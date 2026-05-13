@@ -18,7 +18,7 @@ from bioetl.interfaces.http.types import HealthResponse
 
 if TYPE_CHECKING:
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.domain.ports import HealthMonitorPort, LoggerPort
+    from bioetl.domain.ports import HealthMonitorPort, LoggerPort, RunManifestPort
 
 
 class HealthServer(
@@ -34,6 +34,7 @@ class HealthServer(
         port: int = 8081,
         health_monitor: HealthMonitorPort | None = None,
         quarantine_service: QuarantineService | None = None,
+        run_manifest_port: RunManifestPort | None = None,
         logger: LoggerPort | None = None,
     ) -> None:
         """Initialize health server.
@@ -46,6 +47,8 @@ class HealthServer(
                 healthy with no provider data when None.
             quarantine_service: Optional read-only service for
                 /ops/quarantine/* explorer endpoints.
+            run_manifest_port: Optional read-only control-plane manifest catalog
+                used by /ops/control-plane/* selector endpoints.
             logger: Optional LoggerPort for structured server event logging.
                 Server events are silently dropped when None.
         """
@@ -53,6 +56,7 @@ class HealthServer(
         self.port = port
         self._health_monitor = health_monitor
         self._quarantine_service = quarantine_service
+        self._run_manifest_port = run_manifest_port
         self._logger = logger
         self._server: asyncio.Server | None = None
         self._start_time: float | None = None
@@ -122,6 +126,7 @@ async def run_health_server(
     port: int = 8081,
     health_monitor: HealthMonitorPort | None = None,
     quarantine_service: QuarantineService | None = None,
+    run_manifest_port: RunManifestPort | None = None,
     logger: LoggerPort | None = None,
 ) -> None:
     """Run the health server until interrupted.
@@ -135,6 +140,7 @@ async def run_health_server(
         health_monitor: Optional monitor providing provider health states.
             Health endpoints report no provider data when None.
         quarantine_service: Optional read-only quarantine explorer service.
+        run_manifest_port: Optional read-only control-plane manifest catalog.
         logger: Optional LoggerPort for structured server event logging.
     """
     server = HealthServer(
@@ -142,6 +148,7 @@ async def run_health_server(
         port=port,
         health_monitor=health_monitor,
         quarantine_service=quarantine_service,
+        run_manifest_port=run_manifest_port,
         logger=logger,
     )
     await server.start()

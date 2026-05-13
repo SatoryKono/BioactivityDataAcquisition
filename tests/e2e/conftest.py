@@ -74,6 +74,18 @@ _E2E_VCR_CASSETTE_NAME_OVERRIDES: dict[str, str] = {
 _E2E_RUN_ID_NAMESPACE = UUID("f42c4f5c-1b2c-4db0-8f58-bc97f92a5f2f")
 
 
+def _clear_runtime_config_caches() -> None:
+    """Clear runtime settings/config caches after environment mutations."""
+    from bioetl.infrastructure.config import get_pipeline_config, get_settings
+    from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+    from bioetl.infrastructure.config.source_config_loader import load_source_config
+
+    get_settings.cache_clear()
+    get_pipeline_config.cache_clear()
+    load_pipeline_config.cache_clear()
+    load_source_config.cache_clear()
+
+
 @cache
 def _get_retry_config() -> RetryConfig:
     """Build retry config lazily so collection avoids heavy domain imports."""
@@ -147,10 +159,6 @@ def e2e_environment():
     os.environ.setdefault("BIOETL_ENV", "dev")
     os.environ.setdefault("BIOETL_TEST_MODE", "true")
     os.environ.setdefault("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
-    # Keep the legacy flag for test callers, but populate the canonical nested
-    # setting that ``Settings.pipeline.relaxed_dq`` actually reads.
-    os.environ.setdefault("BIOETL_TEST_RELAXED_DQ", "1")
-    os.environ.setdefault("BIOETL_PIPELINE__RELAXED_DQ", "1")
     os.environ.setdefault("BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__PROFILE", "e2e")
     # Prevent shutil.get_terminal_size hangs in CI/Test environments
     os.environ["COLUMNS"] = "80"
@@ -179,11 +187,31 @@ def e2e_environment():
     yield
 
     try:
-        from bioetl.infrastructure.config import get_settings
-
-        get_settings.cache_clear()
+        _clear_runtime_config_caches()
     except ImportError:
         pass
+
+
+@pytest.fixture
+def relaxed_dq_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
+    """Enable relaxed DQ thresholds explicitly for replay-heavy E2E tests."""
+    _clear_runtime_config_caches()
+    monkeypatch.setenv("BIOETL_TEST_RELAXED_DQ", "1")
+    monkeypatch.setenv("BIOETL_PIPELINE__RELAXED_DQ", "1")
+    _clear_runtime_config_caches()
+    yield
+    _clear_runtime_config_caches()
+
+
+@pytest.fixture
+def strict_dq_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
+    """Force strict DQ mode for E2E tests that validate helper/policy behavior."""
+    _clear_runtime_config_caches()
+    monkeypatch.delenv("BIOETL_TEST_RELAXED_DQ", raising=False)
+    monkeypatch.setenv("BIOETL_PIPELINE__RELAXED_DQ", "0")
+    _clear_runtime_config_caches()
+    yield
+    _clear_runtime_config_caches()
 
 
 @contextmanager

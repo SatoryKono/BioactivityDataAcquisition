@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.services.pipeline_run_execution_service import (
+from bioetl.application.services.execution.pipeline_run_execution_service import (
     PipelineExecutionResult,
     PipelineRunExecutionService,
 )

@@ -27,7 +27,7 @@ from bioetl.application.services.medallion_lifecycle import (
     MedallionLifecycleService,
     PrepareResult,
 )
-from bioetl.application.services.run_ledger_service import RunLedgerService
+from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAMES

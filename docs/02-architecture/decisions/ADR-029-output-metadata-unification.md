@@ -156,7 +156,7 @@ class OutputMetadata(BaseModel):
 
 **Services:**
 
-- `src/bioetl/application/services/metadata_coordinator.py` — Обновлены create\_\*\_metadata методы
+- `src/bioetl/application/services/lineage/metadata_coordinator.py` — Обновлены create\_\*\_metadata методы
 
 **Infrastructure:**
 

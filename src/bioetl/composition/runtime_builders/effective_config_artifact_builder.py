@@ -49,6 +49,9 @@ def _create_and_persist_effective_config_artifact_payload(
     entity: str,
     required_persistence_profile: str,
     resolution_policy: ConfigResolutionPolicy | None,
+    normalization_profile_ref: str | None,
+    normalization_profile_version: str | None,
+    normalization_profile_hash: str | None,
     settings: Settings,
     logger: object,
     run_id: RunID,
@@ -66,6 +69,9 @@ def _create_and_persist_effective_config_artifact_payload(
         ),
         resolution_policy=resolution_policy,
         required_persistence_profile=required_persistence_profile,
+        normalization_profile_ref=normalization_profile_ref,
+        normalization_profile_version=normalization_profile_version,
+        normalization_profile_hash=normalization_profile_hash,
     )
     serialized_payload = service.serialize_artifact(artifact)
     loaded_payload = json.loads(serialized_payload)
@@ -126,7 +132,7 @@ def create_and_persist_effective_config_artifact(
         entity=entity,
         contract_ref=contract_ref,
     )
-    _manifest_support.resolve_contract_identity(
+    contract_identity = _manifest_support.resolve_contract_identity(
         provider=provider,
         entity=entity,
         strict=bool(getattr(ctx, "exact_replay", False))
@@ -152,6 +158,9 @@ def create_and_persist_effective_config_artifact(
                 )
             )
         ),
+        normalization_profile_ref=contract_identity[5],
+        normalization_profile_version=contract_identity[6],
+        normalization_profile_hash=contract_identity[7],
         settings=inputs.settings,
         logger=inputs.observability.logger,
         run_id=ctx.run_id,
@@ -191,6 +200,9 @@ def create_and_persist_composite_effective_config_artifact(
                 )
             )
         ),
+        normalization_profile_ref=None,
+        normalization_profile_version=None,
+        normalization_profile_hash=None,
         settings=settings,
         logger=logger,
         run_id=run_id,

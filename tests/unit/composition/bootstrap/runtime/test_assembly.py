@@ -228,26 +228,6 @@ class TestAssembleRuntimeConfig:
             == "structural_only_auto_promote"
         )
 
-    def test_assembles_legacy_silver_filter_compatibility_mode(
-        self,
-        monkeypatch: pytest.MonkeyPatch,
-    ):
-        """Legacy Silver semantic mode should be explicit in RuntimeConfig."""
-        monkeypatch.setenv("BIOETL_LEGACY_SILVER_SEMANTIC", "1")
-        vacuum = VacuumSettings(enabled=False, retention_days=7)
-
-        result = assemble_runtime_config(
-            run_type=RunType.INCREMENTAL,
-            resume=False,
-            limit=None,
-            query=None,
-            dry_run=False,
-            heartbeat_interval=30,
-            vacuum=vacuum,
-        )
-
-        assert result.silver_filter_compatibility_mode == "legacy_semantic_silver"
-
     def test_assembles_config_with_limit(self):
         """Test that assemble_runtime_config handles limit parameter."""
         vacuum = VacuumSettings(enabled=False, retention_days=7)

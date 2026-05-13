@@ -5,14 +5,18 @@ from __future__ import annotations
 import asyncio
 import json
 from collections.abc import AsyncGenerator
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
+from uuid import uuid4
 
 import pytest
 import pytest_asyncio
 
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
+from bioetl.domain.types import HealthStatus, RunID, RunType
 from bioetl.interfaces.http.health_server import HealthServer
 from bioetl.interfaces.http.types import HealthResponse
+from tests.helpers.control_plane import InMemoryRunManifestStore
 
 
 class TestHealthResponse:
@@ -826,6 +830,298 @@ class TestHealthServerQuarantineExplorer:
         assert status_code == 500
         assert status_text == "Internal Server Error"
         assert "Internal Server Error" in body
+
+
+class TestHealthServerControlPlaneSelector:
+    """Tests for /ops/control-plane/* selector helper endpoints."""
+
+    @pytest_asyncio.fixture(loop_scope="module")
+    async def running_server_without_run_catalog(
+        self,
+    ) -> AsyncGenerator[HealthServer, None]:
+        """Start server without control-plane run catalog."""
+        server = HealthServer(host="127.0.0.1", port=0)
+        await server.start()
+        yield server
+        await server.stop()
+
+    @pytest_asyncio.fixture(loop_scope="module")
+    async def running_server_with_run_catalog(
+        self,
+    ) -> AsyncGenerator[tuple[HealthServer, InMemoryRunManifestStore], None]:
+        """Start server with an in-memory control-plane run catalog."""
+        manifest_store = InMemoryRunManifestStore()
+        created_at = datetime(2026, 5, 12, 8, 21, tzinfo=UTC)
+        manifest_store.save(
+            RunManifest(
+                manifest_id="manifest-1",
+                execution_fingerprint="fingerprint-1",
+                schema_version="1.0",
+                created_at=created_at,
+                run_id=RunID(uuid4()),
+                run_type=RunType.INCREMENTAL,
+                pipeline_name="chembl_activity",
+                provider="chembl",
+                entity="activity",
+                launch_context={"limit": 10},
+                runtime_config={"run_type": "incremental"},
+                resolved_config={"pipeline_name": "chembl_activity"},
+                code_provenance=RunCodeProvenance(
+                    pipeline_version="1.0.0",
+                    git_commit="abc1234",
+                    config_hash="deadbeef",
+                ),
+            )
+        )
+        manifest_store.save(
+            RunManifest(
+                manifest_id="manifest-2",
+                execution_fingerprint="fingerprint-2",
+                schema_version="1.0",
+                created_at=created_at,
+                run_id=RunID(uuid4()),
+                run_type=RunType.BACKFILL,
+                pipeline_name="chembl_activity",
+                provider="chembl",
+                entity="activity",
+                launch_context={"limit": 10},
+                runtime_config={"run_type": "backfill"},
+                resolved_config={"pipeline_name": "chembl_activity"},
+                code_provenance=RunCodeProvenance(
+                    pipeline_version="1.0.0",
+                    git_commit="def5678",
+                    config_hash="feedface",
+                ),
+            )
+        )
+        manifest_store.save(
+            RunManifest(
+                manifest_id="manifest-3",
+                execution_fingerprint="fingerprint-3",
+                schema_version="1.0",
+                created_at=created_at,
+                run_id=RunID(uuid4()),
+                run_type=RunType.INCREMENTAL,
+                pipeline_name="pubchem_compound",
+                provider="pubchem",
+                entity="compound",
+                launch_context={"limit": 10},
+                runtime_config={"run_type": "incremental"},
+                resolved_config={"pipeline_name": "pubchem_compound"},
+                code_provenance=RunCodeProvenance(
+                    pipeline_version="1.0.0",
+                    git_commit="ghi9012",
+                    config_hash="cafebabe",
+                ),
+            )
+        )
+
+        server = HealthServer(
+            host="127.0.0.1",
+            port=0,
+            run_manifest_port=manifest_store,
+        )
+        await server.start()
+        yield server, manifest_store
+        await server.stop()
+
+    @staticmethod
+    def _get_server_port(server: HealthServer) -> int:
+        """Get the actual port of the running server."""
+        assert server._server is not None
+        sockets = server._server.sockets
+        assert sockets is not None
+        return int(sockets[0].getsockname()[1])
+
+    async def _send_request(
+        self, port: int, method: str, path: str
+    ) -> tuple[int, str, str]:
+        """Send request and return status code, status text, and body."""
+        reader, writer = await asyncio.open_connection("127.0.0.1", port)
+        try:
+            request = f"{method} {path} HTTP/1.1\r\nHost: localhost\r\n\r\n"
+            writer.write(request.encode())
+            await writer.drain()
+
+            response_line = await reader.readline()
+            response_str = response_line.decode("utf-8").strip()
+            parts = response_str.split(" ", 2)
+            status_code = int(parts[1])
+            status_text = parts[2] if len(parts) > 2 else ""
+
+            headers = {}
+            while True:
+                line = await reader.readline()
+                if line in (b"\r\n", b"\n", b""):
+                    break
+                header_line = line.decode("utf-8").strip()
+                if ":" in header_line:
+                    key, value = header_line.split(":", 1)
+                    headers[key.strip().lower()] = value.strip()
+
+            content_length = int(headers.get("content-length", 0))
+            body = await reader.read(content_length)
+            return status_code, status_text, body.decode("utf-8")
+        finally:
+            writer.close()
+            await writer.wait_closed()
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_endpoint_requires_run_catalog(
+        self,
+        running_server_without_run_catalog: HealthServer,
+    ) -> None:
+        """Selector endpoint should return 503 when run catalog is not configured."""
+        port = self._get_server_port(running_server_without_run_catalog)
+        status_code, status_text, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/filter-options?dimension=run_id&pipeline=chembl_activity",
+        )
+
+        assert status_code == 503
+        assert status_text == "Control-plane selector catalog unavailable"
+        assert "Control-plane selector catalog unavailable" in body
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_endpoint_requires_pipeline_scope(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Selector endpoint should reject unscoped control-plane reads."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        status_code, status_text, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/filter-options?dimension=run_id",
+        )
+
+        assert status_code == 400
+        assert status_text == "Missing required query parameter: pipeline"
+        assert "Missing required query parameter: pipeline" in body
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_endpoint_filters_run_ids_by_pipeline_and_run_type(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Selector endpoint should expose exact run IDs from persisted manifests."""
+        server, manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        expected_incremental_ids = [
+            str(manifest.run_id)
+            for manifest in manifest_store.list_all()
+            if manifest.pipeline_name == "chembl_activity"
+            and manifest.run_type == RunType.INCREMENTAL
+        ]
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/filter-options?"
+            "dimension=run_id&pipeline=chembl_activity&run_type=incremental",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data["pipeline"] == "chembl_activity"
+        assert data["run_type"] == ["incremental"]
+        assert data["run_ids"] == expected_incremental_ids
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_table_returns_latest_manifest_for_scope(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Identity table should resolve latest persisted manifest for scope."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-table?pipeline=chembl_activity",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        rows = {item["parameter"]: item["value"] for item in data["rows"]}
+        assert data["resolved_via"] == "latest_manifest_for_scope"
+        assert rows["manifest_id"] == "manifest-2"
+        assert rows["pipeline name"] == "chembl_activity"
+        assert rows["run_id"]
+        assert rows["pipelineversion"] == "1.0.0"
+        assert rows["git commit hash"] == "def5678"
+        assert rows["config hash"] == "feedface"
+        assert rows["execution fingerprint"] == "fingerprint-2"
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_table_prefers_selected_run_id(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Identity table should resolve exact manifest when run_id is selected."""
+        server, manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        selected_manifest = next(
+            manifest
+            for manifest in manifest_store.list_all()
+            if manifest.manifest_id == "manifest-1"
+        )
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-table?"
+            f"pipeline=chembl_activity&run_id={selected_manifest.run_id}",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        rows = {item["parameter"]: item["value"] for item in data["rows"]}
+        assert data["resolved_via"] == "selected_run_id"
+        assert rows["manifest_id"] == "manifest-1"
+        assert rows["run_id"] == str(selected_manifest.run_id)
+        assert rows["execution fingerprint"] == "fingerprint-1"
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_table_requires_pipeline_scope(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Identity table should reject unscoped reads."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, status_text, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-table",
+        )
+
+        assert status_code == 400
+        assert status_text == "Missing required query parameter: pipeline"
+        assert "Missing required query parameter: pipeline" in body
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_endpoint_rejects_unknown_dimension(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Selector endpoint should fail closed for unsupported filter dimensions."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        status_code, status_text, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/filter-options?"
+            "dimension=manifest_id&pipeline=chembl_activity",
+        )
+
+        assert status_code == 400
+        assert status_text == "Unsupported control-plane filter dimension: manifest_id"
+        assert "Unsupported control-plane filter dimension: manifest_id" in body
 
 
 class TestHealthServerWithMonitor:

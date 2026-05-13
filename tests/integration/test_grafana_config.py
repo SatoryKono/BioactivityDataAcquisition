@@ -548,9 +548,30 @@ def test_variable_query_sources(dashboard_path):
         infinity_query = run_id_query.get("infinityQuery", {})
         assert isinstance(infinity_query, dict)
         run_id_query_url = str(infinity_query.get("url", ""))
+        assert "/ops/control-plane/filter-options" in run_id_query_url
         assert "dimension=run_id" in run_id_query_url
         assert "pipeline=${pipeline}" in run_id_query_url
-        assert "run_type=${run_type:csv}" not in run_id_query_url
+        assert "run_type=${run_type}" in run_id_query_url
+
+        identity_panel = next(
+            (
+                panel
+                for panel in get_dashboard_panels(dashboard)
+                if panel.get("id") == 9300 and panel.get("title") == "ID"
+            ),
+            None,
+        )
+        assert identity_panel is not None
+        assert identity_panel.get("datasource") == "Quarantine Explorer"
+        identity_targets = identity_panel.get("targets", [])
+        assert isinstance(identity_targets, list) and len(identity_targets) == 1
+        identity_target = identity_targets[0]
+        assert identity_target.get("parser") == "backend"
+        assert identity_target.get("root_selector") == "rows"
+        assert (
+            str(identity_target.get("url", ""))
+            == "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type}&run_id=${run_id}"
+        )
         return
 
     if dashboard_path.name == "bioetl-provider-health-v2.json":
@@ -895,8 +916,8 @@ def test_control_plane_missing_signals_text_panel_exists() -> None:
     content = panel.get("options", {}).get("content", "")
     assert "checkpoint_age <= recovery window / RPO" in content
     assert "replay does not create unexplained duplicate records" in content
-    assert "bioetl_checkpoint_age_seconds" in content
-    assert "bioetl_replay_duplicate_records_total" in content
+    assert "checkpoint-age evidence metric" in content
+    assert "replay duplicate-record evidence metric" in content
 
 
 def test_control_plane_dashboard_links_are_scoped() -> None:

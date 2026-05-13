@@ -122,8 +122,16 @@ def _serialize_metadata_yaml(
 ) -> str:
     """Serialize the metadata model to canonical YAML content."""
 
+    canonical_metadata = type(metadata).model_validate(
+        metadata.model_dump(
+            mode="python",
+            by_alias=True,
+            exclude_computed_fields=True,
+            warnings="none",
+        )
+    )
     serialized_yaml = yaml.safe_dump(
-        metadata.model_dump(mode="json", by_alias=True),
+        canonical_metadata.model_dump(mode="json", by_alias=True),
         default_flow_style=False,
         allow_unicode=True,
         sort_keys=False,

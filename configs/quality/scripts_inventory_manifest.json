@@ -1,17 +1,17 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-13T06:19:28.723569+00:00",
+  "generated_at": "2026-05-13T15:43:07.042356+00:00",
   "summary": {
-    "total_scripts": 368,
+    "total_scripts": 372,
     "status_counts": {
       "active": 333,
-      "supporting": 35
+      "supporting": 39
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 2,
       "ci": 51,
-      "docs": 133,
+      "docs": 135,
       "scripts": 299,
       "skills": 8,
       "tests": 144
@@ -580,6 +580,14 @@
       ]
     },
     {
+      "path": "scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh",
+      "type": "sh",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/ai/codex/helper/setup-env.sh",
       "type": "sh",
       "status": "active",
@@ -757,12 +765,45 @@
       ]
     },
     {
+      "path": "scripts/ai/codex/launch-codex-wsl.ps1",
+      "type": "ps1",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/CODEX_HANG_FIX.md",
+          "line": 5,
+          "source_group": "docs",
+          "text": "Когда запускаете `launch-codex-wsl.ps1 start`, Codex зависает потому что:"
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/codex/run-codex.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 91,
+      "reference_count": 94,
       "references": [
+        {
+          "path": "docs/DOCKER_QUICKSTART.md",
+          "line": 208,
+          "source_group": "docs",
+          "text": ".\\scripts\\ai\\codex\\run-codex.ps1"
+        },
+        {
+          "path": "docs/DOCKER_SETUP.md",
+          "line": 197,
+          "source_group": "docs",
+          "text": ".\\scripts\\ai\\codex\\run-codex.ps1 mcp-setup"
+        },
+        {
+          "path": "docs/DOCKER_SETUP.md",
+          "line": 198,
+          "source_group": "docs",
+          "text": ".\\scripts\\ai\\codex\\run-codex.ps1"
+        },
         {
           "path": "scripts/ai/__main__.py",
           "line": 27,
@@ -792,24 +833,6 @@
           "line": 42,
           "source_group": "scripts",
           "text": ".\\run-codex.ps1 check"
-        },
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 43,
-          "source_group": "scripts",
-          "text": ".\\run-codex.ps1 setup"
-        },
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 46,
-          "source_group": "scripts",
-          "text": "`run-codex.ps1` delegates to `run-codex.sh`, so the WSL/Bash launcher remains"
-        },
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 63,
-          "source_group": "scripts",
-          "text": ".\\run-codex.ps1 help              # Show help"
         }
       ]
     },
@@ -818,7 +841,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 34,
+      "reference_count": 36,
       "references": [
         {
           "path": "scripts/ai/__main__.py",
@@ -2731,48 +2754,6 @@
       ]
     },
     {
-      "path": "scripts/codex-start-wsl.ps1",
-      "type": "ps1",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "docs/CODEX_QUICK_START.md",
-          "line": 32,
-          "source_group": "docs",
-          "text": ".\\scripts\\codex-start-wsl.ps1"
-        },
-        {
-          "path": "docs/CODEX_QUICK_START.md",
-          "line": 145,
-          "source_group": "docs",
-          "text": "- `scripts/codex-start-wsl.ps1` - PowerShell startup script"
-        }
-      ]
-    },
-    {
-      "path": "scripts/codex-start-wsl.sh",
-      "type": "sh",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "docs/CODEX_QUICK_START.md",
-          "line": 35,
-          "source_group": "docs",
-          "text": "bash scripts/codex-start-wsl.sh"
-        },
-        {
-          "path": "docs/CODEX_QUICK_START.md",
-          "line": 144,
-          "source_group": "docs",
-          "text": "- `scripts/codex-start-wsl.sh` - Bash startup script"
-        }
-      ]
-    },
-    {
       "path": "scripts/data_quality/export_chembl_observed_vocab.py",
       "type": "py",
       "status": "supporting",
@@ -2832,7 +2813,7 @@
         },
         {
           "path": "docs/filters/migration-plan.md",
-          "line": 151,
+          "line": 149,
           "source_group": "docs",
           "text": "`scripts/data_quality/inventory_silver_filters_migration.py`."
         },
@@ -4266,6 +4247,54 @@
           "line": 43,
           "source_group": "docs",
           "text": "| DIAG-T001 | Mermaid syntax valid              | Исключить синтаксические ошибки                          | `scripts/diagrams/validate_mermaid_syntax.sh`             | Auto      | PR             | Ha"
+        }
+      ]
+    },
+    {
+      "path": "scripts/docker-setup.ps1",
+      "type": "ps1",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "docs/DOCKER_QUICKSTART.md",
+          "line": 30,
+          "source_group": "docs",
+          "text": ".\\scripts\\docker-setup.ps1 -Mode basic"
+        },
+        {
+          "path": "docs/DOCKER_QUICKSTART.md",
+          "line": 45,
+          "source_group": "docs",
+          "text": ".\\scripts\\docker-setup.ps1 -Mode monitoring"
+        },
+        {
+          "path": "docs/DOCKER_QUICKSTART.md",
+          "line": 61,
+          "source_group": "docs",
+          "text": ".\\scripts\\docker-setup.ps1 -Mode mcp"
+        },
+        {
+          "path": "docs/DOCKER_QUICKSTART.md",
+          "line": 214,
+          "source_group": "docs",
+          "text": "- `.\\scripts\\docker-setup.ps1` - Интерактивная настройка Docker"
+        }
+      ]
+    },
+    {
+      "path": "scripts/docker-setup.sh",
+      "type": "sh",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/DOCKER_QUICKSTART.md",
+          "line": 215,
+          "source_group": "docs",
+          "text": "- `scripts/docker-setup.sh` - Bash версия для WSL/Linux"
         }
       ]
     },
@@ -6975,7 +7004,7 @@
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 73,
+          "line": 75,
           "source_group": "docs",
           "text": "python3 scripts/engineering/diagnostics/audit_structure.py --path ."
         },
@@ -8201,13 +8230,13 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 217,
+          "line": 218,
           "source_group": "docs",
           "text": "./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --auto-certify-sources --auto-certify-composites --claim-scope-mode retained_certifiable_historical_runs --write-dis"
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 242,
+          "line": 243,
           "source_group": "docs",
           "text": "- `run_historical_replay_closure_campaign.py` is the deterministic batch path"
         },
@@ -8234,13 +8263,13 @@
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 218,
+          "line": 219,
           "source_group": "docs",
           "text": "./.venv/bin/python scripts/engineering/qa/run_historical_replay_universe_campaign.py --external-pack path/to/archive-pack.json --write-report"
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 247,
+          "line": 248,
           "source_group": "docs",
           "text": "- `run_historical_replay_universe_campaign.py` is the full-universe path: it"
         },
@@ -8638,13 +8667,13 @@
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 72,
+          "line": 74,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py"
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 103,
+          "line": 105,
           "source_group": "docs",
           "text": "`scripts/engineering/repo/audit_root_cleanliness.py` MUST использовать этот"
         },
@@ -8701,13 +8730,13 @@
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 76,
+          "line": 78,
           "source_group": "scripts",
           "text": "| `check_cleanup_governance.py`  | Guard active docs/scripts against broad cleanup guidance  |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 46,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"check-cleanup-governance\": \"check_cleanup_governance.py\","
         }
@@ -8728,7 +8757,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"check-actions-runtime-policy\": \"check_github_actions_runtime_policy.py\","
         }
@@ -8749,7 +8778,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"check-root-review-registry\": \"check_root_hygiene_review_registry.py\","
         }
@@ -8884,7 +8913,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"check-versions\": \"check_version_consistency.py\","
         }
@@ -8899,37 +8928,37 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply --with-remote"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 51,
+          "line": 52,
           "source_group": "scripts",
           "text": "`cleanup_branch_candidates.sh` when you want the same workflow through a"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 78,
+          "line": 80,
           "source_group": "scripts",
           "text": "| `cleanup_branch_candidates.sh` | Dry-run/apply cleanup for the curated branch deletion set |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 51,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"cleanup-branch-candidates\": \"cleanup_branch_candidates.sh\","
         },
@@ -8962,7 +8991,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"sync-wrapper-caller-matrix\": \"generate_scripts_wrapper_caller_matrix.py\","
         }
@@ -8989,13 +9018,13 @@
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 77,
+          "line": 79,
           "source_group": "scripts",
           "text": "| `preflight_cleanup.sh`         | Bounded release-preflight cleanup helper                  |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"preflight-cleanup\": \"preflight_cleanup.sh\","
         }
@@ -9016,7 +9045,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"split-testing-roadmap\": \"split_testing_roadmap_issue.py\","
         }
@@ -9037,7 +9066,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 50,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"sync-docs-issues\": \"sync_docs_issues.py\","
         }
@@ -9052,7 +9081,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"sync-inventory\": \"sync_scripts_inventory.py\","
         }
@@ -9142,7 +9171,7 @@
         },
         {
           "path": "scripts/engineering/repo/catalog.yaml",
-          "line": 26,
+          "line": 28,
           "source_group": "scripts",
           "text": "- generate_adr_registry.py"
         }
@@ -9157,7 +9186,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/catalog.yaml",
-          "line": 27,
+          "line": 29,
           "source_group": "scripts",
           "text": "- generate_test_github_issues.py"
         }
@@ -9593,6 +9622,22 @@
           "text": "\"checksums\": \"verify_checksums.py\","
         }
       ]
+    },
+    {
+      "path": "scripts/ops/docker-setup.ps1",
+      "type": "ps1",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ops/docker-setup.sh",
+      "type": "sh",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ops/launchers/codex/codex-exec.bat",
@@ -10737,7 +10782,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/catalog.yaml",
-          "line": 28,
+          "line": 30,
           "source_group": "scripts",
           "text": "- optimized_test_runner.py"
         },
@@ -11306,7 +11351,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/catalog.yaml",
-          "line": 29,
+          "line": 31,
           "source_group": "scripts",
           "text": "- test_selection_strategy.py"
         }

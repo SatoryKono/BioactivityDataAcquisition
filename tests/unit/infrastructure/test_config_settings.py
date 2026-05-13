@@ -113,12 +113,10 @@ class TestPipelineSettings:
         """Checkpoint compatibility policy must be a supported literal."""
         settings = PipelineSettings(
             control_plane={
-                "checkpoint_compatibility_policy": "legacy_observe",
+                "checkpoint_compatibility_policy": "observe",
             }
         )
-        assert settings.control_plane.checkpoint_compatibility_policy == (
-            "legacy_observe"
-        )
+        assert settings.control_plane.checkpoint_compatibility_policy == "observe"
 
         with pytest.raises(ValidationError):
             PipelineSettings(
@@ -155,9 +153,7 @@ class TestPipelineSettings:
         ("required_profile", "policy"),
         [
             ("replay_ready", "observe"),
-            ("replay_ready", "legacy_observe"),
             ("forensic_grade", "observe"),
-            ("forensic_grade", "legacy_observe"),
         ],
     )
     def test_control_plane_strict_profiles_require_non_observe_checkpoint_policy(

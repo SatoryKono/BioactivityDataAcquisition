@@ -10,14 +10,16 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from bioetl.application.services.effective_config_service import EffectiveConfigService
-from bioetl.application.services.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.effective_config_service import (
+    EffectiveConfigService,
+)
+from bioetl.application.services.control_plane.run_manifest_inspection_service import (
     RunManifestInspectionCorruptionError,
     RunManifestInspectionService,
 )
-from bioetl.application.services.run_ledger_service import RunLedgerService
-from bioetl.application.services.run_manifest_service import (
-    RunManifestCreateRequest,
+from bioetl.application.services.control_plane import RunLedgerService
+from bioetl.application.services.control_plane.run_manifest_service import (
+    RunManifestCreateSpec as RunManifestCreateRequest,
     RunManifestService,
 )
 from bioetl.domain.config.dq import DQConfig
@@ -247,6 +249,9 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "code_provenance_state": _expected_code_provenance_state(manifest),
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
+        "normalization_profile_ref": None,
+        "normalization_profile_version": None,
+        "normalization_profile_hash": None,
         "replay_of_run_id": None,
         "replay_of_manifest_id": None,
         "replay_parentage": _expected_replay_parentage(manifest),
@@ -415,6 +420,9 @@ def _expected_identity_graph_without_ledger(
         "code_provenance_state": _expected_code_provenance_state(manifest),
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
+        "normalization_profile_ref": None,
+        "normalization_profile_version": None,
+        "normalization_profile_hash": None,
         "replay_of_run_id": None,
         "replay_of_manifest_id": None,
         "replay_parentage": _expected_replay_parentage(manifest),
@@ -513,6 +521,9 @@ def _expected_diagnostics_without_ledger(
         "code_provenance_state": _expected_code_provenance_state(manifest),
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
+        "normalization_profile_ref": None,
+        "normalization_profile_version": None,
+        "normalization_profile_hash": None,
         "replay_of_run_id": None,
         "replay_of_manifest_id": None,
         "replay_parentage": _expected_replay_parentage(manifest),

@@ -28,6 +28,8 @@ from .conftest import (
     get_silver_records,
 )
 
+pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
+
 # Stable DOIs for deterministic cassette playback.
 # Selected from well-known, long-lived publications unlikely to change.
 CROSSREF_TEST_DOIS = (

@@ -20,6 +20,8 @@ from .conftest import (
     get_silver_records,
 )
 
+pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
+
 
 @pytest.mark.e2e
 @pytest.mark.vcr

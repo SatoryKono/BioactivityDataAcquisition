@@ -13,7 +13,16 @@ def resolve_contract_identity(
     provider: str,
     entity: str,
     strict: bool = False,
-) -> tuple[str, str | None, str | None, str | None, str | None]:
+) -> tuple[
+    str,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+]:
     """Resolve contract identity fields from canonical registry when available."""
     contract_ref = f"{provider}.{entity}"
     registry_path = Path("configs/base/contract_registry.yaml")
@@ -23,7 +32,7 @@ def resolve_contract_identity(
                 "Strict reproducibility contexts require configs/base/"
                 f"contract_registry.yaml to resolve contract identity for '{contract_ref}'"
             )
-        return contract_ref, None, None, None, None
+        return contract_ref, None, None, None, None, None, None, None
     entry = _load_contract_registry_entry(
         registry_path,
         contract_ref,
@@ -35,7 +44,7 @@ def resolve_contract_identity(
                 "Strict reproducibility contexts require a contract registry entry "
                 f"for '{contract_ref}' in configs/base/contract_registry.yaml"
             )
-        return contract_ref, None, None, None, None
+        return contract_ref, None, None, None, None, None, None, None
     fields = _extract_contract_identity_fields(entry)
     if strict:
         _validate_complete_contract_identity(contract_ref, fields)
@@ -44,7 +53,15 @@ def resolve_contract_identity(
 
 def _validate_complete_contract_identity(
     contract_ref: str,
-    fields: tuple[str | None, str | None, str | None, str | None],
+    fields: tuple[
+        str | None,
+        str | None,
+        str | None,
+        str | None,
+        str | None,
+        str | None,
+        str | None,
+    ],
 ) -> None:
     missing = [
         name
@@ -54,6 +71,9 @@ def _validate_complete_contract_identity(
                 "contract_schema_hash",
                 "dq_policy_ref",
                 "rule_bundle_version",
+                "normalization_profile_ref",
+                "normalization_profile_version",
+                "normalization_profile_hash",
             ),
             fields,
             strict=True,
@@ -118,7 +138,15 @@ def _read_contract_registry_payload(
 
 def _extract_contract_identity_fields(
     entry: dict[str, object],
-) -> tuple[str | None, str | None, str | None, str | None]:
+) -> tuple[
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+]:
     identity_payload = _identity_payload(entry)
     contract_version = _coerce_optional_text(identity_payload.get("contract_version"))
     contract_schema_hash = _coerce_optional_text(identity_payload.get("schema_hash"))
@@ -128,11 +156,26 @@ def _extract_contract_identity_fields(
     rule_bundle_version = _coerce_optional_text(
         identity_payload.get("rule_bundle_version") or entry.get("rule_bundle_version")
     )
+    normalization_profile_ref = _coerce_optional_text(
+        identity_payload.get("normalization_profile_ref")
+        or entry.get("normalization_profile_ref")
+    )
+    normalization_profile_version = _coerce_optional_text(
+        identity_payload.get("normalization_profile_version")
+        or entry.get("normalization_profile_version")
+    )
+    normalization_profile_hash = _coerce_optional_text(
+        identity_payload.get("normalization_profile_hash")
+        or entry.get("normalization_profile_hash")
+    )
     return (
         contract_version,
         contract_schema_hash,
         dq_policy_ref,
         rule_bundle_version,
+        normalization_profile_ref,
+        normalization_profile_version,
+        normalization_profile_hash,
     )
 
 

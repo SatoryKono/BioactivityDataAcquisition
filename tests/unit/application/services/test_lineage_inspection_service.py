@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from bioetl.application.services.lineage_inspection_service import (
+from bioetl.application.services.lineage.lineage_inspection_service import (
     LineageInspectionService,
 )
 from bioetl.domain.control_plane import RunCodeProvenance, RunManifest

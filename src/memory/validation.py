@@ -379,10 +379,11 @@ def _iter_note_paths(root: Path) -> list[tuple[str, Path]]:
 
 
 def _normalize_target_dir(target_dir: str) -> str:
+    normalized = target_dir.replace("\\", "/").strip("/")
     prefix = "src/memory/"
-    if target_dir.startswith(prefix):
-        return target_dir[len(prefix) :]
-    return target_dir
+    if normalized.startswith(prefix):
+        return normalized[len(prefix) :]
+    return normalized
 
 
 def _rule_map(placement_rules: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -489,7 +490,8 @@ def _validate_note_placement(
             ValidationIssue(path=str(path), message="note path is outside memory root")
         )
         return
-    if expected_rel and not str(relative_path).startswith(expected_rel):
+    relative_text = relative_path.as_posix()
+    if expected_rel and not relative_text.startswith(expected_rel):
         issues.append(
             ValidationIssue(
                 path=str(path),

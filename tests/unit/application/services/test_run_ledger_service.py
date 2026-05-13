@@ -10,7 +10,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.services.run_ledger_service import RunLedgerService
+from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.domain.control_plane import (
     RunCodeProvenance,
     RunManifest,

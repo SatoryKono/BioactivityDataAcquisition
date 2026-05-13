@@ -12,7 +12,13 @@ from bioetl.domain.types import RunType
 
 ROOT = Path(__file__).resolve().parents[2]
 PIPELINE_RUNNER_SERVICE_PATH = (
-    ROOT / "src" / "bioetl" / "application" / "services" / "pipeline_runner_service.py"
+    ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "services"
+    / "execution"
+    / "pipeline_runner_service.py"
 )
 
 

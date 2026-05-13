@@ -21,7 +21,7 @@ if TYPE_CHECKING:
         RunResult,
     )
     from bioetl.application.services.pipeline_debug_service import DebugAbortError
-    from bioetl.application.services.pipeline_runner_service import (
+    from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService,
     )
     from bioetl.composition.registry_api import PipelineRegistry

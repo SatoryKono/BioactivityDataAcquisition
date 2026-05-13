@@ -192,9 +192,6 @@ class CheckpointRuntimeService:
                 else "incompatible"
             )
             return None
-        if disposition == "legacy_observe_loaded_degraded":
-            self._emit_checkpoint_load_status("legacy_observe_loaded_degraded")
-            return result
         self._emit_checkpoint_load_status(
             "observe_loaded_degraded"
             if disposition == "observe_loaded_degraded"
@@ -232,11 +229,7 @@ class CheckpointRuntimeService:
         if result is None:
             self._emit_checkpoint_load_status("missing_compatibility_context")
             return None
-        self._emit_checkpoint_load_status(
-            "legacy_missing_compatibility_context_loaded"
-            if disposition == "legacy_missing_context_loaded_degraded"
-            else "loaded"
-        )
+        self._emit_checkpoint_load_status("loaded")
         return result
 
     async def load_checkpoint(

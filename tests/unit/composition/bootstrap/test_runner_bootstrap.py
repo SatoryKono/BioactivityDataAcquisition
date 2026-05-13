@@ -13,10 +13,10 @@ import pytest
 from bioetl.application.services.execution.pipeline_runner_service import (
     PipelineRunnerService,
 )
-from bioetl.application.services.pipeline_run_context_service import (
+from bioetl.application.services.execution.pipeline_run_context_service import (
     PipelineRunContextService,
 )
-from bioetl.application.services.pipeline_run_execution_service import (
+from bioetl.application.services.execution.pipeline_run_execution_service import (
     PipelineRunExecutionService,
 )
 from bioetl.composition.registry_api import PipelineRegistry

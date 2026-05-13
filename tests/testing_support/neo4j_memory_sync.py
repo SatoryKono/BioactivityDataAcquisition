@@ -1061,7 +1061,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         CONTRACT_CHEMBL_ACTIVITY,
         "DEPENDS_ON",
         "module_surface",
-        "src/bioetl/application/services/run_manifest_service.py",
+        "src/bioetl/application/services/control_plane/run_manifest_service.py",
     ),
     (
         "contract_surface",
@@ -1082,7 +1082,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         CONTRACT_CHEMBL_ACTIVITY,
         "DEPENDS_ON",
         "module_surface",
-        "src/bioetl/application/services/lineage_inspection_service.py",
+        "src/bioetl/application/services/lineage/lineage_inspection_service.py",
     ),
     (
         "contract_surface",

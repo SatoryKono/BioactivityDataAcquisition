@@ -19,7 +19,6 @@ __all__ = [
 HealthCheckMode = Literal["strict", "probe"]
 SilverFilterCompatibilityMode = Literal[
     "structural_only_auto_promote",
-    "legacy_semantic_silver",
 ]
 
 
@@ -143,13 +142,10 @@ class RuntimeConfig:
 
     def _validate_silver_filter_compatibility_mode(self) -> None:
         """Validate the Silver-filter migration compatibility mode."""
-        if self.silver_filter_compatibility_mode not in {
-            "structural_only_auto_promote",
-            "legacy_semantic_silver",
-        }:
+        if self.silver_filter_compatibility_mode != "structural_only_auto_promote":
             raise ValueError(
                 "silver_filter_compatibility_mode must be "
-                "'structural_only_auto_promote' or 'legacy_semantic_silver', "
+                "'structural_only_auto_promote', "
                 f"got {self.silver_filter_compatibility_mode!r}"
             )
 

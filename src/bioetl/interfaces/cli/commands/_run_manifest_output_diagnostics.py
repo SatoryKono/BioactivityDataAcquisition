@@ -28,6 +28,9 @@ def _diagnostics_core_items(
         "code_provenance_state",
         "contract_ref",
         "contract_version",
+        "normalization_profile_ref",
+        "normalization_profile_version",
+        "normalization_profile_hash",
         "dq_policy_ref",
         "rule_bundle_version",
     )

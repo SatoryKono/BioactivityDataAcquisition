@@ -1374,7 +1374,7 @@ def test_run_prepared_request_async_uses_compat_runtime_path():
         PipelineRunResult,
         RunResult,
     )
-    from bioetl.application.services.cli_run_orchestration_models import (
+    from bioetl.application.services.execution.cli_run_orchestration_models import (
         RunExecutionRequest,
     )
     from bioetl.interfaces.cli.commands import run as run_module
@@ -1428,9 +1428,6 @@ def test_run_module_declares_expected_seam_inventory() -> None:
         "_run_prepared_request_async",
     )
     assert run_module._RUN_COMPATIBILITY_SEAMS == (
-        "_get_runner_logger",
-        "_handle_destructive_run_confirmation",
-        "_validate_start_offset",
         "echo_health_server_info",
         "ensure_metrics_server_started",
         "health_server_context",
@@ -1451,12 +1448,6 @@ def test_run_module_declares_expected_seam_inventory() -> None:
         is run_module._build_run_pipeline_callable_impl
     )
     assert run_module._map_status_to_exit_code is run_module.map_status_to_exit_code
-    assert run_module._get_runner_logger is run_module.get_runner_logger
-    assert (
-        run_module._handle_destructive_run_confirmation
-        is run_module.handle_destructive_run_confirmation
-    )
-    assert run_module._validate_start_offset is run_module.validate_options
     assert (
         run_module.echo_health_server_info is run_module._echo_health_server_info_impl
     )
@@ -1465,10 +1456,6 @@ def test_run_module_declares_expected_seam_inventory() -> None:
         is run_module._ensure_metrics_server_started_impl
     )
     assert run_module.health_server_context is run_module._health_server_context_impl
-    assert (
-        run_module.get_pipeline_runner_service
-        is run_module._get_pipeline_runner_service_impl
-    )
 
 
 @pytest.mark.unit
@@ -1684,6 +1671,9 @@ def test_run_all_with_cli_policy_wires_registry_and_cli_seams() -> None:
     from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
         RunAllCommandInput,
     )
+    from bioetl.interfaces.cli.commands.domains.run_all.support import (
+        determine_batch_exit_code,
+    )
 
     ctx = MagicMock(name="click_context")
     registry = MagicMock(name="registry")
@@ -1725,7 +1715,7 @@ def test_run_all_with_cli_policy_wires_registry_and_cli_seams() -> None:
     assert kwargs["health_info_presenter"] is run_all_module.echo_health_server_info
     assert kwargs["execute_batch"] is run_all_module._run_batch_with_policy
     assert kwargs["summary_presenter"] is run_all_module._echo_batch_summary
-    assert kwargs["determine_exit_code"] is run_all_module._determine_exit_code
+    assert kwargs["determine_exit_code"] is determine_batch_exit_code
     assert kwargs["exit_func"] is run_all_module.exit_with_code
 
 

@@ -184,6 +184,39 @@ class TestEffectiveConfigSerializer:
         assert len(snapshot["disposition_overrides"]) == 2
         assert snapshot["disposition_overrides"]["schema.molecule_id"] == "fail"
 
+    def test_serialize_artifact_with_normalization_profile_identity(self) -> None:
+        """Semantic payload should expose normalization profile identity."""
+        artifact = EffectiveConfigArtifact(
+            artifact_id="test_artifact",
+            pipeline_name="pubchem_compound",
+            pipeline_kind="standard",
+            source_refs=[],
+            resolution_policy=ConfigResolutionPolicy(),
+            resolved_config=ResolvedConfigSnapshot(
+                config_type="standard",
+                config_data={},
+                config_hash="resolved_hash",
+            ),
+            runtime_overrides=RuntimeOverrideSnapshot(),
+            effective_execution_config=EffectiveExecutionConfig(
+                config_data={},
+                effective_hash="effective_hash",
+            ),
+            resolved_config_hash="resolved_hash",
+            effective_config_hash="effective_hash",
+            source_fingerprint="source_fingerprint",
+            normalization_profile_ref="pubchem.compound",
+            normalization_profile_version="1.0.0",
+            normalization_profile_hash="a" * 64,
+        )
+
+        parsed = json.loads(self.serializer.serialize_artifact(artifact))
+        semantic = parsed["semantic_artifact"]
+
+        assert semantic["normalization_profile_ref"] == "pubchem.compound"
+        assert semantic["normalization_profile_version"] == "1.0.0"
+        assert semantic["normalization_profile_hash"] == "a" * 64
+
     def test_deterministic_serialization(self) -> None:
         """Test that serialization is deterministic (same input = same output)."""
         # Create two identical artifacts with fixed timestamps

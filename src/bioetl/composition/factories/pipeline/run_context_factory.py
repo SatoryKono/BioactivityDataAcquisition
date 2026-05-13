@@ -29,9 +29,18 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-_ContractIdentityResolver = Callable[
-    ..., tuple[str, str | None, str | None, str | None, str | None]
+_ContractIdentityResult = tuple[str, ...]
+_NormalizedContractIdentity = tuple[
+    str,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
 ]
+_ContractIdentityResolver = Callable[..., _ContractIdentityResult]
 
 
 def _get_transform_version(yaml_config: PipelineYamlConfig) -> str | None:
@@ -53,12 +62,36 @@ def _resolve_contract_identity_snapshot(
     entity: str,
     *,
     strict: bool = False,
-) -> tuple[str, str | None, str | None, str | None, str | None]:
+) -> _NormalizedContractIdentity:
     """Resolve contract identity through the manifest support seam."""
     return resolve_contract_identity(
         provider=provider,
         entity=entity,
         strict=strict,
+    )
+
+
+def _normalize_contract_identity_result(
+    result: _ContractIdentityResult,
+) -> _NormalizedContractIdentity:
+    """Accept legacy 5-field and canonical 8-field contract identity tuples."""
+    if len(result) == 5:
+        contract_ref, contract_version, contract_schema_hash, dq_policy_ref, rule_bundle_version = result
+        return (
+            contract_ref,
+            contract_version,
+            contract_schema_hash,
+            dq_policy_ref,
+            rule_bundle_version,
+            None,
+            None,
+            None,
+        )
+    if len(result) == 8:
+        return result  # type: ignore[return-value]
+    raise RuntimeError(
+        "Contract identity resolver must return either the legacy 5-field "
+        "tuple or the canonical 8-field tuple"
     )
 
 
@@ -79,13 +112,15 @@ def _resolve_contract_identity_for_runtime(
     provider: str,
     entity: str,
     strict: bool,
-) -> tuple[str, str | None, str | None, str | None, str | None]:
+    ) -> _NormalizedContractIdentity:
     """Resolve identity while preserving legacy two-argument test doubles."""
     if strict:
         try:
-            result = resolver(provider, entity, strict=True)
+            result = _normalize_contract_identity_result(
+                resolver(provider, entity, strict=True)
+            )
         except TypeError:
-            result = resolver(provider, entity)
+            result = _normalize_contract_identity_result(resolver(provider, entity))
         missing = [
             name
             for name, value in zip(
@@ -94,6 +129,9 @@ def _resolve_contract_identity_for_runtime(
                     "contract_schema_hash",
                     "dq_policy_ref",
                     "rule_bundle_version",
+                    "normalization_profile_ref",
+                    "normalization_profile_version",
+                    "normalization_profile_hash",
                 ),
                 result[1:],
                 strict=True,
@@ -107,7 +145,7 @@ def _resolve_contract_identity_for_runtime(
                 f"identity for '{result[0]}'; missing: {missing_text}"
             )
         return result
-    return resolver(provider, entity)
+    return _normalize_contract_identity_result(resolver(provider, entity))
 
 
 @dataclass(frozen=True, slots=True)
@@ -155,6 +193,9 @@ class RunContextFactory:
             contract_schema_hash,
             dq_policy_ref,
             rule_bundle_version,
+            normalization_profile_ref,
+            normalization_profile_version,
+            normalization_profile_hash,
         ) = _resolve_contract_identity_for_runtime(
             resolver=self.contract_identity_resolver,
             provider=self.provider,
@@ -189,6 +230,9 @@ class RunContextFactory:
                 contract_schema_hash=contract_schema_hash,
                 dq_policy_ref=dq_policy_ref,
                 rule_bundle_version=rule_bundle_version,
+                normalization_profile_ref=normalization_profile_ref,
+                normalization_profile_version=normalization_profile_version,
+                normalization_profile_hash=normalization_profile_hash,
                 dq_contract_compatibility_hash=dq_contract_compatibility_hash,
                 effective_config_artifact_id=effective_config_artifact_id,
             )

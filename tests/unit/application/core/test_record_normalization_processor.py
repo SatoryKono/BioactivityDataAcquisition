@@ -218,6 +218,94 @@ def test_authoritative_config_hash_policy_overrides_profile_field_selection() ->
 
 
 @pytest.mark.unit
+def test_profile_backed_activity_companion_fields_recompute_from_normalized_context() -> (
+    None
+):
+    processor = RecordNormalizationProcessor(provider="chembl", entity_type="activity")
+
+    normalized = processor.normalize_business_data(
+        {
+            "activity_id": "12345",
+            "molecule_id": "CHEMBL25",
+            "bao_endpoint": " bao:0000190 ",
+            "bao_format": "bao:0000218",
+            "uo_units": "uo:0000065",
+            "qudt_units": " https://qudt.org/vocab/unit/NanoMOL-PER-L ",
+            "bao_endpoint_iri": None,
+            "bao_endpoint_mapping_status": None,
+            "bao_format_iri": None,
+            "bao_format_mapping_status": None,
+            "bao_ontology_version": None,
+            "uo_unit_iri": None,
+            "uo_unit_mapping_status": None,
+            "uo_ontology_version": None,
+            "qudt_unit_iri": None,
+            "qudt_unit_mapping_status": None,
+            "qudt_ontology_version": None,
+        }
+    )
+
+    assert normalized["bao_endpoint"] == "BAO_0000190"
+    assert (
+        normalized["bao_endpoint_iri"]
+        == "https://purl.obolibrary.org/obo/BAO_0000190"
+    )
+    assert normalized["bao_endpoint_mapping_status"] == "mapped"
+    assert normalized["uo_unit_iri"] == "https://purl.obolibrary.org/obo/UO_0000065"
+    assert normalized["uo_unit_mapping_status"] == "mapped"
+    assert (
+        normalized["qudt_unit_iri"] == "https://qudt.org/vocab/unit/NanoMOL-PER-L"
+    )
+    assert normalized["qudt_unit_mapping_status"] == "mapped"
+
+
+@pytest.mark.unit
+def test_profile_backed_publication_taxonomy_fields_recompute_from_raw_provider_type(
+    publication_type_classification_data: None,
+) -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="publication",
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "publication_id": "CHEMBL1234567",
+            "publication_type_raw": "PUBLICATION",
+            "publication_type": None,
+            "publication_type_unified": None,
+            "publication_subclass": None,
+            "publication_class": None,
+        }
+    )
+
+    assert normalized["publication_type_raw"] == "PUBLICATION"
+    assert normalized["publication_type"] == "journal-article"
+    assert normalized["publication_type_unified"] == "Journal Article"
+    assert normalized["publication_subclass"] == "Original Experimental Data"
+    assert normalized["publication_class"] == "EXP"
+
+
+@pytest.mark.unit
+def test_profile_backed_target_organism_class_recomputes_from_normalized_siblings() -> (
+    None
+):
+    processor = RecordNormalizationProcessor(provider="chembl", entity_type="target")
+
+    normalized = processor.normalize_business_data(
+        {
+            "target_id": "CHEMBL1862",
+            "organism": "Homo sapiens",
+            "taxonomy_id": 9606,
+            "organism_class": None,
+        }
+    )
+
+    assert normalized["organism"] == "Homo sapiens"
+    assert normalized["organism_class"] == "multicellular"
+
+
+@pytest.mark.unit
 def test_finalize_pre_silver_attaches_active_and_versioned_content_hashes() -> None:
     processor = RecordNormalizationProcessor(
         provider="crossref",

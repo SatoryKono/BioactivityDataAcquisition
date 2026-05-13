@@ -13,11 +13,12 @@ from bioetl.composition.bootstrap.cli.health import (
     bootstrap_health_server_dependencies,
     bootstrap_health_service,
 )
-from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports import MetricsPort, RunManifestPort
 from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.time import SystemClock
+from tests.helpers.control_plane import InMemoryRunManifestStore
 
 
 @pytest.mark.unit
@@ -28,10 +29,12 @@ class TestHealthServerDependencies:
         """Test that HealthServerDependencies is immutable."""
         metrics = PrometheusMetrics()
         monitor = ProviderHealthMonitor(metrics=metrics)
+        manifest_store = InMemoryRunManifestStore()
 
         deps = HealthServerDependencies(
             health_monitor=monitor,
             metrics=metrics,
+            run_manifest_port=manifest_store,
         )
 
         with pytest.raises(AttributeError):
@@ -45,14 +48,17 @@ class TestHealthServerDependencies:
         """Test that HealthServerDependencies stores components correctly."""
         metrics = PrometheusMetrics()
         monitor = ProviderHealthMonitor(metrics=metrics)
+        manifest_store = InMemoryRunManifestStore()
 
         deps = HealthServerDependencies(
             health_monitor=monitor,
             metrics=metrics,
+            run_manifest_port=manifest_store,
         )
 
         assert deps.health_monitor is monitor
         assert deps.metrics is metrics
+        assert deps.run_manifest_port is manifest_store
 
 
 @pytest.mark.unit
@@ -112,6 +118,12 @@ class TestBootstrapHealthServerDependencies:
 
         assert isinstance(result.health_monitor, ProviderHealthMonitor)
 
+    def test_bootstrap_wires_run_manifest_port(self):
+        """Test that bootstrap_health_server_dependencies exposes a manifest catalog."""
+        result = bootstrap_health_server_dependencies()
+
+        assert isinstance(result.run_manifest_port, RunManifestPort)
+
     def test_bootstrap_wires_metrics_to_health_monitor(self):
         """Test that the metrics are wired to the health monitor."""
         result = bootstrap_health_server_dependencies()
@@ -127,3 +139,4 @@ class TestBootstrapHealthServerDependencies:
         assert result1 is not result2
         assert result1.metrics is not result2.metrics
         assert result1.health_monitor is not result2.health_monitor
+        assert result1.run_manifest_port is not result2.run_manifest_port

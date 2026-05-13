@@ -69,10 +69,6 @@ _ALLOWED_RUNTIME_SEAMS: dict[tuple[str, str], str] = {
         "yaml",
     ): "hash-policy golden fixture contract parses canonical policy YAML",
     (
-        "tests/unit/domain/models/test_metadata_output.py",
-        "datetime.now",
-    ): "legacy deterministic-test cleanup backlog covered by global test-time ratchet",
-    (
         "tests/unit/domain/normalization/profiles/test_additional_profiles.py",
         "read_text",
     ): "normalization profile fixture contract reads observed-value YAML",
@@ -117,30 +113,6 @@ _ALLOWED_RUNTIME_SEAMS: dict[tuple[str, str], str] = {
         "yaml",
     ): "normalization/DQ parity contract parses canonical entity config",
     (
-        "tests/unit/domain/ports/test_noop_audit.py",
-        "datetime.now",
-    ): "legacy deterministic-test cleanup backlog covered by global test-time ratchet",
-    (
-        "tests/unit/domain/ports/test_port_dtos.py",
-        "datetime.now",
-    ): "legacy deterministic-test cleanup backlog covered by global test-time ratchet",
-    (
-        "tests/unit/domain/ports/test_protocol_stubs.py",
-        "datetime.now",
-    ): "legacy deterministic-test cleanup backlog covered by global test-time ratchet",
-    (
-        "tests/unit/domain/schemas/chembl/test_schemas.py",
-        "datetime.now",
-    ): "legacy deterministic-test cleanup backlog covered by global test-time ratchet",
-    (
-        "tests/unit/domain/schemas/common/test_publication_base.py",
-        "datetime.now",
-    ): "legacy deterministic-test cleanup backlog covered by global test-time ratchet",
-    (
-        "tests/unit/domain/schemas/openalex/test_publication_schema.py",
-        "datetime.now",
-    ): "legacy deterministic-test cleanup backlog covered by global test-time ratchet",
-    (
         "tests/unit/domain/schemas/test_constants_yaml.py",
         "exists",
     ): "schema constants sync contract verifies canonical enum YAML presence",
@@ -152,34 +124,6 @@ _ALLOWED_RUNTIME_SEAMS: dict[tuple[str, str], str] = {
         "tests/unit/domain/schemas/test_constants_yaml.py",
         "yaml",
     ): "schema constants sync contract parses canonical enum YAML",
-    (
-        "tests/unit/domain/schemas/test_year_validation.py",
-        "datetime.now",
-    ): "legacy deterministic-test cleanup backlog covered by global test-time ratchet",
-    (
-        "tests/unit/domain/services/test_merged_metadata_explainability.py",
-        "datetime.now",
-    ): "legacy deterministic-test cleanup backlog covered by global test-time ratchet",
-    (
-        "tests/unit/domain/test_contract_identity.py",
-        "datetime.now",
-    ): "legacy deterministic-test cleanup backlog covered by global test-time ratchet",
-    (
-        "tests/unit/domain/test_entities.py",
-        "datetime.now",
-    ): "legacy deterministic-test cleanup backlog covered by global test-time ratchet",
-    (
-        "tests/unit/domain/test_pipeline_context.py",
-        "datetime.now",
-    ): "legacy deterministic-test cleanup backlog covered by global test-time ratchet",
-    (
-        "tests/unit/domain/value_objects/test_dq_result.py",
-        "datetime.now",
-    ): "legacy deterministic-test cleanup backlog covered by global test-time ratchet",
-    (
-        "tests/unit/domain/value_objects/test_run_context.py",
-        "datetime.now",
-    ): "legacy deterministic-test cleanup backlog covered by global test-time ratchet",
 }
 
 
@@ -435,3 +379,14 @@ def test_runtime_seam_detector_catches_representative_violations(
         "datetime.utcnow",
         "time.time",
     } <= seams
+
+
+def test_allowlist_contains_no_stale_legacy_time_cleanup_reasons() -> None:
+    """Legacy datetime cleanup reasons must be removed once source tests are fixed."""
+    stale_reason = " ".join(
+        (
+            "legacy deterministic-test cleanup backlog",
+            "covered by global test-time ratchet",
+        )
+    )
+    assert stale_reason not in _ALLOWED_RUNTIME_SEAMS.values()

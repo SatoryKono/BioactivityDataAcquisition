@@ -1,0 +1,15 @@
+version: 1
+policy_scope: observability_metric_declarations
+recording_rule_metrics:
+  - bioetl_dq_current_status
+  - bioetl_l0_input_status
+  - bioetl_l0_status
+  - bioetl_l1_control_plane_current_status
+  - bioetl_l1_dq_status
+  - bioetl_l1_gold_lifecycle_status
+  - bioetl_l1_provider_global_status
+  - bioetl_l1_runtime_blocker_status
+  - bioetl_l1_workflow_global_status
+  - bioetl_l1_workflow_selected_status
+  - bioetl_provider_current_status
+  - bioetl_runtime_current_status

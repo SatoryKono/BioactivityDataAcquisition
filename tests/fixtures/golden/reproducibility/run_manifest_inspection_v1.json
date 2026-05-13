@@ -59,6 +59,9 @@
         "snapshot-golden-001"
       ],
       "lineage_fragment_ids": [],
+      "normalization_profile_hash": null,
+      "normalization_profile_ref": null,
+      "normalization_profile_version": null,
       "pipeline_name": "chembl_activity",
       "pipeline_version": "1.0.0",
       "published_artifact_ids": [],
@@ -94,9 +97,13 @@
           "exact_replay": "true",
           "git_commit": "abc1234",
           "input_snapshot_fingerprint": "e58619abc415696b45e95f80c34160588cb90bb7bbacfa297d420324ebd483c3",
+          "normalization_profile_hash": null,
+          "normalization_profile_ref": null,
+          "normalization_profile_version": null,
           "pipeline_name": "chembl_activity",
           "pipeline_version": "1.0.0",
-          "run_type": "incremental"
+          "run_type": "incremental",
+          "silver_filter_compatibility_mode": "structural_only_auto_promote"
         }
       },
       "code_provenance_state": {
@@ -142,6 +149,9 @@
           "snapshot-golden-001"
         ],
         "lineage_fragment_ids": [],
+        "normalization_profile_hash": null,
+        "normalization_profile_ref": null,
+        "normalization_profile_version": null,
         "pipeline_name": "chembl_activity",
         "pipeline_version": "1.0.0",
         "published_artifact_ids": [],
@@ -189,6 +199,9 @@
         }
       ],
       "manifest_id": "manifest-golden-001",
+      "normalization_profile_hash": null,
+      "normalization_profile_ref": null,
+      "normalization_profile_version": null,
       "occurrence_only_diagnostics": [],
       "operator_replay_mode": "Exact Replay Blocked",
       "planned_artifacts": [
@@ -354,6 +367,9 @@
       "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
       "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction."
     ],
+    "normalization_profile_hash": null,
+    "normalization_profile_ref": null,
+    "normalization_profile_version": null,
     "occurrence_only_diagnostics": [],
     "operator_replay_mode": "Exact Replay Blocked",
     "persistence_profile": {
@@ -1035,9 +1051,13 @@
         "exact_replay": "true",
         "git_commit": "abc1234",
         "input_snapshot_fingerprint": "e58619abc415696b45e95f80c34160588cb90bb7bbacfa297d420324ebd483c3",
+        "normalization_profile_hash": null,
+        "normalization_profile_ref": null,
+        "normalization_profile_version": null,
         "pipeline_name": "chembl_activity",
         "pipeline_version": "1.0.0",
-        "run_type": "incremental"
+        "run_type": "incremental",
+        "silver_filter_compatibility_mode": "structural_only_auto_promote"
       }
     },
     "code_provenance_state": {
@@ -1083,6 +1103,9 @@
         "snapshot-golden-001"
       ],
       "lineage_fragment_ids": [],
+      "normalization_profile_hash": null,
+      "normalization_profile_ref": null,
+      "normalization_profile_version": null,
       "pipeline_name": "chembl_activity",
       "pipeline_version": "1.0.0",
       "published_artifact_ids": [],
@@ -1130,6 +1153,9 @@
       }
     ],
     "manifest_id": "manifest-golden-001",
+    "normalization_profile_hash": null,
+    "normalization_profile_ref": null,
+    "normalization_profile_version": null,
     "occurrence_only_diagnostics": [],
     "operator_replay_mode": "Exact Replay Blocked",
     "planned_artifacts": [
@@ -1242,6 +1268,9 @@
       "effective_config_artifact_id": "eca-golden-001",
       "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
       "git_commit": "abc1234",
+      "normalization_profile_hash": null,
+      "normalization_profile_ref": null,
+      "normalization_profile_version": null,
       "pipeline_version": "1.0.0",
       "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       "rule_bundle_version": "2026.03",

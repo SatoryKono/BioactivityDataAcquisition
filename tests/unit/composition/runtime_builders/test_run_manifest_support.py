@@ -424,6 +424,9 @@ entries:
     identity:
       contract_version: "1.2.3"
       schema_hash: deadbeef
+      normalization_profile_ref: "chembl.activity"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 """.strip(),
         encoding="utf-8",
     )
@@ -437,6 +440,9 @@ entries:
         "deadbeef",
         "chembl.activity.policy",
         "2026.04",
+        "chembl.activity",
+        "1.0.0",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     )
 
 
@@ -453,7 +459,7 @@ def test_resolve_contract_identity_falls_back_when_registry_invalid(
 
     result = resolve_contract_identity(provider="chembl", entity="activity")
 
-    assert result == ("chembl.activity", None, None, None, None)
+    assert result == ("chembl.activity", None, None, None, None, None, None, None)
 
 
 @pytest.mark.unit
@@ -495,7 +501,14 @@ entries:
     )
     monkeypatch.chdir(tmp_path)
 
-    with pytest.raises(RuntimeError, match="missing: dq_policy_ref"):
+    with pytest.raises(
+        RuntimeError,
+        match=(
+            "missing: dq_policy_ref, rule_bundle_version, "
+            "normalization_profile_ref, normalization_profile_version, "
+            "normalization_profile_hash"
+        ),
+    ):
         resolve_contract_identity(
             provider="chembl",
             entity="activity",

@@ -97,7 +97,6 @@ TEST_FACING_RUN_COMPOSITE_HELPER_SEAM_MODULES = frozenset()
 TEST_FACING_QUARANTINE_HELPER_SEAM_MODULES = frozenset()
 TEST_FACING_HEALTH_HELPER_SEAM_MODULES = frozenset()
 TEST_FACING_SHARED_CLI_POLICY_SEAM_MODULES: frozenset[str] = frozenset()
-PIPELINE_RUNNER_SERVICE_MODULE = "bioetl.application.services.pipeline_runner_service"
 APPLICATION_SERVICES_PACKAGE_ROOT_MODULE = "bioetl.application.services"
 APPLICATION_SERVICES_PACKAGE_ROOT_PATH = (
     ROOT / "src" / "bioetl" / "application" / "services" / "__init__.py"

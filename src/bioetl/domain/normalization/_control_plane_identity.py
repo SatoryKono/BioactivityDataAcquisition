@@ -11,6 +11,7 @@ _EXECUTION_IDENTITY_SHA256_FIELDS = frozenset(
         "dq_contract_compatibility_hash",
         "effective_config_hash",
         "input_snapshot_fingerprint",
+        "normalization_profile_hash",
     }
 )
 _RUNTIME_ANCHOR_SHA256_FIELDS = frozenset(
@@ -22,6 +23,7 @@ _RUNTIME_ANCHOR_SHA256_FIELDS = frozenset(
         "resolved_config_hash",
         "effective_config_hash",
         "input_snapshot_fingerprint",
+        "normalization_profile_hash",
     }
 )
 _SEMVER_PARTS = 3
@@ -116,6 +118,9 @@ def build_execution_identity_payload(
     dq_contract_compatibility_hash: str | None,
     contract_ref: str | None,
     contract_version: str | None,
+    normalization_profile_ref: str | None,
+    normalization_profile_version: str | None,
+    normalization_profile_hash: str | None,
     effective_config_artifact_id: str | None,
     exact_replay: bool | str | None,
     input_snapshot_fingerprint: str | None,
@@ -132,6 +137,9 @@ def build_execution_identity_payload(
         "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
         "contract_ref": contract_ref,
         "contract_version": contract_version,
+        "normalization_profile_ref": normalization_profile_ref,
+        "normalization_profile_version": normalization_profile_version,
+        "normalization_profile_hash": normalization_profile_hash,
         "effective_config_artifact_id": effective_config_artifact_id,
         "exact_replay": exact_replay,
         "input_snapshot_fingerprint": input_snapshot_fingerprint,
@@ -157,6 +165,10 @@ def _normalize_runtime_anchor_value(key: str, value: object | None) -> str | Non
     if key == "contract_ref":
         return normalize_contract_ref(value)
     if key == "contract_version":
+        return normalize_contract_version(value)
+    if key == "normalization_profile_ref":
+        return normalize_contract_ref(value)
+    if key == "normalization_profile_version":
         return normalize_contract_version(value)
     return _normalize_optional_text(value)
 
@@ -203,6 +215,8 @@ _EXECUTION_IDENTITY_FIELD_NORMALIZERS: dict[
     "effective_config_hash": normalize_runtime_anchor_effective_config_hash,
     "contract_ref": normalize_contract_ref,
     "contract_version": normalize_contract_version,
+    "normalization_profile_ref": normalize_contract_ref,
+    "normalization_profile_version": normalize_contract_version,
     "exact_replay": _normalize_optional_bool_token,
     "run_type": _normalize_optional_lower_text,
 }

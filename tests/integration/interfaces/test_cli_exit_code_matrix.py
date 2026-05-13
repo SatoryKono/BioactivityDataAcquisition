@@ -9,7 +9,7 @@ import pytest
 from bioetl.application.services.export_service import (
     ExportResult,
 )
-from bioetl.application.services.pipeline_runner_models import (
+from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineNotFoundError,
     PipelineRunResult,
     RunResult,

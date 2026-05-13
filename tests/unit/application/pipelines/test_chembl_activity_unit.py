@@ -101,15 +101,18 @@ async def test_chembl_transform_bronze_to_silver_no_activity_id(chembl_pipeline)
 
 
 def test_chembl_should_write_gold_true(chembl_pipeline):
-    """Test the should_write_gold method with a valid record."""
+    """Test the should_write_gold method with a valid transformed record."""
     record = {
+        "activity_id": 12345,
         "standard_value": 10.5,
         "standard_units": "nM",
         "target_id": "CHEMBL2",
         "standard_type": "IC50",
         "standard_relation": "=",
         "assay_type": "B",
-        "potential_duplicate": "0",
+        "potential_duplicate": 0,
+        "pchembl_value": 7.8,
+        "publication_year": 2024,
     }
     context = PipelineContext(
         run_id=chembl_pipeline.context.run_id,

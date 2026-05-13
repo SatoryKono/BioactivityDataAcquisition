@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # Политика файлов и директорий
 
-*Синхронизировано с RULES.md v6.1.2 | Последнее обновление: 2026-04-12*
+*Синхронизировано с RULES.md v6.1.2 | Последнее обновление: 2026-05-13*
 
 ______________________________________________________________________
 
@@ -33,15 +33,17 @@ ______________________________________________________________________
   `docs/05-operations/`, а одноразовые status/recovery/final-summary артефакты
   MUST архивироваться под `docs/99-archive/`.
 - Root-level tracked директории MUST ограничиваться approved runtime/tooling and
-  project surfaces: `.codex`, `.github`, `.vibe`, `assets`, `configs`, `data`,
-  `docs`, `grafana`, `reports`, `scripts`, `src`, and `tests`.
+  project surfaces: `.codex`, `.cursor`, `.gemini`, `.github`, `.idea`,
+  `.vibe`, `.vscode`, `assets`, `configs`, `data`, `docs`, `grafana`,
+  `reports`, `scripts`, `src`, and `tests`.
 - Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
-- Shared repo tooling surfaces such as `.codex/` and curated `.vibe/` MAY
-  оставаться tracked только если они поддерживаются как проектные
-  runtime/editor integrations.
+- Shared repo tooling surfaces such as `.codex/`, `.gemini/`, curated `.vibe/`,
+  and curated shared editor metadata roots such as `.cursor/`, `.idea/`, and
+  `.vscode/` MAY оставаться tracked только если они поддерживаются как
+  проектные runtime/editor integrations.
 - Editor/vendor/tooling roots such as `.ai/`, `.aiassistant/`, `ai/`,
-  `.gemini/`, `.jules/`, `.junie/`, `.sonarlint/`, `.windsurf/`,
-  `.agent-work/`, `.agentbridge/`, and `.cache/` MAY существовать в рабочем
+  `.jules/`, `.junie/`, `.sonarlint/`, `.windsurf/`, `.agent-work/`,
+  `.agentbridge/`, `.agents/`, and `.cache/` MAY существовать в рабочем
   дереве, но MUST оставаться untracked и игнорироваться `.gitignore`, если не
   были явно promoted через structure governance.
 - `.idea/`, `.vscode/`, and `.cursor/` MAY содержать curated shared project
@@ -49,17 +51,17 @@ ______________________________________________________________________
   умолчанию рассматриваются как local/editor state surfaces и MUST оставаться
   untracked, если не зарегистрированы как curated shared surfaces.
 - Generated/runtime root trees such as `node_modules/`, `output/`, `test-output/`,
-  `logs/`, `MagicMock/`, and local package trees like `.python-user/` MUST NOT
-  попадать в git-index.
+  `logs/`, `MagicMock/`, `caddy/`, and local package trees like
+  `.python-user/` MUST NOT попадать в git-index.
 
 Root allowlist интерпретируется как policy surface, а не как временный склад.
 Если новый root-level файл существует только для инцидента, ручной проверки или
 финального статуса волны, он не должен закрепляться в корне.
 
 `.codex_tmp/` is a local scratch/cache surface and MUST remain untracked.
-`.gemini/` is a local runtime/editor surface distinct from the tracked
-`GEMINI.md` root entrypoint and MUST remain untracked unless explicitly
-reclassified through structure governance.
+`.gemini/` may remain tracked only as the canonical Gemini runtime tree; local
+runtime state and generated artifacts under `.gemini/` MUST still stay
+untracked unless explicitly reclassified through structure governance.
 `.jules/` is a local vendor workspace surface and MUST remain untracked unless
 explicitly reclassified through structure governance.
 `.vibe/` may remain tracked only for curated project-local Mistral Vibe

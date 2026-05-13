@@ -106,6 +106,7 @@ ONTOLOGY_PREFIXES = {
     "CL": "CL_",
     "PR": "PR_",
     "SO": "SO_",
+    "UO": "UO_",
 }
 
 

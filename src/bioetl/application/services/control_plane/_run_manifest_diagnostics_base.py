@@ -206,6 +206,11 @@ def _build_base_summary_code_provenance_payload(
         "code_provenance_state": code_provenance_state,
         "contract_ref": code_provenance.contract_ref,
         "contract_version": code_provenance.contract_version,
+        "normalization_profile_ref": code_provenance.normalization_profile_ref,
+        "normalization_profile_version": (
+            code_provenance.normalization_profile_version
+        ),
+        "normalization_profile_hash": code_provenance.normalization_profile_hash,
         "dq_policy_ref": code_provenance.dq_policy_ref,
         "rule_bundle_version": code_provenance.rule_bundle_version,
         "dq_contract_compatibility_hash": (

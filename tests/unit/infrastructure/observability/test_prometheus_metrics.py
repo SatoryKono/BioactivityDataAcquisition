@@ -20,6 +20,9 @@ from bioetl.infrastructure.observability.prometheus_metric_label_policies import
     normalize_stage_model_outcome,
     normalize_stage_model_stage,
     normalize_terminal_status,
+    normalize_publication_vocab_field,
+    normalize_publication_vocab_handling,
+    normalize_publication_vocab_provider,
 )
 from bioetl.infrastructure.observability._prometheus_metric_label_normalizers import (
     normalize_source_file_label,
@@ -629,6 +632,35 @@ class TestPrometheusMetrics:
                 "bioetl_metrics_publication_events_total"
             ].labels().inc.assert_called_once_with(1)
 
+    def test_publication_vocab_unknown_metrics_normalize_unknown_labels(
+        self, prometheus_metrics
+    ) -> None:
+        """Publication vocabulary drift counters must keep bounded labels."""
+        with patch.dict(
+            COUNTERS,
+            {"bioetl_publication_raw_vocab_unknown_total": MagicMock()},
+        ):
+            prometheus_metrics.increment_counter(
+                name="bioetl_publication_raw_vocab_unknown_total",
+                value=1,
+                labels={
+                    "pipeline": "pubmed_publication",
+                    "provider": "custom_provider",
+                    "field": "custom_field",
+                    "handling": "custom_handling",
+                },
+            )
+
+            COUNTERS["bioetl_publication_raw_vocab_unknown_total"].labels.assert_called_once_with(
+                pipeline="pubmed_publication",
+                provider="other",
+                field="other",
+                handling="other",
+            )
+            COUNTERS[
+                "bioetl_publication_raw_vocab_unknown_total"
+            ].labels().inc.assert_called_once_with(1)
+
     @pytest.mark.parametrize(
         ("raw_value", "expected"),
         [
@@ -693,6 +725,42 @@ class TestPrometheusMetrics:
     def test_normalize_flow_stage(self, raw_value: str, expected: str) -> None:
         """Record-flow stage labels should stay within the canonical set."""
         assert normalize_flow_stage(raw_value) == expected
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ("crossref", "crossref"),
+            ("future-provider", "other"),
+        ],
+    )
+    def test_normalize_publication_vocab_provider(
+        self, raw_value: str, expected: str
+    ) -> None:
+        assert normalize_publication_vocab_provider(raw_value) == expected
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ("publication_types", "publication_types"),
+            ("future_field", "other"),
+        ],
+    )
+    def test_normalize_publication_vocab_field(
+        self, raw_value: str, expected: str
+    ) -> None:
+        assert normalize_publication_vocab_field(raw_value) == expected
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ("preserved_unknown", "preserved_unknown"),
+            ("future_handling", "other"),
+        ],
+    )
+    def test_normalize_publication_vocab_handling(
+        self, raw_value: str, expected: str
+    ) -> None:
+        assert normalize_publication_vocab_handling(raw_value) == expected
 
     @pytest.mark.parametrize(
         ("raw_value", "expected"),

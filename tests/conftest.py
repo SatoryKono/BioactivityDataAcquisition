@@ -50,6 +50,7 @@ def pytest_cmdline_main(config):
 def pytest_configure(config):
     # Keep it here as well just in case
     _normalize_enum_option(config.option, "diff_mode")
+    _auto_enable_benchmark_selection_for_explicit_benchmark_runs(config)
     _configure_windows_asyncio(config)
     if _selected_paths_need_hypothesis(config):
         _configure_hypothesis_profiles()
@@ -103,30 +104,67 @@ _HYPOTHESIS_TEST_PREFIXES = (
     "tests/architecture/",
     "tests/unit/application/composite/test_join_key_resolution_property.py",
 )
+_BENCHMARK_TEST_PREFIXES = (
+    "tests/benchmarks/",
+    "tests/performance/",
+)
+_DEFAULT_MARK_EXPR = "not benchmark and not slow"
 
 
-def _selected_paths_need_hypothesis(config: pytest.Config) -> bool:
-    """Load Hypothesis profiles only when the selected paths can execute them."""
+def _selected_test_paths(config: pytest.Config) -> tuple[str, ...]:
+    """Return normalized explicit pytest selection paths."""
     selected_args = getattr(config, "args", ())
-    if not selected_args:
-        return True
-
-    normalized_args = []
+    normalized_args: list[str] = []
     for arg in selected_args:
         if arg.startswith("-"):
             continue
         normalized = arg.split("::", 1)[0].replace("\\", "/")
         if normalized in {"tests", "tests/", "."}:
-            return True
+            return ("tests/",)
         normalized_args.append(normalized)
+    return tuple(normalized_args)
 
-    if not normalized_args:
+
+def _selected_paths_need_hypothesis(config: pytest.Config) -> bool:
+    """Load Hypothesis profiles only when the selected paths can execute them."""
+    selected_paths = _selected_test_paths(config)
+    if not selected_paths:
+        return True
+
+    if selected_paths == ("tests/",):
         return True
 
     return any(
         any(path.startswith(prefix) for prefix in _HYPOTHESIS_TEST_PREFIXES)
-        for path in normalized_args
+        for path in selected_paths
     )
+
+
+def _selected_paths_are_benchmark_only(config: pytest.Config) -> bool:
+    """Return True when the explicit selection targets only benchmark suites."""
+    selected_paths = _selected_test_paths(config)
+    if not selected_paths or selected_paths == ("tests/",):
+        return False
+    return all(
+        any(
+            path == prefix.removesuffix("/") or path.startswith(prefix)
+            for prefix in _BENCHMARK_TEST_PREFIXES
+        )
+        for path in selected_paths
+    )
+
+
+def _auto_enable_benchmark_selection_for_explicit_benchmark_runs(
+    config: pytest.Config,
+) -> None:
+    """Replace the repo default markexpr for explicit benchmark-only runs."""
+    markexpr = getattr(config.option, "markexpr", "")
+    if (
+        isinstance(markexpr, str)
+        and markexpr.strip() == _DEFAULT_MARK_EXPR
+        and _selected_paths_are_benchmark_only(config)
+    ):
+        config.option.markexpr = "benchmark"
 
 
 def _configure_hypothesis_profiles() -> None:

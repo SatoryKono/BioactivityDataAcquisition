@@ -254,7 +254,7 @@ The control-plane runtime is governed by the runtime object path
 | `required_persistence_profile`    | `degraded_observable` | Minimum control-plane persistence contract required for this runtime (`degraded_observable`, `replay_ready`, `forensic_grade`) |
 | `run_manifest_enabled`            |                `true` | Create immutable manifest before runner assembly / execution starts                                                            |
 | `run_ledger_enabled`              |                `true` | Append lifecycle and inspection events keyed by `manifest_id`                                                                  |
-| `checkpoint_compatibility_policy` |           `soft_fail` | Resume behavior when checkpoint identity mismatches runtime (`observe`, `soft_fail`, `hard_fail`, `legacy_observe`)            |
+| `checkpoint_compatibility_policy` |           `soft_fail` | Resume behavior when checkpoint identity mismatches runtime (`observe`, `soft_fail`, `hard_fail`)                              |
 
 Current rollout semantics:
 
@@ -280,21 +280,18 @@ Current rollout semantics:
 1. `checkpoint_compatibility_policy` governs resume disposition on checkpoint incompatibility:
    `observe` remains a degraded operator mode for non-identity signals, but canonical
    execution-identity mismatches still block resume; `soft_fail` blocks resume;
-   `hard_fail` raises an error; `legacy_observe` remains a legacy degraded mode
-   for v1.x-era migration periods but does not permit resume when identity
-   continuity is unproven.
+   `hard_fail` raises an error.
 1. `required_persistence_profile=replay_ready` or
    `required_persistence_profile=forensic_grade` is stricter than the requested
-   compatibility policy: runtime coerces `observe` / `legacy_observe` up to
-   `hard_fail` so strict persistence contexts never continue on an unproven
-   resume identity.
+   compatibility policy: runtime coerces `observe` up to `hard_fail` so strict
+   persistence contexts never continue on an unproven resume identity.
 1. `exact_replay=true` is stricter than the requested compatibility policy:
    runtime coerces checkpoint compatibility handling to `hard_fail` so an
    exact replay attempt cannot continue after any compatibility mismatch.
 
 ## Checkpoint Compatibility Policy
 
-The BioETL control-plane supports four checkpoint compatibility modes that govern
+The BioETL control-plane supports three checkpoint compatibility modes that govern
 resume behavior when checkpoint identity mismatches occur:
 
 ### Policy Enum
@@ -302,18 +299,17 @@ resume behavior when checkpoint identity mismatches occur:
 ```python
 # src/bioetl/application/core/lifecycle/checkpoint_runtime.py
 CheckpointCompatibilityPolicy = Literal[
-    "observe", "legacy_observe", "soft_fail", "hard_fail"
+    "observe", "soft_fail", "hard_fail"
 ]
 ```
 
 ### Policy Semantics
 
-| Policy           | Behavior                                                                                                                                | Use Case                                           | Default         |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | --------------- |
-| `observe`        | Resume only after non-identity compatibility warnings; canonical execution-identity mismatch still blocks resume                        | Operator-aware degraded mode outside strict replay | ❌ Manual       |
-| `soft_fail`      | Block resume on incompatibility without aborting the whole process                                                                      | Default fail-closed resume behavior                | ✅ Default      |
-| `hard_fail`      | Halt pipeline by raising on incompatibility                                                                                             | Critical integrity and exact replay                | ✅ Exact replay |
-| `legacy_observe` | Legacy degraded mode for migration periods; may tolerate non-identity degradation but still blocks when identity continuity is unproven | Temporary migration periods only                   | ❌ Manual       |
+| Policy      | Behavior                                                                                                         | Use Case                                           | Default         |
+| ----------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | --------------- |
+| `observe`   | Resume only after non-identity compatibility warnings; canonical execution-identity mismatch still blocks resume | Operator-aware degraded mode outside strict replay | ❌ Manual       |
+| `soft_fail` | Block resume on incompatibility without aborting the whole process                                               | Default fail-closed resume behavior                | ✅ Default      |
+| `hard_fail` | Halt pipeline by raising on incompatibility                                                                      | Critical integrity and exact replay                | ✅ Exact replay |
 
 ### Decision Flow
 
@@ -325,9 +321,6 @@ graph TD
     C -->|no| E[Log Warning\nResume Only After Non-identity Degradation]
     B -->|soft_fail| D
     B -->|hard_fail| H[Halt Pipeline\nRaise Error]
-    B -->|legacy_observe| F{Identity continuity proven?}
-    F -->|no| D
-    F -->|yes| G[Legacy Validation\nResume Only For Non-identity Degradation]
 ```
 
 ### Configuration
@@ -338,7 +331,6 @@ runtime:
   checkpoint_compatibility:
     critical: hard_fail      # Default for critical operations
     non_critical: observe    # Default for non-critical operations
-    migration_mode: legacy_observe  # Temporary during version upgrades
 ```
 
 ### Policy Selection Guide
@@ -362,20 +354,9 @@ runtime:
 - Production steady-state
 - Exact replay requirements
 
-**Use `legacy_observe` when:**
-
-- A temporary migration window still needs legacy checkpoint compatibility
-  diagnostics
-- Mixed-version or mixed-format recovery is being retired in a controlled way
-- You still want identity-continuity failures to block resume
-
-### Migration Procedure
-
-1. **Prepare**: Set `legacy_observe` in configuration
-1. **Upgrade**: Roll out new version nodes incrementally
-1. **Validate**: Monitor validation warnings in logs
-1. **Remove**: Switch to standard modes after full upgrade
-1. **Cleanup**: Remove legacy mode from configurations
+Historical manifests may still preserve removed checkpoint policy values in raw
+launch-context payloads. Treat that as evidence of an older runtime posture,
+not as a supported modern configuration value.
 
 ## Supported Resume Modes
 

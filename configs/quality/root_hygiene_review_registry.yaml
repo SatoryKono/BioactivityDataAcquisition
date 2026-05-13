@@ -63,11 +63,11 @@ review_lanes:
         canonical_path: null
         action_if_reintroduced: decide_owner_or_remove_from_tracked_root
       - path: .gemini
-        current_live_state: present_local_only_root_surface
+        current_live_state: present_curated_root_surface
         canonical_path: GEMINI.md
-        action_if_reintroduced: keep_runtime_state_untracked_and_preserve_only_the_documented_root_entrypoint
+        action_if_reintroduced: keep_curated_runtime_surface_and_preserve_local_generated_state_as_untracked
       - path: .jules
-        current_live_state: present_local_only_root_surface
+        current_live_state: absent_from_root_baseline
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: .vibe
@@ -79,9 +79,9 @@ review_lanes:
     classification: review_required
     scope: local runtime/cache roots that may exist in the working tree but must remain untracked
     verification:
-      - git ls-files .agent-work .agentbridge .cache
-      - git check-ignore -v .agent-work .agentbridge .cache
-      - rg -n "\\.agent-work/|\\.agentbridge/|\\.cache/" .gitignore docs scripts .github tests configs
+      - git ls-files .agent-work .agentbridge .agents .cache .npm-cache caddy
+      - git check-ignore -v .agent-work .agentbridge .agents .cache .npm-cache caddy
+      - rg -n "\\.agent-work/|\\.agentbridge/|\\.agents/|\\.cache/|\\.npm-cache/|caddy/" .gitignore docs scripts .github tests configs
     candidates:
       - path: .agent-work
         current_live_state: present_local_only_root_surface
@@ -91,10 +91,22 @@ review_lanes:
         current_live_state: absent_from_root_baseline
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
+      - path: .agents
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: .cache
         current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_scope_to_a_documented_cache_surface
+      - path: .npm-cache
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_scope_to_a_documented_cache_surface
+      - path: caddy
+        current_live_state: present_local_only_root_surface
+        canonical_path: docker-compose.codex.yml
+        action_if_reintroduced: keep_runtime_state_untracked_and_rebuild_from_the_documented_compose_stack
 
   - lane_id: local_vendor_tooling_roots
     classification: review_required
@@ -121,17 +133,25 @@ review_lanes:
     classification: review_required
     scope: non-canonical root notes, diagnostics, and ad-hoc tests
     verification:
-      - git ls-files AGENT.md QUICK_START.md query_test_docs_memory.js seed_test_docs_memory.js test_neo4j_memory.py Dockerfile entrypoint.sh requirements.txt
-      - rg -n "AGENT\\.md|QUICK_START\\.md|query_test_docs_memory|seed_test_docs_memory|test_neo4j_memory|Dockerfile|requirements\\.txt" .github docs scripts tests configs README.md Makefile pyproject.toml package.json
+      - git ls-files AGENT.md QUICK_START.md MCP_SETUP.md dashboard-audit-report.md query_test_docs_memory.js seed_test_docs_memory.js test_neo4j_memory.py Dockerfile entrypoint.sh requirements.txt
+      - rg -n "AGENT\\.md|QUICK_START\\.md|MCP_SETUP\\.md|dashboard-audit-report\\.md|query_test_docs_memory|seed_test_docs_memory|test_neo4j_memory|Dockerfile|requirements\\.txt" .github docs scripts tests configs README.md Makefile pyproject.toml package.json
     candidates:
       - path: AGENT.md
         current_live_state: absent_from_root_baseline
         canonical_path: AGENTS.md
         action_if_reintroduced: move_to_canonical_docs_or_remove
+      - path: MCP_SETUP.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/99-archive/mcp-codex-stable-startup-guide.md
+        action_if_reintroduced: move_to_docs_or_archive_surface_or_remove
       - path: QUICK_START.md
         current_live_state: absent_from_root_baseline
         canonical_path: docs/03-guides
         action_if_reintroduced: move_to_docs_or_remove
+      - path: dashboard-audit-report.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/reports/audits/dashboard-audit-report-2026-05-08.md
+        action_if_reintroduced: move_to_curated_report_surface_or_remove
       - path: query_test_docs_memory.js
         current_live_state: absent_from_root_baseline
         canonical_path: tests

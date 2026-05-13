@@ -28,6 +28,8 @@ from .conftest import (
     get_silver_records,
 )
 
+pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
+
 # Stable DOIs for deterministic cassette playback.
 OPENALEX_TEST_DOIS = (
     "10.1038/s41586-020-2649-2",  # Nature 2020

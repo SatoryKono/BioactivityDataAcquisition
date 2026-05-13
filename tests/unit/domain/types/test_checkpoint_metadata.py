@@ -385,7 +385,6 @@ class TestCheckpointMetadata:
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             effective_config_hash="a" * 64,
-            silver_filter_compatibility_mode="legacy_semantic_silver",
         )
 
         payload = metadata.checkpoint_execution_identity_payload()

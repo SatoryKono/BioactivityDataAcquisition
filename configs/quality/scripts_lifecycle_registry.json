@@ -170,17 +170,53 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a backward-compatible import shim while the canonical Neo4j memory smoke implementation lives under scripts.ai.mcp.neo4j_memory_mcp_smoke; remove it only after tests and historical import paths stop referencing scripts.memory.mcp_smoke."
     },
-    "scripts/codex-start-wsl.ps1": {
+    "scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_helper_orphan",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as the bounded non-interactive WSL helper used to avoid Codex launch hangs while the surrounding Windows bootstrap flow is still being consolidated; remove it if launch-codex-wsl.ps1 is retired or rewritten onto a different startup path."
+    },
+    "scripts/ai/codex/launch-codex-wsl.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a legacy root Windows wrapper while Codex runtime launchers migrate toward canonical scripts.ai and scripts.ops surfaces; remove it after caller audit confirms no direct root-script consumers remain."
+      "next_step": "Retain only as a Windows-side compatibility launcher while Codex runtime startup guidance still references this PowerShell entrypoint; remove it after docs and operators fully migrate to the governed scripts.ai/canonical launcher surface."
     },
-    "scripts/codex-start-wsl.sh": {
+    "scripts/docker-setup.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as the legacy root Windows wrapper while Docker setup documentation and operator habits still invoke scripts/docker-setup.ps1; remove it after docs switch to the canonical scripts/ops entrypoint and the compatibility window expires."
+    },
+    "scripts/docker-setup.sh": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a legacy root shell wrapper while Codex runtime launchers migrate toward canonical scripts.ai and scripts.ops surfaces; remove it after caller audit confirms no direct root-script consumers remain."
+      "next_step": "Retain only as the legacy root shell wrapper while Docker setup guidance and operator habits still invoke scripts/docker-setup.sh; remove it after docs switch to the canonical scripts/ops entrypoint and the compatibility window expires."
+    },
+    "scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_helper_orphan",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as the bounded non-interactive WSL helper used to avoid Codex launch hangs while the surrounding Windows bootstrap flow is still being consolidated; remove it if launch-codex-wsl.ps1 is retired or rewritten onto a different startup path."
+    },
+    "scripts/ai/codex/launch-codex-wsl.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a Windows-side compatibility launcher while Codex runtime startup guidance still references this PowerShell entrypoint; remove it after docs and operators fully migrate to the governed scripts.ai/canonical launcher surface."
+    },
+    "scripts/ops/docker-setup.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_helper_orphan",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the canonical Windows implementation behind the root Docker setup compatibility wrapper while user-facing docs continue to point at the legacy root launcher; promote it to active inventory once docs and callers reference scripts/ops/docker-setup.ps1 directly."
+    },
+    "scripts/ops/docker-setup.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_helper_orphan",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the canonical shell implementation behind the root Docker setup compatibility wrapper while user-facing docs continue to point at the legacy root launcher; promote it to active inventory once docs and callers reference scripts/ops/docker-setup.sh directly."
     },
     "scripts/shutdown.ps1": {
       "owner": "@bioetl-platform",

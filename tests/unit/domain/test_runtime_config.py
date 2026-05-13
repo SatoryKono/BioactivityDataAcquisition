@@ -175,3 +175,14 @@ class TestRuntimeConfig:
                 exact_replay=True,
                 replay_anchor_date="2026/04/10",
             )
+
+    def test_noncanonical_silver_filter_mode_raises(self) -> None:
+        """RuntimeConfig only accepts the canonical Silver filter mode."""
+        with pytest.raises(
+            ValueError,
+            match="silver_filter_compatibility_mode must be",
+        ):
+            RuntimeConfig(
+                run_type=RunType.INCREMENTAL,
+                silver_filter_compatibility_mode="unsupported_mode",  # type: ignore[arg-type]
+            )

@@ -69,6 +69,9 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         ),
         "bioetl_replay_drift_events_total": _metrics.REPLAY_DRIFT_EVENTS_TOTAL,
         "bioetl_metrics_publication_events_total": _metrics.METRICS_PUBLICATION_EVENTS_TOTAL,
+        "bioetl_publication_raw_vocab_unknown_total": (
+            _metrics.PUBLICATION_RAW_VOCAB_UNKNOWN_TOTAL
+        ),
         "bioetl_workflow_runs_total": _metrics.WORKFLOW_RUNS_TOTAL,
         "bioetl_workflow_step_events_total": _metrics.WORKFLOW_STEP_EVENTS_TOTAL,
     },

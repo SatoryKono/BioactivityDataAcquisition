@@ -162,14 +162,12 @@ class PipelineSettings(BaseSettings):
         """When True, append run-ledger events for lifecycle and lineage."""
 
         checkpoint_compatibility_policy: Literal[
-            "observe", "legacy_observe", "soft_fail", "hard_fail"
+            "observe", "soft_fail", "hard_fail"
         ] = Field(default="soft_fail")
         """Resume behavior when checkpoint compatibility validation fails.
 
         `observe` remains a degraded operator mode only when identity continuity
-        is proven and non-identity signals drift. `legacy_observe` preserves
-        the legacy degraded telemetry contract for that same non-identity drift
-        path, but no longer allows resume when identity continuity is unproven.
+        is proven and non-identity signals drift.
         """
 
         @model_validator(mode="after")
@@ -200,8 +198,7 @@ class PipelineSettings(BaseSettings):
                 )
             if (
                 self.required_persistence_profile in STRICT_PERSISTENCE_PROFILES
-                and self.checkpoint_compatibility_policy
-                in {"observe", "legacy_observe"}
+                and self.checkpoint_compatibility_policy == "observe"
             ):
                 raise ValueError(
                     "pipeline.control_plane.required_persistence_profile="

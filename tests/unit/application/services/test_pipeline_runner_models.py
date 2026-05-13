@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from bioetl.application.services.pipeline_runner_models import (
+from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineNotFoundError,
     PipelineRunResult,
     RunOptions,

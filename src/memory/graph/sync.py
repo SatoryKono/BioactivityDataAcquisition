@@ -7353,9 +7353,9 @@ CONTROL_PLANE_LEDGER_DOCS = (
 
 RUN_MANIFEST_RUNTIME_MODULES = (
     "src/bioetl/domain/control_plane/run_manifest.py",
-    "src/bioetl/application/services/run_manifest_service.py",
-    "src/bioetl/application/services/run_manifest_diagnostics.py",
-    "src/bioetl/application/services/run_manifest_inspection_service.py",
+    "src/bioetl/application/services/control_plane/run_manifest_service.py",
+    "src/bioetl/application/services/control_plane/run_manifest_diagnostics.py",
+    "src/bioetl/application/services/control_plane/run_manifest_inspection_service.py",
     "src/bioetl/interfaces/cli/commands/run_manifest.py",
     "src/bioetl/composition/bootstrap/cli/run_manifest.py",
     "src/bioetl/composition/runtime_builders/run_manifest_builder.py",
@@ -7363,7 +7363,7 @@ RUN_MANIFEST_RUNTIME_MODULES = (
 
 RUN_LEDGER_RUNTIME_MODULES = (
     "src/bioetl/domain/control_plane/run_ledger.py",
-    "src/bioetl/application/services/run_ledger_service.py",
+    "src/bioetl/application/services/control_plane/run_ledger_service.py",
 )
 
 EFFECTIVE_CONFIG_RUNTIME_MODULES = (
@@ -7373,7 +7373,7 @@ EFFECTIVE_CONFIG_RUNTIME_MODULES = (
 )
 
 LINEAGE_RUNTIME_MODULES = (
-    "src/bioetl/application/services/lineage_inspection_service.py",
+    "src/bioetl/application/services/lineage/lineage_inspection_service.py",
     "src/bioetl/composition/bootstrap/cli/lineage.py",
     "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
 )
@@ -16431,12 +16431,13 @@ def _append_snapshot_support_issues(
     snapshot: GraphSnapshot,
     relations: tuple[GraphRelation, ...],
 ) -> None:
+    relation_index = _build_snapshot_relation_index(relations)
     for prefix, label, predicate in _snapshot_support_specs():
         _append_support_issue(
             issues,
             prefix,
             _missing_node_support_names(
-                snapshot, label, lambda key, fn=predicate: fn(relations, key)
+                snapshot, label, lambda key, fn=predicate: fn(relation_index, key)
             ),
         )
 
@@ -16927,23 +16928,23 @@ SNAPSHOT_RELATION_REQUIREMENTS = (
 
 
 def _support_runtime_evidence_surface(
-    relations: tuple[GraphRelation, ...], key: NodeKey
+    relation_index: _SnapshotRelationIndex, key: NodeKey
 ) -> bool:
     return _has_outbound_relation(
-        relations, key, {"BACKED_BY", "DESCRIBED_IN", "WRITES_TO"}
+        relation_index, key, {"BACKED_BY", "DESCRIBED_IN", "WRITES_TO"}
     )
 
 
 def _support_control_plane_artifact_surface(
-    relations: tuple[GraphRelation, ...], key: NodeKey
+    relation_index: _SnapshotRelationIndex, key: NodeKey
 ) -> bool:
     return _has_inbound_relation(
-        relations,
+        relation_index,
         key,
         {"EMITS_ARTIFACT"},
         source_labels={"runtime_evidence_surface"},
     ) and _has_outbound_relation(
-        relations,
+        relation_index,
         key,
         {"MATERIALIZED_AS"},
         target_labels={"storage_surface"},
@@ -16951,15 +16952,15 @@ def _support_control_plane_artifact_surface(
 
 
 def _support_run_instance_surface(
-    relations: tuple[GraphRelation, ...], key: NodeKey
+    relation_index: _SnapshotRelationIndex, key: NodeKey
 ) -> bool:
     return _has_inbound_relation(
-        relations,
+        relation_index,
         key,
         {"HAS_RUN_INSTANCE"},
         source_labels={"project"},
     ) and _has_outbound_relation(
-        relations,
+        relation_index,
         key,
         {"REFERENCES_ARTIFACT"},
         target_labels={"control_plane_artifact_surface"},
@@ -16967,22 +16968,22 @@ def _support_run_instance_surface(
 
 
 def _support_runtime_state_surface(
-    relations: tuple[GraphRelation, ...], key: NodeKey
+    relation_index: _SnapshotRelationIndex, key: NodeKey
 ) -> bool:
     return (
         _has_inbound_relation(
-            relations,
+            relation_index,
             key,
             {"HAS_RUNTIME_STATE"},
             source_labels={"project", "run_instance_surface"},
         )
         and _has_outbound_relation(
-            relations,
+            relation_index,
             key,
             {"DEPENDS_ON"},
         )
         and _has_outbound_relation(
-            relations,
+            relation_index,
             key,
             {"REFERENCES_ARTIFACT"},
             target_labels={"control_plane_artifact_surface"},
@@ -16991,10 +16992,10 @@ def _support_runtime_state_surface(
 
 
 def _support_storage_surface(
-    relations: tuple[GraphRelation, ...], key: NodeKey
+    relation_index: _SnapshotRelationIndex, key: NodeKey
 ) -> bool:
     return _has_inbound_relation(
-        relations,
+        relation_index,
         key,
         {"WRITES_TO", "DEPENDS_ON", "DEFINED_BY"},
         source_labels={
@@ -17004,44 +17005,44 @@ def _support_storage_surface(
             "storage_surface",
         },
     ) or _has_outbound_relation(
-        relations,
+        relation_index,
         key,
         {"PROMOTES_TO", "DEFINED_BY"},
     )
 
 
 def _support_schema_field_surface(
-    relations: tuple[GraphRelation, ...], key: NodeKey
+    relation_index: _SnapshotRelationIndex, key: NodeKey
 ) -> bool:
     return _has_inbound_relation(
-        relations,
+        relation_index,
         key,
         {"HAS_SCHEMA_FIELD"},
         source_labels={"storage_surface", "contract_surface"},
     ) and _has_outbound_relation(
-        relations,
+        relation_index,
         key,
         {"DEFINED_BY", "PROMOTES_FIELD_TO", "DERIVES_FIELD_FROM"},
     )
 
 
 def _support_workflow_job_surface(
-    relations: tuple[GraphRelation, ...], key: NodeKey
+    relation_index: _SnapshotRelationIndex, key: NodeKey
 ) -> bool:
     return _has_inbound_relation(
-        relations, key, {"CONTAINS"}, source_labels={"workflow_surface"}
+        relation_index, key, {"CONTAINS"}, source_labels={"workflow_surface"}
     )
 
 
 def _support_cli_command_surface(
-    relations: tuple[GraphRelation, ...], key: NodeKey
+    relation_index: _SnapshotRelationIndex, key: NodeKey
 ) -> bool:
     return _has_outbound_relation(
-        relations,
+        relation_index,
         key,
         {"RUNS_VIA", "EXECUTES_GATE", "DEPENDS_ON"},
     ) or _has_inbound_relation(
-        relations,
+        relation_index,
         key,
         {"HAS_CLI_COMMAND"},
         source_labels={"project"},
@@ -17049,10 +17050,10 @@ def _support_cli_command_surface(
 
 
 def _support_workflow_artifact_surface(
-    relations: tuple[GraphRelation, ...], key: NodeKey
+    relation_index: _SnapshotRelationIndex, key: NodeKey
 ) -> bool:
     return _has_inbound_relation(
-        relations,
+        relation_index,
         key,
         {"PUBLISHES_ARTIFACT", "DEPENDS_ON"},
         source_labels={"workflow_job_surface"},
@@ -17060,15 +17061,15 @@ def _support_workflow_artifact_surface(
 
 
 def _support_workflow_call_surface(
-    relations: tuple[GraphRelation, ...], key: NodeKey
+    relation_index: _SnapshotRelationIndex, key: NodeKey
 ) -> bool:
     return _has_inbound_relation(
-        relations,
+        relation_index,
         key,
         {"CALLS_WORKFLOW"},
         source_labels={"workflow_surface", "workflow_job_surface"},
     ) or _has_outbound_relation(
-        relations,
+        relation_index,
         key,
         {"DEPENDS_ON"},
         target_labels={"workflow_surface"},
@@ -17076,10 +17077,10 @@ def _support_workflow_call_surface(
 
 
 def _support_workflow_output_surface(
-    relations: tuple[GraphRelation, ...], key: NodeKey
+    relation_index: _SnapshotRelationIndex, key: NodeKey
 ) -> bool:
     return _has_inbound_relation(
-        relations,
+        relation_index,
         key,
         {"EMITS_OUTPUT"},
         source_labels={"workflow_surface", "workflow_job_surface"},
@@ -17087,10 +17088,10 @@ def _support_workflow_output_surface(
 
 
 def _support_cli_option_surface(
-    relations: tuple[GraphRelation, ...], key: NodeKey
+    relation_index: _SnapshotRelationIndex, key: NodeKey
 ) -> bool:
     return _has_inbound_relation(
-        relations,
+        relation_index,
         key,
         {"ACCEPTS_OPTION"},
         source_labels={"cli_command_surface"},
@@ -17098,22 +17099,22 @@ def _support_cli_option_surface(
 
 
 def _support_doc_claim_surface(
-    relations: tuple[GraphRelation, ...], key: NodeKey
+    relation_index: _SnapshotRelationIndex, key: NodeKey
 ) -> bool:
     return _has_inbound_relation(
-        relations,
+        relation_index,
         key,
         {"ASSERTS"},
         source_labels={"doc_source_surface", "doc_artifact", "policy_surface"},
     ) or _has_outbound_relation(
-        relations,
+        relation_index,
         key,
         {"ASSERTS_ABOUT"},
     )
 
 
 def _snapshot_support_specs() -> tuple[
-    tuple[str, str, Callable[[tuple[GraphRelation, ...], NodeKey], bool]], ...
+    tuple[str, str, Callable[[_SnapshotRelationIndex, NodeKey], bool]], ...
 ]:
     return (
         (
@@ -17197,8 +17198,28 @@ def _required_population_issues(stats: dict[str, JsonValue]) -> list[str]:
     return issues
 
 
-def _has_inbound_relation(
+@dataclass(frozen=True)
+class _SnapshotRelationIndex:
+    outbound_by_source: dict[NodeKey, tuple[GraphRelation, ...]]
+    inbound_by_target: dict[NodeKey, tuple[GraphRelation, ...]]
+
+
+def _build_snapshot_relation_index(
     relations: tuple[GraphRelation, ...],
+) -> _SnapshotRelationIndex:
+    outbound: dict[NodeKey, list[GraphRelation]] = {}
+    inbound: dict[NodeKey, list[GraphRelation]] = {}
+    for relation in relations:
+        outbound.setdefault(relation.source, []).append(relation)
+        inbound.setdefault(relation.target, []).append(relation)
+    return _SnapshotRelationIndex(
+        outbound_by_source={key: tuple(value) for key, value in outbound.items()},
+        inbound_by_target={key: tuple(value) for key, value in inbound.items()},
+    )
+
+
+def _has_inbound_relation(
+    relation_index: _SnapshotRelationIndex,
     key: NodeKey,
     relation_types: set[str],
     *,
@@ -17208,12 +17229,12 @@ def _has_inbound_relation(
         rel.target == key
         and rel.relation_type in relation_types
         and (source_labels is None or rel.source.label in source_labels)
-        for rel in relations
+        for rel in relation_index.inbound_by_target.get(key, ())
     )
 
 
 def _has_outbound_relation(
-    relations: tuple[GraphRelation, ...],
+    relation_index: _SnapshotRelationIndex,
     key: NodeKey,
     relation_types: set[str],
     *,
@@ -17223,7 +17244,7 @@ def _has_outbound_relation(
         rel.source == key
         and rel.relation_type in relation_types
         and (target_labels is None or rel.target.label in target_labels)
-        for rel in relations
+        for rel in relation_index.outbound_by_source.get(key, ())
     )
 
 

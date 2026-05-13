@@ -38,6 +38,9 @@ _OPTIONAL_CONTROL_PLANE_FIELDS = (
     "contract_schema_hash",
     "dq_policy_ref",
     "rule_bundle_version",
+    "normalization_profile_ref",
+    "normalization_profile_version",
+    "normalization_profile_hash",
 )
 
 
@@ -58,6 +61,9 @@ def _iter_optional_control_plane_updates(
     contract_schema_hash: str | None = None,
     dq_policy_ref: str | None = None,
     rule_bundle_version: str | None = None,
+    normalization_profile_ref: str | None = None,
+    normalization_profile_version: str | None = None,
+    normalization_profile_hash: str | None = None,
 ) -> tuple[tuple[str, str], ...]:
     values = normalize_runtime_anchor_payload(
         {
@@ -72,6 +78,9 @@ def _iter_optional_control_plane_updates(
             "contract_schema_hash": contract_schema_hash,
             "dq_policy_ref": dq_policy_ref,
             "rule_bundle_version": rule_bundle_version,
+            "normalization_profile_ref": normalization_profile_ref,
+            "normalization_profile_version": normalization_profile_version,
+            "normalization_profile_hash": normalization_profile_hash,
         }
     )
     return tuple(
@@ -121,6 +130,9 @@ def attach_manifest_id(
     contract_schema_hash: str | None = None,
     dq_policy_ref: str | None = None,
     rule_bundle_version: str | None = None,
+    normalization_profile_ref: str | None = None,
+    normalization_profile_version: str | None = None,
+    normalization_profile_hash: str | None = None,
 ) -> PipelineRunContext:
     """Return context carrying manifest/control-plane provenance values."""
     optional_updates = _iter_optional_control_plane_updates(
@@ -135,6 +147,9 @@ def attach_manifest_id(
         contract_schema_hash=contract_schema_hash,
         dq_policy_ref=dq_policy_ref,
         rule_bundle_version=rule_bundle_version,
+        normalization_profile_ref=normalization_profile_ref,
+        normalization_profile_version=normalization_profile_version,
+        normalization_profile_hash=normalization_profile_hash,
     )
     if is_dataclass(ctx):
         return cast(

@@ -19,7 +19,6 @@ _VERDICT_UNKNOWN: Final[str] = "unknown"
 
 _MODE_STRICT: Final[str] = "strict"
 _MODE_LENIENT: Final[str] = "lenient"
-_MODE_LEGACY: Final[str] = "legacy"
 
 _COMPATIBLE_TRANSITIONS: Final[dict[ExecutionPhase, tuple[ExecutionPhase, ...]]] = {
     ExecutionPhase.PREFLIGHT: (ExecutionPhase.NOT_STARTED,),
@@ -172,8 +171,6 @@ def determine_verdict_value(
             execution_identity_result=execution_identity_result,
             schema_result=schema_result,
         )
-    if mode == _MODE_LEGACY:
-        return _determine_legacy_verdict(phase_result=phase_result)
     return _determine_strict_verdict(
         phase_result=phase_result,
         config_result=config_result,
@@ -222,12 +219,6 @@ def _determine_lenient_verdict(
         or schema_result["severity"] == _SEVERITY_MAJOR
     ):
         return _VERDICT_MINOR_INCOMPATIBLE
-    return _VERDICT_COMPATIBLE
-
-
-def _determine_legacy_verdict(*, phase_result: JsonDict) -> str:
-    if phase_result["severity"] == _SEVERITY_MAJOR:
-        return _VERDICT_MAJOR_INCOMPATIBLE
     return _VERDICT_COMPATIBLE
 
 

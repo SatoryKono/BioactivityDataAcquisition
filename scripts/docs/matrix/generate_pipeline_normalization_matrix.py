@@ -212,6 +212,11 @@ CANONICAL_EFFECTIVE_CONFIG_HASH = (
 )
 CANONICAL_CONTRACT_REF = "chembl.activity"
 CANONICAL_CONTRACT_VERSION = "2.0.0"
+CANONICAL_NORMALIZATION_PROFILE_REF_RAW = " ChemBL.Activity "
+CANONICAL_NORMALIZATION_PROFILE_VERSION_RAW = " v1 "
+CANONICAL_NORMALIZATION_PROFILE_HASH_RAW = (
+    " SHA256:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB "
+)
 CANONICAL_MANIFEST_ID = "manifest-123"
 CANONICAL_COMPOSITE_RUN_ID = "run-42"
 
@@ -2221,6 +2226,9 @@ def _control_plane_surface_statuses() -> list[dict[str, object]]:
         dq_contract_compatibility_hash=" DEADBEEF ",
         contract_ref=CANONICAL_CONTRACT_REF_RAW,
         contract_version=" v2 ",
+        normalization_profile_ref=CANONICAL_NORMALIZATION_PROFILE_REF_RAW,
+        normalization_profile_version=CANONICAL_NORMALIZATION_PROFILE_VERSION_RAW,
+        normalization_profile_hash=CANONICAL_NORMALIZATION_PROFILE_HASH_RAW,
         effective_config_artifact_id=" artifact-42 ",
         exact_replay=True,
         input_snapshot_fingerprint=" FACE ",

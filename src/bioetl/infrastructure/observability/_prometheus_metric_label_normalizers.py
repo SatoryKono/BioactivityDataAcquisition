@@ -248,6 +248,21 @@ _ALLOWED_PUBLICATION_TARGET_LABELS = frozenset(
 _ALLOWED_PUBLICATION_STATUS_LABELS = frozenset(
     {"success", "failed", "skipped", "disabled", "other"}
 )
+_ALLOWED_PUBLICATION_VOCAB_PROVIDER_LABELS = frozenset(
+    {"crossref", "openalex", "pubmed", "semanticscholar", "other"}
+)
+_ALLOWED_PUBLICATION_VOCAB_FIELD_LABELS = frozenset(
+    {
+        "publication_type",
+        "type_crossref",
+        "publication_types",
+        "publication_status",
+        "other",
+    }
+)
+_ALLOWED_PUBLICATION_VOCAB_HANDLING_LABELS = frozenset(
+    {"preserved_unknown", "collapsed_to_none", "other"}
+)
 _ALLOWED_OBSERVABILITY_COMPONENT_LABELS = frozenset(
     {"logger", "metrics", "tracing", "audit", "dq_monitor", "other"}
 )
@@ -474,6 +489,30 @@ def normalize_publication_target(target: str) -> str:
 def normalize_publication_status(status: str) -> str:
     """Normalize metrics publication status labels."""
     return _normalize_bounded_label(status, _ALLOWED_PUBLICATION_STATUS_LABELS)
+
+
+def normalize_publication_vocab_provider(provider: str) -> str:
+    """Normalize publication vocabulary provider labels."""
+    return _normalize_bounded_label(
+        provider,
+        _ALLOWED_PUBLICATION_VOCAB_PROVIDER_LABELS,
+    )
+
+
+def normalize_publication_vocab_field(field_name: str) -> str:
+    """Normalize publication vocabulary field labels."""
+    return _normalize_bounded_label(
+        field_name,
+        _ALLOWED_PUBLICATION_VOCAB_FIELD_LABELS,
+    )
+
+
+def normalize_publication_vocab_handling(handling: str) -> str:
+    """Normalize publication vocabulary handling labels."""
+    return _normalize_bounded_label(
+        handling,
+        _ALLOWED_PUBLICATION_VOCAB_HANDLING_LABELS,
+    )
 
 
 def normalize_composite_phase_record_outcome(outcome: str) -> str:

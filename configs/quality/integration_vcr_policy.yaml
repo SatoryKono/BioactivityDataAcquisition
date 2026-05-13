@@ -199,6 +199,7 @@ tracked_suite_inventory:
     - tests/integration/config/test_contract_registry_active_surface_coverage.py
     - tests/integration/config/test_deprecated_gold_contract_registry_inventory.py
     - tests/integration/config/test_dq_config_loading.py
+    - tests/integration/config/test_pipeline_data_storage_contracts.py
     - tests/integration/config/test_pubchem_property_vocabulary_inventory.py
     - tests/integration/config/test_publication_controlled_vocab_parity.py
     - tests/integration/config/test_publication_nested_vocabulary_inventory.py
@@ -253,22 +254,18 @@ tracked_suite_inventory:
       uniprot_protein: tests/e2e/test_uniprot_protein_e2e.py
     scenario_runs:
       advanced_scenarios: tests/e2e/test_advanced_scenarios_e2e.py
-      checkpoint: tests/e2e/test_checkpoint_e2e.py
       full_pipeline: tests/e2e/test_full_pipeline.py
       full_pipeline_chain: tests/e2e/test_full_pipeline_chain_e2e.py
-      run_types: tests/e2e/test_run_types_e2e.py
     operational_and_governance_surfaces:
     - tests/e2e/test_cli_safety.py
     - tests/e2e/test_contract_rollout_e2e.py
     - tests/e2e/test_contract_rollout_runtime_e2e.py
     - tests/e2e/test_e2e_stability_policy.py
-    - tests/e2e/test_gold_layer_e2e.py
     - tests/e2e/test_pipeline_matrix_e2e.py
     resilience_and_failure_surfaces:
     - tests/e2e/test_network_failure_e2e.py
     - tests/e2e/test_pipeline_circuit_breaker_e2e.py
     - tests/e2e/test_pipeline_graceful_shutdown_e2e.py
-    - tests/e2e/test_pipeline_with_dq_errors_e2e.py
     - tests/e2e/test_pipeline_with_schema_drift_e2e.py
     - tests/e2e/test_resilience_scenarios_e2e.py
 execution_paths:

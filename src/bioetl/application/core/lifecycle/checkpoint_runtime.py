@@ -8,18 +8,16 @@ from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 CheckpointCompatibilityPolicy = Literal[
-    "observe", "legacy_observe", "soft_fail", "hard_fail"
+    "observe", "soft_fail", "hard_fail"
 ]
 CheckpointCompatibilityDisposition = Literal[
     "observe_blocked_identity",
-    "legacy_observe_loaded_degraded",
     "observe_loaded_degraded",
     "soft_fail_blocked",
     "hard_fail_raised",
 ]
 CheckpointMissingContextDisposition = Literal[
     "missing_context_blocked",
-    "legacy_missing_context_loaded_degraded",
     "missing_context_hard_fail_raised",
 ]
 
@@ -30,7 +28,6 @@ def validate_compatibility_policy(
     """Validate supported checkpoint compatibility handling modes."""
     allowed: tuple[CheckpointCompatibilityPolicy, ...] = (
         "observe",
-        "legacy_observe",
         "soft_fail",
         "hard_fail",
     )
@@ -199,10 +196,7 @@ def handle_incompatible_checkpoint(
         identity_continuity_proven=identity_continuity_proven,
     )
     forced_resume_rejection = disposition == "observe_blocked_identity"
-    degraded_resume_loaded = disposition in {
-        "observe_loaded_degraded",
-        "legacy_observe_loaded_degraded",
-    }
+    degraded_resume_loaded = disposition == "observe_loaded_degraded"
     payload = {
         "pipeline": pipeline_name,
         "compatibility_policy": compatibility_policy,
@@ -223,12 +217,6 @@ def handle_incompatible_checkpoint(
             **payload,
         )
         return None
-    if disposition == "legacy_observe_loaded_degraded":
-        logger.warning(
-            "Checkpoint compatibility mismatch observed; legacy degraded resume continues.",
-            **payload,
-        )
-        return checkpoint_metadata
     if disposition == "observe_loaded_degraded":
         logger.warning(
             "Checkpoint non-identity compatibility mismatch observed; resume continues.",
@@ -264,25 +252,17 @@ def handle_missing_compatibility_context(
         current_metadata=current_metadata,
         service_available=service_available,
     )
-    degraded_resume_loaded = disposition == ("legacy_missing_context_loaded_degraded")
     payload = {
         "pipeline": pipeline_name,
         "compatibility_policy": compatibility_policy,
         "compatibility_disposition": disposition,
-        "resume_rejected": not degraded_resume_loaded,
+        "resume_rejected": True,
         "messages": messages,
         "checkpoint_metadata": checkpoint_metadata.to_dict(),
         "current_identity": _checkpoint_identity_payload(current_metadata),
         "checkpoint_identity": _checkpoint_identity_payload(checkpoint_metadata),
         "compatibility_service_available": service_available,
     }
-    if disposition == "legacy_missing_context_loaded_degraded":
-        logger.warning(
-            "Checkpoint compatibility context missing; "
-            "legacy degraded resume continues.",
-            **payload,
-        )
-        return checkpoint_metadata
     if disposition == "missing_context_blocked":
         logger.warning(
             "Checkpoint compatibility context missing; resume blocked.",
@@ -333,12 +313,6 @@ def resolve_incompatible_checkpoint_disposition(
         if not identity_continuity_proven or not execution_identity_compatible:
             return "observe_blocked_identity"
         return "observe_loaded_degraded"
-    if compatibility_policy == "legacy_observe":
-        if not identity_continuity_proven:
-            return "observe_blocked_identity"
-        if execution_identity_compatible:
-            return "legacy_observe_loaded_degraded"
-        return "observe_blocked_identity"
     if compatibility_policy == "soft_fail":
         return "soft_fail_blocked"
     return "hard_fail_raised"
@@ -349,8 +323,6 @@ def resolve_missing_compatibility_context_disposition(
     compatibility_policy: CheckpointCompatibilityPolicy,
 ) -> CheckpointMissingContextDisposition:
     """Return bounded disposition for missing resume compatibility context."""
-    if compatibility_policy == "legacy_observe":
-        return "legacy_missing_context_loaded_degraded"
     if compatibility_policy == "hard_fail":
         return "missing_context_hard_fail_raised"
     return "missing_context_blocked"

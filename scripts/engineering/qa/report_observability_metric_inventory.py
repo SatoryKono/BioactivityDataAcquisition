@@ -34,6 +34,10 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (  
     GAUGES,
     HISTOGRAMS,
 )
+from bioetl.infrastructure.observability import metrics_definitions as _metric_defs  # noqa: E402
+from bioetl.infrastructure.observability.metrics_export_names import (  # noqa: E402
+    METRICS_DEFINITION_EXPORT_NAMES,
+)
 
 _CANONICAL_METRIC_RE = re.compile(r"\bbioetl_[a-z0-9_]+\b")
 
@@ -50,6 +54,9 @@ _DOC_SCAN_ROOTS = (
 _RULE_SCAN_ROOT = Path("grafana/prometheus-rules")
 _DEFAULT_DRIFT_ALLOWLIST = Path(
     "configs/quality/observability_metric_inventory_allowlist.yaml"
+)
+_DEFAULT_DECLARED_METRIC_DEFINITIONS = Path(
+    "configs/quality/observability_metric_declarations.yaml"
 )
 _RUNTIME_EXCLUDE_PARTS = (
     "src/bioetl/infrastructure/observability",
@@ -73,6 +80,10 @@ _RUNTIME_SCAN_MARKERS: Final[tuple[str, ...]] = (
     "increment_counter",
     "observe_histogram",
     "set_gauge",
+    ".inc(",
+    ".observe(",
+    ".set(",
+    ".labels(",
     "metric_name",
     "phase_duration_metric",
     "phase_events_metric",
@@ -125,6 +136,24 @@ _CHECK_DRIFT_KEYS: Final[tuple[str, ...]] = (
 _ALLOWLIST_METADATA_REQUIRED_KEYS: Final[frozenset[str]] = frozenset(
     {"runtime_cardinality_review_required"}
 )
+_DIRECT_COLLECTOR_TERMINAL_METHODS: Final[frozenset[str]] = frozenset(
+    {"inc", "observe", "set"}
+)
+_METRIC_OBJECT_NAME_BY_ID: Final[dict[int, str]] = {
+    id(metric): metric_name
+    for registry in (COUNTERS, GAUGES, HISTOGRAMS)
+    for metric_name, metric in registry.items()
+}
+_EXPORTED_PROMETHEUS_METRIC_NAME_BINDINGS: Final[dict[str, str]] = {
+    export_name: metric_name
+    for export_name in METRICS_DEFINITION_EXPORT_NAMES
+    if isinstance(
+        metric_name := _METRIC_OBJECT_NAME_BY_ID.get(
+            id(getattr(_metric_defs, export_name))
+        ),
+        str,
+    )
+}
 
 
 def _iter_text_files(root: Path) -> list[Path]:
@@ -287,13 +316,14 @@ def _resolve_metric_name_expr(
     *,
     string_bindings: dict[str, str],
     attribute_bindings: dict[str, str],
+    metric_bindings: dict[str, str],
 ) -> str | None:
     if isinstance(node, ast.Constant) and isinstance(node.value, str):
         return node.value
     if isinstance(node, ast.Name):
-        return string_bindings.get(node.id)
+        return string_bindings.get(node.id) or metric_bindings.get(node.id)
     if isinstance(node, ast.Attribute):
-        return attribute_bindings.get(node.attr)
+        return attribute_bindings.get(node.attr) or metric_bindings.get(node.attr)
     return None
 
 
@@ -320,6 +350,7 @@ def _helper_metric_candidates(
     *,
     string_bindings: dict[str, str],
     attribute_bindings: dict[str, str],
+    metric_bindings: dict[str, str],
 ) -> set[str]:
     candidates: set[str] = set()
     for arg in node.args:
@@ -327,6 +358,7 @@ def _helper_metric_candidates(
             arg,
             string_bindings=string_bindings,
             attribute_bindings=attribute_bindings,
+            metric_bindings=metric_bindings,
         )
         if metric_name is not None:
             candidates.add(metric_name)
@@ -337,6 +369,7 @@ def _helper_metric_candidates(
             keyword.value,
             string_bindings=string_bindings,
             attribute_bindings=attribute_bindings,
+            metric_bindings=metric_bindings,
         )
         if metric_name is None:
             continue
@@ -352,6 +385,7 @@ def _scan_metric_names_in_tree(
     *,
     string_bindings: dict[str, str],
     attribute_bindings: dict[str, str],
+    metric_bindings: dict[str, str],
 ) -> tuple[set[str], set[str], set[str]]:
     direct_metric_names: set[str] = set()
     helper_metric_names: set[str] = set()
@@ -362,6 +396,7 @@ def _scan_metric_names_in_tree(
             call_node,
             string_bindings=string_bindings,
             attribute_bindings=attribute_bindings,
+            metric_bindings=metric_bindings,
         )
         if direct_metric_name is not None:
             direct_metric_names.add(direct_metric_name)
@@ -444,6 +479,7 @@ def _metric_names_for_call(
     *,
     string_bindings: dict[str, str],
     attribute_bindings: dict[str, str],
+    metric_bindings: dict[str, str],
 ) -> tuple[str | None, set[str]]:
     """Return direct runtime metric name or helper candidates for one call."""
     method_name = _call_method_name(node)
@@ -453,15 +489,25 @@ def _metric_names_for_call(
                 node,
                 string_bindings=string_bindings,
                 attribute_bindings=attribute_bindings,
+                metric_bindings=metric_bindings,
             ),
             set(),
         )
+    collector_metric_name = _direct_collector_metric_name(
+        node,
+        string_bindings=string_bindings,
+        attribute_bindings=attribute_bindings,
+        metric_bindings=metric_bindings,
+    )
+    if collector_metric_name is not None:
+        return (collector_metric_name, set())
     return (
         None,
         _helper_metric_candidates(
             node,
             string_bindings=string_bindings,
             attribute_bindings=attribute_bindings,
+            metric_bindings=metric_bindings,
         ),
     )
 
@@ -471,14 +517,56 @@ def _direct_metric_name(
     *,
     string_bindings: dict[str, str],
     attribute_bindings: dict[str, str],
+    metric_bindings: dict[str, str],
 ) -> str | None:
     """Resolve the direct runtime metric name from a runtime metrics call."""
-    if not node.args:
+    if node.args:
+        return _resolve_metric_name_expr(
+            node.args[0],
+            string_bindings=string_bindings,
+            attribute_bindings=attribute_bindings,
+            metric_bindings=metric_bindings,
+        )
+    for keyword in node.keywords:
+        if keyword.arg != "name" or keyword.value is None:
+            continue
+        return _resolve_metric_name_expr(
+            keyword.value,
+            string_bindings=string_bindings,
+            attribute_bindings=attribute_bindings,
+            metric_bindings=metric_bindings,
+        )
+    return None
+
+
+def _collector_base_metric_expr(node: ast.Call) -> ast.expr | None:
+    func = node.func
+    if not isinstance(func, ast.Attribute) or func.attr not in _DIRECT_COLLECTOR_TERMINAL_METHODS:
+        return None
+    if isinstance(func.value, ast.Call):
+        labels_call = func.value
+        labels_func = labels_call.func
+        if isinstance(labels_func, ast.Attribute) and labels_func.attr == "labels":
+            return labels_func.value
+        return None
+    return func.value
+
+
+def _direct_collector_metric_name(
+    node: ast.Call,
+    *,
+    string_bindings: dict[str, str],
+    attribute_bindings: dict[str, str],
+    metric_bindings: dict[str, str],
+) -> str | None:
+    metric_expr = _collector_base_metric_expr(node)
+    if metric_expr is None:
         return None
     return _resolve_metric_name_expr(
-        node.args[0],
+        metric_expr,
         string_bindings=string_bindings,
         attribute_bindings=attribute_bindings,
+        metric_bindings=metric_bindings,
     )
 
 
@@ -511,6 +599,7 @@ def _scan_direct_metric_label_shapes(
     *,
     string_bindings: dict[str, str],
     attribute_bindings: dict[str, str],
+    metric_bindings: dict[str, str],
 ) -> list[tuple[str, frozenset[str] | None, int]]:
     """Return direct metric label shapes resolved from literal label dictionaries."""
     shapes: list[tuple[str, frozenset[str] | None, int]] = []
@@ -521,6 +610,7 @@ def _scan_direct_metric_label_shapes(
             call_node,
             string_bindings=string_bindings,
             attribute_bindings=attribute_bindings,
+            metric_bindings=metric_bindings,
         )
         if metric_name is None or not metric_name.startswith("bioetl_"):
             continue
@@ -623,6 +713,7 @@ def _scan_runtime_metric_file(
         cache=import_binding_cache,
     )
     string_bindings.update(_collect_local_string_bindings(tree))
+    metric_bindings = _resolve_imported_metric_bindings(tree)
     attribute_bindings = dict(repo_attribute_bindings or {})
     attribute_bindings.update(_collect_class_attribute_bindings(tree))
     direct_metric_names, helper_metric_names, alias_metric_names = (
@@ -630,12 +721,14 @@ def _scan_runtime_metric_file(
             tree,
             string_bindings=string_bindings,
             attribute_bindings=attribute_bindings,
+            metric_bindings=metric_bindings,
         )
     )
     label_shapes = _scan_direct_metric_label_shapes(
         tree,
         string_bindings=string_bindings,
         attribute_bindings=attribute_bindings,
+        metric_bindings=metric_bindings,
     )
     return (
         _as_repo_relative(path, repo_root),
@@ -726,6 +819,39 @@ def _scan_registered_metric_names(repo_root: Path) -> frozenset[str]:
             continue
         metric_names.update(_CANONICAL_METRIC_RE.findall(text))
     return frozenset(metric_names)
+
+
+def _load_declared_rule_metrics(repo_root: Path) -> set[str]:
+    path = repo_root / _DEFAULT_DECLARED_METRIC_DEFINITIONS
+    if not path.exists():
+        return set()
+    try:
+        import yaml
+    except ImportError:
+        return set()
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        return set()
+    raw_metrics = payload.get("recording_rule_metrics", [])
+    if not isinstance(raw_metrics, list):
+        return set()
+    return {
+        value
+        for value in raw_metrics
+        if isinstance(value, str) and value.startswith("bioetl_")
+    }
+
+
+def _resolve_imported_metric_bindings(tree: ast.AST) -> dict[str, str]:
+    bindings = dict(_EXPORTED_PROMETHEUS_METRIC_NAME_BINDINGS)
+    for node in _import_from_nodes(tree):
+        for alias in node.names:
+            if alias.name == "*":
+                continue
+            metric_name = _EXPORTED_PROMETHEUS_METRIC_NAME_BINDINGS.get(alias.name)
+            if metric_name is not None:
+                bindings[alias.asname or alias.name] = metric_name
+    return bindings
 
 
 REGISTERED_PROMETHEUS_METRIC_NAMES = _scan_registered_metric_names(_REPO_ROOT)
@@ -821,7 +947,10 @@ def _extract_rule_metric_names(groups: list[object]) -> list[str]:
 def collect_metric_inventory(
     repo_root: Path,
 ) -> dict[str, list[str] | dict[str, list[str]]]:
-    registered = sorted(REGISTERED_PROMETHEUS_METRIC_NAMES)
+    declared_rule_metrics = _load_declared_rule_metrics(repo_root)
+    runtime_registered_set = set(REGISTERED_PROMETHEUS_METRIC_NAMES)
+    declared_set = runtime_registered_set | declared_rule_metrics
+    registered = sorted(declared_set)
     (
         runtime_mentions,
         helper_backed_mentions,
@@ -837,11 +966,11 @@ def collect_metric_inventory(
         doc_paths.extend(_iter_text_files(repo_root / root))
     docs_mentions = _filter_documented_metric_mentions(
         _scan_canonical_metric_mentions(doc_paths, repo_root),
-        registered_metrics=REGISTERED_PROMETHEUS_METRIC_NAMES,
+        registered_metrics=declared_set,
     )
     rules_mentions = _filter_documented_metric_mentions(
         _scan_rule_metric_mentions(repo_root),
-        registered_metrics=REGISTERED_PROMETHEUS_METRIC_NAMES,
+        registered_metrics=declared_set,
     )
 
     registered_set = set(registered)
@@ -850,11 +979,11 @@ def collect_metric_inventory(
     runtime_set = direct_runtime_set | helper_runtime_set
     docs_set = set(docs_mentions)
     rules_set = set(rules_mentions)
-    registry_only_metrics = registered_set - runtime_set
+    registry_only_metrics = runtime_registered_set - runtime_set
     runtime_without_registry = runtime_set - registered_set
     dead_metrics = registry_only_metrics - docs_set - rules_set
-    documented_without_runtime = (docs_set & registered_set) - runtime_set
-    ruled_without_runtime = (rules_set & registered_set) - runtime_set
+    documented_without_runtime = (docs_set & runtime_registered_set) - runtime_set
+    ruled_without_runtime = (rules_set & runtime_registered_set) - runtime_set
     combined_emitters = _combine_metric_emitters(runtime_mentions, helper_backed_mentions)
     runtime_cardinality_review_required = sorted(
         metric_name

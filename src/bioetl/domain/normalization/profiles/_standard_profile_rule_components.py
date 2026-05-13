@@ -201,10 +201,10 @@ def _compose_null_aware_rule(
         record: Mapping[str, object] | None = None,
     ) -> object:
         null_normalized = normalize_profile_null(value)
-        if null_normalized is None:
-            return None
         if record is not None and _normalizer_accepts_record_context(base_normalizer):
             return base_normalizer(null_normalized, record=record)
+        if null_normalized is None:
+            return None
         return base_normalizer(null_normalized)
 
     _normalize.__name__ = getattr(base_normalizer, "__name__", "_normalize")

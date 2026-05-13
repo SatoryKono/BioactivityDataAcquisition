@@ -1,15 +1,23 @@
-"""Guardrails for the removed RunExecutionContext compatibility export."""
+"""Guardrails for the removed RunExecutionContext compatibility shim."""
 
 from __future__ import annotations
 
+from importlib import import_module
 from pathlib import Path
 
 import pytest
 
-import bioetl.application.services.cli_run_orchestration_models as legacy_models
-
 ROOT = Path(__file__).resolve().parents[2]
 SELF = Path(__file__).resolve()
+REMOVED_COMPAT_MODULE = "bioetl.application.services.cli_run_orchestration_models"
+REMOVED_COMPAT_FILE = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "services"
+    / "cli_run_orchestration_models.py"
+)
 FORBIDDEN_SYMBOL = "RunExecution" + "Context"
 
 
@@ -25,11 +33,11 @@ def _iter_symbol_mentions(root: Path) -> list[str]:
 
 
 @pytest.mark.architecture
-def test_run_execution_context_compat_export_has_been_removed() -> None:
-    """Legacy facade should no longer expose the deprecated execution context name."""
-    assert FORBIDDEN_SYMBOL not in legacy_models.__all__
-    assert not hasattr(legacy_models, FORBIDDEN_SYMBOL)
-    assert FORBIDDEN_SYMBOL not in dir(legacy_models)
+def test_run_execution_context_compat_module_has_been_removed() -> None:
+    """Legacy execution-context shim module must stay removed."""
+    assert not REMOVED_COMPAT_FILE.exists()
+    with pytest.raises(ModuleNotFoundError):
+        import_module(REMOVED_COMPAT_MODULE)
 
 
 @pytest.mark.architecture

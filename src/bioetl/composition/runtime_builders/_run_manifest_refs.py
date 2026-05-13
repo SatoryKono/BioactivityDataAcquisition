@@ -132,6 +132,9 @@ class ManifestControlPlaneRefs:
     contract_schema_hash: str | None
     dq_policy_ref: str | None
     rule_bundle_version: str | None
+    normalization_profile_ref: str | None
+    normalization_profile_version: str | None
+    normalization_profile_hash: str | None
 
 
 def resolve_run_context_values(
@@ -159,6 +162,9 @@ def create_control_plane_refs(
     contract_schema_hash: str | None,
     dq_policy_ref: str | None,
     rule_bundle_version: str | None,
+    normalization_profile_ref: str | None,
+    normalization_profile_version: str | None,
+    normalization_profile_hash: str | None,
 ) -> ManifestControlPlaneRefs:
     """Build the compact control-plane refs bundle returned to callers."""
     return ManifestControlPlaneRefs(
@@ -174,4 +180,7 @@ def create_control_plane_refs(
         contract_schema_hash=contract_schema_hash,
         dq_policy_ref=dq_policy_ref,
         rule_bundle_version=rule_bundle_version,
+        normalization_profile_ref=normalization_profile_ref,
+        normalization_profile_version=normalization_profile_version,
+        normalization_profile_hash=normalization_profile_hash,
     )

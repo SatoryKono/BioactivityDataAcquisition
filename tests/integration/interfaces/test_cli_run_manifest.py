@@ -9,7 +9,7 @@ from uuid import uuid4
 import pytest
 from click.testing import CliRunner
 
-from bioetl.application.services.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.run_manifest_inspection_service import (
     RunManifestDiffEntry,
     RunManifestDiffResult,
     RunManifestInspectionResult,

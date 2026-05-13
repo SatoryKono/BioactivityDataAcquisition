@@ -38,6 +38,8 @@ from .conftest import (
     run_pipeline_or_skip_transient,
 )
 
+pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
+
 CASSETTE_ROOT = Path(__file__).parent.parent / "fixtures" / "vcr"
 
 

@@ -107,7 +107,7 @@ class ServicesBuilder:
         checkpoint_compatibility_service: CheckpointCompatibilityService | None = None,
         current_metadata: CheckpointMetadata | None = None,
         compatibility_policy: Literal[
-            "observe", "legacy_observe", "soft_fail", "hard_fail"
+            "observe", "soft_fail", "hard_fail"
         ] = "soft_fail",
     ) -> CheckpointRuntimeService:
         return create_checkpoint_manager(

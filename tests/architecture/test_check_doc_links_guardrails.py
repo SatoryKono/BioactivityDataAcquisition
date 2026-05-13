@@ -276,7 +276,7 @@ Last verified: "2026-04-13"
 ## Invariants
 ## Inspection surface
 
-- `src/bioetl/application/services/run_manifest_service.py`
+- `src/bioetl/application/services/control_plane/run_manifest_service.py`
 """,
         encoding="utf-8",
     )

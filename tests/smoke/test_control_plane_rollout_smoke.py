@@ -9,10 +9,10 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.services.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.run_manifest_inspection_service import (
     RunManifestInspectionService,
 )
-from bioetl.application.services.run_ledger_service import RunLedgerService
+from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
 from bioetl.domain.ports.observability.metrics import MetricsPort
 from bioetl.domain.types import RunID, RunType

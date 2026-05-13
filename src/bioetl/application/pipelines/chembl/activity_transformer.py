@@ -59,6 +59,20 @@ _PUBLICATION_IDENTIFIER_ALIASES: dict[str, tuple[str, ...]] = {
     "publication_pmc_id": ("publication_pmc_id", "pmc_id", "document_pmc_id"),
 }
 
+_ONTOLOGY_COMPANION_DEFAULTS: JsonDict = {
+    "bao_endpoint_iri": None,
+    "bao_endpoint_mapping_status": None,
+    "bao_format_iri": None,
+    "bao_format_mapping_status": None,
+    "bao_ontology_version": None,
+    "uo_unit_iri": None,
+    "uo_unit_mapping_status": None,
+    "uo_ontology_version": None,
+    "qudt_unit_iri": None,
+    "qudt_unit_mapping_status": None,
+    "qudt_ontology_version": None,
+}
+
 # ============================================================================
 # Declarative field groups for Activity entity
 # ============================================================================
@@ -257,6 +271,9 @@ class ActivityTransformer(BaseChemblTransformer):
             "molecule_id": str(molecule_id),
             # Declarative field groups
             **map_field_groups(record, _ACTIVITY_GROUPS),
+            # Shared domain normalization resolves ontology companion bundles
+            # only for fields that are present in the staged payload.
+            **_ONTOLOGY_COMPANION_DEFAULTS,
             # Nested dict extraction (not declarative)
             **self._extract_ligand_efficiency(
                 cast(

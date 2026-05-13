@@ -280,7 +280,7 @@ async def test_circuit_breaker_opens_on_failures():
 
 @pytest.mark.e2e
 @pytest.mark.asyncio
-async def test_circuit_breaker_half_open_recovery():
+async def test_circuit_breaker_half_open_recovery(monkeypatch: pytest.MonkeyPatch):
     """E2E: Circuit breaker transitions to half-open for recovery probe.
 
     Per ADR-007:
@@ -297,24 +297,22 @@ async def test_circuit_breaker_half_open_recovery():
         recovery_timeout=1,  # 1 second for testing (must be > 0.5 for reliable sleep)
     )
 
-    # Trigger open state via force_open
+    monotonic_ticks = iter((100.0, 101.1))
+    monkeypatch.setattr(
+        "bioetl.infrastructure.adapters.http.circuit_breaker.time.monotonic",
+        lambda: next(monotonic_ticks),
+    )
+
     breaker.force_open()
     assert breaker.get_state() == CircuitBreakerState.OPEN
 
-    # Wait for recovery timeout
-    await asyncio.sleep(1.1)
-
-    # Call should_attempt to trigger transition to half-open
-    # This happens internally when making a request
     async def dummy_func() -> str:
         await asyncio.sleep(0)
         return "success"
 
-    # The call() method triggers state transitions
     result = await breaker.call(dummy_func)
     assert result == "success"
 
-    # After successful call from OPEN->HALF_OPEN->CLOSED
     assert breaker.get_state() == CircuitBreakerState.CLOSED
 
 

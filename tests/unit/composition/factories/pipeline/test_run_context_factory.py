@@ -179,3 +179,36 @@ def test_run_context_factory_allows_degraded_partial_contract_identity(
 
     assert context.contract_ref == "chembl.activity"
     assert context.contract_version is None
+
+
+def test_run_context_factory_maps_extended_contract_identity_fields() -> None:
+    """Canonical 8-field identity should populate normalization profile metadata."""
+    factory = RunContextFactory(
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity_type_extractor=lambda _pipeline_name: "activity",
+        config_hash_getter=lambda _yaml_config: "resolved-hash",
+        contract_identity_resolver=lambda _provider, _entity: (
+            "chembl.activity",
+            "1.0.0",
+            "schema-hash",
+            "dq.policy",
+            "rules-v1",
+            "chembl.activity",
+            "1.2.3",
+            "profile-hash",
+        ),
+    )
+
+    context = factory.create(
+        run_id=RunID(uuid4()),
+        runtime=_runtime(),
+        started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
+        yaml_config=_yaml_config(),
+    )
+
+    assert context.contract_ref == "chembl.activity"
+    assert context.rule_bundle_version == "rules-v1"
+    assert context.normalization_profile_ref == "chembl.activity"
+    assert context.normalization_profile_version == "1.2.3"
+    assert context.normalization_profile_hash == "profile-hash"

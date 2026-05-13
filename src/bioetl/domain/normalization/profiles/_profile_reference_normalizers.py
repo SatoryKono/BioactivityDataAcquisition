@@ -33,6 +33,7 @@ from bioetl.domain.normalization.reference_ids import (
     normalize_uniprot_mixed_mapping_reference_id,
 )
 from bioetl.domain.normalization.text import normalize_string
+from bioetl.domain.value_objects import InChIKey
 
 __all__ = [
     "normalize_profile_chembl_id",
@@ -40,6 +41,7 @@ __all__ = [
     "normalize_profile_drugbank_ids",
     "normalize_profile_issn_id",
     "normalize_profile_issn_ids",
+    "normalize_profile_inchi_key",
     "normalize_profile_mesh_id",
     "normalize_profile_ncbi_taxonomy_id",
     "normalize_profile_openalex_author_ids",
@@ -125,6 +127,16 @@ def normalize_profile_issn_ids(value: object) -> object:
         value,
         item_normalizer=normalize_issn_reference_id,
     )
+
+
+def normalize_profile_inchi_key(value: object) -> object:
+    """Canonicalize one InChIKey value through the shared domain Value Object."""
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        return value
+    normalized = InChIKey.from_raw(value)
+    return None if normalized is None else str(normalized)
 
 
 def normalize_profile_openalex_author_ids(value: object) -> object:

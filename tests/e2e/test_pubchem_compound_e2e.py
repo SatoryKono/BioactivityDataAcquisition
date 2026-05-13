@@ -26,6 +26,8 @@ from .conftest import (
     get_silver_records,
 )
 
+pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
+
 
 @pytest.fixture(scope="module")
 def vcr_config(vcr_cassette_dir) -> dict[str, Any]:

@@ -29,6 +29,8 @@ from .conftest import (
     get_silver_records,
 )
 
+pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
+
 # VCR cassette directory for ChEMBL E2E tests
 CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "chembl"
 TERM_PAYLOAD_MARKERS = ('"mesh_terms"', '"keywords"')

@@ -6,7 +6,7 @@ from inspect import signature
 
 import pytest
 
-from bioetl.application.services.cli_run_orchestration_contracts import (
+from bioetl.application.services.execution.cli_run_orchestration_contracts import (
     MetricsFlushCallable,
     RunCoroutineCallable,
     RunPreparedPipelineCallable,

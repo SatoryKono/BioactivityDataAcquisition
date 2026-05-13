@@ -1,5 +1,5 @@
 {
-  "artifact_id": "effective-config-c891110b8a037882",
+  "artifact_id": "effective-config-37dd9a51ea4514e5",
   "occurrence_envelope": {
     "created_at": "2025-01-01T12:00:00+00:00",
     "effective_execution_timestamp": "2025-01-01T12:00:00+00:00",
@@ -7,7 +7,7 @@
   },
   "schema_version": "1.0",
   "semantic_artifact": {
-    "artifact_id": "effective-config-c891110b8a037882",
+    "artifact_id": "effective-config-37dd9a51ea4514e5",
     "contract_refs": [],
     "dq_contract_compatibility_hash": "no_dq_policies",
     "dq_policy_refs": [],
@@ -64,6 +64,9 @@
         "settings.observability.audit_enabled"
       ]
     },
+    "normalization_profile_hash": null,
+    "normalization_profile_ref": null,
+    "normalization_profile_version": null,
     "pipeline_kind": "standard",
     "pipeline_name": "chembl_activity",
     "resolution_policy": {

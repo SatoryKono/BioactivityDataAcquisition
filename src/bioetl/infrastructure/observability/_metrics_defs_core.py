@@ -41,6 +41,7 @@ __all__ = sorted(
         "METRICS_PUBLICATION_EVENTS_TOTAL",
         "OBSERVABILITY_RUNTIME_STATUS",
         "OUTPUT_ARTIFACT_PUBLICATION_EVENTS_TOTAL",
+        "PUBLICATION_RAW_VOCAB_UNKNOWN_TOTAL",
         "PIPELINE_DURATION_SECONDS",
         "QUARANTINE_OPERATOR_DURATION_SECONDS",
         "QUARANTINE_OPERATOR_OPERATIONS_TOTAL",
@@ -316,6 +317,12 @@ METRICS_PUBLICATION_EVENTS_TOTAL = Counter(
     "bioetl_metrics_publication_events_total",
     "Total best-effort metrics publication attempts by target and status",
     ["pipeline", "run_type", "target", "status"],
+)
+
+PUBLICATION_RAW_VOCAB_UNKNOWN_TOTAL = Counter(
+    "bioetl_publication_raw_vocab_unknown_total",
+    "Total unknown raw publication vocabulary values preserved for drift observability",
+    ["pipeline", "provider", "field", "handling"],
 )
 
 OBSERVABILITY_RUNTIME_STATUS = Gauge(

@@ -45,7 +45,7 @@ Verify the active rollout semantics:
 - `run_ledger_enabled`
 - `required_persistence_profile` with allowed values
   `degraded_observable | replay_ready | forensic_grade`
-- `checkpoint_compatibility_policy` with allowed values `observe | soft_fail | hard_fail | legacy_observe`
+- `checkpoint_compatibility_policy` with allowed values `observe | soft_fail | hard_fail`
 
 Fast source-of-truth checks:
 
@@ -70,15 +70,16 @@ Interpretation:
 - if resume is enabled, `checkpoint_compatibility_policy` controls checkpoint mismatch handling:
   `observe` may continue only for degraded non-identity signals, while canonical
   execution-identity mismatches still block resume.
-- if `checkpoint_compatibility_policy=legacy_observe`, treat it as a temporary
-  migration-only degraded mode: it may still surface legacy validation signals,
-  but identity continuity must already be proven or resume remains blocked.
 - if `required_persistence_profile` is `replay_ready` or `forensic_grade`,
-  runtime does not allow `observe` / `legacy_observe` to remain effective; the
-  applied policy is coerced to `hard_fail`.
+  runtime does not allow `observe` to remain effective; the applied policy is
+  coerced to `hard_fail`.
 - if the current run is `exact_replay=true`, runtime coerces checkpoint
   compatibility handling to `hard_fail`; exact replay is not allowed to
   continue after any compatibility mismatch.
+
+Historical manifests may still contain removed checkpoint policy values in raw
+payloads; use that as an audit clue for legacy runtime behavior rather than as
+a current operator option.
 
 ### 2. Resolve one run
 

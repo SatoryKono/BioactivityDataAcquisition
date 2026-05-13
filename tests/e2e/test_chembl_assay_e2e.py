@@ -21,6 +21,8 @@ from .conftest import (
     run_pipeline_or_skip_transient,
 )
 
+pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
+
 
 @pytest.mark.e2e
 @pytest.mark.vcr

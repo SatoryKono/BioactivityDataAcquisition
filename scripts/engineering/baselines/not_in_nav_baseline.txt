@@ -102,7 +102,7 @@
 00-project/ai/skills/local/synthesizing-pillars/references/synthesis-template.md
 02-architecture/adr-registry/index.md
 02-architecture/adr-registry/status-dashboard.md
-02-architecture/decisions/ADR-047-workflow-control-plane.md
+02-architecture/adr-registry/README.md
 02-architecture/decisions/notes/2026-04-07-ledger-based-resume-spike.md
 02-architecture/diagrams/governance/diagram-expansion-2026-05-12.md
 03-data-model/json-field-typing-inventory.md
@@ -169,6 +169,9 @@
 05-operations/verification/ci-failure-triage-2026-05-05.md
 05-operations/verification/neo4j-memory-qa-examples.md
 05-operations/verification/neo4j-memory-windows-verification.md
+CODEX_HANG_FIX.md
+DOCKER_QUICKSTART.md
+DOCKER_SETUP.md
 CODEX_QUICK_START.md
 CODEX_WSL_SETUP.md
 D-01 Governance & Style Guide.md

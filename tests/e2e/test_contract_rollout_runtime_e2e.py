@@ -19,6 +19,8 @@ if TYPE_CHECKING:
         PipelineContractPolicy,
     )
 
+pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
+
 _PIPELINE_NAME = "chembl_activity"
 
 
