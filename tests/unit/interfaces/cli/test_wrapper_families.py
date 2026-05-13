@@ -19,15 +19,6 @@ from bioetl.interfaces.cli.registry_helpers import build_cli_registry
 def _no_args(_module: ModuleType) -> tuple[tuple[object, ...], dict[str, object]]:
     """Build an empty invocation for zero-argument wrappers."""
     return (), {}
-
-
-def _pipeline_runner_args(
-    _module: ModuleType,
-) -> tuple[tuple[object, ...], dict[str, object]]:
-    """Build representative args for create_pipeline_runner."""
-    return ("chembl_activity", MagicMock()), {}
-
-
 def _registry_kwarg(
     _module: ModuleType,
 ) -> tuple[tuple[object, ...], dict[str, object]]:
@@ -46,14 +37,6 @@ PACKAGE_WRAPPER_CASES: tuple[
     ],
     ...,
 ] = (
-    (
-        "bioetl.interfaces.cli",
-        "create_pipeline_runner",
-        "bioetl.composition.execution_api.create_pipeline_runner",
-        _pipeline_runner_args,
-        object(),
-        "identity",
-    ),
     (
         "bioetl.interfaces.cli.registry_helpers",
         "create_registry",
@@ -84,7 +67,7 @@ PACKAGE_WRAPPER_CASES: tuple[
         "expected_result",
     ),
     PACKAGE_WRAPPER_CASES,
-    ids=("cli-create-runner", "registry-create", "registry-register"),
+    ids=("registry-create", "registry-register"),
 )
 def test_cli_package_wrappers_delegate_to_public_composition_facades(
     module_name: str,
@@ -106,6 +89,28 @@ def test_cli_package_wrappers_delegate_to_public_composition_facades(
     else:
         assert result is expected_result
     mock_impl.assert_called_once_with(*args, **kwargs)
+
+
+@pytest.mark.unit
+def test_cli_package_root_removed_create_pipeline_runner_export_fails_fast() -> None:
+    """Removed CLI package wrapper must stay absent."""
+    module = importlib.import_module("bioetl.interfaces.cli")
+
+    assert "create_pipeline_runner" not in module.__all__
+    assert "create_pipeline_runner" not in dir(module)
+    with pytest.raises(AttributeError):
+        getattr(module, "create_pipeline_runner")
+
+
+@pytest.mark.unit
+def test_cli_package_root_removed_validate_pipeline_name_export_fails_fast() -> None:
+    """Removed CLI package convenience export must stay absent."""
+    module = importlib.import_module("bioetl.interfaces.cli")
+
+    assert "validate_pipeline_name" not in module.__all__
+    assert "validate_pipeline_name" not in dir(module)
+    with pytest.raises(AttributeError):
+        getattr(module, "validate_pipeline_name")
 
 
 @pytest.mark.unit

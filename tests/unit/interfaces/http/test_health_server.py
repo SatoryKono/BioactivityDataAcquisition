@@ -1109,6 +1109,34 @@ class TestHealthServerControlPlaneSelector:
         assert data == {"items": expected_run_ids}
 
     @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_endpoint_supports_brace_expanded_grafana_scope(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Grafana brace-expanded All scope should still resolve run IDs."""
+        server, manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        expected_run_ids = [
+            str(manifest.run_id)
+            for manifest in manifest_store.list_all()
+            if manifest.pipeline_name in {"chembl_activity", "pubchem_compound"}
+            and manifest.run_type == RunType.INCREMENTAL
+        ]
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/filter-options?"
+            "dimension=run_id&response_shape=list"
+            "&pipeline={chembl_activity,pubchem_compound}"
+            "&run_type={incremental}",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data == {"items": expected_run_ids}
+
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_returns_latest_manifest_for_scope(
         self,
         running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
@@ -1238,6 +1266,34 @@ class TestHealthServerControlPlaneSelector:
         assert rows["manifest_id"] == "select one concrete pipeline or exact run_id"
         assert rows["run_id"] == "select one concrete pipeline or exact run_id"
         assert rows["pipeline name"] == "$__all"
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_table_treats_brace_expanded_pipeline_scope_as_aggregate(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Brace-expanded pipeline sets must not be mistaken for one concrete pipeline."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-table?"
+            "pipeline={chembl_activity,chembl_assay,chembl_publication,chembl_target,test_pipe}"
+            "&run_type={incremental,full,rebuild}",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        rows = {item["parameter"]: item["value"] for item in data["rows"]}
+        assert data["resolved_via"] == "aggregate_scope_requires_exact_run_id"
+        assert rows["manifest_id"] == "select one concrete pipeline or exact run_id"
+        assert rows["run_id"] == "select one concrete pipeline or exact run_id"
+        assert (
+            rows["pipeline name"]
+            == "{chembl_activity,chembl_assay,chembl_publication,chembl_target,test_pipe}"
+        )
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_requires_pipeline_scope(

@@ -2,10 +2,12 @@
 
 import pytest
 
-from bioetl.domain.value_objects.publication_field_groups import (
+from bioetl.domain.value_objects._publication_field_group_config import (
     DEFAULT_FIELD_GROUP_CONFIG,
-    FIELD_TO_GROUP_MAPPING,
     FieldGroupConfig,
+)
+from bioetl.domain.value_objects._publication_field_group_types import (
+    FIELD_TO_GROUP_MAPPING,
     PublicationFieldGroup,
 )
 

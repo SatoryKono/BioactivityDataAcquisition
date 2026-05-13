@@ -165,7 +165,6 @@ stateDiagram-v2
 
 - `bioetl.domain.composite.config`
 - `bioetl.domain.value_objects.activity_values`
-- `bioetl.domain.value_objects.publication_field_groups`
 
 Split internal modules остаются implementation detail owner packages и не являются
 рекомендуемыми import path для нового first-party кода.

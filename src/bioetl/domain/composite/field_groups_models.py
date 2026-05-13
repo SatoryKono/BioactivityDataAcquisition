@@ -5,7 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Final
 
-from bioetl.domain.value_objects.publication_field_groups import PublicationFieldGroup
+from bioetl.domain.value_objects._publication_field_group_types import (
+    PublicationFieldGroup,
+)
 
 FieldGroupId = PublicationFieldGroup
 

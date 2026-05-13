@@ -1091,6 +1091,19 @@ def test_non_chembl_rows_include_inventory_evidence_columns() -> None:
     assert uniprot_features["canonical_sidecar"] == "features_canonical_json"
 
 
+def test_non_chembl_taxonomy_rows_use_shared_ncbi_identifier_normalizer() -> None:
+    rows = build_field_matrix_rows()
+
+    for pipeline_name in ("uniprot_protein", "uniprot_idmapping"):
+        row = _row(rows, pipeline_name, "taxonomy_id")
+        assert row["normalization_source"] == "profile"
+        assert row["normalizer"] == "normalize_profile_ncbi_taxonomy_id"
+        assert row["classification"] == "ontology_backed_id"
+        assert row["semantic_category"] == "canonical_identifier"
+        assert row["strictness"] == "canonical_identifier"
+        assert row["field_type"] == "int64"
+
+
 def test_build_artifacts_emits_non_chembl_slice() -> None:
     artifacts = build_artifacts()
 

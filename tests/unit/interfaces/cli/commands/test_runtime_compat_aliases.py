@@ -30,11 +30,6 @@ CLI_INTERNAL_WRAPPER_CASES = (
         ("maintenance",),
     ),
     (
-        "bioetl.interfaces.cli.commands.domains.maintenance.plan",
-        "bioetl.interfaces.cli.commands.plan",
-        ("get_contract_migration_service", "plan_command"),
-    ),
-    (
         "bioetl.interfaces.cli.commands.domains.quarantine.command",
         "bioetl.interfaces.cli.commands.quarantine",
         ("quarantine", "get_quarantine_runtime_service", "get_quarantine_service"),
@@ -84,3 +79,10 @@ def test_cli_internal_wrappers_reexport_public_command_symbols(
         assert getattr(wrapper_module, export_name) is getattr(
             public_module, export_name
         )
+
+
+@pytest.mark.unit
+def test_removed_plan_command_facade_stays_absent() -> None:
+    """The former top-level maintenance plan facade must not return."""
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module("bioetl.interfaces.cli.commands.plan")

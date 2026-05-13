@@ -274,25 +274,8 @@ def test_mypy_error_count(
 
 
 # ---------------------------------------------------------------------------
-# Metric 3: architecture_skip_count (target: ≤24, ratchet)
+# Metric 3: architecture_skip_count (ratchet)
 # ---------------------------------------------------------------------------
-
-
-class _SkipMarkerCounter:
-    """Lightweight pytest plugin that counts skip markers during collection."""
-
-    def __init__(self) -> None:
-        self.skipped = 0
-        self.total = 0
-
-    def pytest_collection_modifyitems(self, items: list[pytest.Item]) -> None:
-        """Count items with skip/skipif markers (without running tests)."""
-        self.total = len(items)
-        for item in items:
-            for marker in item.iter_markers():
-                if marker.name in ("skip", "skipif"):
-                    self.skipped += 1
-                    break
 
 
 def _count_skip_markers(items: list[pytest.Item]) -> int:
@@ -307,7 +290,7 @@ def _count_skip_markers(items: list[pytest.Item]) -> int:
 
 
 def _architecture_skip_cache_key(project_root: Path) -> str:
-    """Build a stable cache key for nested architecture skip collection."""
+    """Build a stable cache key for static architecture skip inventory."""
     digest = hashlib.blake2b(digest_size=16)
     digest.update(sys.version.encode("utf-8"))
     digest.update(sys.platform.encode("utf-8"))
@@ -348,31 +331,57 @@ def _cached_architecture_skip_count(
     return cached_skipped if isinstance(cached_skipped, int) else None
 
 
-def _collect_architecture_skip_count() -> int:
-    counter = _SkipMarkerCounter()
-    exit_code = pytest.main(
-        [
-            "tests/architecture/",
-            "--collect-only",
-            "-q",
-            "--ignore=tests/architecture/test_regression_metrics.py",
-            "-p",
-            "no:xdist",
-            "--no-header",
-            "--override-ini=addopts=",
-        ],
-        plugins=[counter],
-    )
-    accepted_exit_codes = (
-        pytest.ExitCode.OK,
-        pytest.ExitCode.NO_TESTS_COLLECTED,
-    )
-    if int(exit_code) not in {int(code) for code in accepted_exit_codes}:
-        pytest.fail(
-            "Nested architecture collection failed while counting skip markers: "
-            f"exit_code={exit_code}"
-        )
-    return counter.skipped
+def _has_skip_marker(decorators: list[ast.expr]) -> bool:
+    """Return whether a decorator list contains pytest skip/skipif markers."""
+    for decorator in decorators:
+        target = decorator.func if isinstance(decorator, ast.Call) else decorator
+        if not isinstance(target, ast.Attribute):
+            continue
+        if target.attr not in {"skip", "skipif"}:
+            continue
+        value = target.value
+        if isinstance(value, ast.Attribute) and value.attr == "mark":
+            return True
+    return False
+
+
+def _count_skip_markers_in_tree(tree: ast.Module) -> int:
+    """Count architecture test items carrying explicit skip/skipif markers."""
+    skipped = 0
+    for node in tree.body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            if node.name.startswith("test_") and _has_skip_marker(node.decorator_list):
+                skipped += 1
+            continue
+
+        if not isinstance(node, ast.ClassDef):
+            continue
+
+        class_has_skip = _has_skip_marker(node.decorator_list)
+        for child in node.body:
+            if not isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+            if not child.name.startswith("test_"):
+                continue
+            if class_has_skip or _has_skip_marker(child.decorator_list):
+                skipped += 1
+
+    return skipped
+
+
+def _collect_architecture_skip_count(project_root: Path) -> int:
+    """Count explicit architecture skip markers from source without nested pytest."""
+    skipped = 0
+    for path in sorted((project_root / "tests" / "architecture").glob("test_*.py")):
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+        except SyntaxError as exc:
+            pytest.fail(
+                "Failed to parse architecture test while counting skip markers: "
+                f"{path.relative_to(project_root)}:{exc.lineno}"
+            )
+        skipped += _count_skip_markers_in_tree(tree)
+    return skipped
 
 
 def _architecture_skip_count(request: pytest.FixtureRequest) -> int:
@@ -385,7 +394,7 @@ def _architecture_skip_count(request: pytest.FixtureRequest) -> int:
     if cached_skipped is not None:
         return cached_skipped
 
-    skipped = _collect_architecture_skip_count()
+    skipped = _collect_architecture_skip_count(Path.cwd())
     request.config.cache.set(cache_key, skipped)
     return skipped
 
@@ -394,10 +403,9 @@ def _architecture_skip_count(request: pytest.FixtureRequest) -> int:
 def test_architecture_skip_count(request: pytest.FixtureRequest) -> None:
     """Architecture test skip count must not exceed the ratchet budget.
 
-    Uses already collected session items during broad architecture runs to avoid
-    an expensive nested collect. Falls back to collect-only mode for narrow
-    targeted invocations where the current session is too small to represent the
-    architecture suite.
+    Uses already collected session items during broad architecture runs. Falls
+    back to a static AST inventory for narrow targeted invocations so the check
+    stays deterministic without nested pytest collection.
     """
     max_architecture_skips = _resolve_coarse_budget("architecture_skip_count")
     skipped = _architecture_skip_count(request)

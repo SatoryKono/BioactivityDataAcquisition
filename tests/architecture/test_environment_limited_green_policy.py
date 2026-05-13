@@ -77,7 +77,7 @@ class TestEnvironmentLimitedGreenPolicy:
         assert budget_ref.get("scorecard_path") == "configs/quality/debt_scorecard.yaml"
         assert budget_ref.get("coarse_budget_key") == "architecture_skip_count"
         coarse_budgets = scorecard.get("governance", {}).get("coarse_budgets", {})
-        assert coarse_budgets.get("architecture_skip_count", {}).get("max_count") == 7
+        assert coarse_budgets.get("architecture_skip_count", {}).get("max_count") == 3
 
     def test_environment_limited_tracking_has_numerical_threshold(self) -> None:
         policy = _load_yaml(POLICY_PATH)

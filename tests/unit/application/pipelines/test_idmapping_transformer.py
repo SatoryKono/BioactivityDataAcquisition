@@ -91,6 +91,22 @@ class TestIDMappingTransformer:
         assert result["entity_id"] == "uniprot:CHEMBL204"
 
     @pytest.mark.asyncio
+    async def test_transform_entity_id_uses_canonical_target_id(
+        self, transformer, mock_context
+    ):
+        """Entity identity must follow canonical target_id semantics, not raw input."""
+        record = {
+            "target_id": " chembl204 ",
+            "uniprot_accession": "P00742",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["target_id"] == "CHEMBL204"
+        assert result["entity_id"] == "uniprot:CHEMBL204"
+
+    @pytest.mark.asyncio
     async def test_transform_entity_id_for_not_found(self, transformer, mock_context):
         """Test entity_id is generated even for not_found mappings."""
         record = {

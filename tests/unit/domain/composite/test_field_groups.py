@@ -504,7 +504,7 @@ class TestFieldGroupId:
     """Tests for FieldGroupId alias."""
 
     def test_is_publication_field_group(self) -> None:
-        from bioetl.domain.value_objects.publication_field_groups import (
+        from bioetl.domain.value_objects._publication_field_group_types import (
             PublicationFieldGroup,
         )
 

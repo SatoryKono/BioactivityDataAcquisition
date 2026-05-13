@@ -20,7 +20,8 @@ directly from their submodules:
 - ``bioetl.domain.value_objects.dq_result``
 - ``bioetl.domain.value_objects.column_order``
 - ``bioetl.domain.value_objects.column_qualifier``
-- ``bioetl.domain.value_objects.publication_field_groups``
+- ``bioetl.domain.value_objects._publication_field_group_config``
+- ``bioetl.domain.value_objects._publication_field_group_types``
 - ``bioetl.domain.value_objects.bronze_result``
 - ``bioetl.domain.value_objects.silver_result``
 - ``bioetl.domain.value_objects.run_context``

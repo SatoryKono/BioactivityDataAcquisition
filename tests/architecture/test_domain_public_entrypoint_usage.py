@@ -25,8 +25,6 @@ SPLIT_VALUE_OBJECT_MODULES = frozenset(
         "bioetl.domain.value_objects.activity_concentration",
         "bioetl.domain.value_objects.activity_type",
         "bioetl.domain.value_objects.pchembl_value",
-        "bioetl.domain.value_objects._publication_field_group_config",
-        "bioetl.domain.value_objects._publication_field_group_types",
     }
 )
 ALLOWED_CONFIG_TEST_FILES = frozenset(
