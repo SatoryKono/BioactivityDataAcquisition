@@ -58,6 +58,9 @@ REMOVED_COMPAT_MODULES: dict[str, Path] = {
     "application services pipeline_runner_service facade": Path(
         "src/bioetl/application/services/pipeline_runner_service.py"
     ),
+    "application services checkpoint_compatibility_runtime facade": Path(
+        "src/bioetl/application/services/checkpoint_compatibility_runtime.py"
+    ),
     "application services run_manifest_diagnostics facade": Path(
         "src/bioetl/application/services/run_manifest_diagnostics.py"
     ),

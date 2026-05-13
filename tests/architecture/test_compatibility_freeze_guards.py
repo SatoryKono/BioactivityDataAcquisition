@@ -49,9 +49,6 @@ SERVICES_CREATION_API_COMPAT_MODULE_PATH = (
     / "services"
     / "creation_api.py"
 )
-PIPELINE_CREATION_API_COMPAT_MODULE = (
-    "bioetl.composition.factories.pipeline.creation_api"
-)
 PIPELINE_CONFIG_RESOLUTION_COMPAT_MODULE = (
     "bioetl.composition.factories.pipeline.config_resolution"
 )
@@ -287,17 +284,6 @@ SANCTIONED_DEAD_CODE_EXCLUSION_MODULE_PATHS = frozenset(
     }
 )
 ALLOWED_LEGACY_DATASOURCE_FACTORY_TEST_FILES: frozenset[Path] = frozenset()
-ALLOWED_PIPELINE_CREATION_API_TEST_FILES = frozenset(
-    {
-        ROOT / "tests" / "unit" / "composition" / "test_canonical_module_paths.py",
-        ROOT
-        / "tests"
-        / "unit"
-        / "composition"
-        / "factories"
-        / "test_factory_decoupling_contracts.py",
-    }
-)
 ALLOWED_PIPELINE_RUNNER_SERVICE_MODEL_IMPORT_SRC_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "application" / "services" / "__init__.py",

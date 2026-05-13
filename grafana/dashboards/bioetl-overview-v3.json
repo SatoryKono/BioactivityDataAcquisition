@@ -2429,7 +2429,7 @@
         "x": 0,
         "y": 7
       },
-      "description": "Identity table for the selected pipeline scope. It resolves manifest_id and run_id from the control-plane run-manifest catalog for the current pipeline/run_type scope, preferring the selected run_id when present and otherwise falling back to the latest persisted manifest for the selected scope.",
+      "description": "Identity table for the current control-plane scope. It resolves manifest_id and run_id from the local run-manifest catalog, treats Run Type = All as an unbounded run_type filter, prefers the selected run_id when present, and otherwise falls back to the latest persisted manifest only for a concrete pipeline scope. Aggregate Pipeline = All scope requires an exact run_id before this panel claims one manifest identity.",
       "datasource": "Quarantine Explorer",
       "fieldConfig": {
         "defaults": {
@@ -2452,7 +2452,7 @@
           "root_selector": "rows",
           "source": "url",
           "type": "json",
-          "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type}&run_id=${run_id}",
+          "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -2720,8 +2720,8 @@
         "allValue": null,
         "current": {},
         "datasource": "Quarantine Explorer",
-        "definition": "/ops/control-plane/filter-options?dimension=run_id&pipeline=${pipeline}&run_type=${run_type}",
-        "description": "Run ID selector sourced from control-plane run-manifest catalog for the current pipeline/run_type scope. Empty list means no persisted run-manifest evidence for the selected scope; this selector remains HTTP-backed and does not reintroduce run_id into Prometheus labels.",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&pipeline=${pipeline}&run_type=${run_type:csv}",
+        "description": "Run ID selector sourced from the local control-plane run-manifest catalog for the current pipeline/run_type scope. Grafana All values are normalized to an unbounded scope, so Run Type = All no longer empties the selector; Pipeline = All exposes aggregate exact-run handoff options from the catalog. This selector remains HTTP-backed and does not reintroduce run_id into Prometheus labels.",
         "hide": 0,
         "includeAll": false,
         "label": "Run ID",
@@ -2730,9 +2730,10 @@
         "options": [],
         "query": {
           "infinityQuery": {
+            "root_selector": "items",
             "type": "json",
             "source": "url",
-            "url": "/ops/control-plane/filter-options?dimension=run_id&pipeline=${pipeline}&run_type=${run_type}"
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&pipeline=${pipeline}&run_type=${run_type:csv}"
           }
         },
         "refresh": 1,

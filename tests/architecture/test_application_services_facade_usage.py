@@ -26,6 +26,7 @@ REMOVED_FACADE_MODULES = frozenset(
         "bioetl.application.services.pipeline_run_lifecycle_service",
         "bioetl.application.services.pipeline_runner_models",
         "bioetl.application.services.pipeline_runner_service",
+        "bioetl.application.services.checkpoint_compatibility_runtime",
         "bioetl.application.services.run_manifest_diagnostics",
     }
 )
@@ -108,6 +109,12 @@ REMOVED_FACADE_FILES = frozenset(
         / "bioetl"
         / "application"
         / "services"
+        / "checkpoint_compatibility_runtime.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "application"
+        / "services"
         / "run_manifest_diagnostics.py",
     }
 )
@@ -124,6 +131,7 @@ REMOVED_FACADE_PARENT_IMPORTS = {
             "pipeline_run_lifecycle_service",
             "pipeline_runner_models",
             "pipeline_runner_service",
+            "checkpoint_compatibility_runtime",
             "run_ledger_service",
             "run_manifest_diagnostics",
             "run_manifest_inspection_service",

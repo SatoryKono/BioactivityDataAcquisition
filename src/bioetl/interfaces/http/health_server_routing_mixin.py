@@ -137,6 +137,25 @@ class HealthServerRoutingMixin:
         normalized = value.strip()
         return normalized or None
 
+    @staticmethod
+    def _is_all_scope_token(value: str | None) -> bool:
+        """Return True when a selector token represents Grafana's All scope."""
+        if value is None:
+            return False
+        normalized = value.strip()
+        return normalized in {"All", "$__all"}
+
+    def _read_optional_scope_param(
+        self,
+        query: dict[str, str],
+        name: str,
+    ) -> str | None:
+        """Return optional scope value, normalizing Grafana All to no filter."""
+        value = self._read_optional_param(query, name)
+        if self._is_all_scope_token(value):
+            return None
+        return value
+
     def _read_int_param(
         self,
         query: dict[str, str],
@@ -166,6 +185,14 @@ class HealthServerRoutingMixin:
             if normalized and normalized not in items:
                 items.append(normalized)
         return tuple(items)
+
+    @classmethod
+    def _read_scope_csv_param(cls, query: dict[str, str], name: str) -> tuple[str, ...]:
+        """Parse CSV scope values, collapsing Grafana All to an unbounded filter."""
+        items = cls._read_csv_param(query, name)
+        if any(cls._is_all_scope_token(item) for item in items):
+            return ()
+        return items
 
     async def _route_quarantine_request(
         self,
@@ -310,29 +337,42 @@ class HealthServerRoutingMixin:
     ) -> None:
         """Handle control-plane-backed selector options for Grafana variables."""
         assert self._run_manifest_port is not None
-        pipeline = self._read_required_param(query, "pipeline")
+        requested_pipeline = self._read_required_param(query, "pipeline")
+        pipeline = (
+            None
+            if self._is_all_scope_token(requested_pipeline)
+            else requested_pipeline
+        )
         dimension = self._read_optional_param(query, "dimension") or "run_id"
         if dimension != "run_id":
             raise ValueError(
                 f"Unsupported control-plane filter dimension: {dimension}"
             )
+        response_shape = self._read_optional_param(query, "response_shape") or "object"
 
-        selected_run_types = self._read_csv_param(query, "run_type")
+        selected_run_types = self._read_scope_csv_param(query, "run_type")
         run_ids = tuple(
             str(manifest.run_id)
             for manifest in self._run_manifest_port.list_all()
-            if manifest.pipeline_name == pipeline
+            if (pipeline is None or manifest.pipeline_name == pipeline)
             and (
                 not selected_run_types
                 or str(manifest.run_type) in selected_run_types
             )
         )
         response_support = cast(_HealthResponseSupport, self)
+        if response_shape == "list":
+            await response_support._send_payload_response(
+                writer,
+                200,
+                {"items": list(run_ids)},
+            )
+            return
         await response_support._send_payload_response(
             writer,
             200,
             {
-                "pipeline": pipeline,
+                "pipeline": requested_pipeline,
                 "run_type": list(selected_run_types),
                 "run_ids": list(run_ids),
             },
@@ -345,13 +385,18 @@ class HealthServerRoutingMixin:
     ) -> None:
         """Handle control-plane-backed identity rows for Overview v3."""
         assert self._run_manifest_port is not None
-        pipeline = self._read_required_param(query, "pipeline")
-        selected_run_types = self._read_csv_param(query, "run_type")
+        requested_pipeline = self._read_required_param(query, "pipeline")
+        pipeline = (
+            None
+            if self._is_all_scope_token(requested_pipeline)
+            else requested_pipeline
+        )
+        selected_run_types = self._read_scope_csv_param(query, "run_type")
         selected_run_id = self._read_optional_param(query, "run_id")
         manifests = tuple(
             manifest
             for manifest in self._run_manifest_port.list_all()
-            if manifest.pipeline_name == pipeline
+            if (pipeline is None or manifest.pipeline_name == pipeline)
             and (
                 not selected_run_types
                 or str(manifest.run_type) in selected_run_types
@@ -368,12 +413,15 @@ class HealthServerRoutingMixin:
         )
         resolved_via = "selected_run_id"
         if resolved_manifest is None:
-            resolved_manifest = manifests[-1] if manifests else None
-            resolved_via = (
-                "latest_manifest_for_scope"
-                if resolved_manifest is not None
-                else "no_manifest_for_scope"
-            )
+            if pipeline is None:
+                resolved_via = "aggregate_scope_requires_exact_run_id"
+            else:
+                resolved_manifest = manifests[-1] if manifests else None
+                resolved_via = (
+                    "latest_manifest_for_scope"
+                    if resolved_manifest is not None
+                    else "no_manifest_for_scope"
+                )
 
         def _display(value: object | None, *, unavailable: str) -> str:
             if value is None:
@@ -381,7 +429,11 @@ class HealthServerRoutingMixin:
             text = str(value).strip()
             return text or unavailable
 
-        manifest_unavailable = "not available for current scope"
+        manifest_unavailable = (
+            "select one concrete pipeline or exact run_id"
+            if pipeline is None and resolved_manifest is None
+            else "not available for current scope"
+        )
         provenance_unavailable = "not available in selected manifest"
         code_provenance = (
             resolved_manifest.code_provenance if resolved_manifest is not None else None
@@ -403,7 +455,11 @@ class HealthServerRoutingMixin:
             },
             {
                 "parameter": "pipeline name",
-                "value": pipeline,
+                "value": _display(
+                    getattr(resolved_manifest, "pipeline_name", None)
+                    or requested_pipeline,
+                    unavailable="not available for current scope",
+                ),
             },
             {
                 "parameter": "pipelineversion",
