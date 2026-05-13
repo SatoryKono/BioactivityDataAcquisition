@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane._run_manifest_identity_graph_builder import (
-    RunManifestIdentityGraphBuilder,
+    RunManifestIdentityGraphAssembler,
 )
 from bioetl.domain.control_plane import RunManifest
 
@@ -24,7 +24,7 @@ class RunManifestInspectionIdentityGraphMixin:
         diagnostics: dict[str, object],
     ) -> dict[str, object]:
         """Return one operator-facing run identity graph payload."""
-        return RunManifestIdentityGraphBuilder.build(manifest, diagnostics)
+        return RunManifestIdentityGraphAssembler.build(manifest, diagnostics)
 
 
 class RunManifestInspectionDiffClassificationMixin:

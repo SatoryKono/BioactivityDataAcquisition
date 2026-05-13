@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-13T05:15:14.739955+00:00",
+  "generated_at": "2026-05-13T06:19:28.723569+00:00",
   "summary": {
     "total_scripts": 368,
     "status_counts": {
@@ -1562,7 +1562,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 38,
+      "reference_count": 39,
       "references": [
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
@@ -5559,13 +5559,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 596,
+          "line": 594,
           "source_group": "tests",
           "text": "skip_rate = Path(\"scripts/engineering/ci/check_e2e_matrix_skip_rate.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 620,
+          "line": 618,
           "source_group": "tests",
           "text": "assert \"check_e2e_matrix_skip_rate.py\" in content"
         }
@@ -5598,13 +5598,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 597,
+          "line": 595,
           "source_group": "tests",
           "text": "rerun = Path(\"scripts/engineering/ci/check_e2e_rerun_stability.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 621,
+          "line": 619,
           "source_group": "tests",
           "text": "assert \"check_e2e_rerun_stability.py\" in content"
         }
@@ -5983,7 +5983,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 206,
+          "line": 207,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/.wsl-vpn-fix.ps1`                   | Recover Windows-side VPN proxy settings for WSL interoperability                          |"
         }
@@ -6112,7 +6112,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 164,
+          "line": 165,
           "source_group": "scripts",
           "text": "| `install-deps`       | `scripts/engineering/dev/install_deps.py`                    | Auxiliary helper script, not a full project bootstrap            |"
         },
@@ -6133,7 +6133,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 169,
+          "line": 170,
           "source_group": "scripts",
           "text": "| `mock-metrics`       | `scripts/engineering/dev/metrics_mock_server.py`             | Start mock metrics server                                        |"
         },
@@ -6165,29 +6165,35 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 14,
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
           "line": 48,
           "source_group": "scripts",
-          "text": "bash scripts/engineering/dev/pretest_guardrails.sh --scope full"
+          "text": "bash scripts/engineering/dev/pretest_guardrails.sh --mode check --scope full"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 98,
+          "line": 49,
+          "source_group": "scripts",
+          "text": "bash scripts/engineering/dev/pretest_guardrails.sh --mode auto --scope full  # explicit write-capable metadata refresh"
+        },
+        {
+          "path": "scripts/engineering/dev/README.md",
+          "line": 99,
           "source_group": "scripts",
           "text": "invoke `bash scripts/engineering/dev/pretest_guardrails.sh --scope full`"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 166,
+          "line": 167,
           "source_group": "scripts",
           "text": "| `pretest-guardrails` | `scripts/engineering/dev/pretest_guardrails.sh`              | Run cleanup + repo/docs/memory/architecture preflight            |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 198,
+          "line": 199,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/pretest_guardrails.sh`              | Run cleanup + repo/docs/memory/architecture preflight before broad bash pytest runs       |"
         },
@@ -6208,12 +6214,6 @@
           "line": 398,
           "source_group": "scripts",
           "text": "if should_run_preflight && [[ -f \"scripts/engineering/dev/pretest_guardrails.sh\" ]]; then"
-        },
-        {
-          "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 401,
-          "source_group": "scripts",
-          "text": "preflight_cmd=(bash scripts/engineering/dev/pretest_guardrails.sh --mode \"$preflight_mode\" --scope \"$preflight_scope\")"
         }
       ]
     },
@@ -6241,13 +6241,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 165,
+          "line": 166,
           "source_group": "scripts",
           "text": "| `probe-quality`      | `scripts/engineering/dev/quality_gate_probe.py`              | Measure narrow pytest/mypy startup latency and timeout behavior  |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 202,
+          "line": 203,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quality_gate_probe.py`              | Diagnose narrow pytest/mypy startup latency and timeout behavior                          |"
         },
@@ -6268,13 +6268,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 170,
+          "line": 171,
           "source_group": "scripts",
           "text": "| `mock-quarantine`    | `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock quarantine explorer API server                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 203,
+          "line": 204,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock `/ops/quarantine/*` endpoints for Silver Reject Explorer smoke checks          |"
         },
@@ -6612,25 +6612,25 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 50,
+          "line": 51,
           "source_group": "scripts",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --stream"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 51,
+          "line": 52,
           "source_group": "scripts",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --tail"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 109,
+          "line": 110,
           "source_group": "scripts",
           "text": "`run_pytest_sharded.sh` are now externalized in"
         }
@@ -6645,7 +6645,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 195,
+          "line": 196,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.ps1`                      | Run tests (PowerShell variant)                                                            |"
         },
@@ -6672,13 +6672,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 167,
+          "line": 168,
           "source_group": "scripts",
           "text": "| `run-tests`          | `scripts/engineering/dev/run_tests.py`                       | Run tests                                                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 171,
+          "line": 172,
           "source_group": "scripts",
           "text": "| `test-changed`       | `scripts/engineering/dev/run_tests.py changed`               | Run tests for changed files only                                 |"
         },
@@ -6729,7 +6729,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 194,
+          "line": 195,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.sh`                       | Run tests (shell variant)                                                                 |"
         },
@@ -7127,7 +7127,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 138,
+      "reference_count": 140,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -7855,13 +7855,13 @@
         },
         {
           "path": "scripts/engineering/qa/check_naming_package_consistency.py",
-          "line": 30,
+          "line": 31,
           "source_group": "scripts",
           "text": "CANONICAL_NAMING_AUDIT_PATH = Path(\"scripts/engineering/qa/naming_audit.py\")"
         },
         {
           "path": "scripts/engineering/qa/check_naming_package_consistency.py",
-          "line": 203,
+          "line": 262,
           "source_group": "scripts",
           "text": "location=\"scripts/engineering/qa/naming_audit.py --check\","
         }
@@ -8674,7 +8674,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/retention-sensitive-cleanup.md",
-          "line": 180,
+          "line": 197,
           "source_group": "docs",
           "text": "- root placement: `python scripts/engineering/repo/audit_root_cleanliness.py`"
         },
@@ -8794,7 +8794,7 @@
         },
         {
           "path": "scripts/engineering/dev/pretest_guardrails.sh",
-          "line": 428,
+          "line": 431,
           "source_group": "scripts",
           "text": "\"$PYTHON_BIN\" -m scripts.engineering.repo check-catalog \\"
         },
@@ -9120,13 +9120,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/DOCUMENTATION_GOVERNANCE.md",
           "line": 365,
           "source_group": "docs",
           "text": "1. `scripts/generate_adr_registry.py` - ADR metadata generation"
+        },
+        {
+          "path": "docs/02-architecture/adr-registry/README.md",
+          "line": 70,
+          "source_group": "docs",
+          "text": "This registry is automatically generated by `scripts/generate_adr_registry.py`."
+        },
+        {
+          "path": "docs/02-architecture/adr-registry/README.md",
+          "line": 75,
+          "source_group": "docs",
+          "text": "python3 scripts/generate_adr_registry.py"
         },
         {
           "path": "scripts/engineering/repo/catalog.yaml",
@@ -9333,7 +9345,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
-          "line": 90,
+          "line": 128,
           "source_group": "docs",
           "text": "| WSL setup             | `scripts/memory/setup/wsl_startup.sh` |"
         }
@@ -9906,7 +9918,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 90,
+          "line": 91,
           "source_group": "scripts",
           "text": "- `bash scripts/engineering/dev/run_pytest.sh` runs `bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only`"
         },
@@ -10260,7 +10272,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
-          "line": 89,
+          "line": 127,
           "source_group": "docs",
           "text": "| Manual Docker restart | `scripts/ops/runtime/docker/restart-docker.ps1` |"
         },
@@ -10289,29 +10301,35 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
-          "line": 14,
+          "line": 50,
           "source_group": "docs",
           "text": ".\\scripts\\neo4j-recovery-checklist.ps1"
         },
         {
           "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
-          "line": 43,
+          "line": 81,
           "source_group": "docs",
           "text": "The `neo4j-recovery-checklist.ps1` does:"
         },
         {
           "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
-          "line": 88,
+          "line": 126,
           "source_group": "docs",
           "text": "| Automated recovery    | `scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1` |"
         },
         {
           "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
-          "line": 111,
+          "line": 151,
+          "source_group": "docs",
+          "text": "- `scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1` reports backend"
+        },
+        {
+          "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
+          "line": 178,
           "source_group": "docs",
           "text": "**Next**: Restart Docker Desktop, then run `.\\scripts\\neo4j-recovery-checklist.ps1`"
         },

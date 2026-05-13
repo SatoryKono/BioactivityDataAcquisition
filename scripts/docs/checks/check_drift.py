@@ -49,6 +49,9 @@ else:
     from scripts.docs.checks._bootstrap import DOCS_DIR, PROJECT_ROOT
 
 SRC_DIR = PROJECT_ROOT / "src" / "bioetl"
+MANDATORY_TRACING_COVERAGE_PATH = (
+    PROJECT_ROOT / "configs" / "quality" / "mandatory_tracing_coverage.yaml"
+)
 
 
 @dataclass
@@ -229,23 +232,39 @@ ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS: tuple[str, ...] = (
     RUNTIME_POST_CHANGE_PATH,
 )
 ROLE_PROFILE_MEMO_DOC_BY_RUNTIME: dict[Path, tuple[str, ...]] = {
-    Path(GEMINI_PY_AUDIT_BOT_DOC_PATH): (RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)),
-    Path(".gemini/agents/py-plan-bot.md"): (RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)),
+    Path(GEMINI_PY_AUDIT_BOT_DOC_PATH): (
+        RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)
+    ),
+    Path(".gemini/agents/py-plan-bot.md"): (
+        RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)
+    ),
     Path(GEMINI_PY_CONFIG_BOT_DOC_PATH): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
     Path(".gemini/agents/py-debug-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
     Path(".gemini/agents/py-doc-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
     Path(".gemini/agents/py-test-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(".gemini/agents/py-architecture-debt-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(GEMINI_PY_REVIEW_ORCHESTRATOR_DOC_PATH): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(
+        ".gemini/agents/py-architecture-debt-bot.md"
+    ): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(
+        GEMINI_PY_REVIEW_ORCHESTRATOR_DOC_PATH
+    ): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
     Path(".gemini/agents/py-test-swarm.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(CODEX_PY_AUDIT_BOT_DOC_PATH): (RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)),
-    Path(".codex/agents/py-plan-bot.md"): (RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)),
+    Path(CODEX_PY_AUDIT_BOT_DOC_PATH): (
+        RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)
+    ),
+    Path(".codex/agents/py-plan-bot.md"): (
+        RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)
+    ),
     Path(".codex/agents/py-config-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
     Path(".codex/agents/py-debug-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
     Path(".codex/agents/py-doc-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
     Path(".codex/agents/py-test-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(".codex/agents/py-architecture-debt-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(CODEX_PY_REVIEW_ORCHESTRATOR_DOC_PATH): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(
+        ".codex/agents/py-architecture-debt-bot.md"
+    ): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(
+        CODEX_PY_REVIEW_ORCHESTRATOR_DOC_PATH
+    ): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
     Path(".codex/agents/py-test-swarm.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
 }
 ACTIVE_NON_CANONICAL_EVIDENCE_SUMMARIES = (
@@ -416,9 +435,13 @@ AI_SURFACE_FORBIDDEN_PATTERNS: dict[Path, tuple[re.Pattern[str], ...]] = {
     Path(CODEX_PY_REVIEW_ORCHESTRATOR_DOC_PATH): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
     Path(GEMINI_PY_REVIEW_ORCHESTRATOR_DOC_PATH): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
     Path(".gemini/skills/new-pipeline/SKILL.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
-    Path(".gemini/skills/verify-architecture/SKILL.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
+    Path(".gemini/skills/verify-architecture/SKILL.md"): (
+        AI_SURFACE_CLAUDE_PATH_PATTERN,
+    ),
     Path(".gemini/skills/vcr-record/SKILL.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
-    Path(".gemini/skills/py-review-orchestrator/SKILL.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
+    Path(".gemini/skills/py-review-orchestrator/SKILL.md"): (
+        AI_SURFACE_CLAUDE_PATH_PATTERN,
+    ),
     Path(".gemini/skills/py-test-swarm/SKILL.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
     Path(".gemini/skills/documentation-cascade-audit/SKILL.md"): (
         AI_SURFACE_CLAUDE_PATH_PATTERN,
@@ -426,7 +449,9 @@ AI_SURFACE_FORBIDDEN_PATTERNS: dict[Path, tuple[re.Pattern[str], ...]] = {
     Path(".gemini/skills/py-architecture-debt-bot/SKILL.md"): (
         AI_SURFACE_CLAUDE_PATH_PATTERN,
     ),
-    Path(".gemini/skills/capability-discovery/SKILL.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
+    Path(".gemini/skills/capability-discovery/SKILL.md"): (
+        AI_SURFACE_CLAUDE_PATH_PATTERN,
+    ),
 }
 
 
@@ -719,6 +744,7 @@ def _report_expected_class_refs(
 def check_modules(report: DriftReport) -> None:
     """Verify module paths referenced in architecture docs resolve."""
     all_modules = _collect_modules(SRC_DIR)
+    observability_attribute_terms = _collect_observability_attribute_terms()
 
     arch_dir = DOCS_DIR / "02-architecture"
     if not arch_dir.exists():
@@ -730,6 +756,8 @@ def check_modules(report: DriftReport) -> None:
         text = md_file.read_text(encoding="utf-8")
         for match in module_pattern.finditer(text):
             mod_path = match.group(1)
+            if mod_path in observability_attribute_terms:
+                continue
             if not any(
                 module == mod_path or module.startswith(mod_path + ".")
                 for module in all_modules
@@ -740,6 +768,42 @@ def check_modules(report: DriftReport) -> None:
                     str(md_file.relative_to(PROJECT_ROOT)),
                     f"Module path `{mod_path}` referenced but not found in src/",
                 )
+
+
+def _collect_observability_attribute_terms() -> frozenset[str]:
+    """Return documented tracing attributes that are intentionally not modules."""
+    if not MANDATORY_TRACING_COVERAGE_PATH.exists():
+        return frozenset()
+
+    payload = yaml.safe_load(
+        MANDATORY_TRACING_COVERAGE_PATH.read_text(encoding="utf-8")
+    )
+    if not isinstance(payload, dict):
+        return frozenset()
+
+    terms: set[str] = set()
+    surfaces = payload.get("surfaces")
+    if not isinstance(surfaces, dict):
+        return frozenset()
+
+    for surface in surfaces.values():
+        if not isinstance(surface, dict):
+            continue
+        files = surface.get("files")
+        if not isinstance(files, list):
+            continue
+        for file_entry in files:
+            if not isinstance(file_entry, dict):
+                continue
+            for key in ("required_terms", "forbidden_terms"):
+                raw_terms = file_entry.get(key, [])
+                if not isinstance(raw_terms, list):
+                    continue
+                for raw_term in raw_terms:
+                    if isinstance(raw_term, str) and raw_term.startswith("bioetl."):
+                        terms.add(raw_term)
+
+    return frozenset(terms)
 
 
 def check_providers(report: DriftReport) -> None:
@@ -1422,7 +1486,9 @@ def _issues_by_category(report: DriftReport) -> dict[str, list[DriftIssue]]:
     return by_category
 
 
-def _run_checks(report: DriftReport, *, args: argparse.Namespace, run_all: bool) -> None:
+def _run_checks(
+    report: DriftReport, *, args: argparse.Namespace, run_all: bool
+) -> None:
     selected_checks = [
         (run_all or args.ports, check_ports),
         (run_all or args.classes, check_classes),

@@ -15,32 +15,8 @@ policy:
     - removal_step
 registries:
   file_size_limits: {}
-  function_complexity:
-    src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_helpers.py::_collect_append_mode_semantic_sinks:
-      value: 14
-      owner: "@bioetl-architecture"
-      reason: "Replay sink discovery must normalize multiple historical config shapes and append-mode variants during the current diagnostics compatibility window."
-      classification: "technical_debt"
-      linked_rf: "RF-000"
-      expires_on: "2026-09-30"
-      removal_step: "Collapse sink-shape normalization behind a dedicated helper so append-mode detection can return under CC 10."
-    src/bioetl/application/services/control_plane/historical_replay_closure_service.py::_build_universal_scope_global_claim:
-      value: 11
-      owner: "@bioetl-architecture"
-      reason: "Historical replay claim gating still carries explicit branch coverage for closure-state semantics that are scheduled for rule-table extraction."
-      classification: "technical_debt"
-      linked_rf: "RF-000"
-      expires_on: "2026-09-30"
-      removal_step: "Move claim-verdict branching to smaller predicate helpers or a rule table so the function returns under CC 10."
-  function_length:
-    src/bioetl/application/services/control_plane/workflow_execution_preparation.py::_apply_incremental_offset:
-      value: 110
-      owner: "@bioetl-architecture"
-      reason: "Incremental offset preparation still rebuilds the full WorkflowRunOptionsConfig until run-option update helpers are shared across workflow preparation paths."
-      classification: "technical_debt"
-      linked_rf: "RF-000"
-      expires_on: "2026-09-30"
-      removal_step: "Introduce a run-options update helper and shrink the incremental adjustment function below 100 lines."
+  function_complexity: {}
+  function_length: {}
   class_size: {}
   class_method_count: {}
   god_object: {}

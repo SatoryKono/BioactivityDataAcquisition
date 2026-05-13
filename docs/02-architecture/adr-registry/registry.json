@@ -1,6 +1,6 @@
 {
-  "generated": "2026-04-24T14:08:29.030257",
-  "total_adrs": 45,
+  "generated": "2026-05-13T09:01:38.674350",
+  "total_adrs": 47,
   "adrs": [
     {
       "adr_number": "001",
@@ -47,7 +47,7 @@
       "last_reviewed": null,
       "context": "\u0421\u0438\u0441\u0442\u0435\u043c\u0430 \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u043c\u0435\u0445\u0430\u043d\u0438\u0437\u043c \u0431\u043b\u043e\u043a\u0438\u0440\u043e\u0432\u043e\u043a \u0434\u043b\u044f \u043f\u0440\u0435\u0434\u043e\u0442\u0432\u0440\u0430\u0449\u0435\u043d\u0438\u044f \u043e\u0434\u043d\u043e\u0432\u0440\u0435\u043c\u0435\u043d\u043d\u043e\u0433\u043e \u0437\u0430\u043f\u0443\u0441\u043a\u0430 \u043e\u0434\u043d\u043e\u0433\u043e \u043f\u0430\u0439\u043f\u043b\u0430\u0439\u043d\u0430 (\u043d\u0430\u043f\u0440\u0438\u043c\u0435\u0440, `chembl_activity`). \u042d\u0442\u043e \u0437\u0430\u0449\u0438\u0449\u0430\u0435\u0442 \u043e\u0442 race conditions, \u043f\u043e\u0432\u0440\u0435\u0436\u0434\u0435\u043d\u0438\u044f \u0434\u0430\u043d\u043d\u044b\u0445 \u0438 \u0438\u0437\u0431\u044b\u0442\u043e\u0447\u043d\u044b\u0445 API-\u0432\u044b...",
       "decision": "**\u041e\u0422\u041a\u0410\u0417 \u041e\u0422 REDIS**. \u0418\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u0438\u0435 **MemoryLock** \u0434\u043b\u044f \u0432\u0441\u0435\u0445 \u0431\u043b\u043e\u043a\u0438\u0440\u043e\u0432\u043e\u043a \u0432 \u0440\u0430\u043c\u043a\u0430\u0445 Local-Only \u0430\u0440\u0445\u0438\u0442\u0435\u043a\u0442\u0443\u0440\u044b.\n### Strict Single Instance Constraint\n- **\u0417\u0410\u041f\u0420\u0415\u0429\u0415\u041d\u041e** \u0437\u0430\u043f\u0443\u0441\u043a\u0430\u0442\u044c \u043d\u0435\u0441\u043a\u043e\u043b\u044c\u043a\u043e \u044d\u043a\u0437\u0435\u043c\u043f\u043b\u044f\u0440\u043e\u0432 \u043e\u0434\u043d\u043e\u0433\u043e \u043f\u0430...",
-      "consequences": "### Positive\n1. **\u041f\u0440\u043e\u0441\u0442\u043e\u0442\u0430**: \u041d\u0435\u0442 \u0432\u043d\u0435\u0448\u043d\u0438\u0445 \u0437\u0430\u0432\u0438\u0441\u0438\u043c\u043e\u0441\u0442\u0435\u0439 \u0438 \u043a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u0438\n2. **\u0411\u044b\u0441\u0442\u0440\u044b\u0439 \u0441\u0442\u0430\u0440\u0442**: `make install && make test` \u2014 \u0432\u0441\u0451 \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442\n3. **\u0422\u0435\u0441\u0442\u0438\u0440\u0443\u0435\u043c\u043e\u0441\u0442\u044c**: Unit \u0442\u0435\u0441\u0442\u044b \u0431\u0435\u0437 \u043c\u043e\u043a\u043e\u0432 \u0432\u043d\u0435\u0448\u043d\u0438\u0445 \u0441\u0435\u0440\u0432\u0438\u0441\u043e\u0432\n4....",
+      "consequences": "### Positive\n1. **\u041f\u0440\u043e\u0441\u0442\u043e\u0442\u0430**: \u041d\u0435\u0442 \u0432\u043d\u0435\u0448\u043d\u0438\u0445 \u0437\u0430\u0432\u0438\u0441\u0438\u043c\u043e\u0441\u0442\u0435\u0439 \u0438 \u043a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u0438\n1. **\u0411\u044b\u0441\u0442\u0440\u044b\u0439 \u0441\u0442\u0430\u0440\u0442**: `make install && make test` \u2014 \u0432\u0441\u0451 \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442\n1. **\u0422\u0435\u0441\u0442\u0438\u0440\u0443\u0435\u043c\u043e\u0441\u0442\u044c**: Unit \u0442\u0435\u0441\u0442\u044b \u0431\u0435\u0437 \u043c\u043e\u043a\u043e\u0432 \u0432\u043d\u0435\u0448\u043d\u0438\u0445 \u0441\u0435\u0440\u0432\u0438\u0441\u043e\u0432\n1....",
       "supersedes": [],
       "superseded_by": [
         "ADR-010"
@@ -68,7 +68,7 @@
       "last_reviewed": null,
       "context": "The project requires a robust way to define and validate data schemas, especially for data contracts between layers (e.g., API responses, records in Delta tables). The primary candidates were stand...",
       "decision": "We have chosen to use **Pydantic** for defining all data models and schemas throughout the application. Standard `dataclasses` should only be used for simple, internal data structures that do not r...",
-      "consequences": "*   **Dependency**: The project has a dependency on the Pydantic library.\n*   **Performance**: The runtime validation adds a small performance overhead compared to `dataclasses`. However, this is a...",
+      "consequences": "- **Dependency**: The project has a dependency on the Pydantic library.\n- **Performance**: The runtime validation adds a small performance overhead compared to `dataclasses`. However, this is a neg...",
       "supersedes": [],
       "superseded_by": [],
       "related": [],
@@ -152,7 +152,7 @@
       "decision_date": null,
       "last_reviewed": null,
       "context": "All data source adapters (ChEMBL, PubChem, UniProt) implement pagination, but each API uses different mechanisms (offset-based, cursor-based, page tokens). The pagination loop logic was duplicated ...",
-      "decision": "We have implemented **`PaginatedFetcherMixin`** in `infrastructure/adapters/http/pagination.py`:\n1. **Mixin pattern**: Composable with any HTTP adapter\n2. **Callback-based**: Adapter provides fetch...",
+      "decision": "We have implemented **`PaginatedFetcherMixin`** in `infrastructure/adapters/http/pagination.py`:\n1. **Mixin pattern**: Composable with any HTTP adapter\n1. **Callback-based**: Adapter provides fetch...",
       "consequences": "### Positive\n- Single implementation of pagination logic\n- Consistent limit enforcement\n- Type-safe via Protocol\n- Memory-efficient streaming\n- Easy to test (mock fetch-func)\n### Negative\n- **Mixin...",
       "supersedes": [],
       "superseded_by": [],
@@ -188,8 +188,8 @@
       "decision_date": null,
       "last_reviewed": null,
       "context": "\u041c\u0435\u0445\u0430\u043d\u0438\u0437\u043c Watermark \u0431\u044b\u043b \u0440\u0435\u0430\u043b\u0438\u0437\u043e\u0432\u0430\u043d \u0434\u043b\u044f \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0438 \u0438\u043d\u043a\u0440\u0435\u043c\u0435\u043d\u0442\u0430\u043b\u044c\u043d\u043e\u0439 \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0438 \u0434\u0430\u043d\u043d\u044b\u0445:\n- `Watermark` value object \u0432 domain \u0441\u043b\u043e\u0435 \u0434\u043b\u044f \u0445\u0440\u0430\u043d\u0435\u043d\u0438\u044f \u043f\u043e\u0437\u0438\u0446\u0438\u0438 (timestamp, offset, ID)\n- `extract-watermark()` \u043c\u0435\u0442\u043e\u0434 ...",
-      "decision": "**\u0423\u0434\u0430\u043b\u0435\u043d\u0438\u0435 \u043c\u0435\u0445\u0430\u043d\u0438\u0437\u043c\u0430 Watermark** \u0438\u0437 \u043f\u0440\u043e\u0435\u043a\u0442\u0430:\n1. \u0423\u0434\u0430\u043b\u0435\u043d\u0438\u0435 `Watermark` value object \u0438\u0437 domain/types.py\n2. \u0423\u0434\u0430\u043b\u0435\u043d\u0438\u0435 \u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0430 `watermark` \u0438\u0437 `DataSourcePort.fetch()`\n3. \u0423\u0434\u0430\u043b\u0435\u043d\u0438\u0435 \u043c\u0435\u0442\u043e\u0434\u0430 `extract-waterm...",
-      "consequences": "### Positive\n1. **\u041f\u0440\u043e\u0441\u0442\u043e\u0442\u0430**: \u041c\u0435\u043d\u044c\u0448\u0435 \u043a\u043e\u0434\u0430, \u043c\u0435\u043d\u044c\u0448\u0435 \u0430\u0431\u0441\u0442\u0440\u0430\u043a\u0446\u0438\u0439\n2. **\u041f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u043c\u043e\u0441\u0442\u044c**: \u041f\u0440\u043e\u0449\u0435 \u0434\u043e\u0431\u0430\u0432\u043b\u044f\u0442\u044c \u043d\u043e\u0432\u044b\u0435 \u043f\u0430\u0439\u043f\u043b\u0430\u0439\u043d\u044b\n3. **\u041f\u043e\u043d\u044f\u0442\u043d\u043e\u0441\u0442\u044c**: \u041d\u043e\u0432\u044b\u0435 \u0440\u0430\u0437\u0440\u0430\u0431\u043e\u0442\u0447\u0438\u043a\u0438 \u0431\u044b\u0441\u0442\u0440\u0435\u0435 \u0440\u0430\u0437\u0431\u0438\u0440\u0430\u044e\u0442\u0441\u044f \u0432 \u043a\u043e\u0434\u0435\n4. **\u041d\u0430\u0434\u0451\u0436\u043d\u043e\u0441\u0442...",
+      "decision": "**\u0423\u0434\u0430\u043b\u0435\u043d\u0438\u0435 \u043c\u0435\u0445\u0430\u043d\u0438\u0437\u043c\u0430 Watermark** \u0438\u0437 \u043f\u0440\u043e\u0435\u043a\u0442\u0430:\n1. \u0423\u0434\u0430\u043b\u0435\u043d\u0438\u0435 `Watermark` value object \u0438\u0437 domain/types.py\n1. \u0423\u0434\u0430\u043b\u0435\u043d\u0438\u0435 \u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0430 `watermark` \u0438\u0437 `DataSourcePort.fetch()`\n1. \u0423\u0434\u0430\u043b\u0435\u043d\u0438\u0435 \u043c\u0435\u0442\u043e\u0434\u0430 `extract-waterm...",
+      "consequences": "### Positive\n1. **\u041f\u0440\u043e\u0441\u0442\u043e\u0442\u0430**: \u041c\u0435\u043d\u044c\u0448\u0435 \u043a\u043e\u0434\u0430, \u043c\u0435\u043d\u044c\u0448\u0435 \u0430\u0431\u0441\u0442\u0440\u0430\u043a\u0446\u0438\u0439\n1. **\u041f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u043c\u043e\u0441\u0442\u044c**: \u041f\u0440\u043e\u0449\u0435 \u0434\u043e\u0431\u0430\u0432\u043b\u044f\u0442\u044c \u043d\u043e\u0432\u044b\u0435 \u043f\u0430\u0439\u043f\u043b\u0430\u0439\u043d\u044b\n1. **\u041f\u043e\u043d\u044f\u0442\u043d\u043e\u0441\u0442\u044c**: \u041d\u043e\u0432\u044b\u0435 \u0440\u0430\u0437\u0440\u0430\u0431\u043e\u0442\u0447\u0438\u043a\u0438 \u0431\u044b\u0441\u0442\u0440\u0435\u0435 \u0440\u0430\u0437\u0431\u0438\u0440\u0430\u044e\u0442\u0441\u044f \u0432 \u043a\u043e\u0434\u0435\n1. **\u041d\u0430\u0434\u0451\u0436\u043d\u043e\u0441\u0442...",
       "supersedes": [],
       "superseded_by": [],
       "related": [],
@@ -206,7 +206,7 @@
       "last_reviewed": null,
       "context": "\u0414\u0432\u0430 \u0430\u0440\u0445\u0438\u0442\u0435\u043a\u0442\u0443\u0440\u043d\u044b\u0445 \u0432\u043e\u043f\u0440\u043e\u0441\u0430 \u0442\u0440\u0435\u0431\u043e\u0432\u0430\u043b\u0438 \u0440\u0435\u0448\u0435\u043d\u0438\u044f:\n### \u041f\u0440\u043e\u0431\u043b\u0435\u043c\u0430 1: \u0414\u0443\u0431\u043b\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435 run-id\n\u041d\u0430 \u043c\u043e\u043c\u0435\u043d\u0442 \u043f\u0440\u0438\u043d\u044f\u0442\u0438\u044f ADR `BasePipeline` \u0441\u043e\u0437\u0434\u0430\u0432\u0430\u043b \u0441\u043e\u0431\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0439 `run_id` \u0432\u043d\u0443\u0442\u0440\u0438\npipeline-\u043a\u043e\u043d\u0441\u0442\u0440\u0443\u043a\u0442\u043e\u0440\u0430, \u0438\u0433\u043d\u043e\u0440\u0438\u0440\u0443\u044f \u0438\u0434\u0435\u043d\u0442\u0438\u0444\u0438...",
       "decision": "### 1. \u0415\u0434\u0438\u043d\u044b\u0439 run-id \u043e\u0442 orchestration boundary \u0434\u043e \u043c\u0435\u0442\u0430\u043f\u043e\u043b\u0435\u0439\n- `BasePipeline.__init__()` \u043f\u0440\u0438\u043d\u0438\u043c\u0430\u0435\u0442 `run_id` \u043a\u0430\u043a \u043e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u044b\u0439 \u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\n- `run_id` \u0441\u043e\u0437\u0434\u0430\u0451\u0442\u0441\u044f \u0438\u043b\u0438 \u043f\u0440\u0438\u043d\u0438\u043c\u0430\u0435\u0442\u0441\u044f \u043d\u0430 orchestration boundary, ...",
-      "consequences": "### Positive\n- **\u0422\u0440\u0430\u0441\u0441\u0438\u0440\u0443\u0435\u043c\u043e\u0441\u0442\u044c**: \u041e\u0434\u0438\u043d `run_id` \u0432\u043e \u0432\u0441\u0435\u0445 \u0441\u043b\u043e\u044f\u0445 \u0438 \u043a\u043e\u043c\u043f\u043e\u043d\u0435\u043d\u0442\u0430\u0445\n- **\u0422\u0438\u043f\u043e\u0431\u0435\u0437\u043e\u043f\u0430\u0441\u043d\u043e\u0441\u0442\u044c**: \u042f\u0432\u043d\u044b\u0435 \u043c\u0435\u0442\u043e\u0434\u044b \u0432 `StoragePort` \u0432\u043c\u0435\u0441\u0442\u043e reflection\n- **Data Integrity**: Incremental runs \u043d\u0435 \u0443\u0434\u0430\u043b\u044f\u044e\u0442...",
+      "consequences": "### Positive\n- **\u0422\u0440\u0430\u0441\u0441\u0438\u0440\u0443\u0435\u043c\u043e\u0441\u0442\u044c**: \u041e\u0434\u0438\u043d `run_id` \u0432\u043e \u0432\u0441\u0435\u0445 \u0441\u043b\u043e\u044f\u0445 \u0438 \u043a\u043e\u043c\u043f\u043e\u043d\u0435\u043d\u0442\u0430\u0445\n- **\u0422\u0438\u043f\u043e\u0431\u0435\u0437\u043e\u043f\u0430\u0441\u043d\u043e\u0441\u0442\u044c**: \u042f\u0432\u043d\u044b\u0435 \u043c\u0435\u0442\u043e\u0434\u044b \u0432 narrow storage ports \u0432\u043c\u0435\u0441\u0442\u043e reflection\n- **Data Integrity**: Incremental runs \u043d\u0435 ...",
       "supersedes": [],
       "superseded_by": [],
       "related": [],
@@ -221,9 +221,9 @@
       "owner": "architecture-team",
       "decision_date": null,
       "last_reviewed": null,
-      "context": "\u041d\u0430 \u043c\u043e\u043c\u0435\u043d\u0442 \u043f\u0440\u0438\u043d\u044f\u0442\u0438\u044f ADR \u043f\u0443\u0442\u044c \u043e\u0447\u0438\u0441\u0442\u043a\u0438 \u0432 `PipelineRunner` \u0431\u044b\u043b \u043f\u0440\u0435\u0434\u0441\u0442\u0430\u0432\u043b\u0435\u043d \u0447\u0435\u0440\u0435\u0437\n\u043f\u0440\u0438\u0432\u0430\u0442\u043d\u044b\u0439 \u043c\u0435\u0442\u043e\u0434 `_clear_exports()`, \u043a\u043e\u0442\u043e\u0440\u044b\u0439 \u0432\u044b\u0437\u044b\u0432\u0430\u043b \u0430\u0441\u0438\u043d\u0445\u0440\u043e\u043d\u043d\u044b\u0435 \u043c\u0435\u0442\u043e\u0434\u044b\n`StoragePort.clear_silver()` \u0438 `StoragePort.clear...",
+      "context": "\u041d\u0430 \u043c\u043e\u043c\u0435\u043d\u0442 \u043f\u0440\u0438\u043d\u044f\u0442\u0438\u044f ADR \u043f\u0443\u0442\u044c \u043e\u0447\u0438\u0441\u0442\u043a\u0438 \u0432 `PipelineRunner` \u0431\u044b\u043b \u043f\u0440\u0435\u0434\u0441\u0442\u0430\u0432\u043b\u0435\u043d \u0447\u0435\u0440\u0435\u0437\n\u043f\u0440\u0438\u0432\u0430\u0442\u043d\u044b\u0439 \u043c\u0435\u0442\u043e\u0434 `_clear_exports()`, \u043a\u043e\u0442\u043e\u0440\u044b\u0439 \u0432\u044b\u0437\u044b\u0432\u0430\u043b \u0430\u0441\u0438\u043d\u0445\u0440\u043e\u043d\u043d\u044b\u0435 \u043c\u0435\u0442\u043e\u0434\u044b\n\u0438\u0441\u0442\u043e\u0440\u0438\u0447\u0435\u0441\u043a\u043e\u0433\u043e aggregate-facade `StoragePort.clear...",
       "decision": "### 1. \u0410\u0441\u0438\u043d\u0445\u0440\u043e\u043d\u043d\u0430\u044f \u0441\u0438\u0433\u043d\u0430\u0442\u0443\u0440\u0430\n\u0418\u0441\u0442\u043e\u0440\u0438\u0447\u0435\u0441\u043a\u0438 `_clear_exports()` \u0431\u044b\u043b \u043f\u0435\u0440\u0435\u0432\u0435\u0434\u0451\u043d \u0432 \u0430\u0441\u0438\u043d\u0445\u0440\u043e\u043d\u043d\u044b\u0439 \u043f\u0443\u0442\u044c \u043e\u0447\u0438\u0441\u0442\u043a\u0438.\n\u0412 \u0442\u0435\u043a\u0443\u0449\u0435\u043c \u043a\u043e\u0434\u0435 \u043a\u0430\u043d\u043e\u043d\u0438\u0447\u0435\u0441\u043a\u0438\u0439 pre-run \u0432\u044b\u0437\u043e\u0432 \u0432\u044b\u0433\u043b\u044f\u0434\u0438\u0442 \u0442\u0430\u043a:\n```python\nawait self._lifecycle_service...",
-      "consequences": "### Positive\n- **\u041a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u0430\u044f \u0440\u0430\u0431\u043e\u0442\u0430** \u0441 \u0430\u0441\u0438\u043d\u0445\u0440\u043e\u043d\u043d\u044b\u043c `StoragePort`\n- **\u042f\u0432\u043d\u044b\u0435 \u0438\u043d\u0432\u0430\u0440\u0438\u0430\u043d\u0442\u044b** Medallion \u0430\u0440\u0445\u0438\u0442\u0435\u043a\u0442\u0443\u0440\u044b \u0437\u0430\u0444\u0438\u043a\u0441\u0438\u0440\u043e\u0432\u0430\u043d\u044b \u0432 \u043a\u043e\u0434\u0435\n- **\u0422\u0435\u0441\u0442\u0438\u0440\u0443\u0435\u043c\u043e\u0441\u0442\u044c** \u0447\u0435\u0440\u0435\u0437 `CallRecorder` pattern \u0432 \u0438\u043d\u0442\u0435\u0433\u0440\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0445 ...",
+      "consequences": "### Positive\n- **\u041a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u0430\u044f \u0440\u0430\u0431\u043e\u0442\u0430** \u0441 \u0430\u0441\u0438\u043d\u0445\u0440\u043e\u043d\u043d\u043e\u0439 storage boundary family\n- **\u042f\u0432\u043d\u044b\u0435 \u0438\u043d\u0432\u0430\u0440\u0438\u0430\u043d\u0442\u044b** Medallion \u0430\u0440\u0445\u0438\u0442\u0435\u043a\u0442\u0443\u0440\u044b \u0437\u0430\u0444\u0438\u043a\u0441\u0438\u0440\u043e\u0432\u0430\u043d\u044b \u0432 \u043a\u043e\u0434\u0435\n- **\u0422\u0435\u0441\u0442\u0438\u0440\u0443\u0435\u043c\u043e\u0441\u0442\u044c** \u0447\u0435\u0440\u0435\u0437 `CallRecorder` pattern \u0432 \u0438\u043d\u0442\u0435\u0433...",
       "supersedes": [],
       "superseded_by": [],
       "related": [],
@@ -240,7 +240,7 @@
       "last_reviewed": null,
       "context": "\u0414\u043b\u044f \u043e\u0431\u0435\u0441\u043f\u0435\u0447\u0435\u043d\u0438\u044f \u0432\u043e\u0441\u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0438\u043c\u043e\u0441\u0442\u0438 \u0438 \u0443\u043f\u0440\u043e\u0449\u0435\u043d\u0438\u044f \u043e\u0442\u043b\u0430\u0434\u043a\u0438 \u043f\u0430\u0439\u043f\u043b\u0430\u0439\u043d\u043e\u0432 \u043d\u0435\u043e\u0431\u0445\u043e\u0434\u0438\u043c \u0434\u0435\u0442\u0435\u0440\u043c\u0438\u043d\u0438\u0437\u043c:\n1. **\u041f\u0440\u043e\u0431\u043b\u0435\u043c\u0430 \u043e\u0442\u043b\u0430\u0434\u043a\u0438**: \u041f\u0440\u0438 \u0440\u0430\u0441\u0441\u043b\u0435\u0434\u043e\u0432\u0430\u043d\u0438\u0438 \u0438\u043d\u0446\u0438\u0434\u0435\u043d\u0442\u043e\u0432 \u043d\u0435\u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e \u0432\u043e\u0441\u043f\u0440\u043e\u0438\u0437\u0432\u0435\u0441\u0442\u0438 \u0442\u043e\u0447\u043d\u043e\u0435 \u043f\u043e\u0432\u0435\u0434\u0435\u043d\u0438\u0435 \u0438\u0437-\u0437\u0430:\n   - `...",
       "decision": "### 1. \u0414\u0435\u0442\u0435\u0440\u043c\u0438\u043d\u0438\u0441\u0442\u0438\u0447\u043d\u044b\u0439 Retry Jitter\n\u0414\u043e\u0431\u0430\u0432\u043b\u0435\u043d \u0440\u0435\u0436\u0438\u043c `deterministic=True` \u0432 `RetryConfig`:\n```python\n@dataclass\nclass RetryConfig:\n    max-attempts: int = 3\n    base-delay: float = 1.0\n    jitter: f...",
-      "consequences": "### \u041f\u043e\u043b\u043e\u0436\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0435\n1. **\u0412\u043e\u0441\u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0438\u043c\u043e\u0441\u0442\u044c**: \u041e\u0434\u0438\u043d\u0430\u043a\u043e\u0432\u044b\u0435 \u0432\u0445\u043e\u0434\u043d\u044b\u0435 \u0434\u0430\u043d\u043d\u044b\u0435 \u2192 \u043e\u0434\u0438\u043d\u0430\u043a\u043e\u0432\u043e\u0435 \u043f\u043e\u0432\u0435\u0434\u0435\u043d\u0438\u0435\n2. **\u0422\u0435\u0441\u0442\u0438\u0440\u0443\u0435\u043c\u043e\u0441\u0442\u044c**: \u0414\u0435\u0442\u0435\u0440\u043c\u0438\u043d\u0438\u0441\u0442\u0438\u0447\u043d\u044b\u0435 \u0442\u0435\u0441\u0442\u044b \u0431\u0435\u0437 flakiness\n3. **\u041e\u0442\u043b\u0430\u0434\u043a\u0430**: \u041c\u043e\u0436\u043d\u043e \u0432\u043e\u0441\u043f\u0440\u043e\u0438\u0437\u0432\u0435\u0441\u0442\u0438 \u0442\u043e\u0447\u043d\u0443\u044e \u043f\u043e...",
+      "consequences": "### \u041f\u043e\u043b\u043e\u0436\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0435\n1. **\u0412\u043e\u0441\u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0438\u043c\u043e\u0441\u0442\u044c**: \u041e\u0434\u0438\u043d\u0430\u043a\u043e\u0432\u044b\u0435 \u0432\u0445\u043e\u0434\u043d\u044b\u0435 \u0434\u0430\u043d\u043d\u044b\u0435 \u2192 \u043e\u0434\u0438\u043d\u0430\u043a\u043e\u0432\u043e\u0435 \u043f\u043e\u0432\u0435\u0434\u0435\u043d\u0438\u0435\n1. **\u0422\u0435\u0441\u0442\u0438\u0440\u0443\u0435\u043c\u043e\u0441\u0442\u044c**: \u0414\u0435\u0442\u0435\u0440\u043c\u0438\u043d\u0438\u0441\u0442\u0438\u0447\u043d\u044b\u0435 \u0442\u0435\u0441\u0442\u044b \u0431\u0435\u0437 flakiness\n1. **\u041e\u0442\u043b\u0430\u0434\u043a\u0430**: \u041c\u043e\u0436\u043d\u043e \u0432\u043e\u0441\u043f\u0440\u043e\u0438\u0437\u0432\u0435\u0441\u0442\u0438 \u0442\u043e\u0447\u043d\u0443\u044e \u043f\u043e...",
       "supersedes": [],
       "superseded_by": [],
       "related": [],
@@ -346,8 +346,8 @@
       "decision_date": null,
       "last_reviewed": null,
       "context": "### \u041f\u0440\u043e\u0431\u043b\u0435\u043c\u0430\n`BasePipeline` \u044f\u0432\u043b\u044f\u043b\u0441\u044f God Object \u0441 13+ \u0437\u0430\u0432\u0438\u0441\u0438\u043c\u043e\u0441\u0442\u044f\u043c\u0438 \u0432 \u043a\u043e\u043d\u0441\u0442\u0440\u0443\u043a\u0442\u043e\u0440\u0435:\n```python\n# \u0421\u0422\u0410\u0420\u042b\u0419 API (deprecated)\ndef __init__(\n    self,\n    pipeline-name: str,\n    provider: str,\n    entity_...",
-      "decision": "### 1. \u0420\u0430\u0437\u0434\u0435\u043b\u0438\u0442\u044c \u043d\u0430 \u0442\u0440\u0438 \u0441\u0442\u0440\u0443\u043a\u0442\u0443\u0440\u044b\n#### PipelineConfig (immutable dataclass)\n```python\n@dataclass(frozen=True)\nclass PipelineConfig:\n    \"\"\"Static pipeline configuration.\"\"\"\n    pipeline-name: str\n ...",
-      "consequences": "### \u041f\u043e\u043b\u043e\u0436\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0435\n1. **\u042f\u0441\u043d\u043e\u0435 \u0440\u0430\u0437\u0434\u0435\u043b\u0435\u043d\u0438\u0435 \u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0441\u0442\u0438**: Config, Runtime, Services - \u0442\u0440\u0438 \u0447\u0451\u0442\u043a\u0438\u0445 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438\n2. **\u0423\u043b\u0443\u0447\u0448\u0435\u043d\u043d\u0430\u044f \u0442\u0435\u0441\u0442\u0438\u0440\u0443\u0435\u043c\u043e\u0441\u0442\u044c**: \u041c\u043e\u0436\u043d\u043e \u043c\u043e\u043a\u0430\u0442\u044c \u0442\u043e\u043b\u044c\u043a\u043e \u043d\u0443\u0436\u043d\u044b\u0435 \u0447\u0430\u0441\u0442\u0438\n3. **\u0423\u0441\u0442\u0440\u0430\u043d\u0435\u043d\u0438\u0435 \u0446\u0438\u043a\u043b\u0438\u0447\u0435...",
+      "decision": "### 1. \u0420\u0430\u0437\u0434\u0435\u043b\u0438\u0442\u044c \u043d\u0430 \u0442\u0440\u0438 \u0441\u0442\u0440\u0443\u043a\u0442\u0443\u0440\u044b\n#### PipelineConfig (immutable dataclass)\n```python\n@dataclass(frozen=True)\nclass PipelineConfig:\n    \"\"\"Static pipeline configuration.\"\"\"\n    pipeline - name: str...",
+      "consequences": "### \u041f\u043e\u043b\u043e\u0436\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0435\n1. **\u042f\u0441\u043d\u043e\u0435 \u0440\u0430\u0437\u0434\u0435\u043b\u0435\u043d\u0438\u0435 \u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0441\u0442\u0438**: Config, Runtime, Services - \u0442\u0440\u0438 \u0447\u0451\u0442\u043a\u0438\u0445 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438\n1. **\u0423\u043b\u0443\u0447\u0448\u0435\u043d\u043d\u0430\u044f \u0442\u0435\u0441\u0442\u0438\u0440\u0443\u0435\u043c\u043e\u0441\u0442\u044c**: \u041c\u043e\u0436\u043d\u043e \u043c\u043e\u043a\u0430\u0442\u044c \u0442\u043e\u043b\u044c\u043a\u043e \u043d\u0443\u0436\u043d\u044b\u0435 \u0447\u0430\u0441\u0442\u0438\n1. **\u0423\u0441\u0442\u0440\u0430\u043d\u0435\u043d\u0438\u0435 \u0446\u0438\u043a\u043b\u0438\u0447\u0435...",
       "supersedes": [],
       "superseded_by": [],
       "related": [],
@@ -451,7 +451,7 @@
       "last_reviewed": null,
       "context": "BioETL uses Hexagonal Architecture + Medallion (Bronze\u2192Silver\u2192Gold) for ETL bi\u043e\u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0445 \u0434\u0430\u043d\u043d\u044b\u0445. Current pipelines operate independently:\n- `chembl_activity`\n- `chembl_publication`\n- `pubchem_compou...",
       "decision": "Implement **Composite Pipeline Pattern** with the following architecture:\n**Decision Boundary Change (2026-04-24)**:\nThe original ADR specified CrossRef as a required enricher (`required: true`). H...",
-      "consequences": "### Positive\n1. **Unified data enrichment** - Single command to run multi-source pipelines\n2. **Graceful degradation** - Optional enricher failures don't block composite\n3. **Full lineage** - Every...",
+      "consequences": "### Positive\n1. **Unified data enrichment** - Single command to run multi-source pipelines\n1. **Graceful degradation** - Optional enricher failures don't block composite\n1. **Full lineage** - Every...",
       "supersedes": [],
       "superseded_by": [],
       "related": [],
@@ -518,8 +518,8 @@
       "decision_date": null,
       "last_reviewed": null,
       "context": "Publication entities (documents, works, papers) from external APIs present unique challenges for incremental extraction:\n### Problem Statement\n1. **Offset instability**: Publication APIs (ChEMBL `/...",
-      "decision": "Introduce `force-full-scan` flag for publication entities that:\n1. **Disables checkpoint-based resume** for the pipeline\n2. **Each run performs a full scan** of the data source\n3. **Deduplication i...",
-      "consequences": "### Positive\n1. **Reproducible runs**: Each execution produces consistent results\n2. **No data loss**: Full scan guarantees all current records are captured\n3. **No duplicates in Silver**: Merge de...",
+      "decision": "Introduce `force-full-scan` flag for publication entities that:\n1. **Disables checkpoint-based resume** for the pipeline\n1. **Each run performs a full scan** of the data source\n1. **Deduplication i...",
+      "consequences": "### Positive\n1. **Reproducible runs**: Each execution produces consistent results\n1. **No data loss**: Full scan guarantees all current records are captured\n1. **No duplicates in Silver**: Merge de...",
       "supersedes": [],
       "superseded_by": [],
       "related": [],
@@ -623,7 +623,7 @@
       "decision_date": null,
       "last_reviewed": null,
       "context": "Schema audits (2026-02-17) \u0432\u044b\u044f\u0432\u0438\u043b\u0438 \u043c\u043d\u043e\u0436\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0435 \u043f\u043e\u0442\u0435\u043d\u0446\u0438\u0430\u043b\u044c\u043d\u044b\u0435 breaking changes \u0432 Gold \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u0430\u0445:\n- \u041f\u0435\u0440\u0435\u0438\u043c\u0435\u043d\u043e\u0432\u0430\u043d\u0438\u0435 PK (`tissue-chembl-id` \u2192 `tissue-id`)\n- \u0423\u0434\u0430\u043b\u0435\u043d\u0438\u0435 legacy \u043f\u043e\u043b\u0435\u0439 (journal aliases, g...",
-      "decision": "\u041f\u0440\u0438\u043d\u044f\u0442\u044c \u0441\u0435\u043c\u0430\u043d\u0442\u0438\u0447\u0435\u0441\u043a\u043e\u0435 \u0432\u0435\u0440\u0441\u0438\u043e\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435 \u0434\u043b\u044f Gold \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u043e\u0432: `major.minor`.\n### \u041a\u043b\u0430\u0441\u0441\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u044f \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0439\n| \u0422\u0438\u043f \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f | Version bump | \u041f\u0440\u0438\u043c\u0435\u0440\u044b |\n|---------------|-------------|---------|\n| \u0414\u043e\u0431\u0430\u0432\u043b\u0435\u043d...",
+      "decision": "\u041f\u0440\u0438\u043d\u044f\u0442\u044c \u0441\u0435\u043c\u0430\u043d\u0442\u0438\u0447\u0435\u0441\u043a\u043e\u0435 \u0432\u0435\u0440\u0441\u0438\u043e\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435 \u0434\u043b\u044f Gold \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u043e\u0432: `major.minor`.\n### \u041a\u043b\u0430\u0441\u0441\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u044f \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0439\n| \u0422\u0438\u043f \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f                  | Version bump    | \u041f\u0440\u0438\u043c\u0435\u0440\u044b                          |\n| -----...",
       "consequences": "### Positive\n- \u0423\u043f\u0440\u0430\u0432\u043b\u044f\u0435\u043c\u044b\u0435 breaking changes \u0441 \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u044b\u043c\u0438 migration paths\n- \u0421\u043d\u0438\u0436\u0435\u043d\u0438\u0435 \u0440\u0438\u0441\u043a\u0430 silent breakage \u0434\u043b\u044f downstream consumers\n- \u0424\u043e\u0440\u043c\u0430\u043b\u0438\u0437\u043e\u0432\u0430\u043d\u043d\u044b\u0435 rollback criteria \u0438 dual-service policy\n...",
       "supersedes": [],
       "superseded_by": [],
@@ -679,7 +679,7 @@
       "last_reviewed": null,
       "context": "\u0414\u043e \u0440\u0435\u0444\u0430\u043a\u0442\u043e\u0440\u0438\u043d\u0433\u0430 \u043a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f \u043e\u0434\u043d\u043e\u0433\u043e \u0441\u0442\u0430\u043d\u0434\u0430\u0440\u0442\u043d\u043e\u0433\u043e pipeline \u0431\u044b\u043b\u0430 \u0440\u0430\u0441\u043f\u0440\u0435\u0434\u0435\u043b\u0435\u043d\u0430 \u043f\u043e **11 \u0444\u0430\u0439\u043b\u0430\u043c**\n\u0432 9 \u0440\u0430\u0437\u043d\u044b\u0445 \u0434\u0438\u0440\u0435\u043a\u0442\u043e\u0440\u0438\u044f\u0445:\n```\nconfigs/\n\u251c\u2500\u2500 pipelines/{provider}/{entity}.yaml        # Pipeline execution ...",
       "decision": "### 1. Unified Entity Config (`configs/entities/{provider}/{entity}.yaml`)\n\u0412\u0441\u0435 \u043a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u0438 \u043e\u0434\u043d\u043e\u0433\u043e entity \u043e\u0431\u044a\u0435\u0434\u0438\u043d\u044f\u044e\u0442\u0441\u044f \u0432 \u043e\u0434\u0438\u043d \u0444\u0430\u0439\u043b \u0441 \u044f\u0432\u043d\u044b\u043c\u0438 \u0441\u0435\u043a\u0446\u0438\u044f\u043c\u0438:\n```yaml\n# configs/entities/chembl/activity.yaml...",
-      "consequences": "### Positive\n1. **5-\u0432-1**: \u041e\u0434\u0438\u043d unified entity config \u0437\u0430\u043c\u0435\u043d\u044f\u0435\u0442 5\u20136 \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u044b\u0445 \u0444\u0430\u0439\u043b\u043e\u0432 (pipeline, schema, quality, filters, contracts)\n2. **\u041d\u0430\u0432\u0438\u0433\u0430\u0446\u0438\u044f**: \u0418\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0435 entity \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u0440\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u044f \u043e\u0434\u043d\u043e\u0433\u043e ...",
+      "consequences": "### Positive\n1. **5-\u0432-1**: \u041e\u0434\u0438\u043d unified entity config \u0437\u0430\u043c\u0435\u043d\u044f\u0435\u0442 5\u20136 \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u044b\u0445 \u0444\u0430\u0439\u043b\u043e\u0432 (pipeline, schema, quality, filters, contracts)\n1. **\u041d\u0430\u0432\u0438\u0433\u0430\u0446\u0438\u044f**: \u0418\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0435 entity \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u0440\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u044f \u043e\u0434\u043d\u043e\u0433\u043e ...",
       "supersedes": [
         "ADR-025"
       ],
@@ -722,7 +722,7 @@
       "decision_date": null,
       "last_reviewed": null,
       "context": "\u041a\u0440\u0438\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u0430\u0443\u0434\u0438\u0442 historical runtime skills, agents, and command surfaces \u0432\u044b\u044f\u0432\u0438\u043b\n**\u0441\u0438\u0441\u0442\u0435\u043c\u043d\u044b\u0435 \u0440\u0430\u0441\u0445\u043e\u0436\u0434\u0435\u043d\u0438\u044f** \u0432 \u043d\u0430\u0438\u043c\u0435\u043d\u043e\u0432\u0430\u043d\u0438\u044f\u0445, \u0444\u043e\u0440\u043c\u0430\u0442\u0430\u0445 \u0444\u0430\u0439\u043b\u043e\u0432 \u0438 \u044f\u0437\u044b\u043a\u043e\u0432\u043e\u0439 \u043f\u043e\u043b\u0438\u0442\u0438\u043a\u0435.\n\u041e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 \u0444\u043e\u0440\u043c\u0430\u043b\u0438\u0437\u043e\u0432\u0430\u043d\u043d\u043e\u0439 naming po...",
-      "decision": "### 1. Naming Convention\n#### 1.1 Agents (`subagent_type`)\n**Pattern:** `py-{role}-{type}`\n| Segment | Rule | Values |\n|---------|------|--------|\n| `py-` | \u041e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u044b\u0439 \u043f\u0440\u0435\u0444\u0438\u043a\u0441 (Python ecosystem) ...",
+      "decision": "### 1. Naming Convention\n#### 1.1 Agents (`subagent_type`)\n**Pattern:** `py-{role}-{type}`\n| Segment  | Rule                                    | Values                                             ...",
       "consequences": "### Positive\n- \u0415\u0434\u0438\u043d\u044b\u0439 \u0444\u043e\u0440\u043c\u0430\u0442 \u043e\u0431\u043d\u0430\u0440\u0443\u0436\u0435\u043d\u0438\u044f skills \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u043c \u0441\u043a\u0430\u043d\u0435\u0440\u043e\u043c\n- 1:1 mapping \u043c\u0435\u0436\u0434\u0443 \u0438\u043c\u0435\u043d\u0430\u043c\u0438 \u0444\u0430\u0439\u043b\u043e\u0432, frontmatter `name:` \u0438 runtime identifiers\n- \u0424\u043e\u0440\u043c\u0430\u043b\u0438\u0437\u043e\u0432\u0430\u043d\u043d\u0430\u044f \u0442\u0430\u043a\u0441\u043e\u043d\u043e\u043c\u0438\u044f `-bot` / `-swarm` ...",
       "supersedes": [],
       "superseded_by": [],
@@ -741,7 +741,7 @@
       "decision_date": null,
       "last_reviewed": null,
       "context": "BioETL has grown to 854+ test files across 9 test categories. While coverage meets\nthe 85% threshold, several gaps exist:\n1. **No formalized test matrix** \u2014 no systematic mapping of provider x enti...",
-      "decision": "### Test Matrix (Provider x Layer x Type)\n| Layer | Unit | Integration | Contract | Property | E2E |\n|-------|------|-------------|----------|----------|-----|\n| **Domain** (ports, entities, polici...",
+      "decision": "### Test Matrix (Provider x Layer x Type)\n| Layer                                  | Unit   | Integration | Contract | Property              | E2E    |\n| -------------------------------------- | --...",
       "consequences": "### Positive\n- Systematic coverage tracking via matrix\n- Clear boundary between property-based and VCR testing\n- Mutation testing catches undertested logic\n- Contract versioning prevents silent sch...",
       "supersedes": [],
       "superseded_by": [],
@@ -783,7 +783,7 @@
       "last_reviewed": null,
       "context": "BioETL already captured useful provenance fragments during execution:\n- `RunContext` stored `pipeline_version`, `git_commit`, and `config_hash`;\n- Bronze/Silver/Gold sidecars stored runtime and lin...",
       "decision": "BioETL introduces a dedicated control-plane family with two different roles.\n### 1. `RunManifest` is immutable\n`RunManifest` captures what was intended to run:\n- `manifest_id`\n- `run_id`\n- `executi...",
-      "consequences": "### Positive\n1. Each run becomes a globally addressable reproducibility object.\n2. Run-centric provenance can be inspected without reconstructing logs.\n3. Sidecars now link upward to the control pl...",
+      "consequences": "### Positive\n1. Each run becomes a globally addressable reproducibility object.\n1. Run-centric provenance can be inspected without reconstructing logs.\n1. Sidecars now link upward to the control pl...",
       "supersedes": [],
       "superseded_by": [],
       "related": [
@@ -811,18 +811,64 @@
       "superseded_by": [],
       "related": [],
       "tags": []
+    },
+    {
+      "adr_number": "046",
+      "title": "checkpoint vs ledger resume",
+      "file_path": "ADR-046-checkpoint-vs-ledger-resume.md",
+      "status": "active",
+      "category": "architecture",
+      "owner": "architecture-team",
+      "decision_date": null,
+      "last_reviewed": null,
+      "context": "BioETL currently has two different control surfaces that touch resumability, but\nthey do not serve the same role.\n- `CompositeCheckpointState` persists operational runner state such as seed,\n  depe...",
+      "decision": "Recommendation: `not now`.\nBioETL SHOULD keep checkpoint state as the canonical operational resume surface\nfor now, and SHOULD keep RunManifest/RunLedger as provenance and inspection\nsurfaces. The ...",
+      "consequences": "### Positive\n- Preserves the current fail-closed operational model with minimal ambiguity.\n- Keeps `RunLedger` focused on provenance, inspection, and coarse replay\n  evidence.\n- Avoids a speculativ...",
+      "supersedes": [],
+      "superseded_by": [],
+      "related": [
+        "ADR-010",
+        "ADR-014",
+        "ADR-015",
+        "ADR-026",
+        "ADR-044"
+      ],
+      "tags": []
+    },
+    {
+      "adr_number": "047",
+      "title": "workflow control plane",
+      "file_path": "ADR-047-workflow-control-plane.md",
+      "status": "active",
+      "category": "architecture",
+      "owner": "architecture-team",
+      "decision_date": null,
+      "last_reviewed": null,
+      "context": "Declarative workflow DAGs had already shipped config loading and sequential\nexecution, but safe operator recovery still needed explicit workflow-level\ncontrol-plane seams:\n- immutable workflow exec...",
+      "decision": "BioETL introduces four workflow-level control-plane seams.\n### 1. `WorkflowManifest` is immutable\nEach workflow execution persists one immutable manifest before execution starts.\nThe manifest captu...",
+      "consequences": "### Positive\n1. Workflow executions now have immutable intent, append-only history, and a dedicated mutable resume-state owner.\n1. `bioetl workflow status` can expose real persisted workflow state....",
+      "supersedes": [],
+      "superseded_by": [],
+      "related": [
+        "ADR-010",
+        "ADR-014",
+        "ADR-015",
+        "ADR-044",
+        "ADR-046"
+      ],
+      "tags": []
     }
   ],
   "stats": {
     "by_status": {
-      "active": 37,
+      "active": 39,
       "superseded": 3,
       "deprecated": 3,
       "archived": 1,
       "draft": 1
     },
     "by_category": {
-      "architecture": 45
+      "architecture": 47
     }
   }
 }

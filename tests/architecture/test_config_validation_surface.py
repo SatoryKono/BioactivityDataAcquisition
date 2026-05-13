@@ -11,6 +11,15 @@ ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_PATH = ROOT / "configs" / "quality" / "config_validation_surface.yaml"
 CONFIG_ROOT = ROOT / "configs"
 SUPPORTED_SUFFIXES = {".yaml", ".json", ".csv", ".md"}
+VALIDATION_DEPTHS = {
+    "documentation",
+    "governance_gate",
+    "inventory_only",
+    "schema_level",
+    "semantic",
+    "snapshot",
+    "cross_file",
+}
 
 
 def _load_inventory() -> dict[str, object]:
@@ -43,6 +52,18 @@ def _family_prefixes(inventory: dict[str, object]) -> dict[str, str]:
             isinstance(family.get("validation_mechanism"), str)
             and family["validation_mechanism"]
         )
+        validation_depth = family.get("validation_depth")
+        assert isinstance(validation_depth, str) and validation_depth, (
+            f"{family_id} must declare validation_depth"
+        )
+        assert validation_depth in VALIDATION_DEPTHS, (
+            f"{family_id} declares unsupported validation_depth={validation_depth!r}"
+        )
+        if validation_depth == "inventory_only":
+            rationale = family.get("inventory_only_rationale")
+            assert isinstance(rationale, str) and rationale.strip(), (
+                f"{family_id} inventory-only validation requires rationale"
+            )
         enforcing_surfaces = family.get("enforcing_surfaces")
         assert isinstance(enforcing_surfaces, list) and enforcing_surfaces
         for prefix in family.get("path_prefixes", []):
@@ -60,7 +81,9 @@ def test_every_config_file_is_classified_by_validation_surface() -> None:
 
     for config_file in _tracked_config_files():
         matched = [
-            family for prefix, family in prefixes.items() if config_file.startswith(prefix)
+            family
+            for prefix, family in prefixes.items()
+            if config_file.startswith(prefix)
         ]
         if not matched:
             unclassified.append(config_file)
@@ -83,3 +106,18 @@ def test_config_validation_inventory_is_self_classified() -> None:
     relative_path = INVENTORY_PATH.relative_to(ROOT).as_posix()
 
     assert any(relative_path.startswith(prefix) for prefix in prefixes)
+
+
+def test_validate_configs_reports_validation_depth_summary() -> None:
+    script = (
+        ROOT
+        / "docs"
+        / "00-project"
+        / "ai"
+        / "agents"
+        / "scripts"
+        / "py-config-bot-2.py"
+    ).read_text(encoding="utf-8")
+
+    assert "_emit_validation_depth_summary(configs_root)" in script
+    assert "Config validation surface family depths" in script

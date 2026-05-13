@@ -6,7 +6,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 CONFIG_PATH="$REPO_ROOT/configs/quality/pretest_guardrails.yaml"
 cd "$REPO_ROOT"
 
-MODE="auto"
+MODE="check"
 SCOPE="light"
 STRICT_DOCS=0
 SKIP_CLEANUP=0
@@ -40,7 +40,7 @@ Purpose:
 
 Options:
   --mode auto|check             auto: refresh deterministic repo metadata before checks
-                                check: validate only (default: auto)
+                                check: validate only (default)
   --scope light|governance|full|strict
                                 light: cleanup + repo sync/check + targeted doc/policy drift checks
                                 governance: light + governance guardrails
@@ -375,6 +375,7 @@ run_auto_fix() {
     [[ "$MODE" == "auto" ]] || return 0
     [[ "$RUN_AUTO_FIX" == "1" ]] || return 0
 
+    echo "[pretest-guardrails][write] auto mode enabled; running repository metadata sync steps"
     run_step integration-vcr-policy-sync \
         "$PYTHON_BIN" -m scripts.engineering.qa sync-integration-vcr-policy --write
     run_step repo-identity-sync \
@@ -395,8 +396,10 @@ run_repo_checks() {
     [[ "$SKIP_REPO" == "0" ]] || return 0
     [[ "$RUN_REPO_CHECKS" == "1" ]] || return 0
 
-    # Ensure the inventory is completely up to date before running checks that depend on it
-    run_step inventory-sync-final "$PYTHON_BIN" -m scripts.engineering.repo sync-inventory --write
+    if [[ "$MODE" == "auto" ]]; then
+        # Ensure the inventory is completely up to date before running checks that depend on it.
+        run_step inventory-sync-final "$PYTHON_BIN" -m scripts.engineering.repo sync-inventory --write
+    fi
 
     # The inventory-check MUST be the final check for inventory consistency related to auto-fixes
     if ! run_step inventory-check \

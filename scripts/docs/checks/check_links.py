@@ -501,7 +501,7 @@ def _append_runbook_section_violations(
 ) -> None:
     for section in REQUIRED_RUNBOOK_SECTIONS:
         if section == "Rollback/Recovery":
-            if _has_any_heading(headings, "Rollback", "Recovery"):
+            if _has_any_heading(headings, "Rollback/Recovery", "Rollback", "Recovery"):
                 continue
             violations.append(
                 (md_file, "runbook: missing required section 'Rollback/Recovery'")
@@ -1341,7 +1341,7 @@ def _run_check_runner(
 
 
 def _run_selected_checks(
-    check_runners: tuple[tuple[str, bool, Callable[[], int]], ...]
+    check_runners: tuple[tuple[str, bool, Callable[[], int]], ...],
 ) -> tuple[int, list[dict[str, object]]]:
     violations = 0
     checks_run: list[dict[str, object]] = []

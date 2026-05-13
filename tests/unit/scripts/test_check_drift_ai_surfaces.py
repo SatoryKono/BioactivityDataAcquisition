@@ -7,6 +7,74 @@ from pathlib import Path
 from scripts.docs.checks import check_drift
 
 
+def test_check_modules_allows_governed_tracing_attributes(
+    monkeypatch, tmp_path: Path
+) -> None:
+    docs_dir = tmp_path / "docs"
+    arch_dir = docs_dir / "02-architecture"
+    arch_dir.mkdir(parents=True)
+    (arch_dir / "observability-layers.md").write_text(
+        "`bioetl.provider`\n`bioetl.run_id`\n", encoding="utf-8"
+    )
+
+    src_dir = tmp_path / "src" / "bioetl"
+    src_dir.mkdir(parents=True)
+    (src_dir / "__init__.py").write_text("", encoding="utf-8")
+
+    tracing_config = tmp_path / "configs" / "quality" / "mandatory_tracing.yaml"
+    tracing_config.parent.mkdir(parents=True)
+    tracing_config.write_text(
+        """
+surfaces:
+  adapter_request:
+    files:
+      - path: src/bioetl/infrastructure/adapters/http/client_retry_observability.py
+        required_terms:
+          - bioetl.provider
+          - bioetl.run_id
+""".lstrip(),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(check_drift, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(check_drift, "DOCS_DIR", docs_dir)
+    monkeypatch.setattr(check_drift, "SRC_DIR", src_dir)
+    monkeypatch.setattr(check_drift, "MANDATORY_TRACING_COVERAGE_PATH", tracing_config)
+
+    report = check_drift.DriftReport()
+    check_drift.check_modules(report)
+
+    assert report.issues == []
+
+
+def test_check_modules_still_reports_unknown_bioetl_module(
+    monkeypatch, tmp_path: Path
+) -> None:
+    docs_dir = tmp_path / "docs"
+    arch_dir = docs_dir / "02-architecture"
+    arch_dir.mkdir(parents=True)
+    (arch_dir / "overview.md").write_text("`bioetl.missing_module`\n", encoding="utf-8")
+
+    src_dir = tmp_path / "src" / "bioetl"
+    src_dir.mkdir(parents=True)
+    (src_dir / "__init__.py").write_text("", encoding="utf-8")
+
+    tracing_config = tmp_path / "configs" / "quality" / "mandatory_tracing.yaml"
+    tracing_config.parent.mkdir(parents=True)
+    tracing_config.write_text("surfaces: {}\n", encoding="utf-8")
+
+    monkeypatch.setattr(check_drift, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(check_drift, "DOCS_DIR", docs_dir)
+    monkeypatch.setattr(check_drift, "SRC_DIR", src_dir)
+    monkeypatch.setattr(check_drift, "MANDATORY_TRACING_COVERAGE_PATH", tracing_config)
+
+    report = check_drift.DriftReport()
+    check_drift.check_modules(report)
+
+    assert report.error_count == 1
+    assert "bioetl.missing_module" in report.issues[0].detail
+
+
 def test_check_ai_surfaces_reports_missing_policy_token(
     monkeypatch, tmp_path: Path
 ) -> None:

@@ -84,14 +84,14 @@ def _has_irrecoverable_dispositions(
     )
 
 
-def _build_universal_scope_global_claim(
+def _universal_scope_claim_supported(
     *,
     inventory: HistoricalReplayCertifiabilityInventory,
     unresolved_records: tuple[HistoricalReplayCertifiabilityRecord, ...],
-    disposition_map: dict[str, HistoricalReplayResidualDispositionRecord],
-) -> dict[str, object]:
-    has_irrecoverable = _has_irrecoverable_dispositions(disposition_map)
-    claimed = (
+    has_irrecoverable: bool,
+) -> bool:
+    """Return whether all retained historical runs support universal replay claim."""
+    return (
         inventory.manifest_count > 0
         and inventory.certified_count + inventory.replayable_count
         == inventory.manifest_count
@@ -99,16 +99,44 @@ def _build_universal_scope_global_claim(
         and not unresolved_records
         and not has_irrecoverable
     )
+
+
+def _universal_scope_claim_block_reason(
+    *,
+    unresolved_records: tuple[HistoricalReplayCertifiabilityRecord, ...],
+    has_irrecoverable: bool,
+    unsupported_count: int,
+) -> str:
+    """Resolve the deterministic block reason for a universal replay claim."""
+    if unresolved_records:
+        return "residual_historical_runs_lack_explicit_resolution_disposition"
+    if has_irrecoverable:
+        return "irrecoverable_legacy_runs_block_universal_historical_claim"
+    if unsupported_count:
+        return "some_retained_runs_remain_outside_supported_historical_scope"
+    return "historical_replay_closure_program_not_yet_completed"
+
+
+def _build_universal_scope_global_claim(
+    *,
+    inventory: HistoricalReplayCertifiabilityInventory,
+    unresolved_records: tuple[HistoricalReplayCertifiabilityRecord, ...],
+    disposition_map: dict[str, HistoricalReplayResidualDispositionRecord],
+) -> dict[str, object]:
+    has_irrecoverable = _has_irrecoverable_dispositions(disposition_map)
+    claimed = _universal_scope_claim_supported(
+        inventory=inventory,
+        unresolved_records=unresolved_records,
+        has_irrecoverable=has_irrecoverable,
+    )
     if claimed:
         reason = "all_retained_historical_runs_have_exact_replay_evidence_or_certified_parent_state"
-    elif unresolved_records:
-        reason = "residual_historical_runs_lack_explicit_resolution_disposition"
-    elif has_irrecoverable:
-        reason = "irrecoverable_legacy_runs_block_universal_historical_claim"
-    elif inventory.unsupported_count:
-        reason = "some_retained_runs_remain_outside_supported_historical_scope"
     else:
-        reason = "historical_replay_closure_program_not_yet_completed"
+        reason = _universal_scope_claim_block_reason(
+            unresolved_records=unresolved_records,
+            has_irrecoverable=has_irrecoverable,
+            unsupported_count=inventory.unsupported_count,
+        )
     return {
         "claimed": claimed,
         "verdict": "claim_supported" if claimed else "claim_blocked",

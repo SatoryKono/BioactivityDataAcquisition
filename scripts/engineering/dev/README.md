@@ -45,7 +45,8 @@ Preferred runners automatically select the OS-appropriate environment:
 ```bash
 bash scripts/engineering/dev/run_pytest.sh tests/unit --narrow --timeout=120 --lf
 bash scripts/engineering/dev/run_mypy.sh
-bash scripts/engineering/dev/pretest_guardrails.sh --scope full
+bash scripts/engineering/dev/pretest_guardrails.sh --mode check --scope full
+bash scripts/engineering/dev/pretest_guardrails.sh --mode auto --scope full  # explicit write-capable metadata refresh
 bash scripts/engineering/dev/run_pytest_sharded.sh
 bash scripts/engineering/dev/run_pytest_sharded.sh --stream
 bash scripts/engineering/dev/run_pytest_sharded.sh --tail

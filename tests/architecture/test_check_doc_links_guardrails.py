@@ -129,6 +129,20 @@ def test_path_contracts_detect_noncanonical_governance_link(
     assert "governance_path_contract" in rule_names
 
 
+def test_runbook_governance_accepts_rollup_rollback_recovery_heading(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
+    violations: list[tuple[Path, str]] = []
+    headings = {section.casefold() for section in module.REQUIRED_RUNBOOK_SECTIONS}
+
+    module._append_runbook_section_violations(
+        violations, Path("docs/05-operations/runbooks/example.md"), headings
+    )
+
+    assert violations == []
+
+
 def test_drift_rules_include_legacy_run_flag_and_path_tokens(
     check_doc_links_module: ModuleType,
 ) -> None:

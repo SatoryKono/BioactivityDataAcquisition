@@ -55,7 +55,6 @@ dashboard_families:
     uids:
       - bioetl-control-plane-v1
       - bioetl-overview-v2
-      - bioetl-overview-v3
       - bioetl-runtime
       - bioetl-dq-v2
     allowed_visible_selectors:
@@ -77,6 +76,20 @@ dashboard_families:
       scope L0/L1 cards and routes. Runtime current-triage panels apply the
       same normalization for current status, blocker, error-rate, lag, and
       active-blocker drilldown queries.
+  hybrid_overview:
+    uids:
+      - bioetl-overview-v3
+    allowed_visible_selectors:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+    notes: |
+      Overview v3 is a draft hybrid bridge. It keeps pipeline-summary current
+      status semantics, adds a visible workflow evidence-context selector, and
+      exposes run_id only as a visible execution-hint textbox. It MUST NOT
+      claim catalog-backed exact-run resolution until the local run catalog
+      future contract is shipped.
   provider_first:
     uids:
       - bioetl-provider-health-v2
@@ -151,18 +164,24 @@ shipped_selector_registry:
       pipeline: prometheus_records_processed_total
       run_type: prometheus_records_processed_total
   bioetl-overview-v3:
-    family: pipeline_summary
+    family: hybrid_overview
     visible_selectors:
+      - workflow
       - pipeline
       - run_type
+      - run_id
     hidden_context_selectors: []
     hidden_detail_selectors: []
     top_bar_order:
+      - workflow
       - pipeline
       - run_type
+      - run_id
     query_source_families:
+      workflow: prometheus_workflow_runs_total
       pipeline: prometheus_records_processed_total
       run_type: prometheus_records_processed_total
+      run_id: textbox_execution_hint
   bioetl-runtime:
     family: pipeline_summary
     visible_selectors:
@@ -273,8 +292,10 @@ ship_now_selector_contract_by_uid:
     time_range: grafana_builtin
   bioetl-overview-v3:
     visible_selectors:
+      - workflow
       - pipeline
       - run_type
+      - run_id
     time_range: grafana_builtin
   bioetl-runtime:
     visible_selectors:

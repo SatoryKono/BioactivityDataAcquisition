@@ -42,6 +42,7 @@ NAVIGATION_CONTRACT_PATH = Path(
 )
 EXPECTED_VARS_BY_DASHBOARD = {
     "bioetl-overview-v2.json": {"pipeline", "run_type"},
+    "bioetl-overview-v3.json": {"workflow", "pipeline", "run_type", "run_id"},
     "bioetl-dq-v2.json": {"pipeline", "run_type", "stage"},
     "bioetl-runtime.json": {"pipeline", "run_type", "stage"},
     "bioetl-provider-health-v2.json": {
@@ -510,6 +511,37 @@ def test_variable_query_sources(dashboard_path):
         assert "bioetl_workflow_runs_total" in provider_context_query.get("query", "")
         assert "bioetl_workflow_step_events_total" in step_status_query.get("query", "")
         assert "bioetl_workflow_step_events_total" in step_kind_query.get("query", "")
+        return
+
+    if dashboard_path.name == "bioetl-overview-v3.json":
+        workflow_var = variable_map["workflow"]
+        workflow_query = workflow_var.get("query", {})
+        workflow_query_text = (
+            workflow_query.get("query", "") if isinstance(workflow_query, dict) else ""
+        )
+        assert workflow_var.get("datasource") == {
+            "type": "prometheus",
+            "uid": "prometheus",
+        }
+        assert "bioetl_workflow_runs_total" in workflow_query_text
+
+        pipeline_var = variable_map["pipeline"]
+        pipeline_query = pipeline_var.get("query", {})
+        pipeline_query_text = (
+            pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
+        )
+        assert "bioetl_records_processed_total" in pipeline_query_text
+
+        run_type_var = variable_map["run_type"]
+        run_type_query = run_type_var.get("query", {})
+        run_type_query_text = (
+            run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""
+        )
+        assert "bioetl_records_processed_total" in run_type_query_text
+        assert "run_type" in run_type_query_text
+
+        run_id_var = variable_map["run_id"]
+        assert run_id_var.get("type") == "textbox"
         return
 
     if dashboard_path.name == "bioetl-provider-health-v2.json":

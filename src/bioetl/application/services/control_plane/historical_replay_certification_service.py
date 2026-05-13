@@ -9,7 +9,7 @@ from bioetl.application.services.control_plane._historical_replay_certification 
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
 )
 from bioetl.application.services.control_plane._historical_replay_certification_support import (
-    HistoricalReplayCertificationResultBuilder,
+    HistoricalReplayCertificationResultAssembler,
     HistoricalReplayCertificationValidator,
 )
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
@@ -167,7 +167,7 @@ class HistoricalReplayCertificationService:
             ledger_port=self.ledger_port,
         )
 
-    def _result_builder(self) -> HistoricalReplayCertificationResultBuilder:
-        return HistoricalReplayCertificationResultBuilder(
+    def _result_builder(self) -> HistoricalReplayCertificationResultAssembler:
+        return HistoricalReplayCertificationResultAssembler(
             ledger_port=self.ledger_port,
         )

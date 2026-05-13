@@ -41,23 +41,35 @@ push the L0 answer below the fold.
 
 Current visible selectors:
 
+- `workflow`
 - `pipeline`
 - `run_type`
+- `run_id`
 - Grafana time range
 
 Current defaults:
 
+- `workflow=All`
 - `pipeline=All`
 - `run_type=All`
+- `run_id=-`
 
-Forbidden current selectors:
+Current shipped draft (`bioetl-overview-v3`) keeps this exact selector set.
 
-- visible `run_id`
+Current semantics:
+
+- `workflow` is a visible workflow-evidence context selector and Workflow
+  dashboard handoff hint.
+- `pipeline` and `run_type` remain the canonical current-status scope for L0
+  aggregate triage.
+- `run_id` is a visible execution-hint bridge, not a truthful local
+  run-catalog-backed exact selector.
+
+Still forbidden on the first screen as resolved facts:
+
 - visible `manifest_id`
 - visible `execution_fingerprint`
 - visible `payload_hash`
-
-Current shipped draft (`bioetl-overview-v3`) keeps this exact selector set.
 
 Future exact-run resolution may use `run_selector_mode` and hidden
 `selected_run_id` only after the local run catalog gate is satisfied.
@@ -67,7 +79,10 @@ Future exact-run resolution may use `run_selector_mode` and hidden
 Current mode:
 
 - Overview does not resolve one exact run by default.
-- Aggregate L0 panels must work with `All/All` landing scope.
+- Aggregate L0 panels must work with `workflow=All`, `pipeline=All`,
+  `run_type=All`.
+- `run_id` may preserve operator execution context, but it does not yet change
+  the underlying aggregate current-status PromQL.
 - Missing current-state evidence renders `UNKNOWN`, not `OK`.
 
 Future gated mode:

@@ -25,9 +25,12 @@ v3.0 documents an execution-aware dashboard family and a concrete
 Current shipped draft surface:
 
 - `bioetl-overview-v3` already exists in `grafana/dashboards/*.json`
-- it is intentionally `pipeline_summary-safe`
 - it materializes the v3 first-screen header and hybrid layout
-- it does not yet ship exact run selectors or a local run catalog
+- it now exposes visible `workflow`, `pipeline`, `run_type`, and `run_id`
+  selectors
+- it keeps `pipeline` + `run_type` as the truthful current-status scope
+- it does not yet ship a local run catalog; current `run_id` remains a visible
+  execution-hint bridge, not an exact selector
 
 The shipped dashboard source of truth remains:
 
@@ -44,7 +47,9 @@ from the machine-readable contracts.
 Current implementable mode:
 
 - visible selectors follow the shipped dashboard-family contract;
-- `1. Overview` remains `pipeline` + `run_type` + Grafana time range;
+- `1. Overview` now exposes `workflow` + `pipeline` + `run_type` + `run_id`
+  + Grafana time range;
+- current status still anchors on `pipeline` + `run_type`;
 - `1. Overview` remains an L0 answer-first dashboard, not a forensic surface;
 - exact execution fields may be rendered only when a resolved run evidence
   source exists.
