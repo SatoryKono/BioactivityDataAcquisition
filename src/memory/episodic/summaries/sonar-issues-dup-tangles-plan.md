@@ -2,7 +2,7 @@
 id: sonar-issues-dup-tangles-plan
 title: Analyze and remediate Sonar runtime issues, duplication, and tangles
 task_id: sonar-issues-dup-tangles-plan
-created_at: '2026-05-12T19:08:59Z'
+created_at: '2026-05-13T03:12:55Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
