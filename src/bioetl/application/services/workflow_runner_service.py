@@ -81,6 +81,24 @@ class WorkflowRunExecutionResult:
 
 
 @dataclass(slots=True)
+class _WorkflowExecutionState:
+    """Mutable state for one in-process workflow execution."""
+
+    step_results: list[WorkflowStepExecutionResult]
+    step_outputs: dict[str, object]
+    status: str = "success"
+    failed_step_id: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class _WorkflowStepTransition:
+    """Result of resolving one workflow step transition."""
+
+    result: WorkflowStepExecutionResult
+    stores_output: bool
+
+
+@dataclass(slots=True)
 class WorkflowRunnerService:
     """Execute workflow pipeline and transform steps in topological order."""
 
@@ -103,82 +121,105 @@ class WorkflowRunnerService:
         ) = None,
     ) -> WorkflowRunExecutionResult:
         """Run a workflow config and stop on first failed step."""
-        step_results: list[WorkflowStepExecutionResult] = []
-        step_outputs: dict[str, object] = {}
-        status = "success"
-        failed_step_id: str | None = None
+        state = _WorkflowExecutionState(step_results=[], step_outputs={})
         workflow_context_labels = config.workflow_context_labels
 
         for step_id in config.topological_step_ids:
             step = config.get_step(step_id)
             if step is None:
                 continue
-            if failed_step_id is not None:
-                skipped = self._build_skipped_step_result(
-                    workflow_name=config.name,
-                    step=step,
-                    failed_step_id=failed_step_id,
-                    context_labels=workflow_context_labels,
-                )
-                step_results.append(skipped)
-                if step_completed_callback is not None:
-                    step_completed_callback(skipped)
-                continue
-            if completed_step_ids and step.step_id in completed_step_ids:
-                skipped = self._build_resume_skipped_step_result(
-                    workflow_name=config.name,
-                    step=step,
-                    context_labels=workflow_context_labels,
-                )
-                step_results.append(skipped)
-                if step_completed_callback is not None:
-                    step_completed_callback(skipped)
-                continue
-            result = await self._run_step(
+            transition = await self._resolve_step_transition(
                 workflow_name=config.name,
                 step=step,
-                step_outputs=step_outputs,
+                state=state,
                 workflow_context_labels=workflow_context_labels,
+                completed_step_ids=completed_step_ids,
                 completed_transform_fingerprints=completed_transform_fingerprints,
                 step_started_callback=step_started_callback,
                 transform_commit_callback=transform_commit_callback,
             )
-            step_results.append(result)
-            if step_completed_callback is not None:
-                step_completed_callback(result)
-            step_outputs[step.step_id] = result.payload
-            if result.status == "failed":
-                status = "failed"
-                failed_step_id = step.step_id
+            self._apply_step_transition(
+                state=state,
+                step=step,
+                transition=transition,
+                step_completed_callback=step_completed_callback,
+            )
 
-        self.metrics.set_gauge(
-            _WORKFLOW_CURRENT_STATUS,
-            _workflow_status_to_gauge_value(status),
-            {
-                "workflow": config.name,
-                **workflow_context_labels,
-            },
-        )
-        self.metrics.increment_counter(
-            _WORKFLOW_RUNS_TOTAL,
-            1,
-            {
-                "workflow": config.name,
-                "status": status,
-                **workflow_context_labels,
-            },
-        )
-        failed_step = next(
-            (step for step in step_results if step.status == "failed"),
-            None,
-        )
-        return WorkflowRunExecutionResult(
+        _record_workflow_run_metrics(
+            metrics=self.metrics,
             workflow_name=config.name,
-            status=status,
-            steps=tuple(step_results),
-            error_type=None if failed_step is None else failed_step.error_type,
-            error_message=None if failed_step is None else failed_step.error_message,
+            status=state.status,
+            context_labels=workflow_context_labels,
         )
+        return _workflow_result_from_state(config.name, state)
+
+    async def _resolve_step_transition(
+        self,
+        *,
+        workflow_name: str,
+        step: WorkflowStepConfig | TransformStepConfig,
+        state: _WorkflowExecutionState,
+        workflow_context_labels: Mapping[str, str],
+        completed_step_ids: frozenset[str] | None,
+        completed_transform_fingerprints: dict[str, str] | None,
+        step_started_callback: Callable[..., None] | None,
+        transform_commit_callback: (
+            Callable[[WorkflowTransformDestructiveCommit], None] | None
+        ),
+    ) -> _WorkflowStepTransition:
+        """Resolve whether a step should run, resume-skip, or failure-skip."""
+        if state.failed_step_id is not None:
+            return _WorkflowStepTransition(
+                result=_build_skipped_step_result(
+                    metrics=self.metrics,
+                    workflow_name=workflow_name,
+                    step=step,
+                    failed_step_id=state.failed_step_id,
+                    context_labels=workflow_context_labels,
+                ),
+                stores_output=False,
+            )
+        if completed_step_ids and step.step_id in completed_step_ids:
+            return _WorkflowStepTransition(
+                result=_build_resume_skipped_step_result(
+                    metrics=self.metrics,
+                    workflow_name=workflow_name,
+                    step=step,
+                    context_labels=workflow_context_labels,
+                ),
+                stores_output=False,
+            )
+        return _WorkflowStepTransition(
+            result=await self._run_step(
+                workflow_name=workflow_name,
+                step=step,
+                step_outputs=state.step_outputs,
+                workflow_context_labels=workflow_context_labels,
+                completed_transform_fingerprints=completed_transform_fingerprints,
+                step_started_callback=step_started_callback,
+                transform_commit_callback=transform_commit_callback,
+            ),
+            stores_output=True,
+        )
+
+    def _apply_step_transition(
+        self,
+        *,
+        state: _WorkflowExecutionState,
+        step: WorkflowStepConfig | TransformStepConfig,
+        transition: _WorkflowStepTransition,
+        step_completed_callback: Callable[[WorkflowStepExecutionResult], None] | None,
+    ) -> None:
+        """Apply one resolved transition to mutable workflow execution state."""
+        result = transition.result
+        state.step_results.append(result)
+        if step_completed_callback is not None:
+            step_completed_callback(result)
+        if transition.stores_output:
+            state.step_outputs[step.step_id] = result.payload
+        if result.status == "failed":
+            state.status = "failed"
+            state.failed_step_id = step.step_id
 
     async def _run_step(
         self,
@@ -227,7 +268,8 @@ class WorkflowRunnerService:
                 options=_run_options_from_config(step.run_options),
             )
         except _WORKFLOW_STEP_FAILURES as exc:
-            self._record_step_metrics(
+            _record_step_metrics(
+                metrics=self.metrics,
                 workflow_name=workflow_name,
                 step_kind=_STEP_KIND_PIPELINE,
                 status="failed",
@@ -242,7 +284,8 @@ class WorkflowRunnerService:
                 error_message=str(exc),
             )
         status = "success" if result.is_success else "failed"
-        self._record_step_metrics(
+        _record_step_metrics(
+            metrics=self.metrics,
             workflow_name=workflow_name,
             step_kind=_STEP_KIND_PIPELINE,
             status=status,
@@ -289,92 +332,124 @@ class WorkflowRunnerService:
         )
         return _step_result_from_transform_result(result)
 
-    def _build_skipped_step_result(
-        self,
-        *,
-        workflow_name: str,
-        step: WorkflowStepConfig | TransformStepConfig,
-        failed_step_id: str,
-        context_labels: Mapping[str, str],
-    ) -> WorkflowStepExecutionResult:
-        step_kind = (
-            _STEP_KIND_PIPELINE if isinstance(step, WorkflowStepConfig) else "transform"
-        )
-        self._record_step_metrics(
-            workflow_name=workflow_name,
-            step_kind=step_kind,
-            status="skipped",
-            duration_seconds=0.0,
-            context_labels=context_labels,
-        )
-        return WorkflowStepExecutionResult(
-            step_id=step.step_id,
-            step_kind=step_kind,
-            status="skipped",
-            error_type="UpstreamStepFailed",
-            error_message=(
-                f"Skipped because upstream step '{failed_step_id}' failed before "
-                "this step could execute."
-            ),
-        )
 
-    def _build_resume_skipped_step_result(
-        self,
-        *,
-        workflow_name: str,
-        step: WorkflowStepConfig | TransformStepConfig,
-        context_labels: Mapping[str, str],
-    ) -> WorkflowStepExecutionResult:
-        step_kind = (
-            _STEP_KIND_PIPELINE if isinstance(step, WorkflowStepConfig) else "transform"
-        )
-        self._record_step_metrics(
-            workflow_name=workflow_name,
-            step_kind=step_kind,
-            status="skipped",
-            duration_seconds=0.0,
-            context_labels=context_labels,
-        )
-        return WorkflowStepExecutionResult(
-            step_id=step.step_id,
-            step_kind=step_kind,
-            status="skipped",
-            error_type="AlreadyCompletedOnResume",
-            error_message=(
-                "Skipped because this step completed successfully in the last "
-                "persisted workflow execution state."
-            ),
-        )
+def _record_workflow_run_metrics(
+    *,
+    metrics: MetricsPort,
+    workflow_name: str,
+    status: str,
+    context_labels: Mapping[str, str],
+) -> None:
+    """Record terminal workflow status metrics."""
+    metrics.set_gauge(
+        _WORKFLOW_CURRENT_STATUS,
+        _workflow_status_to_gauge_value(status),
+        {
+            "workflow": workflow_name,
+            **context_labels,
+        },
+    )
+    metrics.increment_counter(
+        _WORKFLOW_RUNS_TOTAL,
+        1,
+        {
+            "workflow": workflow_name,
+            "status": status,
+            **context_labels,
+        },
+    )
 
-    def _record_step_metrics(
-        self,
-        *,
-        workflow_name: str,
-        step_kind: str,
-        status: str,
-        duration_seconds: float,
-        context_labels: Mapping[str, str],
-    ) -> None:
-        self.metrics.increment_counter(
-            _WORKFLOW_STEP_EVENTS_TOTAL,
-            1,
-            {
-                "workflow": workflow_name,
-                "step_kind": step_kind,
-                "status": status,
-                **context_labels,
-            },
-        )
-        self.metrics.observe_histogram(
-            _WORKFLOW_STEP_DURATION_SECONDS,
-            max(duration_seconds, 0.0),
-            {
-                "workflow": workflow_name,
-                "step_kind": step_kind,
-                "status": status,
-                **context_labels,
-            },
-        )
+
+def _build_skipped_step_result(
+    *,
+    metrics: MetricsPort,
+    workflow_name: str,
+    step: WorkflowStepConfig | TransformStepConfig,
+    failed_step_id: str,
+    context_labels: Mapping[str, str],
+) -> WorkflowStepExecutionResult:
+    step_kind = _step_kind_for_config(step)
+    _record_step_metrics(
+        metrics=metrics,
+        workflow_name=workflow_name,
+        step_kind=step_kind,
+        status="skipped",
+        duration_seconds=0.0,
+        context_labels=context_labels,
+    )
+    return WorkflowStepExecutionResult(
+        step_id=step.step_id,
+        step_kind=step_kind,
+        status="skipped",
+        error_type="UpstreamStepFailed",
+        error_message=(
+            f"Skipped because upstream step '{failed_step_id}' failed before "
+            "this step could execute."
+        ),
+    )
+
+
+def _build_resume_skipped_step_result(
+    *,
+    metrics: MetricsPort,
+    workflow_name: str,
+    step: WorkflowStepConfig | TransformStepConfig,
+    context_labels: Mapping[str, str],
+) -> WorkflowStepExecutionResult:
+    step_kind = _step_kind_for_config(step)
+    _record_step_metrics(
+        metrics=metrics,
+        workflow_name=workflow_name,
+        step_kind=step_kind,
+        status="skipped",
+        duration_seconds=0.0,
+        context_labels=context_labels,
+    )
+    return WorkflowStepExecutionResult(
+        step_id=step.step_id,
+        step_kind=step_kind,
+        status="skipped",
+        error_type="AlreadyCompletedOnResume",
+        error_message=(
+            "Skipped because this step completed successfully in the last "
+            "persisted workflow execution state."
+        ),
+    )
+
+
+def _step_kind_for_config(step: WorkflowStepConfig | TransformStepConfig) -> str:
+    return _STEP_KIND_PIPELINE if isinstance(step, WorkflowStepConfig) else "transform"
+
+
+def _record_step_metrics(
+    *,
+    metrics: MetricsPort,
+    workflow_name: str,
+    step_kind: str,
+    status: str,
+    duration_seconds: float,
+    context_labels: Mapping[str, str],
+) -> None:
+    metrics.increment_counter(
+        _WORKFLOW_STEP_EVENTS_TOTAL,
+        1,
+        {
+            "workflow": workflow_name,
+            "step_kind": step_kind,
+            "status": status,
+            **context_labels,
+        },
+    )
+    metrics.observe_histogram(
+        _WORKFLOW_STEP_DURATION_SECONDS,
+        max(duration_seconds, 0.0),
+        {
+            "workflow": workflow_name,
+            "step_kind": step_kind,
+            "status": status,
+            **context_labels,
+        },
+    )
 
 
 def _step_result_from_transform_result(
@@ -392,6 +467,23 @@ def _step_result_from_transform_result(
 
 def _run_options_from_config(config: WorkflowRunOptionsConfig) -> RunOptions:
     return RunOptions(**config.to_mapping())
+
+
+def _workflow_result_from_state(
+    workflow_name: str,
+    state: _WorkflowExecutionState,
+) -> WorkflowRunExecutionResult:
+    failed_step = next(
+        (step for step in state.step_results if step.status == "failed"),
+        None,
+    )
+    return WorkflowRunExecutionResult(
+        workflow_name=workflow_name,
+        status=state.status,
+        steps=tuple(state.step_results),
+        error_type=None if failed_step is None else failed_step.error_type,
+        error_message=None if failed_step is None else failed_step.error_message,
+    )
 
 
 def _workflow_status_to_gauge_value(status: str) -> float:

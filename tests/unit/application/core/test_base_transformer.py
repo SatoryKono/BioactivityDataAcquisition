@@ -389,7 +389,7 @@ class TestTemplateMethodPattern:
         assert structural_policy.calls == [{"id": "123", "value": "test"}]
 
     @pytest.mark.asyncio
-    async def test_transform_records_shadow_comparison_for_semantic_reject(
+    async def test_transform_records_shadow_comparison_for_silver_filter_reject(
         self, mock_context: PipelineContext
     ) -> None:
         metrics = MagicMock()
@@ -418,7 +418,7 @@ class TestTemplateMethodPattern:
             labels={
                 "provider": "test",
                 "entity_type": "unknown",
-                "comparison": "structural_pass_semantic_reject",
+                "comparison": "structural_pass_silver_filter_reject",
             },
         )
 

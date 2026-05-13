@@ -60,7 +60,6 @@ fixtures:
         owner: "data-platform"
         last_refresh: "2026-05-11"
         validation_status: valid
-    edge_fixtures:
       - fixture_kind: tracked_edge_case_sample
         fixture_path: tests/fixtures/bronze/chembl/cell_line/sample_edge_ontology_namespaces_2026-05-11.jsonl
         records: 2
@@ -173,7 +172,6 @@ fixtures:
         owner: "data-platform"
         last_refresh: "2026-05-11"
         validation_status: valid
-    edge_fixtures:
       - fixture_kind: tracked_edge_case_sample
         fixture_path: tests/fixtures/bronze/chembl/tissue/sample_edge_ontology_namespaces_2026-05-11.jsonl
         records: 2

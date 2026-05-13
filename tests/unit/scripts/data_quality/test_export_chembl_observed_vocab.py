@@ -19,6 +19,8 @@ def test_build_inventory_payload_scans_all_tracked_chembl_pipelines() -> None:
 
     assert payload["source"] == "tracked_chembl_bronze_fixtures"
     assert len(payload["pipelines_scanned"]) == 14
+    assert payload["governed_fields_count"] > 0
+    assert payload["governed_fields_with_observations_count"] > 0
     assert payload["rows_count"] > 0
 
 
@@ -52,6 +54,7 @@ def test_main_writes_and_check_validates_outputs(tmp_path: Path) -> None:
 
     payload = json.loads(json_out.read_text(encoding="utf-8"))
     assert payload["rows_count"] > 0
+    assert payload["governed_fields_count"] > 0
     assert "classification_hint" in csv_out.read_text(encoding="utf-8")
 
     assert (

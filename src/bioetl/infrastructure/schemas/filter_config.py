@@ -22,7 +22,7 @@ Usage:
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from bioetl.domain.filtering import (
     GoldFilterConfig,
@@ -68,10 +68,12 @@ class InputFilterFileConfig(BaseInputFilterConfig):
 
 
 class SilverFiltersFileConfig(BaseGoldFiltersConfig):
-    """Silver filter configuration for domain-level quality gates.
+    """Silver filter configuration for structural Silver quality gates.
 
     Applied AFTER transformation but BEFORE writing to Silver layer.
-    Reuses the same filter engine as GoldFiltersFileConfig.
+    Semantic Gold-style keys are accepted at the schema boundary only for
+    migration compatibility and are promoted to ``gold_filters`` by
+    ``FilterConfigFile`` before domain conversion.
 
     Attributes:
         columns: Column value filters with operator support.
@@ -83,12 +85,16 @@ class SilverFiltersFileConfig(BaseGoldFiltersConfig):
     """
 
     def to_domain(self) -> SilverFilterConfig:  # type: ignore[override]
-        """Convert to domain SilverFilterConfig dataclass.
+        """Convert to a structural-only domain SilverFilterConfig dataclass.
 
         Returns:
             SilverFilterConfig: Immutable domain filter configuration.
         """
-        return SilverFilterConfig.from_base(super().to_domain())
+        from bioetl.infrastructure.config.silver_filter_migration import (
+            build_silver_filter_config_for_compatibility,
+        )
+
+        return build_silver_filter_config_for_compatibility(super().to_domain())
 
 
 class GoldFiltersFileConfig(BaseGoldFiltersConfig):
@@ -162,6 +168,18 @@ class FilterConfigFile(BaseModel):
         default_factory=dict,
         description="Server-side API query parameters for Bronze extraction (ADR-028 §3)",
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def promote_semantic_silver_filters(cls, data: object) -> object:
+        """Normalize legacy semantic Silver rules before field validation."""
+        if not isinstance(data, dict):
+            return data
+        from bioetl.infrastructure.config.silver_filter_migration import (
+            normalize_silver_gold_filter_payload,
+        )
+
+        return normalize_silver_gold_filter_payload(data)
 
     @field_validator("extraction_params")
     @classmethod

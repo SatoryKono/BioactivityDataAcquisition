@@ -9,6 +9,19 @@
       },
       "pipeline": "chembl_assay"
     },
+    "chembl/cell_line:sample_edge_ontology_ids_2026-05-11.jsonl": {
+      "fields": {
+        "clo_id": [
+          "CLO_0003685",
+          "clo:0003684"
+        ],
+        "efo_id": [
+          "EFO_0001188",
+          "efo:0001187"
+        ]
+      },
+      "pipeline": "chembl_cell_line"
+    },
     "chembl/cell_line:sample_edge_ontology_namespaces_2026-05-11.jsonl": {
       "fields": {
         "clo_id": [
@@ -21,6 +34,23 @@
         ]
       },
       "pipeline": "chembl_cell_line"
+    },
+    "chembl/tissue:sample_edge_ontology_ids_2026-05-11.jsonl": {
+      "fields": {
+        "bto_id": [
+          "BTO_0000147",
+          "bto:0000142"
+        ],
+        "efo_id": [
+          "EFO_0000500",
+          "efo:0000400"
+        ],
+        "uberon_id": [
+          "UBERON_0002113",
+          "uberon:0002107"
+        ]
+      },
+      "pipeline": "chembl_tissue"
     },
     "chembl/tissue:sample_edge_ontology_namespaces_2026-05-11.jsonl": {
       "fields": {

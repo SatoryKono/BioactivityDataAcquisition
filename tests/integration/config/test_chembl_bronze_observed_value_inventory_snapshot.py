@@ -53,23 +53,23 @@ def _build_inventory_snapshot() -> dict[str, object]:
         assert isinstance(edge_fixtures, list) and edge_fixtures, (
             f"Missing tracked edge fixture for {fixture_key}"
         )
-        edge_fixture = edge_fixtures[0]
-        assert isinstance(edge_fixture, dict)
-        fixture_path = ROOT / str(edge_fixture["fixture_path"])
-        rows = _iter_edge_fixture_rows(fixture_path)
-        fixtures[f"{fixture_key}:{fixture_path.name}"] = {
-            "pipeline": f"chembl_{fixture_key.split('/', maxsplit=1)[1]}",
-            "fields": {
-                field_name: sorted(
-                    {
-                        str(row[field_name])
-                        for row in rows
-                        if row.get(field_name) not in (None, "")
-                    }
-                )
-                for field_name in field_names
-            },
-        }
+        for edge_fixture in edge_fixtures:
+            assert isinstance(edge_fixture, dict)
+            fixture_path = ROOT / str(edge_fixture["fixture_path"])
+            rows = _iter_edge_fixture_rows(fixture_path)
+            fixtures[f"{fixture_key}:{fixture_path.name}"] = {
+                "pipeline": f"chembl_{fixture_key.split('/', maxsplit=1)[1]}",
+                "fields": {
+                    field_name: sorted(
+                        {
+                            str(row[field_name])
+                            for row in rows
+                            if row.get(field_name) not in (None, "")
+                        }
+                    )
+                    for field_name in field_names
+                },
+            }
 
     return {"version": 1, "fixtures": fixtures}
 

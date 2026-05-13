@@ -130,6 +130,11 @@ def _registry_governed_field_expectations() -> dict[str, tuple[str, str]]:
             classification = "strict enum"
         elif family.family_name == "assay_confidence_descriptions":
             classification = "strict enum"
+        elif family.family_name in {
+            "publication_oa_statuses",
+            "target_organism_classes",
+        }:
+            classification = "strict enum"
         else:
             classification = "controlled vocabulary"
         for field_ref in family.fields:

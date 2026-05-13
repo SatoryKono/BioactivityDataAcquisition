@@ -54,6 +54,35 @@ def test_yaml_config_to_domain_default_mode():
     assert domain_config.table.silver_write_mode is SilverWriteMode.MERGE
 
 
+def test_pipeline_yaml_config_promotes_semantic_silver_filters_to_gold() -> None:
+    """Unified schema should normalize Silver semantic filters before domain mapping."""
+    yaml_config = PipelineYamlConfig.model_validate(
+        {
+            "pipeline_name": "test_pipeline",
+            "provider": "test",
+            "entity_type": "entity",
+            "business_primary_keys": ["id"],
+            "silver_table": "silver.test",
+            "silver_filters": {
+                "required_fields": ["id"],
+                "columns": {"status": ["active"]},
+            },
+            "gold_filters": {
+                "columns": {"tier": ["gold"]},
+            },
+        }
+    )
+
+    domain_config = yaml_config_to_domain(yaml_config)
+
+    assert domain_config.silver_filters.required_fields == ("id",)
+    assert domain_config.silver_filters.column_filters == ()
+    assert {rule.column for rule in domain_config.gold_filters.column_filters} == {
+        "status",
+        "tier",
+    }
+
+
 def test_pipeline_yaml_config_accepts_field_policy() -> None:
     """field_policy key must parse explicit field-level overrides."""
     yaml_config = PipelineYamlConfig(

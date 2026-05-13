@@ -164,13 +164,12 @@ class PublicationTransformer(BaseChemblTransformer):
         # Preserve provider-native type surfaces here; domain normalization owns
         # canonical publication taxonomy mapping and derived classifications.
         data["publication_type_raw"] = raw_publication_type_value
-        data["publication_type"] = raw_publication_type_value
-        # Seed derived classification fields with the same raw token so the
-        # domain profile can derive canonical taxonomy fields on its own
-        # record-aware path without application-layer semantic mapping.
-        data["publication_type_unified"] = raw_publication_type_value
-        data["publication_subclass"] = raw_publication_type_value
-        data["publication_class"] = raw_publication_type_value
+        data["publication_type"] = None
+        # Shared domain normalization derives the canonical taxonomy fields
+        # record-aware from publication_type_raw.
+        data["publication_type_unified"] = None
+        data["publication_subclass"] = None
+        data["publication_class"] = None
         data["publication_pmid"] = data.get("publication_pmid") or PMID(
             record.get("pmid")
         )

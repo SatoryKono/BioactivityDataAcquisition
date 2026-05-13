@@ -62,8 +62,10 @@ audit-relevant provider detail.
 Current high-signal examples:
 
 - `publication_type_raw` vs `publication_type`
+- `oa_status` as a source-governed strict enum in `chembl_publication`
 - `subcellular_fraction_raw` vs `subcellular_fraction`
 - raw unit alias field `units` vs strict `standard_units`
+- `organism` / `taxonomy_id` vs derived strict-enum `organism_class`
 - ontology identifier + companion bundle fields such as
   `efo_id` / `efo_iri` / `efo_mapping_status` / `efo_ontology_version`
 

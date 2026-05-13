@@ -45,6 +45,9 @@ def test_execution_identity_fingerprint_is_deterministic_for_equivalent_payloads
         "git_commit": payload["git_commit"],
         "run_type": payload["run_type"],
         "pipeline_name": payload["pipeline_name"],
+        "silver_filter_compatibility_mode": (
+            payload["silver_filter_compatibility_mode"]
+        ),
     }
 
     assert compute_execution_identity_fingerprint(
@@ -59,6 +62,16 @@ def test_execution_identity_fingerprint_matches_golden_value() -> None:
         compute_execution_identity_fingerprint(payload)
         == "ac852d4296c8862ab1e6a8f082c9a0be63223176b597efd7ab7a1f548bb78879"
     )
+
+
+def test_execution_identity_fingerprint_changes_when_silver_mode_changes() -> None:
+    payload = _build_payload()
+    changed = dict(payload)
+    changed["silver_filter_compatibility_mode"] = "legacy_semantic_silver"
+
+    assert compute_execution_identity_fingerprint(
+        payload
+    ) != compute_execution_identity_fingerprint(changed)
 
 
 def test_runtime_anchor_fingerprint_is_deterministic_for_equivalent_payloads() -> None:

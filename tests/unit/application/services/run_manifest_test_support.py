@@ -230,6 +230,12 @@ def expected_canonical_execution_identity(
         ),
         exact_replay=requested_exact_replay,
         input_snapshot_fingerprint=snapshot_fingerprint,
+        silver_filter_compatibility_mode=str(
+            manifest.runtime_config.get(
+                "silver_filter_compatibility_mode",
+                "structural_only_auto_promote",
+            )
+        ),
     )
     return {
         "execution_fingerprint": manifest.execution_fingerprint,

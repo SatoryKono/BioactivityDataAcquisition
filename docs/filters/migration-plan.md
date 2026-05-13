@@ -4,7 +4,7 @@ Version: 0.1.0
 Status: Draft
 Class: working-document
 Owner: BioETL Team
-Last updated: '2026-05-12'
+Last updated: '2026-05-13'
 
 ______________________________________________________________________
 
@@ -13,8 +13,8 @@ ______________________________________________________________________
 ## Краткое содержание
 
 **Цель:** Сузить scope `silver_filters` до структурной целостности (`required_fields`,
-`exclude_if_present`); все semantic-правила (`columns`, `ranges`, `list_length_filters`,
-`list_contains_filters`) консолидировать в `gold_filters`.
+`exclude_if_present`); все semantic-правила (`columns`, `ranges`, `list_lengths`,
+`list_contains`) консолидировать в `gold_filters`.
 
 **Связанные документы:**
 
@@ -37,7 +37,7 @@ ______________________________________________________________________
 ```text
 silver_filters: { required_fields, exclude_if_present }       <- structural integrity
 gold_filters:   { required_fields, columns, ranges,           <- business filters
-                  list_length_filters, list_contains_filters,
+                  list_lengths, list_contains,
                   exclude_if_present }
 ```
 
@@ -72,10 +72,10 @@ gold_filters:   { required_fields, columns, ranges,           <- business filter
 
 - Для каждого entity вычислить per-rule план миграции:
   - **Keep in silver** — `required_fields`, `exclude_if_present`
-  - **Move to gold** — `columns`, `ranges`, `list_length_filters`, `list_contains_filters`
+  - **Move to gold** — `columns`, `ranges`, `list_lengths`, `list_contains`
   - **Detect duplicates** — правила, уже совпадающие с `gold_filters` (объединить, не дублировать)
   - **Detect conflicts** — semantic mismatch
-- Output: `docs/filters/inventory-baseline.{csv,md}`
+- Output: `docs/filters/inventory-baseline.{csv,json,md}`
 
 #### 0.3. Baseline measurements
 
@@ -86,22 +86,26 @@ gold_filters:   { required_fields, columns, ranges,           <- business filter
 - Top reject reasons для каждого entity
 - Performance Silver writes (Delta version, write duration)
 
-### Фаза 1: Domain layer
+### Фаза 1: Runtime identity + domain compatibility
 
 #### 1.1. SilverFilterConfig
 
 `src/bioetl/domain/filtering/silver_config.py`:
 
-Минимально инвазивный путь: оставить `SilverFilterConfig: BaseFilterConfig`, но добавить
-validation:
+Минимально инвазивный путь: оставить `SilverFilterConfig: BaseFilterConfig` без
+domain-level warnings. Сужение Silver до structural происходит при конвертации
+infrastructure schema → domain config. Это сохраняет чистоту domain слоя и не
+тащит migration/runtime concerns в `bioetl.domain`.
 
-- если `column_filters`, `range_filters`, `list_*_filters` not empty → DeprecationWarning
-- semantic правила автоматически "поднимаются" в gold_filters в loader
+#### 1.2. RuntimeConfig / execution identity
 
-#### 1.2. PipelineDomainConfig
+Добавить явный режим `silver_filter_compatibility_mode`:
 
-`src/bioetl/domain/config/pipeline.py` — поле `silver_filters: SilverFilterConfig | None`
-остаётся.
+- `structural_only_auto_promote` — default, semantic Silver rules поднимаются в Gold
+- `legacy_semantic_silver` — rollback mode для старого поведения
+
+Режим должен попадать в effective config, run manifest, execution fingerprint и
+checkpoint compatibility payload, иначе rollback/replay не будет воспроизводимым.
 
 ### Фаза 2: Infrastructure layer
 
@@ -113,23 +117,26 @@ validation:
 class SilverFiltersFileConfig(BaseModel):
     required_fields: list[str] = Field(default_factory=list)
     exclude_if_present: list[str] = Field(default_factory=list)
-    # Legacy semantic fields - emit DeprecationWarning, auto-promote to gold
+    # Legacy semantic fields are accepted only for boundary compatibility.
     columns: dict[str, list] | None = Field(default=None, deprecated=True)
     ranges: dict[str, dict] | None = Field(default=None, deprecated=True)
     list_lengths: dict[str, dict] | None = Field(default=None, deprecated=True)
     list_contains: dict[str, dict] | None = Field(default=None, deprecated=True)
 ```
 
-`to_domain()`: возвращает `SilverFilterConfig` только с structural полями; semantic поля
-возвращаются как side-channel для loader.
+`to_domain()`: в default mode возвращает `SilverFilterConfig` только с structural
+полями; в `BIOETL_LEGACY_SILVER_SEMANTIC=1` возвращает полный legacy
+`SilverFilterConfig`.
 
 #### 2.2. Filter config loader
 
 `src/bioetl/infrastructure/config/filter_config_loader.py`:
 
-- В `load()` после merge: auto-promotion semantic полей silver → gold
-- Логирование `silver_semantic_filter_auto_promoted` event с deprecation warning
-- Метрика `bioetl_silver_filter_auto_promotions_total`
+- В `load()` и `load_as_dict()` после merge: auto-promotion semantic полей
+  `silver_filters` → `gold_filters`
+- При конфликте gold выигрывает: существующее gold-правило не перезаписывается.
+- Cache key включает resolved compatibility mode, чтобы rollback env не
+  использовал stale normalized config.
 
 #### 2.3. Pipeline config schema
 
@@ -138,20 +145,28 @@ class SilverFiltersFileConfig(BaseModel):
 
 #### 2.4. CI invariants
 
-`src/bioetl/infrastructure/config/config_ci_contract.py`:
+`tests/architecture/test_silver_filter_boundary_inventory.py`:
 
-- Invariant: `silver_filters` MUST NOT contain `columns`/`ranges`/`list_*`
-  (warning на этапе deprecation, error после rollout)
+- Committed `docs/filters/inventory-baseline.{csv,json,md}` MUST match
+  `scripts/data_quality/inventory_silver_filters_migration.py`.
+- Safe-first-wave candidates MUST remain explicitly justified when empty.
+- После YAML rewrite window добавить отдельный hard-fail invariant:
+  `silver_filters` MUST NOT contain `columns`/`ranges`/`list_lengths`/`list_contains`.
 
-### Фаза 3: Application layer
+### Фаза 3: Application / checkpoint / control-plane identity
 
-Большинство изменений — **изменений в коде нет** (только сужение типа конфига):
+Нужны точечные изменения, потому что runtime mode влияет на reproducibility:
 
-- `apply_silver_filter()` — без изменений
-- `_collect_silver_required_fields()` — без изменений
-- `evaluate_semantic_shadow_decision()` — семантика метрики сужается
-- 8 transformer файлов — без изменений
-- pre_silver path — без изменений
+- `apply_silver_filter()` — оставить поведение, но считать default Silver
+  structural-only после schema conversion.
+- `_collect_silver_required_fields()` — без изменений.
+- Shadow-comparison labels сменить с semantic на structural/silver-filter
+  labels.
+- Run manifest canonical execution identity должен включать
+  `silver_filter_compatibility_mode`.
+- Checkpoint metadata/fallback identity должен включать
+  `silver_filter_compatibility_mode`, иначе strict resume не увидит rollback
+  drift.
 
 ### Фаза 4: Configs migration
 
@@ -207,13 +222,15 @@ Per-entity ревью с владельцем provider/entity.
 
 | File | Изменение |
 | ---- | --------- |
-| `tests/architecture/test_silver_filter_boundary_inventory.py` | Add assertion: `silver_filters` MUST NOT contain semantic rules |
-| `tests/unit/infrastructure/config/test_filter_config_loader.py` | Add auto-promotion tests, deprecation warning tests |
+| `tests/architecture/test_silver_filter_boundary_inventory.py` | Add committed baseline drift check and later harden semantic Silver ban |
+| `tests/unit/infrastructure/config/test_filter_config_loader.py` | Add auto-promotion and legacy rollback tests |
 | `tests/unit/infrastructure/schemas/test_filter_config.py` | Update SilverFiltersFileConfig scope |
+| `tests/unit/infrastructure/test_config.py` | Verify inline pipeline config auto-promotion |
+| `tests/unit/domain/normalization/test_fingerprints.py` | Verify silver mode changes execution fingerprint |
 | `tests/unit/application/core/test_optionality.py` | No change (still uses silver_required_fields) |
 | `tests/integration/test_grafana_silver_reject_config.py` | Update dashboard descriptions |
 | `tests/integration/test_prometheus_rules_config.py` | Update annotations |
-| `tests/integration/test_silver_to_gold_migration_parity.py` (NEW) | Pre/post parity для каждого entity |
+| `tests/integration/test_silver_to_gold_migration_parity.py` (planned) | Pre/post parity для каждого entity |
 
 ### Фаза 7: Documentation
 
@@ -231,8 +248,9 @@ Per-entity ревью с владельцем provider/entity.
 
 #### Phased rollout
 
-1. **PR 1** — Domain + Infrastructure changes (auto-promotion, deprecation warnings)
-1. **PR 2** — Inventory script + baseline measurement
+1. **PR 1** — Runtime identity + Infrastructure compatibility changes
+   (auto-promotion, structural-only Silver domain conversion, rollback mode)
+1. **PR 2** — Inventory baseline enforcement + representative baseline measurement
 1. **PRs 3-N** — Configs migration (per-provider, smaller PRs)
 1. **PR N+1** — Tests + documentation
 1. **PR N+2** — Observability rename/relabel
@@ -240,7 +258,8 @@ Per-entity ревью с владельцем provider/entity.
 
 #### Feature flag
 
-`BIOETL_LEGACY_SILVER_SEMANTIC=1` — отключает auto-promotion (emergency rollback).
+`BIOETL_LEGACY_SILVER_SEMANTIC=1` — отключает auto-promotion (emergency
+rollback) and records `legacy_semantic_silver` in runtime identity artifacts.
 
 #### Rollback triggers
 

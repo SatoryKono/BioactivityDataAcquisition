@@ -32,6 +32,5 @@ mkdocs.yml
 package-lock.json
 package.json
 pyproject.toml
-pytest.ini
 sonar-project.properties
 uv.lock

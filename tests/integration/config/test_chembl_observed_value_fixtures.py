@@ -119,7 +119,17 @@ OBSERVED_VALUE_POLICIES: tuple[ObservedValuePolicy, ...] = (
     ObservedValuePolicy("molecule", "molecule_type", ("molecule", "types")),
     ObservedValuePolicy("molecule", "ro3_pass", ("molecule", "ro3_pass_values")),
     ObservedValuePolicy("molecule", "structure_type", ("molecule", "structure_types")),
+    ObservedValuePolicy(
+        "publication",
+        "oa_status",
+        ("publication", "oa_status_values"),
+    ),
     ObservedValuePolicy("target", "target_type", ("target", "types")),
+    ObservedValuePolicy(
+        "target",
+        "organism_class",
+        ("target", "organism_classes"),
+    ),
     ObservedValuePolicy(
         "target_component",
         "component_type",

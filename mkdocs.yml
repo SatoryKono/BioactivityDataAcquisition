@@ -247,6 +247,13 @@ nav:
                             -   "LLM": 03-guides/dashboards/dashboard-extension-llm.md
                     -   "Monitoring Index": 03-guides/dashboards/monitoring-index.md
                     -   "Variables Guide": 03-guides/dashboards/variables-guide.md
+                    -   "V3 Draft":
+                            -   "Overview": 03-guides/dashboards/v3.0/README.md
+                            -   "1. Overview": 03-guides/dashboards/v3.0/1-overview.md
+                            -   "Template Index": 03-guides/dashboards/v3.0/template/README.md
+                            -   "Execution-Aware Template": 03-guides/dashboards/v3.0/template/run-centric-dashboard-template.md
+                            -   "Selector Resolution": 03-guides/dashboards/v3.0/template/selector-resolution-contract.md
+                            -   "Panel Contract": 03-guides/dashboards/v3.0/template/panel-contract.md
             -   "File Path Audit Report": 03-guides/file-path-audit-report.md
     -   Engineering:
             -   "Overview": 05-engineering/README.md

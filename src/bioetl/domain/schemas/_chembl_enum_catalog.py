@@ -187,6 +187,9 @@ TARGET_COMPONENT_RELATIONSHIPS: frozenset[str] = frozenset(
     ]
 )
 TARGET_COMPONENT_TYPES: frozenset[str] = frozenset(["PROTEIN", "DNA", "RNA"])
+TARGET_ORGANISM_CLASSES: frozenset[str] = frozenset(
+    ["acellular", "unicellular", "multicellular"]
+)
 PUBLICATION_TYPES: frozenset[str] = frozenset(
     [
         "journal-article",
@@ -243,8 +246,10 @@ CHEMBL_ENUM_CATALOG: dict[tuple[str, str], frozenset[str]] = {
     ("assay_parameters", "standard_type"): ASSAY_PARAMETER_STANDARD_TYPES,
     ("assay_parameters", "standard_units"): ACTIVITY_STANDARD_UNITS,
     ("molecule", "ro3_pass"): RO3_PASS_VALUES,
+    ("publication", "oa_status"): frozenset(OA_STATUS_VALUES),
     ("target", "component_relationships"): TARGET_COMPONENT_RELATIONSHIPS,
     ("target", "component_types"): TARGET_COMPONENT_TYPES,
+    ("target", "organism_class"): TARGET_ORGANISM_CLASSES,
     ("subcellular_fraction", "subcellular_fraction"): SUBCELLULAR_FRACTIONS,
     ("target_component", "component_type"): TARGET_COMPONENT_TYPES,
 }
@@ -274,5 +279,6 @@ __all__ = [
     "SUBCELLULAR_FRACTIONS",
     "TARGET_COMPONENT_RELATIONSHIPS",
     "TARGET_COMPONENT_TYPES",
+    "TARGET_ORGANISM_CLASSES",
     "TARGET_TYPES",
 ]

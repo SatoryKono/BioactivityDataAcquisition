@@ -17,6 +17,7 @@ from memory.resources import (
 )
 from memory.validation import (
     _is_tracked_generated_memory_artifact,
+    _validate_note_placement,
     validate_memory_scaffold,
 )
 
@@ -213,3 +214,31 @@ def test_memory_scaffold_validation_can_flag_working_tree_python_cache(
         == "working-tree Python cache should not live under src/memory"
         for issue in issues
     )
+
+
+def test_validate_note_placement_does_not_resolve_paths(monkeypatch) -> None:
+    memory_root = Path("/tmp/memory-root")
+    note_path = memory_root / "curated" / "lessons" / "lesson.md"
+    issues = []
+
+    def _explode(self):  # pragma: no cover - regression guard
+        raise AssertionError("resolve() should not be called for note placement")
+
+    monkeypatch.setattr(Path, "resolve", _explode)
+
+    _validate_note_placement(
+        memory_root,
+        note_path,
+        "curated_note",
+        {
+            "rules": [
+                {
+                    "artifact_class": "curated_note",
+                    "target_dir": "src/memory/curated/lessons",
+                }
+            ]
+        },
+        issues,
+    )
+
+    assert issues == []

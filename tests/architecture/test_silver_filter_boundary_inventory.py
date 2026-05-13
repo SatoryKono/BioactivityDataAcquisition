@@ -10,6 +10,16 @@ import yaml
 from bioetl.infrastructure.observability.prometheus_metric_registries import (
     REGISTERED_PROMETHEUS_METRIC_NAMES,
 )
+from scripts.data_quality.inventory_silver_filters_migration import (
+    CSV_OUT,
+    JSON_OUT,
+    MD_OUT,
+    build_entity_plan,
+    discover_entity_configs,
+    write_csv,
+    write_json,
+    write_markdown,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_PATH = ROOT / "configs" / "quality" / "silver_filter_boundary_inventory.yaml"
@@ -307,3 +317,35 @@ def test_shadow_candidate_rules_match_business_only_inventory() -> None:
                 )
 
     assert not violations, "\n".join(violations)
+
+
+def test_inventory_baseline_outputs_match_generator(tmp_path: Path) -> None:
+    """Keep committed ADR-048 inventory artifacts tied to the scanner output."""
+    plans = [
+        build_entity_plan(provider, entity, path)
+        for provider, entity, path in discover_entity_configs()
+    ]
+
+    generated_csv = tmp_path / CSV_OUT.name
+    generated_json = tmp_path / JSON_OUT.name
+    generated_md = tmp_path / MD_OUT.name
+    write_csv(plans, generated_csv)
+    write_json(plans, generated_json)
+    write_markdown(plans, generated_md)
+
+    mismatches: list[str] = []
+    for expected_path, actual_path in (
+        (CSV_OUT, generated_csv),
+        (JSON_OUT, generated_json),
+        (MD_OUT, generated_md),
+    ):
+        if expected_path.read_text(encoding="utf-8") != actual_path.read_text(
+            encoding="utf-8"
+        ):
+            mismatches.append(str(expected_path.relative_to(ROOT)))
+
+    assert not mismatches, (
+        "ADR-048 inventory baseline drifted from generator output. "
+        "Run: python scripts/data_quality/inventory_silver_filters_migration.py\n"
+        + "\n".join(mismatches)
+    )

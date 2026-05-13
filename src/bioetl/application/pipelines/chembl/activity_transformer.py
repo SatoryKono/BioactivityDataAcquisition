@@ -25,20 +25,12 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import Bioactivity
-from bioetl.domain.normalization.chembl import (
-    normalize_qudt_unit,
-    normalize_standard_unit,
-    normalize_uo_identifier,
-    resolve_activity_ontology_companion_fields,
-)
 from bioetl.domain.transformations import safe_float
 from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects.taxonomy_id import validate_taxonomy_id
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId
-
-OptionalString = str | None
 
 
 # Mapping for ligand efficiency fields extraction (nested dict)
@@ -295,40 +287,4 @@ class ActivityTransformer(BaseChemblTransformer):
         business_data["publication_id"] = business_data.get(
             "publication_id"
         ) or record.get("publication_id")
-        business_data["uo_units"] = normalize_uo_identifier(
-            cast(OptionalString, business_data.get("uo_units"))
-        )
-        business_data["standard_units"] = normalize_standard_unit(
-            cast(OptionalString, business_data.get("standard_units"))
-        )
-        business_data["qudt_units"] = normalize_qudt_unit(
-            cast(OptionalString, business_data.get("qudt_units"))
-        )
-        ontology_companions = resolve_activity_ontology_companion_fields(
-            bao_endpoint=cast(OptionalString, business_data.get("bao_endpoint")),
-            bao_format=cast(OptionalString, business_data.get("bao_format")),
-            uo_units=cast(OptionalString, business_data.get("uo_units")),
-            qudt_units=cast(OptionalString, business_data.get("qudt_units")),
-        )
-        business_data.update(
-            {
-                "bao_endpoint_iri": ontology_companions.bao_endpoint_iri,
-                "bao_endpoint_mapping_status": (
-                    ontology_companions.bao_endpoint_mapping_status
-                ),
-                "bao_format_iri": ontology_companions.bao_format_iri,
-                "bao_format_mapping_status": (
-                    ontology_companions.bao_format_mapping_status
-                ),
-                "bao_ontology_version": ontology_companions.bao_ontology_version,
-                "uo_unit_iri": ontology_companions.uo_unit_iri,
-                "uo_unit_mapping_status": ontology_companions.uo_unit_mapping_status,
-                "uo_ontology_version": ontology_companions.uo_ontology_version,
-                "qudt_unit_iri": ontology_companions.qudt_unit_iri,
-                "qudt_unit_mapping_status": (
-                    ontology_companions.qudt_unit_mapping_status
-                ),
-                "qudt_ontology_version": ontology_companions.qudt_ontology_version,
-            }
-        )
         return business_data

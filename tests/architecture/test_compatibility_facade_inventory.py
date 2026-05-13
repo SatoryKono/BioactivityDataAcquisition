@@ -388,6 +388,31 @@ def test_deprecated_module_alias_surfaces_remain_in_transition_debt() -> None:
 
 
 @pytest.mark.architecture
+def test_retired_maintenance_domain_wrapper_modules_are_absent() -> None:
+    """Retired maintenance wrappers must not return as hidden compatibility facades."""
+    retired = (
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "maintenance"
+    )
+    retired_paths = [
+        retired / "archive.py",
+        retired / "cleanup.py",
+        retired / "vacuum.py",
+    ]
+
+    assert not [path for path in retired_paths if path.exists()], (
+        "Maintenance domain compatibility wrappers were retired; "
+        "lazy loading must target the public command modules directly."
+    )
+
+
+@pytest.mark.architecture
 def test_cli_sys_modules_alias_helper_is_retired() -> None:
     """CLI command wrappers must not rely on runtime `sys.modules` aliasing."""
     helper_path = (

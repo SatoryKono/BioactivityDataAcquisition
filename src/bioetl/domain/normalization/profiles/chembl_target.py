@@ -18,9 +18,10 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_chembl_organism_name,
     normalize_profile_target_component_relationships,
     normalize_profile_target_component_types,
+    normalize_profile_target_organism_class,
 )
 from bioetl.domain.schemas.chembl.target import TargetSchema
-from bioetl.domain.schemas.constants import TARGET_TYPES
+from bioetl.domain.schemas.constants import TARGET_ORGANISM_CLASSES, TARGET_TYPES
 
 from .chembl_json_ordering_policy import (
     chembl_json_fields,
@@ -59,6 +60,7 @@ _REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("target")
 # Enum fields for strict validation
 _ENUM_FIELDS = {
     "target_type": TARGET_TYPES,
+    "organism_class": TARGET_ORGANISM_CLASSES,
 }
 _SPECIAL_RULE_COMPONENTS = {
     **_REFERENCE_IDENTIFIER_RULES,
@@ -77,6 +79,12 @@ _SPECIAL_RULE_COMPONENTS = {
         "Normalize target component_relationships as a canonical JSON array "
         "with element-wise validation against the shared ChEMBL "
         "target-component relationship registry.",
+    ),
+    "organism_class": (
+        normalize_profile_target_organism_class,
+        "Derive organism_class as a strict enum from sibling organism and "
+        "taxonomy_id fields using the shared domain organism-classification "
+        "policy; preserve explicit canonical values when already provided.",
     ),
 }
 

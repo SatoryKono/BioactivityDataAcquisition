@@ -700,7 +700,7 @@ def _registered_controlled_vocabulary_source(
     entity: str,
     field_name: str,
 ) -> str | None:
-    if field_name == "oa_status":
+    if field_name == "oa_status" and provider != "chembl":
         return _OA_STATUS_SOURCE
     if entity == "publication" and _is_publication_taxonomy_field(field_name):
         return _PUBLICATION_TYPE_CLASSIFICATION_SOURCE

@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # Dashboard Extension Guide (LLM)
 
-Дата сверки: **2026-04-13**
+Дата сверки: **2026-05-13**
 Источник истины: `grafana/dashboards/*.json`
 
 Короткий playbook для LLM/AI-агента, который меняет или расширяет shipped
@@ -70,6 +70,8 @@ Grafana dashboards в BioETL.
 - Не меняй `uid` без явной migration reason.
 - Не invent metric names — используй только реально существующие метрики.
 - Не добавляй high-cardinality filters/labels в summary-panels без необходимости.
+- Для нового operator dashboard или first-screen redesign сохраняй contract:
+  `ONE BIG QUESTION`, current scope, provenance summary и `First action`.
 - Для cross-dashboard links не полагайся на blanket `includeVars=true`:
   передавай только target-scoped `var-*` параметры.
 - Не копируй Explorer-only forensic filters (`run_id`, `payload_hash`) в
@@ -133,6 +135,7 @@ query = { span."bioetl.provider" =~ "${provider:regex}" }
 - time range / refresh
 - operator role dashboard
 - drilldown behavior
+- first-screen scope / provenance / first-action semantics
 
 Проверь также:
 
@@ -171,6 +174,8 @@ uv run python -m pytest -q tests/integration/test_grafana_config.py
 - JSON валиден.
 - Dashboard obeys current shipped navigation model.
 - `No data` vs `0` выбрано сознательно, а не случайно.
+- First-screen preamble сохраняет один operator question и не теряет scope /
+  provenance / first-action semantics.
 - Contract tests проходят.
 - Docs синхронизированы в том же PR/change set.
 

@@ -452,10 +452,20 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
     )
 
     chembl_publication_oa_status = _row(rows, "chembl_publication", "oa_status")
-    assert chembl_publication_oa_status["normalizer"] == "normalize_profile_null"
-    assert chembl_publication_oa_status["strictness"] == "normalization_only"
+    assert chembl_publication_oa_status["normalizer"] == "normalize_profile_oa_status"
+    assert chembl_publication_oa_status["strictness"] == "strict_enum"
     assert chembl_publication_oa_status["controlled_vocabulary_source"] == (
-        "domain.schemas.common.publication_base.OA_STATUS_VALUES"
+        "configs/vocab/chembl_controlled.yaml"
+    )
+
+    chembl_target_organism_class = _row(rows, "chembl_target", "organism_class")
+    assert (
+        chembl_target_organism_class["normalizer"]
+        == "normalize_profile_target_organism_class"
+    )
+    assert chembl_target_organism_class["strictness"] == "strict_enum"
+    assert chembl_target_organism_class["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_controlled.yaml"
     )
 
     chembl_target_component_organism = _row(rows, "chembl_target_component", "organism")

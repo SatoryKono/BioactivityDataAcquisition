@@ -15,6 +15,9 @@ from pathlib import Path
 import pytest
 
 from bioetl.domain.filtering import SilverFilterConfig
+from bioetl.infrastructure.config.silver_filter_migration import (
+    LEGACY_SILVER_FILTER_ENV,
+)
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 
 
@@ -283,6 +286,100 @@ class TestFilterConfigLoaderMerge:
 
         assert "field_a" in gold_filters.required_fields
         assert "field_b" in gold_filters.required_fields
+
+    def test_semantic_silver_filters_are_promoted_to_gold(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        """Semantic Silver rules should be removed from Silver and added to Gold."""
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "pipeline.yaml").write_text(
+            """
+version: "1.0.0"
+filter_defaults:
+  gold_filters:
+    required_fields: []
+""",
+            encoding="utf-8",
+        )
+        entities = tmp_path / "entities" / "chembl"
+        entities.mkdir(parents=True)
+        (entities / "activity.yaml").write_text(
+            """
+version: "1.0.0"
+provider: chembl
+entity: activity
+filters:
+  silver_filters:
+    required_fields: [activity_id]
+    columns:
+      standard_type: [IC50]
+  gold_filters:
+    columns:
+      standard_units: [nM]
+""",
+            encoding="utf-8",
+        )
+
+        loader = FilterConfigLoader(tmp_path)
+        _, silver_filters, gold_filters, _ = loader.load("chembl", "activity")
+        merged = loader.load_as_dict("chembl", "activity")
+
+        assert silver_filters.required_fields == ("activity_id",)
+        assert silver_filters.column_filters == ()
+        assert {rule.column for rule in gold_filters.column_filters} == {
+            "standard_type",
+            "standard_units",
+        }
+        assert "columns" not in merged["silver_filters"]
+        assert set(merged["gold_filters"]["columns"]) == {
+            "standard_type",
+            "standard_units",
+        }
+
+    def test_legacy_env_preserves_semantic_silver_filters(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Legacy compatibility mode keeps semantic Silver rules materialized."""
+        monkeypatch.setenv(LEGACY_SILVER_FILTER_ENV, "1")
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "pipeline.yaml").write_text(
+            """
+version: "1.0.0"
+filter_defaults:
+  gold_filters:
+    required_fields: []
+""",
+            encoding="utf-8",
+        )
+        entities = tmp_path / "entities" / "chembl"
+        entities.mkdir(parents=True)
+        (entities / "activity.yaml").write_text(
+            """
+version: "1.0.0"
+provider: chembl
+entity: activity
+filters:
+  silver_filters:
+    columns:
+      standard_type: [IC50]
+""",
+            encoding="utf-8",
+        )
+
+        loader = FilterConfigLoader(tmp_path)
+        _, silver_filters, gold_filters, _ = loader.load("chembl", "activity")
+        merged = loader.load_as_dict("chembl", "activity")
+
+        assert [rule.column for rule in silver_filters.column_filters] == [
+            "standard_type"
+        ]
+        assert gold_filters.column_filters == ()
+        assert "columns" in merged["silver_filters"]
 
 
 class TestFilterConfigLoaderInlineOverrides:
@@ -777,18 +874,19 @@ gold_filters:
         )
 
         loader = FilterConfigLoader(tmp_path)
-        _, silver_filters, _, _ = loader.load("chembl", "assay")
+        _, silver_filters, gold_filters, _ = loader.load("chembl", "assay")
 
         assert isinstance(silver_filters, SilverFilterConfig)
-        # Column filters
-        columns = {cf.column for cf in silver_filters.column_filters}
+        # Semantic filters are promoted to Gold; Silver remains structural-only.
+        assert silver_filters.column_filters == ()
+        assert silver_filters.range_filters == ()
+        columns = {cf.column for cf in gold_filters.column_filters}
         assert "assay_type" in columns
         assert "relationship_type" in columns
-        # Range filter
-        assert len(silver_filters.range_filters) == 1
-        assert silver_filters.range_filters[0].column == "confidence_score"
-        assert silver_filters.range_filters[0].min_value == 8
-        assert silver_filters.range_filters[0].max_value == 9
+        assert len(gold_filters.range_filters) == 1
+        assert gold_filters.range_filters[0].column == "confidence_score"
+        assert gold_filters.range_filters[0].min_value == 8
+        assert gold_filters.range_filters[0].max_value == 9
         # Required fields
         assert "assay_id" in silver_filters.required_fields
         assert "target_chembl_id" in silver_filters.required_fields

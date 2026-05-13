@@ -13,6 +13,11 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_artifac
 from bioetl.application.services.control_plane._run_manifest_diagnostics_composite import (
     build_composite_dossier_projection,
 )
+from bioetl.application.services.control_plane._run_manifest_diagnostics_identity import (
+    build_canonical_execution_identity,
+    build_degraded_runtime_anchor,
+    build_degraded_runtime_anchor_payload,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_ledger import (
     _resolve_policy_value,
 )
@@ -28,10 +33,6 @@ from bioetl.application.services.control_plane.run_manifest_reproducibility_scor
     build_reproducibility_audit_scoring,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
-from bioetl.domain.normalization import (
-    build_execution_identity_payload,
-    compute_execution_identity_fingerprint,
-)
 
 
 @dataclass(frozen=True, slots=True)
@@ -107,67 +108,6 @@ def _build_exact_replay_anchors(
     return anchors
 
 
-def _build_canonical_execution_identity(
-    request: _FinalSummaryRequest,
-) -> dict[str, object]:
-    """Return the canonical execution identity payload for the summary graph."""
-    return cast(
-        dict[str, object],
-        build_execution_identity_payload(
-            pipeline_name=request.manifest.pipeline_name,
-            run_type=request.manifest.run_type.value,
-            pipeline_version=cast(
-                str | None, request.base_summary.get("pipeline_version")
-            ),
-            git_commit=cast(str | None, request.base_summary.get("git_commit")),
-            dependency_lock_hash=cast(
-                str | None, request.base_summary.get("dependency_lock_hash")
-            ),
-            effective_config_hash=cast(
-                str | None, request.base_summary.get("effective_config_hash")
-            ),
-            dq_contract_compatibility_hash=cast(
-                str | None,
-                request.base_summary.get("dq_contract_compatibility_hash"),
-            ),
-            contract_ref=cast(str | None, request.base_summary.get("contract_ref")),
-            contract_version=cast(
-                str | None, request.base_summary.get("contract_version")
-            ),
-            effective_config_artifact_id=cast(
-                str | None,
-                request.base_summary.get("effective_config_artifact_id"),
-            ),
-            exact_replay=cast(
-                bool | None, request.base_summary.get("requested_exact_replay")
-            ),
-            input_snapshot_fingerprint=cast(
-                str | None,
-                request.base_summary.get("input_snapshot_identity_fingerprint"),
-            ),
-        ),
-    )
-
-
-def _build_degraded_runtime_anchor_payload(
-    request: _FinalSummaryRequest,
-) -> dict[str, object]:
-    """Return the degraded runtime anchor payload used for fallback identity."""
-    return {
-        key: value
-        for key, value in {
-            "manifest_id": request.manifest.manifest_id,
-            "effective_config_hash": request.base_summary.get("effective_config_hash"),
-            "contract_ref": request.base_summary.get("contract_ref"),
-            "contract_version": request.base_summary.get("contract_version"),
-            "effective_config_artifact_id": request.base_summary.get(
-                "effective_config_artifact_id"
-            ),
-        }.items()
-        if value is not None
-    }
-
-
 def _add_identity_graph_optional_fields(
     identity_graph: dict[str, object],
     request: _FinalSummaryRequest,
@@ -213,20 +153,9 @@ def _add_identity_graph_optional_fields(
             identity_graph[field_name] = request.base_summary.get(field_name)
 
 
-def _build_identity_graph(
-    request: _FinalSummaryRequest,
-    *,
-    exact_replay_anchors: dict[str, object],
-    produced_artifact_trace: dict[str, object],
-) -> dict[str, object]:
-    """Assemble the operator-facing run identity graph for final summary."""
-    planned_artifacts = cast(
-        list[dict[str, object]],
-        request.base_summary.get("planned_artifacts", []),
-    )
-    canonical_execution_identity_payload = _build_canonical_execution_identity(request)
-    degraded_runtime_anchor_payload = _build_degraded_runtime_anchor_payload(request)
-    identity_graph = {
+def _identity_graph_core_fields(request: _FinalSummaryRequest) -> dict[str, object]:
+    """Return stable run/config identity fields for the summary graph."""
+    return {
         "run_id": str(request.manifest.run_id),
         "manifest_id": request.manifest.manifest_id,
         "execution_fingerprint": request.manifest.execution_fingerprint,
@@ -239,6 +168,12 @@ def _build_identity_graph(
         "code_provenance_state": request.base_summary.get("code_provenance_state"),
         "contract_ref": request.base_summary.get("contract_ref"),
         "contract_version": request.base_summary.get("contract_version"),
+    }
+
+
+def _identity_graph_replay_fields(request: _FinalSummaryRequest) -> dict[str, object]:
+    """Return replay policy and parentage fields for the summary graph."""
+    return {
         "replay_of_run_id": request.base_summary.get("replay_of_run_id"),
         "replay_of_manifest_id": request.base_summary.get("replay_of_manifest_id"),
         "replay_parentage": request.base_summary.get("replay_parentage"),
@@ -284,11 +219,6 @@ def _build_identity_graph(
             "historical_live_run_upgrade_state"
         ),
         "replay_occurrence_kind": request.base_summary.get("replay_occurrence_kind"),
-        "source_posture": request.base_summary.get("source_posture"),
-        "input_snapshot_missing_source_refs": request.base_summary.get(
-            "input_snapshot_missing_source_refs",
-            [],
-        ),
         "replay_capability_reason": request.base_summary.get(
             "replay_capability_reason"
         ),
@@ -296,6 +226,17 @@ def _build_identity_graph(
         "exact_replay_blockers": request.base_summary.get("exact_replay_blockers", []),
         "append_mode_semantic_sinks": request.base_summary.get(
             "append_mode_semantic_sinks",
+            [],
+        ),
+    }
+
+
+def _identity_graph_snapshot_fields(request: _FinalSummaryRequest) -> dict[str, object]:
+    """Return snapshot, resume, and lineage fields for the summary graph."""
+    return {
+        "source_posture": request.base_summary.get("source_posture"),
+        "input_snapshot_missing_source_refs": request.base_summary.get(
+            "input_snapshot_missing_source_refs",
             [],
         ),
         "resume_contract": request.base_summary.get("resume_contract"),
@@ -312,20 +253,40 @@ def _build_identity_graph(
         "input_snapshot_identity_fingerprint": request.base_summary.get(
             "input_snapshot_identity_fingerprint"
         ),
+    }
+
+
+def _build_identity_graph(
+    request: _FinalSummaryRequest,
+    *,
+    exact_replay_anchors: dict[str, object],
+    produced_artifact_trace: dict[str, object],
+) -> dict[str, object]:
+    """Assemble the operator-facing run identity graph for final summary."""
+    planned_artifacts = cast(
+        list[dict[str, object]],
+        request.base_summary.get("planned_artifacts", []),
+    )
+    canonical_execution_identity_payload = build_canonical_execution_identity(
+        manifest=request.manifest,
+        base_summary=request.base_summary,
+    )
+    degraded_runtime_anchor_payload = build_degraded_runtime_anchor_payload(
+        manifest=request.manifest,
+        base_summary=request.base_summary,
+    )
+    identity_graph = {
+        **_identity_graph_core_fields(request),
+        **_identity_graph_replay_fields(request),
+        **_identity_graph_snapshot_fields(request),
         "canonical_execution_identity": {
             "execution_fingerprint": request.manifest.execution_fingerprint,
             "payload": canonical_execution_identity_payload,
         },
         "exact_replay_anchors": exact_replay_anchors,
-        "degraded_runtime_anchor": {
-            "compatibility_scope": "legacy_fallback_only",
-            "fingerprint": (
-                compute_execution_identity_fingerprint(degraded_runtime_anchor_payload)
-                if degraded_runtime_anchor_payload
-                else None
-            ),
-            "payload": degraded_runtime_anchor_payload,
-        },
+        "degraded_runtime_anchor": build_degraded_runtime_anchor(
+            degraded_runtime_anchor_payload
+        ),
         "planned_artifacts": planned_artifacts,
         "published_artifacts": [
             _build_identity_graph_artifact_ref(artifact_ref)

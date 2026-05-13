@@ -288,10 +288,10 @@ _ALLOWED_STRUCTURAL_ACTION_LABELS = frozenset(
 )
 _ALLOWED_STRUCTURAL_COMPARISON_LABELS = frozenset(
     {
-        "structural_pass_semantic_pass",
-        "structural_pass_semantic_reject",
-        "structural_reject_semantic_pass",
-        "structural_reject_semantic_reject",
+        "structural_pass_silver_filter_pass",
+        "structural_pass_silver_filter_reject",
+        "structural_reject_silver_filter_pass",
+        "structural_reject_silver_filter_reject",
         "other",
     }
 )

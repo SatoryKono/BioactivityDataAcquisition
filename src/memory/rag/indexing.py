@@ -86,10 +86,9 @@ def build_rag_manifests(root: Path) -> tuple[dict[str, Any], list[dict[str, Any]
     corpus_sources: list[dict[str, Any]] = []
     chunk_records: list[dict[str, Any]] = []
 
-    for path in sources:
-        rel_path = path.relative_to(root)
+    for rel_path in sources:
         rel_path_str = rel_path.as_posix()
-        text = path.read_text(encoding="utf-8")
+        text = (root / rel_path).read_text(encoding="utf-8")
         sections = chunk_source(rel_path, text)
         source_type = infer_source_type(rel_path)
         domain = infer_domain(rel_path)

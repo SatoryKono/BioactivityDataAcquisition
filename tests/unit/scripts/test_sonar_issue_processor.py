@@ -107,6 +107,14 @@ def test_parse_sources_splits_and_normalizes_roots() -> None:
     assert sources == ["src/bioetl", "scripts", "docs"]
 
 
+def test_normalize_sonar_token_strips_wrapping_quotes() -> None:
+    assert processor.normalize_sonar_token('"abc123"') == "abc123"
+    assert processor.normalize_sonar_token("'abc123'") == "abc123"
+    assert processor.normalize_sonar_token("  bare-token  ") == "bare-token"
+    assert processor.normalize_sonar_token('""') is None
+    assert processor.normalize_sonar_token(None) is None
+
+
 def test_is_in_supported_scope_checks_prefix_boundaries() -> None:
     assert processor._is_in_supported_scope("src/bioetl/domain/a.py", ["src/bioetl"])
     assert not processor._is_in_supported_scope(
@@ -211,6 +219,37 @@ def test_fetch_live_issue_summary_reports_auth_failures(monkeypatch) -> None:
     assert summary["status"] == "error"
     assert summary["reason"] == "auth_failed"
     assert summary["status_code"] == 401
+
+
+def test_fetch_live_issue_summary_uses_normalized_env_token(monkeypatch) -> None:
+    captured_auth: list[tuple[str, str]] = []
+
+    class _Response:
+        status_code = 200
+
+        def json(self) -> dict[str, object]:
+            return {
+                "paging": {"total": 0, "pageSize": 100},
+                "facets": [],
+                "issues": [],
+            }
+
+    def _fake_get(*args, **kwargs):  # type: ignore[no-untyped-def]
+        captured_auth.append(kwargs["auth"])
+        return _Response()
+
+    monkeypatch.setattr(processor.requests, "get", _fake_get)
+
+    summary = processor.fetch_live_issue_summary(
+        sonar_url=SONAR_URL,
+        project_key=SONAR_PROJECT_KEY,
+        token='"good-token"',
+        supported_sources=["src/bioetl"],
+        quarantine_patterns=[],
+    )
+
+    assert summary["status"] == "ok"
+    assert captured_auth == [("good-token", "")]
 
 
 def test_fetch_live_issue_summary_tracks_scope_drift(monkeypatch) -> None:

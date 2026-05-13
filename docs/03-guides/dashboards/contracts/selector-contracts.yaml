@@ -55,6 +55,7 @@ dashboard_families:
     uids:
       - bioetl-control-plane-v1
       - bioetl-overview-v2
+      - bioetl-overview-v3
       - bioetl-runtime
       - bioetl-dq-v2
     allowed_visible_selectors:
@@ -137,6 +138,19 @@ shipped_selector_registry:
       pipeline: prometheus_control_plane_universe
       run_type: prometheus_control_plane_universe
   bioetl-overview-v2:
+    family: pipeline_summary
+    visible_selectors:
+      - pipeline
+      - run_type
+    hidden_context_selectors: []
+    hidden_detail_selectors: []
+    top_bar_order:
+      - pipeline
+      - run_type
+    query_source_families:
+      pipeline: prometheus_records_processed_total
+      run_type: prometheus_records_processed_total
+  bioetl-overview-v3:
     family: pipeline_summary
     visible_selectors:
       - pipeline
@@ -253,6 +267,11 @@ ship_now_selector_contract_by_uid:
       - run_type
     time_range: grafana_builtin
   bioetl-overview-v2:
+    visible_selectors:
+      - pipeline
+      - run_type
+    time_range: grafana_builtin
+  bioetl-overview-v3:
     visible_selectors:
       - pipeline
       - run_type

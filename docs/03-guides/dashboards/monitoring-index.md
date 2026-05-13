@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.3
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-03'
+  Last verified: '2026-05-13'
 
 ______________________________________________________________________
 
@@ -32,6 +32,11 @@ Use the linked dashboards and artifacts for deep setup, contracts, and extension
 Boundary rule: Prometheus/Grafana should answer aggregate operational questions.
 Record-level forensics, exact replay evidence, and per-run identifiers belong in
 `manifest/ledger/CLI/explorer surfaces`, not Prometheus labels.
+
+First-screen policy rule: every operator dashboard should expose one
+`ONE BIG QUESTION`, current scope, provenance summary and `First action`.
+Shipped v2 dashboards may satisfy this through distributed scope/status/context
+surfaces; draft v3.0 turns it into an explicit header contract.
 
 ## If X symptom → open dashboard Y → panel Z
 

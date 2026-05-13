@@ -251,6 +251,12 @@ class RunManifestPayloadMixin:
                 input_snapshot_fingerprint=(
                     compute_input_snapshot_identity_fingerprint(snapshot_ids)
                 ),
+                silver_filter_compatibility_mode=str(
+                    request.runtime_config.get(
+                        "silver_filter_compatibility_mode",
+                        "structural_only_auto_promote",
+                    )
+                ),
             ),
         )
 

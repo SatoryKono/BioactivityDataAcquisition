@@ -219,6 +219,11 @@ target:
         - DNA
         - RNA
 
+    organism_classes:
+        - acellular
+        - unicellular
+        - multicellular
+
 # =============================================================================
 # Publication
 # =============================================================================
@@ -240,6 +245,13 @@ publication:
         - PATENT
         - DATASET
         - BOOK
+
+    oa_status_values:
+        - gold
+        - green
+        - hybrid
+        - bronze
+        - closed
 
     types:
         - journal-article

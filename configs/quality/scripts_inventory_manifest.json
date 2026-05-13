@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-12T18:30:09.447009+00:00",
+  "generated_at": "2026-05-13T05:15:14.739955+00:00",
   "summary": {
     "total_scripts": 368,
     "status_counts": {
-      "active": 332,
-      "supporting": 36
+      "active": 333,
+      "supporting": 35
     },
     "reference_group_coverage": {
       "agents": 4,
@@ -14,7 +14,7 @@
       "docs": 133,
       "scripts": 299,
       "skills": 8,
-      "tests": 143
+      "tests": 144
     }
   },
   "scripts": [
@@ -2790,9 +2790,9 @@
     {
       "path": "scripts/data_quality/inventory_silver_filters_migration.py",
       "type": "py",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/filters/README.md",
@@ -2829,6 +2829,18 @@
           "line": 71,
           "source_group": "docs",
           "text": "`scripts/data_quality/inventory_silver_filters_migration.py`:"
+        },
+        {
+          "path": "docs/filters/migration-plan.md",
+          "line": 151,
+          "source_group": "docs",
+          "text": "`scripts/data_quality/inventory_silver_filters_migration.py`."
+        },
+        {
+          "path": "tests/architecture/test_silver_filter_boundary_inventory.py",
+          "line": 349,
+          "source_group": "tests",
+          "text": "\"Run: python scripts/data_quality/inventory_silver_filters_migration.py\\n\""
         }
       ]
     },
@@ -8168,13 +8180,13 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 364,
+          "line": 365,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_vcr_metadata_catalog.py\","
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 412,
+          "line": 413,
           "source_group": "tests",
           "text": "\"python scripts/engineering/qa/report_vcr_metadata_catalog.py --check\""
         }
@@ -9067,13 +9079,13 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 48,
+          "line": 46,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 55,
+          "line": 52,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`"
         },
@@ -10122,13 +10134,13 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 365,
+          "line": 366,
           "source_group": "tests",
           "text": "\"scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py\","
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 415,
+          "line": 416,
           "source_group": "tests",
           "text": "assert \"backfill_vcr_metadata_sidecars.py\" in migrations_readme"
         }

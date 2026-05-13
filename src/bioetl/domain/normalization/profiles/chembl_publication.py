@@ -22,6 +22,7 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_issn_id,
     normalize_profile_issn_ids,
+    normalize_profile_oa_status,
     normalize_profile_publication_type,
     normalize_profile_publication_type_raw,
 )
@@ -137,6 +138,11 @@ CHEMBL_PUBLICATION_PROFILE = build_standard_profile(
             "Normalize raw provider publication type to the canonical "
             "publication enum registry value; raw provider semantics are "
             "retained separately in publication_type_raw.",
+        ),
+        "oa_status": (
+            normalize_profile_oa_status,
+            "Normalize oa_status against the reviewed ChEMBL open-access "
+            "status strict enum and collapse unknown values to None.",
         ),
     },
     null_fields=chembl_pseudo_null_fields("publication"),

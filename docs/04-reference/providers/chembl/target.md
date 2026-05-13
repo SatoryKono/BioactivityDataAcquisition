@@ -89,10 +89,16 @@ Silver schema.
 
 - `primary_component_id` из первого элемента `component_ids`
 - `taxonomy_id` как нормализованную форму входного `tax_id`
-- `organism_class` через `OrganismClassifier`
+- `organism_class` как hash-governed profile-owned derived field из `organism` + `taxonomy_id`
 - `description` из `target_description` или fallback `description`
 - `downgraded` как bool-нормализацию входного значения
 - `target_components`, `target_component_synonyms`, `cross_references`, `pipeline_stages` как JSON-строки
+
+Текущий runtime boundary намеренно разделён так:
+
+- transformer only extracts raw/provider-facing source fields;
+- domain normalization profile детерминированно вычисляет `organism_class`
+  через shared organism-classification policy перед hash/DQ/contract checks.
 
 Документация не фиксирует literal-формулу `entity_id`; identity/content hash
 вычисляются базовым ChEMBL transformer/runtime слоем.

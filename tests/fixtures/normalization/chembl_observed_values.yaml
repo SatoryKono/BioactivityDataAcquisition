@@ -185,6 +185,9 @@ observed_values:
       - PROTEIN COMPLEX
       - CELL-LINE
       - UNKNOWN
+    organism_class:
+      - unicellular
+      - multicellular
     component_types:
       - '["PROTEIN"]'
       - '["PROTEIN","DNA"]'
@@ -303,7 +306,18 @@ policy_values:
       - PROTEIN
       - DNA
       - RNA
+  target:
+    organism_class:
+      - acellular
+      - unicellular
+      - multicellular
   publication:
+    oa_status:
+      - gold
+      - green
+      - hybrid
+      - bronze
+      - closed
     publication_type:
       - journal-article
       - patent
@@ -337,6 +351,18 @@ dq_only_subsets:
       - PROTEIN
       - DNA
       - RNA
+  target:
+    organism_class:
+      - acellular
+      - unicellular
+      - multicellular
+  publication:
+    oa_status:
+      - gold
+      - green
+      - hybrid
+      - bronze
+      - closed
 
 unexpected_observed_values:
   activity:
@@ -371,7 +397,7 @@ unexpected_observed_values:
   publication:
     oa_status:
       - input: purple
-        expected: purple
+        expected: null
   cell_line:
     cellosaurus_id:
       - input: HE-LA

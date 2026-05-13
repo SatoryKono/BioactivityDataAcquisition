@@ -113,6 +113,14 @@ quality:
             min: 1
             max: 10000000
             nullable: true
+        -   field: organism_class
+            type: enum
+            allowed:
+                - acellular
+                - unicellular
+                - multicellular
+            nullable: true
+            error_message: organism_class must match the reviewed cellularity taxonomy when present
     entity_cross_field_validations:
         -   name: target_identifiable
             fields:
