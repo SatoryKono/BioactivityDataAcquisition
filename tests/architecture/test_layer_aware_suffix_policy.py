@@ -106,6 +106,26 @@ def test_layer_suffix_matrix_has_no_allowed_forbidden_overlap() -> None:
         )
 
 
+def test_canonical_family_registry_paths_resolve_to_public_symbols() -> None:
+    """Published canonical family symbols must point at their owning code."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+
+    for family in policy.canonical_family_registry:
+        for item in family.canonical_symbols:
+            path = ROOT / item.path
+            assert path.exists(), (
+                f"{family.family_id}:{item.symbol} missing {item.path}"
+            )
+            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+            public_symbols = {
+                symbol for symbol, _, _ in module._iter_layer_aware_symbols(tree)
+            }
+            assert item.symbol in public_symbols, (
+                f"{family.family_id}:{item.symbol} not found in {item.path}"
+            )
+
+
 def test_canonical_pipeline_execution_family_is_published() -> None:
     """Pipeline execution naming canon must be published machine-readably."""
     module = _load_gate_module()

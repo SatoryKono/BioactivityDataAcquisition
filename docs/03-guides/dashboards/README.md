@@ -121,6 +121,13 @@ tables before any selected-range evidence. Range counters, trends, raw tables,
 Silver reject breakdowns, logs, and traces stay below the first-screen answer
 row or in collapsed diagnostic rows.
 
+`bioetl-overview-v3` is now shipped as a draft bridge surface. It materializes
+the v3 first-screen policy header and hybrid layout, exposes visible
+`workflow`, `pipeline`, `run_type`, and `run_id` selectors, but it still keeps
+pipeline/run_type as the canonical current-status scope. `workflow` is evidence
+context and `run_id` is an execution-hint bridge until truthful local
+run-catalog-backed exact resolution ships.
+
 ## KPI ownership (canonical vs mirrors)
 
 Правило: KPI имеет один canonical dashboard (источник ответа) и может иметь

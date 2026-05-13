@@ -90,6 +90,10 @@ Pushgateway publication на завершении run. Это позволяет
 first-screen status row, panel descriptions и linked runbooks. В draft v3.0
 она должна материализоваться как явный header contract.
 
+Текущий bridge-surface для этого перехода — `bioetl-overview-v3`: он уже
+показывает explicit header block, но остаётся aggregate-first и не претендует
+на exact run resolution без локального run catalog.
+
 ### Фильтрация и Изоляция данных
 
 В верхней части каждого дашборда расположены выпадающие списки:

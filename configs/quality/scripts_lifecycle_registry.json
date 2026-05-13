@@ -164,12 +164,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the deterministic ChEMBL observed-vocabulary export helper while docs-generated inventory artifacts and normalization parity checks still consume this surface; fold it into broader QA/docs generation only if that reporting pipeline is consolidated."
     },
-    "scripts/data_quality/inventory_silver_filters_migration.py": {
-      "owner": "@bioetl-platform",
-      "decision": "shared_helper_module",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as the deterministic Silver filters migration inventory helper while docs/filters inventory artifacts and migration planning still consume this surface; fold it into broader QA/docs generation only if the filters governance reporting pipeline is consolidated."
-    },
     "scripts/memory/mcp_smoke.py": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",

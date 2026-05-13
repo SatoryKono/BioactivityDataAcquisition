@@ -17,8 +17,9 @@ from __future__ import annotations
 
 import argparse
 import ast
+import importlib.util
+import os
 import re
-import subprocess
 import sys
 from dataclasses import dataclass
 from datetime import date
@@ -158,10 +159,44 @@ class LayerAwareNamingPolicy:
     family_freeze_rules: tuple[FamilyFreezeRule, ...]
 
 
-def _combine_subprocess_output(result: subprocess.CompletedProcess[str]) -> str:
-    stdout = result.stdout or ""
-    stderr = result.stderr or ""
-    return (stdout + "\n" + stderr).strip()
+def _load_naming_audit_module(repo_root: Path):
+    script = repo_root / CANONICAL_NAMING_AUDIT_PATH
+    spec = importlib.util.spec_from_file_location(
+        "bioetl_naming_audit_runtime",
+        script,
+    )
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Cannot load {CANONICAL_NAMING_AUDIT_PATH.as_posix()}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["bioetl_naming_audit_runtime"] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _suffix_policy_preview(
+    results: dict[str, list[object]],
+    blocking_ambiguity_groups: list[object],
+) -> str:
+    lines: list[str] = []
+    for category, violations in results.items():
+        if not violations:
+            continue
+        lines.append(f"{category}: {len(violations)} violation(s)")
+        for item in violations[:5]:
+            path = getattr(item, "path", "<unknown>")
+            line = getattr(item, "line", None) or "-"
+            current_name = getattr(item, "current_name", "<unknown>")
+            issue = getattr(getattr(item, "issue", None), "value", "violation")
+            lines.append(f"  - {path}:{line}: {current_name}: {issue}")
+    if blocking_ambiguity_groups:
+        lines.append(f"blocking ambiguity groups: {len(blocking_ambiguity_groups)}")
+        for group in blocking_ambiguity_groups[:5]:
+            family = getattr(group, "normalized_stem", "<unknown>")
+            classification = getattr(
+                getattr(group, "classification", None), "value", ""
+            )
+            lines.append(f"  - {family}: {classification}")
+    return "\n".join(lines[:30])
 
 
 def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
@@ -175,33 +210,57 @@ def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
                 details=f"{CANONICAL_NAMING_AUDIT_PATH.as_posix()} not found",
             )
         ]
-    result = subprocess.run(
-        [
-            sys.executable,
-            str(script),
-            "--check",
-            "--src",
-            str(repo_root / SRC_ROOT),
-            "--docs",
-            str(docs_skip_path),
-            "--configs",
-            str(repo_root / "configs"),
-        ],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        cwd=repo_root,
-    )
-    if result.returncode == 0:
+    try:
+        naming_audit = _load_naming_audit_module(repo_root)
+        registry = naming_audit.load_naming_registry(
+            repo_root / "configs" / "naming_exceptions.yaml"
+        )
+        registry_errors = naming_audit.validate_naming_registry(registry)
+        if registry_errors:
+            return [
+                Violation(
+                    rule="suffix-policy",
+                    location="configs/naming_exceptions.yaml",
+                    details="\n".join(registry_errors[:30]),
+                )
+            ]
+        results = naming_audit.run_audit(
+            repo_root / SRC_ROOT,
+            docs_skip_path,
+            repo_root / "configs",
+            registry,
+        )
+        ambiguity_groups = naming_audit.build_ambiguity_groups(
+            repo_root / SRC_ROOT,
+            repo_root / "configs",
+            registry,
+        )
+    except Exception as exc:  # pragma: no cover - defensive CLI failure path
+        return [
+            Violation(
+                rule="suffix-policy",
+                location=CANONICAL_NAMING_AUDIT_PATH.as_posix(),
+                details=f"failed to run naming audit: {exc}",
+            )
+        ]
+
+    total_violations = sum(len(violations) for violations in results.values())
+    blocking_ambiguity_groups = [
+        group
+        for group in ambiguity_groups
+        if group.classification
+        in {
+            naming_audit.AmbiguityClassification.CONFLICT,
+            naming_audit.AmbiguityClassification.DUPLICATE,
+        }
+    ]
+    if total_violations == 0 and not blocking_ambiguity_groups:
         return []
-    output = _combine_subprocess_output(result)
-    preview = "\n".join(output.splitlines()[:30])
     return [
         Violation(
             rule="suffix-policy",
             location="scripts/engineering/qa/naming_audit.py --check",
-            details=preview or "naming_audit returned non-zero exit code",
+            details=_suffix_policy_preview(results, blocking_ambiguity_groups),
         )
     ]
 
@@ -407,6 +466,37 @@ def _validate_layer_suffix_matrix(
                 f"layer_suffix_matrix[{entry.layer}] overlaps allowed/forbidden "
                 f"suffixes: {sorted(overlap)}"
             )
+
+
+def _canonical_symbol_names(repo_root: Path, relative_path: str) -> set[str]:
+    path = repo_root / relative_path
+    if not path.exists():
+        raise ValueError(
+            f"canonical_family_registry references missing file: {relative_path}"
+        )
+
+    tree = _parse_python_file(path)
+    if tree is None:
+        raise ValueError(
+            "canonical_family_registry references unparsable Python file: "
+            f"{relative_path}"
+        )
+    return {symbol for symbol, _, _ in _iter_layer_aware_symbols(tree)}
+
+
+def _validate_canonical_family_symbol_locations(
+    entries: tuple[CanonicalFamilyRegistryEntry, ...],
+    *,
+    repo_root: Path,
+) -> None:
+    for entry in entries:
+        for symbol in entry.canonical_symbols:
+            module_symbols = _canonical_symbol_names(repo_root, symbol.path)
+            if symbol.symbol not in module_symbols:
+                raise ValueError(
+                    "canonical_family_registry symbol/path drift: "
+                    f"{entry.family_id}:{symbol.symbol} not found in {symbol.path}"
+                )
 
 
 def _validate_canonical_family_registry(
@@ -968,12 +1058,23 @@ def _parse_python_file(path: Path) -> ast.Module | None:
 
 def _layer_aware_suffix_violations(repo_root: Path) -> list[Violation]:
     policy = _load_layer_aware_suffix_policy(repo_root)
-    src_root = repo_root / SRC_ROOT
+    py_files, _ = _collect_src_tree(repo_root)
+    return _layer_aware_suffix_violations_for_files(
+        repo_root=repo_root,
+        policy=policy,
+        py_files=py_files,
+    )
+
+
+def _layer_aware_suffix_violations_for_files(
+    *,
+    repo_root: Path,
+    policy: LayerAwareNamingPolicy,
+    py_files: tuple[Path, ...],
+) -> list[Violation]:
     violations: list[Violation] = []
 
-    for py_file in src_root.rglob("*.py"):
-        if "__pycache__" in py_file.parts:
-            continue
+    for py_file in py_files:
         relative_path = py_file.relative_to(repo_root).as_posix()
         violations.extend(
             _layer_aware_module_violations(relative_path=relative_path, policy=policy)
@@ -994,6 +1095,31 @@ def _layer_aware_suffix_violations(repo_root: Path) -> list[Violation]:
     return violations
 
 
+def _collect_src_tree(repo_root: Path) -> tuple[tuple[Path, ...], tuple[Path, ...]]:
+    py_files: list[Path] = []
+    directories: list[Path] = []
+    src_root = repo_root / SRC_ROOT
+    for dirpath, dirnames, filenames in os.walk(src_root):
+        if "__pycache__" in Path(dirpath).parts:
+            dirnames[:] = []
+            continue
+        current_dir = Path(dirpath)
+        directories.append(current_dir)
+        py_files.extend(
+            current_dir / filename for filename in filenames if filename.endswith(".py")
+        )
+    return tuple(py_files), tuple(directories)
+
+
+def _is_under_layer(relative_path: str, layer: Path) -> bool:
+    layer_prefix = layer.as_posix().rstrip("/") + "/"
+    return relative_path.startswith(layer_prefix)
+
+
+def _is_under_any_layer(relative_path: str, layers: tuple[Path, ...]) -> bool:
+    return any(_is_under_layer(relative_path, layer) for layer in layers)
+
+
 def _factory_module_violation(py_file: Path, *, repo_root: Path) -> Violation | None:
     if py_file.name not in {"factory.py"} and not py_file.name.endswith("_factory.py"):
         return None
@@ -1010,6 +1136,12 @@ def _factory_module_violation(py_file: Path, *, repo_root: Path) -> Violation | 
 
 def _builder_allowed_modules(repo_root: Path) -> frozenset[str]:
     policy = _load_layer_aware_suffix_policy(repo_root)
+    return _builder_allowed_modules_for_policy(policy)
+
+
+def _builder_allowed_modules_for_policy(
+    policy: LayerAwareNamingPolicy,
+) -> frozenset[str]:
     for rule in policy.suffix_boundary_rules:
         if rule.rule_id == "non_composition_builder_suffix":
             return frozenset(item.path for item in rule.allowed_modules)
@@ -1017,6 +1149,19 @@ def _builder_allowed_modules(repo_root: Path) -> frozenset[str]:
 
 
 def _builder_module_violation(py_file: Path, *, repo_root: Path) -> Violation | None:
+    return _builder_module_violation_for_allowed_modules(
+        py_file,
+        repo_root=repo_root,
+        allowed_modules=_builder_allowed_modules(repo_root),
+    )
+
+
+def _builder_module_violation_for_allowed_modules(
+    py_file: Path,
+    *,
+    repo_root: Path,
+    allowed_modules: frozenset[str],
+) -> Violation | None:
     stem_lower = py_file.stem.lower()
     if not (
         stem_lower == "builder"
@@ -1028,7 +1173,7 @@ def _builder_module_violation(py_file: Path, *, repo_root: Path) -> Violation | 
         return None
 
     rel = py_file.relative_to(repo_root).as_posix()
-    if rel in ALLOWED_BUILDER_FACADES or rel in _builder_allowed_modules(repo_root):
+    if rel in ALLOWED_BUILDER_FACADES or rel in allowed_modules:
         return None
     return Violation(
         rule="builder-only-in-composition",
@@ -1098,18 +1243,24 @@ def _violations_for_forbidden_factory_file(
 
 
 def _factory_violations(repo_root: Path) -> list[Violation]:
+    py_files, _ = _collect_src_tree(repo_root)
+    return _factory_violations_for_files(repo_root=repo_root, py_files=py_files)
+
+
+def _factory_violations_for_files(
+    *,
+    repo_root: Path,
+    py_files: tuple[Path, ...],
+) -> list[Violation]:
     violations: list[Violation] = []
 
-    for layer in FORBIDDEN_FACTORY_LAYERS:
-        layer_path = repo_root / layer
-        if not layer_path.exists():
+    for py_file in py_files:
+        relative_path = py_file.relative_to(repo_root).as_posix()
+        if not _is_under_any_layer(relative_path, FORBIDDEN_FACTORY_LAYERS):
             continue
-        for py_file in layer_path.rglob("*.py"):
-            if "__pycache__" in py_file.parts:
-                continue
-            violations.extend(
-                _violations_for_forbidden_factory_file(py_file, repo_root=repo_root)
-            )
+        violations.extend(
+            _violations_for_forbidden_factory_file(py_file, repo_root=repo_root)
+        )
     return violations
 
 
@@ -1125,26 +1276,53 @@ def _violations_for_forbidden_builder_file(
 
 
 def _builder_violations(repo_root: Path) -> list[Violation]:
+    policy = _load_layer_aware_suffix_policy(repo_root)
+    py_files, _ = _collect_src_tree(repo_root)
+    return _builder_violations_for_files(
+        repo_root=repo_root,
+        py_files=py_files,
+        allowed_modules=_builder_allowed_modules_for_policy(policy),
+    )
+
+
+def _builder_violations_for_files(
+    *,
+    repo_root: Path,
+    py_files: tuple[Path, ...],
+    allowed_modules: frozenset[str],
+) -> list[Violation]:
     violations: list[Violation] = []
 
-    for layer in FORBIDDEN_BUILDER_LAYERS:
-        layer_path = repo_root / layer
-        if not layer_path.exists():
+    for py_file in py_files:
+        relative_path = py_file.relative_to(repo_root).as_posix()
+        if not _is_under_any_layer(relative_path, FORBIDDEN_BUILDER_LAYERS):
             continue
-        for py_file in layer_path.rglob("*.py"):
-            if "__pycache__" in py_file.parts:
-                continue
-            violations.extend(
-                _violations_for_forbidden_builder_file(py_file, repo_root=repo_root)
-            )
+        module_violation = _builder_module_violation_for_allowed_modules(
+            py_file,
+            repo_root=repo_root,
+            allowed_modules=allowed_modules,
+        )
+        if module_violation is not None:
+            violations.append(module_violation)
+        violations.extend(_builder_class_violations(py_file, repo_root=repo_root))
     return violations
 
 
 def _package_template_violations(repo_root: Path) -> list[Violation]:
+    _, directories = _collect_src_tree(repo_root)
+    return _package_template_violations_for_dirs(
+        repo_root=repo_root,
+        directories=directories,
+    )
+
+
+def _package_template_violations_for_dirs(
+    *,
+    repo_root: Path,
+    directories: tuple[Path, ...],
+) -> list[Violation]:
     violations: list[Violation] = []
-    for directory in (repo_root / SRC_ROOT).rglob("*"):
-        if not directory.is_dir() or "__pycache__" in directory.parts:
-            continue
+    for directory in directories:
         singular_name = SINGULAR_ROLE_TO_CANONICAL.get(directory.name)
         if singular_name is None:
             continue
@@ -1164,12 +1342,37 @@ def _package_template_violations(repo_root: Path) -> list[Violation]:
 
 def run_checks(repo_root: Path) -> list[Violation]:
     """Run all consistency checks and return merged violations."""
+    policy = _load_layer_aware_suffix_policy(repo_root)
+    _validate_canonical_family_symbol_locations(
+        policy.canonical_family_registry,
+        repo_root=repo_root,
+    )
+    py_files, directories = _collect_src_tree(repo_root)
     violations: list[Violation] = []
     violations.extend(_run_suffix_policy_check(repo_root))
-    violations.extend(_layer_aware_suffix_violations(repo_root))
-    violations.extend(_factory_violations(repo_root))
-    violations.extend(_builder_violations(repo_root))
-    violations.extend(_package_template_violations(repo_root))
+    violations.extend(
+        _layer_aware_suffix_violations_for_files(
+            repo_root=repo_root,
+            policy=policy,
+            py_files=py_files,
+        )
+    )
+    violations.extend(
+        _factory_violations_for_files(repo_root=repo_root, py_files=py_files)
+    )
+    violations.extend(
+        _builder_violations_for_files(
+            repo_root=repo_root,
+            py_files=py_files,
+            allowed_modules=_builder_allowed_modules_for_policy(policy),
+        )
+    )
+    violations.extend(
+        _package_template_violations_for_dirs(
+            repo_root=repo_root,
+            directories=directories,
+        )
+    )
     return violations
 
 

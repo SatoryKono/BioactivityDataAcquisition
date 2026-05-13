@@ -163,6 +163,33 @@ Look for:
 - Confirm the expected step statuses are present in persisted state.
 - Confirm the workflow lock was released after completion or failure.
 
+## Rollback/Recovery
+
+- If resume or repair selected the wrong workflow run, stop before executing
+  additional destructive steps and inspect the specific `workflow_run_id`.
+- Restore tracked workflow YAML from git if the workflow definition was edited
+  during diagnosis.
+- Do not hand-edit retained manifests, ledgers, state files, or checkpoint
+  anchors. Use the workflow CLI or open a separate recovery issue when persisted
+  control-plane artifacts are inconsistent.
+- For ambiguous destructive-step recovery, prefer `--repair-steps` over
+  `--force-steps` unless the operator explicitly accepts the replay impact.
+
+## Post-incident
+
+- Record the workflow name, `workflow_run_id`, `manifest_id`, chosen recovery
+  path, and verification commands in the incident issue or PR.
+- File a follow-up if `repair_required=true` recurs for the same workflow step.
+- Update workflow examples or ADR-linked docs if the incident exposes a missing
+  recovery path.
+
+## Compliance
+
+- ADR-010 local-only posture remains in force; do not introduce external
+  orchestration or distributed locks to recover one local workflow.
+- ADR-046 and ADR-047 control checkpoint, ledger, resume, and repair semantics.
+  Recovery must preserve explicit operator intent for destructive steps.
+
 ## Related Sources
 
 - [CLI Reference](../../04-reference/cli.md)

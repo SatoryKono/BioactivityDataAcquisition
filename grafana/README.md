@@ -40,7 +40,8 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-> Примечание: в репозитории сейчас поставляются `bioetl-runtime.json` и `*-v2.json` дашборды.
+> Примечание: в репозитории сейчас поставляются `bioetl-runtime.json`,
+> `*-v2.json` и draft `bioetl-overview-v3.json`.
 > Исторические v1 surfaces ниже сведены к краткой archival note, без подробного operator walkthrough.
 >
 > Роль этого документа: setup/reference для monitoring stack.
@@ -109,7 +110,7 @@ ______________________________________________________________________
 │  ┌──────────────────────────────────────────────────────────┐    │
 │  │  Provisioning (автоматическая загрузка)                    │    │
 │  │  - Datasources: Prometheus + Quarantine Explorer          │    │
-│  │  - Dashboards: 7 JSON файлов (bioetl.yaml)               │    │
+│  │  - Dashboards: 8 JSON файлов (bioetl.yaml)               │    │
 │  │  - Обновление каждые 30 секунд                            │    │
 │  │  - allowUiUpdates: false для production dashboard-as-code  │    │
 │  └──────────────────────────────────────────────────────────┘    │
@@ -117,6 +118,7 @@ ______________________________________________________________________
 │  Дашборды (shipped):                                             │
 │  - 0. Control Plane (bioetl-control-plane-v1)                    │
 │  - 1. Overview (bioetl-overview-v2)                               │
+│  - 1. Overview v3 (bioetl-overview-v3, draft)                    │
 │  - 2. Runtime (bioetl-runtime)                                   │
 │  - 3. Provider Health (bioetl-provider-health-v2)                │
 │  - 4. Data Quality (bioetl-dq-v2)                                │
@@ -160,6 +162,7 @@ grafana/
 │       └── bioetl.yaml                # Dashboard provisioning config
 └── dashboards/
     ├── bioetl-overview-v2.json        # Обзор для последнего запуска (v2)
+    ├── bioetl-overview-v3.json        # Draft hybrid L0 overview (v3 bridge)
     ├── bioetl-dq-v2.json              # Data Quality для последнего запуска (v2)
     ├── bioetl-runtime.json            # L2 runtime triage: blockers, latency, backlog, handoffs
     ├── bioetl-provider-health-v2.json # Здоровье провайдеров (v2)

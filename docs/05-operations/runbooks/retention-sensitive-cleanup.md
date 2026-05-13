@@ -38,6 +38,21 @@ GitHub cleanup requests for these surfaces MUST use
 `.github/ISSUE_TEMPLATE/retention_sensitive_cleanup.yml` or provide the same
 evidence fields in a PR description.
 
+## Impact
+
+- Priority: P1.
+- Incorrect cleanup can destroy replay evidence, retained manifests, VCR
+  fixtures, curated reports, or historical traceability needed for audit and
+  reproducibility.
+
+## Preconditions
+
+- The exact candidate paths are known before any apply/delete command is run.
+- The operator has a reviewed issue, PR, or local evidence note that records
+  ownership, retention reason, verification command, and rollback source.
+- The worktree state is known, and generated/local-only artifacts are separated
+  from tracked evidence.
+
 ## Safety Model
 
 Retention-sensitive cleanup is fail-closed:
@@ -173,6 +188,8 @@ rm -rf docs/99-archive/
 rm -rf reports/
 ```
 
+## Verification
+
 ### 6. Verify
 
 Run the verification command recorded for the surface:
@@ -194,13 +211,20 @@ Escalate to a separate retention/security issue when:
 - a VCR cassette may include newly recorded provider data;
 - the restore path is unknown.
 
-## Rollback
+## Rollback/Recovery
 
 - For tracked files, restore from git before rerunning tests.
 - For local runtime data, restore from the documented filesystem or object-store
   backup. Do not synthesize immutable control-plane artifacts by hand.
 - For VCR fixtures, re-record through the maintained VCR workflow and rerun the
   affected contract/e2e tests.
+
+## Post-incident
+
+- Confirm the cleanup decision is linked from the issue or PR.
+- Confirm all verification commands are recorded with pass/fail outcomes.
+- File follow-up issues for any ambiguous retention surface that could not be
+  classified during the cleanup.
 
 ## Post-Cleanup Evidence
 
@@ -215,3 +239,9 @@ Every retention-sensitive cleanup PR or issue MUST include:
 
 The canonical GitHub issue form for this evidence pack is
 `.github/ISSUE_TEMPLATE/retention_sensitive_cleanup.yml`.
+
+## Compliance
+
+- ADR-010 local-only deployment remains the runtime baseline.
+- Cleanup must preserve replay, inspection, and forensic evidence unless a
+  separate reviewed exception explicitly accepts the loss.

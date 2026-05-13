@@ -357,8 +357,6 @@ def _collect_architecture_skip_count() -> int:
             "-q",
             "--ignore=tests/architecture/test_regression_metrics.py",
             "-p",
-            "no:timeout",
-            "-p",
             "no:xdist",
             "--no-header",
             "--override-ini=addopts=",

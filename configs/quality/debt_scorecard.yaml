@@ -1,10 +1,10 @@
 schema_version: 1
 baseline:
-  total_exemptions: 4
+  total_exemptions: 1
   by_registry:
     file_size_limits: 0
-    function_complexity: 2
-    function_length: 1
+    function_complexity: 0
+    function_length: 0
     class_size: 0
     class_method_count: 0
     god_object: 0

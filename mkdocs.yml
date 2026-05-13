@@ -211,6 +211,7 @@ nav:
                     -   "ADR-044 Run Manifest and Run Ledger": 02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md
                     -   "ADR-045 Data Quality Contract System": 02-architecture/decisions/ADR-045-dq-contract-system.md
                     -   "ADR-046 Checkpoint Versus Ledger-Based Resume": 02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md
+                    -   "ADR-047 Workflow Control Plane": 02-architecture/decisions/ADR-047-workflow-control-plane.md
                     -   "Quality Gates Stabilization Notes": 02-architecture/decisions/notes/2026-03-04-quality-gates-stabilization.md
     -   Guides:
             -   "Overview": 03-guides/index.md

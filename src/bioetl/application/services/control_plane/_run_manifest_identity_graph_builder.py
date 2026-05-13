@@ -1,4 +1,4 @@
-"""Identity graph builder for run-manifest inspection output."""
+"""Identity graph assembly for run-manifest inspection output."""
 
 from __future__ import annotations
 
@@ -9,8 +9,8 @@ from bioetl.domain.normalization import (
 )
 
 
-class RunManifestIdentityGraphBuilder:
-    """Build operator-facing identity graph payloads."""
+class RunManifestIdentityGraphAssembler:
+    """Assemble operator-facing identity graph payloads."""
 
     @staticmethod
     def build(
@@ -27,7 +27,7 @@ class RunManifestIdentityGraphBuilder:
                     if isinstance(artifact_ref, dict)
                 ]
             return existing
-        return RunManifestIdentityGraphBuilder._build_fallback_identity_graph(
+        return RunManifestIdentityGraphAssembler._build_fallback_identity_graph(
             manifest,
             diagnostics,
         )
@@ -39,18 +39,18 @@ class RunManifestIdentityGraphBuilder:
     ) -> dict[str, object]:
         code_provenance = manifest.code_provenance
         canonical_execution_identity = (
-            RunManifestIdentityGraphBuilder._build_canonical_execution_identity(
+            RunManifestIdentityGraphAssembler._build_canonical_execution_identity(
                 manifest,
                 diagnostics,
             )
         )
         degraded_runtime_anchor_payload = (
-            RunManifestIdentityGraphBuilder._build_degraded_runtime_anchor_payload(
+            RunManifestIdentityGraphAssembler._build_degraded_runtime_anchor_payload(
                 manifest
             )
         )
         return {
-            **RunManifestIdentityGraphBuilder._build_identity_graph_core(
+            **RunManifestIdentityGraphAssembler._build_identity_graph_core(
                 manifest,
                 diagnostics,
                 code_provenance=code_provenance,
@@ -71,14 +71,14 @@ class RunManifestIdentityGraphBuilder:
                 ),
                 "payload": degraded_runtime_anchor_payload,
             },
-            **RunManifestIdentityGraphBuilder._build_identity_graph_replay_section(
+            **RunManifestIdentityGraphAssembler._build_identity_graph_replay_section(
                 manifest,
                 diagnostics,
             ),
-            **RunManifestIdentityGraphBuilder._build_identity_graph_snapshot_section(
+            **RunManifestIdentityGraphAssembler._build_identity_graph_snapshot_section(
                 diagnostics
             ),
-            **RunManifestIdentityGraphBuilder._build_identity_graph_artifact_section(
+            **RunManifestIdentityGraphAssembler._build_identity_graph_artifact_section(
                 manifest,
                 diagnostics,
             ),

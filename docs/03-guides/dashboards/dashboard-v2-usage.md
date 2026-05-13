@@ -34,6 +34,7 @@ Human-readable selector references:
 | ------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------ |
 | 0. Control Plane          | `bioetl-control-plane-v1`       | L1/L2 replay/resume safety: manifest, ledger, checkpoint, replay, lineage, global reads    |
 | 1. Overview               | `bioetl-overview-v2`            | L0 answer-first dashboard: что сейчас сломано/degraded и куда drill down дальше            |
+| 1. Overview v3            | `bioetl-overview-v3`            | Draft hybrid L0 dashboard: explicit scope/provenance header, visible workflow/run_id bridge selectors, aggregate-first triage |
 | 2. Runtime                | `bioetl-runtime`                | L2 diagnostic runtime triage: blockers, latency, backlog, error localization, handoffs     |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | Incident triage по provider health: latency/failures/degraded/retries exhausted            |
 | 4. Data Quality           | `bioetl-dq-v2`                  | Качество данных, карантин, аномалии, freshness                                             |
@@ -55,6 +56,7 @@ Human-readable selector references:
 ## Фильтрация
 
 - `bioetl-overview-v2`: `$pipeline`, `$run_type`
+- `bioetl-overview-v3`: `$workflow`, `$pipeline`, `$run_type`, `$run_id`
 - `bioetl-control-plane-v1`: `$pipeline`, `$run_type`
 - `bioetl-dq-v2`, `bioetl-runtime`: `$pipeline`, `$run_type`, `$stage`
 - `bioetl-provider-health-v2`: `$provider`, hidden `$pipeline_context`, `$adapter`
@@ -84,6 +86,13 @@ Policy reminder for shipped v2:
 - first-screen scope and `First Action` remain mandatory
 - provenance/risk context may stay distributed across scope panels, current
   status surfaces, descriptions and linked runbooks
+
+`bioetl-overview-v3` is the current draft bridge into the next dashboard line.
+It already materializes the first-screen header contract and exposes visible
+`workflow`, `pipeline`, `run_type`, and `run_id` selectors. Current L0 status
+semantics still anchor on `pipeline` + `run_type`; `workflow` remains evidence
+context and `run_id` remains a visible execution-hint bridge until the
+run-catalog future contract becomes shipped behavior.
 
 1. `bioetl-overview-v2`, first-screen KPI row (no scroll):
    `System Status`, `Next Action` и `L0 Inputs` отвечают на L0 вопрос: что

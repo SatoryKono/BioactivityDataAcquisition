@@ -1,4 +1,40 @@
+______________________________________________________________________
+
+Version: 1.0.0
+Status: active
+Class: internal-published
+Owner: BioETL Team
+Reviewers:
+
+- BioETL Team
+  Priority: P2
+  Runtime profile: Local-Only optional Neo4j memory backend for AI/runtime tooling.
+  Last verified: '2026-05-13'
+
+______________________________________________________________________
+
 # Neo4j Backend Recovery - Quick Start
+
+## Trigger
+
+- Use this runbook when the optional Neo4j memory backend is unavailable,
+  `docker ps` hangs, Bolt/HTTP health checks fail, or AI memory tooling reports
+  Neo4j connectivity errors.
+- Do not use it for BioETL pipeline runtime recovery; this backend is an
+  auxiliary memory surface, not a required ETL dependency.
+
+## Impact
+
+- Priority: P2.
+- Delayed recovery reduces AI memory retrieval quality and graph-backed
+  diagnostics, but does not block local-only BioETL pipeline execution.
+
+## Preconditions
+
+- Docker Desktop is installed and available to the local operator.
+- The repository checkout contains the Neo4j recovery scripts listed below.
+- No production BioETL runtime must be stopped to recover this optional memory
+  backend.
 
 ## TL;DR
 
@@ -39,6 +75,8 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 ## Recovery Script Workflow
+
+## Procedure
 
 The `neo4j-recovery-checklist.ps1` does:
 
@@ -107,6 +145,35 @@ We don't know yet. Possibilities:
 Once tests run, we'll see which one was actually broken.
 
 ______________________________________________________________________
+
+## Verification
+
+- `scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1` reports backend
+  ready.
+- HTTP port `7474` and Bolt port `7687` checks pass.
+- `scripts/ai/mcp/check_neo4j_memory.sh` or the local MCP backend check can
+  connect without authentication/configuration errors.
+
+## Rollback/Recovery
+
+- If recovery makes the local Docker state worse, stop and remove only the
+  reviewed `bioetl-neo4j` container, then restart Docker Desktop.
+- Restore previous MCP/backend configuration from git if configuration files
+  were edited during diagnosis.
+- Escalate to the detailed Neo4j recovery guide if the quick-start checklist
+  still fails after one clean Docker restart.
+
+## Post-incident
+
+- Record the failing check, final recovery action, and any changed local
+  configuration in the related issue or session note.
+- Update this quick-start if the root cause becomes known and repeatable.
+
+## Compliance
+
+- Local-only posture remains unchanged; do not make Neo4j a required BioETL
+  runtime service.
+- Do not store secrets or provider credentials in Neo4j recovery logs.
 
 **Next**: Restart Docker Desktop, then run `.\scripts\neo4j-recovery-checklist.ps1`
 

@@ -21,7 +21,6 @@ from bioetl.domain.ports import WorkflowExecutionStatePort
 from bioetl.domain.types import RunID
 from bioetl.domain.workflow import (
     WorkflowConfig,
-    WorkflowRunOptionsConfig,
     WorkflowStepConfig,
 )
 
@@ -284,93 +283,45 @@ def _apply_incremental_offset(
     - Treats None start_offset as 0 for incremental tracking
     - Otherwise leaves configuration unchanged (first run or error)
     """
-    latest_state = workflow_state_port.get_latest(config.name)
-    if latest_state is None:
-        return config
-
-    # Use offset only from successful runs
-    if latest_state.status != "success":
-        return config
-
-    if latest_state.last_limit is None:
-        return config
-
-    # Treat None start_offset as 0 for incremental tracking
-    last_offset = latest_state.last_start_offset or 0
-    new_offset = last_offset + latest_state.last_limit
-
-    updated_steps = []
-    for step in config.steps:
-        if isinstance(step, WorkflowStepConfig):
-            # Create new run_options with updated start_offset
-            current_opts = step.run_options
-            updated_run_options = WorkflowRunOptionsConfig(
-                run_type=current_opts.run_type,
-                resume=current_opts.resume,
-                start_offset=new_offset,  # Force the new offset
-                limit=current_opts.limit,
-                dry_run=current_opts.dry_run,
-                input_csv=current_opts.input_csv,
-                filter_column=current_opts.filter_column,
-                filter_field=current_opts.filter_field,
-                filter_ids=current_opts.filter_ids,
-                multi_filter_ids=current_opts.multi_filter_ids,
-                fallback_column=current_opts.fallback_column,
-                fallback_mapping=current_opts.fallback_mapping,
-                vacuum_after_run=current_opts.vacuum_after_run,
-                vacuum_retention_days=current_opts.vacuum_retention_days,
-                log_level=current_opts.log_level,
-                ignore_yaml_filter=current_opts.ignore_yaml_filter,
-                skip_gold=current_opts.skip_gold,
-                execution_context=current_opts.execution_context,
-                use_cached_bronze=current_opts.use_cached_bronze,
-                cached_bronze_path=current_opts.cached_bronze_path,
-                cached_bronze_date=current_opts.cached_bronze_date,
-                replay_of_run_id=current_opts.replay_of_run_id,
-                replay_of_manifest_id=current_opts.replay_of_manifest_id,
-                exact_replay=current_opts.exact_replay,
-                enable_tracing=current_opts.enable_tracing,
-            )
-            updated_steps.append(
-                replace(
-                    step,
-                    run_options=updated_run_options,
-                )
-            )
-        else:
-            updated_steps.append(step)
-
-    # Also update defaults
-    updated_defaults = WorkflowRunOptionsConfig(
-        run_type=config.defaults.run_type,
-        resume=config.defaults.resume,
-        start_offset=new_offset,  # Force the new offset
-        limit=config.defaults.limit,
-        dry_run=config.defaults.dry_run,
-        input_csv=config.defaults.input_csv,
-        filter_column=config.defaults.filter_column,
-        filter_field=config.defaults.filter_field,
-        filter_ids=config.defaults.filter_ids,
-        multi_filter_ids=config.defaults.multi_filter_ids,
-        fallback_column=config.defaults.fallback_column,
-        fallback_mapping=config.defaults.fallback_mapping,
-        vacuum_after_run=config.defaults.vacuum_after_run,
-        vacuum_retention_days=config.defaults.vacuum_retention_days,
-        log_level=config.defaults.log_level,
-        ignore_yaml_filter=config.defaults.ignore_yaml_filter,
-        skip_gold=config.defaults.skip_gold,
-        execution_context=config.defaults.execution_context,
-        use_cached_bronze=config.defaults.use_cached_bronze,
-        cached_bronze_path=config.defaults.cached_bronze_path,
-        cached_bronze_date=config.defaults.cached_bronze_date,
-        replay_of_run_id=config.defaults.replay_of_run_id,
-        replay_of_manifest_id=config.defaults.replay_of_manifest_id,
-        exact_replay=config.defaults.exact_replay,
-        enable_tracing=config.defaults.enable_tracing,
+    new_offset = _next_incremental_start_offset(
+        workflow_state_port=workflow_state_port,
+        workflow_name=config.name,
     )
+    if new_offset is None:
+        return config
 
     return replace(
         config,
-        defaults=updated_defaults,
-        steps=tuple(updated_steps),
+        defaults=replace(config.defaults, start_offset=new_offset),
+        steps=tuple(
+            _workflow_step_with_start_offset(step, new_offset)
+            if isinstance(step, WorkflowStepConfig)
+            else step
+            for step in config.steps
+        ),
+    )
+
+
+def _next_incremental_start_offset(
+    *,
+    workflow_state_port: WorkflowExecutionStatePort,
+    workflow_name: str,
+) -> int | None:
+    """Resolve the next start offset from the latest successful workflow state."""
+    latest_state = workflow_state_port.get_latest(workflow_name)
+    if latest_state is None or latest_state.status != "success":
+        return None
+    if latest_state.last_limit is None:
+        return None
+    return (latest_state.last_start_offset or 0) + latest_state.last_limit
+
+
+def _workflow_step_with_start_offset(
+    step: WorkflowStepConfig,
+    start_offset: int,
+) -> WorkflowStepConfig:
+    """Return a workflow step with its run-options offset overridden."""
+    return replace(
+        step,
+        run_options=replace(step.run_options, start_offset=start_offset),
     )

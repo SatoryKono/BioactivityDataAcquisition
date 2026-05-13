@@ -6,7 +6,7 @@ layer_suffix_matrix:
     allowed_suffixes: [Port, Protocol, ABC, Schema, ValueObject]
     forbidden_suffixes: [Service, Manager, Handler, Adapter, Factory, Runner]
   - layer: application
-    allowed_suffixes: [Service, RuntimeService, Runner, Coordinator, Handler]
+    allowed_suffixes: [Service, RuntimeService, Runner, Coordinator, Handler, Assembler]
     forbidden_suffixes: [Adapter, Client]
   - layer: infrastructure
     allowed_suffixes: [Adapter, Client, Factory, Writer, Reader]
@@ -36,7 +36,7 @@ canonical_family_registry:
       - symbol: CompositePipelineRunner
         path: src/bioetl/application/composite/runner_pkg/runner.py
       - symbol: MergeService
-        path: src/bioetl/application/composite/merge_service.py
+        path: src/bioetl/application/composite/merger.py
     compatibility_symbols: []
   - family_id: lock_runtime_admin
     canonical_symbols:

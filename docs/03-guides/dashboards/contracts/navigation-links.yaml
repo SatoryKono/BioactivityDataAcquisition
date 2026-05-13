@@ -106,7 +106,7 @@ top_level_link_priority_by_uid:
 
 required_link_vars_by_target_uid:
   bioetl-overview-v2: [pipeline, run_type]
-  bioetl-overview-v3: [pipeline, run_type]
+  bioetl-overview-v3: [workflow, pipeline, run_type]
   bioetl-control-plane-v1: [pipeline, run_type]
   bioetl-runtime: [pipeline, run_type]
   bioetl-dq-v2: [pipeline, run_type]

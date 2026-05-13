@@ -39,6 +39,7 @@ except ModuleNotFoundError:  # pragma: no cover - direct script execution fallba
 
 DEFAULT_JSON_OUTPUT = PROJECT_ROOT / "reports/quality/hotspot-family-baseline.json"
 DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports/quality/hotspot-family-baseline.md"
+NEAR_BUDGET_RATIO = 0.8
 
 
 def _resolve_snapshot_date(scorecard: dict[str, object]) -> str:
@@ -55,14 +56,57 @@ def _build_json_payload(
     snapshot_date: str,
     metrics: list[dict[str, object]],
 ) -> dict[str, object]:
+    enriched_metrics = [_with_budget_warnings(family) for family in metrics]
     return {
         "summary": {
             "snapshot_date": snapshot_date,
-            "families": len(metrics),
+            "families": len(enriched_metrics),
             "scorecard": str(SCORECARD_PATH.relative_to(PROJECT_ROOT)),
+            "budget_warnings": sum(
+                len(family.get("budget_warnings", []))
+                for family in enriched_metrics
+                if isinstance(family.get("budget_warnings"), list)
+            ),
         },
-        "families": metrics,
+        "families": enriched_metrics,
     }
+
+
+def _budget_warnings_for_family(
+    family: dict[str, object],
+    *,
+    warning_ratio: float = NEAR_BUDGET_RATIO,
+) -> list[str]:
+    """Return bounded-growth warnings before a hard budget failure."""
+    budgets = family.get("bounded_growth_budgets", {})
+    if not isinstance(budgets, dict):
+        return []
+
+    warnings: list[str] = []
+    for metric_name, raw_budget in sorted(budgets.items()):
+        raw_actual = family.get(str(metric_name))
+        if (
+            not isinstance(metric_name, str)
+            or not isinstance(raw_budget, int)
+            or raw_budget <= 0
+            or not isinstance(raw_actual, int)
+        ):
+            continue
+        if raw_actual >= raw_budget:
+            state = "at_budget"
+        elif raw_actual / raw_budget >= warning_ratio:
+            state = "near_budget"
+        else:
+            continue
+        warnings.append(f"{state}:{metric_name}={raw_actual}/{raw_budget}")
+    return warnings
+
+
+def _with_budget_warnings(family: dict[str, object]) -> dict[str, object]:
+    """Return a family metrics row enriched with early budget warnings."""
+    enriched = dict(family)
+    enriched["budget_warnings"] = _budget_warnings_for_family(family)
+    return enriched
 
 
 def _render_markdown(
@@ -79,15 +123,24 @@ def _render_markdown(
         f"- snapshot_date: `{snapshot_date}`",
         f"- families: `{len(metrics)}`",
         "",
-        "| Family | Files | Total LOC | Files >=250 LOC | Helper ratio | Duplication | Max fan-in | Max fan-in module | Budgets |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |",
+        (
+            "| Family | Files | Total LOC | Files >=250 LOC | Helper ratio | "
+            "Duplication | Max fan-in | Max fan-in module | Budgets | Budget warnings |"
+        ),
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |",
     ]
 
-    for family in metrics:
+    for family in (_with_budget_warnings(item) for item in metrics):
         budgets = family.get("bounded_growth_budgets", {})
         budget_text = (
             ", ".join(f"{key}={value}" for key, value in sorted(budgets.items()))
             if isinstance(budgets, dict) and budgets
+            else "-"
+        )
+        budget_warnings = family.get("budget_warnings", [])
+        warning_text = (
+            ", ".join(str(warning) for warning in budget_warnings)
+            if isinstance(budget_warnings, list) and budget_warnings
             else "-"
         )
         duplication = family.get("duplication_clusters")
@@ -102,7 +155,8 @@ def _render_markdown(
             f"{duplication_text} | "
             f"{family['max_internal_fan_in']} | "
             f"`{family['max_internal_fan_in_module'] or '-'}` | "
-            f"`{budget_text}` |"
+            f"`{budget_text}` | "
+            f"`{warning_text}` |"
         )
 
     lines.append("")

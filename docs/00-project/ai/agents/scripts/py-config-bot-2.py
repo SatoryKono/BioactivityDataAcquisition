@@ -220,11 +220,15 @@ def _validate_sink_paths_and_sort(pipeline_payload: dict[str, Any]) -> list[str]
         if not isinstance(layer_cfg, dict):
             continue
         layer_path = layer_cfg.get("path", "")
-        if expected_suffix and isinstance(layer_path, str) and layer_path:
-            if not layer_path.endswith(expected_suffix):
-                warnings.append(
-                    f"sink.{layer}.path should end with '{expected_suffix}', got: {layer_path}"
-                )
+        if (
+            expected_suffix
+            and isinstance(layer_path, str)
+            and layer_path
+            and not layer_path.endswith(expected_suffix)
+        ):
+            warnings.append(
+                f"sink.{layer}.path should end with '{expected_suffix}', got: {layer_path}"
+            )
 
     return warnings
 
@@ -314,6 +318,41 @@ def _process_composite_config(
         errors.append(f"{config_path}: {err_msg}")
 
 
+def _config_validation_depth_summary(configs_root: Path) -> dict[str, int]:
+    """Return family counts by declared config validation depth."""
+    inventory_path = configs_root / "quality" / "config_validation_surface.yaml"
+    if not inventory_path.exists():
+        return {}
+
+    payload = yaml.safe_load(inventory_path.read_text(encoding="utf-8")) or {}
+    if not isinstance(payload, dict):
+        return {}
+
+    families = payload.get("families", [])
+    if not isinstance(families, list):
+        return {}
+
+    summary: dict[str, int] = {}
+    for family in families:
+        if not isinstance(family, dict):
+            continue
+        depth = family.get("validation_depth", "missing")
+        depth_name = str(depth).strip() or "missing"
+        summary[depth_name] = summary.get(depth_name, 0) + 1
+    return dict(sorted(summary.items()))
+
+
+def _emit_validation_depth_summary(configs_root: Path) -> None:
+    """Print config-family validation depth coverage alongside config checks."""
+    summary = _config_validation_depth_summary(configs_root)
+    if not summary:
+        sys.stdout.write("Config validation surface: no family depth inventory found\n")
+        return
+
+    rendered = ", ".join(f"{depth}={count}" for depth, count in summary.items())
+    sys.stdout.write(f"Config validation surface family depths: {rendered}\n")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate unified pipeline configs")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
@@ -359,6 +398,8 @@ def main() -> int:
             composite_schema=composite_schema,
             errors=errors,
         )
+
+    _emit_validation_depth_summary(configs_root)
 
     if errors:
         sys.stderr.write("\nERRORS:\n")

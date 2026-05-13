@@ -465,7 +465,9 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
             (
                 candidate
                 for candidate in get_dashboard_panels(dashboard)
-                if candidate.get("title") == "Review Dashboard Navigation"
+                if candidate.get("id") == 1000
+                and candidate.get("title")
+                in {"Review Dashboard Navigation", "Navigation"}
             ),
             None,
         )
@@ -473,25 +475,25 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
             f"{dashboard_path.name} must expose top navigation guidance panel"
         )
         assert panel.get("gridPos", {}).get("y", 999) == 0, (
-            f"{dashboard_path.name}:Review Dashboard Navigation must remain at y=0"
+            f"{dashboard_path.name}:navigation panel must remain at y=0"
         )
         description = str(panel.get("description", "")).lower()
         assert description, (
-            f"{dashboard_path.name}:Review Dashboard Navigation must define "
+            f"{dashboard_path.name}:navigation panel must define "
             "machine-readable description text"
         )
         for token in required_tokens:
             assert token in description, (
-                f"{dashboard_path.name}:Review Dashboard Navigation description "
+                f"{dashboard_path.name}:navigation panel description "
                 f"must mention {token!r}"
             )
         if dashboard.get("uid") == "bioetl-control-plane-v1":
             assert "explore traces" not in description, (
-                f"{dashboard_path.name}:Review Dashboard Navigation must not "
+                f"{dashboard_path.name}:navigation panel must not "
                 "document direct Explore Traces handoff"
             )
             continue
         assert any(token in description for token in tracing_tokens), (
-            f"{dashboard_path.name}:Review Dashboard Navigation description "
+            f"{dashboard_path.name}:navigation panel description "
             "must document traced-run-only Explore Traces semantics"
         )

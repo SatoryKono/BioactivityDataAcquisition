@@ -2,23 +2,23 @@
 
 Quick overview of ADR status and distribution.
 
-**Last Updated**: 2026-04-24 14:08:29
+**Last Updated**: 2026-05-13 09:01:38
 
 ## 📈 Status Distribution
 
-| Status       | Count | Percentage |
-| ------------ | ----- | ---------- |
-| `active`     | 37    | 82.2%      |
-| `archived`   | 1     | 2.2%       |
-| `deprecated` | 3     | 6.7%       |
-| `draft`      | 1     | 2.2%       |
-| `superseded` | 3     | 6.7%       |
+| Status | Count | Percentage |
+|--------|-------|------------|
+| `active` | 39 | 83.0% |
+| `archived` | 1 | 2.1% |
+| `deprecated` | 3 | 6.4% |
+| `draft` | 1 | 2.1% |
+| `superseded` | 3 | 6.4% |
 
-## 🏷️ Category Distribution
+## 🏷️  Category Distribution
 
-| Category       | Count | Percentage |
-| -------------- | ----- | ---------- |
-| `architecture` | 45    | 100.0%     |
+| Category | Count | Percentage |
+|----------|-------|------------|
+| `architecture` | 47 | 100.0% |
 
 ## 🕒 Recent Activity
 
@@ -32,6 +32,6 @@ Last 5 updated ADRs:
 
 ## 🎯 Health Metrics
 
-- **Active ADRs**: 37/45 (82.2%)
-- **Maintenance Ratio**: 37:8
-- **Average ADRs/Year**: 15.0 (assuming 3-year project)
+- **Active ADRs**: 39/47 (83.0%)
+- **Maintenance Ratio**: 39:8
+- **Average ADRs/Year**: 15.7 (assuming 3-year project)

@@ -38,6 +38,12 @@ First-screen policy rule: every operator dashboard should expose one
 Shipped v2 dashboards may satisfy this through distributed scope/status/context
 surfaces; draft v3.0 turns it into an explicit header contract.
 
+Current shipped draft bridge:
+
+- `bioetl-overview-v3` already materializes that explicit header contract
+- it remains aggregate-first and routes exact run forensics to Control Plane /
+  Silver Reject Explorer
+
 ## If X symptom → open dashboard Y → panel Z
 
 | Symptom (X) | Dashboard (Y) | Panel (Z) |

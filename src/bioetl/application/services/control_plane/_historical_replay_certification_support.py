@@ -33,8 +33,8 @@ class HistoricalReplayCertificationProtocol(Protocol):
 
 
 @dataclass(frozen=True, slots=True)
-class HistoricalReplayCertificationResultBuilder:
-    """Build bounded certification results from manifest diagnostics."""
+class HistoricalReplayCertificationResultAssembler:
+    """Assemble bounded certification results from manifest diagnostics."""
 
     ledger_port: RunLedgerPort
 
