@@ -160,6 +160,9 @@ class EffectiveConfigArtifact:
     schema_version: str = "1.0"
     created_at: datetime = field(default_factory=_current_utc_time)
     contract_refs: list[str] = field(default_factory=list)
+    normalization_profile_ref: str | None = None
+    normalization_profile_version: str | None = None
+    normalization_profile_hash: str | None = None
     dq_policy_refs: list[DQPolicyRef] = field(default_factory=list)
     dq_rule_bundle_versions: dict[str, str] = field(default_factory=dict)
     dq_contract_compatibility_hash: str = ""

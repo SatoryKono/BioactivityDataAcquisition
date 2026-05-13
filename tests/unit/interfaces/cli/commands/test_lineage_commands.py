@@ -9,7 +9,7 @@ from typing import Any
 import pytest
 from click.testing import CliRunner
 
-from bioetl.application.services.lineage_inspection_service import (
+from bioetl.application.services.lineage.lineage_inspection_service import (
     LineageFragmentInspectionResult,
     LineageNodeRelationResult,
     LineageRunExplanationResult,

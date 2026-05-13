@@ -32,6 +32,10 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
         payload["inventory_allowlist"]
         == "configs/quality/observability_metric_inventory_allowlist.yaml"
     )
+    assert (
+        payload["derived_metric_declarations"]
+        == "configs/quality/observability_metric_declarations.yaml"
+    )
 
     governance_views = payload["governance_views"]
     assert governance_views == {

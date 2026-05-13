@@ -58,6 +58,9 @@
       "snapshot-golden-001"
     ],
     "lineage_fragment_ids": [],
+    "normalization_profile_hash": null,
+    "normalization_profile_ref": null,
+    "normalization_profile_version": null,
     "pipeline_name": "chembl_activity",
     "pipeline_version": "1.0.0",
     "published_artifact_ids": [],
@@ -142,6 +145,9 @@
     "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
     "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction."
   ],
+  "normalization_profile_hash": null,
+  "normalization_profile_ref": null,
+  "normalization_profile_version": null,
   "occurrence_only_diagnostics": [],
   "operator_replay_mode": "Exact Replay Blocked",
   "persistence_profile": {

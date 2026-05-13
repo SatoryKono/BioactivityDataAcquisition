@@ -10,8 +10,6 @@ import yaml
 
 from tests.helpers.metadata_fixtures import build_bronze_metadata
 
-pytest_plugins = ("tests.helpers.metadata_fixtures",)
-
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
     GoldMetadata,

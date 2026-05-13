@@ -183,6 +183,20 @@ def test_pubchem_smiles_rules_use_domain_smiles_normalization() -> None:
     assert isomeric_rule.apply(" C ") == "C"
 
 
+def test_pubchem_inchi_key_rules_use_domain_value_object_normalization() -> None:
+    inchi_rule = PUBCHEM_COMPOUND_PROFILE.rule_for("inchi_key")
+    standardized_inchi_rule = PUBCHEM_COMPOUND_PROFILE.rule_for(
+        "standardized_inchi_key"
+    )
+
+    assert inchi_rule is not None
+    assert inchi_rule.apply(" bsynrymutxbxsq-uhfffaoysa-n ") == (
+        "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+    )
+    assert standardized_inchi_rule is not None
+    assert standardized_inchi_rule.apply("invalid") is None
+
+
 def test_pubchem_standardization_fields_are_profile_enums() -> None:
     status_rule = PUBCHEM_COMPOUND_PROFILE.rule_for("chemical_standardization_status")
     policy_rule = PUBCHEM_COMPOUND_PROFILE.rule_for(

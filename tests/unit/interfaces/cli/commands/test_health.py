@@ -695,6 +695,7 @@ class TestHealthServerAsyncExecution:
             port=9000,
             health_monitor=mock_deps.health_monitor,
             quarantine_service=None,
+            run_manifest_port=mock_deps.run_manifest_port,
         )
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
@@ -731,6 +732,7 @@ class TestHealthServerAsyncExecution:
             port=8081,
             health_monitor=mock_deps.health_monitor,
             quarantine_service=None,
+            run_manifest_port=mock_deps.run_manifest_port,
         )
 
 

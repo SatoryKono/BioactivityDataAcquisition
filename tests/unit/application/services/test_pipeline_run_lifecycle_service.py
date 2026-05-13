@@ -8,7 +8,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.services.pipeline_run_lifecycle_service import (
+from bioetl.application.services.execution.pipeline_run_lifecycle_service import (
     PipelineRunLifecycleService,
 )
 from bioetl.domain.aggregates.pipeline_run import PipelineRunState, StageStatus

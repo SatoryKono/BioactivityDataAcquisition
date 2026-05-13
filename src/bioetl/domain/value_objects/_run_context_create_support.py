@@ -30,6 +30,9 @@ _RUN_CONTEXT_OPTIONAL_DEFAULTS: dict[str, object] = {
     "contract_schema_hash": None,
     "dq_policy_ref": None,
     "rule_bundle_version": None,
+    "normalization_profile_ref": None,
+    "normalization_profile_version": None,
+    "normalization_profile_hash": None,
     "dq_contract_compatibility_hash": None,
     "effective_config_artifact_id": None,
     "execution_fingerprint": None,
@@ -148,6 +151,15 @@ def coerce_run_context_create_input(
         dq_policy_ref=cast(_OPTIONAL_STR_ANNOTATION, values["dq_policy_ref"]),
         rule_bundle_version=cast(
             _OPTIONAL_STR_ANNOTATION, values["rule_bundle_version"]
+        ),
+        normalization_profile_ref=cast(
+            _OPTIONAL_STR_ANNOTATION, values["normalization_profile_ref"]
+        ),
+        normalization_profile_version=cast(
+            _OPTIONAL_STR_ANNOTATION, values["normalization_profile_version"]
+        ),
+        normalization_profile_hash=cast(
+            _OPTIONAL_STR_ANNOTATION, values["normalization_profile_hash"]
         ),
         dq_contract_compatibility_hash=cast(
             _OPTIONAL_STR_ANNOTATION, values["dq_contract_compatibility_hash"]

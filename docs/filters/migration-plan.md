@@ -99,13 +99,13 @@ infrastructure schema → domain config. Это сохраняет чистот�
 
 #### 1.2. RuntimeConfig / execution identity
 
-Добавить явный режим `silver_filter_compatibility_mode`:
+Добавить явное поле `silver_filter_compatibility_mode`:
 
-- `structural_only_auto_promote` — default, semantic Silver rules поднимаются в Gold
-- `legacy_semantic_silver` — rollback mode для старого поведения
+- `structural_only_auto_promote` — canonical runtime mode; semantic Silver rules поднимаются в Gold
 
-Режим должен попадать в effective config, run manifest, execution fingerprint и
-checkpoint compatibility payload, иначе rollback/replay не будет воспроизводимым.
+Поле должно попадать в effective config, run manifest, execution fingerprint и
+checkpoint compatibility payload, иначе structural-only behavior не будет
+детерминированно зафиксирован в replay/control-plane surfaces.
 
 ### Фаза 2: Infrastructure layer
 
@@ -124,9 +124,7 @@ class SilverFiltersFileConfig(BaseModel):
     list_contains: dict[str, dict] | None = Field(default=None, deprecated=True)
 ```
 
-`to_domain()`: в default mode возвращает `SilverFilterConfig` только с structural
-полями; в `BIOETL_LEGACY_SILVER_SEMANTIC=1` возвращает полный legacy
-`SilverFilterConfig`.
+`to_domain()`: возвращает `SilverFilterConfig` только с structural полями.
 
 #### 2.2. Filter config loader
 
@@ -165,8 +163,8 @@ class SilverFiltersFileConfig(BaseModel):
 - Run manifest canonical execution identity должен включать
   `silver_filter_compatibility_mode`.
 - Checkpoint metadata/fallback identity должен включать
-  `silver_filter_compatibility_mode`, иначе strict resume не увидит rollback
-  drift.
+  `silver_filter_compatibility_mode`, иначе strict resume не увидит drift между
+  старым и новым execution identity payload.
 
 ### Фаза 4: Configs migration
 
@@ -223,7 +221,7 @@ Per-entity ревью с владельцем provider/entity.
 | File | Изменение |
 | ---- | --------- |
 | `tests/architecture/test_silver_filter_boundary_inventory.py` | Add committed baseline drift check and later harden semantic Silver ban |
-| `tests/unit/infrastructure/config/test_filter_config_loader.py` | Add auto-promotion and legacy rollback tests |
+| `tests/unit/infrastructure/config/test_filter_config_loader.py` | Add auto-promotion tests |
 | `tests/unit/infrastructure/schemas/test_filter_config.py` | Update SilverFiltersFileConfig scope |
 | `tests/unit/infrastructure/test_config.py` | Verify inline pipeline config auto-promotion |
 | `tests/unit/domain/normalization/test_fingerprints.py` | Verify silver mode changes execution fingerprint |
@@ -249,17 +247,12 @@ Per-entity ревью с владельцем provider/entity.
 #### Phased rollout
 
 1. **PR 1** — Runtime identity + Infrastructure compatibility changes
-   (auto-promotion, structural-only Silver domain conversion, rollback mode)
+   (auto-promotion, structural-only Silver domain conversion)
 1. **PR 2** — Inventory baseline enforcement + representative baseline measurement
 1. **PRs 3-N** — Configs migration (per-provider, smaller PRs)
 1. **PR N+1** — Tests + documentation
 1. **PR N+2** — Observability rename/relabel
 1. **Future release** — Remove deprecation warnings, harden CI invariant (warning → error)
-
-#### Feature flag
-
-`BIOETL_LEGACY_SILVER_SEMANTIC=1` — отключает auto-promotion (emergency
-rollback) and records `legacy_semantic_silver` in runtime identity artifacts.
 
 #### Rollback triggers
 

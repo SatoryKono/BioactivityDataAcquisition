@@ -10,8 +10,8 @@ from uuid import UUID
 import pytest
 
 import bioetl.infrastructure.control_plane.file_run_manifest_store as manifest_store_module
-from bioetl.application.services.run_manifest_service import (
-    RunManifestCreateRequest,
+from bioetl.application.services.control_plane.run_manifest_service import (
+    RunManifestCreateSpec as RunManifestCreateRequest,
     RunManifestService,
 )
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
@@ -86,6 +86,9 @@ def _make_request() -> RunManifestCreateRequest:
         contract_schema_hash="abc123",
         dq_policy_ref="chembl.dq.v1",
         rule_bundle_version="dq-rules.v1.0",
+        normalization_profile_ref="chembl.activity",
+        normalization_profile_version="1.0.0",
+        normalization_profile_hash="d" * 64,
         replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
     )
 
@@ -107,6 +110,9 @@ def test_create_manifest_persists_and_links_run_id() -> None:
     assert manifest.code_provenance.contract_schema_hash == "abc123"
     assert manifest.code_provenance.dq_policy_ref == "chembl.dq.v1"
     assert manifest.code_provenance.rule_bundle_version == "dq-rules.v1.0"
+    assert manifest.code_provenance.normalization_profile_ref == "chembl.activity"
+    assert manifest.code_provenance.normalization_profile_version == "1.0.0"
+    assert manifest.code_provenance.normalization_profile_hash == "d" * 64
     assert store.get("manifest-1") == manifest
     assert store.get_by_run_id(manifest.run_id) == manifest
 
@@ -527,7 +533,7 @@ def test_execution_fingerprint_matches_golden_value() -> None:
 
     assert (
         manifest.execution_fingerprint
-        == "4beaf6d6134b76cb2dfdfee89cfa192b5b8d91d486dfcdc62e0087a58378bead"
+        == "7db8ea5799c1b38356a3f3afc02be1b71e7dc420dba5f320429c3b36a855e3b9"
     )
 
 

@@ -13,14 +13,13 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 CheckpointCompatibilityPolicy = Literal[
-    "observe", "legacy_observe", "soft_fail", "hard_fail"
+    "observe", "soft_fail", "hard_fail"
 ]
 _DEFAULT_CHECKPOINT_COMPATIBILITY_POLICY: CheckpointCompatibilityPolicy = "soft_fail"
 _ALLOWED_CHECKPOINT_COMPATIBILITY_POLICIES: tuple[
     CheckpointCompatibilityPolicy, ...
 ] = (
     "observe",
-    "legacy_observe",
     "soft_fail",
     "hard_fail",
 )
@@ -93,7 +92,7 @@ def resolve_checkpoint_compatibility_policy(
         return "hard_fail"
     if (
         required_persistence_profile in STRICT_PERSISTENCE_PROFILES
-        and requested_policy in {"observe", "legacy_observe"}
+        and requested_policy == "observe"
     ):
         logger_port.warning(
             "Required persistence profile enforces hard_fail "

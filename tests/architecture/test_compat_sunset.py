@@ -22,6 +22,57 @@ COMPAT_FILES: dict[str, Path] = {}
 COMPAT_MODULES: dict[str, Path] = {}
 
 REMOVED_COMPAT_MODULES: dict[str, Path] = {
+    "application services cli_run_orchestration_service facade": Path(
+        "src/bioetl/application/services/cli_run_orchestration_service.py"
+    ),
+    "application services cli_run_orchestration_contracts facade": Path(
+        "src/bioetl/application/services/cli_run_orchestration_contracts.py"
+    ),
+    "application services cli_run_orchestration_models facade": Path(
+        "src/bioetl/application/services/cli_run_orchestration_models.py"
+    ),
+    "application services lineage_inspection_service facade": Path(
+        "src/bioetl/application/services/lineage_inspection_service.py"
+    ),
+    "application services metadata_coordinator facade": Path(
+        "src/bioetl/application/services/metadata_coordinator.py"
+    ),
+    "application services run_ledger_service facade": Path(
+        "src/bioetl/application/services/run_ledger_service.py"
+    ),
+    "application services run_manifest_inspection_service facade": Path(
+        "src/bioetl/application/services/run_manifest_inspection_service.py"
+    ),
+    "application services pipeline_run_context_service facade": Path(
+        "src/bioetl/application/services/pipeline_run_context_service.py"
+    ),
+    "application services pipeline_run_execution_service facade": Path(
+        "src/bioetl/application/services/pipeline_run_execution_service.py"
+    ),
+    "application services pipeline_run_lifecycle_service facade": Path(
+        "src/bioetl/application/services/pipeline_run_lifecycle_service.py"
+    ),
+    "application services pipeline_runner_models facade": Path(
+        "src/bioetl/application/services/pipeline_runner_models.py"
+    ),
+    "application services pipeline_runner_service facade": Path(
+        "src/bioetl/application/services/pipeline_runner_service.py"
+    ),
+    "application services run_manifest_diagnostics facade": Path(
+        "src/bioetl/application/services/run_manifest_diagnostics.py"
+    ),
+    "application services effective_config_service facade": Path(
+        "src/bioetl/application/services/effective_config_service.py"
+    ),
+    "application services run_manifest_service facade": Path(
+        "src/bioetl/application/services/run_manifest_service.py"
+    ),
+    "cli inspection_output compat wrapper": Path(
+        "src/bioetl/interfaces/cli/commands/inspection_output.py"
+    ),
+    "cli run_manifest_output compat wrapper": Path(
+        "src/bioetl/interfaces/cli/commands/run_manifest_output.py"
+    ),
     "aggregate_port.py (StoragePort)": Path(
         "src/bioetl/domain/ports/storage/aggregate_port.py"
     ),

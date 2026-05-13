@@ -171,6 +171,44 @@ def test_collect_metric_inventory_detects_keyword_metric_name_emitters(
     ]
 
 
+def test_collect_metric_inventory_detects_direct_keyword_name_emitters(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset({"bioetl_publication_raw_vocab_unknown_total"}),
+    )
+
+    runtime_dir = tmp_path / "src" / "bioetl" / "application" / "pipelines" / "common"
+    runtime_dir.mkdir(parents=True)
+    (runtime_dir / "publication_vocab_observability.py").write_text(
+        "\n".join(
+            [
+                'PUBLICATION_RAW_VOCAB_UNKNOWN_TOTAL = "bioetl_publication_raw_vocab_unknown_total"',
+                "",
+                "def emit(metrics):",
+                "    metrics.increment_counter(",
+                "        name=PUBLICATION_RAW_VOCAB_UNKNOWN_TOTAL,",
+                "        value=1,",
+                "        labels={'pipeline': 'p', 'provider': 'x', 'field': 'y', 'handling': 'z'},",
+                "    )",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert report["live_metrics"] == ["bioetl_publication_raw_vocab_unknown_total"]
+    assert report["direct_live_metrics"] == [
+        "bioetl_publication_raw_vocab_unknown_total"
+    ]
+    assert report["registered_without_runtime"] == []
+
+
 def test_collect_metric_inventory_tracks_helper_backed_emitters(
     tmp_path: Path,
     monkeypatch: object,
@@ -370,6 +408,133 @@ def test_collect_metric_inventory_records_static_prometheus_collector_emitters(
         "src/bioetl/infrastructure/observability/server.py"
     ]
     assert report["registered_without_runtime"] == []
+
+
+def test_collect_metric_inventory_detects_direct_prometheus_collectors(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset(
+            {
+                "bioetl_gold_write_attempts_total",
+                "bioetl_gold_write_duration_seconds",
+                "bioetl_gold_write_outcomes_total",
+            }
+        ),
+    )
+
+    runtime_dir = tmp_path / "src" / "bioetl" / "infrastructure" / "storage" / "gold"
+    runtime_dir.mkdir(parents=True)
+    (runtime_dir / "writer.py").write_text(
+        "\n".join(
+            [
+                "from bioetl.infrastructure.observability.metrics import (",
+                "    GOLD_WRITE_ATTEMPTS_TOTAL,",
+                "    GOLD_WRITE_DURATION_SECONDS,",
+                "    GOLD_WRITE_OUTCOMES_TOTAL,",
+                ")",
+                "",
+                "def emit(duration: float) -> None:",
+                "    GOLD_WRITE_ATTEMPTS_TOTAL.labels(pipeline='p', table='t', mode='append').inc()",
+                "    GOLD_WRITE_OUTCOMES_TOTAL.labels(pipeline='p', table='t', mode='append', status='success').inc()",
+                "    GOLD_WRITE_DURATION_SECONDS.labels(pipeline='p', table='t', mode='append', status='success').observe(duration)",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert report["live_metrics"] == [
+        "bioetl_gold_write_attempts_total",
+        "bioetl_gold_write_duration_seconds",
+        "bioetl_gold_write_outcomes_total",
+    ]
+    assert report["registered_without_runtime"] == []
+    runtime_emitters = report["runtime_emitters"]
+    assert isinstance(runtime_emitters, dict)
+    assert runtime_emitters["bioetl_gold_write_attempts_total"] == [
+        "src/bioetl/infrastructure/storage/gold/writer.py"
+    ]
+    assert runtime_emitters["bioetl_gold_write_outcomes_total"] == [
+        "src/bioetl/infrastructure/storage/gold/writer.py"
+    ]
+    assert runtime_emitters["bioetl_gold_write_duration_seconds"] == [
+        "src/bioetl/infrastructure/storage/gold/writer.py"
+    ]
+
+
+def test_collect_metric_inventory_honors_declared_recording_rule_metrics(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset({"bioetl_live_counter_total"}),
+    )
+    monkeypatch.setattr(
+        inventory,
+        "_DEFAULT_DECLARED_METRIC_DEFINITIONS",
+        Path("configs/quality/observability_metric_declarations.yaml"),
+    )
+
+    runtime_dir = tmp_path / "src" / "bioetl" / "application"
+    runtime_dir.mkdir(parents=True)
+    (runtime_dir / "emitters.py").write_text(
+        'metrics.increment_counter("bioetl_live_counter_total", labels={})\n',
+        encoding="utf-8",
+    )
+
+    docs_dir = tmp_path / "docs" / "03-guides"
+    docs_dir.mkdir(parents=True)
+    (docs_dir / "guide.md").write_text(
+        "bioetl_live_counter_total\nbioetl_runtime_current_status\n",
+        encoding="utf-8",
+    )
+
+    rules_dir = tmp_path / "grafana" / "prometheus-rules"
+    rules_dir.mkdir(parents=True)
+    (rules_dir / "rules.yml").write_text(
+        "\n".join(
+            [
+                "groups:",
+                "  - name: test",
+                "    rules:",
+                "      - record: bioetl_runtime_current_status",
+                "        expr: max(bioetl_live_counter_total)",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    config_dir = tmp_path / "configs" / "quality"
+    config_dir.mkdir(parents=True)
+    (config_dir / "observability_metric_declarations.yaml").write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "policy_scope: observability_metric_declarations",
+                "recording_rule_metrics:",
+                "  - bioetl_runtime_current_status",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert "bioetl_runtime_current_status" in report["declared_metrics"]
+    assert report["documented_without_registry"] == []
+    assert report["rules_without_registry"] == []
+    assert report["registered_without_runtime"] == []
+    assert report["dead_metrics"] == []
 
 
 def test_collect_metric_inventory_flags_multi_emitter_cardinality_review_candidates(

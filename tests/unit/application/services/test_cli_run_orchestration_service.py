@@ -13,28 +13,20 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunResult,
 )
-from bioetl.application.services.cli_run_orchestration_contracts import (
-    MetricsFlushCallable as CanonicalMetricsFlushCallable,
-    RunCoroutineCallable as CanonicalRunCoroutineCallable,
-    RunPreparedPipelineCallable as CanonicalRunPreparedPipelineCallable,
-)
-from bioetl.application.services.cli_run_orchestration_models import (
-    CliRunOptionsInput,
-    CliRunPreparationInput,
-    RunExecutionRequest as CanonicalRunExecutionRequest,
-    RunPreparationResult as CanonicalRunPreparationResult,
-    StartOffsetValidationResult as CanonicalStartOffsetValidationResult,
-)
-from bioetl.application.services.cli_run_orchestration_service import (
-    CliRunOrchestrationService,
+from bioetl.application.services.execution.cli_run_orchestration_contracts import (
     MetricsFlushCallable,
     RunCoroutineCallable,
-    CliRunOptionsInput as ServiceCliRunOptionsInput,
-    CliRunPreparationInput as ServiceCliRunPreparationInput,
+    RunPreparedPipelineCallable,
+)
+from bioetl.application.services.execution.cli_run_orchestration_models import (
+    CliRunOptionsInput,
+    CliRunPreparationInput,
     RunExecutionRequest,
     RunPreparationResult,
-    RunPreparedPipelineCallable,
     StartOffsetValidationResult,
+)
+from bioetl.application.services.execution.cli_run_orchestration_service import (
+    CliRunOrchestrationService,
 )
 
 TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-cli-run-orchestration-"))
@@ -61,17 +53,6 @@ def _make_result(**kwargs: object) -> RunResult:
 
 class TestPrepareExecutionRequest:
     """Tests for request preparation from raw CLI arguments."""
-
-    def test_service_module_re_exports_canonical_models_and_contracts(self) -> None:
-        """Compatibility re-exports should stay identity-equal to canonical owners."""
-        assert RunExecutionRequest is CanonicalRunExecutionRequest
-        assert RunPreparationResult is CanonicalRunPreparationResult
-        assert StartOffsetValidationResult is CanonicalStartOffsetValidationResult
-        assert ServiceCliRunOptionsInput is CliRunOptionsInput
-        assert ServiceCliRunPreparationInput is CliRunPreparationInput
-        assert RunPreparedPipelineCallable is CanonicalRunPreparedPipelineCallable
-        assert RunCoroutineCallable is CanonicalRunCoroutineCallable
-        assert MetricsFlushCallable is CanonicalMetricsFlushCallable
 
     def test_builds_prepared_request_for_valid_inputs(self) -> None:
         service = CliRunOrchestrationService()

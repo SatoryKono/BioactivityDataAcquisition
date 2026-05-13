@@ -90,6 +90,9 @@ class RunContext:
     contract_schema_hash: str | None = None
     dq_policy_ref: str | None = None
     rule_bundle_version: str | None = None
+    normalization_profile_ref: str | None = None
+    normalization_profile_version: str | None = None
+    normalization_profile_hash: str | None = None
     # Data Quality integration
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
@@ -141,6 +144,9 @@ class RunContext:
             contract_schema_hash=create_input.contract_schema_hash,
             dq_policy_ref=create_input.dq_policy_ref,
             rule_bundle_version=create_input.rule_bundle_version,
+            normalization_profile_ref=create_input.normalization_profile_ref,
+            normalization_profile_version=create_input.normalization_profile_version,
+            normalization_profile_hash=create_input.normalization_profile_hash,
             dq_contract_compatibility_hash=create_input.dq_contract_compatibility_hash,
             effective_config_artifact_id=create_input.effective_config_artifact_id,
             execution_fingerprint=create_input.execution_fingerprint,

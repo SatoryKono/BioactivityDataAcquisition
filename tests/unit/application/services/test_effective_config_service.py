@@ -11,7 +11,7 @@ import pytest
 from bioetl.application.services.control_plane._effective_config_support import (
     stable_hash,
 )
-from bioetl.application.services.effective_config_service import (
+from bioetl.application.services.control_plane.effective_config_service import (
     EffectiveConfigService,
     create_effective_config_service,
 )
@@ -147,6 +147,23 @@ class TestEffectiveConfigService:
         assert effective_config["settings"]["timeout"] == 30  # Not overridden
         assert effective_config["log_level"] == "DEBUG"  # Added by override
         assert effective_config["auto_adjust"] is True  # Added by override
+
+    def test_create_artifact_with_normalization_profile_identity(self) -> None:
+        """Normalization profile identity should persist on the artifact surface."""
+        artifact = self.service.create_effective_config_artifact(
+            pipeline_name="pubchem_compound",
+            pipeline_kind="standard",
+            resolved_config={"pipeline": {"name": "pubchem_compound"}},
+            runtime_overrides={},
+            source_refs=[],
+            normalization_profile_ref="pubchem.compound",
+            normalization_profile_version="1.0.0",
+            normalization_profile_hash="a" * 64,
+        )
+
+        assert artifact.normalization_profile_ref == "pubchem.compound"
+        assert artifact.normalization_profile_version == "1.0.0"
+        assert artifact.normalization_profile_hash == "a" * 64
 
     def test_create_artifact_rejects_non_allowlisted_env_overrides(self) -> None:
         """Semantic env overrides must stay inside the explicit allowlist."""

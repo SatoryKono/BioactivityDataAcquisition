@@ -12,7 +12,7 @@ from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CliBoundaryExecutionPolicy,
     run_sync_with_cli_failure_policy,
 )
-from bioetl.interfaces.cli.commands.inspection_output import (
+from bioetl.interfaces.cli.commands._inspection_output import (
     emit_inspection_payload,
 )
 

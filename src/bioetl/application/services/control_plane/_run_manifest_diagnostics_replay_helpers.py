@@ -121,28 +121,49 @@ def _is_composite_execution_context(manifest: RunManifest) -> bool:
 
 
 def _collect_append_mode_semantic_sinks(manifest: RunManifest) -> list[str]:
-    sinks = manifest.launch_context.get("append_mode_semantic_sinks")
-    if isinstance(sinks, list):
-        normalized = [
-            str(sink).strip()
-            for sink in sinks
-            if isinstance(sink, str) and str(sink).strip()
-        ]
-        if normalized:
-            return normalized
-    derived: list[str] = []
+    normalized = _normalize_declared_append_mode_sinks(
+        manifest.launch_context.get("append_mode_semantic_sinks")
+    )
+    if normalized:
+        return normalized
+    return sorted(_derive_append_mode_semantic_sinks_from_manifest(manifest))
+
+
+def _derive_append_mode_semantic_sinks_from_manifest(manifest: RunManifest) -> set[str]:
+    """Derive append mode semantic sinks from runtime and resolved configs."""
+    derived: set[str] = set()
     for config in (manifest.runtime_config, manifest.resolved_config):
-        sink_config = lookup_mapping_path(config, "sink")
-        if not isinstance(sink_config, dict):
-            continue
-        for sink_name, sink_settings in sink_config.items():
-            if not isinstance(sink_name, str) or not isinstance(sink_settings, dict):
-                continue
-            mode = str(sink_settings.get("mode") or "").strip().lower()
-            enabled = sink_settings.get("enabled")
-            if mode == "append" and enabled is not False:
-                derived.append(f"sink.{sink_name}.mode=append")
-    return sorted(set(derived))
+        derived.update(_derive_append_mode_sinks_from_config(config))
+    return derived
+
+
+def _normalize_declared_append_mode_sinks(raw_sinks: object) -> list[str]:
+    if not isinstance(raw_sinks, list):
+        return []
+    return [
+        str(sink).strip()
+        for sink in raw_sinks
+        if isinstance(sink, str) and str(sink).strip()
+    ]
+
+
+def _derive_append_mode_sinks_from_config(config: dict[str, object]) -> set[str]:
+    sink_config = lookup_mapping_path(config, "sink")
+    if not isinstance(sink_config, dict):
+        return set()
+    return {
+        f"sink.{sink_name}.mode=append"
+        for sink_name, sink_settings in sink_config.items()
+        if _is_append_enabled_sink(sink_name, sink_settings)
+    }
+
+
+def _is_append_enabled_sink(sink_name: object, sink_settings: object) -> bool:
+    if not isinstance(sink_name, str) or not isinstance(sink_settings, dict):
+        return False
+    mode = str(sink_settings.get("mode") or "").strip().lower()
+    enabled = sink_settings.get("enabled")
+    return mode == "append" and enabled is not False
 
 
 def _profile_exact_replay_blockers(profile: object) -> list[str]:
@@ -281,7 +302,7 @@ def _resolve_requested_checkpoint_compatibility_policy(
     for candidate in candidates:
         if isinstance(candidate, str):
             normalized = candidate.strip().lower()
-            if normalized in {"observe", "legacy_observe", "soft_fail", "hard_fail"}:
+            if normalized in {"observe", "soft_fail", "hard_fail"}:
                 return normalized
     return None
 

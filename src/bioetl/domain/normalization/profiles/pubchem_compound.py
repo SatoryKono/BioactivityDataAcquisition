@@ -11,6 +11,7 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_canonical_smiles,
+    normalize_profile_inchi_key,
     normalize_profile_isomeric_smiles,
 )
 from bioetl.domain.schemas.pubchem.compound import PubchemMoleculeSchema
@@ -70,9 +71,17 @@ _SPECIAL_RULES = {
         normalize_profile_canonical_smiles,
         "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",
     ),
+    "inchi_key": (
+        normalize_profile_inchi_key,
+        "Validate InChIKey through the canonical domain value-object contract, then emit uppercase canonical text.",
+    ),
     "isomeric_smiles": (
         normalize_profile_isomeric_smiles,
         "Normalize isomeric SMILES via the domain SMILES Value Object; invalid values collapse to None.",
+    ),
+    "standardized_inchi_key": (
+        normalize_profile_inchi_key,
+        "Validate standardized InChIKey through the canonical domain value-object contract, then emit uppercase canonical text.",
     ),
 }
 

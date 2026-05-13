@@ -50,6 +50,18 @@ def build_checkpoint_anchor_matches(
             left_manifest.code_provenance.contract_version
             == right_manifest.code_provenance.contract_version
         ),
+        "normalization_profile_ref": (
+            left_manifest.code_provenance.normalization_profile_ref
+            == right_manifest.code_provenance.normalization_profile_ref
+        ),
+        "normalization_profile_version": (
+            left_manifest.code_provenance.normalization_profile_version
+            == right_manifest.code_provenance.normalization_profile_version
+        ),
+        "normalization_profile_hash": (
+            left_manifest.code_provenance.normalization_profile_hash
+            == right_manifest.code_provenance.normalization_profile_hash
+        ),
         "input_snapshot_ids": (
             manifest_snapshot_ids(left_manifest)
             == manifest_snapshot_ids(right_manifest)

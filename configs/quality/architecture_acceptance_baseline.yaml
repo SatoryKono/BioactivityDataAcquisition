@@ -32,7 +32,7 @@ criteria:
     description: RunLedger exposes a deterministic lifecycle and stage timeline.
     source_paths:
       - src/bioetl/domain/control_plane/run_ledger.py
-      - src/bioetl/application/services/run_ledger_service.py
+      - src/bioetl/application/services/control_plane/run_ledger_service.py
     verification_tests:
       - tests/unit/application/services/test_run_ledger_service.py
       - tests/unit/domain/control_plane/test_run_ledger_replay.py
@@ -83,7 +83,7 @@ criteria:
     description: Correlation logging stays sourced from PipelineRunContext through LoggerPort seams.
     source_paths:
       - src/bioetl/domain/context.py
-      - src/bioetl/application/services/pipeline_runner_service.py
+      - src/bioetl/application/services/execution/pipeline_runner_service.py
     verification_tests:
       - tests/architecture/test_logging_correlation_contract.py
       - tests/architecture/test_no_structlog_in_application_interfaces.py

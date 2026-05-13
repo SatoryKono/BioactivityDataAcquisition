@@ -7,7 +7,7 @@ from pathlib import Path
 
 import click
 
-from bioetl.application.services.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.run_manifest_inspection_service import (
     RunManifestInspectionCorruptionError,
 )
 from bioetl.interfaces.cli.commands._inspection_output import (
@@ -25,7 +25,7 @@ from bioetl.interfaces.cli.commands._run_manifest_services import (
     get_historical_replay_universe_service,
     get_run_manifest_service,
 )
-from bioetl.interfaces.cli.commands.run_manifest_output import (
+from bioetl.interfaces.cli.commands._run_manifest_output import (
     render_text_payload,
 )
 from bioetl.interfaces.cli.formatters import echo_error

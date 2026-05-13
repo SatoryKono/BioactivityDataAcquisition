@@ -1,9 +1,7 @@
-"""Silver-filter migration helpers owned by the infrastructure boundary."""
+"""Silver-filter normalization helpers owned by the infrastructure boundary."""
 
 from __future__ import annotations
 
-import os
-from collections.abc import Mapping
 from copy import deepcopy
 from typing import Any, Literal
 
@@ -12,22 +10,15 @@ from bioetl.domain.types import JsonDict
 
 SilverFilterCompatibilityMode = Literal[
     "structural_only_auto_promote",
-    "legacy_semantic_silver",
 ]
 
 DEFAULT_SILVER_FILTER_COMPATIBILITY_MODE: SilverFilterCompatibilityMode = (
     "structural_only_auto_promote"
 )
-LEGACY_SILVER_FILTER_COMPATIBILITY_MODE: SilverFilterCompatibilityMode = (
-    "legacy_semantic_silver"
-)
-LEGACY_SILVER_FILTER_ENV = "BIOETL_LEGACY_SILVER_SEMANTIC"
 SILVER_STRUCTURAL_FILTER_KEYS = frozenset({"required_fields", "exclude_if_present"})
 SILVER_SEMANTIC_FILTER_KEYS = frozenset(
     {"columns", "ranges", "list_lengths", "list_contains"}
 )
-
-_TRUTHY_ENV_VALUES = frozenset({"1", "true", "yes", "on"})
 
 
 def build_structural_silver_filter_config(
@@ -42,54 +33,32 @@ def build_structural_silver_filter_config(
 
 def build_silver_filter_config_for_compatibility(
     source: BaseFilterConfig,
-    *,
-    compatibility_mode: SilverFilterCompatibilityMode | None = None,
 ) -> SilverFilterConfig:
-    """Return a Silver config that honors the active migration compatibility mode."""
-    resolved_mode = compatibility_mode or resolve_silver_filter_compatibility_mode()
-    if resolved_mode == LEGACY_SILVER_FILTER_COMPATIBILITY_MODE:
-        return SilverFilterConfig.from_base(source)
+    """Return the canonical structural-only Silver config."""
     return build_structural_silver_filter_config(source)
 
 
 def resolve_silver_filter_compatibility_mode(
-    env: Mapping[str, str] | None = None,
 ) -> SilverFilterCompatibilityMode:
-    """Resolve the explicit Silver filter compatibility mode."""
-    environ = os.environ if env is None else env
-    raw_legacy_flag = environ.get(LEGACY_SILVER_FILTER_ENV, "")
-    if raw_legacy_flag.strip().lower() in _TRUTHY_ENV_VALUES:
-        return LEGACY_SILVER_FILTER_COMPATIBILITY_MODE
+    """Return the canonical Silver filter mode captured in runtime identity."""
     return DEFAULT_SILVER_FILTER_COMPATIBILITY_MODE
 
 
 def build_silver_filter_compatibility_snapshot(
-    env: Mapping[str, str] | None = None,
 ) -> JsonDict:
     """Build the manifest/effective-config identity payload for Silver filtering."""
-    mode = resolve_silver_filter_compatibility_mode(env)
-    source = (
-        f"environment:{LEGACY_SILVER_FILTER_ENV}"
-        if mode == LEGACY_SILVER_FILTER_COMPATIBILITY_MODE
-        else "default"
-    )
     return {
         "schema_version": "silver-filter-compatibility-v1",
-        "mode": mode,
-        "source": source,
+        "mode": resolve_silver_filter_compatibility_mode(),
+        "source": "default",
     }
 
 
 def normalize_silver_gold_filter_payload(
     payload: Mapping[str, Any],
-    *,
-    compatibility_mode: SilverFilterCompatibilityMode | None = None,
 ) -> JsonDict:
     """Promote semantic Silver rules into Gold and leave Silver structural-only."""
     result = deepcopy(dict(payload))
-    resolved_mode = compatibility_mode or resolve_silver_filter_compatibility_mode()
-    if resolved_mode == LEGACY_SILVER_FILTER_COMPATIBILITY_MODE:
-        return result
 
     silver_filters = result.get("silver_filters")
     if not isinstance(silver_filters, dict):
@@ -123,8 +92,6 @@ def normalize_silver_gold_filter_payload(
 
 __all__ = [
     "DEFAULT_SILVER_FILTER_COMPATIBILITY_MODE",
-    "LEGACY_SILVER_FILTER_COMPATIBILITY_MODE",
-    "LEGACY_SILVER_FILTER_ENV",
     "SILVER_SEMANTIC_FILTER_KEYS",
     "SILVER_STRUCTURAL_FILTER_KEYS",
     "SilverFilterCompatibilityMode",

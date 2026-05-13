@@ -315,52 +315,6 @@ def test_lenient_mode_compatibility():
     assert result.recovery_suggestions == [DEPENDENCY_PHASE_SUGGESTION]
 
 
-def test_legacy_mode_compatibility():
-    """Test compatibility in legacy mode."""
-    config = CheckpointCompatibilityConfig(mode=CheckpointCompatibilityMode.LEGACY)
-    service = CheckpointCompatibilityServiceV2(config)
-
-    current_identity = CheckpointIdentity(
-        effective_config_hash=HASH_A,
-        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
-        checkpoint_schema_version="2.0.0",
-    )
-
-    checkpoint_identity = CheckpointIdentity(
-        effective_config_hash=HASH_B,
-        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
-        checkpoint_schema_version="1.0.0",  # Different version
-    )
-
-    result = service.check_compatibility(current_identity, checkpoint_identity)
-
-    assert result.verdict == CompatibilityVerdict.COMPATIBLE
-    assert (
-        result.message
-        == "Checkpoint is compatible for dependency_execution phase (mode: legacy)"
-    )
-    assert result.details["compatibility_mode"] == "legacy"
-    _assert_component(
-        result,
-        "config_compatibility",
-        compatible=False,
-        reason="different_config_hash",
-        severity="major",
-    )
-    _assert_component(
-        result,
-        "schema_compatibility",
-        compatible=False,
-        reason="incompatible_major_version",
-        severity="major",
-    )
-    assert result.recovery_suggestions == [
-        CONFIG_MISMATCH_SUGGESTION,
-        MAJOR_SCHEMA_SUGGESTION,
-        DEPENDENCY_PHASE_SUGGESTION,
-    ]
-
-
 def test_compatible_phase_transition():
     """Test compatible phase transition."""
     service = CheckpointCompatibilityServiceV2()

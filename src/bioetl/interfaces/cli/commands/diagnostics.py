@@ -32,10 +32,10 @@ from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
     add_checkpoint_workflow_options,
     run_async_inspection_command,
 )
-from bioetl.interfaces.cli.commands.inspection_output import (
+from bioetl.interfaces.cli.commands._inspection_output import (
     emit_inspection_payload,
 )
-from bioetl.interfaces.cli.commands.run_manifest_output import (
+from bioetl.interfaces.cli.commands._run_manifest_output import (
     render_text_payload,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode

@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Draft v3 hybrid L0 overview. Keeps aggregate answer-first triage for the selected workflow/pipeline/run_type scope, adds explicit scope/provenance/first-action header semantics, and exposes run_id only as a visible execution-hint bridge until a local run-catalog-backed exact execution selector is shipped.",
+  "description": "Draft v3 hybrid L0 overview. Keeps aggregate answer-first triage for the selected workflow/pipeline/run_type scope, adds explicit scope/provenance/first-action header semantics, and exposes a control-plane-backed run_id selector without reintroducing run_id into Prometheus labels.",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -103,7 +103,7 @@
         "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">What is broken or degraded right now, and where should the operator drill down first?</div></div>",
         "mode": "html"
       },
-      "description": "L0 v3 scope/provenance banner. Primary question: what is broken now and where should the operator drill down first? Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Provenance: shipped Prometheus current-status recording rules plus selected-range evidence. Known limitation: exact run resolution remains future-gated; workflow is context/evidence-first and run_id is a visible execution hint, not a catalog-backed exact selector.",
+      "description": "L0 v3 scope/provenance banner. Primary question: what is broken now and where should the operator drill down first? Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Provenance: shipped Prometheus current-status recording rules plus selected-range evidence. Known limitation: first-screen PromQL remains pipeline/run_type-scoped; workflow is context/evidence-first, and run_id is resolved from persisted control-plane manifests for dashboard handoff rather than exact PromQL intersection.",
       "title": "Provenance",
       "type": "text"
     },
@@ -2429,11 +2429,8 @@
         "x": 0,
         "y": 7
       },
-      "description": "Identity table for the selected pipeline scope. pipeline name and run_id come from current selectors; other fields are explicitly marked as unavailable in Overview v3 and require Control Plane evidence surfaces.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+      "description": "Identity table for the selected pipeline scope. It resolves manifest_id and run_id from the control-plane run-manifest catalog for the current pipeline/run_type scope, preferring the selected run_id when present and otherwise falling back to the latest persisted manifest for the selected scope.",
+      "datasource": "Quarantine Explorer",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -2449,58 +2446,18 @@
       },
       "targets": [
         {
-          "expr": "label_replace(label_replace(vector(1), \"parameter\", \"manifest_id\", \"\", \"\"), \"value\", \"not available in Overview v3\", \"\", \"\")",
+          "format": "table",
+          "parser": "backend",
           "refId": "A",
-          "format": "table",
-          "instant": true
-        },
-        {
-          "expr": "label_replace(label_replace(vector(1), \"parameter\", \"run_id\", \"\", \"\"), \"value\", \"$run_id\", \"\", \"\")",
-          "refId": "B",
-          "format": "table",
-          "instant": true
-        },
-        {
-          "expr": "label_replace(label_replace(vector(1), \"parameter\", \"pipeline name\", \"\", \"\"), \"value\", \"$pipeline\", \"\", \"\")",
-          "refId": "C",
-          "format": "table",
-          "instant": true
-        },
-        {
-          "expr": "label_replace(label_replace(vector(1), \"parameter\", \"pipelineversion\", \"\", \"\"), \"value\", \"not available in Overview v3\", \"\", \"\")",
-          "refId": "D",
-          "format": "table",
-          "instant": true
-        },
-        {
-          "expr": "label_replace(label_replace(vector(1), \"parameter\", \"git commit hash\", \"\", \"\"), \"value\", \"not available in Overview v3\", \"\", \"\")",
-          "refId": "E",
-          "format": "table",
-          "instant": true
-        },
-        {
-          "expr": "label_replace(label_replace(vector(1), \"parameter\", \"config hash\", \"\", \"\"), \"value\", \"not available in Overview v3\", \"\", \"\")",
-          "refId": "F",
-          "format": "table",
-          "instant": true
-        },
-        {
-          "expr": "label_replace(label_replace(vector(1), \"parameter\", \"execution fingerprint\", \"\", \"\"), \"value\", \"not available in Overview v3\", \"\", \"\")",
-          "refId": "G",
-          "format": "table",
-          "instant": true
-        },
-        {
-          "expr": "label_replace(label_replace(vector(1), \"parameter\", \"schema contract\", \"\", \"\"), \"value\", \"not available in Overview v3\", \"\", \"\")",
-          "refId": "H",
-          "format": "table",
-          "instant": true
-        },
-        {
-          "expr": "label_replace(label_replace(vector(1), \"parameter\", \"version\", \"\", \"\"), \"value\", \"not available in Overview v3\", \"\", \"\")",
-          "refId": "I",
-          "format": "table",
-          "instant": true
+          "root_selector": "rows",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type}&run_id=${run_id}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
         }
       ],
       "options": {
@@ -2763,8 +2720,8 @@
         "allValue": null,
         "current": {},
         "datasource": "Quarantine Explorer",
-        "definition": "/ops/quarantine/filter-options?dimension=run_id&pipeline=${pipeline}",
-        "description": "Run ID selector sourced from Quarantine Explorer filter options for current pipeline/run_type scope. Empty list means no run_id evidence in selected range; Overview v3 still does not claim exact catalog-backed run resolution.",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&pipeline=${pipeline}&run_type=${run_type}",
+        "description": "Run ID selector sourced from control-plane run-manifest catalog for the current pipeline/run_type scope. Empty list means no persisted run-manifest evidence for the selected scope; this selector remains HTTP-backed and does not reintroduce run_id into Prometheus labels.",
         "hide": 0,
         "includeAll": false,
         "label": "Run ID",
@@ -2775,7 +2732,7 @@
           "infinityQuery": {
             "type": "json",
             "source": "url",
-            "url": "/ops/quarantine/filter-options?dimension=run_id&pipeline=${pipeline}"
+            "url": "/ops/control-plane/filter-options?dimension=run_id&pipeline=${pipeline}&run_type=${run_type}"
           }
         },
         "refresh": 1,

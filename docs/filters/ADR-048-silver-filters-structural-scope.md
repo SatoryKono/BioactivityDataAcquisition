@@ -119,9 +119,9 @@ gold_filters:
 1. Keep `SilverFiltersFileConfig` / `SilverFiltersConfig` Pydantic-compatible
    with legacy semantic keys, but make `to_domain()` return structural-only
    Silver config in the default mode.
-1. Add runtime identity mode `silver_filter_compatibility_mode` so effective
+1. Add runtime identity field `silver_filter_compatibility_mode` so effective
    config, run manifests, execution fingerprints, and checkpoint compatibility
-   can distinguish default auto-promotion from legacy rollback mode.
+   capture the canonical structural-only Silver behavior explicitly.
 1. Add CI invariant for committed inventory artifacts and later harden entity
    configs to reject semantic fields under `silver_filters` after the YAML
    rewrite window closes.
@@ -234,9 +234,8 @@ Summary of phases:
 
 - Phased: Domain → Infrastructure → Configs → Tests → Observability →
   Hardening.
-- Feature flag `BIOETL_LEGACY_SILVER_SEMANTIC=1` disables auto-promotion for
-  emergency rollback and is captured as `legacy_semantic_silver` in effective
-  config, run manifests, execution fingerprints, and checkpoint identity.
+- Runtime identity stays pinned to `structural_only_auto_promote`; the
+  temporary rollback branch used during migration rollout has been retired.
 - Auto-promotion period: 1-2 release cycles before hardening CI invariant
   from warning to error.
 
@@ -250,8 +249,7 @@ Summary of phases:
   - Performance regression > 20% on Silver write duration.
   - Quarantine analytics break in production.
 - **Steps**:
-  1. Set `BIOETL_LEGACY_SILVER_SEMANTIC=1` in deployment env.
-  1. Revert PR introducing auto-promotion.
+  1. Revert the structural-only normalization change set.
   1. Revert config migration PRs.
 
 ## Verification

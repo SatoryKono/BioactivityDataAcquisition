@@ -200,9 +200,11 @@ Canonical composite/runtime phase additions:
 Полный каталог метрик задаётся в `src/bioetl/infrastructure/observability/_metrics_defs_*.py`
 и собирается через `prometheus_metric_registries.py`.
 
-Канонический inventory metric families выводится из
+Канонический inventory metric families выводится из runtime registry surface
 `REGISTERED_PROMETHEUS_METRIC_NAMES` в
-`src/bioetl/infrastructure/observability/prometheus_metric_registries.py`.
+`src/bioetl/infrastructure/observability/prometheus_metric_registries.py`
+плюс explicit recording-rule declaration surface в
+`configs/quality/observability_metric_declarations.yaml`.
 Для repo-local reconciliation docs/runtime/rules drift используйте:
 `python -m scripts.engineering.qa report-observability-metric-inventory --json`.
 

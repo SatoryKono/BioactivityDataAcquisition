@@ -103,6 +103,11 @@ class RunManifestIdentityGraphAssembler:
             ),
             contract_ref=code_provenance.contract_ref,
             contract_version=code_provenance.contract_version,
+            normalization_profile_ref=code_provenance.normalization_profile_ref,
+            normalization_profile_version=(
+                code_provenance.normalization_profile_version
+            ),
+            normalization_profile_hash=code_provenance.normalization_profile_hash,
             effective_config_artifact_id=code_provenance.effective_config_artifact_id,
             exact_replay=bool(manifest.launch_context.get("exact_replay")),
             input_snapshot_fingerprint=(
@@ -129,6 +134,13 @@ class RunManifestIdentityGraphAssembler:
                 "effective_config_hash": code_provenance.effective_config_hash,
                 "contract_ref": code_provenance.contract_ref,
                 "contract_version": code_provenance.contract_version,
+                "normalization_profile_ref": code_provenance.normalization_profile_ref,
+                "normalization_profile_version": (
+                    code_provenance.normalization_profile_version
+                ),
+                "normalization_profile_hash": (
+                    code_provenance.normalization_profile_hash
+                ),
                 "effective_config_artifact_id": (
                     code_provenance.effective_config_artifact_id
                 ),
@@ -166,6 +178,11 @@ class RunManifestIdentityGraphAssembler:
             ),
             "contract_ref": code_provenance.contract_ref,
             "contract_version": code_provenance.contract_version,
+            "normalization_profile_ref": code_provenance.normalization_profile_ref,
+            "normalization_profile_version": (
+                code_provenance.normalization_profile_version
+            ),
+            "normalization_profile_hash": code_provenance.normalization_profile_hash,
             "replay_of_run_id": diagnostics.get("replay_of_run_id"),
             "replay_of_manifest_id": diagnostics.get("replay_of_manifest_id"),
             "replay_parentage": diagnostics.get("replay_parentage"),

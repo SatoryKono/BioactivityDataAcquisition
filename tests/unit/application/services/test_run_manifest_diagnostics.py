@@ -8,8 +8,8 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.services.run_ledger_service import RunLedgerService
-from bioetl.application.services.run_manifest_diagnostics import (
+from bioetl.application.services.control_plane import RunLedgerService
+from bioetl.application.services.control_plane.run_manifest_diagnostics import (
     build_diagnostics_summary,
 )
 from bioetl.domain.control_plane import (
@@ -325,6 +325,9 @@ def _expected_provenance_only_summary_without_score(
         },
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
+        "normalization_profile_ref": None,
+        "normalization_profile_version": None,
+        "normalization_profile_hash": None,
         "dq_policy_ref": "chembl_activity.gold",
         "rule_bundle_version": "2026.03",
         "dq_contract_compatibility_hash": "compat-hash-1",
@@ -826,7 +829,7 @@ def test_build_diagnostics_summary_flags_append_mode_semantic_sinks() -> None:
     assert summary["alert_signals"]["reproducible_semantic_output_mode_gap"] is True
 
 
-def test_build_diagnostics_summary_surfaces_legacy_observe_resume_contract() -> None:
+def test_build_diagnostics_summary_normalizes_removed_legacy_observe_policy() -> None:
     manifest = replace(
         _make_manifest(),
         launch_context={
@@ -838,16 +841,12 @@ def test_build_diagnostics_summary_surfaces_legacy_observe_resume_contract() -> 
     summary = build_diagnostics_summary(manifest, ())
 
     resume_contract = summary["resume_contract"]
-    assert resume_contract["requested_checkpoint_compatibility_policy"] == (
-        "legacy_observe"
-    )
-    assert resume_contract["applied_checkpoint_compatibility_policy"] == (
-        "legacy_observe"
-    )
+    assert resume_contract["requested_checkpoint_compatibility_policy"] is None
+    assert resume_contract["applied_checkpoint_compatibility_policy"] == "observe"
     score = summary["reproducibility_audit_score"]
     assert (
         "legacy_observe_checkpoint_policy"
-        in (score["category_scores"]["checkpoint_safety"]["blockers"])
+        not in (score["category_scores"]["checkpoint_safety"]["blockers"])
     )
 
 
@@ -896,6 +895,9 @@ def _assert_required_operator_identity_graph(
         },
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
+        "normalization_profile_ref": None,
+        "normalization_profile_version": None,
+        "normalization_profile_hash": None,
         "replay_of_run_id": None,
         "replay_of_manifest_id": None,
         "replay_parentage": _expected_replay_parentage(manifest),

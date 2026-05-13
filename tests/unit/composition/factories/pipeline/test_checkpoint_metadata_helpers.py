@@ -10,8 +10,8 @@ from uuid import uuid4
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
 
-from bioetl.application.services.run_manifest_service import (
-    RunManifestCreateRequest,
+from bioetl.application.services.control_plane.run_manifest_service import (
+    RunManifestCreateSpec as RunManifestCreateRequest,
     RunManifestService,
 )
 from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import (

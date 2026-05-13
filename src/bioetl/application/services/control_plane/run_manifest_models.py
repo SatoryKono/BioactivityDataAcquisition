@@ -40,6 +40,9 @@ class RunManifestCreateSpec:
     contract_schema_hash: str | None = None
     dq_policy_ref: str | None = None
     rule_bundle_version: str | None = None
+    normalization_profile_ref: str | None = None
+    normalization_profile_version: str | None = None
+    normalization_profile_hash: str | None = None
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
     replay_capability: ReplayCapability = ReplayCapability.REBUILD_ONLY

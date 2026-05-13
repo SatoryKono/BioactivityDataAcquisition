@@ -122,6 +122,9 @@ def create_run_manifest(
         contract_identity[2],
         contract_identity[3],
         contract_identity[4],
+        contract_identity[5],
+        contract_identity[6],
+        contract_identity[7],
     )
     return control_plane_refs, ledger_service
 
@@ -132,7 +135,16 @@ def _resolve_manifest_contract_identity(
     entity: str,
     required_persistence_profile: str,
     exact_replay_requested: bool,
-) -> tuple[str, str, str, str, str]:
+) -> tuple[
+    str,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+]:
     return _manifest_support.resolve_contract_identity(
         provider=provider,
         entity=entity,
@@ -178,7 +190,16 @@ def _build_manifest_create_request(
     effective_config_hash: str,
     dq_contract_compatibility_hash: str,
     effective_config_artifact_id: str,
-    contract_identity: tuple[str, str, str, str, str],
+    contract_identity: tuple[
+        str,
+        str | None,
+        str | None,
+        str | None,
+        str | None,
+        str | None,
+        str | None,
+        str | None,
+    ],
 ) -> object:
     (
         contract_ref,
@@ -186,6 +207,9 @@ def _build_manifest_create_request(
         contract_schema_hash,
         dq_policy_ref,
         rule_bundle_version,
+        normalization_profile_ref,
+        normalization_profile_version,
+        normalization_profile_hash,
     ) = contract_identity
     return build_manifest_create_request(
         _RunManifestCreateRequestInputs(
@@ -203,6 +227,9 @@ def _build_manifest_create_request(
             contract_schema_hash=contract_schema_hash,
             dq_policy_ref=dq_policy_ref,
             rule_bundle_version=rule_bundle_version,
+            normalization_profile_ref=normalization_profile_ref,
+            normalization_profile_version=normalization_profile_version,
+            normalization_profile_hash=normalization_profile_hash,
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             effective_config_artifact_id=effective_config_artifact_id,
         )

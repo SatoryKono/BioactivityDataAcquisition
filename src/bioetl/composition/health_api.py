@@ -14,7 +14,12 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.cli.health import (
         HealthServerDependencies as HealthServerDependencies,
     )
-    from bioetl.domain.ports import HealthMonitorPort, MetricsPort, QuarantinePort
+    from bioetl.domain.ports import (
+        HealthMonitorPort,
+        MetricsPort,
+        QuarantinePort,
+        RunManifestPort,
+    )
 
     class ObservabilitySettingsProtocol(Protocol):
         metrics_enabled: bool
@@ -72,6 +77,7 @@ class HealthServerDependenciesProtocol(Protocol):
 
     health_monitor: HealthMonitorPort
     metrics: MetricsPort
+    run_manifest_port: RunManifestPort
 
 
 def __getattr__(name: str) -> object:

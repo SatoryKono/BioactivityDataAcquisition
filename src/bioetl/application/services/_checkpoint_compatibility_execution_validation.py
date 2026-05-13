@@ -9,7 +9,7 @@ from bioetl.application.services._checkpoint_compatibility_message_helpers impor
     execution_identity_reason_messages,
     input_snapshot_mismatch_messages,
 )
-from bioetl.application.services.checkpoint_compatibility_runtime import (
+from bioetl.application.services._checkpoint_compatibility_runtime_identity import (
     CheckpointExecutionIdentityFallbackContext,
     ExecutionIdentityCompatibilityContext,
     check_execution_identity_compatibility,

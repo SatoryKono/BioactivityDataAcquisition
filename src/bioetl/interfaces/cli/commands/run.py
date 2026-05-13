@@ -109,9 +109,6 @@ _RUN_CANONICAL_BOUNDARY_SEAMS = (
 )
 
 _RUN_COMPATIBILITY_SEAMS = (
-    "_get_runner_logger",
-    "_handle_destructive_run_confirmation",
-    "_validate_start_offset",
     "echo_health_server_info",
     "ensure_metrics_server_started",
     "health_server_context",
@@ -179,7 +176,6 @@ def execute_run(
 _build_run_command_input = _build_run_command_input_impl
 _map_status_to_exit_code = map_status_to_exit_code
 _build_run_pipeline_callable = _build_run_pipeline_callable_impl
-_get_pipeline_runner_service_impl = get_pipeline_runner_service
 
 
 def _present_run_health_info(request: RunExecutionRequest) -> None:
@@ -311,6 +307,3 @@ run = build_run_click_command(
 echo_health_server_info = _echo_health_server_info_impl
 ensure_metrics_server_started = _ensure_metrics_server_started_impl
 health_server_context = _health_server_context_impl
-_get_runner_logger = get_runner_logger
-_handle_destructive_run_confirmation = handle_destructive_run_confirmation
-_validate_start_offset = validate_options

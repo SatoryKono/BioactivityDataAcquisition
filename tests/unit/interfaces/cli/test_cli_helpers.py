@@ -14,9 +14,9 @@ import pytest
 from click.testing import CliRunner
 
 from bioetl.interfaces.cli import cli, main, validate_pipeline_name
-from bioetl.interfaces.cli.commands.run import (
-    _get_runner_logger,
-    _handle_destructive_run_confirmation,
+from bioetl.interfaces.cli.commands.domains.run.support import (
+    get_runner_logger,
+    handle_destructive_run_confirmation,
 )
 
 
@@ -75,17 +75,17 @@ class TestValidatePipelineName:
 
 
 # =============================================================================
-# _handle_destructive_run_confirmation tests
+# handle_destructive_run_confirmation tests
 # =============================================================================
 
 
 @pytest.mark.unit
 class TestHandleDestructiveRunConfirmation:
-    """Tests for _handle_destructive_run_confirmation helper."""
+    """Tests for handle_destructive_run_confirmation helper."""
 
     def test_incremental_run_returns_true(self):
         """Test that incremental run skips confirmation."""
-        result = _handle_destructive_run_confirmation(
+        result = handle_destructive_run_confirmation(
             pipeline="chembl_activity",
             run_type="incremental",
             dry_run=False,
@@ -96,7 +96,7 @@ class TestHandleDestructiveRunConfirmation:
     @patch("bioetl.interfaces.cli.commands.domains.run.support.show_cleanup_preview")
     def test_rebuild_dry_run_shows_preview_returns_false(self, mock_preview):
         """Test that rebuild with dry-run shows preview and returns False."""
-        result = _handle_destructive_run_confirmation(
+        result = handle_destructive_run_confirmation(
             pipeline="chembl_activity",
             run_type="rebuild",
             dry_run=True,
@@ -109,7 +109,7 @@ class TestHandleDestructiveRunConfirmation:
     @patch("bioetl.interfaces.cli.commands.domains.run.support.show_cleanup_preview")
     def test_backfill_dry_run_shows_preview_returns_false(self, mock_preview):
         """Test that backfill with dry-run shows preview and returns False."""
-        result = _handle_destructive_run_confirmation(
+        result = handle_destructive_run_confirmation(
             pipeline="pubchem_compound",
             run_type="backfill",
             dry_run=True,
@@ -125,7 +125,7 @@ class TestHandleDestructiveRunConfirmation:
     )
     def test_rebuild_with_confirmation_returns_true(self, mock_confirm):
         """Test that rebuild with user confirmation returns True."""
-        result = _handle_destructive_run_confirmation(
+        result = handle_destructive_run_confirmation(
             pipeline="chembl_activity",
             run_type="rebuild",
             dry_run=False,
@@ -142,7 +142,7 @@ class TestHandleDestructiveRunConfirmation:
     @patch("bioetl.interfaces.cli.commands.domains.run.support.sys.exit")
     def test_rebuild_cancelled_exits(self, mock_exit, mock_confirm):
         """Test that cancelled rebuild exits."""
-        _handle_destructive_run_confirmation(
+        handle_destructive_run_confirmation(
             pipeline="chembl_activity",
             run_type="rebuild",
             dry_run=False,
@@ -153,7 +153,7 @@ class TestHandleDestructiveRunConfirmation:
 
     def test_rebuild_with_yes_flag_skips_confirmation(self):
         """Test that --yes flag skips confirmation for rebuild."""
-        result = _handle_destructive_run_confirmation(
+        result = handle_destructive_run_confirmation(
             pipeline="chembl_activity",
             run_type="rebuild",
             dry_run=False,
@@ -164,7 +164,7 @@ class TestHandleDestructiveRunConfirmation:
 
     def test_backfill_with_yes_flag_skips_confirmation(self):
         """Test that --yes flag skips confirmation for backfill."""
-        result = _handle_destructive_run_confirmation(
+        result = handle_destructive_run_confirmation(
             pipeline="uniprot_protein",
             run_type="backfill",
             dry_run=False,
@@ -175,13 +175,13 @@ class TestHandleDestructiveRunConfirmation:
 
 
 # =============================================================================
-# _get_runner_logger tests
+# get_runner_logger tests
 # =============================================================================
 
 
 @pytest.mark.unit
 class TestGetRunnerLogger:
-    """Tests for _get_runner_logger helper."""
+    """Tests for get_runner_logger helper."""
 
     def test_returns_logger_attribute(self):
         """Test that logger attribute is returned if present."""
@@ -189,7 +189,7 @@ class TestGetRunnerLogger:
         mock_logger = MagicMock()
         mock_runner.logger = mock_logger
 
-        result = _get_runner_logger(mock_runner)
+        result = get_runner_logger(mock_runner)
         assert result is mock_logger
 
     def test_returns_private_logger_fallback(self):
@@ -201,7 +201,7 @@ class TestGetRunnerLogger:
         type(mock_runner).logger = property(lambda s: None)
         mock_runner._logger = mock_logger
 
-        result = _get_runner_logger(mock_runner)
+        result = get_runner_logger(mock_runner)
         assert result is mock_logger
 
     def test_returns_none_when_no_logger(self):
@@ -216,7 +216,7 @@ class TestGetRunnerLogger:
             pass
 
         runner = NoLoggerRunner()
-        result = _get_runner_logger(runner)
+        result = get_runner_logger(runner)
         assert result is None
 
 

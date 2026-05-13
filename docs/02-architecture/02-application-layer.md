@@ -335,7 +335,7 @@ Compatibility bridge и collaborator bundle для `MergeService` находят
 | Файл                                | Компонент                     | Назначение                                              |
 | ----------------------------------- | ----------------------------- | ------------------------------------------------------- |
 | `cli_run_orchestration_service.py`  | `CliRunOrchestrationService`  | Верхнеуровневая CLI-оркестрация запуска пайплайна       |
-| `pipeline_runner_service.py`        | `PipelineRunnerService`       | Координация запуска пайплайна (preflight→exec→postrun)  |
+| `execution/pipeline_runner_service.py` | `PipelineRunnerService`    | Координация запуска пайплайна (preflight→exec→postrun)  |
 | `pipeline_run_context_service.py`   | `PipelineRunContextService`   | Управление run context (run_id, config, logger binding) |
 | `pipeline_run_execution_service.py` | `PipelineRunExecutionService` | Исполнение pipeline run (batch loop)                    |
 | `pipeline_run_lifecycle_service.py` | `PipelineRunLifecycleService` | Lifecycle hooks (pre-run, post-run, cleanup)            |

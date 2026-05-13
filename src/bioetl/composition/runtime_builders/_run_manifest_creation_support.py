@@ -50,6 +50,9 @@ class _RunManifestCreateRequestInputs:
     contract_schema_hash: str | None
     dq_policy_ref: str | None
     rule_bundle_version: str | None
+    normalization_profile_ref: str | None
+    normalization_profile_version: str | None
+    normalization_profile_hash: str | None
     dq_contract_compatibility_hash: str
     effective_config_artifact_id: str
 

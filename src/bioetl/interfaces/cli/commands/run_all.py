@@ -7,6 +7,7 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING, cast
 
 import click
+import bioetl.interfaces.cli.commands.domains.run_all.support as run_all_support
 
 from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
@@ -48,22 +49,10 @@ from bioetl.interfaces.cli.commands.domains.run_all.support import (
     should_prompt_for_destructive_run,
 )
 from bioetl.interfaces.cli.commands.domains.run_all.support import (
-    determine_batch_exit_code as _determine_exit_code,
-)
-from bioetl.interfaces.cli.commands.domains.run_all.support import (
     echo_batch_summary as _echo_batch_summary_impl,
 )
 from bioetl.interfaces.cli.commands.domains.run_all.support import (
-    filter_pipelines_by_provider as _filter_pipelines_by_provider,
-)
-from bioetl.interfaces.cli.commands.domains.run_all.support import (
-    get_available_providers as _get_available_providers,
-)
-from bioetl.interfaces.cli.commands.domains.run_all.support import (
     handle_destructive_confirmation as _handle_destructive_confirmation_impl,
-)
-from bioetl.interfaces.cli.commands.domains.run_all.support import (
-    validate_provider as _validate_provider,
 )
 from bioetl.interfaces.cli.commands.domains.shared.callback_dispatch import (
     dispatch_cli_callback,
@@ -257,7 +246,7 @@ def _run_all_with_cli_policy(
         health_info_presenter=echo_health_server_info,
         execute_batch=_run_batch_with_policy,
         summary_presenter=_echo_batch_summary,
-        determine_exit_code=_determine_exit_code,
+        determine_exit_code=run_all_support.determine_batch_exit_code,
         exit_func=exit_with_code,
     )
 
@@ -270,10 +259,6 @@ run_all = build_run_all_click_command(
 
 __all__ = [
     "BatchRunResult",
-    "_determine_exit_code",
-    "_filter_pipelines_by_provider",
-    "_get_available_providers",
-    "_validate_provider",
     "build_cli_registry",
     "run_all",
 ]

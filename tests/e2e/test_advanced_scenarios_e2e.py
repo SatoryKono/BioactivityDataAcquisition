@@ -33,6 +33,8 @@ from .conftest import (
     run_pipeline_or_skip_transient,
 )
 
+pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
+
 
 @pytest.fixture(scope="module")
 def vcr_cassette_dir() -> Path:

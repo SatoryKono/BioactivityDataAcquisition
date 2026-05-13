@@ -193,6 +193,27 @@
           "include_min": false,
           "max_value": null,
           "min_value": 0.0
+        },
+        {
+          "column": "activity_id",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10000000000.0,
+          "min_value": 1.0
+        },
+        {
+          "column": "pchembl_value",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10.0,
+          "min_value": 3.0
+        },
+        {
+          "column": "publication_year",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 2050.0,
+          "min_value": 1950.0
         }
       ],
       "required_fields": [
@@ -215,80 +236,13 @@
       "version_col": "_version"
     },
     "silver_filters": {
-      "column_filters": [
-        {
-          "column": "standard_type",
-          "operator": "in",
-          "values": [
-            "IC50",
-            "Ki"
-          ]
-        },
-        {
-          "column": "standard_relation",
-          "operator": "in",
-          "values": [
-            "="
-          ]
-        },
-        {
-          "column": "standard_units",
-          "operator": "in",
-          "values": [
-            "nM"
-          ]
-        },
-        {
-          "column": "assay_type",
-          "operator": "in",
-          "values": [
-            "B",
-            "F"
-          ]
-        },
-        {
-          "column": "potential_duplicate",
-          "operator": "in",
-          "values": [
-            0
-          ]
-        }
-      ],
+      "column_filters": [],
       "exclude_if_present": [
         "data_validity_comment"
       ],
       "list_contains_filters": [],
       "list_length_filters": [],
-      "range_filters": [
-        {
-          "column": "activity_id",
-          "include_max": true,
-          "include_min": true,
-          "max_value": 10000000000.0,
-          "min_value": 1.0
-        },
-        {
-          "column": "standard_value",
-          "include_max": true,
-          "include_min": false,
-          "max_value": null,
-          "min_value": 0.0
-        },
-        {
-          "column": "pchembl_value",
-          "include_max": true,
-          "include_min": true,
-          "max_value": 10.0,
-          "min_value": 3.0
-        },
-        {
-          "column": "publication_year",
-          "include_max": true,
-          "include_min": true,
-          "max_value": 2050.0,
-          "min_value": 1950.0
-        }
-      ],
+      "range_filters": [],
       "required_fields": [
         "activity_id",
         "molecule_id",
@@ -521,29 +475,7 @@
       "version_col": "_version"
     },
     "silver_filters": {
-      "column_filters": [
-        {
-          "column": "molecule_type",
-          "operator": "in",
-          "values": [
-            "Small molecule"
-          ]
-        },
-        {
-          "column": "structure_type",
-          "operator": "in",
-          "values": [
-            "MOL"
-          ]
-        },
-        {
-          "column": "inorganic_flag",
-          "operator": "in",
-          "values": [
-            0
-          ]
-        }
-      ],
+      "column_filters": [],
       "exclude_if_present": [],
       "list_contains_filters": [],
       "list_length_filters": [],

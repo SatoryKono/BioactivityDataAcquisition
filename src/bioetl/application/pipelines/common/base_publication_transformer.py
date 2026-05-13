@@ -32,6 +32,9 @@ from bioetl.application.pipelines.common.publication_assembly import (
     normalize_publication_business_data,
     prepare_publication_payload,
 )
+from bioetl.application.pipelines.common.publication_vocab_observability import (
+    emit_unknown_publication_vocab_metrics,
+)
 from bioetl.domain.mapping.publication_type_classification import (
     build_publication_type_classification_payload,
 )
@@ -461,11 +464,29 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
         normalized_business_data = normalize_publication_business_data(
             self, prepared.business_data
         )
+        self._emit_unknown_publication_vocab_metrics(
+            context,
+            normalized_business_data,
+        )
         return _assemble_publication_silver_record(
             self,
             context,
             index=index,
             prepared=prepared,
+            normalized_business_data=normalized_business_data,
+        )
+
+    def _emit_unknown_publication_vocab_metrics(
+        self,
+        context: PipelineContext,
+        normalized_business_data: JsonDict,
+    ) -> None:
+        """Publish bounded counters for unknown raw publication vocabulary drift."""
+        pipeline_name = context.pipeline_name or f"{self.provider}_{self.entity_type}"
+        emit_unknown_publication_vocab_metrics(
+            metrics=self._metrics,
+            pipeline_name=pipeline_name,
+            provider=self.provider,
             normalized_business_data=normalized_business_data,
         )
 

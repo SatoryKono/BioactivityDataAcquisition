@@ -23,6 +23,8 @@ policies:
   root_allowlist:
   - docs_parity_check.py
   - documentation_governance_check.py
+  - docker-setup.ps1
+  - docker-setup.sh
   - generate_adr_registry.py
   - generate_test_github_issues.py
   - optimized_test_runner.py

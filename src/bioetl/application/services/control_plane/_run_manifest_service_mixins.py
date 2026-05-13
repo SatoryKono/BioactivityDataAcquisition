@@ -90,6 +90,18 @@ class RunManifestHydrationMixin:
                 payload,
                 "rule_bundle_version",
             ),
+            normalization_profile_ref=_optional_payload_string(
+                payload,
+                "normalization_profile_ref",
+            ),
+            normalization_profile_version=_optional_payload_string(
+                payload,
+                "normalization_profile_version",
+            ),
+            normalization_profile_hash=_optional_payload_string(
+                payload,
+                "normalization_profile_hash",
+            ),
             dq_contract_compatibility_hash=_optional_payload_string(
                 payload,
                 "dq_contract_compatibility_hash",
@@ -246,6 +258,11 @@ class RunManifestPayloadMixin:
                 ),
                 contract_ref=code_provenance.contract_ref,
                 contract_version=code_provenance.contract_version,
+                normalization_profile_ref=code_provenance.normalization_profile_ref,
+                normalization_profile_version=(
+                    code_provenance.normalization_profile_version
+                ),
+                normalization_profile_hash=code_provenance.normalization_profile_hash,
                 effective_config_artifact_id=code_provenance.effective_config_artifact_id,
                 exact_replay=bool(request.launch_context.get("exact_replay")),
                 input_snapshot_fingerprint=(
@@ -293,6 +310,11 @@ class RunManifestPayloadMixin:
                 "contract_schema_hash": code_provenance.contract_schema_hash,
                 "dq_policy_ref": code_provenance.dq_policy_ref,
                 "rule_bundle_version": code_provenance.rule_bundle_version,
+                "normalization_profile_ref": code_provenance.normalization_profile_ref,
+                "normalization_profile_version": (
+                    code_provenance.normalization_profile_version
+                ),
+                "normalization_profile_hash": code_provenance.normalization_profile_hash,
                 "dq_contract_compatibility_hash": code_provenance.dq_contract_compatibility_hash,
                 "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
             },

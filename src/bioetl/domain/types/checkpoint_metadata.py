@@ -1,4 +1,4 @@
-"""Domain types for checkpoint metadata with DQ contract compatibility."""
+"""Checkpoint metadata model with compatibility and replay anchors."""
 
 from __future__ import annotations
 
@@ -24,6 +24,20 @@ _OPTIONAL_STR = str | None
 _OPTIONAL_BOOL = bool | None
 
 
+def _extract_with_fallback(
+    data: JsonDict,
+    key: str,
+    fallback_key: str | None = None,
+) -> _OPTIONAL_STR:
+    """Extract optional string with fallback to run_context anchor."""
+    value = data.get(key)
+    if value is not None:
+        return cast(_OPTIONAL_STR, value)
+    if fallback_key:
+        return cast(_OPTIONAL_STR, extract_run_context_anchor(data, fallback_key))
+    return None
+
+
 def _coerce_json_dict_sequence(value: object) -> tuple[JsonDict, ...]:
     """Coerce persisted JSON objects into an immutable tuple."""
     if not isinstance(value, list | tuple):
@@ -33,35 +47,7 @@ def _coerce_json_dict_sequence(value: object) -> tuple[JsonDict, ...]:
 
 @dataclass(frozen=True, slots=True)
 class CheckpointMetadata:
-    """Extended checkpoint metadata with DQ contract compatibility information.
-
-    Attributes:
-        records_processed: Count of records processed so far.
-        dq_contract_compatibility_hash: Hash of DQ contract for compatibility checking.
-        dq_policy_hash: Hash of DQ policy configuration.
-        dq_rule_bundle_version: Version of DQ rule bundle.
-        pipeline_name: Canonical pipeline name used for execution identity.
-        run_type: Canonical run type used for execution identity.
-        pipeline_version: Version of the pipeline configuration.
-        git_commit: Git commit anchor included in canonical execution identity.
-        dependency_lock_hash: Dependency lockfile content hash for forensic replay.
-        effective_config_hash: Canonical effective-config hash for execution identity.
-        effective_config_artifact_id: Effective-config artifact reference for provenance.
-        execution_fingerprint: Canonical execution-identity fingerprint shared
-            across manifest, checkpoint, and runtime compatibility surfaces.
-        composite_run_identity: Occurrence-scoped composite resume anchor used
-            to prevent resume across different composite executions.
-        manifest_id: Persisted run-manifest identifier for resume identity checks.
-        contract_ref: Canonical contract reference for checkpoint compatibility.
-        contract_version: Canonical contract version for checkpoint compatibility.
-        exact_replay: Whether the checkpoint was created under exact-replay mode.
-        input_snapshot_ids: Snapshot identities required for replay-safe resume.
-        silver_filter_compatibility_mode: Silver/Gold filter migration mode included
-            in canonical execution identity.
-        memory_decision_trace: Bounded adaptive-memory sizing decisions used as
-            replay-visible anchors for pressure/relief behavior.
-        run_context: Additional run context information.
-    """
+    """Extended checkpoint metadata with compatibility and replay anchors."""
 
     records_processed: int
     dq_contract_compatibility_hash: _OPTIONAL_STR = None
@@ -88,14 +74,7 @@ class CheckpointMetadata:
 
     @staticmethod
     def from_legacy_metadata(legacy_metadata: JsonDict) -> CheckpointMetadata:
-        """Create CheckpointMetadata from legacy metadata format.
-
-        Args:
-            legacy_metadata: Legacy checkpoint metadata dictionary.
-
-        Returns:
-            CheckpointMetadata instance with legacy data.
-        """
+        """Create CheckpointMetadata from legacy metadata format."""
         return CheckpointMetadata(
             records_processed=legacy_metadata.get("records_processed", 0),
             dq_contract_compatibility_hash=legacy_metadata.get(
@@ -107,28 +86,19 @@ class CheckpointMetadata:
             run_type=cast(_OPTIONAL_STR, legacy_metadata.get("run_type")),
             pipeline_version=legacy_metadata.get("pipeline_version"),
             git_commit=cast(_OPTIONAL_STR, legacy_metadata.get("git_commit")),
-            dependency_lock_hash=cast(
-                _OPTIONAL_STR,
-                legacy_metadata.get("dependency_lock_hash")
-                or extract_run_context_anchor(legacy_metadata, "dependency_lock_hash"),
+            dependency_lock_hash=_extract_with_fallback(
+                legacy_metadata, "dependency_lock_hash", "dependency_lock_hash"
             ),
             effective_config_hash=legacy_metadata.get("effective_config_hash"),
             effective_config_artifact_id=legacy_metadata.get(
                 "effective_config_artifact_id"
             ),
             execution_fingerprint=legacy_metadata.get("execution_fingerprint"),
-            composite_run_identity=cast(
-                _OPTIONAL_STR,
-                legacy_metadata.get("composite_run_identity")
-                or extract_run_context_anchor(
-                    legacy_metadata,
-                    "composite_run_identity",
-                ),
+            composite_run_identity=_extract_with_fallback(
+                legacy_metadata, "composite_run_identity", "composite_run_identity"
             ),
-            manifest_id=cast(
-                _OPTIONAL_STR,
-                legacy_metadata.get("manifest_id")
-                or extract_run_context_anchor(legacy_metadata, "manifest_id"),
+            manifest_id=_extract_with_fallback(
+                legacy_metadata, "manifest_id", "manifest_id"
             ),
             contract_ref=cast(_OPTIONAL_STR, legacy_metadata.get("contract_ref")),
             contract_version=cast(
@@ -142,13 +112,10 @@ class CheckpointMetadata:
             input_snapshot_fingerprint=cast(
                 _OPTIONAL_STR, legacy_metadata.get("input_snapshot_fingerprint")
             ),
-            silver_filter_compatibility_mode=cast(
-                _OPTIONAL_STR,
-                legacy_metadata.get("silver_filter_compatibility_mode")
-                or extract_run_context_anchor(
-                    legacy_metadata,
-                    "silver_filter_compatibility_mode",
-                ),
+            silver_filter_compatibility_mode=_extract_with_fallback(
+                legacy_metadata,
+                "silver_filter_compatibility_mode",
+                "silver_filter_compatibility_mode",
             ),
             memory_decision_trace=_coerce_json_dict_sequence(
                 legacy_metadata.get("memory_decision_trace")
@@ -157,11 +124,7 @@ class CheckpointMetadata:
         )
 
     def to_dict(self) -> JsonDict:
-        """Convert to dictionary for serialization.
-
-        Returns:
-            Dictionary representation of checkpoint metadata.
-        """
+        """Convert to dictionary for serialization."""
         result: JsonDict = {"records_processed": self.records_processed}
         optional_values: tuple[tuple[str, object | None], ...] = (
             ("dq_contract_compatibility_hash", self.dq_contract_compatibility_hash),
@@ -197,14 +160,7 @@ class CheckpointMetadata:
 
     @staticmethod
     def from_dict(data: JsonDict) -> CheckpointMetadata:
-        """Create CheckpointMetadata from dictionary.
-
-        Args:
-            data: Dictionary with checkpoint metadata.
-
-        Returns:
-            CheckpointMetadata instance.
-        """
+        """Create CheckpointMetadata from dictionary."""
         return CheckpointMetadata(
             records_processed=data.get("records_processed", 0),
             dq_contract_compatibility_hash=data.get("dq_contract_compatibility_hash"),
@@ -214,24 +170,16 @@ class CheckpointMetadata:
             run_type=cast(_OPTIONAL_STR, data.get("run_type")),
             pipeline_version=data.get("pipeline_version"),
             git_commit=cast(_OPTIONAL_STR, data.get("git_commit")),
-            dependency_lock_hash=cast(
-                _OPTIONAL_STR,
-                data.get("dependency_lock_hash")
-                or extract_run_context_anchor(data, "dependency_lock_hash"),
+            dependency_lock_hash=_extract_with_fallback(
+                data, "dependency_lock_hash", "dependency_lock_hash"
             ),
             effective_config_hash=data.get("effective_config_hash"),
             effective_config_artifact_id=data.get("effective_config_artifact_id"),
             execution_fingerprint=data.get("execution_fingerprint"),
-            composite_run_identity=cast(
-                _OPTIONAL_STR,
-                data.get("composite_run_identity")
-                or extract_run_context_anchor(data, "composite_run_identity"),
+            composite_run_identity=_extract_with_fallback(
+                data, "composite_run_identity", "composite_run_identity"
             ),
-            manifest_id=cast(
-                _OPTIONAL_STR,
-                data.get("manifest_id")
-                or extract_run_context_anchor(data, "manifest_id"),
-            ),
+            manifest_id=_extract_with_fallback(data, "manifest_id", "manifest_id"),
             contract_ref=cast(_OPTIONAL_STR, data.get("contract_ref")),
             contract_version=cast(_OPTIONAL_STR, data.get("contract_version")),
             exact_replay=cast(_OPTIONAL_BOOL, data.get("exact_replay")),
@@ -239,13 +187,8 @@ class CheckpointMetadata:
             input_snapshot_fingerprint=cast(
                 _OPTIONAL_STR, data.get("input_snapshot_fingerprint")
             ),
-            silver_filter_compatibility_mode=cast(
-                _OPTIONAL_STR,
-                data.get("silver_filter_compatibility_mode")
-                or extract_run_context_anchor(
-                    data,
-                    "silver_filter_compatibility_mode",
-                ),
+            silver_filter_compatibility_mode=_extract_with_fallback(
+                data, "silver_filter_compatibility_mode", "silver_filter_compatibility_mode"
             ),
             memory_decision_trace=_coerce_json_dict_sequence(
                 data.get("memory_decision_trace")
@@ -254,12 +197,7 @@ class CheckpointMetadata:
         )
 
     def checkpoint_execution_identity_payload(self) -> JsonDict:
-        """Return the canonical checkpoint execution-identity fallback payload.
-
-        This payload mirrors the canonical execution identity contract used by
-        manifest persistence, but only includes the checkpoint-resident anchors
-        that remain available during resume validation.
-        """
+        """Return the canonical checkpoint execution-identity fallback payload."""
 
         snapshot_fingerprint = (
             self.input_snapshot_fingerprint
@@ -293,7 +231,6 @@ class CheckpointMetadata:
 
     def checkpoint_execution_identity_fingerprint(self) -> str | None:
         """Return the deterministic checkpoint execution-identity fingerprint."""
-
         payload = self.checkpoint_execution_identity_payload()
         if not payload:
             return None

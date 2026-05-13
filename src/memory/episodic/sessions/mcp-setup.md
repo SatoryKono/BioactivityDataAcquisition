@@ -1,27 +1,27 @@
 ---
 id: mcp-setup
-title: Configure MCP for Codex workspace
+title: Set up MCP
 task_id: mcp-setup
-created_at: '2026-05-11T12:53:15Z'
+created_at: '2026-05-13T11:33:22Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - AGENTS.md
 summary: Active task session context.
-query: setup mcp codex workspace
+query: mcp
 ---
 
 # Session note
 
 ## Task
 
-- Title: Configure MCP for Codex workspace
-- Retrieval query: setup mcp codex workspace
+- Title: Set up MCP
+- Retrieval query: mcp
 
 ## Retrieved context
 
 - Catalog hits: 0
-- RAG hits: 0
+- RAG hits: 10
 - Timeline hits: 0
 
 ## Working notes

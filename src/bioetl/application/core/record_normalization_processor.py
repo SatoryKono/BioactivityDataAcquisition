@@ -26,6 +26,9 @@ from bioetl.domain.normalization.profiles import (
     FieldRule,
     resolve_normalization_profile,
 )
+from bioetl.domain.normalization.profiles.base import (
+    _normalizer_accepts_record_context as _profile_rule_accepts_record_context,
+)
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_passthrough,
     normalize_profile_smiles,
@@ -181,6 +184,7 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
                 )
                 if finding is not None:
                     findings.append(finding)
+        normalized = self._reapply_record_aware_profile_rules(normalized)
         object.__setattr__(self, "_normalization_findings", tuple(findings))
         return normalized
 
@@ -246,6 +250,34 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
             return serialize_json_canonical(normalized)
         if isinstance(normalized, str):
             return self._normalize_string_field(rule.field_name, normalized)
+        return normalized
+
+    def _reapply_record_aware_profile_rules(self, record: JsonDict) -> JsonDict:
+        """Recompute derived profile fields against the normalized sibling context.
+
+        Some profile-backed fields are intentionally derived from sibling values
+        instead of from their own raw input slot. Reapplying only record-aware
+        rules against the normalized payload preserves deterministic derivation
+        for ontology companions, publication taxonomy, and other profile-backed
+        sidecars without broadening the payload beyond fields already staged by
+        the transformer.
+        """
+        if self.profile is None:
+            return record
+
+        normalized = dict(record)
+        for field_name in tuple(normalized.keys()):
+            rule = self._profile_rule(field_name)
+            if (
+                rule is None
+                or not _profile_rule_accepts_record_context(rule.normalizer)
+            ):
+                continue
+            normalized[field_name] = self._normalize_profile_field_value(
+                rule,
+                normalized.get(field_name),
+                normalized,
+            )
         return normalized
 
     def _normalize_named_text_field(

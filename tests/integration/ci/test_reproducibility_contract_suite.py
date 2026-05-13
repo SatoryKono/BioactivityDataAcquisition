@@ -14,7 +14,9 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.application.services.effective_config_service import EffectiveConfigService
+from bioetl.application.services.control_plane.effective_config_service import (
+    EffectiveConfigService,
+)
 from bioetl.application.services.checkpoint_compatibility_service import (
     CheckpointCompatibilityService,
 )
@@ -36,7 +38,7 @@ from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
 )
 from bioetl.application.services.lineage import MetadataCoordinator
-from bioetl.application.services.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.run_manifest_inspection_service import (
     RunManifestInspectionService,
 )
 from bioetl.composition.bootstrap.runtime.composite_control_plane_builder import (

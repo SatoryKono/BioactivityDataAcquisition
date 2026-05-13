@@ -138,6 +138,9 @@ class EffectiveConfigSerializer:
             "effective_config_hash": artifact.effective_config_hash,
             "source_fingerprint": artifact.source_fingerprint,
             "contract_refs": artifact.contract_refs,
+            "normalization_profile_ref": artifact.normalization_profile_ref,
+            "normalization_profile_version": artifact.normalization_profile_version,
+            "normalization_profile_hash": artifact.normalization_profile_hash,
             "dq_policy_refs": [
                 self._dq_policy_ref_to_dict(ref) for ref in artifact.dq_policy_refs
             ],

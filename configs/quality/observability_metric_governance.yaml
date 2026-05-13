@@ -3,6 +3,7 @@ policy_scope: observability_metric_governance
 owner: "@bioetl-observability"
 report_script: scripts/engineering/qa/report_observability_metric_inventory.py
 inventory_allowlist: configs/quality/observability_metric_inventory_allowlist.yaml
+derived_metric_declarations: configs/quality/observability_metric_declarations.yaml
 governance_views:
   declared_metrics_field: declared_metrics
   emitted_metrics_field: emitted_metrics

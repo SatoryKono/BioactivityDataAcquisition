@@ -225,6 +225,11 @@ def expected_canonical_execution_identity(
         ),
         contract_ref=manifest.code_provenance.contract_ref,
         contract_version=manifest.code_provenance.contract_version,
+        normalization_profile_ref=manifest.code_provenance.normalization_profile_ref,
+        normalization_profile_version=(
+            manifest.code_provenance.normalization_profile_version
+        ),
+        normalization_profile_hash=manifest.code_provenance.normalization_profile_hash,
         effective_config_artifact_id=(
             manifest.code_provenance.effective_config_artifact_id
         ),
@@ -309,6 +314,15 @@ def expected_exact_replay_anchors(
         ),
         "contract_ref": manifest.code_provenance.contract_ref,
         "contract_version": manifest.code_provenance.contract_version,
+        "normalization_profile_ref": (
+            manifest.code_provenance.normalization_profile_ref
+        ),
+        "normalization_profile_version": (
+            manifest.code_provenance.normalization_profile_version
+        ),
+        "normalization_profile_hash": (
+            manifest.code_provenance.normalization_profile_hash
+        ),
         "effective_config_artifact_id": (
             manifest.code_provenance.effective_config_artifact_id
         ),
@@ -367,13 +381,13 @@ def resolve_checkpoint_policy(
     requested_policy: str | None,
 ) -> str:
     """Resolve the checkpoint compatibility policy used in expectations."""
+    if requested_policy not in {"observe", "soft_fail", "hard_fail"}:
+        requested_policy = None
     if requested_exact_replay:
         return "hard_fail"
     if required_profile not in {"replay_ready", "forensic_grade"}:
         return requested_policy or "observe"
-    if requested_policy in {"observe", "legacy_observe"}:
-        return "soft_fail"
-    return requested_policy or "soft_fail"
+    return "hard_fail" if requested_policy != "hard_fail" else requested_policy
 
 
 def _manifest_loading_strategy_values(manifest: RunManifest) -> tuple[object, ...]:
@@ -431,7 +445,10 @@ def expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
         or "degraded_observable"
     )
     requested_policy = manifest.launch_context.get("checkpoint_compatibility_policy")
-    if not isinstance(requested_policy, str):
+    if (
+        not isinstance(requested_policy, str)
+        or requested_policy not in {"observe", "soft_fail", "hard_fail"}
+    ):
         requested_policy = None
     applied_policy = resolve_checkpoint_policy(
         requested_exact_replay=requested_exact_replay,

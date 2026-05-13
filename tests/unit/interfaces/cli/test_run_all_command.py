@@ -14,20 +14,18 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     RunResult,
     PipelineRunResult,
 )
-from bioetl.interfaces.cli.commands.run_all import (
-    BatchRunResult,
-    _filter_pipelines_by_provider,
-    _get_available_providers,
-    _validate_provider,
-)
 from bioetl.interfaces.cli.commands.domains.run_all.support import (
+    BatchRunResult,
     RunAllExecutionPlan,
     create_run_all_options,
     emit_run_all_listing,
+    filter_pipelines_by_provider,
+    get_available_providers,
     record_pipeline_failure,
     record_pipeline_result,
     resolve_run_all_execution_plan,
     should_prompt_for_destructive_run,
+    validate_provider,
 )
 from bioetl.interfaces.cli.main import cli
 
@@ -130,28 +128,28 @@ class TestBatchRunResult:
 
 @pytest.mark.unit
 class TestGetAvailableProviders:
-    """Tests for _get_available_providers function."""
+    """Tests for get_available_providers function."""
 
     def test_returns_unique_providers(self, mock_registry):
         """Test that unique providers are extracted from pipeline names."""
-        providers = _get_available_providers(registry=mock_registry)
+        providers = get_available_providers(registry=mock_registry)
         assert sorted(providers) == ["chembl", "pubchem", "uniprot"]
 
     def test_empty_when_no_pipelines(self):
         """Test that empty list returned when no pipelines registered."""
         mock = MagicMock()
         mock.list_pipelines.return_value = []
-        providers = _get_available_providers(registry=mock)
+        providers = get_available_providers(registry=mock)
         assert providers == []
 
 
 @pytest.mark.unit
 class TestFilterPipelinesByProvider:
-    """Tests for _filter_pipelines_by_provider function."""
+    """Tests for filter_pipelines_by_provider function."""
 
     def test_filters_chembl_pipelines(self, mock_registry):
         """Test that ChEMBL pipelines are correctly filtered."""
-        pipelines = _filter_pipelines_by_provider("chembl", registry=mock_registry)
+        pipelines = filter_pipelines_by_provider("chembl", registry=mock_registry)
         assert pipelines == [
             "chembl_activity",
             "chembl_assay",
@@ -161,28 +159,28 @@ class TestFilterPipelinesByProvider:
 
     def test_filters_pubchem_pipelines(self, mock_registry):
         """Test that PubChem pipelines are correctly filtered."""
-        pipelines = _filter_pipelines_by_provider("pubchem", registry=mock_registry)
+        pipelines = filter_pipelines_by_provider("pubchem", registry=mock_registry)
         assert pipelines == ["pubchem_compound"]
 
     def test_returns_empty_for_unknown_provider(self, mock_registry):
         """Test that empty list returned for unknown provider."""
-        pipelines = _filter_pipelines_by_provider("unknown", registry=mock_registry)
+        pipelines = filter_pipelines_by_provider("unknown", registry=mock_registry)
         assert pipelines == []
 
 
 @pytest.mark.unit
 class TestValidateProvider:
-    """Tests for _validate_provider function."""
+    """Tests for validate_provider function."""
 
     def test_valid_provider_returns_true(self, mock_registry):
         """Test that valid provider returns (True, None)."""
-        is_valid, error = _validate_provider("chembl", registry=mock_registry)
+        is_valid, error = validate_provider("chembl", registry=mock_registry)
         assert is_valid is True
         assert error is None
 
     def test_invalid_provider_returns_false(self, mock_registry):
         """Test that invalid provider returns (False, error_message)."""
-        is_valid, error = _validate_provider("invalid", registry=mock_registry)
+        is_valid, error = validate_provider("invalid", registry=mock_registry)
         assert is_valid is False
         assert "No pipelines found for provider 'invalid'" in error
         assert "Available providers:" in error
@@ -191,7 +189,7 @@ class TestValidateProvider:
         """Test that empty registry returns appropriate error."""
         mock = MagicMock()
         mock.list_pipelines.return_value = []
-        is_valid, error = _validate_provider("chembl", registry=mock)
+        is_valid, error = validate_provider("chembl", registry=mock)
         assert is_valid is False
         assert "No pipelines are registered" in error
 

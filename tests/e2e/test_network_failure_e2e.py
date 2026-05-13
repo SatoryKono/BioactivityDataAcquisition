@@ -309,7 +309,7 @@ class TestRetryExhaustion:
 class TestExponentialBackoff:
     """Tests for exponential backoff behavior."""
 
-    def test_backoff_increases_exponentially(self):
+    async def test_backoff_increases_exponentially(self):
         """E2E: Backoff delay should increase exponentially."""
         base_delay = 0.01
         multiplier = 2.0
@@ -328,7 +328,7 @@ class TestExponentialBackoff:
         assert delays[3] == pytest.approx(0.08)
         assert delays[4] == pytest.approx(0.16)
 
-    def test_backoff_capped_at_max(self):
+    async def test_backoff_capped_at_max(self):
         """E2E: Backoff should be capped at maximum delay."""
         base_delay = 0.1
         multiplier = 2.0

@@ -23,6 +23,8 @@ from .conftest import (
     get_silver_records,
 )
 
+pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
+
 # Stable subset of IDs available in recorded cassette.
 PUBLICATION_TEST_IDS = (
     "CHEMBL1121421",

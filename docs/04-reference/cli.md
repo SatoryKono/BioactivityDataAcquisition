@@ -180,7 +180,7 @@ bioetl run --pipeline <NAME> [OPTIONS]
 | `--vacuum-after-run`                     | flag   | None          | Запустить VACUUM после успешного выполнения                                               |
 | `--vacuum-retention-days`                | int    | None          | Retention для VACUUM (дней, override YAML config)                                         |
 | `--debug`                                | flag   | False         | Включить DEBUG логирование                                                                |
-| `--checkpoint-compatibility`             | choice | None          | Политика совместимости checkpoint (`observe`, `soft_fail`, `hard_fail`, `legacy_observe`) |
+| `--checkpoint-compatibility`             | choice | None          | Политика совместимости checkpoint (`observe`, `soft_fail`, `hard_fail`) |
 | `--health-server/--no-health-server`     | flag   | True          | Включить HTTP health server                                                               |
 | `--health-port`                          | int    | 8081          | Порт для health server                                                                    |
 | `--use-cached-bronze/--no-cached-bronze` | flag   | False         | Читать Bronze cache вместо API                                                            |
@@ -198,9 +198,6 @@ bioetl run --pipeline chembl_activity
 
 # Запуск с политикой совместимости checkpoint
 bioetl run --pipeline chembl_activity --checkpoint-compatibility observe
-
-# Использование legacy mode во время миграции
-bioetl run --pipeline chembl_activity --checkpoint-compatibility legacy_observe
 
 # С ограничением записей (для тестирования)
 bioetl run --pipeline chembl_activity --limit 100
@@ -256,13 +253,8 @@ bioetl run --pipeline chembl_activity \
   (по умолчанию) Заблокировать resume при несовместимости.
 - `settings.pipeline.control_plane.checkpoint_compatibility_policy=hard_fail`
   Прервать запуск ошибкой при несовместимости.
-- `settings.pipeline.control_plane.checkpoint_compatibility_policy=legacy_observe`
-  Legacy degraded mode для migration-only периодов: non-identity degradation
-  ещё может быть диагностирована, но недоказанная identity continuity всё равно
-  блокирует resume.
 - `required_persistence_profile=replay_ready` и `forensic_grade` не
-  используют effective `observe` / `legacy_observe`; runtime повышает policy
-  как минимум до `soft_fail`.
+  используют effective `observe`; runtime повышает policy до `hard_fail`.
 - если текущий запуск выполняется как `exact_replay`, runtime принудительно
   применяет `hard_fail`, даже если в settings запрошен более мягкий policy;
   для published contract это режим strict `exact replay`, а не degraded resume.
@@ -288,9 +280,6 @@ Checkpoint load telemetry uses bounded statuses. In particular:
   canonical execution identity mismatched.
 - `observe_loaded_degraded` means `observe` mode allowed resume only after a
   non-identity compatibility warning.
-- `legacy_observe_loaded_degraded` means the legacy migration path allowed
-  resume only after a non-identity degraded signal while identity continuity
-  was already proven; it is not an override for unproven identity continuity.
 
 **Типы запуска:**
 
@@ -455,8 +444,6 @@ Operational semantics:
 - `observe` не является strict reproducibility mode: canonical
   execution-identity mismatch всё равно блокирует resume, даже если другие
   degraded signals могут быть только зафиксированы warning-ом.
-- `legacy_observe` остаётся migration-only degraded mode и также не
-  разрешает resume, если identity continuity не доказана.
 - strict persistence profiles (`replay_ready`, `forensic_grade`) поднимают
   effective resume policy до `hard_fail`.
 

@@ -10,7 +10,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.composition.runtime_builders import inputs_resolver
-from bioetl.application.services.run_ledger_service import RunLedgerService
+from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
 from tests.unit.application.services.run_manifest_test_support import (

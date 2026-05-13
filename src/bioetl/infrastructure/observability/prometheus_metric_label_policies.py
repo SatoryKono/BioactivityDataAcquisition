@@ -28,6 +28,9 @@ from bioetl.infrastructure.observability._prometheus_metric_label_normalizers im
     normalize_postrun_phase,
     normalize_publication_status,
     normalize_publication_target,
+    normalize_publication_vocab_field,
+    normalize_publication_vocab_handling,
+    normalize_publication_vocab_provider,
     normalize_quarantine_reason,
     normalize_record_flow_invariant,
     normalize_record_flow_invariant_status,
@@ -134,6 +137,9 @@ _DQ_DISPOSITION_LABEL_METRICS = frozenset({"bioetl_dq_dispositions_total"})
 _METRICS_PUBLICATION_LABEL_METRICS = frozenset(
     {"bioetl_metrics_publication_events_total"}
 )
+_PUBLICATION_VOCAB_DRIFT_LABEL_METRICS = frozenset(
+    {"bioetl_publication_raw_vocab_unknown_total"}
+)
 _OUTPUT_ARTIFACT_PUBLICATION_LABEL_METRICS = frozenset(
     {"bioetl_output_artifact_publication_events_total"}
 )
@@ -179,6 +185,9 @@ __all__ = [
     "normalize_postrun_phase",
     "normalize_publication_status",
     "normalize_publication_target",
+    "normalize_publication_vocab_field",
+    "normalize_publication_vocab_handling",
+    "normalize_publication_vocab_provider",
     "normalize_quarantine_reason",
     "normalize_record_flow_invariant",
     "normalize_record_flow_invariant_status",
@@ -444,6 +453,19 @@ def _normalize_publication_metric_labels(
             **labels,
             "target": normalize_publication_target(str(labels.get("target", "other"))),
             "status": normalize_publication_status(str(labels.get("status", "other"))),
+        }
+    if name in _PUBLICATION_VOCAB_DRIFT_LABEL_METRICS:
+        return {
+            **labels,
+            "provider": normalize_publication_vocab_provider(
+                str(labels.get("provider", "other"))
+            ),
+            "field": normalize_publication_vocab_field(
+                str(labels.get("field", "other"))
+            ),
+            "handling": normalize_publication_vocab_handling(
+                str(labels.get("handling", "other"))
+            ),
         }
     if name in _OBSERVABILITY_RUNTIME_STATUS_METRICS:
         return {

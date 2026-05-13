@@ -203,6 +203,11 @@ def _handle_control_plane_setup(
             contract_schema_hash=control_plane_refs.contract_schema_hash,
             dq_policy_ref=control_plane_refs.dq_policy_ref,
             rule_bundle_version=control_plane_refs.rule_bundle_version,
+            normalization_profile_ref=control_plane_refs.normalization_profile_ref,
+            normalization_profile_version=(
+                control_plane_refs.normalization_profile_version
+            ),
+            normalization_profile_hash=control_plane_refs.normalization_profile_hash,
         )
         inputs = _bind_manifest_logger_context(
             inputs,

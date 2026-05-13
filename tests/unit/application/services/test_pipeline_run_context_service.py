@@ -7,10 +7,10 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.services.pipeline_run_context_service import (
+from bioetl.application.services.execution.pipeline_run_context_service import (
     PipelineRunContextService,
 )
-from bioetl.application.services.pipeline_runner_models import RunOptions
+from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 from bioetl.domain.types import RunID
 
 FIXED_STARTED_AT = datetime(2026, 4, 24, 12, 0, 0, tzinfo=UTC)

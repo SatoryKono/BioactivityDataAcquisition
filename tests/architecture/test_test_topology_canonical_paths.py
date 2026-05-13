@@ -98,3 +98,37 @@ def test_top_level_unit_root_has_no_legacy_test_modules() -> None:
         "top-level tests/unit/test_*.py files are deprecated; move them under the "
         "owning layer/package:\n" + "\n".join(f"  - {path}" for path in top_level_tests)
     )
+
+
+@pytest.mark.architecture
+def test_tests_root_has_no_legacy_top_level_test_modules() -> None:
+    """`tests/` root should not accumulate unlabeled lane-less modules."""
+    top_level_tests = sorted(
+        path.relative_to(ROOT).as_posix()
+        for path in (ROOT / "tests").glob("test_*.py")
+    )
+
+    assert not top_level_tests, (
+        "top-level tests/test_*.py files are deprecated; move them into "
+        "tests/architecture, tests/integration, or another owning lane:\n"
+        + "\n".join(f"  - {path}" for path in top_level_tests)
+    )
+
+
+@pytest.mark.architecture
+def test_retired_synthetic_e2e_modules_stay_absent() -> None:
+    """Synthetic/mock-heavy suites retired from E2E must not reappear there."""
+    retired_paths = [
+        "tests/e2e/test_checkpoint_e2e.py",
+        "tests/e2e/test_gold_layer_e2e.py",
+        "tests/e2e/test_pipeline_with_dq_errors_e2e.py",
+        "tests/e2e/test_run_types_e2e.py",
+    ]
+
+    existing_paths = [path for path in retired_paths if (ROOT / path).exists()]
+
+    assert not existing_paths, (
+        "synthetic E2E modules were retired because they bypassed runtime/bootstrap "
+        "seams; keep that coverage in unit/integration lanes:\n"
+        + "\n".join(f"  - {path}" for path in existing_paths)
+    )

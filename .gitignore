@@ -105,6 +105,7 @@ log_test.txt
 .vscode/
 .agent-work/
 .agentbridge/
+.agents/
 .cursor/
 .sonarlint/
 .trae/
@@ -296,3 +297,5 @@ docs/reports/evidence/documentation-internal-surface-governance/02-evidence/inte
 !/docs/99-archive/legacy-05-architecture/**
 /docs/reports
 /.npm-cache/_cacache
+/.npm-cache/
+/caddy/

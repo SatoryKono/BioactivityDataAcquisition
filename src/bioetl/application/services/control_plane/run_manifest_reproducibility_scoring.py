@@ -209,10 +209,6 @@ def _score_checkpoint_safety(summary: JsonDict) -> _ScoreCard:
         if applied_policy == "hard_fail":
             score += 1
             evidence.append("hard_fail_checkpoint_policy")
-        if applied_policy == "legacy_observe":
-            score -= 2
-            evidence.append("legacy_observe_checkpoint_policy")
-            blockers.append("legacy_observe_checkpoint_policy")
         if (
             required_profile in STRICT_PERSISTENCE_PROFILES
             and applied_policy != "hard_fail"

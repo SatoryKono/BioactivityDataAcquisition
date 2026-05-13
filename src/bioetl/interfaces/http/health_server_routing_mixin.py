@@ -12,7 +12,7 @@ from bioetl.interfaces.http.types import HealthResponse
 
 if TYPE_CHECKING:
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.domain.ports import ClockPort, HealthMonitorPort
+    from bioetl.domain.ports import ClockPort, HealthMonitorPort, RunManifestPort
 
 _NOT_FOUND_MESSAGE = "Not Found"
 
@@ -62,6 +62,7 @@ class HealthServerRoutingMixin:
 
     _health_monitor: HealthMonitorPort | None
     _quarantine_service: QuarantineService | None
+    _run_manifest_port: RunManifestPort | None
     _clock: ClockPort | None
 
     @property
@@ -96,6 +97,13 @@ class HealthServerRoutingMixin:
             return
         if route_path.startswith("/ops/quarantine/"):
             await self._route_quarantine_request(
+                writer=writer,
+                path=route_path,
+                query=query,
+            )
+            return
+        if route_path.startswith("/ops/control-plane/"):
+            await self._route_control_plane_request(
                 writer=writer,
                 path=route_path,
                 query=query,
@@ -146,6 +154,19 @@ class HealthServerRoutingMixin:
             raise ValueError(f"Invalid query parameter: {name} must be >= {minimum}")
         return parsed
 
+    @staticmethod
+    def _read_csv_param(query: dict[str, str], name: str) -> tuple[str, ...]:
+        """Parse a CSV-style optional query parameter into unique ordered tokens."""
+        raw = HealthServerRoutingMixin._read_optional_param(query, name)
+        if raw is None:
+            return ()
+        items: list[str] = []
+        for part in raw.split(","):
+            normalized = part.strip()
+            if normalized and normalized not in items:
+                items.append(normalized)
+        return tuple(items)
+
     async def _route_quarantine_request(
         self,
         *,
@@ -178,6 +199,36 @@ class HealthServerRoutingMixin:
                 if not payload_hash:
                     raise ValueError("Missing payload_hash in path")
                 await self._handle_filtered_record_detail(writer, query, payload_hash)
+                return
+            await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
+        except ValueError as exc:
+            await response_support._send_response(writer, 400, str(exc))
+        except Exception as exc:
+            await response_support._handle_request_error(writer, exc)
+
+    async def _route_control_plane_request(
+        self,
+        *,
+        writer: asyncio.StreamWriter,
+        path: str,
+        query: dict[str, str],
+    ) -> None:
+        """Route control-plane selector helper endpoints."""
+        response_support = cast(_HealthResponseSupport, self)
+        if self._run_manifest_port is None:
+            await response_support._send_response(
+                writer,
+                503,
+                "Control-plane selector catalog unavailable",
+            )
+            return
+
+        try:
+            if path == "/ops/control-plane/filter-options":
+                await self._handle_control_plane_filter_options(writer, query)
+                return
+            if path == "/ops/control-plane/identity-table":
+                await self._handle_control_plane_identity_table(writer, query)
                 return
             await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
         except ValueError as exc:
@@ -251,6 +302,164 @@ class HealthServerRoutingMixin:
         )
         response_support = cast(_HealthResponseSupport, self)
         await response_support._send_payload_response(writer, 200, payload)
+
+    async def _handle_control_plane_filter_options(
+        self,
+        writer: asyncio.StreamWriter,
+        query: dict[str, str],
+    ) -> None:
+        """Handle control-plane-backed selector options for Grafana variables."""
+        assert self._run_manifest_port is not None
+        pipeline = self._read_required_param(query, "pipeline")
+        dimension = self._read_optional_param(query, "dimension") or "run_id"
+        if dimension != "run_id":
+            raise ValueError(
+                f"Unsupported control-plane filter dimension: {dimension}"
+            )
+
+        selected_run_types = self._read_csv_param(query, "run_type")
+        run_ids = tuple(
+            str(manifest.run_id)
+            for manifest in self._run_manifest_port.list_all()
+            if manifest.pipeline_name == pipeline
+            and (
+                not selected_run_types
+                or str(manifest.run_type) in selected_run_types
+            )
+        )
+        response_support = cast(_HealthResponseSupport, self)
+        await response_support._send_payload_response(
+            writer,
+            200,
+            {
+                "pipeline": pipeline,
+                "run_type": list(selected_run_types),
+                "run_ids": list(run_ids),
+            },
+        )
+
+    async def _handle_control_plane_identity_table(
+        self,
+        writer: asyncio.StreamWriter,
+        query: dict[str, str],
+    ) -> None:
+        """Handle control-plane-backed identity rows for Overview v3."""
+        assert self._run_manifest_port is not None
+        pipeline = self._read_required_param(query, "pipeline")
+        selected_run_types = self._read_csv_param(query, "run_type")
+        selected_run_id = self._read_optional_param(query, "run_id")
+        manifests = tuple(
+            manifest
+            for manifest in self._run_manifest_port.list_all()
+            if manifest.pipeline_name == pipeline
+            and (
+                not selected_run_types
+                or str(manifest.run_type) in selected_run_types
+            )
+        )
+
+        resolved_manifest = next(
+            (
+                manifest
+                for manifest in manifests
+                if selected_run_id is not None and str(manifest.run_id) == selected_run_id
+            ),
+            None,
+        )
+        resolved_via = "selected_run_id"
+        if resolved_manifest is None:
+            resolved_manifest = manifests[-1] if manifests else None
+            resolved_via = (
+                "latest_manifest_for_scope"
+                if resolved_manifest is not None
+                else "no_manifest_for_scope"
+            )
+
+        def _display(value: object | None, *, unavailable: str) -> str:
+            if value is None:
+                return unavailable
+            text = str(value).strip()
+            return text or unavailable
+
+        manifest_unavailable = "not available for current scope"
+        provenance_unavailable = "not available in selected manifest"
+        code_provenance = (
+            resolved_manifest.code_provenance if resolved_manifest is not None else None
+        )
+        rows = [
+            {
+                "parameter": "manifest_id",
+                "value": _display(
+                    getattr(resolved_manifest, "manifest_id", None),
+                    unavailable=manifest_unavailable,
+                ),
+            },
+            {
+                "parameter": "run_id",
+                "value": _display(
+                    getattr(resolved_manifest, "run_id", None) or selected_run_id,
+                    unavailable=manifest_unavailable,
+                ),
+            },
+            {
+                "parameter": "pipeline name",
+                "value": pipeline,
+            },
+            {
+                "parameter": "pipelineversion",
+                "value": _display(
+                    getattr(code_provenance, "pipeline_version", None),
+                    unavailable=provenance_unavailable,
+                ),
+            },
+            {
+                "parameter": "git commit hash",
+                "value": _display(
+                    getattr(code_provenance, "git_commit", None),
+                    unavailable=provenance_unavailable,
+                ),
+            },
+            {
+                "parameter": "config hash",
+                "value": _display(
+                    getattr(code_provenance, "config_hash", None),
+                    unavailable=provenance_unavailable,
+                ),
+            },
+            {
+                "parameter": "execution fingerprint",
+                "value": _display(
+                    getattr(resolved_manifest, "execution_fingerprint", None),
+                    unavailable=manifest_unavailable,
+                ),
+            },
+            {
+                "parameter": "schema contract",
+                "value": _display(
+                    getattr(code_provenance, "contract_ref", None),
+                    unavailable=provenance_unavailable,
+                ),
+            },
+            {
+                "parameter": "version",
+                "value": _display(
+                    getattr(code_provenance, "contract_version", None),
+                    unavailable=provenance_unavailable,
+                ),
+            },
+        ]
+        response_support = cast(_HealthResponseSupport, self)
+        await response_support._send_payload_response(
+            writer,
+            200,
+            {
+                "pipeline": pipeline,
+                "run_type": list(selected_run_types),
+                "selected_run_id": selected_run_id,
+                "resolved_via": resolved_via,
+                "rows": rows,
+            },
+        )
 
     async def _handle_filtered_record_detail(
         self,

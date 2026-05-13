@@ -62,14 +62,19 @@ Current semantics:
   dashboard handoff hint.
 - `pipeline` and `run_type` remain the canonical current-status scope for L0
   aggregate triage.
-- `run_id` is a visible execution-hint bridge, not a truthful local
-  run-catalog-backed exact selector.
+- `run_id` is now sourced from the local control-plane run-manifest catalog and
+  can drive exact manifest identity handoff for the `ID` panel, but it still
+  does not change the underlying aggregate current-status PromQL.
 
-Still forbidden on the first screen as resolved facts:
+Still forbidden on the first screen as selectors or aggregate-status facts:
 
-- visible `manifest_id`
 - visible `execution_fingerprint`
 - visible `payload_hash`
+
+Allowed exception:
+
+- visible `manifest_id` in the control-plane-backed `ID` panel, because it is
+  resolved identity evidence rather than a first-screen aggregate selector.
 
 Future exact-run resolution may use `run_selector_mode` and hidden
 `selected_run_id` only after the local run catalog gate is satisfied.
@@ -134,8 +139,9 @@ Row 4: Optional Resolved-Run Context
 
 Current shipped draft behavior:
 
-- `bioetl-overview-v3` shows a future-hook `Run Identity` block instead of fake
-  exact run metadata;
+- `bioetl-overview-v3` shows a control-plane-backed `Run Identity` block with
+  `manifest_id` / `run_id` for the selected pipeline scope, while aggregate L0
+  status remains pipeline/run_type scoped;
 - `Records / Invariants` documents the accounting model and routes the operator
   to `4. Data Quality` / `Silver Reject Explorer` for exact bounded evidence.
 

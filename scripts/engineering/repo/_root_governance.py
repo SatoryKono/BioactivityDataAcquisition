@@ -14,17 +14,11 @@ STRUCTURE_CATALOG_FILE = Path("configs/quality/repo_structure_catalog.yaml")
 
 BASE_ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
     {
-        ".ai",
-        ".aiassistant",
-        "ai",
         ".codex",
         ".cursor",
         ".gemini",
         ".github",
         ".idea",
-        ".jules",
-        ".junie",
-        ".sonarlint",
         ".vibe",
         ".vscode",
         "script-codex",

@@ -354,7 +354,7 @@ class TestPublicationTransformer:
     def test_extract_business_data_preserves_raw_publication_type_for_domain_profile(
         self, transformer
     ):
-        """Application extraction must not own ChEMBL publication taxonomy mapping."""
+        """Application extraction keeps the raw seam and defers taxonomy mapping."""
         record = {
             "publication_id": "CHEMBL1234567",
             "doc_type": "PUBLICATION",
@@ -364,10 +364,10 @@ class TestPublicationTransformer:
         result = transformer._extract_business_data(record, "CHEMBL1234567")
 
         assert result["publication_type_raw"] == "PUBLICATION"
-        assert result["publication_type"] == "PUBLICATION"
-        assert result["publication_type_unified"] == "PUBLICATION"
-        assert result["publication_subclass"] == "PUBLICATION"
-        assert result["publication_class"] == "PUBLICATION"
+        assert result["publication_type"] is None
+        assert result["publication_type_unified"] is None
+        assert result["publication_subclass"] is None
+        assert result["publication_class"] is None
 
     @pytest.mark.asyncio
     async def test_transform_survives_uninitialized_publication_classification(

@@ -48,6 +48,9 @@ class EffectiveConfigService:
         resolution_policy: ConfigResolutionPolicy | None = None,
         artifact_id: str | None = None,
         required_persistence_profile: str = DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+        normalization_profile_ref: str | None = None,
+        normalization_profile_version: str | None = None,
+        normalization_profile_hash: str | None = None,
     ) -> EffectiveConfigArtifact:
         """Create a reproducible effective-config artifact from resolved inputs."""
         validate_runtime_environment_provenance(
@@ -99,6 +102,9 @@ class EffectiveConfigService:
                 effective_config_hash=effective_snapshot.effective_hash,
                 source_fingerprint=resolved_source_fingerprint,
                 contract_refs=resolved_contract_refs,
+                normalization_profile_ref=normalization_profile_ref,
+                normalization_profile_version=normalization_profile_version,
+                normalization_profile_hash=normalization_profile_hash,
                 dq_policy_refs=dq_policy_refs,
                 dq_rule_bundle_versions=dq_rule_bundle_versions,
                 dq_contract_compatibility_hash=dq_contract_compatibility_hash,
@@ -123,6 +129,9 @@ class EffectiveConfigService:
             effective_config_hash=effective_snapshot.effective_hash,
             source_fingerprint=resolved_source_fingerprint,
             contract_refs=resolved_contract_refs,
+            normalization_profile_ref=normalization_profile_ref,
+            normalization_profile_version=normalization_profile_version,
+            normalization_profile_hash=normalization_profile_hash,
             dq_policy_refs=dq_policy_refs,
             dq_rule_bundle_versions=dq_rule_bundle_versions,
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,

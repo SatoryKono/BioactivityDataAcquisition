@@ -10,13 +10,16 @@ from dataclasses import dataclass
 
 from bioetl.application.services.health_service import HealthService
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
+from bioetl.composition.bootstrap.cli.run_manifest import (
+    bootstrap_run_manifest_service,
+)
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceFactory,
 )
 from bioetl.composition.providers.registration import (
     resolve_provider_assembly_support,
 )
-from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports import MetricsPort, RunManifestPort
 from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
@@ -39,10 +42,13 @@ class HealthServerDependencies:
     Attributes:
         health_monitor: ProviderHealthMonitor for health state tracking.
         metrics: MetricsPort for observability.
+        run_manifest_port: Read-only control-plane run catalog surface used by
+            Grafana selector helper endpoints.
     """
 
     health_monitor: ProviderHealthMonitor
     metrics: MetricsPort
+    run_manifest_port: RunManifestPort
 
 
 @dataclass(frozen=True, slots=True)
@@ -114,7 +120,8 @@ def bootstrap_health_server_dependencies() -> HealthServerDependencies:
     to maintain proper layer separation (composition cannot import interfaces).
 
     Returns:
-        HealthServerDependencies with metrics and health_monitor.
+        HealthServerDependencies with metrics, health_monitor, and a read-only
+        control-plane run-manifest catalog.
 
     Example:
         >>> deps = bootstrap_health_server_dependencies()
@@ -126,8 +133,10 @@ def bootstrap_health_server_dependencies() -> HealthServerDependencies:
 
     # Create health monitor with injected metrics
     health_monitor = ProviderHealthMonitor(metrics=metrics)
+    run_manifest_port = bootstrap_run_manifest_service().manifest_port
 
     return HealthServerDependencies(
         health_monitor=health_monitor,
         metrics=metrics,
+        run_manifest_port=run_manifest_port,
     )

@@ -26,6 +26,8 @@ from .conftest import (
     get_silver_records,
 )
 
+pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
+
 
 # YYYY-MM-DD pattern for date validation
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")

@@ -36,6 +36,15 @@ def build_canonical_execution_identity(
             ),
             contract_ref=cast(str | None, base_summary.get("contract_ref")),
             contract_version=cast(str | None, base_summary.get("contract_version")),
+            normalization_profile_ref=cast(
+                str | None, base_summary.get("normalization_profile_ref")
+            ),
+            normalization_profile_version=cast(
+                str | None, base_summary.get("normalization_profile_version")
+            ),
+            normalization_profile_hash=cast(
+                str | None, base_summary.get("normalization_profile_hash")
+            ),
             effective_config_artifact_id=cast(
                 str | None, base_summary.get("effective_config_artifact_id")
             ),
@@ -66,6 +75,13 @@ def build_degraded_runtime_anchor_payload(
             "effective_config_hash": base_summary.get("effective_config_hash"),
             "contract_ref": base_summary.get("contract_ref"),
             "contract_version": base_summary.get("contract_version"),
+            "normalization_profile_ref": base_summary.get("normalization_profile_ref"),
+            "normalization_profile_version": base_summary.get(
+                "normalization_profile_version"
+            ),
+            "normalization_profile_hash": base_summary.get(
+                "normalization_profile_hash"
+            ),
             "effective_config_artifact_id": base_summary.get(
                 "effective_config_artifact_id"
             ),

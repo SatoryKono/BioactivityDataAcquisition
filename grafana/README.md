@@ -738,6 +738,16 @@ Shipped dashboards используют несколько template variables в
   read-path и checkpoint-operator panels не несут pipeline/run_type labels,
   поэтому не фильтруются по этим переменным.
 
+- **`1. Overview v3`** остаётся Prometheus-first для L0 current-status panels,
+  но exact `run_id` selector теперь берётся через HTTP helper
+  `/ops/control-plane/filter-options` из persisted run-manifest catalog,
+  scoped by current `$pipeline/$run_type`. Это control-plane-backed selector,
+  а не Prometheus label, поэтому high-cardinality `run_id` не возвращается в
+  metric surface. Panel `ID` в этом draft dashboard теперь также использует
+  control-plane HTTP helper и показывает `manifest_id`/`run_id` для выбранного
+  pipeline scope, preferring selected `run_id` and otherwise falling back to the
+  latest persisted manifest in scope.
+
 - **`5. Workflow`** использует `$workflow` и `$status` через
   `label_values(bioetl_workflow_runs_total, workflow|status)`, а также
   `$step_status` и `$step_kind` через `bioetl_workflow_step_events_total`.

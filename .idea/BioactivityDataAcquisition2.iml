@@ -247,6 +247,10 @@
       <excludeFolder url="file://$MODULE_DIR$/.windsurf" />
       <excludeFolder url="file://$MODULE_DIR$/.npm-cache/_cacache" />
       <excludeFolder url="file://$MODULE_DIR$/.npm-cache/_cacache/tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/.agents" />
+      <excludeFolder url="file://$MODULE_DIR$/.jules" />
+      <excludeFolder url="file://$MODULE_DIR$/.npm-cache" />
+      <excludeFolder url="file://$MODULE_DIR$/caddy" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.13 (BioactivityDataAcquisition2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -5,19 +5,23 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
-from bioetl.application.services.checkpoint_compatibility_runtime import (
-    CheckpointExecutionIdentityFallbackContext,
-    ExecutionIdentityCompatibilityContext,
-    IdentityDetailsRequest,
-    build_identity_details,
+from bioetl.application.services._checkpoint_compatibility_runtime_core import (
     check_config_compatibility,
-    check_execution_identity_compatibility,
     check_phase_compatibility,
     check_schema_compatibility,
     determine_verdict_value,
-    generate_details,
     generate_message,
     generate_recovery_suggestions,
+)
+from bioetl.application.services._checkpoint_compatibility_runtime_identity import (
+    CheckpointExecutionIdentityFallbackContext,
+    ExecutionIdentityCompatibilityContext,
+    check_execution_identity_compatibility,
+)
+from bioetl.application.services._checkpoint_compatibility_runtime_identity_details import (
+    IdentityDetailsRequest,
+    build_identity_details,
+    generate_details,
 )
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.execution_phase import ExecutionPhase
@@ -29,7 +33,6 @@ class CheckpointCompatibilityPolicy(Enum):
 
     STRICT = "strict"
     LENIENT = "lenient"
-    LEGACY = "legacy"
 
 
 class CheckpointCompatibilityReason(Enum):

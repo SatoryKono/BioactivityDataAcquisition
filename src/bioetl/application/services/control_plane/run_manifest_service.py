@@ -176,6 +176,9 @@ class RunManifestService(
             contract_schema_hash=request.contract_schema_hash,
             dq_policy_ref=request.dq_policy_ref,
             rule_bundle_version=request.rule_bundle_version,
+            normalization_profile_ref=request.normalization_profile_ref,
+            normalization_profile_version=request.normalization_profile_version,
+            normalization_profile_hash=request.normalization_profile_hash,
             dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
             effective_config_artifact_id=request.effective_config_artifact_id,
         )

@@ -9,7 +9,7 @@ from click.testing import CliRunner
 
 from bioetl.interfaces.cli import cli
 
-pytestmark = pytest.mark.e2e
+pytestmark = [pytest.mark.e2e, pytest.mark.usefixtures("strict_dq_env")]
 
 
 @pytest.fixture
@@ -55,8 +55,8 @@ def test_cli_rebuild_with_yes(cli_runner, mock_registry):
     """Test that rebuild works with --yes."""
     from bioetl.application.services.execution.pipeline_runner_models import (
         PipelineRunResult,
+        RunResult,
     )
-    from bioetl.application.services.pipeline_runner_service import RunResult
 
     with (
         patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service"),

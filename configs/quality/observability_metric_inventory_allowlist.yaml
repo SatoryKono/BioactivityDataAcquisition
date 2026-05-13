@@ -1,36 +1,11 @@
 allowed:
-  registered_without_runtime:
-    - bioetl_gold_lifecycle_state_total
-    - bioetl_gold_validation_failures_total
-    - bioetl_gold_write_attempts_total
-    - bioetl_gold_write_duration_seconds
-    - bioetl_gold_write_outcomes_total
+  registered_without_runtime: []
   runtime_without_registry: []
-  dead_metrics:
-    - bioetl_gold_lifecycle_state_total
-    - bioetl_gold_validation_failures_total
-    - bioetl_gold_write_attempts_total
-    - bioetl_gold_write_duration_seconds
-    - bioetl_gold_write_outcomes_total
+  dead_metrics: []
   documented_without_registry:
     - bioetl_checkpoint_age_seconds
-    - bioetl_dq_current_status
-    - bioetl_l0_input_status
-    - bioetl_l0_status
-    - bioetl_l1_control_plane_current_status
-    - bioetl_l1_dq_status
-    - bioetl_l1_gold_lifecycle_status
-    - bioetl_l1_provider_global_status
-    - bioetl_l1_runtime_blocker_status
-    - bioetl_l1_workflow_global_status
-    - bioetl_l1_workflow_selected_status
-    - bioetl_provider_current_status
     - bioetl_replay_duplicate_records_total
-    - bioetl_runtime_current_status
-  rules_without_registry:
-    - bioetl_dq_current_status
-    - bioetl_l0_input_status
-    - bioetl_l0_status
+  rules_without_registry: []
   runtime_cardinality_review_required:
     - metric: bioetl_checkpoint_load_events_total
       owner: "@bioetl-observability"

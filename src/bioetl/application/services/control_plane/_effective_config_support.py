@@ -344,6 +344,9 @@ class SemanticIdentityPayloadContext:
     effective_config_hash: str
     source_fingerprint: str
     contract_refs: list[str]
+    normalization_profile_ref: str | None
+    normalization_profile_version: str | None
+    normalization_profile_hash: str | None
     dq_policy_refs: list[DQPolicyRef]
     dq_rule_bundle_versions: dict[str, str]
     dq_contract_compatibility_hash: str
@@ -391,6 +394,9 @@ def build_semantic_identity_payload(
         "effective_config_hash": request.effective_config_hash,
         "source_fingerprint": request.source_fingerprint,
         "contract_refs": request.contract_refs,
+        "normalization_profile_ref": request.normalization_profile_ref,
+        "normalization_profile_version": request.normalization_profile_version,
+        "normalization_profile_hash": request.normalization_profile_hash,
         "dq_policy_refs": [to_jsonable(ref) for ref in request.dq_policy_refs],
         "dq_rule_bundle_versions": request.dq_rule_bundle_versions,
         "dq_contract_compatibility_hash": request.dq_contract_compatibility_hash,
@@ -426,6 +432,9 @@ def semantic_artifact_payload(artifact: EffectiveConfigArtifact) -> JsonDict:
         "effective_config_hash": artifact.effective_config_hash,
         "source_fingerprint": artifact.source_fingerprint,
         "contract_refs": artifact.contract_refs,
+        "normalization_profile_ref": artifact.normalization_profile_ref,
+        "normalization_profile_version": artifact.normalization_profile_version,
+        "normalization_profile_hash": artifact.normalization_profile_hash,
         "dq_policy_refs": [to_jsonable(ref) for ref in artifact.dq_policy_refs],
         "dq_rule_bundle_versions": artifact.dq_rule_bundle_versions,
         "dq_contract_compatibility_hash": artifact.dq_contract_compatibility_hash,

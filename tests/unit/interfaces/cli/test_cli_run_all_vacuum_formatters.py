@@ -25,12 +25,14 @@ from bioetl.application.services.vacuum_service import (
 from bioetl.interfaces.cli import cli
 from bioetl.interfaces.cli.commands.run_all import (
     BatchRunResult,
-    _determine_exit_code,
     _echo_batch_summary,
-    _filter_pipelines_by_provider,
-    _get_available_providers,
     _handle_destructive_confirmation,
-    _validate_provider,
+)
+from bioetl.interfaces.cli.commands.domains.run_all.support import (
+    determine_batch_exit_code,
+    filter_pipelines_by_provider,
+    get_available_providers,
+    validate_provider,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
@@ -111,11 +113,11 @@ class TestBatchRunResult:
 
 @pytest.mark.unit
 class TestGetAvailableProviders:
-    """Tests for _get_available_providers helper."""
+    """Tests for get_available_providers helper."""
 
     def test_returns_unique_providers(self, mock_registry):
         """Test that unique providers are extracted from pipeline names."""
-        providers = _get_available_providers(registry=mock_registry)
+        providers = get_available_providers(registry=mock_registry)
 
         assert "chembl" in providers
         assert "pubchem" in providers
@@ -124,7 +126,7 @@ class TestGetAvailableProviders:
 
     def test_returns_sorted_providers(self, mock_registry):
         """Test that providers are sorted alphabetically."""
-        providers = _get_available_providers(registry=mock_registry)
+        providers = get_available_providers(registry=mock_registry)
 
         assert providers == sorted(providers)
 
@@ -132,18 +134,18 @@ class TestGetAvailableProviders:
         """Test that empty list is returned when no pipelines registered."""
         mock = MagicMock()
         mock.list_pipelines.return_value = []
-        providers = _get_available_providers(registry=mock)
+        providers = get_available_providers(registry=mock)
 
         assert providers == []
 
 
 @pytest.mark.unit
 class TestFilterPipelinesByProvider:
-    """Tests for _filter_pipelines_by_provider helper."""
+    """Tests for filter_pipelines_by_provider helper."""
 
     def test_filters_by_provider_prefix(self, mock_registry):
         """Test that pipelines are filtered by provider prefix."""
-        pipelines = _filter_pipelines_by_provider("chembl", registry=mock_registry)
+        pipelines = filter_pipelines_by_provider("chembl", registry=mock_registry)
 
         assert "chembl_activity" in pipelines
         assert "chembl_molecule" in pipelines
@@ -152,31 +154,31 @@ class TestFilterPipelinesByProvider:
 
     def test_returns_empty_for_unknown_provider(self, mock_registry):
         """Test that empty list is returned for unknown provider."""
-        pipelines = _filter_pipelines_by_provider("unknown", registry=mock_registry)
+        pipelines = filter_pipelines_by_provider("unknown", registry=mock_registry)
 
         assert pipelines == []
 
     def test_returns_sorted_pipelines(self, mock_registry):
         """Test that pipelines are sorted alphabetically."""
-        pipelines = _filter_pipelines_by_provider("chembl", registry=mock_registry)
+        pipelines = filter_pipelines_by_provider("chembl", registry=mock_registry)
 
         assert pipelines == sorted(pipelines)
 
 
 @pytest.mark.unit
 class TestValidateProvider:
-    """Tests for _validate_provider helper."""
+    """Tests for validate_provider helper."""
 
     def test_valid_provider_returns_true(self, mock_registry):
         """Test that valid provider returns (True, None)."""
-        is_valid, error_msg = _validate_provider("chembl", registry=mock_registry)
+        is_valid, error_msg = validate_provider("chembl", registry=mock_registry)
 
         assert is_valid is True
         assert error_msg is None
 
     def test_invalid_provider_returns_false(self, mock_registry):
         """Test that invalid provider returns (False, error_message)."""
-        is_valid, error_msg = _validate_provider("invalid", registry=mock_registry)
+        is_valid, error_msg = validate_provider("invalid", registry=mock_registry)
 
         assert is_valid is False
         assert "No pipelines found for provider 'invalid'" in error_msg
@@ -186,7 +188,7 @@ class TestValidateProvider:
         """Test error when no pipelines are registered."""
         mock = MagicMock()
         mock.list_pipelines.return_value = []
-        is_valid, error_msg = _validate_provider("chembl", registry=mock)
+        is_valid, error_msg = validate_provider("chembl", registry=mock)
 
         assert is_valid is False
         assert "No pipelines are registered" in error_msg
@@ -194,17 +196,17 @@ class TestValidateProvider:
 
 @pytest.mark.unit
 class TestDetermineExitCode:
-    """Tests for _determine_exit_code helper."""
+    """Tests for determine_batch_exit_code helper."""
 
     def test_ok_when_all_succeeded(self):
         """Test ExitCode.OK when all pipelines succeeded."""
         result = BatchRunResult(total=3, succeeded=3, failed=0, skipped=0)
-        assert _determine_exit_code(result) == ExitCode.OK
+        assert determine_batch_exit_code(result) == ExitCode.OK
 
     def test_pipeline_error_when_failures(self):
         """Test ExitCode.PIPELINE_ERROR when there are failures."""
         result = BatchRunResult(total=3, succeeded=1, failed=2, skipped=0)
-        assert _determine_exit_code(result) == ExitCode.PIPELINE_ERROR
+        assert determine_batch_exit_code(result) == ExitCode.PIPELINE_ERROR
 
     def test_sigint_when_shutdown_present(self):
         """Test ExitCode.SIGINT when batch contains a shutdown status."""
@@ -222,12 +224,12 @@ class TestDetermineExitCode:
                 )
             ],
         )
-        assert _determine_exit_code(result) == ExitCode.SIGINT
+        assert determine_batch_exit_code(result) == ExitCode.SIGINT
 
     def test_sigint_when_no_total(self):
         """Test ExitCode.SIGINT when total is 0 (all_succeeded is False)."""
         result = BatchRunResult(total=0, succeeded=0, failed=0, skipped=0)
-        assert _determine_exit_code(result) == ExitCode.SIGINT
+        assert determine_batch_exit_code(result) == ExitCode.SIGINT
 
 
 @pytest.mark.unit

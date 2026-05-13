@@ -119,12 +119,18 @@ def _create_stub_transformer(
     *,
     provider: str = "test_provider",
     entity_type: str = "publication",
+    metrics: object | None = None,
 ) -> StubPublicationTransformer:
     """Construct a stub transformer with shared immutable dependencies."""
+    dependencies = (
+        build_test_transformer_dependencies(metrics=metrics)
+        if metrics is not None
+        else _shared_transformer_dependencies()
+    )
     return transformer_class(
         provider=provider,
         entity_type=entity_type,
-        dependencies=_shared_transformer_dependencies(),
+        dependencies=dependencies,
     )
 
 
@@ -507,6 +513,79 @@ class TestPreExtractValidation:
 
         assert result is not None
         assert result["test_id"] == "test-12345"
+
+
+class TestPublicationVocabularyObservability:
+    """Tests for bounded publication vocabulary drift metrics."""
+
+    def test_unknown_crossref_publication_type_emits_metric(self) -> None:
+        metrics = MagicMock()
+        transformer = _create_stub_transformer(provider="crossref", metrics=metrics)
+        context = PipelineContext(
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+            logger=MagicMock(),
+            pipeline_name="crossref_publication",
+        )
+
+        transformer._emit_unknown_publication_vocab_metrics(
+            context,
+            {"publication_type": "future-article"},
+        )
+
+        metrics.increment_counter.assert_called_once_with(
+            name="bioetl_publication_raw_vocab_unknown_total",
+            value=1,
+            labels={
+                "pipeline": "crossref_publication",
+                "provider": "crossref",
+                "field": "publication_type",
+                "handling": "preserved_unknown",
+            },
+        )
+
+    def test_known_publication_vocab_does_not_emit_metric(self) -> None:
+        metrics = MagicMock()
+        transformer = _create_stub_transformer(provider="openalex", metrics=metrics)
+        context = PipelineContext(
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+            logger=MagicMock(),
+            pipeline_name="openalex_publication",
+        )
+
+        transformer._emit_unknown_publication_vocab_metrics(
+            context,
+            {
+                "publication_type": "article",
+                "type_crossref": "journal-article",
+            },
+        )
+
+        metrics.increment_counter.assert_not_called()
+
+    def test_unknown_pubmed_vocab_counts_each_field(self) -> None:
+        metrics = MagicMock()
+        transformer = _create_stub_transformer(provider="pubmed", metrics=metrics)
+        context = PipelineContext(
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+            logger=MagicMock(),
+            pipeline_name="pubmed_publication",
+        )
+
+        transformer._emit_unknown_publication_vocab_metrics(
+            context,
+            {
+                "publication_types": '["Journal Article","Future Type"]',
+                "publication_status": "future-status",
+            },
+        )
+
+        assert metrics.increment_counter.call_count == 2
 
 
 # =============================================================================

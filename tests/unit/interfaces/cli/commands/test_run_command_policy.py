@@ -18,12 +18,12 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunResult,
 )
-from bioetl.application.services.cli_run_orchestration_models import (
+from bioetl.application.services.execution.cli_run_orchestration_models import (
     CliRunPreparationInput,
     RunExecutionRequest,
     RunPreparationResult,
 )
-from bioetl.application.services.cli_run_orchestration_service import (
+from bioetl.application.services.execution.cli_run_orchestration_service import (
     CliRunOrchestrationService,
 )
 from bioetl.domain.exceptions import NetworkError

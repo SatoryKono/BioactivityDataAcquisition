@@ -13,7 +13,6 @@ from tests.integration.chembl.extraction_params_support import (
     has_any_cassette,
 )
 
-pytest_plugins = ("tests.integration.chembl.extraction_params_support",)
 
 ASSAY_CASE = ExtractionParamsCase(
     entity_type="assay",

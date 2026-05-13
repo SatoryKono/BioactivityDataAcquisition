@@ -91,6 +91,11 @@ def _build_exact_replay_anchors(
         "dq_contract_compatibility_hash": summary.get("dq_contract_compatibility_hash"),
         "contract_ref": summary.get("contract_ref"),
         "contract_version": summary.get("contract_version"),
+        "normalization_profile_ref": summary.get("normalization_profile_ref"),
+        "normalization_profile_version": summary.get(
+            "normalization_profile_version"
+        ),
+        "normalization_profile_hash": summary.get("normalization_profile_hash"),
         "effective_config_artifact_id": summary.get("effective_config_artifact_id"),
         "input_snapshot_identity_fingerprint": summary.get(
             "input_snapshot_identity_fingerprint"
@@ -168,6 +173,15 @@ def _identity_graph_core_fields(request: _FinalSummaryRequest) -> dict[str, obje
         "code_provenance_state": request.base_summary.get("code_provenance_state"),
         "contract_ref": request.base_summary.get("contract_ref"),
         "contract_version": request.base_summary.get("contract_version"),
+        "normalization_profile_ref": request.base_summary.get(
+            "normalization_profile_ref"
+        ),
+        "normalization_profile_version": request.base_summary.get(
+            "normalization_profile_version"
+        ),
+        "normalization_profile_hash": request.base_summary.get(
+            "normalization_profile_hash"
+        ),
     }
 
 

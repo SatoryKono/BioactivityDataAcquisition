@@ -91,8 +91,10 @@ first-screen status row, panel descriptions и linked runbooks. В draft v3.0
 она должна материализоваться как явный header contract.
 
 Текущий bridge-surface для этого перехода — `bioetl-overview-v3`: он уже
-показывает explicit header block, но остаётся aggregate-first и не претендует
-на exact run resolution без локального run catalog.
+показывает explicit header block, остаётся aggregate-first, но уже использует
+локальный control-plane run catalog для `run_id` selector и `ID` panel
+identity handoff (`manifest_id` / `run_id`) в пределах выбранного pipeline
+scope.
 
 ### Фильтрация и Изоляция данных
 

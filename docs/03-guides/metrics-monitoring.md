@@ -76,10 +76,13 @@ BioETL предоставляет комплексную систему observab
   через canonical metrics API.
 - `helper_backed_live_metrics`: metric families, которые проходят через helper
   или wrapper path, но всё ещё реально live.
-- `registry_only_metrics`: зарегистрированные metric families без обнаруженного
-  runtime emission path.
+- `registry_only_metrics`: runtime-registered metric families без
+  обнаруженного runtime emission path.
 - `dead_metrics`: строгий поднабор `registry_only_metrics`, для которого в repo
   не осталось ни runtime, ни docs, ни rules evidence.
+- recording-rule operator metrics декларируются отдельно через
+  `configs/quality/observability_metric_declarations.yaml`, поэтому не должны
+  появляться в `documented_without_registry` / `rules_without_registry`.
 - `documented_without_runtime` / `ruled_without_runtime`: published operator
   surfaces, которые всё ещё ссылаются на registered family без live runtime
   emission path.

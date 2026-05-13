@@ -15,9 +15,6 @@ from pathlib import Path
 import pytest
 
 from bioetl.domain.filtering import SilverFilterConfig
-from bioetl.infrastructure.config.silver_filter_migration import (
-    LEGACY_SILVER_FILTER_ENV,
-)
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 
 
@@ -337,50 +334,6 @@ filters:
             "standard_type",
             "standard_units",
         }
-
-    def test_legacy_env_preserves_semantic_silver_filters(
-        self,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
-        """Legacy compatibility mode keeps semantic Silver rules materialized."""
-        monkeypatch.setenv(LEGACY_SILVER_FILTER_ENV, "1")
-        base_root = tmp_path / "base"
-        base_root.mkdir(parents=True)
-        (base_root / "pipeline.yaml").write_text(
-            """
-version: "1.0.0"
-filter_defaults:
-  gold_filters:
-    required_fields: []
-""",
-            encoding="utf-8",
-        )
-        entities = tmp_path / "entities" / "chembl"
-        entities.mkdir(parents=True)
-        (entities / "activity.yaml").write_text(
-            """
-version: "1.0.0"
-provider: chembl
-entity: activity
-filters:
-  silver_filters:
-    columns:
-      standard_type: [IC50]
-""",
-            encoding="utf-8",
-        )
-
-        loader = FilterConfigLoader(tmp_path)
-        _, silver_filters, gold_filters, _ = loader.load("chembl", "activity")
-        merged = loader.load_as_dict("chembl", "activity")
-
-        assert [rule.column for rule in silver_filters.column_filters] == [
-            "standard_type"
-        ]
-        assert gold_filters.column_filters == ()
-        assert "columns" in merged["silver_filters"]
-
 
 class TestFilterConfigLoaderInlineOverrides:
     """Tests for inline override handling."""
