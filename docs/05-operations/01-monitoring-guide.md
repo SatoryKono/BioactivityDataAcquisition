@@ -93,8 +93,10 @@ first-screen status row, panel descriptions и linked runbooks. В draft v3.0
 Текущий bridge-surface для этого перехода — `bioetl-overview-v3`: он уже
 показывает explicit header block, остаётся aggregate-first, но уже использует
 локальный control-plane run catalog для `run_id` selector и `ID` panel
-identity handoff (`manifest_id` / `run_id`) в пределах выбранного pipeline
-scope.
+identity handoff (`manifest_id` / `run_id`) в пределах текущего
+control-plane scope. `Run Type=All` трактуется как unbounded run-type filter;
+`Pipeline=All` без exact `run_id` не должен притворяться одним manifest
+identity.
 
 ### Фильтрация и Изоляция данных
 

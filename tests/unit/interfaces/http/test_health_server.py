@@ -1030,6 +1030,85 @@ class TestHealthServerControlPlaneSelector:
         assert data["run_ids"] == expected_incremental_ids
 
     @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_endpoint_treats_all_run_type_as_unbounded_scope(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Grafana All run_type should not collapse the selector to an empty scope."""
+        server, manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        expected_run_ids = [
+            str(manifest.run_id)
+            for manifest in manifest_store.list_all()
+            if manifest.pipeline_name == "chembl_activity"
+        ]
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/filter-options?"
+            "dimension=run_id&pipeline=chembl_activity&run_type=$__all",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data["pipeline"] == "chembl_activity"
+        assert data["run_type"] == []
+        assert data["run_ids"] == expected_run_ids
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_endpoint_treats_all_pipeline_as_aggregate_scope(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Grafana All pipeline should expose aggregate run IDs for exact-run handoff."""
+        server, manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        expected_incremental_ids = [
+            str(manifest.run_id)
+            for manifest in manifest_store.list_all()
+            if manifest.run_type == RunType.INCREMENTAL
+        ]
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/filter-options?"
+            "dimension=run_id&pipeline=$__all&run_type=incremental",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data["pipeline"] == "$__all"
+        assert data["run_type"] == ["incremental"]
+        assert data["run_ids"] == expected_incremental_ids
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_endpoint_supports_list_shape_for_variable_queries(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Variable queries may request a plain list wrapper for Infinity parsing."""
+        server, manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        expected_run_ids = [
+            str(manifest.run_id)
+            for manifest in manifest_store.list_all()
+            if manifest.pipeline_name == "chembl_activity"
+        ]
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/filter-options?"
+            "dimension=run_id&response_shape=list&pipeline=chembl_activity&run_type=$__all",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data == {"items": expected_run_ids}
+
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_returns_latest_manifest_for_scope(
         self,
         running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
@@ -1055,6 +1134,29 @@ class TestHealthServerControlPlaneSelector:
         assert rows["git commit hash"] == "def5678"
         assert rows["config hash"] == "feedface"
         assert rows["execution fingerprint"] == "fingerprint-2"
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_table_treats_all_run_type_as_unbounded_scope(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """ID panel should still resolve a concrete pipeline when run_type=All."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-table?"
+            "pipeline=chembl_activity&run_type=$__all",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        rows = {item["parameter"]: item["value"] for item in data["rows"]}
+        assert data["resolved_via"] == "latest_manifest_for_scope"
+        assert rows["manifest_id"] == "manifest-2"
+        assert rows["pipeline name"] == "chembl_activity"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_prefers_selected_run_id(
@@ -1084,6 +1186,58 @@ class TestHealthServerControlPlaneSelector:
         assert rows["manifest_id"] == "manifest-1"
         assert rows["run_id"] == str(selected_manifest.run_id)
         assert rows["execution fingerprint"] == "fingerprint-1"
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_table_supports_all_pipeline_with_selected_run_id(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Aggregate pipeline scope should resolve the exact manifest when run_id is explicit."""
+        server, manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        selected_manifest = next(
+            manifest
+            for manifest in manifest_store.list_all()
+            if manifest.manifest_id == "manifest-3"
+        )
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-table?"
+            f"pipeline=$__all&run_type=incremental&run_id={selected_manifest.run_id}",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        rows = {item["parameter"]: item["value"] for item in data["rows"]}
+        assert data["resolved_via"] == "selected_run_id"
+        assert rows["manifest_id"] == "manifest-3"
+        assert rows["pipeline name"] == "pubchem_compound"
+        assert rows["run_id"] == str(selected_manifest.run_id)
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_table_requires_exact_run_id_for_all_pipeline_scope(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Aggregate pipeline scope should not guess one manifest without explicit run_id."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-table?pipeline=$__all&run_type=incremental",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        rows = {item["parameter"]: item["value"] for item in data["rows"]}
+        assert data["resolved_via"] == "aggregate_scope_requires_exact_run_id"
+        assert rows["manifest_id"] == "select one concrete pipeline or exact run_id"
+        assert rows["run_id"] == "select one concrete pipeline or exact run_id"
+        assert rows["pipeline name"] == "$__all"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_requires_pipeline_scope(

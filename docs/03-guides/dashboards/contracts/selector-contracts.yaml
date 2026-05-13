@@ -88,9 +88,11 @@ dashboard_families:
       Overview v3 is a draft hybrid bridge. It keeps pipeline-summary current
       status semantics, adds a visible workflow evidence-context selector, and
       exposes run_id from the local control-plane run-manifest catalog for
-      identity handoff. It MAY resolve selected manifest identity for the
-      `ID` panel, but it MUST NOT claim that run_id changes aggregate
-      current-status PromQL semantics.
+      identity handoff. Grafana `All` values MAY expand the catalog scope, but
+      the dashboard MUST NOT claim one manifest identity for aggregate pipeline
+      scope unless an exact `run_id` is selected. It MAY resolve selected
+      manifest identity for the `ID` panel, but it MUST NOT claim that run_id
+      changes aggregate current-status PromQL semantics.
   provider_first:
     uids:
       - bioetl-provider-health-v2
