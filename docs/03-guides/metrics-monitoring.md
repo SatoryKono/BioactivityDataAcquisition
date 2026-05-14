@@ -212,6 +212,31 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_dq_baseline_updated`          | Counter   | pipeline, metric                         | Обновления baseline                                                                       |
 | `bioetl_dq_baseline_samples`          | Gauge     | pipeline, metric                         | Семплы в baseline                                                                         |
 
+### Publication vocabulary drift
+
+- `bioetl_publication_raw_vocab_unknown_total` tracks provider-native
+  publication vocabulary values that were intentionally preserved because they
+  are outside the reviewed raw registry in
+  `configs/vocab/publication_controlled.yaml`.
+- Labels are intentionally bounded to `pipeline`, `provider`, `field`, and
+  `handling`. Raw lexemes are never emitted as metric labels.
+- Current bounded providers/fields are:
+  - `crossref.publication_type`
+  - `openalex.publication_type`
+  - `openalex.type_crossref`
+  - `pubmed.publication_types`
+  - `pubmed.publication_status`
+  - `semanticscholar.publication_types`
+- Triage path for a non-zero series:
+  1. confirm the spike in `/metrics` or Prometheus;
+  1. compare the affected provider/field against
+     `configs/vocab/publication_controlled.yaml`;
+  1. inspect tracked fixture inventories via
+     `tests/integration/config/test_publication_controlled_vocab_parity.py` and
+     `tests/integration/config/test_publication_nested_vocabulary_inventory.py`;
+  1. if the provider introduced a legitimate new token, update the reviewed
+     registry and keep `preserve_unknown: true` for forward compatibility.
+
 ### Silver filter rejects: operator semantics
 
 - Для high-level operator summary используйте Prometheus/Grafana signal
