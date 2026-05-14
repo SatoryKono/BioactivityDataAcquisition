@@ -133,8 +133,8 @@ review_lanes:
     classification: review_required
     scope: non-canonical root notes, diagnostics, and ad-hoc tests
     verification:
-      - git ls-files AGENT.md QUICK_START.md MCP_SETUP.md dashboard-audit-report.md query_test_docs_memory.js seed_test_docs_memory.js test_neo4j_memory.py Dockerfile entrypoint.sh requirements.txt
-      - rg -n "AGENT\\.md|QUICK_START\\.md|MCP_SETUP\\.md|dashboard-audit-report\\.md|query_test_docs_memory|seed_test_docs_memory|test_neo4j_memory|Dockerfile|requirements\\.txt" .github docs scripts tests configs README.md Makefile pyproject.toml package.json
+      - git ls-files AGENT.md QUICK_START.md MCP_SETUP.md dashboard-audit-report.md query_test_docs_memory.js seed_test_docs_memory.js test_neo4j_memory.py Dockerfile entrypoint.sh requirements.txt conftest.py
+      - rg -n "AGENT\\.md|QUICK_START\\.md|MCP_SETUP\\.md|dashboard-audit-report\\.md|query_test_docs_memory|seed_test_docs_memory|test_neo4j_memory|Dockerfile|requirements\\.txt|tests/conftest\\.py|conftest\\.py" .github docs scripts tests configs README.md Makefile pyproject.toml package.json
     candidates:
       - path: AGENT.md
         current_live_state: absent_from_root_baseline
@@ -168,6 +168,10 @@ review_lanes:
         current_live_state: absent_from_root_baseline
         canonical_path: Dockerfile.bioetl
         action_if_reintroduced: move_to_named_runtime_surface_or_remove
+      - path: conftest.py
+        current_live_state: absent_from_root_baseline
+        canonical_path: tests/conftest.py
+        action_if_reintroduced: move_to_tests_bootstrap_surface_or_remove_root_copy
       - path: requirements.txt
         current_live_state: absent_from_root_baseline
         canonical_path: pyproject.toml
