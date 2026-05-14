@@ -6,7 +6,12 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.domain.entities.chembl import ActivityRecord
+from bioetl.domain.entities.chembl import (
+    ActivityRecord,
+    CompoundLinkRecord,
+    PublicationSimilarityRecord,
+    TissueRecord,
+)
 from bioetl.domain.exceptions import ExternalServiceError, RetryExhaustedError
 from bioetl.domain.types import CircuitBreakerState
 from bioetl.infrastructure.adapters.chembl import ChemblAdapter
@@ -69,6 +74,69 @@ async def test_fetch_as_models_invalid_type(adapter):
     with pytest.raises(ValueError):
         async for _ in adapter.fetch_as_models("unsupported_type"):
             continue
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("entity_type", "record", "expected_type"),
+    (
+        (
+            "tissue",
+            {
+                "tissue_id": "CHEMBL-T1",
+                "pref_name": "Liver",
+                "bto_id": "BTO:0000759",
+            },
+            TissueRecord,
+        ),
+        (
+            "compound_record",
+            {
+                "record_id": 10,
+                "molecule_id": "CHEMBL25",
+                "publication_id": "CHEMBL1123456",
+                "src_id": 1,
+            },
+            CompoundLinkRecord,
+        ),
+        (
+            "publication_similarity",
+            {
+                "sim_id": 99,
+                "doc_1": 100,
+                "doc_2": 200,
+                "tid_tani": 0.75,
+                "mol_tani": 0.25,
+            },
+            PublicationSimilarityRecord,
+        ),
+    ),
+)
+async def test_fetch_as_models_supports_newly_registered_chembl_dtos(
+    adapter,
+    mock_http_client,
+    entity_type,
+    record,
+    expected_type,
+):
+    plural_key_by_entity = {
+        "tissue": "tissues",
+        "compound_record": "compound_records",
+        "publication_similarity": "document_similarities",
+    }
+    mock_response = MagicMock()
+    mock_response.json.return_value = {
+        plural_key_by_entity[entity_type]: [record],
+        "page_meta": {"next": None},
+    }
+    mock_http_client.get.return_value = mock_response
+
+    models = []
+    async for model in adapter.fetch_as_models(entity_type, validate=True):
+        models.append(model)
+
+    assert len(models) == 1
+    assert isinstance(models[0], expected_type)
 
 
 @pytest.mark.asyncio

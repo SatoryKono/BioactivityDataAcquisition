@@ -121,6 +121,16 @@ quality:
                 - multicellular
             nullable: true
             error_message: organism_class must match the reviewed cellularity taxonomy when present
+        -   field: component_types
+            type: custom
+            validator: validate_target_component_types_json_vocab
+            nullable: true
+            error_message: component_types must be a canonical JSON array of allowed target component types when present
+        -   field: component_relationships
+            type: custom
+            validator: validate_target_component_relationships_json_vocab
+            nullable: true
+            error_message: component_relationships must be a canonical JSON array of allowed target component relationships when present
     entity_cross_field_validations:
         -   name: target_identifiable
             fields:
@@ -128,6 +138,22 @@ quality:
                 - pref_name
             condition: all_present
             error_message: Target must have ID and preferred name
+        -   name: component_ids_require_component_types
+            fields:
+                - component_ids
+                - component_types
+            condition: conditional_required
+            trigger_field: component_ids
+            required_field: component_types
+            error_message: component_types must be populated when component_ids are present
+        -   name: component_ids_require_component_relationships
+            fields:
+                - component_ids
+                - component_relationships
+            condition: conditional_required
+            trigger_field: component_ids
+            required_field: component_relationships
+            error_message: component_relationships must be populated when component_ids are present
     entity_conditional_validations: []
     key_nullability:
         -   field: target_id

@@ -83,6 +83,14 @@ fixtures:
     owner: "data-platform"
     last_refresh: "2026-03-25"
     validation_status: valid
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/chembl/molecule/sample_edge_vocab_2026-05-14.jsonl
+        records: 2
+        provenance: "Targeted ChEMBL molecule Bronze sample covering flag-like, quasi-enum, and structured raw provider fields that are sparse in the bounded CI sample."
+        owner: "data-platform"
+        last_refresh: "2026-05-14"
+        validation_status: valid
   chembl/protein_class:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl

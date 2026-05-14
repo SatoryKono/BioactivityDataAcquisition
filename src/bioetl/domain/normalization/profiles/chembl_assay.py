@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from bioetl.domain.normalization.chembl import BAO_ONTOLOGY_VERSION, normalize_bao_label
+from bioetl.domain.normalization.chembl import BAO_ONTOLOGY_VERSION
 from bioetl.domain.normalization.profiles._profile_ontology_companion_normalizers import (
     build_obo_companion_iri_normalizer,
     build_obo_companion_mapping_status_normalizer,
@@ -26,6 +26,7 @@ from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.schemas.chembl.assay import AssaySchema
 from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
+from ._chembl_bao_label_normalizers import normalize_profile_bao_label_from_bao_format
 from ._chembl_policy_registry import (
     chembl_controlled_family_fields,
     chembl_ontology_family_fields,
@@ -92,26 +93,6 @@ _CONTROLLED_CONFIDENCE_FIELDS = chembl_controlled_family_fields(
 )
 _REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("assay")
 
-
-def _normalize_bao_label_with_profile_context(
-    value: object,
-    record: dict[str, object] | None = None,
-) -> str | None:
-    if value is not None and not isinstance(value, str):
-        return None
-    normalized_bao_identifier = (
-        None
-        if record is None
-        else normalize_profile_bao_identifier(record.get("bao_format"))
-    )
-    bao_identifier = (
-        normalized_bao_identifier
-        if isinstance(normalized_bao_identifier, str)
-        else None
-    )
-    return normalize_bao_label(value, bao_identifier=bao_identifier)
-
-
 def create_case_normalizer(strategy: str = "uppercase") -> Callable[[str], str | None]:
     """Create a case normalizer function with the specified strategy.
 
@@ -144,7 +125,7 @@ _SPECIAL_RULE_COMPONENTS = {
         "Normalize ChEMBL assay organism display name using curated organism aliases.",
     ),
     "bao_label": (
-        _normalize_bao_label_with_profile_context,
+        normalize_profile_bao_label_from_bao_format,
         "Normalize BAO label text inside the profile-visible assay contract, "
         "resolving canonical labels from sibling bao_format identifiers when present.",
     ),

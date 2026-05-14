@@ -25,6 +25,10 @@ from bioetl.domain.behavior._dq_value_coercion import (
     _violates_maximum,
     _violates_minimum,
 )
+from bioetl.domain.schemas.constants import (
+    TARGET_COMPONENT_RELATIONSHIPS,
+    TARGET_COMPONENT_TYPES,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.config.validation import (
@@ -98,12 +102,26 @@ def _custom_rule_violated(
 
     if validator_name == "smiles_validator":
         return value is not None and not validate_smiles(str(value))
+    target_vocabulary = _target_json_vocabulary(validator_name)
+    if target_vocabulary is not None:
+        return _target_json_vocabulary_rule_violated(
+            value,
+            allowed_values=target_vocabulary,
+        )
     if validator_name == "validate_hierarchy_no_self_reference":
         return _custom_cross_rule_violated(
             record,
             validator_name,
         )
     return False
+
+
+def _target_json_vocabulary(validator_name: str | None) -> frozenset[str] | None:
+    if validator_name == "validate_target_component_types_json_vocab":
+        return TARGET_COMPONENT_TYPES
+    if validator_name == "validate_target_component_relationships_json_vocab":
+        return TARGET_COMPONENT_RELATIONSHIPS
+    return None
 
 
 def _custom_cross_rule_violated(
@@ -208,6 +226,27 @@ def _decode_json_list_like(value: str) -> list[object] | None:
     except json.JSONDecodeError:
         return None
     return parsed if isinstance(parsed, list) else None
+
+
+def _target_json_vocabulary_rule_violated(
+    value: object,
+    *,
+    allowed_values: frozenset[str],
+) -> bool:
+    list_like = _coerce_target_json_list(value)
+    if list_like is None:
+        return True
+    return any(
+        not isinstance(item, str) or item not in allowed_values for item in list_like
+    )
+
+
+def _coerce_target_json_list(value: object) -> list[object] | None:
+    if isinstance(value, str):
+        return _coerce_string_list_like(value)
+    if isinstance(value, list):
+        return value
+    return None
 
 
 _FIELD_RULE_EVALUATORS = {

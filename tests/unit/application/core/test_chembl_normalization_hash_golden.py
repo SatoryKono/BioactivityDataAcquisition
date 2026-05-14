@@ -158,3 +158,27 @@ def test_chembl_set_like_and_order_sensitive_hash_contracts_hold() -> None:
     assert target_component_processor.compute_content_hash(
         ordered_left
     ) != target_component_processor.compute_content_hash(ordered_right)
+
+
+@pytest.mark.unit
+def test_chembl_activity_bao_label_hash_is_stable_under_equivalent_bao_format() -> None:
+    processor = RecordNormalizationProcessor(provider="chembl", entity_type="activity")
+    left = processor.normalize_business_data(
+        {
+            "activity_id": "ACT-BAO-1",
+            "bao_format": "BAO_0000357",
+            "bao_label": " noisy provider label ",
+        }
+    )
+    right = processor.normalize_business_data(
+        {
+            "activity_id": "ACT-BAO-1",
+            "bao_format": "bao:0000357",
+            "bao_label": "single protein format",
+        }
+    )
+
+    assert left["bao_label"] == "single protein format"
+    assert right["bao_label"] == "single protein format"
+    assert left == right
+    assert processor.compute_content_hash(left) == processor.compute_content_hash(right)

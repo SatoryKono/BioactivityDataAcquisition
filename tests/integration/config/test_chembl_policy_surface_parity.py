@@ -404,6 +404,7 @@ def test_chembl_unit_policy_families_and_controlled_json_lists_keep_structural_p
         assert _row_classification(row) == "controlled vocabulary"
         assert row["set_like"] == "true"
         assert ordering_policy[field_ref].order_semantics == "set_like"
+        assert row["dq_coverage"] == "custom:error"
 
 
 @pytest.mark.integration

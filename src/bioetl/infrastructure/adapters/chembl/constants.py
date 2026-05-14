@@ -15,10 +15,13 @@ from bioetl.domain.entities.chembl import (
     AssayRecord,
     CellLineRecord,
     ChemblPublicationRecord,
+    CompoundLinkRecord,
     MoleculeRecord,
     ProteinClassRecord,
+    PublicationSimilarityRecord,
     TargetComponentRecord,
     TargetRecord,
+    TissueRecord,
 )
 
 # ChEMBL API base URL
@@ -37,6 +40,9 @@ CHEMBL_DTO_MODELS: dict[str, type[BaseModel]] = {
     "document": ChemblPublicationRecord,
     "cell_line": CellLineRecord,
     "protein_class": ProteinClassRecord,
+    "tissue": TissueRecord,
+    "compound_record": CompoundLinkRecord,
+    "publication_similarity": PublicationSimilarityRecord,
 }
 
 # Entity types that don't support limit/offset pagination

@@ -20,6 +20,7 @@ from ._chembl_activity_fields import (
     SET_LIKE_FIELDS,
     STANDARD_RELATIONS,
 )
+from ._chembl_bao_label_normalizers import normalize_profile_bao_label_from_bao_format
 from ._chembl_policy_registry import (
     chembl_controlled_family_fields,
     chembl_flag_family_fields,
@@ -117,6 +118,11 @@ _SPECIAL_RULE_COMPONENTS = {
     "canonical_smiles": (
         normalize_profile_canonical_smiles,
         "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",
+    ),
+    "bao_label": (
+        normalize_profile_bao_label_from_bao_format,
+        "Normalize BAO label text inside the profile-visible activity contract, "
+        "resolving canonical labels from sibling bao_format identifiers when present.",
     ),
     **dict.fromkeys(
         sorted(_CONTROLLED_ACTION_TYPE_FIELDS),
