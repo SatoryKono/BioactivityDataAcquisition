@@ -61,6 +61,26 @@ class ExecutionOutcome(Enum):
     TIMEOUT = "timeout"
 
 
+TERMINAL_PHASES = {
+    ExecutionPhase.COMPLETED_SUCCESS,
+    ExecutionPhase.COMPLETED_WITH_WARNINGS,
+    ExecutionPhase.FAILED_VALIDATION,
+    ExecutionPhase.FAILED_EXECUTION,
+    ExecutionPhase.FAILED_RECOVERY,
+    ExecutionPhase.TERMINATED,
+}
+
+
+PHASE_OUTCOME_MAP = {
+    ExecutionPhase.COMPLETED_SUCCESS: ExecutionOutcome.SUCCESS,
+    ExecutionPhase.COMPLETED_WITH_WARNINGS: ExecutionOutcome.SUCCESS_WITH_WARNINGS,
+    ExecutionPhase.FAILED_VALIDATION: ExecutionOutcome.FAILED_VALIDATION,
+    ExecutionPhase.FAILED_EXECUTION: ExecutionOutcome.FAILED_EXECUTION,
+    ExecutionPhase.FAILED_RECOVERY: ExecutionOutcome.FAILED_RECOVERY,
+    ExecutionPhase.TERMINATED: ExecutionOutcome.TERMINATED,
+}
+
+
 @dataclass(frozen=True)
 class PhaseTransitionRule:
     """Rule governing a phase transition."""
@@ -116,14 +136,7 @@ class CompositeFSM:
         self, transition: PhaseTransition, validation_passed: bool = True
     ) -> bool:
         """Check if a transition is allowed from current phase."""
-        if self.current_phase in [
-            ExecutionPhase.COMPLETED_SUCCESS,
-            ExecutionPhase.COMPLETED_WITH_WARNINGS,
-            ExecutionPhase.FAILED_VALIDATION,
-            ExecutionPhase.FAILED_EXECUTION,
-            ExecutionPhase.FAILED_RECOVERY,
-            ExecutionPhase.TERMINATED,
-        ]:
+        if self.is_terminal_state():
             return False  # Terminal states cannot transition
 
         valid_transitions = self.transition_table.get(self.current_phase, [])
@@ -158,14 +171,7 @@ class CompositeFSM:
 
     def get_valid_transitions(self) -> list[PhaseTransition]:
         """Get all valid transitions from current phase."""
-        if self.current_phase in [
-            ExecutionPhase.COMPLETED_SUCCESS,
-            ExecutionPhase.COMPLETED_WITH_WARNINGS,
-            ExecutionPhase.FAILED_VALIDATION,
-            ExecutionPhase.FAILED_EXECUTION,
-            ExecutionPhase.FAILED_RECOVERY,
-            ExecutionPhase.TERMINATED,
-        ]:
+        if self.is_terminal_state():
             return []  # Terminal states have no transitions
 
         return [
@@ -175,30 +181,14 @@ class CompositeFSM:
 
     def is_terminal_state(self) -> bool:
         """Check if current phase is a terminal state."""
-        return self.current_phase in {
-            ExecutionPhase.COMPLETED_SUCCESS,
-            ExecutionPhase.COMPLETED_WITH_WARNINGS,
-            ExecutionPhase.FAILED_VALIDATION,
-            ExecutionPhase.FAILED_EXECUTION,
-            ExecutionPhase.FAILED_RECOVERY,
-            ExecutionPhase.TERMINATED,
-        }
+        return self.current_phase in TERMINAL_PHASES
 
     def get_execution_outcome(self) -> ExecutionOutcome | None:
         """Get the final execution outcome if in terminal state."""
         if not self.is_terminal_state():
             return None
 
-        outcome_map = {
-            ExecutionPhase.COMPLETED_SUCCESS: ExecutionOutcome.SUCCESS,
-            ExecutionPhase.COMPLETED_WITH_WARNINGS: ExecutionOutcome.SUCCESS_WITH_WARNINGS,
-            ExecutionPhase.FAILED_VALIDATION: ExecutionOutcome.FAILED_VALIDATION,
-            ExecutionPhase.FAILED_EXECUTION: ExecutionOutcome.FAILED_EXECUTION,
-            ExecutionPhase.FAILED_RECOVERY: ExecutionOutcome.FAILED_RECOVERY,
-            ExecutionPhase.TERMINATED: ExecutionOutcome.TERMINATED,
-        }
-
-        return outcome_map.get(self.current_phase)
+        return PHASE_OUTCOME_MAP.get(self.current_phase)
 
     def reset(self) -> None:
         """Reset FSM to initial state."""
