@@ -16,6 +16,7 @@ Commands:
     check-docs-drift     Documentation forbidden-pattern drift check
     check-xwalk-missing-backlog Validate xwalk MISSING_* backlog coverage
     validate-dq-consistency Validate DQ policy/config consistency
+    check-semantic-field-registry Validate semantic field registry coverage
     generate-debt-tasks  Generate architecture debt task backlog from exemptions registry
     reduce-architecture-debt  Build execution plan from latest architecture debt tasks JSON
     check-terminology    Terminology linting
@@ -61,6 +62,7 @@ COMMAND_SPECS = {
     "check-docs-drift": "check_docs_drift.py",
     "check-xwalk-missing-backlog": "check_xwalk_missing_backlog.py",
     "validate-dq-consistency": "validate_dq_consistency.py",
+    "check-semantic-field-registry": "check_semantic_field_registry.py",
     "generate-debt-tasks": "generate_architecture_debt_tasks.py",
     "reduce-architecture-debt": "reduce_architecture_debt.py",
     "check-terminology": "lint_terminology.py",

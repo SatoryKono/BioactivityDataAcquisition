@@ -33,6 +33,7 @@ class SemanticFieldRegistry:
         self._by_cluster_id: dict[str, SemanticFieldCluster] = {}
         self._by_canonical_name: dict[str, SemanticFieldCluster] = {}
         self._by_legacy_name: dict[str, SemanticFieldCluster] = {}
+        self._by_raw_provider_name: dict[str, SemanticFieldCluster] = {}
 
         for cluster in clusters:
             cluster_id = cluster.cluster_id.lower()
@@ -48,6 +49,14 @@ class SemanticFieldRegistry:
                 if key in self._by_legacy_name:
                     raise ValueError(f"duplicate legacy_name: {legacy_name}")
                 self._by_legacy_name[key] = cluster
+            for raw_provider_name in cluster.raw_provider_names:
+                key = raw_provider_name.lower()
+                existing = self._by_raw_provider_name.get(key)
+                if existing is not None and existing.cluster_id != cluster.cluster_id:
+                    raise ValueError(
+                        f"duplicate raw_provider_name: {raw_provider_name}"
+                    )
+                self._by_raw_provider_name[key] = cluster
 
     @property
     def clusters(self) -> tuple[SemanticFieldCluster, ...]:
@@ -58,12 +67,16 @@ class SemanticFieldRegistry:
         """Return cluster by cluster ID."""
         return self._by_cluster_id.get(cluster_id.lower())
 
-    def get_by_canonical_name(
-        self, canonical_name: str
-    ) -> SemanticFieldCluster | None:
+    def get_by_canonical_name(self, canonical_name: str) -> SemanticFieldCluster | None:
         """Return cluster by canonical field name."""
         return self._by_canonical_name.get(canonical_name.lower())
 
     def get_by_legacy_name(self, legacy_name: str) -> SemanticFieldCluster | None:
         """Return cluster by legacy field name."""
         return self._by_legacy_name.get(legacy_name.lower())
+
+    def get_by_raw_provider_name(
+        self, raw_provider_name: str
+    ) -> SemanticFieldCluster | None:
+        """Return cluster by provider-native field name."""
+        return self._by_raw_provider_name.get(raw_provider_name.lower())

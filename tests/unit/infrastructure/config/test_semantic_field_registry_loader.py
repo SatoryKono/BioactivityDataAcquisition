@@ -46,6 +46,7 @@ def test_loader_reads_registry_and_supports_lookups(tmp_path: Path) -> None:
     assert cluster is not None
     assert cluster.cluster_id == "pubmed_identifier"
     assert registry.get_by_legacy_name("pubmed_id") == cluster
+    assert registry.get_by_raw_provider_name("pubmed_id") == cluster
     assert registry.get_by_cluster_id("pubmed_identifier") == cluster
 
 
@@ -79,4 +80,37 @@ def test_loader_rejects_duplicate_legacy_names(tmp_path: Path) -> None:
     )
 
     with pytest.raises(ValueError, match="duplicate legacy_name"):
+        SemanticFieldRegistryLoader(tmp_path).load()
+
+
+def test_loader_rejects_duplicate_raw_provider_names(tmp_path: Path) -> None:
+    _write_registry(
+        tmp_path,
+        [
+            {
+                "cluster_id": "first_identifier",
+                "semantic_name": "First identifier",
+                "canonical_name": "first_id",
+                "legacy_names": [],
+                "raw_provider_names": ["source_id"],
+                "pipelines": ["first_pipeline"],
+                "affected_paths": ["configs/entities/example.yaml"],
+                "migration_status": "manual_review",
+                "notes": "First raw provider owner.",
+            },
+            {
+                "cluster_id": "second_identifier",
+                "semantic_name": "Second identifier",
+                "canonical_name": "second_id",
+                "legacy_names": [],
+                "raw_provider_names": ["source_id"],
+                "pipelines": ["second_pipeline"],
+                "affected_paths": ["configs/entities/example.yaml"],
+                "migration_status": "manual_review",
+                "notes": "Should fail duplicate raw provider validation.",
+            },
+        ],
+    )
+
+    with pytest.raises(ValueError, match="duplicate raw_provider_name"):
         SemanticFieldRegistryLoader(tmp_path).load()
