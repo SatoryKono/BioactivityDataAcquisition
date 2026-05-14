@@ -409,6 +409,99 @@ def _normalize_publication_metric_labels(
     name: str,
     labels: MetricLabels,
 ) -> MetricLabels | None:
+    for metric_names, normalizer in (
+        (_BATCH_LIFECYCLE_LABEL_METRICS, _normalize_batch_lifecycle_labels),
+        (
+            _OUTPUT_ARTIFACT_PUBLICATION_LABEL_METRICS,
+            _normalize_output_artifact_publication_labels,
+        ),
+        (_METRICS_PUBLICATION_LABEL_METRICS, _normalize_metrics_publication_labels),
+        (_PUBLICATION_VOCAB_DRIFT_LABEL_METRICS, _normalize_publication_vocab_drift_labels),
+        (_OBSERVABILITY_RUNTIME_STATUS_METRICS, _normalize_observability_runtime_status_labels),
+        (_STAGE_BACKLOG_LABEL_METRICS, _normalize_stage_backlog_labels),
+        (_STAGE_LAG_LABEL_METRICS, _normalize_stage_lag_labels),
+        (_STAGE_MODEL_LABEL_METRICS, _normalize_stage_model_labels),
+    ):
+        if name in metric_names:
+            return normalizer(labels)
+
+    return _normalize_phase_metric_labels(name, labels)
+
+
+def _normalize_batch_lifecycle_labels(labels: MetricLabels) -> MetricLabels:
+    return {
+        **labels,
+        "event": normalize_batch_lifecycle_event(str(labels.get("event", "other"))),
+        "stage": normalize_runtime_stage(str(labels.get("stage", "other"))),
+        "status": normalize_publication_status(str(labels.get("status", "other"))),
+    }
+
+
+def _normalize_output_artifact_publication_labels(labels: MetricLabels) -> MetricLabels:
+    return {
+        **labels,
+        "stage": normalize_runtime_stage(str(labels.get("stage", "other"))),
+        "status": normalize_publication_status(str(labels.get("status", "other"))),
+    }
+
+
+def _normalize_metrics_publication_labels(labels: MetricLabels) -> MetricLabels:
+    return {
+        **labels,
+        "target": normalize_publication_target(str(labels.get("target", "other"))),
+        "status": normalize_publication_status(str(labels.get("status", "other"))),
+    }
+
+
+def _normalize_publication_vocab_drift_labels(labels: MetricLabels) -> MetricLabels:
+    return {
+        **labels,
+        "provider": normalize_publication_vocab_provider(
+            str(labels.get("provider", "other"))
+        ),
+        "field": normalize_publication_vocab_field(str(labels.get("field", "other"))),
+        "handling": normalize_publication_vocab_handling(
+            str(labels.get("handling", "other"))
+        ),
+    }
+
+
+def _normalize_observability_runtime_status_labels(labels: MetricLabels) -> MetricLabels:
+    return {
+        **labels,
+        "component": normalize_observability_component(
+            str(labels.get("component", "other"))
+        ),
+        "mode": normalize_observability_mode(str(labels.get("mode", "other"))),
+    }
+
+
+def _normalize_stage_backlog_labels(labels: MetricLabels) -> MetricLabels:
+    return {
+        **labels,
+        "stage": normalize_stage_model_stage(str(labels.get("stage", "other"))),
+    }
+
+
+def _normalize_stage_lag_labels(labels: MetricLabels) -> MetricLabels:
+    return {
+        **labels,
+        "stage": normalize_runtime_stage(str(labels.get("stage", "other"))),
+    }
+
+
+def _normalize_stage_model_labels(labels: MetricLabels) -> MetricLabels:
+    return {
+        **labels,
+        "stage": normalize_stage_model_stage(str(labels.get("stage", "other"))),
+        "outcome": normalize_stage_model_outcome(str(labels.get("outcome", "other"))),
+    }
+
+
+def _normalize_phase_metric_labels(
+    name: str,
+    labels: MetricLabels,
+) -> MetricLabels | None:
     phase_label_key_by_metric_group: tuple[
         tuple[set[str], str, Callable[[str], str]],
         ...,
@@ -435,64 +528,6 @@ def _normalize_publication_metric_labels(
         ),
     )
 
-    if name in _BATCH_LIFECYCLE_LABEL_METRICS:
-        return {
-            **labels,
-            "event": normalize_batch_lifecycle_event(str(labels.get("event", "other"))),
-            "stage": normalize_runtime_stage(str(labels.get("stage", "other"))),
-            "status": normalize_publication_status(str(labels.get("status", "other"))),
-        }
-    if name in _OUTPUT_ARTIFACT_PUBLICATION_LABEL_METRICS:
-        return {
-            **labels,
-            "stage": normalize_runtime_stage(str(labels.get("stage", "other"))),
-            "status": normalize_publication_status(str(labels.get("status", "other"))),
-        }
-    if name in _METRICS_PUBLICATION_LABEL_METRICS:
-        return {
-            **labels,
-            "target": normalize_publication_target(str(labels.get("target", "other"))),
-            "status": normalize_publication_status(str(labels.get("status", "other"))),
-        }
-    if name in _PUBLICATION_VOCAB_DRIFT_LABEL_METRICS:
-        return {
-            **labels,
-            "provider": normalize_publication_vocab_provider(
-                str(labels.get("provider", "other"))
-            ),
-            "field": normalize_publication_vocab_field(
-                str(labels.get("field", "other"))
-            ),
-            "handling": normalize_publication_vocab_handling(
-                str(labels.get("handling", "other"))
-            ),
-        }
-    if name in _OBSERVABILITY_RUNTIME_STATUS_METRICS:
-        return {
-            **labels,
-            "component": normalize_observability_component(
-                str(labels.get("component", "other"))
-            ),
-            "mode": normalize_observability_mode(str(labels.get("mode", "other"))),
-        }
-    if name in _STAGE_BACKLOG_LABEL_METRICS:
-        return {
-            **labels,
-            "stage": normalize_stage_model_stage(str(labels.get("stage", "other"))),
-        }
-    if name in _STAGE_LAG_LABEL_METRICS:
-        return {
-            **labels,
-            "stage": normalize_runtime_stage(str(labels.get("stage", "other"))),
-        }
-    if name in _STAGE_MODEL_LABEL_METRICS:
-        return {
-            **labels,
-            "stage": normalize_stage_model_stage(str(labels.get("stage", "other"))),
-            "outcome": normalize_stage_model_outcome(
-                str(labels.get("outcome", "other"))
-            ),
-        }
     for metric_group, label_key, label_normalizer in phase_label_key_by_metric_group:
         if name in metric_group:
             return {

@@ -18,7 +18,7 @@ PIPELINE_RUNNER_SERVICE_PATH = (
     / "application"
     / "services"
     / "execution"
-    / "pipeline_runner_service.py"
+    / "execution/pipeline_runner_service.py"
 )
 
 

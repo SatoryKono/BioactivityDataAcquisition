@@ -20,6 +20,10 @@ from bioetl.infrastructure.observability.circuit_breaker_mapping import (
     CIRCUIT_BREAKER_STATE_VALUES,
 )
 
+METRIC_CIRCUIT_BREAKER_OPEN_TOTAL = "bioetl_circuit_breaker_open_total"
+METRIC_CIRCUIT_BREAKER_STATE = "bioetl_circuit_breaker_state"
+METRIC_CIRCUIT_BREAKER_TRIPS = "bioetl_circuit_breaker_trips_total"
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
 

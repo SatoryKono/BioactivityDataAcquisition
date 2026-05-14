@@ -103,7 +103,7 @@ REMOVED_FACADE_FILES = frozenset(
         / "bioetl"
         / "application"
         / "services"
-        / "pipeline_runner_service.py",
+        / "execution/pipeline_runner_service.py",
         ROOT
         / "src"
         / "bioetl"

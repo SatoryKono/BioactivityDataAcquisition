@@ -1,18 +1,18 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-13T18:06:07.196297+00:00",
+  "generated_at": "2026-05-14T10:15:20.991417+00:00",
   "summary": {
-    "total_scripts": 372,
+    "total_scripts": 370,
     "status_counts": {
-      "active": 333,
+      "active": 331,
       "supporting": 39
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 2,
       "ci": 51,
-      "docs": 135,
-      "scripts": 299,
+      "docs": 134,
+      "scripts": 297,
       "skills": 8,
       "tests": 144
     }
@@ -1657,16 +1657,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 61,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/github-mcp-wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 61,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/github-mcp-wrapper.sh\""
@@ -1721,16 +1715,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 112,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 112,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
@@ -1756,16 +1744,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 142,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_chembl_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 142,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_chembl_wrapper.sh\""
@@ -1808,16 +1790,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 82,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_context7_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 82,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_context7_wrapper.sh\""
@@ -1843,7 +1819,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/CODEX_WSL_SETUP.md",
@@ -1853,12 +1829,6 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 70,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 70,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_wrapper.sh\""
@@ -1884,16 +1854,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 106,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 106,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
@@ -1919,16 +1883,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 160,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 160,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
@@ -1948,16 +1906,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 124,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 124,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
@@ -1983,7 +1935,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 22,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -2048,16 +2000,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 100,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 100,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
@@ -2083,16 +2029,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 148,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubchem_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 148,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubchem_wrapper.sh\""
@@ -2112,16 +2052,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 154,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubmed_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 154,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubmed_wrapper.sh\""
@@ -2141,16 +2075,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 118,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 118,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
@@ -4364,21 +4292,6 @@
       "references": []
     },
     {
-      "path": "scripts/docs/build/mkdocs_build.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/docs/README.md",
-          "line": 42,
-          "source_group": "scripts",
-          "text": "| `build-site`                             | `scripts/docs/build/mkdocs_build.py`                            | Build the MkDocs site through the packaged Python entrypoint                             "
-        }
-      ]
-    },
-    {
       "path": "scripts/docs/build_docs_site.sh",
       "type": "sh",
       "status": "active",
@@ -5588,13 +5501,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 594,
+          "line": 602,
           "source_group": "tests",
           "text": "skip_rate = Path(\"scripts/engineering/ci/check_e2e_matrix_skip_rate.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 618,
+          "line": 626,
           "source_group": "tests",
           "text": "assert \"check_e2e_matrix_skip_rate.py\" in content"
         }
@@ -5627,13 +5540,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 595,
+          "line": 603,
           "source_group": "tests",
           "text": "rerun = Path(\"scripts/engineering/ci/check_e2e_rerun_stability.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 619,
+          "line": 627,
           "source_group": "tests",
           "text": "assert \"check_e2e_rerun_stability.py\" in content"
         }
@@ -5945,63 +5858,6 @@
       "agent_usage": [],
       "reference_count": 0,
       "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/.setup_wsl_codex.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 12,
-      "references": [
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 68,
-          "source_group": "docs",
-          "text": "| `.setup_wsl_codex.sh`  | `scripts/engineering/dev/` | DNS resolver (dig + PowerShell fallback) |"
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 228,
-          "source_group": "docs",
-          "text": "**Layer 1: DNS** (`scripts/engineering/dev/.setup_wsl_codex.sh`)"
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 241,
-          "source_group": "docs",
-          "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\""
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 267,
-          "source_group": "docs",
-          "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\" 2>/dev/null"
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 323,
-          "source_group": "docs",
-          "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\""
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_QUICK_REF.md",
-          "line": 7,
-          "source_group": "docs",
-          "text": ".\\scripts\\engineering\\dev\\.setup_wsl_codex.sh"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_QUICK_REF.md",
-          "line": 71,
-          "source_group": "docs",
-          "text": "| `OpenAI timeout`    | Run setup: `.\\scripts\\engineering\\dev\\.setup_wsl_codex.sh`                               |"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
-          "line": 23,
-          "source_group": "docs",
-          "text": ".\\scripts\\engineering\\dev\\.setup_wsl_codex.sh"
-        }
-      ]
     },
     {
       "path": "scripts/engineering/dev/.wsl-vpn-fix.ps1",
@@ -9108,13 +8964,13 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 46,
+          "line": 44,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 52,
+          "line": 50,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`"
         },
@@ -9929,7 +9785,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 14,
       "references": [
         {
           "path": "Makefile",
@@ -9950,18 +9806,6 @@
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
         },
         {
-          "path": "makefile",
-          "line": 32,
-          "source_group": "build",
-          "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only"
-        },
-        {
-          "path": "makefile",
-          "line": 35,
-          "source_group": "build",
-          "text": "bash scripts/ops/launchers/codex/setup_plugins.sh"
-        },
-        {
           "path": "scripts/engineering/dev/README.md",
           "line": 91,
           "source_group": "scripts",
@@ -9978,6 +9822,18 @@
           "line": 459,
           "source_group": "scripts",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only"
+        },
+        {
+          "path": "scripts/engineering/dev/run_pytest.sh",
+          "line": 463,
+          "source_group": "scripts",
+          "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
+        },
+        {
+          "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
+          "line": 107,
+          "source_group": "scripts",
+          "text": "Candidate(\"scripts/ops/launchers/codex/setup_plugins.sh\", BOOTSTRAP_HELPER_ROLE),"
         }
       ]
     },
@@ -10248,7 +10104,7 @@
         },
         {
           "path": "tests/architecture/test_test_structural_debt.py",
-          "line": 19,
+          "line": 20,
           "source_group": "tests",
           "text": "\"tests/testing_support/neo4j_memory_sync.py::test_snapshot_contains_core_repo_surfaces\": 295,"
         }

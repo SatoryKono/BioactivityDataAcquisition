@@ -62,8 +62,6 @@ from bioetl.interfaces.cli.commands.domains.run.service_access import (
     get_cli_run_orchestration_service as _get_cli_run_orchestration_service_impl,
 )
 from bioetl.interfaces.cli.commands.domains.run.support import (
-    get_runner_logger,
-    handle_destructive_run_confirmation,
     resolve_context_registry,
     validate_pipeline_name,
 )

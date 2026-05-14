@@ -715,6 +715,9 @@ separately.
 - `rule_bundle_version`
 - `dq_contract_compatibility_hash`
 - `effective_config_artifact_id`
+- `normalization_profile_ref`
+- `normalization_profile_version`
+- `normalization_profile_hash`
 
 `source_revision_state` is a documented allowlist field. New manifests must not
 persist any value outside this set:
