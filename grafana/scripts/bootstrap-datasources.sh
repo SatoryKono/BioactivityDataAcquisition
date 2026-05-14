@@ -25,11 +25,13 @@ wait_for_auto_tracing_ready() {
   elapsed=0
 
   while [ "${elapsed}" -lt "${AUTO_WAIT_SECONDS}" ]; do
-    if [ "${ENABLE_LOKI}" != "true" ] && probe_ready "http://loki:3100/ready"; then
+    if [ "${ENABLE_LOKI}" != "true" ] && probe_ready "http://loki:3100/ready" 2>/dev/null; then
       ENABLE_LOKI="true"
+      echo "[bioetl-grafana] detected Loki ready"
     fi
-    if [ "${ENABLE_TEMPO}" != "true" ] && probe_ready "http://tempo:3200/ready"; then
+    if [ "${ENABLE_TEMPO}" != "true" ] && probe_ready "http://tempo:3200/ready" 2>/dev/null; then
       ENABLE_TEMPO="true"
+      echo "[bioetl-grafana] detected Tempo ready"
     fi
     if [ "${ENABLE_LOKI}" = "true" ] && [ "${ENABLE_TEMPO}" = "true" ]; then
       break
@@ -43,10 +45,13 @@ case "${TRACING_FLAG}" in
   true)
     ENABLE_LOKI="true"
     ENABLE_TEMPO="true"
+    echo "[bioetl-grafana] enabled Loki and Tempo (explicit mode)"
     ;;
   false)
+    echo "[bioetl-grafana] disabled Loki and Tempo (explicit mode)"
     ;;
   auto|"")
+    echo "[bioetl-grafana] auto-detecting Loki and Tempo..."
     wait_for_auto_tracing_ready
     ;;
   *)
