@@ -2,17 +2,26 @@
 
 from __future__ import annotations
 
-from bioetl.domain.normalization.json import deserialize_json_value
 from bioetl.domain.normalization.dates import normalize_partial_date
-from bioetl.domain.normalization.json import canonicalize_json_string, serialize_json_canonical
+from bioetl.domain.normalization.json import (
+    canonicalize_json_string,
+    deserialize_json_value,
+    serialize_json_canonical,
+)
 from bioetl.domain.normalization.reference_ids import (
     normalize_doi_reference_id,
     normalize_pmcid_reference_id,
     normalize_pmid_reference_id,
 )
-from bioetl.domain.normalization.text import normalize_abstract as _normalize_abstract
-from bioetl.domain.normalization.text import normalize_string
-from bioetl.domain.normalization.text import normalize_title as _normalize_title
+from bioetl.domain.normalization.text import (
+    normalize_abstract as _normalize_abstract,
+)
+from bioetl.domain.normalization.text import (
+    normalize_string,
+)
+from bioetl.domain.normalization.text import (
+    normalize_title as _normalize_title,
+)
 from bioetl.domain.value_objects.chemical import SMILES
 
 
@@ -118,23 +127,40 @@ _UNHANDLED = object()
 
 
 def _normalize_unordered_json_collection(value: object) -> object:
-    if isinstance(value, str):
-        normalized = normalize_string(value)
-        if normalized is None:
-            return None
-        try:
-            parsed = deserialize_json_value(normalized)
-        except ValueError:
-            return normalized
-    elif isinstance(value, list | tuple | set | frozenset):
-        parsed = list(value)
-    else:
+    parsed = _parse_unordered_json_collection(value)
+    if parsed is _UNHANDLED:
         return _UNHANDLED
+    return _serialize_unordered_json_collection(parsed, original=value)
 
-    if not isinstance(parsed, list):
-        return serialize_json_canonical(parsed) if isinstance(parsed, dict) else value
 
-    return serialize_json_canonical(_sort_json_collection(parsed))
+def _parse_unordered_json_collection(value: object) -> object:
+    if isinstance(value, str):
+        return _parse_unordered_json_string(value)
+    if isinstance(value, list | tuple | set | frozenset):
+        return list(value)
+    return _UNHANDLED
+
+
+def _parse_unordered_json_string(value: str) -> object:
+    normalized = normalize_string(value)
+    if normalized is None:
+        return None
+    try:
+        return deserialize_json_value(normalized)
+    except ValueError:
+        return normalized
+
+
+def _serialize_unordered_json_collection(
+    parsed: object,
+    *,
+    original: object,
+) -> object:
+    if isinstance(parsed, list):
+        return serialize_json_canonical(_sort_json_collection(parsed))
+    if isinstance(parsed, dict):
+        return serialize_json_canonical(parsed)
+    return original
 
 
 def _sort_json_collection(values: list[object]) -> list[object]:

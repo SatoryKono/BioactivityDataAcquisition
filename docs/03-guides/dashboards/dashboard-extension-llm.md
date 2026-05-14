@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # Dashboard Extension Guide (LLM)
 
-Дата сверки: **2026-05-13**
+Дата сверки: **2026-05-14**
 Источник истины: `grafana/dashboards/*.json`
 
 Короткий playbook для LLM/AI-агента, который меняет или расширяет shipped
@@ -51,19 +51,25 @@ Grafana dashboards в BioETL.
   `Tier 1` answer surface first, `Tier 2` current context second,
   `Tier 3` selected-range evidence below fold, `Tier 4` collapsed diagnostics
   only for secondary or noisy detail.
+- Primary dashboards `0..5` expose the shared operator context shell:
+  `$workflow`, `$pipeline`, `$run_type`, `$run_id`, plus role-specific
+  extensions. `run_id` remains local to the control-plane-backed `ID` panel and
+  MUST NOT leak into Prometheus queries or cross-dashboard links.
 - `1. Overview` intentionally ships with `Workflow=All`, `Pipeline=All`,
-  `Run Type=All`, and `Run ID=-` as its default entry scope; `run_id` remains
-  local to the control-plane-backed `ID` panel and MUST NOT leak into
-  Prometheus queries or cross-dashboard links.
+  `Run Type=All`, and `Run ID=-` as its default entry scope.
 - Во всех остальных pipeline/provider dashboards `$pipeline` и `$provider`
-  остаются single-select; explicit fallback для неизвестного контекста —
-  `unknown`.
+  остаются single-select where they are primary selectors; explicit fallback
+  для неизвестного контекста — `unknown`.
 - `$run_type` всегда использует include-all fallback; cross-dashboard links MUST
   default missing run-type context to `All`, not `unknown`.
 - Переходы в `3. Provider Health` из pipeline-scoped dashboards сохраняют
   hidden `pipeline_context=$pipeline` для обратного перехода и fail-close'ятся
   к `provider=unknown`, если source dashboard не может доказать валидный
   provider value для target contract.
+- Shared `Provenance` / `Status` / `ID` / `Processed Records` panels use ids
+  `9400..9403` on primary dashboards outside Overview. `Status` is
+  role-specific; `Processed Records` is selected-range evidence and never a
+  current OK proof.
 
 Если правка меняет эту модель, синхронизируй docs в том же change set.
 
@@ -76,8 +82,9 @@ Grafana dashboards в BioETL.
   `ONE BIG QUESTION`, current scope, provenance summary и `First action`.
 - Для cross-dashboard links не полагайся на blanket `includeVars=true`:
   передавай только target-scoped `var-*` параметры.
-- Не копируй Explorer-only forensic filters (`run_id`, `payload_hash`) в
-  Prometheus dashboards, summary panels или generic drilldowns.
+- Не копируй exact identifiers (`run_id`, `payload_hash`) в Prometheus
+  dashboards, summary panels или generic drilldowns. Shared `run_id` is allowed
+  only as HTTP-backed identity context.
 - Не используй encoded Loki interpolation по `$pipeline/$provider` как источник истины.
 - Не превращай `Alert Conditions` в “real alert engine”, если datasource/state этого не поддерживает.
 - Не добавляй datasource health tiles по умолчанию. Сначала докажи, что без

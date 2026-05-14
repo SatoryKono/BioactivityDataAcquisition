@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import bioetl.composition.runtime_builders._run_manifest_support as _manifest_support
@@ -36,23 +37,32 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
 
 
-def create_run_manifest(
+@dataclass(frozen=True, slots=True)
+class _ResolvedManifestContext:
+    provider: str
+    entity: str
+    contract_identity: tuple[
+        str,
+        str | None,
+        str | None,
+        str | None,
+        str | None,
+        str | None,
+        str | None,
+        str | None,
+    ]
+    reproducibility_context: object
+
+
+def _resolve_manifest_context(
     *,
     ctx: PipelineRunContext,
     inputs: RunnerInputs,
-    ledger_enabled: bool,
-    effective_config_artifact_id: str,
-    resolved_config_hash: str,
-    effective_config_hash: str,
-    dq_contract_compatibility_hash: str,
-) -> tuple[_manifest_support.ManifestControlPlaneRefs, RunLedgerService | None]:
-    yaml_config = inputs.yaml_config
-    run_type_value, execution_context_value = (
-        _manifest_support.resolve_run_context_values(ctx)
-    )
+) -> _ResolvedManifestContext:
+    """Resolve manifest family, contract identity, and reproducibility context."""
     provider, entity = _manifest_support.resolve_provider_entity(
         pipeline_name=ctx.pipeline_name,
-        yaml_config=yaml_config,
+        yaml_config=inputs.yaml_config,
     )
     contract_ref = f"{provider}.{entity}"
     reproducibility_context = resolve_manifest_reproducibility_context(
@@ -62,55 +72,41 @@ def create_run_manifest(
         entity=entity,
         contract_ref=contract_ref,
     )
-    contract_identity = _resolve_manifest_contract_identity(
+    return _ResolvedManifestContext(
         provider=provider,
         entity=entity,
-        required_persistence_profile=(
-            reproducibility_context.required_persistence_profile
+        contract_identity=_resolve_manifest_contract_identity(
+            provider=provider,
+            entity=entity,
+            required_persistence_profile=(
+                reproducibility_context.required_persistence_profile
+            ),
+            exact_replay_requested=bool(getattr(ctx, "exact_replay", False)),
         ),
-        exact_replay_requested=bool(getattr(ctx, "exact_replay", False)),
+        reproducibility_context=reproducibility_context,
     )
-    _validate_manifest_persistence_requirements(
-        yaml_config=yaml_config,
-        skip_gold=bool(getattr(ctx, "skip_gold", False)),
-        ledger_enabled=ledger_enabled,
-        required_profile=reproducibility_context.required_persistence_profile,
-        strict_exact_replay_supported=(
-            reproducibility_context.strict_exact_replay_supported
-        ),
-    )
-    manifest_create_request = _build_manifest_create_request(
-        ctx=ctx,
-        inputs=inputs,
-        provider=provider,
-        entity=entity,
-        run_type_value=run_type_value,
-        execution_context_value=execution_context_value,
-        resolved_config_hash=resolved_config_hash,
-        effective_config_hash=effective_config_hash,
-        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        effective_config_artifact_id=effective_config_artifact_id,
-        contract_identity=contract_identity,
-    )
-    manifest_store = create_manifest_store(inputs)
-    ledger_service = _maybe_create_ledger_service(
-        ledger_enabled=ledger_enabled,
-        inputs=inputs,
-        ctx=ctx,
-    )
-    emit_replay_reconstructability_metric(
-        request=manifest_create_request,
-        strict_exact_replay_supported=(
-            reproducibility_context.strict_exact_replay_supported
-        ),
-        metrics=inputs.observability.metrics,
-    )
-    manifest = create_manifest_record(
-        manifest_store=manifest_store,
-        manifest_create_request=manifest_create_request,
-        ledger_service=ledger_service,
-    )
-    control_plane_refs = _manifest_support.create_control_plane_refs(
+
+
+def _create_control_plane_refs(
+    *,
+    manifest: object,
+    resolved_config_hash: str,
+    effective_config_hash: str,
+    dq_contract_compatibility_hash: str,
+    effective_config_artifact_id: str,
+    contract_identity: tuple[
+        str,
+        str | None,
+        str | None,
+        str | None,
+        str | None,
+        str | None,
+        str | None,
+        str | None,
+    ],
+) -> _manifest_support.ManifestControlPlaneRefs:
+    """Build canonical control-plane refs from one persisted manifest record."""
+    return _manifest_support.create_control_plane_refs(
         manifest.manifest_id,
         manifest.execution_fingerprint,
         resolved_config_hash,
@@ -125,6 +121,99 @@ def create_run_manifest(
         contract_identity[5],
         contract_identity[6],
         contract_identity[7],
+    )
+
+
+def create_run_manifest(
+    *,
+    ctx: PipelineRunContext,
+    inputs: RunnerInputs,
+    ledger_enabled: bool,
+    effective_config_artifact_id: str,
+    resolved_config_hash: str,
+    effective_config_hash: str,
+    dq_contract_compatibility_hash: str,
+) -> tuple[_manifest_support.ManifestControlPlaneRefs, RunLedgerService | None]:
+    run_type_value, execution_context_value = (
+        _manifest_support.resolve_run_context_values(ctx)
+    )
+    manifest_context = _resolve_manifest_context(
+        ctx=ctx,
+        inputs=inputs,
+    )
+    _validate_manifest_persistence_requirements(
+        yaml_config=inputs.yaml_config,
+        skip_gold=bool(getattr(ctx, "skip_gold", False)),
+        ledger_enabled=ledger_enabled,
+        required_profile=manifest_context.reproducibility_context.required_persistence_profile,
+        strict_exact_replay_supported=(
+            manifest_context.reproducibility_context.strict_exact_replay_supported
+        ),
+    )
+    manifest_create_request = _build_manifest_create_request(
+        ctx=ctx,
+        inputs=inputs,
+        provider=manifest_context.provider,
+        entity=manifest_context.entity,
+        run_type_value=run_type_value,
+        execution_context_value=execution_context_value,
+        resolved_config_hash=resolved_config_hash,
+        effective_config_hash=effective_config_hash,
+        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+        effective_config_artifact_id=effective_config_artifact_id,
+        contract_identity=manifest_context.contract_identity,
+    )
+    return _publish_manifest_and_refs(
+        ctx=ctx,
+        inputs=inputs,
+        ledger_enabled=ledger_enabled,
+        manifest_context=manifest_context,
+        manifest_create_request=manifest_create_request,
+        effective_config_artifact_id=effective_config_artifact_id,
+        resolved_config_hash=resolved_config_hash,
+        effective_config_hash=effective_config_hash,
+        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+    )
+
+
+def _publish_manifest_and_refs(
+    *,
+    ctx: PipelineRunContext,
+    inputs: RunnerInputs,
+    ledger_enabled: bool,
+    manifest_context: _ResolvedManifestContext,
+    manifest_create_request: object,
+    effective_config_artifact_id: str,
+    resolved_config_hash: str,
+    effective_config_hash: str,
+    dq_contract_compatibility_hash: str,
+) -> tuple[_manifest_support.ManifestControlPlaneRefs, RunLedgerService | None]:
+    """Persist the manifest record and translate it into runner control-plane refs."""
+    manifest_store = create_manifest_store(inputs)
+    ledger_service = _maybe_create_ledger_service(
+        ledger_enabled=ledger_enabled,
+        inputs=inputs,
+        ctx=ctx,
+    )
+    emit_replay_reconstructability_metric(
+        request=manifest_create_request,
+        strict_exact_replay_supported=(
+            manifest_context.reproducibility_context.strict_exact_replay_supported
+        ),
+        metrics=inputs.observability.metrics,
+    )
+    manifest = create_manifest_record(
+        manifest_store=manifest_store,
+        manifest_create_request=manifest_create_request,
+        ledger_service=ledger_service,
+    )
+    control_plane_refs = _create_control_plane_refs(
+        manifest=manifest,
+        resolved_config_hash=resolved_config_hash,
+        effective_config_hash=effective_config_hash,
+        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+        effective_config_artifact_id=effective_config_artifact_id,
+        contract_identity=manifest_context.contract_identity,
     )
     return control_plane_refs, ledger_service
 

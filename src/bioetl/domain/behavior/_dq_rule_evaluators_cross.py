@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.domain.behavior._dq_value_coercion import _is_present
+
 if TYPE_CHECKING:
     from bioetl.domain.config.validation import CrossFieldValidation
     from bioetl.domain.types import JsonDict
@@ -44,8 +46,6 @@ def _conditional_required_rule_violated(
     rule: CrossFieldValidation,
     present_count: int,
 ) -> bool:
-    from bioetl.domain.behavior._dq_rule_evaluators import _is_present
-
     del present_count
     if rule.trigger_field is None or rule.required_field is None:
         return True
@@ -54,13 +54,22 @@ def _conditional_required_rule_violated(
     return not _is_present(record.get(rule.required_field))
 
 
+def _custom_cross_rule_violated(
+    record: JsonDict,
+    validator_name: str | None,
+) -> bool:
+    if validator_name == "validate_hierarchy_no_self_reference":
+        protein_class_id = record.get("protein_class_id")
+        parent_id = record.get("parent_id")
+        return _is_present(protein_class_id) and protein_class_id == parent_id
+    return False
+
+
 def _custom_cross_field_rule_violated(
     record: JsonDict,
     rule: CrossFieldValidation,
     present_count: int,
 ) -> bool:
-    from bioetl.domain.behavior._dq_rule_evaluators import _custom_cross_rule_violated
-
     del present_count
     return _custom_cross_rule_violated(record, rule.validator)
 
@@ -70,5 +79,6 @@ __all__ = [
     "_any_present_rule_violated",
     "_conditional_required_rule_violated",
     "_custom_cross_field_rule_violated",
+    "_custom_cross_rule_violated",
     "_mutually_exclusive_rule_violated",
 ]

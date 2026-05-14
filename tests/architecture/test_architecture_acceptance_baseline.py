@@ -96,7 +96,13 @@ def test_acceptance_baseline_code_anchors_match_current_runtime_contract() -> No
 
     context_source = _read("src/bioetl/domain/context.py")
     manifest_source = _read("src/bioetl/domain/control_plane/run_manifest.py")
-    ledger_source = _read("src/bioetl/domain/control_plane/run_ledger.py")
+    ledger_source = "\n".join(
+        [
+            _read("src/bioetl/domain/control_plane/run_ledger.py"),
+            _read("src/bioetl/domain/control_plane/_run_ledger_runtime.py"),
+            _read("src/bioetl/domain/control_plane/run_ledger_replay.py"),
+        ]
+    )
     load_service_source = _read(
         "src/bioetl/application/composite/checkpoint/load_service.py"
     )

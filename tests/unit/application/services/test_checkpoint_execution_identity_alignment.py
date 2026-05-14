@@ -26,7 +26,7 @@ def _v2_service() -> CheckpointCompatibilityServiceV2:
 
 def _metadata(
     *,
-    effective_config_hash: str = "a" * 64,
+    effective_config_hash: str | None = "a" * 64,
     composite_run_identity: str | None = None,
     execution_fingerprint: str | None = None,
     dq_contract_compatibility_hash: str | None = None,
@@ -34,6 +34,11 @@ def _metadata(
     manifest_id: str | None = None,
     contract_ref: str | None = None,
     contract_version: str | None = None,
+    git_commit: str | None = None,
+    dependency_lock_hash: str | None = None,
+    normalization_profile_ref: str | None = None,
+    normalization_profile_version: str | None = None,
+    normalization_profile_hash: str | None = None,
     effective_config_artifact_id: str | None = None,
 ) -> CheckpointMetadata:
     return CheckpointMetadata(
@@ -46,6 +51,11 @@ def _metadata(
         manifest_id=manifest_id,
         contract_ref=contract_ref,
         contract_version=contract_version,
+        git_commit=git_commit,
+        dependency_lock_hash=dependency_lock_hash,
+        normalization_profile_ref=normalization_profile_ref,
+        normalization_profile_version=normalization_profile_version,
+        normalization_profile_hash=normalization_profile_hash,
         effective_config_artifact_id=effective_config_artifact_id,
     )
 
@@ -55,9 +65,15 @@ def _identity(
     effective_config_hash: str = "a" * 64,
     composite_run_identity: str | None = None,
     execution_fingerprint: str | None = None,
+    pipeline_version: str | None = None,
     manifest_id: str | None = None,
     contract_ref: str | None = None,
     contract_version: str | None = None,
+    git_commit: str | None = None,
+    dependency_lock_hash: str | None = None,
+    normalization_profile_ref: str | None = None,
+    normalization_profile_version: str | None = None,
+    normalization_profile_hash: str | None = None,
     effective_config_artifact_id: str | None = None,
 ) -> CheckpointIdentity:
     return CheckpointIdentity(
@@ -66,9 +82,15 @@ def _identity(
         checkpoint_schema_version="1.0.0",
         composite_run_identity=composite_run_identity,
         execution_fingerprint=execution_fingerprint,
+        pipeline_version=pipeline_version,
         manifest_id=manifest_id,
+        git_commit=git_commit,
+        dependency_lock_hash=dependency_lock_hash,
         contract_ref=contract_ref,
         contract_version=contract_version,
+        normalization_profile_ref=normalization_profile_ref,
+        normalization_profile_version=normalization_profile_version,
+        normalization_profile_hash=normalization_profile_hash,
         effective_config_artifact_id=effective_config_artifact_id,
     )
 
@@ -195,6 +217,59 @@ def test_legacy_and_v2_align_when_composite_run_identity_mismatches() -> None:
     assert (
         v2_result.details["execution_identity_compatibility"]["reason"]
         == "identical_degraded_runtime_anchor_fingerprint"
+    )
+
+
+def test_legacy_and_v2_align_when_git_commit_and_profile_drift() -> None:
+    legacy = _legacy_service()
+    v2 = _v2_service()
+
+    current_metadata = _metadata(
+        pipeline_version="1.0.0",
+        git_commit="commit-a",
+        dependency_lock_hash="sha256:deps",
+        normalization_profile_ref="chembl.activity",
+        normalization_profile_version="2.0.0",
+        normalization_profile_hash="a" * 64,
+    )
+    checkpoint_metadata = _metadata(
+        pipeline_version="1.0.0",
+        git_commit="commit-b",
+        dependency_lock_hash="sha256:deps",
+        normalization_profile_ref="chembl.activity",
+        normalization_profile_version="2.0.0",
+        normalization_profile_hash="a" * 64,
+    )
+    current_identity = _identity(
+        pipeline_version="1.0.0",
+        git_commit="commit-a",
+        dependency_lock_hash="sha256:deps",
+        normalization_profile_ref="chembl.activity",
+        normalization_profile_version="2.0.0",
+        normalization_profile_hash="a" * 64,
+    )
+    checkpoint_identity = _identity(
+        pipeline_version="1.0.0",
+        git_commit="commit-b",
+        dependency_lock_hash="sha256:deps",
+        normalization_profile_ref="chembl.activity",
+        normalization_profile_version="2.0.0",
+        normalization_profile_hash="a" * 64,
+    )
+
+    legacy_result = legacy.validate_checkpoint_compatibility(
+        current_metadata,
+        checkpoint_metadata,
+    )
+    v2_result = v2.check_compatibility(current_identity, checkpoint_identity)
+
+    assert legacy_result.compatible is False
+    assert legacy_result.execution_identity_compatible is False
+    assert any("Git commit mismatch" in msg for msg in legacy_result.messages)
+    assert v2_result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    assert (
+        v2_result.details["execution_identity_compatibility"]["reason"]
+        == "checkpoint_execution_identity_fallback_mismatch"
     )
 
 

@@ -219,6 +219,20 @@ ______________________________________________________________________
 | **Run ID**       | UUID identifying a pipeline run            | `UUID`                               | `execution-id`, `job-id`      |
 | **Batch ID**     | UUID identifying a batch within a run      | `UUID`                               | `chunk-id`                    |
 
+### Canonical Semantic Field Clusters
+
+| Canonical Field | Legacy / Provider-Native Variants | Scope |
+| --------------- | --------------------------------- | ----- |
+| `assay_id` | `assay_chembl_id` | ChEMBL assay and downstream composite/activity internal runtime surfaces |
+| `molecule_id` | `molecule_chembl_id` | ChEMBL molecule and downstream composite/activity internal runtime surfaces |
+| `pmid` | `pubmed_id` | PubMed and composite publication internal runtime surfaces |
+| `title` | `pubmed_title`, `openalex_title` | Publication normalization and composite publication join surfaces |
+| `doi` | `doi` | Publication identifier surfaces across CrossRef, OpenAlex, PubMed and Semantic Scholar |
+
+Published source of truth:
+`docs/04-reference/contracts/canonical-field-registry.md` and
+`configs/field_registry/canonical_registry.json`.
+
 ______________________________________________________________________
 
 ## Component Terminology

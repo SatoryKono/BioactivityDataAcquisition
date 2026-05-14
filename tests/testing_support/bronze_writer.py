@@ -9,7 +9,6 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import cast
 from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4
 
 import pytest
 import zstandard as zstd
@@ -29,6 +28,14 @@ TMP_GLOB = "*.tmp"
 SAMPLE_JSON_RECORD = b'{"id": 1}\n'
 
 
+def _batch_id(label: str) -> BatchID:
+    return BatchID(deterministic_batch_id(f"bronze_writer.{label}"))
+
+
+def _run_id(label: str) -> RunID:
+    return RunID(deterministic_run_id(f"bronze_writer.{label}"))
+
+
 @pytest.fixture
 def noop_logger() -> NoOpLogger:
     """Provide a local no-op logger fixture for sibling storage suites."""
@@ -44,13 +51,13 @@ def noop_metrics() -> MetricsPort:
 @pytest.fixture
 def batch_id() -> BatchID:
     """Generate a unique batch ID."""
-    return BatchID(deterministic_batch_id("bronze_writer.fixture"))
+    return _batch_id("fixture")
 
 
 @pytest.fixture
 def run_id() -> RunID:
     """Generate a unique run ID."""
-    return RunID(deterministic_run_id("bronze_writer.fixture"))
+    return _run_id("fixture")
 
 
 @pytest.fixture
@@ -90,7 +97,6 @@ class TestBronzeWriterNameValidation:
             metrics=NoOpMetrics(),
         )
 
-        # Should not raise for valid names (alphanumeric + underscore only)
         writer._validate_bronze_names("chembl", "activity")
         writer._validate_bronze_names("pub_chem", "compound_data")
         writer._validate_bronze_names("uniprot_kb", "protein_entry")
@@ -831,7 +837,7 @@ class TestBronzeWriterListBatches:
             provider="chembl",
             entity="activity",
             date=date1,
-            batch_id=BatchID(deterministic_batch_id("bronze_writer.list_batches.date1")),
+            batch_id=_batch_id("list_batches.date1"),
             run_id=run_id,
             run_type=run_type,
             ingestion_ts=ingestion_ts,
@@ -841,7 +847,7 @@ class TestBronzeWriterListBatches:
             provider="chembl",
             entity="activity",
             date=date2,
-            batch_id=BatchID(deterministic_batch_id("bronze_writer.list_batches.date2")),
+            batch_id=_batch_id("list_batches.date2"),
             run_id=run_id,
             run_type=run_type,
             ingestion_ts=ingestion_ts,
@@ -876,9 +882,7 @@ class TestBronzeWriterListBatches:
             provider="chembl",
             entity="activity",
             date=date1,
-            batch_id=BatchID(
-                deterministic_batch_id("bronze_writer.list_batches_filter.date1")
-            ),
+            batch_id=_batch_id("list_batches_filter.date1"),
             run_id=run_id,
             run_type=run_type,
             ingestion_ts=ingestion_ts,
@@ -888,9 +892,7 @@ class TestBronzeWriterListBatches:
             provider="chembl",
             entity="activity",
             date=date2,
-            batch_id=BatchID(
-                deterministic_batch_id("bronze_writer.list_batches_filter.date2")
-            ),
+            batch_id=_batch_id("list_batches_filter.date2"),
             run_id=run_id,
             run_type=run_type,
             ingestion_ts=ingestion_ts,
@@ -1219,9 +1221,7 @@ class TestBronzeWriterMetadataDeterminism:
             provider="chembl",
             entity="activity",
             date=date,
-            batch_id=BatchID(
-                deterministic_batch_id("bronze_writer.bitwise_payload.result1")
-            ),
+            batch_id=_batch_id("bitwise_payload.result1"),
             run_id=run_id,
             run_type=run_type,
             ingestion_ts=ingestion_ts,
@@ -1231,9 +1231,7 @@ class TestBronzeWriterMetadataDeterminism:
             provider="chembl",
             entity="activity",
             date=date,
-            batch_id=BatchID(
-                deterministic_batch_id("bronze_writer.bitwise_payload.result2")
-            ),
+            batch_id=_batch_id("bitwise_payload.result2"),
             run_id=run_id,
             run_type=run_type,
             ingestion_ts=ingestion_ts,
@@ -1269,13 +1267,8 @@ class TestBronzeWriterMetadataDeterminism:
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
-        # Write twice with the same parameters but different batch IDs
-        batch_id_1 = BatchID(
-            deterministic_batch_id("bronze_writer.metadata_bitwise.batch1")
-        )
-        batch_id_2 = BatchID(
-            deterministic_batch_id("bronze_writer.metadata_bitwise.batch2")
-        )
+        batch_id_1 = _batch_id("metadata_bitwise.batch1")
+        batch_id_2 = _batch_id("metadata_bitwise.batch2")
 
         result_1 = await writer.write_bronze(
             records=iter(sample_records),
@@ -1848,14 +1841,11 @@ class TestBronzeWriterJsonValidation:
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
-        # These are invalid JSON but should still be written when validation disabled
-        # Note: They still need to be bytes
         invalid_records = [
             b"not json but bytes\n",
             b"another invalid line\n",
         ]
 
-        # Should not raise - writes the bytes as-is
         result = await writer.write_bronze(
             records=iter(invalid_records),
             provider="test",
@@ -1867,7 +1857,6 @@ class TestBronzeWriterJsonValidation:
             ingestion_ts=ingestion_ts,
         )
 
-        # Verify file was written
         full_path = tmp_path / result.relative_path
         assert full_path.exists()
 
@@ -1902,11 +1891,9 @@ class TestBronzeWriterJsonValidation:
             ingestion_ts=ingestion_ts,
         )
 
-        # Verify file was written successfully
         full_path = tmp_path / result.relative_path
         assert full_path.exists()
 
-        # Verify we can read back the records
         records_read = []
         async for record in writer.read_bronze(result.relative_path):
             records_read.append(record)

@@ -7,6 +7,12 @@ import argparse
 import json
 from pathlib import Path
 
+from bioetl.application.services.control_plane.historical_replay_certification_service import (
+    HistoricalReplayCertificationService,
+)
+from bioetl.application.services.control_plane.historical_replay_corpus_service import (
+    HistoricalReplayCorpusService,
+)
 from bioetl.application.services.control_plane.historical_replay_universe_service import (
     HistoricalReplayUniverseExternalRecord,
     HistoricalReplayUniverseService,
@@ -17,12 +23,6 @@ from bioetl.infrastructure.control_plane import (
     FileHistoricalReplayUniverseStore,
     FileRunLedgerStore,
     FileRunManifestStore,
-)
-from bioetl.application.services.control_plane.historical_replay_corpus_service import (
-    HistoricalReplayCorpusService,
-)
-from bioetl.application.services.control_plane.historical_replay_certification_service import (
-    HistoricalReplayCertificationService,
 )
 
 
@@ -43,6 +43,16 @@ def _parse_args() -> argparse.Namespace:
         "--write-report",
         action="store_true",
         help="Persist the universe closure artifact under data/output/control/historical_replay_universe.",
+    )
+    parser.add_argument(
+        "--require-universal-claim",
+        action="store_true",
+        help="Fail when the full-universe universal replay claim remains unclaimed.",
+    )
+    parser.add_argument(
+        "--require-durable-evidence-coverage",
+        action="store_true",
+        help="Fail when durable evidence coverage for the full historical universe remains unclaimed.",
     )
     return parser.parse_args()
 
@@ -120,29 +130,28 @@ def main() -> int:
         )
         artifact_path = str(store.save(report))
 
-    print(
-        json.dumps(
-            {
-                "report_id": report.report_id,
-                "artifact_path": artifact_path,
-                "inventory_summary": {
-                    "manifest_count": report.inventory.manifest_count,
-                    "unresolved_count": report.inventory.unresolved_count,
-                    "durable_coverage_gap_count": (
-                        report.inventory.durable_coverage_gap_count
-                    ),
-                    "local_retained_count": report.inventory.local_retained_count,
-                    "external_archived_count": report.inventory.external_archived_count,
-                },
-                "universal_claim": report.universal_claim,
-                "durable_evidence_coverage_claim": (
-                    report.durable_evidence_coverage_claim
-                ),
-            },
-            indent=2,
-            sort_keys=True,
-        )
-    )
+    payload = {
+        "report_id": report.report_id,
+        "artifact_path": artifact_path,
+        "inventory_summary": {
+            "manifest_count": report.inventory.manifest_count,
+            "unresolved_count": report.inventory.unresolved_count,
+            "durable_coverage_gap_count": report.inventory.durable_coverage_gap_count,
+            "local_retained_count": report.inventory.local_retained_count,
+            "external_archived_count": report.inventory.external_archived_count,
+        },
+        "universal_claim": report.universal_claim,
+        "durable_evidence_coverage_claim": report.durable_evidence_coverage_claim,
+    }
+    print(json.dumps(payload, indent=2, sort_keys=True))
+    if args.require_universal_claim and not bool(
+        report.universal_claim.get("claimed", False)
+    ):
+        return 1
+    if args.require_durable_evidence_coverage and not bool(
+        report.durable_evidence_coverage_claim.get("claimed", False)
+    ):
+        return 1
     return 0
 
 

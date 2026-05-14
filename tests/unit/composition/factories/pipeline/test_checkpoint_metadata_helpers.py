@@ -69,6 +69,9 @@ def test_build_current_checkpoint_metadata_includes_resume_anchors(tmp_path) -> 
         manifest_id="manifest-1",
         contract_ref="chembl.activity",
         contract_version="1.0.0",
+        normalization_profile_ref="chembl.activity",
+        normalization_profile_version="2.0.0",
+        normalization_profile_hash="p" * 64,
         dq_contract_compatibility_hash="dq-hash",
         effective_config_artifact_id="artifact-1",
     )
@@ -94,6 +97,9 @@ def test_build_current_checkpoint_metadata_includes_resume_anchors(tmp_path) -> 
     assert metadata.run_context["dependency_lock_hash"] == "sha256:deps-001"
     assert metadata.contract_ref == "chembl.activity"
     assert metadata.contract_version == "1.0.0"
+    assert metadata.normalization_profile_ref == "chembl.activity"
+    assert metadata.normalization_profile_version == "2.0.0"
+    assert metadata.normalization_profile_hash == "p" * 64
     assert metadata.exact_replay is True
     assert len(metadata.input_snapshot_ids) == 2
     assert metadata.input_snapshot_ids == tuple(sorted(metadata.input_snapshot_ids))
@@ -124,6 +130,9 @@ def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
         manifest_id="manifest-1",
         contract_ref="chembl.activity",
         contract_version="1.0.0",
+        normalization_profile_ref="chembl.activity",
+        normalization_profile_version="2.0.0",
+        normalization_profile_hash="p" * 64,
         dq_contract_compatibility_hash="dq-hash",
         effective_config_artifact_id="artifact-1",
     )
@@ -175,6 +184,9 @@ def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
             git_commit="test-commit-hash",
             source_revision_state="clean",
             dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="p" * 64,
         )
     )
 

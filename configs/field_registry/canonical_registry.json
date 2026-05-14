@@ -1,0 +1,134 @@
+{
+  "version": "1.0.0",
+  "adr_refs": [
+    "ADR-018",
+    "ADR-026",
+    "ADR-039",
+    "ADR-045"
+  ],
+  "clusters": [
+    {
+      "cluster_id": "chembl_assay_identifier",
+      "semantic_name": "ChEMBL assay business identifier",
+      "canonical_name": "assay_id",
+      "legacy_names": [
+        "assay_chembl_id"
+      ],
+      "raw_provider_names": [
+        "assay_chembl_id"
+      ],
+      "pipelines": [
+        "chembl_assay",
+        "chembl_activity",
+        "composite_assay",
+        "composite_activity"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/assay.yaml",
+        "configs/composites/assay.yaml",
+        "configs/composites/activity.yaml"
+      ],
+      "migration_status": "canonical_internal_with_legacy_input_filter",
+      "notes": "Internal config, DQ, join and contract surfaces use assay_id. Provider-native input filters retain assay_chembl_id as the external column name."
+    },
+    {
+      "cluster_id": "chembl_molecule_identifier",
+      "semantic_name": "ChEMBL molecule business identifier",
+      "canonical_name": "molecule_id",
+      "legacy_names": [
+        "molecule_chembl_id"
+      ],
+      "raw_provider_names": [
+        "molecule_chembl_id"
+      ],
+      "pipelines": [
+        "chembl_molecule",
+        "chembl_activity",
+        "composite_molecule",
+        "composite_activity"
+      ],
+      "affected_paths": [
+        "configs/entities/chembl/molecule.yaml",
+        "configs/entities/chembl/compound_record.yaml",
+        "configs/composites/molecule.yaml",
+        "configs/composites/activity.yaml"
+      ],
+      "migration_status": "canonical_internal_with_legacy_input_filter",
+      "notes": "Internal schema, merge and DQ surfaces use molecule_id. Provider-native ChEMBL filters still accept molecule_chembl_id at the ingestion boundary."
+    },
+    {
+      "cluster_id": "pubmed_identifier",
+      "semantic_name": "PubMed publication identifier",
+      "canonical_name": "pmid",
+      "legacy_names": [
+        "pubmed_id"
+      ],
+      "raw_provider_names": [
+        "pubmed_id"
+      ],
+      "pipelines": [
+        "pubmed_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/pubmed/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_legacy_input_filter",
+      "notes": "PubMed provider input still arrives as pubmed_id, but normalized schema, join keys and DQ contracts use pmid."
+    },
+    {
+      "cluster_id": "doi_identifier",
+      "semantic_name": "Digital Object Identifier",
+      "canonical_name": "doi",
+      "legacy_names": [],
+      "raw_provider_names": [
+        "doi"
+      ],
+      "pipelines": [
+        "crossref_publication",
+        "openalex_publication",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_and_external",
+      "notes": "doi is already the canonical identifier name across provider, composite and Gold surfaces."
+    },
+    {
+      "cluster_id": "publication_title",
+      "semantic_name": "Publication display title",
+      "canonical_name": "title",
+      "legacy_names": [
+        "pubmed_title",
+        "openalex_title"
+      ],
+      "raw_provider_names": [
+        "title"
+      ],
+      "pipelines": [
+        "pubmed_publication",
+        "openalex_publication",
+        "crossref_publication",
+        "semanticscholar_publication",
+        "composite_publication"
+      ],
+      "affected_paths": [
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/composites/publication.yaml"
+      ],
+      "migration_status": "canonical_internal_with_legacy_aliases_retired",
+      "notes": "All normalized publication configs and composite join paths use title. Historical provider-prefixed title aliases are retained only as migration references in registry/docs."
+    }
+  ]
+}

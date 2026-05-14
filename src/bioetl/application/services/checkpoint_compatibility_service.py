@@ -29,6 +29,10 @@ _STRICT_REQUIRED_CHECKPOINT_FIELDS: tuple[str, ...] = (
     "dq_contract_compatibility_hash",
     "pipeline_version",
     "git_commit",
+    "dependency_lock_hash",
+    "normalization_profile_ref",
+    "normalization_profile_version",
+    "normalization_profile_hash",
     "exact_replay",
 )
 
@@ -52,6 +56,14 @@ def _strict_anchor_policy_requested(
             checkpoint_metadata.contract_version,
             current_metadata.git_commit,
             checkpoint_metadata.git_commit,
+            current_metadata.dependency_lock_hash,
+            checkpoint_metadata.dependency_lock_hash,
+            current_metadata.normalization_profile_ref,
+            checkpoint_metadata.normalization_profile_ref,
+            current_metadata.normalization_profile_version,
+            checkpoint_metadata.normalization_profile_version,
+            current_metadata.normalization_profile_hash,
+            checkpoint_metadata.normalization_profile_hash,
         )
     )
 

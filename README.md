@@ -83,7 +83,7 @@ The domain layer implements Domain-Driven Design patterns:
 | Document                                                                    | Description                                                          |
 | --------------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | [API Reference](docs/04-reference/api/index.md)                             | Full API documentation with mkdocstrings                             |
-| [Architecture Decisions](docs/02-architecture/decisions/)                   | 46 ADRs explaining design choices                                    |
+| [Architecture Decisions](docs/02-architecture/decisions/)                   | Canonical ADR index for architectural decisions                      |
 | [Ubiquitous Language](docs/00-project/glossary.md)                          | Domain terminology and canonical naming                              |
 | [RULES.md](docs/00-project/RULES.md)                                        | Canonical active governance and requirements                         |
 | [Project Map](docs/00-project/00-map.md)                                    | Primary navigator for active project docs                            |
@@ -569,10 +569,10 @@ Access the docs at `http://localhost:8000`.
 .
 ├── configs/                  # YAML pipeline configurations
 ├── docs/                     # Documentation (Architecture, Guides, Runbooks)
-│   ├── 02-architecture/      # Layer docs, diagrams, ADRs (45 decisions)
+│   ├── 02-architecture/      # Layer docs, diagrams, ADR index
 │   ├── 00-project/
 │   │   ├── glossary.md       # Ubiquitous Language glossary
-│   │   └── RULES.md          # Project governance (v6.1.2)
+│   │   └── RULES.md          # Project governance (see file header)
 │   └── ...
 ├── src/
 │   └── bioetl/

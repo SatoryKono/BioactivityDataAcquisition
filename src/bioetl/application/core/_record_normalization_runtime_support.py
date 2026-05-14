@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.core._record_normalization_contract import (
+    NormalizationContractError,
+    _NormalizationFinding,
+)
 from bioetl.domain.normalization.json import canonicalize_json_string
 from bioetl.domain.normalization.text import normalize_string
 
 if TYPE_CHECKING:
-    from bioetl.application.core.record_normalization_processor import (
-        _NormalizationFinding,
-    )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.normalization.profiles import FieldRule
     from bioetl.domain.types import JsonDict
@@ -98,10 +99,6 @@ def should_forbid_fallback(
 
 def raise_profile_gap(provider: str, entity_type: str | None, field_name: str) -> None:
     """Raise the canonical profile-gap error for implicit fallback attempts."""
-    from bioetl.application.core.record_normalization_processor import (
-        NormalizationContractError,
-    )
-
     entity_label = entity_type or "<unknown>"
     raise NormalizationContractError(
         "profile-backed normalization cannot fall back implicitly for "

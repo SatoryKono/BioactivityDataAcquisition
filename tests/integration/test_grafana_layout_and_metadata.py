@@ -79,6 +79,38 @@ def test_runtime_top_fold_text_panels_do_not_overlap() -> None:
     assert not overlaps, "Runtime top-fold text panels overlap:\n" + "\n".join(overlaps)
 
 
+def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
+    """Runtime root layout must keep duplicated guidance out of operator triage."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    root_titles = {
+        panel.get("title")
+        for panel in dashboard.get("panels", [])
+        if isinstance(panel.get("title"), str)
+    }
+
+    assert "Inspect Runtime Scope" not in root_titles
+    assert "Review Diagnostic Scope Note" not in root_titles
+    assert "Review Incident Summary" not in root_titles
+    assert "Inspect Active Runtime Blocker Detail" not in root_titles
+
+    detect_row = next(
+        (
+            panel
+            for panel in dashboard.get("panels", [])
+            if panel.get("title") == "Detect (collapsed)"
+        ),
+        None,
+    )
+    assert detect_row is not None, "Runtime dashboard must keep Detect row"
+    assert detect_row.get("collapsed") is True
+    detect_titles = {
+        panel.get("title")
+        for panel in detect_row.get("panels", [])
+        if isinstance(panel.get("title"), str)
+    }
+    assert "Inspect Active Runtime Blocker Detail" in detect_titles
+
+
 def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping() -> (
     None
 ):
@@ -128,11 +160,11 @@ def test_control_plane_collapsed_row_sequence_matches_operator_flow() -> None:
         )
     ]
     assert row_pairs == [
-        (902, "Incident Drilldown: Replay Safety (Checkpoint / Replay)", 8),
-        (901, "Incident Drilldown: Manifest / Ledger Integrity", 9),
-        (903, "Incident Drilldown: Global Control-Plane Store Reliability", 10),
-        (904, "Incident Drilldown: Audit / Lineage Completeness", 11),
-        (905, "Known missing replay-safety signals", 12),
+        (902, "Incident Drilldown: Replay Safety (Checkpoint / Replay)", 18),
+        (901, "Incident Drilldown: Manifest / Ledger Integrity", 19),
+        (903, "Incident Drilldown: Global Control-Plane Store Reliability", 20),
+        (904, "Incident Drilldown: Audit / Lineage Completeness", 21),
+        (905, "Known missing replay-safety signals", 22),
     ], f"Control Plane row order/title drifted: {row_pairs}"
 
 

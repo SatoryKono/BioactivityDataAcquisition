@@ -50,6 +50,27 @@ operator_safe_visible_classes:
   - scope
   - state
 
+operator_context_shell:
+  status: shipped_context_shell
+  visible_selectors:
+    - workflow
+    - pipeline
+    - run_type
+    - run_id
+  semantics: |
+    The operator context shell standardizes the top-level context controls
+    across primary dashboards. It does not make every selector a first-class
+    PromQL filter for every dashboard. `workflow` is context/evidence unless a
+    dashboard explicitly documents truthful intersection semantics. `run_id` is
+    local control-plane identity context only: it is loaded from the local
+    run-manifest catalog and MUST NOT be used as a Prometheus label or a
+    cross-dashboard handoff variable.
+  primary_selector_rule: |
+    Dashboard families retain their role-specific primary selectors. Provider
+    Health remains provider-first; Workflow remains selected-range workflow
+    evidence; pipeline-summary dashboards remain pipeline/run_type current-state
+    surfaces.
+
 dashboard_families:
   pipeline_summary:
     uids:
@@ -57,14 +78,18 @@ dashboard_families:
       - bioetl-runtime
       - bioetl-dq-v2
     allowed_visible_selectors:
+      - workflow
       - pipeline
       - run_type
+      - run_id
     optional_visible_selectors:
       - stage
     notes: |
       Pipeline-summary dashboards answer pipeline-scoped operator questions and
-      remain Prometheus-first. They MUST NOT expose forensic identifiers or
-      claim exact run selection until a dedicated run catalog exists.
+      remain Prometheus-first. The shared context shell may expose workflow and
+      run_id, but workflow is context/evidence only and run_id is HTTP-backed
+      identity context only. They MUST NOT use run_id as a Prometheus label or
+      claim exact run selection for current-status PromQL.
       When a single-pipeline workflow hands off into these dashboards, shipped
       PromQL may tolerate legacy `workflow_<pipeline>` emitted series as a
       bounded compatibility alias for the selected entity pipeline scope.
@@ -97,19 +122,27 @@ dashboard_families:
     uids:
       - bioetl-provider-health-v2
     allowed_visible_selectors:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
       - provider
     hidden_context_selectors:
       - pipeline_context
     hidden_detail_selectors:
       - adapter
     notes: |
-      Provider Health is provider-first. pipeline_context preserves return-path
+      Provider Health is provider-first. The shared context shell is secondary
+      identity/evidence context only. pipeline_context preserves return-path
       context and MUST NOT be treated as a first-class provider business filter.
   workflow_evidence:
     uids:
       - bioetl-workflow-overview
     allowed_visible_selectors:
       - workflow
+      - pipeline
+      - run_type
+      - run_id
       - status
       - step_status
       - step_kind
@@ -119,8 +152,10 @@ dashboard_families:
       - provider_context
     notes: |
       Workflow Overview is selected-range workflow evidence only. It does not
-      expose visible pipeline/run_type selectors, but it does preserve hidden
-      single-pipeline handoff context for downstream operator dashboards.
+      use visible pipeline/run_type/run_id selectors as live execution filters,
+      but the shared context shell can expose them for local identity/evidence
+      context. It preserves hidden single-pipeline handoff context for
+      downstream operator dashboards.
       Downstream dashboards remain entity-scoped at the UX layer even when
       some emitted series still require a temporary `workflow_<pipeline>` query
       alias during migration.
@@ -143,16 +178,22 @@ shipped_selector_registry:
   bioetl-control-plane-v1:
     family: pipeline_summary
     visible_selectors:
+      - workflow
       - pipeline
       - run_type
+      - run_id
     hidden_context_selectors: []
     hidden_detail_selectors: []
     top_bar_order:
+      - workflow
       - pipeline
       - run_type
+      - run_id
     query_source_families:
+      workflow: prometheus_workflow_runs_total
       pipeline: prometheus_control_plane_universe
       run_type: prometheus_control_plane_universe
+      run_id: control_plane_filter_options_api
   bioetl-overview-v2:
     family: hybrid_overview
     visible_selectors:
@@ -194,53 +235,80 @@ shipped_selector_registry:
   bioetl-runtime:
     family: pipeline_summary
     visible_selectors:
+      - workflow
       - pipeline
       - run_type
+      - run_id
       - stage
     hidden_context_selectors: []
     hidden_detail_selectors: []
     top_bar_order:
+      - workflow
       - pipeline
       - run_type
+      - run_id
       - stage
     query_source_families:
+      workflow: prometheus_workflow_runs_total
       pipeline: prometheus_runtime_pipeline_run_type_universe
       run_type: prometheus_runtime_pipeline_run_type_universe
+      run_id: control_plane_filter_options_api
       stage: prometheus_pipeline_stage_expected
   bioetl-provider-health-v2:
     family: provider_first
     visible_selectors:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
       - provider
     hidden_context_selectors:
       - pipeline_context
     hidden_detail_selectors:
       - adapter
     top_bar_order:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
       - provider
     query_source_families:
+      workflow: prometheus_workflow_runs_total
+      pipeline: prometheus_records_processed_total
+      run_type: prometheus_records_processed_total
+      run_id: control_plane_filter_options_api
       provider: prometheus_provider_health_union
       pipeline_context: textbox_navigation_context
       adapter: prometheus_circuit_breaker_state
   bioetl-dq-v2:
     family: pipeline_summary
     visible_selectors:
+      - workflow
       - pipeline
       - run_type
+      - run_id
       - stage
     hidden_context_selectors: []
     hidden_detail_selectors: []
     top_bar_order:
+      - workflow
       - pipeline
       - run_type
+      - run_id
       - stage
     query_source_families:
+      workflow: prometheus_workflow_runs_total
       pipeline: prometheus_records_processed_total
       run_type: prometheus_records_processed_total
+      run_id: control_plane_filter_options_api
       stage: prometheus_records_processed_total
   bioetl-workflow-overview:
     family: workflow_evidence
     visible_selectors:
       - workflow
+      - pipeline
+      - run_type
+      - run_id
       - status
       - step_status
       - step_kind
@@ -251,11 +319,17 @@ shipped_selector_registry:
     hidden_detail_selectors: []
     top_bar_order:
       - workflow
+      - pipeline
+      - run_type
+      - run_id
       - status
       - step_status
       - step_kind
     query_source_families:
       workflow: prometheus_workflow_runs_total
+      pipeline: prometheus_records_processed_total
+      run_type: prometheus_records_processed_total
+      run_id: control_plane_filter_options_api
       status: prometheus_workflow_runs_total
       pipeline_context: prometheus_workflow_runs_total
       run_type_context: prometheus_workflow_runs_total
@@ -291,8 +365,10 @@ shipped_selector_registry:
 ship_now_selector_contract_by_uid:
   bioetl-control-plane-v1:
     visible_selectors:
+      - workflow
       - pipeline
       - run_type
+      - run_id
     time_range: grafana_builtin
   bioetl-overview-v2:
     visible_selectors:
@@ -310,12 +386,18 @@ ship_now_selector_contract_by_uid:
     time_range: grafana_builtin
   bioetl-runtime:
     visible_selectors:
+      - workflow
       - pipeline
       - run_type
+      - run_id
       - stage
     time_range: grafana_builtin
   bioetl-provider-health-v2:
     visible_selectors:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
       - provider
     hidden_context_selectors:
       - pipeline_context
@@ -324,13 +406,18 @@ ship_now_selector_contract_by_uid:
     time_range: grafana_builtin
   bioetl-dq-v2:
     visible_selectors:
+      - workflow
       - pipeline
       - run_type
+      - run_id
       - stage
     time_range: grafana_builtin
   bioetl-workflow-overview:
     visible_selectors:
       - workflow
+      - pipeline
+      - run_type
+      - run_id
       - status
       - step_status
       - step_kind

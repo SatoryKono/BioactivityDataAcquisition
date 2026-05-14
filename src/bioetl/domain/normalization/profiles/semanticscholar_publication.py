@@ -11,10 +11,10 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_issn_id,
     normalize_profile_issn_ids,
+    normalize_profile_json_string_unordered_collection,
     normalize_profile_oa_status,
     normalize_profile_orcid_ids,
     normalize_profile_passthrough,
-    normalize_profile_json_string_unordered_collection,
     normalize_profile_semantic_scholar_id,
     normalize_profile_semantic_scholar_ids,
     normalize_profile_semantic_scholar_publication_type_raw,

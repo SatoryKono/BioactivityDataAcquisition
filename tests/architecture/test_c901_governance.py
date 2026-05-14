@@ -17,6 +17,15 @@ def test_c901_governance_job_is_declared_in_workflow() -> None:
     assert "--mode" in workflow
 
 
+def test_import_linter_contracts_are_declared_as_blocking_workflow_step() -> None:
+    """CI must expose import-linter as an explicit blocking confidence signal."""
+    workflow = Path(".github/workflows/import-linter.yml").read_text(encoding="utf-8")
+
+    assert "arch-tests:" in workflow
+    assert "Run import-linter architecture contracts" in workflow
+    assert "uv run lint-imports --config .importlinter" in workflow
+
+
 def test_c901_baseline_manifest_contains_expected_count() -> None:
     """C901 baseline manifest size is fixed to current approved debt budget."""
     baseline_path = Path("scripts/engineering/baselines/c901_baseline.json")
@@ -24,8 +33,8 @@ def test_c901_baseline_manifest_contains_expected_count() -> None:
 
     entries = payload.get("entries", [])
     assert isinstance(entries, list)
-    assert len(entries) == 7, (
-        "C901 baseline must track exactly 7 approved violations. "
+    assert len(entries) == 0, (
+        "C901 baseline must track exactly 0 approved violations. "
         "If debt is reduced, remove entries; if increased, refactor code instead."
     )
 

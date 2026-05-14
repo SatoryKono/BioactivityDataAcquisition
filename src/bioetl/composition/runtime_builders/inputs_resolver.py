@@ -39,20 +39,20 @@ from bioetl.composition.runtime_builders._inputs_resolution_support import (
     validate_pk_contract_impl as _validate_pk_contract_impl,
 )
 from bioetl.composition.runtime_builders.config_access import load_source_config
-from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
-    build_runtime_config as _build_runtime_config,
+from bioetl.composition.runtime_builders.inputs_resolution_orchestration import (
+    resolve_runner_filter_config as _resolve_runner_filter_config,
+)
+from bioetl.composition.runtime_builders.inputs_resolution_orchestration import (
+    resolve_runner_runtime_config as _resolve_runner_runtime_config,
+)
+from bioetl.composition.runtime_builders.inputs_resolution_orchestration import (
+    validate_runner_data_root_policy as _validate_runner_data_root_policy,
 )
 from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
     log_cached_bronze as _log_cached_bronze,
 )
 from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
-    log_filter_config as _log_filter_config,
-)
-from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
     resolve_health_check_mode_policy as _resolve_health_check_mode_policy,
-)
-from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
-    resolve_runtime_projection as _resolve_runtime_projection,
 )
 from bioetl.composition.runtime_builders.inputs_runtime_models import (
     ResolvedVacuumSettings,
@@ -101,6 +101,74 @@ __all__ = [
 ]
 
 _DEFAULT_HEALTH_CHECK_MODE: Literal["strict", "probe"] = "strict"
+
+
+def _resolve_settings_for_runner(
+    *,
+    ctx: PipelineRunContext,
+    get_settings_fn: Callable[[], Settings],
+) -> Settings:
+    """Apply runtime tracing overrides before building runner inputs."""
+    return _apply_tracing_override_impl(
+        settings=get_settings_fn(),
+        enabled=getattr(ctx, "tracing_enabled_override", None),
+    )
+
+
+def _resolve_required_persistence_profile(settings: Settings) -> str:
+    pipeline_settings = getattr(settings, "pipeline", None)
+    control_plane = getattr(pipeline_settings, "control_plane", None)
+    return getattr(
+        control_plane,
+        "required_persistence_profile",
+        "degraded_observable",
+    )
+
+
+def _resolve_effective_context(
+    *,
+    ctx: PipelineRunContext,
+    settings: Settings,
+    assemble_cached_bronze_context_fn: Callable[
+        [PipelineRunContext], CachedBronzeContext
+    ],
+) -> tuple[PipelineRunContext, CachedBronzeContext]:
+    """Resolve exact-replay cached Bronze state and bind it into the context."""
+    cached_bronze = _resolve_exact_replay_cached_bronze_context(
+        ctx=ctx,
+        settings=settings,
+        cached_bronze=assemble_cached_bronze_context_fn(ctx),
+    )
+    return _bind_cached_bronze_context(ctx, cached_bronze), cached_bronze
+
+
+def _load_runner_yaml_config(
+    *,
+    pipeline_name: str,
+    load_pipeline_config_fn: Callable[[str], PipelineYamlConfig],
+) -> PipelineYamlConfig:
+    """Load and validate the pipeline contract used for runner assembly."""
+    yaml_config = load_pipeline_config_fn(pipeline_name)
+    validate_pk_contract(yaml_config)
+    return yaml_config
+
+
+def _build_runner_observability(
+    *,
+    ctx: PipelineRunContext,
+    settings: Settings,
+    yaml_config: PipelineYamlConfig,
+    build_observability_bundle_fn: Callable[..., ObservabilityBundle],
+) -> ObservabilityBundle:
+    """Create the observability bundle for one effective runner context."""
+    return build_observability_bundle_fn(
+        pipeline=ctx.pipeline_name,
+        run_id=ctx.run_id,
+        settings=settings,
+        log_level=ctx.log_level,
+        yaml_config=yaml_config,
+        skip_gold=bool(getattr(ctx, "skip_gold", False)),
+    )
 
 
 def assemble_vacuum_settings(
@@ -212,72 +280,46 @@ def prepare_runner_inputs(
     ],
     load_source_config_fn: Callable[..., object] | None = None,
 ) -> RunnerInputs:
-    settings = _apply_tracing_override_impl(
-        settings=get_settings_fn(),
-        enabled=getattr(ctx, "tracing_enabled_override", None),
+    settings = _resolve_settings_for_runner(
+        ctx=ctx,
+        get_settings_fn=get_settings_fn,
     )
-    pipeline_settings = getattr(settings, "pipeline", None)
-    control_plane = getattr(pipeline_settings, "control_plane", None)
-    required_profile = getattr(
-        control_plane,
-        "required_persistence_profile",
-        "degraded_observable",
-    )
-    from bioetl.composition.runtime_builders._runner_builder_support import (
-        validate_strict_data_root_policy as _validate_strict_data_root_policy,
-    )
-
-    _validate_strict_data_root_policy(
-        settings=settings,
-        required_profile=required_profile,
-        exact_replay=bool(getattr(ctx, "exact_replay", False)),
-    )
-    cached_bronze = _resolve_exact_replay_cached_bronze_context(
+    _validate_runner_data_root_policy(
         ctx=ctx,
         settings=settings,
-        cached_bronze=assemble_cached_bronze_context_fn(ctx),
+        required_persistence_profile=_resolve_required_persistence_profile(settings),
     )
-    effective_ctx = _bind_cached_bronze_context(ctx, cached_bronze)
-    yaml_config = load_pipeline_config_fn(ctx.pipeline_name)
-    validate_pk_contract(yaml_config)
-    observability = build_observability_bundle_fn(
-        pipeline=effective_ctx.pipeline_name,
-        run_id=effective_ctx.run_id,
+    effective_ctx, cached_bronze = _resolve_effective_context(
+        ctx=ctx,
         settings=settings,
-        log_level=effective_ctx.log_level,
+        assemble_cached_bronze_context_fn=assemble_cached_bronze_context_fn,
+    )
+    yaml_config = _load_runner_yaml_config(
+        pipeline_name=ctx.pipeline_name,
+        load_pipeline_config_fn=load_pipeline_config_fn,
+    )
+    observability = _build_runner_observability(
+        ctx=effective_ctx,
+        settings=settings,
         yaml_config=yaml_config,
-        skip_gold=bool(getattr(effective_ctx, "skip_gold", False)),
+        build_observability_bundle_fn=build_observability_bundle_fn,
     )
-    vacuum = assemble_vacuum_settings_fn(
-        cli_vacuum=effective_ctx.vacuum, yaml_maintenance=yaml_config.maintenance
-    )
-    runtime_projection = _resolve_runtime_projection(
+    runtime_config = _resolve_runner_runtime_config(
         ctx=effective_ctx,
         settings=settings,
         yaml_config=yaml_config,
         observability=observability,
         default_health_check_mode=_DEFAULT_HEALTH_CHECK_MODE,
-    )
-    runtime_config = _build_runtime_config(
+        assemble_vacuum_settings_fn=assemble_vacuum_settings_fn,
         assemble_runtime_config_fn=assemble_runtime_config_fn,
+    )
+    filter_config = _resolve_runner_filter_config(
         ctx=effective_ctx,
-        vacuum=vacuum,
-        runtime_projection=runtime_projection,
-    )
-    filter_config = assemble_filter_config_fn(
-        yaml_filter=yaml_config.input_filter,
-        ctx=effective_ctx,
-        test_mode=settings.test_mode,
-    )
-    _log_filter_config(
-        observability=observability,
-        filter_config=filter_config,
-        from_cli=effective_ctx.input_filter.enabled,
-    )
-    adjust_batch_size_for_filter(
+        settings=settings,
         yaml_config=yaml_config,
-        filter_config=filter_config,
         observability=observability,
+        assemble_filter_config_fn=assemble_filter_config_fn,
+        adjust_batch_size_for_filter_fn=adjust_batch_size_for_filter,
         load_source_config_fn=load_source_config_fn,
     )
     _log_cached_bronze(observability=observability, cached_bronze=cached_bronze)

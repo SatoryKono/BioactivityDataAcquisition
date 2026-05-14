@@ -14,6 +14,10 @@ from bioetl.application.services.control_plane.historical_replay_certification_s
     HistoricalReplayCertificationService,
     HistoricalReplaySnapshotCertification,
 )
+from bioetl.application.services.control_plane.replay_bundle_descriptor_service import (
+    RunReplayBundleDescriptor,
+    build_run_replay_bundle_descriptor,
+)
 from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
 )
@@ -55,6 +59,7 @@ __all__ = [
     "HistoricalReplayCertificationResult",
     "HistoricalReplayCertificationService",
     "HistoricalReplaySnapshotCertification",
+    "RunReplayBundleDescriptor",
     "RunLedgerService",
     "RunManifestCreateSpec",
     "RunManifestDiffEntry",
@@ -70,4 +75,5 @@ __all__ = [
     "WorkflowManifestCreateSpec",
     "WorkflowManifestService",
     "build_diagnostics_summary",
+    "build_run_replay_bundle_descriptor",
 ]

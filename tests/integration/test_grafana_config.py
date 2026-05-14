@@ -9,6 +9,7 @@ import pytest
 import yaml
 from tests.integration._grafana_test_support import (
     _PROMQL_METRIC_SELECTOR_RE,
+    _assert_operator_context_shell_contract,
     _assert_provider_health_variable_contract,
     _assert_silver_reject_explorer_variable_contract,
     _assert_standard_variable_contract,
@@ -43,16 +44,28 @@ NAVIGATION_CONTRACT_PATH = Path(
 EXPECTED_VARS_BY_DASHBOARD = {
     "bioetl-overview-v2.json": {"workflow", "pipeline", "run_type", "run_id"},
     "bioetl-overview-v3.json": {"workflow", "pipeline", "run_type", "run_id"},
-    "bioetl-dq-v2.json": {"pipeline", "run_type", "stage"},
-    "bioetl-runtime.json": {"pipeline", "run_type", "stage"},
+    "bioetl-dq-v2.json": {"workflow", "pipeline", "run_type", "run_id", "stage"},
+    "bioetl-runtime.json": {"workflow", "pipeline", "run_type", "run_id", "stage"},
     "bioetl-provider-health-v2.json": {
+        "workflow",
+        "pipeline",
+        "run_type",
+        "run_id",
         "provider",
         "pipeline_context",
         "adapter",
     },
-    "bioetl-control-plane-v1.json": {"pipeline", "run_type"},
+    "bioetl-control-plane-v1.json": {
+        "workflow",
+        "pipeline",
+        "run_type",
+        "run_id",
+    },
     "bioetl-workflow-overview.json": {
         "workflow",
+        "pipeline",
+        "run_type",
+        "run_id",
         "status",
         "pipeline_context",
         "run_type_context",
@@ -490,7 +503,10 @@ def test_variable_query_sources(dashboard_path):
         return
 
     if dashboard_path.name == "bioetl-workflow-overview.json":
+        _assert_operator_context_shell_contract(dashboard_path, variable_map)
         workflow_query = variable_map["workflow"].get("query", {})
+        pipeline_query = variable_map["pipeline"].get("query", {})
+        run_type_query = variable_map["run_type"].get("query", {})
         status_query = variable_map["status"].get("query", {})
         pipeline_context_query = variable_map["pipeline_context"].get("query", {})
         run_type_context_query = variable_map["run_type_context"].get("query", {})
@@ -498,6 +514,8 @@ def test_variable_query_sources(dashboard_path):
         step_status_query = variable_map["step_status"].get("query", {})
         step_kind_query = variable_map["step_kind"].get("query", {})
         assert isinstance(workflow_query, dict)
+        assert isinstance(pipeline_query, dict)
+        assert isinstance(run_type_query, dict)
         assert isinstance(status_query, dict)
         assert isinstance(pipeline_context_query, dict)
         assert isinstance(run_type_context_query, dict)
@@ -505,6 +523,8 @@ def test_variable_query_sources(dashboard_path):
         assert isinstance(step_status_query, dict)
         assert isinstance(step_kind_query, dict)
         assert "bioetl_workflow_runs_total" in workflow_query.get("query", "")
+        assert "bioetl_records_processed_total" in pipeline_query.get("query", "")
+        assert "bioetl_records_processed_total" in run_type_query.get("query", "")
         assert "bioetl_workflow_runs_total" in status_query.get("query", "")
         assert "bioetl_workflow_runs_total" in pipeline_context_query.get("query", "")
         assert "bioetl_workflow_runs_total" in run_type_context_query.get("query", "")
@@ -733,7 +753,7 @@ def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None
     }
     next_step_title = "Next Action: Replay Diagnostics"
     first_screen_titles = {
-        panel.get("title") for panel in panels[:9] if panel.get("type") != "row"
+        panel.get("title") for panel in panels[:13] if panel.get("type") != "row"
     }
 
     assert kpi_titles.issubset(first_screen_titles)
@@ -1219,7 +1239,7 @@ def test_workflow_dashboard_collapses_step_diagnostics_below_first_screen() -> N
         None,
     )
     assert next_panel is not None
-    assert next_panel.get("gridPos", {}).get("y") == 12
+    assert next_panel.get("gridPos", {}).get("y") == 22
     data_links = next_panel.get("options", {}).get("dataLinks", [])
     assert data_links, (
         "Workflow Next Diagnostic Surface must expose actionable dataLinks"
@@ -1441,7 +1461,7 @@ def test_runtime_warning_loki_queries_filter_parsed_fields_after_json() -> None:
 
 
 def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
-    """Runtime dashboard should explain the tracing-off degradation path."""
+    """Runtime dashboard should keep tracing guidance in dashboard/row metadata."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     description = dashboard.get("description", "")
     assert "Prometheus-first" in description
@@ -1455,14 +1475,23 @@ def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
         ),
         None,
     )
-    assert note_panel is not None, (
-        "Runtime dashboard must expose a tracing-mode guidance note"
+    assert note_panel is None, (
+        "Runtime tracing guidance must not consume first-screen panel space"
     )
-    content = note_panel.get("options", {}).get("content", "")
-    assert "L2 diagnostic flow" in content
-    assert "Prometheus-first mode" in content
-    assert "Tracing-only Log Hygiene" in content
-    assert "DQ / Control Plane / Provider Health" in content
+
+    tracing_row = next(
+        (
+            panel
+            for panel in dashboard.get("panels", [])
+            if panel.get("title")
+            == "Tracing-only Log Hygiene (requires optional tracing profile)"
+        ),
+        None,
+    )
+    assert tracing_row is not None, (
+        "Runtime dashboard must expose optional tracing diagnostics as a collapsed row"
+    )
+    assert tracing_row.get("collapsed") is True
 
 
 def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> None:

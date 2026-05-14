@@ -3,12 +3,8 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import Protocol, cast
 from urllib.parse import unquote
-
-if TYPE_CHECKING:
-    from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.domain.ports import RunManifestPort
 
 _NOT_FOUND_MESSAGE = "Not Found"
 _RUN_ID_NO_SELECTION = "-"
@@ -37,8 +33,8 @@ class _HealthResponseSupport(Protocol):
 
 
 class _HealthRoutingHost(_HealthResponseSupport, Protocol):
-    _quarantine_service: QuarantineService | None
-    _run_manifest_port: RunManifestPort | None
+    _quarantine_service: object | None
+    _run_manifest_port: object | None
 
     def _read_required_param(self, query: dict[str, str], name: str) -> str: ...
 
@@ -98,8 +94,6 @@ async def dispatch_quarantine_request(
         await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
     except ValueError as exc:
         await response_support._send_response(writer, 400, str(exc))
-    except Exception as exc:
-        await response_support._handle_request_error(writer, exc)
 
 
 async def dispatch_control_plane_request(
@@ -129,8 +123,6 @@ async def dispatch_control_plane_request(
         await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
     except ValueError as exc:
         await response_support._send_response(writer, 400, str(exc))
-    except Exception as exc:
-        await response_support._handle_request_error(writer, exc)
 
 
 async def handle_filtered_records(

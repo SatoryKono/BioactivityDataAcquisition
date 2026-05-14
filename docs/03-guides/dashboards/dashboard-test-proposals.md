@@ -396,7 +396,7 @@ def test_runtime_first_action_cta_contract():
     link_titles = {link.get("title") for link in links}
     expected_ctas = {
         "Review current status",
-        "Review incident summary",
+        "Review range evidence",
         "Inspect top blockers",
         "Inspect active blocker",
     }

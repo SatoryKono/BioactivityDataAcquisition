@@ -65,6 +65,9 @@ class CheckpointMetadata:
     manifest_id: _OPTIONAL_STR = None
     contract_ref: _OPTIONAL_STR = None
     contract_version: _OPTIONAL_STR = None
+    normalization_profile_ref: _OPTIONAL_STR = None
+    normalization_profile_version: _OPTIONAL_STR = None
+    normalization_profile_hash: _OPTIONAL_STR = None
     exact_replay: _OPTIONAL_BOOL = None
     input_snapshot_ids: tuple[str, ...] = ()
     input_snapshot_fingerprint: _OPTIONAL_STR = None
@@ -105,6 +108,21 @@ class CheckpointMetadata:
                 _OPTIONAL_STR,
                 legacy_metadata.get("contract_version"),
             ),
+            normalization_profile_ref=_extract_with_fallback(
+                legacy_metadata,
+                "normalization_profile_ref",
+                "normalization_profile_ref",
+            ),
+            normalization_profile_version=_extract_with_fallback(
+                legacy_metadata,
+                "normalization_profile_version",
+                "normalization_profile_version",
+            ),
+            normalization_profile_hash=_extract_with_fallback(
+                legacy_metadata,
+                "normalization_profile_hash",
+                "normalization_profile_hash",
+            ),
             exact_replay=cast(_OPTIONAL_BOOL, legacy_metadata.get("exact_replay")),
             input_snapshot_ids=coerce_snapshot_ids(
                 legacy_metadata.get("input_snapshot_ids")
@@ -142,6 +160,12 @@ class CheckpointMetadata:
             ("manifest_id", self.manifest_id),
             ("contract_ref", self.contract_ref),
             ("contract_version", self.contract_version),
+            ("normalization_profile_ref", self.normalization_profile_ref),
+            (
+                "normalization_profile_version",
+                self.normalization_profile_version,
+            ),
+            ("normalization_profile_hash", self.normalization_profile_hash),
             ("exact_replay", self.exact_replay),
             ("input_snapshot_ids", list(self.input_snapshot_ids)),
             ("input_snapshot_fingerprint", self.input_snapshot_fingerprint),
@@ -182,6 +206,21 @@ class CheckpointMetadata:
             manifest_id=_extract_with_fallback(data, "manifest_id", "manifest_id"),
             contract_ref=cast(_OPTIONAL_STR, data.get("contract_ref")),
             contract_version=cast(_OPTIONAL_STR, data.get("contract_version")),
+            normalization_profile_ref=_extract_with_fallback(
+                data,
+                "normalization_profile_ref",
+                "normalization_profile_ref",
+            ),
+            normalization_profile_version=_extract_with_fallback(
+                data,
+                "normalization_profile_version",
+                "normalization_profile_version",
+            ),
+            normalization_profile_hash=_extract_with_fallback(
+                data,
+                "normalization_profile_hash",
+                "normalization_profile_hash",
+            ),
             exact_replay=cast(_OPTIONAL_BOOL, data.get("exact_replay")),
             input_snapshot_ids=coerce_snapshot_ids(data.get("input_snapshot_ids")),
             input_snapshot_fingerprint=cast(
@@ -217,6 +256,11 @@ class CheckpointMetadata:
                 "dq_contract_compatibility_hash": self.dq_contract_compatibility_hash,
                 "contract_ref": self.contract_ref,
                 "contract_version": self.contract_version,
+                "normalization_profile_ref": self.normalization_profile_ref,
+                "normalization_profile_version": (
+                    self.normalization_profile_version
+                ),
+                "normalization_profile_hash": self.normalization_profile_hash,
                 "effective_config_artifact_id": self.effective_config_artifact_id,
                 "exact_replay": self.exact_replay,
                 "input_snapshot_fingerprint": snapshot_fingerprint,

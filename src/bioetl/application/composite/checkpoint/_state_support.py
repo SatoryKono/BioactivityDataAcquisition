@@ -17,14 +17,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import ClockPort
     from bioetl.domain.types import JsonDict
-else:
-    from bioetl.domain.composite.result import (
-        DependencyResult,
-        EnrichmentResult,
-        SeedResult,
-    )
-    from bioetl.domain.ports import ClockPort
-    from bioetl.domain.types import JsonDict
 
 T = TypeVar("T")
 TCheckpointState = TypeVar("TCheckpointState", bound="CompositeCheckpointState")
@@ -148,11 +140,8 @@ def _replace_checkpoint_state[TCheckpointState: "CompositeCheckpointState"](
     def _resolved(current: T, override: T | None) -> T:
         return current if override is None else override
 
-    from bioetl.application.composite.checkpoint.state import (
-        CompositeCheckpointState,
-    )
-
-    checkpoint_state_copy = CompositeCheckpointState(
+    checkpoint_state_type = cast(type[TCheckpointState], type(checkpoint_state))
+    checkpoint_state_copy = checkpoint_state_type(
         composite_name=checkpoint_state.composite_name,
         run_id=checkpoint_state.run_id,
         state=_resolved(checkpoint_state.state, state),

@@ -782,6 +782,15 @@ def test_dashboard_queries_do_not_filter_by_payload_hash_label(
 
 def test_exact_identifier_variables_do_not_leak_into_other_dashboards() -> None:
     """Exact-id variables must remain isolated to explicitly contracted dashboards."""
+    local_identity_dashboards = {
+        "bioetl-control-plane-v1.json",
+        "bioetl-overview-v2.json",
+        "bioetl-overview-v3.json",
+        "bioetl-runtime.json",
+        "bioetl-provider-health-v2.json",
+        "bioetl-dq-v2.json",
+        "bioetl-workflow-overview.json",
+    }
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         variables = {
@@ -792,10 +801,7 @@ def test_exact_identifier_variables_do_not_leak_into_other_dashboards() -> None:
         if dashboard_path.name == "bioetl-silver-reject-explorer.json":
             assert {"run_id", "payload_hash"} <= variables
             continue
-        if dashboard_path.name in {
-            "bioetl-overview-v2.json",
-            "bioetl-overview-v3.json",
-        }:
+        if dashboard_path.name in local_identity_dashboards:
             assert "run_id" in variables
             assert "payload_hash" not in variables
             continue

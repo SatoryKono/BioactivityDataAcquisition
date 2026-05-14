@@ -7,9 +7,6 @@ from typing import TYPE_CHECKING
 import click
 
 from bioetl.domain.workflow import WorkflowConfig
-from bioetl.interfaces.cli.commands._inspection_output import (
-    emit_inspection_payload,
-)
 from bioetl.interfaces.cli.commands._workflow_run_support import (
     _execute_workflow_and_publish_metrics,
     _handle_workflow_result,
@@ -27,6 +24,9 @@ from bioetl.interfaces.cli.commands.domains.health.metrics_publication_integrati
 )
 from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
     ensure_metrics_server_started,
+)
+from bioetl.interfaces.cli.commands.domains.shared.inspection_output import (
+    emit_inspection_payload,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error

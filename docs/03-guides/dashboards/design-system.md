@@ -1,6 +1,6 @@
 # Dashboard Design System (BioETL)
 
-Дата актуализации: **2026-05-03**
+Дата актуализации: **2026-05-14**
 Источник истины: `grafana/dashboards/*.json`
 
 ## 1) Единая семантика статусов OK/WARN/CRIT/UNKNOWN (обязательно)
@@ -146,7 +146,7 @@ timeseries without checking whether the panel compares multiple series.
 
 | Dashboard | First-screen responsibility | Current-status rules | Selected-range evidence | Drilldown / forensic surface |
 | --- | --- | --- | --- | --- |
-| `bioetl-overview-v2` | Что сейчас broken/degraded и куда идти дальше? | `bioetl_l0_status`, `bioetl_l0_next_action_route`, `bioetl_l0_input_status` | collapsed `Range Evidence` row | linked L1 dashboards |
+| `bioetl-overview-v2` | Что сейчас broken/degraded и куда идти дальше? | `bioetl_l0_status`, `bioetl_l0_next_action_route`, `bioetl_l0_input_status` | `L1 Historical Trends` row plus collapsed `Range Evidence` row | linked L1 dashboards |
 | `bioetl-runtime` | Что прямо сейчас блокирует runtime execution? | `bioetl_runtime_current_status`, `bioetl_runtime_current_blocker_reason` | failed/no-record runs, stage lag/backlog trends, shutdown intervals | Runtime detail tables, Loki/Tempo handoff |
 | `bioetl-provider-health-v2` | Какой provider сейчас degraded/failing и почему? | `bioetl_provider_current_status`, `bioetl_provider_current_cause` | health-check counters, failure/degraded trends, latency/rate-limit history | provider detail panels and runbook links |
 | `bioetl-dq-v2` | Каково текущее DQ состояние и первое действие? | `bioetl_dq_current_status`, `bioetl_dq_current_reason` | Bronze→Silver→Gold range flow, reject counts/rates, validation histories | `bioetl-silver-reject-explorer`, DQ diagnostics |
@@ -158,13 +158,24 @@ Decision matrix:
 | --- | --- | --- | --- |
 | Current status / current reason | Yes | Fixed current windows or recording rules; MUST NOT use `$__range` | `Monitor ...` or `Inspect ...` |
 | Next action / route | Yes | Low-cardinality route/action rules; preserve `UNKNOWN` when data is missing | `Next Action`, `First Action`, or `Inspect ...` |
-| Selected-range count/rate/trend | No, except compact L0 context | MUST use `$__range`, `$__interval`, or explicit range wording | `Track ... in Range` or description says selected range |
+| Selected-range count/rate/trend | No; compact evidence may appear below first-screen answer bands | MUST use `$__range`, `$__interval`, or explicit range wording. L1 current recording rules may be trended over the selected dashboard window only when the description says selected-range evidence and not current verdict. | `Track ... in Range` or description says selected range |
 | Raw counter / histogram / latency evidence | No | Preserve no-data unless zero is semantically valid | `Track ...` |
 | Forensic row/table/details | No | May carry scoped IDs only in dedicated explorer surfaces | `Inspect ...` or `Investigate ...` |
 
 Normative rules:
+- Primary dashboards `0..5` SHOULD expose the shared operator context shell
+  before dashboard-specific evidence rows: `Provenance`, `Status`, `ID`, and
+  `Processed Records`. These panels standardize context, identity, and
+  selected-range throughput evidence, but they do not override the
+  role-specific first-action/current-cause panels.
 - First-screen current-status panels MUST NOT use `$__range`.
 - Range panels MUST include selected-range wording in title or description.
+- Compact Overview evidence panels below the first screen MAY reuse L1 current
+  recording rules as selected-range trend evidence, but their descriptions MUST
+  say they do not determine `L0 Status` or `Next Action`.
+- Historical/range evidence MUST NOT be treated as a recovery verdict: zero
+  matching rows or missing samples do not prove current `OK` unless the panel is
+  explicitly a zero-valid event counter.
 - Top-level `gridPos` rectangles in a shipped dashboard MUST NOT overlap;
   navigation, scope, first-action, current-status, range evidence, and collapsed
   rows must occupy explicit non-overlapping grid bands.
@@ -175,6 +186,28 @@ Normative rules:
   means zero events; status panels preserve `UNKNOWN`.
 - Deep details (`run_id`, `payload_hash`, record-level tables) MUST NOT appear
   on first-screen status rows.
+
+### 4.1.1 Shared operator context shell
+
+The shared shell is derived from `1. Overview` and applies to primary
+dashboards `0. Control Plane`, `2. Runtime`, `3. Provider Health`,
+`4. Data Quality`, and `5. Workflow`.
+
+| Panel | Canonical ID | Role | Data contract |
+| --- | ---:| --- | --- |
+| `Provenance` | `9400` | Question banner | Visible text contains only the primary dashboard question; workflow, pipeline, run_type, run_id, and selected-time context stay in the panel tooltip/description. |
+| `Status` | `9401` | Compact dashboard verdict | Prometheus status for the dashboard role; no `$run_id` Prometheus filtering. `5. Workflow` is selected-range evidence and must say so. |
+| `ID` | `9402` | Local control-plane identity | HTTP/Infinity `Quarantine Explorer` table from `/ops/control-plane/identity-table`; exact `run_id` is local identity context only. |
+| `Processed Records` | `9403` | Selected-range evidence | Prometheus table over `bioetl_records_processed_total` with `[$__range]`; zero values do not prove current OK status. |
+
+Normative rules:
+- `run_id` MUST NOT be added to Prometheus label filters.
+- `Processed Records` MUST remain selected-range evidence, not current verdict.
+- Provider Health keeps `$provider` as the primary current-status selector even
+  though the shared shell also exposes `$pipeline` and `$run_type`.
+- Workflow keeps `$status`, `$step_status`, and `$step_kind` as workflow-local
+  evidence filters; `$pipeline`, `$run_type`, and `$run_id` are context/identity
+  aids unless a future rule defines truthful intersection semantics.
 
 ## 4.2) Layout grammar by dashboard role (обязательно)
 
@@ -288,6 +321,18 @@ datasource/query failure по роли панели.
 - Они required для surfaces наподобие `Runtime` и `Control Plane`, где zero
   counters без telemetry health могут вводить в заблуждение.
 - Они не являются blanket requirement для всех dashboards.
+
+### 4.5.6 Compact Overview selected-range evidence
+
+- `Runtime Blockers Trend`, `DQ Status Trend`, `Gold Lifecycle Trend`,
+  `Historical Failures`, and `Recent Terminal Runs` on `bioetl-overview-v2`
+  are retained as compact below-fold evidence panels.
+- They MUST stay below the current L0 verdict path and MUST NOT be referenced as
+  current `Status` / `Next Action` inputs.
+- Descriptions MUST state role, selected scope, no-data semantics, and owner
+  drilldown target.
+- Missing samples, gaps, zero matching failures, or no terminal rows are
+  selected-range evidence states, not proof of current `OK`.
 
 ## 5) Единый unit/decimals для схожих KPI (обязательно)
 

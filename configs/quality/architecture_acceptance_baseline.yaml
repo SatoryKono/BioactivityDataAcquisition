@@ -32,6 +32,8 @@ criteria:
     description: RunLedger exposes a deterministic lifecycle and stage timeline.
     source_paths:
       - src/bioetl/domain/control_plane/run_ledger.py
+      - src/bioetl/domain/control_plane/_run_ledger_runtime.py
+      - src/bioetl/domain/control_plane/run_ledger_replay.py
       - src/bioetl/application/services/control_plane/run_ledger_service.py
     verification_tests:
       - tests/unit/application/services/test_run_ledger_service.py

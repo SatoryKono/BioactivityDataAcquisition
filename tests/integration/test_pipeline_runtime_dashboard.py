@@ -75,7 +75,7 @@ def test_pipeline_runtime_has_required_variables() -> None:
         for variable in _dashboard().get("templating", {}).get("list", [])
         if variable.get("name")
     }
-    assert variables == {"pipeline", "run_type", "stage"}
+    assert variables == {"workflow", "pipeline", "run_type", "run_id", "stage"}
 
 
 def test_pipeline_runtime_variables_use_runtime_universe() -> None:
@@ -96,13 +96,13 @@ def test_pipeline_runtime_variables_use_runtime_universe() -> None:
     assert "bioetl_pipeline_stage_expected" in stage_query
 
 
-def test_pipeline_runtime_does_not_have_forensic_variables() -> None:
+def test_pipeline_runtime_keeps_record_level_forensic_variables_out() -> None:
     variables = {
         variable.get("name")
         for variable in _dashboard().get("templating", {}).get("list", [])
         if variable.get("name")
     }
-    assert "run_id" not in variables
+    assert "run_id" in variables
     assert "payload_hash" not in variables
     assert "record_id" not in variables
 
@@ -146,12 +146,19 @@ def test_pipeline_runtime_data_panel_titles_are_action_first() -> None:
         "Review ",
         "First Action",
     )
+    shared_panel_titles = {
+        "Provenance",
+        "Status",
+        "ID",
+        "Processed Records",
+    }
     offenders = [
         panel.get("title", "<untitled>")
         for panel in get_dashboard_panels(_dashboard())
         if panel.get("type") != "row"
         and isinstance(panel.get("title"), str)
         and not panel["title"].startswith(allowed_prefixes)
+        and panel["title"] not in shared_panel_titles
     ]
     assert not offenders, (
         "Runtime dashboard data panels must use action-first titles:\n"
@@ -464,7 +471,7 @@ def test_runtime_first_action_cta_contract() -> None:
     link_titles = {link.get("title") for link in links if isinstance(link, dict)}
     expected_ctas = {
         "Review current status",
-        "Review incident summary",
+        "Review range evidence",
         "Inspect top blockers",
         "Inspect active blocker",
     }

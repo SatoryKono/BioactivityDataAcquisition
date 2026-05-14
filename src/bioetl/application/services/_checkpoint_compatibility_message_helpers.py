@@ -140,6 +140,31 @@ def execution_identity_metadata_mismatch_messages(
             checkpoint_metadata.contract_version,
             label="Contract version mismatch",
         ),
+        *optional_mismatch_message(
+            current_metadata.git_commit,
+            checkpoint_metadata.git_commit,
+            label="Git commit mismatch",
+        ),
+        *optional_mismatch_message(
+            current_metadata.dependency_lock_hash,
+            checkpoint_metadata.dependency_lock_hash,
+            label="Dependency lock hash mismatch",
+        ),
+        *optional_mismatch_message(
+            current_metadata.normalization_profile_ref,
+            checkpoint_metadata.normalization_profile_ref,
+            label="Normalization profile reference mismatch",
+        ),
+        *optional_mismatch_message(
+            current_metadata.normalization_profile_version,
+            checkpoint_metadata.normalization_profile_version,
+            label="Normalization profile version mismatch",
+        ),
+        *optional_mismatch_message(
+            current_metadata.normalization_profile_hash,
+            checkpoint_metadata.normalization_profile_hash,
+            label="Normalization profile hash mismatch",
+        ),
     ]
 
 

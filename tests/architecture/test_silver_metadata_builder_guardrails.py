@@ -63,9 +63,13 @@ def test_silver_metadata_sidecar_adapter_carries_control_plane_provenance() -> N
     required_fragments = (
         "extract_control_plane_provenance_from_records",
         "execution_fingerprint=request.execution_fingerprint",
+        "git_commit=request.git_commit",
+        "dependency_lock_hash=request.dependency_lock_hash",
         "effective_config_hash=request.effective_config_hash",
         "effective_config_artifact_id=request.effective_config_artifact_id",
         "contract_ref=request.contract_ref",
+        "normalization_profile_ref=request.normalization_profile_ref",
+        "normalization_profile_hash=request.normalization_profile_hash",
         "dq_contract_compatibility_hash=request.dq_contract_compatibility_hash",
     )
 
