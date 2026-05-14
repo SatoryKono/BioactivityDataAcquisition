@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-13'
+  Last verified: '2026-05-14'
 
 ______________________________________________________________________
 
@@ -35,9 +35,10 @@ Record-level forensics, exact replay evidence, and per-run identifiers belong in
 
 First-screen policy rule: every operator dashboard should expose one
 `ONE BIG QUESTION`, current scope, provenance summary and `First action`.
-`1. Overview` now uses the frozen Overview v3 layout as the canonical example:
-the header is explicit, while other dashboards may satisfy the same policy
-through distributed scope/status/context surfaces.
+Primary dashboards `0..5` share the Overview-derived context shell
+(`workflow`, `pipeline`, `run_type`, `run_id`) and common
+`Provenance` / `Status` / `ID` / `Processed Records` panels. `run_id` remains
+local identity context and must not become a Prometheus label.
 
 Current canonical Overview baseline:
 

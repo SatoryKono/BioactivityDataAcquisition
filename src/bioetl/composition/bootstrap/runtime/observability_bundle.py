@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.composition.bootstrap.runtime._observability_preflight_support import (
@@ -9,6 +10,15 @@ from bioetl.composition.bootstrap.runtime._observability_preflight_support impor
     validate_control_plane_readiness,
     validate_forensic_grade_observability_evidence,
     validate_prod_noop_components,
+)
+from bioetl.composition.bootstrap.runtime.observability_assembly import (
+    create_observability_bundle as _create_observability_bundle,
+)
+from bioetl.composition.bootstrap.runtime.observability_assembly import (
+    run_observability_preflight as _run_observability_preflight,
+)
+from bioetl.composition.bootstrap.runtime.observability_assembly import (
+    settings_control_plane as _settings_control_plane,
 )
 from bioetl.composition.observability import (
     ObservabilityBundle,
@@ -32,6 +42,50 @@ __all__ = [
     "bootstrap_observability_bundle_impl",
     "validate_observability_preflight_impl",
 ]
+
+
+@dataclass(frozen=True, slots=True)
+class _ObservabilityComponents:
+    logger: LoggerPort
+    tracer: TracingPort
+    metrics: MetricsPort
+    audit: AuditPort
+    dq_monitor: DQMonitorPort | None
+
+
+def _build_observability_components(
+    *,
+    pipeline: str,
+    run_id: UUID,
+    settings: Settings,
+    log_level: str,
+    logger_bootstrapper: Callable[[str, UUID, str], LoggerPort],
+    tracer_bootstrapper: Callable[[Settings], TracingPort],
+    metrics_bootstrapper: Callable[[Settings], MetricsPort],
+    audit_bootstrapper: Callable[
+        [Settings, LoggerPort, MetricsPort, TracingPort], AuditPort
+    ]
+    | None,
+    dq_monitor_bootstrapper: Callable[
+        [Settings, LoggerPort | None], DQMonitorPort | None
+    ],
+) -> _ObservabilityComponents:
+    """Construct the concrete observability collaborators for one run."""
+    logger = logger_bootstrapper(pipeline, run_id, log_level)
+    tracer = tracer_bootstrapper(settings)
+    metrics = metrics_bootstrapper(settings)
+    audit = (
+        audit_bootstrapper(settings, logger, metrics, tracer)
+        if audit_bootstrapper is not None
+        else NoOpAudit()
+    )
+    return _ObservabilityComponents(
+        logger=logger,
+        tracer=tracer,
+        metrics=metrics,
+        audit=audit,
+        dq_monitor=dq_monitor_bootstrapper(settings, logger),
+    )
 
 
 def validate_observability_preflight_impl(
@@ -135,48 +189,37 @@ def bootstrap_observability_bundle_impl(
     Returns:
         Validated ObservabilityBundle with logger, metrics, tracer, and DQ monitor.
     """
-    logger = logger_bootstrapper(pipeline, run_id, log_level)
-    tracer = tracer_bootstrapper(settings)
-    metrics = metrics_bootstrapper(settings)
-    audit = (
-        audit_bootstrapper(settings, logger, metrics, tracer)
-        if audit_bootstrapper is not None
-        else NoOpAudit()
-    )
-    dq_monitor = dq_monitor_bootstrapper(settings, logger)
-
-    bundle = ObservabilityBundle(
-        logger=logger,
-        metrics=metrics,
-        tracer=tracer,
-        audit=audit,
-        dq_monitor=dq_monitor,
+    components = _build_observability_components(
+        pipeline=pipeline,
+        run_id=run_id,
+        settings=settings,
+        log_level=log_level,
+        logger_bootstrapper=logger_bootstrapper,
+        tracer_bootstrapper=tracer_bootstrapper,
+        metrics_bootstrapper=metrics_bootstrapper,
+        audit_bootstrapper=audit_bootstrapper,
+        dq_monitor_bootstrapper=dq_monitor_bootstrapper,
     )
 
-    preflight_validator(
-        tracer=tracer,
-        metrics=metrics,
-        environment=settings.env,
-        logger=logger,
-        allow_noop_in_prod=settings.observability.allow_noop_observability_in_prod,
-        audit=audit,
-        audit_required=bool(getattr(settings.observability, "audit_enabled", False)),
-        control_plane=getattr(
-            getattr(settings, "pipeline", None), "control_plane", None
-        ),
+    bundle = _create_observability_bundle(components)
+    control_plane = _settings_control_plane(settings)
+
+    _run_observability_preflight(
+        components=components,
+        settings=settings,
+        preflight_validator=preflight_validator,
+        control_plane=control_plane,
         yaml_config=yaml_config,
         skip_gold=skip_gold,
     )
 
     _log_observability_initialized(
-        logger=logger,
-        metrics=metrics,
-        tracer=tracer,
-        audit=audit,
-        dq_monitor=dq_monitor,
-        control_plane=getattr(
-            getattr(settings, "pipeline", None), "control_plane", None
-        ),
+        logger=components.logger,
+        metrics=components.metrics,
+        tracer=components.tracer,
+        audit=components.audit,
+        dq_monitor=components.dq_monitor,
+        control_plane=control_plane,
     )
 
     return bundle
@@ -218,49 +261,53 @@ def _log_observability_initialized(
     pipeline_name = getattr(logger, "pipeline", None)
     if not isinstance(pipeline_name, str) or not pipeline_name.strip():
         pipeline_name = "unknown"
-    metrics.set_gauge(
-        "bioetl_observability_runtime_status",
-        1.0,
-        {
-            "pipeline": pipeline_name,
-            "component": "logger",
-            "mode": "noop" if logger.__class__.__name__ == "NoOpLogger" else "active",
-        },
+    _set_component_runtime_gauge(
+        metrics=metrics,
+        pipeline_name=pipeline_name,
+        component="logger",
+        mode="noop" if logger.__class__.__name__ == "NoOpLogger" else "active",
     )
-    metrics.set_gauge(
-        "bioetl_observability_runtime_status",
-        1.0,
-        {
-            "pipeline": pipeline_name,
-            "component": "metrics",
-            "mode": "noop" if isinstance(metrics, NoOpMetrics) else "active",
-        },
+    _set_component_runtime_gauge(
+        metrics=metrics,
+        pipeline_name=pipeline_name,
+        component="metrics",
+        mode="noop" if isinstance(metrics, NoOpMetrics) else "active",
     )
-    metrics.set_gauge(
-        "bioetl_observability_runtime_status",
-        1.0,
-        {
-            "pipeline": pipeline_name,
-            "component": "tracing",
-            "mode": "noop" if isinstance(tracer, NoOpTracing) else "active",
-        },
+    _set_component_runtime_gauge(
+        metrics=metrics,
+        pipeline_name=pipeline_name,
+        component="tracing",
+        mode="noop" if isinstance(tracer, NoOpTracing) else "active",
     )
-    metrics.set_gauge(
-        "bioetl_observability_runtime_status",
-        1.0,
-        {
-            "pipeline": pipeline_name,
-            "component": "audit",
-            "mode": "noop" if isinstance(audit, NoOpAudit) else "active",
-        },
+    _set_component_runtime_gauge(
+        metrics=metrics,
+        pipeline_name=pipeline_name,
+        component="audit",
+        mode="noop" if isinstance(audit, NoOpAudit) else "active",
     )
+    _set_component_runtime_gauge(
+        metrics=metrics,
+        pipeline_name=pipeline_name,
+        component="dq_monitor",
+        mode="disabled" if dq_monitor is None else "active",
+    )
+
+
+def _set_component_runtime_gauge(
+    *,
+    metrics: MetricsPort,
+    pipeline_name: str,
+    component: str,
+    mode: str,
+) -> None:
+    """Emit one normalized component runtime-status gauge."""
     metrics.set_gauge(
         "bioetl_observability_runtime_status",
         1.0,
         {
             "pipeline": pipeline_name,
-            "component": "dq_monitor",
-            "mode": "disabled" if dq_monitor is None else "active",
+            "component": component,
+            "mode": mode,
         },
     )
 

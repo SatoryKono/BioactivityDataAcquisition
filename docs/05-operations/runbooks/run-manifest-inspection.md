@@ -126,7 +126,31 @@ Interpretation:
 - `composite_run_identity` is a separate occurrence-scoped resume anchor used
   only to prevent composite checkpoint drift; it must not be interpreted as a
   replacement for the semantic `execution_fingerprint`.
-- checkpoint compatibility may also use a narrower runtime-anchor contract when a persisted manifest fingerprint is unavailable, but that contract is intentionally smaller and must not be read as a substitute for full manifest identity.
+- checkpoint compatibility now carries the same strict replay anchors for
+  `git_commit`, `dependency_lock_hash`, `contract_ref`, `contract_version`,
+  `contract_schema_hash`, `dq_policy_ref`, `rule_bundle_version`,
+  `normalization_profile_ref`, `normalization_profile_version`,
+  `normalization_profile_hash`, and
+  `dq_contract_compatibility_hash` when a checkpoint is used in replay-ready or
+  forensic-grade resume flows.
+
+Build one canonical replay descriptor when you need one operator-facing object
+instead of manually correlating manifest, ledger, sidecars, and snapshots:
+
+```bash
+bioetl run-manifest replay-bundle <run-id|manifest-id>
+bioetl run-manifest replay-bundle <run-id|manifest-id> --format json
+```
+
+Interpretation:
+
+- the replay bundle is the published single-object descriptor for supported
+  replay/debug investigation;
+- it carries control-plane identity, code/config provenance, replay parentage,
+  immutable input snapshots, artifact refs, lineage fragment IDs, and the
+  replay-readiness verdict in one payload;
+- missing requirements in the bundle are fail-closed evidence gaps, not hints
+  that operators should reconstruct the run heuristically.
 
 Verify replay evidence across manifest and effective-config stores:
 
@@ -216,7 +240,9 @@ bioetl run-manifest certify-historical-bulk path/to/plan.json --format json
 bioetl run-manifest closure-report --write --format json
 bioetl run-manifest universe-report --external-pack path/to/archive-pack.json --write --format json
 ./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --auto-certify-sources --auto-certify-composites --claim-scope-mode retained_certifiable_historical_runs --write-dispositions --write-report
+./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --auto-certify-sources --auto-certify-composites --claim-scope-mode retained_certifiable_historical_runs --write-report --require-global-claim
 ./.venv/bin/python scripts/engineering/qa/run_historical_replay_universe_campaign.py --external-pack path/to/archive-pack.json --write-report
+./.venv/bin/python scripts/engineering/qa/run_historical_replay_universe_campaign.py --external-pack path/to/archive-pack.json --write-report --require-universal-claim --require-durable-evidence-coverage
 ```
 
 Interpretation:
@@ -249,6 +275,13 @@ Interpretation:
   merges the local retained corpus with authoritative external universe packs
   for archived/offline historical runs and persists a full-universe closure
   artifact.
+- `--require-global-claim` is the retained-corpus fail-closed gate: use it in
+  CI or release qualification whenever the retained corpus must already support
+  the published global replay claim.
+- `--require-universal-claim` and `--require-durable-evidence-coverage` are
+  the full-universe fail-closed gates: use them when top-level project wording
+  or release evidence wants to say that any historical run remains exact
+  replayable with durable evidence coverage.
 - each external universe pack must be authoritative for its archived slice and
   include one record per historical occurrence with
   `manifest_id`, `run_id`, `pipeline_name`, `provider`, `entity`,

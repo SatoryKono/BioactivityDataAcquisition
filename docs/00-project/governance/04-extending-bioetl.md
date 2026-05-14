@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # Extending BioETL: Providers and Pipelines
 
-*Synchronized with RULES.md v6.1.2 | Updated: 2026-04-09*
+*Synchronized with RULES.md v6.1.3 | Updated: 2026-04-29*
 
 This document is the governance playbook for extending BioETL.
 

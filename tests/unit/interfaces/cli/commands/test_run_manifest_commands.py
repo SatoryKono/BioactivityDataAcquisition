@@ -636,6 +636,7 @@ class TestRunManifestCommands:
         assert "show" in result.output
         assert "diff" in result.output
         assert "forensic-diff" in result.output
+        assert "replay-bundle" in result.output
         assert "score" in result.output
         assert "verify" in result.output
 
@@ -725,6 +726,30 @@ class TestRunManifestCommands:
         assert score["global_reproducibility_claim"]["claimed"] is False
         assert score["blockers"] == []
         assert "diagnostics.git_commit" in score["evidence_refs"]
+
+    def test_replay_bundle_json_outputs_control_plane_descriptor(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_run_manifest_service(monkeypatch, _FakeRunManifestService())
+
+        result = cli_runner.invoke(
+            cli,
+            ["run-manifest", "replay-bundle", "manifest-1", "--format", "json"],
+        )
+
+        assert result.exit_code == 0
+        payload = json.loads(result.output)
+        assert payload["manifest_id"] == "manifest-1"
+        assert payload["execution_fingerprint"] == "fingerprint-1"
+        assert payload["replay_capability"] == "exact_replay_supported"
+        assert payload["bundle"]["control_plane"]["ledger_event_count"] == 1
+        assert payload["bundle"]["code_provenance"]["git_commit"] == "abc1234"
+        assert payload["bundle"]["input_snapshots"][0]["snapshot_id"] == "snapshot-1"
+        assert payload["bundle"]["artifact_refs"][0]["artifact_id"] == (
+            "gold:chembl.activity@1"
+        )
 
     def test_score_text_labels_boundary_and_global_claim(
         self,

@@ -12,6 +12,10 @@ from bioetl.composition.factories.pipeline.assembler import (
     GenericPipelineFactory,
 )
 from bioetl.composition.factories.pipeline.contract_validator import create_factory
+from bioetl.composition.factories.pipeline.registry_exports import (
+    FACTORY_EXPORTS,
+    REGISTRY_PUBLIC_EXPORTS,
+)
 from bioetl.composition.factories.pipeline.registry_manifest import (
     PIPELINE_CONFIGS,
 )
@@ -48,29 +52,12 @@ def _build_factories() -> dict[str, GenericPipelineFactory[GenericPipeline]]:
 # Backward-compatible module surface kept for tests/importers, but frozen to
 # avoid additional module-level mutable registry state.
 _factories = MappingProxyType(_build_factories())
-
-# Export individual factories for backward compatibility
-chembl_activity_factory = _factories["chembl_activity"]
-chembl_assay_factory = _factories["chembl_assay"]
-chembl_assay_parameters_factory = _factories["chembl_assay_parameters"]
-chembl_cell_line_factory = _factories["chembl_cell_line"]
-chembl_compound_record_factory = _factories["chembl_compound_record"]
-chembl_publication_factory = _factories["chembl_publication"]
-chembl_publication_similarity_factory = _factories["chembl_publication_similarity"]
-chembl_publication_term_factory = _factories["chembl_publication_term"]
-chembl_molecule_factory = _factories["chembl_molecule"]
-chembl_target_factory = _factories["chembl_target"]
-chembl_target_component_factory = _factories["chembl_target_component"]
-chembl_tissue_factory = _factories["chembl_tissue"]
-chembl_subcellular_fraction_factory = _factories["chembl_subcellular_fraction"]
-chembl_protein_class_factory = _factories["chembl_protein_class"]
-pubchem_compound_factory = _factories["pubchem_compound"]
-uniprot_protein_factory = _factories["uniprot_protein"]
-uniprot_idmapping_factory = _factories["uniprot_idmapping"]
-pubmed_publication_factory = _factories["pubmed_publication"]
-crossref_publication_factory = _factories["crossref_publication"]
-openalex_publication_factory = _factories["openalex_publication"]
-semanticscholar_publication_factory = _factories["semanticscholar_publication"]
+globals().update(
+    {
+        export_name: _factories[pipeline_name]
+        for export_name, pipeline_name in FACTORY_EXPORTS.items()
+    }
+)
 
 
 class PipelineFactoryRegistrationState:
@@ -249,42 +236,4 @@ def list_available_pipelines() -> list[str]:
     return _list_pipeline_names()
 
 
-_PIPELINE_FACTORY_API = (
-    get_factory,
-    list_available_pipelines,
-    reset_registration,
-)
-
-__all__ = [
-    "PipelineDefinition",
-    "PipelineFactoryRegistrationState",
-    "PipelineRegistry",
-    "chembl_activity_factory",
-    "chembl_assay_factory",
-    "chembl_assay_parameters_factory",
-    "chembl_cell_line_factory",
-    "chembl_compound_record_factory",
-    "chembl_molecule_factory",
-    "chembl_protein_class_factory",
-    "chembl_publication_factory",
-    "chembl_publication_similarity_factory",
-    "chembl_publication_term_factory",
-    "chembl_subcellular_fraction_factory",
-    "chembl_target_component_factory",
-    "chembl_target_factory",
-    "chembl_tissue_factory",
-    "create_pipeline_registration_state",
-    "create_registry",
-    "crossref_publication_factory",
-    "get_factory",
-    "is_registered",
-    "list_available_pipelines",
-    "openalex_publication_factory",
-    "pubchem_compound_factory",
-    "pubmed_publication_factory",
-    "register_all_pipelines",
-    "reset_registration",
-    "semanticscholar_publication_factory",
-    "uniprot_idmapping_factory",
-    "uniprot_protein_factory",
-]
+__all__ = REGISTRY_PUBLIC_EXPORTS

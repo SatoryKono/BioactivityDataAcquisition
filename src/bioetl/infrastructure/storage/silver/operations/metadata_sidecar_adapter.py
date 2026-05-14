@@ -40,6 +40,8 @@ SIDECAR_ADAPTER_PRODUCTION_STATUS = "quarantined_compatibility_only"
 
 _CONTROL_PLANE_PROVENANCE_RECORD_KEYS: dict[str, tuple[str, ...]] = {
     "execution_fingerprint": ("_execution_fingerprint", "execution_fingerprint"),
+    "git_commit": ("_git_commit", "git_commit"),
+    "dependency_lock_hash": ("_dependency_lock_hash", "dependency_lock_hash"),
     "config_hash": ("_config_hash", "config_hash"),
     "resolved_config_hash": ("_resolved_config_hash", "resolved_config_hash"),
     "effective_config_hash": ("_effective_config_hash", "effective_config_hash"),
@@ -52,6 +54,18 @@ _CONTROL_PLANE_PROVENANCE_RECORD_KEYS: dict[str, tuple[str, ...]] = {
     "contract_schema_hash": ("_contract_schema_hash", "contract_schema_hash"),
     "dq_policy_ref": ("_dq_policy_ref", "dq_policy_ref"),
     "rule_bundle_version": ("_rule_bundle_version", "rule_bundle_version"),
+    "normalization_profile_ref": (
+        "_normalization_profile_ref",
+        "normalization_profile_ref",
+    ),
+    "normalization_profile_version": (
+        "_normalization_profile_version",
+        "normalization_profile_version",
+    ),
+    "normalization_profile_hash": (
+        "_normalization_profile_hash",
+        "normalization_profile_hash",
+    ),
     "dq_contract_compatibility_hash": (
         "_dq_contract_compatibility_hash",
         "dq_contract_compatibility_hash",
@@ -83,6 +97,8 @@ class _SilverMetadataSidecarRequest:
     bioetl_version: str = "test"
     python_version: str = "test"
     execution_fingerprint: str | None = None
+    git_commit: str | None = None
+    dependency_lock_hash: str | None = None
     config_hash: str | None = None
     resolved_config_hash: str | None = None
     effective_config_hash: str | None = None
@@ -92,6 +108,9 @@ class _SilverMetadataSidecarRequest:
     contract_schema_hash: str | None = None
     dq_policy_ref: str | None = None
     rule_bundle_version: str | None = None
+    normalization_profile_ref: str | None = None
+    normalization_profile_version: str | None = None
+    normalization_profile_hash: str | None = None
     dq_contract_compatibility_hash: str | None = None
 
 
@@ -262,6 +281,8 @@ def _build_pipeline_metadata(
         provider=provider_name,
         entity=entity_name,
         version="1.0",
+        git_commit=request.git_commit,
+        dependency_lock_hash=request.dependency_lock_hash,
         execution_fingerprint=request.execution_fingerprint,
         config_hash=request.config_hash,
         resolved_config_hash=request.resolved_config_hash,
@@ -272,6 +293,9 @@ def _build_pipeline_metadata(
         contract_schema_hash=request.contract_schema_hash,
         dq_policy_ref=request.dq_policy_ref,
         rule_bundle_version=request.rule_bundle_version,
+        normalization_profile_ref=request.normalization_profile_ref,
+        normalization_profile_version=request.normalization_profile_version,
+        normalization_profile_hash=request.normalization_profile_hash,
         dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
     )
 

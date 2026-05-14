@@ -356,6 +356,10 @@ class TestCheckpointCompatibilityService:
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             git_commit="a" * 40,
+            dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="n" * 64,
             exact_replay=True,
             input_snapshot_ids=("snapshot-a",),
             input_snapshot_fingerprint="snapshot-fp-a",
@@ -371,6 +375,10 @@ class TestCheckpointCompatibilityService:
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             git_commit="a" * 40,
+            dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="n" * 64,
             exact_replay=True,
         )
 
@@ -396,6 +404,10 @@ class TestCheckpointCompatibilityService:
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             git_commit="a" * 40,
+            dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="n" * 64,
             exact_replay=True,
             input_snapshot_ids=("snapshot-a",),
             input_snapshot_fingerprint="snapshot-fp-a",
@@ -411,6 +423,10 @@ class TestCheckpointCompatibilityService:
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             git_commit="a" * 40,
+            dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="n" * 64,
             exact_replay=True,
             input_snapshot_ids=("snapshot-b",),
             input_snapshot_fingerprint="snapshot-fp-b",
@@ -435,6 +451,10 @@ class TestCheckpointCompatibilityService:
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             git_commit="a" * 40,
+            dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="n" * 64,
         )
         checkpoint = CheckpointMetadata(
             records_processed=500,
@@ -445,6 +465,10 @@ class TestCheckpointCompatibilityService:
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             git_commit="a" * 40,
+            dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="n" * 64,
         )
 
         result = self.service.validate_checkpoint_compatibility(current, checkpoint)
@@ -469,6 +493,10 @@ class TestCheckpointCompatibilityService:
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             git_commit="a" * 40,
+            dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="n" * 64,
         )
         checkpoint = CheckpointMetadata(
             records_processed=500,
@@ -479,6 +507,10 @@ class TestCheckpointCompatibilityService:
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             git_commit="a" * 40,
+            dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="n" * 64,
         )
 
         result = self.service.validate_checkpoint_compatibility(current, checkpoint)
@@ -488,6 +520,64 @@ class TestCheckpointCompatibilityService:
         assert any(
             "checkpoint_missing_required_execution_anchor" in msg
             for msg in result.messages
+        )
+
+    def test_validate_git_commit_mismatch(self) -> None:
+        current = CheckpointMetadata(
+            records_processed=1000,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            git_commit="commit-a",
+            dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="n" * 64,
+        )
+        checkpoint = CheckpointMetadata(
+            records_processed=500,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            git_commit="commit-b",
+            dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="n" * 64,
+        )
+
+        result = self.service.validate_checkpoint_compatibility(current, checkpoint)
+
+        assert result.compatible is False
+        assert result.execution_identity_compatible is False
+        assert any("Git commit mismatch" in msg for msg in result.messages)
+
+    def test_validate_normalization_profile_hash_mismatch(self) -> None:
+        current = CheckpointMetadata(
+            records_processed=1000,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            git_commit="commit-a",
+            dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="a" * 64,
+        )
+        checkpoint = CheckpointMetadata(
+            records_processed=500,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            git_commit="commit-a",
+            dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="b" * 64,
+        )
+
+        result = self.service.validate_checkpoint_compatibility(current, checkpoint)
+
+        assert result.compatible is False
+        assert result.execution_identity_compatible is False
+        assert any(
+            "Normalization profile hash mismatch" in msg for msg in result.messages
         )
 
     def test_strict_resume_blocks_missing_execution_identity_proof(self) -> None:

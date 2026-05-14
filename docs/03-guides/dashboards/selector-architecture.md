@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-08'
+  Last verified: '2026-05-14'
 
 ______________________________________________________________________
 
 # Grafana Selector Architecture
 
-Дата сверки: **2026-05-08**  
+Дата сверки: **2026-05-14**
 Источник истины: `grafana/dashboards/*.json`
 
 Machine-readable SSOT:
@@ -29,8 +29,19 @@ It separates:
 - future execution-aware selection
 - forensic-only selectors
 
-The repo does **not** currently ship one flat universal selector bar for all
-dashboards. It ships a **role-based selector contract** by dashboard family.
+The repo ships a shared **operator context shell** on primary dashboards `0..5`
+and keeps role-specific selectors on top of that shell. The shell is not a
+promise that every selector filters every current-status query.
+
+Shared visible context shell:
+
+- `workflow`
+- `pipeline`
+- `run_type`
+- `run_id`
+
+Role-specific extensions remain dashboard-owned. `run_id` is HTTP-backed
+control-plane identity context only and MUST NOT become a Prometheus label.
 
 ## Dashboard families
 
@@ -44,10 +55,13 @@ Dashboards:
 - `4. Data Quality`
 
 These surfaces answer pipeline-scoped operator questions and remain
-Prometheus-first. Their shipped top-level selectors are built around:
+Prometheus-first for Status/diagnostic panels. Their shipped top-level
+selectors include the shared context shell and optional role-specific filters:
 
+- `workflow` as context/evidence
 - `pipeline`
 - `run_type`
+- `run_id` as local identity context only
 - optional `stage`
 - Grafana time range
 
@@ -57,8 +71,12 @@ Dashboard:
 
 - `3. Provider Health`
 
-This surface is intentionally provider-first:
+This surface is intentionally provider-first, while still exposing the shared
+context shell for provenance, identity, and processed-record evidence:
 
+- `workflow` as context/evidence
+- `pipeline` / `run_type` as context shell
+- `run_id` as local identity context only
 - visible `provider`
 - hidden `pipeline_context`
 - hidden detail-only `adapter`
@@ -74,20 +92,15 @@ Dashboard:
 - `5. Workflow`
 
 This surface is selected-range workflow evidence, not current-state runtime
-triage. It ships:
+triage. It ships the shared context shell plus workflow-local filters:
 
 - `workflow`
+- `pipeline` / `run_type` as context shell
+- `run_id` as local identity context only
 - `status`
 - `step_status`
 - `step_kind`
 - Grafana time range
-
-It does **not** currently ship:
-
-- `pipeline`
-- `run_type`
-- `run_id`
-- exact execution selection
 
 ### Forensic explorer
 
@@ -129,21 +142,21 @@ These refine the selected scope without identifying one exact execution.
 
 ### Execution selectors
 
-Future execution-aware selectors include:
+Execution-aware selectors include:
 
+- `run_id`
 - `run_selector_mode`
 - `started_at`
-- `run_id`
 - `manifest_id`
 - `execution_fingerprint`
 
-These are **not** universal shipped selectors today.
+`run_id` is shipped in the primary context shell, backed by the local
+control-plane HTTP surface. It selects local identity/provenance rows, not
+Prometheus time-series. `run_selector_mode`, `started_at`, `manifest_id`, and
+`execution_fingerprint` remain future/local-catalog candidates.
 
-`bioetl-overview-v2` is the current hybrid Overview baseline: it exposes a
-control-plane-backed `run_id` selector with default `-` for the optional `ID`
-panel only. The selector is not a Prometheus label filter and does not make
-exact-run selection a universal dashboard contract. `bioetl-overview-v3`
-remains only a draft/snapshot surface for the same selector shape.
+`bioetl-overview-v2` is the current hybrid Overview baseline and
+`bioetl-overview-v3` remains a draft/snapshot for the same selector shape.
 
 ### Hidden context selectors
 
@@ -168,25 +181,26 @@ Future reserved:
 - `manifest_id`
 - `execution_fingerprint`
 
-These stay out of universal Prometheus dashboards and dashboard-to-dashboard
-handoms unless an explicit future contract says otherwise.
+These stay out of Prometheus dashboard label selectors and dashboard-to-dashboard
+handoffs unless an explicit future contract says otherwise.
 
 ## Ship-now selector contract
 
 The current shipped selector model is:
 
-- `0. Control Plane`: `pipeline`, `run_type`, time range
 - `1. Overview`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
-- `2. Runtime`: `pipeline`, `run_type`, `stage`, time range
-- `3. Provider Health`: `provider`, hidden `pipeline_context`, hidden
-  detail-only `adapter`, time range
-- `4. Data Quality`: `pipeline`, `run_type`, `stage`, time range
-- `5. Workflow`: `workflow`, `status`, `step_status`, `step_kind`, time range
+- `0. Control Plane`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
+- `2. Runtime`: `workflow`, `pipeline`, `run_type`, `run_id`, `stage`, time range
+- `3. Provider Health`: `workflow`, `pipeline`, `run_type`, `run_id`,
+  `provider`, hidden `pipeline_context`, hidden detail-only `adapter`, time range
+- `4. Data Quality`: `workflow`, `pipeline`, `run_type`, `run_id`, `stage`, time range
+- `5. Workflow`: `workflow`, `pipeline`, `run_type`, `run_id`, `status`,
+  `step_status`, `step_kind`, time range
 - `Silver Reject Explorer`: `pipeline`, `run_type`, `reason_code`, `field`,
   `run_id`, `payload_hash`, time range
 
-This contract is intentionally role-based. It is unified by taxonomy and family
-rules, not by forcing every dashboard to expose the same selector list.
+This contract is unified by the shared context shell, taxonomy, and family
+rules. It does not force every Status panel to consume every visible selector.
 
 ## Hidden handoff contract
 
@@ -207,7 +221,7 @@ Rules:
 - forensic identifiers do not propagate across dashboards by default
 - no blanket `includeVars=true` semantics for cross-dashboard navigation
 
-## Why exact execution selection is not shipped everywhere today
+## Why exact execution filtering is not shipped everywhere today
 
 The repo already has canonical execution anchors such as:
 
@@ -216,9 +230,10 @@ The repo already has canonical execution anchors such as:
 - `execution_fingerprint`
 - `PipelineContext.started_at`
 
-But these anchors live in control-plane artifacts, manifests, sidecars, and
-diagnostic surfaces. They do not currently exist as one universal Grafana
-selector datasource.
+`run_id` is now exposed through the shared context shell, but it remains local
+identity/provenance context. The other anchors live in control-plane artifacts,
+manifests, sidecars, and diagnostic surfaces. They do not currently exist as a
+universal Grafana filtering model for Prometheus-backed current-status panels.
 
 Prometheus is also the wrong place to solve this because project rules forbid
 high-cardinality runtime identifiers such as `run_id`, `manifest_id`, and
@@ -226,8 +241,9 @@ high-cardinality runtime identifiers such as `run_id`, `manifest_id`, and
 
 ## Future local-only run catalog
 
-Before BioETL can ship `latest / previous / exact` execution selection on
-summary dashboards, it needs a local-only run catalog.
+Before BioETL can ship `latest / previous / exact` execution filtering on
+summary dashboards, it needs a local-only run catalog that resolves identities
+without adding high-cardinality Prometheus labels.
 
 Minimum schema:
 
@@ -266,26 +282,17 @@ Resolved hidden context would then be:
 - `selected_manifest_id`
 - `selected_started_at`
 
-Initial candidate dashboards:
+Initial candidate surfaces are the shared `ID` panels and any future
+control-plane-backed tables. Prometheus-backed Status panels remain excluded
+unless a future ADR explicitly defines low-cardinality projection semantics.
 
-- `2. Runtime`
-- `4. Data Quality`
-- `0. Control Plane`
-- possibly `1. Overview`
+## Workflow + pipeline dual-scope evaluation
 
-Excluded by default:
+Primary dashboards expose both `workflow` and `pipeline` for context, but this
+does not mean every current-status query evaluates the exact intersection.
 
-- `3. Provider Health`
-- `5. Workflow`
-- `Silver Reject Explorer`
-
-## Future workflow + pipeline dual-scope evaluation
-
-The repo does **not** currently assume that every dashboard should expose both
-`workflow` and `pipeline`.
-
-Dual-scope `workflow + pipeline` is a future candidate only for dashboards that
-can prove:
+Truthful `workflow + pipeline` filtering remains limited to panels that can
+prove:
 
 - truthful intersection semantics
 - run-catalog-backed resolution

@@ -18,6 +18,9 @@ from bioetl.domain.behavior._dq_rule_evaluators_cross import (
     _custom_cross_field_rule_violated,
     _mutually_exclusive_rule_violated,
 )
+from bioetl.domain.behavior._dq_rule_evaluators_cross import (
+    _custom_cross_rule_violated as _custom_cross_rule_violated_impl,
+)
 from bioetl.domain.behavior._dq_value_coercion import (
     _coerce_list_like,
     _coerce_numeric_value,
@@ -128,11 +131,7 @@ def _custom_cross_rule_violated(
     record: JsonDict,
     validator_name: str | None,
 ) -> bool:
-    if validator_name == "validate_hierarchy_no_self_reference":
-        protein_class_id = record.get("protein_class_id")
-        parent_id = record.get("parent_id")
-        return _is_present(protein_class_id) and protein_class_id == parent_id
-    return False
+    return _custom_cross_rule_violated_impl(record, validator_name)
 
 
 def _required_rule_violated(

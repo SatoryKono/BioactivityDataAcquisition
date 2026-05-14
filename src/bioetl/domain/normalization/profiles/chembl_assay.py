@@ -26,7 +26,9 @@ from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.schemas.chembl.assay import AssaySchema
 from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
-from ._chembl_bao_label_normalizers import normalize_profile_bao_label_from_bao_format
+from ._chembl_bao_label_normalizers import (
+    normalize_profile_bao_label_from_bao_format as normalize_bao_label_from_bao_format,
+)
 from ._chembl_policy_registry import (
     chembl_controlled_family_fields,
     chembl_ontology_family_fields,
@@ -125,7 +127,7 @@ _SPECIAL_RULE_COMPONENTS = {
         "Normalize ChEMBL assay organism display name using curated organism aliases.",
     ),
     "bao_label": (
-        normalize_profile_bao_label_from_bao_format,
+        normalize_bao_label_from_bao_format,
         "Normalize BAO label text inside the profile-visible assay contract, "
         "resolving canonical labels from sibling bao_format identifiers when present.",
     ),

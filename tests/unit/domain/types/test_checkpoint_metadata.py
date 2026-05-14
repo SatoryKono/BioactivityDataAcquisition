@@ -35,6 +35,9 @@ class TestCheckpointMetadata:
             manifest_id="manifest-1",
             contract_ref="chembl.activity",
             contract_version="1.2.3",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="b" * 64,
             exact_replay=True,
             input_snapshot_ids=("snap-a", "snap-b"),
             input_snapshot_fingerprint="snap-fingerprint",
@@ -72,6 +75,9 @@ class TestCheckpointMetadata:
         assert metadata.manifest_id == "manifest-1"
         assert metadata.contract_ref == "chembl.activity"
         assert metadata.contract_version == "1.2.3"
+        assert metadata.normalization_profile_ref == "chembl.activity"
+        assert metadata.normalization_profile_version == "2.0.0"
+        assert metadata.normalization_profile_hash == "b" * 64
         assert metadata.exact_replay is True
         assert metadata.input_snapshot_ids == ("snap-a", "snap-b")
         assert metadata.input_snapshot_fingerprint == "snap-fingerprint"
@@ -98,6 +104,9 @@ class TestCheckpointMetadata:
         assert metadata.manifest_id is None
         assert metadata.contract_ref is None
         assert metadata.contract_version is None
+        assert metadata.normalization_profile_ref is None
+        assert metadata.normalization_profile_version is None
+        assert metadata.normalization_profile_hash is None
         assert metadata.exact_replay is None
         assert metadata.input_snapshot_ids == ()
         assert metadata.memory_decision_trace == ()
@@ -114,6 +123,9 @@ class TestCheckpointMetadata:
                 "manifest_id": "manifest-legacy",
                 "composite_run_identity": "run-legacy",
                 "dependency_lock_hash": "sha256:deps-legacy",
+                "normalization_profile_ref": "chembl.activity",
+                "normalization_profile_version": "1.0.0",
+                "normalization_profile_hash": "c" * 64,
             },
         }
 
@@ -130,10 +142,16 @@ class TestCheckpointMetadata:
         assert metadata.execution_fingerprint is None
         assert metadata.composite_run_identity == "run-legacy"
         assert metadata.manifest_id == "manifest-legacy"
+        assert metadata.normalization_profile_ref == "chembl.activity"
+        assert metadata.normalization_profile_version == "1.0.0"
+        assert metadata.normalization_profile_hash == "c" * 64
         assert metadata.run_context == {
             "manifest_id": "manifest-legacy",
             "composite_run_identity": "run-legacy",
             "dependency_lock_hash": "sha256:deps-legacy",
+            "normalization_profile_ref": "chembl.activity",
+            "normalization_profile_version": "1.0.0",
+            "normalization_profile_hash": "c" * 64,
         }
 
     def test_checkpoint_metadata_to_dict(self) -> None:
@@ -145,6 +163,9 @@ class TestCheckpointMetadata:
             run_type="incremental",
             pipeline_version="1.1.0",
             composite_run_identity="run-2",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="1.0.0",
+            normalization_profile_hash="d" * 64,
             exact_replay=False,
         )
 
@@ -156,6 +177,9 @@ class TestCheckpointMetadata:
         assert metadata_dict["run_type"] == "incremental"
         assert metadata_dict["pipeline_version"] == "1.1.0"
         assert metadata_dict["composite_run_identity"] == "run-2"
+        assert metadata_dict["normalization_profile_ref"] == "chembl.activity"
+        assert metadata_dict["normalization_profile_version"] == "1.0.0"
+        assert metadata_dict["normalization_profile_hash"] == "d" * 64
         assert metadata_dict["exact_replay"] is False
         assert "dq_policy_hash" not in metadata_dict
         assert "dq_rule_bundle_version" not in metadata_dict
@@ -179,6 +203,9 @@ class TestCheckpointMetadata:
             "manifest_id": "manifest-2",
             "contract_ref": "chembl.activity",
             "contract_version": "2.0.0",
+            "normalization_profile_ref": "chembl.activity",
+            "normalization_profile_version": "2.0.0",
+            "normalization_profile_hash": "e" * 64,
             "exact_replay": True,
             "input_snapshot_ids": ["snap-1", "snap-2", "snap-1"],
             "memory_decision_trace": [
@@ -213,6 +240,9 @@ class TestCheckpointMetadata:
         assert metadata.manifest_id == "manifest-2"
         assert metadata.contract_ref == "chembl.activity"
         assert metadata.contract_version == "2.0.0"
+        assert metadata.normalization_profile_ref == "chembl.activity"
+        assert metadata.normalization_profile_version == "2.0.0"
+        assert metadata.normalization_profile_hash == "e" * 64
         assert metadata.exact_replay is True
         assert metadata.input_snapshot_ids == ("snap-1", "snap-2")
         assert metadata.memory_decision_trace[0]["reason"] == "config_budget_exceeded"
@@ -360,6 +390,49 @@ class TestCheckpointMetadata:
         payload = metadata.checkpoint_execution_identity_payload()
 
         assert payload["dependency_lock_hash"] == "sha256:deps-001"
+        assert (
+            metadata.checkpoint_execution_identity_fingerprint()
+            != drifted.checkpoint_execution_identity_fingerprint()
+        )
+
+    def test_checkpoint_execution_identity_payload_includes_normalization_profile(
+        self,
+    ) -> None:
+        """Normalization profile coordinates must drift strict checkpoint identity."""
+        metadata = CheckpointMetadata(
+            records_processed=100,
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+            pipeline_version="1.0.0",
+            git_commit="abc1234",
+            dependency_lock_hash="sha256:deps-001",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.1.0",
+            normalization_profile_hash="c" * 64,
+            effective_config_hash="a" * 64,
+        )
+        drifted = CheckpointMetadata(
+            records_processed=100,
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+            pipeline_version="1.0.0",
+            git_commit="abc1234",
+            dependency_lock_hash="sha256:deps-001",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.2.0",
+            normalization_profile_hash="c" * 64,
+            effective_config_hash="a" * 64,
+        )
+
+        payload = metadata.checkpoint_execution_identity_payload()
+
+        assert payload["normalization_profile_ref"] == "chembl.activity"
+        assert payload["normalization_profile_version"] == "2.1.0"
+        assert payload["normalization_profile_hash"] == "c" * 64
         assert (
             metadata.checkpoint_execution_identity_fingerprint()
             != drifted.checkpoint_execution_identity_fingerprint()

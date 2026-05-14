@@ -26,6 +26,10 @@ Gold-слой должен гарантировать качество данн�
 
 Мы вводим **строгую валидацию Gold-схем** с feature flag для контролируемой миграции существующих пайплайнов.
 
+**Operationalization note (2026-05-14):** for semantic field unification,
+Gold-facing schema and config validation surfaces bind to canonical names
+listed in `configs/field_registry/canonical_registry.json`.
+
 ### 1. Обязательная Gold-схема
 
 При `strict-gold-validation=True` в конфигурации пайплайна:

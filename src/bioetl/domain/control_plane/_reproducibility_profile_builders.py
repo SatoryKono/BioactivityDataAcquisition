@@ -5,29 +5,13 @@ Extracted from reproducibility_profiles.py to meet file size limits.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from bioetl.domain.control_plane.reproducibility_profiles import (
-        ReproducibilityFamilyProfile,
-    )
-
-ReproducibilityExecutionContext = Literal["source", "composite"]
-ReplayFamilyContractName = Literal[
-    "snapshot_backed_exact_replay",
-    "composite_snapshot_backed_exact_replay",
-    "rebuild_only",
-]
-ReplaySupportState = Literal[
-    "exact_replay_supported",
-    "rebuild_only",
-    "debug_only",
-]
-StrictReplayRuntimeVerdict = Literal[
-    "allowed_with_snapshot_backed_source_refs",
-    "requires_full_composite_snapshot_envelope",
-    "blocked_outside_supported_boundary",
-]
+from bioetl.domain.control_plane._reproducibility_profile_types import (
+    ReplayFamilyContractName,
+    ReplaySupportState,
+    ReproducibilityExecutionContext,
+    ReproducibilityFamilyProfile,
+    StrictReplayRuntimeVerdict,
+)
 
 _PUBLISHED_SOURCE_FAMILIES = (
     "chembl.activity",
@@ -98,10 +82,6 @@ def _build_composite_reproducibility_family_profile(
     family: str | None,
     execution_context: ReproducibilityExecutionContext,
 ) -> ReproducibilityFamilyProfile:
-    from bioetl.domain.control_plane.reproducibility_profiles import (
-        ReproducibilityFamilyProfile,
-    )
-
     return ReproducibilityFamilyProfile(
         family=family,
         execution_context=execution_context,
@@ -141,10 +121,6 @@ def _build_source_reproducibility_family_profile(
     family: str | None,
     execution_context: ReproducibilityExecutionContext,
 ) -> ReproducibilityFamilyProfile:
-    from bioetl.domain.control_plane.reproducibility_profiles import (
-        ReproducibilityFamilyProfile,
-    )
-
     supported = family in _PUBLISHED_SUPPORTED_SOURCE_FAMILIES
     published = family in _PUBLISHED_SOURCE_FAMILIES
     return ReproducibilityFamilyProfile(

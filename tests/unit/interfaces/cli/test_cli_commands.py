@@ -1418,6 +1418,7 @@ def test_run_module_declares_expected_seam_inventory() -> None:
     from bioetl.interfaces.cli.commands import run as run_module
 
     assert run_module._RUN_CANONICAL_BOUNDARY_SEAMS == (
+        "create_cli_run_orchestration_service",
         "get_cli_run_orchestration_service",
         "_build_run_command_input",
         "_build_run_pipeline_callable",

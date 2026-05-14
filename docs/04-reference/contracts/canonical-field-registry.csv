@@ -1,0 +1,7 @@
+cluster_id,legacy_name,canonical_name,pipelines,notes,status
+chembl_assay_identifier,assay_chembl_id,assay_id,"chembl_assay|chembl_activity|composite_assay|composite_activity","Canonical internal field; provider-native input filter retains assay_chembl_id.",canonical_internal_with_legacy_input_filter
+chembl_molecule_identifier,molecule_chembl_id,molecule_id,"chembl_molecule|chembl_activity|composite_molecule|composite_activity","Canonical internal field; provider-native input filter retains molecule_chembl_id.",canonical_internal_with_legacy_input_filter
+pubmed_identifier,pubmed_id,pmid,"pubmed_publication|composite_publication","Canonical internal field; provider-native input filter retains pubmed_id.",canonical_internal_with_legacy_input_filter
+doi_identifier,,doi,"crossref_publication|openalex_publication|pubmed_publication|semanticscholar_publication|composite_publication","Canonical externally and internally.",canonical_internal_and_external
+publication_title,pubmed_title,title,"pubmed_publication|crossref_publication|openalex_publication|semanticscholar_publication|composite_publication","Historical provider-prefixed alias retired; canonical normalized field is title.",canonical_internal_with_legacy_aliases_retired
+publication_title,openalex_title,title,"pubmed_publication|crossref_publication|openalex_publication|semanticscholar_publication|composite_publication","Historical provider-prefixed alias retired; canonical normalized field is title.",canonical_internal_with_legacy_aliases_retired

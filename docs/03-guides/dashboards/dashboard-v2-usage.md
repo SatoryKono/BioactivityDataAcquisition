@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # BioETL Dashboards v2: Usage
 
-Дата сверки: **2026-05-13**
+Дата сверки: **2026-05-14**
 Источник истины: `grafana/dashboards/*.json`
 
 Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navigation-links.yaml` (docs/tests должны соответствовать ему).
@@ -55,13 +55,21 @@ Human-readable selector references:
 ## Фильтрация
 
 - `bioetl-overview-v2`: `$workflow`, `$pipeline`, `$run_type`, `$run_id`
-- `bioetl-control-plane-v1`: `$pipeline`, `$run_type`
-- `bioetl-dq-v2`, `bioetl-runtime`: `$pipeline`, `$run_type`, `$stage`
-- `bioetl-provider-health-v2`: `$provider`, hidden `$pipeline_context`, `$adapter`
+- `bioetl-control-plane-v1`: `$workflow`, `$pipeline`, `$run_type`, `$run_id`
+- `bioetl-runtime`: `$workflow`, `$pipeline`, `$run_type`, `$run_id`, `$stage`
+- `bioetl-dq-v2`: `$workflow`, `$pipeline`, `$run_type`, `$run_id`, `$stage`
+- `bioetl-provider-health-v2`: `$workflow`, `$pipeline`, `$run_type`,
+  `$run_id`, `$provider`, hidden `$pipeline_context`, `$adapter`
+- `bioetl-workflow-overview`: `$workflow`, `$pipeline`, `$run_type`,
+  `$run_id`, `$status`, `$step_status`, `$step_kind`, hidden
+  `$pipeline_context`, `$run_type_context`, `$provider_context`
 - `bioetl-silver-reject-explorer`: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
 - `bioetl-overview-v2` intentionally ships with `Workflow=All`,
   `Pipeline=All`, `Run Type=All`, and `Run ID=-` как default entry scope.
-- Во всех остальных pipeline/provider dashboards `$pipeline` и `$provider`
+- Primary dashboards `0..5` now expose the shared context shell
+  `$workflow/$pipeline/$run_type/$run_id`. `$workflow` is context/evidence
+  unless the panel explicitly documents truthful intersection semantics.
+- Во всех non-Overview pipeline/provider dashboards `$pipeline` и `$provider`
   остаются single-select; если исходного контекста нет, используется explicit
   fallback `unknown`.
 - `$run_type` всегда имеет include-all fallback; если исходного run-type
@@ -74,9 +82,9 @@ Human-readable selector references:
   single-select, потому что quarantine API fail-closed требует явный
   `pipeline` параметр.
 - Переменная `execution` не используется; `$payload_hash` остаётся только в
-  `bioetl-silver-reject-explorer`, а `$run_id` в `1. Overview` используется
-  только для local control-plane `ID` panel и не становится Prometheus label
-  или cross-dashboard filter.
+  `bioetl-silver-reject-explorer`, а `$run_id` в primary dashboards `0..5`
+  используется только для local control-plane `ID` panel и не становится
+  Prometheus label или cross-dashboard filter.
 
 ## Что смотреть в первую очередь
 
@@ -86,11 +94,12 @@ Policy reminder:
 - provenance/risk context may stay distributed across scope panels, current
   status surfaces, descriptions and linked runbooks
 
-`bioetl-overview-v2` is the canonical frozen Overview v3 baseline. It
-materializes the first-screen header contract and exposes visible `workflow`,
-`pipeline`, `run_type`, and `run_id` selectors. Current L0 status semantics
-still anchor on `pipeline` + `run_type`; `workflow` remains evidence context,
-and `run_id` affects only the local control-plane `ID` panel.
+`bioetl-overview-v2` is the canonical frozen Overview v3 baseline. Primary
+dashboards `0..5` reuse its visible context shell and common header panels:
+`Provenance`, `Status`, `ID`, and `Processed Records`. Current status semantics
+still belong to each dashboard role; `workflow` remains evidence context unless
+documented otherwise, and `run_id` affects only the local control-plane `ID`
+panel.
 
 1. `bioetl-overview-v2`, first screen (no scroll):
    `Provenance`, `Status`, `Next Action`, `ID`, and `Processed Records` answer
@@ -98,22 +107,26 @@ and `run_id` affects only the local control-plane `ID` panel.
    is selected or resolved, and where to open drilldown first. `OK` requires
    recent activity; missing current evidence remains `UNKNOWN`, not green zero.
 1. `bioetl-runtime`, first-screen answer row (без скролла):
+   `Provenance`, `Status`, `ID`, `Processed Records`, then
    `First Action`, `Monitor Runtime Current Status`,
-   `Monitor Runtime Telemetry Gap`, `Monitor Runtime Blockers` и
-   `Inspect Top Runtime Blockers` отвечают на L2 вопрос «что блокирует
-   выполнение сейчас и куда идти дальше». Selected-range evidence начинается
-   ниже и не определяет current status; non-zero/UNKNOWN telemetry gap делает
-   ниже расположенные zero-count cards недоказательными.
+   `Monitor Runtime Blockers`, `Inspect Top Runtime Blockers` и
+   `Monitor Runtime Telemetry Gap` отвечают на L2 вопрос «что блокирует
+   выполнение сейчас и куда идти дальше». Selected-range KPI evidence
+   (`Monitor Failed Runs`, `Monitor Runtime Error Rate`,
+   `Monitor Worst Stage Lag`) находится ниже answer row и не определяет
+   current status; non-zero/UNKNOWN telemetry gap делает zero-count cards
+   недоказательными.
    Datasource trust markers are targeted: `Runtime` keeps this explicit
    telemetry-gap panel first-screen, `Control Plane` uses
    `Inspect: Telemetry Missing`, while `Silver Reject Explorer` relies on
    explicit no-data/backend-failure copy instead of a generic datasource-health
    stat tile.
 1. `bioetl-runtime`, collapsed row-группы по сценарию:
-   `Backlog Trends`, `Durations`, `Shutdown Diagnostics`,
-   `Tracing-only Log Hygiene`. Открывайте ровно одну нужную группу после
-   чтения summary KPI, чтобы сократить шум первого экрана.
+   `Detect`, `Localize`, `Escalate`, `Tracing-only Log Hygiene`. Открывайте
+   ровно одну нужную группу после чтения answer row и selected-range KPI,
+   чтобы сократить шум первого экрана.
 1. `bioetl-control-plane-v1`, answer row:
+   `Provenance`, `Status`, `ID`, `Processed Records`, then
    `Monitor: Replay Safety State`, `Inspect: Checkpoint Freshness Gap`,
    `Monitor: Manifest / Ledger Integrity` и `Inspect: Telemetry Missing`
    отвечают на L1/L2 вопрос: можно ли доверять
@@ -161,15 +174,18 @@ and `run_id` affects only the local control-plane `ID` panel.
    `Control Plane`, `Runtime`, `Data Quality`, `Provider`,
    `Data Validation`, `Inputs`, и `Workflow` показывают current-only operator
    state с явным scope. Status tables use row-wide threshold coloring, а не
-   только окраску ячейки `Status`. Historical trend/evidence rows вынесены в
-   collapsed `L1 Historical Trends` и `Range Evidence`, а `Diagnostics & Docs`
-   содержит routing по logs/traces/raw metrics.
+   только окраску ячейки `Status`. Compact historical trend/evidence panels
+   вынесены ниже первого экрана в `L1 Historical Trends` и collapsed
+   `Range Evidence`; они служат selected-range/L1 evidence и не определяют
+   `Status` или `Next Action`. `Diagnostics & Docs` содержит routing по
+   logs/traces/raw metrics.
 1. `bioetl-workflow-overview`, panels `id=2`, `id=3`, `id=6`, `id=7`, `id=4`,
    `id=5`, `id=8`:
    selected-range declarative workflow evidence for failed runs, failed/skipped
    step events, run-outcome mix, step outcomes, и step latency. Используйте его,
-   когда нужен bounded workflow evidence layer, но для current stage/run_id,
-   replay/resume или provider/DQ root cause переходите дальше по top-level bus.
+   когда нужен bounded workflow evidence layer. Shared `run_id` помогает
+   identity lookup в `ID`, но current stage, replay/resume или provider/DQ root
+   cause остаются задачами соседних dashboards.
 
 ## Incident first steps (Runtime top navigation)
 
@@ -207,8 +223,29 @@ Panel-level dashboard handoffs и `First Action` dashboard CTAs намеренн
 - что сломано: `Status` + `Inputs` + L1 current cards;
 - куда идти дальше: `Next Action` с `action_target/action_reason/action_dashboard_uid`;
 - какая execution identity выбрана: `ID`, backed by local control-plane manifests;
-- что было в окне времени: collapsed `Range Evidence`;
+- что было в окне времени: compact `L1 Historical Trends` и collapsed `Range Evidence`;
 - где искать сырые traces/logs/metrics: collapsed `Diagnostics & Docs`.
+
+Compact evidence ниже первого экрана:
+- `Runtime Blockers Trend` (`id=9018`): selected-range L1 runtime evidence over
+  `bioetl_l1_runtime_blocker_status`; no-data/gaps остаются diagnostic, а не
+  OK; handoff `Open Runtime`.
+- `DQ Status Trend` (`id=9019`): selected-range L1 Data Quality evidence over
+  `bioetl_l1_dq_status`; missing series не доказывает green state; handoff
+  `Open Data Quality`.
+- `Gold Lifecycle Trend` (`id=9020`): selected-range L1 data-validation
+  lifecycle evidence over `bioetl_l1_gold_lifecycle_status` with
+  `lifecycle_state`; disabled Gold stage may be OK, but missing series is still
+  diagnostic; handoffs `Open Runtime` and `Open Control Plane`.
+- `Historical Failures` (`id=9010`): selected-range historical failure table
+  over `bioetl_pipeline_runs_total`; zero matching rows only means no failed-run
+  samples in the selected range, not current OK; handoff `Open Runtime`.
+- `Recent Terminal Runs` (`id=9011`): selected-range non-success terminal-run
+  table over `bioetl_pipeline_runs_total`; no terminal rows is not proof of
+  current OK; handoffs `Open Control Plane` and `Open Runtime`.
+
+Эти пять panels retained intentionally. Current verdict по-прежнему определяется
+только first-screen `Status`, `Next Action`, `Inputs` и current L1 cards.
 ## Silver Filter Rejects workflow
 
 - Для быстрых summary используйте `Silver Rejects + Rate` в
@@ -284,7 +321,10 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - Pass only target-scoped variables directly in URL (`var-*`) when required by the destination dashboard.
 - For overview/runtime/dq flows pass only `$pipeline/$run_type` unless destination needs another explicit scope.
 - For provider flow pass only `$provider/$adapter` (or explicit `All` defaults when opening non-provider dashboards).
-- Workflow-specific variables (`$workflow`, `$status`) and forensic IDs (`$run_id`, `$payload_hash`) MUST NOT be propagated into non-target dashboards.
+- Workflow-specific state variables (`$status`, `$step_status`, `$step_kind`)
+  and forensic IDs (`$run_id`, `$payload_hash`) MUST NOT be propagated into
+  non-target dashboards. `$workflow` may appear as shared context, but links
+  still pass only target-scoped variables explicitly.
 - Top-level links дополнительно маркируются приоритетом (`primary`, `secondary`, `contextual`) через contract block `top_level_link_priority_by_uid`; приоритет должен быть виден в `title`/`tooltip` для неоднозначных маршрутов.
 
 ## Default dashboard windows (L0/L1 baseline + L2 forensic exception)
@@ -405,7 +445,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   panel-level handoff exception. Although the header bus already exists, this
   panel remains the sole first-screen workflow CTA and therefore exposes
   bounded `Open ...` dataLinks to neighboring dashboards while preserving the
-  time range and resetting unsupported workflow-only scope.
+  time range and resetting unsupported workflow-only state filters.
 - `bioetl-silver-reject-explorer`: `Review: First Action / No-Data Semantics`
   now also carries bounded CTA row links (`Review total rejects`,
   `Review scoped summary`, `Open Data Quality`) so the first-screen forensic
@@ -414,7 +454,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
 
   **First 2 clicks (L1):**
   1. Click #1: открыть `bioetl-workflow-overview`, проверить `Failed Workflow Runs / Range` (`id=2`), `Failed Pipeline Steps / Range` (`id=3`) и `Failed Transform Steps / Range` (`id=6`).
-  2. Click #2: перейти в `2. Runtime` для incident triage по pipeline impact, в `4. Data Quality` для transform/filtering fallout, или в `0. Control Plane` для replay/resume trust verification. Prometheus panels use only bounded workflow labels (`workflow`, `status`, `step_status`, `step_kind`) and never require `run_id`/`step_id` labels.
+  2. Click #2: перейти в `2. Runtime` для incident triage по pipeline impact, в `4. Data Quality` для transform/filtering fallout, или в `0. Control Plane` для replay/resume trust verification. Workflow Prometheus evidence uses bounded workflow labels and never requires `run_id`/`step_id` labels; shared `$pipeline/$run_type/$run_id` context feeds only context/identity surfaces unless a panel documents otherwise.
 - Loki drilldown использует безопасный low-cardinality entrypoint `{job="bioetl"}` без dashboard-variable interpolation внутри encoded Explore payload. Это сознательный baseline: Grafana надёжно не подставляет `$pipeline/$provider` в `left=...`, поэтому дополнительное сужение оператор делает уже в самом Explore. Tempo drilldown открывает trace search в том же временном окне; детальная correlation идёт через `trace_id` / `span_id`, а не через Prometheus labels.
 - Tempo drilldown теперь тоже открывается contextual: pipeline-scoped
   dashboards предварительно фильтруют TraceQL по `span."bioetl.pipeline"`, а
@@ -449,7 +489,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
 ## Важные пороги (из JSON)
 
 - `overview.id=214 (Status)`: `CRIT` при runtime blocker `>0`, DQ hard fail `>0`, blocking data-validation lifecycle или control-plane blocker `>0`; `WARN` при non-fatal warning-only сигналах; `UNKNOWN` при no recent samples. Panel links route directly to Runtime / Control Plane / Data Quality / Provider Health / Workflow with the current time range.
-- `overview.id=215 (Next Action)`: priority order `Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor`. If the selected scope is missing from `bioetl_overview_pipeline_run_type_universe` (aliased from the runtime pipeline/run_type universe), the panel falls back to `NO_ROUTE` instead of rendering empty. Next action: open the first non-OK surface via the matching panel link. Runtime / Control Plane / DQ handoffs preserve `$pipeline/$run_type`; Provider Health fail-closes to `provider=unknown` while preserving `pipeline_context`; Workflow resets scope because the target dashboard does not accept pipeline/run_type variables.
+- `overview.id=215 (Next Action)`: priority order `Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor`. If the selected scope is missing from `bioetl_overview_pipeline_run_type_universe` (aliased from the runtime pipeline/run_type universe), the panel falls back to `NO_ROUTE` instead of rendering empty. Next action: open the first non-OK surface via the matching panel link. Runtime / Control Plane / DQ handoffs preserve `$pipeline/$run_type`; Provider Health fail-closes to `provider=unknown` while preserving `pipeline_context`; Workflow accepts the shared context shell but workflow-only state filters are reset.
 - `overview` first-screen selected-scope cards normalize a manually selected `workflow_<pipeline>` value back to the entity pipeline before reading `bioetl_l0_*` / `bioetl_l1_*` summary recording rules. For example, `workflow_chembl_assay` resolves to the same current-state summary rows as `chembl_assay`.
 - `dq.id=2 (DQ Score Snapshot)`: no-data остается `UNKNOWN`, не `0`; hard-fail signals блокируют promotion, warning-only означает drift. Next action: hard-fail -> reject/quarantine diagnostics; warning-only -> trend + top reasons.
 - `overview.id=9002 (Inputs)`: использует `max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"})`. Это compact projected selected-scope surface: first-screen таблица держит одну worst-status строку на operator input, чтобы не требовать scroll на default `Workflow=All/Pipeline=All/Run Type=All`.
@@ -547,4 +587,4 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - **Localize**: локализация culprit stage/phase и проверка latency/backlog breakdown.
 - **Escalate**: shutdown/terminal-state диагностика и handoff в tracing/log drilldown для подтверждения причины.
 
-На first screen оставлена ровно одна рекомендация drilldown — panel `id=9991` (`First Action`). Оператор сначала читает `Inspect Active Runtime Blocker Detail`, выбирает текущий blocker type, затем идёт по тем же трём полосам в фиксированном порядке.
+На first screen оставлена ровно одна рекомендация drilldown — panel `id=9991` (`First Action`). Оператор сначала читает current status, top blockers и telemetry gap; `Inspect Active Runtime Blocker Detail` открывается из CTA только когда нужен полный rule-level breakdown внутри `Detect`.

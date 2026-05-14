@@ -183,7 +183,6 @@ def _simple_composition_cycles(module_imports: dict[str, set[str]]) -> list[str]
 
 _ALLOWED_COMPOSITION_CYCLES: frozenset[str] = frozenset(
     {
-        "_services <-> _workflow_services",
         "bootstrap_logger <-> bootstrap_logger",
     }
 )
@@ -489,6 +488,18 @@ class TestCompositionRootIntegrity:
             + "\nUnexpected cycles:\n"
             + "\n".join(f"  - {cycle}" for cycle in unexpected_cycles)
         )
+
+    def test_workflow_services_do_not_depend_on_service_facade(
+        self,
+        src_dir: Path,
+    ) -> None:
+        """Workflow assembly must not depend back on the aggregate service facade."""
+        workflow_services = src_dir / "bioetl" / "composition" / "_workflow_services.py"
+        content = workflow_services.read_text(encoding="utf-8")
+
+        assert "bioetl.composition._services" not in content
+        assert "from bioetl.composition import _services" not in content
+        assert "pipeline_runner_service_factory" in content
 
 
 class TestInfrastructureIsolation:
