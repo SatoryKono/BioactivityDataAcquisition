@@ -211,3 +211,16 @@ class TestNormalizationFunctionIntegration:
             assert activity_rule.apply(raw_value) == canonical
             assert target_rule.apply(raw_value) == canonical
             assert component_rule.apply(raw_value) == canonical
+
+    def test_chembl_activity_and_assay_share_bao_label_resolution(self) -> None:
+        """Activity and assay BAO labels should resolve through the same helper."""
+        activity_rule = CHEMBL_ACTIVITY_PROFILE.field_rules["bao_label"]
+        assay_rule = CHEMBL_ASSAY_PROFILE.field_rules["bao_label"]
+        record = {"bao_format": "bao:0000357", "bao_label": "noisy provider label"}
+
+        assert activity_rule.apply(record["bao_label"], record=record) == (
+            "single protein format"
+        )
+        assert assay_rule.apply(record["bao_label"], record=record) == (
+            "single protein format"
+        )

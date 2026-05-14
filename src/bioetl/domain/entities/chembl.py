@@ -8,6 +8,11 @@ from bioetl.domain.entities._chembl_activity_target_models import (
     MoleculeRecord,
     TargetRecord,
 )
+from bioetl.domain.entities._chembl_additional_models import (
+    CompoundLinkRecord,
+    PublicationSimilarityRecord,
+    TissueRecord,
+)
 from bioetl.domain.entities._chembl_reference_models import (
     CellLineRecord,
     ChemblPublicationRecord,
@@ -22,8 +27,11 @@ __all__ = [
     "CellLineRecord",
     "ChemblPublicationRecord",
     "ChemblPublicationTermRecord",
+    "CompoundLinkRecord",
     "MoleculeRecord",
     "ProteinClassRecord",
+    "PublicationSimilarityRecord",
     "TargetComponentRecord",
     "TargetRecord",
+    "TissueRecord",
 ]

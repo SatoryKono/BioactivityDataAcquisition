@@ -74,6 +74,25 @@ def _chembl_fixture_entries() -> list[tuple[str, dict[str, Any]]]:
     )
 
 
+def _tracked_fixture_paths(fixture_key: str, entry: dict[str, Any]) -> tuple[str, ...]:
+    fixture_path_raw = entry.get("fixture_path")
+    assert isinstance(fixture_path_raw, str), f"{fixture_key}: fixture_path missing"
+    tracked_paths = [fixture_path_raw]
+
+    edge_fixtures = entry.get("edge_fixtures", [])
+    assert isinstance(edge_fixtures, list), f"{fixture_key}: edge_fixtures must be a list"
+    for edge_entry in edge_fixtures:
+        if not isinstance(edge_entry, dict):
+            continue
+        if edge_entry.get("fixture_kind") != "tracked_edge_case_sample":
+            continue
+        edge_path = edge_entry.get("fixture_path")
+        assert isinstance(edge_path, str), f"{fixture_key}: edge fixture path missing"
+        tracked_paths.append(edge_path)
+
+    return tuple(dict.fromkeys(tracked_paths))
+
+
 def _canonical_example(value: object) -> str:
     if isinstance(value, str):
         return value
@@ -101,9 +120,10 @@ def _summarize_fixture(
     *,
     max_examples: int,
 ) -> list[FixtureSummaryRow]:
-    fixture_path_raw = entry.get("fixture_path")
-    assert isinstance(fixture_path_raw, str), f"{fixture_key}: fixture_path missing"
-    rows = _load_jsonl(PROJECT_ROOT / fixture_path_raw)
+    tracked_paths = _tracked_fixture_paths(fixture_key, entry)
+    rows: list[dict[str, Any]] = []
+    for fixture_path_raw in tracked_paths:
+        rows.extend(_load_jsonl(PROJECT_ROOT / fixture_path_raw))
 
     field_values: dict[str, set[str]] = defaultdict(set)
     non_null_counts: dict[str, int] = defaultdict(int)
@@ -130,7 +150,7 @@ def _summarize_fixture(
                 null_count=null_counts.get(field_name, 0),
                 distinct_count=len(field_values.get(field_name, set())),
                 observed_examples=examples,
-                fixture_path=fixture_path_raw,
+                fixture_path=" | ".join(tracked_paths),
             )
         )
     return summaries
@@ -147,6 +167,8 @@ def build_inventory_payload(*, max_examples: int = 5) -> dict[str, object]:
                 "fixture_key": fixture_key,
                 "pipeline_name": _pipeline_name_from_fixture_key(fixture_key),
                 "fixture_path": entry["fixture_path"],
+                "tracked_fixture_paths": list(_tracked_fixture_paths(fixture_key, entry)),
+                "tracked_fixture_count": len(_tracked_fixture_paths(fixture_key, entry)),
                 "records": entry["records"],
                 "field_count": len(summaries),
             }

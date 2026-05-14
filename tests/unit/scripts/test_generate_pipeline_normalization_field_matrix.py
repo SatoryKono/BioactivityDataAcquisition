@@ -259,12 +259,14 @@ def _assert_publication_and_target_rows(rows: list[dict[str, str]]) -> None:
     target_component_types = _row(rows, "chembl_target", "component_types")
     assert target_component_types["set_like"] == "true"
     assert target_component_types["hash_ordering"] == "set_like"
+    assert target_component_types["dq_coverage"] == "custom:error"
 
     target_component_relationships = _row(
         rows, "chembl_target", "component_relationships"
     )
     assert target_component_relationships["set_like"] == "true"
     assert target_component_relationships["hash_ordering"] == "set_like"
+    assert target_component_relationships["dq_coverage"] == "custom:error"
 
     component_type = _row(rows, "chembl_target_component", "component_type")
     assert component_type["controlled_vocabulary_source"] == (
@@ -753,28 +755,33 @@ def test_build_field_matrix_rows_exposes_publication_structured_field_registry()
     assert matched_policies > 0
 
 
-def test_build_field_matrix_rows_documents_structured_payload_sidecar_policy() -> None:
+def test_build_field_matrix_rows_documents_structured_payload_governance_modes() -> None:
     rows = build_field_matrix_rows()
 
     for policy in semantic_sensitive_structured_payload_policies():
         pipeline_name = policy.profile_name.replace(".", "_")
         row = _row(rows, pipeline_name, policy.field_name)
         semantics = policy.collection_semantics.value.replace("_", " ")
-        raw_row = _row(rows, pipeline_name, policy.raw_sidecar_field)
-        canonical_row = _row(rows, pipeline_name, policy.canonical_sidecar_field)
 
         assert row["normalization_summary"] == row["notes"]
         assert semantics in row["notes"]
-        assert policy.raw_sidecar_field in row["notes"]
-        assert policy.canonical_sidecar_field in row["notes"]
-        assert "not a raw provider substitute" in row["notes"]
         if policy.controlled_vocabulary_source is not None:
             assert (
                 row["controlled_vocabulary_source"]
                 == policy.controlled_vocabulary_source
             )
-        assert raw_row["normalizer"] == "normalize_profile_passthrough"
-        assert canonical_row["field_type"] == "string"
+        if policy.requires_raw_sidecar_before_semantic_transform:
+            assert policy.raw_sidecar_field in row["notes"]
+            assert policy.canonical_sidecar_field in row["notes"]
+            assert "not a raw provider substitute" in row["notes"]
+            raw_row = _row(rows, pipeline_name, policy.raw_sidecar_field)
+            canonical_row = _row(rows, pipeline_name, policy.canonical_sidecar_field)
+            assert raw_row["normalizer"] == "normalize_profile_passthrough"
+            assert canonical_row["field_type"] == "string"
+        else:
+            assert row["classification"] == "structured_json_canonical_only"
+            assert policy.canonical_sidecar_field in row["notes"]
+            assert "ratified evidence surface" in row["notes"]
 
 
 def test_build_field_matrix_rows_keeps_chembl_cell_line_policy_fields_visible() -> None:
@@ -1089,6 +1096,11 @@ def test_non_chembl_rows_include_inventory_evidence_columns() -> None:
     assert uniprot_features["classification"] == "structured_json_sidecar"
     assert uniprot_features["raw_sidecar"] == "features_raw_json"
     assert uniprot_features["canonical_sidecar"] == "features_canonical_json"
+
+    crossref_references = _row(rows, "crossref_publication", "references")
+    assert crossref_references["classification"] == "structured_json_canonical_only"
+    assert crossref_references["raw_sidecar"] == ""
+    assert crossref_references["canonical_sidecar"] == "references"
 
 
 def test_non_chembl_taxonomy_rows_use_shared_ncbi_identifier_normalizer() -> None:

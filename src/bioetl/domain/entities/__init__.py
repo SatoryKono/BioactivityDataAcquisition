@@ -31,9 +31,12 @@ from bioetl.domain.entities.chembl import (
     CellLineRecord,
     ChemblPublicationRecord,
     ChemblPublicationTermRecord,
+    CompoundLinkRecord,
     MoleculeRecord,
+    PublicationSimilarityRecord,
     TargetComponentRecord,
     TargetRecord,
+    TissueRecord,
 )
 
 # ChEMBL Domain Entities (dataclass)
@@ -99,6 +102,7 @@ __all__ = [
     "ChemblPublicationSimilarity",
     "ChemblPublicationTerm",
     "ChemblPublicationTermRecord",
+    "CompoundLinkRecord",
     "CompoundRecord",  # ChEMBL compound_record (molecule-document link)
     "CrossRefPublicationEntity",
     "Molecule",
@@ -110,6 +114,7 @@ __all__ = [
     "PubchemMoleculeRecord",
     "PublicationEntityBase",
     "PublicationRecord",
+    "PublicationSimilarityRecord",
     "SemanticScholarPublicationEntity",
     "SubcellularFraction",
     "Target",
@@ -117,5 +122,6 @@ __all__ = [
     "TargetComponentRecord",
     "TargetRecord",
     "Tissue",
+    "TissueRecord",
     "UniprotTarget",
 ]

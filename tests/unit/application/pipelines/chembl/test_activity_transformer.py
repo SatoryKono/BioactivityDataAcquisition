@@ -213,6 +213,24 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
         assert result["qudt_unit_mapping_status"] == "unmapped"
         assert result["qudt_ontology_version"] == "3.2.1"
 
+    @pytest.mark.asyncio
+    async def test_transform_canonicalizes_bao_label_from_bao_format(
+        self, transformer, mock_context
+    ) -> None:
+        """Activity BAO labels should resolve from sibling bao_format identifiers."""
+        record = {
+            "activity_id": 12345,
+            "molecule_id": "CHEMBL25",
+            "bao_format": "BAO:0000357",
+            "bao_label": " noisy provider label ",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["bao_format"] == "BAO_0000357"
+        assert result["bao_label"] == "single protein format"
+
 
 @pytest.mark.unit
 class TestActivityTransformerLigandEfficiency(

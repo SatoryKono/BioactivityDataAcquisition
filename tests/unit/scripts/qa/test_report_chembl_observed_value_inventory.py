@@ -37,6 +37,15 @@ def test_build_inventory_payload_covers_all_tracked_chembl_fixtures() -> None:
         "chembl/tissue",
     }
 
+    rows_by_pipeline = {
+        pipeline_name: [
+            row for row in payload["rows"] if row["pipeline_name"] == pipeline_name
+        ]
+        for pipeline_name in ("chembl_activity", "chembl_molecule")
+    }
+    assert len(rows_by_pipeline["chembl_activity"]) > 5
+    assert len(rows_by_pipeline["chembl_molecule"]) > 5
+
 
 def test_render_markdown_mentions_fixture_and_field_counts() -> None:
     markdown = _render_markdown(
