@@ -41,10 +41,6 @@ groups:
         columns:
           - chembl.publication.publication_id
 
-      - base_name: document_chembl_id
-        columns:
-          - chembl.publication.document_chembl_id
-
       - base_name: publication_doi
         columns:
           - chembl.publication.publication_doi
