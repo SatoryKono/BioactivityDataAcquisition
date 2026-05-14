@@ -254,16 +254,81 @@ def test_provider_and_workflow_scope_are_explicit() -> None:
 
 def test_range_evidence_and_trend_rows_are_retained() -> None:
     panels = _panels_by_title()
+    current_verdict_titles = {
+        "Status",
+        "Next Action",
+        "Inputs",
+        "Control Plane",
+        "Runtime",
+        "Data Quality",
+        "Provider",
+        "Data Validation",
+        "Workflow",
+    }
+    expected_evidence_panels = {
+        "Runtime Blockers Trend": {
+            "id": 9018,
+            "links": {"Open Runtime"},
+            "tokens": ("selected-range", "l1 runtime evidence", "does not determine"),
+        },
+        "DQ Status Trend": {
+            "id": 9019,
+            "links": {"Open Data Quality"},
+            "tokens": (
+                "selected-range",
+                "l1 data quality evidence",
+                "does not determine",
+            ),
+        },
+        "Gold Lifecycle Trend": {
+            "id": 9020,
+            "links": {"Open Runtime", "Open Control Plane"},
+            "tokens": (
+                "selected-range",
+                "l1 data-validation lifecycle evidence",
+                "lifecycle_state",
+            ),
+        },
+        "Historical Failures": {
+            "id": 9010,
+            "links": {"Open Runtime"},
+            "tokens": (
+                "selected-range historical failure evidence only",
+                "does not determine",
+                "not proof",
+            ),
+        },
+        "Recent Terminal Runs": {
+            "id": 9011,
+            "links": {"Open Control Plane", "Open Runtime"},
+            "tokens": (
+                "selected-range terminal-run evidence only",
+                "does not determine",
+                "not proof",
+            ),
+        },
+    }
 
-    for title in (
-        "Runtime Blockers Trend",
-        "DQ Status Trend",
-        "Gold Lifecycle Trend",
-        "Historical Failures",
-        "Recent Terminal Runs",
-        "Silver Rejects + Rate",
-    ):
+    for title in (*expected_evidence_panels, "Silver Rejects + Rate"):
         assert title in panels
+
+    for title, expectation in expected_evidence_panels.items():
+        panel = panels[title]
+        description = str(panel.get("description", "")).lower()
+        data_links = panel.get("options", {}).get("dataLinks", [])
+
+        assert panel.get("id") == expectation["id"]
+        assert panel.get("gridPos", {}).get("y", 0) > max(
+            panels[current_title].get("gridPos", {}).get("y", 0)
+            for current_title in current_verdict_titles
+        )
+        assert {link.get("title") for link in data_links} == expectation["links"]
+        assert all(link.get("includeVars") is False for link in data_links)
+        assert all(link.get("targetBlank") is False for link in data_links)
+        for token in expectation["tokens"]:
+            assert token in description
+        assert "l0 status" in description
+        assert "next action" in description
 
     assert "[$__range]" in _panel_expr(panels["Historical Failures"])
     assert "[$__range]" in _panel_expr(panels["Recent Terminal Runs"])

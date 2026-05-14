@@ -22,7 +22,6 @@ FIELD_TO_GROUP_VALUE_MAPPING: dict[str, str] = {
     "content_hash": "system_metadata",
     "corpus_id": "id_and_status",
     "dblp_id": "id_and_status",
-    "document_chembl_id": "id_and_status",
     "publication_id": "id_and_status",
     "doi": "id_and_status",
     "entity_id": "id_and_status",

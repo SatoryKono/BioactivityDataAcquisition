@@ -38,6 +38,10 @@ Previously, data quality validation was inconsistent across the pipeline, with d
 
 Implement a contract-based Data Quality (DQ) System with the following characteristics:
 
+**Operationalization note (2026-05-14):** DQ rules that validate identifier
+and title clusters bind to the canonical field names published in
+`configs/field_registry/canonical_registry.json`.
+
 ### 1. Contract-Based Validation Architecture
 
 ```mermaid

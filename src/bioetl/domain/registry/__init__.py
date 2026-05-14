@@ -26,6 +26,10 @@ from bioetl.domain.registry.publication import (
     is_legacy_publication_alias,
     is_publication_entity,
 )
+from bioetl.domain.registry.semantic_fields import (
+    SemanticFieldCluster,
+    SemanticFieldRegistry,
+)
 
 __all__ = [
     "LEGACY_PUBLICATION_ALIASES",
@@ -33,6 +37,8 @@ __all__ = [
     "PUBLICATION_ENTITY_TYPES",
     "FieldAlias",
     "PublicationMapping",
+    "SemanticFieldCluster",
+    "SemanticFieldRegistry",
     "get_alias_map_for_provider",
     "get_canonical_name",
     "get_provider_field",

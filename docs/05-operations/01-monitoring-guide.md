@@ -94,20 +94,29 @@ control-plane scope. `Run Type=All` трактуется как unbounded run-ty
 `Pipeline=All` без exact `run_id` не должен притворяться одним manifest
 identity.
 
+Primary dashboards `0..5` now reuse the Overview-derived context shell:
+`workflow`, `pipeline`, `run_type`, and HTTP-backed `run_id`, plus common
+`Provenance`, `Status`, `ID`, and `Processed Records` panels. `run_id` remains
+local identity context only; do not use it as a Prometheus label or as a
+cross-dashboard filter.
+
 ### Фильтрация и Изоляция данных
 
 В верхней части каждого дашборда расположены выпадающие списки:
 
-- **0. Control Plane**: `$pipeline`, `$run_type`
+- **0. Control Plane**: `$workflow`, `$pipeline`, `$run_type`, `$run_id`
 - **1. Overview**: `$workflow`, `$pipeline`, `$run_type`, `$run_id`
-- **2. Runtime / 4. Data Quality**: `$pipeline`, `$run_type`, `$stage`
-- **3. Provider Health**: `$provider` visible; `$adapter` hidden detail-only for
-  cross-scope circuit-breaker diagnostics
+- **2. Runtime / 4. Data Quality**: `$workflow`, `$pipeline`, `$run_type`,
+  `$run_id`, `$stage`
+- **3. Provider Health**: `$workflow`, `$pipeline`, `$run_type`, `$run_id`,
+  `$provider` visible; `$adapter` hidden detail-only for cross-scope
+  circuit-breaker diagnostics
 - **Silver Reject Explorer**: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
-- **5. Workflow**: `$workflow`, `$status`, `$step_status`, `$step_kind`
+- **5. Workflow**: `$workflow`, `$pipeline`, `$run_type`, `$run_id`,
+  `$status`, `$step_status`, `$step_kind`
 
-> **Важно**: shipped dashboards используют unified selector taxonomy by
-> dashboard family, а не один flat universal selector list.
+> **Важно**: shipped dashboards используют общий context shell plus
+> role-specific selectors, а не один flat universal query model.
 > Канонический machine-readable selector contract:
 > `docs/03-guides/dashboards/contracts/selector-contracts.yaml`.
 > `1. Overview` допускает `Workflow=All`, `Pipeline=All`, `Run Type=All` и

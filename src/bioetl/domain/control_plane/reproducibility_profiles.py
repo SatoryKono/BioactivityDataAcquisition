@@ -2,11 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    pass
+from dataclasses import asdict
 
 from bioetl.domain.control_plane._reproducibility_profile_builders import (
     _PUBLISHED_COMPOSITE_FAMILIES,
@@ -16,41 +12,10 @@ from bioetl.domain.control_plane._reproducibility_profile_builders import (
     _build_source_reproducibility_family_profile,
     resolve_reproducibility_family,
 )
-
-# Re-export for type checking
-if TYPE_CHECKING:
-    from bioetl.domain.control_plane._reproducibility_profile_builders import (
-        ReplayFamilyContractName,
-        ReplaySupportState,
-        ReproducibilityExecutionContext,
-        StrictReplayRuntimeVerdict,
-    )
-
-
-@dataclass(frozen=True, slots=True)
-class ReproducibilityFamilyProfile:
-    """Published per-family reproducibility profile."""
-
-    family: str | None
-    execution_context: ReproducibilityExecutionContext
-    lineage_closure_supported: bool
-    strict_exact_replay_supported: bool
-    support_state: ReplaySupportState
-    strict_replay_runtime_verdict: StrictReplayRuntimeVerdict
-    exact_replay_support_boundary: str
-    post_capture_replayable_parent_supported: bool
-    post_capture_replayable_parent_boundary: str | None
-    post_capture_replayable_parent_reason: str
-    historical_live_run_upgrade_policy: str
-    historical_live_run_upgrade_boundary: str | None
-    historical_live_run_upgrade_reason: str
-    broader_historical_exact_replay_policy: str
-    broader_historical_exact_replay_boundary: str | None
-    broader_historical_exact_replay_reason: str
-    replay_family_contract: ReplayFamilyContractName
-    default_required_persistence_profile: str
-    support_scope: str
-    reason: str
+from bioetl.domain.control_plane._reproducibility_profile_types import (
+    ReproducibilityExecutionContext,
+    ReproducibilityFamilyProfile,
+)
 
 
 def published_supported_reproducibility_families() -> list[str]:

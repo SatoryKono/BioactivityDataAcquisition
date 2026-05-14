@@ -388,10 +388,10 @@ L2 diagnostic runtime triage: blockers, latency, backlog, error localization, ha
 - **Tier 4**: collapsed tracing-only log hygiene
 
 ### KPI ownership (canonical mirrors)
-- System Status → mirror (canonical: `bioetl-overview-v2`)
+- Status → mirror (canonical: `bioetl-overview-v2`)
 - Next Action → mirror (canonical: `bioetl-overview-v2`)
-- L0 Inputs → mirror (canonical: `bioetl-overview-v2`)
-- Gold Lifecycle → mirror (canonical: `bioetl-overview-v2`)
+- Inputs → mirror (canonical: `bioetl-overview-v2`)
+- Data Validation → mirror (canonical: `bioetl-overview-v2`)
 - Replay Safety State → mirror (canonical: `bioetl-control-plane-v1`)
 - Checkpoint Freshness Proxy → mirror (canonical: `bioetl-control-plane-v1`)
 - Ledger/Manifest Consistency → mirror (canonical: `bioetl-control-plane-v1`)
@@ -536,8 +536,7 @@ Selected-range declarative workflow run/step evidence and transform-step latency
 - **Tier 4**: collapsed diagnostics
 
 ### KPI ownership (canonical mirrors)
-- Workflow Selected → canonical for `bioetl-overview-v2`
-- Workflow Global → canonical for `bioetl-overview-v2`
+- Workflow → canonical for `bioetl-overview-v2`
 
 ### Специфические требования
 - Selected-range operational evidence surface

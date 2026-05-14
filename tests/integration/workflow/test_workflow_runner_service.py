@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass, field
-from uuid import uuid4
 
 import pytest
 
@@ -26,6 +25,7 @@ from bioetl.domain.workflow import (
     WorkflowTransformSpec,
 )
 from tests.helpers.clock import FIXED_TEST_TIME
+from tests.helpers.deterministic_ids import deterministic_run_id
 
 pytestmark = pytest.mark.integration
 
@@ -79,7 +79,7 @@ class _PipelineRunner:
         return RunResult(
             status=PipelineRunResult.SUCCESS,
             pipeline_name=pipeline_name,
-            run_id=str(uuid4()),
+            run_id=deterministic_run_id(f"workflow_runner:{pipeline_name}"),
             run_type="incremental",
             records_bronze=3,
             records_silver=3,
@@ -165,6 +165,12 @@ async def test_workflow_runner_roundtrips_pipeline_transform_and_metrics() -> No
         and labels["run_type_context"] == "incremental"
         and labels["provider_context"] == "chembl"
         for name, _value, labels in metrics.histograms
+    )
+    assert any(
+        name == "bioetl_workflow_step_events_total"
+        and labels["step_kind"] == "transform"
+        and labels["status"] == "success"
+        for name, _value, labels in metrics.counters
     )
 
 

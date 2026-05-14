@@ -79,12 +79,308 @@
       ]
     },
     {
+      "id": 9400,
+      "type": "text",
+      "title": "Provenance",
+      "gridPos": {
+        "h": 4,
+        "w": 16,
+        "x": 0,
+        "y": 3
+      },
+      "description": "Unified context/provenance banner for 0. Control Plane. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only.",
+      "options": {
+        "mode": "html",
+        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Can we trust control-plane state and safely replay or resume?</div></div>"
+      }
+    },
+    {
+      "id": 9401,
+      "type": "stat",
+      "title": "Status",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Current Control Plane replay/resume trust state for the selected pipeline/run_type scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "WARN",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "CRIT",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "noValue": "UNKNOWN",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "max((bioetl_replay_safety_blockers_15m{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 9402,
+      "type": "table",
+      "title": "ID",
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 0,
+        "y": 7
+      },
+      "datasource": "Quarantine Explorer",
+      "description": "Local control-plane identity table for the shared context shell. Exact selected run_id wins; concrete pipeline scope may resolve latest manifest; aggregate pipeline scope without exact run_id must not guess one manifest identity.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": false,
+        "footer": {
+          "show": false
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "rows",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "Value": true
+            },
+            "indexByName": {
+              "parameter": 0,
+              "value": 1
+            },
+            "renameByName": {
+              "parameter": "parameter",
+              "value": "value"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 9403,
+      "type": "table",
+      "title": "Processed Records",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 10,
+        "y": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Selected-range processed-records evidence for the shared pipeline/run_type context. Zero values are range-summary evidence only and do not prove current OK status.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "decimals": 0,
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "parameter"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "1 bronze": {
+                        "text": "bronze"
+                      },
+                      "2 silver [valid]": {
+                        "text": "silver [valid]"
+                      },
+                      "3 silver [error]": {
+                        "text": "silver [error]"
+                      },
+                      "4 gold [valid]": {
+                        "text": "gold [valid]"
+                      },
+                      "5 gold [error]": {
+                        "text": "gold [error]"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": false,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "parameter"
+          }
+        ],
+        "footer": {
+          "show": false
+        }
+      },
+      "targets": [
+        {
+          "expr": "label_replace(round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[$__range])) or vector(0)), \"parameter\", \"1 bronze\", \"\", \"\") or label_replace(round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"silver\"}[$__range])) or vector(0)), \"parameter\", \"2 silver [valid]\", \"\", \"\") or label_replace(round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0)), \"parameter\", \"3 silver [error]\", \"\", \"\") or label_replace(round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"gold\"}[$__range])) or vector(0)), \"parameter\", \"4 gold [valid]\", \"\", \"\") or label_replace(round(clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"silver\"}[$__range])) or vector(0)) - (sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"gold\"}[$__range])) or vector(0)), 0)), \"parameter\", \"5 gold [error]\", \"\", \"\")",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "parameter": 0,
+              "Value": 1
+            },
+            "renameByName": {
+              "parameter": "parameter",
+              "Value": "value"
+            }
+          }
+        }
+      ]
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 13
       },
       "id": 890,
       "panels": [],
@@ -157,7 +453,7 @@
         "h": 4,
         "w": 4,
         "x": 0,
-        "y": 4
+        "y": 14
       },
       "id": 891,
       "options": {
@@ -210,7 +506,7 @@
         "h": 4,
         "w": 5,
         "x": 4,
-        "y": 4
+        "y": 14
       },
       "id": 892,
       "options": {
@@ -288,7 +584,7 @@
         "h": 4,
         "w": 5,
         "x": 9,
-        "y": 4
+        "y": 14
       },
       "id": 893,
       "options": {
@@ -389,7 +685,7 @@
         "h": 4,
         "w": 5,
         "x": 14,
-        "y": 4
+        "y": 14
       },
       "id": 907,
       "options": {
@@ -432,7 +728,7 @@
         "h": 4,
         "w": 5,
         "x": 19,
-        "y": 4
+        "y": 14
       },
       "options": {
         "content": "### Next step\nOpen Replay diagnostics for blockers. If telemetry is non-zero or UNKNOWN, validate scrape/rules before replay/resume. Use Manifest Inspection for proof.",
@@ -455,7 +751,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 18
       },
       "id": 902,
       "panels": [
@@ -1557,7 +1853,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 9
+        "y": 19
       },
       "id": 901,
       "panels": [
@@ -2088,7 +2384,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 10
+        "y": 20
       },
       "id": 903,
       "panels": [
@@ -2413,7 +2709,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 21
       },
       "id": 904,
       "panels": [
@@ -2987,7 +3283,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 22
       },
       "id": 905,
       "panels": [
@@ -3025,6 +3321,39 @@
   ],
   "templating": {
     "list": [
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_workflow_runs_total, workflow)",
+        "description": "Shared operator context: workflow evidence selector. This selector does not imply exact current-status intersection unless the dashboard explicitly documents that semantics.",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Workflow",
+        "multi": false,
+        "name": "workflow",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_runs_total, workflow)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
       {
         "allValue": null,
         "current": {
@@ -3084,6 +3413,54 @@
         "type": "query",
         "useTags": false,
         "description": "Core scope: run_type selector bounded by the active control-plane pipeline universe. Default All is intentional; missing run-type context must be represented as All, not unknown."
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "-",
+          "value": "-"
+        },
+        "datasource": "Quarantine Explorer",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&pipeline=${pipeline}&run_type=${run_type:csv}",
+        "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs.",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Run ID",
+        "multi": false,
+        "name": "run_id",
+        "options": [
+          {
+            "selected": true,
+            "text": "-",
+            "value": "-"
+          }
+        ],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$.items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&pipeline=${pipeline}&run_type=${run_type:csv}"
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },

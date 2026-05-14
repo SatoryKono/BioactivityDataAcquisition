@@ -25,7 +25,6 @@ _PUBLIC_COMMAND_MODULES = frozenset(
         "lineage",
         "lock",
         "maintenance",
-        "plan",
         "quarantine",
         "run",
         "run_all",

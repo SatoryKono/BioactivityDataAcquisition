@@ -22,6 +22,14 @@ CANONICAL_DOC_ROOTS = (
 )
 
 
+def test_codeowners_assigns_explicit_docs_ownership() -> None:
+    """Published docs roots must have explicit review ownership."""
+    codeowners = (PROJECT_ROOT / ".github" / "CODEOWNERS").read_text(encoding="utf-8")
+
+    assert "docs/00-project/ @SatoryKono" in codeowners
+    assert "docs/02-architecture/ @SatoryKono" in codeowners
+
+
 def _resolve_composite_config_dir() -> Path:
     return CONFIGS_ROOT / "composites"
 

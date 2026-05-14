@@ -5,3 +5,5 @@
 src/bioetl/domain/ @SatoryKono
 src/bioetl/composition/ @SatoryKono
 .github/workflows/ @SatoryKono
+docs/00-project/ @SatoryKono
+docs/02-architecture/ @SatoryKono

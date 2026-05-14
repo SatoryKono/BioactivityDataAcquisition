@@ -63,6 +63,9 @@ def test_tests_workflow_splits_heavy_preflight_from_dependency_smoke() -> None:
     assert "needs: governance-preflight" in workflow, (
         "quality-metrics-gate should depend on governance-preflight"
     )
+    assert 'uv run pytest tests/smoke/ -m "not memory" -v --tb=short' in workflow, (
+        "smoke-check must exclude dedicated memory-marked smoke tests"
+    )
 
 
 def test_tests_workflow_publishes_duration_telemetry_artifact() -> None:

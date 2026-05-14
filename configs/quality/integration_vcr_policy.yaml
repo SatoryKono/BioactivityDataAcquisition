@@ -181,6 +181,7 @@ tracked_suite_inventory:
       - tests/integration/test_grafana_variable_reference.py
       - tests/integration/test_pipeline_runtime_dashboard.py
       prometheus:
+      - tests/integration/test_observability_emission_integration.py
       - tests/integration/test_prometheus_rules_config.py
     composite_config_and_merge:
     - tests/integration/composite/test_column_naming_integration.py
@@ -203,6 +204,7 @@ tracked_suite_inventory:
     - tests/integration/config/test_pubchem_property_vocabulary_inventory.py
     - tests/integration/config/test_publication_controlled_vocab_parity.py
     - tests/integration/config/test_publication_nested_vocabulary_inventory.py
+    - tests/integration/config/test_semantic_field_unification_contract.py
     - tests/integration/config/test_uniprot_semantic_payload_vocabulary_inventory.py
     - tests/integration/fixtures/test_non_chembl_edge_fixture_manifest.py
     - tests/integration/infrastructure/storage/test_atomic.py

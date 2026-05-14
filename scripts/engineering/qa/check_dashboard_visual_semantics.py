@@ -396,7 +396,7 @@ def _dashboard_errors(dashboard_path: Path) -> list[str]:
                 )
                 continue
             grid_pos = panel.get("gridPos", {})
-            if not isinstance(grid_pos, dict) or int(grid_pos.get("y", 999)) > 12:
+            if not isinstance(grid_pos, dict) or int(grid_pos.get("y", 999)) > 22:
                 errors.append(
                     f"{dashboard_path}: trust marker panel '{title}' must stay above fold"
                 )

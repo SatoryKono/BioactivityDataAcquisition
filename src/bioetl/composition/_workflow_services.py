@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
@@ -17,6 +18,9 @@ if TYPE_CHECKING:
     )
     from bioetl.application.services.control_plane.workflow_ledger_service import (
         WorkflowLedgerService,
+    )
+    from bioetl.application.services.execution.pipeline_runner_service import (
+        PipelineRunnerService,
     )
     from bioetl.application.services.workflow_runner_service import (
         WorkflowRunnerService,
@@ -49,8 +53,24 @@ def load_workflow_config(name: str) -> WorkflowConfig:
     return load_workflow_config_impl(name)
 
 
+def _default_pipeline_runner_service_factory(
+    registry: PipelineRegistry | None,
+) -> PipelineRunnerService:
+    """Build the pipeline runner service without depending on the facade module."""
+    from bioetl.composition.bootstrap.runtime.runner import (
+        bootstrap_pipeline_runner_service,
+    )
+
+    return bootstrap_pipeline_runner_service(registry=registry)
+
+
 def get_workflow_runner_service(
     registry: PipelineRegistry | None = None,
+    *,
+    pipeline_runner_service_factory: Callable[
+        [PipelineRegistry | None], PipelineRunnerService
+    ]
+    | None = None,
 ) -> WorkflowRunnerService:
     """Build the baseline declarative workflow runner through composition seams."""
     from bioetl.application.services.workflow_runner_service import (
@@ -63,7 +83,6 @@ def get_workflow_runner_service(
     from bioetl.application.workflow.transforms.builtins import (
         register_builtin_workflow_transforms,
     )
-    from bioetl.composition._services import get_pipeline_runner_service
     from bioetl.composition.bootstrap.cli.noop import create_noop_logger
     from bioetl.composition.factories.services.port_factories import create_metrics
     from bioetl.infrastructure.config import get_settings
@@ -86,8 +105,13 @@ def get_workflow_runner_service(
             silver_writer=transform_storage
         ),
     )
+    pipeline_runner_factory = (
+        _default_pipeline_runner_service_factory
+        if pipeline_runner_service_factory is None
+        else pipeline_runner_service_factory
+    )
     return WorkflowRunnerService(
-        pipeline_runner=get_pipeline_runner_service(registry=registry),
+        pipeline_runner=pipeline_runner_factory(registry),
         transform_service=WorkflowTransformService(
             registry=transform_registry,
             metrics=metrics,

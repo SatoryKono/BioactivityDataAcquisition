@@ -76,6 +76,31 @@ def test_publication_field_groups_keep_publication_doi_as_chembl_legacy_only() -
     assert publication_doi["columns"] == ["chembl.publication.publication_doi"]
 
 
+def test_composite_publication_retires_document_chembl_id_from_provider_ids() -> None:
+    config = _load_yaml("configs/composites/publication.yaml")
+    provider_ids = next(
+        group
+        for group in config["composite"]["merge"]["column_groups"]
+        if group["name"] == "provider_ids"
+    )
+
+    assert "document_chembl_id" not in provider_ids["fields"]
+    assert "publication_id" in provider_ids["fields"]
+
+
+def test_publication_field_groups_retain_publication_id_not_document_chembl_id() -> (
+    None
+):
+    config = _load_yaml("configs/composites/field_groups/publication.yaml")
+    id_group = next(
+        group for group in config["groups"] if group["id"] == "id_and_status"
+    )
+    base_names = {field["base_name"] for field in id_group["fields"]}
+
+    assert "publication_id" in base_names
+    assert "document_chembl_id" not in base_names
+
+
 def test_molecule_composite_exposes_pubchem_normalized_structure_anchors() -> None:
     config = _load_yaml("configs/composites/molecule.yaml")
     column_groups = config["composite"]["merge"]["column_groups"]

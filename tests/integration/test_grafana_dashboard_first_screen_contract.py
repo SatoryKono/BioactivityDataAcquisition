@@ -104,6 +104,42 @@ def test_design_system_defines_first_screen_decision_matrix() -> None:
     )
 
 
+def test_primary_dashboards_expose_common_context_header_panels() -> None:
+    """Primary dashboards must expose the shared context shell before domain details."""
+    expected = {
+        "Provenance": {"id": 9400, "x": 0, "y": 3, "w": 16, "h": 4},
+        "Status": {"id": 9401, "x": 16, "y": 3, "w": 8, "h": 4},
+        "ID": {"id": 9402, "x": 0, "y": 7, "w": 10, "h": 6},
+        "Processed Records": {"id": 9403, "x": 10, "y": 7, "w": 6, "h": 6},
+    }
+    dashboard_names = {
+        "bioetl-control-plane-v1.json",
+        "bioetl-runtime.json",
+        "bioetl-provider-health-v2.json",
+        "bioetl-dq-v2.json",
+        "bioetl-workflow-overview.json",
+    }
+
+    for dashboard_name in dashboard_names:
+        dashboard = load_dashboard(_DASHBOARD_DIR / dashboard_name)
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+        for title, placement in expected.items():
+            panel = panels.get(title)
+            assert panel is not None, (
+                f"{dashboard_name} must expose common panel {title!r}"
+            )
+            assert panel.get("id") == placement["id"]
+            grid_pos = panel.get("gridPos", {})
+            for key in ("x", "y", "w", "h"):
+                assert grid_pos.get(key) == placement[key], (
+                    f"{dashboard_name}:{title} must keep common {key} placement"
+                )
+
+
 def test_current_status_recording_rules_are_canonicalized() -> None:
     """#3698: Runtime/Provider/DQ current status belongs in recording rules."""
     payload = yaml.safe_load(_OBSERVABILITY_RULES_PATH.read_text(encoding="utf-8"))
@@ -166,7 +202,7 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             assert panel is not None, (
                 f"{dashboard_name} must expose first-screen panel {panel_title!r}"
             )
-            assert panel.get("gridPos", {}).get("y", 999) <= 10, (
+            assert panel.get("gridPos", {}).get("y", 999) <= 20, (
                 f"{dashboard_name}:{panel_title} must be visible before range evidence"
             )
             expressions = [
@@ -211,7 +247,7 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
             assert panel is not None, (
                 f"{dashboard_name} must expose first-screen panel {panel_title!r}"
             )
-            max_answer_y = 18 if dashboard_name == "bioetl-overview-v2.json" else 10
+            max_answer_y = 18 if dashboard_name == "bioetl-overview-v2.json" else 20
             assert panel.get("gridPos", {}).get("y", 999) <= max_answer_y, (
                 f"{dashboard_name}:{panel_title} must stay in the answer row"
             )
@@ -294,7 +330,7 @@ def test_required_trust_markers_stay_visible_on_target_dashboards() -> None:
         assert panel is not None, (
             f"{dashboard_name} must expose required trust marker {panel_title!r}"
         )
-        assert panel.get("gridPos", {}).get("y", 999) <= 12, (
+        assert panel.get("gridPos", {}).get("y", 999) <= 22, (
             f"{dashboard_name}:{panel_title} must stay above fold"
         )
         assert panel.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
@@ -400,25 +436,25 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
         "bioetl-dq-v2.json": {
             "Review: Pipeline Scope": {
                 "tokens": ("current", "selected-range", "pipeline-wide"),
-                "max_y": 12,
+                "max_y": 22,
             },
             "Review: First Action": {
                 "tokens": ("crit", "warn", "selected-range"),
-                "max_y": 12,
+                "max_y": 22,
             },
             "Review: Latest Successful Data Timestamp": {
                 "tokens": ("current freshness", "selected-range", "unknown"),
-                "max_y": 12,
+                "max_y": 22,
             },
         },
         "bioetl-provider-health-v2.json": {
             "GLOBAL Provider Scope": {
                 "tokens": ("global", "current", "pipeline_context"),
-                "max_y": 12,
+                "max_y": 22,
             },
             "First Action": {
                 "tokens": ("current", "top causes", "selected-range"),
-                "max_y": 13,
+                "max_y": 23,
             },
         },
     }

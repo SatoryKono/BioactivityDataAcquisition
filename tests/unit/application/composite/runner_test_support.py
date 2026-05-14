@@ -175,6 +175,42 @@ def create_in_memory_checkpoint_manager(
     )
 
 
+class InMemoryCompositeCheckpointStorage:
+    """In-memory CompositeCheckpointPort fake for unit tests."""
+
+    def __init__(self) -> None:
+        self._files: dict[str, str] = {}
+        self._order: list[str] = []
+
+    def read(self, path: str) -> str | None:
+        return self._files.get(path)
+
+    def write_atomic(self, path: str, content: str) -> None:
+        self._files[path] = content
+        if path in self._order:
+            self._order.remove(path)
+        self._order.insert(0, path)
+
+    def delete(self, path: str) -> bool:
+        existed = path in self._files
+        self._files.pop(path, None)
+        if path in self._order:
+            self._order.remove(path)
+        return existed
+
+    def list_glob(self, pattern: str) -> list[str]:
+        prefix = pattern.split("*", 1)[0]
+        suffix = pattern.rsplit("*", 1)[-1] if "*" in pattern else ""
+        return [
+            path
+            for path in self._order
+            if path.startswith(prefix) and path.endswith(suffix)
+        ]
+
+    def exists(self, path: str) -> bool:
+        return path in self._files
+
+
 def create_mock_logger() -> MagicMock:
     """Create a mock logger with all standard methods."""
     logger = MagicMock()

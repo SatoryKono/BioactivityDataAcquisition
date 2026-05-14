@@ -13,6 +13,7 @@ from memory.rag.chunking import (
     split_markdown_sections,
     split_python_symbols,
 )
+from memory.rag import indexing as rag_indexing
 from memory.rag.indexing import build_rag_manifests, write_rag_manifests
 from memory.rag.retrieval import filter_chunks, load_chunk_manifest
 
@@ -329,4 +330,31 @@ def test_write_and_reload_rag_manifests(tmp_path: Path) -> None:
             )
         )
         == 1
+    )
+
+
+def test_build_rag_manifests_skips_missing_tracked_source_paths(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    (tmp_path / "docs/00-project").mkdir(parents=True)
+    existing_doc = tmp_path / "docs/00-project/overview.md"
+    existing_doc.write_text("# Overview\nAlpha\n", encoding="utf-8")
+
+    monkeypatch.setattr(
+        rag_indexing,
+        "iter_rag_sources",
+        lambda root: [
+            Path("docs/00-project/overview.md"),
+            Path("src/bioetl/interfaces/cli/commands/_inspection_output.py"),
+        ],
+    )
+
+    catalog, chunks = build_rag_manifests(tmp_path)
+
+    assert catalog["source_count"] == 1
+    assert catalog["sources"][0]["source_path"] == "docs/00-project/overview.md"
+    assert all(
+        chunk["source_path"] != "src/bioetl/interfaces/cli/commands/_inspection_output.py"
+        for chunk in chunks
     )

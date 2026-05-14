@@ -16,9 +16,6 @@ from bioetl.application.composite.checkpoint import (
     CompositeCheckpointServiceContext,
     CompositeCheckpointState,
 )
-from bioetl.infrastructure.storage.support.checkpoint_writer import (
-    FileCompositeCheckpointWriter,
-)
 from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
 from bioetl.domain.composite.result import (
     EnrichmentResult,
@@ -28,6 +25,7 @@ from bioetl.domain.composite.state import CompositePipelineState
 from tests.unit.application.composite.runner_test_support import (
     MockCompositeConfig,
     MockEnricherConfig,
+    InMemoryCompositeCheckpointStorage,
     MockPipelineRunner,
     create_mock_checkpoint_manager,
     create_mock_logger,
@@ -290,17 +288,18 @@ class TestCheckpointExistsWarning:
     """Tests for warning when checkpoint exists but resume=False."""
 
     @pytest.mark.asyncio
-    async def test_warns_when_checkpoint_exists_without_resume(self, tmp_path):
+    async def test_warns_when_checkpoint_exists_without_resume(self):
         """Should warn when checkpoint with progress exists but resume=False."""
         logger = create_mock_logger()
         run_id = str(uuid4())
+        storage = InMemoryCompositeCheckpointStorage()
 
-        # Create a real checkpoint manager and save a state with progress
+        # Create a checkpoint manager and save a state with progress.
         manager = CompositeCheckpointService(
             CompositeCheckpointServiceContext(
                 composite_name="test_composite",
                 run_id=run_id,
-                storage=FileCompositeCheckpointWriter(tmp_path),
+                storage=storage,
                 logger=logger,
                 resume=False,
             )
@@ -340,7 +339,7 @@ class TestCheckpointExistsWarning:
             CompositeCheckpointServiceContext(
                 composite_name="test_composite",
                 run_id=str(uuid4()),
-                storage=FileCompositeCheckpointWriter(tmp_path),
+                storage=storage,
                 logger=logger,
                 resume=False,
             )
@@ -358,15 +357,16 @@ class TestCheckpointExistsWarning:
         assert any("--resume flag" in c for c in warning_calls)
 
     @pytest.mark.asyncio
-    async def test_no_warning_when_no_checkpoint_exists(self, tmp_path):
+    async def test_no_warning_when_no_checkpoint_exists(self):
         """Should not warn when no checkpoint exists."""
         logger = create_mock_logger()
+        storage = InMemoryCompositeCheckpointStorage()
 
         manager = CompositeCheckpointService(
             CompositeCheckpointServiceContext(
                 composite_name="test_composite",
                 run_id=str(uuid4()),
-                storage=FileCompositeCheckpointWriter(tmp_path),
+                storage=storage,
                 logger=logger,
                 resume=False,
             )
@@ -382,17 +382,18 @@ class TestCheckpointExistsWarning:
         )
 
     @pytest.mark.asyncio
-    async def test_no_warning_when_checkpoint_has_no_progress(self, tmp_path):
+    async def test_no_warning_when_checkpoint_has_no_progress(self):
         """Should not warn when checkpoint exists but has no progress."""
         logger = create_mock_logger()
         run_id = str(uuid4())
+        storage = InMemoryCompositeCheckpointStorage()
 
         # Save a fresh checkpoint with no progress
         manager_setup = CompositeCheckpointService(
             CompositeCheckpointServiceContext(
                 composite_name="test_composite",
                 run_id=run_id,
-                storage=FileCompositeCheckpointWriter(tmp_path),
+                storage=storage,
                 logger=MagicMock(),
                 resume=False,
             )
@@ -412,7 +413,7 @@ class TestCheckpointExistsWarning:
             CompositeCheckpointServiceContext(
                 composite_name="test_composite",
                 run_id=str(uuid4()),
-                storage=FileCompositeCheckpointWriter(tmp_path),
+                storage=storage,
                 logger=logger,
                 resume=False,
             )

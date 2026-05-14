@@ -51,6 +51,10 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 893 | Monitor: Manifest / Ledger Integrity |
 | bioetl-control-plane-v1.json | 894 | Inspect: Known Blind Spots |
 | bioetl-control-plane-v1.json | 908 | Inspect: Terminal Run Events by Status in Range |
+| bioetl-control-plane-v1.json | 9400 | Provenance |
+| bioetl-control-plane-v1.json | 9401 | Status |
+| bioetl-control-plane-v1.json | 9402 | ID |
+| bioetl-control-plane-v1.json | 9403 | Processed Records |
 | bioetl-dq-v2.json | 1 | Track Range Evidence: Bronze -> Silver -> Gold |
 | bioetl-dq-v2.json | 2 | Data Quality Score (Volume-weighted) |
 | bioetl-dq-v2.json | 3 | Source Records in Range (Bronze) |
@@ -68,6 +72,10 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 9101 | Monitor DQ Threshold State |
 | bioetl-dq-v2.json | 9102 | Inspect DQ Current Reasons |
 | bioetl-dq-v2.json | 9103 | Review: First Action |
+| bioetl-dq-v2.json | 9400 | Provenance |
+| bioetl-dq-v2.json | 9401 | Status |
+| bioetl-dq-v2.json | 9402 | ID |
+| bioetl-dq-v2.json | 9403 | Processed Records |
 | bioetl-dq-v2.json | 101 | Latest Successful Data Timestamp |
 | bioetl-dq-v2.json | 116 | Lineage Refs Missing |
 | bioetl-dq-v2.json | 117 | Silver Filter Rejects |
@@ -125,6 +133,10 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 9101 | Monitor GLOBAL Provider Severity Matrix |
 | bioetl-provider-health-v2.json | 9102 | Inspect Critical Providers |
 | bioetl-provider-health-v2.json | 9103 | Inspect Provider Top Causes |
+| bioetl-provider-health-v2.json | 9400 | Provenance |
+| bioetl-provider-health-v2.json | 9401 | Status |
+| bioetl-provider-health-v2.json | 9402 | ID |
+| bioetl-provider-health-v2.json | 9403 | Processed Records |
 | bioetl-runtime.json | 1 | Inspect Runtime Scope |
 | bioetl-runtime.json | 4 | Inspect DQ Alert Conditions |
 | bioetl-runtime.json | 5 | Inspect Control-plane Alert Conditions |
@@ -156,6 +168,10 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 257 | Inspect Top Warning Events by Message / Range |
 | bioetl-runtime.json | 258 | Track GLOBAL Log Hygiene Trend |
 | bioetl-runtime.json | 298 | Review Diagnostic Scope Note |
+| bioetl-runtime.json | 9400 | Provenance |
+| bioetl-runtime.json | 9401 | Status |
+| bioetl-runtime.json | 9402 | ID |
+| bioetl-runtime.json | 9403 | Processed Records |
 | bioetl-runtime.json | 9991 | First Action |
 | bioetl-silver-reject-explorer.json | 1 | Inspect Explorer Scope |
 | bioetl-silver-reject-explorer.json | 10 | Review: First Action / No-Data Semantics |
@@ -176,3 +192,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-workflow-overview.json | 7 | Skipped Step Events / Range |
 | bioetl-workflow-overview.json | 8 | Step Duration p95 by Kind / Step Status / Range |
 | bioetl-workflow-overview.json | 9 | Next Diagnostic Surface |
+| bioetl-workflow-overview.json | 9400 | Provenance |
+| bioetl-workflow-overview.json | 9401 | Status |
+| bioetl-workflow-overview.json | 9402 | ID |
+| bioetl-workflow-overview.json | 9403 | Processed Records |

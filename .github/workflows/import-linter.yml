@@ -152,6 +152,9 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
 
+            -   name: Run import-linter architecture contracts
+                run: uv run lint-imports --config .importlinter
+
             -   name: Run canonical full architecture gate
                 run: uv run pytest tests/architecture/ -m "not slow and not benchmark and not memory"
 

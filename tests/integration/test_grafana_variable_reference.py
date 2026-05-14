@@ -105,6 +105,14 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
         assert run_type.get("current", {}).get("value") == "$__all"
 
     provider = _variables("bioetl-provider-health-v2.json")
+    assert provider["pipeline"].get("multi") is False
+    assert provider["pipeline"].get("includeAll") is False
+    assert provider["pipeline"].get("current", {}).get("value") == "unknown"
+    assert provider["run_type"].get("includeAll") is True
+    assert provider["run_type"].get("current", {}).get("value") == "$__all"
+    assert provider["run_id"].get("multi") is False
+    assert provider["run_id"].get("includeAll") is False
+    assert provider["run_id"].get("current", {}).get("value") == "-"
     assert provider["provider"].get("multi") is False
     assert provider["provider"].get("includeAll") is False
     assert provider["provider"].get("current", {}).get("value") == "unknown"
@@ -114,6 +122,9 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     workflow = _variables("bioetl-workflow-overview.json")
     assert set(workflow) == {
         "workflow",
+        "pipeline",
+        "run_type",
+        "run_id",
         "status",
         "pipeline_context",
         "run_type_context",
@@ -124,6 +135,14 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     for name in ("workflow", "status", "step_status", "step_kind"):
         assert workflow[name].get("includeAll") is True
         assert workflow[name].get("current", {}).get("value") == "$__all"
+    assert workflow["pipeline"].get("multi") is False
+    assert workflow["pipeline"].get("includeAll") is False
+    assert workflow["pipeline"].get("current", {}).get("value") == "unknown"
+    assert workflow["run_type"].get("includeAll") is True
+    assert workflow["run_type"].get("current", {}).get("value") == "$__all"
+    assert workflow["run_id"].get("multi") is False
+    assert workflow["run_id"].get("includeAll") is False
+    assert workflow["run_id"].get("current", {}).get("value") == "-"
     assert workflow["pipeline_context"].get("hide") == 2
     assert workflow["pipeline_context"].get("current", {}).get("value") == "unknown"
     assert workflow["run_type_context"].get("hide") == 2
@@ -141,15 +160,15 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
 def test_variable_reference_explains_role_specific_exceptions() -> None:
     text = _VARIABLE_REFERENCE.read_text(encoding="utf-8")
     required_tokens = {
-        "`bioetl-workflow-overview` does not expose visible `$pipeline` / `$run_type` selectors",
+        "`bioetl-workflow-overview` exposes the shared context shell",
         "`$pipeline_context` | `bioetl-workflow-overview` | Hidden context var",
         "`$run_type_context` | `bioetl-workflow-overview` | Hidden context var",
         "`$provider_context` | `bioetl-workflow-overview` | Hidden context var",
         "`bioetl-silver-reject-explorer` requires single-select `$pipeline`",
         "`$payload_hash` | `bioetl-silver-reject-explorer` | Visible textbox",
         "run_type` always uses include-all fallback",
-        "Pipeline-scoped operator dashboards используют single-select `$pipeline`",
-        "кроме `bioetl-overview-v2`",
+        "Primary operator dashboards `0..5` expose the shared context shell",
+        "Pipeline-scoped operator dashboards use single-select `$pipeline`, except",
         "`bioetl-overview-v2` uses control-plane-backed `$run_id=-`",
     }
     missing = sorted(token for token in required_tokens if token not in text)

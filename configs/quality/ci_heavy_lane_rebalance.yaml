@@ -70,7 +70,7 @@ lanes:
     classification: isolated_environment_sensitive_lane
     full_bootstrap_policy: "Memory-marked Neo4j/tooling checks stay isolated from coverage and broad parallel shards."
     retained_scenarios:
-      - path: tests/unit/scripts/ops/
+      - path: tests/smoke/test_neo4j_memory_mcp_smoke.py
         marker_expression: memory
     telemetry_artifact: test-telemetry-memory
   - job: performance-budgets

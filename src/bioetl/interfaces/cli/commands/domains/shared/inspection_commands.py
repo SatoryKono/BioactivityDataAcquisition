@@ -8,7 +8,9 @@ from typing import Protocol
 
 import click
 
-from bioetl.interfaces.cli.commands.inspection_output import emit_inspection_payload
+from bioetl.interfaces.cli.commands.domains.shared.inspection_output import (
+    emit_inspection_payload,
+)
 from bioetl.interfaces.cli.formatters import echo_error
 
 __all__ = [

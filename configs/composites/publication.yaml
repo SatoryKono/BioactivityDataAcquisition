@@ -373,7 +373,6 @@ composite:
                     - chembl_release
                     - corpus_id
                     - dblp_id
-                    - document_chembl_id
                     - mag_id
                     - nlm_unique_id
                     - openalex_id

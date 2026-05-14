@@ -39,7 +39,7 @@ COMMANDS: dict[str, CommandSpec] = {
     "security": CommandSpec("Security Tests", ["tests/security/", "-v"]),
     "memory": CommandSpec(
         "Neo4j Memory Tests",
-        ["tests/unit/scripts/ops/", "-m", "memory", "-q"],
+        ["tests/smoke/test_neo4j_memory_mcp_smoke.py", "-m", "memory", "-q"],
     ),
     "cov": CommandSpec(
         "Tests + Coverage",

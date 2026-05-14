@@ -52,6 +52,11 @@ A common use case requires combining data from multiple sources:
 
 Implement **Composite Pipeline Pattern** with the following architecture:
 
+**Operationalization note (2026-05-14):** canonical semantic field clusters
+used by composite `join_keys` and merge surfaces are tracked in
+`configs/field_registry/canonical_registry.json`. Composite configs must use
+registry canonical names, not provider-prefixed historical aliases.
+
 **Decision Boundary Change (2026-04-24)**:
 The original ADR specified CrossRef as a required enricher (`required: true`). However, actual composite configurations show `required: false`. This change reflects the evolution of the composite pattern to prioritize resilience and graceful degradation over strict completeness requirements.
 
