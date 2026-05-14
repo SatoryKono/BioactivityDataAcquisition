@@ -665,9 +665,18 @@
         "name": "run_type",
         "options": [],
         "query": {
+          "queryType": "infinity",
+          "refId": "variable",
           "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$.run_types",
             "type": "json",
             "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
             "url": "/ops/quarantine/filter-options?dimension=run_type&pipeline=${pipeline}"
           }
         },
@@ -698,9 +707,18 @@
         "name": "reason_code",
         "options": [],
         "query": {
+          "queryType": "infinity",
+          "refId": "variable",
           "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$.reason_codes",
             "type": "json",
             "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
             "url": "/ops/quarantine/filter-options?dimension=reason_code&pipeline=${pipeline}&run_type=${run_type:csv}"
           }
         },
@@ -731,9 +749,18 @@
         "name": "field",
         "options": [],
         "query": {
+          "queryType": "infinity",
+          "refId": "variable",
           "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$.fields",
             "type": "json",
             "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
             "url": "/ops/quarantine/filter-options?dimension=field&pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}"
           }
         },
@@ -760,9 +787,18 @@
         "name": "run_id",
         "options": [],
         "query": {
+          "queryType": "infinity",
+          "refId": "variable",
           "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$.run_ids",
             "type": "json",
             "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
             "url": "/ops/quarantine/filter-options?dimension=run_id&pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}"
           }
         },

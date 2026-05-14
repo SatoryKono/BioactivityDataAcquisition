@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import Protocol, cast
 
 from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
@@ -14,11 +14,6 @@ from bioetl.application.services.control_plane.run_manifest_diagnostics import (
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID
-
-if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.historical_replay_certification_service import (
-        HistoricalReplayCertificationResult,
-    )
 
 
 class HistoricalReplayCertificationProtocol(Protocol):
@@ -33,6 +28,18 @@ class HistoricalReplayCertificationProtocol(Protocol):
 
 
 @dataclass(frozen=True, slots=True)
+class HistoricalReplayCertificationResult:
+    """Bounded result of one historical replay certification workflow."""
+
+    manifest_id: str
+    run_id: str
+    certification_scope: str
+    appended_snapshot_count: int
+    replay_occurrence_kind: str
+    broader_historical_exact_replay_state: str
+
+
+@dataclass(frozen=True, slots=True)
 class HistoricalReplayCertificationResultAssembler:
     """Assemble bounded certification results from manifest diagnostics."""
 
@@ -44,10 +51,6 @@ class HistoricalReplayCertificationResultAssembler:
         manifest: RunManifest,
         certification_scope: str,
     ) -> HistoricalReplayCertificationResult:
-        from bioetl.application.services.control_plane.historical_replay_certification_service import (
-            HistoricalReplayCertificationResult,
-        )
-
         diagnostics = build_diagnostics_summary(
             manifest,
             tuple(self.ledger_port.list_entries(manifest.manifest_id)),

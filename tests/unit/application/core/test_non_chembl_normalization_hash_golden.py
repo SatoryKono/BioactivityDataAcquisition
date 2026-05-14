@@ -169,7 +169,14 @@ def test_non_chembl_set_like_field_permutations_keep_hash_stable() -> None:
             "publication",
             {"publication_types": ["Review", "JournalArticle"]},
             {"publication_types": ["JournalArticle", "Review"]},
-            False,
+            True,
+        ),
+        (
+            "semanticscholar",
+            "publication",
+            {"subject_fields": ["Biology", "Chemistry"]},
+            {"subject_fields": ["Chemistry", "Biology"]},
+            True,
         ),
         (
             "uniprot",

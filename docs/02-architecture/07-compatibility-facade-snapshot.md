@@ -5,18 +5,18 @@
 ## Summary
 
 - Registry YAML: `configs/quality/compatibility_facade_inventory.yaml`
-- Curated inventory rows: `13`
+- Curated inventory rows: `11`
 - Transition debt rows: `0`
-- Sanctioned public entrypoint rows: `13`
+- Sanctioned public entrypoint rows: `11`
 - Retained review entrypoints: `0`
-- Permanent public entrypoints: `13`
-- Measured tracked modules: `13`
+- Permanent public entrypoints: `11`
+- Measured tracked modules: `11`
 - Measured-only modules outside curated inventory: `0`
 - Discovered docstring-tracked modules: `0`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
-- Curated rows requiring external breaking change process: `13`
+- Curated rows requiring external breaking change process: `11`
 - Curated rows marked internal-callers-zero: `0`
 - First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`

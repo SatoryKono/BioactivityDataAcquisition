@@ -117,6 +117,8 @@ def test_json_field_typing_inventory_documents_governed_non_chembl_fields() -> N
     for field_name in (
         "authors",
         "affiliation_list",
+        "author_details",
+        "references",
         "affiliation_structured",
         "affiliation_structured_raw_json",
         "affiliation_structured_canonical_json",
@@ -138,8 +140,12 @@ def test_json_field_typing_inventory_documents_governed_non_chembl_fields() -> N
         "subject_fields",
         "subject_fields_raw_json",
         "subject_fields_canonical_json",
+        "alternative_products",
+        "biophysicochemical_properties",
+        "cofactors",
         "features_json",
         "features_raw_json",
         "features_canonical_json",
+        "reactions",
     ):
         assert f"`{field_name}`" in actual

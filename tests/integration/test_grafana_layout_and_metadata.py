@@ -287,16 +287,15 @@ def test_overview_current_panels_stay_out_of_selected_range_semantics() -> None:
     }
 
     for panel_title in (
-        "System Status",
+        "Status",
         "Next Action",
-        "L0 Inputs",
-        "Runtime Blockers",
-        "DQ Status",
-        "Gold Lifecycle",
+        "Inputs",
+        "Runtime",
+        "Data Quality",
+        "Data Validation",
         "Control Plane",
-        "Provider Global",
-        "Workflow Selected",
-        "Workflow Global",
+        "Provider",
+        "Workflow",
     ):
         panel = panels.get(panel_title)
         assert panel is not None

@@ -81,6 +81,7 @@ The current RAG MVP builds deterministic manifests for:
 - active project and operations docs
 - requirements and working rollout plans
 - accepted ADRs
+- derived navigation context from `.devin/wiki.json`
 - runtime code under `src/bioetl/`
 - memory subsystem implementation, policies, schemas, and playbooks under
   `src/memory/`
@@ -220,6 +221,11 @@ refresh them explicitly or use the query facade's temporary refresh mode:
 python -m memory.tooling.refresh_all
 python -m memory.query all chembl_activity --profile architecture --auto-refresh
 ```
+
+The `.devin/wiki.json` surface is indexed only as auxiliary navigation context.
+It must not override runtime code, configs, accepted ADRs, or published active
+docs, and each retrieved wiki claim should be confirmed against canonical
+repository sources before reuse.
 
 Task-aware retrieval profiles:
 

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-13T18:06:07.196297+00:00",
+  "generated_at": "2026-05-14T06:58:21.267492+00:00",
   "summary": {
     "total_scripts": 372,
     "status_counts": {
@@ -5420,13 +5420,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 123,
+          "line": 128,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci neo4j-memory`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 129,
+          "line": 134,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci neo4j-memory-live`."
         },
@@ -5588,13 +5588,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 594,
+          "line": 602,
           "source_group": "tests",
           "text": "skip_rate = Path(\"scripts/engineering/ci/check_e2e_matrix_skip_rate.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 618,
+          "line": 626,
           "source_group": "tests",
           "text": "assert \"check_e2e_matrix_skip_rate.py\" in content"
         }
@@ -5627,13 +5627,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 595,
+          "line": 603,
           "source_group": "tests",
           "text": "rerun = Path(\"scripts/engineering/ci/check_e2e_rerun_stability.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 619,
+          "line": 627,
           "source_group": "tests",
           "text": "assert \"check_e2e_rerun_stability.py\" in content"
         }
@@ -6183,7 +6183,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/run_pytest.ps1",
-          "line": 171,
+          "line": 197,
           "source_group": "scripts",
           "text": "$PreflightScript = Join-Path $ScriptDir \"pretest_guardrails.ps1\""
         }
@@ -9108,13 +9108,13 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 46,
+          "line": 44,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 52,
+          "line": 50,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`"
         },
@@ -9201,49 +9201,49 @@
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 52,
+          "line": 57,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync`"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 93,
+          "line": 98,
           "source_group": "docs",
           "text": "Для cleanup-режима используй `python -m scripts.memory sync --apply --prune-stale`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 97,
+          "line": 102,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --export /tmp/storage-memory.json --only-storage-layer`,"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 98,
+          "line": 103,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --export /tmp/runtime-memory.json --only-runtime-evidence-layer`,"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 99,
+          "line": 104,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --export /tmp/workflow-memory.json --only-workflow-graph`,"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 100,
+          "line": 105,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --export /tmp/docs-drift-memory.json --only-docs-drift`."
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 101,
+          "line": 106,
           "source_group": "docs",
           "text": "Для audit/report режима используй `python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 105,
+          "line": 110,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --report-fast --report /tmp/neo4j-memory-audit.json`:"
         }
@@ -9299,13 +9299,13 @@
         },
         {
           "path": "tests/unit/memory/test_rag_indexing.py",
-          "line": 47,
+          "line": 48,
           "source_group": "tests",
           "text": "assert infer_source_type(Path(\"src/memory/query.py\")) == \"memory\""
         },
         {
           "path": "tests/unit/memory/test_rag_indexing.py",
-          "line": 61,
+          "line": 63,
           "source_group": "tests",
           "text": "assert infer_domain(Path(\"src/memory/query.py\")) == \"memory_subsystem\""
         },

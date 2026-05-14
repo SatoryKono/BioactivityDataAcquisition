@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import ast
+from collections import Counter
+from functools import cache
 from pathlib import Path
 
 import yaml
@@ -35,39 +37,48 @@ def _iter_triage_entries(triage: dict[str, object]) -> list[dict[str, object]]:
     ]
 
 
-def _iter_src_python_files() -> list[Path]:
-    return sorted(SRC_ROOT.rglob("*.py"))
+@cache
+def _iter_src_python_files() -> tuple[Path, ...]:
+    return tuple(sorted(SRC_ROOT.rglob("*.py")))
 
 
 def _file_imports_module(path: Path, module_name: str) -> bool:
     """Return True when the file imports the requested module."""
+    return module_name in _absolute_import_targets_for_file(path)
+
+
+def _absolute_import_targets_for_file(path: Path) -> frozenset[str]:
+    """Return absolute module targets imported by one source file."""
     tree = ast.parse(path.read_text(encoding="utf-8"))
+    targets: set[str] = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
-            if any(alias.name == module_name for alias in node.names):
-                return True
+            targets.update(alias.name for alias in node.names)
             continue
         if not isinstance(node, ast.ImportFrom) or node.level != 0:
             continue
-        if node.module == module_name:
-            return True
         if node.module is None:
             continue
-        if any(
-            f"{node.module}.{alias.name}" == module_name
+        targets.add(node.module)
+        targets.update(
+            f"{node.module}.{alias.name}"
             for alias in node.names
             if alias.name != "*"
-        ):
-            return True
-    return False
+        )
+    return frozenset(targets)
+
+
+@cache
+def _src_importer_counts() -> Counter[str]:
+    """Count source importers once per module target for the whole test file."""
+    counts: Counter[str] = Counter()
+    for path in _iter_src_python_files():
+        counts.update(_absolute_import_targets_for_file(path))
+    return counts
 
 
 def _count_src_importers(module_name: str) -> int:
-    return sum(
-        1
-        for path in _iter_src_python_files()
-        if _file_imports_module(path, module_name)
-    )
+    return _src_importer_counts()[module_name]
 
 
 def test_retirement_triage_entries_are_explicit_and_actionable() -> None:

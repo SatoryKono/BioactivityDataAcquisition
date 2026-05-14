@@ -20,7 +20,6 @@ from __future__ import annotations
 
 from importlib import import_module
 
-
 _main_module = import_module("bioetl.interfaces.cli.main")
 cli = _main_module.cli
 

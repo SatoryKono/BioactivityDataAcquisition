@@ -47,7 +47,9 @@ ______________________________________________________________________
 - Variable contract checks: `tests/integration/test_grafana_config.py` + `tests/integration/_grafana_test_support.py`
 - Selector taxonomy / registry checks: `tests/integration/test_grafana_selector_contract.py`
 - Variable reference mirror checks: `tests/integration/test_grafana_variable_reference.py`
-- Forensic isolation checks: `run_id`/`payload_hash` запрещены вне reject explorer.
+- Exact-id isolation checks: `run_id`/`payload_hash` запрещены в Prometheus
+  label filtering and cross-dashboard links; `bioetl-overview-v2` exposes
+  control-plane-backed `run_id=-` for its local `ID` panel.
 
 ## UID → Variables (inventory parity reference)
 
@@ -55,7 +57,8 @@ ______________________________________________________________________
 |---|---|
 | `bioetl-control-plane-v1` | `$pipeline`, `$run_type` |
 | `bioetl-dq-v2` | `$pipeline`, `$run_type`, `$stage` |
-| `bioetl-overview-v2` | `$pipeline`, `$run_type` |
+| `bioetl-overview-v2` | `$pipeline`, `$run_id`, `$run_type`, `$workflow` |
+| `bioetl-overview-v3` | `$pipeline`, `$run_id`, `$run_type`, `$workflow` |
 | `bioetl-provider-health-v2` | `$adapter`, `$pipeline_context`, `$provider` |
 | `bioetl-runtime` | `$pipeline`, `$run_type`, `$stage` |
 | `bioetl-silver-reject-explorer` | `$field`, `$payload_hash`, `$pipeline`, `$reason_code`, `$run_id`, `$run_type` |

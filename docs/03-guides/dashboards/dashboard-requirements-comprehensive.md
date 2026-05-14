@@ -70,7 +70,8 @@
 - Нет blanket `includeVars=true` semantics для cross-dashboard navigation
 
 **Семейства дашбордов:**
-- **pipeline_summary**: `bioetl-control-plane-v1`, `bioetl-overview-v2`, `bioetl-runtime`, `bioetl-dq-v2`
+- **pipeline_summary**: `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-dq-v2`
+- **hybrid_overview**: `bioetl-overview-v2` (canonical frozen Overview v3 baseline), `bioetl-overview-v3` (retained snapshot/draft)
 - **provider_first**: `bioetl-provider-health-v2`
 - **workflow_evidence**: `bioetl-workflow-overview`
 - **forensic_explorer**: `bioetl-silver-reject-explorer`
@@ -267,49 +268,50 @@
 ## 1. bioetl-overview-v2 (L0 Overview)
 
 ### Назначение
-L0 answer-first hub: отвечает на вопрос "что сейчас broken/degraded и куда drill down первым"
+Canonical L0 answer-first hub using the frozen `1. Overview v3` layout as the baseline: отвечает на вопрос "что сейчас broken/degraded и куда drill down первым" с явным provenance/scope header и локальной identity context.
 
 ### Переменные
-- **Видимые**: `pipeline` (single-select, default `All`), `run_type` (multi-select with Include All, default `All`)
-- **Семейство**: pipeline_summary
-- **Query sources**: `prometheus_records_processed_total`
+- **Видимые**: `workflow` (single-select with Include All, default `All`), `pipeline` (single-select with Include All, default `All`), `run_type` (multi-select with Include All, default `All`), `run_id` (single-select, default `-`)
+- **Семейство**: hybrid_overview
+- **Query sources**: `bioetl_workflow_runs_total`, `bioetl_records_processed_total`, local control-plane `/ops/control-plane/filter-options?dimension=run_id&response_shape=list`
+- **Run ID semantics**: `run_id` is local to the `ID` panel and MUST NOT appear in Prometheus queries or cross-dashboard links.
 
 ### Навигация (required_top_level_links)
 - `0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`
 - `Explore Logs`, `Explore Traces`, `Silver Reject Explorer`
 
 ### Required panel links (dataLinks)
-- Panel `214` (System Status) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
+- Panel `214` (Status) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
 - Panel `215` (Next Action) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
-- Panel `9002` (L0 Inputs) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
-- Panel `9003` (Runtime Blockers) → Open Runtime
-- Panel `9004` (DQ Status) → Open Data Quality
-- Panel `9005` (Gold Lifecycle) → Open Runtime
+- Panel `9002` (Inputs) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
+- Panel `9003` (Runtime) → Open Runtime
+- Panel `9004` (Data Quality) → Open Data Quality
+- Panel `9005` (Data Validation) → Open Runtime
 - Panel `9006` (Control Plane) → Open Control Plane
-- Panel `9007` (Provider Global) → Open Provider Health
-- Panel `9008` (Workflow Selected) → Open Workflow
-- Panel `9013` (Workflow Global) → Open Workflow
+- Panel `9007` (Provider) → Open Provider Health
+- Panel `9013` (Workflow) → Open Workflow
 
 ### First-screen структура
-- **Tier 1**: `System Status`, `Next Action`, `L0 Inputs`
-- **Tier 2**: `Runtime Blockers`, `DQ Status`, `Gold Lifecycle`, `Control Plane`, `Provider Global`, `Workflow Selected`, `Workflow Global`
-- **Tier 3**: collapsed `Range Evidence (Historical / Recent History)`
-- **Tier 4**: collapsed `Diagnostics & Docs (Logs / Traces / Raw Metrics)`
+- **Tier 1**: `Provenance`, `Status`, `Next Action`, `ID`, `Processed Records`
+- **Tier 2**: `Control Plane`, `Runtime`, `Data Quality`, `Provider`, `Data Validation`, `Inputs`, `Workflow`
+- **Tier 3**: collapsed `L1 Historical Trends`, collapsed `Range Evidence`
+- **Tier 4**: collapsed `Diagnostics & Docs`
 
 ### KPI ownership (canonical)
-- System Status → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `0. Control Plane`, `5. Workflow`
+- Status → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `0. Control Plane`, `5. Workflow`
 - Next Action → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `3. Provider Health`
-- L0 Inputs → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `4. Data Quality`, `0. Control Plane`
-- Gold Lifecycle → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `0. Control Plane`
-- Provider Global → canonical for `bioetl-overview-v2`, mirrors: `3. Provider Health`
-- Workflow Selected → canonical for `bioetl-overview-v2`, mirrors: `5. Workflow`
-- Workflow Global → canonical for `bioetl-overview-v2`, mirrors: `5. Workflow`
+- Inputs → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `4. Data Quality`, `0. Control Plane`
+- Data Validation → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `0. Control Plane`
+- Provider → canonical for `bioetl-overview-v2`, mirrors: `3. Provider Health`
+- Workflow → canonical for `bioetl-overview-v2`, mirrors: `5. Workflow`
 
 ### Специфические требования
 - Normalizes `workflow_<pipeline>` back to entity pipeline для current-state queries
-- First-screen answer row без скролла
+- `workflow` is visible evidence context; current-status PromQL remains pipeline/run_type scoped until truthful intersection semantics exist.
+- `run_id` resolves optional control-plane identity only in `ID`; aggregate `Pipeline=All` scope MUST NOT claim one manifest identity unless exact `run_id` is selected.
+- First-screen answer surface follows the frozen Overview v3 layout.
 - Panel-level CTA MAY оставаться dashboard-only (не требует прямых runbook links)
-- Intentionally ships с `Pipeline=All` и `Run Type=All` как default entry scope
+- Intentionally ships с `Workflow=All`, `Pipeline=All`, `Run Type=All`, `Run ID=-` как default entry scope
 
 ### Cross-scope marker contract
 - Переходы в `bioetl-provider-health-v2` используют маркер `Context mapping`

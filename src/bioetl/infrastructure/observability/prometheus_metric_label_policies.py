@@ -159,6 +159,31 @@ _POSTRUN_PHASE_LABEL_METRICS = frozenset(
 )
 
 type _StringLabelNormalizer = Callable[[str], str]
+_PHASE_LABEL_KEY_BY_METRIC_GROUP: tuple[
+    tuple[frozenset[str], str, _StringLabelNormalizer],
+    ...,
+] = (
+    (
+        _COMPOSITE_PHASE_RECORDS_METRICS,
+        "outcome",
+        normalize_composite_phase_record_outcome,
+    ),
+    (
+        _COMPOSITE_PHASE_ERRORS_METRICS,
+        "error_kind",
+        normalize_composite_phase_error_kind,
+    ),
+    (
+        _COMPOSITE_PHASE_LOSS_METRICS,
+        "loss_kind",
+        normalize_composite_phase_loss_kind,
+    ),
+    (
+        _COMPOSITE_PHASE_RETRIES_METRICS,
+        "retry_kind",
+        normalize_composite_phase_retry_kind,
+    ),
+)
 
 __all__ = [
     "APPROVED_ENDPOINT_LABEL_METRICS",
@@ -409,32 +434,22 @@ def _normalize_publication_metric_labels(
     name: str,
     labels: MetricLabels,
 ) -> MetricLabels | None:
-    phase_label_key_by_metric_group: tuple[
-        tuple[set[str], str, Callable[[str], str]],
-        ...,
-    ] = (
-        (
-            _COMPOSITE_PHASE_RECORDS_METRICS,
-            "outcome",
-            normalize_composite_phase_record_outcome,
-        ),
-        (
-            _COMPOSITE_PHASE_ERRORS_METRICS,
-            "error_kind",
-            normalize_composite_phase_error_kind,
-        ),
-        (
-            _COMPOSITE_PHASE_LOSS_METRICS,
-            "loss_kind",
-            normalize_composite_phase_loss_kind,
-        ),
-        (
-            _COMPOSITE_PHASE_RETRIES_METRICS,
-            "retry_kind",
-            normalize_composite_phase_retry_kind,
-        ),
-    )
+    for normalizer in (
+        _normalize_publication_lifecycle_labels,
+        _normalize_publication_registry_labels,
+        _normalize_publication_stage_labels,
+        _normalize_composite_phase_labels,
+    ):
+        normalized = normalizer(name, labels)
+        if normalized is not None:
+            return normalized
+    return None
 
+
+def _normalize_publication_lifecycle_labels(
+    name: str,
+    labels: MetricLabels,
+) -> MetricLabels | None:
     if name in _BATCH_LIFECYCLE_LABEL_METRICS:
         return {
             **labels,
@@ -448,6 +463,13 @@ def _normalize_publication_metric_labels(
             "stage": normalize_runtime_stage(str(labels.get("stage", "other"))),
             "status": normalize_publication_status(str(labels.get("status", "other"))),
         }
+    return None
+
+
+def _normalize_publication_registry_labels(
+    name: str,
+    labels: MetricLabels,
+) -> MetricLabels | None:
     if name in _METRICS_PUBLICATION_LABEL_METRICS:
         return {
             **labels,
@@ -475,6 +497,13 @@ def _normalize_publication_metric_labels(
             ),
             "mode": normalize_observability_mode(str(labels.get("mode", "other"))),
         }
+    return None
+
+
+def _normalize_publication_stage_labels(
+    name: str,
+    labels: MetricLabels,
+) -> MetricLabels | None:
     if name in _STAGE_BACKLOG_LABEL_METRICS:
         return {
             **labels,
@@ -493,7 +522,14 @@ def _normalize_publication_metric_labels(
                 str(labels.get("outcome", "other"))
             ),
         }
-    for metric_group, label_key, label_normalizer in phase_label_key_by_metric_group:
+    return None
+
+
+def _normalize_composite_phase_labels(
+    name: str,
+    labels: MetricLabels,
+) -> MetricLabels | None:
+    for metric_group, label_key, label_normalizer in _PHASE_LABEL_KEY_BY_METRIC_GROUP:
         if name in metric_group:
             return {
                 **labels,

@@ -1,4 +1,4 @@
-.PHONY: install test-deps setup-plugins precommit-install lint lint-fix lint-scripts-advisory quality-fast quality-pre-push quality-full clean clean-all clean-preflight clean-local-artifacts test run-local qa-arch-fast qa-arch-full qa-debt quarantine-inspect quarantine-replay quarantine-purge release-lock
+.PHONY: install test-deps setup-plugins precommit-install lint lint-fix lint-scripts-advisory quality-fast quality-pre-push quality-full clean clean-all clean-preflight clean-local-artifacts test test-fast test-unit test-integration test-architecture test-smoke test-serial test-cov-fast-stable test-ci run-local qa-arch-fast qa-arch-full qa-debt quarantine-inspect quarantine-replay quarantine-purge release-lock
 
 PYTHON ?= python3
 RUN ?= $(PYTHON) -m
@@ -8,6 +8,7 @@ RUN_LOCAL_PIPELINE ?= chembl_activity
 RUN_LOCAL_LIMIT ?= 10
 DRY_RUN ?= 0
 PURGE_WORKTREES ?= 0
+LOCAL_COV_FAIL_UNDER ?= 80
 
 ifeq ($(filter 1 true yes TRUE YES,$(DRY_RUN)),)
 	CLEAN_APPLY_FLAG := --apply
@@ -72,7 +73,29 @@ clean-local-artifacts:
 	@$(if $(PURGE_WORKTREES_CMD),$(PURGE_WORKTREES_CMD),:)
 
 test:
-	$(RUN) pytest
+	$(RUN) scripts.engineering.qa run-tests --suite coverage-verify --skip-preflight
+
+test-fast:
+	$(RUN) scripts.engineering.qa run-tests --suite unit-fast --skip-preflight
+
+test-unit: test-fast
+
+test-integration:
+	$(RUN) scripts.engineering.qa run-tests --suite integration-replay --skip-preflight
+
+test-architecture: qa-arch-full
+
+test-smoke:
+	$(RUN) scripts.engineering.qa run-tests --suite smoke --skip-preflight
+
+test-serial:
+	$(RUN) pytest tests/ -m "serial and not e2e and not benchmark and not memory" -q --tb=short -p no:xdist
+
+test-cov-fast-stable:
+	BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -m "not e2e and not benchmark and not memory" --cov=src/bioetl --cov-report=term-missing --cov-fail-under=$(LOCAL_COV_FAIL_UNDER)
+
+test-ci:
+	$(RUN) scripts.engineering.ci run-tests
 
 run-local:
 	$(RUN) bioetl run --pipeline $(RUN_LOCAL_PIPELINE) --run-type incremental --limit $(RUN_LOCAL_LIMIT)

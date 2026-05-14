@@ -34,6 +34,7 @@ from scripts.engineering.repo._root_governance import (
 )
 from scripts.engineering.repo.audit_root_cleanliness import (
     _is_forbidden_tracked_artifact,
+    collect_root_layout_state,
 )
 
 logging.basicConfig(
@@ -99,6 +100,19 @@ REVIEW_REFERENCE_SEARCH_PATHS: tuple[str, ...] = (
     ".gitignore",
     ".dockerignore",
 )
+REPORTS_WORKSPACE = Path("reports")
+REPORTS_LOCAL_PRUNE_DIRS: tuple[Path, ...] = (
+    Path("reports/Codex"),
+    Path("reports/tmp"),
+)
+REPORTS_RETAINED_DIRS: tuple[Path, ...] = (
+    Path("reports/logs"),
+    Path("reports/observability"),
+    Path("reports/quality"),
+    Path("reports/test-swarm"),
+)
+REPORTS_RETAINED_FILES: tuple[Path, ...] = (Path("reports/README.md"),)
+REPORTS_ROOT_PRUNE_PATTERNS: tuple[str, ...] = ("*_merged.md", "tmp_module_dependency_map.*")
 
 
 @dataclass(frozen=True)
@@ -129,6 +143,34 @@ class ReviewLaneEvidence:
     cmp_status: str | None
     reference_hits: int
     review_status: str
+
+    @property
+    def rel_path(self) -> str:
+        return self.path.as_posix()
+
+
+@dataclass(frozen=True)
+class RootPolicyMismatch:
+    path: Path
+    mismatch_type: str
+    tracked: bool
+
+    @property
+    def rel_path(self) -> str:
+        return self.path.as_posix()
+
+
+@dataclass(frozen=True)
+class ReportsWorkspaceEvidence:
+    path: Path
+    classification: str
+    tracked: bool
+    exists: bool
+    has_history: bool
+    reference_hits: int
+    generator: str | None
+    commit_policy: str | None
+    reason: str
 
     @property
     def rel_path(self) -> str:
@@ -609,6 +651,193 @@ def collect_root_review_evidence(repo_root: Path) -> list[ReviewLaneEvidence]:
     return sorted(evidence, key=lambda item: (item.lane_id, item.rel_path))
 
 
+def collect_root_policy_mismatches(repo_root: Path) -> list[RootPolicyMismatch]:
+    layout_state = collect_root_layout_state(repo_root)
+    mismatches: list[RootPolicyMismatch] = []
+    mismatch_specs = (
+        ("unexpected_tracked_root_file", layout_state["unexpected_root_files"], True),
+        ("unexpected_tracked_root_dir", layout_state["unexpected_root_dirs"], True),
+        (
+            "unexpected_untracked_root_file",
+            layout_state["unexpected_untracked_root_files"],
+            False,
+        ),
+        (
+            "unexpected_untracked_root_dir",
+            layout_state["unexpected_untracked_root_dirs"],
+            False,
+        ),
+    )
+    for mismatch_type, raw_paths, tracked in mismatch_specs:
+        assert isinstance(raw_paths, list)
+        for raw_path in raw_paths:
+            mismatches.append(
+                RootPolicyMismatch(
+                    path=Path(str(raw_path)),
+                    mismatch_type=mismatch_type,
+                    tracked=tracked,
+                )
+            )
+    return sorted(mismatches, key=lambda item: (item.mismatch_type, item.rel_path))
+
+
+def _load_generated_artifact_routes(repo_root: Path) -> list[dict[str, object]]:
+    routing_path = repo_root / "configs" / "quality" / "generated_artifact_routing.yaml"
+    if not routing_path.exists():
+        return []
+    payload = _load_yaml_object(routing_path)
+    routes = payload.get("routes")
+    if not isinstance(routes, list):
+        return []
+    return [route for route in routes if isinstance(route, dict)]
+
+
+def _reports_registered_route_metadata(
+    repo_root: Path,
+) -> dict[str, tuple[str | None, str | None]]:
+    metadata: dict[str, tuple[str | None, str | None]] = {}
+    for route in _load_generated_artifact_routes(repo_root):
+        generator = route.get("generator")
+        commit_policy = route.get("commit_policy")
+        outputs = route.get("outputs")
+        if not isinstance(outputs, list):
+            continue
+        for output in outputs:
+            if not isinstance(output, str) or not output.startswith("reports/"):
+                continue
+            metadata[output.rstrip("/")] = (
+                str(generator) if isinstance(generator, str) else None,
+                str(commit_policy) if isinstance(commit_policy, str) else None,
+            )
+    return metadata
+
+
+def _iter_reports_root_prune_candidates(repo_root: Path) -> set[Path]:
+    candidates: set[Path] = set()
+    for pattern in REPORTS_ROOT_PRUNE_PATTERNS:
+        for match in (repo_root / REPORTS_WORKSPACE).glob(pattern):
+            if match.is_file():
+                candidates.add(match.relative_to(repo_root))
+    return candidates
+
+
+def _reports_workspace_row(
+    repo_root: Path,
+    tracked_paths: set[str],
+    *,
+    path: Path,
+    classification: str,
+    route_metadata: dict[str, tuple[str | None, str | None]],
+    reason: str,
+) -> ReportsWorkspaceEvidence:
+    rel_path = path.as_posix()
+    generator, commit_policy = route_metadata.get(rel_path, (None, None))
+    exists = (repo_root / path).exists()
+    tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
+    return ReportsWorkspaceEvidence(
+        path=path,
+        classification=classification,
+        tracked=tracked,
+        exists=exists,
+        has_history=_git_path_has_history(repo_root, path),
+        reference_hits=_count_reference_hits(repo_root, path) if exists else 0,
+        generator=generator,
+        commit_policy=commit_policy,
+        reason=reason,
+    )
+
+
+def collect_reports_workspace_evidence(repo_root: Path) -> list[ReportsWorkspaceEvidence]:
+    tracked_paths = _tracked_path_set(repo_root)
+    route_metadata = _reports_registered_route_metadata(repo_root)
+    rows: dict[str, ReportsWorkspaceEvidence] = {}
+
+    for path in REPORTS_RETAINED_FILES:
+        if (repo_root / path).exists() or _path_is_tracked_or_has_tracked_descendants(
+            path, tracked_paths
+        ):
+            rows[path.as_posix()] = _reports_workspace_row(
+                repo_root,
+                tracked_paths,
+                path=path,
+                classification="RETAIN",
+                route_metadata=route_metadata,
+                reason="canonical reports workspace guide must remain present",
+            )
+
+    for path in REPORTS_RETAINED_DIRS:
+        if (repo_root / path).exists() or _path_is_tracked_or_has_tracked_descendants(
+            path, tracked_paths
+        ):
+            reason = "governed reports workspace surface retained by docs or tracked evidence"
+            if path == Path("reports/logs"):
+                reason = "runtime log sink documented in active operator guidance"
+            rows[path.as_posix()] = _reports_workspace_row(
+                repo_root,
+                tracked_paths,
+                path=path,
+                classification="RETAIN",
+                route_metadata=route_metadata,
+                reason=reason,
+            )
+
+    for path in REPORTS_LOCAL_PRUNE_DIRS:
+        if (repo_root / path).exists():
+            tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
+            rows[path.as_posix()] = _reports_workspace_row(
+                repo_root,
+                tracked_paths,
+                path=path,
+                classification="REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE",
+                route_metadata=route_metadata,
+                reason=(
+                    "local model/tmp reports are exact-path prune candidates"
+                    if not tracked
+                    else "tracked reports subtree requires manual review before prune"
+                ),
+            )
+
+    for path_text, (generator, commit_policy) in route_metadata.items():
+        path = Path(path_text)
+        if not (repo_root / path).exists():
+            continue
+        if path in REPORTS_RETAINED_FILES or path in REPORTS_RETAINED_DIRS:
+            continue
+        tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
+        classification = "REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE"
+        rows[path.as_posix()] = _reports_workspace_row(
+            repo_root,
+            tracked_paths,
+            path=path,
+            classification=classification,
+            route_metadata=route_metadata,
+            reason=(
+                "registered working report exists as tracked output and needs explicit retention review"
+                if tracked
+                else "registered working report exists only locally and may be pruned after review"
+            ),
+        )
+
+    for path in _iter_reports_root_prune_candidates(repo_root):
+        if path.as_posix() in rows:
+            continue
+        tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
+        rows[path.as_posix()] = _reports_workspace_row(
+            repo_root,
+            tracked_paths,
+            path=path,
+            classification="REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE",
+            route_metadata=route_metadata,
+            reason=(
+                "tracked root report requires explicit owner review"
+                if tracked
+                else "untracked root report matches approved local prune pattern"
+            ),
+        )
+
+    return sorted(rows.values(), key=lambda item: (item.classification, item.rel_path))
+
+
 def _dedupe_candidates(candidates: list[CleanupCandidate]) -> list[CleanupCandidate]:
     deduped: dict[tuple[str, str], CleanupCandidate] = {}
     for candidate in candidates:
@@ -636,6 +865,33 @@ def _summarize_classifications(
         summary[_candidate_classification(candidate)] += 1
     for row in review_evidence:
         summary[_review_evidence_classification(row)] += 1
+    return summary
+
+
+def _summarize_root_review(
+    *,
+    mismatches: list[RootPolicyMismatch],
+    review_evidence: list[ReviewLaneEvidence],
+) -> dict[str, int]:
+    return {
+        "ROOT_POLICY_MISMATCH": len(mismatches),
+        "REVIEW_REQUIRED": sum(
+            1
+            for row in review_evidence
+            if _review_evidence_classification(row) == "REVIEW_REQUIRED"
+        ),
+        "BLOCKED": sum(
+            1 for row in review_evidence if _review_evidence_classification(row) == "BLOCKED"
+        ),
+    }
+
+
+def _summarize_reports_workspace(
+    reports_evidence: list[ReportsWorkspaceEvidence],
+) -> dict[str, int]:
+    summary = {"PRUNE_CANDIDATE": 0, "RETAIN": 0, "REVIEW_REQUIRED": 0}
+    for row in reports_evidence:
+        summary[row.classification] += 1
     return summary
 
 
@@ -687,6 +943,81 @@ def build_cleanup_classification_report(
                 "action_if_reintroduced": row.action_if_reintroduced,
             }
             for row in review_evidence
+        ],
+    }
+
+
+def build_root_review_evidence_report(
+    repo_root: Path,
+    *,
+    mismatches: list[RootPolicyMismatch],
+    review_evidence: list[ReviewLaneEvidence],
+) -> dict[str, object]:
+    return {
+        "schema_version": 1,
+        "tool": "scripts/ops/support/repo/cleanup_repository.py",
+        "repository_root": repo_root.as_posix(),
+        "summary": _summarize_root_review(
+            mismatches=mismatches,
+            review_evidence=review_evidence,
+        ),
+        "root_policy_mismatches": [
+            {
+                "path": mismatch.rel_path,
+                "mismatch_type": mismatch.mismatch_type,
+                "tracked": mismatch.tracked,
+            }
+            for mismatch in mismatches
+        ],
+        "root_review_evidence": [
+            {
+                "lane_id": row.lane_id,
+                "path": row.rel_path,
+                "classification": _review_evidence_classification(row),
+                "registry_classification": row.classification,
+                "current_live_state": row.current_live_state,
+                "review_status": row.review_status,
+                "exists": row.exists,
+                "tracked": row.tracked,
+                "has_history": row.has_history,
+                "canonical_path": (
+                    row.canonical_path.as_posix()
+                    if row.canonical_path is not None
+                    else None
+                ),
+                "canonical_exists": row.canonical_exists,
+                "cmp_status": row.cmp_status,
+                "reference_hits": row.reference_hits,
+                "action_if_reintroduced": row.action_if_reintroduced,
+            }
+            for row in review_evidence
+        ],
+    }
+
+
+def build_reports_workspace_review_report(
+    repo_root: Path,
+    *,
+    reports_evidence: list[ReportsWorkspaceEvidence],
+) -> dict[str, object]:
+    return {
+        "schema_version": 1,
+        "tool": "scripts/ops/support/repo/cleanup_repository.py",
+        "repository_root": repo_root.as_posix(),
+        "summary": _summarize_reports_workspace(reports_evidence),
+        "reports_workspace_evidence": [
+            {
+                "path": row.rel_path,
+                "classification": row.classification,
+                "tracked": row.tracked,
+                "exists": row.exists,
+                "has_history": row.has_history,
+                "reference_hits": row.reference_hits,
+                "generator": row.generator,
+                "commit_policy": row.commit_policy,
+                "reason": row.reason,
+            }
+            for row in reports_evidence
         ],
     }
 
@@ -760,6 +1091,33 @@ def _apply_local_candidates(
             deleted.append(candidate)
         except OSError as exc:
             errors.append(f"{candidate.rel_path}: {exc}")
+    return deleted, errors
+
+
+def _apply_reports_workspace_prune(
+    repo_root: Path,
+    reports_evidence: list[ReportsWorkspaceEvidence],
+) -> tuple[list[str], list[str]]:
+    deleted: list[str] = []
+    errors: list[str] = []
+    for row in reports_evidence:
+        if row.classification != "PRUNE_CANDIDATE" or row.tracked:
+            continue
+        target = repo_root / row.path
+        if not target.exists():
+            continue
+        try:
+            if target.is_dir():
+                shutil.rmtree(target, ignore_errors=True)
+                if target.exists():
+                    raise OSError(
+                        f"directory still exists after cleanup: {row.rel_path}"
+                    )
+            else:
+                target.unlink()
+            deleted.append(row.rel_path)
+        except OSError as exc:
+            errors.append(f"{row.rel_path}: {exc}")
     return deleted, errors
 
 
@@ -844,6 +1202,62 @@ def _log_review_lane_evidence(
         logger.info("")
 
 
+def _log_root_policy_mismatches(
+    mismatches: list[RootPolicyMismatch],
+    *,
+    detail_limit: int = DEFAULT_DETAIL_LIMIT,
+) -> None:
+    if not mismatches:
+        return
+    logger.info("## ROOT POLICY MISMATCHES (%d)", len(mismatches))
+    visible_rows = mismatches[:detail_limit]
+    for row in visible_rows:
+        logger.info(
+            "  [%s] %s",
+            row.mismatch_type,
+            row.rel_path,
+        )
+    hidden_count = len(mismatches) - len(visible_rows)
+    if hidden_count > 0:
+        logger.info("  ... %d additional mismatch row(s) omitted", hidden_count)
+    logger.info("")
+
+
+def _log_reports_workspace_evidence(
+    rows: list[ReportsWorkspaceEvidence],
+    *,
+    detail_limit: int = DEFAULT_DETAIL_LIMIT,
+) -> None:
+    if not rows:
+        return
+
+    groups: dict[str, list[ReportsWorkspaceEvidence]] = {}
+    for row in rows:
+        groups.setdefault(row.classification, []).append(row)
+
+    logger.info("## REPORTS WORKSPACE EVIDENCE")
+    for classification in sorted(groups):
+        evidence_rows = groups[classification]
+        visible_rows = evidence_rows[:detail_limit]
+        logger.info("### %s (%d)", classification, len(evidence_rows))
+        for row in visible_rows:
+            logger.info(
+                "  %s | exists=%s tracked=%s history=%s refs=%d route=%s policy=%s",
+                row.rel_path,
+                str(row.exists).lower(),
+                str(row.tracked).lower(),
+                str(row.has_history).lower(),
+                row.reference_hits,
+                row.generator or "n/a",
+                row.commit_policy or "n/a",
+            )
+            logger.info("      %s", row.reason)
+        hidden_count = len(evidence_rows) - len(visible_rows)
+        if hidden_count > 0:
+            logger.info("  ... %d additional reports row(s) omitted", hidden_count)
+        logger.info("")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Deterministic BioETL repository cleanup",
@@ -858,6 +1272,11 @@ def parse_args() -> argparse.Namespace:
         "--apply",
         action="store_true",
         help="Delete only exact local artifact candidates outside blocked zones",
+    )
+    parser.add_argument(
+        "--apply-reports-prune",
+        action="store_true",
+        help="Delete only exact untracked reports workspace prune candidates",
     )
     parser.add_argument(
         "--no-cache",
@@ -894,14 +1313,24 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         help="Write a machine-readable cleanup classification report to this path",
     )
+    parser.add_argument(
+        "--report-root-review-json",
+        type=Path,
+        help="Write root-policy mismatches and review-lane evidence to this path",
+    )
+    parser.add_argument(
+        "--report-reports-workspace-json",
+        type=Path,
+        help="Write reports workspace inventory/classification evidence to this path",
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
     repo_root = _discover_repo_root(args.path)
-    if args.dry_run and args.apply:
-        logger.error("Use either --dry-run or --apply, not both.")
+    if args.dry_run and (args.apply or args.apply_reports_prune):
+        logger.error("Use --dry-run without apply modes.")
         return 2
 
     candidates = collect_cleanup_candidates(
@@ -912,11 +1341,21 @@ def main() -> int:
     )
     _log_candidates(candidates, detail_limit=max(args.detail_limit, 0))
     review_evidence = collect_root_review_evidence(repo_root) if args.root else []
+    root_policy_mismatches = collect_root_policy_mismatches(repo_root) if args.root else []
+    reports_evidence = collect_reports_workspace_evidence(repo_root)
     if args.root:
+        _log_root_policy_mismatches(
+            root_policy_mismatches,
+            detail_limit=max(args.detail_limit, 0),
+        )
         _log_review_lane_evidence(
             review_evidence,
             detail_limit=max(args.detail_limit, 0),
         )
+    _log_reports_workspace_evidence(
+        reports_evidence,
+        detail_limit=max(args.detail_limit, 0),
+    )
     if args.report_json is not None:
         report_path = write_cleanup_classification_report(
             repo_root,
@@ -928,18 +1367,49 @@ def main() -> int:
             ),
         )
         logger.info("Wrote cleanup classification report: %s", report_path)
+    if args.report_root_review_json is not None:
+        report_path = write_cleanup_classification_report(
+            repo_root,
+            args.report_root_review_json,
+            build_root_review_evidence_report(
+                repo_root,
+                mismatches=root_policy_mismatches,
+                review_evidence=review_evidence,
+            ),
+        )
+        logger.info("Wrote root review evidence report: %s", report_path)
+    if args.report_reports_workspace_json is not None:
+        report_path = write_cleanup_classification_report(
+            repo_root,
+            args.report_reports_workspace_json,
+            build_reports_workspace_review_report(
+                repo_root,
+                reports_evidence=reports_evidence,
+            ),
+        )
+        logger.info("Wrote reports workspace review report: %s", report_path)
+
+    apply_errors: list[str] = []
+    deleted_reports: list[str] = []
+    if args.apply_reports_prune:
+        deleted_reports, reports_errors = _apply_reports_workspace_prune(
+            repo_root,
+            reports_evidence,
+        )
+        apply_errors.extend(reports_errors)
+        logger.info("Deleted reports workspace prune candidates: %d", len(deleted_reports))
 
     if not args.apply:
-        return 0
+        return 1 if apply_errors else 0
 
     deleted, errors = _apply_local_candidates(repo_root, candidates)
     skipped_review = [candidate for candidate in candidates if not candidate.apply_allowed]
     _log_apply_summary(
         deleted=deleted,
         skipped_review=skipped_review,
-        errors=errors,
+        errors=errors + apply_errors,
     )
-    return 1 if errors else 0
+    return 1 if errors or apply_errors else 0
 
 
 if __name__ == "__main__":

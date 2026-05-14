@@ -31,20 +31,24 @@ Machine-readable selector SSOT:
 
 - Все variables MUST иметь `description` в shipped JSON.
 - Pipeline-scoped operator dashboards используют single-select `$pipeline`,
-  кроме `bioetl-overview-v2`, где intentional landing default = `All`.
+  кроме `bioetl-overview-v2`, where intentional landing default =
+  `All`.
 - `$run_type` always uses include-all fallback. Missing context is represented as
   `All`, not `unknown`.
-- Explorer-only forensic variables (`$run_id`, `$payload_hash`) MUST NOT leak
-  into Prometheus dashboards or dashboard-to-dashboard links.
+- Exact identifiers (`$run_id`, `$payload_hash`) MUST NOT leak into Prometheus
+  label filtering or dashboard-to-dashboard links. `bioetl-overview-v2` uses
+  control-plane-backed `$run_id=-` only for its optional `ID` panel.
 - Hidden context variables are allowed only when they preserve return-path or
   detail-only scope, например `$pipeline_context` и `$adapter`.
 - Variable behavior is standardized by role, not by one universal default.
+- `bioetl-overview-v3` is retained as a snapshot/draft with the same hybrid
+  selector set as canonical `bioetl-overview-v2`.
 
 ## Common variables
 
 | Variable | Dashboards | Datasource / query family | Selection mode | Default / fallback | Notes |
 | --- | --- | --- | --- | --- | --- |
-| `$pipeline` | `bioetl-overview-v2`, `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-dq-v2`, `bioetl-silver-reject-explorer` | Prometheus `label_values(...)`; Runtime uses `bioetl_runtime_pipeline_run_type_universe`; Explorer uses concrete pipeline scope for Quarantine API | Single-select | `All` only on `bioetl-overview-v2`; otherwise fail-closed `unknown` | Canonical pipeline scope. Explorer requires one concrete pipeline. |
+| `$pipeline` | `bioetl-overview-v2`, `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-dq-v2`, `bioetl-silver-reject-explorer` | Prometheus `label_values(...)`; Runtime uses `bioetl_runtime_pipeline_run_type_universe`; Explorer uses concrete pipeline scope for Quarantine API | Single-select | `All` on `bioetl-overview-v2`; otherwise fail-closed `unknown` | Canonical pipeline scope. Explorer requires one concrete pipeline. |
 | `$run_type` | `bioetl-overview-v2`, `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-dq-v2`, `bioetl-silver-reject-explorer` | Prometheus `label_values(..., run_type)` or runtime/control-plane universe metrics | Multi-select with Include All | `All` / `$__all` | Cross-dashboard links MUST NOT pass `run_type=unknown`. |
 | `$stage` | `bioetl-runtime`, `bioetl-dq-v2` | Runtime: `bioetl_pipeline_stage_expected`; DQ: `bioetl_records_processed_total` | Multi-select with Include All | Dynamic Grafana selection | Bounded stage breakdown filter, not a forensic identifier. |
 
@@ -58,8 +62,9 @@ Machine-readable selector SSOT:
 | `$reason_code` | `bioetl-silver-reject-explorer` | Multi-select with Include All | `All` / `$__all` | Explorer-only forensic narrowing for bounded reject causes. |
 | `$field` | `bioetl-silver-reject-explorer` | Multi-select with Include All | `All` / `$__all` | Explorer-only forensic narrowing for rejected fields. |
 | `$run_id` | `bioetl-silver-reject-explorer` | Single-select | Empty until selected | Explorer-only forensic selector; MUST NOT appear in Prometheus queries or cross-dashboard links. |
+| `$run_id` | `bioetl-overview-v2` | Single-select | `-` | Control-plane-backed optional identity selector for the `ID` panel; MUST NOT appear in Prometheus queries or cross-dashboard links. |
 | `$payload_hash` | `bioetl-silver-reject-explorer` | Visible textbox | Empty string | Forensic exact-record selector; visible only in the explorer and MUST NOT propagate into other dashboards. |
-| `$workflow` | `bioetl-workflow-overview` | Multi-select with Include All | `All` / `$__all` | Workflow-level selected-range scope, not pipeline scope. |
+| `$workflow` | `bioetl-overview-v2`, `bioetl-workflow-overview` | Multi-select with Include All | `All` / `$__all` | Workflow-level selected-range scope, not pipeline scope. |
 | `$status` | `bioetl-workflow-overview` | Multi-select with Include All | `All` / `$__all` | Workflow run-status filter. |
 | `$pipeline_context` | `bioetl-workflow-overview` | Hidden context var | `unknown` | Preserves single-pipeline handoff scope for downstream dashboards; multi-pipeline workflows fail-close to `unknown`. |
 | `$run_type_context` | `bioetl-workflow-overview` | Hidden context var | `All` | Preserves effective run_type for single-pipeline workflows; multi-pipeline workflows fail-close to `All`. |
@@ -81,6 +86,10 @@ Machine-readable selector SSOT:
 - `bioetl-silver-reject-explorer`
   - `$pipeline` is required before Quarantine Explorer reads are trustworthy
   - `$reason_code`, `$field`, `$run_id`, `$payload_hash` are explorer-only narrowing filters
+- `bioetl-overview-v2`
+  - `$workflow`, `$pipeline`, and `$run_type` define the aggregate L0 context
+  - `$run_id` is loaded from `/ops/control-plane/filter-options` and defaults to `-`
+  - selecting a concrete `$run_id` affects only the control-plane `ID` panel
 - `bioetl-workflow-overview`
   - `$workflow`, `$status`, `$step_status`, `$step_kind` are local to workflow evidence
   - `$pipeline_context`, `$run_type_context`, `$provider_context` are hidden handoff selectors derived from workflow metrics
@@ -90,8 +99,11 @@ Machine-readable selector SSOT:
 
 ### L0 / pipeline-scoped dashboards
 
-- `bioetl-overview-v2` intentionally defaults to `Pipeline=All`, `Run Type=All`
-  so the landing page answers the L0 question immediately.
+- `bioetl-overview-v2` intentionally defaults to `Workflow=All`,
+  `Pipeline=All`, `Run Type=All`, and `Run ID=-`; the dash means no exact run
+  is selected.
+- `bioetl-overview-v2` uses control-plane-backed `$run_id=-` for its optional
+  `ID` panel only.
 - `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-dq-v2`, and
   `bioetl-silver-reject-explorer` fail-close to `pipeline=unknown` when source
   context is absent.

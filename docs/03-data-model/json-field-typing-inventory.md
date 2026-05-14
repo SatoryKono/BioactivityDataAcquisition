@@ -12,14 +12,20 @@ Related:
 - `src/bioetl/domain/normalization/publication_structured_fields.py`
 - `src/bioetl/domain/normalization/structured_payload_policies.py`
 
+Migration status:
+- non-ChEMBL semantic sidecars are in the additive rollout phase
+- canonical JSON fields remain the persisted compatibility contract
+- `*_raw_json` preserves raw-provider evidence for replay/debug and future semantic extraction
+- `*_canonical_json` preserves deterministic semantic-ready payloads without replacing the current canonical field
+
 | Pipeline | Field | Representation | Notes |
 | --- | --- | --- | --- |
 | `crossref_publication` | `authors` | `canonical JSON string` | ordered author list |
 | `crossref_publication` | `affiliation_list` | `canonical JSON string` | set-like affiliation list |
-| `crossref_publication` | `author_details` | `canonical JSON string` | ordered author objects |
+| `crossref_publication` | `author_details` | `canonical JSON string` | ordered author objects; reviewed canonical-only hashed-PII-safe evidence surface |
 | `crossref_publication` | `author_orcids` | `canonical JSON string` | set-like ORCID list |
 | `crossref_publication` | `issn_list` | `canonical JSON string` | set-like ISSN list |
-| `crossref_publication` | `references` | `canonical JSON string` | ordered reference objects |
+| `crossref_publication` | `references` | `canonical JSON string` | ordered reference objects; reviewed canonical-only bibliographic evidence surface |
 | `crossref_publication` | `subject_keywords` | `canonical JSON string` | set-like keyword list |
 | `openalex_publication` | `authors` | `canonical JSON string` | ordered author list |
 | `openalex_publication` | `affiliation_list` | `canonical JSON string` | set-like affiliation list |
@@ -51,14 +57,19 @@ Related:
 | `semanticscholar_publication` | `author_s2_ids` | `canonical JSON string` | set-like identifier list |
 | `semanticscholar_publication` | `author_h_indices` | `canonical JSON string` | semantic-sensitive; persisted with `author_h_indices_raw_json` and `author_h_indices_canonical_json` companions |
 | `semanticscholar_publication` | `citation_contexts` | `canonical JSON string` | semantic-sensitive; persisted with `citation_contexts_raw_json` and `citation_contexts_canonical_json` companions |
-| `semanticscholar_publication` | `publication_types` | `canonical JSON string` | semantic-sensitive set-like classification evidence |
-| `semanticscholar_publication` | `subject_fields` | `canonical JSON string` | semantic-sensitive set-like classification evidence |
+| `semanticscholar_publication` | `publication_types` | `canonical JSON string` | semantic-sensitive set-like classification evidence; persisted row order matches hash semantics |
+| `semanticscholar_publication` | `subject_fields` | `canonical JSON string` | semantic-sensitive set-like classification evidence; persisted row order matches hash semantics |
+| `uniprot_protein` | `alternative_products` | `canonical JSON string` | semantic-sensitive canonical-only comment projection governed by `configs/vocab/uniprot_semantic_payloads.yaml` |
+| `uniprot_protein` | `biophysicochemical_properties` | `canonical JSON string` | semantic-sensitive canonical-only comment projection governed by `configs/vocab/uniprot_semantic_payloads.yaml` |
+| `uniprot_protein` | `cofactors` | `canonical JSON string` | semantic-sensitive canonical-only comment projection governed by `configs/vocab/uniprot_semantic_payloads.yaml` |
 | `uniprot_protein` | `features_json` | `canonical JSON string` | semantic-sensitive ordered feature payload with `features_raw_json` and `features_canonical_json` companions; nested `feature.type`, `comment.commentType`, and keyword `category` terms are governed by `configs/vocab/uniprot_semantic_payloads.yaml` |
+| `uniprot_protein` | `reactions` | `canonical JSON string` | semantic-sensitive canonical-only comment projection governed by `configs/vocab/uniprot_semantic_payloads.yaml` |
 
 Sidecar companion policy:
 - semantic-sensitive fields keep the current canonical JSON field for compatibility
 - raw provider evidence is preserved in `*_raw_json`
 - semantic-ready canonical companion payloads are preserved in `*_canonical_json`
+- reviewed canonical-only payloads explicitly use the persisted field itself as the governed evidence surface
 - shipped sidecar fields currently include
   `grants_raw_json`, `grants_canonical_json`,
   `primary_topic_raw_json`, `primary_topic_canonical_json`,

@@ -37,13 +37,15 @@ interfaces/ -> composition/ -> application/ -> domain/ <- infrastructure/
 | application    | OK              | OK          | NO             | NO          | NO         |
 | infrastructure | OK (ports only) | NO          | OK             | NO          | NO         |
 | composition    | OK              | OK          | OK             | OK          | NO         |
-| interfaces     | OK              | OK          | OK             | OK          | OK         |
+| interfaces     | OK              | OK          | NO             | OK          | OK         |
 
 ## Allowed Exceptions
 
 - Allow `TYPE-CHECKING` imports (type hints only, no runtime dependency).
 - Allow `domain.ports` imports in infrastructure (port protocols are contracts).
 - Allow `domain.types` and `domain.exceptions` imports everywhere.
+- Direct `interfaces -> infrastructure` imports are forbidden; route concrete
+  runtime wiring through `composition` entrypoints.
 
 ## DI Violations (Critical)
 

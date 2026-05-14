@@ -102,10 +102,20 @@ must not assume only `EXP|REV|PEER` at every intermediate Silver surface.
 | `semanticscholar_publication` | `citation_contexts` | ordered sequence | `citation_contexts_raw_json` | `citation_contexts_canonical_json` |
 | `semanticscholar_publication` | `publication_types` | unordered set | `publication_types_raw_json` | `publication_types_canonical_json` |
 | `semanticscholar_publication` | `subject_fields` | unordered set | `subject_fields_raw_json` | `subject_fields_canonical_json` |
+| `crossref_publication` | `author_details` | ordered sequence | `n/a` | `author_details` |
+| `crossref_publication` | `references` | ordered sequence | `n/a` | `references` |
 
 These payloads are semantic-sensitive evidence surfaces. Canonical JSON is not a
 drop-in replacement for the raw provider object/list when future semantic
 extraction happens.
+
+CrossRef is the reviewed exception: `author_details` and `references` are
+currently ratified canonical-only evidence surfaces. They are governed
+explicitly, but no additive raw sidecar is shipped today.
+
+For Semantic Scholar unordered-set payloads, `publication_types` and
+`subject_fields` now canonicalize into the same deterministic item order for
+both persisted rows and `content_hash`.
 
 ## Nested Vocabulary Inventories
 

@@ -815,6 +815,7 @@ def test_provider_dashboard_exposes_single_runtime_link() -> None:
         for link in links
         if _extract_dashboard_uid(str(link.get("url", ""))) == "bioetl-runtime"
     ]
+    assert len(runtime_links) == 1
 
 
 def test_workflow_overview_next_diagnostic_surface_cta_contract() -> None:
@@ -902,15 +903,16 @@ def test_pipeline_and_provider_variables_are_single_select_unknown_default() -> 
             current = variable.get("current", {})
             assert isinstance(current, dict)
             if (
-                dashboard_path.name == "bioetl-overview-v2.json"
+                dashboard_path.name
+                in {"bioetl-overview-v2.json", "bioetl-overview-v3.json"}
                 and variable_name == "pipeline"
             ):
                 assert variable.get("includeAll") is True, (
-                    "bioetl-overview-v2.json 'pipeline' must default to All so "
+                    f"{dashboard_path.name} 'pipeline' must default to All so "
                     "the overview landing page renders a meaningful scope"
                 )
                 assert current.get("value") == "$__all", (
-                    "bioetl-overview-v2.json 'pipeline' must default to All"
+                    f"{dashboard_path.name} 'pipeline' must default to All"
                 )
                 continue
             assert variable.get("includeAll") is False, (

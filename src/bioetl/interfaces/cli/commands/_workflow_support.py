@@ -219,58 +219,76 @@ def render_status_payload(payload: dict[str, object]) -> str:
         f"version: {version}",
         "topological order: " + ", ".join(str(item) for item in topological),
     ]
-    if bool(payload.get("execution_history_available")):
-        lines.extend(
-            [
-                f"status: {payload['status']}",
-                f"workflow_run_id: {payload['workflow_run_id']}",
-                f"manifest_id: {payload['manifest_id']}",
-                f"execution_fingerprint: {payload['execution_fingerprint']}",
-                f"ledger_entries: {payload['ledger_entry_count']}",
-            ]
-        )
-        if payload.get("repair_required"):
-            lines.append("repair_required: yes")
-        if payload.get("repair_hint"):
-            lines.append(f"repair_hint: {payload['repair_hint']}")
-        if payload.get("last_error_type") or payload.get("last_error_message"):
-            lines.append(
-                "last_error: "
-                f"{payload.get('last_error_type') or 'Unknown'} / "
-                f"{payload.get('last_error_message') or '-'}"
-            )
-    else:
-        lines.append("history: unavailable")
+    lines.extend(_render_history_lines(payload))
     lines.extend(["", "Steps:"])
-    if isinstance(steps, list):
-        for step in steps:
-            if not isinstance(step, dict):
-                continue
-            depends_on = step.get("depends_on") or []
-            depends_rendered = ", ".join(str(item) for item in depends_on) or "-"
-            kind = str(step.get("kind", step.get("step_kind", "unknown")))
-            if kind == "pipeline" and "pipeline_name" in step:
-                lines.append(
-                    f"- {step['step_id']} [{kind}] pipeline={step['pipeline_name']} "
-                    f"depends_on={depends_rendered}"
-                )
-            elif kind == "transform" and "transform_name" in step:
-                lines.append(
-                    f"- {step['step_id']} [{kind}] transform={step['transform_name']} "
-                    f"depends_on={depends_rendered}"
-                )
-            else:
-                summary = (
-                    f"- {step['step_id']} [{kind}] -> {step.get('status', 'unknown')}"
-                )
-                error_type = step.get("error_type")
-                error_message = step.get("error_message")
-                if error_type or error_message:
-                    summary += f" ({error_type or 'Error'}: {error_message or '-'})"
-                lines.append(summary)
+    lines.extend(_render_status_steps(steps))
     lines.append("")
     lines.append(str(payload["note"]))
     return "\n".join(lines)
+
+
+def _render_history_lines(payload: dict[str, object]) -> list[str]:
+    """Render optional persisted workflow execution state."""
+    if bool(payload.get("execution_history_available")):
+        lines = [
+            f"status: {payload['status']}",
+            f"workflow_run_id: {payload['workflow_run_id']}",
+            f"manifest_id: {payload['manifest_id']}",
+            f"execution_fingerprint: {payload['execution_fingerprint']}",
+            f"ledger_entries: {payload['ledger_entry_count']}",
+        ]
+        return lines + _render_repair_and_error_lines(payload)
+    return ["history: unavailable"]
+
+
+def _render_repair_and_error_lines(payload: dict[str, object]) -> list[str]:
+    """Render optional repair hints and terminal workflow errors."""
+    lines: list[str] = []
+    if payload.get("repair_required"):
+        lines.append("repair_required: yes")
+    if payload.get("repair_hint"):
+        lines.append(f"repair_hint: {payload['repair_hint']}")
+    if payload.get("last_error_type") or payload.get("last_error_message"):
+        lines.append(
+            "last_error: "
+            f"{payload.get('last_error_type') or 'Unknown'} / "
+            f"{payload.get('last_error_message') or '-'}"
+        )
+    return lines
+
+
+def _render_status_steps(steps: object) -> list[str]:
+    """Render declarative workflow steps when the payload has a valid list."""
+    if not isinstance(steps, list):
+        return []
+    rendered: list[str] = []
+    for step in steps:
+        if isinstance(step, dict):
+            rendered.append(_render_status_step(step))
+    return rendered
+
+
+def _render_status_step(step: dict[str, object]) -> str:
+    """Render one workflow status step."""
+    depends_on = step.get("depends_on") or []
+    depends_rendered = ", ".join(str(item) for item in depends_on) or "-"
+    kind = str(step.get("kind", step.get("step_kind", "unknown")))
+    if kind == "pipeline" and "pipeline_name" in step:
+        return (
+            f"- {step['step_id']} [{kind}] pipeline={step['pipeline_name']} "
+            f"depends_on={depends_rendered}"
+        )
+    if kind == "transform" and "transform_name" in step:
+        return (
+            f"- {step['step_id']} [{kind}] transform={step['transform_name']} "
+            f"depends_on={depends_rendered}"
+        )
+    summary = f"- {step['step_id']} [{kind}] -> {step.get('status', 'unknown')}"
+    error_type = step.get("error_type")
+    error_message = step.get("error_message")
+    if error_type or error_message:
+        summary += f" ({error_type or 'Error'}: {error_message or '-'})"
+    return summary
 
 
 def render_run_result(

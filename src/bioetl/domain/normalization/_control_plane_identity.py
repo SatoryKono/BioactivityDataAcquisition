@@ -158,18 +158,11 @@ def _normalize_optional_text(value: object | None) -> str | None:
 
 
 def _normalize_runtime_anchor_value(key: str, value: object | None) -> str | None:
-    if key == "effective_config_hash":
-        return normalize_runtime_anchor_effective_config_hash(value)
+    direct_normalizer = _RUNTIME_ANCHOR_FIELD_NORMALIZERS.get(key)
+    if direct_normalizer is not None:
+        return direct_normalizer(value)
     if key in _RUNTIME_ANCHOR_SHA256_FIELDS:
         return normalize_control_plane_opaque_hash_ref(value)
-    if key == "contract_ref":
-        return normalize_contract_ref(value)
-    if key == "contract_version":
-        return normalize_contract_version(value)
-    if key == "normalization_profile_ref":
-        return normalize_contract_ref(value)
-    if key == "normalization_profile_version":
-        return normalize_contract_version(value)
     return _normalize_optional_text(value)
 
 
@@ -219,6 +212,13 @@ _EXECUTION_IDENTITY_FIELD_NORMALIZERS: dict[
     "normalization_profile_version": normalize_contract_version,
     "exact_replay": _normalize_optional_bool_token,
     "run_type": _normalize_optional_lower_text,
+}
+_RUNTIME_ANCHOR_FIELD_NORMALIZERS: dict[str, Callable[[object | None], str | None]] = {
+    "contract_ref": normalize_contract_ref,
+    "contract_version": normalize_contract_version,
+    "effective_config_hash": normalize_runtime_anchor_effective_config_hash,
+    "normalization_profile_ref": normalize_contract_ref,
+    "normalization_profile_version": normalize_contract_version,
 }
 
 

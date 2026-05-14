@@ -9,3 +9,6 @@ owners:
   - area: graph_sync_legacy
     owner: "BioETL Team"
     paths: ["scripts/memory"]
+  - area: derived_navigation_context
+    owner: "BioETL Team"
+    paths: [".devin"]

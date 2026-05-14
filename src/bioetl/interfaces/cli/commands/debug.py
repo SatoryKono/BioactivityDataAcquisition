@@ -20,10 +20,10 @@ if TYPE_CHECKING:
         RunOptions,
         RunResult,
     )
-    from bioetl.application.services.pipeline_debug_service import DebugAbortError
     from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService,
     )
+    from bioetl.application.services.pipeline_debug_service import DebugAbortError
     from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.domain.ports import StageBreakpoint
 

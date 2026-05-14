@@ -66,3 +66,17 @@ def test_candidate_source_paths_prefers_git_tracked_files(
 
     assert calls == [("git", "ls-files", "--", "docs/00-project")]
     assert [path.as_posix() for path in candidates] == ["docs/00-project/alpha.md"]
+
+
+def test_candidate_source_paths_supports_single_file_sources(tmp_path: Path) -> None:
+    wiki_path = tmp_path / ".devin" / "wiki.json"
+    wiki_path.parent.mkdir(parents=True)
+    wiki_path.write_text('{"pages": []}\n', encoding="utf-8")
+
+    candidates = _candidate_source_paths(
+        root=tmp_path,
+        source_id="devin_wiki",
+        base=Path(".devin/wiki.json"),
+    )
+
+    assert [path.as_posix() for path in candidates] == [".devin/wiki.json"]

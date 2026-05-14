@@ -15,3 +15,6 @@ zones:
   - id: generated_context
     classification: derived
     paths: ["docs/reports", "reports", "site"]
+  - id: derived_navigation_context
+    classification: derived
+    paths: [".devin"]

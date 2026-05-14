@@ -293,6 +293,8 @@ def infer_source_type(path: Path) -> str:
         return "runbook"
     if normalized.startswith("docs/plans/"):
         return "plan"
+    if normalized == ".devin/wiki.json":
+        return "devin_wiki"
     if normalized.startswith("src/memory/"):
         return "memory"
     if normalized.startswith("src/bioetl/") and path.suffix == ".py":

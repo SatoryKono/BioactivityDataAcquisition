@@ -780,8 +780,8 @@ def test_dashboard_queries_do_not_filter_by_payload_hash_label(
     )
 
 
-def test_explorer_only_forensic_variables_do_not_leak_into_other_dashboards() -> None:
-    """run_id/payload_hash variables must remain isolated to the reject explorer."""
+def test_exact_identifier_variables_do_not_leak_into_other_dashboards() -> None:
+    """Exact-id variables must remain isolated to explicitly contracted dashboards."""
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         variables = {
@@ -792,11 +792,18 @@ def test_explorer_only_forensic_variables_do_not_leak_into_other_dashboards() ->
         if dashboard_path.name == "bioetl-silver-reject-explorer.json":
             assert {"run_id", "payload_hash"} <= variables
             continue
+        if dashboard_path.name in {
+            "bioetl-overview-v2.json",
+            "bioetl-overview-v3.json",
+        }:
+            assert "run_id" in variables
+            assert "payload_hash" not in variables
+            continue
         assert "run_id" not in variables, (
-            f"{dashboard_path.name} must not define explorer-only variable run_id"
+            f"{dashboard_path.name} must not define uncontracted variable run_id"
         )
         assert "payload_hash" not in variables, (
-            f"{dashboard_path.name} must not define explorer-only variable payload_hash"
+            f"{dashboard_path.name} must not define uncontracted variable payload_hash"
         )
 
 
@@ -914,6 +921,7 @@ def test_dashboard_titles_match_home_dashboard_navigation_names() -> None:
     expected_titles_by_uid = {
         "bioetl-control-plane-v1": "0. Control Plane",
         "bioetl-overview-v2": "1. Overview",
+        "bioetl-overview-v3": "1. Overview v3",
         "bioetl-runtime": "2. Runtime",
         "bioetl-provider-health-v2": "3. Provider Health",
         "bioetl-dq-v2": "4. Data Quality",
@@ -1229,6 +1237,7 @@ def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -
     expected_current_title = {
         "bioetl-control-plane-v1": "0. Control Plane",
         "bioetl-overview-v2": "1. Overview",
+        "bioetl-overview-v3": "1. Overview v3",
         "bioetl-runtime": "2. Runtime",
         "bioetl-provider-health-v2": "3. Provider Health",
         "bioetl-dq-v2": "4. Data Quality",

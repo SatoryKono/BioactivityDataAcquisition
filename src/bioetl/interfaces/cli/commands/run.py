@@ -59,11 +59,12 @@ from bioetl.interfaces.cli.commands.domains.run.runtime_helpers import (
     run_prepared_request_async as _run_prepared_request_async_impl,
 )
 from bioetl.interfaces.cli.commands.domains.run.service_access import (
+    create_cli_run_orchestration_service as _create_cli_run_orchestration_service_impl,
+)
+from bioetl.interfaces.cli.commands.domains.run.service_access import (
     get_cli_run_orchestration_service as _get_cli_run_orchestration_service_impl,
 )
 from bioetl.interfaces.cli.commands.domains.run.support import (
-    get_runner_logger,
-    handle_destructive_run_confirmation,
     resolve_context_registry,
     validate_pipeline_name,
 )
@@ -89,6 +90,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "build_run_options",
+    "create_cli_run_orchestration_service",
     "execute_run",
     "get_cli_run_orchestration_service",
     "handle_cli_failure",
@@ -98,6 +100,7 @@ __all__ = [
 
 # Inventory of retained run-command seams. Update tests alongside intentional changes.
 _RUN_CANONICAL_BOUNDARY_SEAMS = (
+    "create_cli_run_orchestration_service",
     "get_cli_run_orchestration_service",
     "_build_run_command_input",
     "_build_run_pipeline_callable",
@@ -117,8 +120,13 @@ _RUN_COMPATIBILITY_SEAMS = (
 
 
 def get_cli_run_orchestration_service() -> CliRunOrchestrationService:
-    """Return process-local run orchestration service (lazy cached accessor seam)."""
+    """Return process-local run orchestration service compatibility accessor."""
     return _get_cli_run_orchestration_service_impl()
+
+
+def create_cli_run_orchestration_service() -> CliRunOrchestrationService:
+    """Build a fresh run orchestration service for one CLI command execution."""
+    return _create_cli_run_orchestration_service_impl()
 
 
 def get_pipeline_runner_service(
@@ -202,7 +210,7 @@ def _run_command_with_cli_policy(
 ) -> None:
     """Execute the prepared run command through the canonical CLI policy path."""
     registry = resolve_context_registry(ctx)
-    service = get_cli_run_orchestration_service()
+    service = create_cli_run_orchestration_service()
     run_command_flow(
         cli_input=cli_input,
         service=service,

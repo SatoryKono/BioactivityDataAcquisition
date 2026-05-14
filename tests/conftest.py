@@ -16,6 +16,11 @@ from tests.helpers.vcr_config import (
     resolve_requested_cassette_path,
 )
 
+pytest_plugins = (
+    "tests.helpers.metadata_fixtures",
+    "tests.integration.chembl.extraction_params_support",
+)
+
 
 def pytest_addoption(parser: pytest.Parser) -> None:
     """Register global test options."""

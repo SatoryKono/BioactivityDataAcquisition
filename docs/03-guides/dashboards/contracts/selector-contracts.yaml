@@ -54,7 +54,6 @@ dashboard_families:
   pipeline_summary:
     uids:
       - bioetl-control-plane-v1
-      - bioetl-overview-v2
       - bioetl-runtime
       - bioetl-dq-v2
     allowed_visible_selectors:
@@ -71,13 +70,12 @@ dashboard_families:
       bounded compatibility alias for the selected entity pipeline scope.
       Control Plane first-screen current-status queries additionally normalize
       a manually selected `workflow_<pipeline>` value back to the entity
-      pipeline before reading current-state recording rules. Overview first-
-      screen current-state summaries apply the same normalization for selected-
-      scope L0/L1 cards and routes. Runtime current-triage panels apply the
-      same normalization for current status, blocker, error-rate, lag, and
-      active-blocker drilldown queries.
+      pipeline before reading current-state recording rules. Runtime current-
+      triage panels apply the same normalization for current status, blocker,
+      error-rate, lag, and active-blocker drilldown queries.
   hybrid_overview:
     uids:
+      - bioetl-overview-v2
       - bioetl-overview-v3
     allowed_visible_selectors:
       - workflow
@@ -85,14 +83,16 @@ dashboard_families:
       - run_type
       - run_id
     notes: |
-      Overview v3 is a draft hybrid bridge. It keeps pipeline-summary current
-      status semantics, adds a visible workflow evidence-context selector, and
-      exposes run_id from the local control-plane run-manifest catalog for
-      identity handoff. Grafana `All` values MAY expand the catalog scope, but
-      the dashboard MUST NOT claim one manifest identity for aggregate pipeline
-      scope unless an exact `run_id` is selected. It MAY resolve selected
-      manifest identity for the `ID` panel, but it MUST NOT claim that run_id
-      changes aggregate current-status PromQL semantics.
+      The canonical Overview dashboard (`bioetl-overview-v2`) uses the frozen
+      Overview v3 hybrid layout as its baseline; `bioetl-overview-v3` remains
+      as the retained snapshot/draft surface. Hybrid Overview keeps pipeline-
+      summary current-status semantics, adds a visible workflow evidence-
+      context selector, and exposes run_id from the local control-plane run-
+      manifest catalog for identity handoff. Grafana `All` values MAY expand
+      the catalog scope, but the dashboard MUST NOT claim one manifest identity
+      for aggregate pipeline scope unless an exact `run_id` is selected. It MAY
+      resolve selected manifest identity for the `ID` panel, but it MUST NOT
+      claim that run_id changes aggregate current-status PromQL semantics.
   provider_first:
     uids:
       - bioetl-provider-health-v2
@@ -154,18 +154,24 @@ shipped_selector_registry:
       pipeline: prometheus_control_plane_universe
       run_type: prometheus_control_plane_universe
   bioetl-overview-v2:
-    family: pipeline_summary
+    family: hybrid_overview
     visible_selectors:
+      - workflow
       - pipeline
       - run_type
+      - run_id
     hidden_context_selectors: []
     hidden_detail_selectors: []
     top_bar_order:
+      - workflow
       - pipeline
       - run_type
+      - run_id
     query_source_families:
+      workflow: prometheus_workflow_runs_total
       pipeline: prometheus_records_processed_total
       run_type: prometheus_records_processed_total
+      run_id: control_plane_filter_options_api
   bioetl-overview-v3:
     family: hybrid_overview
     visible_selectors:
@@ -184,7 +190,7 @@ shipped_selector_registry:
       workflow: prometheus_workflow_runs_total
       pipeline: prometheus_records_processed_total
       run_type: prometheus_records_processed_total
-      run_id: textbox_execution_hint
+      run_id: control_plane_filter_options_api
   bioetl-runtime:
     family: pipeline_summary
     visible_selectors:
@@ -290,8 +296,10 @@ ship_now_selector_contract_by_uid:
     time_range: grafana_builtin
   bioetl-overview-v2:
     visible_selectors:
+      - workflow
       - pipeline
       - run_type
+      - run_id
     time_range: grafana_builtin
   bioetl-overview-v3:
     visible_selectors:

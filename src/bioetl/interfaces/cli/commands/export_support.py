@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import sys
 from collections.abc import Callable, Coroutine
 from pathlib import Path
 from typing import Literal, Protocol, cast
@@ -38,6 +39,22 @@ __all__ = [
 ]
 
 ExportFormat = Literal["csv", "xlsx", "tsv"]
+
+
+def _scrub_parent_package_binding() -> None:
+    """Keep helper module importable as a submodule, not a package-root seam."""
+    package_name, _, module_name = __name__.rpartition(".")
+    package = sys.modules.get(package_name)
+    module = sys.modules.get(__name__)
+    if (
+        package is not None
+        and module is not None
+        and getattr(package, module_name, None) is module
+    ):
+        delattr(package, module_name)
+
+
+_scrub_parent_package_binding()
 
 
 class _ExportCommandService(Protocol):

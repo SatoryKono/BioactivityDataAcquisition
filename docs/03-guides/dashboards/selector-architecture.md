@@ -139,6 +139,12 @@ Future execution-aware selectors include:
 
 These are **not** universal shipped selectors today.
 
+`bioetl-overview-v2` is the current hybrid Overview baseline: it exposes a
+control-plane-backed `run_id` selector with default `-` for the optional `ID`
+panel only. The selector is not a Prometheus label filter and does not make
+exact-run selection a universal dashboard contract. `bioetl-overview-v3`
+remains only a draft/snapshot surface for the same selector shape.
+
 ### Hidden context selectors
 
 Currently shipped:
@@ -170,7 +176,7 @@ handoms unless an explicit future contract says otherwise.
 The current shipped selector model is:
 
 - `0. Control Plane`: `pipeline`, `run_type`, time range
-- `1. Overview`: `pipeline`, `run_type`, time range
+- `1. Overview`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
 - `2. Runtime`: `pipeline`, `run_type`, `stage`, time range
 - `3. Provider Health`: `provider`, hidden `pipeline_context`, hidden
   detail-only `adapter`, time range

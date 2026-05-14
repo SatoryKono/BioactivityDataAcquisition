@@ -48,9 +48,19 @@ def test_root_hygiene_workflow_uploads_cleanup_classification_artifact() -> None
         in workflow
     )
     assert (
+        "--report-root-review-json reports/quality/root-hygiene-review-evidence.json"
+        in workflow
+    )
+    assert (
+        "--report-reports-workspace-json reports/quality/reports-workspace-review.json"
+        in workflow
+    )
+    assert (
         "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in workflow
     )
     assert "root-hygiene-cleanup-classification" in workflow
+    assert "root-hygiene-review-evidence" in workflow
+    assert "reports-workspace-review" in workflow
 
 
 def test_github_policy_lists_root_hygiene_as_required_check() -> None:

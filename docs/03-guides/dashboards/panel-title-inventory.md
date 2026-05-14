@@ -80,24 +80,29 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 153 | Data Quality Score Trend (Volume-weighted) |
 | bioetl-dq-v2.json | 154 | DQ Impact on Deliverability (Blocked Share) |
 | bioetl-dq-v2.json | 155 | DQ Impact on Deliverability Trend (Blocked Share %) |
-| bioetl-overview-v2.json | 99 | L0 Overview Scope |
-| bioetl-overview-v2.json | 214 | System Status |
+| bioetl-overview-v2.json | 99 | Provenance |
+| bioetl-overview-v2.json | 214 | Status |
 | bioetl-overview-v2.json | 215 | Next Action |
-| bioetl-overview-v2.json | 9002 | L0 Inputs |
-| bioetl-overview-v2.json | 9003 | Runtime Blockers |
-| bioetl-overview-v2.json | 9004 | DQ Status |
-| bioetl-overview-v2.json | 9005 | Gold Lifecycle |
+| bioetl-overview-v2.json | 1000 | Navigation |
+| bioetl-overview-v2.json | 9002 | Inputs |
+| bioetl-overview-v2.json | 9003 | Runtime |
+| bioetl-overview-v2.json | 9004 | Data Quality |
+| bioetl-overview-v2.json | 9005 | Data Validation |
 | bioetl-overview-v2.json | 9006 | Control Plane |
-| bioetl-overview-v2.json | 9007 | Provider Global |
-| bioetl-overview-v2.json | 9008 | Workflow Selected |
+| bioetl-overview-v2.json | 9007 | Provider |
 | bioetl-overview-v2.json | 9009 | Range Evidence (Historical / Recent History) |
 | bioetl-overview-v2.json | 9010 | Historical Failures |
 | bioetl-overview-v2.json | 9011 | Recent Terminal Runs |
 | bioetl-overview-v2.json | 9012 | Diagnostics & Docs (Logs / Traces / Raw Metrics) |
-| bioetl-overview-v2.json | 9013 | Workflow Global |
+| bioetl-overview-v2.json | 9013 | Workflow |
 | bioetl-overview-v2.json | 9014 | L1 Historical Trends |
 | bioetl-overview-v2.json | 9015 | Silver Rejects + Rate |
+| bioetl-overview-v2.json | 9018 | Runtime Blockers Trend |
+| bioetl-overview-v2.json | 9019 | DQ Status Trend |
+| bioetl-overview-v2.json | 9020 | Gold Lifecycle Trend |
 | bioetl-overview-v2.json | 9021 | Diagnostics Navigation |
+| bioetl-overview-v2.json | 9300 | ID |
+| bioetl-overview-v2.json | 9301 | Processed Records |
 | bioetl-provider-health-v2.json | 1 | Track Health Check Latency by Provider (p95) |
 | bioetl-provider-health-v2.json | 2 | Monitor Healthy Checks (Selected Range) |
 | bioetl-provider-health-v2.json | 7 | Track Health Checks Total (Selected Range) |

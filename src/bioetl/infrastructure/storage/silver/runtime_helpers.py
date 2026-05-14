@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Awaitable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -109,6 +109,7 @@ class SilverWriterRuntimeServicesRequest:
     contract_rollout_policy: ContractRolloutPolicy | None = None
     base_path: str | Path | None = None
     pipeline_name: str | None = None
+    delta_module_loader: Callable[[], object] | None = None
 
 
 def resolve_silver_writer_runtime(
@@ -233,6 +234,7 @@ def _build_delta_operations(
         logger=logger,
         _metrics=request.metrics,
         _merge_resilience_policy=merge_resilience_policy,
+        _load_delta_module=request.delta_module_loader,
     )
 
 

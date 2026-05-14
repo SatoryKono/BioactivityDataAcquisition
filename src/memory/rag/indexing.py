@@ -15,6 +15,7 @@ from memory.rag.chunking import (
     infer_domain,
     infer_source_type,
 )
+from memory.rag.devin_wiki import build_devin_wiki_records
 from memory.rag.filters import iter_rag_sources
 from memory.resources import CATALOG_DIR, MEMORY_ROOT, load_yaml_resource
 
@@ -88,12 +89,23 @@ def build_rag_manifests(root: Path) -> tuple[dict[str, Any], list[dict[str, Any]
 
     for rel_path in sources:
         rel_path_str = rel_path.as_posix()
-        text = (root / rel_path).read_text(encoding="utf-8")
-        sections = chunk_source(rel_path, text)
         source_type = infer_source_type(rel_path)
         domain = infer_domain(rel_path)
         owner = _lookup_owner(rel_path_str, owner_specs)
         repo_zone = _lookup_repo_zone(rel_path_str, zone_specs)
+        if source_type == "devin_wiki":
+            corpus_source, chunk_rows = build_devin_wiki_records(
+                root,
+                rel_path,
+                owner=owner,
+                repo_zone=repo_zone,
+            )
+            corpus_sources.append(corpus_source)
+            chunk_records.extend(chunk_rows)
+            continue
+
+        text = (root / rel_path).read_text(encoding="utf-8")
+        sections = chunk_source(rel_path, text)
         corpus_sources.append(
             {
                 "source_path": rel_path_str,

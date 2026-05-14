@@ -196,9 +196,6 @@ required_panel_links_by_uid:
     - panel_id: 9007
       target_uid: bioetl-provider-health-v2
       link_titles: [Open Provider Health]
-    - panel_id: 9008
-      target_uid: bioetl-workflow-overview
-      link_titles: [Open Workflow (Reset Scope)]
     - panel_id: 9013
       target_uid: bioetl-workflow-overview
       link_titles: [Open Workflow]
@@ -263,9 +260,6 @@ required_panel_links_by_uid:
     - panel_id: 9007
       target_uid: bioetl-provider-health-v2
       link_titles: [Open Provider Health]
-    - panel_id: 9008
-      target_uid: bioetl-workflow-overview
-      link_titles: [Open Workflow (Reset Scope)]
     - panel_id: 9013
       target_uid: bioetl-workflow-overview
       link_titles: [Open Workflow]

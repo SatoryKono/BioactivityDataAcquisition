@@ -1,52 +1,10 @@
 {
-  "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
   "python.testing.pytestEnabled": true,
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestPath": "uv",
   "python.testing.cwd": "${workspaceFolder}",
-  "python.testing.autoTestDiscoverOnSaveEnabled": true,
+  "python.analysis.extraPaths": ["src"],
   "python.testing.pytestArgs": [
-    "tests"
-  ],
-  "python.envFile": "${workspaceFolder}/.env",
-  "python.analysis.typeCheckingMode": "basic",
-  "python.analysis.autoImportCompletions": true,
-  "ruff.nativeServer": "on",
-  "ruff.lint.run": "onSave",
-  "[python]": {
-    "editor.defaultFormatter": "charliermarsh.ruff",
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-      "source.fixAll": "explicit",
-      "source.organizeImports": "explicit"
-    }
-  },
-  "mypy-type-checker.enabled": true,
-  "mypy-type-checker.args": [
-    "--strict",
-    "src/bioetl"
-  ],
-  "mypy.runUsingActiveInterpreter": true,
-  "mypy.configFile": "pyproject.toml",
-  "claudeCodeChat.permissions.yoloMode": true,
-  "chatgpt.runCodexInWindowsSubsystemForLinux": true,
-  "containers.commands.attach": "${containerCommand} exec -it ${containerId} ${shellCommand}",
-  "autoDocstring.docstringFormat": "google",
-  "files.exclude": {
-    "**/.pytest_cache": true,
-    "**/.ruff_cache": true,
-    "**/.mypy_cache": true,
-    "**/.import_linter_cache": true,
-    "**/__pycache__": true
-  },
-  "search.exclude": {
-    "**/.pytest_cache": true,
-    "**/.ruff_cache": true,
-    "**/.mypy_cache": true,
-    "**/__pycache__": true
-  },
-  "sonarlint.connectedMode.project": {
-    "connectionId": "satorykono",
-    "projectKey": "SatoryKono_BioactivityDataAcquisition"
-  }
+    "-o",
+    "cache_dir=${env:TEMP}/bioetl-pytest-cache"
+  ]
 }

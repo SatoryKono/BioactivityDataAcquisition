@@ -11,10 +11,13 @@ import pytest
 from bioetl.domain.exceptions.network import ExternalServiceError
 
 from .conftest import (
+    E2E_FIXED_RUN_ID,
+    E2E_FIXED_STARTED_AT,
     build_e2e_run_context,
     build_e2e_skip_reason,
     build_e2e_replay_context,
     create_test_context,
+    create_deterministic_test_context,
     _create_retry_run_context,
     assert_bronze_files_exist,
     assert_bronze_metadata_files_exist,
@@ -159,7 +162,7 @@ def test_build_e2e_fail_reason_is_deterministic() -> None:
 def test_create_test_context_initializes_started_at() -> None:
     """E2E test contexts must not inherit the sentinel runtime timestamp."""
     context = create_test_context("chembl_activity", limit=1)
-    assert context.started_at.isoformat() == "2026-04-28T12:00:00+00:00"
+    assert context.started_at == E2E_FIXED_STARTED_AT
 
 
 def test_create_test_context_uses_unique_occurrence_run_ids() -> None:
@@ -177,17 +180,34 @@ def test_build_e2e_run_context_accepts_explicit_deterministic_seed() -> None:
         "chembl_activity",
         limit=3,
         resume=False,
-        run_id_seed="stable-case",
+        run_id_seed=str(E2E_FIXED_RUN_ID),
     )
     ctx2 = build_e2e_run_context(
         "chembl_activity",
         limit=3,
         resume=False,
-        run_id_seed="stable-case",
+        run_id_seed=str(E2E_FIXED_RUN_ID),
     )
 
     assert ctx1.run_id == ctx2.run_id
     assert ctx1.started_at == ctx2.started_at
+
+
+def test_create_deterministic_test_context_is_stable_for_same_inputs() -> None:
+    """Control-plane assertion tests can opt into one stable replay-safe context."""
+    ctx1 = create_deterministic_test_context(
+        "pubchem_compound",
+        limit=5,
+        query="aspirin",
+    )
+    ctx2 = create_deterministic_test_context(
+        "pubchem_compound",
+        limit=5,
+        query="aspirin",
+    )
+
+    assert ctx1.run_id == ctx2.run_id
+    assert ctx1.started_at == ctx2.started_at == E2E_FIXED_STARTED_AT
 
 
 def test_retry_run_context_uses_deterministic_attempt_seed() -> None:

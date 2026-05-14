@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sys
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, Literal, cast
 
@@ -47,6 +49,11 @@ __all__ = ["SilverWriteMode", "SilverWriter", "_SilverWriteExecutionContext"]
 # Keep Delta Lake dependency explicit in the root infrastructure adapter for
 # medallion architecture guards; concrete calls live in split operation services.
 _DELTA_LAKE_REQUIREMENTS = (DeltaTable, write_deltalake)
+
+
+def _load_silver_writer_patch_module() -> object:
+    """Return this module so legacy tests can patch SilverWriter Delta symbols."""
+    return sys.modules[__name__]
 
 
 class SilverWriter(
@@ -144,6 +151,7 @@ class SilverWriter(
                     Any,  # Any: policy type is dynamic
                     runtime_dependencies.pop("contract_rollout_policy", None),
                 ),
+                delta_module_loader=_load_silver_writer_patch_module,
             )
             if runtime_dependencies:
                 unexpected_dependency = ", ".join(sorted(runtime_dependencies))
@@ -153,6 +161,11 @@ class SilverWriter(
                 )
         else:
             runtime_request = cast(SilverWriterRuntimeServicesRequest, runtime_request)
+            if runtime_request.delta_module_loader is None:
+                runtime_request = replace(
+                    runtime_request,
+                    delta_module_loader=_load_silver_writer_patch_module,
+                )
 
         super().__init__(base_path, logger, flat_structure=flat_structure)
         services = _resolve_runtime_services_for_writer(

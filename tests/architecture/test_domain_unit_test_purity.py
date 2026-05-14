@@ -113,6 +113,14 @@ _ALLOWED_RUNTIME_SEAMS: dict[tuple[str, str], str] = {
         "yaml",
     ): "normalization/DQ parity contract parses canonical entity config",
     (
+        "tests/unit/domain/normalization/test_pubchem_constants_yaml.py",
+        "read_text",
+    ): "PubChem enum catalog contract reads canonical enum YAML",
+    (
+        "tests/unit/domain/normalization/test_pubchem_constants_yaml.py",
+        "yaml",
+    ): "PubChem enum catalog contract parses canonical enum YAML",
+    (
         "tests/unit/domain/schemas/test_constants_yaml.py",
         "exists",
     ): "schema constants sync contract verifies canonical enum YAML presence",

@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from bioetl.domain.normalization.json import deserialize_json_value
 from bioetl.domain.normalization.dates import normalize_partial_date
-from bioetl.domain.normalization.json import canonicalize_json_string
+from bioetl.domain.normalization.json import canonicalize_json_string, serialize_json_canonical
 from bioetl.domain.normalization.reference_ids import (
     normalize_doi_reference_id,
     normalize_pmcid_reference_id,
@@ -34,6 +35,12 @@ def normalize_profile_json_string(value: object) -> object:
     except ValueError:
         return normalized
     return canonical if canonical is not None else normalized
+
+
+def normalize_profile_json_string_unordered_collection(value: object) -> object:
+    """Canonicalize one JSON-like unordered collection into deterministic row order."""
+    normalized = _normalize_unordered_json_collection(value)
+    return value if normalized is _UNHANDLED else normalized
 
 
 def normalize_profile_json_string_strict(value: object) -> object:
@@ -105,3 +112,30 @@ def normalize_profile_canonical_smiles(value: object) -> str | None:
 def normalize_profile_isomeric_smiles(value: object) -> str | None:
     """Normalize one isomeric-SMILES profile field."""
     return normalize_profile_smiles(value, is_canonical=False)
+
+
+_UNHANDLED = object()
+
+
+def _normalize_unordered_json_collection(value: object) -> object:
+    if isinstance(value, str):
+        normalized = normalize_string(value)
+        if normalized is None:
+            return None
+        try:
+            parsed = deserialize_json_value(normalized)
+        except ValueError:
+            return normalized
+    elif isinstance(value, list | tuple | set | frozenset):
+        parsed = list(value)
+    else:
+        return _UNHANDLED
+
+    if not isinstance(parsed, list):
+        return serialize_json_canonical(parsed) if isinstance(parsed, dict) else value
+
+    return serialize_json_canonical(_sort_json_collection(parsed))
+
+
+def _sort_json_collection(values: list[object]) -> list[object]:
+    return sorted(values, key=lambda item: serialize_json_canonical({"value": item}))

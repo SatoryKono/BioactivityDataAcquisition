@@ -38,12 +38,12 @@ def test_variable_reference_documents_all_shipped_dashboard_variables() -> None:
         "$payload_hash",
         "$workflow",
         "$status",
-        "$pipeline_context",
         "$run_type_context",
         "$provider_context",
         "$step_status",
         "$step_kind",
         "bioetl-overview-v2",
+        "bioetl-overview-v3",
         "bioetl-runtime",
         "bioetl-provider-health-v2",
         "bioetl-dq-v2",
@@ -69,10 +69,25 @@ def test_all_dashboard_variables_have_non_empty_descriptions() -> None:
 
 def test_variable_defaults_follow_repo_aligned_contract() -> None:
     overview = _variables("bioetl-overview-v2.json")
+    assert set(overview) == {"workflow", "pipeline", "run_type", "run_id"}
+    assert overview["workflow"].get("includeAll") is True
+    assert overview["workflow"].get("current", {}).get("text") == "All"
     assert overview["pipeline"].get("multi") is False
     assert overview["pipeline"].get("includeAll") is True
     assert overview["pipeline"].get("current", {}).get("text") == "All"
+    assert overview["run_type"].get("includeAll") is True
     assert overview["run_type"].get("current", {}).get("text") == "All"
+    assert overview["run_id"].get("multi") is False
+    assert overview["run_id"].get("includeAll") is False
+    assert overview["run_id"].get("current", {}).get("value") == "-"
+
+    overview_v3 = _variables("bioetl-overview-v3.json")
+    assert overview_v3["workflow"].get("includeAll") is True
+    assert overview_v3["pipeline"].get("includeAll") is True
+    assert overview_v3["run_type"].get("includeAll") is True
+    assert overview_v3["run_id"].get("multi") is False
+    assert overview_v3["run_id"].get("includeAll") is False
+    assert overview_v3["run_id"].get("current", {}).get("value") == "-"
 
     for dashboard_name in (
         "bioetl-control-plane-v1.json",
@@ -135,6 +150,7 @@ def test_variable_reference_explains_role_specific_exceptions() -> None:
         "run_type` always uses include-all fallback",
         "Pipeline-scoped operator dashboards используют single-select `$pipeline`",
         "кроме `bioetl-overview-v2`",
+        "`bioetl-overview-v2` uses control-plane-backed `$run_id=-`",
     }
     missing = sorted(token for token in required_tokens if token not in text)
     assert not missing, (

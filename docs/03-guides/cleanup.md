@@ -38,10 +38,15 @@ Use the repo cleanup tool only as an exact candidate discovery lane:
 ```bash
 # Dry run (show exact review/apply candidates)
 python -m scripts.ops.support.repo.cleanup_repository --dry-run \
-  --report-json reports/quality/root-hygiene-cleanup-classification.json
+  --report-json reports/quality/root-hygiene-cleanup-classification.json \
+  --report-root-review-json reports/quality/root-hygiene-review-evidence.json \
+  --report-reports-workspace-json reports/quality/reports-workspace-review.json
 
 # Apply only policy-approved local artifact candidates
 python -m scripts.ops.support.repo.cleanup_repository --apply
+
+# Apply only exact reviewed local-only reports workspace prune candidates
+python -m scripts.ops.support.repo.cleanup_repository --apply-reports-prune
 ```
 
 Tracked policy violations reported by this tool still require explicit git
@@ -113,6 +118,10 @@ The repository includes pre-commit hooks that prevent cache files from being com
 ### Weekly
 
 - Run repo-hygiene review lane in dry-run mode
+- Review `reports/quality/root-hygiene-review-evidence.json` for live root
+  mismatches and review-lane drift
+- Review `reports/quality/reports-workspace-review.json` for exact-path
+  `reports/` prune candidates before deleting local-only working outputs
 - Check repository size growth
 - Review CI/CD pipeline results
 
@@ -146,7 +155,7 @@ The repository includes pre-commit hooks that prevent cache files from being com
 ## 🎯 Best Practices
 
 1. **Always use dry-run first**: `python -m scripts.ops.support.repo.cleanup_repository --dry-run`
-1. **Attach machine-readable evidence**: add `--report-json reports/quality/root-hygiene-cleanup-classification.json`
+1. **Attach machine-readable evidence**: add `--report-json reports/quality/root-hygiene-cleanup-classification.json`, `--report-root-review-json reports/quality/root-hygiene-review-evidence.json`, and `--report-reports-workspace-json reports/quality/reports-workspace-review.json`
 1. **Commit cleanup changes separately**: Makes reviews easier
 1. **Document exceptions**: If you need to keep a cache file, document why
 1. **Use Git LFS for large files**: Anything >1MB should use LFS

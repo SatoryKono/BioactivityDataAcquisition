@@ -117,9 +117,11 @@ ______________________________________________________________________
 | **application**    | ✅     | ✅          | ❌             | ❌          | ❌         |
 | **infrastructure** | ✅     | ❌          | ✅             | ❌          | ❌         |
 | **composition**    | ✅     | ✅          | ✅             | ✅          | ❌         |
-| **interfaces**     | ✅     | ✅          | ✅             | ✅          | ✅         |
+| **interfaces**     | ✅     | ✅          | ❌             | ✅          | ✅         |
 
 **Violation = PR Blocker.** Enforced by `import-linter` and `tests/architecture/`.
+Direct `interfaces -> infrastructure` imports are forbidden; interfaces must
+obtain concrete runtime wiring through composition entrypoints.
 
 ### Key Patterns
 

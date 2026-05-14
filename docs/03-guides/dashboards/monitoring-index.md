@@ -20,7 +20,7 @@ Use the linked dashboards and artifacts for deep setup, contracts, and extension
 
 | Question / symptom | Open first | Then use | Owner doc |
 | ------------------ | ---------- | -------- | --------- |
-| What is currently broken or degraded? | `bioetl-overview-v2` | `System Status`, `Next Action`, then `0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow` | [Dashboard v2 Usage](dashboard-v2-usage.md) |
+| What is currently broken or degraded? | `bioetl-overview-v2` | `Status`, `Next Action`, then `0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow` | [Dashboard v2 Usage](dashboard-v2-usage.md) |
 | Runtime latency, logs, memory, or alert-condition concern? | `bioetl-runtime` | `bioetl diagnostics guide`; [Observability Checklist](../../05-operations/runbooks/observability-checklist.md) | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Provider retries, slowness, or failures? | `bioetl-provider-health-v2` | `bioetl diagnostics health --json`; provider incident runbook | [Incident Response](../../05-operations/runbooks/incident-response.md) |
 | DQ/freshness/quarantine signal concern? | `bioetl-dq-v2` | `bioetl diagnostics quarantine --pipeline <pipeline>` | [DQ Failure Investigation](../../05-operations/runbooks/dq-failure-investigation.md) |
@@ -35,20 +35,21 @@ Record-level forensics, exact replay evidence, and per-run identifiers belong in
 
 First-screen policy rule: every operator dashboard should expose one
 `ONE BIG QUESTION`, current scope, provenance summary and `First action`.
-Shipped v2 dashboards may satisfy this through distributed scope/status/context
-surfaces; draft v3.0 turns it into an explicit header contract.
+`1. Overview` now uses the frozen Overview v3 layout as the canonical example:
+the header is explicit, while other dashboards may satisfy the same policy
+through distributed scope/status/context surfaces.
 
-Current shipped draft bridge:
+Current canonical Overview baseline:
 
-- `bioetl-overview-v3` already materializes that explicit header contract
+- `bioetl-overview-v2` materializes the explicit header contract
 - it remains aggregate-first and routes exact run forensics to Control Plane /
-  Silver Reject Explorer
+  Silver Reject Explorer; its local `run_id` selector feeds only the `ID` panel
 
 ## If X symptom → open dashboard Y → panel Z
 
 | Symptom (X) | Dashboard (Y) | Panel (Z) |
 | --- | --- | --- |
-| "What is broken or degraded now?" | `bioetl-overview-v2` | `System Status`, then `Next Action` |
+| "What is broken or degraded now?" | `bioetl-overview-v2` | `Status`, then `Next Action` |
 | Runtime failures / lag / blocker drift | `bioetl-runtime` | `Monitor Runtime Current Status`, `Monitor Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Inspect Top Runtime Blockers` |
 | Provider degradation or retry exhaustion | `bioetl-provider-health-v2` | `Monitor GLOBAL Provider Severity Matrix`, `Inspect Provider Top Causes` |
 | DQ quality or quarantine increase | `bioetl-dq-v2` | `Monitor DQ Current Status`, `Monitor DQ Threshold State`, `Inspect DQ Current Reasons` |

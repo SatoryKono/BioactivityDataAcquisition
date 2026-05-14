@@ -44,6 +44,7 @@ def test_infer_source_metadata_from_repo_paths() -> None:
     )
     assert infer_source_type(Path("docs/plans/example.md")) == "plan"
     assert infer_source_type(Path("docs/00-project/overview.md")) == "doc"
+    assert infer_source_type(Path(".devin/wiki.json")) == "devin_wiki"
     assert infer_source_type(Path("src/memory/query.py")) == "memory"
     assert infer_source_type(Path("src/bioetl/application/service.py")) == "code"
     assert infer_source_type(Path("tests/unit/test_service.py")) == "test"
@@ -57,6 +58,7 @@ def test_infer_source_metadata_from_repo_paths() -> None:
     )
     assert infer_domain(Path("docs/05-operations/runbooks/example.md")) == "operations"
     assert infer_domain(Path(".github/workflows/tests.yml")) == "operations"
+    assert infer_domain(Path(".devin/wiki.json")) == "project"
     assert infer_domain(Path("docs/00-project/overview.md")) == "project"
     assert infer_domain(Path("src/memory/query.py")) == "memory_subsystem"
     assert infer_domain(Path("src/bioetl/application/service.py")) == "runtime"
@@ -116,9 +118,51 @@ def test_split_config_sections_serializes_dates_deterministically() -> None:
     assert sections[1].content == json.dumps("2026-04-29T12:34:56", ensure_ascii=True)
 
 
+def test_build_rag_manifests_indexes_devin_wiki_pages(tmp_path: Path) -> None:
+    (tmp_path / ".devin").mkdir(parents=True)
+    (tmp_path / ".devin" / "wiki.json").write_text(
+        json.dumps(
+            {
+                "repo_notes": [{"content": "Navigation seed for onboarding."}],
+                "pages": [
+                    {
+                        "title": "BioETL Overview",
+                        "purpose": "High-level project map.",
+                        "page_notes": [{"content": "Top-level wiki page."}],
+                    },
+                    {
+                        "title": "Architecture",
+                        "purpose": "Hexagonal architecture and medallion overview.",
+                        "parent": "BioETL Overview",
+                        "page_notes": [],
+                    },
+                ],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    catalog, chunks = build_rag_manifests(tmp_path)
+
+    assert catalog["source_count"] == 1
+    assert catalog["sources"][0]["source_type"] == "devin_wiki"
+    assert catalog["sources"][0]["repo_zone"] == "derived_navigation_context"
+    assert catalog["sources"][0]["section_count"] == 3
+
+    page_chunk = next(chunk for chunk in chunks if chunk["title"] == "Architecture")
+    assert page_chunk["source_type"] == "devin_wiki"
+    assert page_chunk["symbol_kind"] == "wiki_page"
+    assert page_chunk["source_path"] == ".devin/wiki.json#architecture"
+    assert "Parent: BioETL Overview" in page_chunk["content"]
+    assert "devin-wiki-page::architecture" in page_chunk["related_refs"]
+    assert "doc_artifact:.devin/wiki.json" in page_chunk["graph_node_refs"]
+
+
 def test_build_rag_manifests_indexes_docs_code_tests_and_configs(
     tmp_path: Path,
 ) -> None:
+    (tmp_path / ".devin").mkdir(parents=True)
     (tmp_path / "docs/00-project").mkdir(parents=True)
     (tmp_path / "docs/02-architecture/decisions").mkdir(parents=True)
     (tmp_path / "docs/plans").mkdir(parents=True)
@@ -170,16 +214,33 @@ def test_build_rag_manifests_indexes_docs_code_tests_and_configs(
         "#!/usr/bin/env bash\nset -euo pipefail\n",
         encoding="utf-8",
     )
+    (tmp_path / ".devin/wiki.json").write_text(
+        json.dumps(
+            {
+                "repo_notes": [],
+                "pages": [
+                    {
+                        "title": "BioETL Overview",
+                        "purpose": "High-level introduction to the project.",
+                        "page_notes": [],
+                    }
+                ],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     (tmp_path / "docs/99-archive/ignored.md").write_text("# Ignore\n", encoding="utf-8")
 
     catalog, chunks = build_rag_manifests(tmp_path)
 
-    assert catalog["source_count"] == 10
+    assert catalog["source_count"] == 11
     assert {item["source_type"] for item in catalog["sources"]} == {
         "doc",
         "adr",
         "plan",
         "runbook",
+        "devin_wiki",
         "code",
         "test",
         "config",
@@ -222,6 +283,11 @@ def test_build_rag_manifests_indexes_docs_code_tests_and_configs(
         "operational_artifact:.github/workflows/tests.yml"
         in workflow_chunk["graph_node_refs"]
     )
+    devin_chunk = next(
+        chunk for chunk in chunks if chunk["source_type"] == "devin_wiki"
+    )
+    assert devin_chunk["repo_zone"] == "derived_navigation_context"
+    assert devin_chunk["confidence"] == "derived"
 
 
 def test_write_and_reload_rag_manifests(tmp_path: Path) -> None:

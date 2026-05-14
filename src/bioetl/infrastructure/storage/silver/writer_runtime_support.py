@@ -85,6 +85,7 @@ def _resolve_runtime_services_for_writer(
         contract_rollout_policy=runtime_request.contract_rollout_policy,
         base_path=base_path,
         pipeline_name=writer._pipeline_name,
+        delta_module_loader=runtime_request.delta_module_loader,
     )
     return build_silver_writer_runtime_services(resolved_request)
 

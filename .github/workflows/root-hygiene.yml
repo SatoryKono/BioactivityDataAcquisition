@@ -41,12 +41,26 @@ jobs:
           --dry-run
           --detail-limit 0
           --report-json reports/quality/root-hygiene-cleanup-classification.json
+          --report-root-review-json reports/quality/root-hygiene-review-evidence.json
+          --report-reports-workspace-json reports/quality/reports-workspace-review.json
 
       - name: Upload cleanup classification evidence
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: root-hygiene-cleanup-classification
           path: reports/quality/root-hygiene-cleanup-classification.json
+
+      - name: Upload root review evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: root-hygiene-review-evidence
+          path: reports/quality/root-hygiene-review-evidence.json
+
+      - name: Upload reports workspace evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: reports-workspace-review
+          path: reports/quality/reports-workspace-review.json
 
       - name: Run root hygiene unit tests
         run: >

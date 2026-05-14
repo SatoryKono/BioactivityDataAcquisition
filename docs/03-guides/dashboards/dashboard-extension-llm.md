@@ -51,8 +51,10 @@ Grafana dashboards в BioETL.
   `Tier 1` answer surface first, `Tier 2` current context second,
   `Tier 3` selected-range evidence below fold, `Tier 4` collapsed diagnostics
   only for secondary or noisy detail.
-- `1. Overview` intentionally ships with `Pipeline=All` / `Run Type=All` as its
-  default entry scope.
+- `1. Overview` intentionally ships with `Workflow=All`, `Pipeline=All`,
+  `Run Type=All`, and `Run ID=-` as its default entry scope; `run_id` remains
+  local to the control-plane-backed `ID` panel and MUST NOT leak into
+  Prometheus queries or cross-dashboard links.
 - Во всех остальных pipeline/provider dashboards `$pipeline` и `$provider`
   остаются single-select; explicit fallback для неизвестного контекста —
   `unknown`.

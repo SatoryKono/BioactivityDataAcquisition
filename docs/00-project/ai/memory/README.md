@@ -44,6 +44,11 @@ same change set.
   `mcp-memory.json`
   — служебный memory snapshot для tooling/integration сценариев, не human
   source of truth.
+- **Derived navigation wiki**:
+  `.devin/wiki.json`
+  — вспомогательный onboarding/discovery surface для memory retrieval. Он
+  индексируется как derived navigation context и не может переопределять
+  canonical docs, ADR, configs или runtime code.
 - **Neo4j project-memory seed pack**:
   `neo4j-project-memory-seed.md` и `neo4j-project-memory-seed.json`
   — phase-by-phase prompts и structured seed facts для заполнения

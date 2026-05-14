@@ -67,6 +67,23 @@ explicit companions:
 Collection semantics are ordered sequence. Reordering feature objects is
 hash-affecting unless the governing policy changes explicitly.
 
+## Additional Structured Comment Projections
+
+The following `uniprot_protein` fields are now explicitly governed as
+canonical-only semantic payloads:
+
+| Field | Collection semantics | Current contract |
+| --- | --- | --- |
+| `alternative_products` | ordered sequence | persisted canonical JSON is the reviewed evidence surface |
+| `biophysicochemical_properties` | ordered sequence | persisted canonical JSON is the reviewed evidence surface |
+| `cofactors` | unordered set | persisted canonical JSON is the reviewed evidence surface |
+| `reactions` | ordered sequence | persisted canonical JSON is the reviewed evidence surface |
+
+These fields remain backed by
+`configs/vocab/uniprot_semantic_payloads.yaml`, but they do not yet ship
+additive `*_raw_json` companions. Any future raw-sidecar rollout is therefore a
+contract change, not an implicit normalizer tweak.
+
 ## Composite Target Impact
 
 Current composite target normalization boundary:
