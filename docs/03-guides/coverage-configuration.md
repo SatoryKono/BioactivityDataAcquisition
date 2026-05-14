@@ -135,6 +135,19 @@ uv run python -m coverage report --show-missing --fail-under=85
 
 Coverage CI check runs in `.github/workflows/tests.yml` → `coverage-verify` job.
 
+### First-Class Confidence Lanes
+
+The hard `85%` threshold is not the only merge-blocking test signal.
+BioETL also treats the following as first-class CI confidence lanes alongside
+`coverage-verify`:
+
+- `contract-confidence`
+- `control-plane-e2e`
+- `memory-tests`
+
+These lanes stay outside coverage combine on purpose, but failures block the
+workflow independently and are summarized in CI telemetry and step summaries.
+
 ______________________________________________________________________
 
 ## Understanding Exclude Patterns

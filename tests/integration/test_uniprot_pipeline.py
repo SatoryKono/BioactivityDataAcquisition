@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import pytest
 
@@ -18,6 +18,7 @@ from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunType
+from tests.helpers.deterministic_ids import deterministic_uuid
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 _MOCK_TOKEN = FencingToken(
@@ -124,7 +125,7 @@ class TestUniProtProteinPipelineTransform:
         mock_uniprot_services,
     ):
         """Тест трансформации полной записи Bronze → Silver."""
-        run_id = uuid4()
+        run_id = deterministic_uuid("uniprot.complete.pipeline")
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
@@ -138,7 +139,7 @@ class TestUniProtProteinPipelineTransform:
         )
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid("uniprot.complete.context"),
             run_type=RunType.INCREMENTAL,
             logger=mock_uniprot_services.logger,
         )
@@ -186,7 +187,7 @@ class TestUniProtProteinPipelineTransform:
         Protein entity requires: accession, entry_name.
         Optional fields: protein_name, gene_primary, taxonomy_id, sequence_length.
         """
-        run_id = uuid4()
+        run_id = deterministic_uuid("uniprot.minimal.pipeline")
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
@@ -200,7 +201,7 @@ class TestUniProtProteinPipelineTransform:
         )
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid("uniprot.minimal.context"),
             run_type=RunType.INCREMENTAL,
             logger=mock_uniprot_services.logger,
         )
@@ -236,7 +237,7 @@ class TestUniProtProteinPipelineTransform:
         mock_uniprot_services,
     ):
         """Тест: запись без primaryAccession возвращает None."""
-        run_id = uuid4()
+        run_id = deterministic_uuid("uniprot.missing_accession.pipeline")
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
@@ -250,7 +251,7 @@ class TestUniProtProteinPipelineTransform:
         )
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid("uniprot.missing_accession.context"),
             run_type=RunType.INCREMENTAL,
             logger=mock_uniprot_services.logger,
         )
@@ -274,7 +275,7 @@ class TestUniProtProteinPipelineTransform:
         protein_name is optional, so records without
         proteinDescription.recommendedName.fullName.value are accepted.
         """
-        run_id = uuid4()
+        run_id = deterministic_uuid("uniprot.missing_description.pipeline")
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
@@ -288,7 +289,7 @@ class TestUniProtProteinPipelineTransform:
         )
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid("uniprot.missing_description.context"),
             run_type=RunType.INCREMENTAL,
             logger=mock_uniprot_services.logger,
         )
@@ -321,7 +322,7 @@ class TestUniProtProteinPipelineTransform:
         mock_uniprot_services,
     ):
         """Тест трансформации записи с пустым списком генов."""
-        run_id = uuid4()
+        run_id = deterministic_uuid("uniprot.empty_genes.pipeline")
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
@@ -335,7 +336,7 @@ class TestUniProtProteinPipelineTransform:
         )
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid("uniprot.empty_genes.context"),
             run_type=RunType.INCREMENTAL,
             logger=mock_uniprot_services.logger,
         )
@@ -365,7 +366,7 @@ class TestUniProtProteinPipelineTransform:
         mock_uniprot_services,
     ):
         """Test extraction of taxonomy, GO, PTM, isoform, and reaction fields."""
-        run_id = uuid4()
+        run_id = deterministic_uuid("uniprot.new_fields.pipeline")
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
@@ -379,7 +380,7 @@ class TestUniProtProteinPipelineTransform:
         )
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid("uniprot.new_fields.context"),
             run_type=RunType.INCREMENTAL,
             logger=mock_uniprot_services.logger,
         )
@@ -564,7 +565,7 @@ class TestUniProtProteinPipelineCreate:
         mock_uniprot_services,
     ):
         """Тест создания пайплайна через factory method."""
-        run_id = uuid4()
+        run_id = deterministic_uuid("uniprot.create.pipeline")
         pipeline = UniProtProteinPipeline.create(
             run_id=run_id,
             runtime=uniprot_runtime,
@@ -589,7 +590,7 @@ class TestUniProtProteinPipelineEdgeCases:
         mock_uniprot_services,
     ):
         """Тест трансформации с некорректной структурой genes."""
-        run_id = uuid4()
+        run_id = deterministic_uuid("uniprot.malformed_genes.pipeline")
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
@@ -603,7 +604,7 @@ class TestUniProtProteinPipelineEdgeCases:
         )
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid("uniprot.malformed_genes.context"),
             run_type=RunType.INCREMENTAL,
             logger=mock_uniprot_services.logger,
         )
@@ -639,7 +640,7 @@ class TestUniProtProteinPipelineEdgeCases:
         mock_uniprot_services,
     ):
         """Тест трансформации с None organism."""
-        run_id = uuid4()
+        run_id = deterministic_uuid("uniprot.none_organism.pipeline")
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
@@ -653,7 +654,7 @@ class TestUniProtProteinPipelineEdgeCases:
         )
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid("uniprot.none_organism.context"),
             run_type=RunType.INCREMENTAL,
             logger=mock_uniprot_services.logger,
         )

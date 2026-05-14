@@ -8,6 +8,17 @@ threshold_policy:
     Coverage enforcement is centralized in the dedicated coverage-verify job.
     Other jobs may contribute shard data or execution confidence without
     directly enforcing the threshold.
+confidence_accounting:
+  first_class_confidence: true
+  hard_threshold_gate: coverage-verify
+  blocking_confidence_lanes:
+    - contract-confidence
+    - control-plane-e2e
+    - memory-tests
+  notes: >-
+    Repo health is determined by both the hard coverage threshold and the
+    blocking confidence lanes that deliberately stay outside the coverage
+    combine path.
 confidence_lane_policy:
   notes: >-
     Contract, e2e, and memory confidence lanes are blocking pass/fail gates even
@@ -26,7 +37,8 @@ lanes:
     execution_confidence_role: dependency_smoke
     notes: >-
       Smoke check provides minimal dependency/import confidence before heavier
-      lanes start, but it no longer emits coverage data into the hard gate.
+      lanes start, excludes memory-marked smoke tests, and it no longer emits
+      coverage data into the hard gate.
   - job: control-plane-e2e
     lane_type: execution_only
     blocking_confidence_lane: true
@@ -84,7 +96,7 @@ lanes:
     execution_confidence_role: neo4j_memory_isolated_execution
     blocking_assertions:
       command_contains:
-        - tests/unit/scripts/ops/
+        - tests/smoke/test_neo4j_memory_mcp_smoke.py
         - -m "memory"
         - --junitxml=reports/test-telemetry/junit-memory.xml
       required_artifacts:

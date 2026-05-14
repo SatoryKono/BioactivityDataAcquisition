@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import pytest
 
@@ -18,6 +18,7 @@ from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunType
+from tests.helpers.deterministic_ids import deterministic_uuid
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 _MOCK_TOKEN = FencingToken(
@@ -126,7 +127,7 @@ class TestPubChemCompoundPipelineTransform:
         mock_pubchem_services,
     ):
         """Тест трансформации полной записи Bronze → Silver."""
-        run_id = uuid4()
+        run_id = deterministic_uuid("pubchem.complete.pipeline")
         pipeline = PubChemCompoundPipeline(
             config=pubchem_config,
             runtime=pubchem_runtime,
@@ -140,7 +141,7 @@ class TestPubChemCompoundPipelineTransform:
         )
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid("pubchem.complete.context"),
             run_type=RunType.INCREMENTAL,
             logger=mock_pubchem_services.logger,
         )
@@ -185,7 +186,7 @@ class TestPubChemCompoundPipelineTransform:
         (canonical_smiles, isomeric_smiles, or inchi). Records without
         structural identifiers are rejected per entity invariant.
         """
-        run_id = uuid4()
+        run_id = deterministic_uuid("pubchem.partial.pipeline")
         pipeline = PubChemCompoundPipeline(
             config=pubchem_config,
             runtime=pubchem_runtime,
@@ -199,7 +200,7 @@ class TestPubChemCompoundPipelineTransform:
         )
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid("pubchem.partial.context"),
             run_type=RunType.INCREMENTAL,
             logger=mock_pubchem_services.logger,
         )
@@ -237,7 +238,7 @@ class TestPubChemCompoundPipelineTransform:
         Compound entity invariant requires at least one of:
         canonical_smiles, isomeric_smiles, or inchi.
         """
-        run_id = uuid4()
+        run_id = deterministic_uuid("pubchem.no_structural_id.pipeline")
         pipeline = PubChemCompoundPipeline(
             config=pubchem_config,
             runtime=pubchem_runtime,
@@ -251,7 +252,7 @@ class TestPubChemCompoundPipelineTransform:
         )
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid("pubchem.no_structural_id.context"),
             run_type=RunType.INCREMENTAL,
             logger=mock_pubchem_services.logger,
         )
@@ -275,7 +276,7 @@ class TestPubChemCompoundPipelineTransform:
         mock_pubchem_services,
     ):
         """Тест: запись без CID возвращает None."""
-        run_id = uuid4()
+        run_id = deterministic_uuid("pubchem.missing_molecule_id.pipeline")
         pipeline = PubChemCompoundPipeline(
             config=pubchem_config,
             runtime=pubchem_runtime,
@@ -289,7 +290,7 @@ class TestPubChemCompoundPipelineTransform:
         )
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid("pubchem.missing_molecule_id.context"),
             run_type=RunType.INCREMENTAL,
             logger=mock_pubchem_services.logger,
         )
@@ -314,7 +315,7 @@ class TestPubChemCompoundPipelineCreate:
         mock_pubchem_services,
     ):
         """Тест создания пайплайна через factory method."""
-        run_id = uuid4()
+        run_id = deterministic_uuid("pubchem.create.pipeline")
         pipeline = PubChemCompoundPipeline.create(
             run_id=run_id,
             runtime=pubchem_runtime,

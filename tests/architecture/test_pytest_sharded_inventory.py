@@ -64,6 +64,15 @@ def test_pytest_shard_inventory_declares_canonical_schema_and_aliases() -> None:
         "S7-crosscutting-architecture-c",
         "S7-crosscutting-architecture-d",
     ]
+    assert aliases["S7-architecture-fast-boundary"]["expands_to"] == [
+        "S7-crosscutting-architecture-a",
+        "S7-crosscutting-architecture-b",
+        "S7-crosscutting-architecture-c",
+        "S7-crosscutting-architecture-d",
+    ]
+    assert aliases["S7-architecture-slow-governance"]["expands_to"] == [
+        "S7-crosscutting-architecture-guardrails",
+    ]
 
 
 @pytest.mark.architecture
