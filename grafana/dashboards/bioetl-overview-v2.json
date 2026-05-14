@@ -240,7 +240,7 @@
     {
       "id": 215,
       "type": "table",
-      "title": "Next Action",
+      "title": "First Action",
       "gridPos": {
         "h": 6,
         "w": 8,
@@ -1931,7 +1931,7 @@
           "legendFormat": "{{pipeline}}/{{run_type}}"
         }
       ],
-      "description": "Selected-range L1 runtime evidence for the active pipeline/run_type scope. This compact trend is below the current verdict path and does not determine L0 Status or Next Action. Shows OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null); missing series or gaps remain diagnostic and must not be treated as OK. Open Runtime for detailed blocker conditions."
+      "description": "Selected-range L1 runtime evidence for the active pipeline/run_type scope. This compact trend is below the current verdict path and does not determine L0 Status or First Action. Shows OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null); missing series or gaps remain diagnostic and must not be treated as OK. Open Runtime for detailed blocker conditions."
     },
     {
       "id": 9019,
@@ -2046,7 +2046,7 @@
           "legendFormat": "{{pipeline}}/{{run_type}}"
         }
       ],
-      "description": "Selected-range L1 Data Quality evidence for the active pipeline/run_type scope. This compact trend is below the current verdict path and does not determine L0 Status or Next Action. Shows OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null); missing series or gaps remain diagnostic and must not be treated as OK. Open Data Quality for detailed DQ conditions."
+      "description": "Selected-range L1 Data Quality evidence for the active pipeline/run_type scope. This compact trend is below the current verdict path and does not determine L0 Status or First Action. Shows OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null); missing series or gaps remain diagnostic and must not be treated as OK. Open Data Quality for detailed DQ conditions."
     },
     {
       "id": 9020,
@@ -2167,7 +2167,7 @@
           "legendFormat": "{{pipeline}}/{{run_type}}/{{lifecycle_state}}"
         }
       ],
-      "description": "Selected-range L1 data-validation lifecycle evidence for the active pipeline/run_type scope. This compact trend is below the current verdict path and does not determine L0 Status or Next Action. Legend includes pipeline/run_type/lifecycle_state; disabled Gold stage returns OK as a valid non-error state. Missing series or gaps remain diagnostic and must not be treated as OK. Open Runtime for lifecycle-state detail or Control Plane for replay/manifest context."
+      "description": "Selected-range L1 data-validation lifecycle evidence for the active pipeline/run_type scope. This compact trend is below the current verdict path and does not determine L0 Status or First Action. Legend includes pipeline/run_type/lifecycle_state; disabled Gold stage returns OK as a valid non-error state. Missing series or gaps remain diagnostic and must not be treated as OK. Open Runtime for lifecycle-state detail or Control Plane for replay/manifest context."
     },
     {
       "id": 9009,
@@ -2254,7 +2254,7 @@
               }
             }
           ],
-          "description": "Selected-range historical failure evidence only. Keeps pipeline and run_type labels from the active Grafana window and remains below the current verdict path; it does not determine L0 Status or Next Action. Zero matching rows means no failed-run samples in the selected range, not proof that the current scope is OK. Open Runtime for failed-run and blocker localization."
+          "description": "Selected-range historical failure evidence only. Keeps pipeline and run_type labels from the active Grafana window and remains below the current verdict path; it does not determine L0 Status or First Action. Zero matching rows means no failed-run samples in the selected range, not proof that the current scope is OK. Open Runtime for failed-run and blocker localization."
         },
         {
           "id": 9011,
@@ -2335,7 +2335,7 @@
               }
             }
           ],
-          "description": "Selected-range terminal-run evidence only. Shows non-success terminal statuses grouped by pipeline so the evidence table stays readable without scroll while preserving the active Grafana time window. This panel is below the current verdict path and does not determine L0 Status or Next Action; no terminal rows is not proof that the current scope is OK. Open Control Plane for manifest/terminal-run proof or Runtime for execution localization."
+          "description": "Selected-range terminal-run evidence only. Shows non-success terminal statuses grouped by pipeline so the evidence table stays readable without scroll while preserving the active Grafana time window. This panel is below the current verdict path and does not determine L0 Status or First Action; no terminal rows is not proof that the current scope is OK. Open Control Plane for manifest/terminal-run proof or Runtime for execution localization."
         },
         {
           "id": 9015,
@@ -2463,7 +2463,7 @@
             "y": 23
           },
           "options": {
-            "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.6\">Raw metric starting points for this dashboard are<br><strong>System Status:</strong> <code>bioetl_l0_status{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>,<br><strong>Next Action:</strong> <code>bioetl_l0_next_action_route{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>,<br><strong>Input Status:</strong> <code>bioetl_l0_input_status_selected{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>.<br>Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider Health, and Workflow dashboards.<br>Historical evidence stays in the row above.</div>",
+            "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.6\">Raw metric starting points for this dashboard are<br><strong>System Status:</strong> <code>bioetl_l0_status{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>,<br><strong>First Action route:</strong> <code>bioetl_l0_next_action_route{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>,<br><strong>Input Status:</strong> <code>bioetl_l0_input_status_selected{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>.<br>Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider Health, and Workflow dashboards.<br>Historical evidence stays in the row above.</div>",
             "mode": "html"
           },
           "links": [],

@@ -97,6 +97,57 @@ Bounded DQ golden bundles обновляются вместе с изменен�
 должны оставаться перечисленными в
 `configs/quality/test_matrix.yaml -> fixture_governance.gold_snapshot_registry`.
 
+### Nullable Numeric Compatibility
+
+Gold JSON contracts intentionally publish selected nullable numeric fields as
+`["number", "null"]` even when upstream Silver/runtime semantics are
+integer-like or provider-native values are parsed from strings. This convention
+keeps strict Gold validation compatible with Pandera nullable numeric columns
+while preserving semantic meaning in field names, DQ rules, filters and
+transformers.
+
+The guardrail is
+`python3 scripts/engineering/qa/check_gold_nullable_numeric_compatibility.py --check`.
+It verifies the published Gold JSON contracts, source Pandera markers, and this
+documentation section for the compatibility families below.
+
+#### Publication Nullable Integer Compatibility
+
+Publication Silver/common schemas keep `publication_year` as nullable integer
+semantics (`Series[pd.Int64Dtype]`) so provider transformers preserve the
+business meaning of a year. Gold publication contracts intentionally export the
+same field as nullable `number` (`Series[float]`, `coerce=True`) because Pandera
+uses float compatibility for nullable numeric columns in strict Gold outputs.
+
+This is a compatibility convention, not a semantic rename: `publication_year`
+remains an integer-like year constrained to the configured 1500-2100 range.
+Published JSON contracts for ChEMBL, CrossRef, OpenAlex, PubMed and
+SemanticScholar publication Gold schemas must therefore continue to expose
+`publication_year` as `["number", "null"]` while Silver/runtime schemas keep
+the integer intent explicit.
+
+Publication citation counters such as `citations_received` and
+`citations_made` follow the same nullable `number` convention in Gold. They
+remain count semantics with non-negative DQ/Pandera constraints where the
+provider contract exposes the field.
+
+#### Molecule Descriptor Numeric Compatibility
+
+ChEMBL and PubChem molecule descriptors use nullable `number` in Gold for
+computed or provider-supplied descriptor families such as `molecular_weight`,
+`logp`/`xlogp`, `polar_surface_area`/`tpsa`, `hba_count`, and `hbd_count`.
+Canonical registry aliases preserve semantic identity across provider naming,
+while the Gold JSON surface remains provider-contract specific.
+
+#### Activity Measurement Numeric Compatibility
+
+ChEMBL activity measurements and derived metrics such as `value`,
+`standard_value`, `standard_upper_value`, `pchembl_value`, and
+`ligand_efficiency_*` are nullable `number` in Gold. They remain measurement
+semantics constrained by DQ filters, units policy, ontology mapping policy, and
+activity-specific Pandera checks; the nullable numeric representation is a Gold
+compatibility surface, not a relaxation of activity measurement meaning.
+
 ______________________________________________________________________
 
 ## Архитектура Gold-слоя

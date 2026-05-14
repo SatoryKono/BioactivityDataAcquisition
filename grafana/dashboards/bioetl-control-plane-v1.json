@@ -451,7 +451,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
+        "w": 6,
         "x": 0,
         "y": 14
       },
@@ -504,8 +504,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 5,
-        "x": 4,
+        "w": 6,
+        "x": 6,
         "y": 14
       },
       "id": 892,
@@ -582,8 +582,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 5,
-        "x": 9,
+        "w": 6,
+        "x": 12,
         "y": 14
       },
       "id": 893,
@@ -683,8 +683,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 5,
-        "x": 14,
+        "w": 6,
+        "x": 18,
         "y": 14
       },
       "id": 907,
@@ -725,10 +725,10 @@
       "type": "text",
       "title": "Next Action: Replay Diagnostics",
       "gridPos": {
-        "h": 4,
-        "w": 5,
-        "x": 19,
-        "y": 14
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 7
       },
       "options": {
         "content": "### Next step\nOpen Replay diagnostics for blockers. If telemetry is non-zero or UNKNOWN, validate scrape/rules before replay/resume. Use Manifest Inspection for proof.",

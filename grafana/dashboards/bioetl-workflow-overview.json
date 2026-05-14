@@ -386,22 +386,6 @@
       ]
     },
     {
-      "gridPos": {
-        "h": 4,
-        "w": 24,
-        "x": 0,
-        "y": 13
-      },
-      "id": 1,
-      "options": {
-        "content": "<center><h2>Workflow Evidence / $workflow</h2><div>Run status: $status · Step status: $step_status · Step kind: $step_kind</div></center>",
-        "mode": "html"
-      },
-      "title": "Workflow Scope",
-      "type": "text",
-      "description": "Shows selected-range workflow evidence only, not current live run state. Variables: `Workflow` filters bounded workflow name; `Run Status` filters workflow run outcomes; `Step Status` and `Step Kind` filter step evidence panels. Hidden context selectors preserve single-pipeline handoff scope as `pipeline_context`, `run_type_context`, and `provider_context`; multi-pipeline workflows fail-close those values. No run_id, stage, dependency, enricher, merge, cross-validation, or manifest-level labels exist on these Prometheus metrics. If selected-range failures are non-zero, continue in `2. Runtime` for stage/runtime blockers, `4. Data Quality` for validation/quarantine signals, `3. Provider Health` for upstream provider incidents, or `0. Control Plane` for replay/resume and ledger evidence."
-    },
-    {
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -438,7 +422,7 @@
         "h": 5,
         "w": 6,
         "x": 0,
-        "y": 17
+        "y": 13
       },
       "id": 2,
       "options": {
@@ -502,7 +486,7 @@
         "h": 5,
         "w": 6,
         "x": 6,
-        "y": 17
+        "y": 13
       },
       "id": 3,
       "options": {
@@ -566,7 +550,7 @@
         "h": 5,
         "w": 6,
         "x": 12,
-        "y": 17
+        "y": 13
       },
       "id": 6,
       "options": {
@@ -630,7 +614,7 @@
         "h": 5,
         "w": 6,
         "x": 18,
-        "y": 17
+        "y": 13
       },
       "id": 7,
       "options": {
@@ -674,9 +658,9 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 24,
         "x": 0,
-        "y": 22
+        "y": 18
       },
       "id": 4,
       "options": {
@@ -709,14 +693,14 @@
     },
     {
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 22
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 7
       },
       "id": 9,
       "options": {
-        "content": "<h3>Next Diagnostic Surface</h3><ul><li><strong>2. Runtime</strong>: locate blocking stage, backlog, error-code, or logs/traces when pipeline-step failures appear.</li><li><strong>4. Data Quality</strong>: investigate validation failures, quarantine, filtered-out paths, or transform-side rejects.</li><li><strong>3. Provider Health</strong>: use when workflow failure correlates with upstream provider degradation.</li><li><strong>0. Control Plane</strong>: inspect manifest, ledger, replay/resume, checkpoint, and terminal run evidence.</li><li><strong>1. Overview</strong>: return to L0 when workflow evidence must be prioritized against other incident domains.</li></ul>",
+        "content": "<h3>First Action</h3><ul><li><strong>Scope:</strong> selected-range workflow evidence only, not current live run state.</li><li><strong>2. Runtime</strong>: locate blocking stage, backlog, error-code, or logs/traces when pipeline-step failures appear.</li><li><strong>4. Data Quality</strong>: investigate validation failures, quarantine, filtered-out paths, or transform-side rejects.</li><li><strong>3. Provider Health</strong>: use when workflow failure correlates with upstream provider degradation.</li><li><strong>0. Control Plane</strong>: inspect manifest, ledger, replay/resume, checkpoint, and terminal run evidence.</li><li><strong>1. Overview</strong>: return to L0 when workflow evidence must be prioritized against other incident domains.</li></ul>",
         "dataLinks": [
           {
             "title": "Open 2. Runtime",
@@ -751,9 +735,41 @@
         ],
         "mode": "html"
       },
-      "title": "Next Diagnostic Surface",
+      "links": [
+        {
+          "title": "Open 2. Runtime",
+          "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&var-run_type=$run_type_context&var-stage=unknown&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open 4. Data Quality",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&var-run_type=$run_type_context&var-stage=unknown&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open 3. Provider Health",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$provider_context&var-pipeline_context=$pipeline_context&var-adapter=unknown&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open 0. Control Plane",
+          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&var-run_type=$run_type_context&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open 1. Overview",
+          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&var-run_type=$run_type_context&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        }
+      ],
+      "title": "First Action",
       "type": "text",
-      "description": "Static operator handoff guide for the selected-range workflow evidence above. This panel intentionally does not claim stage, run_id, dependency, enricher, merge, cross-validation, or Gold-write coverage because those dimensions are not present on `bioetl_workflow_*` metrics. It is the one justified panel-level CTA exception on this dashboard, so its bounded `Open ...` dataLinks duplicate the header bus intentionally while preserving the selected time range and mapping single-pipeline workflow context into downstream dashboard scope."
+      "description": "First operator handoff for selected-range workflow evidence on this dashboard. It explicitly preserves the selected-range-only interpretation that used to live in Workflow Scope: this surface does not provide current live run state. Continue in `2. Runtime` for stage/runtime blockers, `4. Data Quality` for validation, quarantine, dependency, filtered-out, or transform-side rejects, `3. Provider Health` for upstream provider incidents, `0. Control Plane` for replay/resume and ledger evidence, or `1. Overview` for L0 prioritization. This panel intentionally does not claim stage, run_id, dependency, enricher, merge, cross-validation, or gold-write proof from `bioetl_workflow_*` metrics; those dimensions require downstream surfaces. It occupies the shared-shell CTA slot beside `ID` and `Processed Records` and remains the one justified panel-level CTA exception on this dashboard."
     },
     {
       "collapsed": true,
@@ -761,7 +777,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 26
       },
       "id": 10,
       "panels": [

@@ -95,6 +95,7 @@ _CONTROLLED_CONFIDENCE_FIELDS = chembl_controlled_family_fields(
 )
 _REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("assay")
 
+
 def create_case_normalizer(strategy: str = "uppercase") -> Callable[[str], str | None]:
     """Create a case normalizer function with the specified strategy.
 

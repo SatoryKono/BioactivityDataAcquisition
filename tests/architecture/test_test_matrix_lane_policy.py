@@ -172,6 +172,10 @@ class TestCanonicalTestLanes:
 
         assert repo_wide_coverage_lanes == {"coverage-verify"}
         assert lanes_with_coverage_args == {"coverage-verify"}
+        assert "--cov-fail-under=85" not in lanes["coverage-verify"]["pytest_args"], (
+            "coverage-verify shard lane must not enforce the hard threshold before "
+            "combined coverage is computed"
+        )
 
     def test_lane_marker_boundaries_match_current_policy(self) -> None:
         matrix = load_matrix()
@@ -189,10 +193,16 @@ class TestCanonicalTestLanes:
             == "security and not benchmark and not memory"
         )
         assert lanes["architecture"]["runner_backend"] == "run_pytest_sharded"
-        assert "S7-architecture-fast-boundary" in lanes["architecture"]["runner_options"]
-        assert "S7-architecture-slow-governance" in lanes["architecture"]["runner_options"]
+        assert (
+            "S7-architecture-fast-boundary" in lanes["architecture"]["runner_options"]
+        )
+        assert (
+            "S7-architecture-slow-governance" in lanes["architecture"]["runner_options"]
+        )
         assert lanes["memory"]["marker_expression"] == "memory and not benchmark"
-        assert lanes["memory"]["paths"] == ["tests/smoke/test_neo4j_memory_mcp_smoke.py"]
+        assert lanes["memory"]["paths"] == [
+            "tests/smoke/test_neo4j_memory_mcp_smoke.py"
+        ]
         assert lanes["performance"]["marker_expression"] == "benchmark and performance"
         assert "-p" in lanes["performance"]["pytest_args"]
         assert "no:xdist" in lanes["performance"]["pytest_args"]

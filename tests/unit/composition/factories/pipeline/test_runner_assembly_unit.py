@@ -315,4 +315,3 @@ def test_build_checkpoint_manager_coerces_observe_to_hard_fail_for_replay_ready(
     assert warning_kwargs["required_persistence_profile"] == "replay_ready"
     assert warning_kwargs["requested_policy"] == "observe"
     assert warning_kwargs["applied_policy"] == "hard_fail"
-

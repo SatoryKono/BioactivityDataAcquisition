@@ -445,10 +445,11 @@ def expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
         or "degraded_observable"
     )
     requested_policy = manifest.launch_context.get("checkpoint_compatibility_policy")
-    if (
-        not isinstance(requested_policy, str)
-        or requested_policy not in {"observe", "soft_fail", "hard_fail"}
-    ):
+    if not isinstance(requested_policy, str) or requested_policy not in {
+        "observe",
+        "soft_fail",
+        "hard_fail",
+    }:
         requested_policy = None
     applied_policy = resolve_checkpoint_policy(
         requested_exact_replay=requested_exact_replay,

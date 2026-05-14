@@ -175,9 +175,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             dq_policy_ref=self._context.dq_policy_ref,
             rule_bundle_version=self._context.rule_bundle_version,
             normalization_profile_ref=self._context.normalization_profile_ref,
-            normalization_profile_version=(
-                self._context.normalization_profile_version
-            ),
+            normalization_profile_version=(self._context.normalization_profile_version),
             normalization_profile_hash=self._context.normalization_profile_hash,
             dq_contract_compatibility_hash=(
                 self._context.dq_contract_compatibility_hash

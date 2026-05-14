@@ -19,6 +19,8 @@ from bioetl.interfaces.cli.registry_helpers import build_cli_registry
 def _no_args(_module: ModuleType) -> tuple[tuple[object, ...], dict[str, object]]:
     """Build an empty invocation for zero-argument wrappers."""
     return (), {}
+
+
 def _registry_kwarg(
     _module: ModuleType,
 ) -> tuple[tuple[object, ...], dict[str, object]]:

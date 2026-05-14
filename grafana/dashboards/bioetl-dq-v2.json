@@ -387,22 +387,6 @@
       ]
     },
     {
-      "gridPos": {
-        "h": 3,
-        "w": 12,
-        "x": 0,
-        "y": 13
-      },
-      "id": 99,
-      "options": {
-        "content": "<center><h2>4. Data Quality / $pipeline</h2><div><strong>Current window:</strong> 15m pipeline-wide DQ status. <strong>Run type:</strong> $run_type shapes selected-range evidence below.</div></center>",
-        "mode": "html"
-      },
-      "description": "Scope banner for the Data Quality dashboard. The first-screen answer row is current and pipeline-wide from fixed recording-rule windows; run_type and stage mostly shape selected-range evidence below, not the current-status verdict.",
-      "title": "Review: Pipeline Scope",
-      "type": "text"
-    },
-    {
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -450,7 +434,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 35
+        "y": 32
       },
       "id": 1,
       "options": {
@@ -563,7 +547,7 @@
         "h": 7,
         "w": 5,
         "x": 0,
-        "y": 16
+        "y": 13
       },
       "id": 9100,
       "options": {
@@ -662,7 +646,7 @@
         "h": 7,
         "w": 5,
         "x": 5,
-        "y": 16
+        "y": 13
       },
       "id": 9101,
       "options": {
@@ -742,7 +726,7 @@
         "h": 7,
         "w": 10,
         "x": 10,
-        "y": 16
+        "y": 13
       },
       "id": 9102,
       "options": {
@@ -783,10 +767,10 @@
       "type": "text",
       "title": "Review: First Action",
       "gridPos": {
-        "h": 7,
-        "w": 4,
-        "x": 20,
-        "y": 16
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 7
       },
       "options": {
         "content": "<div style=\"padding:0.45rem 0.65rem;line-height:1.5\"><strong>CRIT:</strong> inspect DQ reasons first; if <strong>filtered_out=0</strong>, check <strong>Quarantined</strong>, <strong>Silver Validation Failures</strong>, and <strong>Blocked Share</strong> before assuming the incident is a reject-path issue. <strong>WARN:</strong> open Silver Reject Explorer. <strong>Scope:</strong> status above is pipeline-wide; <strong>$run_type</strong> and stage filters shape only selected-range evidence below. <strong>invalid_record_policy</strong> visibility absent = UNKNOWN.</div>",
@@ -868,7 +852,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 23
+        "y": 20
       },
       "id": 2,
       "options": {
@@ -947,7 +931,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 44
+        "y": 41
       },
       "id": 3,
       "options": {
@@ -1016,7 +1000,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 44
+        "y": 41
       },
       "id": 4,
       "options": {
@@ -1095,7 +1079,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 23
+        "y": 20
       },
       "id": 5,
       "options": {
@@ -1169,7 +1153,7 @@
         "h": 5,
         "w": 8,
         "x": 0,
-        "y": 30
+        "y": 27
       },
       "id": 6,
       "options": {
@@ -1250,7 +1234,7 @@
         "h": 5,
         "w": 8,
         "x": 8,
-        "y": 30
+        "y": 27
       },
       "id": 7,
       "options": {
@@ -1339,7 +1323,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 23
+        "y": 20
       },
       "id": 8,
       "options": {
@@ -1422,7 +1406,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 44
+        "y": 41
       },
       "id": 154,
       "options": {
@@ -1510,9 +1494,9 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
-        "w": 12,
-        "x": 12,
+        "h": 7,
+        "w": 4,
+        "x": 20,
         "y": 13
       },
       "id": 101,
@@ -1595,7 +1579,7 @@
         "h": 5,
         "w": 8,
         "x": 16,
-        "y": 30
+        "y": 27
       },
       "id": 117,
       "options": {
@@ -1638,7 +1622,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 51
+        "y": 48
       },
       "id": 220,
       "panels": [
@@ -1958,7 +1942,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 52
+        "y": 49
       },
       "id": 221,
       "panels": [

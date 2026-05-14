@@ -148,7 +148,9 @@ class TestUniProtIDMappingPipelineTransform:
             "reviewed": True,
         }
 
-        silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
+        silver_record = await pipeline.transform_bronze_to_silver(
+            context, bronze_record
+        )
 
         assert silver_record is not None
         assert silver_record["target_id"] == "CHEMBL204"
@@ -191,7 +193,9 @@ class TestUniProtIDMappingPipelineTransform:
             "taxonomy_id": "9606",
         }
 
-        silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
+        silver_record = await pipeline.transform_bronze_to_silver(
+            context, bronze_record
+        )
 
         assert silver_record is not None
         assert silver_record["mapping_status"] == "multiple"
@@ -230,7 +234,9 @@ class TestUniProtIDMappingPipelineTransform:
             "taxonomy_id": "10090",
         }
 
-        silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
+        silver_record = await pipeline.transform_bronze_to_silver(
+            context, bronze_record
+        )
 
         assert silver_record is not None
         assert silver_record["target_id"] == "CHEMBL9999999999"

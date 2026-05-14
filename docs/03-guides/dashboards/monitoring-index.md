@@ -20,7 +20,7 @@ Use the linked dashboards and artifacts for deep setup, contracts, and extension
 
 | Question / symptom | Open first | Then use | Owner doc |
 | ------------------ | ---------- | -------- | --------- |
-| What is currently broken or degraded? | `bioetl-overview-v2` | `Status`, `Next Action`, then `0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow` | [Dashboard v2 Usage](dashboard-v2-usage.md) |
+| What is currently broken or degraded? | `bioetl-overview-v2` | `Status`, `First Action`, then `0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow` | [Dashboard v2 Usage](dashboard-v2-usage.md) |
 | Runtime latency, logs, memory, or alert-condition concern? | `bioetl-runtime` | `bioetl diagnostics guide`; [Observability Checklist](../../05-operations/runbooks/observability-checklist.md) | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Provider retries, slowness, or failures? | `bioetl-provider-health-v2` | `bioetl diagnostics health --json`; provider incident runbook | [Incident Response](../../05-operations/runbooks/incident-response.md) |
 | DQ/freshness/quarantine signal concern? | `bioetl-dq-v2` | `bioetl diagnostics quarantine --pipeline <pipeline>` | [DQ Failure Investigation](../../05-operations/runbooks/dq-failure-investigation.md) |
@@ -50,8 +50,8 @@ Current canonical Overview baseline:
 
 | Symptom (X) | Dashboard (Y) | Panel (Z) |
 | --- | --- | --- |
-| "What is broken or degraded now?" | `bioetl-overview-v2` | `Status`, then `Next Action` |
-| Runtime failures / lag / blocker drift | `bioetl-runtime` | `Monitor Runtime Current Status`, `Monitor Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Inspect Top Runtime Blockers` |
+| "What is broken or degraded now?" | `bioetl-overview-v2` | `Status`, then `First Action` |
+| Runtime failures / lag / blocker drift | `bioetl-runtime` | `Runtime Status`, `Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Runtime Blockers` |
 | Provider degradation or retry exhaustion | `bioetl-provider-health-v2` | `Monitor GLOBAL Provider Severity Matrix`, `Inspect Provider Top Causes` |
 | DQ quality or quarantine increase | `bioetl-dq-v2` | `Monitor DQ Current Status`, `Monitor DQ Threshold State`, `Inspect DQ Current Reasons` |
 | Replay confidence / checkpoint issues | `bioetl-control-plane-v1` | `Track: Replay / Resume Blockers in Range` |

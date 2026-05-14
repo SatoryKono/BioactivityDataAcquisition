@@ -48,6 +48,8 @@ from bioetl.application.services.lineage.lineage_inspection_service import (
 from bioetl.application.services.lineage.metadata_coordinator import (
     MetadataCoordinator,
 )
+
+
 def test_legacy_control_plane_facades_point_to_canonical_package() -> None:
     assert RunManifestServicePackage is RunManifestService
     assert RunManifestInspectionServicePackage is RunManifestInspectionService

@@ -97,9 +97,8 @@ def build_run_replay_bundle_descriptor(
         "exact_replay_eligible",
         identity_graph.get("exact_replay_eligible", False),
     )
-    required_profile = (
-        persistence_profile.get("required_profile")
-        or diagnostics.get("required_persistence_profile")
+    required_profile = persistence_profile.get("required_profile") or diagnostics.get(
+        "required_persistence_profile"
     )
     bundle = {
         "control_plane": {
@@ -108,7 +107,9 @@ def build_run_replay_bundle_descriptor(
             "schema_version": manifest.schema_version,
             "execution_fingerprint": manifest.execution_fingerprint,
             "ledger_event_count": len(result.ledger_entries),
-            "event_family_counts": _dict_or_empty(diagnostics.get("event_family_counts")),
+            "event_family_counts": _dict_or_empty(
+                diagnostics.get("event_family_counts")
+            ),
             "event_type_counts": _dict_or_empty(diagnostics.get("event_type_counts")),
         },
         "code_provenance": {
@@ -166,9 +167,7 @@ def build_run_replay_bundle_descriptor(
         replay_capability=None if replay_capability is None else str(replay_capability),
         exact_replay_eligible=bool(exact_replay_eligible),
         replay_readiness_verdict=(
-            None
-            if replay_readiness_verdict is None
-            else str(replay_readiness_verdict)
+            None if replay_readiness_verdict is None else str(replay_readiness_verdict)
         ),
         exact_replay_support_boundary=(
             None

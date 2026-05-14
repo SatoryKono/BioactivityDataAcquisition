@@ -354,7 +354,9 @@ def _build_identity_rows(
     ]
 
 
-def _identity_row(parameter: str, value: object | None, *, unavailable: str) -> dict[str, str]:
+def _identity_row(
+    parameter: str, value: object | None, *, unavailable: str
+) -> dict[str, str]:
     return {
         "parameter": parameter,
         "value": _display(value, unavailable=unavailable),

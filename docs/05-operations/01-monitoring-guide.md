@@ -182,10 +182,13 @@ answer row, latency/localization и handoff-панели usable без Loki/Temp
 tracing-backed log hygiene живёт в collapsed row
 `Tracing-only Log Hygiene (requires optional tracing profile)`.
 
-- **Top answer row**:
-  `First Action`, `Monitor Runtime Current Status`,
-  `Monitor Runtime Blockers`, `Inspect Top Runtime Blockers`,
-  `Monitor Runtime Telemetry Gap`.
+- **Top answer area**:
+  `Monitor Runtime Current Status` and `Inspect Top Runtime Blockers` share the
+  current-cause row. The compact evidence row contains
+  `Monitor Worst Stage Lag`, `Monitor Runtime Blockers`,
+  `Monitor Runtime Error Rate`, `Monitor Runtime Telemetry Gap`, and
+  `Monitor Failed Runs`; `First Action` remains a full-width operator CTA below
+  those compact rows.
   Это первый экран triage. Если здесь уже понятно, что runtime blocked,
   оператор не должен сначала прокручивать в logs/traces.
   `Monitor Runtime Telemetry Gap` проверяет scrape plus runtime dashboard
@@ -194,8 +197,9 @@ tracing-backed log hygiene живёт в collapsed row
   Это intentional datasource trust marker: runtime сохраняет явный first-screen
   health signal только там, где без него zero-count cards можно спутать с
   healthy state.
-  `Monitor Failed Runs`, `Monitor Runtime Error Rate` и
-  `Monitor Worst Stage Lag` остаются selected-range evidence ниже answer row;
+  `Monitor Worst Stage Lag`, `Monitor Failed Runs` и
+  `Monitor Runtime Error Rate` остаются selected-range evidence; они не
+  определяют current status.
   `Inspect Active Runtime Blocker Detail` открывается как collapsed `Detect`
   drilldown, а не как отдельная first-screen guidance panel.
 

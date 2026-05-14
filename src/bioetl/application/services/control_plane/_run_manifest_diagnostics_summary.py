@@ -92,9 +92,7 @@ def _build_exact_replay_anchors(
         "contract_ref": summary.get("contract_ref"),
         "contract_version": summary.get("contract_version"),
         "normalization_profile_ref": summary.get("normalization_profile_ref"),
-        "normalization_profile_version": summary.get(
-            "normalization_profile_version"
-        ),
+        "normalization_profile_version": summary.get("normalization_profile_version"),
         "normalization_profile_hash": summary.get("normalization_profile_hash"),
         "effective_config_artifact_id": summary.get("effective_config_artifact_id"),
         "input_snapshot_identity_fingerprint": summary.get(

@@ -25,6 +25,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[3]
 MATRIX_PATH = ROOT / "configs" / "quality" / "test_matrix.yaml"
 CLASSIFIERS_PATH = ROOT / "configs" / "quality" / "test_health_classifiers.yaml"
+BASELINE_PATH = ROOT / "configs" / "quality" / "test_telemetry_baseline.yaml"
 DEFAULT_REPORTS_DIR = ROOT / "reports" / "quality" / "test-runs"
 
 
@@ -745,9 +746,85 @@ def _append_new_failures_section(
     lines.append("")
 
 
-def format_rollup_markdown(rollup: dict[str, Any]) -> str:
+def _load_committed_baseline(
+    baseline_path: Path = BASELINE_PATH,
+) -> dict[str, Any] | None:
+    if not baseline_path.exists():
+        return None
+    payload = yaml.safe_load(baseline_path.read_text(encoding="utf-8")) or {}
+    return payload if isinstance(payload, dict) else None
+
+
+def _append_baseline_section(
+    lines: list[str],
+    baseline: dict[str, Any] | None,
+) -> None:
+    lines.extend(
+        [
+            "## Current Authoritative Baseline",
+            "",
+            "- Current merge-blocking truth comes from live CI status and the "
+            "`coverage-verify` hard coverage gate.",
+            "- This rollup is historical evidence only and must not be read as the "
+            "current pass/fail baseline.",
+            "- Committed baseline artifact: "
+            "`configs/quality/test_telemetry_baseline.yaml`",
+        ]
+    )
+    if not baseline:
+        lines.extend(
+            [
+                "- Committed baseline payload: `missing`",
+                "",
+            ]
+        )
+        return
+
+    coverage = baseline.get("coverage", {})
+    duration = baseline.get("duration_telemetry", {})
+    actual_percent = coverage.get("actual_percent")
+    threshold_percent = coverage.get("threshold_percent")
+    total_cases = duration.get("total_cases")
+    coverage_display = (
+        "pending"
+        if actual_percent is None
+        else f"{float(actual_percent):.2f}%"
+    )
+    threshold_display = (
+        "pending"
+        if threshold_percent is None
+        else f"{float(threshold_percent):.1f}%"
+    )
+    total_cases_display = "pending" if total_cases is None else str(total_cases)
+    lines.extend(
+        [
+            f"- Source branch: `{baseline.get('source_branch') or 'pending'}`",
+            f"- Source commit: `{baseline.get('source_commit') or 'pending'}`",
+            f"- Source run id: `{baseline.get('source_run_id') or 'pending'}`",
+            f"- Refresh status: `{baseline.get('refresh_status') or 'pending'}`",
+            f"- Coverage baseline: `{coverage_display}` "
+            f"(threshold `{threshold_display}`)",
+            f"- Duration telemetry cases: `{total_cases_display}`",
+            "",
+        ]
+    )
+
+
+def format_rollup_markdown(
+    rollup: dict[str, Any],
+    *,
+    baseline: dict[str, Any] | None = None,
+) -> str:
     """Render a test-health rollup as GitHub job-summary friendly Markdown."""
-    lines = ["# Test Health Rollup", "", f"Runs analyzed: {rollup['run_count']}", ""]
+    lines = [
+        "# Test Health Rollup",
+        "",
+        "Historical test-health evidence for recent recorded lane runs.",
+        "",
+        f"Runs analyzed: {rollup['run_count']}",
+        "",
+    ]
+    _append_baseline_section(lines, baseline)
     _append_suite_table(lines, rollup.get("suites", {}))
     _append_count_section(
         lines=lines,
@@ -866,7 +943,10 @@ def _write_rollup_markdown_outputs(
 ) -> None:
     if not (args.markdown_out or args.github_step_summary):
         return
-    markdown = format_rollup_markdown(rollup)
+    markdown = format_rollup_markdown(
+        rollup,
+        baseline=_load_committed_baseline(),
+    )
     if args.markdown_out:
         args.markdown_out.parent.mkdir(parents=True, exist_ok=True)
         args.markdown_out.write_text(markdown, encoding="utf-8")

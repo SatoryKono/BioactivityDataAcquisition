@@ -266,9 +266,7 @@ def _dict_to_artifact(artifact_dict: JsonDict) -> EffectiveConfigArtifact:
         contract_refs=[str(value) for value in artifact_dict.get("contract_refs", [])],
         normalization_profile_ref=artifact_dict.get("normalization_profile_ref")
         and str(artifact_dict["normalization_profile_ref"]),
-        normalization_profile_version=artifact_dict.get(
-            "normalization_profile_version"
-        )
+        normalization_profile_version=artifact_dict.get("normalization_profile_version")
         and str(artifact_dict["normalization_profile_version"]),
         normalization_profile_hash=artifact_dict.get("normalization_profile_hash")
         and str(artifact_dict["normalization_profile_hash"]),

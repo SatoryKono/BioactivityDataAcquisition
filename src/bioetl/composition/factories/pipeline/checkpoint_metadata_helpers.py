@@ -207,9 +207,7 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
         contract_ref=identity_payload["contract_ref"],
         contract_version=identity_payload["contract_version"],
         normalization_profile_ref=identity_payload["normalization_profile_ref"],
-        normalization_profile_version=identity_payload[
-            "normalization_profile_version"
-        ],
+        normalization_profile_version=identity_payload["normalization_profile_version"],
         normalization_profile_hash=identity_payload["normalization_profile_hash"],
         exact_replay=exact_replay,
         input_snapshot_ids=input_snapshot_ids,
@@ -229,9 +227,7 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
             "dq_contract_compatibility_hash": identity_payload[
                 "dq_contract_compatibility_hash"
             ],
-            "normalization_profile_ref": identity_payload[
-                "normalization_profile_ref"
-            ],
+            "normalization_profile_ref": identity_payload["normalization_profile_ref"],
             "normalization_profile_version": identity_payload[
                 "normalization_profile_version"
             ],

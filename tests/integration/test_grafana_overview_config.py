@@ -132,7 +132,7 @@ def test_first_screen_layout_matches_overview_v3_baseline() -> None:
         "Status": {"id": 214, "x": 16, "y": 3, "w": 8, "h": 4},
         "ID": {"id": 9300, "x": 0, "y": 7, "w": 10, "h": 6},
         "Processed Records": {"id": 9301, "x": 10, "y": 7, "w": 6, "h": 6},
-        "Next Action": {"id": 215, "x": 16, "y": 7, "w": 8, "h": 6},
+        "First Action": {"id": 215, "x": 16, "y": 7, "w": 8, "h": 6},
         "Control Plane": {"id": 9006, "x": 0, "y": 13, "w": 5, "h": 5},
         "Runtime": {"id": 9003, "x": 5, "y": 13, "w": 4, "h": 5},
         "Data Quality": {"id": 9004, "x": 9, "y": 13, "w": 5, "h": 5},
@@ -155,7 +155,7 @@ def test_first_screen_layout_matches_overview_v3_baseline() -> None:
 def test_status_and_next_action_preserve_current_status_semantics() -> None:
     panels = _panels_by_title()
     status = panels["Status"]
-    next_action = panels["Next Action"]
+    next_action = panels["First Action"]
 
     assert status.get("type") == "stat"
     assert "bioetl_l0_status" in _panel_expr(status)
@@ -217,7 +217,7 @@ def test_l1_cards_have_operator_mappings_and_targeted_links() -> None:
 def test_selected_scope_cards_normalize_workflow_pipeline_aliases() -> None:
     for title in (
         "Status",
-        "Next Action",
+        "First Action",
         "Inputs",
         "Runtime",
         "Data Quality",
@@ -247,7 +247,7 @@ def test_provider_and_workflow_scope_are_explicit() -> None:
     )
 
     assert "bioetl_l1_workflow_global_status" in _panel_expr(workflow)
-    assert "pipeline!=\"test_pipe\"" in _panel_expr(workflow)
+    assert 'pipeline!="test_pipe"' in _panel_expr(workflow)
     workflow_links = workflow.get("options", {}).get("dataLinks", [])
     assert {link.get("title") for link in workflow_links} == {"Open Workflow"}
 
@@ -256,7 +256,7 @@ def test_range_evidence_and_trend_rows_are_retained() -> None:
     panels = _panels_by_title()
     current_verdict_titles = {
         "Status",
-        "Next Action",
+        "First Action",
         "Inputs",
         "Control Plane",
         "Runtime",

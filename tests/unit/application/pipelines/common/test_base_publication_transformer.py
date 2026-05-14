@@ -566,6 +566,31 @@ class TestPublicationVocabularyObservability:
 
         metrics.increment_counter.assert_not_called()
 
+    def test_unknown_openalex_vocab_counts_each_unknown_field(self) -> None:
+        metrics = MagicMock()
+        transformer = _create_stub_transformer(provider="openalex", metrics=metrics)
+        context = PipelineContext(
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+            logger=MagicMock(),
+            pipeline_name="openalex_publication",
+        )
+
+        transformer._emit_unknown_publication_vocab_metrics(
+            context,
+            {
+                "publication_type": "future-openalex-type",
+                "type_crossref": "future-crossref-type",
+            },
+        )
+
+        assert metrics.increment_counter.call_count == 2
+        assert {
+            call.kwargs["labels"]["field"]
+            for call in metrics.increment_counter.call_args_list
+        } == {"publication_type", "type_crossref"}
+
     def test_unknown_pubmed_vocab_counts_each_field(self) -> None:
         metrics = MagicMock()
         transformer = _create_stub_transformer(provider="pubmed", metrics=metrics)
@@ -586,6 +611,36 @@ class TestPublicationVocabularyObservability:
         )
 
         assert metrics.increment_counter.call_count == 2
+
+    def test_unknown_semanticscholar_publication_types_emit_metric(self) -> None:
+        metrics = MagicMock()
+        transformer = _create_stub_transformer(
+            provider="semanticscholar",
+            metrics=metrics,
+        )
+        context = PipelineContext(
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+            logger=MagicMock(),
+            pipeline_name="semanticscholar_publication",
+        )
+
+        transformer._emit_unknown_publication_vocab_metrics(
+            context,
+            {"publication_types": ["JournalArticle", "FutureSemanticType"]},
+        )
+
+        metrics.increment_counter.assert_called_once_with(
+            name="bioetl_publication_raw_vocab_unknown_total",
+            value=1,
+            labels={
+                "pipeline": "semanticscholar_publication",
+                "provider": "semanticscholar",
+                "field": "publication_types",
+                "handling": "preserved_unknown",
+            },
+        )
 
 
 # =============================================================================

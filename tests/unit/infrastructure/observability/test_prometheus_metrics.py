@@ -651,7 +651,9 @@ class TestPrometheusMetrics:
                 },
             )
 
-            COUNTERS["bioetl_publication_raw_vocab_unknown_total"].labels.assert_called_once_with(
+            COUNTERS[
+                "bioetl_publication_raw_vocab_unknown_total"
+            ].labels.assert_called_once_with(
                 pipeline="pubmed_publication",
                 provider="other",
                 field="other",

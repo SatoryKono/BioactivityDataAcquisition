@@ -234,8 +234,38 @@ def test_rollup_reads_recent_run_summaries(tmp_path: Path, capsys) -> None:
     assert "1x tests/unit/test_sample.py::test_fail" in output
     markdown = markdown_out.read_text(encoding="utf-8")
     assert "# Test Health Rollup" in markdown
+    assert "Historical test-health evidence" in markdown
+    assert "## Current Authoritative Baseline" in markdown
+    assert "Current merge-blocking truth comes from live CI status" in markdown
+    assert "`configs/quality/test_telemetry_baseline.yaml`" in markdown
     assert "| unit-fast | 1 | 1 | 0.0% | 1 | 1 | 2 |" in markdown
     assert "- `assertion`: 1" in markdown
+
+
+def test_format_rollup_markdown_renders_committed_baseline_snapshot() -> None:
+    markdown = test_health.format_rollup_markdown(
+        {"run_count": 0, "suites": {}},
+        baseline={
+            "source_branch": "main",
+            "source_commit": "abc123",
+            "source_run_id": "run-42",
+            "refresh_status": "captured",
+            "coverage": {
+                "actual_percent": 91.23,
+                "threshold_percent": 85.0,
+            },
+            "duration_telemetry": {
+                "total_cases": 321,
+            },
+        },
+    )
+
+    assert "- Source branch: `main`" in markdown
+    assert "- Source commit: `abc123`" in markdown
+    assert "- Source run id: `run-42`" in markdown
+    assert "- Refresh status: `captured`" in markdown
+    assert "- Coverage baseline: `91.23%` (threshold `85.0%`)" in markdown
+    assert "- Duration telemetry cases: `321`" in markdown
 
 
 def test_summarize_junit_writes_test_health_json(tmp_path: Path) -> None:

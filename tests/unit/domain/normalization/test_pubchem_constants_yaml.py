@@ -31,9 +31,10 @@ def test_pubchem_yaml_statuses_match_domain_contract() -> None:
 
     assert statuses == CHEMICAL_STANDARDIZATION_STATUSES
     assert statuses == PUBCHEM_CHEMICAL_STANDARDIZATION_STATUSES
-    assert statuses == PUBCHEM_STANDARDIZATION_ENUM_CATALOG[
-        "chemical_standardization_statuses"
-    ]
+    assert (
+        statuses
+        == PUBCHEM_STANDARDIZATION_ENUM_CATALOG["chemical_standardization_statuses"]
+    )
 
 
 def test_pubchem_yaml_policy_version_matches_domain_contract() -> None:
@@ -42,6 +43,9 @@ def test_pubchem_yaml_policy_version_matches_domain_contract() -> None:
 
     assert versions == (CHEMICAL_STANDARDIZATION_POLICY_VERSION,)
     assert versions == (PUBCHEM_CHEMICAL_STANDARDIZATION_POLICY_VERSION,)
-    assert versions == PUBCHEM_STANDARDIZATION_ENUM_CATALOG[
-        "chemical_standardization_policy_versions"
-    ]
+    assert (
+        versions
+        == PUBCHEM_STANDARDIZATION_ENUM_CATALOG[
+            "chemical_standardization_policy_versions"
+        ]
+    )

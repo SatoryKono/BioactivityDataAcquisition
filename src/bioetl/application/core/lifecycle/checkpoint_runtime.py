@@ -7,9 +7,7 @@ from typing import Literal
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
-CheckpointCompatibilityPolicy = Literal[
-    "observe", "soft_fail", "hard_fail"
-]
+CheckpointCompatibilityPolicy = Literal["observe", "soft_fail", "hard_fail"]
 CheckpointCompatibilityDisposition = Literal[
     "observe_blocked_identity",
     "observe_loaded_degraded",

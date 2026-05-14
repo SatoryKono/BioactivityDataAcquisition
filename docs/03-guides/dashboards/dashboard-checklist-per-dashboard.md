@@ -173,7 +173,7 @@
 - [ ] Required top-level links: `0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`
 - [ ] Required top-level links: `Explore Logs`, `Explore Traces`, `Silver Reject Explorer`
 - [ ] Panel `214` (System Status) имеет dataLinks: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
-- [ ] Panel `215` (Next Action) имеет dataLinks: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
+- [ ] Panel `215` (First Action) имеет dataLinks: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
 - [ ] Panel `9002` (L0 Inputs) имеет dataLinks: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
 - [ ] Panel `9003` (Runtime Blockers) имеет dataLink: Open Runtime
 - [ ] Panel `9004` (DQ Status) имеет dataLink: Open Data Quality
@@ -184,14 +184,14 @@
 - [ ] Panel `9013` (Workflow Global) имеет dataLink: Open Workflow
 
 ### First-screen структура
-- [ ] Tier 1 включает: System Status, Next Action, L0 Inputs
+- [ ] Tier 1 включает: System Status, First Action, L0 Inputs
 - [ ] Tier 2 включает: Runtime Blockers, DQ Status, Gold Lifecycle, Control Plane, Provider Global, Workflow Selected, Workflow Global
 - [ ] Tier 3 collapsed: Range Evidence (Historical / Recent History)
 - [ ] Tier 4 collapsed: Diagnostics & Docs (Logs / Traces / Raw Metrics)
 
 ### KPI ownership
 - [ ] System Status canonical для `bioetl-overview-v2`
-- [ ] Next Action canonical для `bioetl-overview-v2`
+- [ ] First Action canonical для `bioetl-overview-v2`
 - [ ] L0 Inputs canonical для `bioetl-overview-v2`
 - [ ] Gold Lifecycle canonical для `bioetl-overview-v2`
 - [ ] Provider Global canonical для `bioetl-overview-v2`
@@ -272,14 +272,14 @@
 - [ ] CTA: Inspect active blocker
 
 ### First-screen структура
-- [ ] Tier 1 включает: First Action, Monitor Runtime Current Status, Monitor Runtime Telemetry Gap, Monitor Runtime Blockers, Inspect Top Runtime Blockers
+- [ ] Tier 1 включает: First Action, Runtime Status, Runtime Telemetry Gap, Monitor Runtime Blockers, Runtime Blockers
 - [ ] Tier 2 collapsed rows по сценариям: Backlog Trends, Durations, Shutdown Diagnostics, Tracing-only Log Hygiene
 - [ ] Tier 3: selected-range evidence ниже
 - [ ] Tier 4 collapsed: tracing-only log hygiene
 
 ### KPI ownership (mirrors)
 - [ ] System Status mirror (canonical: `bioetl-overview-v2`)
-- [ ] Next Action mirror (canonical: `bioetl-overview-v2`)
+- [ ] First Action mirror (canonical: `bioetl-overview-v2`)
 - [ ] L0 Inputs mirror (canonical: `bioetl-overview-v2`)
 - [ ] Gold Lifecycle mirror (canonical: `bioetl-overview-v2`)
 - [ ] Replay Safety State mirror (canonical: `bioetl-control-plane-v1`)
