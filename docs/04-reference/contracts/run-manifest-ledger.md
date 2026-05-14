@@ -69,6 +69,7 @@ The current code owners / source-of-truth seams are:
 - `src/bioetl/composition/runtime_builders/run_manifest_builder.py`
 - `src/bioetl/composition/runtime_builders/runner_builder.py`
 - `src/bioetl/composition/factories/pipeline/checkpoint_policy_helpers.py`
+- `src/bioetl/composition/factories/pipeline/checkpoint_metadata_helpers.py`
 - `src/bioetl/infrastructure/config/_base.py`
 - `src/bioetl/infrastructure/control_plane/`
 
@@ -87,6 +88,10 @@ contexts.
   `normalization_profile_version`, and `normalization_profile_hash` so replay
   diagnostics can tie one manifest to the exact normalization profile surface
   used for that run.
+- `CheckpointMetadata` now carries the same strict replay anchors for
+  `git_commit`, `dependency_lock_hash`, `normalization_profile_ref`,
+  `normalization_profile_version`, and `normalization_profile_hash` whenever a
+  checkpoint participates in replay-ready or forensic-grade resume flows.
 
 This means the supported model is deliberately split. BioETL does not define
 one universal manifest object that serves as launch descriptor, in-run context,
@@ -198,6 +203,10 @@ Certified historical replay is therefore bounded but operationalized:
   inventory so operators can see which manifests are already replayable,
   already certified, awaiting source snapshot certification, or awaiting
   certified source lineage;
+- `bioetl run-manifest replay-bundle <run-id|manifest-id>` emits one canonical
+  replay descriptor that ties the manifest, ledger, code/config provenance,
+  replay parentage, immutable input snapshots, published artifact refs, and
+  lineage fragment identities into one inspection payload;
 - `bioetl run-manifest certify-historical-bulk <plan.json>` applies a
   deterministic source-first certification pass across retained manifests using
   explicit immutable snapshot evidence from the provided plan;
@@ -211,6 +220,13 @@ Certified historical replay is therefore bounded but operationalized:
 - `scripts/engineering/qa/run_historical_replay_universe_campaign.py` persists
   a full-universe closure artifact by merging the local retained corpus with
   one or more authoritative external universe packs for archived/offline runs;
+- `scripts/engineering/qa/run_historical_replay_closure_campaign.py --require-global-claim`
+  fails closed when the retained-corpus closure artifact still cannot make the
+  published global replay claim;
+- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-universal-claim`
+  and `--require-durable-evidence-coverage` fail closed when the merged
+  full-universe artifact cannot make the stronger universal or durable-evidence
+  claims;
 - each external universe pack is the authoritative bridge from retained local
   control-plane evidence to the full historical-run universe and must carry one
   record per historical occurrence with
@@ -390,6 +406,13 @@ modes:
 - `execution_fingerprint` remains the canonical semantic execution identity,
   while `composite_run_identity` is an occurrence-scoped resume anchor used to
   block composite checkpoint drift across logically different executions.
+- checkpoint execution identity now carries the same strict code/config replay
+  anchors as the manifest/effective-config path, including `git_commit`,
+  `dependency_lock_hash`, `contract_ref`, `contract_version`,
+  `contract_schema_hash`, `dq_policy_ref`, `rule_bundle_version`,
+  `normalization_profile_ref`, `normalization_profile_version`,
+  `normalization_profile_hash`, and
+  `dq_contract_compatibility_hash`.
 
 This asymmetry is intentional. The current contract finishes the existing
 composite replay model without requiring every runner to implement the same

@@ -78,6 +78,11 @@ def _parse_args() -> argparse.Namespace:
         default="all_retained_historical_runs",
         help="Choose whether the final claim gate targets the full retained corpus or only the certifiable retained subset.",
     )
+    parser.add_argument(
+        "--require-global-claim",
+        action="store_true",
+        help="Fail when the retained-corpus global universal historical replay claim remains unclaimed.",
+    )
     return parser.parse_args()
 
 
@@ -585,6 +590,10 @@ def main() -> int:
         },
     }
     print(json.dumps(payload, indent=2, sort_keys=True))
+    if args.require_global_claim and not bool(
+        closure_report.global_universal_historical_replay_claim.get("claimed", False)
+    ):
+        return 1
     return 0
 
 

@@ -166,6 +166,18 @@ class PipelineMetadata(BaseModel):
         default=None,
         description="DQ rule-bundle version used with the contract",
     )
+    normalization_profile_ref: str | None = Field(
+        default=None,
+        description="Normalization profile reference aligned with semantic run identity",
+    )
+    normalization_profile_version: str | None = Field(
+        default=None,
+        description="Normalization profile semantic version used during the run",
+    )
+    normalization_profile_hash: str | None = Field(
+        default=None,
+        description="Normalization profile hash used for forensic replay continuity",
+    )
     dq_contract_compatibility_hash: str | None = Field(
         default=None,
         description="DQ contract compatibility hash included in execution identity",
