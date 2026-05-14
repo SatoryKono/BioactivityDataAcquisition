@@ -81,6 +81,22 @@ def build_run_replay_bundle_descriptor(
         if result.identity_graph
         else _dict_or_empty(diagnostics.get("identity_graph"))
     )
+    replay_capability = diagnostics.get("replay_capability") or identity_graph.get(
+        "replay_capability"
+    )
+    replay_readiness_verdict = diagnostics.get(
+        "replay_readiness_verdict"
+    ) or identity_graph.get("replay_readiness_verdict")
+    exact_replay_support_boundary = diagnostics.get(
+        "exact_replay_support_boundary"
+    ) or identity_graph.get("exact_replay_support_boundary")
+    replay_family_contract = diagnostics.get(
+        "replay_family_contract"
+    ) or identity_graph.get("replay_family_contract")
+    exact_replay_eligible = diagnostics.get(
+        "exact_replay_eligible",
+        identity_graph.get("exact_replay_eligible", False),
+    )
     required_profile = (
         persistence_profile.get("required_profile")
         or diagnostics.get("required_persistence_profile")
@@ -126,17 +142,11 @@ def build_run_replay_bundle_descriptor(
         "produced_artifact_trace": produced_artifact_trace,
         "identity_graph": identity_graph,
         "replay_claims": {
-            "replay_capability": diagnostics.get("replay_capability"),
-            "replay_readiness_verdict": diagnostics.get(
-                "replay_readiness_verdict"
-            ),
-            "exact_replay_eligible": bool(
-                diagnostics.get("exact_replay_eligible", False)
-            ),
-            "exact_replay_support_boundary": diagnostics.get(
-                "exact_replay_support_boundary"
-            ),
-            "replay_family_contract": diagnostics.get("replay_family_contract"),
+            "replay_capability": replay_capability,
+            "replay_readiness_verdict": replay_readiness_verdict,
+            "exact_replay_eligible": bool(exact_replay_eligible),
+            "exact_replay_support_boundary": exact_replay_support_boundary,
+            "replay_family_contract": replay_family_contract,
             "historical_live_run_upgrade_state": diagnostics.get(
                 "historical_live_run_upgrade_state"
             ),
@@ -153,26 +163,20 @@ def build_run_replay_bundle_descriptor(
         manifest_id=manifest.manifest_id,
         run_id=str(manifest.run_id),
         execution_fingerprint=manifest.execution_fingerprint,
-        replay_capability=(
-            None
-            if diagnostics.get("replay_capability") is None
-            else str(diagnostics.get("replay_capability"))
-        ),
-        exact_replay_eligible=bool(diagnostics.get("exact_replay_eligible", False)),
+        replay_capability=None if replay_capability is None else str(replay_capability),
+        exact_replay_eligible=bool(exact_replay_eligible),
         replay_readiness_verdict=(
             None
-            if diagnostics.get("replay_readiness_verdict") is None
-            else str(diagnostics.get("replay_readiness_verdict"))
+            if replay_readiness_verdict is None
+            else str(replay_readiness_verdict)
         ),
         exact_replay_support_boundary=(
             None
-            if diagnostics.get("exact_replay_support_boundary") is None
-            else str(diagnostics.get("exact_replay_support_boundary"))
+            if exact_replay_support_boundary is None
+            else str(exact_replay_support_boundary)
         ),
         replay_family_contract=(
-            None
-            if diagnostics.get("replay_family_contract") is None
-            else str(diagnostics.get("replay_family_contract"))
+            None if replay_family_contract is None else str(replay_family_contract)
         ),
         required_persistence_profile=(
             None if required_profile is None else str(required_profile)

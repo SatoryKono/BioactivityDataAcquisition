@@ -6,8 +6,16 @@ from pathlib import Path
 
 import yaml
 
+from bioetl.domain.mapping.molecule_fields import MOLECULE_FIELD_MAPPING
+from bioetl.domain.mapping.publication_fields import PUBLICATION_FIELD_MAPPING
+from bioetl.domain.registry.field_aliases import MOLECULE_FIELD_ALIASES
+from bioetl.domain.registry.semantic_fields import SemanticFieldRegistry
 from bioetl.infrastructure.config.semantic_field_registry_loader import (
     SemanticFieldRegistryLoader,
+)
+
+GENERIC_LEXICAL_COLLISIONS = frozenset(
+    {"type", "value", "score", "description", "relation", "source"}
 )
 
 
@@ -15,6 +23,22 @@ def _load_yaml(path: str) -> dict[str, object]:
     payload = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
+
+
+def _assert_alias_resolves_to_canonical(
+    registry: SemanticFieldRegistry,
+    *,
+    raw_name: str,
+    canonical_name: str,
+) -> None:
+    canonical_cluster = registry.get_by_canonical_name(canonical_name)
+    assert canonical_cluster is not None, canonical_name
+    if raw_name == canonical_name:
+        return
+    alias_cluster = registry.get_by_legacy_name(raw_name)
+    if alias_cluster is None:
+        alias_cluster = registry.get_by_raw_provider_name(raw_name)
+    assert alias_cluster == canonical_cluster, (raw_name, canonical_name)
 
 
 def test_registry_contains_expected_semantic_clusters() -> None:
@@ -32,7 +56,9 @@ def test_registry_contains_expected_semantic_clusters() -> None:
     assert registry.get_by_canonical_name("doi") is not None
 
 
-def test_input_filters_map_legacy_provider_columns_to_canonical_runtime_fields() -> None:
+def test_input_filters_map_legacy_provider_columns_to_canonical_runtime_fields() -> (
+    None
+):
     assay = _load_yaml("configs/entities/chembl/assay.yaml")
     molecule = _load_yaml("configs/entities/chembl/molecule.yaml")
     pubmed = _load_yaml("configs/entities/pubmed/publication.yaml")
@@ -73,15 +99,9 @@ def test_entity_quality_surfaces_use_canonical_key_fields() -> None:
     molecule = _load_yaml("configs/entities/chembl/molecule.yaml")
     pubmed = _load_yaml("configs/entities/pubmed/publication.yaml")
 
-    assay_keys = {
-        item["field"] for item in assay["quality"]["key_nullability"]
-    }
-    molecule_keys = {
-        item["field"] for item in molecule["quality"]["key_nullability"]
-    }
-    pubmed_keys = {
-        item["field"] for item in pubmed["quality"]["key_nullability"]
-    }
+    assay_keys = {item["field"] for item in assay["quality"]["key_nullability"]}
+    molecule_keys = {item["field"] for item in molecule["quality"]["key_nullability"]}
+    pubmed_keys = {item["field"] for item in pubmed["quality"]["key_nullability"]}
 
     assert "assay_id" in assay_keys
     assert "assay_chembl_id" not in assay_keys
@@ -89,3 +109,43 @@ def test_entity_quality_surfaces_use_canonical_key_fields() -> None:
     assert "molecule_chembl_id" not in molecule_keys
     assert "pmid" in pubmed_keys
     assert "pubmed_id" not in pubmed_keys
+
+
+def test_publication_field_mapping_clusters_are_registry_backed() -> None:
+    registry = SemanticFieldRegistryLoader(Path("configs")).load()
+
+    for mapping in PUBLICATION_FIELD_MAPPING.values():
+        for raw_name, canonical_name in mapping.items():
+            _assert_alias_resolves_to_canonical(
+                registry,
+                raw_name=raw_name,
+                canonical_name=canonical_name,
+            )
+
+
+def test_molecule_mapping_and_alias_clusters_are_registry_backed() -> None:
+    registry = SemanticFieldRegistryLoader(Path("configs")).load()
+
+    for mapping in MOLECULE_FIELD_MAPPING.values():
+        for raw_name, canonical_name in mapping.items():
+            _assert_alias_resolves_to_canonical(
+                registry,
+                raw_name=raw_name,
+                canonical_name=canonical_name,
+            )
+
+    for field_alias in MOLECULE_FIELD_ALIASES:
+        assert registry.get_by_canonical_name(field_alias.canonical_name) is not None
+        for raw_name in field_alias.provider_aliases.values():
+            _assert_alias_resolves_to_canonical(
+                registry,
+                raw_name=raw_name,
+                canonical_name=field_alias.canonical_name,
+            )
+
+
+def test_generic_lexical_collisions_are_not_canonicalized() -> None:
+    registry = SemanticFieldRegistryLoader(Path("configs")).load()
+
+    for field_name in GENERIC_LEXICAL_COLLISIONS:
+        assert registry.get_by_canonical_name(field_name) is None
