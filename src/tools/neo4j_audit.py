@@ -34,13 +34,22 @@ def get_neo4j_auth() -> tuple[str, str]:
 
     Returns:
         Tuple of (username, password)
+
+    Raises:
+        RuntimeError: If password is not set in environment.
     """
     if os.getenv("LIVE_AUDIT_MODE"):
         # Audit instance has separate credentials
-        return ("neo4j", "audit_secure_password")
+        password = os.getenv("NEO4J_AUDIT_PASSWORD")
+        if not password:
+            raise RuntimeError("NEO4J_AUDIT_PASSWORD environment variable is not set")
+        return ("neo4j", password)
     else:
         # MCP instance
-        return ("neo4j", os.getenv("NEO4J_PASSWORD", "bioetl_secure_password"))
+        password = os.getenv("NEO4J_PASSWORD")
+        if not password:
+            raise RuntimeError("NEO4J_PASSWORD environment variable is not set")
+        return ("neo4j", password)
 
 
 def is_audit_mode() -> bool:
