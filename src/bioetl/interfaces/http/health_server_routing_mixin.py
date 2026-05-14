@@ -339,15 +339,11 @@ class HealthServerRoutingMixin:
         assert self._run_manifest_port is not None
         requested_pipeline = self._read_required_param(query, "pipeline")
         pipeline = (
-            None
-            if self._is_all_scope_token(requested_pipeline)
-            else requested_pipeline
+            None if self._is_all_scope_token(requested_pipeline) else requested_pipeline
         )
         dimension = self._read_optional_param(query, "dimension") or "run_id"
         if dimension != "run_id":
-            raise ValueError(
-                f"Unsupported control-plane filter dimension: {dimension}"
-            )
+            raise ValueError(f"Unsupported control-plane filter dimension: {dimension}")
         response_shape = self._read_optional_param(query, "response_shape") or "object"
 
         selected_run_types = self._read_scope_csv_param(query, "run_type")
@@ -355,10 +351,7 @@ class HealthServerRoutingMixin:
             str(manifest.run_id)
             for manifest in self._run_manifest_port.list_all()
             if (pipeline is None or manifest.pipeline_name == pipeline)
-            and (
-                not selected_run_types
-                or str(manifest.run_type) in selected_run_types
-            )
+            and (not selected_run_types or str(manifest.run_type) in selected_run_types)
         )
         response_support = cast(_HealthResponseSupport, self)
         if response_shape == "list":
@@ -387,27 +380,24 @@ class HealthServerRoutingMixin:
         assert self._run_manifest_port is not None
         requested_pipeline = self._read_required_param(query, "pipeline")
         pipeline = (
-            None
-            if self._is_all_scope_token(requested_pipeline)
-            else requested_pipeline
+            None if self._is_all_scope_token(requested_pipeline) else requested_pipeline
         )
         selected_run_types = self._read_scope_csv_param(query, "run_type")
         selected_run_id = self._read_optional_param(query, "run_id")
+
         manifests = tuple(
             manifest
             for manifest in self._run_manifest_port.list_all()
             if (pipeline is None or manifest.pipeline_name == pipeline)
-            and (
-                not selected_run_types
-                or str(manifest.run_type) in selected_run_types
-            )
+            and (not selected_run_types or str(manifest.run_type) in selected_run_types)
         )
 
         resolved_manifest = next(
             (
                 manifest
                 for manifest in manifests
-                if selected_run_id is not None and str(manifest.run_id) == selected_run_id
+                if selected_run_id is not None
+                and str(manifest.run_id) == selected_run_id
             ),
             None,
         )
@@ -423,6 +413,33 @@ class HealthServerRoutingMixin:
                     else "no_manifest_for_scope"
                 )
 
+        rows = self._build_identity_table_rows(
+            resolved_manifest,
+            pipeline,
+            requested_pipeline,
+            selected_run_id,
+        )
+
+        response_support = cast(_HealthResponseSupport, self)
+        await response_support._send_payload_response(
+            writer,
+            200,
+            {
+                "pipeline": pipeline,
+                "run_type": list(selected_run_types),
+                "selected_run_id": selected_run_id,
+                "resolved_via": resolved_via,
+                "rows": rows,
+            },
+        )
+
+    def _build_identity_table_rows(
+        self,
+        resolved_manifest: object | None,
+        pipeline: str | None,
+        requested_pipeline: str,
+        selected_run_id: str | None,
+    ) -> list[dict[str, str]]:
         def _display(value: object | None, *, unavailable: str) -> str:
             if value is None:
                 return unavailable
@@ -436,9 +453,10 @@ class HealthServerRoutingMixin:
         )
         provenance_unavailable = "not available in selected manifest"
         code_provenance = (
-            resolved_manifest.code_provenance if resolved_manifest is not None else None
+            getattr(resolved_manifest, "code_provenance", None) if resolved_manifest is not None else None
         )
-        rows = [
+
+        return [
             {
                 "parameter": "manifest_id",
                 "value": _display(
@@ -504,18 +522,6 @@ class HealthServerRoutingMixin:
                 ),
             },
         ]
-        response_support = cast(_HealthResponseSupport, self)
-        await response_support._send_payload_response(
-            writer,
-            200,
-            {
-                "pipeline": pipeline,
-                "run_type": list(selected_run_types),
-                "selected_run_id": selected_run_id,
-                "resolved_via": resolved_via,
-                "rows": rows,
-            },
-        )
 
     async def _handle_filtered_record_detail(
         self,

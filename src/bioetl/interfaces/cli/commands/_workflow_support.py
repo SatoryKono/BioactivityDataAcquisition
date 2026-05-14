@@ -219,6 +219,27 @@ def render_status_payload(payload: dict[str, object]) -> str:
         f"version: {version}",
         "topological order: " + ", ".join(str(item) for item in topological),
     ]
+
+    _append_execution_history(lines, payload)
+
+    lines.extend(["", "Steps:"])
+    if isinstance(steps, list):
+        for step in steps:
+            if not isinstance(step, dict):
+                continue
+            depends_on = step.get("depends_on") or []
+            depends_rendered = ", ".join(str(item) for item in depends_on) or "-"
+            lines.append(
+                f"- {step.get('step_id')}: {step.get('state')} "
+                f"(depends_on: {depends_rendered})"
+            )
+            if step.get("error"):
+                lines.append(f"  error: {step['error']}")
+
+    return "\n".join(lines)
+
+
+def _append_execution_history(lines: list[str], payload: dict[str, object]) -> None:
     if bool(payload.get("execution_history_available")):
         lines.extend(
             [
@@ -241,36 +262,6 @@ def render_status_payload(payload: dict[str, object]) -> str:
             )
     else:
         lines.append("history: unavailable")
-    lines.extend(["", "Steps:"])
-    if isinstance(steps, list):
-        for step in steps:
-            if not isinstance(step, dict):
-                continue
-            depends_on = step.get("depends_on") or []
-            depends_rendered = ", ".join(str(item) for item in depends_on) or "-"
-            kind = str(step.get("kind", step.get("step_kind", "unknown")))
-            if kind == "pipeline" and "pipeline_name" in step:
-                lines.append(
-                    f"- {step['step_id']} [{kind}] pipeline={step['pipeline_name']} "
-                    f"depends_on={depends_rendered}"
-                )
-            elif kind == "transform" and "transform_name" in step:
-                lines.append(
-                    f"- {step['step_id']} [{kind}] transform={step['transform_name']} "
-                    f"depends_on={depends_rendered}"
-                )
-            else:
-                summary = (
-                    f"- {step['step_id']} [{kind}] -> {step.get('status', 'unknown')}"
-                )
-                error_type = step.get("error_type")
-                error_message = step.get("error_message")
-                if error_type or error_message:
-                    summary += f" ({error_type or 'Error'}: {error_message or '-'})"
-                lines.append(summary)
-    lines.append("")
-    lines.append(str(payload["note"]))
-    return "\n".join(lines)
 
 
 def render_run_result(

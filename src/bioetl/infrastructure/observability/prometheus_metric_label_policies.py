@@ -475,6 +475,18 @@ def _normalize_publication_metric_labels(
             ),
             "mode": normalize_observability_mode(str(labels.get("mode", "other"))),
         }
+    return _normalize_publication_metric_labels_stage_metrics(
+        name, labels, phase_label_key_by_metric_group
+    )
+
+
+def _normalize_publication_metric_labels_stage_metrics(
+    name: str,
+    labels: MetricLabels,
+    phase_label_key_by_metric_group: tuple[
+        tuple[set[str], str, Callable[[str], str]], ...
+    ],
+) -> MetricLabels | None:
     if name in _STAGE_BACKLOG_LABEL_METRICS:
         return {
             **labels,
