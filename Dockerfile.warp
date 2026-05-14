@@ -1,9 +1,11 @@
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Cloudflare Warp client container
 FROM debian:12-slim
 
 WORKDIR /app
 
 # Install Warp and runtime dependencies
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     gnupg \

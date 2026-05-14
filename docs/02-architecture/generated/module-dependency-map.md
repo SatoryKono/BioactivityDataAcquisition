@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `1833`
-- Internal import edges (raw): `7311`
+- Scanned modules: `1816`
+- Internal import edges (raw): `7297`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `321`
@@ -21,38 +21,38 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1205 OK| application
-    application -->|1089 OK| domain
+    application -->|1190 OK| application
+    application -->|1093 OK| domain
     composition -->|286 OK| application
-    composition -->|596 OK| composition
+    composition -->|597 OK| composition
     composition -->|415 OK| domain
     composition -->|335 OK| infrastructure
-    domain -->|1269 OK| domain
+    domain -->|1270 OK| domain
     infrastructure -->|783 OK| domain
     infrastructure -->|954 OK| infrastructure
     interfaces -->|76 OK| application
     interfaces -->|66 OK| composition
     interfaces -->|40 OK| domain
-    interfaces -->|197 OK| interfaces
+    interfaces -->|192 OK| interfaces
 ```
 
 ## Layer Edge Table
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1205 | allowed |
-| `application`    | `domain`         |    1089 | allowed |
+| `application`    | `application`    |    1190 | allowed |
+| `application`    | `domain`         |    1093 | allowed |
 | `composition`    | `application`    |     286 | allowed |
-| `composition`    | `composition`    |     596 | allowed |
+| `composition`    | `composition`    |     597 | allowed |
 | `composition`    | `domain`         |     415 | allowed |
 | `composition`    | `infrastructure` |     335 | allowed |
-| `domain`         | `domain`         |    1269 | allowed |
+| `domain`         | `domain`         |    1270 | allowed |
 | `infrastructure` | `domain`         |     783 | allowed |
 | `infrastructure` | `infrastructure` |     954 | allowed |
 | `interfaces`     | `application`    |      76 | allowed |
 | `interfaces`     | `composition`    |      66 | allowed |
 | `interfaces`     | `domain`         |      40 | allowed |
-| `interfaces`     | `interfaces`     |     197 | allowed |
+| `interfaces`     | `interfaces`     |     192 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
@@ -62,7 +62,7 @@ flowchart LR
 | `infrastructure.adapters`       | `domain.types`                  |     110 |
 | `application.core`              | `domain.types`                  |     106 |
 | `infrastructure.adapters`       | `domain.ports`                  |      87 |
-| `application.pipelines`         | `domain.types`                  |      79 |
+| `application.pipelines`         | `domain.types`                  |      80 |
 | `application.core`              | `domain.ports`                  |      72 |
 | `application.composite`         | `domain.ports`                  |      71 |
 | `composition.factories`         | `application.core`              |      71 |
@@ -110,8 +110,8 @@ flowchart LR
 | `infrastructure.control_plane`  | `domain.control_plane`          |      15 |
 | `infrastructure.observability`  | `domain.ports`                  |      15 |
 | `infrastructure.quality`        | `domain.types`                  |      15 |
+| `application.core`              | `domain.normalization`          |      14 |
 | `infrastructure.schemas`        | `domain.config`                 |      14 |
-| `application.core`              | `domain.normalization`          |      13 |
 | `application.pipelines`         | `domain.context`                |      13 |
 | `application.services`          | `domain.lineage`                |      13 |
 | `composition.factories`         | `domain.behavior`               |      13 |

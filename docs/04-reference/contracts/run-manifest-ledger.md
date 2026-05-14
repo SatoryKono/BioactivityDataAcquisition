@@ -705,6 +705,9 @@ separately.
 - `git_commit`
 - `source_revision_state`
 - `dependency_lock_hash`
+- `normalization_profile_ref`
+- `normalization_profile_version`
+- `normalization_profile_hash`
 - `config_hash`
 - `resolved_config_hash`
 - `effective_config_hash`

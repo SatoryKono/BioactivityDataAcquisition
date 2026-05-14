@@ -81,7 +81,7 @@ _SPECIAL_RULES = {
     ),
     "standardized_inchi_key": (
         normalize_profile_inchi_key,
-        "Validate standardized InChIKey through the canonical domain value-object contract, then emit uppercase canonical text.",
+        "Validate standardized InChIKey via the domain contract, then emit uppercase text.",
     ),
 }
 
