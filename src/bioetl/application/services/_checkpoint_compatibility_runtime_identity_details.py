@@ -26,10 +26,14 @@ class IdentityDetailsSpec:
     pipeline_name: str | None = None
     run_type: str | None = None
     pipeline_version: str | None = None
+    git_commit: str | None = None
     manifest_id: str | None = None
     dq_contract_compatibility_hash: str | None = None
     contract_ref: str | None = None
     contract_version: str | None = None
+    normalization_profile_ref: str | None = None
+    normalization_profile_version: str | None = None
+    normalization_profile_hash: str | None = None
     effective_config_artifact_id: str | None = None
     exact_replay: bool | None = None
     input_snapshot_fingerprint: str | None = None
@@ -52,11 +56,15 @@ def _canonical_execution_identity_payload(
     pipeline_name: str | None,
     run_type: str | None,
     pipeline_version: str | None,
+    git_commit: str | None,
     dependency_lock_hash: str | None,
     effective_config_hash: str,
     dq_contract_compatibility_hash: str | None,
     contract_ref: str | None,
     contract_version: str | None,
+    normalization_profile_ref: str | None,
+    normalization_profile_version: str | None,
+    normalization_profile_hash: str | None,
     effective_config_artifact_id: str | None,
     exact_replay: bool | None,
     input_snapshot_fingerprint: str | None,
@@ -69,8 +77,12 @@ def _canonical_execution_identity_payload(
             pipeline_name,
             run_type,
             pipeline_version,
+            git_commit,
             dependency_lock_hash,
             dq_contract_compatibility_hash,
+            normalization_profile_ref,
+            normalization_profile_version,
+            normalization_profile_hash,
             exact_replay,
             input_snapshot_fingerprint,
             silver_filter_compatibility_mode,
@@ -83,15 +95,15 @@ def _canonical_execution_identity_payload(
             pipeline_name=pipeline_name,
             run_type=run_type,
             pipeline_version=pipeline_version,
-            git_commit=None,
+            git_commit=git_commit,
             dependency_lock_hash=dependency_lock_hash,
             effective_config_hash=effective_config_hash,
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             contract_ref=contract_ref,
             contract_version=contract_version,
-            normalization_profile_ref=None,
-            normalization_profile_version=None,
-            normalization_profile_hash=None,
+            normalization_profile_ref=normalization_profile_ref,
+            normalization_profile_version=normalization_profile_version,
+            normalization_profile_hash=normalization_profile_hash,
             effective_config_artifact_id=effective_config_artifact_id,
             exact_replay=exact_replay,
             input_snapshot_fingerprint=input_snapshot_fingerprint,
@@ -142,11 +154,15 @@ def build_identity_details(request: IdentityDetailsSpec) -> JsonDict:
         pipeline_name=request.pipeline_name,
         run_type=request.run_type,
         pipeline_version=request.pipeline_version,
+        git_commit=request.git_commit,
         dependency_lock_hash=request.dependency_lock_hash,
         effective_config_hash=request.effective_config_hash,
         dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
         contract_ref=request.contract_ref,
         contract_version=request.contract_version,
+        normalization_profile_ref=request.normalization_profile_ref,
+        normalization_profile_version=request.normalization_profile_version,
+        normalization_profile_hash=request.normalization_profile_hash,
         effective_config_artifact_id=request.effective_config_artifact_id,
         exact_replay=request.exact_replay,
         input_snapshot_fingerprint=request.input_snapshot_fingerprint,
@@ -163,6 +179,7 @@ def build_identity_details(request: IdentityDetailsSpec) -> JsonDict:
         "pipeline_name": _identity_detail_value(request.pipeline_name),
         "run_type": _identity_detail_value(request.run_type),
         "pipeline_version": _identity_detail_value(request.pipeline_version),
+        "git_commit": _identity_detail_value(request.git_commit),
         "dependency_lock_hash": _identity_detail_value(request.dependency_lock_hash),
         "manifest_id": _identity_detail_value(request.manifest_id),
         "dq_contract_compatibility_hash": _identity_detail_value(
@@ -170,6 +187,15 @@ def build_identity_details(request: IdentityDetailsSpec) -> JsonDict:
         ),
         "contract_ref": _identity_detail_value(request.contract_ref),
         "contract_version": _identity_detail_value(request.contract_version),
+        "normalization_profile_ref": _identity_detail_value(
+            request.normalization_profile_ref
+        ),
+        "normalization_profile_version": _identity_detail_value(
+            request.normalization_profile_version
+        ),
+        "normalization_profile_hash": _identity_detail_value(
+            request.normalization_profile_hash
+        ),
         "effective_config_artifact_id": _identity_detail_value(
             request.effective_config_artifact_id
         ),

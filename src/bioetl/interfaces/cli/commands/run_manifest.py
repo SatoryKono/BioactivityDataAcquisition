@@ -10,6 +10,9 @@ import click
 from bioetl.application.services.control_plane.run_manifest_inspection_service import (
     RunManifestInspectionCorruptionError,
 )
+from bioetl.application.services.control_plane.replay_bundle_descriptor_service import (
+    build_run_replay_bundle_descriptor,
+)
 from bioetl.interfaces.cli.commands._run_manifest_historical_support import (
     _coerce_bulk_certification_specs,
     _load_residual_dispositions,
@@ -37,6 +40,7 @@ __all__ = [
     "diff_command",
     "forensic_diff_command",
     "inventory_command",
+    "replay_bundle_command",
     "run_manifest",
     "score_command",
     "show_command",
@@ -174,6 +178,33 @@ def verify_command(
         return
     emit_inspection_payload(
         result.to_dict(),
+        output_format,
+        text_renderer=render_text_payload,
+    )
+
+
+@run_manifest.command("replay-bundle")
+@click.argument("identifier")
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(["text", "json", "yaml"]),
+    default="text",
+    help="Output format",
+)
+def replay_bundle_command(identifier: str, output_format: str) -> None:
+    """Emit one replay-bundle descriptor for a supported run."""
+    service = get_run_manifest_service()
+    try:
+        result = service.show(identifier)
+    except RunManifestInspectionCorruptionError as exc:
+        echo_error(RUN_MANIFEST_STORE_CORRUPTION, str(exc))
+        return
+    except ValueError as exc:
+        echo_error("Run manifest not found", str(exc))
+        return
+    emit_inspection_payload(
+        build_run_replay_bundle_descriptor(result).to_dict(),
         output_format,
         text_renderer=render_text_payload,
     )

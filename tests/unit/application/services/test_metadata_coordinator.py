@@ -543,6 +543,41 @@ class TestSourceMetadataQueryString:
 class TestSilverMetadata:
     """Tests for Silver metadata creation."""
 
+    def test_pipeline_metadata_carries_normalization_profile_identity(self) -> None:
+        context = RunContext.create(
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            started_at=_FIXED_TIME,
+            provider="chembl",
+            entity="activity",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="a" * 64,
+        )
+        metadata = MetadataCoordinator(context).create_silver_metadata(
+            SilverMetadataInput(
+                table_path="/data/silver/chembl/activity",
+                records=[
+                    {
+                        "_run_id": str(context.run_id),
+                        "_run_type": "incremental",
+                        "_source_batch_id": str(uuid4()),
+                        "_ingestion_ts": _FIXED_TIME.isoformat(),
+                        "chembl_id": "CHEMBL123",
+                    }
+                ],
+                primary_keys=["chembl_id"],
+                mode=SilverWriteMode.MERGE,
+                dq_metrics=None,
+                started_at=_FIXED_TIME,
+                completed_at=_FIXED_TIME,
+            )
+        )
+
+        assert metadata.pipeline.normalization_profile_ref == "chembl.activity"
+        assert metadata.pipeline.normalization_profile_version == "2.0.0"
+        assert metadata.pipeline.normalization_profile_hash == "a" * 64
+
     def test_create_silver_metadata(self, coordinator: MetadataCoordinator) -> None:
         """Test creating Silver metadata."""
         records = [
