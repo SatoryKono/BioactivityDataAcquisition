@@ -460,8 +460,10 @@ def test_collect_reports_workspace_evidence_marks_local_only_candidates_for_prun
     monkeypatch,
 ) -> None:
     _write_governance_files(tmp_path)
+    (tmp_path / "reports" / "docs-audit").mkdir(parents=True)
     (tmp_path / "reports" / "Codex").mkdir(parents=True)
     (tmp_path / "reports" / "tmp").mkdir(parents=True)
+    (tmp_path / "reports" / "test-swarm").mkdir(parents=True)
     (tmp_path / "reports" / "README.md").write_text("guide\n", encoding="utf-8")
     (tmp_path / "reports" / "documentation_merged.md").write_text(
         "merged\n",
@@ -471,7 +473,17 @@ def test_collect_reports_workspace_evidence_marks_local_only_candidates_for_prun
         "{}\n",
         encoding="utf-8",
     )
-    monkeypatch.setattr(module, "_tracked_paths", lambda repo_root: ["reports/README.md"])
+    quality_dir = tmp_path / "reports" / "quality"
+    quality_dir.mkdir(parents=True)
+    (quality_dir / "_tmp_field_level_diagnostics.csv").write_text(
+        "field,value\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        module,
+        "_tracked_paths",
+        lambda repo_root: ["reports/README.md", "reports/test-swarm/README.md"],
+    )
     monkeypatch.setattr(module, "_git_path_has_history", lambda repo_root, path: False)
     monkeypatch.setattr(module, "_count_reference_hits", lambda repo_root, path: 0)
 
@@ -479,11 +491,17 @@ def test_collect_reports_workspace_evidence_marks_local_only_candidates_for_prun
     by_path = {row.rel_path: row for row in evidence}
 
     assert by_path["reports/README.md"].classification == "RETAIN"
+    assert by_path["reports/test-swarm"].classification == "RETAIN"
     assert by_path["reports/Codex"].classification == "PRUNE_CANDIDATE"
     assert by_path["reports/tmp"].classification == "PRUNE_CANDIDATE"
+    assert by_path["reports/docs-audit"].classification == "PRUNE_CANDIDATE"
     assert by_path["reports/documentation_merged.md"].classification == "PRUNE_CANDIDATE"
     assert (
         by_path["reports/tmp_module_dependency_map.json"].classification
+        == "PRUNE_CANDIDATE"
+    )
+    assert (
+        by_path["reports/quality/_tmp_field_level_diagnostics.csv"].classification
         == "PRUNE_CANDIDATE"
     )
 

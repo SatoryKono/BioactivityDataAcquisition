@@ -113,6 +113,7 @@ REPORTS_RETAINED_DIRS: tuple[Path, ...] = (
 )
 REPORTS_RETAINED_FILES: tuple[Path, ...] = (Path("reports/README.md"),)
 REPORTS_ROOT_PRUNE_PATTERNS: tuple[str, ...] = ("*_merged.md", "tmp_module_dependency_map.*")
+REPORTS_RETAINED_DIR_TRANSIENT_PATTERNS: tuple[str, ...] = ("_tmp_*",)
 
 
 @dataclass(frozen=True)
@@ -721,6 +722,32 @@ def _iter_reports_root_prune_candidates(repo_root: Path) -> set[Path]:
     return candidates
 
 
+def _iter_reports_retained_dir_transient_candidates(repo_root: Path) -> set[Path]:
+    candidates: set[Path] = set()
+    for retained_dir in REPORTS_RETAINED_DIRS:
+        root = repo_root / retained_dir
+        if not root.exists():
+            continue
+        for pattern in REPORTS_RETAINED_DIR_TRANSIENT_PATTERNS:
+            for match in root.rglob(pattern):
+                candidates.add(match.relative_to(repo_root))
+    return candidates
+
+
+def _iter_reports_top_level_uncurated_surfaces(repo_root: Path) -> set[Path]:
+    reports_root = repo_root / REPORTS_WORKSPACE
+    if not reports_root.exists():
+        return set()
+    retained = set(REPORTS_RETAINED_FILES) | set(REPORTS_RETAINED_DIRS)
+    local_prune = set(REPORTS_LOCAL_PRUNE_DIRS)
+    return {
+        child.relative_to(repo_root)
+        for child in reports_root.iterdir()
+        if child.relative_to(repo_root) not in retained
+        and child.relative_to(repo_root) not in local_prune
+    }
+
+
 def _reports_workspace_row(
     repo_root: Path,
     tracked_paths: set[str],
@@ -832,6 +859,44 @@ def collect_reports_workspace_evidence(repo_root: Path) -> list[ReportsWorkspace
                 "tracked root report requires explicit owner review"
                 if tracked
                 else "untracked root report matches approved local prune pattern"
+            ),
+        )
+
+    for path in _iter_reports_retained_dir_transient_candidates(repo_root):
+        if path.as_posix() in rows:
+            continue
+        tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
+        rows[path.as_posix()] = _reports_workspace_row(
+            repo_root,
+            tracked_paths,
+            path=path,
+            classification="REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE",
+            route_metadata=route_metadata,
+            reason=(
+                "tracked transient artifact inside retained reports surface "
+                "requires manual review before prune"
+                if tracked
+                else "transient _tmp_ artifact inside retained reports surface "
+                "is a local prune candidate"
+            ),
+        )
+
+    for path in _iter_reports_top_level_uncurated_surfaces(repo_root):
+        if path.as_posix() in rows:
+            continue
+        tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
+        rows[path.as_posix()] = _reports_workspace_row(
+            repo_root,
+            tracked_paths,
+            path=path,
+            classification="REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE",
+            route_metadata=route_metadata,
+            reason=(
+                "tracked reports workspace surface sits outside retained "
+                "families and needs explicit retention review"
+                if tracked
+                else "non-curated top-level reports workspace surface is a "
+                "local prune candidate"
             ),
         )
 

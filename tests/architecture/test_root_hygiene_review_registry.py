@@ -94,6 +94,23 @@ def test_root_hygiene_review_registry_candidates_are_unique_and_grounded() -> No
                 )
 
 
+def test_root_hygiene_review_registry_tracks_absent_root_conftest_surface() -> None:
+    payload = _load_yaml(REGISTRY_PATH)
+    lanes = payload.get("review_lanes")
+    assert isinstance(lanes, list), "Expected review_lanes list"
+
+    conftest_candidate = next(
+        candidate
+        for lane in lanes
+        if isinstance(lane, dict)
+        for candidate in lane.get("candidates", [])
+        if isinstance(candidate, dict) and candidate.get("path") == "conftest.py"
+    )
+
+    assert conftest_candidate["current_live_state"] == "absent_from_root_baseline"
+    assert conftest_candidate["canonical_path"] == "tests/conftest.py"
+
+
 def test_blocked_cleanup_lane_matches_structure_catalog() -> None:
     registry = _load_yaml(REGISTRY_PATH)
     structure_catalog = _load_yaml(STRUCTURE_CATALOG_PATH)
