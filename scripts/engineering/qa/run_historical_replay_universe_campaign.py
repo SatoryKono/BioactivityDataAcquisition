@@ -7,6 +7,12 @@ import argparse
 import json
 from pathlib import Path
 
+from bioetl.application.services.control_plane.historical_replay_certification_service import (
+    HistoricalReplayCertificationService,
+)
+from bioetl.application.services.control_plane.historical_replay_corpus_service import (
+    HistoricalReplayCorpusService,
+)
 from bioetl.application.services.control_plane.historical_replay_universe_service import (
     HistoricalReplayUniverseExternalRecord,
     HistoricalReplayUniverseService,
@@ -17,12 +23,6 @@ from bioetl.infrastructure.control_plane import (
     FileHistoricalReplayUniverseStore,
     FileRunLedgerStore,
     FileRunManifestStore,
-)
-from bioetl.application.services.control_plane.historical_replay_corpus_service import (
-    HistoricalReplayCorpusService,
-)
-from bioetl.application.services.control_plane.historical_replay_certification_service import (
-    HistoricalReplayCertificationService,
 )
 
 

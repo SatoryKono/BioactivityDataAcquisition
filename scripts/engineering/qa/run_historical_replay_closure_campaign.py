@@ -9,6 +9,10 @@ import json
 from pathlib import Path
 from typing import Any
 
+from bioetl.application.services.control_plane.historical_replay_certification_service import (
+    HistoricalReplayCertificationService,
+    HistoricalReplaySnapshotCertification,
+)
 from bioetl.application.services.control_plane.historical_replay_closure_service import (
     HistoricalReplayClaimScopeMode,
     HistoricalReplayClosureService,
@@ -18,10 +22,6 @@ from bioetl.application.services.control_plane.historical_replay_corpus_service 
     HistoricalReplayBulkCertificationSpec,
     HistoricalReplayCertifiabilityInventory,
     HistoricalReplayCorpusService,
-)
-from bioetl.application.services.control_plane.historical_replay_certification_service import (
-    HistoricalReplayCertificationService,
-    HistoricalReplaySnapshotCertification,
 )
 from bioetl.application.services.control_plane.run_manifest_diagnostics import (
     build_diagnostics_summary,
@@ -76,7 +76,10 @@ def _parse_args() -> argparse.Namespace:
             "retained_certifiable_historical_runs",
         ],
         default="all_retained_historical_runs",
-        help="Choose whether the final claim gate targets the full retained corpus or only the certifiable retained subset.",
+        help=(
+            "Choose whether the final claim gate targets the full retained "
+            "corpus or only the certifiable retained subset."
+        ),
     )
     parser.add_argument(
         "--require-global-claim",
@@ -96,7 +99,8 @@ def _default_disposition_for(record: dict[str, object]) -> tuple[str, str]:
     if status == "awaiting_certified_source_lineage":
         return (
             "certify_upstream_source_lineage",
-            "historical composite run still requires certified upstream source lineage before parent replay certification",
+            "historical composite run still requires certified upstream "
+            "source lineage before parent replay certification",
         )
     if status == "outside_certified_historical_scope":
         return (
@@ -119,7 +123,8 @@ def _narrowed_scope_disposition_for(record: dict[str, object]) -> tuple[str, str
     if status == "awaiting_certified_source_lineage":
         return (
             "outside_universal_claim_scope",
-            "retained composite run depends on upstream source lineage that remains outside the certifiable retained evidence scope",
+            "retained composite run depends on upstream source lineage that "
+            "remains outside the certifiable retained evidence scope",
         )
     if status == "outside_certified_historical_scope":
         return (
