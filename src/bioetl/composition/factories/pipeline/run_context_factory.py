@@ -76,7 +76,13 @@ def _normalize_contract_identity_result(
 ) -> _NormalizedContractIdentity:
     """Accept legacy 5-field and canonical 8-field contract identity tuples."""
     if len(result) == 5:
-        contract_ref, contract_version, contract_schema_hash, dq_policy_ref, rule_bundle_version = result
+        (
+            contract_ref,
+            contract_version,
+            contract_schema_hash,
+            dq_policy_ref,
+            rule_bundle_version,
+        ) = result
         return (
             contract_ref,
             contract_version,
@@ -112,7 +118,7 @@ def _resolve_contract_identity_for_runtime(
     provider: str,
     entity: str,
     strict: bool,
-    ) -> _NormalizedContractIdentity:
+) -> _NormalizedContractIdentity:
     """Resolve identity while preserving legacy two-argument test doubles."""
     if strict:
         try:

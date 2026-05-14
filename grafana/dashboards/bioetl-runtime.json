@@ -391,7 +391,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current snapshot from canonical recording rules. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN/no runtime status data. If UNKNOWN, check Monitor Runtime Telemetry Gap and Prometheus scrape/rule health before trusting zero count panels. Labels: pipeline, run_type. Next action: inspect top blocker reason, then active blocker detail or logs/traces.",
+      "description": "Current snapshot from canonical recording rules. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN/no runtime status data. If UNKNOWN, check Runtime Telemetry Gap and Prometheus scrape/rule health before trusting zero count panels. Labels: pipeline, run_type. Next action: inspect top blocker reason, then active blocker detail or logs/traces.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -450,8 +450,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 6,
+        "w": 5,
+        "x": 0,
         "y": 13
       },
       "id": 9100,
@@ -470,7 +470,7 @@
         "textMode": "auto",
         "dataLinks": [
           {
-            "title": "Inspect Top Runtime Blockers",
+            "title": "Runtime Blockers",
             "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=9101&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
@@ -494,7 +494,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Runtime Current Status",
+      "title": "Runtime Status",
       "type": "stat"
     },
     {
@@ -561,8 +561,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 0,
+        "w": 5,
+        "x": 15,
         "y": 19
       },
       "id": 9102,
@@ -593,7 +593,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Runtime Telemetry Gap",
+      "title": "Runtime Telemetry Gap",
       "type": "stat"
     },
     {
@@ -601,7 +601,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Top active runtime blocker reasons for the selected pipeline/run_type with severity and action_target labels. Time scope: current recording-rule snapshot. Empty table means no current blocker reason only when Monitor Runtime Current Status and Monitor Runtime Telemetry Gap are not UNKNOWN. Use the Inspect Active Runtime Blocker Detail drilldown for complete reason evidence.",
+      "description": "Top active runtime blocker reasons for the selected pipeline/run_type with severity and action_target labels. Time scope: current recording-rule snapshot. Empty table means no current blocker reason only when Runtime Status and Runtime Telemetry Gap are not UNKNOWN. Use the Inspect Active Runtime Blocker Detail drilldown for complete reason evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -649,8 +649,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 7,
-        "x": 17,
+        "w": 18,
+        "x": 5,
         "y": 13
       },
       "id": 9101,
@@ -689,7 +689,17 @@
           "refId": "A"
         }
       ],
-      "title": "Inspect Top Runtime Blockers",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "__name__": true
+            }
+          }
+        }
+      ],
+      "title": "Runtime Blockers",
       "type": "table"
     },
     {
@@ -736,8 +746,8 @@
       "gridPos": {
         "h": 6,
         "w": 5,
-        "x": 12,
-        "y": 13
+        "x": 5,
+        "y": 19
       },
       "id": 16,
       "options": {
@@ -816,8 +826,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 6,
+        "w": 4,
+        "x": 20,
         "y": 19
       },
       "id": 205,
@@ -860,7 +870,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Failed Runs",
+      "title": "Failed Runs",
       "type": "stat"
     },
     {
@@ -912,8 +922,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 12,
+        "w": 5,
+        "x": 10,
         "y": 19
       },
       "id": 220,
@@ -947,7 +957,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Runtime Error Rate",
+      "title": "Runtime Error Rate",
       "type": "stat"
     },
     {
@@ -997,8 +1007,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 18,
+        "w": 5,
+        "x": 0,
         "y": 19
       },
       "id": 237,
@@ -1028,7 +1038,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Worst Stage Lag",
+      "title": "Worst Stage Lag",
       "type": "stat"
     },
     {
@@ -1037,13 +1047,13 @@
       "title": "First Action",
       "description": "First operator action for Runtime triage. Uses current snapshot panels before selected-range evidence. UNKNOWN means missing status telemetry or scrape/rule gap until proven otherwise.",
       "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 0,
-        "y": 13
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 7
       },
       "options": {
-        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> read <em>Monitor Runtime Current Status</em>, then inspect the top blocker reason. If status is CRIT, open <em>Inspect Active Runtime Blocker Detail</em>; if WARN, inspect terminal-run/stage lag evidence; if UNKNOWN, verify <em>Monitor Runtime Telemetry Gap</em> before treating zero as OK.</div>",
+        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\">Read <em>Runtime Status</em>, then inspect the top blocker reason.<br>If status is CRIT, open <em>Inspect Active Runtime Blocker Detail</em>,<br>if WARN, inspect terminal-run/stage lag evidence,<br>if UNKNOWN, verify <em>Runtime Telemetry Gap</em> before treating zero as OK.</div>",
         "mode": "html"
       },
       "links": [
@@ -1332,7 +1342,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows each active runtime blocker recording rule with its current value for the selected pipeline/run_type where the source metric exposes run_type. Empty table means no active blockers only when Monitor Runtime Current Status and Monitor Runtime Telemetry Gap are not UNKNOWN.",
+          "description": "Shows each active runtime blocker recording rule with its current value for the selected pipeline/run_type where the source metric exposes run_type. Empty table means no active blockers only when Runtime Status and Runtime Telemetry Gap are not UNKNOWN.",
           "fieldConfig": {
             "defaults": {
               "color": {

@@ -8,7 +8,13 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 ACTIVE_SURFACES = (
-    ROOT / "src" / "bioetl" / "application" / "core" / "lifecycle" / "checkpoint_runtime.py",
+    ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "core"
+    / "lifecycle"
+    / "checkpoint_runtime.py",
     ROOT / "src" / "bioetl" / "infrastructure" / "config" / "_base.py",
     ROOT
     / "src"

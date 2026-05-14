@@ -268,9 +268,8 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
         normalized = dict(record)
         for field_name in tuple(normalized.keys()):
             rule = self._profile_rule(field_name)
-            if (
-                rule is None
-                or not _profile_rule_accepts_record_context(rule.normalizer)
+            if rule is None or not _profile_rule_accepts_record_context(
+                rule.normalizer
             ):
                 continue
             normalized[field_name] = self._normalize_profile_field_value(

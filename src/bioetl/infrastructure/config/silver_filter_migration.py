@@ -9,9 +9,7 @@ from typing import Any, Literal
 from bioetl.domain.filtering import BaseFilterConfig, SilverFilterConfig
 from bioetl.domain.types import JsonDict
 
-SilverFilterCompatibilityMode = Literal[
-    "structural_only_auto_promote",
-]
+SilverFilterCompatibilityMode = Literal["structural_only_auto_promote",]
 
 DEFAULT_SILVER_FILTER_COMPATIBILITY_MODE: SilverFilterCompatibilityMode = (
     "structural_only_auto_promote"
@@ -39,14 +37,12 @@ def build_silver_filter_config_for_compatibility(
     return build_structural_silver_filter_config(source)
 
 
-def resolve_silver_filter_compatibility_mode(
-) -> SilverFilterCompatibilityMode:
+def resolve_silver_filter_compatibility_mode() -> SilverFilterCompatibilityMode:
     """Return the canonical Silver filter mode captured in runtime identity."""
     return DEFAULT_SILVER_FILTER_COMPATIBILITY_MODE
 
 
-def build_silver_filter_compatibility_snapshot(
-) -> JsonDict:
+def build_silver_filter_compatibility_snapshot() -> JsonDict:
     """Build the manifest/effective-config identity payload for Silver filtering."""
     return {
         "schema_version": "silver-filter-compatibility-v1",

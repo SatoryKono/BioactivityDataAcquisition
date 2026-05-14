@@ -17,12 +17,12 @@ EXPECTED_STEPS_BY_PANEL = {
         {"color": "green", "value": None},
         {"color": "red", "value": 1},
     ],
-    ("bioetl-runtime.json", "Monitor Runtime Error Rate"): [
+    ("bioetl-runtime.json", "Runtime Error Rate"): [
         {"color": "green", "value": None},
         {"color": "orange", "value": 0.05},
         {"color": "red", "value": 0.2},
     ],
-    ("bioetl-runtime.json", "Monitor Worst Stage Lag"): [
+    ("bioetl-runtime.json", "Worst Stage Lag"): [
         {"color": "green", "value": None},
         {"color": "orange", "value": 300},
         {"color": "red", "value": 900},
@@ -44,12 +44,12 @@ STANDARD_SEVERITY_TITLE_TOKENS = (
 )
 BACKGROUND_SEVERITY_STAT_PANELS = {
     ("bioetl-overview-v2.json", "Status"),
-    ("bioetl-runtime.json", "Monitor Runtime Current Status"),
-    ("bioetl-runtime.json", "Monitor Runtime Telemetry Gap"),
+    ("bioetl-runtime.json", "Runtime Status"),
+    ("bioetl-runtime.json", "Runtime Telemetry Gap"),
     ("bioetl-runtime.json", "Monitor Runtime Blockers"),
-    ("bioetl-runtime.json", "Monitor Failed Runs"),
-    ("bioetl-runtime.json", "Monitor Runtime Error Rate"),
-    ("bioetl-runtime.json", "Monitor Worst Stage Lag"),
+    ("bioetl-runtime.json", "Failed Runs"),
+    ("bioetl-runtime.json", "Runtime Error Rate"),
+    ("bioetl-runtime.json", "Worst Stage Lag"),
     ("bioetl-dq-v2.json", "Monitor DQ Current Status"),
     ("bioetl-dq-v2.json", "Monitor DQ Threshold State"),
     ("bioetl-control-plane-v1.json", "Monitor: Replay Safety State"),
@@ -74,12 +74,12 @@ EXPLICIT_VALUE_MAPPING_STAT_PANELS = {
         "2": {"text": "CRIT", "color": "red"},
         "3": {"text": "UNKNOWN", "color": "gray"},
     },
-    ("bioetl-runtime.json", "Monitor Runtime Current Status"): {
+    ("bioetl-runtime.json", "Runtime Status"): {
         "0": {"text": "OK", "color": "green"},
         "1": {"text": "WARN", "color": "orange"},
         "2": {"text": "CRIT", "color": "red"},
     },
-    ("bioetl-runtime.json", "Monitor Runtime Telemetry Gap"): {
+    ("bioetl-runtime.json", "Runtime Telemetry Gap"): {
         "0": {"text": "SCRAPING", "color": "green"},
         "1": {"text": "SCRAPE/RULE GAP", "color": "orange"},
         "2": {"text": "SCRAPE+RULE GAP", "color": "red"},
@@ -112,11 +112,11 @@ EXPLICIT_VALUE_MAPPING_STAT_PANELS = {
 }
 FAIL_CLOSED_NO_ZERO_FALLBACK_PANELS = {
     ("bioetl-overview-v2.json", "Status"): "UNKNOWN",
-    ("bioetl-runtime.json", "Monitor Runtime Current Status"): "UNKNOWN",
-    ("bioetl-runtime.json", "Monitor Runtime Telemetry Gap"): "UNKNOWN",
+    ("bioetl-runtime.json", "Runtime Status"): "UNKNOWN",
+    ("bioetl-runtime.json", "Runtime Telemetry Gap"): "UNKNOWN",
     ("bioetl-runtime.json", "Monitor Runtime Blockers"): "UNKNOWN",
-    ("bioetl-runtime.json", "Monitor Runtime Error Rate"): "UNKNOWN",
-    ("bioetl-runtime.json", "Monitor Worst Stage Lag"): "UNKNOWN",
+    ("bioetl-runtime.json", "Runtime Error Rate"): "UNKNOWN",
+    ("bioetl-runtime.json", "Worst Stage Lag"): "UNKNOWN",
     ("bioetl-runtime.json", "Monitor Memory Pressure Active"): "UNKNOWN",
     ("bioetl-provider-health-v2.json", "Monitor GLOBAL Provider Severity Matrix"): None,
     ("bioetl-provider-health-v2.json", "Inspect Provider Top Causes"): None,
@@ -127,7 +127,7 @@ FAIL_CLOSED_NO_ZERO_FALLBACK_PANELS = {
     ("bioetl-control-plane-v1.json", "Inspect: Telemetry Missing"): "UNKNOWN",
 }
 REQUIRED_TRUST_MARKER_PANELS = {
-    "bioetl-runtime.json": {"Monitor Runtime Telemetry Gap"},
+    "bioetl-runtime.json": {"Runtime Telemetry Gap"},
     "bioetl-control-plane-v1.json": {"Inspect: Telemetry Missing"},
 }
 

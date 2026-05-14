@@ -1,0 +1,103 @@
+version: "1.0.0"
+adr_refs:
+  - ADR-018
+  - ADR-026
+  - ADR-039
+  - ADR-045
+denied_terms:
+  - description
+  - relation
+  - score
+  - source
+  - status
+  - type
+  - value
+entries:
+  - surface: gold_json_property
+    path: docs/04-reference/contracts/gold/chembl_activity_v1.0.json
+    context: properties
+    fields:
+      - type
+      - value
+      - relation
+    owner: BioETL Team
+    semantic_role: chembl_activity_raw_measurement_terms
+    rationale: ChEMBL activity Gold keeps provider-native raw measurement fields beside standardized activity fields; these are not cross-pipeline canonical aliases.
+
+  - surface: composite_column_group_field
+    path: configs/composites/activity.yaml
+    context: original_values
+    fields:
+      - type
+      - value
+      - relation
+    owner: BioETL Team
+    semantic_role: chembl_activity_raw_measurement_terms
+    rationale: Composite activity groups raw measurement columns under original_values to keep them scoped away from standardized activity semantics.
+
+  - surface: gold_json_property
+    path: docs/04-reference/contracts/gold/chembl_assay_parameters_v1.0.json
+    context: properties
+    fields:
+      - type
+      - value
+      - relation
+    owner: BioETL Team
+    semantic_role: chembl_assay_parameter_terms
+    rationale: Assay parameter type/value/relation fields are provider-scoped experimental parameter metadata, not global canonical aliases.
+
+  - surface: gold_json_property
+    path: docs/04-reference/contracts/gold/chembl_assay_v1.0.json
+    context: properties
+    fields:
+      - description
+      - score
+    owner: BioETL Team
+    semantic_role: chembl_assay_descriptive_metadata
+    rationale: Assay description and score are ChEMBL assay metadata fields with source-specific meaning.
+
+  - surface: composite_column_group_field
+    path: configs/composites/assay.yaml
+    context: description
+    fields:
+      - description
+      - score
+    owner: BioETL Team
+    semantic_role: chembl_assay_descriptive_metadata
+    rationale: Composite assay keeps source-specific descriptive metadata in an explicit description group.
+
+  - surface: gold_json_property
+    path: docs/04-reference/contracts/gold/chembl_target_v1.0.json
+    context: properties
+    fields:
+      - description
+    owner: BioETL Team
+    semantic_role: chembl_target_descriptive_metadata
+    rationale: Target description is source-specific biological target text and must not be treated as a generic cross-entity description alias.
+
+  - surface: composite_column_group_field
+    path: configs/composites/target.yaml
+    context: descriptors
+    fields:
+      - description
+    owner: BioETL Team
+    semantic_role: chembl_target_descriptive_metadata
+    rationale: Composite target places source-specific target description in the descriptors group instead of canonicalizing generic description globally.
+
+  - surface: gold_json_property
+    path: docs/04-reference/contracts/gold/chembl_target_component_v1.0.json
+    context: properties
+    fields:
+      - description
+    owner: BioETL Team
+    semantic_role: chembl_target_component_descriptive_metadata
+    rationale: Target component description is source-specific component metadata and is not a generic cross-entity description alias.
+
+  - surface: composite_field_group_base_name
+    path: configs/composites/field_groups/publication.yaml
+    context: publication_types
+    fields:
+      - type
+    owner: BioETL Team
+    semantic_role: raw_provider_publication_type
+    rationale: Publication field groups retain provider-native raw type under publication_typing while canonical publication_type and publication_type_unified carry normalized semantics.

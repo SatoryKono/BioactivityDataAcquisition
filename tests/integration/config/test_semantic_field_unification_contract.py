@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import yaml
@@ -17,10 +18,23 @@ from bioetl.infrastructure.config.semantic_field_registry_loader import (
 GENERIC_LEXICAL_COLLISIONS = frozenset(
     {"type", "value", "score", "description", "relation", "source"}
 )
+PUBLICATION_GOLD_CONTRACTS = (
+    "docs/04-reference/contracts/gold/chembl_publication_v1.0.json",
+    "docs/04-reference/contracts/gold/crossref_publication_v1.0.json",
+    "docs/04-reference/contracts/gold/openalex_publication_v1.0.json",
+    "docs/04-reference/contracts/gold/pubmed_publication_v1.0.json",
+    "docs/04-reference/contracts/gold/semanticscholar_publication_v1.0.json",
+)
 
 
 def _load_yaml(path: str) -> dict[str, object]:
     payload = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    return payload
+
+
+def _load_json(path: str) -> dict[str, object]:
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
 
@@ -149,3 +163,29 @@ def test_generic_lexical_collisions_are_not_canonicalized() -> None:
 
     for field_name in GENERIC_LEXICAL_COLLISIONS:
         assert registry.get_by_canonical_name(field_name) is None
+
+
+def test_publication_year_gold_nullable_number_compatibility_is_documented() -> None:
+    silver_source = Path(
+        "src/bioetl/domain/schemas/common/publication_base.py"
+    ).read_text(encoding="utf-8")
+    gold_source = Path(
+        "src/bioetl/domain/contracts/gold/_publication_common_schema.py"
+    ).read_text(encoding="utf-8")
+    gold_docs = Path("docs/04-reference/contracts/gold-schemas.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert "publication_year: Series[pd.Int64Dtype]" in silver_source
+    assert "publication_year: Series[float]" in gold_source
+    assert "coerce=True" in gold_source
+    assert "Publication Nullable Integer Compatibility" in gold_docs
+
+    for contract_path in PUBLICATION_GOLD_CONTRACTS:
+        payload = _load_json(contract_path)
+        properties = payload["properties"]
+        assert isinstance(properties, dict)
+        publication_year = properties["publication_year"]
+        assert isinstance(publication_year, dict)
+        assert publication_year["type"] == ["number", "null"]
+        assert publication_year["nullable"] is True

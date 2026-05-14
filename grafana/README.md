@@ -748,6 +748,9 @@ Common context panels on primary dashboards outside Overview:
 
 - **`0. Control Plane`** uses the shared context shell and adds
   control-plane-specific trust panels for manifest/ledger/checkpoint/replay/lineage.
+  `Next Action: Replay Diagnostics` now occupies the rightmost shared-shell slot
+  beside `ID` and `Processed Records`, while the four compact trust cards remain
+  grouped below the `Trust Summary (Answer-First)` separator.
   First-screen trust panels preserve `UNKNOWN` for missing
   telemetry; `Inspect: Telemetry Missing` must be `0` before operator
   treats current trust cards as replay/resume-safe evidence. `Inspect: Terminal Run Events by Status in Range`
@@ -773,7 +776,10 @@ Common context panels on primary dashboards outside Overview:
 
 - **`5. Workflow`** exposes the shared context shell plus `$status` через
   `label_values(bioetl_workflow_runs_total, status)`, а также `$step_status` и
-  `$step_kind` через `bioetl_workflow_step_events_total`.
+  `$step_kind` через `bioetl_workflow_step_events_total`. `First Action`
+  now occupies the rightmost shared-shell slot beside `ID` and `Processed Records`
+  and also carries the selected-range-only interpretation contract for this
+  dashboard after the removal of the separate `Workflow Scope` banner.
   Shipped workflow panels aggregate per-run published series with
   `max_over_time(...)`, because workflow jobs are short-lived and must remain
   queryable after the CLI process exits. `$pipeline/$run_type/$run_id` are
@@ -905,12 +911,11 @@ not use it as a Prometheus label.
 
 | ID  | Название                                     | Тип        | PromQL                                                                                                                                 | Описание                                                                                                                                                                   |
 | --- | -------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 99  | Review: Pipeline Scope                       | Stat       | `max(label_values(..., pipeline)) or vector(0)`                                                                                        | Информационная панель пайплайна.                                                                                                                                           |
 | 100 | Run Type                                     | Stat       | `max(label_values(..., run_type)) or vector(0)`                                                                                        | Информационная панель типа запуска.                                                                                                                                        |
 | 9100 | Monitor DQ Current Status                   | Stat       | `max(bioetl_dq_current_status{pipeline=~"$pipeline"})`                                                                                | Pipeline-wide current DQ state: `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN`; disabled/noop DQ monitoring contributes WARN rather than unconditional green. Selected-range evidence ниже не меняет этот first-screen статус. |
 | 9101 | Monitor DQ Threshold State                  | Stat       | `max(bioetl_dq_current_reason{severity=...})` + explicit `OK` fallback                                                                | Bounded current threshold summary: warning reasons map to WARN, hard reasons map to CRIT, explicit current OK stays `0=OK`.                                                |
 | 9102 | Inspect DQ Current Reasons                  | Table      | `topk(5, bioetl_dq_current_reason{pipeline=~"$pipeline"} > 0)`                                                                        | Current DQ reasons table with `severity` and `action_target`; `CRIT` can come from quarantine/validation blockers even when `filtered_out=0`.                             |
-| 9103 | Review: First Action                         | Text      | n/a                                                                                                                                    | Operator CTA: review current status and reasons first; if `filtered_out=0`, inspect quarantine, silver validation failures, and blocked share before assuming reject-path only. |
+| 9103 | Review: First Action                         | Text      | n/a                                                                                                                                    | CTA block now sits in the same shared-shell row as `ID` and `Processed Records` (`w=8`, `h=6`). Review current status and reasons first; if `filtered_out=0`, inspect quarantine, silver validation failures, and blocked share before assuming reject-path only. |
 | 1   | Track Range Evidence: Bronze -> Silver -> Gold | Timeseries | `sum by (pipeline, stage) (max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Full-width selected-range evidence panel that now sits below the compact current-context band; не определяет current DQ status.                                            |
 | 2   | Monitor: Data Quality Score (Volume-weighted) | Gauge      | `sum(score * record_count) / clamp_min(sum(record_count), 1)`                                                                          | Канонический DQ gauge на базе `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`; в layout он входит в compact current-context row сразу под answer row.   |
 | 3   | Track: Source Records in Range (Bronze)      | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="bronze"}[$__range])) or vector(0))`                                  | Суммарный Bronze input для pushed-counter evidence внутри активного Grafana окна; это bounded range evidence, а не latest-value snapshot.                                   |
@@ -923,7 +928,7 @@ not use it as a Prometheus label.
 | 121 | Inspect: Top Silver Reject Reasons (Pareto) | Bar gauge  | `topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                      | Bounded top-10 summary по `reason_code`; use the top-level `Silver Reject Explorer` handoff for record-level narrowing inside the explorer.                                  |
 | 122 | Inspect: Top Silver Reject Fields            | Bar gauge  | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                            | Bounded top-10 summary по `field`; use the top-level `Silver Reject Explorer` handoff for record-level narrowing inside the explorer.                                        |
 | 152 | Monitor: Silver Filter Reject Accounting Mismatch | Stat  | `round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{...}[$__range])))`                                              | Reconciliation guard между stage-total `filtered_out` surface и bounded breakdown metric. `0` = healthy, non-zero = расследовать drift, `No data` = recording rule не публикуется. |
-| 101 | Review: Latest Successful Data Timestamp     | Stat       | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})`                                                                            | Последний observed ingestion timestamp внутри выбранного pipeline scope.                                                                                                   |
+| 101 | Review: Latest Successful Data Timestamp     | Stat       | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})`                                                                            | Последний observed ingestion timestamp внутри выбранного pipeline scope; остаётся в first-screen current-context band после переноса CTA из answer row.                  |
 
 **Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
 
@@ -1031,11 +1036,10 @@ first screen.
 
 | ID  | Название                                        | Тип            | PromQL                                                                                                               | Описание                                                  |
 | --- | ----------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| 9100 | GLOBAL Provider Scope                          | Text           | n/a                                                                                                                  | Явно показывает GLOBAL provider scope, selected `$provider` и сохранённый `$pipeline_context`. |
 | 9101 | Monitor GLOBAL Provider Severity Matrix        | Table          | `bioetl_provider_current_status`                                                                                     | Current provider severity: `0=OK`, `1=DEGRADED`, `2=FAILING`, `null=UNKNOWN`; derived summary semantics, не фильтруется по pipeline. Raw `bioetl_provider_health_status` uses a different contract: `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`. |
 | 9102 | Inspect Critical Providers                     | Table          | `bioetl_provider_current_status >= 1`                                                                                | Только providers с current `DEGRADED`/`FAILING`; missing current-status telemetry остаётся в `Monitor GLOBAL Provider Severity Matrix` как `UNKNOWN`. Panel exposes direct provider incident runbook handoff. |
 | 9103 | Inspect Provider Top Causes                    | Table          | `topk(5, bioetl_provider_current_cause > 0)`                                                                         | Current cause chips: raw health status, failure rate, retry exhaustion, latency, HTTP errors, rate-limit pressure. This panel can stay non-empty while `Monitor GLOBAL Provider Severity Matrix` still reads `0 (OK)` because cause projection includes early-warning provider signals independent of current-status projection. Empty table means no active provider causes are currently above zero; if severity is still non-OK, treat that as an explainability gap. Panel exposes direct provider incident runbook handoff. |
-| 9002 | First Action                                   | Text           | n/a                                                                                                                  | CTA: review the GLOBAL severity matrix, inspect critical providers, or inspect provider top causes before leaving the dashboard. |
+| 9002 | First Action                                   | Text           | n/a                                                                                                                  | CTA block sits on the same first-screen row as `ID` and `Processed Records`, using the rightmost shared-shell slot (`w=8`, `h=6`). Review the GLOBAL severity matrix, inspect critical providers, or inspect provider top causes before leaving the dashboard. |
 | 1   | Track Health Check Latency by Provider (p95)    | Timeseries     | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__interval])))`                                       | Selected-range evidence: p95 latency trend по выбранным providers; `No data` сохраняется как diagnostic gap, не маскируется в `0s`. |
 | 114 | Monitor Current Provider Health Status          | Table          | `max by (provider) (bioetl_provider_health_status{provider=~"$provider"}) or ((bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0) / (bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0))` | Текущий raw status по provider с mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`; если provider universe существует без raw status sample, panel остаётся `UNKNOWN`. |
 | 2   | Monitor Healthy Checks (Selected Range)         | Stat           | `round(sum(increase(bioetl_health_check_success_total{provider=~"$provider"}[$__range])) or vector(0))`              | Selected-range evidence: completed probes со статусом `HEALTHY` в выбранном окне.  |
@@ -1099,8 +1103,10 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 | `Inspect Top Runtime Blockers` | `topk(3, bioetl_runtime_current_blocker_reason{pipeline=~"$pipeline",run_type=~"$run_type"} > 0)` | table | reason/severity/action labels |
 
 Range and localization evidence (`Monitor Failed Runs`,
-`Monitor Runtime Error Rate`, `Monitor Worst Stage Lag`, latency, records by
-stage, logs/traces) lives below the answer row or inside collapsed rows.
+`Monitor Runtime Error Rate`, latency, records by stage, logs/traces) lives
+below the current-cause row or inside collapsed rows. `Monitor Worst Stage Lag`
+is colocated with the compact evidence row as a selected-range risk marker; it
+is not a current status input.
 `Inspect Active Runtime Blocker Detail` is a collapsed `Detect` drilldown, not
 first-screen guidance. This evidence supports investigation but does not replace
 the canonical current status recording rule. `Monitor Runtime Error Rate`,
@@ -2124,7 +2130,7 @@ ______________________________________________________________________
 | 2. Runtime                | `bioetl-runtime`                | 2            | 27     | 30s     | 12h        | Prometheus + Quarantine Explorer identity + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 21     | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Provider latency, health, retries, failure ratios |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 25     | 30s     | 12h        | Prometheus + Quarantine Explorer identity | DQ score, quarantine, freshness, validation failures |
-| 5. Workflow               | `bioetl-workflow-overview`      | 2            | 12     | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Selected-range workflow run and step evidence with one justified panel-level CTA surface (`Next Diagnostic Surface`) plus collapsed step diagnostics |
+| 5. Workflow               | `bioetl-workflow-overview`      | 2            | 11     | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Selected-range workflow run and step evidence with `First Action` in the shared shell plus collapsed step diagnostics |
 | Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 10     | 1m      | 24h        | Quarantine Explorer API | Record-level browsing and action handoff for Silver rejects |
 
 ______________________________________________________________________

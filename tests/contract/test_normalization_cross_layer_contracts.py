@@ -185,9 +185,7 @@ def test_checkpoint_execution_identity_payload_matches_domain_contract() -> None
         effective_config_artifact_id=raw_inputs["effective_config_artifact_id"],
         exact_replay=raw_inputs["exact_replay"],
         input_snapshot_fingerprint=raw_inputs["input_snapshot_fingerprint"],
-        silver_filter_compatibility_mode=raw_inputs[
-            "silver_filter_compatibility_mode"
-        ],
+        silver_filter_compatibility_mode=raw_inputs["silver_filter_compatibility_mode"],
     )
 
     assert metadata.checkpoint_execution_identity_payload() == {

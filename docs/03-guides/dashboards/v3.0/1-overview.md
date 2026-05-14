@@ -122,7 +122,7 @@ Row 1: Navigation
 Row 2: L0 Answer
 
 - System Status;
-- Next Action;
+- First Action;
 - L0 Inputs / trust context.
 
 Row 3: Current Subsystem Summary
@@ -168,7 +168,7 @@ Collapsed Rows
 
 - `ONE BIG QUESTION / Scope / Provenance`
 - `System Status`
-- `Next Action`
+- `First Action`
 - `L0 Inputs`
 - `Runtime Blockers`
 - `DQ Status`
@@ -218,7 +218,7 @@ Navigation must follow `contracts/navigation-links.yaml`.
 Carry forward:
 
 - `System Status`;
-- `Next Action`;
+- `First Action`;
 - `L0 Inputs`;
 - runtime blocker signal;
 - DQ status signal;

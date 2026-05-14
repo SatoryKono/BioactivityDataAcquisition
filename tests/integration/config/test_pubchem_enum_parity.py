@@ -47,7 +47,8 @@ def _matrix_row(field_name: str) -> dict[str, Any]:
     return next(
         row
         for row in build_field_matrix_rows()
-        if row["pipeline_name"] == "pubchem_compound" and row["field_name"] == field_name
+        if row["pipeline_name"] == "pubchem_compound"
+        and row["field_name"] == field_name
     )
 
 
@@ -61,7 +62,9 @@ def test_pubchem_standardization_status_parity_across_enum_config_profile_fixtur
     )
 
     assert expected_statuses == CHEMICAL_STANDARDIZATION_STATUSES
-    assert _entity_allowed_values("chemical_standardization_status") == expected_statuses
+    assert (
+        _entity_allowed_values("chemical_standardization_status") == expected_statuses
+    )
 
     fixture_values = tuple(
         fixture_payload["pipelines"]["pubchem_compound"]["expected_controlled_values"][
@@ -116,7 +119,8 @@ def test_pubchem_property_urn_vocab_review_stays_governance_only() -> None:
         row
         for row in build_field_matrix_rows()
         if row["pipeline_name"] == "pubchem_compound"
-        and row["controlled_vocabulary_source"] == "configs/vocab/pubchem_property_urn.yaml"
+        and row["controlled_vocabulary_source"]
+        == "configs/vocab/pubchem_property_urn.yaml"
     ]
 
     assert set(urn_vocab["fields"]) == {

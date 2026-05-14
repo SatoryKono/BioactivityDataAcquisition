@@ -24,8 +24,7 @@ def _load_implemented_benchmark_keys() -> set[str]:
         if not isinstance(node, ast.Assign):
             continue
         if not any(
-            isinstance(target, ast.Name)
-            and target.id == "_IMPLEMENTED_BENCHMARK_KEYS"
+            isinstance(target, ast.Name) and target.id == "_IMPLEMENTED_BENCHMARK_KEYS"
             for target in node.targets
         ):
             continue

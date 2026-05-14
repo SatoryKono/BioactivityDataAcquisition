@@ -282,7 +282,7 @@ Canonical L0 answer-first hub using the frozen `1. Overview v3` layout as the ba
 
 ### Required panel links (dataLinks)
 - Panel `214` (Status) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
-- Panel `215` (Next Action) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
+- Panel `215` (First Action) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
 - Panel `9002` (Inputs) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
 - Panel `9003` (Runtime) → Open Runtime
 - Panel `9004` (Data Quality) → Open Data Quality
@@ -292,14 +292,14 @@ Canonical L0 answer-first hub using the frozen `1. Overview v3` layout as the ba
 - Panel `9013` (Workflow) → Open Workflow
 
 ### First-screen структура
-- **Tier 1**: `Provenance`, `Status`, `Next Action`, `ID`, `Processed Records`
+- **Tier 1**: `Provenance`, `Status`, `First Action`, `ID`, `Processed Records`
 - **Tier 2**: `Control Plane`, `Runtime`, `Data Quality`, `Provider`, `Data Validation`, `Inputs`, `Workflow`
 - **Tier 3**: collapsed `L1 Historical Trends`, collapsed `Range Evidence`
 - **Tier 4**: collapsed `Diagnostics & Docs`
 
 ### KPI ownership (canonical)
 - Status → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `0. Control Plane`, `5. Workflow`
-- Next Action → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `3. Provider Health`
+- First Action → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `3. Provider Health`
 - Inputs → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `4. Data Quality`, `0. Control Plane`
 - Data Validation → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `0. Control Plane`
 - Provider → canonical for `bioetl-overview-v2`, mirrors: `3. Provider Health`
@@ -382,14 +382,14 @@ L2 diagnostic runtime triage: blockers, latency, backlog, error localization, ha
 - **CTAs**: Review current status, Review range evidence, Inspect top blockers, Inspect active blocker
 
 ### First-screen структура
-- **Tier 1**: `First Action`, `Monitor Runtime Current Status`, `Monitor Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Inspect Top Runtime Blockers`
+- **Tier 1**: `First Action`, `Runtime Status`, `Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Runtime Blockers`
 - **Tier 2**: collapsed rows по сценариям: `Backlog Trends`, `Durations`, `Shutdown Diagnostics`, `Tracing-only Log Hygiene`
 - **Tier 3**: selected-range evidence ниже
 - **Tier 4**: collapsed tracing-only log hygiene
 
 ### KPI ownership (canonical mirrors)
 - Status → mirror (canonical: `bioetl-overview-v2`)
-- Next Action → mirror (canonical: `bioetl-overview-v2`)
+- First Action → mirror (canonical: `bioetl-overview-v2`)
 - Inputs → mirror (canonical: `bioetl-overview-v2`)
 - Data Validation → mirror (canonical: `bioetl-overview-v2`)
 - Replay Safety State → mirror (canonical: `bioetl-control-plane-v1`)

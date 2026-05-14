@@ -229,9 +229,7 @@ def test_runtime_overrides_snapshot_materializes_execution_environment_provenanc
     assert env_snapshot["settings_snapshot_hash"].startswith("sha256:")
 
 
-def test_runtime_overrides_snapshot_materializes_silver_filter_compatibility() -> (
-    None
-):
+def test_runtime_overrides_snapshot_materializes_silver_filter_compatibility() -> None:
     """Silver compatibility mode must be part of effective-config identity."""
     settings = Settings(env="prod", data_dir=Path("data"), debug=True)
 
@@ -251,9 +249,10 @@ def test_runtime_overrides_snapshot_materializes_silver_filter_compatibility() -
         "mode": "structural_only_auto_promote",
         "source": "default",
     }
-    assert snapshot["runtime"]["settings_snapshot"]["silver_filter_compatibility"][
-        "mode"
-    ] == "structural_only_auto_promote"
+    assert (
+        snapshot["runtime"]["settings_snapshot"]["silver_filter_compatibility"]["mode"]
+        == "structural_only_auto_promote"
+    )
 
 
 def test_build_effective_config_source_refs_is_stable_across_equivalent_calls(
@@ -744,6 +743,9 @@ def test_create_and_persist_composite_effective_config_artifact_forwards_require
         ),
         runtime_config=RuntimeConfig(run_type=RunType.INCREMENTAL),
         required_persistence_profile="forensic_grade",
+        normalization_profile_ref=None,
+        normalization_profile_version=None,
+        normalization_profile_hash=None,
         settings=Settings(data_dir=Path("data")),
         logger=NoOpLogger(),
         run_id=RunID(uuid4()),

@@ -334,7 +334,7 @@ Run: `uv run python -m scripts.engineering.qa report-dashboard-query-duplicates`
 
 ### 11.1 Canonical Dashboard Mapping
 - [ ] System Status → canonical: `1. Overview`, mirrors: `2. Runtime`, `0. Control Plane`, `5. Workflow`
-- [ ] Next Action → canonical: `1. Overview`, mirrors: `2. Runtime`, `3. Provider Health`
+- [ ] First Action → canonical: `1. Overview`, mirrors: `2. Runtime`, `3. Provider Health`
 - [ ] L0 Inputs → canonical: `1. Overview`, mirrors: `2. Runtime`, `4. Data Quality`, `0. Control Plane`
 - [ ] Gold Lifecycle → canonical: `1. Overview`, mirrors: `2. Runtime`, `0. Control Plane`
 - [ ] Provider Global → canonical: `1. Overview`, mirrors: `3. Provider Health`
@@ -365,7 +365,7 @@ Check against `contracts/navigation-links.yaml` → `required_panel_links_by_uid
 
 **bioetl-overview-v2**:
 - [ ] Panel `214` (System Status) → dataLinks to: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
-- [ ] Panel `215` (Next Action) → dataLinks to: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
+- [ ] Panel `215` (First Action) → dataLinks to: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
 - [ ] Panel `9002` (L0 Inputs) → dataLinks to: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
 - [ ] Panel `9003` (Runtime Blockers) → dataLink to: Open Runtime
 - [ ] Panel `9004` (DQ Status) → dataLink to: Open Data Quality

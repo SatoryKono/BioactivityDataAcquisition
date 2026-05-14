@@ -35,7 +35,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `calibrate-hotspots`             | `scripts/engineering/qa/calibrate_hotspot_budgets.py` | Calibrate hotspot budgets                                                                         |
 | `run-tests`                      | `test_health.py`                                      | Run a named test-health lane and emit JUnit XML plus JSON summary                                 |
 | `summarize-junit`                | `test_health.py`                                      | Aggregate existing JUnit XML into test-health JSON summary                                        |
-| `test-health`                    | `test_health.py`                                      | Summarize recent `reports/quality/test-runs/*.json` history                                       |
+| `test-health`                    | `test_health.py`                                      | Summarize historical lane history from recent `reports/quality/test-runs/*.json` evidence         |
 
 ## When to Use
 
@@ -63,7 +63,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `calibrate-hotspots`             | After collecting new performance observations; recalculates budget thresholds                                                                    | Manual, on-demand                          |
 | `run-tests`                      | When a local or CI run should be recorded under a canonical `test_lanes` suite name                                                              | Local / CI test-health telemetry           |
 | `summarize-junit`                | When an existing CI pytest job already wrote JUnit XML and should be folded into the test-health format                                          | CI test-health telemetry migration         |
-| `test-health`                    | When reviewing recent lane history, failing nodeids, and skip/failure counts                                                                     | Local / CI test-health reporting           |
+| `test-health`                    | When reviewing recent lane history, failing nodeids, and skip/failure counts; historical evidence only, not the current coverage baseline        | Local / CI test-health reporting           |
 
 Important distinction:
 
@@ -105,7 +105,10 @@ python -m scripts.engineering.qa analyze-duplicate-functions
 `run-tests` and `summarize-junit` classify failures with
 `configs/quality/test_health_classifiers.yaml`. Those classes are
 informational; pytest exit codes and quality gates remain the blocking source of
-truth.
+truth. `test-health` rollups and `reports/quality/test-runs/rollup.md` are
+historical lane history only. The authoritative committed telemetry baseline
+lives in `configs/quality/test_telemetry_baseline.yaml`, and current
+merge-blocking coverage status remains owned by the live `coverage-verify` lane.
 
 The legacy direct paths for the historical architecture, application-deps, and
 constructor-args checks remain supported during the migration window, but new

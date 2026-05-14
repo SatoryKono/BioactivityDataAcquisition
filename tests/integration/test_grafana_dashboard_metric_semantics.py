@@ -158,7 +158,7 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
     """Overview compact evidence panels must stay below the current L0 verdict path."""
     current_verdict_titles = {
         "Status",
-        "Next Action",
+        "First Action",
         "Inputs",
         "Control Plane",
         "Runtime",
@@ -209,13 +209,13 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
             )
             assert "selected-range" in description
             assert "evidence" in description
-            assert "does not determine l0 status or next action" in description
+            assert "does not determine l0 status or first action" in description
             assert data_links
             assert all(
                 str(link.get("title", "")).startswith("Open ") for link in data_links
             )
 
-        for panel_title in ("Status", "Next Action"):
+        for panel_title in ("Status", "First Action"):
             assert "$__range" not in "\n".join(
                 get_panel_expressions(panels[panel_title])
             )
@@ -300,7 +300,9 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
     processed_expressions = get_panel_expressions({"panels": [processed]})
     processed_description = str(processed.get("description", "")).lower()
     assert processed_expressions
-    assert any("bioetl_records_processed_total" in expr for expr in processed_expressions)
+    assert any(
+        "bioetl_records_processed_total" in expr for expr in processed_expressions
+    )
     assert any("max_over_time(" in expr for expr in processed_expressions)
     assert any("[$__range]" in expr for expr in processed_expressions)
     assert any("or vector(0)" in expr for expr in processed_expressions)
@@ -317,7 +319,7 @@ def test_runtime_selected_count_zeroes_are_scope_anchored() -> None:
     """Selected runtime count cards must keep UNKNOWN when selected scope is absent."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected_panels = {
-        "Monitor Failed Runs": "bioetl_runtime_pipeline_run_type_universe",
+        "Failed Runs": "bioetl_runtime_pipeline_run_type_universe",
         "Monitor No-Records Runs": "bioetl_runtime_pipeline_run_type_universe",
     }
     panels = {
@@ -778,11 +780,11 @@ def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
     """Runtime diagnostic gauges must not convert missing telemetry to OK."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected_panels = {
-        "Monitor Runtime Current Status",
-        "Monitor Runtime Telemetry Gap",
+        "Runtime Status",
+        "Runtime Telemetry Gap",
         "Monitor Runtime Blockers",
-        "Monitor Runtime Error Rate",
-        "Monitor Worst Stage Lag",
+        "Runtime Error Rate",
+        "Worst Stage Lag",
         "Monitor Memory Pressure Active",
     }
     panels = {
@@ -810,11 +812,11 @@ def test_runtime_telemetry_gap_checks_scrape_and_rule_health() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Runtime Telemetry Gap"
+            if item.get("title") == "Runtime Telemetry Gap"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Monitor Runtime Telemetry Gap' not found"
+    assert panel is not None, "Panel 'Runtime Telemetry Gap' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any('up{job="bioetl"}' in expr for expr in expressions)
@@ -839,12 +841,12 @@ def test_runtime_domain_thresholds_match_alert_rule_policy() -> None:
     """Runtime domain gauges should use real alert units, not generic 1/2 severity steps."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected_steps = {
-        "Monitor Runtime Error Rate": [
+        "Runtime Error Rate": [
             {"color": "green", "value": None},
             {"color": "orange", "value": 0.05},
             {"color": "red", "value": 0.2},
         ],
-        "Monitor Worst Stage Lag": [
+        "Worst Stage Lag": [
             {"color": "green", "value": None},
             {"color": "orange", "value": 300},
             {"color": "red", "value": 900},
@@ -865,7 +867,7 @@ def test_runtime_domain_thresholds_match_alert_rule_policy() -> None:
         assert defaults.get("thresholds", {}).get("steps") == steps
 
     error_defaults = (
-        panels["Monitor Runtime Error Rate"].get("fieldConfig", {}).get("defaults", {})
+        panels["Runtime Error Rate"].get("fieldConfig", {}).get("defaults", {})
     )
     assert error_defaults.get("min") == 0
     assert error_defaults.get("max") == 1
@@ -1433,7 +1435,7 @@ def test_exact_duplicate_promql_groups_are_only_explicitly_justified_reuse() -> 
         'or ((bioetl_runtime_current_status{run_type=~"$run_type"}) and on(pipeline) '
         'label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
         '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
-            ("bioetl-runtime.json", "Monitor Runtime Current Status"),
+            ("bioetl-runtime.json", "Runtime Status"),
             ("bioetl-runtime.json", "Status"),
         },
         'label_replace(round(sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
@@ -1475,7 +1477,7 @@ def test_exact_duplicate_promql_groups_are_only_explicitly_justified_reuse() -> 
             ("bioetl-overview-v2.json", "Gold Lifecycle Trend"),
             ("bioetl-overview-v3.json", "Gold Lifecycle Trend"),
         },
-        'bioetl_l1_provider_global_status': {
+        "bioetl_l1_provider_global_status": {
             ("bioetl-overview-v2.json", "Provider Global"),
             ("bioetl-overview-v3.json", "Provider"),
         },

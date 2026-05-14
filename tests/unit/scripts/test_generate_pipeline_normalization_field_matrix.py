@@ -755,7 +755,9 @@ def test_build_field_matrix_rows_exposes_publication_structured_field_registry()
     assert matched_policies > 0
 
 
-def test_build_field_matrix_rows_documents_structured_payload_governance_modes() -> None:
+def test_build_field_matrix_rows_documents_structured_payload_governance_modes() -> (
+    None
+):
     rows = build_field_matrix_rows()
 
     for policy in semantic_sensitive_structured_payload_policies():

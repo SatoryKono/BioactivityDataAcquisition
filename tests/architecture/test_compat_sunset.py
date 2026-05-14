@@ -76,9 +76,7 @@ REMOVED_COMPAT_MODULES: dict[str, Path] = {
     "cli run_manifest_output compat wrapper": Path(
         "src/bioetl/interfaces/cli/commands/run_manifest_output.py"
     ),
-    "cli maintenance plan facade": Path(
-        "src/bioetl/interfaces/cli/commands/plan.py"
-    ),
+    "cli maintenance plan facade": Path("src/bioetl/interfaces/cli/commands/plan.py"),
     "aggregate_port.py (StoragePort)": Path(
         "src/bioetl/domain/ports/storage/aggregate_port.py"
     ),

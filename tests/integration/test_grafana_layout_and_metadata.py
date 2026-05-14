@@ -111,6 +111,29 @@ def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
     assert "Inspect Active Runtime Blocker Detail" in detect_titles
 
 
+def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
+    """Runtime First Action must share the identity/evidence row."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in dashboard.get("panels", [])
+        if isinstance(panel.get("title"), str)
+    }
+
+    first_action_grid = panels["First Action"]["gridPos"]
+    id_grid = panels["ID"]["gridPos"]
+    processed_records_grid = panels["Processed Records"]["gridPos"]
+
+    assert (
+        first_action_grid["x"]
+        == processed_records_grid["x"] + processed_records_grid["w"]
+    )
+    assert first_action_grid["w"] == 8
+    assert first_action_grid["h"] == processed_records_grid["h"]
+    assert first_action_grid["y"] == id_grid["y"] == processed_records_grid["y"]
+    assert first_action_grid["x"] + first_action_grid["w"] == 24
+
+
 def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping() -> (
     None
 ):
@@ -320,7 +343,7 @@ def test_overview_current_panels_stay_out_of_selected_range_semantics() -> None:
 
     for panel_title in (
         "Status",
-        "Next Action",
+        "First Action",
         "Inputs",
         "Runtime",
         "Data Quality",
@@ -673,7 +696,7 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
 def test_runtime_dq_control_plane_expose_contextual_loki_explore_link() -> None:
     """Only Runtime/DQ critical panels expose contextual Loki Explore links."""
     dashboard_panels = {
-        "bioetl-runtime.json": "Monitor Failed Runs",
+        "bioetl-runtime.json": "Failed Runs",
         "bioetl-dq-v2.json": "Track Range Evidence: Bronze -> Silver -> Gold",
     }
 

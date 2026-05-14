@@ -82,6 +82,12 @@ python -m scripts.engineering.qa test-health --last 30 --markdown-out reports/qu
 python -m scripts.engineering.qa test-health --suite coverage-verify --run-id coverage-verify-local --junit-glob 'reports/quality/test-runs/junit/*.xml' --last 30 --markdown-out reports/quality/test-runs/rollup.md
 ```
 
+`reports/quality/test-runs/rollup.md` is historical evidence only. Current
+merge-blocking status comes from live CI plus the `coverage-verify` hard gate,
+while the committed baseline snapshot lives in
+`configs/quality/test_telemetry_baseline.yaml` and
+`docs/05-engineering/test-telemetry-baseline.md`.
+
 Failure classifications are informational and come from
 `configs/quality/test_health_classifiers.yaml`; pytest exit codes and quality
 gates remain the blocking signals.

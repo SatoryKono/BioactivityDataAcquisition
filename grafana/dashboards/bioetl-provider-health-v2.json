@@ -387,25 +387,6 @@
       ]
     },
     {
-      "id": 9100,
-      "type": "text",
-      "title": "GLOBAL Provider Scope",
-      "gridPos": {
-        "h": 3,
-        "w": 24,
-        "x": 0,
-        "y": 13
-      },
-      "options": {
-        "content": "<center><h2>3. Provider Health / GLOBAL</h2><div><strong>Current window:</strong> provider status from fixed recording-rule windows. <strong>Selected provider:</strong> $provider. <strong>Pipeline context:</strong> $pipeline_context.</div></center>",
-        "mode": "html"
-      },
-      "description": "Global scope banner for Provider Health. The answer row below shows current provider severity from fixed recording-rule windows rather than selected-range evidence. Selected provider narrows provider-specific detail, while pipeline_context is preserved only for bounded cross-dashboard return flow.",
-      "links": [],
-      "pluginVersion": "12.2.0",
-      "transparent": true
-    },
-    {
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -470,7 +451,7 @@
         "h": 7,
         "w": 7,
         "x": 0,
-        "y": 16
+        "y": 13
       },
       "id": 9101,
       "options": {
@@ -581,7 +562,7 @@
         "h": 7,
         "w": 7,
         "x": 7,
-        "y": 16
+        "y": 13
       },
       "id": 9102,
       "options": {
@@ -672,7 +653,7 @@
         "h": 7,
         "w": 10,
         "x": 14,
-        "y": 16
+        "y": 13
       },
       "id": 9103,
       "options": {
@@ -736,10 +717,10 @@
       "title": "First Action",
       "description": "First operator CTA for global provider incidents and early-warning provider causes. Start with the current severity matrix, then inspect critical providers and top causes. Use this after the current answer row; selected-range latency/error evidence stays below and downstream Runtime or Control Plane follow-up depends on the diagnosed cause.",
       "gridPos": {
-        "h": 5,
-        "w": 24,
-        "x": 0,
-        "y": 23
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 7
       },
       "options": {
         "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> start with the GLOBAL severity matrix, then inspect critical providers and top causes. If top causes are visible while GLOBAL severity still reads OK, treat that as an early-warning provider lead rather than proof of a current degraded/failing provider: confirm raw provider status first, then inspect selected-range latency/error evidence before escalating. If the top-cause table stays empty while severity is non-OK, treat that as a provider explainability gap: confirm raw provider status, then inspect optional rate-limit/circuit-breaker panels before leaving the page. If cause is retry/rate-limit/circuit-breaker, inspect control-plane safety before replay. If cause is latency/errors, correlate with Runtime impact, then logs/traces from the runtime or DQ dashboards.</div>",
@@ -815,7 +796,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 28
+        "y": 20
       },
       "id": 1,
       "options": {
@@ -922,7 +903,7 @@
         "h": 8,
         "w": 8,
         "x": 12,
-        "y": 28
+        "y": 20
       },
       "id": 114,
       "options": {
@@ -993,7 +974,7 @@
         "h": 8,
         "w": 4,
         "x": 20,
-        "y": 28
+        "y": 20
       },
       "id": 2,
       "options": {
@@ -1071,7 +1052,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 36
+        "y": 28
       },
       "id": 104,
       "options": {
@@ -1144,7 +1125,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 36
+        "y": 28
       },
       "id": 7,
       "options": {
@@ -1212,7 +1193,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 36
+        "y": 28
       },
       "id": 105,
       "options": {
@@ -1287,7 +1268,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 44
+        "y": 36
       },
       "id": 106,
       "options": {
@@ -1365,7 +1346,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 44
+        "y": 36
       },
       "id": 107,
       "options": {
@@ -1431,7 +1412,7 @@
         "h": 14,
         "w": 12,
         "x": 0,
-        "y": 52
+        "y": 44
       },
       "id": 108,
       "options": {
@@ -1512,7 +1493,7 @@
         "h": 14,
         "w": 12,
         "x": 12,
-        "y": 52
+        "y": 44
       },
       "id": 109,
       "options": {
@@ -1546,7 +1527,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 66
+        "y": 58
       },
       "id": 91,
       "panels": [],
@@ -1607,7 +1588,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 67
+        "y": 59
       },
       "id": 102,
       "options": {
@@ -1674,7 +1655,7 @@
         "h": 14,
         "w": 12,
         "x": 0,
-        "y": 75
+        "y": 67
       },
       "id": 110,
       "options": {
@@ -1756,7 +1737,7 @@
         "h": 14,
         "w": 12,
         "x": 12,
-        "y": 75
+        "y": 67
       },
       "id": 111,
       "options": {
@@ -1842,7 +1823,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 89
+        "y": 81
       },
       "id": 112,
       "options": {
@@ -1918,7 +1899,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 89
+        "y": 81
       },
       "id": 113,
       "options": {
@@ -1993,7 +1974,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 97
+        "y": 89
       },
       "id": 31,
       "options": {
@@ -2068,7 +2049,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 97
+        "y": 89
       },
       "id": 32,
       "options": {

@@ -481,6 +481,7 @@ filters:
             - units
             - standard_value
             - standard_units
+            - standard_type
             - standard_flag
             - pchembl_value
             - uo_units

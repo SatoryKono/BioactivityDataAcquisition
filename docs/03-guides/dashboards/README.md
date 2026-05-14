@@ -92,7 +92,7 @@ monitoring guide.
 frozen `1. Overview v3` layout as its baseline. It answers one question:
 what is currently broken or degraded in BioETL, and where should the operator
 drill down first? The first screen materializes provenance/scope, `Status`,
-`Next Action`, `ID`, and `Processed Records`, then keeps current subsystem
+`First Action`, `ID`, and `Processed Records`, then keeps current subsystem
 summaries (`Control Plane`, `Runtime`, `Data Quality`, `Provider`,
 `Data Validation`) plus selected workflow context. Historical evidence remains
 below the current answer rows, and diagnostics routing lives under the collapsed
@@ -134,7 +134,7 @@ secondary mirrors только как локальный контекст. Mirro
 | KPI | Canonical dashboard | Secondary mirrors |
 | --- | --- | --- |
 | Status | `1. Overview` | `2. Runtime`, `0. Control Plane`, `5. Workflow` |
-| Next Action | `1. Overview` | `2. Runtime`, `3. Provider Health` |
+| First Action | `1. Overview` | `2. Runtime`, `3. Provider Health` |
 | Inputs | `1. Overview` | `2. Runtime`, `4. Data Quality`, `0. Control Plane` |
 | Data Validation | `1. Overview` | `2. Runtime`, `0. Control Plane` |
 | Provider | `1. Overview` | `3. Provider Health` |

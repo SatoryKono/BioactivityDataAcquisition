@@ -227,7 +227,9 @@ class CheckpointMetadata:
                 _OPTIONAL_STR, data.get("input_snapshot_fingerprint")
             ),
             silver_filter_compatibility_mode=_extract_with_fallback(
-                data, "silver_filter_compatibility_mode", "silver_filter_compatibility_mode"
+                data,
+                "silver_filter_compatibility_mode",
+                "silver_filter_compatibility_mode",
             ),
             memory_decision_trace=_coerce_json_dict_sequence(
                 data.get("memory_decision_trace")
@@ -257,9 +259,7 @@ class CheckpointMetadata:
                 "contract_ref": self.contract_ref,
                 "contract_version": self.contract_version,
                 "normalization_profile_ref": self.normalization_profile_ref,
-                "normalization_profile_version": (
-                    self.normalization_profile_version
-                ),
+                "normalization_profile_version": (self.normalization_profile_version),
                 "normalization_profile_hash": self.normalization_profile_hash,
                 "effective_config_artifact_id": self.effective_config_artifact_id,
                 "exact_replay": self.exact_replay,

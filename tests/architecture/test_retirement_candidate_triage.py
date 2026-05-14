@@ -61,9 +61,7 @@ def _absolute_import_targets_for_file(path: Path) -> frozenset[str]:
             continue
         targets.add(node.module)
         targets.update(
-            f"{node.module}.{alias.name}"
-            for alias in node.names
-            if alias.name != "*"
+            f"{node.module}.{alias.name}" for alias in node.names if alias.name != "*"
         )
     return frozenset(targets)
 

@@ -1178,7 +1178,6 @@ def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None
         if panel.get("title")
     }
     expected_tokens = {
-        "Workflow Scope": ("selected-range", "runtime", "data quality"),
         "Failed Workflow Runs / Range": ("selected time range", "0. control plane"),
         "Failed Pipeline Steps / Range": ("step_kind=pipeline", "2. runtime"),
         "Failed Transform Steps / Range": ("transform", "4. data quality"),
@@ -1194,7 +1193,14 @@ def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None
             "selected time range",
             "2. runtime",
         ),
-        "Next Diagnostic Surface": ("run_id", "dependency", "gold-write"),
+        "First Action": (
+            "selected-range",
+            "runtime",
+            "data quality",
+            "run_id",
+            "dependency",
+            "gold-write",
+        ),
     }
     for title, tokens in expected_tokens.items():
         panel = panels.get(title)
@@ -1235,15 +1241,17 @@ def test_workflow_dashboard_collapses_step_diagnostics_below_first_screen() -> N
     assert "Step Duration p95 by Kind / Step Status / Range" not in top_level_titles
 
     next_panel = next(
-        (panel for panel in panels if panel.get("title") == "Next Diagnostic Surface"),
+        (panel for panel in panels if panel.get("title") == "First Action"),
         None,
     )
     assert next_panel is not None
-    assert next_panel.get("gridPos", {}).get("y") == 22
+    next_grid = next_panel.get("gridPos", {})
+    assert next_grid.get("x") == 16
+    assert next_grid.get("y") == 7
+    assert next_grid.get("w") == 8
+    assert next_grid.get("h") == 6
     data_links = next_panel.get("options", {}).get("dataLinks", [])
-    assert data_links, (
-        "Workflow Next Diagnostic Surface must expose actionable dataLinks"
-    )
+    assert data_links, "Workflow First Action must expose actionable dataLinks"
     observed_titles = {
         str(link.get("title"))
         for link in data_links
@@ -1565,11 +1573,11 @@ def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_ti
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Runtime Error Rate"
+            if item.get("title") == "Runtime Error Rate"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Monitor Runtime Error Rate' not found"
+    assert panel is not None, "Panel 'Runtime Error Rate' not found"
 
     expressions = [
         target.get("expr", "")
@@ -1577,13 +1585,13 @@ def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_ti
         if isinstance(target.get("expr"), str)
     ]
     assert any("bioetl_errors_total" in expr for expr in expressions), (
-        "Monitor Runtime Error Rate must use bioetl_errors_total"
+        "Runtime Error Rate must use bioetl_errors_total"
     )
     assert any("[30m]" in expr for expr in expressions), (
-        "Monitor Runtime Error Rate must use the shipped 30-minute window"
+        "Runtime Error Rate must use the shipped 30-minute window"
     )
     assert any(">= 20" in expr for expr in expressions), (
-        "Monitor Runtime Error Rate must preserve the shipped Bronze denominator gate"
+        "Runtime Error Rate must preserve the shipped Bronze denominator gate"
     )
 
 

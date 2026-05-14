@@ -153,7 +153,9 @@ class IDMappingTransformer(PreSilverAdapterMixin, BaseTransformer):
     def _resolve_mapping_entity_id(self, business_data: JsonDict) -> str:
         """Resolve entity identity from canonical target_id semantics."""
         target_id = business_data.get("target_id")
-        assert isinstance(target_id, str)  # normalize_profile_chembl_id returns canonical str
+        assert isinstance(
+            target_id, str
+        )  # normalize_profile_chembl_id returns canonical str
         return self.compute_entity_id(
             source_id=target_id,
             record={"target_id": target_id},

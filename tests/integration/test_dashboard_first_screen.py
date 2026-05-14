@@ -1,7 +1,5 @@
 """Integration tests for Grafana dashboard first-screen responsibility."""
 
-from pathlib import Path
-
 import pytest
 
 from tests.integration._grafana_test_support import (
@@ -18,7 +16,8 @@ def test_critical_panels_on_first_screen():
     # Define critical panel patterns that should be on first screen
     critical_patterns = [
         "System Status",
-        "Next Action",
+        "Runtime Status",
+        "Runtime Blockers",
         "Current Status",
         "Current Cause",
         "First Action",
@@ -31,7 +30,6 @@ def test_critical_panels_on_first_screen():
             if any(pattern in title for pattern in critical_patterns):
                 grid_pos = panel.get("gridPos", {})
                 y = grid_pos.get("y", 0)
-                h = grid_pos.get("h", 0)
                 # First screen is typically y < 12 (24 rows total, 12 is half)
                 # Allow some flexibility - if y < 16 it's still reasonably visible
                 assert y < 16, (

@@ -90,7 +90,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 155 | DQ Impact on Deliverability Trend (Blocked Share %) |
 | bioetl-overview-v2.json | 99 | Provenance |
 | bioetl-overview-v2.json | 214 | Status |
-| bioetl-overview-v2.json | 215 | Next Action |
+| bioetl-overview-v2.json | 215 | First Action |
 | bioetl-overview-v2.json | 1000 | Navigation |
 | bioetl-overview-v2.json | 9002 | Inputs |
 | bioetl-overview-v2.json | 9003 | Runtime |
@@ -142,18 +142,18 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 6 | Inspect GLOBAL Provider Alert Conditions |
 | bioetl-runtime.json | 7 | Inspect Freshness Alert Conditions |
 | bioetl-runtime.json | 16 | Monitor Runtime Blockers |
-| bioetl-runtime.json | 9100 | Monitor Runtime Current Status |
-| bioetl-runtime.json | 9101 | Inspect Top Runtime Blockers |
-| bioetl-runtime.json | 9102 | Monitor Runtime Telemetry Gap |
+| bioetl-runtime.json | 9100 | Runtime Status |
+| bioetl-runtime.json | 9101 | Runtime Blockers |
+| bioetl-runtime.json | 9102 | Runtime Telemetry Gap |
 | bioetl-runtime.json | 21 | Monitor Memory Pressure Active |
-| bioetl-runtime.json | 205 | Monitor Failed Runs |
+| bioetl-runtime.json | 205 | Failed Runs |
 | bioetl-runtime.json | 207 | Track Pipeline Phase Duration p50/p95/p99 |
 | bioetl-runtime.json | 209 | Track GLOBAL Shutdown Initiated by Reason / Interval |
 | bioetl-runtime.json | 210 | Track GLOBAL Shutdown Completed by Reason / Interval |
-| bioetl-runtime.json | 220 | Monitor Runtime Error Rate |
+| bioetl-runtime.json | 220 | Runtime Error Rate |
 | bioetl-runtime.json | 230 | Monitor Pipeline Alert Conditions |
 | bioetl-runtime.json | 236 | Monitor No-Records Runs |
-| bioetl-runtime.json | 237 | Monitor Worst Stage Lag |
+| bioetl-runtime.json | 237 | Worst Stage Lag |
 | bioetl-runtime.json | 238 | Track Stage Backlog Trend |
 | bioetl-runtime.json | 239 | Track Pipeline Duration p50/p95/p99 |
 | bioetl-runtime.json | 240 | Track Records by Stage / Interval |
