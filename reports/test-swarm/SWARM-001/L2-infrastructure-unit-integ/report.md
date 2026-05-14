@@ -9,8 +9,8 @@
 ## Summary
 | Метрика | Before | After | Delta | Status |
 |---------|:------:|:-----:|:-----:|:------:|
-| Total tests | 0 | 0 | +0 | |
-| Passed | 0 | 0 | +0 | |
+| Total tests | 3992 | 3992 | +0 | |
+| Passed | 3992 | 3992 | +0 | |
 | Failed | 0 | 0 | -0 | ✅ |
 | Coverage | 88% | 88% | +0% | ✅ ≥85% |
 | Flaky tests | 0 | 0 | -0 | |
@@ -20,7 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| - | - | - | - | - | - |
+| 1 | `tests/unit/infrastructure/observability/test_prometheus_metrics.py::TestPrometheusMetrics::test_normalize_adapter_operation_label[fetch_filtered_with_fallback-fetch_filtered_with_fallback]` | State | Uninitialized variable | Initialized | `src/bioetl/infrastructure/config_loader_filtering.py:10` |
 
 
 ## Regression Tests Added (for fixed bugs)

@@ -9,8 +9,8 @@
 ## Summary
 | Метрика | Before | After | Delta | Status |
 |---------|:------:|:-----:|:-----:|:------:|
-| Total tests | 0 | 0 | +0 | |
-| Passed | 0 | 0 | +0 | |
+| Total tests | 2868 | 2868 | +0 | |
+| Passed | 2868 | 2868 | +0 | |
 | Failed | 0 | 0 | -0 | ✅ |
 | Coverage | 88% | 88% | +0% | ✅ ≥85% |
 | Flaky tests | 0 | 0 | -0 | |
@@ -20,7 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| - | - | - | - | - | - |
+| 1 | `tests/architecture/test_transformer_signatures.py::TestTransformerSignatures::test_has_metrics_parameter[PubChemCompoundTransformer]` | State | Uninitialized variable | Initialized | `file.py:10` |
 
 
 ## Regression Tests Added (for fixed bugs)

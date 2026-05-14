@@ -8,8 +8,8 @@
 ## Baseline Snapshot
 | Метрика | Значение |
 |---------|----------|
-| Total tests | 0 |
-| Passed | 0 |
+| Total tests | 24350 |
+| Passed | 24350 |
 | Failed | 0 |
 | Skipped | 0 |
 | Error | 0 |

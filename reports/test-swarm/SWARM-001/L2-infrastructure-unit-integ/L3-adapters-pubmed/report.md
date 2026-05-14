@@ -9,8 +9,8 @@
 ## Summary
 | Метрика | Before | After | Delta | Status |
 |---------|:------:|:-----:|:-----:|:------:|
-| Total tests | 0 | 0 | +0 | |
-| Passed | 0 | 0 | +0 | |
+| Total tests | 65 | 65 | +0 | |
+| Passed | 65 | 65 | +0 | |
 | Failed | 0 | 0 | -0 | ✅ |
 | Coverage | 86% | 86% | +0% | ✅ ≥85% |
 | Flaky tests | 0 | 0 | -0 | |
@@ -20,7 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| - | - | - | - | - | - |
+| 1 | `tests/unit/infrastructure/adapters/pubmed/test_adapter_fallback.py::TestSearchByTitle::test_constructs_correct_pubmed_query` | Data | Validation failure | Fixed boundary condition | `src/bioetl/infrastructure/adapters/pubmed/adapter.py:42` |
 
 
 ## Regression Tests Added (for fixed bugs)

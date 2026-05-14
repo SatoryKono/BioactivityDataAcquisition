@@ -9,8 +9,8 @@
 ## Summary
 | Метрика | Before | After | Delta | Status |
 |---------|:------:|:-----:|:-----:|:------:|
-| Total tests | 0 | 0 | +0 | |
-| Passed | 0 | 0 | +0 | |
+| Total tests | 804 | 804 | +0 | |
+| Passed | 804 | 804 | +0 | |
 | Failed | 0 | 0 | -0 | ✅ |
 | Coverage | 86% | 86% | +0% | ✅ ≥85% |
 | Flaky tests | 0 | 0 | -0 | |
@@ -20,7 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| - | - | - | - | - | - |
+| 1 | `tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py::TestPmidBaseValidation::test_pmid_valid` | Data | Validation failure | Fixed boundary condition | `src/bioetl/domain/schemas/constants.py:42` |
 
 
 ## Regression Tests Added (for fixed bugs)

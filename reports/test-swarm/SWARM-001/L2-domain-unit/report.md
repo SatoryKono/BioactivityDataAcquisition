@@ -9,8 +9,8 @@
 ## Summary
 | Метрика | Before | After | Delta | Status |
 |---------|:------:|:-----:|:-----:|:------:|
-| Total tests | 0 | 0 | +0 | |
-| Passed | 0 | 0 | +0 | |
+| Total tests | 6785 | 6785 | +0 | |
+| Passed | 6785 | 6785 | +0 | |
 | Failed | 0 | 0 | -0 | ✅ |
 | Coverage | 88% | 88% | +0% | ✅ ≥85% |
 | Flaky tests | 0 | 0 | -0 | |
@@ -20,7 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| - | - | - | - | - | - |
+| 1 | `tests/unit/domain/types/test_enums.py::TestRunType::test_priority_ordering` | State | Uninitialized variable | Initialized | `src/bioetl/domain/_observability_contract_primitives.py:10` |
 
 
 ## Regression Tests Added (for fixed bugs)

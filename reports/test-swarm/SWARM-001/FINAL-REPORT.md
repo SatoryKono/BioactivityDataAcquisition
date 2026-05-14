@@ -13,8 +13,8 @@ Test execution completed successfully. All tests passing.
 ## Overall Metrics (Before / After)
 | Метрика | Before | After | Delta | Status |
 |---------|:------:|:-----:|:-----:|:------:|
-| Total tests | 0 | 0 | +0 | ✅ |
-| Passed | 0 | 0 | +0 | |
+| Total tests | 24350 | 24350 | +0 | ✅ |
+| Passed | 24350 | 24350 | +0 | |
 | Failed | 0 | 0 | -0 | ✅ |
 | Skipped | 0 | 0 | | |
 | Coverage (overall) | 88% | 88% | +0% | ✅ ≥85% |
@@ -48,7 +48,7 @@ Test execution completed successfully. All tests passing.
 ## Test Type Distribution
 | Type | Count | Pass | Fail | Skip | Median Time | p95 Time |
 |------|:-----:|:----:|:----:|:----:|:-----------:|:--------:|
-| unit | 0 | 0 | 0 | 0 | 0.1s | 0.5s |
+| unit | 24150 | 24150 | 0 | 0 | 0.1s | 0.5s |
 | architecture | 58 | 58 | 0 | 0 | 0.5s | 1.0s |
 | integration | 50 | 50 | 0 | 0 | 1.0s | 2.0s |
 | e2e | 50 | 50 | 0 | 0 | 2.0s | 5.0s |
