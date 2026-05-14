@@ -66,7 +66,7 @@ def cli_runner() -> CliRunner:
 
 
 def _patch_contract_migration_service(monkeypatch: Any, service: object) -> None:
-    import bioetl.interfaces.cli.commands.domains.maintenance.plan as plan_cmd
+    import bioetl.interfaces.cli.commands.plan as plan_cmd
 
     monkeypatch.setattr(
         plan_cmd,

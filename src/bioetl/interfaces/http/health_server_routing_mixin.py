@@ -179,11 +179,8 @@ class HealthServerRoutingMixin:
         raw = HealthServerRoutingMixin._read_optional_param(query, name)
         if raw is None:
             return ()
-        normalized_raw = raw.strip()
-        if normalized_raw.startswith("{") and normalized_raw.endswith("}"):
-            normalized_raw = normalized_raw[1:-1]
         items: list[str] = []
-        for part in normalized_raw.split(","):
+        for part in raw.split(","):
             normalized = part.strip()
             if normalized and normalized not in items:
                 items.append(normalized)
@@ -341,7 +338,11 @@ class HealthServerRoutingMixin:
         """Handle control-plane-backed selector options for Grafana variables."""
         assert self._run_manifest_port is not None
         requested_pipeline = self._read_required_param(query, "pipeline")
-        selected_pipelines = self._read_scope_csv_param(query, "pipeline")
+        pipeline = (
+            None
+            if self._is_all_scope_token(requested_pipeline)
+            else requested_pipeline
+        )
         dimension = self._read_optional_param(query, "dimension") or "run_id"
         if dimension != "run_id":
             raise ValueError(
@@ -353,10 +354,7 @@ class HealthServerRoutingMixin:
         run_ids = tuple(
             str(manifest.run_id)
             for manifest in self._run_manifest_port.list_all()
-            if (
-                not selected_pipelines
-                or manifest.pipeline_name in selected_pipelines
-            )
+            if (pipeline is None or manifest.pipeline_name == pipeline)
             and (
                 not selected_run_types
                 or str(manifest.run_type) in selected_run_types
@@ -388,16 +386,17 @@ class HealthServerRoutingMixin:
         """Handle control-plane-backed identity rows for Overview v3."""
         assert self._run_manifest_port is not None
         requested_pipeline = self._read_required_param(query, "pipeline")
-        selected_pipelines = self._read_scope_csv_param(query, "pipeline")
+        pipeline = (
+            None
+            if self._is_all_scope_token(requested_pipeline)
+            else requested_pipeline
+        )
         selected_run_types = self._read_scope_csv_param(query, "run_type")
         selected_run_id = self._read_optional_param(query, "run_id")
         manifests = tuple(
             manifest
             for manifest in self._run_manifest_port.list_all()
-            if (
-                not selected_pipelines
-                or manifest.pipeline_name in selected_pipelines
-            )
+            if (pipeline is None or manifest.pipeline_name == pipeline)
             and (
                 not selected_run_types
                 or str(manifest.run_type) in selected_run_types
@@ -414,7 +413,7 @@ class HealthServerRoutingMixin:
         )
         resolved_via = "selected_run_id"
         if resolved_manifest is None:
-            if len(selected_pipelines) != 1:
+            if pipeline is None:
                 resolved_via = "aggregate_scope_requires_exact_run_id"
             else:
                 resolved_manifest = manifests[-1] if manifests else None
@@ -432,7 +431,7 @@ class HealthServerRoutingMixin:
 
         manifest_unavailable = (
             "select one concrete pipeline or exact run_id"
-            if len(selected_pipelines) != 1 and resolved_manifest is None
+            if pipeline is None and resolved_manifest is None
             else "not available for current scope"
         )
         provenance_unavailable = "not available in selected manifest"
@@ -510,7 +509,7 @@ class HealthServerRoutingMixin:
             writer,
             200,
             {
-                "pipeline": requested_pipeline,
+                "pipeline": pipeline,
                 "run_type": list(selected_run_types),
                 "selected_run_id": selected_run_id,
                 "resolved_via": resolved_via,

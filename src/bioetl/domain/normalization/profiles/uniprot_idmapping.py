@@ -7,7 +7,6 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_chembl_id,
-    normalize_profile_ncbi_taxonomy_id,
     normalize_profile_uniprot_accession,
     normalize_profile_uniprot_mixed_mappings,
 )
@@ -50,10 +49,6 @@ _SPECIAL_RULES = {
     "target_id": (
         normalize_profile_chembl_id,
         "Canonicalize ChEMBL target identifier through the shared ID registry.",
-    ),
-    "taxonomy_id": (
-        normalize_profile_ncbi_taxonomy_id,
-        "Canonicalize NCBI Taxonomy identifiers through the shared reference-ID registry.",
     ),
     "uniprot_accession": (
         normalize_profile_uniprot_accession,

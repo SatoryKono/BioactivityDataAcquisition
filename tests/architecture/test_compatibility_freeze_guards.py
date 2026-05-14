@@ -98,7 +98,6 @@ APPLICATION_SERVICES_PACKAGE_ROOT_MODULE = "bioetl.application.services"
 APPLICATION_SERVICES_PACKAGE_ROOT_PATH = (
     ROOT / "src" / "bioetl" / "application" / "services" / "__init__.py"
 )
-PIPELINE_RUNNER_SERVICE_MODULE = "bioetl.application.services.pipeline_runner_service"
 LEGACY_MERGE_SERVICE_KEYWORDS = frozenset(
     {
         "deduplicator",

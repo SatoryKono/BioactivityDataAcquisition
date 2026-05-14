@@ -46,9 +46,28 @@ def test_activity_values_facade_reexports_canonical_symbols() -> None:
 
 
 @pytest.mark.unit
-def test_removed_publication_field_groups_facade_stays_absent() -> None:
-    """Removed publication field-group facade must stay absent."""
-    import importlib
+def test_publication_field_groups_facade_reexports_canonical_symbols() -> None:
+    """publication_field_groups should remain the public entrypoint over split modules."""
+    from bioetl.domain.value_objects._publication_field_group_config import (
+        DEFAULT_FIELD_GROUP_CONFIG as CanonicalDefaultFieldGroupConfig,
+    )
+    from bioetl.domain.value_objects._publication_field_group_config import (
+        FieldGroupConfig as CanonicalFieldGroupConfig,
+    )
+    from bioetl.domain.value_objects._publication_field_group_types import (
+        FIELD_TO_GROUP_MAPPING as CanonicalFieldToGroupMapping,
+    )
+    from bioetl.domain.value_objects._publication_field_group_types import (
+        PublicationFieldGroup as CanonicalPublicationFieldGroup,
+    )
+    from bioetl.domain.value_objects.publication_field_groups import (
+        DEFAULT_FIELD_GROUP_CONFIG,
+        FIELD_TO_GROUP_MAPPING,
+        FieldGroupConfig,
+        PublicationFieldGroup,
+    )
 
-    with pytest.raises(ModuleNotFoundError):
-        importlib.import_module("bioetl.domain.value_objects.publication_field_groups")
+    assert DEFAULT_FIELD_GROUP_CONFIG is CanonicalDefaultFieldGroupConfig
+    assert FIELD_TO_GROUP_MAPPING is CanonicalFieldToGroupMapping
+    assert FieldGroupConfig is CanonicalFieldGroupConfig
+    assert PublicationFieldGroup is CanonicalPublicationFieldGroup

@@ -2,7 +2,9 @@ allowed:
   registered_without_runtime: []
   runtime_without_registry: []
   dead_metrics: []
-  documented_without_registry: []
+  documented_without_registry:
+    - bioetl_checkpoint_age_seconds
+    - bioetl_replay_duplicate_records_total
   rules_without_registry: []
   runtime_cardinality_review_required:
     - metric: bioetl_checkpoint_load_events_total

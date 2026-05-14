@@ -51,11 +51,6 @@ METRIC_CIRCUIT_BREAKER_OPEN_TOTAL = "bioetl_circuit_breaker_open_total"
 METRIC_CIRCUIT_BREAKER_TRIPS = "bioetl_circuit_breaker_trips_total"
 
 
-def _now() -> float:
-    """Return the current monotonic time for circuit breaker state decisions."""
-    return time.monotonic()
-
-
 @dataclass
 class CircuitBreakerGuard:
     """Circuit breaker implementation for HTTP clients.
@@ -140,7 +135,7 @@ class CircuitBreakerGuard:
 
         """
         async with self._lock:
-            now = _now()
+            now = time.monotonic()
             should_attempt, self._state = decide_attempt_state(
                 state=self._state,
                 last_failure_time=self._last_failure_time,
@@ -170,7 +165,7 @@ class CircuitBreakerGuard:
             result = await func(*args, **kwargs)
         except CALL_OPERATION_ERRORS:
             async with self._lock:
-                self._last_failure_time = _now()
+                self._last_failure_time = time.monotonic()
                 self._state, self._failure_count, trips_delta = record_failure(
                     state=self._state,
                     failure_count=self._failure_count,
@@ -208,7 +203,7 @@ class CircuitBreakerGuard:
     def force_open(self) -> None:
         """Manually force circuit breaker to OPEN state."""
         self._state = CircuitBreakerState.OPEN
-        self._last_failure_time = _now()
+        self._last_failure_time = time.monotonic()
         self._trips_total += 1
         emit_state_metric(
             self.metrics,

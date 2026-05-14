@@ -76,9 +76,6 @@ REMOVED_COMPAT_MODULES: dict[str, Path] = {
     "cli run_manifest_output compat wrapper": Path(
         "src/bioetl/interfaces/cli/commands/run_manifest_output.py"
     ),
-    "cli maintenance plan facade": Path(
-        "src/bioetl/interfaces/cli/commands/plan.py"
-    ),
     "aggregate_port.py (StoragePort)": Path(
         "src/bioetl/domain/ports/storage/aggregate_port.py"
     ),
@@ -93,9 +90,6 @@ REMOVED_COMPAT_MODULES: dict[str, Path] = {
     ),
     "domain normalization_chembl compat wrapper": Path(
         "src/bioetl/domain/normalization_chembl.py"
-    ),
-    "domain publication_field_groups facade": Path(
-        "src/bioetl/domain/value_objects/publication_field_groups.py"
     ),
     "domain services doi_normalization compat wrapper": Path(
         "src/bioetl/domain/services/doi_normalization.py"

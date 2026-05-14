@@ -623,9 +623,7 @@ class TestValidatePipelineName:
 
     def test_valid_pipeline_returns_value(self):
         """Test that valid pipeline name is returned unchanged."""
-        from bioetl.interfaces.cli.commands.domains.run.support import (
-            validate_pipeline_name,
-        )
+        from bioetl.interfaces.cli import validate_pipeline_name
 
         result = validate_pipeline_name(None, None, "chembl_activity")
         assert result == "chembl_activity"
@@ -634,9 +632,7 @@ class TestValidatePipelineName:
         """Test that invalid pipeline raises BadParameter."""
         import click
 
-        from bioetl.interfaces.cli.commands.domains.run.support import (
-            validate_pipeline_name,
-        )
+        from bioetl.interfaces.cli import validate_pipeline_name
 
         with pytest.raises(click.BadParameter) as exc_info:
             validate_pipeline_name(None, None, "definitely_not_a_real_pipeline")

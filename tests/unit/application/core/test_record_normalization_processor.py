@@ -1154,25 +1154,6 @@ def test_uniprot_idmapping_profile_treats_all_mappings_as_identifier_set() -> No
 
 
 @pytest.mark.unit
-def test_uniprot_idmapping_profile_canonicalizes_taxonomy_id_through_reference_id_policy() -> (
-    None
-):
-    processor = RecordNormalizationProcessor(
-        provider="uniprot", entity_type="idmapping"
-    )
-
-    normalized = processor.normalize_business_data(
-        {
-            "target_id": "CHEMBL204",
-            "mapping_status": "found",
-            "taxonomy_id": " 09606 ",
-        }
-    )
-
-    assert normalized["taxonomy_id"] == 9606
-
-
-@pytest.mark.unit
 def test_uniprot_protein_profile_treats_identifier_arrays_as_sets() -> None:
     processor = RecordNormalizationProcessor(provider="uniprot", entity_type="protein")
 
@@ -1192,22 +1173,6 @@ def test_uniprot_protein_profile_treats_identifier_arrays_as_sets() -> None:
     assert processor.compute_content_hash(record_a) == processor.compute_content_hash(
         record_b
     )
-
-
-@pytest.mark.unit
-def test_uniprot_protein_profile_canonicalizes_taxonomy_id_through_reference_id_policy() -> (
-    None
-):
-    processor = RecordNormalizationProcessor(provider="uniprot", entity_type="protein")
-
-    normalized = processor.normalize_business_data(
-        {
-            "accession": "P12345",
-            "taxonomy_id": " 09606 ",
-        }
-    )
-
-    assert normalized["taxonomy_id"] == 9606
 
 
 @pytest.mark.unit

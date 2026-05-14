@@ -125,15 +125,13 @@ class IDMappingTransformer(PreSilverAdapterMixin, BaseTransformer):
             TransformationError: If required fields are missing.
             ValueError: If IDMappingResult entity validation fails.
         """
-        _, business_data = self._build_mapping_business_data(record)
-        return cast(
-            "SilverRecord",
-            self._transform_optional_normalized_business_data(
-                context=context,
-                index=index,
-                business_data=cast(JsonDict, business_data),
-                resolve_entity_id=self._resolve_mapping_entity_id,
-            ),
+        target_id, business_data = self._build_mapping_business_data(record)
+        return self._transform_identity_business_data(
+            context=context,
+            source_id=target_id,
+            identity_field="target_id",
+            index=index,
+            business_data=cast(JsonDict, business_data),
         )
 
     async def transform_pre_silver(
@@ -144,19 +142,11 @@ class IDMappingTransformer(PreSilverAdapterMixin, BaseTransformer):
     ) -> PreSilverRecord | None:
         """Build an intermediate ID mapping payload for application finalization."""
         del context, index
-        _, business_data = self._build_mapping_business_data(record)
-        return self._stage_optional_normalized_business_data(
-            business_data=cast(JsonDict, business_data),
-            resolve_entity_id=self._resolve_mapping_entity_id,
-        )
-
-    def _resolve_mapping_entity_id(self, business_data: JsonDict) -> str:
-        """Resolve entity identity from canonical target_id semantics."""
-        target_id = business_data.get("target_id")
-        assert isinstance(target_id, str)  # normalize_profile_chembl_id returns canonical str
-        return self.compute_entity_id(
+        target_id, business_data = self._build_mapping_business_data(record)
+        return self._stage_identity_business_data(
             source_id=target_id,
-            record={"target_id": target_id},
+            identity_field="target_id",
+            business_data=cast(JsonDict, business_data),
         )
 
     def _build_mapping_business_data(

@@ -33,7 +33,3 @@ session because:
 
 14. `CHEMBL-014-Promote-Bronze-Fixtures-For-Missing-Chembl-Pipelines.md`
 15. `CHEMBL-015-Register-Missing-ChEMBL-Gold-Contracts.md`
-
-### Follow-up umbrella
-
-16. `CHEMBL-016-Close-Remaining-Chembl-Normalization-Governance-Gaps.md`

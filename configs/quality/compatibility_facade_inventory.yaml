@@ -157,6 +157,27 @@ retained_entrypoints:
   exit_criteria: The top-level module remains the sanctioned public CLI patch/import
     seam, and direct internal-owner imports remain confined to the owning package
     plus dedicated boundary tests.
+- path: src/bioetl/interfaces/cli/commands/plan.py
+  compatibility_role: Permanent public plan command seam over the internal owner
+    module `bioetl.interfaces.cli.commands.domains.maintenance.plan`.
+  canonical_target: bioetl.interfaces.cli.commands.plan
+  status: public-entrypoint
+  owner: bioetl.interfaces.cli.commands
+  introduced_in: 2026-03 RF-024
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.plan` as the public
+    seam; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py`;
+    `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.plan`,
+    while direct `bioetl.interfaces.cli.commands.domains.maintenance.plan` imports
+    stay confined to dedicated boundary coverage'
+  migration_path: Use `bioetl.interfaces.cli.commands.plan` for public CLI wiring
+    and patch targets; do not import `bioetl.interfaces.cli.commands.domains.maintenance.plan`
+    directly outside the owning package or dedicated boundary tests.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import
+    seam, and direct internal-owner imports remain confined to the owning package
+    plus dedicated boundary tests.
 - path: src/bioetl/composition/entrypoints.py
   compatibility_role: Permanent public composition entrypoint that intentionally
     shields internal `_pipeline_execution`, `_resource_management`, and `_services`
@@ -224,6 +245,26 @@ retained_entrypoints:
   exit_criteria: The facade remains the sanctioned public path and direct imports
     of split activity-value internals stay confined to the owning package plus the
     dedicated facade-coverage test.
+- path: src/bioetl/domain/value_objects/publication_field_groups.py
+  compatibility_role: Permanent public entrypoint for publication field-group definitions
+    that shields private split config/type modules.
+  canonical_target: bioetl.domain.value_objects.publication_field_groups
+  status: public-entrypoint
+  owner: bioetl.domain.value_objects
+  introduced_in: legacy-pre-2026-03
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: '`src`: canonical entrypoint usage allowed; private split modules
+    stay inside `src/bioetl/domain/value_objects/`; `tests`: direct split-internal
+    coverage stays confined to `tests/unit/domain/value_objects/test_value_object_facade_reexports.py`,
+    while ordinary tests keep importing the public entrypoint'
+  migration_path: Use `bioetl.domain.value_objects.publication_field_groups` as
+    the sanctioned public seam; do not import split value-object internals outside
+    the owning package or the dedicated facade-coverage test.
+  exit_criteria: The facade remains the sanctioned public path and direct imports
+    of private publication-field-group internals stay confined to the owning package
+    plus the dedicated facade-coverage test.
 - path: src/bioetl/application/composite/merger.py
   compatibility_role: Permanent public composite merge module that requires `MergeCollaboratorGroup`
     bundle; legacy per-collaborator keyword wiring removed in RF-009.2.

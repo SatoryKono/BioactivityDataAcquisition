@@ -47,7 +47,6 @@ RUN mkdir -p /app/logs && chown bioetl:bioetl /app/logs
 
 # Enable the venv
 ENV PATH="/app/.venv/bin:$PATH"
-ENV PYTHONPATH="/app/src"
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 

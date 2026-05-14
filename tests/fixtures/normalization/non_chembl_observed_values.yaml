@@ -94,8 +94,8 @@ pipelines:
         - r-hsa-199420
         - R-HSA-5674003
       taxonomy_id:
-        - 9606
-        - 10090
+        - "9606"
+        - "10090"
     expected_normalized_values:
       accession:
         - P12345
@@ -218,7 +218,7 @@ pipelines:
         collection_semantics: unordered_set
         composite_usage: composite_target:upstream_inherited
       taxonomy_id:
-        category: ontology_backed_id
+        category: identifier_namespace
         identifier_family: ncbi_taxonomy_id
         collection_semantics: scalar
         composite_usage: composite_target:upstream_inherited
@@ -272,8 +272,8 @@ pipelines:
         - CHEMBL203
         - q9y6k9
       taxonomy_id:
-        - 9606
-        - 10090
+        - "9606"
+        - "10090"
     expected_normalized_values:
       target_id:
         - CHEMBL203
@@ -317,7 +317,7 @@ pipelines:
         collection_semantics: scalar
         composite_usage: composite_target:upstream_inherited
       taxonomy_id:
-        category: ontology_backed_id
+        category: identifier_namespace
         identifier_family: ncbi_taxonomy_id
         collection_semantics: scalar
         composite_usage: composite_target:upstream_inherited
