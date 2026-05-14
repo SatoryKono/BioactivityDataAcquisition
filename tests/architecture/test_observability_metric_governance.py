@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 from datetime import date
+import json
 from pathlib import Path
 
 import pytest
 import yaml
+
+from scripts.engineering.qa import report_observability_metric_inventory as inventory
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -14,6 +17,7 @@ GOVERNANCE_PATH = ROOT / "configs" / "quality" / "observability_metric_governanc
 ALLOWLIST_PATH = (
     ROOT / "configs" / "quality" / "observability_metric_inventory_allowlist.yaml"
 )
+EVIDENCE_PATH = ROOT / "artifacts" / "observability" / "runtime_cardinality_inventory.json"
 
 
 @pytest.mark.architecture
@@ -108,3 +112,23 @@ def test_runtime_cardinality_allowlist_entries_require_metadata() -> None:
             f"{metric}"
         )
         seen_metrics.add(metric)
+
+
+@pytest.mark.architecture
+def test_runtime_cardinality_evidence_artifact_matches_current_inventory() -> None:
+    """Replayable cardinality evidence artifact must stay materialized and current."""
+    assert EVIDENCE_PATH.exists(), (
+        "Missing runtime cardinality evidence artifact: "
+        "artifacts/observability/runtime_cardinality_inventory.json"
+    )
+
+    actual = json.loads(EVIDENCE_PATH.read_text(encoding="utf-8"))
+    expected = inventory.collect_metric_inventory(ROOT)
+
+    assert actual == expected, (
+        "Runtime cardinality evidence artifact drifted from the current "
+        "observability inventory report. Regenerate it with:\n"
+        "python -m scripts.engineering.qa.report_observability_metric_inventory "
+        "--repo-root . "
+        "--write-evidence artifacts/observability/runtime_cardinality_inventory.json"
+    )

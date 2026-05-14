@@ -86,3 +86,12 @@ def test_removed_plan_command_facade_stays_absent() -> None:
     """The former top-level maintenance plan facade must not return."""
     with pytest.raises(ModuleNotFoundError):
         importlib.import_module("bioetl.interfaces.cli.commands.plan")
+
+
+@pytest.mark.unit
+def test_commands_package_does_not_advertise_removed_plan_facade() -> None:
+    """Package-root CLI exports must stay aligned with the removed plan seam."""
+    commands_package = importlib.import_module("bioetl.interfaces.cli.commands")
+
+    assert "plan" not in commands_package.__all__
+    assert "plan" not in dir(commands_package)
