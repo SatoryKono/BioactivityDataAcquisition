@@ -87,6 +87,11 @@ specific operator-facing subcommand:
 
 - Confirm the local metrics endpoint responds and exports `bioetl_` metrics.
 - Confirm the active run publishes the expected pipeline/runtime series.
+- For non-ChEMBL publication drift symptoms, confirm the scrape surface includes
+  `bioetl_publication_raw_vocab_unknown_total`.
+- If `bioetl_publication_raw_vocab_unknown_total` is non-zero, triage only by
+  bounded labels (`pipeline`, `provider`, `field`, `handling`) and then compare
+  the affected provider/field against `configs/vocab/publication_controlled.yaml`.
 - For postrun incidents, confirm the scrape surface includes:
   - `bioetl_postrun_phase_events_total`
   - `bioetl_postrun_phase_duration_seconds`
@@ -129,6 +134,10 @@ python -m scripts.engineering.qa report-observability-metric-inventory --json
 - Confirm the inventory output still classifies expected families as
   `direct_live_metrics` or `helper_backed_live_metrics`, not
   `registry_only_metrics` / `dead_metrics`.
+- For publication vocabulary drift, confirm
+  `bioetl_publication_raw_vocab_unknown_total` remains in the live metric
+  inventory and that the provider/field labels map to a reviewed registry entry
+  in `configs/vocab/publication_controlled.yaml`.
 - Compare the inventory output with
   `grafana/prometheus-rules/bioetl_observability.yml` and the shipped dashboard
   JSON to verify that dashboard vocabulary still matches runtime and rule
