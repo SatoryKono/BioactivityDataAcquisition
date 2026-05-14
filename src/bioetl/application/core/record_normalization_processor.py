@@ -5,6 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.core._record_normalization_contract import (
+    NormalizationContractError,
+    _NormalizationFinding,
+)
 from bioetl.application.core._record_normalization_hash_support import (
     RecordNormalizationHashSupportMixin,
     _NormalizationProfileLike,
@@ -47,17 +51,6 @@ if TYPE_CHECKING:
     from bioetl.domain.types import JsonDict
 
 __all__ = ["NormalizationContractError", "RecordNormalizationProcessor"]
-
-@dataclass(frozen=True, slots=True)
-class _NormalizationFinding:
-    field_name: str
-    reason_code: str
-    action_taken: str
-    dq_warn: bool = True
-
-
-class NormalizationContractError(ValueError):
-    """Raised when profile-backed runtime normalization would fall back implicitly."""
 
 
 @dataclass(frozen=True, slots=True)

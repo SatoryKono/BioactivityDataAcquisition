@@ -49,3 +49,11 @@ def test_commands_package_rejects_export_support_after_command_module_import() -
 
     with pytest.raises(AttributeError, match="export_support"):
         getattr(commands_package, "export_support")
+
+
+def test_commands_package_rejects_inspection_output_after_command_module_import() -> None:
+    """Importing public diagnostics commands must not re-expose helper submodules."""
+    import bioetl.interfaces.cli.commands.diagnostics  # noqa: F401
+
+    with pytest.raises(AttributeError, match="inspection_output"):
+        getattr(commands_package, "inspection_output")

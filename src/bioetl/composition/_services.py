@@ -10,12 +10,6 @@ from bioetl.composition._service_protocols import (
     BronzeCleanupServiceProtocol,
     HealthServerDependenciesProtocol,
 )
-from bioetl.composition._workflow_services import (
-    get_workflow_execution_service,
-    get_workflow_inspection_service,
-    get_workflow_runner_service,
-    load_workflow_config,
-)
 
 if TYPE_CHECKING:
     from bioetl.application.services.audit_inspection_service import (
@@ -41,6 +35,12 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.run_manifest_inspection_service import (
         RunManifestInspectionService,
     )
+    from bioetl.application.services.control_plane.workflow_execution_service import (
+        WorkflowExecutionService,
+    )
+    from bioetl.application.services.control_plane.workflow_inspection_service import (
+        WorkflowInspectionService,
+    )
     from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService,
     )
@@ -56,41 +56,16 @@ if TYPE_CHECKING:
     )
     from bioetl.application.services.quarantine_service import QuarantineService
     from bioetl.application.services.vacuum_service import VacuumService
+    from bioetl.application.services.workflow_runner_service import (
+        WorkflowRunnerService,
+    )
     from bioetl.composition.registry_api import PipelineRegistry
-    from bioetl.domain.ports import QuarantinePort
+    from bioetl.domain.ports import LockPort, QuarantinePort
+    from bioetl.domain.workflow import WorkflowConfig
 
-
-__all__ = [
-    "cleanup_bronze",
-    "get_adr_service",
-    "get_audit_service",
-    "get_bronze_cleanup_service",
-    "get_checkpoint_service",
-    "get_config_service",
-    "get_contract_migration_service",
-    "get_export_service",
-    "get_forensic_run_diff_service",
-    "get_health_server_dependencies",
-    "get_health_service",
-    "get_historical_replay_closure_service",
-    "get_historical_replay_corpus_service",
-    "get_historical_replay_universe_service",
-    "get_lineage_service",
-    "get_lock_service",
-    "get_metrics_service",
-    "get_observability_workflow_service",
-    "get_pipeline_runner_service",
-    "get_quarantine_port",
-    "get_quarantine_service",
-    "get_run_manifest_service",
-    "get_vacuum_service",
-    "get_workflow_execution_service",
-    "get_workflow_inspection_service",
-    "get_workflow_runner_service",
-    "load_workflow_config",
-]
 
 _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE = "bioetl.composition.bootstrap.cli.checkpoint"
+_BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE = "bioetl.composition.bootstrap.cli.run_manifest"
 _BOOTSTRAP_STORAGE_EXPORT_MODULE = "bioetl.composition.bootstrap.cli.storage"
 
 _BOOTSTRAP_EXPORT_MODULES: dict[str, str] = {
@@ -101,19 +76,11 @@ _BOOTSTRAP_EXPORT_MODULES: dict[str, str] = {
     "bootstrap_config_service": "bioetl.composition.bootstrap.cli.config",
     "bootstrap_contract_migration_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
     "bootstrap_export_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
-    "bootstrap_forensic_run_diff_service": (
-        "bioetl.composition.bootstrap.cli.run_manifest"
-    ),
-    "bootstrap_historical_replay_corpus_service": (
-        "bioetl.composition.bootstrap.cli.run_manifest"
-    ),
-    "bootstrap_historical_replay_closure_service": (
-        "bioetl.composition.bootstrap.cli.run_manifest"
-    ),
-    "bootstrap_historical_replay_universe_service": (
-        "bioetl.composition.bootstrap.cli.run_manifest"
-    ),
-    "bootstrap_health_server_dependencies": ("bioetl.composition.bootstrap.cli.health"),
+    "bootstrap_forensic_run_diff_service": _BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE,
+    "bootstrap_historical_replay_corpus_service": _BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE,
+    "bootstrap_historical_replay_closure_service": _BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE,
+    "bootstrap_historical_replay_universe_service": _BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE,
+    "bootstrap_health_server_dependencies": "bioetl.composition.bootstrap.cli.health",
     "bootstrap_health_service": "bioetl.composition.bootstrap.cli.health",
     "bootstrap_lineage_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
     "bootstrap_lock_service": "bioetl.composition.bootstrap.cli.lock",
@@ -218,11 +185,10 @@ async def cleanup_bronze(
 ) -> BronzeCleanupResult:
     """Clean up Bronze files based on retention policy."""
     service = cast(BronzeCleanupServiceProtocol, get_bronze_cleanup_service())
-    result = await service.cleanup(
+    return await service.cleanup(
         retention_days=retention_days,
         dry_run=dry_run,
     )
-    return result
 
 
 def get_pipeline_runner_service(
@@ -234,6 +200,42 @@ def get_pipeline_runner_service(
         "PipelineRunnerService",
         _invoke_bootstrap("bootstrap_pipeline_runner_service", registry=registry),
     )
+
+
+def get_workflow_runner_service(
+    registry: PipelineRegistry | None = None,
+) -> WorkflowRunnerService:
+    """Build workflow runner service via the canonical workflow seam."""
+    from bioetl.composition import _workflow_services
+
+    return _workflow_services.get_workflow_runner_service(registry=registry)
+
+
+def get_workflow_execution_service(
+    registry: PipelineRegistry | None = None,
+    workflow_lock_port: LockPort | None = None,
+) -> WorkflowExecutionService:
+    """Build workflow execution service via the canonical workflow seam."""
+    from bioetl.composition import _workflow_services
+
+    return _workflow_services.get_workflow_execution_service(
+        registry=registry,
+        workflow_lock_port=workflow_lock_port,
+    )
+
+
+def get_workflow_inspection_service() -> WorkflowInspectionService:
+    """Build workflow inspection service via the canonical workflow seam."""
+    from bioetl.composition import _workflow_services
+
+    return _workflow_services.get_workflow_inspection_service()
+
+
+def load_workflow_config(name: str) -> WorkflowConfig:
+    """Load workflow YAML through the canonical workflow seam."""
+    from bioetl.composition import _workflow_services
+
+    return _workflow_services.load_workflow_config(name)
 
 
 def get_config_service() -> object:

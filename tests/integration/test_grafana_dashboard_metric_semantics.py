@@ -154,6 +154,165 @@ def test_workflow_selected_range_counters_use_zero_valid_empty_state() -> None:
         ) or "0` means no" in str(panel.get("description", ""))
 
 
+def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> None:
+    """Overview compact evidence panels must stay below the current L0 verdict path."""
+    current_verdict_titles = {
+        "Status",
+        "Next Action",
+        "Inputs",
+        "Control Plane",
+        "Runtime",
+        "Data Quality",
+        "Provider",
+        "Data Validation",
+        "Workflow",
+    }
+    compact_evidence = {
+        "Runtime Blockers Trend": (9018, "bioetl_l1_runtime_blocker_status"),
+        "DQ Status Trend": (9019, "bioetl_l1_dq_status"),
+        "Gold Lifecycle Trend": (9020, "bioetl_l1_gold_lifecycle_status"),
+        "Historical Failures": (9010, "bioetl_pipeline_runs_total"),
+        "Recent Terminal Runs": (9011, "bioetl_pipeline_runs_total"),
+    }
+
+    for dashboard_path in (
+        Path("grafana/dashboards/bioetl-overview-v2.json"),
+        Path("grafana/dashboards/bioetl-overview-v3.json"),
+    ):
+        dashboard = load_dashboard(dashboard_path)
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+        max_current_y = max(
+            panels[title].get("gridPos", {}).get("y", 0)
+            for title in current_verdict_titles
+        )
+
+        for panel_title, (panel_id, expected_metric) in compact_evidence.items():
+            panel = panels[panel_title]
+            expressions = [
+                target.get("expr", "")
+                for target in panel.get("targets", [])
+                if isinstance(target.get("expr"), str)
+            ]
+            description = str(panel.get("description", "")).lower()
+            data_links = panel.get("options", {}).get("dataLinks", [])
+
+            assert panel.get("id") == panel_id, dashboard_path
+            assert panel.get("gridPos", {}).get("y", 0) > max_current_y
+            assert any(expected_metric in expr for expr in expressions), dashboard_path
+            assert all(
+                forbidden not in "\n".join(expressions)
+                for forbidden in ("run_id", "payload_hash", "error_message")
+            )
+            assert "selected-range" in description
+            assert "evidence" in description
+            assert "does not determine l0 status or next action" in description
+            assert data_links
+            assert all(
+                str(link.get("title", "")).startswith("Open ") for link in data_links
+            )
+
+        for panel_title in ("Status", "Next Action"):
+            assert "$__range" not in "\n".join(
+                get_panel_expressions(panels[panel_title])
+            )
+
+
+@pytest.mark.parametrize(
+    "dashboard_name",
+    [
+        "bioetl-control-plane-v1.json",
+        "bioetl-runtime.json",
+        "bioetl-provider-health-v2.json",
+        "bioetl-dq-v2.json",
+        "bioetl-workflow-overview.json",
+    ],
+)
+def test_operator_context_shell_panels_preserve_canonical_semantics(
+    dashboard_name: str,
+) -> None:
+    """Shared context shell panels must preserve Overview-derived semantics."""
+    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+    expected_ids = {
+        "Provenance": 9400,
+        "Status": 9401,
+        "ID": 9402,
+        "Processed Records": 9403,
+    }
+    assert expected_ids.keys() <= panels.keys()
+
+    for panel_title, expected_id in expected_ids.items():
+        assert panels[panel_title].get("id") == expected_id
+
+    provenance = panels["Provenance"]
+    provenance_description = str(provenance.get("description", "")).lower()
+    provenance_content = str(provenance.get("options", {}).get("content", "")).lower()
+    assert "scope:" in provenance_description
+    assert "workflow" in provenance_description
+    assert "pipeline" in provenance_description
+    assert "run_type" in provenance_description
+    assert "run_id" in provenance_description
+    assert "local control-plane identity context only" in provenance_description
+    assert "context shell:" not in provenance_content
+    assert "workflow=" not in provenance_content
+    assert "pipeline=" not in provenance_content
+    assert "run id=" not in provenance_content
+    assert "run_id is http identity context" not in provenance_content
+
+    status = panels["Status"]
+    status_expressions = get_panel_expressions({"panels": [status]})
+    status_description = str(status.get("description", "")).lower()
+    assert status_expressions
+    assert all("run_id" not in expr for expr in status_expressions)
+    assert all("payload_hash" not in expr for expr in status_expressions)
+    if dashboard_name == "bioetl-workflow-overview.json":
+        assert any("$__range" in expr for expr in status_expressions)
+        assert "selected-range workflow evidence status" in status_description
+        assert "not current live run state" in status_description
+    else:
+        assert all("$__range" not in expr for expr in status_expressions)
+        assert "current" in status_description
+    assert "0=ok" in status_description
+    assert "null=unknown" in status_description
+
+    identity = panels["ID"]
+    assert identity.get("datasource") == "Quarantine Explorer"
+    identity_target = identity.get("targets", [])[0]
+    assert identity_target.get("format") == "table"
+    assert identity_target.get("parser") == "backend"
+    assert identity_target.get("root_selector") == "rows"
+    assert identity_target.get("source") == "url"
+    assert identity_target.get("url_options", {}).get("method") == "GET"
+    assert identity_target.get("url") == (
+        "/ops/control-plane/identity-table?"
+        "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+    )
+
+    processed = panels["Processed Records"]
+    processed_expressions = get_panel_expressions({"panels": [processed]})
+    processed_description = str(processed.get("description", "")).lower()
+    assert processed_expressions
+    assert any("bioetl_records_processed_total" in expr for expr in processed_expressions)
+    assert any("max_over_time(" in expr for expr in processed_expressions)
+    assert any("[$__range]" in expr for expr in processed_expressions)
+    assert any("or vector(0)" in expr for expr in processed_expressions)
+    assert "selected-range" in processed_description
+    assert "evidence" in processed_description
+    assert "do not prove current ok status" in processed_description
+
+    dashboard_promql = "\n".join(get_panel_expressions(dashboard))
+    assert "$run_id" not in dashboard_promql
+    assert "${run_id}" not in dashboard_promql
+
+
 def test_runtime_selected_count_zeroes_are_scope_anchored() -> None:
     """Selected runtime count cards must keep UNKNOWN when selected scope is absent."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
@@ -1236,6 +1395,11 @@ def test_exact_duplicate_promql_groups_are_only_explicitly_justified_reuse() -> 
     duplicate_uses_by_expr = {
         expr: uses for expr, uses in observed_uses_by_expr.items() if len(uses) > 1
     }
+
+    def _is_overview_snapshot_duplicate(uses: set[tuple[str, str]]) -> bool:
+        dashboards = {dashboard_name for dashboard_name, _title in uses}
+        return dashboards == {"bioetl-overview-v2.json", "bioetl-overview-v3.json"}
+
     expected_duplicate_uses = {
         '((sum((bioetl_dq_validation_score{pipeline=~"$pipeline"} * '
         'bioetl_dq_validation_record_count{pipeline=~"$pipeline"}))) / '
@@ -1254,6 +1418,47 @@ def test_exact_duplicate_promql_groups_are_only_explicitly_justified_reuse() -> 
         "[$__range])) or vector(0))": {
             ("bioetl-control-plane-v1.json", "Monitor: Lineage Refs Missing"),
             ("bioetl-dq-v2.json", "Monitor: Lineage Refs Missing"),
+        },
+        'max((bioetl_replay_safety_blockers_15m{run_type=~"$run_type"}) and '
+        'on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))': {
+            ("bioetl-control-plane-v1.json", "Monitor: Replay Safety State"),
+            ("bioetl-control-plane-v1.json", "Status"),
+        },
+        'max(bioetl_dq_current_status{pipeline=~"$pipeline"})': {
+            ("bioetl-dq-v2.json", "Monitor DQ Current Status"),
+            ("bioetl-dq-v2.json", "Status"),
+        },
+        'max(bioetl_runtime_current_status{pipeline=~"$pipeline",run_type=~"$run_type"} '
+        'or ((bioetl_runtime_current_status{run_type=~"$run_type"}) and on(pipeline) '
+        'label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
+            ("bioetl-runtime.json", "Monitor Runtime Current Status"),
+            ("bioetl-runtime.json", "Status"),
+        },
+        'label_replace(round(sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
+        'run_type=~"$run_type",stage="bronze"}[$__range])) or vector(0)), '
+        '"parameter", "1 bronze", "", "") or label_replace(round(sum(max_over_time('
+        'bioetl_records_processed_total{pipeline=~"$pipeline",run_type=~"$run_type",'
+        'stage="silver"}[$__range])) or vector(0)), "parameter", "2 silver [valid]", '
+        '"", "") or label_replace(round(sum(max_over_time(bioetl_records_processed_total{'
+        'pipeline=~"$pipeline",run_type=~"$run_type",stage="filtered_out"}[$__range])) '
+        'or vector(0)), "parameter", "3 silver [error]", "", "") or label_replace(round('
+        'sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
+        'run_type=~"$run_type",stage="gold"}[$__range])) or vector(0)), "parameter", '
+        '"4 gold [valid]", "", "") or label_replace(round(clamp_min((sum(max_over_time('
+        'bioetl_records_processed_total{pipeline=~"$pipeline",run_type=~"$run_type",'
+        'stage="silver"}[$__range])) or vector(0)) - (sum(max_over_time('
+        'bioetl_records_processed_total{pipeline=~"$pipeline",run_type=~"$run_type",'
+        'stage="gold"}[$__range])) or vector(0)), 0)), "parameter", '
+        '"5 gold [error]", "", "")': {
+            ("bioetl-control-plane-v1.json", "Processed Records"),
+            ("bioetl-dq-v2.json", "Processed Records"),
+            ("bioetl-overview-v2.json", "Processed Records"),
+            ("bioetl-overview-v3.json", "Processed Records"),
+            ("bioetl-provider-health-v2.json", "Processed Records"),
+            ("bioetl-runtime.json", "Processed Records"),
+            ("bioetl-workflow-overview.json", "Processed Records"),
         },
         '(sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
         'run_type=~"$run_type",stage="filtered_out"}[$__range])) or vector(0)) / '
@@ -1328,6 +1533,16 @@ def test_exact_duplicate_promql_groups_are_only_explicitly_justified_reuse() -> 
             ("bioetl-overview-v2.json", "Recent Terminal Runs"),
             ("bioetl-overview-v3.json", "Recent Terminal Runs"),
         },
+    }
+    duplicate_uses_by_expr = {
+        expr: uses
+        for expr, uses in duplicate_uses_by_expr.items()
+        if not _is_overview_snapshot_duplicate(uses)
+    }
+    expected_duplicate_uses = {
+        expr: uses
+        for expr, uses in expected_duplicate_uses.items()
+        if not _is_overview_snapshot_duplicate(uses)
     }
     assert duplicate_uses_by_expr == expected_duplicate_uses, (
         "Dashboard exact PromQL duplication drifted outside the audited allowlist: "

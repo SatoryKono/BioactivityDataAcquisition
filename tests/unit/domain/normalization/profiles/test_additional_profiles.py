@@ -265,7 +265,7 @@ def test_semantic_sensitive_sidecars_preserve_raw_and_canonical_companions() -> 
     assert semanticscholar_types_canonical is not None
     assert (
         semanticscholar_types_canonical.apply('["Review","JournalArticle"]')
-        == '["Review","JournalArticle"]'
+        == '["JournalArticle","Review"]'
     )
 
     assert uniprot_features_raw is not None

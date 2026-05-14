@@ -17,7 +17,7 @@ docs/00-project/ai/rules/
 └── [скопировать в .cursor/rules/]
 ```
 
-Источник канонических правил: `docs/00-project/RULES.md` (v6.1.2)
+Источник канонических правил: `docs/00-project/RULES.md` (v6.1.3)
 
 ## Использование
 

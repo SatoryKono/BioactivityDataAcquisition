@@ -204,3 +204,40 @@ def test_provider_configs_use_canonical_pagination_fields() -> None:
         "Provider YAML corpus must use canonical provider_config.pagination.* "
         "fields and must not keep legacy pagination aliases.\n" + "\n".join(violations)
     )
+
+
+def test_dq_schema_describes_contract_strictness_key_distinction() -> None:
+    """DQ schema docs must distinguish quality-config keys from contract keys."""
+    schema = _load_schema("dq.json")
+    description = str(schema.get("description", ""))
+    properties = schema.get("properties")
+    assert isinstance(properties, dict), "dq.json must define top-level properties"
+    strict_validation = properties.get("strict_validation")
+    assert isinstance(strict_validation, dict), (
+        "dq.json must define strict_validation property metadata"
+    )
+
+    assert "strict_dq_validation" in description, (
+        "dq.json description must explain that contract YAML uses "
+        "strict_dq_validation as the canonical file key"
+    )
+    assert "configs/contracts/*" in description
+    assert "strict_dq_validation" in str(strict_validation.get("description", ""))
+
+
+def test_pipeline_schema_describes_inline_dq_vs_contract_strictness() -> None:
+    """pipeline.json must not present legacy contract strictness wording as canonical."""
+    schema = _load_schema("pipeline.json")
+    defs = schema.get("$defs")
+    assert isinstance(defs, dict), "pipeline.json must contain $defs section"
+    dq_schema = defs.get("DQYamlConfig")
+    assert isinstance(dq_schema, dict), "pipeline.json missing DQYamlConfig definition"
+    properties = dq_schema.get("properties")
+    assert isinstance(properties, dict), "DQYamlConfig must define properties"
+    strict_validation = properties.get("strict_validation")
+    assert isinstance(strict_validation, dict), (
+        "DQYamlConfig must define strict_validation property metadata"
+    )
+    strictness_description = str(strict_validation.get("description", ""))
+    assert "strict_dq_validation" in strictness_description
+    assert "inline pipeline quality config" in strictness_description

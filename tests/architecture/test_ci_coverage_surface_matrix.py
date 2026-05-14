@@ -45,6 +45,10 @@ class TestCiCoverageSurfaceMatrix:
             matrix.get("threshold_policy", {}).get("enforced_in_job")
             == "coverage-verify"
         )
+        assert matrix.get("confidence_accounting", {}).get("first_class_confidence") is True
+        assert matrix.get("confidence_accounting", {}).get("hard_threshold_gate") == (
+            "coverage-verify"
+        )
 
     def test_ci_coverage_surface_matrix_tracks_expected_major_lanes(self) -> None:
         matrix = _load_yaml(MATRIX_PATH)
@@ -136,6 +140,12 @@ class TestCiCoverageSurfaceMatrix:
         required_jobs = set(
             matrix.get("confidence_lane_policy", {}).get("required_blocking_jobs", [])
         )
+        assert set(
+            matrix.get("confidence_accounting", {}).get(
+                "blocking_confidence_lanes",
+                [],
+            )
+        ) == required_jobs
         assert required_jobs == {
             "contract-confidence",
             "control-plane-e2e",

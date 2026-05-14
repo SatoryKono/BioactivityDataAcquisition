@@ -1,7 +1,7 @@
 # BioETL Мониторинг: Prometheus + Grafana
 
 **Версия документа:** 2.0.0
-**Дата обновления:** 2026-03-29
+**Дата обновления:** 2026-05-14
 **Статус:** Production Ready
 **Совместимость:** BioETL v5.21+, Grafana 9+, Prometheus 2.40+
 
@@ -677,20 +677,44 @@ ______________________________________________________________________
 
 ## 6. Переменные фильтрации (Template Variables)
 
-Shipped dashboards используют несколько template variables в зависимости от
-операторской роли dashboard. Переменные отображаются как выпадающие списки в
-верхней части дашборда.
+Primary dashboards `0..5` используют общий operator context shell:
+`$workflow`, `$pipeline`, `$run_type`, `$run_id`. Role-specific variables
+(`$stage`, `$provider`, `$status`, `$step_status`, `$step_kind`,
+`$pipeline_context`, `$adapter`) добавляются поверх shell. Переменные
+отображаются как выпадающие списки в верхней части дашборда.
+
+`$run_id` в primary dashboards остаётся HTTP-backed local identity selector
+для панели `ID`; он не используется в Prometheus label filtering и не
+передаётся как cross-dashboard filter.
+
+### 6.0 Shared context shell
+
+| Variable | Primary dashboards | Source | Semantics |
+| --- | --- | --- | --- |
+| `$workflow` | `0..5` | `label_values(bioetl_workflow_runs_total, workflow)` | Context/evidence unless a panel documents truthful current-status intersection. |
+| `$pipeline` | `0..5` | Dashboard-bounded Prometheus universe: Overview/DQ/Provider/Workflow use `bioetl_records_processed_total`; Runtime uses `bioetl_runtime_pipeline_run_type_universe`; Control Plane uses `bioetl_control_plane_run_type_universe`. | Canonical pipeline context; Overview may default to `All`, non-Overview dashboards fail-close to `unknown`. |
+| `$run_type` | `0..5` | Same bounded universe as `$pipeline` for the dashboard role. | Multi-select Include All; missing context is `All`, not `unknown`. |
+| `$run_id` | `0..5` | Quarantine Explorer HTTP `/ops/control-plane/filter-options?dimension=run_id...` | Local control-plane identity context only; no Include All; default `-`. |
+
+Common context panels on primary dashboards outside Overview:
+
+| Panel | ID | Contract |
+| --- | ---:| --- |
+| `Provenance` | `9400` | Visible question-only banner; selected context stays in the panel tooltip/description. |
+| `Status` | `9401` | Role-specific compact status; no Prometheus `$run_id` filtering. |
+| `ID` | `9402` | Quarantine Explorer HTTP identity table for `pipeline/run_type/run_id`. |
+| `Processed Records` | `9403` | Selected-range `bioetl_records_processed_total` evidence; zero does not prove current OK. |
 
 ### 6.1 `$pipeline`
 
-- **Определение:** базово `label_values(bioetl_records_processed_total, pipeline)`;
-  для `bioetl-runtime` используется
-  `label_values(bioetl_runtime_pipeline_run_type_universe, pipeline)`, чтобы
-  no-record/failed-before-record runs не выпадали из выбора.
+- **Определение:** dashboard-bounded query family. Overview/DQ/Provider/Workflow
+  use `bioetl_records_processed_total`; Runtime uses
+  `bioetl_runtime_pipeline_run_type_universe`; Control Plane uses
+  `bioetl_control_plane_run_type_universe`.
 - **Тип:** Query (автоматическое обнаружение значений)
 - **Multi-select:** Нет
-- **Include All:** Да только для `bioetl-overview-v2`; в остальных
-  pipeline-scoped dashboards остаётся fail-closed single-select policy.
+- **Include All:** Да только для `bioetl-overview-v2`/snapshot Overview; в
+  остальных primary dashboards остаётся fail-closed single-select policy.
 - **Default:** для `bioetl-overview-v2` используется `All`, чтобы landing page
   показывал актуальный L0 state без пустого `unknown` scope. Для остальных
   pipeline-centric dashboards default остаётся `unknown`, если исходный
@@ -701,10 +725,8 @@ Shipped dashboards используют несколько template variables в
 
 ### 6.2 `$run_type`
 
-- **Определение:** базово
-  `label_values(bioetl_records_processed_total{pipeline=~"$pipeline"}, run_type)`;
-  для `bioetl-runtime` используется
-  `label_values(bioetl_runtime_pipeline_run_type_universe{pipeline=~"$pipeline"}, run_type)`.
+- **Определение:** same dashboard-bounded query family as `$pipeline`, filtered
+  by selected `$pipeline`.
 - **Тип:** Query (каскадная зависимость от `$pipeline`)
 - **Multi-select:** Да
 - **Include All:** Да
@@ -724,11 +746,9 @@ Shipped dashboards используют несколько template variables в
   diagnostics оставались доступны даже до record emission. Это bounded stage
   breakdown filter, а не forensic selector.
 
-- **`0. Control Plane`** использует собственные
-  `$pipeline/$run_type` queries для manifest/ledger/checkpoint/replay/lineage
-  decision row. Variable universe берётся из active
-  `bioetl_control_plane_run_type_universe`, чтобы stale historical pipelines не
-  попадали в trust-scope dropdown. First-screen trust panels preserve `UNKNOWN` for missing
+- **`0. Control Plane`** uses the shared context shell and adds
+  control-plane-specific trust panels for manifest/ledger/checkpoint/replay/lineage.
+  First-screen trust panels preserve `UNKNOWN` for missing
   telemetry; `Inspect: Telemetry Missing` must be `0` before operator
   treats current trust cards as replay/resume-safe evidence. `Inspect: Terminal Run Events by Status in Range`
   stays below fold as selected-range terminal ledger evidence, while exact `run_id` /
@@ -751,15 +771,18 @@ Shipped dashboards используют несколько template variables в
   latest persisted manifest, aggregate `Pipeline=All` scope without exact
   `run_id` must not guess one manifest identity.
 
-- **`5. Workflow`** использует `$workflow` и `$status` через
-  `label_values(bioetl_workflow_runs_total, workflow|status)`, а также
-  `$step_status` и `$step_kind` через `bioetl_workflow_step_events_total`.
+- **`5. Workflow`** exposes the shared context shell plus `$status` через
+  `label_values(bioetl_workflow_runs_total, status)`, а также `$step_status` и
+  `$step_kind` через `bioetl_workflow_step_events_total`.
   Shipped workflow panels aggregate per-run published series with
   `max_over_time(...)`, because workflow jobs are short-lived and must remain
-  queryable after the CLI process exits.
+  queryable after the CLI process exits. `$pipeline/$run_type/$run_id` are
+  context/identity aids unless a panel documents truthful intersection
+  semantics.
 
-- **`Provider Health`** использует single-select `$provider`, hidden
-  `$pipeline_context` и hidden detail-only `$adapter`. Переходы из pipeline-scoped dashboards
+- **`Provider Health`** exposes the shared context shell plus single-select
+  `$provider`, hidden `$pipeline_context` и hidden detail-only `$adapter`.
+  `$provider` remains the current-status selector. Переходы из pipeline-scoped dashboards
   сохраняют `$pipeline_context=$pipeline` и fail-close'ятся к
   `$provider=unknown`, если source dashboard не может доказать валидный
   provider value; при обратном переходе `$pipeline_context` восстанавливает
@@ -825,11 +848,11 @@ ______________________________________________________________________
 | 9006 | Control Plane                 | Table      | `max by (pipeline) (bioetl_l1_control_plane_current_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                   | Compact current control-plane summary: worst current status per pipeline across the selected run-type scope.                                                                    |
 | 9007 | Provider                      | Table      | `bioetl_l1_provider_global_status`                                                                                            | Global provider health across pipelines; intentionally not filtered by `$pipeline/$run_type`.                                                                                   |
 | 9013 | Workflow                      | Table      | `max by (pipeline) (bioetl_l1_workflow_global_status{pipeline!="test_pipe"})`                                                | Compact global workflow summary: worst current workflow status per pipeline. Backed by the latest bounded terminal workflow signal, not cumulative workflow counters.           |
-| 9018 | Runtime Blockers Trend        | Timeseries | `bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",run_type=~"$run_type"}`                                              | Historical trend of current-state runtime blocker status across the active time window.                                                                                          |
-| 9019 | DQ Status Trend               | Timeseries | `bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"}`                                                            | Historical trend of current-state DQ status across the active time window.                                                                                                       |
-| 9020 | Gold Lifecycle Trend          | Timeseries | `bioetl_l1_gold_lifecycle_status{pipeline=~"$pipeline",run_type=~"$run_type"}`                                                | Historical trend of gold lifecycle status across the active time window.                                                                                                         |
-| 9010 | Historical Failures | Table | `sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed",...}[$__range]))`                         | Historical evidence only; retains `run_type`.                                                                                                                                   |
-| 9011 | Recent Terminal Runs | Table | `sum by (pipeline, status) (increase(bioetl_pipeline_runs_total{status!="success",...}[$__range]))`                          | Historical terminal-run evidence only; keeps non-success terminal statuses grouped by pipeline to avoid noisy first evidence scroll.                                            |
+| 9018 | Runtime Blockers Trend        | Timeseries | `bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",run_type=~"$run_type"}`                                              | Selected-range L1 runtime evidence below the current verdict path; does not determine L0 `Status` or `Next Action`; no-data/gaps are diagnostic; handoff `Open Runtime`.         |
+| 9019 | DQ Status Trend               | Timeseries | `bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"}`                                                            | Selected-range L1 Data Quality evidence below the current verdict path; does not determine L0 `Status` or `Next Action`; no-data/gaps are diagnostic; handoff `Open Data Quality`. |
+| 9020 | Gold Lifecycle Trend          | Timeseries | `bioetl_l1_gold_lifecycle_status{pipeline=~"$pipeline",run_type=~"$run_type"}`                                                | Selected-range L1 data-validation lifecycle evidence below the current verdict path; includes `lifecycle_state`; handoffs `Open Runtime` and `Open Control Plane`.               |
+| 9010 | Historical Failures | Table | `sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed",...}[$__range]))`                         | Selected-range historical failure evidence only; zero matching rows is not proof of current OK; handoff `Open Runtime`.                                                          |
+| 9011 | Recent Terminal Runs | Table | `sum by (pipeline, status) (increase(bioetl_pipeline_runs_total{status!="success",...}[$__range]))`                          | Selected-range non-success terminal-run evidence only; no terminal rows is not proof of current OK; handoffs `Open Control Plane` and `Open Runtime`.                            |
 | 9012/9021 | Diagnostics & Docs (Logs / Traces / Raw Metrics) / Diagnostics Navigation | Row/Text | n/a                                                                                                       | Collapsed diagnostics row is populated again with raw-metric routing guidance and dashboard navigation pointers.                                                                |
 
 **Используемые метрики:** `bioetl_pipeline_runs_total`, `bioetl_records_processed_total`,
@@ -873,6 +896,10 @@ ______________________________________________________________________
 DQ сейчас `OK`/`WARN`/`CRIT`/`UNKNOWN`, какая threshold/reason state
 активна и какое первое действие выполнить; selected-range flow/score/quarantine
 панели являются evidence ниже first screen.
+
+**Фильтрация:** shared context shell `$workflow/$pipeline/$run_type/$run_id`
+plus `$stage`. `run_id` feeds only the local `ID` panel; current DQ status does
+not use it as a Prometheus label.
 
 ### Панели
 
@@ -1023,7 +1050,11 @@ first screen.
 
 **Используемые метрики:** `health_check_latency_seconds`, `provider_health_status`, `health_check_success_total`, `health_check_degraded_total`, `health_check_failures_total`.
 
-**Фильтрация:** только `$provider`. Health-check counters и histograms в текущем инструментировании являются provider-labeled, поэтому pipeline filter здесь намеренно не используется.
+**Фильтрация:** shared context shell `$workflow/$pipeline/$run_type/$run_id`
+plus primary `$provider`. Health-check counters и histograms в текущем
+инструментировании являются provider-labeled, поэтому current provider status
+по-прежнему фильтруется `$provider`; pipeline/run_type/run_id работают как
+context/identity/evidence shell.
 
 **Drilldown:** canonical navigation bus `0. Control Plane`, `1. Overview`,
 `2. Runtime`, `4. Data Quality`, `5. Workflow`, `Explore Logs`,
@@ -1049,8 +1080,8 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 
 - **Audience:** SRE, developer, data engineer
 - **Primary question:** где runtime теряет время, падает, копит backlog или даёт warning/error signals
-- **Variables:** только bounded `$pipeline`, `$run_type`, `$stage`
-- **Forbidden variables:** `run_id`, `payload_hash`, `record_id`
+- **Variables:** shared `$workflow`, `$pipeline`, `$run_type`, `$run_id` plus bounded `$stage`
+- **Forbidden Prometheus labels:** `run_id`, `payload_hash`, `record_id`
 - **Top links:** navigation bus `0. Control Plane`, `1. Overview`, `3. Provider Health`,
   `4. Data Quality`, `5. Workflow`, `Explore Logs`, `Explore Traces`
 - **Known blocked panels:** `Retry vs Failure` и `Batch Size Distribution`
@@ -2087,14 +2118,13 @@ ______________________________________________________________________
 
 | Dashboard                 | UID                             | JSON version | Panels | Refresh | Time Range | Primary surface | Purpose |
 | ------------------------- | ------------------------------- | ------------ | ------ | ------- | ---------- | --------------- | ------- |
-| 0. Control Plane          | `bioetl-control-plane-v1`       | 2            | 34     | 30s     | 12h        | Prometheus      | Replay/resume safety, telemetry gap detection, terminal ledger evidence, GLOBAL read diagnostics, missing-signal markers |
+| 0. Control Plane          | `bioetl-control-plane-v1`       | 2            | 38     | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Replay/resume safety, telemetry gap detection, terminal ledger evidence, GLOBAL read diagnostics, missing-signal markers |
 | 1. Overview               | `bioetl-overview-v2`            | 5            | 27     | 30s     | 12h        | Prometheus      | L0 broken/degraded answer and operational handoff |
-| 2. Runtime                | `bioetl-runtime`                | 2            | 26     | 30s     | 12h        | Prometheus + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
-| 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 17     | 30s     | 12h        | Prometheus      | Provider latency, health, retries, failure ratios |
-| 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 21     | 30s     | 12h        | Prometheus      | DQ score, quarantine, freshness, validation failures |
-| 5. Workflow               | `bioetl-workflow-overview`      | 2            | 8      | 30s     | 12h        | Prometheus      | Selected-range workflow run and step evidence with one justified panel-level CTA surface (`Next Diagnostic Surface`) plus collapsed step diagnostics |
+| 2. Runtime                | `bioetl-runtime`                | 2            | 30     | 30s     | 12h        | Prometheus + Quarantine Explorer identity + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
+| 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 21     | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Provider latency, health, retries, failure ratios |
+| 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 25     | 30s     | 12h        | Prometheus + Quarantine Explorer identity | DQ score, quarantine, freshness, validation failures |
+| 5. Workflow               | `bioetl-workflow-overview`      | 2            | 12     | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Selected-range workflow run and step evidence with one justified panel-level CTA surface (`Next Diagnostic Surface`) plus collapsed step diagnostics |
 | Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 10     | 1m      | 24h        | Quarantine Explorer API | Record-level browsing and action handoff for Silver rejects |
-| 5. Workflow      | `bioetl-workflow-overview`      | 2            | 8      | 30s     | 12h        | Prometheus      | Selected-range workflow run and step evidence built from per-run published series with explicit diagnostic handoff; `Workflow Run Outcomes / Range` plus `Next Diagnostic Surface` stay visible while step outcome/duration detail lives under collapsed row `Step Diagnostics (collapsed)` |
 
 ______________________________________________________________________
 

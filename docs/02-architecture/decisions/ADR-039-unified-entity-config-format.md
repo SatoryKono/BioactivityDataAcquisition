@@ -57,6 +57,12 @@ ADR-037 унифицировал механизм deep-merge через `config_
 
 ### 1. Unified Entity Config (`configs/entities/{provider}/{entity}.yaml`)
 
+**Operationalization note (2026-05-14):** canonical semantic field clusters
+are now tracked in `configs/field_registry/canonical_registry.json`. Unified
+entity configs remain the runtime source of truth for canonical internal field
+names, while the registry documents which legacy/provider-native names may
+remain only at ingestion boundaries.
+
 Все конфигурации одного entity объединяются в один файл с явными секциями:
 
 ```yaml

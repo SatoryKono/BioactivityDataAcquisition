@@ -18,6 +18,7 @@ _PROMETHEUS_RULE_FILES = tuple(Path("grafana/prometheus-rules").glob("*.yml"))
 
 __all__ = [
     "_PROMQL_METRIC_SELECTOR_RE",
+    "_assert_operator_context_shell_contract",
     "_assert_provider_health_variable_contract",
     "_assert_silver_reject_explorer_variable_contract",
     "_assert_standard_variable_contract",
@@ -26,9 +27,9 @@ __all__ = [
     "_extract_selector_labels",
     "_infer_recording_rule_labels",
     "_unknown_metrics_for_query",
-    "get_dashboard_navigation_links",
     "get_all_valid_metric_names",
     "get_dashboard_files",
+    "get_dashboard_navigation_links",
     "get_dashboard_panels",
     "get_dashboard_prometheus_queries",
     "get_metric_label_sets",
@@ -311,9 +312,7 @@ def _assert_standard_variable_contract(
     dashboard_path: Path, variable_map: dict[str, dict[str, object]]
 ) -> None:
     """Assert the variable contract for standard dashboards."""
-    assert "run_id" not in variable_map, (
-        f"Dashboard {dashboard_path.name} must not define deprecated 'run_id' variable"
-    )
+    _assert_operator_context_shell_contract(dashboard_path, variable_map)
 
     pipeline_var = variable_map.get("pipeline")
     assert pipeline_var is not None, (
@@ -353,13 +352,73 @@ def _assert_standard_variable_contract(
     )
 
 
+def _assert_operator_context_shell_contract(
+    dashboard_path: Path, variable_map: dict[str, dict[str, object]]
+) -> None:
+    """Assert shared context selectors without allowing Prometheus run_id use."""
+    workflow_var = variable_map.get("workflow")
+    assert workflow_var is not None, (
+        f"Dashboard {dashboard_path.name} must define shared 'workflow' context"
+    )
+    workflow_query = workflow_var.get("query", {})
+    workflow_query_text = (
+        workflow_query.get("query", "") if isinstance(workflow_query, dict) else ""
+    )
+    assert "bioetl_workflow_runs_total" in workflow_query_text, (
+        f"Dashboard {dashboard_path.name} 'workflow' query must use workflow runs"
+    )
+
+    run_id_var = variable_map.get("run_id")
+    assert run_id_var is not None, (
+        f"Dashboard {dashboard_path.name} must define shared 'run_id' identity context"
+    )
+    assert run_id_var.get("type") == "query"
+    assert run_id_var.get("datasource") == "Quarantine Explorer"
+    assert run_id_var.get("includeAll") is False
+    assert run_id_var.get("multi") is False
+    run_id_query = run_id_var.get("query", {})
+    assert isinstance(run_id_query, dict)
+    assert run_id_query.get("queryType") == "infinity"
+    assert run_id_query.get("refId") == "variable"
+    infinity_query = run_id_query.get("infinityQuery", {})
+    assert isinstance(infinity_query, dict)
+    assert infinity_query.get("format") == "table"
+    assert infinity_query.get("parser") == "backend"
+    assert infinity_query.get("root_selector") == "$.items"
+    assert infinity_query.get("url_options", {}).get("method") == "GET"
+    query_url = str(infinity_query.get("url", ""))
+    assert "/ops/control-plane/filter-options" in query_url
+    assert "dimension=run_id" in query_url
+    assert "response_shape=list" in query_url
+    assert "pipeline=${pipeline}" in query_url
+    assert "run_type=${run_type:csv}" in query_url
+
+
 def _assert_provider_health_variable_contract(
     dashboard_path: Path, variable_map: dict[str, dict[str, object]]
 ) -> None:
     """Assert the variable contract for the provider health dashboard."""
-    assert "run_id" not in variable_map, (
-        f"Dashboard {dashboard_path.name} must not define deprecated 'run_id' variable"
+    _assert_operator_context_shell_contract(dashboard_path, variable_map)
+
+    pipeline_var = variable_map.get("pipeline")
+    assert pipeline_var is not None, (
+        f"Dashboard {dashboard_path.name} must define shared 'pipeline' context"
     )
+    pipeline_query = pipeline_var.get("query", {})
+    pipeline_query_text = (
+        pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
+    )
+    assert "bioetl_records_processed_total" in pipeline_query_text
+
+    run_type_var = variable_map.get("run_type")
+    assert run_type_var is not None, (
+        f"Dashboard {dashboard_path.name} must define shared 'run_type' context"
+    )
+    run_type_query = run_type_var.get("query", {})
+    run_type_query_text = (
+        run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""
+    )
+    assert "bioetl_records_processed_total" in run_type_query_text
 
     provider_var = variable_map.get("provider")
     assert provider_var is not None, (
@@ -405,9 +464,9 @@ def _assert_provider_health_variable_contract(
     assert "adapter" in adapter_query_text, (
         f"Dashboard {dashboard_path.name} 'adapter' query must select adapter label"
     )
-    assert "pipeline" not in variable_map, (
-        f"Dashboard {dashboard_path.name} must not expose misleading 'pipeline' variable"
-    )
+    pipeline_context = variable_map.get("pipeline_context")
+    assert pipeline_context is not None
+    assert pipeline_context.get("hide") == 2
 
 
 def _assert_silver_reject_explorer_variable_contract(

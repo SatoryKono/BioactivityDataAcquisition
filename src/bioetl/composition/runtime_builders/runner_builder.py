@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import is_dataclass, replace
-from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.run_ledger_service import (
@@ -56,6 +54,9 @@ from bioetl.composition.runtime_builders.ledger_collaborator import (
 from bioetl.composition.runtime_builders.observability_builder import (
     build_observability_bundle,
 )
+from bioetl.composition.runtime_builders.runner_input_assembly import (
+    prepare_runner_context_and_inputs as _prepare_runner_context_and_inputs,
+)
 from bioetl.domain.config import RuntimeConfig
 
 if TYPE_CHECKING:
@@ -85,76 +86,6 @@ def _initialize_registry(
     ensure_providers_loaded_fn()
     register_all_pipelines_fn(registry=effective_registry)
     return effective_registry
-
-
-def _resolve_optional_functions(
-    build_observability_bundle_fn: Callable[..., ObservabilityBundle] | None,
-    assemble_vacuum_settings_fn: Callable[..., ResolvedVacuumSettings] | None,
-    assemble_runtime_config_fn: Callable[..., RuntimeConfig] | None,
-    assemble_filter_config_fn: Callable[..., InputFilterConfig | None] | None,
-    assemble_cached_bronze_context_fn: Callable[
-        [PipelineRunContext], CachedBronzeContext
-    ]
-    | None,
-) -> tuple[
-    Callable[..., ObservabilityBundle],
-    Callable[..., ResolvedVacuumSettings],
-    Callable[..., RuntimeConfig],
-    Callable[..., InputFilterConfig | None],
-    Callable[[PipelineRunContext], CachedBronzeContext],
-]:
-    """Resolve optional function parameters to their implementations."""
-    return (
-        build_observability_bundle
-        if build_observability_bundle_fn is None
-        else build_observability_bundle_fn,
-        assemble_vacuum_settings
-        if assemble_vacuum_settings_fn is None
-        else assemble_vacuum_settings_fn,
-        assemble_runtime_config
-        if assemble_runtime_config_fn is None
-        else assemble_runtime_config_fn,
-        assemble_filter_config
-        if assemble_filter_config_fn is None
-        else assemble_filter_config_fn,
-        assemble_cached_bronze_context
-        if assemble_cached_bronze_context_fn is None
-        else assemble_cached_bronze_context_fn,
-    )
-
-
-def _prepare_runner_inputs_with_resolved_functions(
-    ctx: PipelineRunContext,
-    get_settings_fn: Callable[[], Settings],
-    load_pipeline_config_fn: Callable[[str], PipelineYamlConfig],
-    load_source_config_fn: Callable[[], object],
-    resolved_functions: tuple[
-        Callable[..., ObservabilityBundle],
-        Callable[..., ResolvedVacuumSettings],
-        Callable[..., RuntimeConfig],
-        Callable[..., InputFilterConfig | None],
-        Callable[[PipelineRunContext], CachedBronzeContext],
-    ],
-) -> _RunnerInputs:
-    """Prepare runner inputs using resolved function implementations."""
-    (
-        build_obs_bundle,
-        assemble_vacuum,
-        assemble_runtime,
-        assemble_filter,
-        assemble_cached_bronze,
-    ) = resolved_functions
-    return prepare_runner_inputs(
-        ctx=ctx,
-        get_settings_fn=get_settings_fn,
-        load_pipeline_config_fn=load_pipeline_config_fn,
-        build_observability_bundle_fn=build_obs_bundle,
-        assemble_vacuum_settings_fn=assemble_vacuum,
-        assemble_runtime_config_fn=assemble_runtime,
-        assemble_filter_config_fn=assemble_filter,
-        assemble_cached_bronze_context_fn=assemble_cached_bronze,
-        load_source_config_fn=load_source_config_fn,
-    )
 
 
 def _handle_control_plane_setup(
@@ -217,20 +148,48 @@ def _handle_control_plane_setup(
     return ctx, inputs, run_ledger_service
 
 
-def _bind_resolved_cached_bronze_context(
+def _create_runner(
+    *,
+    registry: PipelineRegistry,
     ctx: PipelineRunContext,
     inputs: _RunnerInputs,
-) -> PipelineRunContext:
-    """Propagate resolved cached Bronze replay context back into the run context."""
-    current = getattr(ctx, "cached_bronze", None)
-    resolved = getattr(inputs, "cached_bronze", None)
-    if current == resolved:
-        return ctx
-    if is_dataclass(ctx):
-        return replace(ctx, cached_bronze=resolved)
-    payload = dict(vars(ctx))
-    payload["cached_bronze"] = resolved
-    return SimpleNamespace(**payload)
+) -> PipelineRunnerProtocol:
+    """Create the runtime runner from the registered factory seam."""
+    factory = registry.get(ctx.pipeline_name).factory
+    return _create_runner_from_factory(
+        factory=factory,
+        ctx=ctx,
+        inputs=inputs,
+    )
+
+
+def _attach_runner_control_plane_collaborators(
+    *,
+    runner: PipelineRunnerProtocol,
+    inputs: _RunnerInputs,
+    run_ledger_service: RunLedgerService | None,
+) -> None:
+    """Attach optional control-plane collaborators and validate closure."""
+    if run_ledger_service is None:
+        return
+    pipeline_settings = getattr(inputs.settings, "pipeline", None)
+    control_plane = getattr(pipeline_settings, "control_plane", None)
+    required_profile = getattr(
+        control_plane,
+        "required_persistence_profile",
+        "degraded_observable",
+    )
+    attachment_result = attach_control_plane_collaborators(
+        runner,
+        run_ledger_service,
+    )
+    _validate_artifact_recorder_attachment(
+        required_profile=required_profile,
+        candidate_count=attachment_result.candidate_count,
+        attached_count=attachment_result.attached_count,
+        missing_attach_method_count=(attachment_result.missing_attach_method_count),
+        failed_count=attachment_result.failed_count,
+    )
 
 
 def build_pipeline_runner(
@@ -284,44 +243,37 @@ def build_pipeline_runner(
         register_all_pipelines_fn=register_all_pipelines_fn,
     )
 
-    resolved_functions = _resolve_optional_functions(
-        build_observability_bundle_fn,
-        assemble_vacuum_settings_fn,
-        assemble_runtime_config_fn,
-        assemble_filter_config_fn,
-        assemble_cached_bronze_context_fn,
-    )
-    inputs = _prepare_runner_inputs_with_resolved_functions(
+    ctx, inputs = _prepare_runner_context_and_inputs(
         ctx=ctx,
         get_settings_fn=get_settings_fn,
         load_pipeline_config_fn=load_pipeline_config_fn,
         load_source_config_fn=load_source_config_fn,
-        resolved_functions=resolved_functions,
+        build_observability_bundle_fn=build_observability_bundle
+        if build_observability_bundle_fn is None
+        else build_observability_bundle_fn,
+        assemble_vacuum_settings_fn=assemble_vacuum_settings
+        if assemble_vacuum_settings_fn is None
+        else assemble_vacuum_settings_fn,
+        assemble_runtime_config_fn=assemble_runtime_config
+        if assemble_runtime_config_fn is None
+        else assemble_runtime_config_fn,
+        assemble_filter_config_fn=assemble_filter_config
+        if assemble_filter_config_fn is None
+        else assemble_filter_config_fn,
+        assemble_cached_bronze_context_fn=assemble_cached_bronze_context
+        if assemble_cached_bronze_context_fn is None
+        else assemble_cached_bronze_context_fn,
+        prepare_runner_inputs_fn=prepare_runner_inputs,
     )
-    ctx = _bind_resolved_cached_bronze_context(ctx, inputs)
     ctx, inputs, run_ledger_service = _handle_control_plane_setup(ctx, inputs)
-    runner = _create_runner_from_factory(
-        factory=effective_registry.get(ctx.pipeline_name).factory,
+    runner = _create_runner(
+        registry=effective_registry,
         ctx=ctx,
         inputs=inputs,
     )
-    if run_ledger_service is not None:
-        pipeline_settings = getattr(inputs.settings, "pipeline", None)
-        control_plane = getattr(pipeline_settings, "control_plane", None)
-        required_profile = getattr(
-            control_plane,
-            "required_persistence_profile",
-            "degraded_observable",
-        )
-        attachment_result = attach_control_plane_collaborators(
-            runner,
-            run_ledger_service,
-        )
-        _validate_artifact_recorder_attachment(
-            required_profile=required_profile,
-            candidate_count=attachment_result.candidate_count,
-            attached_count=attachment_result.attached_count,
-            missing_attach_method_count=(attachment_result.missing_attach_method_count),
-            failed_count=attachment_result.failed_count,
-        )
+    _attach_runner_control_plane_collaborators(
+        runner=runner,
+        inputs=inputs,
+        run_ledger_service=run_ledger_service,
+    )
     return runner

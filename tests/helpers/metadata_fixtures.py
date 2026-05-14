@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import uuid4
 
 import pytest
 
@@ -28,6 +27,7 @@ from bioetl.domain.models.metadata import (
     SourceMetadata,
 )
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
+from tests.helpers.deterministic_ids import deterministic_run_id
 
 BRONZE_BASE_PATH = "/virtual/bronze"
 SILVER_TABLE_PATH = "/virtual/silver/test/table"
@@ -46,7 +46,7 @@ def build_runtime_metadata(
 ) -> RuntimeMetadata:
     """Build canonical runtime metadata used across metadata tests."""
     return RuntimeMetadata(
-        run_id=run_id or str(uuid4()),
+        run_id=run_id or deterministic_run_id("metadata.runtime"),
         manifest_id=manifest_id,
         run_type=run_type,
         started_at_utc=started_at_utc or datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC),

@@ -14,7 +14,7 @@ from bioetl.domain.composite.result import (
     EnrichmentStatus,
 )
 from bioetl.domain.composite.state import CompositePipelineState
-from bioetl.domain.control_plane.run_ledger import (
+from bioetl.domain.control_plane._run_ledger_runtime import (
     COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
     COMPOSITE_ENRICHER_COMPLETED_EVENT,
     COMPOSITE_MERGE_COMPLETED_EVENT,

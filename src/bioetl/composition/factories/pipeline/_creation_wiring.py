@@ -128,6 +128,73 @@ class _PipelineCreationInputs:
     pandera_silver_schema: object | None = None
 
 
+def _resolve_yaml_config(
+    *,
+    inputs: _PipelineCreationInputs,
+    deps: _ServiceBundleDeps,
+) -> PipelineYamlConfig:
+    """Resolve the effective pipeline YAML config for one creation request."""
+    return inputs.request.config or deps.load_pipeline_config(inputs.pipeline_name)
+
+
+def _build_metadata_coordinator(
+    *,
+    inputs: _PipelineCreationInputs,
+    yaml_config: PipelineYamlConfig,
+    deps: _ServiceBundleDeps,
+    extract_entity_type: EntityTypeExtractor,
+) -> MetadataCoordinator:
+    """Build the metadata coordinator from the canonical run context factory."""
+    request = inputs.request
+    run_context_factory = RunContextFactory(
+        pipeline_name=inputs.pipeline_name,
+        provider=inputs.provider,
+        entity_type_extractor=extract_entity_type,
+        pipeline_version_getter=get_pipeline_version,
+        git_commit_getter=get_git_commit,
+        config_hash_getter=deps.compute_config_hash,
+    )
+    return MetadataCoordinator(
+        run_context_factory.create(
+            run_id=request.run_id,
+            runtime=request.runtime,
+            started_at=request.started_at,
+            yaml_config=yaml_config,
+            manifest_id=request.manifest_id,
+            execution_fingerprint=request.execution_fingerprint,
+            config_hash=request.config_hash,
+            resolved_config_hash=request.resolved_config_hash,
+            effective_config_hash=request.effective_config_hash,
+            dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
+            effective_config_artifact_id=request.effective_config_artifact_id,
+        )
+    )
+
+
+def _build_pipeline_transformer(
+    *,
+    inputs: _PipelineCreationInputs,
+    yaml_config: PipelineYamlConfig,
+    domain_config: PipelineConfig,
+    extract_entity_type: EntityTypeExtractor,
+) -> BaseTransformer | None:
+    """Build the runtime transformer while preserving the public factory seam."""
+    request = inputs.request
+    return TransformerBuilder(
+        provider=inputs.provider,
+        pipeline_name=inputs.pipeline_name,
+        entity_type_extractor=extract_entity_type,
+        contract_policy_loader=load_pipeline_contract_policy,
+    ).build(
+        transformer_class=inputs.transformer_class,
+        yaml_config=yaml_config,
+        domain_config=domain_config,
+        pandera_silver_schema=inputs.pandera_silver_schema,
+        tracer=request.tracer,
+        metrics=request.metrics,
+    )
+
+
 def _create_pipeline_with_services_impl(
     inputs: _PipelineCreationInputs,
     *,
@@ -147,29 +214,15 @@ def _create_pipeline_with_services_impl(
         Configured BasePipeline instance ready for execution.
     """
     request = inputs.request
-    yaml_config = request.config or deps.load_pipeline_config(inputs.pipeline_name)
-    run_context_factory = RunContextFactory(
-        pipeline_name=inputs.pipeline_name,
-        provider=inputs.provider,
-        entity_type_extractor=extract_entity_type,
-        pipeline_version_getter=get_pipeline_version,
-        git_commit_getter=get_git_commit,
-        config_hash_getter=deps.compute_config_hash,
+    yaml_config = _resolve_yaml_config(
+        inputs=inputs,
+        deps=deps,
     )
-    metadata_coordinator = MetadataCoordinator(
-        run_context_factory.create(
-            run_id=request.run_id,
-            runtime=request.runtime,
-            started_at=request.started_at,
-            yaml_config=yaml_config,
-            manifest_id=request.manifest_id,
-            execution_fingerprint=request.execution_fingerprint,
-            config_hash=request.config_hash,
-            resolved_config_hash=request.resolved_config_hash,
-            effective_config_hash=request.effective_config_hash,
-            dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
-            effective_config_artifact_id=request.effective_config_artifact_id,
-        )
+    metadata_coordinator = _build_metadata_coordinator(
+        inputs=inputs,
+        yaml_config=yaml_config,
+        deps=deps,
+        extract_entity_type=extract_entity_type,
     )
     domain_config = resolve_domain_pipeline_config(
         yaml_config,
@@ -194,18 +247,11 @@ def _create_pipeline_with_services_impl(
             cast("DQConfig | None", domain_config.dq),
         ),
     )
-    transformer = TransformerBuilder(
-        provider=inputs.provider,
-        pipeline_name=inputs.pipeline_name,
-        entity_type_extractor=extract_entity_type,
-        contract_policy_loader=load_pipeline_contract_policy,
-    ).build(
-        transformer_class=inputs.transformer_class,
+    transformer = _build_pipeline_transformer(
+        inputs=inputs,
         yaml_config=yaml_config,
         domain_config=domain_config,
-        pandera_silver_schema=inputs.pandera_silver_schema,
-        tracer=request.tracer,
-        metrics=request.metrics,
+        extract_entity_type=extract_entity_type,
     )
 
     return inputs.pipeline_class.create(
