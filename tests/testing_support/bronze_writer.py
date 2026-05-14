@@ -19,6 +19,7 @@ from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+from tests.helpers.deterministic_ids import deterministic_batch_id, deterministic_run_id
 
 INVALID_PROVIDER_NAME = "Invalid provider name"
 INVALID_ENTITY_NAME = "Invalid entity name"
@@ -43,13 +44,13 @@ def noop_metrics() -> MetricsPort:
 @pytest.fixture
 def batch_id() -> BatchID:
     """Generate a unique batch ID."""
-    return BatchID(uuid4())
+    return BatchID(deterministic_batch_id("bronze_writer.fixture"))
 
 
 @pytest.fixture
 def run_id() -> RunID:
     """Generate a unique run ID."""
-    return RunID(uuid4())
+    return RunID(deterministic_run_id("bronze_writer.fixture"))
 
 
 @pytest.fixture
@@ -830,7 +831,7 @@ class TestBronzeWriterListBatches:
             provider="chembl",
             entity="activity",
             date=date1,
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_batch_id("bronze_writer.list_batches.date1")),
             run_id=run_id,
             run_type=run_type,
             ingestion_ts=ingestion_ts,
@@ -840,7 +841,7 @@ class TestBronzeWriterListBatches:
             provider="chembl",
             entity="activity",
             date=date2,
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_batch_id("bronze_writer.list_batches.date2")),
             run_id=run_id,
             run_type=run_type,
             ingestion_ts=ingestion_ts,
@@ -875,7 +876,9 @@ class TestBronzeWriterListBatches:
             provider="chembl",
             entity="activity",
             date=date1,
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(
+                deterministic_batch_id("bronze_writer.list_batches_filter.date1")
+            ),
             run_id=run_id,
             run_type=run_type,
             ingestion_ts=ingestion_ts,
@@ -885,7 +888,9 @@ class TestBronzeWriterListBatches:
             provider="chembl",
             entity="activity",
             date=date2,
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(
+                deterministic_batch_id("bronze_writer.list_batches_filter.date2")
+            ),
             run_id=run_id,
             run_type=run_type,
             ingestion_ts=ingestion_ts,
@@ -1214,7 +1219,9 @@ class TestBronzeWriterMetadataDeterminism:
             provider="chembl",
             entity="activity",
             date=date,
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(
+                deterministic_batch_id("bronze_writer.bitwise_payload.result1")
+            ),
             run_id=run_id,
             run_type=run_type,
             ingestion_ts=ingestion_ts,
@@ -1224,7 +1231,9 @@ class TestBronzeWriterMetadataDeterminism:
             provider="chembl",
             entity="activity",
             date=date,
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(
+                deterministic_batch_id("bronze_writer.bitwise_payload.result2")
+            ),
             run_id=run_id,
             run_type=run_type,
             ingestion_ts=ingestion_ts,
@@ -1261,8 +1270,12 @@ class TestBronzeWriterMetadataDeterminism:
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
         # Write twice with the same parameters but different batch IDs
-        batch_id_1 = BatchID(uuid4())
-        batch_id_2 = BatchID(uuid4())
+        batch_id_1 = BatchID(
+            deterministic_batch_id("bronze_writer.metadata_bitwise.batch1")
+        )
+        batch_id_2 = BatchID(
+            deterministic_batch_id("bronze_writer.metadata_bitwise.batch2")
+        )
 
         result_1 = await writer.write_bronze(
             records=iter(sample_records),

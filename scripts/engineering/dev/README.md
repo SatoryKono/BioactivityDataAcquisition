@@ -111,6 +111,11 @@ The canonical shard membership and ignore/deselect rules for
 `configs/quality/pytest_shards.yaml`. Update that inventory rather than editing
 the shard plan inline in the shell runner.
 
+For architecture-focused local runs, prefer the explicit aliases:
+
+- `S7-architecture-fast-boundary`
+- `S7-architecture-slow-governance`
+
 ## Integration And E2E Quick Paths
 
 For the tracked integration/VCR execution policy, prefer explicit replay for

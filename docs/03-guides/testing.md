@@ -44,6 +44,11 @@ must use these `suite_name` values for comparable local and CI runs:
 - `performance`: benchmark-backed hotspot/performance-budget lane;
 - `coverage-verify`: the only lane that enforces the repo-wide coverage gate.
 
+Architecture runs are additionally decomposed in the sharded runner into:
+
+- `S7-architecture-fast-boundary`
+- `S7-architecture-slow-governance`
+
 Large local runs should use the maintained sharded runner rather than invoking
 pytest directly:
 
@@ -64,6 +69,9 @@ future test-health tooling should preserve the logical `suite_name` while
 recording sharded runner details separately. The canonical shard membership and
 ignore/deselect inventory for `run_pytest_sharded.sh` lives in
 `configs/quality/pytest_shards.yaml`.
+Local architecture runs should prefer the explicit
+`S7-architecture-fast-boundary` and `S7-architecture-slow-governance` aliases
+over older implicit shard names.
 
 The QA entrypoint can record named lane runs as JUnit XML plus JSON summaries:
 
@@ -157,6 +165,9 @@ Supported policy slice for issue `#2598`:
 - **Domain**: Тестирование сущностей и чистых функций в `src/bioetl/domain/`.
 - **Application**: Тестирование трансформеров и логики пайплайнов. In-memory fakes предпочтительны, MagicMock допустим.
 - **Правило**: Никакого сетевого взаимодействия или реального ввода-вывода.
+- Memory-marked MCP/Neo4j smoke tests and file-backed workflow smokes не
+  относятся к `tests/unit/`; их canonical path теперь `tests/smoke/` или
+  integration lanes.
 
 #### 2.1.1. Source-to-Test Ownership
 

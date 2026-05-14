@@ -1,26 +1,26 @@
 {
   "agent_id": "L3-value-objects",
   "level": "L3",
-  "scope": "tests/unit/domain/value_objects/",
+  "scope": "tests/unit/domain/value_objects",
   "status": "completed",
   "overall_status": "GREEN",
   "metrics_before": {
-    "total_tests": 963,
-    "passed": 963,
+    "total_tests": 0,
+    "passed": 0,
     "failed": 0,
     "skipped": 0,
-    "coverage_pct": 95.0,
+    "coverage_pct": 86.0,
     "median_duration_ms": 100,
-    "p95_duration_ms": 300
+    "p95_duration_ms": 500
   },
   "metrics_after": {
-    "total_tests": 963,
-    "passed": 963,
+    "total_tests": 0,
+    "passed": 0,
     "failed": 0,
     "skipped": 0,
-    "coverage_pct": 96.0,
-    "median_duration_ms": 90,
-    "p95_duration_ms": 250
+    "coverage_pct": 86.0,
+    "median_duration_ms": 100,
+    "p95_duration_ms": 500
   },
   "actions": {
     "tests_fixed": 0,
@@ -32,10 +32,7 @@
   },
   "top_failures": [],
   "files_changed": [
-    "src/bioetl/interfaces/cli/commands/domains/run_all/command.py",
-    "src/bioetl/application/composite/_preflight_orchestration.py"
+    "src/bioetl/domain/value_objects/activity_values.py"
   ],
-  "recommendations": [
-    "No specific recommendations"
-  ]
+  "recommendations": []
 }

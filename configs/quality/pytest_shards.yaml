@@ -11,6 +11,15 @@ aliases:
       - S7-crosscutting-architecture-b
       - S7-crosscutting-architecture-c
       - S7-crosscutting-architecture-d
+  S7-architecture-fast-boundary:
+    expands_to:
+      - S7-crosscutting-architecture-a
+      - S7-crosscutting-architecture-b
+      - S7-crosscutting-architecture-c
+      - S7-crosscutting-architecture-d
+  S7-architecture-slow-governance:
+    expands_to:
+      - S7-crosscutting-architecture-guardrails
 shards:
   - name: S1-domain-core
     wave: 1

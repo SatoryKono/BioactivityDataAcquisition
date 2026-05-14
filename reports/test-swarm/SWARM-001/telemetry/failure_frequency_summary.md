@@ -1,3 +1,3 @@
 # Failure Frequency Summary
 
-All tests passed successfully.
+No failures observed.

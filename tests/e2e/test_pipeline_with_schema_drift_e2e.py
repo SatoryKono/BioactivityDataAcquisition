@@ -14,13 +14,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
-from uuid import uuid4
 
 import pyarrow as pa
 import pytest
 
 from bioetl.domain.exceptions import SchemaEvolutionError
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from tests.helpers.deterministic_ids import deterministic_batch_id, deterministic_run_id
 
 
 @pytest.fixture
@@ -64,18 +64,18 @@ def base_records() -> list[dict[str, Any]]:
             "entity_id": "entity_1",
             "name": "Test Entity 1",
             "value": 1.0,
-            "_run_id": str(uuid4()),
+            "_run_id": deterministic_run_id("schema_drift.base.entity_1"),
             "_run_type": "incremental",
-            "_source_batch_id": str(uuid4()),
+            "_source_batch_id": deterministic_batch_id("schema_drift.base.entity_1"),
             "_ingestion_ts": "2025-01-15T12:00:00Z",
         },
         {
             "entity_id": "entity_2",
             "name": "Test Entity 2",
             "value": 2.0,
-            "_run_id": str(uuid4()),
+            "_run_id": deterministic_run_id("schema_drift.base.entity_2"),
             "_run_type": "incremental",
-            "_source_batch_id": str(uuid4()),
+            "_source_batch_id": deterministic_batch_id("schema_drift.base.entity_2"),
             "_ingestion_ts": "2025-01-15T12:00:00Z",
         },
     ]
@@ -90,9 +90,11 @@ def evolved_records() -> list[dict[str, Any]]:
             "name": "Test Entity 3",
             "value": 3.0,
             "new_field": "extra_data",  # New field
-            "_run_id": str(uuid4()),
+            "_run_id": deterministic_run_id("schema_drift.evolved.entity_3"),
             "_run_type": "incremental",
-            "_source_batch_id": str(uuid4()),
+            "_source_batch_id": deterministic_batch_id(
+                "schema_drift.evolved.entity_3"
+            ),
             "_ingestion_ts": "2025-01-15T12:00:00Z",
         },
     ]
@@ -106,9 +108,11 @@ def reduced_records() -> list[dict[str, Any]]:
             "entity_id": "entity_4",
             # "name" field is missing
             "value": 4.0,
-            "_run_id": str(uuid4()),
+            "_run_id": deterministic_run_id("schema_drift.reduced.entity_4"),
             "_run_type": "incremental",
-            "_source_batch_id": str(uuid4()),
+            "_source_batch_id": deterministic_batch_id(
+                "schema_drift.reduced.entity_4"
+            ),
             "_ingestion_ts": "2025-01-15T12:00:00Z",
         },
     ]
@@ -458,9 +462,11 @@ class TestSchemaEvolutionEdgeCases:
                 "entity_id": "entity_5",
                 "name": "Test Entity 5",
                 "value": 5.0,
-                "_run_id": str(uuid4()),
+                "_run_id": deterministic_run_id("schema_drift.no_drift.entity_5"),
                 "_run_type": "incremental",
-                "_source_batch_id": str(uuid4()),
+                "_source_batch_id": deterministic_batch_id(
+                    "schema_drift.no_drift.entity_5"
+                ),
                 "_ingestion_ts": "2025-01-15T12:00:00Z",
             },
         ]
@@ -507,9 +513,9 @@ class TestSchemaEvolutionEdgeCases:
                 "entity_id": "v1",
                 "name": "Version 1",
                 "value": 1.0,
-                "_run_id": str(uuid4()),
+                "_run_id": deterministic_run_id("schema_drift.multi.v1"),
                 "_run_type": "incremental",
-                "_source_batch_id": str(uuid4()),
+                "_source_batch_id": deterministic_batch_id("schema_drift.multi.v1"),
                 "_ingestion_ts": "2025-01-15T12:00:00Z",
             },
         ]
@@ -543,9 +549,9 @@ class TestSchemaEvolutionEdgeCases:
                 "name": "Version 2",
                 "value": 2.0,
                 "field_a": "added_a",
-                "_run_id": str(uuid4()),
+                "_run_id": deterministic_run_id("schema_drift.multi.v2"),
                 "_run_type": "incremental",
-                "_source_batch_id": str(uuid4()),
+                "_source_batch_id": deterministic_batch_id("schema_drift.multi.v2"),
                 "_ingestion_ts": "2025-01-15T12:00:00Z",
             },
         ]
@@ -581,9 +587,9 @@ class TestSchemaEvolutionEdgeCases:
                 "value": 3.0,
                 "field_a": "still_a",
                 "field_b": 42,
-                "_run_id": str(uuid4()),
+                "_run_id": deterministic_run_id("schema_drift.multi.v3"),
                 "_run_type": "incremental",
-                "_source_batch_id": str(uuid4()),
+                "_source_batch_id": deterministic_batch_id("schema_drift.multi.v3"),
                 "_ingestion_ts": "2025-01-15T12:00:00Z",
             },
         ]

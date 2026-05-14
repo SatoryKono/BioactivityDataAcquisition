@@ -355,6 +355,16 @@ class TestRealConfigValidation:
         assert config.hard_fail_threshold == pytest.approx(0.20)
         assert config.strict_validation is False
 
+    def test_contract_dq_configs_use_explicit_dq_strict_flag_name(self) -> None:
+        """Contract configs must not reuse Gold/runtime strict-validation wording."""
+        contract_paths = sorted(Path("configs/contracts").glob("*/*.yaml"))
+        assert contract_paths
+
+        for path in contract_paths:
+            payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+            assert "strict_dq_validation" in payload
+            assert "strict_validation" not in payload
+
     def test_provider_configs_have_correct_metadata(
         self, dq_loader: DQConfigLoader
     ) -> None:

@@ -189,8 +189,10 @@ class TestCanonicalTestLanes:
             == "security and not benchmark and not memory"
         )
         assert lanes["architecture"]["runner_backend"] == "run_pytest_sharded"
-        assert "S7-crosscutting-architecture" in lanes["architecture"]["runner_options"]
+        assert "S7-architecture-fast-boundary" in lanes["architecture"]["runner_options"]
+        assert "S7-architecture-slow-governance" in lanes["architecture"]["runner_options"]
         assert lanes["memory"]["marker_expression"] == "memory and not benchmark"
+        assert lanes["memory"]["paths"] == ["tests/smoke/test_neo4j_memory_mcp_smoke.py"]
         assert lanes["performance"]["marker_expression"] == "benchmark and performance"
         assert "-p" in lanes["performance"]["pytest_args"]
         assert "no:xdist" in lanes["performance"]["pytest_args"]
