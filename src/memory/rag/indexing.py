@@ -104,7 +104,11 @@ def build_rag_manifests(root: Path) -> tuple[dict[str, Any], list[dict[str, Any]
             chunk_records.extend(chunk_rows)
             continue
 
-        text = (root / rel_path).read_text(encoding="utf-8")
+        source_path = root / rel_path
+        if not source_path.exists():
+            continue
+
+        text = source_path.read_text(encoding="utf-8")
         sections = chunk_source(rel_path, text)
         corpus_sources.append(
             {

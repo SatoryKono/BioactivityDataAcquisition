@@ -578,7 +578,7 @@
         },
         "strict_validation": {
           "default": false,
-          "description": "Apply stricter validation rules (feature flag)",
+          "description": "Apply DQ-only stricter validation rules for inline pipeline quality config. Contract YAML under configs/contracts/* uses strict_dq_validation as the canonical file key.",
           "title": "Strict Validation",
           "type": "boolean"
         },
