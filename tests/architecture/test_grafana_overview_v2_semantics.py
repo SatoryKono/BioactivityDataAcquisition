@@ -15,8 +15,8 @@ def test_overview_v2_semantics_contract():
     d = json.loads(Path("grafana/dashboards/bioetl-overview-v2.json").read_text())
     panels = _panels(d)
     titles = [p.get("title") for p in panels]
-    assert titles.count("System Status") == 1
-    system = next(p for p in panels if p.get("title") == "System Status")
+    assert titles.count("Status") == 1
+    system = next(p for p in panels if p.get("title") == "Status")
     expr = "\n".join(t.get("expr", "") for t in system.get("targets", []))
     assert "bioetl_l0_status" in expr
     assert "$__range" not in expr
@@ -42,12 +42,12 @@ def test_overview_v2_semantics_contract():
         assert token in links
 
     for current_title in [
-        "System Status",
+        "Status",
         "Next Action",
-        "L0 Inputs",
-        "Runtime Blockers",
-        "DQ Status",
-        "Gold Lifecycle",
+        "Inputs",
+        "Runtime",
+        "Data Quality",
+        "Data Validation",
         "Control Plane",
     ]:
         p = next(x for x in panels if x.get("title") == current_title)

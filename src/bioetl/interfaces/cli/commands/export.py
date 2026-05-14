@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -20,6 +21,16 @@ if TYPE_CHECKING:
     from bioetl.application.services.export_service import ExportService
 
 __all__ = ["ExportFormat", "export_command"]
+
+
+def _scrub_helper_module_binding() -> None:
+    """Keep helper-only export_support off the package-root public seam."""
+    package = sys.modules.get(__package__)
+    if package is not None and hasattr(package, "export_support"):
+        delattr(package, "export_support")
+
+
+_scrub_helper_module_binding()
 
 
 def get_export_service() -> ExportService:

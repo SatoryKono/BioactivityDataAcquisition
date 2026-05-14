@@ -7,8 +7,8 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING, cast
 
 import click
-import bioetl.interfaces.cli.commands.domains.run_all.support as run_all_support
 
+import bioetl.interfaces.cli.commands.domains.run_all.support as run_all_support
 from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
     ensure_metrics_server_started,

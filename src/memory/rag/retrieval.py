@@ -17,6 +17,7 @@ SOURCE_BUCKET_BY_TYPE = {
     "doc": "active_docs",
     "plan": "active_docs",
     "runbook": "active_docs",
+    "devin_wiki": "devin_wiki",
     "test": "tests",
     "workflow": "operational_assets",
     "dashboard": "operational_assets",

@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1833,
-    "total_internal_imports": 7311,
+    "scanned_modules": 1814,
+    "total_internal_imports": 7285,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 321,
@@ -11,13 +11,13 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 1205,
+      "imports": 1188,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1089,
+      "imports": 1093,
       "allowed": true
     },
     {
@@ -29,7 +29,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 596,
+      "imports": 595,
       "allowed": true
     },
     {
@@ -47,7 +47,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1269,
+      "imports": 1268,
       "allowed": true
     },
     {
@@ -59,31 +59,31 @@
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 954,
+      "imports": 953,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 76,
+      "imports": 75,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "composition",
-      "imports": 66,
+      "imports": 65,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 40,
+      "imports": 39,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 197,
+      "imports": 190,
       "allowed": true
     }
   ],
@@ -111,7 +111,7 @@
     {
       "source": "application.pipelines",
       "target": "domain.types",
-      "imports": 79
+      "imports": 80
     },
     {
       "source": "application.core",
@@ -156,7 +156,7 @@
     {
       "source": "interfaces.cli",
       "target": "application.services",
-      "imports": 62
+      "imports": 61
     },
     {
       "source": "composition.bootstrap",
@@ -349,14 +349,14 @@
       "imports": 15
     },
     {
-      "source": "infrastructure.schemas",
-      "target": "domain.config",
+      "source": "application.core",
+      "target": "domain.normalization",
       "imports": 14
     },
     {
-      "source": "application.core",
-      "target": "domain.normalization",
-      "imports": 13
+      "source": "infrastructure.schemas",
+      "target": "domain.config",
+      "imports": 14
     },
     {
       "source": "application.pipelines",

@@ -15,6 +15,7 @@ DEFAULT_SOURCE_PATHS = (
     Path("docs/02-architecture/decisions"),
     Path("docs/plans"),
     Path("docs/05-operations/runbooks"),
+    Path(".devin/wiki.json"),
     Path("src/bioetl"),
     Path("tests"),
     Path("configs"),
@@ -34,6 +35,7 @@ SOURCE_SUFFIXES = {
     "active_docs": MARKDOWN_SUFFIXES,
     "planning_docs": MARKDOWN_SUFFIXES,
     "accepted_adrs": MARKDOWN_SUFFIXES,
+    "devin_wiki": CONFIG_SUFFIXES,
     "runtime_code": PYTHON_SUFFIXES,
     "memory_implementation": MEMORY_SUFFIXES,
     "tests": PYTHON_SUFFIXES,
@@ -58,6 +60,7 @@ def _load_source_paths() -> tuple[Path, ...]:
         "active_docs",
         "planning_docs",
         "accepted_adrs",
+        "devin_wiki",
         "runtime_code",
         "memory_implementation",
         "tests",
@@ -80,6 +83,7 @@ def _load_source_specs() -> list[tuple[str, Path]]:
         "active_docs",
         "planning_docs",
         "accepted_adrs",
+        "devin_wiki",
         "runtime_code",
         "memory_implementation",
         "tests",
@@ -102,6 +106,7 @@ def _load_source_specs() -> list[tuple[str, Path]]:
         ("active_docs", Path("docs/00-project")),
         ("active_docs", Path("docs/01-requirements")),
         ("accepted_adrs", Path("docs/02-architecture/decisions")),
+        ("devin_wiki", Path(".devin/wiki.json")),
         ("active_docs", Path("docs/plans")),
         ("active_docs", Path("docs/05-operations/runbooks")),
         ("runtime_code", Path("src/bioetl")),
@@ -132,8 +137,6 @@ def _candidate_source_paths(
 ) -> list[Path]:
     suffixes = SOURCE_SUFFIXES.get(source_id, MARKDOWN_SUFFIXES)
     source_dir = root / base
-    if not source_dir.exists():
-        return []
     tracked_paths = _git_tracked_source_paths(root=root, base=base)
     if tracked_paths:
         return [
@@ -141,6 +144,12 @@ def _candidate_source_paths(
             for rel_path in tracked_paths
             if Path(rel_path).suffix.lower() in suffixes
         ]
+    if not source_dir.exists():
+        return []
+    if not source_dir.is_dir():
+        if source_dir.suffix.lower() in suffixes:
+            return [base]
+        return []
     candidates: list[Path] = []
     for current_root, dirnames, filenames in os.walk(source_dir):
         dirnames.sort()

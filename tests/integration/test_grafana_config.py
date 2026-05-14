@@ -41,7 +41,7 @@ NAVIGATION_CONTRACT_PATH = Path(
     "docs/03-guides/dashboards/contracts/navigation-links.yaml"
 )
 EXPECTED_VARS_BY_DASHBOARD = {
-    "bioetl-overview-v2.json": {"pipeline", "run_type"},
+    "bioetl-overview-v2.json": {"workflow", "pipeline", "run_type", "run_id"},
     "bioetl-overview-v3.json": {"workflow", "pipeline", "run_type", "run_id"},
     "bioetl-dq-v2.json": {"pipeline", "run_type", "stage"},
     "bioetl-runtime.json": {"pipeline", "run_type", "stage"},
@@ -284,7 +284,7 @@ def test_explore_traces_links_use_safe_search_first_handoff(
     assert (
         "span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22" not in content
     ), (
-        f"{dashboard_path.name} must not couple Explore Traces to ${run_type:regex}; "
+        f"{dashboard_path.name} must not couple Explore Traces to ${{run_type:regex}}; "
         "includeAll run_type selectors can collapse into an empty regex"
     )
     assert (
@@ -513,7 +513,7 @@ def test_variable_query_sources(dashboard_path):
         assert "bioetl_workflow_step_events_total" in step_kind_query.get("query", "")
         return
 
-    if dashboard_path.name == "bioetl-overview-v3.json":
+    if dashboard_path.name in {"bioetl-overview-v2.json", "bioetl-overview-v3.json"}:
         workflow_var = variable_map["workflow"]
         workflow_query = workflow_var.get("query", {})
         workflow_query_text = (
@@ -543,11 +543,20 @@ def test_variable_query_sources(dashboard_path):
         run_id_var = variable_map["run_id"]
         assert run_id_var.get("type") == "query"
         assert run_id_var.get("datasource") == "Quarantine Explorer"
+        assert run_id_var.get("includeAll") is False
+        assert run_id_var.get("multi") is False
+        assert run_id_var.get("current", {}).get("text") == "-"
+        assert run_id_var.get("current", {}).get("value") == "-"
         run_id_query = run_id_var.get("query", {})
         assert isinstance(run_id_query, dict)
+        assert run_id_query.get("queryType") == "infinity"
+        assert run_id_query.get("refId") == "variable"
         infinity_query = run_id_query.get("infinityQuery", {})
         assert isinstance(infinity_query, dict)
-        assert infinity_query.get("root_selector") == "items"
+        assert infinity_query.get("format") == "table"
+        assert infinity_query.get("parser") == "backend"
+        assert infinity_query.get("root_selector") == "$.items"
+        assert infinity_query.get("url_options", {}).get("method") == "GET"
         run_id_query_url = str(infinity_query.get("url", ""))
         assert "/ops/control-plane/filter-options" in run_id_query_url
         assert "dimension=run_id" in run_id_query_url

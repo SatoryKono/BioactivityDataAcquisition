@@ -1,25 +1,25 @@
 ---
 id: mcp-setup
-title: Set up MCP
+title: Configure MCP runtime
 task_id: mcp-setup
-created_at: '2026-05-13T11:34:25Z'
+created_at: '2026-05-14T06:49:40Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- scripts/ai/codex/setup_mcp.py
-summary: Ran the canonical setup-mcp flow, regenerated workspace MCP configs, refreshed
-  ~/.codex/config.toml, and verified syntax plus Codex MCP readiness.
+- scripts/ai/mcp/check.sh
+summary: Verified that Codex MCP is already configured, validated registered servers
+  and wrapper routing, and confirmed GitHub auth env remains optional but unset.
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Set up MCP
+- Title: Configure MCP runtime
 
 ## Outcome
 
-- Ran the canonical setup-mcp flow, regenerated workspace MCP configs, refreshed ~/.codex/config.toml, and verified syntax plus Codex MCP readiness.
+- Verified that Codex MCP is already configured, validated registered servers and wrapper routing, and confirmed GitHub auth env remains optional but unset.
 
 ## Lessons learned
 

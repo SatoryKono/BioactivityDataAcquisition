@@ -9,6 +9,7 @@ from bioetl.application.services.control_plane._historical_replay_certification 
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
 )
 from bioetl.application.services.control_plane._historical_replay_certification_support import (
+    HistoricalReplayCertificationResult,
     HistoricalReplayCertificationResultAssembler,
     HistoricalReplayCertificationValidator,
 )
@@ -39,18 +40,6 @@ class HistoricalReplaySnapshotCertification:
     certification_basis: str = "retained_bronze_artifact"
     upstream_run_id: str | None = None
     upstream_manifest_id: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class HistoricalReplayCertificationResult:
-    """Bounded result of one historical replay certification workflow."""
-
-    manifest_id: str
-    run_id: str
-    certification_scope: str
-    appended_snapshot_count: int
-    replay_occurrence_kind: str
-    broader_historical_exact_replay_state: str
 
 
 @dataclass(slots=True)

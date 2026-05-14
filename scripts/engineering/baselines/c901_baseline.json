@@ -2,61 +2,11 @@
   "rule": "C901",
   "target": "src/bioetl",
   "threshold": 10,
-  "entries": [
-    {
-      "file": "src/bioetl/application/composite/dependency_coordinator.py",
-      "function": "_get_effective_keys",
-      "complexity": 13,
-      "threshold": 10,
-      "row": 199
-    },
-    {
-      "file": "src/bioetl/application/pipelines/uniprot/extractors/comments.py",
-      "function": "extract_isoform_details",
-      "complexity": 17,
-      "threshold": 10,
-      "row": 485
-    },
-    {
-      "file": "src/bioetl/application/services/dq/_checks_integrity.py",
-      "function": "check_referential_integrity",
-      "complexity": 12,
-      "threshold": 10,
-      "row": 29
-    },
-    {
-      "file": "src/bioetl/application/services/dq/_checks_statistical.py",
-      "function": "check_statistical_profile",
-      "complexity": 11,
-      "threshold": 10,
-      "row": 27
-    },
-    {
-      "file": "src/bioetl/composition/bootstrap/runtime/composite.py",
-      "function": "bootstrap_composite_runner",
-      "complexity": 14,
-      "threshold": 10,
-      "row": 317
-    },
-    {
-      "file": "src/bioetl/infrastructure/schemas/source_config.py",
-      "function": "_promote_legacy_pagination",
-      "complexity": 11,
-      "threshold": 10,
-      "row": 117
-    },
-    {
-      "file": "src/bioetl/interfaces/cli/commands/export.py",
-      "function": "export_command",
-      "complexity": 11,
-      "threshold": 10,
-      "row": 70
-    }
-  ],
+  "entries": [],
   "folder_budgets": {
-    "src/bioetl/application": 4,
-    "src/bioetl/composition": 1,
-    "src/bioetl/infrastructure": 1,
-    "src/bioetl/interfaces": 1
+    "src/bioetl/application": 0,
+    "src/bioetl/composition": 0,
+    "src/bioetl/infrastructure": 0,
+    "src/bioetl/interfaces": 0
   }
 }

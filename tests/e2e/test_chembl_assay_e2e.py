@@ -16,6 +16,7 @@ from .conftest import (
     assert_bronze_files_exist,
     assert_run_manifest_exists,
     assert_silver_table_has_records,
+    create_deterministic_test_context,
     create_test_context,
     get_silver_records,
     run_pipeline_or_skip_transient,
@@ -36,7 +37,7 @@ async def test_chembl_assay_full_cycle(e2e_data_dir: Path):
     3. Core assay fields are present
     """
     # Arrange
-    ctx = create_test_context("chembl_assay", limit=5)
+    ctx = create_deterministic_test_context("chembl_assay", limit=5)
 
     # Act
     await run_pipeline_or_skip_transient(ctx)

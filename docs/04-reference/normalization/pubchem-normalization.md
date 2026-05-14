@@ -52,6 +52,12 @@ Rule: if a new PubChem standardization state is introduced, update the enum
 catalog, matrix evidence, and observed-value fixture together. Do not infer a
 new status ad hoc in docs or downstream code.
 
+Rule: if `chemical_standardization_policy_version` changes, treat it as a
+reviewed contract event. Update the enum catalog, matrix evidence, observed
+fixtures, and downstream rollout notes together because the policy-version field
+participates in persisted normalized records and can therefore affect
+`content_hash`.
+
 ## Raw Structure Fields Are Not Enums
 
 PubChem structure strings are normalization-sensitive text, not reviewed
@@ -84,6 +90,10 @@ Current governed URN fields:
 Rule: newly observed `props[].urn.*` values require inventory review. They must
 not trigger Bronze mutation, ad hoc enum widening in domain code, or implicit
 flattening into Silver.
+
+Current review result: no additional `props[].urn.*` vocabularies are promoted
+into Silver/Gold contracts beyond `chemical_standardization_status` and
+`chemical_standardization_policy_version`.
 
 ## Composite Molecule Impact
 

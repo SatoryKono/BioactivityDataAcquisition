@@ -1,11 +1,6 @@
 """Circuit breaker for fault tolerance.
 
 Implements RULES.md Section 3.1.4 circuit breaker pattern.
-
-State machine:
-    CLOSED -> OPEN (after failure_threshold consecutive errors)
-    OPEN -> HALF_OPEN (after recovery_timeout)
-    HALF_OPEN -> CLOSED (on success) or OPEN (on failure)
 """
 
 from __future__ import annotations

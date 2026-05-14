@@ -45,6 +45,9 @@ design rationale and layer structure.
 - [Non-ChEMBL Normalization Overview](normalization/non-chembl-normalization-overview.md)
 - [Non-ChEMBL Normalization Inventory](normalization/non-chembl-normalization-inventory.md)
 - [Publication Normalization](normalization/publication-normalization.md)
+- [PubChem Normalization](normalization/pubchem-normalization.md)
+- [UniProt Normalization](normalization/uniprot-normalization.md)
+- [Reference Identifiers](normalization/reference-identifiers.md)
 - [Publication Validation Index](publication-validation-index.md)
 
 ## Boundary With Architecture Docs

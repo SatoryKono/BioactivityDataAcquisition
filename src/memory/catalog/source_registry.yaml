@@ -41,6 +41,10 @@ sources:
     classification: derived
     paths: ["docs/reports", "reports"]
     description: "Generated evidence and analysis outputs."
+  - id: devin_wiki
+    classification: derived
+    paths: [".devin/wiki.json"]
+    description: "Derived repository navigation wiki used as auxiliary onboarding and discovery context."
   - id: expanded_knowledge_graph_snapshot
     classification: derived
     paths: ["src/memory/graph/projections/bioetl_knowledge_graph_expanded.json"]

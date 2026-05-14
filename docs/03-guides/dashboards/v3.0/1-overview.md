@@ -63,8 +63,11 @@ Current semantics:
 - `pipeline` and `run_type` remain the canonical current-status scope for L0
   aggregate triage.
 - `run_id` is now sourced from the local control-plane run-manifest catalog and
-  can drive exact manifest identity handoff for the `ID` panel, but it still
-  does not change the underlying aggregate current-status PromQL.
+  can drive exact manifest identity handoff for the `ID` panel. Its default
+  `-` value means "no exact run selected" and is normalized as unselected by
+  the control-plane identity endpoint; choosing a concrete value resolves that
+  run for the identity block, but still does not change the underlying
+  aggregate current-status PromQL.
 
 Still forbidden on the first screen as selectors or aggregate-status facts:
 
@@ -189,7 +192,7 @@ explicit context or are labeled as mirrors.
 ## Removed / Forbidden Patterns
 
 - Overview as pure forensic dashboard.
-- Visible `run_id` selector.
+- Using `run_id` as a Prometheus label selector.
 - Prometheus exact-run labels.
 - `includeVars=true` navigation.
 - `run_id` or `payload_hash` handoff to non-target dashboards.

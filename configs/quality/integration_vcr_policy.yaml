@@ -81,10 +81,8 @@ supported_scopes:
       - uniprot_protein
       scenario_runs:
       - advanced_scenarios
-      - checkpoint
       - full_pipeline
       - full_pipeline_chain
-      - run_types
 tracked_suite_inventory:
   integration:
     adapter_provider_surfaces:
@@ -201,6 +199,7 @@ tracked_suite_inventory:
     - tests/integration/config/test_deprecated_gold_contract_registry_inventory.py
     - tests/integration/config/test_dq_config_loading.py
     - tests/integration/config/test_pipeline_data_storage_contracts.py
+    - tests/integration/config/test_pubchem_enum_parity.py
     - tests/integration/config/test_pubchem_property_vocabulary_inventory.py
     - tests/integration/config/test_publication_controlled_vocab_parity.py
     - tests/integration/config/test_publication_nested_vocabulary_inventory.py

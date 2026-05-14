@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Protocol
 
+import deltalake as _deltalake_module
 import pyarrow as pa
 
 from bioetl.infrastructure.storage.delta.resilience import (
@@ -29,6 +31,11 @@ if TYPE_CHECKING:
     from deltalake import DeltaTable as DeltaTableType
 
     from bioetl.domain.ports import LoggerPort, MetricsPort
+
+
+def _load_deltalake_module() -> object:
+    """Return the concrete Delta Lake module for operation-service writes."""
+    return _deltalake_module
 
 
 class _SilverDeltaHostProtocol(Protocol):
@@ -238,12 +245,12 @@ class _SilverDeltaOperationFacade:
         """Access logger via private convention for delegation pattern compliance."""
         return self.logger
 
-    @staticmethod
-    def _load_silver_writer_module() -> Any:  # Any: return type varies at runtime
-        """Load silver_writer module for backward-compatible patch points."""
-        import bioetl.infrastructure.storage.silver_writer as silver_writer_module
-
-        return silver_writer_module
+    def _load_silver_writer_module(self) -> object:
+        """Load the Delta module through an injected compatibility seam."""
+        load_delta_module = getattr(self, "_load_delta_module", None)
+        if callable(load_delta_module):
+            return load_delta_module()
+        return _load_deltalake_module()
 
     async def _write_delete(
         self,
@@ -348,3 +355,4 @@ class SilverDeltaOperations(_SilverDeltaOperationFacade):
     logger: LoggerPort
     _metrics: MetricsPort | None
     _merge_resilience_policy: SilverMergeResiliencePolicy
+    _load_delta_module: Callable[[], object] | None = _load_deltalake_module

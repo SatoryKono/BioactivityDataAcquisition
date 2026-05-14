@@ -72,6 +72,8 @@ _E2E_VCR_CASSETTE_NAME_OVERRIDES: dict[str, str] = {
     ),
 }
 _E2E_RUN_ID_NAMESPACE = UUID("f42c4f5c-1b2c-4db0-8f58-bc97f92a5f2f")
+E2E_FIXED_RUN_ID = UUID("81acb12e-f7f9-4d27-9d2d-d5f541c8ee88")
+E2E_FIXED_STARTED_AT = FIXED_TEST_TIME
 
 
 def _clear_runtime_config_caches() -> None:
@@ -345,6 +347,28 @@ def create_test_context(
     )
 
 
+def create_deterministic_test_context(
+    pipeline_name: str,
+    limit: int | None = 10,
+    run_type: RunType | None = None,
+    resume: bool = False,
+    query: str | None = None,
+    filter_ids: tuple[str, ...] | None = None,
+    filter_field: str | None = None,
+) -> PipelineRunContext:
+    """Create a stable E2E context for replay/control-plane identity assertions."""
+    return build_e2e_run_context(
+        pipeline_name=pipeline_name,
+        limit=limit,
+        run_type=run_type,
+        resume=resume,
+        query=query,
+        filter_ids=filter_ids,
+        filter_field=filter_field,
+        run_id_seed=str(E2E_FIXED_RUN_ID),
+    )
+
+
 def _build_e2e_run_id(seed: str) -> UUID:
     """Return deterministic UUID for E2E contexts and retries."""
     return uuid5(_E2E_RUN_ID_NAMESPACE, seed)
@@ -442,7 +466,7 @@ def build_e2e_run_context(
         pipeline_name=pipeline_name,
         run_id=RunID(run_id),
         run_type=resolved_run_type,
-        started_at=FIXED_TEST_TIME,
+        started_at=E2E_FIXED_STARTED_AT,
         resume=resume,
         limit=limit,
         query=query,
@@ -471,7 +495,7 @@ def build_e2e_replay_context(
         replace(
             context,
             run_id=RunID(_build_e2e_run_id(replay_seed)),
-            started_at=FIXED_TEST_TIME,
+            started_at=E2E_FIXED_STARTED_AT,
             replay_of_run_id=parent_run_id,
             replay_of_manifest_id=replay_of_manifest_id,
         ),

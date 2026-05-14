@@ -92,6 +92,32 @@ function Test-XdistPluginNeeded {
     return $false
 }
 
+function Test-PytestCacheDirSpecified {
+    param(
+        [string[]]$Args
+    )
+
+    for ($i = 0; $i -lt $Args.Count; $i++) {
+        $Arg = $Args[$i]
+        if ($Arg -eq "-o" -or $Arg -eq "--override-ini") {
+            if ($i + 1 -lt $Args.Count) {
+                $Value = $Args[$i + 1]
+                if ($Value -match '(^|;)\s*cache_dir\s*=') {
+                    return $true
+                }
+            }
+            continue
+        }
+        if ($Arg -match '^(-o|--override-ini)[:=]') {
+            $Tail = $Arg -replace '^(-o|--override-ini)[:=]', ''
+            if ($Tail -match '(^|;)\s*cache_dir\s*=') {
+                return $true
+            }
+        }
+    }
+    return $false
+}
+
 function Test-PreflightScope {
     param(
         [string[]]$Args
@@ -255,6 +281,11 @@ if ($PytestNarrow) {
     if (Test-BenchmarkPluginNeeded -Args $PytestArgs) {
         $PytestPluginArgs += @("-p", "pytest_benchmark.plugin")
     }
+}
+
+if ($env:OS -eq "Windows_NT" -and -not (Test-PytestCacheDirSpecified -Args $PytestArgs)) {
+    $WindowsPytestCacheDir = Join-Path $env:TEMP "bioetl-pytest-cache"
+    $PytestArgs = @("-o", "cache_dir=$WindowsPytestCacheDir") + $PytestArgs
 }
 
 $WindowsVenvPython = Join-Path $RepoRoot ".venv-win/Scripts/python.exe"

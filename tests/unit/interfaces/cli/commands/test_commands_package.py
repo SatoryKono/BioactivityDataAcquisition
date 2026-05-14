@@ -41,3 +41,11 @@ def test_commands_package_rejects_helper_only_modules_at_package_root(
     """Direct helper modules stay importable as submodules, not package-root seams."""
     with pytest.raises(AttributeError, match=module_name):
         getattr(commands_package, module_name)
+
+
+def test_commands_package_rejects_export_support_after_command_module_import() -> None:
+    """Importing the public export command must not re-expose helper submodules."""
+    import bioetl.interfaces.cli.commands.export  # noqa: F401
+
+    with pytest.raises(AttributeError, match="export_support"):
+        getattr(commands_package, "export_support")

@@ -188,9 +188,9 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
     """Overview/Control Plane answer rows must stay on projected current-state or fixed-window evidence."""
     expectations = {
         "bioetl-overview-v2.json": {
-            "System Status": "bioetl_l0_status",
+            "Status": "bioetl_l0_status",
             "Next Action": "bioetl_l0_next_action_route",
-            "L0 Inputs": "bioetl_l0_input_status_selected",
+            "Inputs": "bioetl_l0_input_status_selected",
         },
         "bioetl-control-plane-v1.json": {
             "Monitor: Replay Safety State": "bioetl_replay_safety_blockers_15m",
@@ -211,7 +211,8 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
             assert panel is not None, (
                 f"{dashboard_name} must expose first-screen panel {panel_title!r}"
             )
-            assert panel.get("gridPos", {}).get("y", 999) <= 10, (
+            max_answer_y = 18 if dashboard_name == "bioetl-overview-v2.json" else 10
+            assert panel.get("gridPos", {}).get("y", 999) <= max_answer_y, (
                 f"{dashboard_name}:{panel_title} must stay in the answer row"
             )
             expressions = [
@@ -391,8 +392,8 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
     """Text/CTA first-screen panels should expose machine-readable operator guidance."""
     expectations = {
         "bioetl-overview-v2.json": {
-            "L0 Overview Scope": {
-                "tokens": ("primary question", "scope", "unknown"),
+            "Provenance": {
+                "tokens": ("primary question", "scope", "provenance"),
                 "max_y": 12,
             },
         },

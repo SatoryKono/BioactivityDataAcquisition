@@ -9,6 +9,14 @@ from bioetl.application.core._record_normalization_hash_support import (
     RecordNormalizationHashSupportMixin,
     _NormalizationProfileLike,
 )
+from bioetl.application.core._record_normalization_runtime_support import (
+    profile_json_runtime_finding,
+    raise_profile_gap,
+    should_forbid_fallback,
+)
+from bioetl.application.core._record_normalization_runtime_support import (
+    project_normalization_findings as _project_normalization_findings,
+)
 from bioetl.application.core.config import ContentHashPolicyByVersion
 from bioetl.application.core.normalization_fallbacks import (
     UNHANDLED_FALLBACK_NORMALIZATION,
@@ -18,10 +26,7 @@ from bioetl.application.core.normalization_fallbacks import (
 )
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
 from bioetl.application.core.pre_silver_record import PreSilverRecord
-from bioetl.domain.normalization.json import (
-    canonicalize_json_string,
-    serialize_json_canonical,
-)
+from bioetl.domain.normalization.json import serialize_json_canonical
 from bioetl.domain.normalization.profiles import (
     FieldRule,
     resolve_normalization_profile,
@@ -42,10 +47,6 @@ if TYPE_CHECKING:
     from bioetl.domain.types import JsonDict
 
 __all__ = ["NormalizationContractError", "RecordNormalizationProcessor"]
-
-_MALFORMED_JSON_REASON_CODE = "malformed_json_normalized_to_null"
-_MALFORMED_JSON_EVENT = "silver_normalization_malformed_json"
-
 
 @dataclass(frozen=True, slots=True)
 class _NormalizationFinding:
@@ -176,11 +177,12 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
             normalized[field_name] = normalized_value
             profile_rule = self._profile_rule(field_name)
             if profile_rule is not None:
-                finding = self._profile_json_runtime_finding(
+                finding = profile_json_runtime_finding(
                     profile_rule,
                     field_name=field_name,
                     raw_value=value,
                     normalized_value=normalized_value,
+                    finding_factory=_NormalizationFinding,
                 )
                 if finding is not None:
                     findings.append(finding)
@@ -204,8 +206,13 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
         profile_rule = self._profile_rule(field_name)
         if profile_rule is not None:
             return self._normalize_profile_field_value(profile_rule, value, record)
-        if self._should_forbid_fallback(field_name):
-            self._raise_profile_gap(field_name)
+        if should_forbid_fallback(
+            has_profile=self.profile is not None,
+            allow_compatibility_fallback=self.allow_compatibility_fallback,
+            field_name=field_name,
+            passthrough_fields=self.rule_set.passthrough_fields,
+        ):
+            raise_profile_gap(self.provider, self.entity_type, field_name)
         normalized_special = self._normalize_special_field(field_name, value)
         if normalized_special is not UNHANDLED_FALLBACK_NORMALIZATION:
             return normalized_special
@@ -314,67 +321,11 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
         projected = dict(record)
         projected["_dq_warn"] = True
 
-        if context is not None:
-            for finding in self._normalization_findings:
-                context.logger.warning(
-                    _MALFORMED_JSON_EVENT,
-                    provider=self.provider,
-                    entity_type=self.entity_type,
-                    record_index=index,
-                    reason_code=finding.reason_code,
-                    field=finding.field_name,
-                    action_taken=finding.action_taken,
-                    dq_warn=finding.dq_warn,
-                    proposed_normalized_outcome=None,
-                )
-
-        return projected
-
-    def _profile_json_runtime_finding(
-        self,
-        rule: FieldRule,
-        *,
-        field_name: str,
-        raw_value: object,
-        normalized_value: object,
-    ) -> _NormalizationFinding | None:
-        if normalized_value is not None or not isinstance(raw_value, str):
-            return None
-
-        normalized_text = normalize_string(raw_value)
-        if normalized_text is None:
-            return None
-        if not self._rule_uses_json_policy(rule):
-            return None
-
-        try:
-            canonicalize_json_string(normalized_text)
-        except ValueError:
-            return _NormalizationFinding(
-                field_name=field_name,
-                reason_code=_MALFORMED_JSON_REASON_CODE,
-                action_taken="set_null_and_warn",
-            )
-        return None
-
-    def _rule_uses_json_policy(self, rule: FieldRule) -> bool:
-        notes = (rule.notes or "").casefold()
-        normalizer_name = getattr(rule.normalizer, "__name__", "").casefold()
-        return "json" in notes or "json" in normalizer_name
-
-    def _should_forbid_fallback(self, field_name: str) -> bool:
-        return (
-            self.profile is not None
-            and not self.allow_compatibility_fallback
-            and not field_name.startswith("_")
-            and field_name not in self.rule_set.passthrough_fields
-        )
-
-    def _raise_profile_gap(self, field_name: str) -> None:
-        entity_label = self.entity_type or "<unknown>"
-        raise NormalizationContractError(
-            "profile-backed normalization cannot fall back implicitly for "
-            f"{self.provider}.{entity_label} field {field_name!r}; "
-            "add an explicit normalization profile rule or enable "
-            "allow_compatibility_fallback for bounded compatibility paths"
+        return _project_normalization_findings(
+            self._normalization_findings,
+            record,
+            context=context,
+            index=index,
+            provider=self.provider,
+            entity_type=self.entity_type,
         )

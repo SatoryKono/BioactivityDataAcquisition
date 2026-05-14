@@ -111,6 +111,30 @@ quality/governance assets и composite helpers, поэтому active guide фи
 | Enum configs                  | Enum and publication-classification assets (`configs/enums`)                       |
 | Misc standalone configs       | Naming exceptions and similar top-level config assets                              |
 
+### Section-Level Ownership For Large YAML Files
+
+Unified entity configs and composite configs deliberately keep related runtime
+policy in one SSOT file, but ownership is section-level. Do not treat a large
+YAML file as a single undifferentiated owner surface.
+
+| Config surface | Section / keys | Architectural owner | Extraction trigger | Regression gate |
+| -------------- | -------------- | ------------------- | ------------------ | --------------- |
+| `configs/entities/{provider}/{entity}.yaml` | `version`, `provider`, `entity`, `pipeline.*`, `pipeline.sink.*` | pipeline runtime / infrastructure config loading | section starts carrying provider-specific adapter behavior or non-YAML runtime branching | `uv run python -m scripts.schema validate-configs`; `tests/architecture/test_config_validation_surface.py` |
+| `configs/entities/{provider}/{entity}.yaml` | `schema.*`, `schema.column_groups`, `schema.{silver,gold}` | schema/domain contract owners | field groups duplicate generated reference data or need cross-provider ownership | config validation plus schema/golden contract tests for the affected provider/entity |
+| `configs/entities/{provider}/{entity}.yaml` | `quality.*` | DQ contract owners | inline DQ policy grows beyond entity-local checks or must be shared across providers | DQ config validation, contract tests, and docs drift checks for DQ references |
+| `configs/entities/{provider}/{entity}.yaml` | `filters.*`, `input_filter`, `silver_filters`, `gold_filters` | filter-rule owners from ADR-028 | filter behavior needs reusable rule bundles or provider-level inheritance | config validation plus targeted filter-rule tests |
+| `configs/entities/{provider}/{entity}.yaml` | migration, canonicalization, system-field policy | architecture/config governance owners | policy applies to more than one entity family or changes manifest/hash identity | config validation plus architecture/governance tests that cover hash and migration semantics |
+| `configs/composites/{entity}.yaml` | `composite.seed`, `dependencies`, `enrichers`, join/filter conditions | composite runtime owners | runtime orchestration logic leaks into config comments or requires code branches per provider | composite config loader tests and composite runtime tests |
+| `configs/composites/{entity}.yaml` | `merge`, `field_priorities`, `exclude_fields`, `schema.column_groups` | composite schema/merge owners | provider priority or field-order rules duplicate generated references or become shared across composites | composite config validation plus field-order/reference drift checks |
+| `configs/composites/{entity}.yaml` | `dq_overrides`, `lineage`, provider lookup/source tracking | DQ/lineage owners | lineage semantics need cross-composite policy or DQ overrides become common rules | `uv run python -m scripts.schema validate-configs` plus lineage/DQ contract tests |
+
+Current policy: keep sections in the YAML SSOT while they are entity-local or
+composite-local. Extract to a shared config, generated reference artifact, or
+domain-specific config file only when the section becomes cross-entity,
+cross-provider, or independently versioned. When extraction happens, update
+this matrix, the relevant schema validator, and any generated reference docs in
+the same change.
+
 ### Fixture Governance: `manifest + gaps`
 
 Для Bronze testability используется dual model:
@@ -131,6 +155,23 @@ quality/governance assets и composite helpers, поэтому active guide фи
   current floor — не меньше `20` JSONL records на fixture.
 - для replay-critical family promotion нужен хотя бы один зафиксированный consumer path:
   integration, replay, или e2e test, который использует эту pipeline family в CI-visible surface.
+
+### Non-ChEMBL Field Governance
+
+Для новых non-ChEMBL полей недостаточно просто добавить колонку в YAML.
+Минимальный expected closure path:
+
+- нормализация должна жить в shipped profile-rule surface, а не в ad hoc transformer logic;
+- observed inventory и generated normalization matrix должны получить evidence row;
+- DQ и Gold/domain contracts должны остаться согласованными с identifier,
+  vocabulary, или structured-payload semantics;
+- semantic-sensitive JSON payloads должны использовать additive
+  `*_raw_json` / `*_canonical_json` sidecars до любого future semantic rewrite.
+
+Практический ориентир: перед merge сверь изменения с
+`docs/04-reference/normalization/non-chembl-normalization-overview.md`,
+`docs/reports/generated/pipeline_normalization_field_matrix/`, и
+`tests/fixtures/normalization/non_chembl_observed_values.yaml`.
 
 ______________________________________________________________________
 

@@ -162,6 +162,8 @@ def _related_refs_by_source_type(
         return _related_runbook_refs(source_path, path)
     if source_type == "doc":
         return [related_ref("doc", source_path)]
+    if source_type == "devin_wiki":
+        return [related_ref("devin-wiki", source_path)]
     if source_type in {"memory", "plan", "workflow", "dashboard", "script"}:
         return [related_ref(source_type, source_path)]
     if source_type == "code":
@@ -255,7 +257,15 @@ def _graph_refs_by_source_type(
     symbol_kind: str | None,
     symbol_name: str | None,
 ) -> list[str]:
-    if source_type in {"doc", "adr", "runbook", "memory", "plan", "dashboard"}:
+    if source_type in {
+        "doc",
+        "adr",
+        "runbook",
+        "memory",
+        "plan",
+        "dashboard",
+        "devin_wiki",
+    }:
         return [node_ref("doc_artifact", source_path)]
     if source_type in {"workflow", "script"}:
         return [node_ref("operational_artifact", source_path)]

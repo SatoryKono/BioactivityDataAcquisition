@@ -35,6 +35,11 @@ class StructuredPayloadSemanticPolicy(StrEnum):
     RAW_JSON_PLUS_CANONICAL_JSON_BEFORE_SEMANTIC_TRANSFORM = (
         "raw_json_plus_canonical_json_before_semantic_transform"
     )
+    CANONICAL_JSON_BIBLIOGRAPHIC_EVIDENCE = (
+        "canonical_json_bibliographic_evidence"
+    )
+    HASHED_PII_CANONICAL_JSON_ONLY = "hashed_pii_canonical_json_only"
+    CANONICAL_JSON_COMMENT_PROJECTION = "canonical_json_comment_projection"
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,8 +51,8 @@ class StructuredPayloadPolicy:
     representation: StructuredPayloadRepresentation
     collection_semantics: StructuredPayloadCollectionSemantics
     semantic_policy: StructuredPayloadSemanticPolicy
-    raw_sidecar_field: str
-    canonical_sidecar_field: str
+    raw_sidecar_field: str | None
+    canonical_sidecar_field: str | None
     rationale: str
     controlled_vocabulary_source: str | None = None
 
@@ -59,10 +64,41 @@ class StructuredPayloadPolicy:
             is StructuredPayloadSemanticPolicy.RAW_JSON_PLUS_CANONICAL_JSON_BEFORE_SEMANTIC_TRANSFORM
         )
 
+    @property
+    def uses_canonical_json_only(self) -> bool:
+        """Return whether the persisted field itself is the ratified evidence surface."""
+        return not self.requires_raw_sidecar_before_semantic_transform
+
 
 _SEMANTICSCHOLAR_PROFILE = "semanticscholar.publication"
 
 _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
+    StructuredPayloadPolicy(
+        profile_name="crossref.publication",
+        field_name="author_details",
+        representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
+        collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
+        semantic_policy=StructuredPayloadSemanticPolicy.HASHED_PII_CANONICAL_JSON_ONLY,
+        raw_sidecar_field=None,
+        canonical_sidecar_field="author_details",
+        rationale=(
+            "CrossRef author-detail payloads already persist a hashed-PII-safe "
+            "canonical JSON evidence surface; no separate raw companion is shipped."
+        ),
+    ),
+    StructuredPayloadPolicy(
+        profile_name="crossref.publication",
+        field_name="references",
+        representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
+        collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
+        semantic_policy=StructuredPayloadSemanticPolicy.CANONICAL_JSON_BIBLIOGRAPHIC_EVIDENCE,
+        raw_sidecar_field=None,
+        canonical_sidecar_field="references",
+        rationale=(
+            "CrossRef bibliographic reference objects are persisted as the ratified "
+            "canonical JSON evidence surface without a dedicated raw sidecar."
+        ),
+    ),
     StructuredPayloadPolicy(
         profile_name="openalex.publication",
         field_name="grants",
@@ -169,6 +205,48 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
     ),
     StructuredPayloadPolicy(
         profile_name="uniprot.protein",
+        field_name="alternative_products",
+        representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
+        collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
+        semantic_policy=StructuredPayloadSemanticPolicy.CANONICAL_JSON_COMMENT_PROJECTION,
+        raw_sidecar_field=None,
+        canonical_sidecar_field="alternative_products",
+        rationale=(
+            "Alternative-product comment projections are retained as canonical JSON "
+            "evidence today; any raw-sidecar rollout would be an explicit contract change."
+        ),
+        controlled_vocabulary_source="configs/vocab/uniprot_semantic_payloads.yaml",
+    ),
+    StructuredPayloadPolicy(
+        profile_name="uniprot.protein",
+        field_name="biophysicochemical_properties",
+        representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
+        collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
+        semantic_policy=StructuredPayloadSemanticPolicy.CANONICAL_JSON_COMMENT_PROJECTION,
+        raw_sidecar_field=None,
+        canonical_sidecar_field="biophysicochemical_properties",
+        rationale=(
+            "Biophysicochemical-property projections remain canonical JSON evidence "
+            "until a reviewed semantic split justifies additive sidecars."
+        ),
+        controlled_vocabulary_source="configs/vocab/uniprot_semantic_payloads.yaml",
+    ),
+    StructuredPayloadPolicy(
+        profile_name="uniprot.protein",
+        field_name="cofactors",
+        representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
+        collection_semantics=StructuredPayloadCollectionSemantics.UNORDERED_SET,
+        semantic_policy=StructuredPayloadSemanticPolicy.CANONICAL_JSON_COMMENT_PROJECTION,
+        raw_sidecar_field=None,
+        canonical_sidecar_field="cofactors",
+        rationale=(
+            "Cofactor comment projections are governed canonical JSON evidence; "
+            "they are not yet split into raw and semantic companion payloads."
+        ),
+        controlled_vocabulary_source="configs/vocab/uniprot_semantic_payloads.yaml",
+    ),
+    StructuredPayloadPolicy(
+        profile_name="uniprot.protein",
         field_name="features_json",
         representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
         collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
@@ -178,6 +256,20 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
         rationale=(
             "UniProt features are forensic sequence annotations; derived feature "
             "projections must keep the raw feature envelope."
+        ),
+        controlled_vocabulary_source="configs/vocab/uniprot_semantic_payloads.yaml",
+    ),
+    StructuredPayloadPolicy(
+        profile_name="uniprot.protein",
+        field_name="reactions",
+        representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
+        collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
+        semantic_policy=StructuredPayloadSemanticPolicy.CANONICAL_JSON_COMMENT_PROJECTION,
+        raw_sidecar_field=None,
+        canonical_sidecar_field="reactions",
+        rationale=(
+            "Reaction comment projections remain canonical JSON evidence until a "
+            "reviewed semantic-expansion contract introduces additive companions."
         ),
         controlled_vocabulary_source="configs/vocab/uniprot_semantic_payloads.yaml",
     ),

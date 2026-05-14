@@ -7,6 +7,8 @@ import pytest
 
 from bioetl.composition.registry_api import create_registry, get_default_registry
 from bioetl.composition.factories.pipeline.registry import (
+    create_pipeline_registration_state,
+    is_registered,
     register_all_pipelines,
     reset_registration,
 )
@@ -98,8 +100,6 @@ def test_registry_contains_expected_pipelines():
 
 def test_register_all_pipelines_is_idempotent():
     """Test that calling register_all_pipelines multiple times is safe."""
-    from bioetl.composition.factories.pipeline.registry import is_registered
-
     registry = get_default_registry()
 
     # First call already made in fixture
@@ -159,8 +159,6 @@ def test_multiple_registries_in_same_process():
 
 def test_reset_registration_clears_default_registry_state():
     """reset_registration should clear the default registry and registration flag."""
-    from bioetl.composition.factories.pipeline.registry import is_registered
-
     try:
         register_all_pipelines()
         assert is_registered()
@@ -172,3 +170,14 @@ def test_reset_registration_clears_default_registry_state():
         assert get_default_registry().list_pipelines() == []
     finally:
         register_all_pipelines()
+
+
+def test_explicit_registration_state_tracks_registration_independently():
+    """Explicit registration state should avoid coupling tests to module globals."""
+    registration_state = create_pipeline_registration_state()
+
+    assert not is_registered(registration_state=registration_state)
+
+    register_all_pipelines(registration_state=registration_state)
+
+    assert is_registered(registration_state=registration_state)

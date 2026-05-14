@@ -1,4 +1,9 @@
-"""Immutable control-plane provenance artifacts for launched runs."""
+"""Immutable control-plane provenance artifacts for launched runs.
+
+This control-plane model records provenance for one launched occurrence and does
+not replace ``PipelineRunContext`` or ``PipelineContext`` as the runtime
+execution contexts.
+"""
 
 from __future__ import annotations
 
@@ -101,7 +106,11 @@ class RunCodeProvenance:
 
 @dataclass(frozen=True, slots=True)
 class RunManifest:
-    """Immutable provenance snapshot for one launched run."""
+    """Immutable provenance/control-plane artifact for one launched run.
+
+    This is not the universal runtime execution object; runtime flows keep using
+    ``PipelineRunContext`` and ``PipelineContext``.
+    """
 
     manifest_id: str
     execution_fingerprint: str

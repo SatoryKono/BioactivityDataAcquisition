@@ -155,10 +155,10 @@ REQUIRED_CONTROL_PLANE_CONTRACT_SECTIONS = (
     "Inspection surface",
 )
 CONTROL_PLANE_COMPATIBILITY_FACADE_PATHS = (
-    "src/bioetl/application/services/run_manifest_service.py",
-    "src/bioetl/application/services/run_ledger_service.py",
-    "src/bioetl/application/services/run_manifest_diagnostics.py",
-    "src/bioetl/application/services/run_manifest_inspection_service.py",
+    "src/bioetl/application/services/control_plane/run_manifest_service.py",
+    "src/bioetl/application/services/control_plane/run_ledger_service.py",
+    "src/bioetl/application/services/control_plane/run_manifest_diagnostics.py",
+    "src/bioetl/application/services/control_plane/run_manifest_inspection_service.py",
 )
 SECTION_SEPARATOR = "=" * 60
 DELIMITED_FRONTMATTER_RE = re.compile(r"_{10,}")
@@ -600,16 +600,12 @@ def check_control_plane_contract_governance() -> list[tuple[Path, str]]:
         for legacy_path in CONTROL_PLANE_COMPATIBILITY_FACADE_PATHS:
             if legacy_path not in text:
                 continue
-            canonical_path = legacy_path.replace(
-                "src/bioetl/application/services/",
-                "src/bioetl/application/services/control_plane/",
-                1,
-            )
             violations.append(
                 (
                     md_file,
                     "control-plane contract-spec: compatibility facade path "
-                    f"{legacy_path!r} is not sanctioned; use {canonical_path!r}",
+                    f"{legacy_path!r} is not sanctioned; reference domain, "
+                    "ports, composition, or published contract surfaces instead",
                 )
             )
 

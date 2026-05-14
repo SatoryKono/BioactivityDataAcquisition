@@ -137,7 +137,7 @@ Rollout notes:
 
 ## 2026-05-02 Non-ChEMBL Governance Publication Closure
 
-Issues `#3498`, `#3500`, `#3503`, `#3504`, `#3506`, and `#3507` close the
+Issues `#3498`, `#3500`, `#3503`, `#3504`, `#3505`, `#3506`, and `#3507` close the
 remaining documentation gap between current non-ChEMBL normalization code and
 the published reference surface.
 
@@ -148,6 +148,10 @@ The active publication rule is:
   composite impact
 - published docs under `docs/04-reference/normalization/` summarize the current
   governance boundary without redefining code-owned behavior
+- semantic-sensitive structured payload sidecars remain additive compatibility
+  fields during the dual-read window; canonical JSON fields keep the persisted
+  contract while `*_raw_json` and `*_canonical_json` preserve raw-provider and
+  semantic-ready evidence for future migrations
 - raw publication provider types and ontology/reference identifiers must remain
   explicitly documented as non-enum surfaces
 - composite docs must describe upstream-inherited non-key semantics rather than

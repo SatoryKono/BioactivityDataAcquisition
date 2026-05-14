@@ -173,10 +173,14 @@ def test_non_chembl_structured_inventory_fields_publish_sidecar_evidence() -> No
         for field_name, shape in spec.get("structured_json_shapes", {}).items():
             row = rows_by_key[(pipeline_name, field_name)]
 
-            assert row["classification"] == "structured_json_sidecar"
             assert row["collection_semantics"] == shape["collection_semantics"]
-            assert row["raw_sidecar"] == shape["raw_sidecar_field"]
-            assert row["canonical_sidecar"] == shape["canonical_sidecar_field"]
+            assert row["canonical_sidecar"] == (shape["canonical_sidecar_field"] or "")
+            if shape["raw_sidecar_field"] is None:
+                assert row["classification"] == "structured_json_canonical_only"
+                assert row["raw_sidecar"] == ""
+            else:
+                assert row["classification"] == "structured_json_sidecar"
+                assert row["raw_sidecar"] == shape["raw_sidecar_field"]
 
 
 def test_publication_raw_type_rows_remain_open_world_not_fixture_enum_driven() -> None:
@@ -267,10 +271,6 @@ def test_structured_payload_observed_shapes_match_policy_registry() -> None:
             policy = structured_payload_policy(f"{provider}.{entity}", field_name)
 
             assert policy is not None, f"{pipeline_name}.{field_name}: policy"
-            assert (
-                shape["semantic_policy"]
-                == StructuredPayloadSemanticPolicy.RAW_JSON_PLUS_CANONICAL_JSON_BEFORE_SEMANTIC_TRANSFORM
-            )
             assert shape["semantic_policy"] == policy.semantic_policy
             assert shape["collection_semantics"] == policy.collection_semantics
             assert shape["raw_sidecar_field"] == policy.raw_sidecar_field
@@ -294,6 +294,31 @@ def test_uniprot_feature_payload_matrix_links_semantic_vocabulary_inventory() ->
         "configs/vocab/uniprot_semantic_payloads.yaml"
     )
     assert row["policy_scope"] == "provider_full_universe"
+
+
+def test_crossref_and_uniprot_canonical_only_payloads_are_governed_explicitly() -> None:
+    rows_by_key = {
+        (row["pipeline_name"], row["field_name"]): row
+        for row in build_field_matrix_rows()
+    }
+
+    for pipeline_name, field_name in (
+        ("crossref_publication", "author_details"),
+        ("crossref_publication", "references"),
+        ("uniprot_protein", "alternative_products"),
+        ("uniprot_protein", "biophysicochemical_properties"),
+        ("uniprot_protein", "cofactors"),
+        ("uniprot_protein", "reactions"),
+    ):
+        row = rows_by_key[(pipeline_name, field_name)]
+        provider, entity = pipeline_name.split("_", maxsplit=1)
+        policy = structured_payload_policy(f"{provider}.{entity}", field_name)
+
+        assert policy is not None
+        assert policy.uses_canonical_json_only is True
+        assert row["classification"] == "structured_json_canonical_only"
+        assert row["raw_sidecar"] == ""
+        assert row["canonical_sidecar"] == field_name
 
 
 def test_governed_non_chembl_structured_fields_are_string_typed_cross_layer() -> None:
@@ -434,6 +459,8 @@ def test_structured_payload_sidecar_fields_are_in_current_cross_layer_surfaces()
     }
 
     for policy in semantic_sensitive_structured_payload_policies():
+        if not policy.requires_raw_sidecar_before_semantic_transform:
+            continue
         pipeline_name = policy.profile_name.replace(".", "_")
         config_fields = _config_fields(_entity_config_path(pipeline_name))
         silver_fields = _arrow_fields(ENTITY_SILVER_SCHEMA_REGISTRY[pipeline_name])

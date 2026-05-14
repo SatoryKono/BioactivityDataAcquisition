@@ -419,7 +419,9 @@ pytest tests/integration/test_grafana_variable_reference.py
 - [ ] Variable contract test passes
 - [ ] Selector taxonomy test passes
 - [ ] Variable reference mirror test passes
-- [ ] Forensic isolation test passes (`run_id`/`payload_hash` forbidden outside reject explorer)
+- [ ] Exact-id isolation test passes (`run_id`/`payload_hash` forbidden in
+  Prometheus labels and cross-dashboard links; Overview v3 local `run_id`
+  exception remains control-plane-backed)
 
 ### 15.2 First-Screen Contract Test
 - [ ] `tests/integration/test_grafana_dashboard_first_screen_contract.py` validates no top-level `gridPos` overlaps

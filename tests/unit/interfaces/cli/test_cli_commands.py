@@ -1576,7 +1576,9 @@ def test_run_command_with_cli_policy_wires_registry_and_cli_seams() -> None:
     assert mock_run_command_flow.call_count == 1
     kwargs = mock_run_command_flow.call_args.kwargs
     assert kwargs["cli_input"] is cli_input
-    assert kwargs["service"] is run_module.get_cli_run_orchestration_service()
+    compatibility_service = run_module.get_cli_run_orchestration_service()
+    assert kwargs["service"] is not compatibility_service
+    assert type(kwargs["service"]) is type(compatibility_service)
     assert kwargs["health_info_presenter"] is run_module._present_run_health_info
     assert kwargs["result_finalizer"] is run_module._finalize_run_result
     assert kwargs["exit_func"] is run_module._exit_with_code

@@ -41,7 +41,7 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 > Примечание: в репозитории сейчас поставляются `bioetl-runtime.json`,
-> `*-v2.json` и draft `bioetl-overview-v3.json`.
+> `*-v2.json`; `bioetl-overview-v3.json` сохранён как retained snapshot/draft.
 > Исторические v1 surfaces ниже сведены к краткой archival note, без подробного operator walkthrough.
 >
 > Роль этого документа: setup/reference для monitoring stack.
@@ -118,7 +118,6 @@ ______________________________________________________________________
 │  Дашборды (shipped):                                             │
 │  - 0. Control Plane (bioetl-control-plane-v1)                    │
 │  - 1. Overview (bioetl-overview-v2)                               │
-│  - 1. Overview v3 (bioetl-overview-v3, draft)                    │
 │  - 2. Runtime (bioetl-runtime)                                   │
 │  - 3. Provider Health (bioetl-provider-health-v2)                │
 │  - 4. Data Quality (bioetl-dq-v2)                                │
@@ -161,8 +160,8 @@ grafana/
 │   └── dashboards/
 │       └── bioetl.yaml                # Dashboard provisioning config
 └── dashboards/
-    ├── bioetl-overview-v2.json        # Обзор для последнего запуска (v2)
-    ├── bioetl-overview-v3.json        # Draft hybrid L0 overview (v3 bridge)
+    ├── bioetl-overview-v2.json        # 1. Overview, canonical frozen v3 baseline
+    ├── bioetl-overview-v3.json        # Retained hybrid L0 overview snapshot/draft
     ├── bioetl-dq-v2.json              # Data Quality для последнего запуска (v2)
     ├── bioetl-runtime.json            # L2 runtime triage: blockers, latency, backlog, handoffs
     ├── bioetl-provider-health-v2.json # Здоровье провайдеров (v2)
@@ -738,14 +737,15 @@ Shipped dashboards используют несколько template variables в
   read-path и checkpoint-operator panels не несут pipeline/run_type labels,
   поэтому не фильтруются по этим переменным.
 
-- **`1. Overview v3`** остаётся Prometheus-first для L0 current-status panels,
-  но exact `run_id` selector теперь берётся через HTTP helper
+- **`1. Overview`** uses the frozen Overview v3 baseline and remains
+  Prometheus-first для L0 current-status panels, но exact `run_id` selector
+  теперь берётся через HTTP helper
   `/ops/control-plane/filter-options` из persisted run-manifest catalog,
   scoped by current `$pipeline/$run_type`. Grafana `All` values нормализуются
   в unbounded control-plane scope, поэтому `Run Type=All` не должен quietly
   опустошать selector. Это control-plane-backed selector, а не Prometheus
   label, поэтому high-cardinality `run_id` не возвращается в metric surface.
-  Panel `ID` в этом draft dashboard теперь также использует control-plane HTTP
+  Panel `ID` в этом dashboard теперь также использует control-plane HTTP
   helper и показывает `manifest_id`/`run_id` для текущего control-plane scope:
   exact selected `run_id` wins, concrete pipeline scope may fall back to the
   latest persisted manifest, aggregate `Pipeline=All` scope without exact
@@ -805,25 +805,26 @@ ______________________________________________________________________
 
 **Файл:** `grafana/dashboards/bioetl-overview-v2.json`
 **UID:** `bioetl-overview-v2`
-**Refresh:** 1 минута
-**Time range:** Последние 24 часа
-**Назначение:** L0 answer-first surface. Primary question: what is currently broken or degraded in BioETL, and where should the operator drill down first?
+**Refresh:** 30 секунд
+**Time range:** Последние 12 часов
+**Назначение:** L0 answer-first surface using the frozen Overview v3 baseline. Primary question: what is currently broken or degraded in BioETL, and where should the operator drill down first?
 
 ### Панели
 
 | ID  | Название                       | Тип        | PromQL                                                                                                                       | Описание                                                                                                                                                                         |
 | --- | ------------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 99  | L0 Overview Scope              | Text       | n/a                                                                                                                          | Primary question, scope, owner, audience.                                                                                                                                       |
-| 214 | System Status                  | Stat       | `max(bioetl_l0_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                                                         | `UNKNOWN`/`OK`/`WARN`/`CRIT`; null/no-series remain `UNKNOWN` via explicit null mapping. Panel-level links duplicate the canonical Runtime / Control Plane / Data Quality / Provider Health / Workflow handoff. |
+| 99  | Provenance                     | Text       | n/a                                                                                                                          | Primary question, scope, provenance, known limitations.                                                                                                                         |
+| 214 | Status                         | Stat       | `max(bioetl_l0_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                                                         | `UNKNOWN`/`OK`/`WARN`/`CRIT`; null/no-series remain `UNKNOWN` via explicit null mapping. Panel-level links duplicate the canonical Runtime / Control Plane / Data Quality / Provider Health / Workflow handoff. |
 | 215 | Next Action                    | Table      | `topk(1, bioetl_l0_next_action_route{pipeline=~"$pipeline",run_type=~"$run_type"} or label_replace(... vector(0) ...))`     | Shows `action_target`, `action_reason`, and `action_dashboard_uid`; invalid/missing selected scope falls back to `NO_ROUTE`. Routing priority remains Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Runtime / Control Plane / DQ preserve scope; Provider Health fail-closes to `provider=unknown`; Workflow link explicitly resets scope. |
-| 9002 | L0 Inputs                     | Table      | `max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"})`                              | Compact L0 input summary: one worst-status row per operator input so the first screen fits without scroll while preserving selected-scope UNKNOWN rows.                       |
-| 9003 | Runtime Blockers              | Table      | `max by (pipeline) (bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                         | Compact current runtime blocker summary: worst current status per pipeline across the selected run-type scope.                                                                  |
-| 9004 | DQ Status                     | Table      | `max by (pipeline) (bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                                      | Compact selected-scope DQ summary: worst current status per pipeline across the selected run-type scope.                                                                        |
-| 9005 | Gold Lifecycle                | Table      | `max by (pipeline) (bioetl_l1_gold_lifecycle_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                           | Compact current gold lifecycle summary: worst current lifecycle status per pipeline across the selected run-type scope. Exact lifecycle-state detail remains in deeper surfaces. |
+| 9300 | ID                            | Table      | HTTP `/ops/control-plane/identity-table?...&run_id=${run_id}`                                                                | Local control-plane identity context; exact selected `run_id` wins, aggregate `Pipeline=All` does not guess one manifest identity.                                              |
+| 9301 | Processed Records             | Table      | `sum(max_over_time(bioetl_records_processed_total{...}[$__range]))`                                                          | Selected-range processed-records context for bronze/silver/filtered/gold stages.                                                                                                |
+| 9002 | Inputs                        | Table      | `max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"})`                              | Compact L0 input summary: one worst-status row per operator input so the first screen fits without scroll while preserving selected-scope UNKNOWN rows.                       |
+| 9003 | Runtime                       | Table      | `max by (pipeline) (bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                         | Compact current runtime blocker summary: worst current status per pipeline across the selected run-type scope.                                                                  |
+| 9004 | Data Quality                  | Table      | `max by (pipeline) (bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                                      | Compact selected-scope DQ summary: worst current status per pipeline across the selected run-type scope.                                                                        |
+| 9005 | Data Validation               | Table      | `max by (pipeline) (bioetl_l1_gold_lifecycle_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                           | Compact current data-validation lifecycle summary: worst current lifecycle status per pipeline across the selected run-type scope. Exact lifecycle-state detail remains in deeper surfaces. |
 | 9006 | Control Plane                 | Table      | `max by (pipeline) (bioetl_l1_control_plane_current_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                   | Compact current control-plane summary: worst current status per pipeline across the selected run-type scope.                                                                    |
-| 9007 | Provider Global               | Table      | `bioetl_l1_provider_global_status`                                                                                            | Global provider health across pipelines; intentionally not filtered by `$pipeline/$run_type`.                                                                                   |
-| 9008 | Workflow Selected             | Table      | `max by (pipeline) (bioetl_l1_workflow_selected_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                       | Compact selected-scope workflow summary: worst current workflow status per pipeline across the selected run-type scope. Backed by the latest bounded terminal workflow signal, not cumulative workflow counters. |
-| 9013 | Workflow Global               | Table      | `max by (pipeline) (bioetl_l1_workflow_global_status)`                                                                       | Compact global workflow summary: worst current workflow status per pipeline. Backed by the latest bounded terminal workflow signal, not cumulative workflow counters.           |
+| 9007 | Provider                      | Table      | `bioetl_l1_provider_global_status`                                                                                            | Global provider health across pipelines; intentionally not filtered by `$pipeline/$run_type`.                                                                                   |
+| 9013 | Workflow                      | Table      | `max by (pipeline) (bioetl_l1_workflow_global_status{pipeline!="test_pipe"})`                                                | Compact global workflow summary: worst current workflow status per pipeline. Backed by the latest bounded terminal workflow signal, not cumulative workflow counters.           |
 | 9018 | Runtime Blockers Trend        | Timeseries | `bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",run_type=~"$run_type"}`                                              | Historical trend of current-state runtime blocker status across the active time window.                                                                                          |
 | 9019 | DQ Status Trend               | Timeseries | `bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"}`                                                            | Historical trend of current-state DQ status across the active time window.                                                                                                       |
 | 9020 | Gold Lifecycle Trend          | Timeseries | `bioetl_l1_gold_lifecycle_status{pipeline=~"$pipeline",run_type=~"$run_type"}`                                                | Historical trend of gold lifecycle status across the active time window.                                                                                                         |

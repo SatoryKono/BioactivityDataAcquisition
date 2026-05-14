@@ -123,6 +123,7 @@ def _create_workflow_ledger_service(
 
 def get_workflow_execution_service(
     registry: PipelineRegistry | None = None,
+    workflow_lock_port: LockPort | None = None,
 ) -> WorkflowExecutionService:
     """Build workflow execution orchestration with durable control-plane seams."""
     from bioetl.application.services.control_plane.workflow_execution_service import (
@@ -163,7 +164,9 @@ def get_workflow_execution_service(
         workflow_ledger_port=ledger_store,
         workflow_ledger_factory=_create_workflow_ledger_service,
         workflow_state_port=state_store,
-        workflow_lock_port=cast("LockPort", _get_workflow_memory_lock()),
+        workflow_lock_port=workflow_lock_port
+        if workflow_lock_port is not None
+        else cast("LockPort", _get_workflow_memory_lock()),
     )
 
 

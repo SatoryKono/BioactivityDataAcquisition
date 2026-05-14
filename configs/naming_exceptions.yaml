@@ -1,7 +1,7 @@
 # Naming Convention Exceptions
 # This file documents allowed exceptions to the naming conventions in RULES.md §2.
-# Version: 2.2
-# Last Updated: 2026-03-20
+# Version: 2.3
+# Last Updated: 2026-05-14
 
 # Documentation files that are allowed to use UPPER_CASE names.
 # These are conventional files recognized by GitHub and standard tooling.
@@ -22,6 +22,11 @@ documentation_exceptions:
     - CODEX.md            # Codex runtime docs
     - GEMINI.md           # Gemini runtime docs
     # Governance-approved legacy docs retained without bulk rename churn.
+    - docs/CODEX_HANG_FIX.md       # Legacy root setup/troubleshooting entrypoint
+    - docs/CODEX_QUICK_START.md    # Legacy root setup/troubleshooting entrypoint
+    - docs/CODEX_WSL_SETUP.md      # Legacy root setup/troubleshooting entrypoint
+    - docs/DOCKER_QUICKSTART.md    # Legacy root setup/troubleshooting entrypoint
+    - docs/DOCKER_SETUP.md         # Legacy root setup/troubleshooting entrypoint
     - docs/00-project/DOCUMENTATION_GOVERNANCE.md
     - docs/99-archive/legacy-05-architecture/COMPLEX_COMPONENTS_DOCUMENTATION.md
     - docs/99-archive/legacy-05-architecture/EXECUTION_LOG_2024-08-21.md

@@ -22,6 +22,7 @@ from .conftest import (
     assert_run_ledger_has_events,
     assert_run_manifest_exists,
     assert_silver_table_has_records,
+    create_deterministic_test_context,
     create_test_context,
     get_silver_records,
 )
@@ -47,7 +48,11 @@ async def test_pubchem_compound_full_cycle(e2e_data_dir: Path):
     Note: PubChem requires a query parameter for compound search.
     """
     # Arrange - PubChem requires query
-    ctx = create_test_context("pubchem_compound", limit=5, query="aspirin")
+    ctx = create_deterministic_test_context(
+        "pubchem_compound",
+        limit=5,
+        query="aspirin",
+    )
 
     # Act
     runner = bootstrap_pipeline_runner(ctx)

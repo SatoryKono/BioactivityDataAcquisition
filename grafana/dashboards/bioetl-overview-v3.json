@@ -1812,7 +1812,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 35
+        "y": 26
       },
       "collapsed": false
     },
@@ -1824,7 +1824,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 36
+        "y": 27
       },
       "datasource": {
         "type": "prometheus",
@@ -1933,7 +1933,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 36
+        "y": 27
       },
       "datasource": {
         "type": "prometheus",
@@ -2040,7 +2040,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 36
+        "y": 27
       },
       "datasource": {
         "type": "prometheus",
@@ -2147,7 +2147,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 44
+        "y": 35
       },
       "collapsed": true,
       "panels": [
@@ -2395,7 +2395,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 45
+        "y": 36
       },
       "collapsed": true,
       "panels": [
@@ -2718,7 +2718,11 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "-",
+          "value": "-"
+        },
         "datasource": "Quarantine Explorer",
         "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&pipeline=${pipeline}&run_type=${run_type:csv}",
         "description": "Run ID selector sourced from the local control-plane run-manifest catalog for the current pipeline/run_type scope. Grafana All values are normalized to an unbounded scope, so Run Type = All no longer empties the selector; Pipeline = All exposes aggregate exact-run handoff options from the catalog. This selector remains HTTP-backed and does not reintroduce run_id into Prometheus labels.",
@@ -2727,12 +2731,26 @@
         "label": "Run ID",
         "multi": false,
         "name": "run_id",
-        "options": [],
+        "options": [
+          {
+            "selected": true,
+            "text": "-",
+            "value": "-"
+          }
+        ],
         "query": {
+          "queryType": "infinity",
+          "refId": "variable",
           "infinityQuery": {
-            "root_selector": "items",
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$.items",
             "type": "json",
             "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
             "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&pipeline=${pipeline}&run_type=${run_type:csv}"
           }
         },

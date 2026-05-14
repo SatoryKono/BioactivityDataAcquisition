@@ -548,6 +548,43 @@ def _report_untracked_root_entries(
     return has_violations
 
 
+def collect_root_layout_state(
+    repo_root: Path,
+    *,
+    include_untracked: bool = True,
+) -> dict[str, object]:
+    """Return deterministic root-layout state for audits and evidence export."""
+    allowed_root_files = _load_allowed_root_files(repo_root)
+    structure_catalog = _load_structure_catalog(repo_root)
+    tracked_paths = _get_tracked_paths(repo_root)
+    allowed_root_dirs = _approved_root_directories(structure_catalog)
+    tracked_root_files, tracked_root_dirs = _collect_tracked_root_entries(tracked_paths)
+
+    state: dict[str, object] = {
+        "allowed_root_files": allowed_root_files,
+        "allowed_root_dirs": allowed_root_dirs,
+        "structure_catalog": structure_catalog,
+        "tracked_paths": tracked_paths,
+        "tracked_root_files": tracked_root_files,
+        "tracked_root_dirs": tracked_root_dirs,
+        "unexpected_root_files": sorted(tracked_root_files - allowed_root_files),
+        "unexpected_root_dirs": sorted(tracked_root_dirs - allowed_root_dirs),
+        "missing_allowed_files": sorted(allowed_root_files - tracked_root_files),
+    }
+    if include_untracked:
+        untracked_paths = _get_untracked_paths(repo_root)
+        state["untracked_paths"] = untracked_paths
+        state["unexpected_untracked_root_files"] = sorted(
+            _collect_untracked_root_files(untracked_paths)
+        )
+        state["unexpected_untracked_root_dirs"] = _unexpected_untracked_root_dirs(
+            untracked_paths,
+            tracked_root_dirs,
+            allowed_root_dirs,
+        )
+    return state
+
+
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Validate root tracked layout and flag unexpected untracked root files.",
@@ -574,29 +611,18 @@ def main() -> int:
     repo_root = _discover_repo_root(script_root)
 
     try:
-        allowed_root_files = _load_allowed_root_files(repo_root)
-    except (OSError, RuntimeError) as exc:
-        sys.stderr.write(f"ERROR: failed to load root allowlist: {exc}\n")
-        return 2
-    try:
-        structure_catalog = _load_structure_catalog(repo_root)
-    except (OSError, RuntimeError, yaml.YAMLError) as exc:
-        sys.stderr.write(f"ERROR: failed to load structure catalog: {exc}\n")
+        layout_state = collect_root_layout_state(repo_root)
+    except (OSError, RuntimeError, subprocess.CalledProcessError, yaml.YAMLError) as exc:
+        sys.stderr.write(f"ERROR: failed to collect root layout state: {exc}\n")
         return 2
 
-    try:
-        tracked_paths = _get_tracked_paths(repo_root)
-    except subprocess.CalledProcessError as exc:
-        sys.stderr.write(f"ERROR: failed to query git index: {exc}\n")
-        return 2
-
-    allowed_root_dirs = _approved_root_directories(structure_catalog)
-
-    tracked_root_files, tracked_root_dirs = _collect_tracked_root_entries(tracked_paths)
-
-    unexpected_root_files = sorted(tracked_root_files - allowed_root_files)
-    unexpected_root_dirs = sorted(tracked_root_dirs - allowed_root_dirs)
-    missing_allowed_files = sorted(allowed_root_files - tracked_root_files)
+    structure_catalog = layout_state["structure_catalog"]
+    tracked_paths = layout_state["tracked_paths"]
+    tracked_root_files = layout_state["tracked_root_files"]
+    tracked_root_dirs = layout_state["tracked_root_dirs"]
+    unexpected_root_files = layout_state["unexpected_root_files"]
+    unexpected_root_dirs = layout_state["unexpected_root_dirs"]
+    missing_allowed_files = layout_state["missing_allowed_files"]
 
     root_layout_exit = _report_root_layout_violations(
         unexpected_root_files=unexpected_root_files,
@@ -621,18 +647,8 @@ def main() -> int:
 
     _report_missing_allowed_files(missing_allowed_files)
 
-    try:
-        untracked_paths = _get_untracked_paths(repo_root)
-    except subprocess.CalledProcessError as exc:
-        sys.stderr.write(f"ERROR: failed to query untracked paths: {exc}\n")
-        return 2
-
-    unexpected_untracked_root_files = sorted(
-        _collect_untracked_root_files(untracked_paths)
-    )
-    unexpected_untracked_root_dirs = _unexpected_untracked_root_dirs(
-        untracked_paths, tracked_root_dirs, allowed_root_dirs
-    )
+    unexpected_untracked_root_files = layout_state["unexpected_untracked_root_files"]
+    unexpected_untracked_root_dirs = layout_state["unexpected_untracked_root_dirs"]
     strict_untracked_violation = _report_untracked_root_entries(
         unexpected_untracked_root_files=unexpected_untracked_root_files,
         unexpected_untracked_root_dirs=unexpected_untracked_root_dirs,
@@ -650,7 +666,9 @@ def main() -> int:
         forbidden_local_outputs = _collect_forbidden_local_output_roots(
             ignored_or_untracked_paths,
             forbidden_roots=_forbidden_output_roots(routing),
-            blocked_cleanup_paths=root_governance.blocked_cleanup_paths(structure_catalog),
+            blocked_cleanup_paths=root_governance.blocked_cleanup_paths(
+                structure_catalog
+            ),
         )
         forbidden_local_output_exit = _report_forbidden_local_output_roots(
             forbidden_local_outputs

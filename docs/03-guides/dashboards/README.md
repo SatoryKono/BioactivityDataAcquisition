@@ -84,20 +84,18 @@ ______________________________________________________________________
 - availability / risk notes
 - `First action`
 
-Для shipped v2 dashboards эта политика может быть распределена между scope
-panel, current-status row, panel descriptions и monitoring guide. Для новых
-v3 dashboards policy header SHOULD быть materialized explicitly as a dedicated
-first-screen text/context block.
+Для shipped dashboards эта политика должна быть видима на первом экране через
+scope/provenance/first-action блоки, current-status row, panel descriptions и
+monitoring guide.
 
-`bioetl-overview-v2` is the L0 answer-first surface. It answers one question:
+`bioetl-overview-v2` is the canonical L0 answer-first surface and now uses the
+frozen `1. Overview v3` layout as its baseline. It answers one question:
 what is currently broken or degraded in BioETL, and where should the operator
-drill down first? The first visible answer is now a compact L0/L1 row:
-`System Status`, `Next Action`, and `L0 Inputs`. The next visible row keeps
-current subsystem summaries (`Runtime Blockers`, `DQ Status`,
-`Gold Lifecycle`, `Control Plane`), while provider/workflow
-scope is explicit via `Provider Global`, `Workflow Selected`, and
-`Workflow Global`. Historical evidence is isolated under the collapsed
-`Range Evidence` row, and diagnostics routing lives under the collapsed
+drill down first? The first screen materializes provenance/scope, `Status`,
+`Next Action`, `ID`, and `Processed Records`, then keeps current subsystem
+summaries (`Control Plane`, `Runtime`, `Data Quality`, `Provider`,
+`Data Validation`) plus selected workflow context. Historical evidence remains
+below the current answer rows, and diagnostics routing lives under the collapsed
 `Diagnostics & Docs (Logs / Traces / Raw Metrics)` row.
 
 `bioetl-control-plane-v1` is the `0. Control Plane` surface. It
@@ -121,12 +119,10 @@ tables before any selected-range evidence. Range counters, trends, raw tables,
 Silver reject breakdowns, logs, and traces stay below the first-screen answer
 row or in collapsed diagnostic rows.
 
-`bioetl-overview-v3` is now shipped as a draft bridge surface. It materializes
-the v3 first-screen policy header and hybrid layout, exposes visible
-`workflow`, `pipeline`, `run_type`, and `run_id` selectors, but it still keeps
-pipeline/run_type as the canonical current-status scope. `workflow` is evidence
-context and `run_id` is an execution-hint bridge until truthful local
-run-catalog-backed exact resolution ships.
+`bioetl-overview-v2` exposes visible `workflow`, `pipeline`, `run_type`, and
+`run_id` selectors. Pipeline/run_type remain the canonical current-status
+Prometheus scope; `workflow` is evidence context, and `run_id` is a
+control-plane-backed identity selector for the local `ID` panel only.
 
 ## KPI ownership (canonical vs mirrors)
 
@@ -137,13 +133,12 @@ secondary mirrors только как локальный контекст. Mirro
 
 | KPI | Canonical dashboard | Secondary mirrors |
 | --- | --- | --- |
-| System Status | `1. Overview` | `2. Runtime`, `0. Control Plane`, `5. Workflow` |
+| Status | `1. Overview` | `2. Runtime`, `0. Control Plane`, `5. Workflow` |
 | Next Action | `1. Overview` | `2. Runtime`, `3. Provider Health` |
-| L0 Inputs | `1. Overview` | `2. Runtime`, `4. Data Quality`, `0. Control Plane` |
-| Gold Lifecycle | `1. Overview` | `2. Runtime`, `0. Control Plane` |
-| Provider Global | `1. Overview` | `3. Provider Health` |
-| Workflow Selected | `1. Overview` | `5. Workflow` |
-| Workflow Global | `1. Overview` | `5. Workflow` |
+| Inputs | `1. Overview` | `2. Runtime`, `4. Data Quality`, `0. Control Plane` |
+| Data Validation | `1. Overview` | `2. Runtime`, `0. Control Plane` |
+| Provider | `1. Overview` | `3. Provider Health` |
+| Workflow | `1. Overview` | `5. Workflow` |
 | Replay Safety State | `0. Control Plane` | `1. Overview`, `2. Runtime` |
 | Checkpoint Freshness Proxy | `0. Control Plane` | `2. Runtime` |
 | Ledger/Manifest Consistency | `0. Control Plane` | `2. Runtime` |

@@ -56,13 +56,14 @@ Use the following interpretation consistently:
 | `derived_vocabulary` | Harmonized analytical taxonomy derived from raw provider values. |
 | `structured_json_collection` | Canonical JSON collection is governed, often with a raw sidecar anchor. |
 | `structured_json_sidecar` | Raw and canonical JSON sidecars are both part of the contract. |
+| `structured_json_canonical_only` | The persisted canonical JSON field itself is the ratified governed evidence surface; no shipped raw sidecar exists today. |
 
 ## Review Boundaries
 
 - Do not infer strict enums from a short observed-value list alone.
 - Raw publication provider types remain open-world provider labels.
 - Reference identifiers remain namespace-governed, not enum-governed.
-- Structured payload rows must keep the documented raw/canonical sidecars.
+- Structured payload rows must keep either the documented raw/canonical sidecars or the explicitly ratified canonical-only evidence surface.
 - Composite usage must reflect whether a field is a join key or only upstream inherited.
 
 ## Provider Coverage

@@ -43,7 +43,7 @@ STANDARD_SEVERITY_TITLE_TOKENS = (
     "Threshold State",
 )
 BACKGROUND_SEVERITY_STAT_PANELS = {
-    ("bioetl-overview-v2.json", "System Status"),
+    ("bioetl-overview-v2.json", "Status"),
     ("bioetl-runtime.json", "Monitor Runtime Current Status"),
     ("bioetl-runtime.json", "Monitor Runtime Telemetry Gap"),
     ("bioetl-runtime.json", "Monitor Runtime Blockers"),
@@ -62,10 +62,13 @@ SCALAR_TREND_TIMESERIES_PANELS = {
     ("bioetl-overview-v2.json", "Runtime Blockers Trend"),
     ("bioetl-overview-v2.json", "DQ Status Trend"),
     ("bioetl-overview-v2.json", "Gold Lifecycle Trend"),
+    ("bioetl-overview-v3.json", "Runtime Blockers Trend"),
+    ("bioetl-overview-v3.json", "DQ Status Trend"),
+    ("bioetl-overview-v3.json", "Gold Lifecycle Trend"),
 }
 ALLOWED_TABLE_CELL_OPTION_TYPES = {"auto", "color-background", "color-text"}
 EXPLICIT_VALUE_MAPPING_STAT_PANELS = {
-    ("bioetl-overview-v2.json", "System Status"): {
+    ("bioetl-overview-v2.json", "Status"): {
         "0": {"text": "OK", "color": "green"},
         "1": {"text": "WARN", "color": "orange"},
         "2": {"text": "CRIT", "color": "red"},
@@ -108,7 +111,7 @@ EXPLICIT_VALUE_MAPPING_STAT_PANELS = {
     },
 }
 FAIL_CLOSED_NO_ZERO_FALLBACK_PANELS = {
-    ("bioetl-overview-v2.json", "System Status"): "UNKNOWN",
+    ("bioetl-overview-v2.json", "Status"): "UNKNOWN",
     ("bioetl-runtime.json", "Monitor Runtime Current Status"): "UNKNOWN",
     ("bioetl-runtime.json", "Monitor Runtime Telemetry Gap"): "UNKNOWN",
     ("bioetl-runtime.json", "Monitor Runtime Blockers"): "UNKNOWN",

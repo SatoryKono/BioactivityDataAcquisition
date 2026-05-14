@@ -4,10 +4,14 @@ from __future__ import annotations
 
 import asyncio
 from typing import TYPE_CHECKING, Protocol, cast
-from urllib.parse import parse_qs, unquote, urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 from bioetl.domain.context import current_utc_time
 from bioetl.domain.types import HealthStatus, JsonDict
+from bioetl.interfaces.http._health_server_routing_support import (
+    dispatch_control_plane_request,
+    dispatch_quarantine_request,
+)
 from bioetl.interfaces.http.types import HealthResponse
 
 if TYPE_CHECKING:
@@ -96,14 +100,16 @@ class HealthServerRoutingMixin:
             await response_support._send_json_response(writer, response)
             return
         if route_path.startswith("/ops/quarantine/"):
-            await self._route_quarantine_request(
+            await dispatch_quarantine_request(
+                self,
                 writer=writer,
                 path=route_path,
                 query=query,
             )
             return
         if route_path.startswith("/ops/control-plane/"):
-            await self._route_control_plane_request(
+            await dispatch_control_plane_request(
+                self,
                 writer=writer,
                 path=route_path,
                 query=query,
@@ -196,345 +202,6 @@ class HealthServerRoutingMixin:
         if any(cls._is_all_scope_token(item) for item in items):
             return ()
         return items
-
-    async def _route_quarantine_request(
-        self,
-        *,
-        writer: asyncio.StreamWriter,
-        path: str,
-        query: dict[str, str],
-    ) -> None:
-        """Route record-level quarantine explorer requests."""
-        response_support = cast(_HealthResponseSupport, self)
-        if self._quarantine_service is None:
-            await response_support._send_response(
-                writer,
-                503,
-                "Quarantine explorer unavailable",
-            )
-            return
-
-        try:
-            if path == "/ops/quarantine/filtered-records":
-                await self._handle_filtered_records(writer, query)
-                return
-            if path == "/ops/quarantine/filtered-stats":
-                await self._handle_filtered_stats(writer, query)
-                return
-            if path == "/ops/quarantine/filter-options":
-                await self._handle_filter_options(writer, query)
-                return
-            if path.startswith("/ops/quarantine/filtered-record/"):
-                payload_hash = unquote(path.rsplit("/", maxsplit=1)[-1]).strip()
-                if not payload_hash:
-                    raise ValueError("Missing payload_hash in path")
-                await self._handle_filtered_record_detail(writer, query, payload_hash)
-                return
-            await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
-        except ValueError as exc:
-            await response_support._send_response(writer, 400, str(exc))
-        except Exception as exc:
-            await response_support._handle_request_error(writer, exc)
-
-    async def _route_control_plane_request(
-        self,
-        *,
-        writer: asyncio.StreamWriter,
-        path: str,
-        query: dict[str, str],
-    ) -> None:
-        """Route control-plane selector helper endpoints."""
-        response_support = cast(_HealthResponseSupport, self)
-        if self._run_manifest_port is None:
-            await response_support._send_response(
-                writer,
-                503,
-                "Control-plane selector catalog unavailable",
-            )
-            return
-
-        try:
-            if path == "/ops/control-plane/filter-options":
-                await self._handle_control_plane_filter_options(writer, query)
-                return
-            if path == "/ops/control-plane/identity-table":
-                await self._handle_control_plane_identity_table(writer, query)
-                return
-            await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
-        except ValueError as exc:
-            await response_support._send_response(writer, 400, str(exc))
-        except Exception as exc:
-            await response_support._handle_request_error(writer, exc)
-
-    async def _handle_filtered_records(
-        self,
-        writer: asyncio.StreamWriter,
-        query: dict[str, str],
-    ) -> None:
-        """Handle paginated list endpoint for filtered Silver records."""
-        assert self._quarantine_service is not None
-        pipeline = self._read_required_param(query, "pipeline")
-        limit = self._read_int_param(query, "limit", default=50, minimum=1)
-        offset = self._read_int_param(query, "offset", default=0, minimum=0)
-        payload = await self._quarantine_service.list_filtered_records(
-            pipeline=pipeline,
-            run_type=self._read_optional_param(query, "run_type"),
-            reason_code=self._read_optional_param(query, "reason_code"),
-            field=self._read_optional_param(query, "field"),
-            run_id=self._read_optional_param(query, "run_id"),
-            payload_hash=self._read_optional_param(query, "payload_hash"),
-            from_ts=self._read_optional_param(query, "from"),
-            to_ts=self._read_optional_param(query, "to"),
-            limit=limit,
-            offset=offset,
-            sort=self._read_optional_param(query, "sort") or "ingestion_ts_desc",
-        )
-        response_support = cast(_HealthResponseSupport, self)
-        await response_support._send_payload_response(writer, 200, payload)
-
-    async def _handle_filtered_stats(
-        self,
-        writer: asyncio.StreamWriter,
-        query: dict[str, str],
-    ) -> None:
-        """Handle aggregate stats endpoint for filtered Silver records."""
-        assert self._quarantine_service is not None
-        pipeline = self._read_required_param(query, "pipeline")
-        payload = await self._quarantine_service.get_filtered_stats(
-            pipeline=pipeline,
-            run_type=self._read_optional_param(query, "run_type"),
-            reason_code=self._read_optional_param(query, "reason_code"),
-            field=self._read_optional_param(query, "field"),
-            run_id=self._read_optional_param(query, "run_id"),
-            payload_hash=self._read_optional_param(query, "payload_hash"),
-            from_ts=self._read_optional_param(query, "from"),
-            to_ts=self._read_optional_param(query, "to"),
-        )
-        response_support = cast(_HealthResponseSupport, self)
-        await response_support._send_payload_response(writer, 200, payload)
-
-    async def _handle_filter_options(
-        self,
-        writer: asyncio.StreamWriter,
-        query: dict[str, str],
-    ) -> None:
-        """Handle variable-options endpoint for filtered Silver records."""
-        assert self._quarantine_service is not None
-        pipeline = self._read_required_param(query, "pipeline")
-        payload = await self._quarantine_service.get_filtered_filter_options(
-            pipeline=pipeline,
-            run_type=self._read_optional_param(query, "run_type"),
-            reason_code=self._read_optional_param(query, "reason_code"),
-            field=self._read_optional_param(query, "field"),
-            run_id=self._read_optional_param(query, "run_id"),
-            from_ts=self._read_optional_param(query, "from"),
-            to_ts=self._read_optional_param(query, "to"),
-        )
-        response_support = cast(_HealthResponseSupport, self)
-        await response_support._send_payload_response(writer, 200, payload)
-
-    async def _handle_control_plane_filter_options(
-        self,
-        writer: asyncio.StreamWriter,
-        query: dict[str, str],
-    ) -> None:
-        """Handle control-plane-backed selector options for Grafana variables."""
-        assert self._run_manifest_port is not None
-        requested_pipeline = self._read_required_param(query, "pipeline")
-        selected_pipelines = self._read_scope_csv_param(query, "pipeline")
-        dimension = self._read_optional_param(query, "dimension") or "run_id"
-        if dimension != "run_id":
-            raise ValueError(
-                f"Unsupported control-plane filter dimension: {dimension}"
-            )
-        response_shape = self._read_optional_param(query, "response_shape") or "object"
-
-        selected_run_types = self._read_scope_csv_param(query, "run_type")
-        run_ids = tuple(
-            str(manifest.run_id)
-            for manifest in self._run_manifest_port.list_all()
-            if (
-                not selected_pipelines
-                or manifest.pipeline_name in selected_pipelines
-            )
-            and (
-                not selected_run_types
-                or str(manifest.run_type) in selected_run_types
-            )
-        )
-        response_support = cast(_HealthResponseSupport, self)
-        if response_shape == "list":
-            await response_support._send_payload_response(
-                writer,
-                200,
-                {"items": list(run_ids)},
-            )
-            return
-        await response_support._send_payload_response(
-            writer,
-            200,
-            {
-                "pipeline": requested_pipeline,
-                "run_type": list(selected_run_types),
-                "run_ids": list(run_ids),
-            },
-        )
-
-    async def _handle_control_plane_identity_table(
-        self,
-        writer: asyncio.StreamWriter,
-        query: dict[str, str],
-    ) -> None:
-        """Handle control-plane-backed identity rows for Overview v3."""
-        assert self._run_manifest_port is not None
-        requested_pipeline = self._read_required_param(query, "pipeline")
-        selected_pipelines = self._read_scope_csv_param(query, "pipeline")
-        selected_run_types = self._read_scope_csv_param(query, "run_type")
-        selected_run_id = self._read_optional_param(query, "run_id")
-        manifests = tuple(
-            manifest
-            for manifest in self._run_manifest_port.list_all()
-            if (
-                not selected_pipelines
-                or manifest.pipeline_name in selected_pipelines
-            )
-            and (
-                not selected_run_types
-                or str(manifest.run_type) in selected_run_types
-            )
-        )
-
-        resolved_manifest = next(
-            (
-                manifest
-                for manifest in manifests
-                if selected_run_id is not None and str(manifest.run_id) == selected_run_id
-            ),
-            None,
-        )
-        resolved_via = "selected_run_id"
-        if resolved_manifest is None:
-            if len(selected_pipelines) != 1:
-                resolved_via = "aggregate_scope_requires_exact_run_id"
-            else:
-                resolved_manifest = manifests[-1] if manifests else None
-                resolved_via = (
-                    "latest_manifest_for_scope"
-                    if resolved_manifest is not None
-                    else "no_manifest_for_scope"
-                )
-
-        def _display(value: object | None, *, unavailable: str) -> str:
-            if value is None:
-                return unavailable
-            text = str(value).strip()
-            return text or unavailable
-
-        manifest_unavailable = (
-            "select one concrete pipeline or exact run_id"
-            if len(selected_pipelines) != 1 and resolved_manifest is None
-            else "not available for current scope"
-        )
-        provenance_unavailable = "not available in selected manifest"
-        code_provenance = (
-            resolved_manifest.code_provenance if resolved_manifest is not None else None
-        )
-        rows = [
-            {
-                "parameter": "manifest_id",
-                "value": _display(
-                    getattr(resolved_manifest, "manifest_id", None),
-                    unavailable=manifest_unavailable,
-                ),
-            },
-            {
-                "parameter": "run_id",
-                "value": _display(
-                    getattr(resolved_manifest, "run_id", None) or selected_run_id,
-                    unavailable=manifest_unavailable,
-                ),
-            },
-            {
-                "parameter": "pipeline name",
-                "value": _display(
-                    getattr(resolved_manifest, "pipeline_name", None)
-                    or requested_pipeline,
-                    unavailable="not available for current scope",
-                ),
-            },
-            {
-                "parameter": "pipelineversion",
-                "value": _display(
-                    getattr(code_provenance, "pipeline_version", None),
-                    unavailable=provenance_unavailable,
-                ),
-            },
-            {
-                "parameter": "git commit hash",
-                "value": _display(
-                    getattr(code_provenance, "git_commit", None),
-                    unavailable=provenance_unavailable,
-                ),
-            },
-            {
-                "parameter": "config hash",
-                "value": _display(
-                    getattr(code_provenance, "config_hash", None),
-                    unavailable=provenance_unavailable,
-                ),
-            },
-            {
-                "parameter": "execution fingerprint",
-                "value": _display(
-                    getattr(resolved_manifest, "execution_fingerprint", None),
-                    unavailable=manifest_unavailable,
-                ),
-            },
-            {
-                "parameter": "schema contract",
-                "value": _display(
-                    getattr(code_provenance, "contract_ref", None),
-                    unavailable=provenance_unavailable,
-                ),
-            },
-            {
-                "parameter": "version",
-                "value": _display(
-                    getattr(code_provenance, "contract_version", None),
-                    unavailable=provenance_unavailable,
-                ),
-            },
-        ]
-        response_support = cast(_HealthResponseSupport, self)
-        await response_support._send_payload_response(
-            writer,
-            200,
-            {
-                "pipeline": requested_pipeline,
-                "run_type": list(selected_run_types),
-                "selected_run_id": selected_run_id,
-                "resolved_via": resolved_via,
-                "rows": rows,
-            },
-        )
-
-    async def _handle_filtered_record_detail(
-        self,
-        writer: asyncio.StreamWriter,
-        query: dict[str, str],
-        payload_hash: str,
-    ) -> None:
-        """Handle detail endpoint for one filtered Silver record."""
-        assert self._quarantine_service is not None
-        payload = await self._quarantine_service.get_filtered_record(
-            payload_hash=payload_hash,
-            pipeline=self._read_required_param(query, "pipeline"),
-        )
-        response_support = cast(_HealthResponseSupport, self)
-        if payload is None:
-            await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
-            return
-        await response_support._send_payload_response(writer, 200, payload)
 
     async def _handle_health(self) -> HealthResponse:
         """Handle /health endpoint - overall health status."""

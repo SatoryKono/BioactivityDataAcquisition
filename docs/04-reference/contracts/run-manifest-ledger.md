@@ -62,10 +62,6 @@ The current code owners / source-of-truth seams are:
 - `src/bioetl/domain/control_plane/run_manifest.py`
 - `src/bioetl/domain/control_plane/run_ledger.py`
 - `src/bioetl/domain/ports/control_plane/`
-- `src/bioetl/application/services/control_plane/run_manifest_service.py`
-- `src/bioetl/application/services/control_plane/run_ledger_service.py`
-- `src/bioetl/application/services/control_plane/run_manifest_diagnostics.py`
-- `src/bioetl/application/services/control_plane/run_manifest_inspection_service.py`
 - `src/bioetl/application/core/lifecycle/checkpoint_runtime.py`
 - `src/bioetl/application/composite/checkpoint/load_service.py`
 - `src/bioetl/interfaces/cli/commands/run_manifest.py`
@@ -87,10 +83,34 @@ contexts.
   record, batch, write, and post-write flows.
 - `RunManifest` remains an immutable provenance/control-plane artifact linked
   to runtime execution via `manifest_id`.
+- `RunCodeProvenance` includes `normalization_profile_ref`,
+  `normalization_profile_version`, and `normalization_profile_hash` so replay
+  diagnostics can tie one manifest to the exact normalization profile surface
+  used for that run.
 
 This means the supported model is deliberately split. BioETL does not define
 one universal manifest object that serves as launch descriptor, in-run context,
 and provenance artifact at the same time.
+
+The published `RunCodeProvenance` schema currently includes:
+
+- `pipeline_version`
+- `git_commit`
+- `source_revision_state`
+- `dependency_lock_hash`
+- `config_hash`
+- `resolved_config_hash`
+- `effective_config_hash`
+- `contract_ref`
+- `contract_version`
+- `contract_schema_hash`
+- `dq_policy_ref`
+- `rule_bundle_version`
+- `normalization_profile_ref`
+- `normalization_profile_version`
+- `normalization_profile_hash`
+- `dq_contract_compatibility_hash`
+- `effective_config_artifact_id`
 
 ## Storage Layout
 
@@ -949,10 +969,9 @@ an identifier parses as UUID-like input. Default output is human-readable
 - `diagnostics`
 - `identity_graph`
 
-The `diagnostics` block is built from
-`src/bioetl/application/services/control_plane/run_manifest_diagnostics.py` and is the
-published operator-facing summary for event counts, artifact linkage, DQ
-anchors, correlation-anchor gaps, replay capability, and suggested next steps.
+The `diagnostics` block is the published operator-facing summary for event
+counts, artifact linkage, DQ anchors, correlation-anchor gaps, replay
+capability, and suggested next steps.
 Diagnostics also include `append_mode_semantic_sinks`; any enabled Silver/Gold
 semantic sink with `mode=append` is reported as
 `append_mode_semantic_outputs` in `exact_replay_blockers` and as a

@@ -173,6 +173,9 @@ def create_and_persist_composite_effective_config_artifact(
     config: object,
     runtime_config: object,
     required_persistence_profile: str,
+    normalization_profile_ref: str | None,
+    normalization_profile_version: str | None,
+    normalization_profile_hash: str | None,
     settings: Settings,
     logger: object,
     run_id: RunID,
@@ -200,9 +203,9 @@ def create_and_persist_composite_effective_config_artifact(
                 )
             )
         ),
-        normalization_profile_ref=None,
-        normalization_profile_version=None,
-        normalization_profile_hash=None,
+        normalization_profile_ref=normalization_profile_ref,
+        normalization_profile_version=normalization_profile_version,
+        normalization_profile_hash=normalization_profile_hash,
         settings=settings,
         logger=logger,
         run_id=run_id,

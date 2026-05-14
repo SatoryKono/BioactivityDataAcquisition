@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import replace
 from typing import Protocol, cast
 
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders._run_manifest_refs import (
     is_explicit_data_root_configured,
     resolve_data_root_mode,
-)
-from bioetl.composition.runtime_builders.inputs_resolver import (
-    RunnerInputs as _RunnerInputs,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
@@ -246,10 +244,10 @@ def resolve_control_plane_flags(
     return True, ledger_enabled
 
 
-def bind_manifest_logger_context(
-    inputs: _RunnerInputs,
+def bind_manifest_logger_context[RunnerInputsT](
+    inputs: RunnerInputsT,
     manifest_id: str,
-) -> _RunnerInputs:
+) -> RunnerInputsT:
     """Bind ``manifest_id`` into runtime observability when available."""
     observability = getattr(inputs, "observability", None)
     rebound_observability = _rebind_observability_logger(
@@ -260,14 +258,13 @@ def bind_manifest_logger_context(
         return inputs
     if not isinstance(rebound_observability, ObservabilityBundle):
         return inputs
-    return _RunnerInputs(
-        settings=inputs.settings,
-        yaml_config=inputs.yaml_config,
-        observability=rebound_observability,
-        runtime_config=inputs.runtime_config,
-        filter_config=inputs.filter_config,
-        cached_bronze=inputs.cached_bronze,
-    )
+    try:
+        return cast(
+            "RunnerInputsT",
+            replace(inputs, observability=rebound_observability),
+        )
+    except (TypeError, AttributeError):
+        return inputs
 
 
 def _rebind_observability_logger(

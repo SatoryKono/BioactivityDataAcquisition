@@ -55,8 +55,10 @@ values, canonical normalized values, DQ expectations, and composite impact.
    not. Publication raw types are the main example.
 1. Reference identifiers are canonicalized by identifier family, not by
    enumerating currently observed values.
-1. Semantic-sensitive structured payloads keep raw and canonical JSON sidecars
-   before any future semantic transform replaces the provider payload.
+1. Semantic-sensitive structured payloads either keep reviewed raw and canonical
+   JSON sidecars or explicitly ratify the persisted canonical JSON field as the
+   governed evidence surface before any future semantic transform replaces the
+   provider payload.
 1. Composite pipelines normalize join keys explicitly, but non-key field
    semantics are upstream inherited from already normalized provider outputs.
 
@@ -71,6 +73,7 @@ values, canonical normalized values, DQ expectations, and composite impact.
 | Ontology-backed ID | Canonical prefix or URL form is governed; new IDs remain valid without enum updates. | GO, InterPro, Pfam, Reactome, ROR |
 | Derived vocabulary | Harmonized analytical field derived from raw values. | `publication_type_unified`, `publication_subclass`, `publication_class` |
 | Structured JSON sidecar | Canonical JSON plus raw JSON companion fields are part of the contract. | `features_json`, `grants`, `primary_topic`, `authors_with_affiliations` |
+| Structured JSON canonical-only | The persisted canonical JSON field is the reviewed evidence surface and no raw sidecar is shipped today. | `crossref_publication.references`, `crossref_publication.author_details`, selected UniProt comment projections |
 
 ## Anti-Patterns
 
@@ -82,6 +85,8 @@ Do not:
   only show a few values
 - replace raw structured provider payloads with only canonical JSON when the
   structured payload policy requires both raw and canonical sidecars
+- invent an implicit raw sidecar for a field whose reviewed contract is
+  canonical-only evidence
 - document composite outputs as if they re-normalize every inherited non-key
   field locally
 

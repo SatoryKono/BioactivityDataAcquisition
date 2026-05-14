@@ -14,6 +14,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_oa_status,
     normalize_profile_orcid_ids,
     normalize_profile_passthrough,
+    normalize_profile_json_string_unordered_collection,
     normalize_profile_semantic_scholar_id,
     normalize_profile_semantic_scholar_ids,
     normalize_profile_semantic_scholar_publication_type_raw,
@@ -144,6 +145,26 @@ _SPECIAL_RULES = {
     "paper_id": (
         normalize_profile_semantic_scholar_id,
         "Canonicalize Semantic Scholar paper identifier through the shared ID registry.",
+    ),
+    "publication_types": (
+        normalize_profile_json_string_unordered_collection,
+        "Canonicalize unordered Semantic Scholar publication-type JSON arrays into "
+        "deterministic persisted-row order aligned with hash semantics.",
+    ),
+    "publication_types_canonical_json": (
+        normalize_profile_json_string_unordered_collection,
+        "Canonicalize unordered Semantic Scholar publication-type companion JSON "
+        "arrays into deterministic persisted-row order aligned with hash semantics.",
+    ),
+    "subject_fields": (
+        normalize_profile_json_string_unordered_collection,
+        "Canonicalize unordered Semantic Scholar subject-field JSON arrays into "
+        "deterministic persisted-row order aligned with hash semantics.",
+    ),
+    "subject_fields_canonical_json": (
+        normalize_profile_json_string_unordered_collection,
+        "Canonicalize unordered Semantic Scholar subject-field companion JSON "
+        "arrays into deterministic persisted-row order aligned with hash semantics.",
     ),
     "author_h_indices_raw_json": (
         normalize_profile_passthrough,

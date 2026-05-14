@@ -50,6 +50,28 @@ def _write_governance_files(tmp_path: Path) -> None:
         ),
         encoding="utf-8",
     )
+    routing_path = (
+        tmp_path / "configs" / "quality" / "generated_artifact_routing.yaml"
+    )
+    routing_path.write_text(
+        yaml.safe_dump(
+            {
+                "routes": [
+                    {
+                        "id": "file-merger-working-reports",
+                        "generator": "src/tools/file_merger.py",
+                        "commit_policy": "working_output",
+                        "outputs": [
+                            "reports/documentation_merged.md",
+                            "reports/project_structure.md",
+                        ],
+                    }
+                ]
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
 
 
 def _write_review_registry(tmp_path: Path, lanes: list[dict[str, object]]) -> None:
@@ -407,3 +429,98 @@ def test_build_cleanup_classification_report_distinguishes_policy_classes(
     assert loaded["summary"] == {"BLOCKED": 1, "REVIEW_REQUIRED": 1, "SAFE": 1}
     assert loaded["cleanup_candidates"][0]["classification"] == "SAFE"
     assert loaded["root_review_evidence"][0]["classification"] == "BLOCKED"
+
+
+def test_collect_root_policy_mismatches_includes_live_root_violation(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _write_governance_files(tmp_path)
+    monkeypatch.setattr(
+        module,
+        "collect_root_layout_state",
+        lambda repo_root: {
+            "unexpected_root_files": ["conftest.py"],
+            "unexpected_root_dirs": [],
+            "unexpected_untracked_root_files": [],
+            "unexpected_untracked_root_dirs": [],
+        },
+    )
+
+    mismatches = module.collect_root_policy_mismatches(tmp_path)
+
+    assert len(mismatches) == 1
+    assert mismatches[0].rel_path == "conftest.py"
+    assert mismatches[0].mismatch_type == "unexpected_tracked_root_file"
+    assert mismatches[0].tracked is True
+
+
+def test_collect_reports_workspace_evidence_marks_local_only_candidates_for_prune(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _write_governance_files(tmp_path)
+    (tmp_path / "reports" / "Codex").mkdir(parents=True)
+    (tmp_path / "reports" / "tmp").mkdir(parents=True)
+    (tmp_path / "reports" / "README.md").write_text("guide\n", encoding="utf-8")
+    (tmp_path / "reports" / "documentation_merged.md").write_text(
+        "merged\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "reports" / "tmp_module_dependency_map.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(module, "_tracked_paths", lambda repo_root: ["reports/README.md"])
+    monkeypatch.setattr(module, "_git_path_has_history", lambda repo_root, path: False)
+    monkeypatch.setattr(module, "_count_reference_hits", lambda repo_root, path: 0)
+
+    evidence = module.collect_reports_workspace_evidence(tmp_path)
+    by_path = {row.rel_path: row for row in evidence}
+
+    assert by_path["reports/README.md"].classification == "RETAIN"
+    assert by_path["reports/Codex"].classification == "PRUNE_CANDIDATE"
+    assert by_path["reports/tmp"].classification == "PRUNE_CANDIDATE"
+    assert by_path["reports/documentation_merged.md"].classification == "PRUNE_CANDIDATE"
+    assert (
+        by_path["reports/tmp_module_dependency_map.json"].classification
+        == "PRUNE_CANDIDATE"
+    )
+
+
+def test_build_root_review_and_reports_workspace_reports_include_new_sections(
+    tmp_path: Path,
+) -> None:
+    _write_governance_files(tmp_path)
+    root_review_report = module.build_root_review_evidence_report(
+        tmp_path,
+        mismatches=[
+            module.RootPolicyMismatch(
+                path=Path("conftest.py"),
+                mismatch_type="unexpected_tracked_root_file",
+                tracked=True,
+            )
+        ],
+        review_evidence=[],
+    )
+    reports_report = module.build_reports_workspace_review_report(
+        tmp_path,
+        reports_evidence=[
+            module.ReportsWorkspaceEvidence(
+                path=Path("reports/Codex"),
+                classification="PRUNE_CANDIDATE",
+                tracked=False,
+                exists=True,
+                has_history=False,
+                reference_hits=0,
+                generator=None,
+                commit_policy=None,
+                reason="local-only",
+            )
+        ],
+    )
+
+    assert root_review_report["summary"]["ROOT_POLICY_MISMATCH"] == 1
+    assert root_review_report["root_policy_mismatches"][0]["path"] == "conftest.py"
+    assert reports_report["summary"]["PRUNE_CANDIDATE"] == 1
+    assert reports_report["reports_workspace_evidence"][0]["path"] == "reports/Codex"

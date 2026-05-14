@@ -916,8 +916,13 @@ def _default_non_chembl_classification(
         return "controlled_vocabulary"
     if _default_identifier_family(provider=provider, entity=entity, field_name=field_name):
         return "identifier_namespace"
-    if structured_payload_policy(f"{provider}.{entity}", field_name) is not None:
-        return "structured_json_sidecar"
+    semantic_policy = structured_payload_policy(f"{provider}.{entity}", field_name)
+    if semantic_policy is not None:
+        return (
+            "structured_json_sidecar"
+            if semantic_policy.requires_raw_sidecar_before_semantic_transform
+            else "structured_json_canonical_only"
+        )
     if _publication_structured_policy(
         provider=provider,
         entity=entity,
@@ -1795,12 +1800,20 @@ def _augment_structured_payload_policy_notes(
         return notes
 
     semantics = policy.collection_semantics.value.replace("_", " ")
-    governance_note = (
-        f"Semantic-sensitive {semantics} payload: canonical JSON is not a raw "
-        f"provider substitute; semantic transforms must materialize "
-        f"{policy.raw_sidecar_field} and {policy.canonical_sidecar_field} before "
-        f"replacing or deriving provider payload semantics."
-    )
+    if policy.requires_raw_sidecar_before_semantic_transform:
+        governance_note = (
+            f"Semantic-sensitive {semantics} payload: canonical JSON is not a raw "
+            f"provider substitute; semantic transforms must materialize "
+            f"{policy.raw_sidecar_field} and {policy.canonical_sidecar_field} before "
+            f"replacing or deriving provider payload semantics."
+        )
+    else:
+        governance_note = (
+            f"Semantic-sensitive {semantics} payload: the persisted canonical JSON "
+            f"field {policy.canonical_sidecar_field} is the ratified evidence surface; "
+            f"future semantic transforms must not assume an implicit raw sidecar or "
+            f"replace provider semantics without an explicit contract change."
+        )
     if not notes:
         return governance_note
     return f"{notes} {governance_note}"
@@ -2520,6 +2533,7 @@ def _is_json_string_normalizer(rule: Any) -> bool:
     return (
         rule.normalizer is normalize_profile_json_string
         or normalizer_name == "normalize_profile_json_string"
+        or normalizer_name == "normalize_profile_json_string_unordered_collection"
         or rule.normalizer is normalize_profile_json_string_strict
         or normalizer_name == "normalize_profile_json_string_strict"
         or rule.normalizer is normalize_profile_target_component_types

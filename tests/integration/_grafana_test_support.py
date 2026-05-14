@@ -458,6 +458,45 @@ def _assert_silver_reject_explorer_variable_contract(
             f"Dashboard {dashboard_path.name} '{variable_name}' must use "
             "Quarantine Explorer datasource"
         )
+        query = variable.get("query", {})
+        assert isinstance(query, dict), (
+            f"Dashboard {dashboard_path.name} '{variable_name}' query must be a "
+            "structured Infinity variable query"
+        )
+        assert query.get("queryType") == "infinity", (
+            f"Dashboard {dashboard_path.name} '{variable_name}' query must opt "
+            "into Infinity CustomVariableSupport"
+        )
+        assert query.get("refId") == "variable", (
+            f"Dashboard {dashboard_path.name} '{variable_name}' query must use "
+            "the Infinity variable refId"
+        )
+        infinity_query = query.get("infinityQuery", {})
+        assert isinstance(infinity_query, dict), (
+            f"Dashboard {dashboard_path.name} '{variable_name}' query must define "
+            "an infinityQuery block"
+        )
+        assert infinity_query.get("format") == "table", (
+            f"Dashboard {dashboard_path.name} '{variable_name}' query must return "
+            "a table for Grafana variable extraction"
+        )
+        assert infinity_query.get("parser") == "backend", (
+            f"Dashboard {dashboard_path.name} '{variable_name}' query must use "
+            "the backend parser"
+        )
+        expected_root_selector = {
+            "run_type": "$.run_types",
+            "reason_code": "$.reason_codes",
+            "field": "$.fields",
+            "run_id": "$.run_ids",
+        }[variable_name]
+        assert infinity_query.get("root_selector") == expected_root_selector, (
+            f"Dashboard {dashboard_path.name} '{variable_name}' query must select "
+            f"{expected_root_selector}"
+        )
+        assert infinity_query.get("url_options", {}).get("method") == "GET", (
+            f"Dashboard {dashboard_path.name} '{variable_name}' query must use GET"
+        )
         query_url = _extract_query_url(variable)
         assert "/ops/quarantine/filter-options" in query_url, (
             f"Dashboard {dashboard_path.name} '{variable_name}' query must use "

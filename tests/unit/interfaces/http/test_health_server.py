@@ -1106,7 +1106,7 @@ class TestHealthServerControlPlaneSelector:
 
         assert status_code == 200
         data = json.loads(body)
-        assert data == {"items": expected_run_ids}
+        assert data == {"items": ["-", *expected_run_ids]}
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_endpoint_supports_brace_expanded_grafana_scope(
@@ -1134,7 +1134,7 @@ class TestHealthServerControlPlaneSelector:
 
         assert status_code == 200
         data = json.loads(body)
-        assert data == {"items": expected_run_ids}
+        assert data == {"items": ["-", *expected_run_ids]}
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_returns_latest_manifest_for_scope(
@@ -1177,6 +1177,28 @@ class TestHealthServerControlPlaneSelector:
             "GET",
             "/ops/control-plane/identity-table?"
             "pipeline=chembl_activity&run_type=$__all",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        rows = {item["parameter"]: item["value"] for item in data["rows"]}
+        assert data["resolved_via"] == "latest_manifest_for_scope"
+        assert rows["manifest_id"] == "manifest-2"
+        assert rows["pipeline name"] == "chembl_activity"
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_table_treats_run_id_dash_as_unselected(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Overview v3 Run ID placeholder should not count as exact selection."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-table?pipeline=chembl_activity&run_id=-",
         )
 
         assert status_code == 200

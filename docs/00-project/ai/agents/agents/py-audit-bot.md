@@ -152,11 +152,13 @@ pytest tests/architecture/ -v --tb=short
 | **application**    | OK     | OK          | NO             | NO          | NO         |
 | **infrastructure** | OK     | NO          | OK             | NO          | NO         |
 | **composition**    | OK     | OK          | OK             | OK          | NO         |
-| **interfaces**     | OK     | OK          | OK             | OK          | OK         |
+| **interfaces**     | OK     | OK          | NO             | OK          | OK         |
 
 > Infrastructure может импортировать все domain-модули (ports, types, exceptions,
 > entities, config, models, value_objects и т.д.). Domain содержит чистые value
 > objects и контракты без I/O. Ports MUST импортироваться через фасад (ARCH-008).
+> Direct `interfaces -> infrastructure` imports are forbidden; interfaces must
+> obtain concrete runtime wiring through composition entrypoints.
 
 **Allowed Exceptions:**
 

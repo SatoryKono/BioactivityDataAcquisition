@@ -4,16 +4,15 @@ from __future__ import annotations
 
 from bioetl.domain.normalization.structured_payload_policies import (
     StructuredPayloadCollectionSemantics,
+    StructuredPayloadSemanticPolicy,
     StructuredPayloadRepresentation,
     semantic_sensitive_structured_payload_policies,
     structured_payload_policy,
 )
 
 
-def test_semantic_sensitive_payload_registry_declares_raw_sidecar_migration_policy() -> (
-    None
-):
-    governed_fields = {
+def test_semantic_sensitive_payload_registry_declares_reviewed_policy_shapes() -> None:
+    raw_sidecar_fields = {
         ("openalex.publication", "grants"),
         ("openalex.publication", "primary_topic"),
         ("pubmed.publication", "affiliation_structured"),
@@ -24,8 +23,16 @@ def test_semantic_sensitive_payload_registry_declares_raw_sidecar_migration_poli
         ("semanticscholar.publication", "subject_fields"),
         ("uniprot.protein", "features_json"),
     }
+    canonical_only_fields = {
+        ("crossref.publication", "author_details"),
+        ("crossref.publication", "references"),
+        ("uniprot.protein", "alternative_products"),
+        ("uniprot.protein", "biophysicochemical_properties"),
+        ("uniprot.protein", "cofactors"),
+        ("uniprot.protein", "reactions"),
+    }
 
-    for profile_name, field_name in governed_fields:
+    for profile_name, field_name in raw_sidecar_fields | canonical_only_fields:
         policy = structured_payload_policy(profile_name, field_name)
 
         assert policy is not None
@@ -33,11 +40,19 @@ def test_semantic_sensitive_payload_registry_declares_raw_sidecar_migration_poli
             policy.representation
             is StructuredPayloadRepresentation.CANONICAL_JSON_STRING
         )
-        assert policy.requires_raw_sidecar_before_semantic_transform is True
-        assert policy.raw_sidecar_field.endswith("_raw_json")
-        assert policy.canonical_sidecar_field.endswith("_canonical_json")
-        assert policy.raw_sidecar_field != policy.field_name
-        assert policy.canonical_sidecar_field != policy.field_name
+
+        if (profile_name, field_name) in raw_sidecar_fields:
+            assert policy.requires_raw_sidecar_before_semantic_transform is True
+            assert policy.raw_sidecar_field is not None
+            assert policy.raw_sidecar_field.endswith("_raw_json")
+            assert policy.canonical_sidecar_field is not None
+            assert policy.canonical_sidecar_field.endswith("_canonical_json")
+            assert policy.raw_sidecar_field != policy.field_name
+            assert policy.canonical_sidecar_field != policy.field_name
+        else:
+            assert policy.uses_canonical_json_only is True
+            assert policy.raw_sidecar_field is None
+            assert policy.canonical_sidecar_field == policy.field_name
 
 
 def test_semantic_sensitive_payload_registry_has_unique_keys() -> None:
@@ -53,6 +68,14 @@ def test_semantic_sensitive_payload_registry_classifies_collection_semantics() -
             "openalex.publication",
             "grants",
         ): StructuredPayloadCollectionSemantics.UNORDERED_SET,
+        (
+            "crossref.publication",
+            "author_details",
+        ): StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
+        (
+            "crossref.publication",
+            "references",
+        ): StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
         (
             "openalex.publication",
             "primary_topic",
@@ -83,7 +106,23 @@ def test_semantic_sensitive_payload_registry_classifies_collection_semantics() -
         ): StructuredPayloadCollectionSemantics.UNORDERED_SET,
         (
             "uniprot.protein",
+            "alternative_products",
+        ): StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
+        (
+            "uniprot.protein",
+            "biophysicochemical_properties",
+        ): StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
+        (
+            "uniprot.protein",
+            "cofactors",
+        ): StructuredPayloadCollectionSemantics.UNORDERED_SET,
+        (
+            "uniprot.protein",
             "features_json",
+        ): StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
+        (
+            "uniprot.protein",
+            "reactions",
         ): StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
     }
 
@@ -92,3 +131,34 @@ def test_semantic_sensitive_payload_registry_classifies_collection_semantics() -
 
         assert policy is not None
         assert policy.collection_semantics is expected
+
+
+def test_semantic_sensitive_payload_registry_exposes_canonical_only_semantic_modes() -> (
+    None
+):
+    crossref_references = structured_payload_policy("crossref.publication", "references")
+    assert crossref_references is not None
+    assert (
+        crossref_references.semantic_policy
+        is StructuredPayloadSemanticPolicy.CANONICAL_JSON_BIBLIOGRAPHIC_EVIDENCE
+    )
+
+    crossref_author_details = structured_payload_policy(
+        "crossref.publication",
+        "author_details",
+    )
+    assert crossref_author_details is not None
+    assert (
+        crossref_author_details.semantic_policy
+        is StructuredPayloadSemanticPolicy.HASHED_PII_CANONICAL_JSON_ONLY
+    )
+
+    uniprot_alternative_products = structured_payload_policy(
+        "uniprot.protein",
+        "alternative_products",
+    )
+    assert uniprot_alternative_products is not None
+    assert (
+        uniprot_alternative_products.semantic_policy
+        is StructuredPayloadSemanticPolicy.CANONICAL_JSON_COMMENT_PROJECTION
+    )

@@ -73,7 +73,7 @@ openalex_publication_factory = _factories["openalex_publication"]
 semanticscholar_publication_factory = _factories["semanticscholar_publication"]
 
 
-class _PipelineFactoryRegistrationState:
+class PipelineFactoryRegistrationState:
     """Thread-safe default-registration state holder.
 
     This keeps mutable registration state instance-scoped and lazily created,
@@ -86,14 +86,19 @@ class _PipelineFactoryRegistrationState:
         self._registered = False
 
 
-_default_registration_state: _PipelineFactoryRegistrationState | None = None
+def create_pipeline_registration_state() -> PipelineFactoryRegistrationState:
+    """Create isolated pipeline registration state for explicit composition seams."""
+    return PipelineFactoryRegistrationState()
 
 
-def _get_default_registration_state() -> _PipelineFactoryRegistrationState:
+_default_registration_state: PipelineFactoryRegistrationState | None = None
+
+
+def _get_default_registration_state() -> PipelineFactoryRegistrationState:
     """Get the lazy default registration-state singleton."""
     global _default_registration_state
     if _default_registration_state is None:
-        _default_registration_state = _PipelineFactoryRegistrationState()
+        _default_registration_state = create_pipeline_registration_state()
     return _default_registration_state
 
 
@@ -103,7 +108,7 @@ def _register_to_explicit_registry(registry: PipelineRegistryProtocol) -> None:
 
 
 def _register_default_registry_once(
-    registration_state: _PipelineFactoryRegistrationState,
+    registration_state: PipelineFactoryRegistrationState,
 ) -> None:
     """Register factories into the default registry exactly once."""
     if registration_state._registered:
@@ -115,7 +120,11 @@ def _register_default_registry_once(
         registration_state._registered = True
 
 
-def register_all_pipelines(registry: PipelineRegistryProtocol | None = None) -> None:
+def register_all_pipelines(
+    registry: PipelineRegistryProtocol | None = None,
+    *,
+    registration_state: PipelineFactoryRegistrationState | None = None,
+) -> None:
     """Explicitly register all pipeline factories with PipelineRegistry.
 
     This function is idempotent and thread-safe - calling it multiple times
@@ -131,6 +140,8 @@ def register_all_pipelines(registry: PipelineRegistryProtocol | None = None) -> 
     Args:
         registry: Optional PipelineRegistry instance. If None, uses the
             default global registry. Pass a custom registry for test isolation.
+        registration_state: Optional explicit idempotency state for the default
+            registry path. Pass one when composing isolated startup contexts.
 
     Should be called once at application startup (e.g., in cli.py or bootstrap.py).
     """
@@ -138,7 +149,12 @@ def register_all_pipelines(registry: PipelineRegistryProtocol | None = None) -> 
         _register_to_explicit_registry(registry)
         return
 
-    _register_default_registry_once(_get_default_registration_state())
+    state = (
+        registration_state
+        if registration_state is not None
+        else _get_default_registration_state()
+    )
+    _register_default_registry_once(state)
 
 
 def _register_factories_to(registry: PipelineRegistryProtocol) -> None:
@@ -162,7 +178,9 @@ def _list_pipeline_names() -> list[str]:
     return sorted(_factories.keys())
 
 
-def is_registered() -> bool:
+def is_registered(
+    registration_state: PipelineFactoryRegistrationState | None = None,
+) -> bool:
     """Check if factories have been registered.
 
     Thread-safe check of registration state.
@@ -170,10 +188,19 @@ def is_registered() -> bool:
     Returns:
         True if register_all_pipelines() has been called.
     """
-    return _get_default_registration_state()._registered
+    state = (
+        registration_state
+        if registration_state is not None
+        else _get_default_registration_state()
+    )
+    return state._registered
 
 
-def reset_registration() -> None:
+def reset_registration(
+    registry: PipelineRegistryProtocol | None = None,
+    *,
+    registration_state: PipelineFactoryRegistrationState | None = None,
+) -> None:
     """Reset registration state (for testing only).
 
     Thread-safe reset of registration flag. Also clears the default PipelineRegistry.
@@ -182,10 +209,15 @@ def reset_registration() -> None:
     Note: For isolated tests, prefer creating a new registry instance with
     create_registry() rather than using reset_registration().
     """
-    registration_state = _get_default_registration_state()
-    with registration_state._lock:
-        get_default_registry().clear()
-        registration_state._registered = False
+    state = (
+        registration_state
+        if registration_state is not None
+        else _get_default_registration_state()
+    )
+    target_registry = registry if registry is not None else get_default_registry()
+    with state._lock:
+        target_registry.clear()
+        state._registered = False
 
 
 def get_factory(pipeline_name: str) -> GenericPipelineFactory[GenericPipeline]:
@@ -225,6 +257,7 @@ _PIPELINE_FACTORY_API = (
 
 __all__ = [
     "PipelineDefinition",
+    "PipelineFactoryRegistrationState",
     "PipelineRegistry",
     "chembl_activity_factory",
     "chembl_assay_factory",
@@ -240,6 +273,7 @@ __all__ = [
     "chembl_target_component_factory",
     "chembl_target_factory",
     "chembl_tissue_factory",
+    "create_pipeline_registration_state",
     "create_registry",
     "crossref_publication_factory",
     "get_factory",

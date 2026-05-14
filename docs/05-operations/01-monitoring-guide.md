@@ -86,14 +86,10 @@ Pushgateway publication на завершении run. Это позволяет
 - availability/risk notes: SLA, known limitations, sensitivity
 - `First action`: что делать при `CRIT` и `WARN`
 
-В shipped v2 suite эта информация частично распределена между scope text-panel,
-first-screen status row, panel descriptions и linked runbooks. В draft v3.0
-она должна материализоваться как явный header contract.
-
-Текущий bridge-surface для этого перехода — `bioetl-overview-v3`: он уже
-показывает explicit header block, остаётся aggregate-first, но уже использует
-локальный control-plane run catalog для `run_id` selector и `ID` panel
-identity handoff (`manifest_id` / `run_id`) в пределах текущего
+Canonical `1. Overview` (`bioetl-overview-v2`) now uses the frozen Overview v3
+layout for this transition: explicit provenance header, aggregate-first status
+cards, visible `workflow`/`run_id` context, and local control-plane identity
+handoff in the `ID` panel (`manifest_id` / `run_id`) within the current
 control-plane scope. `Run Type=All` трактуется как unbounded run-type filter;
 `Pipeline=All` без exact `run_id` не должен притворяться одним manifest
 identity.
@@ -102,7 +98,8 @@ identity.
 
 В верхней части каждого дашборда расположены выпадающие списки:
 
-- **0. Control Plane / 1. Overview**: `$pipeline`, `$run_type`
+- **0. Control Plane**: `$pipeline`, `$run_type`
+- **1. Overview**: `$workflow`, `$pipeline`, `$run_type`, `$run_id`
 - **2. Runtime / 4. Data Quality**: `$pipeline`, `$run_type`, `$stage`
 - **3. Provider Health**: `$provider` visible; `$adapter` hidden detail-only for
   cross-scope circuit-breaker diagnostics
@@ -113,8 +110,8 @@ identity.
 > dashboard family, а не один flat universal selector list.
 > Канонический machine-readable selector contract:
 > `docs/03-guides/dashboards/contracts/selector-contracts.yaml`.
-> `1. Overview` допускает `Pipeline=All` и `Run Type=All` как shipped default
-> entry scope. Pipeline-scoped L1 dashboards сохраняют scoped handoff через
+> `1. Overview` допускает `Workflow=All`, `Pipeline=All`, `Run Type=All` и
+> `Run ID=-` как shipped default entry scope. Pipeline-scoped L1 dashboards сохраняют scoped handoff через
 > `$pipeline`/`$run_type`, а `3. Provider Health` получает hidden
 > `$pipeline_context` для обратного перехода и fail-closed `provider=unknown`,
 > если source dashboard не может доказать валидный provider label. Если
@@ -129,17 +126,16 @@ identity.
 L0 дашборд для одного operator question: что сейчас broken/degraded в BioETL и
 куда drill down первым.
 
-- **Answer row**: `System Status`, `Next Action`, `L0 Inputs`,
-  `Runtime Blockers`, `DQ Status`, `Gold Lifecycle`, `Control Plane`,
-  `Provider GLOBAL`, `Workflow Selected`, `Workflow GLOBAL`. `OK` requires
-  recent signal; no recent samples stay `UNKNOWN`, not green. Workflow
-  summaries are current-state surfaces and must follow the latest bounded
-  terminal workflow signal rather than cumulative workflow-run counters.
-- **Above-the-fold layout**: first screen without scroll contains the scope
-  header, the answer row (`System Status`, `Next Action`, `L0 Inputs`) and the
-  first-screen subsystem current-status tables (`Runtime Blockers`, `DQ Status`,
-  `Gold Lifecycle`, `Control Plane`, `Provider GLOBAL`, `Workflow Selected`,
-  `Workflow GLOBAL`).
+- **Answer surface**: `Provenance`, `Status`, `ID`, `Processed Records`,
+  `Next Action`, `Control Plane`, `Runtime`, `Data Quality`, `Provider`,
+  `Data Validation`, `Inputs`, `Workflow`. `OK` requires recent signal; no
+  recent samples stay `UNKNOWN`, not green. Workflow summary is current-state
+  evidence and must follow the latest bounded terminal workflow signal rather
+  than cumulative workflow-run counters.
+- **Above-the-fold layout**: first screen without scroll contains the
+  provenance header, `Status`, local identity context (`ID`), processed-record
+  context, `Next Action`, compact subsystem current-status cards, `Inputs`,
+  and `Workflow`.
 - **L1 historical context**: immediately below the first screen lives the
   `L1 Historical Trends` row with `Runtime Blockers Trend`, `DQ Status Trend`,
   and `Gold Lifecycle Trend`. Эти графики дают recent-history context и не
@@ -147,16 +143,16 @@ L0 дашборд для одного operator question: что сейчас bro
 - **Subsystem routing**: first-screen current-status panels показывают
   status-first verdict и panel-level drilldowns в canonical dashboards
   (`Runtime`, `Control Plane`, `Data Quality`, `Provider Health`,
-  `Workflow`), а `System Status` / `Next Action` дают общий triage order.
+  `Workflow`), а `Status` / `Next Action` дают общий triage order.
   Provider handoff fail-close'ится к `provider=unknown` с сохранением
   `pipeline_context`; workflow handoff явно reset-scope.
 - **Failure summary**: только compact selected-range summaries по manifest /
   ledger, checkpoint, lineage и `Silver Rejects + Rate`. Distribution
   pie panels, standalone vanity yield/rate gauges и composite source-selection
   detail не входят в L0 flow.
-- **Collapsed rows**: `Range Evidence (Historical / Recent History)` содержит
+- **Collapsed rows**: `Range Evidence` содержит
   `Historical Failures`, `Recent Terminal Runs` и `Silver Rejects + Rate`;
-  `Diagnostics & Docs (Logs / Traces / Raw Metrics)` остаётся отдельной
+  `Diagnostics & Docs` остаётся отдельной
   collapsed navigation/support surface.
 - **Drilldown**: top-level шина содержит `0. Control Plane`, `2. Runtime`,
   `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `Silver Reject Explorer`;
