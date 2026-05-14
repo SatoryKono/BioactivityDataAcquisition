@@ -9,7 +9,7 @@ default_disposition_policy: "warn"
 strictness_mode: "moderate"
 soft_fail_threshold: 0.05
 hard_fail_threshold: 0.20
-strict_validation: false
+strict_dq_validation: false
 invalid_record_policy: "quarantine"
 disposition_overrides:
   "paper_id_required": "fail"

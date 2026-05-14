@@ -10669,7 +10669,9 @@ def _contract_policy_fields(contract_config: dict[str, object]) -> dict[str, obj
         "contract_config_ref": contract_config.get("contract_ref"),
         "soft_fail_threshold": contract_config.get("soft_fail_threshold"),
         "hard_fail_threshold": contract_config.get("hard_fail_threshold"),
-        "strict_validation": contract_config.get("strict_validation"),
+        "strict_validation": contract_config.get(
+            "strict_dq_validation", contract_config.get("strict_validation")
+        ),
         "invalid_record_policy": contract_config.get("invalid_record_policy"),
         "default_disposition_policy": contract_config.get("default_disposition_policy"),
     }

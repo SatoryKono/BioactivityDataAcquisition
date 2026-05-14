@@ -107,6 +107,39 @@ def test_loader_supports_flat_threshold_fields(temp_contract_root: Path) -> None
     assert dq_config.hard_fail_threshold == pytest.approx(0.31)
 
 
+def test_loader_prefers_strict_dq_validation_key(temp_contract_root: Path) -> None:
+    """Canonical contract key should drive DQ strictness semantics."""
+    contract_path = temp_contract_root / "contracts" / "chembl" / "activity.yaml"
+    _write_yaml(
+        contract_path,
+        {
+            "strict_dq_validation": True,
+            "strict_validation": False,
+        },
+    )
+
+    loader = DQContractConfigLoader(temp_contract_root)
+    dq_config = loader.load_dq_config_for_pipeline("chembl_activity")
+    assert dq_config.strict_validation is True
+
+
+def test_loader_supports_legacy_strict_validation_alias(temp_contract_root: Path) -> (
+    None
+):
+    """Legacy contract key remains readable during config migration."""
+    contract_path = temp_contract_root / "contracts" / "chembl" / "activity.yaml"
+    _write_yaml(
+        contract_path,
+        {
+            "strict_validation": True,
+        },
+    )
+
+    loader = DQContractConfigLoader(temp_contract_root)
+    dq_config = loader.load_dq_config_for_pipeline("chembl_activity")
+    assert dq_config.strict_validation is True
+
+
 def test_loader_does_not_fallback_to_legacy_dq_files(tmp_path: Path) -> None:
     """Missing contract files should fail fast without consulting legacy *_dq files."""
     registry_payload = {

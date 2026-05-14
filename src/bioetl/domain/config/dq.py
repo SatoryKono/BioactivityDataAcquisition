@@ -64,8 +64,9 @@ class DQConfig:
     Attributes:
         soft_fail_threshold: Error rate threshold for warnings (0.0-1.0).
         hard_fail_threshold: Error rate threshold for failures (0.0-1.0).
-        strict_validation: If True, apply stricter validation rules that may
-            reject more records. Use with caution in production. Default: False.
+        strict_validation: DQ-only strictness flag for rule evaluation and
+            invalid-record handling. This is distinct from Gold write-path
+            strict validation/runtime strict Gold enforcement. Default: False.
         field_validations: Field-level validation rules.
         cross_field_validations: Cross-field validation rules.
         conditional_validations: Conditional validation rules.

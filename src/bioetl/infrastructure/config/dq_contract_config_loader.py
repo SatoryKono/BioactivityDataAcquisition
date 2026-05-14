@@ -70,6 +70,13 @@ def _resolve_threshold(
     return default
 
 
+def _resolve_contract_strict_dq_validation(contract_config: JsonDict) -> bool:
+    """Resolve DQ-only strict-validation flag from canonical or legacy key."""
+    if "strict_dq_validation" in contract_config:
+        return bool(contract_config["strict_dq_validation"])
+    return bool(contract_config.get("strict_validation", False))
+
+
 def _parse_disposition_overrides(
     overrides: dict[str, str] | None,
 ) -> dict[str, DQDisposition]:
@@ -167,7 +174,7 @@ class DQContractConfigLoader:
             ),
             soft_fail_threshold=_resolve_threshold(contract_config, "soft_fail", 0.05),
             hard_fail_threshold=_resolve_threshold(contract_config, "hard_fail", 0.20),
-            strict_validation=contract_config.get("strict_validation", False),
+            strict_validation=_resolve_contract_strict_dq_validation(contract_config),
             field_validations=(),
             cross_field_validations=(),
             conditional_validations=(),
