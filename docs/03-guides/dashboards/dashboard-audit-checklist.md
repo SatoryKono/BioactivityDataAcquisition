@@ -388,7 +388,7 @@ Check against `contracts/navigation-links.yaml` → `first_action_contract`:
 
 **bioetl-runtime** (panel `9991`):
 - [ ] Min CTA: 4, Max CTA: 4
-- [ ] CTAs: Review current status, Review incident summary, Inspect top blockers, Inspect active blocker
+- [ ] CTAs: Review current status, Review range evidence, Inspect top blockers, Inspect active blocker
 
 **bioetl-provider-health-v2** (panel `9002`):
 - [ ] Min CTA: 3, Max CTA: 3

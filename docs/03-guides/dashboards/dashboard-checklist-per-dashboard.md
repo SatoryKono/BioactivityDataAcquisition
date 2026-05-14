@@ -267,7 +267,7 @@
 - [ ] Panel `9991` (First Action) существует
 - [ ] Min CTA: 4, Max CTA: 4
 - [ ] CTA: Review current status
-- [ ] CTA: Review incident summary
+- [ ] CTA: Review range evidence
 - [ ] CTA: Inspect top blockers
 - [ ] CTA: Inspect active blocker
 

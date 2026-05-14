@@ -379,7 +379,7 @@ L2 diagnostic runtime triage: blockers, latency, backlog, error localization, ha
 
 ### First Action Contract (panel `9991`)
 - **Min CTA**: 4, **Max CTA**: 4
-- **CTAs**: Review current status, Review incident summary, Inspect top blockers, Inspect active blocker
+- **CTAs**: Review current status, Review range evidence, Inspect top blockers, Inspect active blocker
 
 ### First-screen структура
 - **Tier 1**: `First Action`, `Monitor Runtime Current Status`, `Monitor Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Inspect Top Runtime Blockers`

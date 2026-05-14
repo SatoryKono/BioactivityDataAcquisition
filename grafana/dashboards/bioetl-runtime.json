@@ -387,48 +387,6 @@
       ]
     },
     {
-      "gridPos": {
-        "h": 3,
-        "w": 24,
-        "x": 0,
-        "y": 13
-      },
-      "id": 1,
-      "options": {
-        "content": "<center><h2>2. Runtime / $pipeline / $run_type</h2><div><strong>Current window:</strong> 15m status, 30m terminal-run evidence. <strong>Selected range:</strong> diagnostics only.</div></center>",
-        "mode": "html"
-      },
-      "description": "Runtime L2 scope. Current status panels use fixed recording-rule windows; selected-range panels below are evidence only. If current status is UNKNOWN, inspect telemetry gap before treating zero count cards as OK.",
-      "title": "Inspect Runtime Scope",
-      "type": "text"
-    },
-    {
-      "datasource": "-- Grafana --",
-      "description": "Review Diagnostic Scope Note",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 22
-      },
-      "id": 298,
-      "options": {
-        "content": "<strong>Review Diagnostic Scope Note</strong>: This dashboard uses L2 diagnostic flow with Prometheus-first mode. Core triage panels use Prometheus metrics shipped with BioETL. Tracing-only Log Hygiene panels (below, collapsed) require optional tracing profile and use Loki for log-level diagnostics. For deeper investigation, drill down to DQ / Control Plane / Provider Health dashboards.",
-        "mode": "html"
-      },
-      "title": "Review Diagnostic Scope Note",
-      "type": "text"
-    },
-    {
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -494,7 +452,7 @@
         "h": 6,
         "w": 6,
         "x": 6,
-        "y": 16
+        "y": 13
       },
       "id": 9100,
       "options": {
@@ -603,9 +561,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
+        "w": 6,
         "x": 0,
-        "y": 22
+        "y": 19
       },
       "id": 9102,
       "options": {
@@ -637,22 +595,6 @@
       ],
       "title": "Monitor Runtime Telemetry Gap",
       "type": "stat"
-    },
-    {
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 22
-      },
-      "id": 222,
-      "description": "Range-evidence summary note for the KPI cards below. The cards support runtime localization after the current-status answer row; they do not replace the current blocker recording rules. UNKNOWN means missing status telemetry or scrape/rule gap until proven otherwise.",
-      "options": {
-        "content": "<div style=\"padding:0.25rem 0.6rem;line-height:1.55\"><strong>Review Incident Summary</strong>: first-pass KPIs for blocker count, failed runs, worst stage lag, and runtime error rate. Use these before expanding deeper diagnostics.</div>",
-        "mode": "html"
-      },
-      "title": "Review Incident Summary",
-      "type": "text"
     },
     {
       "datasource": {
@@ -709,7 +651,7 @@
         "h": 6,
         "w": 7,
         "x": 17,
-        "y": 16
+        "y": 13
       },
       "id": 9101,
       "options": {
@@ -795,7 +737,7 @@
         "h": 6,
         "w": 5,
         "x": 12,
-        "y": 16
+        "y": 13
       },
       "id": 16,
       "options": {
@@ -874,9 +816,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
-        "x": 0,
-        "y": 28
+        "w": 6,
+        "x": 6,
+        "y": 19
       },
       "id": 205,
       "options": {
@@ -970,9 +912,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 28
+        "w": 6,
+        "x": 12,
+        "y": 19
       },
       "id": 220,
       "options": {
@@ -1055,9 +997,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 28
+        "w": 6,
+        "x": 18,
+        "y": 19
       },
       "id": 237,
       "options": {
@@ -1090,159 +1032,6 @@
       "type": "stat"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Shows each active runtime blocker recording rule with its current value for the selected pipeline/run_type where the source metric exposes run_type. Empty table means no active blockers only when Monitor Runtime Current Status and Monitor Runtime Telemetry Gap are not UNKNOWN.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "short",
-          "noValue": "No active blockers"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 34
-      },
-      "id": 242,
-      "options": {
-        "cellHeight": "sm",
-        "dataLinks": [
-          {
-            "title": "Open Runtime Troubleshooting Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
-            "targetBlank": true
-          },
-          {
-            "title": "Open Pipeline Failure Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-critical.md",
-            "targetBlank": true
-          },
-          {
-            "title": "Open Checkpoint Debugging Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md",
-            "targetBlank": true
-          },
-          {
-            "title": "Open Run Manifest Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md",
-            "targetBlank": true
-          }
-        ],
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "showHeader": true
-      },
-      "pluginVersion": "10.4.0",
-      "targets": [
-        {
-          "expr": "label_replace((bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"} > 0) or (((bioetl_runtime_alert_condition_pipeline_preflight_failed_15m) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"preflight_failed\", \"\", \"\")",
-          "legendFormat": "{{pipeline}} / {{blocker}}",
-          "refId": "A",
-          "instant": true,
-          "format": "table"
-        },
-        {
-          "expr": "label_replace((bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"} > 0) or (((bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"infrastructure_failed\", \"\", \"\")",
-          "legendFormat": "{{pipeline}} / {{blocker}}",
-          "refId": "H",
-          "instant": true,
-          "format": "table"
-        },
-        {
-          "expr": "label_replace((bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_pipeline_runs_failed_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"runs_failed\", \"\", \"\")",
-          "legendFormat": "{{pipeline}} / {{blocker}}",
-          "refId": "B",
-          "instant": true,
-          "format": "table"
-        },
-        {
-          "expr": "label_replace((bioetl_runtime_alert_condition_stage_backlog_active_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_stage_backlog_active_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"stage_backlog_active\", \"\", \"\")",
-          "legendFormat": "{{pipeline}} / {{stage}} / {{blocker}}",
-          "refId": "C",
-          "instant": true,
-          "format": "table"
-        },
-        {
-          "expr": "label_replace((bioetl_runtime_alert_condition_stage_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_stage_lag_high_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"stage_lag_high\", \"\", \"\")",
-          "legendFormat": "{{pipeline}} / {{stage}} / {{blocker}}",
-          "refId": "D",
-          "instant": true,
-          "format": "table"
-        },
-        {
-          "expr": "label_replace((bioetl_runtime_alert_condition_gold_write_missing_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_gold_write_missing_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"gold_write_missing\", \"\", \"\")",
-          "legendFormat": "{{pipeline}} / {{blocker}}",
-          "refId": "E",
-          "instant": true,
-          "format": "table"
-        },
-        {
-          "expr": "label_replace((bioetl_runtime_alert_condition_no_terminal_run_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_no_terminal_run_30m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"no_terminal_run\", \"\", \"\")",
-          "legendFormat": "{{pipeline}} / {{blocker}}",
-          "refId": "F",
-          "instant": true,
-          "format": "table"
-        },
-        {
-          "expr": "label_replace((bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"ingestion_throughput_degraded\", \"\", \"\")",
-          "legendFormat": "{{pipeline}} / {{blocker}}",
-          "refId": "I",
-          "instant": true,
-          "format": "table"
-        },
-        {
-          "expr": "label_replace((bioetl_runtime_alert_condition_record_flow_invariant_violated_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_record_flow_invariant_violated_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"flow_invariant_violated\", \"\", \"\")",
-          "legendFormat": "{{pipeline}} / {{blocker}}",
-          "refId": "G",
-          "instant": true,
-          "format": "table"
-        }
-      ],
-      "title": "Inspect Active Runtime Blocker Detail",
-      "type": "table",
-      "transformations": [
-        {
-          "id": "merge",
-          "options": {}
-        }
-      ]
-    },
-    {
       "id": 9991,
       "type": "text",
       "title": "First Action",
@@ -1251,7 +1040,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 16
+        "y": 13
       },
       "options": {
         "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> read <em>Monitor Runtime Current Status</em>, then inspect the top blocker reason. If status is CRIT, open <em>Inspect Active Runtime Blocker Detail</em>; if WARN, inspect terminal-run/stage lag evidence; if UNKNOWN, verify <em>Monitor Runtime Telemetry Gap</em> before treating zero as OK.</div>",
@@ -1265,8 +1054,8 @@
           "includeVars": false
         },
         {
-          "title": "Review incident summary",
-          "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=222&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
+          "title": "Review range evidence",
+          "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=205&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },
@@ -1295,7 +1084,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 42
+        "y": 25
       },
       "panels": [
         {
@@ -1537,6 +1326,159 @@
           ],
           "title": "Track Records by Stage / Interval",
           "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Shows each active runtime blocker recording rule with its current value for the selected pipeline/run_type where the source metric exposes run_type. Empty table means no active blockers only when Monitor Runtime Current Status and Monitor Runtime Telemetry Gap are not UNKNOWN.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "short",
+              "noValue": "No active blockers"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 29
+          },
+          "id": 242,
+          "options": {
+            "cellHeight": "sm",
+            "dataLinks": [
+              {
+                "title": "Open Runtime Troubleshooting Runbook",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
+                "targetBlank": true
+              },
+              {
+                "title": "Open Pipeline Failure Runbook",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-critical.md",
+                "targetBlank": true
+              },
+              {
+                "title": "Open Checkpoint Debugging Runbook",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md",
+                "targetBlank": true
+              },
+              {
+                "title": "Open Run Manifest Runbook",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md",
+                "targetBlank": true
+              }
+            ],
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true
+          },
+          "pluginVersion": "10.4.0",
+          "targets": [
+            {
+              "expr": "label_replace((bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"} > 0) or (((bioetl_runtime_alert_condition_pipeline_preflight_failed_15m) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"preflight_failed\", \"\", \"\")",
+              "legendFormat": "{{pipeline}} / {{blocker}}",
+              "refId": "A",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "expr": "label_replace((bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"} > 0) or (((bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"infrastructure_failed\", \"\", \"\")",
+              "legendFormat": "{{pipeline}} / {{blocker}}",
+              "refId": "H",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "expr": "label_replace((bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_pipeline_runs_failed_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"runs_failed\", \"\", \"\")",
+              "legendFormat": "{{pipeline}} / {{blocker}}",
+              "refId": "B",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "expr": "label_replace((bioetl_runtime_alert_condition_stage_backlog_active_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_stage_backlog_active_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"stage_backlog_active\", \"\", \"\")",
+              "legendFormat": "{{pipeline}} / {{stage}} / {{blocker}}",
+              "refId": "C",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "expr": "label_replace((bioetl_runtime_alert_condition_stage_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_stage_lag_high_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"stage_lag_high\", \"\", \"\")",
+              "legendFormat": "{{pipeline}} / {{stage}} / {{blocker}}",
+              "refId": "D",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "expr": "label_replace((bioetl_runtime_alert_condition_gold_write_missing_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_gold_write_missing_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"gold_write_missing\", \"\", \"\")",
+              "legendFormat": "{{pipeline}} / {{blocker}}",
+              "refId": "E",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "expr": "label_replace((bioetl_runtime_alert_condition_no_terminal_run_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_no_terminal_run_30m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"no_terminal_run\", \"\", \"\")",
+              "legendFormat": "{{pipeline}} / {{blocker}}",
+              "refId": "F",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "expr": "label_replace((bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"ingestion_throughput_degraded\", \"\", \"\")",
+              "legendFormat": "{{pipeline}} / {{blocker}}",
+              "refId": "I",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "expr": "label_replace((bioetl_runtime_alert_condition_record_flow_invariant_violated_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_record_flow_invariant_violated_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"flow_invariant_violated\", \"\", \"\")",
+              "legendFormat": "{{pipeline}} / {{blocker}}",
+              "refId": "G",
+              "instant": true,
+              "format": "table"
+            }
+          ],
+          "title": "Inspect Active Runtime Blocker Detail",
+          "type": "table",
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            }
+          ]
         }
       ]
     },
@@ -1549,7 +1491,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 43
+        "y": 26
       },
       "panels": [
         {
@@ -2034,7 +1976,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 44
+        "y": 27
       },
       "panels": [
         {
@@ -2623,7 +2565,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 45
+        "y": 28
       },
       "panels": [
         {

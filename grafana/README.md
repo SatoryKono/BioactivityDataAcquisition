@@ -1099,10 +1099,11 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 | `Inspect Top Runtime Blockers` | `topk(3, bioetl_runtime_current_blocker_reason{pipeline=~"$pipeline",run_type=~"$run_type"} > 0)` | table | reason/severity/action labels |
 
 Range and localization evidence (`Monitor Failed Runs`,
-`Monitor Runtime Error Rate`, `Monitor Worst Stage Lag`, blocker detail,
-latency, records by stage, logs/traces) lives below the answer row or inside
-collapsed rows. It supports investigation but does not replace the canonical
-current status recording rule. `Monitor Runtime Error Rate`,
+`Monitor Runtime Error Rate`, `Monitor Worst Stage Lag`, latency, records by
+stage, logs/traces) lives below the answer row or inside collapsed rows.
+`Inspect Active Runtime Blocker Detail` is a collapsed `Detect` drilldown, not
+first-screen guidance. This evidence supports investigation but does not replace
+the canonical current status recording rule. `Monitor Runtime Error Rate`,
 `Monitor Runtime Blockers`, `Monitor Worst Stage Lag`, and
 `Monitor Memory Pressure Active` preserve `UNKNOWN` when telemetry is absent
 instead of coercing missing metrics to `0`.
@@ -2120,7 +2121,7 @@ ______________________________________________________________________
 | ------------------------- | ------------------------------- | ------------ | ------ | ------- | ---------- | --------------- | ------- |
 | 0. Control Plane          | `bioetl-control-plane-v1`       | 2            | 38     | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Replay/resume safety, telemetry gap detection, terminal ledger evidence, GLOBAL read diagnostics, missing-signal markers |
 | 1. Overview               | `bioetl-overview-v2`            | 5            | 27     | 30s     | 12h        | Prometheus      | L0 broken/degraded answer and operational handoff |
-| 2. Runtime                | `bioetl-runtime`                | 2            | 30     | 30s     | 12h        | Prometheus + Quarantine Explorer identity + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
+| 2. Runtime                | `bioetl-runtime`                | 2            | 27     | 30s     | 12h        | Prometheus + Quarantine Explorer identity + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 21     | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Provider latency, health, retries, failure ratios |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 25     | 30s     | 12h        | Prometheus + Quarantine Explorer identity | DQ score, quarantine, freshness, validation failures |
 | 5. Workflow               | `bioetl-workflow-overview`      | 2            | 12     | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Selected-range workflow run and step evidence with one justified panel-level CTA surface (`Next Diagnostic Surface`) plus collapsed step diagnostics |

@@ -184,8 +184,8 @@ tracing-backed log hygiene живёт в collapsed row
 
 - **Top answer row**:
   `First Action`, `Monitor Runtime Current Status`,
-  `Monitor Runtime Telemetry Gap`, `Monitor Runtime Blockers`,
-  `Inspect Top Runtime Blockers`.
+  `Monitor Runtime Blockers`, `Inspect Top Runtime Blockers`,
+  `Monitor Runtime Telemetry Gap`.
   Это первый экран triage. Если здесь уже понятно, что runtime blocked,
   оператор не должен сначала прокручивать в logs/traces.
   `Monitor Runtime Telemetry Gap` проверяет scrape plus runtime dashboard
@@ -194,6 +194,10 @@ tracing-backed log hygiene живёт в collapsed row
   Это intentional datasource trust marker: runtime сохраняет явный first-screen
   health signal только там, где без него zero-count cards можно спутать с
   healthy state.
+  `Monitor Failed Runs`, `Monitor Runtime Error Rate` и
+  `Monitor Worst Stage Lag` остаются selected-range evidence ниже answer row;
+  `Inspect Active Runtime Blocker Detail` открывается как collapsed `Detect`
+  drilldown, а не как отдельная first-screen guidance panel.
 
 - **Localization row**:
   `Stage Backlog Trend`, `Records by Stage / Interval`,

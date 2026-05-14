@@ -392,7 +392,7 @@ def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:
             "var-run_type=$run_type",
             "var-stage=$stage",
         ),
-        "Review incident summary": (
+        "Review range evidence": (
             "var-pipeline=$pipeline",
             "var-run_type=$run_type",
             "var-stage=$stage",

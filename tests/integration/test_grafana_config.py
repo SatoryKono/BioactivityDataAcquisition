@@ -1461,7 +1461,7 @@ def test_runtime_warning_loki_queries_filter_parsed_fields_after_json() -> None:
 
 
 def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
-    """Runtime dashboard should explain the tracing-off degradation path."""
+    """Runtime dashboard should keep tracing guidance in dashboard/row metadata."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     description = dashboard.get("description", "")
     assert "Prometheus-first" in description
@@ -1475,14 +1475,23 @@ def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
         ),
         None,
     )
-    assert note_panel is not None, (
-        "Runtime dashboard must expose a tracing-mode guidance note"
+    assert note_panel is None, (
+        "Runtime tracing guidance must not consume first-screen panel space"
     )
-    content = note_panel.get("options", {}).get("content", "")
-    assert "L2 diagnostic flow" in content
-    assert "Prometheus-first mode" in content
-    assert "Tracing-only Log Hygiene" in content
-    assert "DQ / Control Plane / Provider Health" in content
+
+    tracing_row = next(
+        (
+            panel
+            for panel in dashboard.get("panels", [])
+            if panel.get("title")
+            == "Tracing-only Log Hygiene (requires optional tracing profile)"
+        ),
+        None,
+    )
+    assert tracing_row is not None, (
+        "Runtime dashboard must expose optional tracing diagnostics as a collapsed row"
+    )
+    assert tracing_row.get("collapsed") is True
 
 
 def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> None:
