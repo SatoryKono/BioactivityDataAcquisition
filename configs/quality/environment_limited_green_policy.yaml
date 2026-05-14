@@ -38,9 +38,11 @@ reason_policy:
     posture: transitional_debt
     allowed_in_current_baseline: true
     rationale: >-
-      Historical architecture skips still have an explicit coarse budget, but
-      they remain debt to retire rather than the target steady state.
-    next_hardening_target: retire skip inventory and ratchet budget downward
+      Historical architecture skips now sit behind an explicit coarse budget of
+      three measured skipif tests, but they remain debt to retire rather than the
+      target steady state.
+    next_hardening_target: retire the remaining three skipif tests and ratchet the
+      budget to zero
   - skip_class: live_network_opt_in_gate
     posture: accepted_steady_state_policy
     allowed_in_current_baseline: true

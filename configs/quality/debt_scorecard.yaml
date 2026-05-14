@@ -42,11 +42,12 @@ governance:
       rationale: Strict typing is already stabilized repo-wide and stays zero-budget.
       ratchet_policy: ratchet only downward from zero
     architecture_skip_count:
-      max_count: 7
+      max_count: 3
       owner: '@bioetl-architecture'
       linked_rf: RF-ARCH-015
-      rationale: Marker-skip budget remains explicit until historical skip debt is
-        fully retired.
+      rationale: Marker-skip budget now matches the three explicit architecture
+        skipif tests still present in the suite and stays fail-fast against any
+        re-expansion.
       ratchet_policy: ratchet only after skip inventory shrinks
   review_policy:
     new_exemption_requires:
@@ -95,8 +96,8 @@ compatibility_debt_metrics:
   sunset_source: tests/architecture/test_compat_sunset.py
   metrics:
     retained_public_facade_count:
-      current_count: 13
-      max_count: 13
+      current_count: 11
+      max_count: 11
       owner: '@bioetl-architecture'
       linked_issue: '3354'
       rationale: Sanctioned public facades are retained compatibility obligations;
@@ -237,21 +238,21 @@ hotspot_family_ratchets:
     path_prefixes:
     - src/bioetl/application/core/
     bounded_growth_budgets:
-      files_ge_250_loc: 18
-      max_internal_fan_in: 22
+      files_ge_250_loc: 14
+      max_internal_fan_in: 15
     metrics:
       duplication_clusters: 0
-      files: 81
-      total_loc: 12259
-      files_ge_250_loc: 18
-      helper_function_ratio: 0.46
-      max_internal_fan_in: 22
-      max_internal_fan_in_module: bioetl.application.core.base_transformer
+      files: 163
+      total_loc: 20282
+      files_ge_250_loc: 14
+      helper_function_ratio: 0.37
+      max_internal_fan_in: 15
+      max_internal_fan_in_module: bioetl.application.core.pipeline_services
     trend:
       status: down_vs_2026-03-23
-      next_action: 2026-04-08 adds bounded files_ge_250_loc and max_internal_fan_in
-        caps at the reviewed baseline for application/core while keeping the family
-        duplication ratchet active.
+      next_action: 2026-05-13 ratchets files_ge_250_loc and max_internal_fan_in
+        down to the reviewed measured baseline for application/core while keeping
+        the family duplication ratchet active.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -267,16 +268,17 @@ hotspot_family_ratchets:
       max_internal_fan_in: 7
     metrics:
       duplication_clusters: 0
-      files: 27
-      total_loc: 3163
-      files_ge_250_loc: 6
-      helper_function_ratio: 0.333
+      files: 40
+      total_loc: 5396
+      files_ge_250_loc: 5
+      helper_function_ratio: 0.336
       max_internal_fan_in: 7
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.composite_support_services_factory
     trend:
       status: down_vs_2026-03-23
-      next_action: 2026-04-08 adds bounded files_ge_250_loc and max_internal_fan_in
-        caps at the current reviewed baseline for composition/bootstrap/runtime.
+      next_action: 2026-05-13 keeps composition/bootstrap/runtime pinned to the
+        current reviewed max_internal_fan_in ceiling while the files_ge_250_loc
+        baseline stays one step below the budget.
   - name: composition_factories_pipeline
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -288,20 +290,20 @@ hotspot_family_ratchets:
     path_prefixes:
     - src/bioetl/composition/factories/pipeline/
     bounded_growth_budgets:
-      files_ge_250_loc: 4
-      max_internal_fan_in: 6
+      files_ge_250_loc: 2
+      max_internal_fan_in: 4
     metrics:
       duplication_clusters: 0
-      files: 22
-      total_loc: 2589
-      files_ge_250_loc: 4
-      helper_function_ratio: 0.469
-      max_internal_fan_in: 6
-      max_internal_fan_in_module: bioetl.composition.factories.pipeline.registry
+      files: 29
+      total_loc: 3978
+      files_ge_250_loc: 2
+      helper_function_ratio: 0.4
+      max_internal_fan_in: 4
+      max_internal_fan_in_module: bioetl.composition.factories.pipeline.control_plane_artifacts
     trend:
       status: down_vs_2026-03-23
-      next_action: 2026-04-08 adds bounded files_ge_250_loc and max_internal_fan_in
-        caps at the current reviewed baseline for composition/factories/pipeline.
+      next_action: 2026-05-13 ratchets files_ge_250_loc and max_internal_fan_in
+        down to the reviewed measured baseline for composition/factories/pipeline.
 removable_complexity_family_ratchets:
   snapshot_date: '2026-04-13'
   update_policy: Only raise budgets after an intentional reviewed baseline refresh
