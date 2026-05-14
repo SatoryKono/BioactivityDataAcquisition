@@ -186,7 +186,9 @@ def test_build_baseline_payload_marks_duration_only_refresh_as_captured(
     assert payload["duration_telemetry"]["total_cases"] == 0
 
 
-def test_build_baseline_payload_uses_fallback_coverage_and_junit(tmp_path: Path) -> None:
+def test_build_baseline_payload_uses_fallback_coverage_and_junit(
+    tmp_path: Path,
+) -> None:
     coverage_log = tmp_path / "parallel.log"
     coverage_log.write_text(
         "TOTAL  42248  2218  8880  1084  92.81%\n",
