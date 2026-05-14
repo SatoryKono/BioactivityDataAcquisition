@@ -389,7 +389,7 @@ navigation_transition_contract:
       ctas:
         - title: Review current status
           expected_target_uid: bioetl-runtime
-        - title: Review incident summary
+        - title: Review range evidence
           expected_target_uid: bioetl-runtime
         - title: Inspect top blockers
           expected_target_uid: bioetl-runtime

@@ -137,7 +137,6 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 9401 | Status |
 | bioetl-provider-health-v2.json | 9402 | ID |
 | bioetl-provider-health-v2.json | 9403 | Processed Records |
-| bioetl-runtime.json | 1 | Inspect Runtime Scope |
 | bioetl-runtime.json | 4 | Inspect DQ Alert Conditions |
 | bioetl-runtime.json | 5 | Inspect Control-plane Alert Conditions |
 | bioetl-runtime.json | 6 | Inspect GLOBAL Provider Alert Conditions |
@@ -152,7 +151,6 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 209 | Track GLOBAL Shutdown Initiated by Reason / Interval |
 | bioetl-runtime.json | 210 | Track GLOBAL Shutdown Completed by Reason / Interval |
 | bioetl-runtime.json | 220 | Monitor Runtime Error Rate |
-| bioetl-runtime.json | 222 | Review Incident Summary |
 | bioetl-runtime.json | 230 | Monitor Pipeline Alert Conditions |
 | bioetl-runtime.json | 236 | Monitor No-Records Runs |
 | bioetl-runtime.json | 237 | Monitor Worst Stage Lag |
@@ -167,7 +165,6 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 256 | Inspect Errors by Stage / Error Code / Range |
 | bioetl-runtime.json | 257 | Inspect Top Warning Events by Message / Range |
 | bioetl-runtime.json | 258 | Track GLOBAL Log Hygiene Trend |
-| bioetl-runtime.json | 298 | Review Diagnostic Scope Note |
 | bioetl-runtime.json | 9400 | Provenance |
 | bioetl-runtime.json | 9401 | Status |
 | bioetl-runtime.json | 9402 | ID |

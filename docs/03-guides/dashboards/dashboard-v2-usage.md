@@ -109,20 +109,22 @@ panel.
 1. `bioetl-runtime`, first-screen answer row (без скролла):
    `Provenance`, `Status`, `ID`, `Processed Records`, then
    `First Action`, `Monitor Runtime Current Status`,
-   `Monitor Runtime Telemetry Gap`, `Monitor Runtime Blockers` и
-   `Inspect Top Runtime Blockers` отвечают на L2 вопрос «что блокирует
-   выполнение сейчас и куда идти дальше». Selected-range evidence начинается
-   ниже и не определяет current status; non-zero/UNKNOWN telemetry gap делает
-   ниже расположенные zero-count cards недоказательными.
+   `Monitor Runtime Blockers`, `Inspect Top Runtime Blockers` и
+   `Monitor Runtime Telemetry Gap` отвечают на L2 вопрос «что блокирует
+   выполнение сейчас и куда идти дальше». Selected-range KPI evidence
+   (`Monitor Failed Runs`, `Monitor Runtime Error Rate`,
+   `Monitor Worst Stage Lag`) находится ниже answer row и не определяет
+   current status; non-zero/UNKNOWN telemetry gap делает zero-count cards
+   недоказательными.
    Datasource trust markers are targeted: `Runtime` keeps this explicit
    telemetry-gap panel first-screen, `Control Plane` uses
    `Inspect: Telemetry Missing`, while `Silver Reject Explorer` relies on
    explicit no-data/backend-failure copy instead of a generic datasource-health
    stat tile.
 1. `bioetl-runtime`, collapsed row-группы по сценарию:
-   `Backlog Trends`, `Durations`, `Shutdown Diagnostics`,
-   `Tracing-only Log Hygiene`. Открывайте ровно одну нужную группу после
-   чтения summary KPI, чтобы сократить шум первого экрана.
+   `Detect`, `Localize`, `Escalate`, `Tracing-only Log Hygiene`. Открывайте
+   ровно одну нужную группу после чтения answer row и selected-range KPI,
+   чтобы сократить шум первого экрана.
 1. `bioetl-control-plane-v1`, answer row:
    `Provenance`, `Status`, `ID`, `Processed Records`, then
    `Monitor: Replay Safety State`, `Inspect: Checkpoint Freshness Gap`,
@@ -585,4 +587,4 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - **Localize**: локализация culprit stage/phase и проверка latency/backlog breakdown.
 - **Escalate**: shutdown/terminal-state диагностика и handoff в tracing/log drilldown для подтверждения причины.
 
-На first screen оставлена ровно одна рекомендация drilldown — panel `id=9991` (`First Action`). Оператор сначала читает `Inspect Active Runtime Blocker Detail`, выбирает текущий blocker type, затем идёт по тем же трём полосам в фиксированном порядке.
+На first screen оставлена ровно одна рекомендация drilldown — panel `id=9991` (`First Action`). Оператор сначала читает current status, top blockers и telemetry gap; `Inspect Active Runtime Blocker Detail` открывается из CTA только когда нужен полный rule-level breakdown внутри `Detect`.
