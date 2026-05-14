@@ -118,7 +118,7 @@ jobs:
 
             -   name: Smoke check (dependencies + core imports)
                 run: |
-                    uv run pytest tests/smoke/ -v --tb=short
+                    uv run pytest tests/smoke/ -m "not memory" -v --tb=short
 
     control-plane-e2e:
         runs-on: ubuntu-latest
@@ -602,12 +602,12 @@ jobs:
                 with:
                     enable-pytest-cache: "true"
                     pytest-cache-prefix: "pytest-memory"
-                    pytest-cache-fingerprint: ${{ hashFiles('tests/unit/scripts/ops/test_neo4j_memory*.py', 'tests/conftest.py', 'pyproject.toml') }}
+                    pytest-cache-fingerprint: ${{ hashFiles('tests/smoke/test_neo4j_memory*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
             -   name: Run dedicated Neo4j memory test lane
                 run: |
                     mkdir -p reports/test-telemetry
-                    uv run pytest tests/unit/scripts/ops/ \
+                    uv run pytest tests/smoke/test_neo4j_memory_mcp_smoke.py \
                       -m "memory" \
                       -q --tb=short \
                       --junitxml=reports/test-telemetry/junit-memory.xml
@@ -934,6 +934,17 @@ jobs:
                         with Path(summary_path).open("a", encoding="utf-8") as handle:
                             handle.write(markdown)
                     PY
+
+            -   name: Publish CI confidence accounting summary
+                if: always()
+                shell: bash
+                run: |
+                    {
+                      echo
+                      echo "### CI confidence accounting"
+                      echo "- Hard coverage gate: \`coverage-verify\` (85%)"
+                      echo "- Blocking confidence lanes outside hard coverage: \`contract-confidence\`, \`control-plane-e2e\`, \`memory-tests\`"
+                    } >> "$GITHUB_STEP_SUMMARY"
 
             -   name: Upload slow-test telemetry
                 if: always()

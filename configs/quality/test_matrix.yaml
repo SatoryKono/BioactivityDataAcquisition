@@ -34,7 +34,7 @@ test_lanes:
   lanes:
     smoke:
       suite_name: smoke
-      description: "Minimal dependency and import smoke lane aligned with the CI smoke-check job."
+      description: "Minimal dependency and import smoke lane aligned with the CI smoke-check job and excluding dedicated memory smoke."
       runner_backend: run_pytest
       runner: scripts/engineering/dev/run_pytest.sh
       paths:
@@ -129,14 +129,14 @@ test_lanes:
 
     architecture:
       suite_name: architecture
-      description: "Layer boundary, contract, governance, and repository policy checks."
+      description: "Layer boundary, import-linter contract, governance, and repository policy checks split into fast-boundary and slow-governance shards; CI also runs lint-imports directly in .github/workflows/import-linter.yml."
       runner_backend: run_pytest_sharded
       runner: scripts/engineering/dev/run_pytest_sharded.sh
       runner_options:
         - --shard
-        - S7-crosscutting-architecture
+        - S7-architecture-fast-boundary
         - --shard
-        - S7-crosscutting-architecture-guardrails
+        - S7-architecture-slow-governance
       paths:
         - tests/architecture/
       marker_expression: "not slow and not benchmark and not memory"
@@ -174,10 +174,10 @@ test_lanes:
       runner_backend: run_pytest
       runner: scripts/engineering/dev/run_pytest.sh
       paths:
-        - tests/unit/scripts/ops/
+        - tests/smoke/test_neo4j_memory_mcp_smoke.py
       marker_expression: "memory and not benchmark"
       pytest_args:
-        - tests/unit/scripts/ops/
+        - tests/smoke/test_neo4j_memory_mcp_smoke.py
         - -m
         - memory and not benchmark
       replay_mode: not_applicable
@@ -488,6 +488,7 @@ fixture_governance:
     cassette_staleness_age: enforced
     cassette_metadata_catalog: enforced
     cassette_metadata_backfill: enforced
+    bronze_replay_fixtures: enforced
     contract_snapshots: enforced
     golden_masters: enforced
     extensionless_filenames: enforced
