@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1832,
-    "total_internal_imports": 7344,
+    "scanned_modules": 1845,
+    "total_internal_imports": 7379,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 321,
@@ -11,13 +11,13 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 1193,
+      "imports": 1218,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1095,
+      "imports": 1105,
       "allowed": true
     },
     {
@@ -91,7 +91,7 @@
     {
       "source": "application.composite",
       "target": "domain.composite",
-      "imports": 111
+      "imports": 115
     },
     {
       "source": "infrastructure.adapters",
@@ -114,6 +114,11 @@
       "imports": 80
     },
     {
+      "source": "application.composite",
+      "target": "domain.ports",
+      "imports": 72
+    },
+    {
       "source": "application.core",
       "target": "domain.ports",
       "imports": 72
@@ -127,11 +132,6 @@
       "source": "infrastructure.storage",
       "target": "domain.types",
       "imports": 71
-    },
-    {
-      "source": "application.composite",
-      "target": "domain.ports",
-      "imports": 70
     },
     {
       "source": "application.services",
@@ -166,7 +166,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 55
+      "imports": 58
     },
     {
       "source": "infrastructure.storage",
