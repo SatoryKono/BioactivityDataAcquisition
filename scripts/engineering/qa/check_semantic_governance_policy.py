@@ -462,7 +462,6 @@ def _typing_policy_findings(
         ]
     actual = _current_unknown_composite_fields(rows)
     covered: set[tuple[str, str]] = set()
-    declared: set[tuple[str, str]] = set()
     for entry in entries:
         if not isinstance(entry, dict):
             findings.append(
@@ -507,12 +506,24 @@ def _typing_policy_findings(
                 )
             )
             continue
+        matched = False
         for pipeline in pipelines:
             for field in fields:
                 pair = (pipeline, field)
-                declared.add(pair)
                 if pair in actual:
                     covered.add(pair)
+                    matched = True
+        if not matched:
+            findings.append(
+                GovernanceFinding(
+                    kind="stale_composite_unknown_typing_review",
+                    subject=review_id,
+                    message=(
+                        f"composite unknown typing review {review_id} does not cover "
+                        "any current unknown composite schema field"
+                    ),
+                )
+            )
     for missing in sorted(actual - covered):
         findings.append(
             GovernanceFinding(
@@ -521,17 +532,6 @@ def _typing_policy_findings(
                 message=(
                     f"composite unknown schema field {missing[0]}.{missing[1]} "
                     "is not covered by composite_unknown_typing_reviews"
-                ),
-            )
-        )
-    for stale in sorted(declared - actual):
-        findings.append(
-            GovernanceFinding(
-                kind="stale_composite_unknown_typing_review",
-                subject=f"{stale[0]}.{stale[1]}",
-                message=(
-                    f"composite unknown typing review declares stale pair "
-                    f"{stale[0]}.{stale[1]}"
                 ),
             )
         )

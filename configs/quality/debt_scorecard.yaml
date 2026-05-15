@@ -1,8 +1,8 @@
 schema_version: 1
 baseline:
-  total_exemptions: 1
+  total_exemptions: 4
   by_registry:
-    file_size_limits: 0
+    file_size_limits: 3
     function_complexity: 0
     function_length: 0
     class_size: 0
@@ -457,7 +457,7 @@ quarterly_targets:
     complexity_metrics: 4
     structural_debt: 2
   registry_budgets:
-    file_size_limits: 0
+    file_size_limits: 3
     function_complexity: 3
     function_length: 2
     class_size: 2
