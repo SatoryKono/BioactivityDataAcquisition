@@ -10,6 +10,7 @@ __all__ = [
 ]
 
 
+<<<<<<< Updated upstream
 def _build_registry_indexes(
     clusters: tuple[SemanticFieldCluster, ...],
 ) -> tuple[
@@ -37,6 +38,36 @@ def _build_registry_indexes(
     )
 
 
+||||||| Stash base
+=======
+def _build_registry_indexes(
+    clusters: tuple["SemanticFieldCluster", ...],
+) -> tuple[
+    dict[str, "SemanticFieldCluster"],
+    dict[str, "SemanticFieldCluster"],
+    dict[str, "SemanticFieldCluster"],
+    dict[str, "SemanticFieldCluster"],
+]:
+    by_cluster_id: dict[str, SemanticFieldCluster] = {}
+    by_canonical_name: dict[str, SemanticFieldCluster] = {}
+    by_legacy_name: dict[str, SemanticFieldCluster] = {}
+    by_raw_provider_name: dict[str, SemanticFieldCluster] = {}
+
+    for cluster in clusters:
+        _register_cluster_id(by_cluster_id, cluster)
+        _register_canonical_name(by_canonical_name, cluster)
+        _register_legacy_names(by_legacy_name, cluster)
+        _register_raw_provider_names(by_raw_provider_name, cluster)
+
+    return (
+        by_cluster_id,
+        by_canonical_name,
+        by_legacy_name,
+        by_raw_provider_name,
+    )
+
+
+>>>>>>> Stashed changes
 @dataclass(frozen=True, slots=True)
 class SemanticFieldCluster:
     """One semantic field cluster with canonical and legacy naming metadata."""

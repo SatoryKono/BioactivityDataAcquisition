@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 version: "1.2.0"
 matrix_path: reports/semantic_pipeline_audit/semantic_pair_matrix_2026-05-15.csv
 review_registry_path: configs/field_registry/semantic_audit_review_registry.yaml
@@ -54,3 +55,177 @@ status_budgets:
     max_count: 1053
     ratchet_only: true
 reviewed_critical_rows: []
+||||||| Stash base
+=======
+version: "1.0.0"
+matrix_path: reports/semantic_pipeline_audit/semantic_pair_matrix_2026-05-14.csv
+reviewed_on: "2026-05-14"
+owner: BioETL Team
+budgets:
+  CRITICAL:
+    max_count: 16
+    require_reviewed_rows: true
+  HIGH:
+    max_count: 333
+    ratchet_only: true
+reviewed_critical_rows:
+  - row_key: 466cd678b1b25e57
+    cluster_id: publication_title
+    pipeline_a: composite_publication
+    field_a: title
+    pipeline_b: crossref_publication
+    field_b: title
+    owner: BioETL Team
+    expires_on: "2026-08-14"
+    rationale: Composite title is a fallback join and display field; cross-provider Gold/Pandera strictness needs a dedicated publication-title compatibility pass.
+
+  - row_key: 10c2342c50302fb8
+    cluster_id: publication_title
+    pipeline_a: composite_publication
+    field_a: title
+    pipeline_b: openalex_publication
+    field_b: title
+    owner: BioETL Team
+    expires_on: "2026-08-14"
+    rationale: Composite title is a fallback join and display field; OpenAlex title strictness differs from the composite output contract.
+
+  - row_key: 7f551f1d7e31c2f9
+    cluster_id: publication_title
+    pipeline_a: composite_publication
+    field_a: title
+    pipeline_b: semanticscholar_publication
+    field_b: title
+    owner: BioETL Team
+    expires_on: "2026-08-14"
+    rationale: Composite title is a fallback join and display field; Semantic Scholar title strictness differs from the composite output contract.
+
+  - row_key: 1b3559ef428f6f22
+    cluster_id: shared_accession
+    pipeline_a: chembl_target_component
+    field_a: accession
+    pipeline_b: uniprot_protein
+    field_b: accession
+    owner: BioETL Team
+    expires_on: "2026-08-14"
+    rationale: ChEMBL component accessions and UniProt primary accessions share spelling but need explicit cross-provider identifier ownership before aliasing.
+
+  - row_key: ee38e548ceec0a9a
+    cluster_id: shared_canonical_smiles
+    pipeline_a: chembl_activity
+    field_a: canonical_smiles
+    pipeline_b: pubchem_compound
+    field_b: canonical_smiles
+    owner: BioETL Team
+    expires_on: "2026-08-14"
+    rationale: SMILES fields require molecule-structure typing and strictness review before cross-provider contract unification.
+
+  - row_key: d958329a336e2e89
+    cluster_id: shared_component_id
+    pipeline_a: chembl_target_component
+    field_a: component_id
+    pipeline_b: composite_target
+    field_b: component_id
+    owner: BioETL Team
+    expires_on: "2026-08-14"
+    rationale: Composite target retains component_id as merged lineage; type/validation lossiness needs target-component contract remediation.
+
+  - row_key: c4ed12626f0f84fa
+    cluster_id: shared_protein_class_id
+    pipeline_a: chembl_protein_class
+    field_a: protein_class_id
+    pipeline_b: composite_target
+    field_b: protein_class_id
+    owner: BioETL Team
+    expires_on: "2026-08-14"
+    rationale: Composite target retains protein class lineage with looser typing than the source pipeline.
+
+  - row_key: b5accf0da2b0eea6
+    cluster_id: shared_record_id
+    pipeline_a: chembl_compound_record
+    field_a: record_id
+    pipeline_b: composite_activity
+    field_b: record_id
+    owner: BioETL Team
+    expires_on: "2026-08-14"
+    rationale: Composite activity carries compound-record lineage; record_id typing and DQ strictness need a focused lineage contract pass.
+
+  - row_key: cce35709bb8562f6
+    cluster_id: shared_score
+    pipeline_a: chembl_assay
+    field_a: score
+    pipeline_b: composite_assay
+    field_b: score
+    owner: BioETL Team
+    expires_on: "2026-08-14"
+    rationale: score is a generic lexical field with source-specific assay meaning and must not become a global canonical alias.
+
+  - row_key: 963f0989a6bf6fb8
+    cluster_id: shared_src_id
+    pipeline_a: chembl_compound_record
+    field_a: src_id
+    pipeline_b: composite_activity
+    field_b: src_id
+    owner: BioETL Team
+    expires_on: "2026-08-14"
+    rationale: src_id is provider lineage metadata; composite projections need lineage-specific typing review before unification.
+
+  - row_key: fc974cabe46e3021
+    cluster_id: shared_src_id
+    pipeline_a: chembl_compound_record
+    field_a: src_id
+    pipeline_b: composite_assay
+    field_b: src_id
+    owner: BioETL Team
+    expires_on: "2026-08-14"
+    rationale: src_id is provider lineage metadata; composite projections need lineage-specific typing review before unification.
+
+  - row_key: f8c4ca9ae51a8dfb
+    cluster_id: shared_src_id
+    pipeline_a: chembl_compound_record
+    field_a: src_id
+    pipeline_b: composite_publication
+    field_b: src_id
+    owner: BioETL Team
+    expires_on: "2026-08-14"
+    rationale: src_id is provider lineage metadata; composite projections need lineage-specific typing review before unification.
+
+  - row_key: 480a4ce2ea852cdc
+    cluster_id: shared_type
+    pipeline_a: chembl_activity
+    field_a: type
+    pipeline_b: chembl_assay_parameters
+    field_b: type
+    owner: BioETL Team
+    expires_on: "2026-08-14"
+    rationale: type is a generic lexical field with conflicting activity and assay-parameter semantics.
+
+  - row_key: 3edd4527d0515a3b
+    cluster_id: shared_type
+    pipeline_a: chembl_assay_parameters
+    field_a: type
+    pipeline_b: composite_activity
+    field_b: type
+    owner: BioETL Team
+    expires_on: "2026-08-14"
+    rationale: type is a generic lexical field with conflicting assay-parameter and composite activity semantics.
+
+  - row_key: 74ee6f286b480bfd
+    cluster_id: shared_value
+    pipeline_a: chembl_activity
+    field_a: value
+    pipeline_b: composite_activity
+    field_b: value
+    owner: BioETL Team
+    expires_on: "2026-08-14"
+    rationale: value is raw activity measurement data and must stay separate from standardized measurement semantics.
+
+  - row_key: 8aea14eb6e80b26f
+    cluster_id: shared_value
+    pipeline_a: chembl_assay_parameters
+    field_a: value
+    pipeline_b: composite_activity
+    field_b: value
+    owner: BioETL Team
+    expires_on: "2026-08-14"
+    rationale: value is a generic raw measurement field with assay-parameter and composite activity meaning differences.
+>>>>>>> Stashed changes

@@ -570,6 +570,7 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
     processed = panels["Processed Records"]
     processed_expressions = get_panel_expressions({"panels": [processed]})
     processed_description = str(processed.get("description", "")).lower()
+<<<<<<< Updated upstream
     assert processed.get("datasource") == "Quarantine Explorer"
     assert processed_expressions == []
     processed_target = processed.get("targets", [])[0]
@@ -583,6 +584,23 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         "pipeline=${pipeline}&run_type=${run_type:csv}"
     )
     assert "accounting" in processed_description
+||||||| Stash base
+    assert processed_expressions
+    assert any("bioetl_records_processed_total" in expr for expr in processed_expressions)
+    assert any("max_over_time(" in expr for expr in processed_expressions)
+    assert any("[$__range]" in expr for expr in processed_expressions)
+    assert any("or vector(0)" in expr for expr in processed_expressions)
+    assert "selected-range" in processed_description
+=======
+    assert processed_expressions
+    assert any(
+        "bioetl_records_processed_total" in expr for expr in processed_expressions
+    )
+    assert any("max_over_time(" in expr for expr in processed_expressions)
+    assert any("[$__range]" in expr for expr in processed_expressions)
+    assert any("or vector(0)" in expr for expr in processed_expressions)
+    assert "selected-range" in processed_description
+>>>>>>> Stashed changes
     assert "evidence" in processed_description
     assert "missing" in processed_description
     assert "not ok" in processed_description
@@ -1844,12 +1862,314 @@ def test_exact_duplicate_promql_groups_are_only_explicitly_justified_reuse() -> 
     duplicate_uses_by_expr = {
         expr: uses for expr, uses in observed_uses_by_expr.items() if len(uses) > 1
     }
+<<<<<<< Updated upstream
     duplicate_uses_by_expr = _filter_overview_snapshot_duplicates(
         duplicate_uses_by_expr
     )
     expected_duplicate_uses = _filter_overview_snapshot_duplicates(
         _expected_duplicate_uses()
     )
+||||||| Stash base
+
+    def _is_overview_snapshot_duplicate(uses: set[tuple[str, str]]) -> bool:
+        dashboards = {dashboard_name for dashboard_name, _title in uses}
+        return dashboards == {"bioetl-overview-v2.json", "bioetl-overview-v3.json"}
+
+    expected_duplicate_uses = {
+        '((sum((bioetl_dq_validation_score{pipeline=~"$pipeline"} * '
+        'bioetl_dq_validation_record_count{pipeline=~"$pipeline"}))) / '
+        'clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~"$pipeline"}), '
+        "1))": {
+            (
+                "bioetl-dq-v2.json",
+                "Monitor: Data Quality Score (Volume-weighted)",
+            ),
+            (
+                "bioetl-dq-v2.json",
+                "Track: Data Quality Score Trend (Volume-weighted)",
+            ),
+        },
+        'round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~"$pipeline"}'
+        "[$__range])) or vector(0))": {
+            ("bioetl-control-plane-v1.json", "Monitor: Lineage Refs Missing"),
+            ("bioetl-dq-v2.json", "Monitor: Lineage Refs Missing"),
+        },
+        'max((bioetl_replay_safety_blockers_15m{run_type=~"$run_type"}) and '
+        'on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))': {
+            ("bioetl-control-plane-v1.json", "Monitor: Replay Safety State"),
+            ("bioetl-control-plane-v1.json", "Status"),
+        },
+        'max(bioetl_dq_current_status{pipeline=~"$pipeline"})': {
+            ("bioetl-dq-v2.json", "Monitor DQ Current Status"),
+            ("bioetl-dq-v2.json", "Status"),
+        },
+        'max(bioetl_runtime_current_status{pipeline=~"$pipeline",run_type=~"$run_type"} '
+        'or ((bioetl_runtime_current_status{run_type=~"$run_type"}) and on(pipeline) '
+        'label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
+            ("bioetl-runtime.json", "Monitor Runtime Current Status"),
+            ("bioetl-runtime.json", "Status"),
+        },
+        'label_replace(round(sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
+        'run_type=~"$run_type",stage="bronze"}[$__range])) or vector(0)), '
+        '"parameter", "1 bronze", "", "") or label_replace(round(sum(max_over_time('
+        'bioetl_records_processed_total{pipeline=~"$pipeline",run_type=~"$run_type",'
+        'stage="silver"}[$__range])) or vector(0)), "parameter", "2 silver [valid]", '
+        '"", "") or label_replace(round(sum(max_over_time(bioetl_records_processed_total{'
+        'pipeline=~"$pipeline",run_type=~"$run_type",stage="filtered_out"}[$__range])) '
+        'or vector(0)), "parameter", "3 silver [error]", "", "") or label_replace(round('
+        'sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
+        'run_type=~"$run_type",stage="gold"}[$__range])) or vector(0)), "parameter", '
+        '"4 gold [valid]", "", "") or label_replace(round(clamp_min((sum(max_over_time('
+        'bioetl_records_processed_total{pipeline=~"$pipeline",run_type=~"$run_type",'
+        'stage="silver"}[$__range])) or vector(0)) - (sum(max_over_time('
+        'bioetl_records_processed_total{pipeline=~"$pipeline",run_type=~"$run_type",'
+        'stage="gold"}[$__range])) or vector(0)), 0)), "parameter", '
+        '"5 gold [error]", "", "")': {
+            ("bioetl-control-plane-v1.json", "Processed Records"),
+            ("bioetl-dq-v2.json", "Processed Records"),
+            ("bioetl-overview-v2.json", "Processed Records"),
+            ("bioetl-overview-v3.json", "Processed Records"),
+            ("bioetl-provider-health-v2.json", "Processed Records"),
+            ("bioetl-runtime.json", "Processed Records"),
+            ("bioetl-workflow-overview.json", "Processed Records"),
+        },
+        '(sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
+        'run_type=~"$run_type",stage="filtered_out"}[$__range])) or vector(0)) / '
+        'clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
+        'run_type=~"$run_type",stage="bronze"}[$__range])) or vector(0)), 1)': {
+            ("bioetl-overview-v2.json", "Silver Rejects + Rate"),
+            ("bioetl-overview-v3.json", "Silver Rejects + Rate"),
+        },
+        'bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"}': {
+            ("bioetl-overview-v2.json", "DQ Status Trend"),
+            ("bioetl-overview-v3.json", "DQ Status Trend"),
+        },
+        'bioetl_l1_gold_lifecycle_status{pipeline=~"$pipeline",run_type=~"$run_type"}': {
+            ("bioetl-overview-v2.json", "Gold Lifecycle Trend"),
+            ("bioetl-overview-v3.json", "Gold Lifecycle Trend"),
+        },
+        'bioetl_l1_provider_global_status': {
+            ("bioetl-overview-v2.json", "Provider Global"),
+            ("bioetl-overview-v3.json", "Provider"),
+        },
+        'bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",run_type=~"$run_type"}': {
+            ("bioetl-overview-v2.json", "Runtime Blockers Trend"),
+            ("bioetl-overview-v3.json", "Runtime Blockers Trend"),
+        },
+        'max by (pipeline) (bioetl_l1_control_plane_current_status{pipeline=~"$pipeline",'
+        'run_type=~"$run_type"} or ((bioetl_l1_control_plane_current_status{run_type=~"$run_type"}) '
+        'and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
+            ("bioetl-overview-v2.json", "Control Plane"),
+            ("bioetl-overview-v3.json", "Control Plane"),
+        },
+        'max by (pipeline) (bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"} '
+        'or ((bioetl_l1_dq_status{run_type=~"$run_type"}) and on(pipeline) '
+        'label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
+            ("bioetl-overview-v2.json", "DQ Status"),
+            ("bioetl-overview-v3.json", "Data Quality"),
+        },
+        'max by (pipeline) (bioetl_l1_gold_lifecycle_status{pipeline=~"$pipeline",'
+        'run_type=~"$run_type"} or ((bioetl_l1_gold_lifecycle_status{run_type=~"$run_type"}) '
+        'and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
+            ("bioetl-overview-v2.json", "Gold Lifecycle"),
+            ("bioetl-overview-v3.json", "Data Validation"),
+        },
+        'max by (pipeline) (bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",'
+        'run_type=~"$run_type"} or ((bioetl_l1_runtime_blocker_status{run_type=~"$run_type"}) '
+        'and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
+            ("bioetl-overview-v2.json", "Runtime Blockers"),
+            ("bioetl-overview-v3.json", "Runtime"),
+        },
+        'max(bioetl_l0_status{pipeline=~"$pipeline",run_type=~"$run_type"} or '
+        '((bioetl_l0_status{run_type=~"$run_type"}) and on(pipeline) '
+        'label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
+            ("bioetl-overview-v2.json", "System Status"),
+            ("bioetl-overview-v3.json", "Status"),
+        },
+        'round(sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
+        'run_type=~"$run_type",stage="filtered_out"}[$__range])) or vector(0))': {
+            ("bioetl-overview-v2.json", "Silver Rejects + Rate"),
+            ("bioetl-overview-v3.json", "Silver Rejects + Rate"),
+        },
+        'sum by (pipeline, run_type) (max_over_time(bioetl_pipeline_runs_total{status="failed",'
+        'pipeline=~"(${pipeline:regex}|workflow_${pipeline:regex})",run_type=~"$run_type"}[$__range]))': {
+            ("bioetl-overview-v2.json", "Historical Failures"),
+            ("bioetl-overview-v3.json", "Historical Failures"),
+        },
+        'sum by (pipeline, status) (max_over_time(bioetl_pipeline_runs_total{pipeline=~"(${pipeline:regex}|'
+        'workflow_${pipeline:regex})",run_type=~"$run_type",status!="success"}[$__range]))': {
+            ("bioetl-overview-v2.json", "Recent Terminal Runs"),
+            ("bioetl-overview-v3.json", "Recent Terminal Runs"),
+        },
+    }
+    duplicate_uses_by_expr = {
+        expr: uses
+        for expr, uses in duplicate_uses_by_expr.items()
+        if not _is_overview_snapshot_duplicate(uses)
+    }
+    expected_duplicate_uses = {
+        expr: uses
+        for expr, uses in expected_duplicate_uses.items()
+        if not _is_overview_snapshot_duplicate(uses)
+    }
+=======
+
+    def _is_overview_snapshot_duplicate(uses: set[tuple[str, str]]) -> bool:
+        dashboards = {dashboard_name for dashboard_name, _title in uses}
+        return dashboards == {"bioetl-overview-v2.json", "bioetl-overview-v3.json"}
+
+    expected_duplicate_uses = {
+        '((sum((bioetl_dq_validation_score{pipeline=~"$pipeline"} * '
+        'bioetl_dq_validation_record_count{pipeline=~"$pipeline"}))) / '
+        'clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~"$pipeline"}), '
+        "1))": {
+            (
+                "bioetl-dq-v2.json",
+                "Monitor: Data Quality Score (Volume-weighted)",
+            ),
+            (
+                "bioetl-dq-v2.json",
+                "Track: Data Quality Score Trend (Volume-weighted)",
+            ),
+        },
+        'round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~"$pipeline"}'
+        "[$__range])) or vector(0))": {
+            ("bioetl-control-plane-v1.json", "Monitor: Lineage Refs Missing"),
+            ("bioetl-dq-v2.json", "Monitor: Lineage Refs Missing"),
+        },
+        'max((bioetl_replay_safety_blockers_15m{run_type=~"$run_type"}) and '
+        'on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))': {
+            ("bioetl-control-plane-v1.json", "Monitor: Replay Safety State"),
+            ("bioetl-control-plane-v1.json", "Status"),
+        },
+        'max(bioetl_dq_current_status{pipeline=~"$pipeline"})': {
+            ("bioetl-dq-v2.json", "Monitor DQ Current Status"),
+            ("bioetl-dq-v2.json", "Status"),
+        },
+        'max(bioetl_runtime_current_status{pipeline=~"$pipeline",run_type=~"$run_type"} '
+        'or ((bioetl_runtime_current_status{run_type=~"$run_type"}) and on(pipeline) '
+        'label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
+            ("bioetl-runtime.json", "Runtime Status"),
+            ("bioetl-runtime.json", "Status"),
+        },
+        'label_replace(round(sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
+        'run_type=~"$run_type",stage="bronze"}[$__range])) or vector(0)), '
+        '"parameter", "1 bronze", "", "") or label_replace(round(sum(max_over_time('
+        'bioetl_records_processed_total{pipeline=~"$pipeline",run_type=~"$run_type",'
+        'stage="silver"}[$__range])) or vector(0)), "parameter", "2 silver [valid]", '
+        '"", "") or label_replace(round(sum(max_over_time(bioetl_records_processed_total{'
+        'pipeline=~"$pipeline",run_type=~"$run_type",stage="filtered_out"}[$__range])) '
+        'or vector(0)), "parameter", "3 silver [error]", "", "") or label_replace(round('
+        'sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
+        'run_type=~"$run_type",stage="gold"}[$__range])) or vector(0)), "parameter", '
+        '"4 gold [valid]", "", "") or label_replace(round(clamp_min((sum(max_over_time('
+        'bioetl_records_processed_total{pipeline=~"$pipeline",run_type=~"$run_type",'
+        'stage="silver"}[$__range])) or vector(0)) - (sum(max_over_time('
+        'bioetl_records_processed_total{pipeline=~"$pipeline",run_type=~"$run_type",'
+        'stage="gold"}[$__range])) or vector(0)), 0)), "parameter", '
+        '"5 gold [error]", "", "")': {
+            ("bioetl-control-plane-v1.json", "Processed Records"),
+            ("bioetl-dq-v2.json", "Processed Records"),
+            ("bioetl-overview-v2.json", "Processed Records"),
+            ("bioetl-overview-v3.json", "Processed Records"),
+            ("bioetl-provider-health-v2.json", "Processed Records"),
+            ("bioetl-runtime.json", "Processed Records"),
+            ("bioetl-workflow-overview.json", "Processed Records"),
+        },
+        '(sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
+        'run_type=~"$run_type",stage="filtered_out"}[$__range])) or vector(0)) / '
+        'clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
+        'run_type=~"$run_type",stage="bronze"}[$__range])) or vector(0)), 1)': {
+            ("bioetl-overview-v2.json", "Silver Rejects + Rate"),
+            ("bioetl-overview-v3.json", "Silver Rejects + Rate"),
+        },
+        'bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"}': {
+            ("bioetl-overview-v2.json", "DQ Status Trend"),
+            ("bioetl-overview-v3.json", "DQ Status Trend"),
+        },
+        'bioetl_l1_gold_lifecycle_status{pipeline=~"$pipeline",run_type=~"$run_type"}': {
+            ("bioetl-overview-v2.json", "Gold Lifecycle Trend"),
+            ("bioetl-overview-v3.json", "Gold Lifecycle Trend"),
+        },
+        "bioetl_l1_provider_global_status": {
+            ("bioetl-overview-v2.json", "Provider Global"),
+            ("bioetl-overview-v3.json", "Provider"),
+        },
+        'bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",run_type=~"$run_type"}': {
+            ("bioetl-overview-v2.json", "Runtime Blockers Trend"),
+            ("bioetl-overview-v3.json", "Runtime Blockers Trend"),
+        },
+        'max by (pipeline) (bioetl_l1_control_plane_current_status{pipeline=~"$pipeline",'
+        'run_type=~"$run_type"} or ((bioetl_l1_control_plane_current_status{run_type=~"$run_type"}) '
+        'and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
+            ("bioetl-overview-v2.json", "Control Plane"),
+            ("bioetl-overview-v3.json", "Control Plane"),
+        },
+        'max by (pipeline) (bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"} '
+        'or ((bioetl_l1_dq_status{run_type=~"$run_type"}) and on(pipeline) '
+        'label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
+            ("bioetl-overview-v2.json", "DQ Status"),
+            ("bioetl-overview-v3.json", "Data Quality"),
+        },
+        'max by (pipeline) (bioetl_l1_gold_lifecycle_status{pipeline=~"$pipeline",'
+        'run_type=~"$run_type"} or ((bioetl_l1_gold_lifecycle_status{run_type=~"$run_type"}) '
+        'and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
+            ("bioetl-overview-v2.json", "Gold Lifecycle"),
+            ("bioetl-overview-v3.json", "Data Validation"),
+        },
+        'max by (pipeline) (bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",'
+        'run_type=~"$run_type"} or ((bioetl_l1_runtime_blocker_status{run_type=~"$run_type"}) '
+        'and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
+            ("bioetl-overview-v2.json", "Runtime Blockers"),
+            ("bioetl-overview-v3.json", "Runtime"),
+        },
+        'max(bioetl_l0_status{pipeline=~"$pipeline",run_type=~"$run_type"} or '
+        '((bioetl_l0_status{run_type=~"$run_type"}) and on(pipeline) '
+        'label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
+        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
+            ("bioetl-overview-v2.json", "System Status"),
+            ("bioetl-overview-v3.json", "Status"),
+        },
+        'round(sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
+        'run_type=~"$run_type",stage="filtered_out"}[$__range])) or vector(0))': {
+            ("bioetl-overview-v2.json", "Silver Rejects + Rate"),
+            ("bioetl-overview-v3.json", "Silver Rejects + Rate"),
+        },
+        'sum by (pipeline, run_type) (max_over_time(bioetl_pipeline_runs_total{status="failed",'
+        'pipeline=~"(${pipeline:regex}|workflow_${pipeline:regex})",run_type=~"$run_type"}[$__range]))': {
+            ("bioetl-overview-v2.json", "Historical Failures"),
+            ("bioetl-overview-v3.json", "Historical Failures"),
+        },
+        'sum by (pipeline, status) (max_over_time(bioetl_pipeline_runs_total{pipeline=~"(${pipeline:regex}|'
+        'workflow_${pipeline:regex})",run_type=~"$run_type",status!="success"}[$__range]))': {
+            ("bioetl-overview-v2.json", "Recent Terminal Runs"),
+            ("bioetl-overview-v3.json", "Recent Terminal Runs"),
+        },
+    }
+    duplicate_uses_by_expr = {
+        expr: uses
+        for expr, uses in duplicate_uses_by_expr.items()
+        if not _is_overview_snapshot_duplicate(uses)
+    }
+    expected_duplicate_uses = {
+        expr: uses
+        for expr, uses in expected_duplicate_uses.items()
+        if not _is_overview_snapshot_duplicate(uses)
+    }
+>>>>>>> Stashed changes
     assert duplicate_uses_by_expr == expected_duplicate_uses, (
         "Dashboard exact PromQL duplication drifted outside the audited allowlist: "
         f"{duplicate_uses_by_expr}"
