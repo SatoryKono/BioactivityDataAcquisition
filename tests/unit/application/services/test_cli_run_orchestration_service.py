@@ -310,6 +310,7 @@ class TestPrepareExecutionRequest:
         assert options.use_cached_bronze is True
         assert options.exact_replay is True
 
+    @pytest.mark.unit
     def test_build_options_propagates_required_persistence_profile(self) -> None:
         service = CliRunOrchestrationService()
 
