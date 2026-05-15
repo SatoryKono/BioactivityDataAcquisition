@@ -15,6 +15,7 @@ on:
       - "scripts/engineering/qa/check_generic_field_ownership.py"
       - "scripts/engineering/qa/check_ontology_unit_semantics.py"
       - "scripts/engineering/qa/check_semantic_anchor_parity.py"
+      - "scripts/engineering/qa/check_semantic_governance_policy.py"
       - "scripts/engineering/qa/check_semantic_pair_matrix_budget.py"
       - "scripts/engineering/qa/check_semantic_registry_drift.py"
       - "scripts/engineering/qa/generate_semantic_pipeline_audit.py"
@@ -39,6 +40,7 @@ on:
       - "scripts/engineering/qa/check_generic_field_ownership.py"
       - "scripts/engineering/qa/check_ontology_unit_semantics.py"
       - "scripts/engineering/qa/check_semantic_anchor_parity.py"
+      - "scripts/engineering/qa/check_semantic_governance_policy.py"
       - "scripts/engineering/qa/check_semantic_pair_matrix_budget.py"
       - "scripts/engineering/qa/check_semantic_registry_drift.py"
       - "scripts/engineering/qa/generate_semantic_pipeline_audit.py"
@@ -88,6 +90,9 @@ jobs:
       - name: Verify semantic registry drift
         run: uv run python -m scripts.engineering.qa check-semantic-registry-drift --check --json
 
+      - name: Verify semantic governance policy
+        run: uv run python -m scripts.engineering.qa check-semantic-governance-policy --check --json
+
       - name: Verify semantic anchor parity
         run: uv run python -m scripts.engineering.qa check-semantic-anchor-parity --check --json
 
@@ -101,6 +106,7 @@ jobs:
         run: |
           uv run pytest -p no:benchmark --noconftest \
             tests/integration/config/test_semantic_field_unification_contract.py \
+            tests/integration/config/test_semantic_governance_policy.py \
             tests/integration/config/test_semantic_pair_matrix_budget.py \
             tests/integration/config/test_semantic_anchor_parity.py \
             -q --tb=short
