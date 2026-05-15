@@ -459,8 +459,36 @@ hidden_handoff_contract:
     - Visible selectors MUST NOT be propagated implicitly with blanket
       includeVars semantics.
 
+control_plane_selector_context_contract:
+  status: shipped
+  endpoint: /ops/control-plane/selector-context
+  filter_options_endpoint: /ops/control-plane/filter-options
+  local_only: true
+  source_priority:
+    - run_manifest_catalog
+    - run_ledger_terminal_events
+  visible_selector_resolution:
+    selected_run_id: exact_run_identity_wins
+    workflow_pipeline_run_type: latest_terminal_run_for_scope
+  fallback_rules:
+    - run_id_default_dash_means_no_exact_run_selected
+    - terminal_time_uses_run_ledger_event_when_present
+    - manifest_created_at_is_fallback_only
+    - filter_options_run_id_includes_dash_default
+  forbidden:
+    - prometheus_run_id_labels
+    - dashboard_to_dashboard_run_id_handoff
+    - cyclic_grafana_variable_dependencies
+  notes: |
+    The shipped control-plane selector resolver provides coherent local selector
+    context for the shared dashboard shell and HTTP-backed identity surfaces.
+    Native Grafana query variables can consume its option lists, but they cannot
+    safely auto-write sibling visible selector values without a custom selector
+    shell or plugin. Current-status PromQL remains selected-scope, not exact
+    run-id scoped.
+
 run_catalog_future_contract:
-  status: design_only
+  status: design_only_for_execution_filtering
   local_only: true
   required_source_properties:
     - local_manifest_or_ledger_backed

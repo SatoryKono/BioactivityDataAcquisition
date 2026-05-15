@@ -19,7 +19,7 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 from bioetl.composition.providers.registration import (
     resolve_provider_assembly_support,
 )
-from bioetl.domain.ports import MetricsPort, RunManifestPort
+from bioetl.domain.ports import MetricsPort, RunLedgerPort, RunManifestPort
 from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
@@ -44,11 +44,14 @@ class HealthServerDependencies:
         metrics: MetricsPort for observability.
         run_manifest_port: Read-only control-plane run catalog surface used by
             Grafana selector helper endpoints.
+        run_ledger_port: Read-only control-plane run ledger used by selector
+            helper endpoints to resolve latest terminal run completion.
     """
 
     health_monitor: ProviderHealthMonitor
     metrics: MetricsPort
     run_manifest_port: RunManifestPort
+    run_ledger_port: RunLedgerPort
 
 
 @dataclass(frozen=True, slots=True)
@@ -133,10 +136,11 @@ def bootstrap_health_server_dependencies() -> HealthServerDependencies:
 
     # Create health monitor with injected metrics
     health_monitor = ProviderHealthMonitor(metrics=metrics)
-    run_manifest_port = bootstrap_run_manifest_service().manifest_port
+    run_manifest_service = bootstrap_run_manifest_service()
 
     return HealthServerDependencies(
         health_monitor=health_monitor,
         metrics=metrics,
-        run_manifest_port=run_manifest_port,
+        run_manifest_port=run_manifest_service.manifest_port,
+        run_ledger_port=run_manifest_service.ledger_port,
     )

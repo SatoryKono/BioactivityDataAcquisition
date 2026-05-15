@@ -25,6 +25,17 @@ PUBLICATION_GOLD_CONTRACTS = (
     "docs/04-reference/contracts/gold/pubmed_publication_v1.0.json",
     "docs/04-reference/contracts/gold/semanticscholar_publication_v1.0.json",
 )
+PUBLICATION_TITLE_REQUIRED_GOLD_CONTRACTS = (
+    *PUBLICATION_GOLD_CONTRACTS,
+    "docs/04-reference/contracts/gold/composite_publication_v1.0.json",
+)
+PUBLICATION_CONFIGS = (
+    "configs/entities/chembl/publication.yaml",
+    "configs/entities/crossref/publication.yaml",
+    "configs/entities/openalex/publication.yaml",
+    "configs/entities/pubmed/publication.yaml",
+    "configs/entities/semanticscholar/publication.yaml",
+)
 
 
 def _load_yaml(path: str) -> dict[str, object]:
@@ -37,6 +48,20 @@ def _load_json(path: str) -> dict[str, object]:
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
+
+
+def _field_validations(
+    config: dict[str, object], field: str
+) -> list[dict[str, object]]:
+    quality = config["quality"]
+    assert isinstance(quality, dict)
+    validations = quality["entity_field_validations"]
+    assert isinstance(validations, list)
+    return [
+        validation
+        for validation in validations
+        if isinstance(validation, dict) and validation.get("field") == field
+    ]
 
 
 def _assert_alias_resolves_to_canonical(
@@ -189,3 +214,55 @@ def test_publication_year_gold_nullable_number_compatibility_is_documented() -> 
         assert isinstance(publication_year, dict)
         assert publication_year["type"] == ["number", "null"]
         assert publication_year["nullable"] is True
+
+
+def test_publication_title_requiredness_is_aligned_across_gold_and_dq() -> None:
+    for contract_path in PUBLICATION_TITLE_REQUIRED_GOLD_CONTRACTS:
+        contract = _load_json(contract_path)
+        properties = contract["properties"]
+        required = contract["required"]
+        assert isinstance(properties, dict)
+        assert isinstance(required, list)
+        assert "title" in properties, contract_path
+        assert "title" in required, contract_path
+        title = properties["title"]
+        assert isinstance(title, dict)
+        assert title["nullable"] is False
+
+    for config_path in PUBLICATION_CONFIGS:
+        config = _load_yaml(config_path)
+        validations = _field_validations(config, "title")
+        by_type = {
+            str(validation.get("type")): validation for validation in validations
+        }
+        assert {"max_length", "not_null", "pattern"} <= set(by_type), config_path
+        for validation_type in ("max_length", "not_null", "pattern"):
+            assert by_type[validation_type]["nullable"] is False, config_path
+            assert by_type[validation_type].get("severity", "error") == "error"
+
+
+def test_publication_identifier_dq_rules_use_canonical_patterns() -> None:
+    expected_patterns = {
+        "doi": r"^10\.\d{4,}/\S+$",
+        "pmid": r"^[1-9]\d{0,9}$",
+        "pmc_id": r"^PMC\d+$",
+    }
+    for config_path in PUBLICATION_CONFIGS:
+        config = _load_yaml(config_path)
+        for field, pattern in expected_patterns.items():
+            validations = _field_validations(config, field)
+            if not validations and config_path.endswith("chembl/publication.yaml"):
+                validations = _field_validations(config, f"publication_{field}")
+            assert any(
+                validation.get("type") == "pattern"
+                and validation.get("pattern") == pattern
+                for validation in validations
+            ), (config_path, field)
+
+    chembl = _load_yaml("configs/entities/chembl/publication.yaml")
+    publication_pmid_rules = _field_validations(chembl, "publication_pmid")
+    assert any(
+        rule.get("type") == "pattern"
+        and rule.get("pattern") == expected_patterns["pmid"]
+        for rule in publication_pmid_rules
+    )

@@ -211,7 +211,7 @@ docker compose up --build -d
 ---
 
 **Автоматизированные скрипты:**
-- `.\scripts\docker-setup.ps1` - Интерактивная настройка Docker
-- `scripts/docker-setup.sh` - Bash версия для WSL/Linux
+- `.\scripts\ops\docker-setup.ps1` - Canonical интерактивная настройка Docker для Windows
+- `scripts/ops/docker-setup.sh` - Canonical Bash версия для WSL/Linux
 
 **Все готово к запуску!** 🚀

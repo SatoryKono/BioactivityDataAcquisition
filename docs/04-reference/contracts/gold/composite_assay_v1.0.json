@@ -34,6 +34,54 @@
       "type": "string",
       "nullable": false,
       "description": ""
+    },
+    "assay_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "ChEMBL assay identifier retained as assay lineage anchor."
+    },
+    "target_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "ChEMBL target identifier used as assay-to-target lineage anchor."
+    },
+    "publication_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "ChEMBL publication identifier used as assay-to-publication lineage anchor."
+    },
+    "src_id": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Provider source identifier retained as source-scoped lineage metadata."
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "ChEMBL assay description retained as source-scoped metadata."
+    },
+    "score": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": "ChEMBL assay confidence score retained as source-scoped metadata."
     }
   },
   "required": [

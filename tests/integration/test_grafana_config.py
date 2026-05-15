@@ -581,6 +581,7 @@ def test_variable_query_sources(dashboard_path):
         assert "/ops/control-plane/filter-options" in run_id_query_url
         assert "dimension=run_id" in run_id_query_url
         assert "response_shape=list" in run_id_query_url
+        assert "workflow=${workflow}" in run_id_query_url
         assert "pipeline=${pipeline}" in run_id_query_url
         assert "run_type=${run_type:csv}" in run_id_query_url
 
@@ -949,6 +950,9 @@ def test_control_plane_missing_signals_text_panel_exists() -> None:
     assert "replay does not create unexplained duplicate records" in content
     assert "checkpoint-age evidence metric" in content
     assert "replay duplicate-record evidence metric" in content
+    description = str(panel.get("description", "")).lower()
+    assert "detailed companion" in description
+    assert "not green health signals" in description
 
 
 def test_control_plane_dashboard_links_are_scoped() -> None:

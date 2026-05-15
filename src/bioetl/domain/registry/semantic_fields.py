@@ -11,12 +11,12 @@ __all__ = [
 
 
 def _build_registry_indexes(
-    clusters: tuple["SemanticFieldCluster", ...],
+    clusters: tuple[SemanticFieldCluster, ...],
 ) -> tuple[
-    dict[str, "SemanticFieldCluster"],
-    dict[str, "SemanticFieldCluster"],
-    dict[str, "SemanticFieldCluster"],
-    dict[str, "SemanticFieldCluster"],
+    dict[str, SemanticFieldCluster],
+    dict[str, SemanticFieldCluster],
+    dict[str, SemanticFieldCluster],
+    dict[str, SemanticFieldCluster],
 ]:
     by_cluster_id: dict[str, SemanticFieldCluster] = {}
     by_canonical_name: dict[str, SemanticFieldCluster] = {}

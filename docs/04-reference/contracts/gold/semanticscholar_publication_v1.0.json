@@ -55,11 +55,8 @@
       "description": ""
     },
     "title": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
+      "type": "string",
+      "nullable": false,
       "description": ""
     },
     "abstract": {
@@ -263,7 +260,7 @@
     },
     "is_oa": {
       "type": [
-        "boolean",
+        "object",
         "null"
       ],
       "nullable": true,
@@ -422,11 +419,12 @@
     "_source",
     "content_hash",
     "entity_id",
-    "paper_id"
+    "paper_id",
+    "title"
   ],
   "normalization_profile": {
     "ref": "semanticscholar.publication",
     "version": "1.0.0",
-    "hash": "fe3b6f629a1380c32bcf1c9faf9f2fbba4a2135a66b5dcf7cbc80f9f0cdaa2ae"
+    "hash": "ec6bf812be62b9c64c79435a8f9173a5637025becfa9014630e29417686dbf28"
   }
 }

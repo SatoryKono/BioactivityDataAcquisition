@@ -148,22 +148,30 @@ quality:
     pattern: ^10\.\d{4,}/\S+$
     nullable: false
     error_message: DOI is required and must match format 10.XXXX/suffix (no whitespace)
+  - field: pmid
+    type: pattern
+    pattern: ^[1-9]\d{0,9}$
+    nullable: true
+    error_message: PMID must be a canonical positive numeric string when present
+  - field: pmc_id
+    type: pattern
+    pattern: ^PMC\d+$
+    nullable: true
+    error_message: PMC identifier must match PMC format when present
   - field: title
     type: max_length
     max_length: 2000
-    nullable: true
+    nullable: false
     error_message: Title must not exceed 2000 characters
   - field: title
     type: not_null
-    nullable: true
-    severity: warn
-    error_message: "Missing title \u2014 record will be filtered before Gold"
+    nullable: false
+    error_message: Missing title is not allowed for CrossRef publication Gold records
   - field: title
     type: pattern
     pattern: \S
-    nullable: true
-    severity: warn
-    error_message: Title should not be empty or whitespace-only
+    nullable: false
+    error_message: Title must not be empty or whitespace-only
   - field: publication_year
     type: range
     min: 1950

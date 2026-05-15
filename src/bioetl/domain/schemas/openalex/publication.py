@@ -46,6 +46,10 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         str_matches=r"^W\d+$",
         description="OpenAlex Work ID (e.g., W2148763428)",
     )
+    title: Series[str] = pa.Field(
+        nullable=True,
+        description="Publication title when available from OpenAlex.",
+    )
 
     # _lookup_method: inherited from PublicationBaseSchema (non-nullable, isin=LOOKUP_METHODS)
 

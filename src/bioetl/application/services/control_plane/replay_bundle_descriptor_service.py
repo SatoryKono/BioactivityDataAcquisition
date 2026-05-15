@@ -10,7 +10,7 @@ from bioetl.application.services.control_plane.run_manifest_inspection_models im
 )
 
 __all__ = [
-    "RunReplayBundleDescriptor",
+    "RunReplayBundleDescriptorRecord",
     "build_run_replay_bundle_descriptor",
 ]
 
@@ -34,8 +34,149 @@ def _string_list(value: object) -> list[str]:
     return [str(item) for item in value]
 
 
+def _optional_string(value: object) -> str | None:
+    """Return a string payload when present."""
+    return None if value is None else str(value)
+
+
 @dataclass(frozen=True, slots=True)
-class RunReplayBundleDescriptor:
+class ReplayClaimSnapshot:
+    """Normalized replay-claim values extracted from diagnostics."""
+
+    replay_capability: object
+    replay_readiness_verdict: object
+    exact_replay_support_boundary: object
+    replay_family_contract: object
+    exact_replay_eligible: bool
+    required_profile: object
+
+
+def _resolve_identity_graph(
+    result: RunManifestInspectionResult,
+    diagnostics: Mapping[str, object],
+) -> dict[str, object]:
+    """Return the canonical identity graph payload."""
+    return (
+        result.identity_graph
+        if result.identity_graph
+        else _dict_or_empty(diagnostics.get("identity_graph"))
+    )
+
+
+def _resolve_replay_claims(
+    diagnostics: Mapping[str, object],
+    identity_graph: Mapping[str, object],
+    persistence_profile: Mapping[str, object],
+) -> ReplayClaimSnapshot:
+    """Resolve replay claims from diagnostics and identity-graph fallbacks."""
+    return ReplayClaimSnapshot(
+        replay_capability=diagnostics.get("replay_capability")
+        or identity_graph.get("replay_capability"),
+        replay_readiness_verdict=diagnostics.get("replay_readiness_verdict")
+        or identity_graph.get("replay_readiness_verdict"),
+        exact_replay_support_boundary=diagnostics.get("exact_replay_support_boundary")
+        or identity_graph.get("exact_replay_support_boundary"),
+        replay_family_contract=diagnostics.get("replay_family_contract")
+        or identity_graph.get("replay_family_contract"),
+        exact_replay_eligible=bool(
+            diagnostics.get(
+                "exact_replay_eligible",
+                identity_graph.get("exact_replay_eligible", False),
+            )
+        ),
+        required_profile=persistence_profile.get("required_profile")
+        or diagnostics.get("required_persistence_profile"),
+    )
+
+
+def _build_control_plane_bundle(
+    result: RunManifestInspectionResult,
+    diagnostics: Mapping[str, object],
+) -> dict[str, object]:
+    """Build control-plane replay bundle data."""
+    manifest = result.manifest
+    return {
+        "manifest_id": manifest.manifest_id,
+        "run_id": str(manifest.run_id),
+        "schema_version": manifest.schema_version,
+        "execution_fingerprint": manifest.execution_fingerprint,
+        "ledger_event_count": len(result.ledger_entries),
+        "event_family_counts": _dict_or_empty(diagnostics.get("event_family_counts")),
+        "event_type_counts": _dict_or_empty(diagnostics.get("event_type_counts")),
+    }
+
+
+def _build_code_provenance_bundle(
+    result: RunManifestInspectionResult,
+) -> dict[str, object]:
+    """Build code-provenance replay bundle data."""
+    code_provenance = result.manifest.code_provenance
+    return {
+        "pipeline_version": code_provenance.pipeline_version,
+        "git_commit": code_provenance.git_commit,
+        "dependency_lock_hash": code_provenance.dependency_lock_hash,
+        "config_hash": code_provenance.config_hash,
+        "resolved_config_hash": code_provenance.resolved_config_hash,
+        "effective_config_hash": code_provenance.effective_config_hash,
+        "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
+        "contract_ref": code_provenance.contract_ref,
+        "contract_version": code_provenance.contract_version,
+        "contract_schema_hash": code_provenance.contract_schema_hash,
+        "dq_policy_ref": code_provenance.dq_policy_ref,
+        "rule_bundle_version": code_provenance.rule_bundle_version,
+        "normalization_profile_ref": code_provenance.normalization_profile_ref,
+        "normalization_profile_version": code_provenance.normalization_profile_version,
+        "normalization_profile_hash": code_provenance.normalization_profile_hash,
+        "dq_contract_compatibility_hash": (
+            code_provenance.dq_contract_compatibility_hash
+        ),
+    }
+
+
+def _build_replay_claims_bundle(
+    diagnostics: Mapping[str, object],
+    claims: ReplayClaimSnapshot,
+) -> dict[str, object]:
+    """Build replay-claim replay bundle data."""
+    return {
+        "replay_capability": claims.replay_capability,
+        "replay_readiness_verdict": claims.replay_readiness_verdict,
+        "exact_replay_eligible": claims.exact_replay_eligible,
+        "exact_replay_support_boundary": claims.exact_replay_support_boundary,
+        "replay_family_contract": claims.replay_family_contract,
+        "historical_live_run_upgrade_state": diagnostics.get(
+            "historical_live_run_upgrade_state"
+        ),
+        "broader_historical_exact_replay_state": diagnostics.get(
+            "broader_historical_exact_replay_state"
+        ),
+    }
+
+
+def _build_replay_bundle(
+    result: RunManifestInspectionResult,
+    diagnostics: Mapping[str, object],
+    identity_graph: Mapping[str, object],
+    claims: ReplayClaimSnapshot,
+    produced_artifact_trace: Mapping[str, object],
+) -> dict[str, object]:
+    """Assemble the operator-facing replay bundle."""
+    return {
+        "control_plane": _build_control_plane_bundle(result, diagnostics),
+        "code_provenance": _build_code_provenance_bundle(result),
+        "replay_parentage": _dict_or_empty(diagnostics.get("replay_parentage")),
+        "input_snapshots": _list_of_dicts(diagnostics.get("input_snapshots")),
+        "artifact_refs": _list_of_dicts(diagnostics.get("artifact_refs")),
+        "lineage_fragment_ids": _string_list(diagnostics.get("lineage_fragment_ids")),
+        "produced_artifact_trace": dict(produced_artifact_trace),
+        "identity_graph": dict(identity_graph),
+        "replay_claims": _build_replay_claims_bundle(diagnostics, claims),
+        "required_persistence_profile": claims.required_profile,
+    }
+
+
+@dataclass(frozen=True, slots=True)
+class RunReplayBundleDescriptorRecord:
     """Operator-facing replay descriptor for one supported run."""
 
     manifest_id: str
@@ -69,117 +210,40 @@ class RunReplayBundleDescriptor:
 
 def build_run_replay_bundle_descriptor(
     result: RunManifestInspectionResult,
-) -> RunReplayBundleDescriptor:
+) -> RunReplayBundleDescriptorRecord:
     """Build one deterministic replay-bundle descriptor from inspection output."""
     diagnostics = result.diagnostics
     manifest = result.manifest
-    code_provenance = manifest.code_provenance
     persistence_profile = _dict_or_empty(diagnostics.get("persistence_profile"))
     produced_artifact_trace = _dict_or_empty(diagnostics.get("produced_artifact_trace"))
-    identity_graph = (
-        result.identity_graph
-        if result.identity_graph
-        else _dict_or_empty(diagnostics.get("identity_graph"))
+    identity_graph = _resolve_identity_graph(result, diagnostics)
+    claims = _resolve_replay_claims(
+        diagnostics,
+        identity_graph,
+        persistence_profile,
     )
-    replay_capability = diagnostics.get("replay_capability") or identity_graph.get(
-        "replay_capability"
+    bundle = _build_replay_bundle(
+        result,
+        diagnostics,
+        identity_graph,
+        claims,
+        produced_artifact_trace,
     )
-    replay_readiness_verdict = diagnostics.get(
-        "replay_readiness_verdict"
-    ) or identity_graph.get("replay_readiness_verdict")
-    exact_replay_support_boundary = diagnostics.get(
-        "exact_replay_support_boundary"
-    ) or identity_graph.get("exact_replay_support_boundary")
-    replay_family_contract = diagnostics.get(
-        "replay_family_contract"
-    ) or identity_graph.get("replay_family_contract")
-    exact_replay_eligible = diagnostics.get(
-        "exact_replay_eligible",
-        identity_graph.get("exact_replay_eligible", False),
-    )
-    required_profile = persistence_profile.get("required_profile") or diagnostics.get(
-        "required_persistence_profile"
-    )
-    bundle = {
-        "control_plane": {
-            "manifest_id": manifest.manifest_id,
-            "run_id": str(manifest.run_id),
-            "schema_version": manifest.schema_version,
-            "execution_fingerprint": manifest.execution_fingerprint,
-            "ledger_event_count": len(result.ledger_entries),
-            "event_family_counts": _dict_or_empty(
-                diagnostics.get("event_family_counts")
-            ),
-            "event_type_counts": _dict_or_empty(diagnostics.get("event_type_counts")),
-        },
-        "code_provenance": {
-            "pipeline_version": code_provenance.pipeline_version,
-            "git_commit": code_provenance.git_commit,
-            "dependency_lock_hash": code_provenance.dependency_lock_hash,
-            "config_hash": code_provenance.config_hash,
-            "resolved_config_hash": code_provenance.resolved_config_hash,
-            "effective_config_hash": code_provenance.effective_config_hash,
-            "effective_config_artifact_id": (
-                code_provenance.effective_config_artifact_id
-            ),
-            "contract_ref": code_provenance.contract_ref,
-            "contract_version": code_provenance.contract_version,
-            "contract_schema_hash": code_provenance.contract_schema_hash,
-            "dq_policy_ref": code_provenance.dq_policy_ref,
-            "rule_bundle_version": code_provenance.rule_bundle_version,
-            "normalization_profile_ref": code_provenance.normalization_profile_ref,
-            "normalization_profile_version": (
-                code_provenance.normalization_profile_version
-            ),
-            "normalization_profile_hash": code_provenance.normalization_profile_hash,
-            "dq_contract_compatibility_hash": (
-                code_provenance.dq_contract_compatibility_hash
-            ),
-        },
-        "replay_parentage": _dict_or_empty(diagnostics.get("replay_parentage")),
-        "input_snapshots": _list_of_dicts(diagnostics.get("input_snapshots")),
-        "artifact_refs": _list_of_dicts(diagnostics.get("artifact_refs")),
-        "lineage_fragment_ids": _string_list(diagnostics.get("lineage_fragment_ids")),
-        "produced_artifact_trace": produced_artifact_trace,
-        "identity_graph": identity_graph,
-        "replay_claims": {
-            "replay_capability": replay_capability,
-            "replay_readiness_verdict": replay_readiness_verdict,
-            "exact_replay_eligible": bool(exact_replay_eligible),
-            "exact_replay_support_boundary": exact_replay_support_boundary,
-            "replay_family_contract": replay_family_contract,
-            "historical_live_run_upgrade_state": diagnostics.get(
-                "historical_live_run_upgrade_state"
-            ),
-            "broader_historical_exact_replay_state": diagnostics.get(
-                "broader_historical_exact_replay_state"
-            ),
-        },
-        "required_persistence_profile": required_profile,
-    }
     missing_requirements = tuple(
         str(item) for item in produced_artifact_trace.get("missing_requirements", [])
     )
-    return RunReplayBundleDescriptor(
+    return RunReplayBundleDescriptorRecord(
         manifest_id=manifest.manifest_id,
         run_id=str(manifest.run_id),
         execution_fingerprint=manifest.execution_fingerprint,
-        replay_capability=None if replay_capability is None else str(replay_capability),
-        exact_replay_eligible=bool(exact_replay_eligible),
-        replay_readiness_verdict=(
-            None if replay_readiness_verdict is None else str(replay_readiness_verdict)
+        replay_capability=_optional_string(claims.replay_capability),
+        exact_replay_eligible=claims.exact_replay_eligible,
+        replay_readiness_verdict=_optional_string(claims.replay_readiness_verdict),
+        exact_replay_support_boundary=_optional_string(
+            claims.exact_replay_support_boundary
         ),
-        exact_replay_support_boundary=(
-            None
-            if exact_replay_support_boundary is None
-            else str(exact_replay_support_boundary)
-        ),
-        replay_family_contract=(
-            None if replay_family_contract is None else str(replay_family_contract)
-        ),
-        required_persistence_profile=(
-            None if required_profile is None else str(required_profile)
-        ),
+        replay_family_contract=_optional_string(claims.replay_family_contract),
+        required_persistence_profile=_optional_string(claims.required_profile),
         bundle=bundle,
         missing_requirements=missing_requirements,
     )

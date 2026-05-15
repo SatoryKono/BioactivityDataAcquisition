@@ -208,6 +208,16 @@ async def test_write_cv_quarantine_when_payloads_written_then_logs_and_emits_met
             "outcome": "quarantined",
         },
     )
+    harness._metrics.increment_counter.assert_any_call(
+        "bioetl_stage_records_total",
+        2,
+        {
+            "pipeline": "composite:test_composite",
+            "run_type": "composite",
+            "stage": "silver",
+            "outcome": "quarantined",
+        },
+    )
 
 
 @pytest.mark.unit

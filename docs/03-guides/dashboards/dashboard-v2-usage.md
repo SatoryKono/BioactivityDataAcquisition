@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-13'
+  Last verified: '2026-05-15'
 
 ______________________________________________________________________
 
 # BioETL Dashboards v2: Usage
 
-Дата сверки: **2026-05-14**
+Дата сверки: **2026-05-15**
 Источник истины: `grafana/dashboards/*.json`
 
 Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navigation-links.yaml` (docs/tests должны соответствовать ему).
@@ -69,6 +69,11 @@ Human-readable selector references:
 - Primary dashboards `0..5` now expose the shared context shell
   `$workflow/$pipeline/$run_type/$run_id`. `$workflow` is context/evidence
   unless the panel explicitly documents truthful intersection semantics.
+- `$run_id` options on primary dashboards are loaded from
+  `/ops/control-plane/filter-options` using the visible
+  `$workflow/$pipeline/$run_type` context. `/ops/control-plane/selector-context`
+  can resolve one coherent local selector tuple for selector-shell clients, but
+  native Grafana variables do not auto-write sibling selector values.
 - Во всех non-Overview pipeline/provider dashboards `$pipeline` и `$provider`
   остаются single-select; если исходного контекста нет, используется explicit
   fallback `unknown`.
@@ -101,6 +106,20 @@ still belong to each dashboard role; `workflow` remains evidence context unless
 documented otherwise, and `run_id` affects only the local control-plane `ID`
 panel.
 
+`Processed Records` is no longer a range-only throughput summary. It is the
+shared compact stage/outcome accounting table for Bronze, Silver outcomes, and
+Gold outcomes backed by local `/ops/observability/processed-records` rows over
+`bioetl_processed_records_*` recording rules and canonical
+`bioetl_stage_records_total` outcomes. It intentionally omits reconciliation
+status, accounted subtotal, and delta rows; missing accounting series are
+diagnostic no-data/instrumentation gaps, not green zero. The table shows
+`value` and formatted `percintage`: Bronze is always `100%`; `silver [valid]`
+and `gold [valid]` render one decimal (`91.0%`, `99.0%`); secondary Silver and
+Gold outcomes render up to three decimals with trailing zeroes trimmed
+(`8.51%`, `0.47%`, `0%`). Silver outcome percentages use Bronze total as
+denominator, and Gold outcome percentages use `silver [valid]` as denominator.
+It does not replace the dashboard-specific `Status` or `First Action` route.
+
 1. `bioetl-overview-v2`, first screen (no scroll):
    `Provenance`, `Status`, `First Action`, `ID`, and `Processed Records` answer
    the L0 question: what is broken/degraded, what exact control-plane identity
@@ -110,6 +129,9 @@ panel.
    `Provenance`, `Status`, `ID`, `Processed Records`, then
    `Runtime Status`, `Runtime Blockers` и
    `First Action` отвечают на L2 current-cause вопрос и next operator move.
+   `Status` is the compact shared-shell verdict; `Runtime Status` is an
+   expanded first-screen mirror of the same current-status recording rule next
+   to blocker causes, not an independent second signal.
    Compact evidence row содержит `Worst Stage Lag`,
    `Monitor Runtime Blockers`, `Runtime Error Rate`,
    `Runtime Telemetry Gap` и `Failed Runs`; selected-range risk
@@ -159,6 +181,9 @@ panel.
    `Inspect DQ Current Reasons` и `Review: First Action`
    отвечают на вопрос «DQ сейчас OK/WARN/CRIT/UNKNOWN и какое действие
    первое». Сразу под этим first-screen row расположен compact current-context
+   `Status` is the compact shared-shell verdict; `Monitor DQ Current Status`
+   is an expanded first-screen mirror beside threshold/reason explainability,
+   not an independent second signal.
    band: `Monitor: Data Quality Score (Volume-weighted)`,
    `Monitor: Worst-Entity DQ Score`, `Monitor: Worst Data Freshness Lag (seconds)`,
    `Track: Records Quarantined in Range`, `Track: Soft Threshold Exceeded in Range`
@@ -388,11 +413,13 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `1. Overview`, `2. Runtime`, `4. Data Quality`, `5. Workflow` дают быстрый
   переход из provider health surface без дублирования Runtime variants.
   Panel `id=114` (`Monitor Current Provider Health Status`) показывает явный enum
-  mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY` и fail-closed
+  raw-source mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY` as below-fold
+  evidence, while canonical first-screen severity remains `Status` plus
+  `Monitor GLOBAL Provider Severity Matrix`. Raw status stays fail-closed
   `UNKNOWN`, если provider universe существует, а raw status sample отсутствует.
   
   **First 2 clicks (L1):**
-  1. Click #1: открыть `bioetl-provider-health-v2`, проверить `Monitor Current Provider Health Status` (`id=114`) и `Health Check Latency by Provider (p95)` (`id=1`).
+  1. Click #1: открыть `bioetl-provider-health-v2`, проверить `Monitor GLOBAL Provider Severity Matrix` (`id=9101`), `Inspect Critical Providers` (`id=9102`) и `Inspect Provider Top Causes` (`id=9103`).
   2. Click #2: перейти в `2. Runtime` при active degradation/failure trend или
      в `0. Control Plane` при симптомах retry exhaustion/state inconsistency.
 - `bioetl-dq-v2`: dashboard links `0. Control Plane`, `1. Overview`,
@@ -547,6 +574,12 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `2=CRIT` при `>10%`.
 - `control-plane latency p50/p95/p99`: histogram-backed panels сохраняют
   `No data` как diagnostic signal; отсутствие samples не превращается в `0s`.
+- `control-plane.Known Blind Spots` and `Review: Known Missing Replay-Safety Signals`
+  are a two-part collapsed documentation surface in this refactor phase:
+  `Known Blind Spots` is the compact summary, while `Review: Known Missing
+  Replay-Safety Signals` is the detailed companion. They are limitation notes,
+  not healthy signals, and can be physically merged in a later panel-id
+  migration.
 - `control-plane.Review: Known Missing Replay-Safety Signals`: manifest/run identity,
   config/contract hashes, ledger ordering, checkpoint age vs RPO, replay
   duplicate detection и identity graph completeness документируются как

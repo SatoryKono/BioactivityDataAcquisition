@@ -6,6 +6,7 @@ Provides standard liveness and readiness probes.
 from __future__ import annotations
 
 import asyncio
+import os
 import time
 from typing import TYPE_CHECKING
 
@@ -13,12 +14,20 @@ from bioetl.interfaces.http.health_server_http_mixin import HealthServerHTTPMixi
 from bioetl.interfaces.http.health_server_routing_mixin import (
     HealthServerRoutingMixin,
 )
+from bioetl.interfaces.http.processed_records_table import (
+    DEFAULT_PROMETHEUS_BASE_URL,
+)
 from bioetl.interfaces.http.health_server_state_mixin import HealthServerStateMixin
 from bioetl.interfaces.http.types import HealthResponse
 
 if TYPE_CHECKING:
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.domain.ports import HealthMonitorPort, LoggerPort, RunManifestPort
+    from bioetl.domain.ports import (
+        HealthMonitorPort,
+        LoggerPort,
+        RunLedgerPort,
+        RunManifestPort,
+    )
 
 
 class HealthServer(
@@ -35,6 +44,8 @@ class HealthServer(
         health_monitor: HealthMonitorPort | None = None,
         quarantine_service: QuarantineService | None = None,
         run_manifest_port: RunManifestPort | None = None,
+        run_ledger_port: RunLedgerPort | None = None,
+        prometheus_base_url: str | None = None,
         logger: LoggerPort | None = None,
     ) -> None:
         """Initialize health server.
@@ -49,6 +60,11 @@ class HealthServer(
                 /ops/quarantine/* explorer endpoints.
             run_manifest_port: Optional read-only control-plane manifest catalog
                 used by /ops/control-plane/* selector endpoints.
+            run_ledger_port: Optional read-only control-plane run ledger used
+                to resolve latest terminal run completion for selector endpoints.
+            prometheus_base_url: Optional Prometheus HTTP API base URL for local
+                dashboard helper endpoints such as /ops/observability/processed-records.
+                Defaults to BIOETL_PROMETHEUS_URL or http://localhost:9090.
             logger: Optional LoggerPort for structured server event logging.
                 Server events are silently dropped when None.
         """
@@ -57,6 +73,12 @@ class HealthServer(
         self._health_monitor = health_monitor
         self._quarantine_service = quarantine_service
         self._run_manifest_port = run_manifest_port
+        self._run_ledger_port = run_ledger_port
+        self._prometheus_base_url = (
+            prometheus_base_url
+            or os.getenv("BIOETL_PROMETHEUS_URL")
+            or DEFAULT_PROMETHEUS_BASE_URL
+        ).rstrip("/")
         self._logger = logger
         self._server: asyncio.Server | None = None
         self._start_time: float | None = None
@@ -127,6 +149,8 @@ async def run_health_server(
     health_monitor: HealthMonitorPort | None = None,
     quarantine_service: QuarantineService | None = None,
     run_manifest_port: RunManifestPort | None = None,
+    run_ledger_port: RunLedgerPort | None = None,
+    prometheus_base_url: str | None = None,
     logger: LoggerPort | None = None,
 ) -> None:
     """Run the health server until interrupted.
@@ -141,6 +165,8 @@ async def run_health_server(
             Health endpoints report no provider data when None.
         quarantine_service: Optional read-only quarantine explorer service.
         run_manifest_port: Optional read-only control-plane manifest catalog.
+        run_ledger_port: Optional read-only control-plane run ledger.
+        prometheus_base_url: Optional Prometheus HTTP API base URL.
         logger: Optional LoggerPort for structured server event logging.
     """
     server = HealthServer(
@@ -149,6 +175,8 @@ async def run_health_server(
         health_monitor=health_monitor,
         quarantine_service=quarantine_service,
         run_manifest_port=run_manifest_port,
+        run_ledger_port=run_ledger_port,
+        prometheus_base_url=prometheus_base_url,
         logger=logger,
     )
     await server.start()

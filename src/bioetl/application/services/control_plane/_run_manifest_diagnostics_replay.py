@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from typing import Literal
 
+from bioetl.application.services.control_plane._run_manifest_diagnostics_base_helpers import (
+    _resolve_operator_replay_mode,
+    _resolve_source_posture,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
     _append_mode_exact_replay_blockers,
     _collect_append_mode_semantic_sinks,
@@ -198,6 +202,91 @@ def _resolve_broader_historical_exact_replay_state(
     if _is_composite_execution_context(manifest):
         return "awaiting_certified_source_lineage"
     return "awaiting_historical_snapshot_certification"
+
+
+def _build_replay_state_projection(
+    *,
+    manifest: RunManifest,
+    input_snapshots: list[dict[str, object]],
+    policy_assessment: ReproducibilityPolicyAssessment,
+) -> dict[str, str]:
+    """Return canonical replay-state fields shared by base and refreshed views."""
+    return {
+        "replay_occurrence_kind": _resolve_replay_occurrence_kind(
+            manifest=manifest,
+            input_snapshots=input_snapshots,
+            policy_assessment=policy_assessment,
+        ),
+        "historical_live_run_upgrade_state": (
+            _resolve_historical_live_run_upgrade_state(
+                manifest=manifest,
+                input_snapshots=input_snapshots,
+                policy_assessment=policy_assessment,
+            )
+        ),
+        "broader_historical_exact_replay_state": (
+            _resolve_broader_historical_exact_replay_state(
+                manifest=manifest,
+                input_snapshots=input_snapshots,
+                policy_assessment=policy_assessment,
+            )
+        ),
+        "source_posture": _resolve_source_posture(policy_assessment),
+    }
+
+
+def _build_operator_replay_projection(
+    *,
+    manifest: RunManifest,
+    input_snapshots: list[dict[str, object]],
+    requested_exact_replay: bool,
+    resume_requested: bool,
+    policy_assessment: ReproducibilityPolicyAssessment,
+) -> dict[str, object]:
+    """Return canonical operator-facing replay projection fields."""
+    exact_replay_blockers = _resolve_exact_replay_blockers(
+        manifest=manifest,
+        policy_assessment=policy_assessment,
+    )
+    exact_replay_eligible = (
+        manifest.replay_capability.value == "exact_replay_supported"
+        and not exact_replay_blockers
+    )
+    replay_mode = _resolve_replay_mode(
+        manifest=manifest,
+        requested_exact_replay=requested_exact_replay,
+        resume_requested=resume_requested,
+    )
+    continuation_mode = _resolve_continuation_mode(
+        manifest=manifest,
+        requested_exact_replay=requested_exact_replay,
+        resume_requested=resume_requested,
+    )
+    replay_readiness_verdict = _resolve_manifest_replay_readiness_verdict(
+        manifest=manifest,
+        requested_exact_replay=requested_exact_replay,
+        resume_requested=resume_requested,
+        continuation_mode=continuation_mode,
+        policy_assessment=policy_assessment,
+    ).value
+    return {
+        "replay_capability_reason": _resolve_replay_capability_reason(
+            manifest=manifest,
+            input_snapshots=input_snapshots,
+            resume_requested=resume_requested,
+            policy_assessment=policy_assessment,
+        ),
+        "exact_replay_blockers": exact_replay_blockers,
+        "exact_replay_eligible": exact_replay_eligible,
+        "replay_readiness_verdict": replay_readiness_verdict,
+        "replay_mode": replay_mode,
+        "continuation_mode": continuation_mode,
+        "operator_replay_mode": _resolve_operator_replay_mode(
+            replay_mode=replay_mode,
+            continuation_mode=continuation_mode,
+            replay_readiness_verdict=replay_readiness_verdict,
+        ),
+    }
 
 
 def _resolve_exact_replay_blockers(

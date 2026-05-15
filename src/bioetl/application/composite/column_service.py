@@ -96,6 +96,28 @@ class ColumnOrderService:
         """Get ordered column names by semantic groups."""
         return get_ordered_columns(columns, config=self._config)
 
+    def order_column_names(self, columns: Sequence[str]) -> list[str]:
+        """Order column names by semantic or YAML groups."""
+        if not columns:
+            return []
+
+        if self._column_groups:
+            ordered = self._order_by_yaml_groups(columns)
+            self._logger.debug(
+                "Ordered column names by YAML groups",
+                total_columns=len(ordered),
+                groups_configured=len(self._column_groups),
+            )
+        else:
+            ordered = self.get_ordered_columns(columns)
+            self._logger.debug(
+                "Ordered column names by semantic groups",
+                total_columns=len(ordered),
+                groups_used=self._count_groups(ordered),
+            )
+
+        return ordered
+
     def group_columns(self, columns: Sequence[str]) -> dict[SemanticGroup, list[str]]:
         """Group columns by semantic type."""
         return group_columns(columns, config=self._config)
@@ -222,6 +244,33 @@ class ColumnOrderService:
             collect_group_columns=self._collect_group_columns,
             logger=self._logger,
         )
+
+    def filter_by_layer_config(
+        self, columns: Sequence[str], layer_config: LayerColumnConfig
+    ) -> list[str]:
+        """Filter columns by layer config and apply renames.
+
+        Args:
+            columns: Available column names.
+            layer_config: Layer configuration with column filters and renames.
+
+        Returns:
+            Filtered and renamed column list.
+        """
+        # Determine which filtering strategy to use
+        if layer_config.columns:
+            filtered = self._filter_columns_by_explicit(columns, layer_config)
+        elif layer_config.include_groups:
+            filtered = self._filter_columns_by_groups(columns, layer_config)
+        else:
+            # No filtering specified, return all columns
+            filtered = list(columns)
+
+        # Apply renames if specified
+        if layer_config.rename_fields:
+            filtered = self._apply_renames(filtered, layer_config.rename_fields)
+
+        return filtered
 
     @staticmethod
     def get_enricher_prefix(enricher_pipeline: str) -> str:

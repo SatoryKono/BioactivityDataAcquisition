@@ -707,6 +707,12 @@ def test_build_field_matrix_rows_exposes_non_chembl_composite_join_key_contracts
         "lowercase join-canonical text."
     )
 
+    composite_publication_title = _row(rows, "composite_publication", "title")
+    assert composite_publication_title["normalization_summary"] == (
+        "Normalize fallback title join text through canonical title cleanup while "
+        "preserving case."
+    )
+
     composite_molecule_inchi_key = _row(rows, "composite_molecule", "inchi_key")
     assert composite_molecule_inchi_key["normalization_summary"] == (
         "Validate InChIKey through the canonical domain value-object contract, then "

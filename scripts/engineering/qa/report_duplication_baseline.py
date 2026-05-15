@@ -443,11 +443,13 @@ def _markdown_summary_lines(
             ]
         )
     if trend_summary and trend_summary.get("status") == "compared_to_previous":
+        raw_delta = trend_summary.get("total_duplicate_cluster_delta")
+        delta_text = f"{raw_delta:+d}" if isinstance(raw_delta, int) else "n/a"
         lines.extend(
             [
                 f"- previous_snapshot_date: {trend_summary.get('previous_snapshot_date')}",
                 "- total_duplicate_cluster_delta_vs_previous: "
-                f"{trend_summary.get('total_duplicate_cluster_delta'):+d}",
+                f"{delta_text}",
             ]
         )
     lines.extend(
@@ -551,13 +553,14 @@ def _trend_markdown_section(trend_summary: dict[str, object] | None) -> list[str
     """Render trend comparison section when available."""
     if not trend_summary or trend_summary.get("status") != "compared_to_previous":
         return []
+    raw_delta = trend_summary.get("total_duplicate_cluster_delta")
+    delta_text = f"{raw_delta:+d}" if isinstance(raw_delta, int) else "n/a"
     lines = [
         "",
         "## Trend vs Previous Snapshot",
         "",
         f"- previous snapshot: `{trend_summary.get('previous_snapshot_date')}`",
-        "- total duplicate cluster delta: "
-        f"{trend_summary.get('total_duplicate_cluster_delta'):+d}",
+        f"- total duplicate cluster delta: {delta_text}",
         "",
         "| Target | Current | Previous | Delta |",
         "| --- | ---: | ---: | ---: |",

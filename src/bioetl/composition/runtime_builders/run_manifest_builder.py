@@ -41,16 +41,7 @@ if TYPE_CHECKING:
 class _ResolvedManifestContext:
     provider: str
     entity: str
-    contract_identity: tuple[
-        str,
-        str | None,
-        str | None,
-        str | None,
-        str | None,
-        str | None,
-        str | None,
-        str | None,
-    ]
+    contract_identity: _manifest_support.RunManifestContractIdentity
     reproducibility_context: object
 
 
@@ -58,6 +49,8 @@ def _resolve_manifest_context(
     *,
     ctx: PipelineRunContext,
     inputs: RunnerInputs,
+    reproducibility_context: object | None = None,
+    contract_identity: _manifest_support.RunManifestContractIdentity | None = None,
 ) -> _ResolvedManifestContext:
     """Resolve manifest family, contract identity, and reproducibility context."""
     provider, entity = _manifest_support.resolve_provider_entity(
@@ -65,17 +58,19 @@ def _resolve_manifest_context(
         yaml_config=inputs.yaml_config,
     )
     contract_ref = f"{provider}.{entity}"
-    reproducibility_context = resolve_manifest_reproducibility_context(
-        ctx=ctx,
-        inputs=inputs,
-        provider=provider,
-        entity=entity,
-        contract_ref=contract_ref,
-    )
+    if reproducibility_context is None:
+        reproducibility_context = resolve_manifest_reproducibility_context(
+            ctx=ctx,
+            inputs=inputs,
+            provider=provider,
+            entity=entity,
+            contract_ref=contract_ref,
+        )
     return _ResolvedManifestContext(
         provider=provider,
         entity=entity,
-        contract_identity=_resolve_manifest_contract_identity(
+        contract_identity=contract_identity
+        or _resolve_manifest_contract_identity(
             provider=provider,
             entity=entity,
             required_persistence_profile=(
@@ -94,16 +89,7 @@ def _create_control_plane_refs(
     effective_config_hash: str,
     dq_contract_compatibility_hash: str,
     effective_config_artifact_id: str,
-    contract_identity: tuple[
-        str,
-        str | None,
-        str | None,
-        str | None,
-        str | None,
-        str | None,
-        str | None,
-        str | None,
-    ],
+    contract_identity: _manifest_support.RunManifestContractIdentity,
 ) -> _manifest_support.ManifestControlPlaneRefs:
     """Build canonical control-plane refs from one persisted manifest record."""
     return _manifest_support.create_control_plane_refs(
@@ -113,14 +99,14 @@ def _create_control_plane_refs(
         effective_config_hash,
         dq_contract_compatibility_hash,
         effective_config_artifact_id,
-        contract_identity[0],
-        contract_identity[1],
-        contract_identity[2],
-        contract_identity[3],
-        contract_identity[4],
-        contract_identity[5],
-        contract_identity[6],
-        contract_identity[7],
+        contract_identity.contract_ref,
+        contract_identity.contract_version,
+        contract_identity.contract_schema_hash,
+        contract_identity.dq_policy_ref,
+        contract_identity.rule_bundle_version,
+        contract_identity.normalization_profile_ref,
+        contract_identity.normalization_profile_version,
+        contract_identity.normalization_profile_hash,
     )
 
 
@@ -133,6 +119,8 @@ def create_run_manifest(
     resolved_config_hash: str,
     effective_config_hash: str,
     dq_contract_compatibility_hash: str,
+    reproducibility_context: object | None = None,
+    contract_identity: _manifest_support.RunManifestContractIdentity | None = None,
 ) -> tuple[_manifest_support.ManifestControlPlaneRefs, RunLedgerService | None]:
     run_type_value, execution_context_value = (
         _manifest_support.resolve_run_context_values(ctx)
@@ -140,6 +128,8 @@ def create_run_manifest(
     manifest_context = _resolve_manifest_context(
         ctx=ctx,
         inputs=inputs,
+        reproducibility_context=reproducibility_context,
+        contract_identity=contract_identity,
     )
     _validate_manifest_persistence_requirements(
         yaml_config=inputs.yaml_config,
@@ -155,6 +145,7 @@ def create_run_manifest(
         inputs=inputs,
         provider=manifest_context.provider,
         entity=manifest_context.entity,
+        reproducibility_context=manifest_context.reproducibility_context,
         run_type_value=run_type_value,
         execution_context_value=execution_context_value,
         resolved_config_hash=resolved_config_hash,
@@ -224,16 +215,7 @@ def _resolve_manifest_contract_identity(
     entity: str,
     required_persistence_profile: str,
     exact_replay_requested: bool,
-) -> tuple[
-    str,
-    str | None,
-    str | None,
-    str | None,
-    str | None,
-    str | None,
-    str | None,
-    str | None,
-]:
+) -> _manifest_support.RunManifestContractIdentity:
     return _manifest_support.resolve_contract_identity(
         provider=provider,
         entity=entity,
@@ -273,52 +255,35 @@ def _build_manifest_create_request(
     inputs: RunnerInputs,
     provider: str,
     entity: str,
+    reproducibility_context: object,
     run_type_value: str,
     execution_context_value: str,
     resolved_config_hash: str,
     effective_config_hash: str,
     dq_contract_compatibility_hash: str,
     effective_config_artifact_id: str,
-    contract_identity: tuple[
-        str,
-        str | None,
-        str | None,
-        str | None,
-        str | None,
-        str | None,
-        str | None,
-        str | None,
-    ],
+    contract_identity: _manifest_support.RunManifestContractIdentity,
 ) -> object:
-    (
-        contract_ref,
-        contract_version,
-        contract_schema_hash,
-        dq_policy_ref,
-        rule_bundle_version,
-        normalization_profile_ref,
-        normalization_profile_version,
-        normalization_profile_hash,
-    ) = contract_identity
     return build_manifest_create_request(
         _RunManifestCreateRequestInputs(
             ctx=ctx,
             inputs=inputs,
             provider=provider,
             entity=entity,
+            reproducibility_context=reproducibility_context,
             run_type_value=run_type_value,
             execution_context_value=execution_context_value,
             config_hash=resolved_config_hash,
             resolved_config_hash=resolved_config_hash,
             effective_config_hash=effective_config_hash,
-            contract_ref=contract_ref,
-            contract_version=contract_version,
-            contract_schema_hash=contract_schema_hash,
-            dq_policy_ref=dq_policy_ref,
-            rule_bundle_version=rule_bundle_version,
-            normalization_profile_ref=normalization_profile_ref,
-            normalization_profile_version=normalization_profile_version,
-            normalization_profile_hash=normalization_profile_hash,
+            contract_ref=contract_identity.contract_ref,
+            contract_version=contract_identity.contract_version,
+            contract_schema_hash=contract_identity.contract_schema_hash,
+            dq_policy_ref=contract_identity.dq_policy_ref,
+            rule_bundle_version=contract_identity.rule_bundle_version,
+            normalization_profile_ref=contract_identity.normalization_profile_ref,
+            normalization_profile_version=contract_identity.normalization_profile_version,
+            normalization_profile_hash=contract_identity.normalization_profile_hash,
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             effective_config_artifact_id=effective_config_artifact_id,
         )

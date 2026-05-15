@@ -182,6 +182,11 @@ quality:
             type: custom
             validator: smiles_validator
             nullable: true
+        -   field: inchi_key
+            type: pattern
+            pattern: ^[A-Z]{14}-[A-Z]{10}-[A-Z]$
+            nullable: true
+            error_message: inchi_key must be a canonical uppercase InChIKey when present
         -   field: black_box_warning
             type: enum
             allowed:

@@ -20,8 +20,23 @@ SNAPSHOT_PATH = (
 )
 
 _FIELDS_BY_FIXTURE_KEY = {
+    "chembl/activity": (
+        "bao_format",
+        "bao_endpoint",
+        "uo_units",
+        "qudt_units",
+        "standard_units",
+        "units",
+    ),
     "chembl/assay": ("bao_format",),
     "chembl/cell_line": ("clo_id", "efo_id"),
+    "chembl/molecule": (
+        "availability_type",
+        "molecule_type",
+        "oral",
+        "chirality",
+        "withdrawn_flag",
+    ),
     "chembl/tissue": ("bto_id", "efo_id", "uberon_id"),
 }
 

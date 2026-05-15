@@ -13,11 +13,6 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_artifac
 from bioetl.application.services.control_plane._run_manifest_diagnostics_composite import (
     build_composite_dossier_projection,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_identity import (
-    build_canonical_execution_identity,
-    build_degraded_runtime_anchor,
-    build_degraded_runtime_anchor_payload,
-)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_ledger import (
     _resolve_policy_value,
 )
@@ -29,8 +24,8 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_persist
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
     _is_composite_execution_context,
 )
-from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring import (
-    build_reproducibility_audit_scoring,
+from bioetl.application.services.control_plane._run_manifest_identity_graph_builder import (
+    RunManifestIdentityGraphAssembler,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 
@@ -60,6 +55,21 @@ class _FinalSummaryRequest:
     missing_link_count: int
     correlation_anchor_gaps: dict[str, int]
     resume_diagnostics: dict[str, object] | None
+
+
+@dataclass(frozen=True, slots=True)
+class _RuntimeViewsRequest:
+    """Structured inputs for persistence and operator-alert overlays."""
+
+    manifest: RunManifest
+    summary: dict[str, object]
+    ledger_entries_present: bool
+    artifact_refs: list[dict[str, object]]
+    lineage_fragment_ids: set[str]
+    missing_link_count: int
+    latest_status: str | None
+    dq_signal_present: bool
+    cross_validation_signal_present: bool
 
 
 def _build_exact_replay_anchors(
@@ -111,224 +121,45 @@ def _build_exact_replay_anchors(
     return anchors
 
 
-def _add_identity_graph_optional_fields(
-    identity_graph: dict[str, object],
-    request: _FinalSummaryRequest,
-) -> None:
-    """Add optional identity graph fields without changing historical shape."""
-    if request.base_summary.get("dependency_lock_hash") is not None:
-        identity_graph["dependency_lock_hash"] = request.base_summary.get(
-            "dependency_lock_hash"
-        )
-    if "replay_mode" not in request.base_summary:
-        return
-    identity_graph["operator_replay_mode"] = request.base_summary.get(
-        "operator_replay_mode"
-    )
-    identity_graph["replay_readiness_verdict"] = request.base_summary.get(
-        "replay_readiness_verdict"
-    )
-    identity_graph["replay_mode"] = request.base_summary["replay_mode"]
-    identity_graph["continuation_mode"] = request.base_summary.get("continuation_mode")
-    identity_graph["input_snapshot_count"] = request.base_summary[
-        "input_snapshot_count"
-    ]
-    identity_graph["snapshot_status"] = request.base_summary.get("snapshot_status")
-    identity_graph["source_posture"] = request.base_summary.get("source_posture")
-    identity_graph["input_snapshot_missing_source_refs"] = request.base_summary.get(
-        "input_snapshot_missing_source_refs", []
-    )
-    identity_graph["input_snapshots"] = request.base_summary["input_snapshots"]
-    for field_name in (
-        "historical_live_run_upgrade_policy",
-        "historical_live_run_upgrade_boundary",
-        "historical_live_run_upgrade_reason",
-        "broader_historical_exact_replay_policy",
-        "broader_historical_exact_replay_boundary",
-        "broader_historical_exact_replay_reason",
-        "broader_historical_exact_replay_state",
-        "historical_live_run_upgrade_state",
-        "replay_occurrence_kind",
-        "post_capture_replayable_parent_supported",
-        "post_capture_replayable_parent_boundary",
-    ):
-        if field_name in request.base_summary:
-            identity_graph[field_name] = request.base_summary.get(field_name)
-
-
-def _identity_graph_core_fields(request: _FinalSummaryRequest) -> dict[str, object]:
-    """Return stable run/config identity fields for the summary graph."""
-    return {
-        "run_id": str(request.manifest.run_id),
-        "manifest_id": request.manifest.manifest_id,
-        "execution_fingerprint": request.manifest.execution_fingerprint,
-        "config_hash": request.base_summary.get("config_hash"),
-        "resolved_config_hash": request.base_summary.get("resolved_config_hash"),
-        "effective_config_hash": request.base_summary.get("effective_config_hash"),
-        "git_commit": request.base_summary.get("git_commit"),
-        "source_revision_state": request.base_summary.get("source_revision_state"),
-        "dependency_lock_state": request.base_summary.get("dependency_lock_state"),
-        "code_provenance_state": request.base_summary.get("code_provenance_state"),
-        "contract_ref": request.base_summary.get("contract_ref"),
-        "contract_version": request.base_summary.get("contract_version"),
-        "normalization_profile_ref": request.base_summary.get(
-            "normalization_profile_ref"
-        ),
-        "normalization_profile_version": request.base_summary.get(
-            "normalization_profile_version"
-        ),
-        "normalization_profile_hash": request.base_summary.get(
-            "normalization_profile_hash"
-        ),
-    }
-
-
-def _identity_graph_replay_fields(request: _FinalSummaryRequest) -> dict[str, object]:
-    """Return replay policy and parentage fields for the summary graph."""
-    return {
-        "replay_of_run_id": request.base_summary.get("replay_of_run_id"),
-        "replay_of_manifest_id": request.base_summary.get("replay_of_manifest_id"),
-        "replay_parentage": request.base_summary.get("replay_parentage"),
-        "replay_capability": request.base_summary.get("replay_capability"),
-        "replay_readiness_verdict": request.base_summary.get(
-            "replay_readiness_verdict"
-        ),
-        "operator_replay_mode": request.base_summary.get("operator_replay_mode"),
-        "requested_exact_replay": request.base_summary.get("requested_exact_replay"),
-        "exact_replay_support_boundary": request.base_summary.get(
-            "exact_replay_support_boundary"
-        ),
-        "replay_family_contract": request.base_summary.get("replay_family_contract"),
-        "replay_support_state": request.base_summary.get("replay_support_state"),
-        "post_capture_replayable_parent_supported": request.base_summary.get(
-            "post_capture_replayable_parent_supported"
-        ),
-        "post_capture_replayable_parent_boundary": request.base_summary.get(
-            "post_capture_replayable_parent_boundary"
-        ),
-        "historical_live_run_upgrade_policy": request.base_summary.get(
-            "historical_live_run_upgrade_policy"
-        ),
-        "historical_live_run_upgrade_boundary": request.base_summary.get(
-            "historical_live_run_upgrade_boundary"
-        ),
-        "historical_live_run_upgrade_reason": request.base_summary.get(
-            "historical_live_run_upgrade_reason"
-        ),
-        "broader_historical_exact_replay_policy": request.base_summary.get(
-            "broader_historical_exact_replay_policy"
-        ),
-        "broader_historical_exact_replay_boundary": request.base_summary.get(
-            "broader_historical_exact_replay_boundary"
-        ),
-        "broader_historical_exact_replay_reason": request.base_summary.get(
-            "broader_historical_exact_replay_reason"
-        ),
-        "broader_historical_exact_replay_state": request.base_summary.get(
-            "broader_historical_exact_replay_state"
-        ),
-        "historical_live_run_upgrade_state": request.base_summary.get(
-            "historical_live_run_upgrade_state"
-        ),
-        "replay_occurrence_kind": request.base_summary.get("replay_occurrence_kind"),
-        "replay_capability_reason": request.base_summary.get(
-            "replay_capability_reason"
-        ),
-        "exact_replay_eligible": request.base_summary.get("exact_replay_eligible"),
-        "exact_replay_blockers": request.base_summary.get("exact_replay_blockers", []),
-        "append_mode_semantic_sinks": request.base_summary.get(
-            "append_mode_semantic_sinks",
-            [],
-        ),
-    }
-
-
-def _identity_graph_snapshot_fields(request: _FinalSummaryRequest) -> dict[str, object]:
-    """Return snapshot, resume, and lineage fields for the summary graph."""
-    return {
-        "source_posture": request.base_summary.get("source_posture"),
-        "input_snapshot_missing_source_refs": request.base_summary.get(
-            "input_snapshot_missing_source_refs",
-            [],
-        ),
-        "resume_contract": request.base_summary.get("resume_contract"),
-        "resume_diagnostics": request.resume_diagnostics,
-        "lineage_closure_boundary": request.base_summary.get(
-            "lineage_closure_boundary"
-        ),
-        "input_snapshot_ids": request.base_summary.get("input_snapshot_ids", []),
-        "snapshot_status": request.base_summary.get("snapshot_status"),
-        "input_snapshot_content_hashes": request.base_summary.get(
-            "input_snapshot_content_hashes",
-            [],
-        ),
-        "input_snapshot_identity_fingerprint": request.base_summary.get(
-            "input_snapshot_identity_fingerprint"
-        ),
-    }
-
-
 def _build_identity_graph(
     request: _FinalSummaryRequest,
     *,
     exact_replay_anchors: dict[str, object],
     produced_artifact_trace: dict[str, object],
 ) -> dict[str, object]:
-    """Assemble the operator-facing run identity graph for final summary."""
-    planned_artifacts = cast(
-        list[dict[str, object]],
-        request.base_summary.get("planned_artifacts", []),
-    )
-    canonical_execution_identity_payload = build_canonical_execution_identity(
-        manifest=request.manifest,
-        base_summary=request.base_summary,
-    )
-    degraded_runtime_anchor_payload = build_degraded_runtime_anchor_payload(
-        manifest=request.manifest,
-        base_summary=request.base_summary,
-    )
-    identity_graph = {
-        **_identity_graph_core_fields(request),
-        **_identity_graph_replay_fields(request),
-        **_identity_graph_snapshot_fields(request),
-        "canonical_execution_identity": {
-            "execution_fingerprint": request.manifest.execution_fingerprint,
-            "payload": canonical_execution_identity_payload,
-        },
+    """Assemble the operator-facing run identity graph via the canonical seam."""
+    diagnostics_seed = {
+        **request.base_summary,
         "exact_replay_anchors": exact_replay_anchors,
-        "degraded_runtime_anchor": build_degraded_runtime_anchor(
-            degraded_runtime_anchor_payload
-        ),
-        "planned_artifacts": planned_artifacts,
-        "published_artifacts": [
-            _build_identity_graph_artifact_ref(artifact_ref)
-            for artifact_ref in request.artifact_refs
-        ],
         "produced_artifact_trace": produced_artifact_trace,
+        "artifact_refs": request.artifact_refs,
         "occurrence_only_diagnostics": sorted(
             request.occurrence_only_diagnostic_scopes
         ),
+        "resume_diagnostics": request.resume_diagnostics,
+        "total_events": len(request.ledger_entries),
     }
-    _add_identity_graph_optional_fields(identity_graph, request)
-    return identity_graph
+    return RunManifestIdentityGraphAssembler.build(
+        request.manifest,
+        diagnostics_seed,
+    )
 
 
 def _build_alert_bundle(
-    request: _FinalSummaryRequest,
+    request: _RuntimeViewsRequest,
     *,
     persistence_profile: dict[str, object],
 ) -> tuple[dict[str, bool], list[str]]:
     """Return alert signals and operator next steps for final summary."""
-    latest_entry = request.ledger_entries[-1]
     composite_execution_context = _is_composite_execution_context(request.manifest)
     composite_rich_replay_supported = bool(
-        request.base_summary.get(
+        request.summary.get(
             "composite_resume_rich_replay_supported",
             not composite_execution_context,
         )
     )
     alert_signals = build_alert_signals(
-        latest_status=latest_entry.status,
+        latest_status=request.latest_status,
         artifact_refs=request.artifact_refs,
         lineage_fragment_ids=request.lineage_fragment_ids,
         missing_link_count=request.missing_link_count,
@@ -351,6 +182,24 @@ def _build_alert_bundle(
         ),
     )
     return alert_signals, build_next_steps(alert_signals)
+
+
+def _build_runtime_views(
+    request: _RuntimeViewsRequest,
+) -> tuple[dict[str, object], dict[str, bool], list[str]]:
+    """Return canonical persistence and operator overlays for one summary."""
+    persistence_profile = build_persistence_profile(
+        base_summary=request.summary,
+        ledger_entries_present=request.ledger_entries_present,
+        artifact_refs=request.artifact_refs,
+        lineage_fragment_ids=request.lineage_fragment_ids,
+        missing_link_count=request.missing_link_count,
+    )
+    alert_signals, next_steps = _build_alert_bundle(
+        request,
+        persistence_profile=persistence_profile,
+    )
+    return persistence_profile, alert_signals, next_steps
 
 
 def _build_final_summary_updates(
@@ -429,18 +278,20 @@ def _build_final_summary(
         exact_replay_anchors=exact_replay_anchors,
         produced_artifact_trace=produced_artifact_trace,
     )
-    persistence_profile = build_persistence_profile(
-        base_summary=request.base_summary,
-        ledger_entries_present=bool(request.ledger_entries),
-        artifact_refs=request.artifact_refs,
-        lineage_fragment_ids=request.lineage_fragment_ids,
-        missing_link_count=request.missing_link_count,
+    persistence_profile, alert_signals, next_steps = _build_runtime_views(
+        _RuntimeViewsRequest(
+            manifest=request.manifest,
+            summary=request.base_summary,
+            ledger_entries_present=bool(request.ledger_entries),
+            artifact_refs=request.artifact_refs,
+            lineage_fragment_ids=request.lineage_fragment_ids,
+            missing_link_count=request.missing_link_count,
+            latest_status=request.ledger_entries[-1].status,
+            dq_signal_present=request.dq_signal_present,
+            cross_validation_signal_present=request.cross_validation_signal_present,
+        )
     )
     composite_dossier_projection = build_composite_dossier_projection(
-        request,
-        persistence_profile=persistence_profile,
-    )
-    alert_signals, next_steps = _build_alert_bundle(
         request,
         persistence_profile=persistence_profile,
     )
@@ -457,14 +308,4 @@ def _build_final_summary(
             produced_artifact_trace=produced_artifact_trace,
         )
     )
-    summary["reproducibility_audit_score"] = build_reproducibility_audit_scoring(
-        summary
-    )
     return summary
-
-
-def _build_identity_graph_artifact_ref(
-    artifact_ref: dict[str, object],
-) -> dict[str, object]:
-    """Return the operator-facing artifact shape used inside identity graph."""
-    return {key: value for key, value in artifact_ref.items() if key != "artifact_id"}

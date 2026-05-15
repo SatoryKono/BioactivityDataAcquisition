@@ -2549,11 +2549,8 @@
         "x": 10,
         "y": 7
       },
-      "description": "Selected-range processed-records summary for the current pipeline/run_type scope.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+      "description": "Current stage/outcome accounting evidence for the selected pipeline/run_type scope. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage.",
+      "datasource": "Quarantine Explorer",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -2579,36 +2576,202 @@
                   {
                     "type": "value",
                     "options": {
-                      "1 bronze": {
-                        "text": "bronze"
+                      "01 bronze_records": {
+                        "text": "bronze [total]",
+                        "color": "#cd7f32"
                       },
-                      "2 silver [valid]": {
-                        "text": "silver [valid]"
+                      "01 bronze_records__zero": {
+                        "text": "bronze [total]",
+                        "color": "#374151"
                       },
-                      "3 silver [error]": {
-                        "text": "silver [error]"
+                      "02 silver_valid_records": {
+                        "text": "silver [valid]",
+                        "color": "#c0c0c0"
                       },
-                      "4 gold [valid]": {
-                        "text": "gold [valid]"
+                      "02 silver_valid_records__zero": {
+                        "text": "silver [valid]",
+                        "color": "#374151"
                       },
-                      "5 gold [error]": {
-                        "text": "gold [error]"
+                      "03 silver_filtered_out_records": {
+                        "text": "silver [filtered out]",
+                        "color": "#d1d5db"
+                      },
+                      "03 silver_filtered_out_records__zero": {
+                        "text": "silver [filtered out]",
+                        "color": "#374151"
+                      },
+                      "04 silver_quarantined_records": {
+                        "text": "silver [quarantined]",
+                        "color": "#d1d5db"
+                      },
+                      "04 silver_quarantined_records__zero": {
+                        "text": "silver [quarantined]",
+                        "color": "#374151"
+                      },
+                      "05 silver_skipped_records": {
+                        "text": "silver [skipped]",
+                        "color": "#d1d5db"
+                      },
+                      "05 silver_skipped_records__zero": {
+                        "text": "silver [skipped]",
+                        "color": "#374151"
+                      },
+                      "06 silver_deduplicated_records": {
+                        "text": "silver [deduplicated]",
+                        "color": "#d1d5db"
+                      },
+                      "06 silver_deduplicated_records__zero": {
+                        "text": "silver [deduplicated]",
+                        "color": "#374151"
+                      },
+                      "07 gold_written_records": {
+                        "text": "gold [valid]",
+                        "color": "#d4af37"
+                      },
+                      "07 gold_written_records__zero": {
+                        "text": "gold [valid]",
+                        "color": "#374151"
+                      },
+                      "08 gold_excluded_by_contract_records": {
+                        "text": "gold [excluded]",
+                        "color": "#d1d5db"
+                      },
+                      "08 gold_excluded_by_contract_records__zero": {
+                        "text": "gold [excluded]",
+                        "color": "#374151"
+                      },
+                      "09 gold_quarantined_records": {
+                        "text": "gold [quarantined]",
+                        "color": "#d1d5db"
+                      },
+                      "09 gold_quarantined_records__zero": {
+                        "text": "gold [quarantined]",
+                        "color": "#374151"
+                      },
+                      "10 gold_skipped_records": {
+                        "text": "gold [skipped]",
+                        "color": "#d1d5db"
+                      },
+                      "10 gold_skipped_records__zero": {
+                        "text": "gold [skipped]",
+                        "color": "#374151"
+                      },
+                      "11 gold_deduplicated_records": {
+                        "text": "gold [deduplicated]",
+                        "color": "#d1d5db"
+                      },
+                      "11 gold_deduplicated_records__zero": {
+                        "text": "gold [deduplicated]",
+                        "color": "#374151"
                       }
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Value"
+              "options": "value"
             },
             "properties": [
               {
                 "id": "decimals",
                 "value": 0
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#374151",
+                      "value": null
+                    },
+                    {
+                      "color": "#d1d5db",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "percintage"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d1d5db"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0%": {
+                        "text": "0%",
+                        "color": "#374151"
+                      },
+                      "0.0%": {
+                        "text": "0.0%",
+                        "color": "#374151"
+                      },
+                      "0.000%": {
+                        "text": "0.000%",
+                        "color": "#374151"
+                      },
+                      "No data": {
+                        "text": "No data",
+                        "color": "#374151"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           }
@@ -2616,10 +2779,18 @@
       },
       "targets": [
         {
-          "expr": "label_replace(round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[$__range])) or vector(0)), \"parameter\", \"1 bronze\", \"\", \"\") or label_replace(round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"silver\"}[$__range])) or vector(0)), \"parameter\", \"2 silver [valid]\", \"\", \"\") or label_replace(round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0)), \"parameter\", \"3 silver [error]\", \"\", \"\") or label_replace(round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"gold\"}[$__range])) or vector(0)), \"parameter\", \"4 gold [valid]\", \"\", \"\") or label_replace(round(clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"silver\"}[$__range])) or vector(0)) - (sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"gold\"}[$__range])) or vector(0)), 0)), \"parameter\", \"5 gold [error]\", \"\", \"\")",
-          "refId": "A",
           "format": "table",
-          "instant": true
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "rows",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
         }
       ],
       "options": {
@@ -2638,17 +2809,16 @@
         {
           "id": "organize",
           "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true
-            },
+            "excludeByName": {},
             "indexByName": {
               "parameter": 0,
-              "Value": 1
+              "value": 1,
+              "percintage": 2
             },
             "renameByName": {
               "parameter": "parameter",
-              "Value": "value"
+              "value": "value",
+              "percintage": "percintage"
             }
           }
         }
@@ -2775,7 +2945,7 @@
           "value": "-"
         },
         "datasource": "Quarantine Explorer",
-        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&pipeline=${pipeline}&run_type=${run_type:csv}",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
         "description": "Run ID selector sourced from the local control-plane run-manifest catalog for the current pipeline/run_type scope. Grafana All values are normalized to an unbounded scope, so Run Type = All no longer empties the selector; Pipeline = All exposes aggregate exact-run handoff options from the catalog. This selector remains HTTP-backed and does not reintroduce run_id into Prometheus labels.",
         "hide": 0,
         "includeAll": false,
@@ -2802,7 +2972,7 @@
               "method": "GET",
               "data": ""
             },
-            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&pipeline=${pipeline}&run_type=${run_type:csv}"
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}"
           }
         },
         "refresh": 1,

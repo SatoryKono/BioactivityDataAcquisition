@@ -117,6 +117,29 @@ def test_project_map_promotes_active_entrypoints_into_published_nav() -> None:
     assert "## Document Status" not in map_text
 
 
+def test_rules_appendix_f_tracks_latest_adr_registry_policy() -> None:
+    """RULES appendix must expose current ADR summary and delegate live registry."""
+    text = RULES_DOC.read_text(encoding="utf-8")
+
+    expected_fragments = (
+        "canonical live ADR registry",
+        "docs/02-architecture/decisions/README.md",
+        "docs/02-architecture/adr-registry.md",
+        "[ADR-046]",
+        "[ADR-047]",
+    )
+    missing = [fragment for fragment in expected_fragments if fragment not in text]
+    assert not missing, f"RULES ADR appendix drifted: {missing}"
+
+
+def test_mkdocs_comment_uses_packaged_docs_guardrail_name() -> None:
+    """Published MkDocs config should reference the active docs CLI guardrail."""
+    text = MKDOCS_FILE.read_text(encoding="utf-8")
+
+    assert "scripts/check_doc_links.py" not in text
+    assert "python -m scripts.docs check-links" in text
+
+
 def test_source_tree_readme_maps_entrypoints_and_ownership() -> None:
     """The source-tree README must expose useful entrypoints and ownership seams."""
     text = SOURCE_MAP_DOC.read_text(encoding="utf-8")

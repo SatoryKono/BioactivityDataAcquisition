@@ -34,6 +34,46 @@
       "type": "string",
       "nullable": false,
       "description": ""
+    },
+    "molecule_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Canonical ChEMBL molecule identifier retained as seed lineage anchor."
+    },
+    "canonical_smiles": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Canonical SMILES string retained for structure-level joins."
+    },
+    "inchi_key": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Canonical InChIKey retained for cross-provider structure joins."
+    },
+    "standardized_inchi_key": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Provider-standardized InChIKey retained as source-scoped identifier."
+    },
+    "structure_parent_key": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Structure parent key retained for PubChem/ChEMBL hierarchy lineage."
     }
   },
   "required": [

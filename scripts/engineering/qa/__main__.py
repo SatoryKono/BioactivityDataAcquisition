@@ -19,6 +19,7 @@ Commands:
     check-semantic-field-registry Validate semantic field registry coverage
     check-semantic-registry-drift Validate generated semantic registry drift candidates
     check-semantic-pair-budget Validate semantic pair-matrix drift budgets
+    report-semantic-pipeline-audit Generate/check semantic pipeline audit snapshot artifacts
     check-semantic-anchor-parity Validate semantic anchor DQ/Gold parity
     check-gold-nullable-numeric Validate Gold nullable numeric compatibility
     check-generic-field-ownership Validate generic semantic field ownership
@@ -72,6 +73,7 @@ COMMAND_SPECS = {
     "check-semantic-field-registry": "check_semantic_field_registry.py",
     "check-semantic-registry-drift": "check_semantic_registry_drift.py",
     "check-semantic-pair-budget": "check_semantic_pair_matrix_budget.py",
+    "report-semantic-pipeline-audit": "generate_semantic_pipeline_audit.py",
     "check-semantic-anchor-parity": "check_semantic_anchor_parity.py",
     "check-gold-nullable-numeric": "check_gold_nullable_numeric_compatibility.py",
     "check-generic-field-ownership": "check_generic_field_ownership.py",

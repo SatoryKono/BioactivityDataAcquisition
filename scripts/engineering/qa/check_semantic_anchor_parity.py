@@ -157,6 +157,74 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         ),
     ),
     AnchorSpec(
+        anchor_id="crossref_title_publication_fallback_anchor",
+        field="title",
+        entity_config="configs/entities/crossref/publication.yaml",
+        gold_contract="docs/04-reference/contracts/gold/crossref_publication_v1.0.json",
+        expected_gold_required=True,
+        require_join_key_normalization_policy=True,
+        require_field_validation=True,
+        require_cross_field_validation=True,
+        require_silver_required_filter=True,
+        require_gold_required_filter=True,
+        composite_requirements=(
+            CompositeRequirement(
+                "configs/composites/publication.yaml",
+                "publication_fallback_join_key",
+            ),
+            CompositeRequirement(
+                "configs/composites/publication.yaml",
+                "field_priority",
+            ),
+        ),
+    ),
+    AnchorSpec(
+        anchor_id="openalex_title_publication_fallback_anchor",
+        field="title",
+        entity_config="configs/entities/openalex/publication.yaml",
+        gold_contract="docs/04-reference/contracts/gold/openalex_publication_v1.0.json",
+        expected_gold_required=True,
+        require_join_key_normalization_policy=True,
+        require_field_validation=True,
+        require_cross_field_validation=True,
+        require_silver_required_filter=True,
+        require_gold_required_filter=True,
+        composite_requirements=(
+            CompositeRequirement(
+                "configs/composites/publication.yaml",
+                "publication_fallback_join_key",
+            ),
+            CompositeRequirement(
+                "configs/composites/publication.yaml",
+                "field_priority",
+            ),
+        ),
+    ),
+    AnchorSpec(
+        anchor_id="semanticscholar_title_publication_fallback_anchor",
+        field="title",
+        entity_config="configs/entities/semanticscholar/publication.yaml",
+        gold_contract=(
+            "docs/04-reference/contracts/gold/semanticscholar_publication_v1.0.json"
+        ),
+        expected_gold_required=True,
+        require_join_key_normalization_policy=True,
+        require_field_validation=True,
+        require_cross_field_validation=True,
+        require_silver_required_filter=True,
+        require_gold_required_filter=True,
+        composite_requirements=(
+            CompositeRequirement(
+                "configs/composites/publication.yaml",
+                "publication_fallback_join_key",
+            ),
+            CompositeRequirement(
+                "configs/composites/publication.yaml",
+                "field_priority",
+            ),
+        ),
+    ),
+    AnchorSpec(
         anchor_id="pubmed_pmc_publication_reference_anchor",
         field="pmc_id",
         entity_config="configs/entities/pubmed/publication.yaml",

@@ -189,7 +189,7 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_records_processed_total`   | Counter   | pipeline, stage, run_type         | Обработанные записи     |
 | `bioetl_record_flow_records_total` | Counter   | pipeline, run_type, flow_stage    | Bounded flow-проекция fetched/bronze/silver/gold/filtered_out/quarantined |
 | `bioetl_record_flow_invariants_total` | Counter | pipeline, run_type, invariant, status | Terminal invariants для `fetched_equals_bronze`, `bronze_partitioned`, `silver_gold_monotonic` |
-| `bioetl_stage_records_total`       | Counter   | pipeline, run_type, stage, outcome | Canonical stage-model projection для input/ingestion/transform/validation/storage/output |
+| `bioetl_stage_records_total`       | Counter   | pipeline, run_type, stage, outcome | Canonical stage-model projection для input/ingestion/transform/validation/storage/output plus record-accounting outcomes (`bronze/records`, `silver/valid|quarantined|skipped|filtered_out|deduplicated`, `gold/written|quarantined|skipped|excluded_by_contract|deduplicated`) |
 | `bioetl_stage_backlog_records`     | Gauge     | pipeline, run_type, stage         | Текущий bounded backlog по canonical stage |
 | `bioetl_stage_lag_seconds`         | Gauge     | pipeline, run_type, stage         | Текущий bounded lag для unresolved stage backlog |
 | `bioetl_batch_lifecycle_events_total` | Counter | pipeline, run_type, event, stage, status | Bounded batch lifecycle events for `created` / `written` / `failed` |
@@ -197,6 +197,19 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_errors_total`              | Counter   | pipeline, stage, error_code       | Количество ошибок       |
 | `bioetl_batch_size_records`        | Histogram | pipeline, stage                   | Размер батчей           |
 | `bioetl_pipeline_runs_total`       | Counter   | pipeline, run_type, status        | Количество запусков     |
+
+#### Processed Records Reconciliation Rules
+
+Dashboard `Processed Records` panels use recording rules derived from
+`bioetl_stage_records_total`, not `$__range` throughput counters:
+
+| Rule family | Labels | Назначение |
+| --- | --- | --- |
+| `bioetl_processed_records_*_current` | `pipeline,run_type` | Current 15m Bronze/Silver/Gold accounting rows and deltas. |
+| `bioetl_processed_records_reconciliation_status` | `pipeline,run_type` | `0=UNKNOWN`, `1=OK`, `2=DEGRADED`, `3=FAILING` reconciliation status. Missing accounting series remain UNKNOWN/no-data, not OK. |
+
+These rules MUST NOT add `run_id`, manifest IDs, payload hashes, raw file paths,
+or raw error messages as Prometheus labels.
 
 #### Data Quality Metrics
 

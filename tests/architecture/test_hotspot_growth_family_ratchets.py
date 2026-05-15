@@ -8,6 +8,7 @@ import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SCORECARD_PATH = PROJECT_ROOT / "configs/quality/debt_scorecard.yaml"
+_ENFORCED_RATCHET_STAGES = {"active", "reviewed-baseline"}
 
 
 def _load_scorecard() -> dict[str, object]:
@@ -50,11 +51,13 @@ def test_active_hotspot_family_file_growth_budgets_hold_reviewed_baseline() -> N
         family
         for family in families
         if isinstance(family, dict)
-        and family.get("ratchet_stage") == "active"
+        and family.get("ratchet_stage") in _ENFORCED_RATCHET_STAGES
         and isinstance(family.get("bounded_growth_budgets"), dict)
         and "files_ge_250_loc" in family["bounded_growth_budgets"]
     ]
-    assert budgeted_families, "Expected at least one active family with a growth budget"
+    assert budgeted_families, (
+        "Expected at least one enforced hotspot family with a growth budget"
+    )
 
     for family in budgeted_families:
         family_name = family.get("name")
@@ -71,5 +74,6 @@ def test_active_hotspot_family_file_growth_budgets_hold_reviewed_baseline() -> N
         assert actual_count <= budget, (
             f"Hotspot family {family_name} has {actual_count} files >= 250 LOC, "
             f"exceeding bounded budget {budget}. Keep the composition/file-growth "
-            "ratchet stable or rebaseline the reviewed scorecard snapshot intentionally."
+            "ratchet stable or intentionally refresh the reviewed hotspot-family "
+            "baseline."
         )

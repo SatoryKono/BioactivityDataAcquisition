@@ -1457,7 +1457,7 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
         "produced_artifact_trace": False,
         "run_ledger_history": False,
         "artifact_lineage_links": True,
-        "lineage_closure_boundary_support": False,
+        "lineage_closure_boundary_support": True,
     }
     assert summary["persistence_profile"]["replay_ready_missing_requirements"] == [
         "exact_replay_capability",
@@ -1471,20 +1471,14 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
         "immutable_input_snapshots",
         "produced_artifact_trace",
         "run_ledger_history",
-        "lineage_closure_boundary_support",
         "composite_rich_replay_projection",
     ]
     assert summary["alert_signals"]["strict_replay_boundary_gap"] is False
-    assert summary["alert_signals"]["lineage_closure_boundary_gap"] is True
+    assert summary["alert_signals"]["lineage_closure_boundary_gap"] is False
     assert summary["alert_signals"]["produced_artifact_trace_gap"] is True
     assert summary["alert_signals"]["composite_resume_reconstructability_gap"] is True
     assert summary["next_steps"] == [
         "Persist immutable cached Bronze input snapshots before treating this run as strict exact-replay capable.",
-        (
-            "Treat this pipeline family as outside the current operator-grade "
-            "lineage closure boundary; do not claim forensic-grade trace/debug "
-            "support for it."
-        ),
         "Resolve concrete produced artifacts from the run ledger before claiming replay-ready reproducibility.",
         (
             "Treat composite resume as checkpoint snapshot plus ledger suffix "

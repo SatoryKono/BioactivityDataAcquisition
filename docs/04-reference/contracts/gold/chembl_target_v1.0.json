@@ -93,7 +93,7 @@
     },
     "downgraded": {
       "type": [
-        "boolean",
+        "object",
         "null"
       ],
       "nullable": true,
@@ -191,6 +191,6 @@
   "normalization_profile": {
     "ref": "chembl.target",
     "version": "1.0.0",
-    "hash": "02e19dfe636610c557a6439eedb497a7d4bb65f09bd86b3c4d1fb7c4d9d665a4"
+    "hash": "eee121c6ddf35cab4cf8044d633a9a3f823ffeec5b41bcbd1ac5fad5c91727e5"
   }
 }

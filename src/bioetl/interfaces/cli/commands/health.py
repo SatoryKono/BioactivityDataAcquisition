@@ -188,6 +188,7 @@ async def _run_health_server(host: str, port: int) -> None:
         health_monitor=deps.health_monitor,
         quarantine_service=quarantine_service,
         run_manifest_port=deps.run_manifest_port,
+        run_ledger_port=deps.run_ledger_port,
     )
     try:
         await server.start()

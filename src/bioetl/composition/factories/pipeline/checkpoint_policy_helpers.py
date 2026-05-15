@@ -90,7 +90,7 @@ def resolve_checkpoint_compatibility_policy(
         return "hard_fail"
     if (
         required_persistence_profile in STRICT_PERSISTENCE_PROFILES
-        and requested_policy == "observe"
+        and requested_policy != "hard_fail"
     ):
         logger_port.warning(
             "Required persistence profile enforces hard_fail "

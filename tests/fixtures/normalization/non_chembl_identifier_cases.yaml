@@ -116,6 +116,7 @@ composite_publication_join_keys:
       - "  Mixed Case Title  "
       - "Mixed Case Title"
       - "Mixed\t Case\nTitle"
+      - " <b>Mixed</b>&nbsp;Case Title "
     expected: "Mixed Case Title"
 composite_molecule_join_keys:
   inchi_key_primary:

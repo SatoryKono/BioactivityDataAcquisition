@@ -364,9 +364,7 @@ def build_supported_boundary_verdict(
         if isinstance(persistence_profile, dict)
         else False
     )
-    blocked_outside_supported_boundary = (
-        not strict_exact_replay_supported or not lineage_supported
-    )
+    blocked_outside_supported_boundary = not strict_exact_replay_supported
     has_supported_boundary_gaps = (
         bool(threshold_failures)
         or not required_profile_satisfied

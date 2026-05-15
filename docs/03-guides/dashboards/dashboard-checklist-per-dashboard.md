@@ -240,6 +240,7 @@
 - [ ] Replay/checkpoint panels route к `checkpoint-debugging.md`
 - [ ] Manifest/ledger evidence panels route к `run-manifest-inspection.md`
 - [ ] Known Blind Spots и terminal-event evidence ниже fold в collapsed incident rows
+- [ ] `Known Blind Spots` и `Review: Known Missing Replay-Safety Signals` явно описаны как summary/detail limitation notes, not healthy signals
 - [ ] Starts с answer-first Trust Summary block
 
 ### Cross-scope markers
@@ -273,6 +274,7 @@
 
 ### First-screen структура
 - [ ] Tier 1 включает: First Action, Runtime Status, Runtime Telemetry Gap, Monitor Runtime Blockers, Runtime Blockers
+- [ ] `Runtime Status` описан как mirror of shared-shell `Status`, not independent second signal
 - [ ] Tier 2 collapsed rows по сценариям: Backlog Trends, Durations, Shutdown Diagnostics, Tracing-only Log Hygiene
 - [ ] Tier 3: selected-range evidence ниже
 - [ ] Tier 4 collapsed: tracing-only log hygiene
@@ -382,6 +384,7 @@
 
 ### First-screen структура
 - [ ] Tier 1 включает: Monitor DQ Current Status, Monitor DQ Threshold State, Inspect DQ Current Reasons, Review: First Action
+- [ ] `Monitor DQ Current Status` описан как mirror of shared-shell `Status`, not independent second signal
 - [ ] Tier 2 compact current-context band: Monitor: Data Quality Score (Volume-weighted), Monitor: Worst-Entity DQ Score, Monitor: Worst Data Freshness Lag (seconds), Track: Records Quarantined in Range, Track: Soft Threshold Exceeded in Range, Track: Silver Filter Rejects in Range
 - [ ] Tier 3: полноширинный Track Range Evidence: Bronze -> Silver -> Gold
 - [ ] Tier 4 collapsed rows: Reject / Pareto / Fields, Validation Diagnostics

@@ -335,6 +335,16 @@ class TestTrackProcessedRecords:
                 "outcome": "filtered_out",
             },
         )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_stage_records_total",
+            3,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "stage": "silver",
+                "outcome": "filtered_out",
+            },
+        )
 
     def test_track_records_fetched_uses_record_flow_counter(
         self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock

@@ -354,6 +354,7 @@ L1/L2 replay/resume safety: manifest, ledger, checkpoint, replay, lineage, globa
 - Replay/checkpoint panels route к `checkpoint-debugging.md`
 - Manifest/ledger evidence panels route к `run-manifest-inspection.md`
 - Known Blind Spots и terminal-event evidence ниже fold в collapsed incident rows, не в first-screen trust block
+- `Known Blind Spots` и `Review: Known Missing Replay-Safety Signals` могут оставаться двумя collapsed docs panels только как non-destructive refactor phase: первый summary, второй detailed companion; оба являются limitation notes, не health signals.
 - Starts с answer-first **Trust Summary** block: replay safety state, checkpoint freshness gap, ledger/manifest consistency, telemetry presence
 
 ### Cross-scope marker contract
@@ -383,6 +384,7 @@ L2 diagnostic runtime triage: blockers, latency, backlog, error localization, ha
 
 ### First-screen структура
 - **Tier 1**: `First Action`, `Runtime Status`, `Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Runtime Blockers`
+- `Runtime Status` is an expanded mirror of compact shared-shell `Status`, not an independent second current-status signal.
 - **Tier 2**: collapsed rows по сценариям: `Backlog Trends`, `Durations`, `Shutdown Diagnostics`, `Tracing-only Log Hygiene`
 - **Tier 3**: selected-range evidence ниже
 - **Tier 4**: collapsed tracing-only log hygiene
@@ -488,6 +490,7 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 
 ### First-screen структура
 - **Tier 1**: `Monitor DQ Current Status`, `Monitor DQ Threshold State`, `Inspect DQ Current Reasons`, `Review: First Action`
+- `Monitor DQ Current Status` is an expanded mirror of compact shared-shell `Status`, not an independent second current-status signal.
 - **Tier 2**: compact current-context band: `Monitor: Data Quality Score (Volume-weighted)`, `Monitor: Worst-Entity DQ Score`, `Monitor: Worst Data Freshness Lag (seconds)`, `Track: Records Quarantined in Range`, `Track: Soft Threshold Exceeded in Range`, `Track: Silver Filter Rejects in Range`
 - **Tier 3**: полноширинный `Track Range Evidence: Bronze -> Silver -> Gold`
 - **Tier 4**: collapsed rows: `Reject / Pareto / Fields`, `Validation Diagnostics`

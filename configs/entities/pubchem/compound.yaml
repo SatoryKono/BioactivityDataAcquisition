@@ -125,6 +125,16 @@ quality:
     type: custom
     validator: smiles_validator
     nullable: true
+  - field: inchi_key
+    type: pattern
+    pattern: ^[A-Z]{14}-[A-Z]{10}-[A-Z]$
+    nullable: true
+    error_message: inchi_key must be a canonical uppercase InChIKey when present
+  - field: standardized_inchi_key
+    type: pattern
+    pattern: ^[A-Z]{14}-[A-Z]{10}-[A-Z]$
+    nullable: true
+    error_message: standardized_inchi_key must be a canonical uppercase InChIKey when present
   - field: isomeric_smiles
     type: custom
     validator: smiles_validator

@@ -34,6 +34,38 @@
       "type": "string",
       "nullable": false,
       "description": ""
+    },
+    "target_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "ChEMBL target identifier retained as target lineage anchor."
+    },
+    "uniprot_accession": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "UniProt accession retained as partial cross-source protein lineage anchor."
+    },
+    "taxonomy_id": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "nullable": true,
+      "description": "NCBI taxonomy identifier retained as organism lineage metadata."
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Target description retained as source-scoped metadata."
     }
   },
   "required": [

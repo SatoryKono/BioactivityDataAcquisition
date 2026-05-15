@@ -13,6 +13,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_pdb_references,
     normalize_profile_pfam_references,
     normalize_profile_reactome_references,
+    normalize_profile_uniprot_accession,
     normalize_profile_uniprot_accessions,
     normalize_profile_uniprot_go_references,
     normalize_profile_uniprot_interpro_references,
@@ -134,6 +135,10 @@ _REFERENCE_ID_RULE_NOTES = {
     ),
 }
 _SPECIAL_RULES = {
+    "accession": (
+        normalize_profile_uniprot_accession,
+        "Canonicalize the primary UniProt accession through the shared value-object contract.",
+    ),
     "chembl_ids": (
         normalize_profile_chembl_ids,
         "Canonicalize ChEMBL identifiers inside a set-like canonical JSON array.",

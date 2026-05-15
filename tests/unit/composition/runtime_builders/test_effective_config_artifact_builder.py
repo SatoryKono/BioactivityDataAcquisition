@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
@@ -24,6 +25,9 @@ from bioetl.composition.runtime_builders._effective_config_artifact_builder_supp
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     create_and_persist_composite_effective_config_artifact,
     create_and_persist_effective_config_artifact,
+)
+from bioetl.composition.runtime_builders.run_manifest_support import (
+    RunManifestContractIdentity,
 )
 from bioetl.domain.control_plane.effective_config_environment import (
     SEMANTIC_RUNTIME_ENV_DEPENDENCIES,
@@ -122,6 +126,56 @@ def test_build_effective_config_source_refs_include_dependency_provenance_files(
 
     assert "pyproject.toml" in [ref.source_path for ref in refs]
     assert "uv.lock" in [ref.source_path for ref in refs]
+
+
+def test_build_effective_config_source_refs_discovers_transitive_config_graph_edges(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "configs" / "base").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "configs" / "composites").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "configs" / "quality" / "entities" / "composite").mkdir(
+        parents=True, exist_ok=True
+    )
+    (tmp_path / "configs" / "base" / "pipeline.yaml").write_text(
+        "pipeline:\n  version: 1\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "configs" / "base" / "quality.yaml").write_text(
+        "quality:\n  mode: strict\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "configs" / "base" / "contract_registry.yaml").write_text(
+        "contracts:\n  composite.publication: 1.0.0\n",
+        encoding="utf-8",
+    )
+    (
+        tmp_path / "configs" / "composites" / "publication.yaml"
+    ).write_text(
+        "composite:\n"
+        "  dq_overrides:\n"
+        "    dq_config_file: ../quality/entities/composite/publication.yaml\n",
+        encoding="utf-8",
+    )
+    (
+        tmp_path / "configs" / "quality" / "entities" / "composite" / "publication.yaml"
+    ).write_text(
+        "dq_overrides:\n  thresholds:\n    soft_fail: 0.01\n",
+        encoding="utf-8",
+    )
+
+    refs = _build_effective_config_source_refs(
+        provider="composite",
+        entity="publication",
+        repo_root=tmp_path,
+    )
+
+    assert [ref.source_path for ref in refs] == [
+        "configs/base/pipeline.yaml",
+        "configs/base/quality.yaml",
+        "configs/composites/publication.yaml",
+        "configs/quality/entities/composite/publication.yaml",
+        "configs/base/contract_registry.yaml",
+    ]
 
 
 def _build_runner_inputs(
@@ -686,6 +740,87 @@ def test_create_and_persist_effective_config_artifact_forwards_runtime_strictnes
 
     assert captured["resolution_policy"].strict_validation is False
     assert captured["normalization_profile_ref"] == "chembl.activity"
+
+
+def test_create_and_persist_effective_config_artifact_uses_supplied_publication_context(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def _fake_payload(
+        *,
+        pipeline_name: str,
+        pipeline_kind: str,
+        resolved_config: object,
+        runtime_overrides: dict[str, object],
+        provider: str,
+        entity: str,
+        required_persistence_profile: str,
+        resolution_policy: object,
+        normalization_profile_ref: str | None,
+        normalization_profile_version: str | None,
+        normalization_profile_hash: str | None,
+        settings: Settings,
+        logger: object,
+        run_id: RunID,
+    ) -> tuple[str, str, str, str]:
+        captured["required_persistence_profile"] = required_persistence_profile
+        captured["normalization_profile_ref"] = normalization_profile_ref
+        captured["normalization_profile_version"] = normalization_profile_version
+        captured["normalization_profile_hash"] = normalization_profile_hash
+        return ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
+
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders.effective_config_artifact_builder._create_and_persist_effective_config_artifact_payload",
+        _fake_payload,
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders.effective_config_artifact_builder.resolve_manifest_reproducibility_context",
+        lambda **_: (_ for _ in ()).throw(AssertionError("resolver should not run")),
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders.effective_config_artifact_builder._manifest_support.resolve_contract_identity",
+        lambda **_: (_ for _ in ()).throw(AssertionError("identity resolver should not run")),
+    )
+
+    settings = Settings(data_dir=Path("data"))
+    observability = ObservabilityBundle.create(
+        logger=NoOpLogger(),
+        metrics=NoOpMetrics(),
+        tracer=NoOpTracing(),
+        audit=NoOpAudit(),
+    )
+    inputs: RunnerInputs = _build_runner_inputs(settings, observability)
+    ctx: PipelineRunContext = _build_pipeline_run_context()
+    reproducibility_context = SimpleNamespace(
+        required_persistence_profile="forensic_grade",
+        strict_exact_replay_supported=False,
+    )
+    contract_identity = RunManifestContractIdentity(
+        contract_ref="chembl.activity",
+        contract_version="1.2.3",
+        contract_schema_hash="schema-deadbeef",
+        dq_policy_ref="chembl.activity.policy",
+        rule_bundle_version="2026.04",
+        normalization_profile_ref="chembl.activity.norm",
+        normalization_profile_version="1.0.0",
+        normalization_profile_hash="f" * 64,
+    )
+
+    result = create_and_persist_effective_config_artifact(
+        ctx=ctx,
+        inputs=inputs,
+        provider="chembl",
+        entity="activity",
+        reproducibility_context=reproducibility_context,
+        contract_identity=contract_identity,
+    )
+
+    assert result == ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
+    assert captured["required_persistence_profile"] == "forensic_grade"
+    assert captured["normalization_profile_ref"] == "chembl.activity.norm"
+    assert captured["normalization_profile_version"] == "1.0.0"
+    assert captured["normalization_profile_hash"] == "f" * 64
 
 
 def test_create_and_persist_composite_effective_config_artifact_forwards_required_profile(

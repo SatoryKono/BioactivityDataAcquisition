@@ -34,10 +34,13 @@ DEFAULT_AUDIT_CLUSTER_REGISTRY = (
     REPO_ROOT
     / "reports"
     / "semantic_pipeline_audit"
-    / "semantic_cluster_registry_2026-05-14.json"
+    / "semantic_cluster_registry_2026-05-15.json"
+)
+DEFAULT_REVIEW_REGISTRY = (
+    REPO_ROOT / "configs" / "field_registry" / "semantic_audit_review_registry.yaml"
 )
 MOLECULE_COMPOSITE_CONFIG = REPO_ROOT / "configs" / "composites" / "molecule.yaml"
-NON_BLOCKING_AUDIT_STATUSES = frozenset({"WEAK", "CONFLICTING"})
+NON_BLOCKING_AUDIT_STATUSES = frozenset({"PARTIAL", "WEAK", "CONFLICTING"})
 MAX_WARNING_LINES = 20
 
 
@@ -276,6 +279,7 @@ def _resolve_candidate(
 def _iter_non_blocking_audit_warnings(
     repo_root: Path,
     audit_cluster_registry: Path,
+    review_registry: Path,
 ) -> tuple[DriftWarning, ...]:
     path = audit_cluster_registry
     if not path.is_absolute():
@@ -284,6 +288,11 @@ def _iter_non_blocking_audit_warnings(
         return ()
 
     payload = _load_json(path)
+    review_payload = _load_yaml(
+        review_registry
+        if review_registry.is_absolute()
+        else repo_root / review_registry
+    )
     clusters = payload.get("clusters", [])
     if not isinstance(clusters, list):
         return ()
@@ -305,19 +314,25 @@ def _iter_non_blocking_audit_warnings(
             continue
 
         cluster_id = str(cluster.get("cluster_id") or "<unknown>")
+        if _warning_reviewed(
+            review_payload,
+            cluster_id=cluster_id,
+            status=status,
+        ):
+            continue
         canonical_name = str(
             cluster.get("canonical_field")
             or cluster.get("canonical_name")
             or "<unknown>"
         )
-        kind = (
-            "weak_same_name_cluster"
-            if status == "WEAK"
-            else "conflicting_cluster_requires_owner_review"
-        )
+        kind_by_status = {
+            "CONFLICTING": "conflicting_cluster_requires_owner_review",
+            "PARTIAL": "partial_identity_cluster_requires_owner_review",
+            "WEAK": "weak_same_name_cluster",
+        }
         warnings.append(
             DriftWarning(
-                kind=kind,
+                kind=kind_by_status.get(status, "non_blocking_audit_cluster"),
                 cluster_id=cluster_id,
                 canonical_name=canonical_name,
                 status=status,
@@ -331,10 +346,39 @@ def _iter_non_blocking_audit_warnings(
     return tuple(warnings)
 
 
+def _warning_reviewed(
+    review_payload: dict[str, Any],
+    *,
+    cluster_id: str,
+    status: str,
+) -> bool:
+    for section in ("semantic_reviews", "warning_reviews"):
+        reviews = review_payload.get(section, [])
+        if not isinstance(reviews, list):
+            continue
+        for review in reviews:
+            if not isinstance(review, dict):
+                continue
+            statuses = review.get("semantic_statuses", [])
+            if not isinstance(statuses, list) or status not in {
+                str(item).upper() for item in statuses
+            }:
+                continue
+            clusters = review.get("clusters")
+            if clusters is None:
+                return True
+            if isinstance(clusters, list) and cluster_id in {
+                str(item) for item in clusters
+            }:
+                return True
+    return False
+
+
 def validate_semantic_registry_drift(
     repo_root: Path = REPO_ROOT,
     *,
     audit_cluster_registry: Path = DEFAULT_AUDIT_CLUSTER_REGISTRY,
+    review_registry: Path = DEFAULT_REVIEW_REGISTRY,
 ) -> DriftValidationResult:
     """Return blocking findings and non-blocking warnings for registry drift."""
     registry = SemanticFieldRegistryLoader(repo_root / "configs").load()
@@ -344,7 +388,11 @@ def validate_semantic_registry_drift(
         for candidate in candidates
         if (finding := _resolve_candidate(registry, candidate)) is not None
     )
-    warnings = _iter_non_blocking_audit_warnings(repo_root, audit_cluster_registry)
+    warnings = _iter_non_blocking_audit_warnings(
+        repo_root,
+        audit_cluster_registry,
+        review_registry,
+    )
     return DriftValidationResult(
         candidates=candidates,
         findings=findings,
@@ -378,6 +426,12 @@ def _build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_AUDIT_CLUSTER_REGISTRY,
         help="semantic audit cluster registry used for non-blocking warnings",
     )
+    parser.add_argument(
+        "--review-registry",
+        type=Path,
+        default=DEFAULT_REVIEW_REGISTRY,
+        help="semantic audit review registry used to suppress reviewed warnings",
+    )
     return parser
 
 
@@ -388,6 +442,7 @@ def main(argv: list[str] | None = None) -> int:
     result = validate_semantic_registry_drift(
         args.repo_root,
         audit_cluster_registry=args.audit_cluster_registry,
+        review_registry=args.review_registry,
     )
     if args.json:
         payload = {

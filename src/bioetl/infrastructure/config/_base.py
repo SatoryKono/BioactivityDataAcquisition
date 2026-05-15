@@ -198,13 +198,13 @@ class PipelineSettings(BaseSettings):
                 )
             if (
                 self.required_persistence_profile in STRICT_PERSISTENCE_PROFILES
-                and self.checkpoint_compatibility_policy == "observe"
+                and self.checkpoint_compatibility_policy != "hard_fail"
             ):
                 raise ValueError(
                     "pipeline.control_plane.required_persistence_profile="
                     f"{self.required_persistence_profile} requires "
                     "pipeline.control_plane.checkpoint_compatibility_policy "
-                    "to be soft_fail or hard_fail"
+                    "to be hard_fail"
                 )
             return self
 

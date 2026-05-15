@@ -3,9 +3,24 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
+
+
+@dataclass(frozen=True, slots=True)
+class RunManifestContractIdentity:
+    """Canonical manifest contract identity resolved from the contract registry."""
+
+    contract_ref: str
+    contract_version: str | None
+    contract_schema_hash: str | None
+    dq_policy_ref: str | None
+    rule_bundle_version: str | None
+    normalization_profile_ref: str | None
+    normalization_profile_version: str | None
+    normalization_profile_hash: str | None
 
 
 def resolve_contract_identity(
@@ -13,16 +28,7 @@ def resolve_contract_identity(
     provider: str,
     entity: str,
     strict: bool = False,
-) -> tuple[
-    str,
-    str | None,
-    str | None,
-    str | None,
-    str | None,
-    str | None,
-    str | None,
-    str | None,
-]:
+) -> RunManifestContractIdentity:
     """Resolve contract identity fields from canonical registry when available."""
     contract_ref = f"{provider}.{entity}"
     registry_path = Path("configs/base/contract_registry.yaml")
@@ -32,7 +38,7 @@ def resolve_contract_identity(
                 "Strict reproducibility contexts require configs/base/"
                 f"contract_registry.yaml to resolve contract identity for '{contract_ref}'"
             )
-        return contract_ref, None, None, None, None, None, None, None
+        return RunManifestContractIdentity(contract_ref, None, None, None, None, None, None, None)
     entry = _load_contract_registry_entry(
         registry_path,
         contract_ref,
@@ -44,11 +50,11 @@ def resolve_contract_identity(
                 "Strict reproducibility contexts require a contract registry entry "
                 f"for '{contract_ref}' in configs/base/contract_registry.yaml"
             )
-        return contract_ref, None, None, None, None, None, None, None
+        return RunManifestContractIdentity(contract_ref, None, None, None, None, None, None, None)
     fields = _extract_contract_identity_fields(entry)
     if strict:
         _validate_complete_contract_identity(contract_ref, fields)
-    return (contract_ref, *fields)
+    return RunManifestContractIdentity(contract_ref, *fields)
 
 
 def _validate_complete_contract_identity(
