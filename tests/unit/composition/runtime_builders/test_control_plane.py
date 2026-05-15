@@ -176,6 +176,7 @@ def test_attach_manifest_id_accepts_control_plane_refs_object() -> None:
         normalization_profile_ref="chembl.activity.norm",
         normalization_profile_version="1.0.0",
         normalization_profile_hash="d" * 64,
+        required_persistence_profile="replay_ready",
     )
 
     updated = control_plane.attach_manifest_id(

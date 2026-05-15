@@ -90,6 +90,7 @@ def _create_control_plane_refs(
     dq_contract_compatibility_hash: str,
     effective_config_artifact_id: str,
     contract_identity: _manifest_support.RunManifestContractIdentity,
+    required_persistence_profile: str,
 ) -> _manifest_support.ManifestControlPlaneRefs:
     """Build canonical control-plane refs from one persisted manifest record."""
     return _manifest_support.create_control_plane_refs(
@@ -107,6 +108,7 @@ def _create_control_plane_refs(
         contract_identity.normalization_profile_ref,
         contract_identity.normalization_profile_version,
         contract_identity.normalization_profile_hash,
+        required_persistence_profile,
     )
 
 
@@ -205,6 +207,9 @@ def _publish_manifest_and_refs(
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         effective_config_artifact_id=effective_config_artifact_id,
         contract_identity=manifest_context.contract_identity,
+        required_persistence_profile=(
+            manifest_context.reproducibility_context.required_persistence_profile
+        ),
     )
     return control_plane_refs, ledger_service
 

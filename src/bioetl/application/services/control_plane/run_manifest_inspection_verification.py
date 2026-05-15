@@ -27,7 +27,7 @@ __all__ = [
 ]
 
 
-class EffectiveConfigArtifactStoreLike(Protocol):
+class EffectiveConfigArtifactStoreProtocol(Protocol):
     """Structural protocol for effective-config artifact verification."""
 
     def get_by_run_id(self, run_id: RunID) -> dict[str, object] | None: ...
@@ -110,7 +110,7 @@ def resolve_cross_surface_replay_verdict(
 
 
 def build_effective_config_store_verification(
-    effective_config_artifact_port: EffectiveConfigArtifactStoreLike | None,
+    effective_config_artifact_port: EffectiveConfigArtifactStoreProtocol | None,
     *,
     left_manifest: RunManifest,
     right_manifest: RunManifest,

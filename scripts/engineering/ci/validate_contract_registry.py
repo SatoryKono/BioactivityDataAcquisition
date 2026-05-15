@@ -134,6 +134,45 @@ def _active_standard_contract_refs(repo_root: Path) -> dict[str, Path]:
     return refs
 
 
+def _active_entity_config_identity_issues(
+    contract_ref: str,
+    config_path: Path,
+) -> list[RegistryValidationIssue]:
+    """Validate provider/entity pipeline identity for one active entity config."""
+    provider, entity = contract_ref.split(".", 1)
+    config = _load_yaml_mapping(config_path)
+    pipeline = config.get("pipeline")
+    pipeline_mapping = pipeline if isinstance(pipeline, dict) else {}
+    expected_values = (
+        ("provider", config.get("provider"), provider),
+        ("entity", config.get("entity"), entity),
+        ("pipeline.provider", pipeline_mapping.get("provider"), provider),
+        ("pipeline.entity_type", pipeline_mapping.get("entity_type"), entity),
+        (
+            "pipeline.pipeline_name",
+            pipeline_mapping.get("pipeline_name"),
+            f"{provider}_{entity}",
+        ),
+    )
+    issues: list[RegistryValidationIssue] = []
+    for field_name, actual_value, expected_value in expected_values:
+        if actual_value == expected_value:
+            continue
+        issues.append(
+            RegistryValidationIssue(
+                message=(
+                    "Active Gold entity config identity drift: "
+                    f"expected {field_name}={expected_value!r}, "
+                    f"found {actual_value!r}: {config_path}"
+                ),
+                severity=RegistryValidationSeverity.BLOCKING,
+                contract_ref=contract_ref,
+                field=field_name,
+            )
+        )
+    return issues
+
+
 def _active_gold_surface_issues(
     repo_root: Path,
     registry: ContractRegistry,
@@ -141,6 +180,7 @@ def _active_gold_surface_issues(
     """Validate that active Gold entity configs point to active registry refs."""
     issues: list[RegistryValidationIssue] = []
     for contract_ref, config_path in sorted(_active_standard_contract_refs(repo_root).items()):
+        issues.extend(_active_entity_config_identity_issues(contract_ref, config_path))
         entry = registry.entries.get(contract_ref)
         if entry is None:
             issues.append(

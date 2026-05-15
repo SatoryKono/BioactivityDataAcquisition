@@ -36,7 +36,7 @@ PROFILE_SCORE_THRESHOLDS: dict[str, dict[str, int]] = {
 
 
 @dataclass(frozen=True, slots=True)
-class ScoreCard:
+class ScoreCardRecord:
     category: str
     score: int
     evidence: tuple[str, ...]
@@ -54,7 +54,7 @@ class ScoreCard:
         }
 
 
-def score_determinism(summary: JsonDict) -> ScoreCard:
+def score_determinism(summary: JsonDict) -> ScoreCardRecord:
     evidence = []
     blockers = []
     refs = ["diagnostics.effective_config_hash", "diagnostics.input_snapshot_ids"]
@@ -76,7 +76,7 @@ def score_determinism(summary: JsonDict) -> ScoreCard:
         evidence.append("exact_replay_blockers_present")
         blockers.extend(string_items(summary.get("exact_replay_blockers")))
         refs.append("diagnostics.exact_replay_blockers")
-    return ScoreCard(
+    return ScoreCardRecord(
         "determinism",
         bounded(score),
         tuple(evidence),
@@ -85,7 +85,7 @@ def score_determinism(summary: JsonDict) -> ScoreCard:
     )
 
 
-def score_idempotency(summary: JsonDict) -> ScoreCard:
+def score_idempotency(summary: JsonDict) -> ScoreCardRecord:
     evidence = []
     blockers = []
     refs = ["diagnostics.exact_replay_eligible", "diagnostics.artifact_refs"]
@@ -100,7 +100,7 @@ def score_idempotency(summary: JsonDict) -> ScoreCard:
         score -= 2
         evidence.append("missing_artifact_links_present")
         blockers.append("missing_artifact_links_present")
-    return ScoreCard(
+    return ScoreCardRecord(
         "idempotency",
         bounded(score),
         tuple(evidence),
@@ -109,7 +109,7 @@ def score_idempotency(summary: JsonDict) -> ScoreCard:
     )
 
 
-def score_run_identity(summary: JsonDict) -> ScoreCard:
+def score_run_identity(summary: JsonDict) -> ScoreCardRecord:
     evidence = []
     blockers = []
     refs = []
@@ -133,7 +133,7 @@ def score_run_identity(summary: JsonDict) -> ScoreCard:
             score -= 1
             evidence.append(f"{field_name}_missing")
             blockers.append(f"{field_name}_missing")
-    return ScoreCard(
+    return ScoreCardRecord(
         "run_identity",
         bounded(score),
         tuple(evidence),
@@ -142,7 +142,7 @@ def score_run_identity(summary: JsonDict) -> ScoreCard:
     )
 
 
-def score_checkpoint_safety(summary: JsonDict) -> ScoreCard:
+def score_checkpoint_safety(summary: JsonDict) -> ScoreCardRecord:
     evidence = []
     blockers = []
     refs = ["diagnostics.resume_contract"]
@@ -169,7 +169,7 @@ def score_checkpoint_safety(summary: JsonDict) -> ScoreCard:
         score -= 1
         evidence.append("resume_contract_missing")
         blockers.append("resume_contract_missing")
-    return ScoreCard(
+    return ScoreCardRecord(
         "checkpoint_safety",
         bounded(score),
         tuple(evidence),
@@ -178,7 +178,7 @@ def score_checkpoint_safety(summary: JsonDict) -> ScoreCard:
     )
 
 
-def score_lineage_completeness(summary: JsonDict) -> ScoreCard:
+def score_lineage_completeness(summary: JsonDict) -> ScoreCardRecord:
     evidence = []
     blockers = []
     refs = [
@@ -205,7 +205,7 @@ def score_lineage_completeness(summary: JsonDict) -> ScoreCard:
     if not summary.get("lineage_fragment_ids"):
         score -= 1
         evidence.append("no_lineage_fragments_observed")
-    return ScoreCard(
+    return ScoreCardRecord(
         "lineage_completeness",
         bounded(score),
         tuple(evidence),
@@ -214,7 +214,7 @@ def score_lineage_completeness(summary: JsonDict) -> ScoreCard:
     )
 
 
-def score_replay_readiness(summary: JsonDict) -> ScoreCard:
+def score_replay_readiness(summary: JsonDict) -> ScoreCardRecord:
     evidence = []
     blocker_items = []
     refs = [
@@ -240,7 +240,7 @@ def score_replay_readiness(summary: JsonDict) -> ScoreCard:
         score -= 2
         evidence.append("rebuild_only_replay_mode")
         blocker_items.append("rebuild_only_replay_mode")
-    return ScoreCard(
+    return ScoreCardRecord(
         "replay_readiness",
         bounded(score),
         tuple(evidence),
@@ -249,7 +249,7 @@ def score_replay_readiness(summary: JsonDict) -> ScoreCard:
     )
 
 
-def score_layer_consistency(summary: JsonDict) -> ScoreCard:
+def score_layer_consistency(summary: JsonDict) -> ScoreCardRecord:
     evidence = []
     blockers = []
     refs = [
@@ -273,7 +273,7 @@ def score_layer_consistency(summary: JsonDict) -> ScoreCard:
         blockers.append("resolved_or_effective_hash_missing")
     if summary.get("occurrence_only_diagnostics"):
         evidence.append("occurrence_only_diagnostics_exposed")
-    return ScoreCard(
+    return ScoreCardRecord(
         "layer_consistency",
         bounded(score),
         tuple(evidence),
@@ -316,7 +316,10 @@ def evaluate_threshold_failures(
     return failures
 
 
-def overall_blockers(summary: JsonDict, score_cards: tuple[ScoreCard, ...]) -> list[str]:
+def overall_blockers(
+    summary: JsonDict,
+    score_cards: tuple[ScoreCardRecord, ...],
+) -> list[str]:
     blockers: list[str] = []
     blockers.extend(string_items(summary.get("exact_replay_blockers")))
     persistence_profile = summary.get("persistence_profile")
@@ -331,7 +334,7 @@ def overall_blockers(summary: JsonDict, score_cards: tuple[ScoreCard, ...]) -> l
     return sorted(dict.fromkeys(blockers))
 
 
-def overall_evidence_refs(score_cards: tuple[ScoreCard, ...]) -> list[str]:
+def overall_evidence_refs(score_cards: tuple[ScoreCardRecord, ...]) -> list[str]:
     refs: list[str] = []
     for card in score_cards:
         refs.extend(card.evidence_refs)
@@ -424,7 +427,7 @@ def build_global_reproducibility_claim(
 
 __all__ = [
     "PROFILE_SCORE_THRESHOLDS",
-    "ScoreCard",
+    "ScoreCardRecord",
     "build_global_reproducibility_claim",
     "build_supported_boundary_verdict",
     "evaluate_threshold_failures",

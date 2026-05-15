@@ -97,6 +97,7 @@ def test_create_control_plane_refs_uses_named_contract_identity_fields() -> None
         dq_contract_compatibility_hash="dq-hash",
         effective_config_artifact_id="artifact-1",
         contract_identity=identity,
+        required_persistence_profile="replay_ready",
     )
 
     assert refs.contract_ref == identity.contract_ref
@@ -110,6 +111,7 @@ def test_create_control_plane_refs_uses_named_contract_identity_fields() -> None
         == identity.normalization_profile_version
     )
     assert refs.normalization_profile_hash == identity.normalization_profile_hash
+    assert refs.required_persistence_profile == "replay_ready"
 
 
 def test_build_manifest_create_request_passes_through_reproducibility_context(
