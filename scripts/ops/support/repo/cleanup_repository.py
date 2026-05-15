@@ -13,6 +13,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import logging
 import os
@@ -87,6 +88,7 @@ PRUNED_WALK_DIRS: frozenset[str] = frozenset(VENV_SEGMENTS | {".git", ".worktree
 SAFE_LOCAL_FILE_SUFFIXES: frozenset[str] = frozenset({".pyc", ".pyo"})
 DEFAULT_DETAIL_LIMIT = 25
 ROOT_HYGIENE_REVIEW_REGISTRY = Path("configs/quality/root_hygiene_review_registry.yaml")
+REPLAY_SAFE_CLEANUP_INVENTORY = Path("configs/quality/replay_safe_cleanup_inventory.yaml")
 REVIEW_REFERENCE_SEARCH_PATHS: tuple[str, ...] = (
     ".github",
     "docs",
@@ -113,7 +115,10 @@ REPORTS_RETAINED_DIRS: tuple[Path, ...] = (
 )
 REPORTS_RETAINED_FILES: tuple[Path, ...] = (Path("reports/README.md"),)
 REPORTS_ROOT_PRUNE_PATTERNS: tuple[str, ...] = ("*_merged.md", "tmp_module_dependency_map.*")
-REPORTS_RETAINED_DIR_TRANSIENT_PATTERNS: tuple[str, ...] = ("_tmp_*",)
+REPORTS_RETAINED_DIR_TRANSIENT_PATTERNS: tuple[str, ...] = (
+    "_tmp_*",
+    "pretest_guardrails_*.json",
+)
 
 
 @dataclass(frozen=True)
@@ -172,6 +177,9 @@ class ReportsWorkspaceEvidence:
     generator: str | None
     commit_policy: str | None
     reason: str
+    retention_entry_id: str | None = None
+    retention_owner: str | None = None
+    retention_ttl_days: int | None = None
 
     @property
     def rel_path(self) -> str:
@@ -693,6 +701,17 @@ def _load_generated_artifact_routes(repo_root: Path) -> list[dict[str, object]]:
     return [route for route in routes if isinstance(route, dict)]
 
 
+def _load_replay_safe_cleanup_entries(repo_root: Path) -> list[dict[str, object]]:
+    inventory_path = repo_root / REPLAY_SAFE_CLEANUP_INVENTORY
+    if not inventory_path.exists():
+        return []
+    payload = _load_yaml_object(inventory_path)
+    entries = payload.get("entries")
+    if not isinstance(entries, list):
+        return []
+    return [entry for entry in entries if isinstance(entry, dict)]
+
+
 def _reports_registered_route_metadata(
     repo_root: Path,
 ) -> dict[str, tuple[str | None, str | None]]:
@@ -710,6 +729,22 @@ def _reports_registered_route_metadata(
                 str(generator) if isinstance(generator, str) else None,
                 str(commit_policy) if isinstance(commit_policy, str) else None,
             )
+    return metadata
+
+
+def _reports_retention_metadata(
+    repo_root: Path,
+) -> dict[str, tuple[str, str | None, int | None]]:
+    metadata: dict[str, tuple[str, str | None, int | None]] = {}
+    for entry in _load_replay_safe_cleanup_entries(repo_root):
+        path = entry.get("path")
+        if not isinstance(path, str) or not path.startswith("reports/quality/"):
+            continue
+        metadata[path] = (
+            str(entry.get("id", "")) or path,
+            str(entry.get("owner")) if isinstance(entry.get("owner"), str) else None,
+            int(entry["ttl_days"]) if isinstance(entry.get("ttl_days"), int) else None,
+        )
     return metadata
 
 
@@ -755,10 +790,18 @@ def _reports_workspace_row(
     path: Path,
     classification: str,
     route_metadata: dict[str, tuple[str | None, str | None]],
+    retention_metadata: dict[str, tuple[str, str | None, int | None]],
     reason: str,
 ) -> ReportsWorkspaceEvidence:
     rel_path = path.as_posix()
     generator, commit_policy = route_metadata.get(rel_path, (None, None))
+    retention_entry_id = None
+    retention_owner = None
+    retention_ttl_days = None
+    for pattern, values in retention_metadata.items():
+        if fnmatch.fnmatch(rel_path, pattern):
+            retention_entry_id, retention_owner, retention_ttl_days = values
+            break
     exists = (repo_root / path).exists()
     tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
     return ReportsWorkspaceEvidence(
@@ -770,6 +813,9 @@ def _reports_workspace_row(
         reference_hits=_count_reference_hits(repo_root, path) if exists else 0,
         generator=generator,
         commit_policy=commit_policy,
+        retention_entry_id=retention_entry_id,
+        retention_owner=retention_owner,
+        retention_ttl_days=retention_ttl_days,
         reason=reason,
     )
 
@@ -777,6 +823,7 @@ def _reports_workspace_row(
 def collect_reports_workspace_evidence(repo_root: Path) -> list[ReportsWorkspaceEvidence]:
     tracked_paths = _tracked_path_set(repo_root)
     route_metadata = _reports_registered_route_metadata(repo_root)
+    retention_metadata = _reports_retention_metadata(repo_root)
     rows: dict[str, ReportsWorkspaceEvidence] = {}
 
     for path in REPORTS_RETAINED_FILES:
@@ -789,6 +836,7 @@ def collect_reports_workspace_evidence(repo_root: Path) -> list[ReportsWorkspace
                 path=path,
                 classification="RETAIN",
                 route_metadata=route_metadata,
+                retention_metadata=retention_metadata,
                 reason="canonical reports workspace guide must remain present",
             )
 
@@ -805,6 +853,7 @@ def collect_reports_workspace_evidence(repo_root: Path) -> list[ReportsWorkspace
                 path=path,
                 classification="RETAIN",
                 route_metadata=route_metadata,
+                retention_metadata=retention_metadata,
                 reason=reason,
             )
 
@@ -817,6 +866,7 @@ def collect_reports_workspace_evidence(repo_root: Path) -> list[ReportsWorkspace
                 path=path,
                 classification="REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE",
                 route_metadata=route_metadata,
+                retention_metadata=retention_metadata,
                 reason=(
                     "local model/tmp reports are exact-path prune candidates"
                     if not tracked
@@ -838,6 +888,7 @@ def collect_reports_workspace_evidence(repo_root: Path) -> list[ReportsWorkspace
             path=path,
             classification=classification,
             route_metadata=route_metadata,
+            retention_metadata=retention_metadata,
             reason=(
                 "registered working report exists as tracked output and needs explicit retention review"
                 if tracked
@@ -855,6 +906,7 @@ def collect_reports_workspace_evidence(repo_root: Path) -> list[ReportsWorkspace
             path=path,
             classification="REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE",
             route_metadata=route_metadata,
+            retention_metadata=retention_metadata,
             reason=(
                 "tracked root report requires explicit owner review"
                 if tracked
@@ -872,6 +924,7 @@ def collect_reports_workspace_evidence(repo_root: Path) -> list[ReportsWorkspace
             path=path,
             classification="REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE",
             route_metadata=route_metadata,
+            retention_metadata=retention_metadata,
             reason=(
                 "tracked transient artifact inside retained reports surface "
                 "requires manual review before prune"
@@ -891,6 +944,7 @@ def collect_reports_workspace_evidence(repo_root: Path) -> list[ReportsWorkspace
             path=path,
             classification="REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE",
             route_metadata=route_metadata,
+            retention_metadata=retention_metadata,
             reason=(
                 "tracked reports workspace surface sits outside retained "
                 "families and needs explicit retention review"
@@ -1080,6 +1134,9 @@ def build_reports_workspace_review_report(
                 "reference_hits": row.reference_hits,
                 "generator": row.generator,
                 "commit_policy": row.commit_policy,
+                "retention_entry_id": row.retention_entry_id,
+                "retention_owner": row.retention_owner,
+                "retention_ttl_days": row.retention_ttl_days,
                 "reason": row.reason,
             }
             for row in reports_evidence
@@ -1307,7 +1364,7 @@ def _log_reports_workspace_evidence(
         logger.info("### %s (%d)", classification, len(evidence_rows))
         for row in visible_rows:
             logger.info(
-                "  %s | exists=%s tracked=%s history=%s refs=%d route=%s policy=%s",
+                "  %s | exists=%s tracked=%s history=%s refs=%d route=%s policy=%s ttl=%s owner=%s",
                 row.rel_path,
                 str(row.exists).lower(),
                 str(row.tracked).lower(),
@@ -1315,6 +1372,8 @@ def _log_reports_workspace_evidence(
                 row.reference_hits,
                 row.generator or "n/a",
                 row.commit_policy or "n/a",
+                str(row.retention_ttl_days) if row.retention_ttl_days is not None else "n/a",
+                row.retention_owner or "n/a",
             )
             logger.info("      %s", row.reason)
         hidden_count = len(evidence_rows) - len(visible_rows)

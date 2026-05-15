@@ -77,6 +77,27 @@ _DQ_SENSITIVE_OUTPUTS: dict[str, dict[str, Any]] = {
             "source-resolution provenance."
         ),
     },
+    "pubchem_compound_dq_bundle": {
+        "entity": "pubchem_compound",
+        "snapshot_path": (
+            "tests/fixtures/golden/gold/pubchem_compound_dq_bundle_v1.json"
+        ),
+        "required_columns": [
+            "entity_id",
+            "molecule_id",
+            "canonical_smiles",
+            "molecular_formula",
+            "molecular_weight",
+            "chemical_standardization_status",
+            "_dq_warn",
+            "_dq_error",
+            "_index",
+        ],
+        "purpose": (
+            "Bounded PubChem compound output bundle for DQ- and "
+            "chemical-standardization-sensitive Gold checks."
+        ),
+    },
     "pubmed_publication_dq_bundle": {
         "entity": "pubmed_publication",
         "snapshot_path": (

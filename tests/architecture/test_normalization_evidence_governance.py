@@ -12,6 +12,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 NORMALIZATION_PLAN_PATH = (
     PROJECT_ROOT / "docs/05-engineering/normalization_plan_P0_P6.md"
 )
+NORMALIZATION_PLAN_REDIRECT_PATH = (
+    PROJECT_ROOT / "docs/05-engineering/normalization-plan-P0-P6.md"
+)
+CONFIG_MATRIX_PATH = PROJECT_ROOT / "docs/04-reference/config_comparison_matrix.csv"
+LEGACY_CONFIG_MATRIX_PATH = PROJECT_ROOT / "docs/config_comparison_matrix.csv"
 
 
 def test_normalization_plan_mentions_all_shipped_profile_coordinates() -> None:
@@ -55,3 +60,15 @@ def test_normalization_plan_references_final_dq_schema_reconciliation() -> None:
     assert "test_normalization_cross_layer_contracts.py" in plan_text
     assert "test_normalization_surface_coverage_ratchet.py" in plan_text
     assert "test_chembl_observed_value_fixtures.py" in plan_text
+
+
+def test_normalization_plan_compatibility_redirect_is_explicit() -> None:
+    redirect_text = NORMALIZATION_PLAN_REDIRECT_PATH.read_text(encoding="utf-8")
+
+    assert "Status: compatibility-redirect" in redirect_text
+    assert "normalization_plan_P0_P6.md" in redirect_text
+
+
+def test_config_comparison_matrix_has_single_canonical_owner() -> None:
+    assert CONFIG_MATRIX_PATH.exists()
+    assert not LEGACY_CONFIG_MATRIX_PATH.exists()

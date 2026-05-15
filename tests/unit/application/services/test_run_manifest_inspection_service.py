@@ -35,7 +35,6 @@ from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRe
 from tests.unit.application.services.run_manifest_test_support import (
     FIXED_TIME as _FIXED_TIME,
     RunManifestOverrides,
-    SNAPSHOT_IDENTITY_FINGERPRINT as _SNAPSHOT_IDENTITY_FINGERPRINT,
     VALID_CONFIG_HASH as _VALID_CONFIG_HASH,
     VALID_EFFECTIVE_CONFIG_HASH as _VALID_EFFECTIVE_CONFIG_HASH,
     VALID_RESOLVED_CONFIG_HASH as _VALID_RESOLVED_CONFIG_HASH,
@@ -45,6 +44,7 @@ from tests.unit.application.services.run_manifest_test_support import (
     expected_canonical_execution_identity as _expected_canonical_execution_identity,
     expected_degraded_runtime_anchor as _expected_degraded_runtime_anchor,
     expected_exact_replay_anchors as _expected_exact_replay_anchors,
+    expected_input_snapshot_identity_fingerprint as _expected_input_snapshot_identity_fingerprint,
     expected_lineage_closure_boundary as _expected_lineage_closure_boundary,
     expected_produced_artifact_trace as _expected_produced_artifact_trace,
     expected_replay_family_contract as _expected_replay_family_contract,
@@ -225,6 +225,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
     )
 
     result = service.show(str(run_id))
+    snapshot_fingerprint = _expected_input_snapshot_identity_fingerprint(manifest)
 
     assert result.manifest == manifest
     assert result.ledger_entries == (ledger_entry,)
@@ -262,11 +263,11 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "canonical_execution_identity": _expected_canonical_execution_identity(
             manifest,
             requested_exact_replay=True,
-            snapshot_fingerprint=_SNAPSHOT_IDENTITY_FINGERPRINT,
+            snapshot_fingerprint=snapshot_fingerprint,
         ),
         "exact_replay_anchors": _expected_exact_replay_anchors(
             manifest,
-            snapshot_fingerprint=_SNAPSHOT_IDENTITY_FINGERPRINT,
+            snapshot_fingerprint=snapshot_fingerprint,
         ),
         "degraded_runtime_anchor": _expected_degraded_runtime_anchor(manifest),
         "replay_capability": "exact_replay_supported",
@@ -313,7 +314,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
         "input_snapshot_ids": ["snapshot-1"],
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
-        "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
+        "input_snapshot_identity_fingerprint": snapshot_fingerprint,
         "replay_mode": "exact_replay",
         "operator_replay_mode": "Exact Replay",
         "snapshot_status": "full",
@@ -363,7 +364,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "reproducible_semantic_output_mode_gap": False,
         "produced_artifact_trace_gap": True,
         "composite_resume_reconstructability_gap": False,
-        "required_persistence_profile_gap": False,
+        "required_persistence_profile_gap": True,
         "replay_ready_gap": True,
         "forensic_grade_gap": True,
         "dq_signal_present": False,
@@ -378,6 +379,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
     )
     assert result.diagnostics["next_steps"] == [
         "Resolve concrete produced artifacts from the run ledger before claiming replay-ready reproducibility.",
+        "Current persisted surfaces do not satisfy the declared required persistence profile for this run.",
         "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
         "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
     ]
@@ -410,6 +412,7 @@ def _expected_identity_graph_without_ledger(
     *,
     run_id: RunID,
 ) -> dict[str, object]:
+    snapshot_fingerprint = _expected_input_snapshot_identity_fingerprint(manifest)
     return {
         "run_id": str(run_id),
         "manifest_id": "manifest-no-ledger",
@@ -433,11 +436,11 @@ def _expected_identity_graph_without_ledger(
         "canonical_execution_identity": _expected_canonical_execution_identity(
             manifest,
             requested_exact_replay=True,
-            snapshot_fingerprint=_SNAPSHOT_IDENTITY_FINGERPRINT,
+            snapshot_fingerprint=snapshot_fingerprint,
         ),
         "exact_replay_anchors": _expected_exact_replay_anchors(
             manifest,
-            snapshot_fingerprint=_SNAPSHOT_IDENTITY_FINGERPRINT,
+            snapshot_fingerprint=snapshot_fingerprint,
         ),
         "degraded_runtime_anchor": _expected_degraded_runtime_anchor(manifest),
         "replay_capability": "exact_replay_supported",
@@ -484,7 +487,7 @@ def _expected_identity_graph_without_ledger(
         "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
         "input_snapshot_ids": ["snapshot-1"],
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
-        "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
+        "input_snapshot_identity_fingerprint": snapshot_fingerprint,
         "replay_mode": "exact_replay",
         "operator_replay_mode": "Exact Replay",
         "snapshot_status": "full",
@@ -508,6 +511,7 @@ def _expected_diagnostics_without_ledger(
     identity_graph: dict[str, object],
     reproducibility_audit_score: object,
 ) -> dict[str, object]:
+    snapshot_fingerprint = _expected_input_snapshot_identity_fingerprint(manifest)
     return {
         "manifest_id": "manifest-no-ledger",
         "manifest_created_at": manifest.created_at.isoformat(),
@@ -534,7 +538,7 @@ def _expected_diagnostics_without_ledger(
         "replay_of_manifest_id": None,
         "replay_parentage": _expected_replay_parentage(manifest),
         "replay_capability": "exact_replay_supported",
-        "required_persistence_profile": "degraded_observable",
+        "required_persistence_profile": "replay_ready",
         "requested_exact_replay": True,
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
         "replay_family_contract": _expected_replay_family_contract(manifest),
@@ -578,7 +582,7 @@ def _expected_diagnostics_without_ledger(
         "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
         "input_snapshot_ids": ["snapshot-1"],
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
-        "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
+        "input_snapshot_identity_fingerprint": snapshot_fingerprint,
         "replay_mode": "exact_replay",
         "operator_replay_mode": "Exact Replay",
         "snapshot_status": "full",
@@ -596,7 +600,7 @@ def _expected_diagnostics_without_ledger(
         "published_artifact_count": 0,
         "exact_replay_anchors": _expected_exact_replay_anchors(
             manifest,
-            snapshot_fingerprint=_SNAPSHOT_IDENTITY_FINGERPRINT,
+            snapshot_fingerprint=snapshot_fingerprint,
         ),
         "produced_artifact_trace": _expected_produced_artifact_trace(
             manifest,
@@ -605,8 +609,8 @@ def _expected_diagnostics_without_ledger(
         "identity_graph": identity_graph,
         "persistence_profile": {
             "attained_profile": "degraded_observable",
-            "required_profile": "degraded_observable",
-            "required_profile_satisfied": True,
+            "required_profile": "replay_ready",
+            "required_profile_satisfied": False,
             "claims": {
                 "degraded_observable": True,
                 "replay_ready": False,
@@ -625,7 +629,9 @@ def _expected_diagnostics_without_ledger(
                 "artifact_lineage_links": True,
                 "lineage_closure_boundary_support": True,
             },
-            "required_profile_missing_requirements": [],
+            "required_profile_missing_requirements": [
+                "produced_artifact_trace",
+            ],
             "replay_ready_missing_requirements": [
                 "produced_artifact_trace",
             ],
@@ -662,7 +668,7 @@ def _expected_diagnostics_without_ledger(
             "reproducible_semantic_output_mode_gap": False,
             "produced_artifact_trace_gap": True,
             "composite_resume_reconstructability_gap": False,
-            "required_persistence_profile_gap": False,
+            "required_persistence_profile_gap": True,
             "replay_ready_gap": True,
             "forensic_grade_gap": True,
             "dq_signal_present": False,
@@ -670,6 +676,7 @@ def _expected_diagnostics_without_ledger(
         },
         "next_steps": [
             "Resolve concrete produced artifacts from the run ledger before claiming replay-ready reproducibility.",
+            "Current persisted surfaces do not satisfy the declared required persistence profile for this run.",
             "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
             "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         ],
@@ -711,7 +718,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         }
     }
     assert result.diagnostics["replay_capability_assessment"] == {
-        "required_persistence_profile": "degraded_observable",
+        "required_persistence_profile": "replay_ready",
         "replay_capability": "exact_replay_supported",
         "strict_requirement_requested": True,
         "strict_exact_replay_supported": True,
@@ -1144,6 +1151,7 @@ def test_show_marks_artifact_linkage_gap_signal() -> None:
     assert result.diagnostics["next_steps"] == [
         "Validate artifact publication metadata and repair dataset/lineage links.",
         "Investigate lineage persistence for published artifacts before restart.",
+        "Current persisted surfaces do not satisfy the declared required persistence profile for this run.",
         "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
         "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
     ]
@@ -1248,7 +1256,7 @@ def test_show_collects_dq_trace_anchors() -> None:
         "reproducible_semantic_output_mode_gap": False,
         "produced_artifact_trace_gap": True,
         "composite_resume_reconstructability_gap": False,
-        "required_persistence_profile_gap": False,
+        "required_persistence_profile_gap": True,
         "replay_ready_gap": True,
         "forensic_grade_gap": True,
         "dq_signal_present": True,
@@ -1257,6 +1265,7 @@ def test_show_collects_dq_trace_anchors() -> None:
     assert result.diagnostics["next_steps"] == [
         "Inspect failure classification and decide retry/quarantine/escalation.",
         "Resolve concrete produced artifacts from the run ledger before claiming replay-ready reproducibility.",
+        "Current persisted surfaces do not satisfy the declared required persistence profile for this run.",
         "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
         "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",
@@ -1704,7 +1713,7 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
         "reproducible_semantic_output_mode_gap": False,
         "produced_artifact_trace_gap": False,
         "composite_resume_reconstructability_gap": False,
-        "required_persistence_profile_gap": False,
+        "required_persistence_profile_gap": True,
         "replay_ready_gap": True,
         "forensic_grade_gap": True,
         "dq_signal_present": False,
@@ -1712,6 +1721,7 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
     }
     assert result.diagnostics["next_steps"] == [
         "Persist immutable cached Bronze input snapshots before treating this run as strict exact-replay capable.",
+        "Current persisted surfaces do not satisfy the declared required persistence profile for this run.",
         "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
         "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
     ]
@@ -1836,7 +1846,7 @@ def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
         "reproducible_semantic_output_mode_gap": False,
         "produced_artifact_trace_gap": True,
         "composite_resume_reconstructability_gap": False,
-        "required_persistence_profile_gap": False,
+        "required_persistence_profile_gap": True,
         "replay_ready_gap": True,
         "forensic_grade_gap": True,
         "dq_signal_present": True,
@@ -1846,6 +1856,7 @@ def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
         "Inspect failure classification and decide retry/quarantine/escalation.",
         "Persist immutable cached Bronze input snapshots before treating this run as strict exact-replay capable.",
         "Resolve concrete produced artifacts from the run ledger before claiming replay-ready reproducibility.",
+        "Current persisted surfaces do not satisfy the declared required persistence profile for this run.",
         "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
         "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",

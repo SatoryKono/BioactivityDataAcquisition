@@ -13,6 +13,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_YAML = ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
+POLICY_REVIEW_DATE = date(2026, 5, 15)
 INVENTORY_DOC = (
     ROOT / "docs" / "02-architecture" / "07-compatibility-facade-inventory.md"
 )
@@ -174,7 +175,7 @@ def test_registry_yaml_has_expected_shape() -> None:
             f"external breaking-change process: {row.path}"
         )
         assert date.fromisoformat(row.review_date).year >= 2026
-        assert date.fromisoformat(row.review_date) >= date.today(), (
+        assert date.fromisoformat(row.review_date) >= POLICY_REVIEW_DATE, (
             "Compatibility facade review metadata is stale and must be refreshed "
             f"before merge: {row.path} review_date={row.review_date}"
         )

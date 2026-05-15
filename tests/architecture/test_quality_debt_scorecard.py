@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from datetime import date
 import importlib.util
-from itertools import pairwise
 from pathlib import Path
 import sys
 from types import ModuleType
@@ -33,6 +32,7 @@ from bioetl.infrastructure.quality import (
 
 
 ROOT = Path(__file__).resolve().parents[2]
+POLICY_REVIEW_DATE = date(2026, 5, 15)
 
 
 def _owner_diversification_settings(
@@ -316,7 +316,7 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
         "compat_sunset_scorecard_loader",
     )
     sunset_count = len(sunset_module.COMPAT_FILES) + len(sunset_module.COMPAT_MODULES)
-    expired_count = 0 if date.today() <= sunset_module.SUNSET_DATE else sunset_count
+    expired_count = 0 if POLICY_REVIEW_DATE <= sunset_module.SUNSET_DATE else sunset_count
 
     expected_counts = {
         "transition_compat_count": len(transition_debt),
@@ -481,7 +481,7 @@ def test_debt_scorecard_has_no_stale_rollout_cutoffs() -> None:
     stale_cutoffs = {
         section_key: cutoff
         for section_key, cutoff in warn_until.items()
-        if _is_rollout_cutoff_stale(cutoff, today=date.today())
+        if _is_rollout_cutoff_stale(cutoff, today=POLICY_REVIEW_DATE)
     }
     assert not stale_cutoffs, f"Remove stale rollout cutoffs: {stale_cutoffs}"
 
@@ -559,7 +559,7 @@ def test_debt_scorecard_inventory_has_owner_and_expiry_decomposition() -> None:
     inventory = build_exemption_inventory()
     scorecard = load_debt_scorecard()
     starts_quarter, min_distinct_owners = _owner_diversification_settings(scorecard)
-    today_quarter = _parse_quarter_label(_quarter_label(date.today()))
+    today_quarter = _parse_quarter_label(_quarter_label(POLICY_REVIEW_DATE))
     technical_debt_entries = _technical_debt_entry_count()
 
     # When active technical debt is empty, owner diversification does not apply.

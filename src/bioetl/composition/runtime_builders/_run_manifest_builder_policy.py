@@ -11,6 +11,7 @@ from bioetl.composition.services.versioning import (
     get_code_revision_provenance,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,
     assess_reproducibility_policy,
     is_critical_reproducibility_runtime,
@@ -69,7 +70,11 @@ def resolve_manifest_reproducibility_context(
         getattr(inputs.settings, "pipeline", None), "control_plane", None
     )
     configured_required_profile = str(
-        getattr(control_plane, "required_persistence_profile", "degraded_observable")
+        getattr(
+            control_plane,
+            "required_persistence_profile",
+            DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+        )
     )
     reproducibility_profile = resolve_reproducibility_family_profile(
         provider=provider,

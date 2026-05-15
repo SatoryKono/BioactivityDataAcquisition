@@ -26,40 +26,38 @@ class TestBronzeWriterMetadataMixin:
     """Tests for Bronze metadata construction helpers."""
 
     def test_build_bronze_metadata_returns_expected_keys(self) -> None:
-        """_build_bronze_metadata should return a dict with all lineage fields."""
+        """_build_bronze_metadata should fail closed without MetadataCoordinator."""
         host = _Host()
         ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
-        result = host._build_bronze_metadata(
-            run_id=RunID("run-123"),
-            run_type=RunType.INCREMENTAL,
-            effective_ts=ts,
-            provider="chembl",
-            entity="activity",
-            batch_id=BatchID("batch-001"),
-        )
-        assert result == {
-            "run_id": "run-123",
-            "run_type": "incremental",
-            "ingestion_ts": ts.isoformat(),
-            "provider": "chembl",
-            "entity": "activity",
-            "batch_id": "batch-001",
-        }
+        with pytest.raises(
+            RuntimeError,
+            match="MetadataCoordinator with create_bronze_lineage_sidecar is required",
+        ):
+            host._build_bronze_metadata(
+                run_id=RunID("run-123"),
+                run_type=RunType.INCREMENTAL,
+                effective_ts=ts,
+                provider="chembl",
+                entity="activity",
+                batch_id=BatchID("batch-001"),
+            )
 
     def test_build_bronze_metadata_backfill_run_type(self) -> None:
-        """_build_bronze_metadata should correctly serialize BACKFILL run type."""
+        """Missing coordinator should fail closed regardless of run type."""
         host = _Host()
         ts = datetime(2025, 3, 1, 0, 0, 0, tzinfo=UTC)
-        result = host._build_bronze_metadata(
-            run_id=RunID("run-456"),
-            run_type=RunType.BACKFILL,
-            effective_ts=ts,
-            provider="pubmed",
-            entity="publication",
-            batch_id=BatchID("batch-002"),
-        )
-        assert result["run_type"] == "backfill"
-        assert result["provider"] == "pubmed"
+        with pytest.raises(
+            RuntimeError,
+            match="MetadataCoordinator with create_bronze_lineage_sidecar is required",
+        ):
+            host._build_bronze_metadata(
+                run_id=RunID("run-456"),
+                run_type=RunType.BACKFILL,
+                effective_ts=ts,
+                provider="pubmed",
+                entity="publication",
+                batch_id=BatchID("batch-002"),
+            )
 
     def test_build_bronze_metadata_prefers_coordinator_projection(self) -> None:
         """Coordinator-backed Bronze writers should project the legacy sidecar centrally."""

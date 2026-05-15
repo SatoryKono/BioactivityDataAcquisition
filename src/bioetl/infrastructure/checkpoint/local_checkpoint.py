@@ -31,6 +31,61 @@ from bioetl.domain.serialization import deserialize_from_json, serialize_to_json
 from bioetl.domain.types import JsonDict, RunID
 
 
+def _history_run_dir(base_path: Path, pipeline: str, run_id: RunID) -> Path:
+    return base_path / ".history" / "by_pipeline" / pipeline / str(run_id)
+
+
+def _build_history_entry_path(base_path: Path, pipeline: str, run_id: RunID) -> Path:
+    return _history_run_dir(base_path, pipeline, run_id) / f"{time.time_ns()}.json"
+
+
+def _manifest_index_path(base_path: Path, manifest_id: str) -> Path:
+    return base_path / ".history" / "by_manifest" / f"{manifest_id}.json"
+
+
+def _extract_manifest_id(metadata: JsonDict) -> str | None:
+    manifest_id = metadata.get("manifest_id")
+    if manifest_id is None and isinstance(metadata.get("run_context"), dict):
+        manifest_id = metadata["run_context"].get("manifest_id")
+    if manifest_id is None:
+        return None
+    text = str(manifest_id).strip()
+    return text or None
+
+
+def _read_json_file(path: Path) -> JsonDict:
+    with open(path, encoding="utf-8") as f:
+        payload = f.read()
+    data = deserialize_from_json(payload)
+    if not isinstance(data, dict):
+        raise ValueError("Checkpoint data must be a dictionary")
+    return data
+
+
+def _load_checkpoint_tuple(path: Path) -> tuple[RunID, JsonDict]:
+    checkpoint_data = _read_json_file(path)
+    run_id = RunID(UUID(checkpoint_data["run_id"]))
+    metadata = checkpoint_data.get("metadata", {})
+    return (run_id, metadata)
+
+
+def _atomic_write_text(path: Path, payload: str) -> None:
+    fd, temp_path = tempfile.mkstemp(
+        dir=path.parent,
+        prefix=".checkpoint_",
+        suffix=".tmp",
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(payload)
+        Path(temp_path).replace(path)
+    except (OSError, ValueError, TypeError, RuntimeError):
+        temp_file = Path(temp_path)
+        if temp_file.exists():
+            temp_file.unlink()
+        raise
+
+
 class LocalCheckpointAdapter:
     """Checkpoint storage using local filesystem.
 
@@ -90,11 +145,11 @@ class LocalCheckpointAdapter:
             "version": "2.0",
         }
         checkpoint_json = serialize_to_json(checkpoint_data, ensure_ascii=False)
-        self._atomic_write_text(full_path, checkpoint_json)
-        history_path = self._build_history_entry_path(pipeline, run_id)
+        _atomic_write_text(full_path, checkpoint_json)
+        history_path = _build_history_entry_path(self.base_path, pipeline, run_id)
         history_path.parent.mkdir(parents=True, exist_ok=True)
-        self._atomic_write_text(history_path, checkpoint_json)
-        manifest_id = self._extract_manifest_id(metadata or {})
+        _atomic_write_text(history_path, checkpoint_json)
+        manifest_id = _extract_manifest_id(metadata or {})
         if manifest_id is not None:
             manifest_index = {
                 "manifest_id": manifest_id,
@@ -102,12 +157,12 @@ class LocalCheckpointAdapter:
                 "run_id": str(run_id),
                 "history_path": str(history_path.relative_to(self.base_path)),
             }
-            self._manifest_index_path(manifest_id).parent.mkdir(
+            _manifest_index_path(self.base_path, manifest_id).parent.mkdir(
                 parents=True,
                 exist_ok=True,
             )
-            self._atomic_write_text(
-                self._manifest_index_path(manifest_id),
+            _atomic_write_text(
+                _manifest_index_path(self.base_path, manifest_id),
                 serialize_to_json(manifest_index, ensure_ascii=False),
             )
 
@@ -146,7 +201,7 @@ class LocalCheckpointAdapter:
 
         if not full_path.exists():
             return None
-        return self._load_from_path(full_path)
+        return _load_checkpoint_tuple(full_path)
 
     async def delete(self, pipeline: str) -> None:
         """Delete checkpoint.
@@ -250,7 +305,7 @@ class LocalCheckpointAdapter:
         pipeline: str,
         run_id: RunID,
     ) -> tuple[RunID, JsonDict] | None:
-        history_dir = self._history_run_dir(pipeline, run_id)
+        history_dir = _history_run_dir(self.base_path, pipeline, run_id)
         if not history_dir.exists():
             return None
         candidates = sorted(
@@ -258,7 +313,7 @@ class LocalCheckpointAdapter:
         )
         if not candidates:
             return None
-        return self._load_from_path(candidates[-1])
+        return _load_checkpoint_tuple(candidates[-1])
 
     async def load_for_manifest_id(
         self,
@@ -276,65 +331,17 @@ class LocalCheckpointAdapter:
         self,
         manifest_id: str,
     ) -> tuple[RunID, JsonDict] | None:
-        index_path = self._manifest_index_path(manifest_id)
+        index_path = _manifest_index_path(self.base_path, manifest_id)
         if not index_path.exists():
             return None
-        index = self._read_json_file(index_path)
+        index = _read_json_file(index_path)
         history_path = index.get("history_path") if isinstance(index, dict) else None
         if not isinstance(history_path, str) or not history_path:
             return None
         full_history_path = self.base_path / history_path
         if not full_history_path.exists():
             return None
-        return self._load_from_path(full_history_path)
-
-    def _build_history_entry_path(self, pipeline: str, run_id: RunID) -> Path:
-        return self._history_run_dir(pipeline, run_id) / f"{time.time_ns()}.json"
-
-    def _history_run_dir(self, pipeline: str, run_id: RunID) -> Path:
-        return self.base_path / ".history" / "by_pipeline" / pipeline / str(run_id)
-
-    def _manifest_index_path(self, manifest_id: str) -> Path:
-        return self.base_path / ".history" / "by_manifest" / f"{manifest_id}.json"
-
-    def _extract_manifest_id(self, metadata: JsonDict) -> str | None:
-        manifest_id = metadata.get("manifest_id")
-        if manifest_id is None and isinstance(metadata.get("run_context"), dict):
-            manifest_id = metadata["run_context"].get("manifest_id")
-        if manifest_id is None:
-            return None
-        text = str(manifest_id).strip()
-        return text or None
-
-    def _atomic_write_text(self, path: Path, payload: str) -> None:
-        fd, temp_path = tempfile.mkstemp(
-            dir=path.parent,
-            prefix=".checkpoint_",
-            suffix=".tmp",
-        )
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8") as f:
-                f.write(payload)
-            Path(temp_path).replace(path)
-        except (OSError, ValueError, TypeError, RuntimeError):
-            temp_file = Path(temp_path)
-            if temp_file.exists():
-                temp_file.unlink()
-            raise
-
-    def _read_json_file(self, path: Path) -> JsonDict:
-        with open(path, encoding="utf-8") as f:
-            payload = f.read()
-        data = deserialize_from_json(payload)
-        if not isinstance(data, dict):
-            raise ValueError("Checkpoint data must be a dictionary")
-        return data
-
-    def _load_from_path(self, path: Path) -> tuple[RunID, JsonDict]:
-        checkpoint_data = self._read_json_file(path)
-        run_id = RunID(UUID(checkpoint_data["run_id"]))
-        metadata = checkpoint_data.get("metadata", {})
-        return (run_id, metadata)
+        return _load_checkpoint_tuple(full_history_path)
 
     async def aclose(self) -> None:
         """Close checkpoint storage (no-op for local filesystem)."""

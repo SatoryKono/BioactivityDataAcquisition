@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,
 )
 
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 CheckpointCompatibilityPolicy = Literal["observe", "soft_fail", "hard_fail"]
-_DEFAULT_CHECKPOINT_COMPATIBILITY_POLICY: CheckpointCompatibilityPolicy = "soft_fail"
+_DEFAULT_CHECKPOINT_COMPATIBILITY_POLICY: CheckpointCompatibilityPolicy = "hard_fail"
 _ALLOWED_CHECKPOINT_COMPATIBILITY_POLICIES: tuple[
     CheckpointCompatibilityPolicy, ...
 ] = (
@@ -41,7 +42,7 @@ def _resolve_requested_checkpoint_compatibility_policy(
     if raw_policy is not None:
         logger_port.warning(
             "Unsupported checkpoint compatibility policy in settings; "
-            "falling back to soft_fail.",
+            "falling back to hard_fail.",
             pipeline=pipeline.config.pipeline_name,
             policy=raw_policy,
             default=_DEFAULT_CHECKPOINT_COMPATIBILITY_POLICY,
@@ -60,7 +61,7 @@ def _resolve_required_persistence_profile(
     raw_profile = getattr(control_plane, "required_persistence_profile", None)
     if isinstance(raw_profile, str) and raw_profile:
         return raw_profile
-    return "degraded_observable"
+    return DEFAULT_REQUIRED_PERSISTENCE_PROFILE
 
 
 def resolve_checkpoint_compatibility_policy(

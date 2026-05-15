@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from bioetl.domain.control_plane.run_manifest import ReplayCapability, RunSourceRef
 
-DEFAULT_REQUIRED_PERSISTENCE_PROFILE = "degraded_observable"
+DEFAULT_REQUIRED_PERSISTENCE_PROFILE = "replay_ready"
 
 
 def normalize_required_persistence_profile(required_profile: object) -> str:
@@ -30,7 +30,11 @@ def resolve_effective_required_persistence_profile(
     family_default = normalize_required_persistence_profile(family_default_profile)
     if (
         (exact_replay_requested or critical_runtime)
-        and configured == DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+        and configured
+        in {
+            "degraded_observable",
+            DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+        }
         and family_default in strict_persistence_profiles
     ):
         return family_default

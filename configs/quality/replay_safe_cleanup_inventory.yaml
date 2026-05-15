@@ -94,3 +94,27 @@ entries:
     protection: generated-output-review
     replay_impact_required: false
     runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+  - id: reports_quality_tmp_diagnostics
+    path: reports/quality/_tmp_*
+    classification: working_report_ttl_cleanup
+    replay_anchor: none
+    touches_replay_evidence: false
+    dry_run_required: true
+    canonical_tool: repo cleanup dry-run
+    protection: owner-reviewed-working-report-ttl
+    replay_impact_required: false
+    owner: Engineering / Quality
+    ttl_days: 7
+    runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+  - id: reports_quality_pretest_guardrails_history
+    path: reports/quality/pretest_guardrails_*.json
+    classification: working_report_ttl_cleanup
+    replay_anchor: none
+    touches_replay_evidence: false
+    dry_run_required: true
+    canonical_tool: repo cleanup dry-run
+    protection: owner-reviewed-working-report-ttl
+    replay_impact_required: false
+    owner: Engineering / Quality
+    ttl_days: 30
+    runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md

@@ -233,7 +233,13 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
         (data_dir / subdir).mkdir(exist_ok=True)
 
     previous_data_dir = os.environ.get("BIOETL_DATA_DIR")
+    previous_required_profile = os.environ.get(
+        "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE"
+    )
     os.environ["BIOETL_DATA_DIR"] = str(data_dir)
+    os.environ["BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE"] = (
+        "degraded_observable"
+    )
 
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()
@@ -250,6 +256,15 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
             os.environ.pop("BIOETL_DATA_DIR", None)
         else:
             os.environ["BIOETL_DATA_DIR"] = previous_data_dir
+        if previous_required_profile is None:
+            os.environ.pop(
+                "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE",
+                None,
+            )
+        else:
+            os.environ[
+                "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE"
+            ] = previous_required_profile
         get_settings.cache_clear()
         get_pipeline_config.cache_clear()
 

@@ -628,6 +628,7 @@ fixture_governance:
       - tests/fixtures/golden/gold/chembl_activity_dq_bundle_v1.json
       - tests/fixtures/golden/gold/composite_molecule_dq_bundle_v1.json
       - tests/fixtures/golden/gold/composite_publication_dq_bundle_v1.json
+      - tests/fixtures/golden/gold/pubchem_compound_dq_bundle_v1.json
       - tests/fixtures/golden/gold/pubmed_publication_dq_bundle_v1.json
   interoperability_drift_gates:
     scope: provider_contract_and_export_interoperability_surfaces

@@ -24,6 +24,7 @@ from bioetl.composition.runtime_builders._run_manifest_create_spec_support impor
 )
 from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,
     assess_reproducibility_policy,
 )
@@ -248,7 +249,7 @@ def emit_replay_reconstructability_metric(
     strict_replay_requested = bool(request.launch_context.get("exact_replay"))
     required_persistence_profile = str(
         request.launch_context.get("required_persistence_profile")
-        or "degraded_observable"
+        or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
     )
     strict_requirement = (
         strict_replay_requested

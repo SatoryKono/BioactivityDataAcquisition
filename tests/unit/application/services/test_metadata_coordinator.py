@@ -6,7 +6,6 @@ Tests centralized metadata creation for Bronze, Silver, and Gold layers.
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
-from uuid import uuid4
 
 import pytest
 
@@ -34,6 +33,7 @@ from bioetl.domain.ports import (
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.run_context import RunContext
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 _FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
 
@@ -42,7 +42,7 @@ _FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
 def run_context() -> RunContext:
     """Create a test RunContext."""
     return RunContext.create(
-        run_id=RunID(uuid4()),
+        run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
         run_type=RunType.INCREMENTAL,
         started_at=_FIXED_TIME,
         provider="chembl",
@@ -63,7 +63,7 @@ class TestRunContext:
 
     def test_create_with_valid_data(self) -> None:
         """Test creating RunContext with valid data."""
-        run_id = RunID(uuid4())
+        run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
         started_at = _FIXED_TIME
 
         context = RunContext.create(
@@ -85,7 +85,7 @@ class TestRunContext:
         """Test that naive datetime raises ValueError."""
         with pytest.raises(ValueError, match="timezone-aware"):
             RunContext.create(
-                run_id=RunID(uuid4()),
+                run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
                 run_type=RunType.INCREMENTAL,
                 started_at=datetime(2025, 1, 1, 12, 0),  # Naive datetime
                 provider="chembl",
@@ -96,7 +96,7 @@ class TestRunContext:
         """Test that empty provider raises ValueError."""
         with pytest.raises(ValueError, match="provider cannot be empty"):
             RunContext.create(
-                run_id=RunID(uuid4()),
+                run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
                 run_type=RunType.INCREMENTAL,
                 started_at=_FIXED_TIME,
                 provider="",
@@ -107,7 +107,7 @@ class TestRunContext:
         """Test that empty entity raises ValueError."""
         with pytest.raises(ValueError, match="entity cannot be empty"):
             RunContext.create(
-                run_id=RunID(uuid4()),
+                run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
                 run_type=RunType.INCREMENTAL,
                 started_at=_FIXED_TIME,
                 provider="chembl",
@@ -162,7 +162,7 @@ class TestBronzeMetadata:
         completed_at = started_at + timedelta(seconds=5.5)
 
         input_data = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=1000,
             compressed_size=50000,
             output_path="v1/chembl/activity/2024-01-15/batch_123.jsonl.zst",
@@ -186,7 +186,7 @@ class TestBronzeMetadata:
         """Bronze output content_hash should track semantic emitted file identity."""
         started_at = _FIXED_TIME
         completed_at = started_at + timedelta(seconds=1)
-        batch_id = BatchID(uuid4())
+        batch_id = BatchID(deterministic_uuid_from_callsite("replay-sensitive"))
         input_data = BronzeMetadataInput(
             batch_id=batch_id,
             record_count=1000,
@@ -239,7 +239,7 @@ class TestBronzeMetadata:
         completed_at = started_at + timedelta(seconds=3.0)
 
         input_data = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
@@ -259,7 +259,7 @@ class TestBronzeMetadata:
     def test_bronze_pipeline_metadata(self, coordinator: MetadataCoordinator) -> None:
         """Test Bronze pipeline metadata uses context values."""
         input_data = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
@@ -276,7 +276,7 @@ class TestBronzeMetadata:
     def test_bronze_pipeline_metadata_includes_contract_identity(self) -> None:
         """Bronze pipeline metadata should expose resolved contract identity fields."""
         context = RunContext.create(
-            run_id=RunID(uuid4()),
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
             run_type=RunType.INCREMENTAL,
             started_at=_FIXED_TIME,
             provider="chembl",
@@ -295,7 +295,7 @@ class TestBronzeMetadata:
         )
         coordinator = MetadataCoordinator(context)
         input_data = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=25,
             compressed_size=2048,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
@@ -320,7 +320,7 @@ class TestBronzeMetadata:
     def test_bronze_pipeline_metadata_does_not_alias_effective_hash(self) -> None:
         """Sidecar metadata keeps legacy config_hash separate from effective hash."""
         context = RunContext.create(
-            run_id=RunID(uuid4()),
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
             run_type=RunType.INCREMENTAL,
             started_at=_FIXED_TIME,
             provider="chembl",
@@ -331,7 +331,7 @@ class TestBronzeMetadata:
         )
         coordinator = MetadataCoordinator(context)
         input_data = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=25,
             compressed_size=2048,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
@@ -351,7 +351,7 @@ class TestBronzeMetadata:
         completed_at = started_at
 
         input_data = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=500,
             compressed_size=25000,
             output_path="v1/chembl/activity/2024-01-15/batch_abc.jsonl.zst",
@@ -377,7 +377,7 @@ class TestBronzeMetadata:
     ) -> None:
         """Bronze metadata should include query_string from BronzeMetadataInput."""
         input_data = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
@@ -400,7 +400,7 @@ class TestBronzeMetadata:
             query_string="original_query=value",
         )
         input_data = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
@@ -425,7 +425,7 @@ class TestBronzeMetadata:
             # query_string is None by default
         )
         input_data = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
@@ -463,7 +463,7 @@ class TestBronzeMetadata:
             ],
         )
         input_data = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
@@ -492,7 +492,7 @@ class TestBronzeMetadata:
     ) -> None:
         """Bronze metadata query_string should default to None when not provided."""
         input_data = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
@@ -545,7 +545,7 @@ class TestSilverMetadata:
 
     def test_pipeline_metadata_carries_normalization_profile_identity(self) -> None:
         context = RunContext.create(
-            run_id=RunID(uuid4()),
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
             run_type=RunType.INCREMENTAL,
             started_at=_FIXED_TIME,
             provider="chembl",
@@ -561,7 +561,7 @@ class TestSilverMetadata:
                     {
                         "_run_id": str(context.run_id),
                         "_run_type": "incremental",
-                        "_source_batch_id": str(uuid4()),
+                        "_source_batch_id": str(deterministic_uuid_from_callsite("replay-sensitive")),
                         "_ingestion_ts": _FIXED_TIME.isoformat(),
                         "chembl_id": "CHEMBL123",
                     }
@@ -584,7 +584,7 @@ class TestSilverMetadata:
             {
                 "_run_id": str(coordinator.run_context.run_id),
                 "_run_type": "incremental",
-                "_source_batch_id": str(uuid4()),
+                "_source_batch_id": str(deterministic_uuid_from_callsite("replay-sensitive")),
                 "_ingestion_ts": _FIXED_TIME.isoformat(),
                 "chembl_id": "CHEMBL123",
             }
@@ -620,8 +620,8 @@ class TestSilverMetadata:
 
     def test_silver_lineage_metadata(self, coordinator: MetadataCoordinator) -> None:
         """Test Silver lineage metadata extracts batch IDs."""
-        batch_id_1 = str(uuid4())
-        batch_id_2 = str(uuid4())
+        batch_id_1 = str(deterministic_uuid_from_callsite("replay-sensitive"))
+        batch_id_2 = str(deterministic_uuid_from_callsite("replay-sensitive"))
         records = [
             {"_source_batch_id": batch_id_1, "id": 1},
             {"_source_batch_id": batch_id_2, "id": 2},
@@ -692,7 +692,7 @@ class TestSilverMetadata:
     def test_silver_metadata_surfaces_composite_cv_trace_in_dq_summary(self) -> None:
         """Composite CV markers should become DQ summary counts and provenance."""
         context = RunContext.create(
-            run_id=RunID(uuid4()),
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
             run_type=RunType.INCREMENTAL,
             started_at=_FIXED_TIME,
             provider="composite",
@@ -1042,7 +1042,7 @@ class TestTransformVersionTracking:
         MetadataCoordinator.reset_environment_cache()
 
         context = RunContext.create(
-            run_id=RunID(uuid4()),
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
             run_type=RunType.INCREMENTAL,
             started_at=_FIXED_TIME,
             provider="chembl",
@@ -1072,7 +1072,7 @@ class TestTransformVersionTracking:
         MetadataCoordinator.reset_environment_cache()
 
         context = RunContext.create(
-            run_id=RunID(uuid4()),
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
             run_type=RunType.INCREMENTAL,
             started_at=_FIXED_TIME,
             provider="chembl",
@@ -1102,7 +1102,7 @@ class TestTransformVersionTracking:
 
     def test_run_context_with_transform_info(self) -> None:
         """Test RunContext can be created with transform version and steps."""
-        run_id = RunID(uuid4())
+        run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
         started_at = _FIXED_TIME
 
         context = RunContext.create(
@@ -1121,7 +1121,7 @@ class TestTransformVersionTracking:
     def test_run_context_defaults_empty_transform(self) -> None:
         """Test RunContext defaults to None/empty for transform fields."""
         context = RunContext.create(
-            run_id=RunID(uuid4()),
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
             run_type=RunType.INCREMENTAL,
             started_at=_FIXED_TIME,
             provider="chembl",
@@ -1136,7 +1136,7 @@ class TestTransformVersionTracking:
         MetadataCoordinator.reset_environment_cache()
 
         context = RunContext.create(
-            run_id=RunID(uuid4()),
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
             run_type=RunType.INCREMENTAL,
             started_at=_FIXED_TIME,
             provider="chembl",
@@ -1181,7 +1181,7 @@ class TestRunTypeMappings:
         MetadataCoordinator.reset_environment_cache()
 
         context = RunContext.create(
-            run_id=RunID(uuid4()),
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
             run_type=run_type,
             started_at=_FIXED_TIME,
             provider="test",
@@ -1190,7 +1190,7 @@ class TestRunTypeMappings:
         coordinator = MetadataCoordinator(context)
 
         input_data = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=1,
             compressed_size=100,
             output_path="path",
@@ -1213,7 +1213,7 @@ class TestConsistencyAcrossLayers:
 
         # Bronze
         bronze_input = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=10,
             compressed_size=1000,
             output_path="path",
@@ -1250,7 +1250,7 @@ class TestConsistencyAcrossLayers:
     ) -> None:
         """Test that pipeline metadata is consistent across layers."""
         bronze_input = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=10,
             compressed_size=1000,
             output_path="path",
@@ -1289,7 +1289,7 @@ class TestConsistencyAcrossLayers:
     ) -> None:
         """Test that environment metadata is consistent (same object)."""
         bronze_input = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=10,
             compressed_size=1000,
             output_path="path",
@@ -1339,7 +1339,7 @@ class TestLineageFragments:
 
     def test_bronze_fragment_links_source_request_run_and_batch(self) -> None:
         context = RunContext.create(
-            run_id=RunID(uuid4()),
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
             run_type=RunType.INCREMENTAL,
             started_at=_FIXED_TIME,
             provider="chembl",
@@ -1358,7 +1358,7 @@ class TestLineageFragments:
         )
         coordinator = MetadataCoordinator(context)
         input_data = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=50,
             compressed_size=1024,
             output_path="v1/chembl/activity/2026-03-24/batch-1.jsonl.zst",
@@ -1416,7 +1416,7 @@ class TestLineageFragments:
 
     def test_bronze_fragment_id_is_stable_across_run_ids(self) -> None:
         """Bronze fragment identity must not depend on run_id."""
-        batch_id = BatchID(uuid4())
+        batch_id = BatchID(deterministic_uuid_from_callsite("replay-sensitive"))
         input_data = BronzeMetadataInput(
             batch_id=batch_id,
             record_count=50,
@@ -1433,7 +1433,7 @@ class TestLineageFragments:
         )
         fragment_first = MetadataCoordinator(
             RunContext.create(
-                run_id=RunID(uuid4()),
+                run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
                 run_type=RunType.INCREMENTAL,
                 started_at=_FIXED_TIME,
                 provider="chembl",
@@ -1442,7 +1442,7 @@ class TestLineageFragments:
         ).build_bronze_lineage_fragment(input_data)
         fragment_second = MetadataCoordinator(
             RunContext.create(
-                run_id=RunID(uuid4()),
+                run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
                 run_type=RunType.INCREMENTAL,
                 started_at=_FIXED_TIME,
                 provider="chembl",
@@ -1454,7 +1454,7 @@ class TestLineageFragments:
 
     def test_silver_fragment_uses_bronze_refs_and_transform_chain(self) -> None:
         context = RunContext.create(
-            run_id=RunID(uuid4()),
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
             run_type=RunType.INCREMENTAL,
             started_at=_FIXED_TIME,
             provider="chembl",
@@ -1464,7 +1464,7 @@ class TestLineageFragments:
         )
         coordinator = MetadataCoordinator(context)
         bronze_ref = BronzeWriteResult(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             relative_path="chembl/activity/2026-03-24/batch-1.jsonl.zst",
             absolute_path="/data/output/bronze/chembl/activity/2026-03-24/batch-1.jsonl.zst",
             record_count=25,
@@ -1509,7 +1509,7 @@ class TestLineageFragments:
     def test_silver_fragment_id_is_stable_across_run_ids(self) -> None:
         """Silver fragment identity must not depend on run_id."""
         bronze_ref = BronzeWriteResult(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             relative_path="chembl/activity/2026-03-24/batch-1.jsonl.zst",
             absolute_path="/data/output/bronze/chembl/activity/2026-03-24/batch-1.jsonl.zst",
             record_count=25,
@@ -1527,7 +1527,7 @@ class TestLineageFragments:
         )
         fragment_first = MetadataCoordinator(
             RunContext.create(
-                run_id=RunID(uuid4()),
+                run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
                 run_type=RunType.INCREMENTAL,
                 started_at=_FIXED_TIME,
                 provider="chembl",
@@ -1538,7 +1538,7 @@ class TestLineageFragments:
         ).build_silver_lineage_fragment(input_data)
         fragment_second = MetadataCoordinator(
             RunContext.create(
-                run_id=RunID(uuid4()),
+                run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
                 run_type=RunType.INCREMENTAL,
                 started_at=_FIXED_TIME,
                 provider="chembl",
@@ -1552,7 +1552,7 @@ class TestLineageFragments:
 
     def test_silver_fragment_exposes_composite_source_and_cv_summary(self) -> None:
         context = RunContext.create(
-            run_id=RunID(uuid4()),
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
             run_type=RunType.INCREMENTAL,
             started_at=_FIXED_TIME,
             provider="composite",
@@ -1617,7 +1617,7 @@ class TestLineageFragments:
 
     def test_gold_fragment_links_silver_refs_schema_and_transforms(self) -> None:
         context = RunContext.create(
-            run_id=RunID(uuid4()),
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
             run_type=RunType.REBUILD,
             started_at=_FIXED_TIME,
             provider="chembl",
@@ -1681,7 +1681,7 @@ class TestLineageFragments:
         )
         fragment_first = MetadataCoordinator(
             RunContext.create(
-                run_id=RunID(uuid4()),
+                run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
                 run_type=RunType.REBUILD,
                 started_at=_FIXED_TIME,
                 provider="chembl",
@@ -1692,7 +1692,7 @@ class TestLineageFragments:
         ).build_gold_lineage_fragment(input_data)
         fragment_second = MetadataCoordinator(
             RunContext.create(
-                run_id=RunID(uuid4()),
+                run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
                 run_type=RunType.REBUILD,
                 started_at=_FIXED_TIME,
                 provider="chembl",
@@ -1706,7 +1706,7 @@ class TestLineageFragments:
 
     def test_gold_fragment_exposes_composite_source_and_cv_summary(self) -> None:
         context = RunContext.create(
-            run_id=RunID(uuid4()),
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
             run_type=RunType.REBUILD,
             started_at=_FIXED_TIME,
             provider="composite",
@@ -1849,7 +1849,7 @@ class TestLineageFragments:
         self, coordinator: MetadataCoordinator
     ) -> None:
         input_data = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             record_count=10,
             compressed_size=512,
             output_path="v1/chembl/activity/2026-03-24/batch-1.jsonl.zst",

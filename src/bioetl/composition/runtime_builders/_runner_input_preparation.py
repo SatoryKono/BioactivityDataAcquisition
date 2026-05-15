@@ -26,6 +26,9 @@ from bioetl.composition.runtime_builders.inputs_resolution_orchestration import 
     validate_runner_data_root_policy as _validate_runner_data_root_policy,
 )
 from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+)
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.inputs_runtime_models import (
@@ -70,7 +73,7 @@ def _resolve_required_persistence_profile(settings: Settings) -> str:
     return getattr(
         control_plane,
         "required_persistence_profile",
-        "degraded_observable",
+        DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     )
 
 

@@ -14,6 +14,7 @@ from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     resolve_contract_identity,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,
     is_critical_reproducibility_runtime,
     resolve_effective_required_persistence_profile,
@@ -77,7 +78,7 @@ def _build_composite_control_plane_config_artifacts(
     required_profile = getattr(
         control_plane,
         "required_persistence_profile",
-        "degraded_observable",
+        DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     )
     effective_required_profile = _resolve_composite_required_persistence_profile(
         infra_context.settings,

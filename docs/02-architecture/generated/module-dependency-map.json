@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1856,
-    "total_internal_imports": 7409,
+    "scanned_modules": 1858,
+    "total_internal_imports": 7417,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 321,
@@ -29,19 +29,19 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 631,
+      "imports": 634,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 424,
+      "imports": 429,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 342,
+      "imports": 343,
       "allowed": true
     },
     {
@@ -59,7 +59,7 @@
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 955,
+      "imports": 954,
       "allowed": true
     },
     {
@@ -261,7 +261,7 @@
     {
       "source": "composition.runtime_builders",
       "target": "domain.control_plane",
-      "imports": 22
+      "imports": 24
     },
     {
       "source": "infrastructure.config",

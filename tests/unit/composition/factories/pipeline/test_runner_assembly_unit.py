@@ -211,7 +211,7 @@ def test_build_checkpoint_manager_fallbacks_to_soft_fail_on_invalid_policy() -> 
             logger_port=logger,
         )
 
-    assert mock_create_manager.call_args.kwargs["compatibility_policy"] == "soft_fail"
+    assert mock_create_manager.call_args.kwargs["compatibility_policy"] == "hard_fail"
     logger.warning.assert_called_once()
 
 

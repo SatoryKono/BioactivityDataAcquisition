@@ -22,6 +22,7 @@ from tests.unit.infrastructure.storage.silver_writer._test_support import (
     silver_table_path,
     silver_write_schema,
 )
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 pytestmark = pytest.mark.unit
 
@@ -77,7 +78,6 @@ class TestSilverWriterAudit:
     async def test_log_silver_audit_skips_when_no_audit(self, noop_logger):
         """Test _log_silver_audit does nothing when audit is None."""
         from datetime import UTC, datetime
-        from uuid import uuid4
 
         from bioetl.domain.medallion import SilverWriteMode
         from bioetl.domain.types import BatchID, RunID, RunType
@@ -89,9 +89,9 @@ class TestSilverWriterAudit:
             table_name="test.table",
             records=[{"entity_id": "CHEMBL1"}],
             mode=SilverWriteMode.MERGE,
-            run_id=RunID(uuid4()),
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
             run_type=RunType.INCREMENTAL,
-            source_batch_id=BatchID(uuid4()),
+            source_batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             ingestion_ts=datetime(2025, 1, 1, tzinfo=UTC),
         )
 
@@ -99,7 +99,6 @@ class TestSilverWriterAudit:
     async def test_log_silver_audit_missing_run_id_raises(self, noop_logger):
         """Test _log_silver_audit fails closed when run_id is missing."""
         from datetime import UTC, datetime
-        from uuid import uuid4
 
         from bioetl.domain.medallion import SilverWriteMode
         from bioetl.domain.types import BatchID, RunType
@@ -117,7 +116,7 @@ class TestSilverWriterAudit:
                 mode=SilverWriteMode.MERGE,
                 run_id=None,
                 run_type=RunType.INCREMENTAL,
-                source_batch_id=BatchID(uuid4()),
+                source_batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
                 ingestion_ts=datetime(2025, 1, 1, tzinfo=UTC),
             )
 
@@ -127,7 +126,6 @@ class TestSilverWriterAudit:
     async def test_log_silver_audit_with_valid_data(self, noop_logger):
         """Test _log_silver_audit logs correctly with valid data."""
         from datetime import UTC, datetime
-        from uuid import uuid4
 
         from bioetl.domain.medallion import SilverWriteMode
         from bioetl.domain.types import BatchID, RunID, RunType
@@ -137,14 +135,14 @@ class TestSilverWriterAudit:
 
         writer = make_silver_writer(logger=noop_logger, audit=mock_audit)
 
-        valid_uuid = uuid4()
+        valid_uuid = deterministic_uuid_from_callsite("replay-sensitive")
         await writer._log_silver_audit(
             table_name="test.table",
             records=[{"entity_id": "CHEMBL1"}],
             mode=SilverWriteMode.MERGE,
             run_id=RunID(valid_uuid),
             run_type=RunType.INCREMENTAL,
-            source_batch_id=BatchID(uuid4()),
+            source_batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             ingestion_ts=datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC),
         )
 
@@ -154,7 +152,6 @@ class TestSilverWriterAudit:
     async def test_log_silver_audit_with_datetime_ingestion_ts(self, noop_logger):
         """Test _log_silver_audit handles datetime ingestion_ts."""
         from datetime import UTC, datetime
-        from uuid import uuid4
 
         from bioetl.domain.medallion import SilverWriteMode
         from bioetl.domain.types import BatchID, RunID, RunType
@@ -164,7 +161,7 @@ class TestSilverWriterAudit:
 
         writer = make_silver_writer(logger=noop_logger, audit=mock_audit)
 
-        valid_uuid = uuid4()
+        valid_uuid = deterministic_uuid_from_callsite("replay-sensitive")
         ingestion_dt = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
 
         await writer._log_silver_audit(
@@ -173,7 +170,7 @@ class TestSilverWriterAudit:
             mode=SilverWriteMode.APPEND,
             run_id=RunID(valid_uuid),
             run_type=RunType.BACKFILL,
-            source_batch_id=BatchID(uuid4()),
+            source_batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             ingestion_ts=ingestion_dt,
         )
 
@@ -182,7 +179,6 @@ class TestSilverWriterAudit:
     @pytest.mark.asyncio
     async def test_log_silver_audit_missing_ingestion_ts_raises(self, noop_logger):
         """Test _log_silver_audit fails closed when ingestion_ts is missing."""
-        from uuid import uuid4
 
         from bioetl.domain.medallion import SilverWriteMode
         from bioetl.domain.types import BatchID, RunID, RunType
@@ -192,7 +188,7 @@ class TestSilverWriterAudit:
 
         writer = make_silver_writer(logger=noop_logger, audit=mock_audit)
 
-        valid_uuid = uuid4()
+        valid_uuid = deterministic_uuid_from_callsite("replay-sensitive")
         with pytest.raises(ValueError, match="ingestion_ts is required"):
             await writer._log_silver_audit(
                 table_name="test.table",
@@ -200,7 +196,7 @@ class TestSilverWriterAudit:
                 mode=SilverWriteMode.DELETE,
                 run_id=RunID(valid_uuid),
                 run_type=RunType.REBUILD,
-                source_batch_id=BatchID(uuid4()),
+                source_batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
                 ingestion_ts=None,
             )
 
@@ -295,13 +291,12 @@ class TestSilverWriterLineage:
         self, noop_logger, valid_records, tmp_path
     ):
         """Test write_silver accepts bronze_refs parameter."""
-        from uuid import uuid4
 
         from bioetl.domain.types import BatchID
         from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
         bronze_result = BronzeWriteResult(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             relative_path="v1/chembl/activity/2024-01-15/batch_123.jsonl.zst",
             absolute_path="/data/bronze/v1/chembl/activity/2024-01-15/batch_123.jsonl.zst",
             record_count=100,
@@ -330,14 +325,13 @@ class TestSilverWriterLineage:
         self, noop_logger, valid_records, mock_metadata_coordinator
     ):
         """Test _write_silver_metadata populates bronze_paths from bronze_refs."""
-        from uuid import uuid4
 
         from bioetl.domain.types import BatchID
         from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
         from bioetl.infrastructure.storage.silver_writer import SilverWriteMode
 
         bronze_result_1 = BronzeWriteResult(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             relative_path="v1/chembl/activity/2024-01-15/batch_001.jsonl.zst",
             absolute_path="/data/bronze/v1/chembl/activity/2024-01-15/batch_001.jsonl.zst",
             record_count=50,
@@ -347,7 +341,7 @@ class TestSilverWriterLineage:
         )
 
         bronze_result_2 = BronzeWriteResult(
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
             relative_path="v1/chembl/activity/2024-01-15/batch_002.jsonl.zst",
             absolute_path="/data/bronze/v1/chembl/activity/2024-01-15/batch_002.jsonl.zst",
             record_count=50,

@@ -12,6 +12,7 @@ from bioetl.application.services.control_plane.historical_replay_corpus_service 
     HistoricalReplayCorpusService,
 )
 from bioetl.application.services.control_plane.historical_replay_universe_policy import (
+    build_authoritative_truth_surface,
     build_durable_coverage_claim,
     build_universal_claim,
     build_universe_report_id,
@@ -150,6 +151,7 @@ class HistoricalReplayUniverseClosureReportRecord:
     generated_at: datetime
     report_id: str
     inventory: HistoricalReplayUniverseInventorySnapshot
+    authoritative_truth_surface: dict[str, object]
     universal_claim: dict[str, object]
     durable_evidence_coverage_claim: dict[str, object]
 
@@ -158,6 +160,7 @@ class HistoricalReplayUniverseClosureReportRecord:
             "generated_at": self.generated_at.astimezone(UTC).isoformat(),
             "report_id": self.report_id,
             "inventory": self.inventory.to_dict(),
+            "authoritative_truth_surface": self.authoritative_truth_surface,
             "universal_claim": self.universal_claim,
             "durable_evidence_coverage_claim": self.durable_evidence_coverage_claim,
         }
@@ -197,10 +200,12 @@ class HistoricalReplayUniverseService:
         external_records: tuple[HistoricalReplayUniverseExternalRecord, ...] = (),
     ) -> HistoricalReplayUniverseClosureReportRecord:
         inventory = self.build_universe_inventory(external_records=external_records)
+        authoritative_truth_surface = build_authoritative_truth_surface()
         universal_claim = build_universal_claim(inventory)
         durable_claim = build_durable_coverage_claim(inventory)
         report_id = build_universe_report_id(
             inventory=inventory,
+            authoritative_truth_surface=authoritative_truth_surface,
             universal_claim=universal_claim,
             durable_claim=durable_claim,
         )
@@ -208,6 +213,7 @@ class HistoricalReplayUniverseService:
             generated_at=self.now_factory(),
             report_id=report_id,
             inventory=inventory,
+            authoritative_truth_surface=authoritative_truth_surface,
             universal_claim=universal_claim,
             durable_evidence_coverage_claim=durable_claim,
         )

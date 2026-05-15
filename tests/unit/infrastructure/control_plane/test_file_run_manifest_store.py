@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
-from uuid import uuid4
 
 import pytest
 
@@ -23,11 +22,12 @@ from bioetl.infrastructure.control_plane import (
     FileRunManifestStore,
     RunManifestStoreCorruptionError,
 )
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 
 def test_file_store_round_trips_manifest_by_id_and_run_id(tmp_path) -> None:
     store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     manifest = RunManifest(
         manifest_id="manifest-1",
         execution_fingerprint="fingerprint-1",
@@ -87,7 +87,7 @@ def test_file_store_emits_manifest_write_metric(tmp_path) -> None:
         execution_fingerprint="fingerprint-2",
         schema_version="1.0",
         created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
-        run_id=RunID(uuid4()),
+        run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
         run_type=RunType.INCREMENTAL,
         pipeline_name="chembl_activity",
         provider="chembl",
@@ -127,7 +127,7 @@ def test_file_store_emits_manifest_read_metric_on_get_success(tmp_path) -> None:
         base_path=tmp_path / "run_manifest",
         metrics=metrics,
     )
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     manifest = RunManifest(
         manifest_id="manifest-3",
         execution_fingerprint="fingerprint-3",
@@ -206,7 +206,7 @@ def test_file_store_lists_all_manifests_in_deterministic_order(tmp_path) -> None
         execution_fingerprint="fingerprint-b",
         schema_version="1.0",
         created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
-        run_id=RunID(uuid4()),
+        run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
         run_type=RunType.INCREMENTAL,
         pipeline_name="chembl_activity",
         provider="chembl",
@@ -221,7 +221,7 @@ def test_file_store_lists_all_manifests_in_deterministic_order(tmp_path) -> None
         execution_fingerprint="fingerprint-a",
         schema_version="1.0",
         created_at=datetime(2026, 1, 2, 12, 0, tzinfo=UTC),
-        run_id=RunID(uuid4()),
+        run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
         run_type=RunType.INCREMENTAL,
         pipeline_name="chembl_activity",
         provider="chembl",
@@ -255,7 +255,7 @@ def test_file_store_rolls_back_manifest_when_run_index_write_fails(
         execution_fingerprint="fingerprint-rollback",
         schema_version="1.0",
         created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
-        run_id=RunID(uuid4()),
+        run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
         run_type=RunType.INCREMENTAL,
         pipeline_name="chembl_activity",
         provider="chembl",
@@ -314,7 +314,7 @@ def test_file_store_rolls_back_manifest_when_run_index_write_fails(
 
 def test_file_store_reports_orphan_manifest_without_run_index(tmp_path) -> None:
     store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     manifest = RunManifest(
         manifest_id="manifest-orphan",
         execution_fingerprint="fingerprint-orphan",
@@ -344,7 +344,7 @@ def test_file_store_reports_orphan_manifest_without_run_index(tmp_path) -> None:
 def test_file_store_reports_mismatched_run_index(tmp_path) -> None:
     metrics = MagicMock()
     store = FileRunManifestStore(base_path=tmp_path / "run_manifest", metrics=metrics)
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     manifest = RunManifest(
         manifest_id="manifest-indexed",
         execution_fingerprint="fingerprint-indexed",
@@ -395,7 +395,7 @@ def test_file_store_reports_mismatched_run_index(tmp_path) -> None:
 
 def test_file_store_fails_closed_on_run_id_manifest_collision(tmp_path) -> None:
     store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     original = RunManifest(
         manifest_id="manifest-original",
         execution_fingerprint="fingerprint-original",
@@ -449,7 +449,7 @@ def test_file_store_allows_idempotent_retry_for_same_run_id_mapping(tmp_path) ->
         execution_fingerprint="fingerprint-retry",
         schema_version="1.0",
         created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
-        run_id=RunID(uuid4()),
+        run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
         run_type=RunType.INCREMENTAL,
         pipeline_name="chembl_activity",
         provider="chembl",

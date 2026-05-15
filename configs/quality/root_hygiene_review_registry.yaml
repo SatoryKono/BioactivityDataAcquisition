@@ -140,6 +140,10 @@ review_lanes:
         current_live_state: absent_from_root_baseline
         canonical_path: AGENTS.md
         action_if_reintroduced: move_to_canonical_docs_or_remove
+      - path: domain.types
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: require explicit owner decision or remove root leftover
       - path: MCP_SETUP.md
         current_live_state: absent_from_root_baseline
         canonical_path: docs/99-archive/mcp-codex-stable-startup-guide.md
@@ -164,6 +168,10 @@ review_lanes:
         current_live_state: absent_from_root_baseline
         canonical_path: tests
         action_if_reintroduced: move_to_tests_or_remove
+      - path: tmp_git_status.txt
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: remove transient root diagnostic or catalog a maintained owner
       - path: Dockerfile
         current_live_state: absent_from_root_baseline
         canonical_path: Dockerfile.bioetl

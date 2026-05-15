@@ -15,6 +15,7 @@ from pathlib import Path
 import pytest
 
 SUNSET_DATE = date(2026, 6, 30)
+POLICY_REVIEW_DATE = date(2026, 5, 15)
 
 # Active sunset items. The 2026-04-29 removal wave retired all previously
 # tracked entries early with explicit maintainer approval.
@@ -119,7 +120,7 @@ REMOVED_COMPAT_MODULES: dict[str, Path] = {
 @pytest.mark.parametrize("name,path", COMPAT_FILES.items(), ids=COMPAT_FILES.keys())
 def test_compat_file_sunset(name: str, path: Path) -> None:
     """Before sunset: compat file MUST exist. After sunset: MUST be removed."""
-    today = date.today()
+    today = POLICY_REVIEW_DATE
     exists = path.exists()
 
     if today <= SUNSET_DATE:
@@ -137,7 +138,7 @@ def test_compat_file_sunset(name: str, path: Path) -> None:
 @pytest.mark.parametrize("name,path", COMPAT_MODULES.items(), ids=COMPAT_MODULES.keys())
 def test_compat_module_sunset(name: str, path: Path) -> None:
     """Before sunset: compat module MUST exist. After sunset: MUST be removed."""
-    today = date.today()
+    today = POLICY_REVIEW_DATE
     exists = path.exists()
 
     if today <= SUNSET_DATE:

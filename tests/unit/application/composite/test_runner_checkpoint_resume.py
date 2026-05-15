@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
-from uuid import uuid4
 
 import pytest
 
@@ -33,6 +32,7 @@ from tests.unit.application.composite.runner_test_support import (
     create_runner,
     seed_runner_factory,
 )
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 
 class TestResumeFromFailedState:
@@ -44,7 +44,7 @@ class TestResumeFromFailedState:
         # Create checkpoint in FAILED state with seed not completed
         failed_state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=str(deterministic_uuid_from_callsite("replay-sensitive")),
             state=CompositePipelineState.FAILED,
             seed_completed=False,  # Seed failed
             created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
@@ -85,7 +85,7 @@ class TestResumeFromFailedState:
         # Create checkpoint in FAILED state with seed completed and 1 of 3 enrichers done
         failed_state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=str(deterministic_uuid_from_callsite("replay-sensitive")),
             state=CompositePipelineState.FAILED,
             seed_completed=True,
             seed_result=SeedResult(
@@ -143,7 +143,7 @@ class TestResumeFromFailedState:
         # Create checkpoint in FAILED state with all enrichers completed
         failed_state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=str(deterministic_uuid_from_callsite("replay-sensitive")),
             state=CompositePipelineState.FAILED,
             seed_completed=True,
             seed_result=SeedResult(
@@ -216,7 +216,7 @@ class TestResumeContextLogging:
         # Create checkpoint with partial progress
         partial_state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=str(deterministic_uuid_from_callsite("replay-sensitive")),
             state=CompositePipelineState.ENRICHING,
             seed_completed=True,
             seed_result=SeedResult(
@@ -291,7 +291,7 @@ class TestCheckpointExistsWarning:
     async def test_warns_when_checkpoint_exists_without_resume(self):
         """Should warn when checkpoint with progress exists but resume=False."""
         logger = create_mock_logger()
-        run_id = str(uuid4())
+        run_id = str(deterministic_uuid_from_callsite("replay-sensitive"))
         storage = InMemoryCompositeCheckpointStorage()
 
         # Create a checkpoint manager and save a state with progress.
@@ -338,7 +338,7 @@ class TestCheckpointExistsWarning:
         manager_no_resume = CompositeCheckpointService(
             CompositeCheckpointServiceContext(
                 composite_name="test_composite",
-                run_id=str(uuid4()),
+                run_id=str(deterministic_uuid_from_callsite("replay-sensitive")),
                 storage=storage,
                 logger=logger,
                 resume=False,
@@ -365,7 +365,7 @@ class TestCheckpointExistsWarning:
         manager = CompositeCheckpointService(
             CompositeCheckpointServiceContext(
                 composite_name="test_composite",
-                run_id=str(uuid4()),
+                run_id=str(deterministic_uuid_from_callsite("replay-sensitive")),
                 storage=storage,
                 logger=logger,
                 resume=False,
@@ -385,7 +385,7 @@ class TestCheckpointExistsWarning:
     async def test_no_warning_when_checkpoint_has_no_progress(self):
         """Should not warn when checkpoint exists but has no progress."""
         logger = create_mock_logger()
-        run_id = str(uuid4())
+        run_id = str(deterministic_uuid_from_callsite("replay-sensitive"))
         storage = InMemoryCompositeCheckpointStorage()
 
         # Save a fresh checkpoint with no progress
@@ -412,7 +412,7 @@ class TestCheckpointExistsWarning:
         manager_no_resume = CompositeCheckpointService(
             CompositeCheckpointServiceContext(
                 composite_name="test_composite",
-                run_id=str(uuid4()),
+                run_id=str(deterministic_uuid_from_callsite("replay-sensitive")),
                 storage=storage,
                 logger=logger,
                 resume=False,
@@ -437,7 +437,7 @@ class TestFSMStateTransitionOnResume:
         """FSM transition from FAILED should be logged."""
         failed_state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=str(deterministic_uuid_from_callsite("replay-sensitive")),
             state=CompositePipelineState.FAILED,
             seed_completed=True,
             seed_result=SeedResult(
@@ -479,7 +479,7 @@ class TestFSMStateTransitionOnResume:
         # All enrichers completed, merge failed
         failed_state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=str(deterministic_uuid_from_callsite("replay-sensitive")),
             state=CompositePipelineState.FAILED,
             seed_completed=True,
             seed_result=SeedResult(

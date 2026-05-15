@@ -70,6 +70,8 @@ def test_universe_report_blocks_claim_when_external_archived_record_is_unresolve
 
     assert report.inventory.external_archived_count == 1
     assert report.inventory.durable_coverage_gap_count == 2
+    assert report.authoritative_truth_surface["authoritative"] is True
+    assert report.authoritative_truth_surface["scope"] == "all_known_historical_runs"
     assert report.universal_claim["claimed"] is False
     assert report.universal_claim["scope"] == "all_known_historical_runs"
     assert "archived-manifest-1" in report.universal_claim["blocked_manifest_ids"]
@@ -113,6 +115,9 @@ def test_universe_report_supports_claim_when_local_and_external_records_are_clos
 
     assert report.inventory.local_retained_count == 0
     assert report.inventory.external_archived_count == 1
+    assert report.authoritative_truth_surface["claim_kind"] == (
+        "literal_any_run_exact_replay"
+    )
     assert report.universal_claim["claimed"] is True
     assert report.universal_claim["scope"] == "all_known_historical_runs"
     assert report.durable_evidence_coverage_claim["claimed"] is True

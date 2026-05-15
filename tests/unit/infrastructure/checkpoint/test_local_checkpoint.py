@@ -14,6 +14,8 @@ import pytest
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def checkpoint_dir(tmp_path: Path) -> Path:

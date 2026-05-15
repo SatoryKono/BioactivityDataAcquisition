@@ -152,7 +152,7 @@ class PipelineSettings(BaseSettings):
 
         required_persistence_profile: Literal[
             "degraded_observable", "replay_ready", "forensic_grade"
-        ] = Field(default="degraded_observable")
+        ] = Field(default="replay_ready")
         """Minimum persistence profile required for this deployment/runtime."""
 
         run_manifest_enabled: bool = Field(default=True)
@@ -163,7 +163,7 @@ class PipelineSettings(BaseSettings):
 
         checkpoint_compatibility_policy: Literal[
             "observe", "soft_fail", "hard_fail"
-        ] = Field(default="soft_fail")
+        ] = Field(default="hard_fail")
         """Resume behavior when checkpoint compatibility validation fails.
 
         `observe` remains a degraded operator mode only when identity continuity

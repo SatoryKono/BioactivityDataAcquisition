@@ -19,6 +19,7 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
 )
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
+    compute_input_snapshot_identity_fingerprint,
     compute_execution_identity_fingerprint,
 )
 from bioetl.domain.types import RunID, RunType
@@ -29,9 +30,6 @@ FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
 VALID_CONFIG_HASH = "a" * 64
 VALID_RESOLVED_CONFIG_HASH = "b" * 64
 VALID_EFFECTIVE_CONFIG_HASH = "c" * 64
-SNAPSHOT_IDENTITY_FINGERPRINT = (
-    "273c9e5f598ea834b7fa778048db3ff57a0f73c9b406e4edd9db26ae9ae4fcf9"
-)
 TEST_ROOT = synthetic_test_root("run-manifest-test-support")
 DEFAULT_BRONZE_BATCH_URI = (TEST_ROOT / "bronze" / "batch_1.jsonl.zst").as_uri()
 
@@ -249,6 +247,18 @@ def expected_canonical_execution_identity(
     }
 
 
+def expected_input_snapshot_identity_fingerprint(
+    manifest: RunManifest,
+) -> str | None:
+    """Build the canonical snapshot-identity fingerprint for a manifest."""
+    snapshots = [
+        snapshot
+        for source_ref in manifest.source_refs
+        for snapshot in source_ref.input_snapshots
+    ]
+    return compute_input_snapshot_identity_fingerprint(snapshots)
+
+
 def expected_degraded_runtime_anchor(manifest: RunManifest) -> dict[str, object]:
     """Build the degraded-runtime-anchor expectation payload."""
     payload = {
@@ -443,7 +453,7 @@ def expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
     requested_exact_replay = bool(manifest.launch_context.get("exact_replay"))
     required_profile = str(
         manifest.launch_context.get("required_persistence_profile")
-        or "degraded_observable"
+        or "replay_ready"
     )
     requested_policy = manifest.launch_context.get("checkpoint_compatibility_policy")
     if not isinstance(requested_policy, str) or requested_policy not in {

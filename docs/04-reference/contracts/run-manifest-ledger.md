@@ -252,11 +252,15 @@ Certified historical replay is therefore bounded but operationalized:
 - a literal universal exact replay claim for **any historical run** is only
   supported from the full-universe artifact, not from the retained-corpus
   artifact alone. That artifact must merge locally retained runs with
-  authoritative archived/offline historical records and publish both
-  `universal_claim` and `durable_evidence_coverage_claim`.
+  authoritative archived/offline historical records and publish
+  `authoritative_truth_surface`, `universal_claim`, and
+  `durable_evidence_coverage_claim`.
 - the full-universe artifact uses `scope=all_known_historical_runs`. It is the
   only published scope that may back literal wording about **any historical
   run** rather than retained-only or retained-certifiable subsets.
+- `authoritative_truth_surface.surface=historical_replay_universe_closure_report`
+  is the machine-readable declaration that this artifact family, and only this
+  artifact family, may back literal **any historical run** wording.
 - top-level project wording may claim universal historical exact replay only
   when the latest full-universe artifact reports
   `universal_claim.claimed=true` and
@@ -287,10 +291,10 @@ The control-plane runtime is governed by the runtime object path
 
 | Setting                           |               Default | Effect                                                                                                                         |
 | --------------------------------- | --------------------: | ------------------------------------------------------------------------------------------------------------------------------ |
-| `required_persistence_profile`    | `degraded_observable` | Minimum control-plane persistence contract required for this runtime (`degraded_observable`, `replay_ready`, `forensic_grade`) |
+| `required_persistence_profile`    |         `replay_ready` | Minimum control-plane persistence contract required for this runtime (`degraded_observable`, `replay_ready`, `forensic_grade`) |
 | `run_manifest_enabled`            |                `true` | Create immutable manifest before runner assembly / execution starts                                                            |
 | `run_ledger_enabled`              |                `true` | Append lifecycle and inspection events keyed by `manifest_id`                                                                  |
-| `checkpoint_compatibility_policy` |           `soft_fail` | Resume behavior when checkpoint identity mismatches runtime (`observe`, `soft_fail`, `hard_fail`)                              |
+| `checkpoint_compatibility_policy` |           `hard_fail` | Resume behavior when checkpoint identity mismatches runtime (`observe`, `soft_fail`, `hard_fail`)                              |
 
 Current rollout semantics:
 
@@ -299,10 +303,10 @@ Current rollout semantics:
    without manifest creation.
 1. `run_manifest_enabled=true`, `run_ledger_enabled=false` keeps manifest creation but suppresses ledger writes where that degraded mode is still allowed.
 1. `run_ledger_enabled=true` is only valid when `run_manifest_enabled=true`.
-1. Supported production and debug-critical launches inherit the published
-   family default when the configured profile remains
-   `degraded_observable`. For snapshot-backed supported source families and
-   composite launches this effective default is `replay_ready`.
+1. Executable launches default to `replay_ready`. When an exact-replay request
+   or critical runtime still carries a legacy `degraded_observable`
+   configuration, the effective profile is promoted to the published strict
+   family default instead of silently preserving the weaker floor.
 1. The effective default is fail-closed: a production/debug-critical supported
    family launch that cannot prove immutable input snapshots, or a composite
    launch without a full snapshot envelope, is blocked before it can be claimed
@@ -479,8 +483,9 @@ persistence-profile taxonomy:
 `required_persistence_profile` is the declared minimum profile requested by the
 runtime/deployment for that run. The current published contract is:
 
-- `degraded_observable` is always the floor and may still be inspected even
-  when richer replay/forensic surfaces are absent;
+- `degraded_observable` remains a valid explicit opt-down and may still be
+  inspected even when richer replay/forensic surfaces are absent;
+- `replay_ready` is the default floor for executable runs;
 - `replay_ready` is only valid inside the strict exact-replay support boundary;
   execution contexts outside that boundary must fail closed during bootstrap
   instead of running and merely reporting a degraded profile later. For

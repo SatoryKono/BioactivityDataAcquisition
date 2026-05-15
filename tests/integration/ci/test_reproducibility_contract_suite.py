@@ -59,6 +59,7 @@ from bioetl.domain.control_plane import (
 )
 from bioetl.domain.control_plane.reproducibility_profiles import (
     published_production_reproducibility_families,
+    published_supported_boundary_families,
     published_reproducibility_family_inventory,
     published_supported_reproducibility_families,
 )
@@ -110,6 +111,7 @@ pytestmark = pytest.mark.integration
 
 _VALID_CONFIG_HASH = "a" * 64
 _PUBLISHED_SUPPORTED_FAMILIES = tuple(published_supported_reproducibility_families())
+_PUBLISHED_SUPPORTED_BOUNDARY_FAMILIES = tuple(published_supported_boundary_families())
 _PUBLISHED_SUPPORTED_SOURCE_FAMILIES = tuple(
     family
     for family in _PUBLISHED_SUPPORTED_FAMILIES
@@ -1211,7 +1213,7 @@ def test_reproducibility_contract_forensic_grade_profile_is_attained(
         "support_scope": "operator_grade_trace_debug",
         "supported": True,
         "reason": "family_within_supported_boundary",
-        "supported_families": list(_PUBLISHED_SUPPORTED_FAMILIES),
+        "supported_families": list(_PUBLISHED_SUPPORTED_BOUNDARY_FAMILIES),
     }
     assert result.diagnostics["replay_family_contract"]["family"] == family
     assert (
@@ -1737,7 +1739,7 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
         "support_scope": "operator_grade_trace_debug",
         "supported": False,
         "reason": "family_outside_published_inventory",
-        "supported_families": list(_PUBLISHED_SUPPORTED_FAMILIES),
+        "supported_families": list(_PUBLISHED_SUPPORTED_BOUNDARY_FAMILIES),
     }
     assert result.diagnostics["replay_family_contract"]["family"] == "openalex.works"
     assert (

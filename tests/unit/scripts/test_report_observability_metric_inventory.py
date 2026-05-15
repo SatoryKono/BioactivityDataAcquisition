@@ -727,6 +727,26 @@ def test_validate_metric_inventory_reports_unallowed_drift() -> None:
     }
 
 
+def test_validate_metric_inventory_allows_unresolved_label_contracts_by_metric_name() -> (
+    None
+):
+    report = {
+        "runtime_label_contract_unresolved": [
+            "bioetl_unknown_total @ src/y.py:1",
+            "bioetl_unknown_total @ src/z.py:2",
+        ]
+    }
+
+    violations = inventory.validate_metric_inventory(
+        report,
+        allowlist={
+            "runtime_label_contract_unresolved": {"bioetl_unknown_total"},
+        },
+    )
+
+    assert violations == {}
+
+
 def test_load_drift_allowlist_supports_metadata_entries_for_risky_labels(
     tmp_path: Path,
 ) -> None:

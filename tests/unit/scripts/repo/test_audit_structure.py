@@ -114,3 +114,20 @@ def test_run_audit_rejects_unapproved_root_directory(tmp_path: Path) -> None:
         violation.category == "ROOT_DIR" and violation.path == "rogue"
         for violation in result.must_violations
     )
+
+
+def test_run_audit_rejects_editor_metadata_inside_data(tmp_path: Path) -> None:
+    _write_governance_files(tmp_path)
+    _write_minimal_repo_tree(tmp_path)
+    (tmp_path / "data" / ".idea").mkdir(parents=True)
+    (tmp_path / "data" / ".idea" / "workspace.xml").write_text(
+        "<project />\n", encoding="utf-8"
+    )
+
+    result = module.run_audit(tmp_path)
+
+    assert any(
+        violation.category == "DATA_EDITOR_STATE"
+        and violation.path == "data/.idea"
+        for violation in result.must_violations
+    )

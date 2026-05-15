@@ -81,6 +81,31 @@ def test_retention_sensitive_runbook_points_to_replay_safe_inventory() -> None:
 
     assert "configs/quality/replay_safe_cleanup_inventory.yaml" in runbook
     assert "replay-impact checklist" in runbook
+    assert "reports/quality/_tmp_*" in runbook
+    assert "pretest_guardrails_*.json" in runbook
+
+
+@pytest.mark.architecture
+def test_reports_quality_working_diagnostics_publish_owner_and_ttl() -> None:
+    payload = _inventory()
+    entries = payload["entries"]
+    assert isinstance(entries, list)
+
+    by_id = {
+        str(entry["id"]): entry
+        for entry in entries
+        if isinstance(entry, dict)
+    }
+
+    for entry_id, expected_ttl in (
+        ("reports_quality_tmp_diagnostics", 7),
+        ("reports_quality_pretest_guardrails_history", 30),
+    ):
+        entry = by_id[entry_id]
+        assert entry.get("touches_replay_evidence") is False
+        assert entry.get("protection") == "owner-reviewed-working-report-ttl"
+        assert entry.get("owner") == "Engineering / Quality"
+        assert entry.get("ttl_days") == expected_ttl
 
 
 @pytest.mark.architecture

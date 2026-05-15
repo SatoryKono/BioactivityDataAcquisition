@@ -681,15 +681,29 @@ def _iter_python_files(base_path: Path) -> Iterator[Path]:
         yield py_file
 
 
-def _iter_python_modules_with_trees(
+def _build_python_module_tree_cache(
     base_path: Path,
-) -> Iterator[tuple[Path, ast.Module]]:
-    """Yield parsed AST modules under the requested base path."""
+) -> tuple[tuple[Path, ast.Module], ...]:
+    """Parse Python modules once for consumers that need repeated AST scans."""
+    modules: list[tuple[Path, ast.Module]] = []
     for py_file in _iter_python_files(base_path):
         try:
             tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
         except (OSError, SyntaxError, UnicodeDecodeError):
             continue
+        modules.append((py_file, tree))
+    return tuple(modules)
+
+
+def _iter_python_modules_with_trees(
+    base_path: Path,
+    module_trees: tuple[tuple[Path, ast.Module], ...] | None = None,
+) -> Iterator[tuple[Path, ast.Module]]:
+    """Yield parsed AST modules under the requested base path."""
+    if module_trees is not None:
+        yield from module_trees
+        return
+    for py_file, tree in _build_python_module_tree_cache(base_path):
         yield py_file, tree
 
 
@@ -938,9 +952,15 @@ def _build_symbol_surface(py_file: Path, node_name: str) -> SymbolSurface | None
     )
 
 
-def _iter_class_symbol_surfaces(src_path: Path) -> Iterator[SymbolSurface]:
+def _iter_class_symbol_surfaces(
+    src_path: Path,
+    module_trees: tuple[tuple[Path, ast.Module], ...] | None = None,
+) -> Iterator[SymbolSurface]:
     """Discover relevant class surfaces from code."""
-    for py_file, tree in _iter_python_modules_with_trees(src_path):
+    for py_file, tree in _iter_python_modules_with_trees(
+        src_path,
+        module_trees=module_trees,
+    ):
         for node in ast.walk(tree):
             if not _is_valid_class_node(node):
                 continue
@@ -1046,9 +1066,10 @@ def _iter_all_symbol_surfaces(
     src_path: Path,
     configs_path: Path,
     registry: NamingRegistry,
+    module_trees: tuple[tuple[Path, ast.Module], ...] | None = None,
 ) -> Iterator[SymbolSurface]:
     """Enumerate all naming surfaces participating in ambiguity detection."""
-    yield from _iter_class_symbol_surfaces(src_path)
+    yield from _iter_class_symbol_surfaces(src_path, module_trees=module_trees)
     yield from _iter_domain_export_surfaces(src_path, registry)
     yield from _iter_pipeline_id_surfaces(configs_path)
     yield from _iter_registry_symbol_surfaces(registry)
@@ -1177,10 +1198,16 @@ def build_ambiguity_groups(
     src_path: Path,
     configs_path: Path,
     registry: NamingRegistry,
+    module_trees: tuple[tuple[Path, ast.Module], ...] | None = None,
 ) -> list[AmbiguityGroup]:
     """Build a deterministic ambiguity map for naming-family overlap."""
     grouped: dict[str, dict[tuple[str, str, str], SymbolSurface]] = defaultdict(dict)
-    for symbol in _iter_all_symbol_surfaces(src_path, configs_path, registry):
+    for symbol in _iter_all_symbol_surfaces(
+        src_path,
+        configs_path,
+        registry,
+        module_trees=module_trees,
+    ):
         grouped[symbol.semantic_family][(symbol.name, symbol.kind, symbol.location)] = (
             symbol
         )
@@ -1292,15 +1319,16 @@ def check_python_modules(base_path: Path) -> Iterator[Violation]:
             )
 
 
-def check_classes(base_path: Path, registry: NamingRegistry) -> Iterator[Violation]:
+def check_classes(
+    base_path: Path,
+    registry: NamingRegistry,
+    module_trees: tuple[tuple[Path, ast.Module], ...] | None = None,
+) -> Iterator[Violation]:
     """Проверяет naming conventions для классов."""
-    for py_file in _iter_python_files(base_path):
-        try:
-            with open(py_file, encoding="utf-8") as f:
-                tree = ast.parse(f.read(), filename=str(py_file))
-        except (SyntaxError, UnicodeDecodeError):
-            continue
-
+    for py_file, tree in _iter_python_modules_with_trees(
+        base_path,
+        module_trees=module_trees,
+    ):
         for node in ast.walk(tree):
             if not isinstance(node, ast.ClassDef):
                 continue
@@ -1313,10 +1341,14 @@ def check_classes(base_path: Path, registry: NamingRegistry) -> Iterator[Violati
 def check_public_symbol_aliases(
     base_path: Path,
     registry: NamingRegistry,
+    module_trees: tuple[tuple[Path, ast.Module], ...] | None = None,
 ) -> Iterator[Violation]:
     """Validate exported top-level aliases against the public alias registry."""
     registered_aliases = _public_symbol_alias_index(registry)
-    for py_file, tree in _iter_python_modules_with_trees(base_path):
+    for py_file, tree in _iter_python_modules_with_trees(
+        base_path,
+        module_trees=module_trees,
+    ):
         exports = _extract_all_exports(py_file)
         if not exports:
             continue
@@ -1414,6 +1446,7 @@ def run_audit(
     docs_path: Path,
     configs_path: Path,
     registry: NamingRegistry,
+    module_trees: tuple[tuple[Path, ast.Module], ...] | None = None,
 ) -> dict[str, list[Violation]]:
     """Запускает полный аудит naming conventions."""
     results: dict[str, list[Violation]] = {
@@ -1428,10 +1461,18 @@ def run_audit(
     results["modules"].extend(check_python_modules(src_path))
 
     # Проверка классов
-    results["classes"].extend(check_classes(src_path, registry))
+    results["classes"].extend(
+        check_classes(src_path, registry, module_trees=module_trees)
+    )
 
     # Проверка публичных alias surfaces
-    results["aliases"].extend(check_public_symbol_aliases(src_path, registry))
+    results["aliases"].extend(
+        check_public_symbol_aliases(
+            src_path,
+            registry,
+            module_trees=module_trees,
+        )
+    )
 
     # Проверка документации
     if docs_path.exists():
@@ -1605,8 +1646,20 @@ def main() -> int:
     if registry is None:
         return 1
 
-    results = run_audit(src_path, docs_path, configs_path, registry)
-    ambiguity_groups = build_ambiguity_groups(src_path, configs_path, registry)
+    module_trees = _build_python_module_tree_cache(src_path)
+    results = run_audit(
+        src_path,
+        docs_path,
+        configs_path,
+        registry,
+        module_trees=module_trees,
+    )
+    ambiguity_groups = build_ambiguity_groups(
+        src_path,
+        configs_path,
+        registry,
+        module_trees=module_trees,
+    )
     report = format_full_report(results, ambiguity_groups)
     _emit_report(report, args.output)
 

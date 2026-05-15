@@ -100,9 +100,11 @@ lifecycle и artifact publication events, связанную через `manifes
 Минимальный static control-plane contract задаётся через
 `settings.pipeline.control_plane.required_persistence_profile`:
 
-- `degraded_observable` — достаточно manifest/ledger rollout по текущим флагам;
-- `replay_ready` — runtime требует `run_manifest_enabled=true` и execution
+- `replay_ready` — default floor for executable runs; runtime требует
+  `run_manifest_enabled=true` и execution
   context внутри опубликованной strict exact-replay support boundary;
+- `degraded_observable` — explicit legacy opt-down for non-strict operator
+  workflows; it is no longer the default floor for executable runs;
 - `forensic_grade` — runtime требует и `run_manifest_enabled=true`, и
   `run_ledger_enabled=true`, и replay-ready / lineage-closure surfaces внутри
   той же опубликованной boundary.

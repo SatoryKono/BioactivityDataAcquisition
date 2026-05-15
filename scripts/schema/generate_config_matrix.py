@@ -66,7 +66,7 @@ def main() -> None:
     )
     config_names = sorted(configs.keys())
 
-    output_path = Path("docs/config_comparison_matrix.csv")
+    output_path = Path("docs/04-reference/config_comparison_matrix.csv")
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle)

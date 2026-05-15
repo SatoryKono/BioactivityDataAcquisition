@@ -17,7 +17,6 @@ from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import observability_builder
 from bioetl.composition.runtime_builders import runner_builder
 from bioetl.domain.ports import PipelineCreateRunnerRequest
-
 SILVER_OUTPUT_PATH = "test-output/silver/chembl/activity"
 SILVER_METADATA_PATH = "test-output/silver/chembl/activity/_metadata.yaml"
 
@@ -34,7 +33,6 @@ class _FakeRunner:
 
     def __eq__(self, other: object) -> bool:
         return other == "runner-instance" or other is self
-
 
 class _FakeFactory:
     def __init__(self) -> None:
@@ -68,7 +66,6 @@ class _FakeFactory:
         }
         return self.runner
 
-
 class _RecorderAwareMetadataWriter:
     def __init__(self) -> None:
         self.recorder = None
@@ -76,14 +73,12 @@ class _RecorderAwareMetadataWriter:
     def attach_artifact_recorder(self, recorder) -> None:
         self.recorder = recorder
 
-
 class _FakeRegistry:
     def __init__(self, factory: _FakeFactory) -> None:
         self._factory = factory
 
     def get(self, pipeline_name: str) -> SimpleNamespace:
         return SimpleNamespace(factory=self._factory, pipeline_name=pipeline_name)
-
 
 def _namespace_observability(logger: object | None = None) -> SimpleNamespace:
     effective_logger = (
@@ -97,15 +92,12 @@ def _namespace_observability(logger: object | None = None) -> SimpleNamespace:
         dq_monitor=None,
     )
 
-
 def _runtime_config_stub() -> dict[str, object]:
     return {"runtime_profile": "stub"}
-
 
 def _build_factory_registry() -> tuple[_FakeFactory, _FakeRegistry]:
     fake_factory = _FakeFactory()
     return fake_factory, _FakeRegistry(factory=fake_factory)
-
 
 def _build_context(**overrides: object) -> SimpleNamespace:
     values: dict[str, object] = {
@@ -125,10 +117,9 @@ def _build_context(**overrides: object) -> SimpleNamespace:
     values.update(overrides)
     return SimpleNamespace(**values)
 
-
 def _build_settings(
     *,
-    data_dir: str | None = None,
+    data_dir: str | None = "/tmp/bioetl-test-data",
     heartbeat_interval: int = 30,
     health_check_mode: str | None = None,
     control_plane: object | None = None,
@@ -139,8 +130,16 @@ def _build_settings(
     }
     if health_check_mode is not None:
         pipeline_values["health_check_mode"] = health_check_mode
-    if control_plane is not None:
-        pipeline_values["control_plane"] = control_plane
+    pipeline_values["control_plane"] = (
+        control_plane
+        if control_plane is not None
+        else SimpleNamespace(
+            required_persistence_profile="degraded_observable",
+            checkpoint_compatibility_policy="hard_fail",
+            run_manifest_enabled=True,
+            run_ledger_enabled=True,
+        )
+    )
 
     settings_values: dict[str, object] = {
         "pipeline": SimpleNamespace(**pipeline_values),
@@ -149,7 +148,6 @@ def _build_settings(
     if data_dir is not None:
         settings_values["data_dir"] = data_dir
     return SimpleNamespace(**settings_values)
-
 
 def _build_pipeline_config(**overrides: object) -> SimpleNamespace:
     values: dict[str, object] = {
@@ -164,14 +162,11 @@ def _build_pipeline_config(**overrides: object) -> SimpleNamespace:
     values.update(overrides)
     return SimpleNamespace(**values)
 
-
 def _default_build_observability_bundle_fn(**_: object) -> SimpleNamespace:
     return _namespace_observability(SimpleNamespace(info=lambda *_, **__: None))
 
-
 def _default_cached_bronze_context(_: object) -> SimpleNamespace:
     return SimpleNamespace(enabled=False)
-
 
 def _call_build_pipeline_runner(
     context: SimpleNamespace | None = None,
@@ -226,7 +221,6 @@ def _call_build_pipeline_runner(
         **kwargs,
     )
 
-
 def test_handle_control_plane_setup_returns_effective_manifest_profile(
     monkeypatch,
 ) -> None:
@@ -277,15 +271,12 @@ def test_handle_control_plane_setup_returns_effective_manifest_profile(
     assert captured["manifest_id"] == "manifest-1"
     assert result.required_profile == "replay_ready"
 
-
 def test_build_pipeline_runner_defaults_to_provider_registry_bootstrap() -> None:
     """Default provider bootstrap should come from the named loader helper."""
     default_fn = runner_builder.build_pipeline_runner.__kwdefaults__[
         "ensure_providers_loaded_fn"
     ]
-
     assert default_fn is runner_builder.ensure_providers_loaded
-
 
 def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
     """Builder should assemble dependencies and pass them to pipeline factory."""
@@ -418,7 +409,6 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
     ]
     assert "effective_config_artifact_persisted" in events
 
-
 def test_build_pipeline_runner_creates_registry_when_not_provided() -> None:
     """Builder should create a fresh registry when no explicit registry is provided."""
     fake_factory, created_registry = _build_factory_registry()
@@ -436,7 +426,6 @@ def test_build_pipeline_runner_creates_registry_when_not_provided() -> None:
     assert result == "runner-instance"
     assert fake_factory.kwargs is not None
     assert fake_factory.kwargs["runtime"] == _runtime_config_stub()
-
 
 def test_build_pipeline_runner_registers_pipelines_into_created_registry() -> None:
     """Builder should register pipelines against the created runtime registry."""
@@ -461,7 +450,6 @@ def test_build_pipeline_runner_registers_pipelines_into_created_registry() -> No
     assert calls["providers"] is True
     assert calls["pipelines_registry"] is created_registry
 
-
 def test_build_pipeline_runner_uses_canonical_runtime_subservices_by_default() -> None:
     """Builder should resolve canonical subservices when no overrides are passed."""
     fake_factory = _FakeFactory()
@@ -485,15 +473,27 @@ def test_build_pipeline_runner_uses_canonical_runtime_subservices_by_default() -
         log_level="INFO",
     )
 
-    with patch.object(
-        runner_builder, "prepare_runner_inputs", return_value=expected_inputs
-    ) as mock_prepare_inputs:
+    with (
+        patch.object(
+            runner_builder, "prepare_runner_inputs", return_value=expected_inputs
+        ) as mock_prepare_inputs,
+        patch.object(
+            runner_builder,
+            "_handle_control_plane_setup",
+            return_value=runner_builder._ControlPlaneSetupResult(
+                ctx=context,
+                inputs=expected_inputs,
+                run_ledger_service=None,
+                required_profile="degraded_observable",
+            ),
+        ),
+    ):
         result = runner_builder.build_pipeline_runner(
             context,
             registry=fake_registry,
             ensure_providers_loaded_fn=lambda: None,
             register_all_pipelines_fn=lambda registry=None: None,
-            get_settings_fn=lambda: MagicMock(),
+            get_settings_fn=lambda: _build_settings(),
             load_pipeline_config_fn=lambda _: MagicMock(),
         )
 
@@ -515,7 +515,6 @@ def test_build_pipeline_runner_uses_canonical_runtime_subservices_by_default() -
         is runner_builder.assemble_cached_bronze_context
     )
     assert kwargs["load_source_config_fn"] is runner_builder.load_source_config
-
 
 def test_build_pipeline_runner_persists_manifest_before_factory_create(
     tmp_path: Path,
@@ -627,7 +626,6 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
     assert ledger_payload["manifest_id"] == manifest_id
     assert ledger_payload["event_type"] == "manifest_created"
 
-
 def test_build_pipeline_runner_rejects_exact_replay_without_materialized_cached_bronze_batches(
     tmp_path: Path,
 ) -> None:
@@ -702,7 +700,6 @@ def test_build_pipeline_runner_rejects_exact_replay_without_materialized_cached_
         )
 
     assert fake_factory.kwargs is None
-
 
 def test_build_pipeline_runner_keeps_snapshot_backed_execution_identity_stable_across_repeated_exact_replays(
     tmp_path: Path,
@@ -796,7 +793,6 @@ def test_build_pipeline_runner_keeps_snapshot_backed_execution_identity_stable_a
     assert second_manifest["replay_capability"] == "exact_replay_supported"
     assert first_manifest["source_refs"] == second_manifest["source_refs"]
 
-
 def test_build_pipeline_runner_persists_resume_launch_context_when_resume_enabled(
     tmp_path: Path,
 ) -> None:
@@ -843,7 +839,6 @@ def test_build_pipeline_runner_persists_resume_launch_context_when_resume_enable
     assert ledger_payload["manifest_id"] == manifest_id
     assert ledger_payload["event_type"] == "manifest_created"
 
-
 def test_build_pipeline_runner_aborts_before_factory_create_when_manifest_persistence_fails(
     tmp_path: Path,
 ) -> None:
@@ -877,7 +872,6 @@ def test_build_pipeline_runner_aborts_before_factory_create_when_manifest_persis
     assert fake_factory.kwargs is None
     assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
-
 def test_build_pipeline_runner_binds_manifest_id_into_observability_bundle(
     tmp_path: Path,
 ) -> None:
@@ -910,7 +904,6 @@ def test_build_pipeline_runner_binds_manifest_id_into_observability_bundle(
     base_logger.bind.assert_called_once_with(manifest_id=manifest_id)
     assert fake_factory.kwargs["observability"].logger is bound_logger
 
-
 def test_build_pipeline_runner_binds_manifest_id_into_namespace_logger(
     tmp_path: Path,
 ) -> None:
@@ -937,7 +930,6 @@ def test_build_pipeline_runner_binds_manifest_id_into_namespace_logger(
     assert isinstance(manifest_id, str)
     base_logger.bind.assert_called_once_with(manifest_id=manifest_id)
     assert fake_factory.kwargs["observability"].logger is bound_logger
-
 
 def test_build_pipeline_runner_requires_manifest_control_plane_when_manifest_disabled(
     tmp_path: Path,
@@ -970,7 +962,6 @@ def test_build_pipeline_runner_requires_manifest_control_plane_when_manifest_dis
     assert not (tmp_path / "output" / "control" / "run_manifest").exists()
     assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
-
 def test_build_pipeline_runner_can_disable_ledger_while_keeping_manifest(
     tmp_path: Path,
 ) -> None:
@@ -985,6 +976,7 @@ def test_build_pipeline_runner_can_disable_ledger_while_keeping_manifest(
             control_plane=SimpleNamespace(
                 run_manifest_enabled=True,
                 run_ledger_enabled=False,
+                required_persistence_profile="degraded_observable",
             ),
         ),
         pipeline_config=_build_pipeline_config(),
@@ -1001,7 +993,6 @@ def test_build_pipeline_runner_can_disable_ledger_while_keeping_manifest(
     assert not (
         tmp_path / "output" / "control" / "run_ledger" / f"{manifest_id}.jsonl"
     ).exists()
-
 
 def test_build_pipeline_runner_requires_ledger_for_forensic_grade_profile(
     tmp_path: Path,
@@ -1337,6 +1328,7 @@ def test_build_pipeline_runner_requires_explicit_data_dir_for_strict_profiles() 
             _build_context(limit=25, exact_replay=True),
             registry=fake_registry,
             settings=_build_settings(
+                data_dir=None,
                 control_plane=SimpleNamespace(
                     run_manifest_enabled=True,
                     run_ledger_enabled=True,
@@ -1688,7 +1680,15 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
         register_all_pipelines_fn=lambda registry=None: None,
         get_settings_fn=lambda: SimpleNamespace(
             data_dir=str(tmp_path),
-            pipeline=SimpleNamespace(heartbeat_interval=30),
+            pipeline=SimpleNamespace(
+                heartbeat_interval=30,
+                control_plane=SimpleNamespace(
+                    required_persistence_profile="degraded_observable",
+                    checkpoint_compatibility_policy="hard_fail",
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=True,
+                ),
+            ),
             test_mode=False,
         ),
         load_pipeline_config_fn=lambda _: SimpleNamespace(
