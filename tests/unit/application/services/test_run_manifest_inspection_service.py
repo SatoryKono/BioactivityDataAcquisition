@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import tempfile
 from dataclasses import replace
 from datetime import UTC, datetime
-from pathlib import Path
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import pytest
 
@@ -54,8 +52,10 @@ from tests.unit.application.services.run_manifest_test_support import (
     expected_resume_contract as _expected_resume_contract,
     make_run_manifest,
 )
+from tests.helpers.deterministic_ids import deterministic_uuid
+from tests.helpers.synthetic_paths import synthetic_test_root
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-run-manifest-inspection-"))
+TEST_ROOT = synthetic_test_root("run-manifest-inspection")
 BRONZE_BATCH_URI = (TEST_ROOT / "bronze" / "batch_1.jsonl.zst").as_uri()
 SILVER_ARTIFACT_PATH = str(TEST_ROOT / "output" / "silver" / "chembl" / "activity")
 GOLD_DQ_REPORT_PATH = str(TEST_ROOT / "reports" / "gold_dq.json")
@@ -91,6 +91,10 @@ def _expected_code_provenance_state(manifest: RunManifest) -> dict[str, object]:
 
 _InMemoryRunManifestStore = InMemoryRunManifestStore
 _InMemoryRunLedgerStore = InMemoryRunLedgerStore
+
+
+def _run_id(label: str) -> RunID:
+    return RunID(deterministic_uuid(f"run-manifest-inspection:{label}"))
 
 
 class _InMemoryEffectiveConfigArtifactStore:
@@ -203,7 +207,7 @@ def _make_manifest(
 def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
     manifest_store = _InMemoryRunManifestStore()
     ledger_store = _InMemoryRunLedgerStore()
-    run_id = RunID(uuid4())
+    run_id = _run_id("show-run-id-history")
     manifest = _make_manifest(manifest_id="manifest-1", run_id=run_id)
     manifest_store.save(manifest)
     ledger_entry = RunLedgerEntry(
@@ -473,9 +477,11 @@ def _expected_identity_graph_without_ledger(
         "replay_capability_reason": ("full_immutable_input_snapshot_envelope_present"),
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
+        "replay_readiness_verdict": "exact_replay_ready",
         "append_mode_semantic_sinks": [],
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
+        "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
         "input_snapshot_ids": ["snapshot-1"],
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
@@ -673,7 +679,7 @@ def _expected_diagnostics_without_ledger(
 
 def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
     manifest_store = _InMemoryRunManifestStore()
-    run_id = RunID(uuid4())
+    run_id = _run_id("execution-identity-mismatch")
     manifest = _make_manifest(manifest_id="manifest-no-ledger", run_id=run_id)
     manifest_store.save(manifest)
     service = RunManifestInspectionService(manifest_port=manifest_store)
@@ -770,7 +776,7 @@ def test_show_surfaces_manifest_store_corruption_as_forensic_error() -> None:
 
 def test_show_resume_only_manifest_reports_resume_mode() -> None:
     manifest_store = _InMemoryRunManifestStore()
-    run_id = RunID(uuid4())
+    run_id = _run_id("effective-config-hash-mismatch")
     manifest = replace(
         _make_manifest(manifest_id="manifest-resume", run_id=run_id),
         launch_context={"limit": 100, "resume": True, "exact_replay": False},
@@ -833,8 +839,8 @@ def test_show_resume_only_manifest_reports_resume_mode() -> None:
 
 def test_diff_distinguishes_exact_replay_ancestry_from_semantic_equality() -> None:
     store = _InMemoryRunManifestStore()
-    parent_run_id = RunID(uuid4())
-    child_run_id = RunID(uuid4())
+    parent_run_id = _run_id("resume-parent")
+    child_run_id = _run_id("resume-child")
     parent = _make_manifest(
         manifest_id="manifest-parent",
         run_id=parent_run_id,
@@ -863,7 +869,7 @@ def test_diff_distinguishes_exact_replay_ancestry_from_semantic_equality() -> No
 def test_show_surfaces_persisted_resume_diagnostics() -> None:
     manifest_store = _InMemoryRunManifestStore()
     ledger_store = _InMemoryRunLedgerStore()
-    run_id = RunID(uuid4())
+    run_id = _run_id("missing-artifact-dataset-ref")
     manifest = _make_manifest(manifest_id="manifest-resume-diagnostics", run_id=run_id)
     manifest_store.save(manifest)
     ledger_store.append(
@@ -926,7 +932,7 @@ def test_show_surfaces_persisted_resume_diagnostics() -> None:
 
 def test_show_composite_manifest_surfaces_bounded_reconstructability_contract() -> None:
     manifest_store = _InMemoryRunManifestStore()
-    run_id = RunID(uuid4())
+    run_id = _run_id("missing-artifact-id")
     manifest = replace(
         _make_manifest(manifest_id="manifest-composite", run_id=run_id),
         provider="composite",
@@ -977,7 +983,7 @@ def test_show_composite_manifest_surfaces_bounded_reconstructability_contract() 
 
 def test_show_snapshot_backed_manifest_reports_non_replay_snapshot_mode() -> None:
     manifest_store = _InMemoryRunManifestStore()
-    run_id = RunID(uuid4())
+    run_id = _run_id("missing-exact-replay-source-identity")
     manifest = replace(
         _make_manifest(manifest_id="manifest-snapshot-backed", run_id=run_id),
         launch_context={"limit": 100, "resume": False, "exact_replay": False},
@@ -1007,7 +1013,7 @@ def test_show_snapshot_backed_manifest_reports_non_replay_snapshot_mode() -> Non
 
 def test_show_does_not_report_exact_replay_from_intent_alone() -> None:
     manifest_store = _InMemoryRunManifestStore()
-    run_id = RunID(uuid4())
+    run_id = _run_id("missing-source-storage-identity")
     manifest = replace(
         _make_manifest(manifest_id="manifest-requested-replay", run_id=run_id),
         launch_context={"limit": 100, "resume": False, "exact_replay": True},
@@ -1035,7 +1041,7 @@ def test_show_does_not_report_exact_replay_from_intent_alone() -> None:
 def test_show_collects_artifact_diagnostic_links() -> None:
     manifest_store = _InMemoryRunManifestStore()
     ledger_store = _InMemoryRunLedgerStore()
-    run_id = RunID(uuid4())
+    run_id = _run_id("missing-effective-config-occurrence")
     manifest = _make_manifest(manifest_id="manifest-2", run_id=run_id)
     manifest_store.save(manifest)
     ledger_store.append(
@@ -1103,7 +1109,7 @@ def test_show_collects_artifact_diagnostic_links() -> None:
 def test_show_marks_artifact_linkage_gap_signal() -> None:
     manifest_store = _InMemoryRunManifestStore()
     ledger_store = _InMemoryRunLedgerStore()
-    run_id = RunID(uuid4())
+    run_id = _run_id("missing-snapshot-fingerprint")
     manifest = _make_manifest(manifest_id="manifest-3", run_id=run_id)
     manifest_store.save(manifest)
     ledger_store.append(
@@ -1163,7 +1169,7 @@ def test_show_distinguishes_partial_artifact_anchor_gaps(
 ) -> None:
     manifest_store = _InMemoryRunManifestStore()
     ledger_store = _InMemoryRunLedgerStore()
-    run_id = RunID(uuid4())
+    run_id = _run_id("missing-dependency-lock-hash")
     manifest = _make_manifest(manifest_id="manifest-partial-gap", run_id=run_id)
     manifest_store.save(manifest)
     ledger_store.append(
@@ -1195,7 +1201,7 @@ def test_show_distinguishes_partial_artifact_anchor_gaps(
 def test_show_collects_dq_trace_anchors() -> None:
     manifest_store = _InMemoryRunManifestStore()
     ledger_store = _InMemoryRunLedgerStore()
-    run_id = RunID(uuid4())
+    run_id = _run_id("effective-config-occurrence-diff")
     manifest = _make_manifest(manifest_id="manifest-dq", run_id=run_id)
     manifest_store.save(manifest)
     ledger_store.append(
@@ -1259,8 +1265,8 @@ def test_show_collects_dq_trace_anchors() -> None:
 
 def test_diff_reports_changed_top_level_fields() -> None:
     manifest_store = _InMemoryRunManifestStore()
-    left_run_id = RunID(uuid4())
-    right_run_id = RunID(uuid4())
+    left_run_id = _run_id("diff-left")
+    right_run_id = _run_id("diff-right")
     left = _make_manifest(
         manifest_id="manifest-left",
         run_id=left_run_id,

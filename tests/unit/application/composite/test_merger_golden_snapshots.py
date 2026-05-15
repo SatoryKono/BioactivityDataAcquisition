@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -11,6 +10,7 @@ import polars as pl
 from bioetl.application.composite.merger import MergeService
 from bioetl.domain.composite.config import MergeConfig
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
+from tests.helpers.golden_files import load_json_fixture
 from tests.unit.application.composite.merge_test_support import build_merge_service
 
 
@@ -35,7 +35,7 @@ def _build_merge_service() -> MergeService:
 def test_conflict_resolution_seed_priority_golden_snapshot() -> None:
     """Seed-priority coalesce semantics stay stable on golden dataset."""
     fixture_path = FIXTURES_DIR / "conflict_resolution_seed_priority.json"
-    fixture = json.loads(fixture_path.read_text(encoding="utf-8"))
+    fixture = load_json_fixture(fixture_path)
 
     merge_service = _build_merge_service()
     df = pl.DataFrame(fixture["input_rows"])
@@ -54,10 +54,10 @@ def test_conflict_resolution_seed_priority_golden_snapshot() -> None:
 def test_column_order_golden_snapshot() -> None:
     """Column ordering remains stable for composite output snapshot."""
     fixture_path = FIXTURES_DIR / "column_order_snapshot.json"
-    fixture = json.loads(fixture_path.read_text(encoding="utf-8"))
+    fixture = load_json_fixture(fixture_path)
 
     merge_service = _build_merge_service()
-    ordered_columns = merge_service._orderer.order_column_names(
+    ordered_columns = merge_service._orderer.get_ordered_columns(
         fixture["input_columns"]
     )
 
