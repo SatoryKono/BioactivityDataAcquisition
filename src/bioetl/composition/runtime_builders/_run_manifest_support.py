@@ -23,6 +23,7 @@ from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
     to_serializable_mapping,
 )
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
+    RunManifestContractIdentity,
     resolve_contract_identity,
 )
 from bioetl.domain.control_plane import (
@@ -44,6 +45,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "ManifestControlPlaneRefs",
+    "RunManifestContractIdentity",
     "build_launch_context_snapshot",
     "build_planned_artifacts",
     "build_run_source_refs",

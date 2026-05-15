@@ -10,7 +10,12 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 ACTIVE_SURFACES = (
     ROOT / "src" / "bioetl" / "domain" / "config" / "runtime.py",
-    ROOT / "src" / "bioetl" / "infrastructure" / "config" / "silver_filter_migration.py",
+    ROOT
+    / "src"
+    / "bioetl"
+    / "infrastructure"
+    / "config"
+    / "silver_filter_migration.py",
     ROOT / "src" / "bioetl" / "infrastructure" / "config" / "filter_config_loader.py",
     ROOT / "docs" / "filters" / "ADR-048-silver-filters-structural-scope.md",
     ROOT / "docs" / "filters" / "migration-plan.md",

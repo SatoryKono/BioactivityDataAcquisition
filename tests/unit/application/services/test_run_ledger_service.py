@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import tempfile
 from datetime import UTC, datetime
 from json import dumps
 from pathlib import Path
-from uuid import uuid4
 
 import pytest
 
@@ -19,8 +17,10 @@ from bioetl.domain.types import RunID, RunType
 from tests.helpers.control_plane import InMemoryRunLedgerStore
 from bioetl.domain.types.dq_contracts import DQDisposition
 from tests.helpers.clock import FixedClock
+from tests.helpers.deterministic_ids import deterministic_uuid
+from tests.helpers.synthetic_paths import synthetic_test_root
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-run-ledger-service-"))
+TEST_ROOT = synthetic_test_root("run-ledger-service")
 SILVER_ARTIFACT_PATH = str(TEST_ROOT / "output" / "silver" / "chembl" / "activity")
 SILVER_METADATA_PATH = str(Path(SILVER_ARTIFACT_PATH) / "_metadata.yaml")
 GOLD_DQ_REPORT_PATH = str(
@@ -29,6 +29,10 @@ GOLD_DQ_REPORT_PATH = str(
 
 
 _InMemoryRunLedgerStore = InMemoryRunLedgerStore
+
+
+def _run_id(label: str) -> RunID:
+    return RunID(deterministic_uuid(f"run-ledger:{label}"))
 
 
 def _make_manifest(
@@ -63,7 +67,7 @@ def _make_manifest(
 
 
 def test_record_manifest_created_appends_first_control_plane_event() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("manifest-created")
     store = _InMemoryRunLedgerStore()
     occurred_at = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
     service = RunLedgerService(
@@ -103,7 +107,7 @@ def test_record_manifest_created_appends_first_control_plane_event() -> None:
 
 
 def test_record_input_snapshot_published_appends_bounded_snapshot_event() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("input-snapshot-published")
     store = _InMemoryRunLedgerStore()
     service = RunLedgerService(
         ledger_port=store,
@@ -134,7 +138,7 @@ def test_record_input_snapshot_published_appends_bounded_snapshot_event() -> Non
 
 
 def test_record_input_snapshot_published_rejects_missing_required_identity() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("input-snapshot-missing-required-identity")
     service = RunLedgerService(
         ledger_port=_InMemoryRunLedgerStore(),
         manifest_id="manifest-1",
@@ -154,7 +158,7 @@ def test_record_input_snapshot_published_rejects_missing_required_identity() -> 
 
 
 def test_record_manifest_created_rejects_mismatched_manifest_identity() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("manifest-created-mismatch")
     store = _InMemoryRunLedgerStore()
     service = RunLedgerService(
         ledger_port=store,
@@ -170,7 +174,7 @@ def test_record_manifest_created_rejects_mismatched_manifest_identity() -> None:
 
 
 def test_record_run_started_uses_canonical_identity_anchor_names() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("run-started-canonical-anchors")
     store = _InMemoryRunLedgerStore()
     service = RunLedgerService(
         ledger_port=store,
@@ -198,7 +202,7 @@ def test_record_run_started_uses_canonical_identity_anchor_names() -> None:
 
 
 def test_record_run_started_rejects_missing_persisted_manifest_link() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("run-started-missing-manifest-link")
     store = _InMemoryRunLedgerStore()
     service = RunLedgerService(
         ledger_port=store,
@@ -214,7 +218,7 @@ def test_record_run_started_rejects_missing_persisted_manifest_link() -> None:
 
 
 def test_record_stage_started_captures_stage_and_details() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("stage-started-captures-details")
     store = _InMemoryRunLedgerStore()
     service = RunLedgerService(
         ledger_port=store,
@@ -247,7 +251,7 @@ def test_record_stage_started_captures_stage_and_details() -> None:
 
 
 def test_record_run_failed_captures_message_and_metrics() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("run-failed-captures-metrics")
     store = _InMemoryRunLedgerStore()
     service = RunLedgerService(
         ledger_port=store,
@@ -283,7 +287,7 @@ def test_record_run_failed_captures_message_and_metrics() -> None:
 
 
 def test_record_run_exception_uses_canonical_failure_payload() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("run-exception-canonical-payload")
     store = _InMemoryRunLedgerStore()
     service = RunLedgerService(
         ledger_port=store,
@@ -305,7 +309,7 @@ def test_record_run_exception_uses_canonical_failure_payload() -> None:
 
 
 def test_record_run_finished_captures_success_metrics() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("run-finished-success-metrics")
     store = _InMemoryRunLedgerStore()
     service = RunLedgerService(
         ledger_port=store,
@@ -345,7 +349,7 @@ def test_record_run_finished_captures_success_metrics() -> None:
 
 
 def test_record_run_finished_retry_reuses_logical_idempotency_key() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("run-finished-idempotency-retry")
     store = _InMemoryRunLedgerStore()
     entry_ids = iter(["entry-run-finished-1", "entry-run-finished-2"])
     occurred_at_values = iter(
@@ -374,7 +378,7 @@ def test_record_run_finished_retry_reuses_logical_idempotency_key() -> None:
 
 
 def test_record_run_finished_distinguishes_different_logical_payloads() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("run-finished-distinguishes-payloads")
     store = _InMemoryRunLedgerStore()
     entry_ids = iter(["entry-run-finished-1", "entry-run-finished-2"])
     service = RunLedgerService(
@@ -392,7 +396,7 @@ def test_record_run_finished_distinguishes_different_logical_payloads() -> None:
 
 
 def test_record_run_shutdown_captures_shutdown_metrics() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("run-shutdown-metrics")
     store = _InMemoryRunLedgerStore()
     service = RunLedgerService(
         ledger_port=store,
@@ -422,7 +426,7 @@ def test_record_run_shutdown_captures_shutdown_metrics() -> None:
 
 
 def test_record_stage_completed_captures_stage_and_metrics() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("stage-completed-metrics")
     store = _InMemoryRunLedgerStore()
     service = RunLedgerService(
         ledger_port=store,
@@ -457,7 +461,7 @@ def test_record_stage_completed_captures_stage_and_metrics() -> None:
 
 
 def test_record_artifact_published_captures_layer_and_path() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("artifact-published-layer-path")
     store = _InMemoryRunLedgerStore()
     service = RunLedgerService(
         ledger_port=store,
@@ -499,7 +503,7 @@ def test_record_artifact_published_captures_layer_and_path() -> None:
 
 
 def test_record_artifact_published_rejects_unlinked_artifact() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("artifact-published-unlinked")
     store = _InMemoryRunLedgerStore()
     service = RunLedgerService(
         ledger_port=store,
@@ -519,7 +523,7 @@ def test_record_artifact_published_rejects_unlinked_artifact() -> None:
 
 
 def test_record_dq_policy_applied_captures_trace_anchors() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("dq-policy-applied-anchors")
     store = _InMemoryRunLedgerStore()
     service = RunLedgerService(
         ledger_port=store,
@@ -557,7 +561,7 @@ def test_record_dq_policy_applied_captures_trace_anchors() -> None:
 
 
 def test_record_stage_started_canonicalizes_nested_detail_order() -> None:
-    run_id = RunID(uuid4())
+    run_id = _run_id("stage-started-canonical-detail-order")
     store = _InMemoryRunLedgerStore()
     service = RunLedgerService(
         ledger_port=store,

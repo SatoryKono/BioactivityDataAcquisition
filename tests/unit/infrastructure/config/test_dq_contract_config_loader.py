@@ -123,9 +123,9 @@ def test_loader_prefers_strict_dq_validation_key(temp_contract_root: Path) -> No
     assert dq_config.strict_validation is True
 
 
-def test_loader_supports_legacy_strict_validation_alias(temp_contract_root: Path) -> (
-    None
-):
+def test_loader_supports_legacy_strict_validation_alias(
+    temp_contract_root: Path,
+) -> None:
     """Legacy contract key remains readable during config migration."""
     contract_path = temp_contract_root / "contracts" / "chembl" / "activity.yaml"
     _write_yaml(

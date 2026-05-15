@@ -33,9 +33,9 @@ def test_overview_dashboard_required_panel_links():
             f"Panel 214 must have dataLink '{required_link}'"
         )
 
-    # Panel 215 (Next Action) should have dataLinks to specific dashboards
+    # Panel 215 (First Action) should have dataLinks to specific dashboards
     panel_215 = panels.get(215)
-    assert panel_215 is not None, "Panel 215 (Next Action) must exist"
+    assert panel_215 is not None, "Panel 215 (First Action) must exist"
     data_links_215 = panel_215.get("options", {}).get("dataLinks", [])
     for required_link in required_links_214:  # Same as System Status
         assert any(required_link in link.get("title", "") for link in data_links_215), (
@@ -62,9 +62,9 @@ def test_workflow_overview_required_panel_links():
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
     panels = {p.get("id"): p for p in get_dashboard_panels(dashboard)}
 
-    # Panel 9 (Next Diagnostic Surface) should have dataLinks to specific dashboards
+    # Panel 9 (First Action) should have dataLinks to specific dashboards
     panel_9 = panels.get(9)
-    assert panel_9 is not None, "Panel 9 (Next Diagnostic Surface) must exist"
+    assert panel_9 is not None, "Panel 9 (First Action) must exist"
     data_links_9 = panel_9.get("options", {}).get("dataLinks", [])
     required_links_9 = [
         "Open 2. Runtime",

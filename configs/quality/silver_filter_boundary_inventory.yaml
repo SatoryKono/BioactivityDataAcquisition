@@ -17,6 +17,7 @@ pipelines:
     shadow_analysis:
       candidate_business_rules:
         required_fields:
+          - standard_type
           - standard_units
           - pchembl_value
           - journal
@@ -78,6 +79,7 @@ pipelines:
           - target_organism
           - assay_description
         business_only:
+          - standard_type
           - standard_units
           - pchembl_value
           - journal

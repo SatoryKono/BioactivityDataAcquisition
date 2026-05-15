@@ -136,7 +136,9 @@ def test_semantic_sensitive_payload_registry_classifies_collection_semantics() -
 def test_semantic_sensitive_payload_registry_exposes_canonical_only_semantic_modes() -> (
     None
 ):
-    crossref_references = structured_payload_policy("crossref.publication", "references")
+    crossref_references = structured_payload_policy(
+        "crossref.publication", "references"
+    )
     assert crossref_references is not None
     assert (
         crossref_references.semantic_policy

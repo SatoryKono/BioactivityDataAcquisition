@@ -21,7 +21,6 @@ from bioetl.domain.ports import PipelineCreateRunnerRequest
 SILVER_OUTPUT_PATH = "test-output/silver/chembl/activity"
 SILVER_METADATA_PATH = "test-output/silver/chembl/activity/_metadata.yaml"
 
-
 class _FakeRunner:
     def __init__(self) -> None:
         self.attached_run_ledger_service: object | None = None
@@ -226,6 +225,57 @@ def _call_build_pipeline_runner(
         context if context is not None else _build_context(),
         **kwargs,
     )
+
+
+def test_handle_control_plane_setup_returns_effective_manifest_profile(
+    monkeypatch,
+) -> None:
+    """Attachment closure must follow the manifest-resolved strict profile."""
+    ctx = SimpleNamespace(skip_gold=False, exact_replay=True)
+    inputs = SimpleNamespace(
+        settings=SimpleNamespace(data_dir="/tmp/bioetl-test-data"),
+        yaml_config=SimpleNamespace(),
+    )
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr(
+        runner_builder,
+        "_resolve_runner_control_plane_policy",
+        lambda *_, **__: SimpleNamespace(
+            manifest_enabled=True,
+            ledger_enabled=True,
+            required_profile="degraded_observable",
+        ),
+    )
+    monkeypatch.setattr(
+        runner_builder,
+        "create_run_manifest_with_effective_config",
+        lambda **_: (
+            SimpleNamespace(
+                manifest_id="manifest-1",
+                required_persistence_profile="replay_ready",
+            ),
+            None,
+        ),
+    )
+    monkeypatch.setattr(
+        runner_builder,
+        "attach_manifest_id",
+        lambda effective_ctx, **_: effective_ctx,
+    )
+    monkeypatch.setattr(
+        runner_builder,
+        "_bind_manifest_logger_context",
+        lambda effective_inputs, manifest_id: (
+            captured.setdefault("manifest_id", manifest_id),
+            effective_inputs,
+        )[1],
+    )
+
+    result = runner_builder._handle_control_plane_setup(ctx, inputs)
+
+    assert captured["manifest_id"] == "manifest-1"
+    assert result.required_profile == "replay_ready"
 
 
 def test_build_pipeline_runner_defaults_to_provider_registry_bootstrap() -> None:

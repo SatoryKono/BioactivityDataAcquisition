@@ -84,20 +84,18 @@ def _build_composite_control_plane_config_artifacts(
         configured_required_profile=required_profile,
     )
     contract_ref, contract_entity = _resolve_composite_contract_coordinates(config)
-    (
-        _resolved_contract_ref,
-        contract_version,
-        contract_schema_hash,
-        dq_policy_ref,
-        rule_bundle_version,
-        normalization_profile_ref,
-        normalization_profile_version,
-        normalization_profile_hash,
-    ) = resolve_contract_identity(
+    contract_identity = resolve_contract_identity(
         provider="composite",
         entity=contract_entity,
         strict=effective_required_profile in STRICT_PERSISTENCE_PROFILES,
     )
+    contract_version = contract_identity.contract_version
+    contract_schema_hash = contract_identity.contract_schema_hash
+    dq_policy_ref = contract_identity.dq_policy_ref
+    rule_bundle_version = contract_identity.rule_bundle_version
+    normalization_profile_ref = contract_identity.normalization_profile_ref
+    normalization_profile_version = contract_identity.normalization_profile_version
+    normalization_profile_hash = contract_identity.normalization_profile_hash
     pipeline_version = getattr(config, "version", "") or ""
     (
         effective_config_artifact_id,

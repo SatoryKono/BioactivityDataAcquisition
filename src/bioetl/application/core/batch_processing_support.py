@@ -115,6 +115,11 @@ class BatchProcessingSupportService:
             outcome="bronze_written",
             count=len(records),
         )
+        self._batch_metrics.track_stage_records(
+            stage="bronze",
+            outcome="records",
+            count=len(records),
+        )
         emit_batch_written(
             emitter=self._domain_event_emitter,
             run_id=self._run_id,
@@ -146,6 +151,11 @@ class BatchProcessingSupportService:
         self._batch_metrics.track_stage_records(
             stage="transform",
             outcome="silver_ready",
+            count=len(transform_result.silver_records),
+        )
+        self._batch_metrics.track_stage_records(
+            stage="silver",
+            outcome="valid",
             count=len(transform_result.silver_records),
         )
         self._batch_metrics.track_stage_records(
@@ -207,6 +217,11 @@ class BatchProcessingSupportService:
         self._batch_metrics.track_stage_records(
             stage="storage",
             outcome="gold_written",
+            count=len(transform_result.gold_records),
+        )
+        self._batch_metrics.track_stage_records(
+            stage="gold",
+            outcome="written",
             count=len(transform_result.gold_records),
         )
 

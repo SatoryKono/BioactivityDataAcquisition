@@ -177,19 +177,36 @@ _ALLOWED_RECORD_FLOW_INVARIANT_STATUS_LABELS = frozenset(
     {"passed", "violated", "unknown", "other"}
 )
 _ALLOWED_STAGE_MODEL_STAGE_LABELS = frozenset(
-    {"input", "ingestion", "transform", "validation", "storage", "output", "other"}
+    {
+        "input",
+        "ingestion",
+        "transform",
+        "validation",
+        "storage",
+        "output",
+        "bronze",
+        "silver",
+        "gold",
+        "other",
+    }
 )
 _ALLOWED_STAGE_MODEL_OUTCOME_LABELS = frozenset(
     {
         "fetched",
         "bronze_written",
+        "records",
         "silver_ready",
+        "valid",
         "gold_ready",
         "filtered_out",
         "evaluated",
         "quarantined",
+        "skipped",
+        "deduplicated",
         "silver_written",
         "gold_written",
+        "written",
+        "excluded_by_contract",
         "ready",
         "other",
     }

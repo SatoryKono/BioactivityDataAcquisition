@@ -50,12 +50,7 @@ REMOVED_FACADE_FILES = frozenset(
         / "application"
         / "services"
         / "metadata_coordinator.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "application"
-        / "services"
-        / "run_ledger_service.py",
+        ROOT / "src" / "bioetl" / "application" / "services" / "run_ledger_service.py",
         ROOT
         / "src"
         / "bioetl"
@@ -145,8 +140,7 @@ def test_removed_application_services_facade_file_stays_absent() -> None:
     """Removed application.services facade file must not return."""
     lingering = find_lingering_files(root=ROOT, removed_files=REMOVED_FACADE_FILES)
     assert not lingering, (
-        "application.services facade file must stay removed:\n"
-        + "\n".join(lingering)
+        "application.services facade file must stay removed:\n" + "\n".join(lingering)
     )
 
 

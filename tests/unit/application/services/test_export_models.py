@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import tempfile
-from pathlib import Path
-
 import pytest
 
 from bioetl.application.services.export_models import (
@@ -14,8 +11,9 @@ from bioetl.application.services.export_models import (
     TableInfo,
     TablePreview,
 )
+from tests.helpers.synthetic_paths import synthetic_test_root
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-export-models-"))
+TEST_ROOT = synthetic_test_root("export-models")
 ACTIVITY_CSV_PATH = TEST_ROOT / "activity.csv"
 SILVER_ACTIVITY_PATH = TEST_ROOT / "silver" / "activity"
 

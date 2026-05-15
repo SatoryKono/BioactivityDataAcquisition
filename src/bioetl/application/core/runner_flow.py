@@ -136,6 +136,14 @@ def emit_pipeline_completion(host: _PipelineRunnerFlowHostProtocol) -> None:
 
 def record_run_started(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append run_started ledger entry when control-plane ledger is attached."""
+    from bioetl.application.observability.pipeline_metrics import (
+        PipelineMetricsRecorder,
+    )
+
+    PipelineMetricsRecorder(
+        host._services.metrics,
+        host._config.pipeline_name,
+    ).initialize_record_accounting_outcomes(run_type=host._runtime.run_type.value)
     _record_with_ledger_service(
         host,
         lambda ledger_service: ledger_service.record_run_started(),

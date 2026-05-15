@@ -8,6 +8,8 @@ from scripts.engineering.qa.hotspot_family_metrics import (
     load_scorecard,
 )
 
+_ENFORCED_RATCHET_STAGES = {"active", "reviewed-baseline"}
+
 
 def test_active_hotspot_family_internal_fan_in_budgets_hold_reviewed_baseline() -> None:
     """Selected active hotspot families must not exceed their internal fan-in cap."""
@@ -22,11 +24,13 @@ def test_active_hotspot_family_internal_fan_in_budgets_hold_reviewed_baseline() 
         family
         for family in families
         if isinstance(family, dict)
-        and family.get("ratchet_stage") == "active"
+        and family.get("ratchet_stage") in _ENFORCED_RATCHET_STAGES
         and isinstance(family.get("bounded_growth_budgets"), dict)
         and "max_internal_fan_in" in family["bounded_growth_budgets"]
     ]
-    assert budgeted_families, "Expected at least one active family with a fan-in budget"
+    assert budgeted_families, (
+        "Expected at least one enforced hotspot family with a fan-in budget"
+    )
 
     for family in budgeted_families:
         family_name = family.get("name")
@@ -43,6 +47,6 @@ def test_active_hotspot_family_internal_fan_in_budgets_hold_reviewed_baseline() 
         assert actual_fan_in <= budget, (
             f"Hotspot family {family_name} has max_internal_fan_in={actual_fan_in} "
             f"at module {actual_module}, exceeding bounded budget {budget}. "
-            "Keep the family dependency ratchet stable or rebaseline the reviewed "
-            "scorecard snapshot intentionally under RF-06."
+            "Keep the family dependency ratchet stable or intentionally refresh "
+            "the reviewed hotspot-family baseline under RF-06."
         )

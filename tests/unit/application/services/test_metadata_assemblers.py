@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-import tempfile
 from dataclasses import fields
 from datetime import UTC, datetime, timedelta
-from pathlib import Path
 from typing import cast
-from uuid import uuid4
 
 import pytest
 
@@ -30,8 +27,10 @@ from bioetl.domain.types import BatchID, RunID, RunType, ScdConfig
 from bioetl.domain.types.dq_contracts import DQRuleProvenance
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.run_context import RunContext
+from tests.helpers.deterministic_ids import deterministic_uuid
+from tests.helpers.synthetic_paths import synthetic_test_root
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-metadata-assemblers-"))
+TEST_ROOT = synthetic_test_root("metadata-assemblers")
 SILVER_TABLE_PATH = str(TEST_ROOT / "silver" / "activity")
 GOLD_TABLE_PATH = str(TEST_ROOT / "gold" / "activity")
 SILVER_DQ_REPORT_PATH = str(TEST_ROOT / "reports" / "silver_dq.json")
@@ -40,7 +39,7 @@ GOLD_DQ_REPORT_PATH = str(TEST_ROOT / "reports" / "gold_dq.json")
 
 def _make_run_context() -> RunContext:
     return RunContext(
-        run_id=RunID(uuid4()),
+        run_id=RunID(deterministic_uuid("metadata-assemblers:run-context")),
         run_type=RunType.INCREMENTAL,
         started_at=datetime(2026, 3, 19, 10, 0, tzinfo=UTC),
         pipeline_name="chembl_activity",
@@ -107,7 +106,7 @@ def _make_pipeline_builder(run_context: RunContext) -> PipelineMetadataBuilderPr
 
 def _make_bronze_ref(relative_path: str) -> BronzeWriteResult:
     return BronzeWriteResult(
-        batch_id=BatchID(uuid4()),
+        batch_id=BatchID(deterministic_uuid(f"metadata-assemblers:{relative_path}")),
         relative_path=relative_path,
         absolute_path=str(TEST_ROOT / relative_path),
         record_count=3,

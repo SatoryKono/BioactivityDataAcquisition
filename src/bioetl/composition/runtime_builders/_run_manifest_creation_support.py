@@ -17,7 +17,6 @@ from bioetl.composition.runtime_builders._run_manifest_attr_support import (
 )
 from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
     resolve_code_revision_for_manifest,
-    resolve_manifest_reproducibility_context,
     validate_required_runtime_persistence_profile,
 )
 from bioetl.composition.runtime_builders._run_manifest_create_spec_support import (
@@ -40,6 +39,7 @@ class _RunManifestCreateRequestInputs:
     inputs: RunnerInputs
     provider: str
     entity: str
+    reproducibility_context: object
     run_type_value: str
     execution_context_value: str
     config_hash: str
@@ -177,13 +177,7 @@ def build_manifest_create_request(
     """Build the canonical RunManifest create request."""
     ctx = request_inputs.ctx
     inputs = request_inputs.inputs
-    reproducibility_context = resolve_manifest_reproducibility_context(
-        ctx=ctx,
-        inputs=inputs,
-        provider=request_inputs.provider,
-        entity=request_inputs.entity,
-        contract_ref=request_inputs.contract_ref,
-    )
+    reproducibility_context = request_inputs.reproducibility_context
     _validate_exact_replay_boundary(ctx, reproducibility_context)
     source_refs = _build_manifest_source_refs(
         ctx=ctx,

@@ -182,18 +182,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a Windows-side compatibility launcher while Codex runtime startup guidance still references this PowerShell entrypoint; remove it after docs and operators fully migrate to the governed scripts.ai/canonical launcher surface."
     },
-    "scripts/docker-setup.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as the legacy root Windows wrapper while Docker setup documentation and operator habits still invoke scripts/docker-setup.ps1; remove it after docs switch to the canonical scripts/ops entrypoint and the compatibility window expires."
-    },
-    "scripts/docker-setup.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as the legacy root shell wrapper while Docker setup guidance and operator habits still invoke scripts/docker-setup.sh; remove it after docs switch to the canonical scripts/ops entrypoint and the compatibility window expires."
-    },
     "scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_helper_orphan",
@@ -210,37 +198,13 @@
       "owner": "@bioetl-platform",
       "decision": "internal_helper_orphan",
       "review_by": "2026-07-15",
-      "next_step": "Retain as the canonical Windows implementation behind the root Docker setup compatibility wrapper while user-facing docs continue to point at the legacy root launcher; promote it to active inventory once docs and callers reference scripts/ops/docker-setup.ps1 directly."
+      "next_step": "Retain as the canonical Windows Docker setup implementation. User-facing docs now reference scripts/ops/docker-setup.ps1 directly; keep the root wrapper only for external compatibility until the reviewed removal window closes."
     },
     "scripts/ops/docker-setup.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_helper_orphan",
       "review_by": "2026-07-15",
-      "next_step": "Retain as the canonical shell implementation behind the root Docker setup compatibility wrapper while user-facing docs continue to point at the legacy root launcher; promote it to active inventory once docs and callers reference scripts/ops/docker-setup.sh directly."
-    },
-    "scripts/shutdown.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a legacy root Windows shutdown wrapper while canonical ops/runtime launchers move under governed scripts.ops surfaces; remove it after direct root-script usage is eliminated."
-    },
-    "scripts/shutdown.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a legacy root shell shutdown wrapper while canonical ops/runtime launchers move under governed scripts.ops surfaces; remove it after direct root-script usage is eliminated."
-    },
-    "scripts/startup.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a legacy root Windows startup wrapper while canonical ops/runtime launchers move under governed scripts.ops surfaces; remove it after direct root-script usage is eliminated."
-    },
-    "scripts/startup.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a legacy root shell startup wrapper while canonical ops/runtime launchers move under governed scripts.ops surfaces; remove it after direct root-script usage is eliminated."
+      "next_step": "Retain as the canonical shell Docker setup implementation. User-facing docs now reference scripts/ops/docker-setup.sh directly; keep the root wrapper only for external compatibility until the reviewed removal window closes."
     },
     "src/tools/neo4j_audit.py": {
       "owner": "@bioetl-platform",

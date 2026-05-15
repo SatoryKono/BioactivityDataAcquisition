@@ -693,7 +693,7 @@
     },
     "reviewed": {
       "type": [
-        "boolean",
+        "object",
         "null"
       ],
       "nullable": true,
@@ -711,6 +711,6 @@
   "normalization_profile": {
     "ref": "uniprot.protein",
     "version": "1.0.0",
-    "hash": "ec1ddaa0d0c8e6390fd9564f96b65d4488f78c448c8d6728d7f547f9009a62aa"
+    "hash": "1216490ff5db46d29d7977c5ef1c99d6cc0177de82f4f0c5b1fd1816037d817f"
   }
 }

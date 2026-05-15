@@ -85,7 +85,7 @@ def _build_composite_reproducibility_family_profile(
     return ReproducibilityFamilyProfile(
         family=family,
         execution_context=execution_context,
-        lineage_closure_supported=False,
+        lineage_closure_supported=True,
         strict_exact_replay_supported=True,
         support_state="exact_replay_supported",
         strict_replay_runtime_verdict="requires_full_composite_snapshot_envelope",
@@ -112,7 +112,7 @@ def _build_composite_reproducibility_family_profile(
         replay_family_contract="composite_snapshot_backed_exact_replay",
         default_required_persistence_profile="replay_ready",
         support_scope="snapshot_backed_composite_trace_debug",
-        reason="composite_family_requires_full_snapshot_envelope",
+        reason="family_within_supported_boundary",
     )
 
 

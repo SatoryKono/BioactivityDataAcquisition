@@ -17,9 +17,7 @@ __all__ = [
 ]
 
 HealthCheckMode = Literal["strict", "probe"]
-SilverFilterCompatibilityMode = Literal[
-    "structural_only_auto_promote",
-]
+SilverFilterCompatibilityMode = Literal["structural_only_auto_promote",]
 
 
 @dataclass(frozen=True, slots=True)

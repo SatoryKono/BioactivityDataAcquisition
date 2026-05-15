@@ -146,8 +146,8 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 13. Внедрён first-screen responsibility contract для L2 dashboards:
 
 - `2. Runtime`: первый экран теперь содержит `First Action`,
-  `Monitor Runtime Current Status`, `Monitor Runtime Blockers` и
-  `Inspect Top Runtime Blockers`; aggregate blockers потребляют
+  `Runtime Status`, `Monitor Runtime Blockers` и
+  `Runtime Blockers`; aggregate blockers потребляют
   `bioetl_runtime_current_blocker_reason` в selected `pipeline/run_type` scope,
   а inline PromQL aggregation вынесена в recording rules.
 - `3. Provider Health`: первый экран начинается с `GLOBAL Provider Scope`,
@@ -165,10 +165,10 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 
 14. Уточнён Runtime false-zero contract:
 
-- `Monitor Runtime Telemetry Gap` теперь проверяет не только scrape и
+- `Runtime Telemetry Gap` теперь проверяет не только scrape и
   evaluation failures, но также наличие и свежесть rule group
   `bioetl_observability.yml;bioetl_runtime_dashboard_recording`.
-- `Monitor Failed Runs`, `Monitor No-Records Runs` и Runtime handoff cards
+- `Failed Runs`, `Monitor No-Records Runs` и Runtime handoff cards
   показывают `0` только при подтверждённом selected runtime universe или GLOBAL
   provider current-status telemetry; missing scope остаётся `UNKNOWN`.
 - `Inspect GLOBAL Unstructured Logs` использует корректное LogQL поле

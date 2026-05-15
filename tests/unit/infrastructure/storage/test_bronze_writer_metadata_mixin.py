@@ -18,6 +18,7 @@ class _Host(BronzeWriterMetadataMixin):
 
     def __init__(self) -> None:
         self.logger = MagicMock()
+        self._metadata_coordinator = None
 
 
 @pytest.mark.unit
@@ -59,6 +60,32 @@ class TestBronzeWriterMetadataMixin:
         )
         assert result["run_type"] == "backfill"
         assert result["provider"] == "pubmed"
+
+    def test_build_bronze_metadata_prefers_coordinator_projection(self) -> None:
+        """Coordinator-backed Bronze writers should project the legacy sidecar centrally."""
+        host = _Host()
+        ts = datetime(2025, 3, 1, 0, 0, 0, tzinfo=UTC)
+        host._metadata_coordinator = MagicMock()
+        host._metadata_coordinator.create_bronze_lineage_sidecar.return_value = {
+            "run_id": "run-coordinator",
+            "run_type": "incremental",
+            "ingestion_ts": ts.isoformat(),
+            "provider": "chembl",
+            "entity": "activity",
+            "batch_id": "batch-003",
+        }
+
+        result = host._build_bronze_metadata(
+            run_id=RunID("run-ignored"),
+            run_type=RunType.INCREMENTAL,
+            effective_ts=ts,
+            provider="chembl",
+            entity="activity",
+            batch_id=BatchID("batch-003"),
+        )
+
+        assert result["run_id"] == "run-coordinator"
+        host._metadata_coordinator.create_bronze_lineage_sidecar.assert_called_once()
 
     def test_build_bronze_metadata_payload_returns_dict_with_runtime_key(self) -> None:
         """Legacy Bronze sidecar payload builder should fail closed."""

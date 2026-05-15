@@ -65,6 +65,10 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
         str_matches=DOI_REGEX_PATTERN,
         description="Digital Object Identifier (normalized: lowercase, stripped)",
     )
+    title: Series[str] = pa.Field(
+        nullable=True,
+        description="Publication title when available from CrossRef enrichment.",
+    )
 
     # === Provider-specific Fields ===
     issn: Series[str] = pa.Field(

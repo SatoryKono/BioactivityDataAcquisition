@@ -178,6 +178,11 @@ def test_published_reproducibility_inventory_declares_runtime_verdicts() -> None
         str(item["strict_replay_runtime_verdict"]) for item in inventory
     } <= valid_verdicts
     assert all("strict_replay_runtime_verdict" in item for item in inventory)
+    assert any(
+        str(item["family"]) == "composite.publication"
+        and item["lineage_closure_supported"] is True
+        for item in inventory
+    )
 
 
 def test_exact_replay_launch_inherits_supported_family_default_profile() -> None:

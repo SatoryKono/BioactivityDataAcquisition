@@ -25,8 +25,8 @@ def test_normalize_join_key_text_applies_trim_and_lowercase_for_doi() -> None:
 
 
 @pytest.mark.unit
-def test_normalize_join_key_dataframe_columns_trims_title_without_lowercase() -> None:
-    df = pl.DataFrame({"title": ["  Mixed\t Case\nTitle  "]})
+def test_normalize_join_key_dataframe_columns_cleans_title_without_lowercase() -> None:
+    df = pl.DataFrame({"title": ["  <b>Mixed</b>&nbsp;\tCase\nTitle  "]})
 
     result = normalize_join_key_dataframe_columns(df=df, join_keys=("title",))
 

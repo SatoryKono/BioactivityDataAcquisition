@@ -37,6 +37,24 @@ Operational implication:
 - Any future module-level compatibility shim must be explicitly reintroduced in
   the curated inventory instead of silently reappearing in source.
 
+## Governance Reclassification Wave (2026-05-15)
+
+Completed in this cycle:
+
+- Stopped counting sanctioned `public-entrypoint` rows as compatibility debt in
+  `configs/quality/debt_scorecard.yaml`.
+- Rebased the compatibility debt KPI onto the real transition ledger
+  (`transition_compat_count`), which is currently `0`.
+- Added a separate sanctioned-public-entrypoint governance metric so stable
+  public API seams remain visible without inflating technical-debt reporting.
+
+Operational implication:
+
+- Compatibility debt now measures only transition/sunset residue.
+- Stable public CLI/composition/domain entrypoints remain governed through the
+  curated inventory and review metadata, but they no longer appear as active
+  compatibility debt unless they regress into transition-only shims again.
+
 ## Provider Client-Path Shim Removal (2026-05-05)
 
 Removal outcome:

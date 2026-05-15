@@ -60,9 +60,22 @@ def _family_prefixes(inventory: dict[str, object]) -> dict[str, str]:
             f"{family_id} declares unsupported validation_depth={validation_depth!r}"
         )
         if validation_depth == "inventory_only":
-            rationale = family.get("inventory_only_rationale")
+            rationale = family.get("inventory_only_rationale") or family.get(
+                "depth_rationale"
+            )
             assert isinstance(rationale, str) and rationale.strip(), (
                 f"{family_id} inventory-only validation requires rationale"
+            )
+        if validation_depth in {"inventory_only", "snapshot"}:
+            rationale = family.get("depth_rationale") or family.get(
+                "inventory_only_rationale"
+            )
+            assert isinstance(rationale, str) and rationale.strip(), (
+                f"{family_id} {validation_depth} validation requires rationale"
+            )
+            migration_path = family.get("migration_path")
+            assert isinstance(migration_path, str) and migration_path.strip(), (
+                f"{family_id} {validation_depth} validation requires migration_path"
             )
         enforcing_surfaces = family.get("enforcing_surfaces")
         assert isinstance(enforcing_surfaces, list) and enforcing_surfaces
@@ -121,3 +134,28 @@ def test_validate_configs_reports_validation_depth_summary() -> None:
 
     assert "_emit_validation_depth_summary(configs_root)" in script
     assert "Config validation surface family depths" in script
+
+
+def test_high_risk_runtime_config_families_require_cross_file_validation() -> None:
+    inventory = _load_inventory()
+    families = inventory.get("families")
+    assert isinstance(families, list)
+
+    expected_depths = {
+        "composite_runtime": "cross_file",
+        "entity_pipelines": "cross_file",
+        "provider_runtime": "cross_file",
+        "workflow_runtime": "cross_file",
+    }
+    observed_depths = {
+        family["family_id"]: family["validation_depth"]
+        for family in families
+        if isinstance(family, dict)
+        and isinstance(family.get("family_id"), str)
+        and isinstance(family.get("validation_depth"), str)
+    }
+
+    for family_id, expected_depth in expected_depths.items():
+        assert observed_depths.get(family_id) == expected_depth, (
+            f"{family_id} must declare {expected_depth} validation depth"
+        )

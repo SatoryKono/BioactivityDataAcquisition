@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-14'
+  Last verified: '2026-05-15'
 
 ______________________________________________________________________
 
 # Grafana Selector Architecture
 
-Дата сверки: **2026-05-14**
+Дата сверки: **2026-05-15**
 Источник истины: `grafana/dashboards/*.json`
 
 Machine-readable SSOT:
@@ -42,6 +42,9 @@ Shared visible context shell:
 
 Role-specific extensions remain dashboard-owned. `run_id` is HTTP-backed
 control-plane identity context only and MUST NOT become a Prometheus label.
+The control-plane selector resolver exposes `/ops/control-plane/selector-context`
+for coherent local selector tuples and `/ops/control-plane/filter-options` for
+Grafana option lists.
 
 ## Dashboard families
 
@@ -239,38 +242,52 @@ Prometheus is also the wrong place to solve this because project rules forbid
 high-cardinality runtime identifiers such as `run_id`, `manifest_id`, and
 `record_id` as dashboard label selectors.
 
-## Future local-only run catalog
+## Shipped local selector resolver
 
-Before BioETL can ship `latest / previous / exact` execution filtering on
-summary dashboards, it needs a local-only run catalog that resolves identities
-without adding high-cardinality Prometheus labels.
+BioETL now ships a local-only selector resolver backed by run manifests and run
+ledger terminal events. It supports the shared context shell without adding
+high-cardinality Prometheus labels.
 
-Minimum schema:
+Endpoint surfaces:
+
+- `/ops/control-plane/filter-options`
+- `/ops/control-plane/selector-context`
+
+Resolved fields:
 
 - `run_id`
-- `pipeline_name`
-- `workflow_name` if available
+- `pipeline`
+- `workflow` if available
 - `run_type`
-- `started_at`
 - `manifest_id`
 - `status`
+- `completed_at`
 - optional `provider`
-- optional `execution_fingerprint`
 
-Allowed source candidates:
+Resolution rules:
 
-- manifest index
-- ledger index
-- lightweight local API
-- local table-backed run index
+- exact `run_id` wins when selected
+- otherwise `workflow` / `pipeline` / `run_type` scope resolves to the latest
+  terminal run by ledger event time
+- manifest `created_at` is fallback only when terminal ledger time is absent
+- the dashboard `run_id` option list includes `-` as the no-exact-run default
 
 Not allowed:
 
 - Prometheus label explosion for execution identifiers
+- cyclic Grafana variable dependencies
+- dashboard-to-dashboard propagation of `run_id`
+
+Native Grafana query variables can consume resolver option lists, but they
+cannot safely auto-write sibling visible selectors. Full bidirectional
+auto-selection requires a custom selector shell/plugin or another UI surface
+that calls `/ops/control-plane/selector-context` and writes all variables as one
+transaction.
 
 ## Future execution selector model
 
-After the run catalog exists, eligible dashboards may adopt:
+After the shipped resolver is paired with an execution-aware selector shell,
+eligible dashboards may adopt:
 
 - `run_selector_mode=latest`
 - `run_selector_mode=previous`

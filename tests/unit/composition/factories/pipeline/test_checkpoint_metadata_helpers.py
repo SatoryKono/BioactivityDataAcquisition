@@ -101,6 +101,8 @@ def test_build_current_checkpoint_metadata_includes_resume_anchors(tmp_path) -> 
     assert metadata.normalization_profile_version == "2.0.0"
     assert metadata.normalization_profile_hash == "p" * 64
     assert metadata.exact_replay is True
+    assert len(metadata.input_snapshot_refs) == 2
+    assert metadata.input_snapshot_refs[0]["snapshot_id"].startswith("sha256:")
     assert len(metadata.input_snapshot_ids) == 2
     assert metadata.input_snapshot_ids == tuple(sorted(metadata.input_snapshot_ids))
     assert metadata.input_snapshot_fingerprint is not None

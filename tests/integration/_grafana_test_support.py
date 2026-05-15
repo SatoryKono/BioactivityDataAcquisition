@@ -390,6 +390,7 @@ def _assert_operator_context_shell_contract(
     assert "/ops/control-plane/filter-options" in query_url
     assert "dimension=run_id" in query_url
     assert "response_shape=list" in query_url
+    assert "workflow=${workflow}" in query_url
     assert "pipeline=${pipeline}" in query_url
     assert "run_type=${run_type:csv}" in query_url
 

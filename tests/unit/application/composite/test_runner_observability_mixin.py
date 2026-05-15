@@ -213,6 +213,16 @@ async def test_write_cv_quarantine_writes_records_and_emits_metric() -> None:
             "outcome": "quarantined",
         },
     )
+    runner._metrics.increment_counter.assert_any_call(
+        "bioetl_stage_records_total",
+        2,
+        {
+            "pipeline": "composite:publication",
+            "run_type": "composite",
+            "stage": "silver",
+            "outcome": "quarantined",
+        },
+    )
 
 
 @pytest.mark.unit
@@ -292,6 +302,16 @@ async def test_write_cv_quarantine_handles_non_fatal_and_bioetl_errors() -> None
             "pipeline": "composite:publication",
             "run_type": "composite",
             "stage": "validation",
+            "outcome": "quarantined",
+        },
+    )
+    runner._metrics.increment_counter.assert_any_call(
+        "bioetl_stage_records_total",
+        1,
+        {
+            "pipeline": "composite:publication",
+            "run_type": "composite",
+            "stage": "silver",
             "outcome": "quarantined",
         },
     )

@@ -177,8 +177,8 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
     """L2 first screens must answer current state before range evidence."""
     expectations = {
         "bioetl-runtime.json": {
-            "Monitor Runtime Current Status": "bioetl_runtime_current_status",
-            "Inspect Top Runtime Blockers": "bioetl_runtime_current_blocker_reason",
+            "Runtime Status": "bioetl_runtime_current_status",
+            "Runtime Blockers": "bioetl_runtime_current_blocker_reason",
         },
         "bioetl-provider-health-v2.json": {
             "Monitor GLOBAL Provider Severity Matrix": "bioetl_provider_current_status",
@@ -218,6 +218,30 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             )
 
 
+def test_expanded_current_status_panels_are_documented_as_mirrors() -> None:
+    """Expanded first-screen status panels must not look like independent verdicts."""
+    expectations = {
+        "bioetl-runtime.json": ("Status", "Runtime Status"),
+        "bioetl-dq-v2.json": ("Status", "Monitor DQ Current Status"),
+    }
+
+    for dashboard_name, (compact_title, expanded_title) in expectations.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+        compact_description = str(panels[compact_title].get("description", "")).lower()
+        expanded_description = str(
+            panels[expanded_title].get("description", "")
+        ).lower()
+
+        assert "expanded first-screen mirror" in compact_description
+        assert "expanded mirror" in expanded_description
+        assert "not an independent second" in expanded_description
+
+
 def test_overview_and_control_plane_first_screens_use_role_appropriate_queries() -> (
     None
 ):
@@ -225,7 +249,7 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
     expectations = {
         "bioetl-overview-v2.json": {
             "Status": "bioetl_l0_status",
-            "Next Action": "bioetl_l0_next_action_route",
+            "First Action": "bioetl_l0_next_action_route",
             "Inputs": "bioetl_l0_input_status_selected",
         },
         "bioetl-control-plane-v1.json": {
@@ -268,8 +292,8 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
     """Fail-closed current-status surfaces must not hide missing telemetry behind or vector(0)."""
     expectations = {
         "bioetl-runtime.json": [
-            "Monitor Runtime Current Status",
-            "Inspect Top Runtime Blockers",
+            "Runtime Status",
+            "Runtime Blockers",
         ],
         "bioetl-provider-health-v2.json": [
             "Monitor GLOBAL Provider Severity Matrix",
@@ -310,7 +334,7 @@ def test_required_trust_markers_stay_visible_on_target_dashboards() -> None:
     """Datasource trust surfaces are targeted: Runtime/Control Plane need explicit first-screen markers."""
     expectations = {
         "bioetl-runtime.json": (
-            "Monitor Runtime Telemetry Gap",
+            "Runtime Telemetry Gap",
             ("treat zero count panels as inconclusive", "prometheus targets"),
         ),
         "bioetl-control-plane-v1.json": (
@@ -434,10 +458,6 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
             },
         },
         "bioetl-dq-v2.json": {
-            "Review: Pipeline Scope": {
-                "tokens": ("current", "selected-range", "pipeline-wide"),
-                "max_y": 22,
-            },
             "Review: First Action": {
                 "tokens": ("crit", "warn", "selected-range"),
                 "max_y": 22,
@@ -448,10 +468,6 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
             },
         },
         "bioetl-provider-health-v2.json": {
-            "GLOBAL Provider Scope": {
-                "tokens": ("global", "current", "pipeline_context"),
-                "max_y": 22,
-            },
             "First Action": {
                 "tokens": ("current", "top causes", "selected-range"),
                 "max_y": 23,

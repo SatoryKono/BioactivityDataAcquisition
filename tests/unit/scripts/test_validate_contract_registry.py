@@ -8,6 +8,7 @@ import yaml
 
 from bioetl.domain.control_plane.contract_registry import ContractRegistry
 from scripts.engineering.ci.validate_contract_registry import (
+    _active_entity_config_identity_issues,
     _active_gold_surface_issues,
 )
 
@@ -30,6 +31,9 @@ def _write_entity_config(
                 "provider": provider,
                 "entity": entity,
                 "pipeline": {
+                    "pipeline_name": f"{provider}_{entity}",
+                    "provider": provider,
+                    "entity_type": entity,
                     "sink": {
                         "gold": gold_payload,
                     }
@@ -136,5 +140,70 @@ def test_active_gold_surface_issues_accepts_active_registry_surface(
     )
 
     issues = _active_gold_surface_issues(tmp_path, registry)
+
+    assert issues == []
+
+
+def test_active_entity_config_identity_issues_reports_pipeline_identity_drift(
+    tmp_path: Path,
+) -> None:
+    """Active entity configs must keep provider/entity identity aligned."""
+    config_path = tmp_path / "configs" / "entities" / "chembl" / "activity.yaml"
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(
+        yaml.safe_dump(
+            {
+                "provider": "chembl",
+                "entity": "activity",
+                "pipeline": {
+                    "provider": "chembl",
+                    "entity_type": "assay",
+                    "pipeline_name": "chembl_assay",
+                    "sink": {"gold": {"enabled": True}},
+                },
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    issues = _active_entity_config_identity_issues(
+        "chembl.activity",
+        config_path,
+    )
+
+    assert [issue.field for issue in issues] == [
+        "pipeline.entity_type",
+        "pipeline.pipeline_name",
+    ]
+
+
+def test_active_entity_config_identity_issues_accepts_aligned_identity(
+    tmp_path: Path,
+) -> None:
+    """Aligned active entity configs should not report identity drift."""
+    config_path = tmp_path / "configs" / "entities" / "chembl" / "activity.yaml"
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(
+        yaml.safe_dump(
+            {
+                "provider": "chembl",
+                "entity": "activity",
+                "pipeline": {
+                    "provider": "chembl",
+                    "entity_type": "activity",
+                    "pipeline_name": "chembl_activity",
+                    "sink": {"gold": {"enabled": True}},
+                },
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    issues = _active_entity_config_identity_issues(
+        "chembl.activity",
+        config_path,
+    )
 
     assert issues == []

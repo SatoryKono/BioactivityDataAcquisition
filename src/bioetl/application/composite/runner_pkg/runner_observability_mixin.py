@@ -266,6 +266,12 @@ class CompositeRunnerObservabilityMixin:
             outcome="quarantined",
             count=written,
         )
+        metrics_recorder.record_stage_records(
+            run_type="composite",
+            stage="silver",
+            outcome="quarantined",
+            count=written,
+        )
 
 
 __all__ = ["CompositeRunnerObservabilityMixin"]

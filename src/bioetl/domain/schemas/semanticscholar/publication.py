@@ -58,6 +58,10 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         str_matches=r"^[a-f0-9]{40}$",
         description="Semantic Scholar Paper ID (40-char hex)",
     )
+    title: Series[str] = pa.Field(
+        nullable=True,
+        description="Publication title when available from Semantic Scholar.",
+    )
 
     # _lookup_method: inherited from PublicationBaseSchema (non-nullable, isin=LOOKUP_METHODS)
 

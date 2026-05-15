@@ -74,7 +74,13 @@ def test_runtime_first_screen_status_panels_expose_actionable_drilldowns() -> No
     current_status_urls = {
         str(link.get("title")): str(link.get("url")) for link in current_status_links
     }
+<<<<<<< Updated upstream
+    assert "viewPanel=9101" in current_status_urls["Open Runtime Blockers"]
+||||||| Stash base
     assert "viewPanel=9101" in current_status_urls["Inspect Top Runtime Blockers"]
+=======
+    assert "viewPanel=9101" in current_status_urls["Runtime Blockers"]
+>>>>>>> Stashed changes
     assert (
         "viewPanel=242" in current_status_urls["Inspect Active Runtime Blocker Detail"]
     )
@@ -712,7 +718,7 @@ def test_overview_panels_use_dashboard_handoffs_not_runbook_ctas() -> None:
 
 
 def test_workflow_range_cards_do_not_ship_panel_level_runbook_links() -> None:
-    """Workflow selected-range cards should hand off via Next Diagnostic Surface instead."""
+    """Workflow selected-range cards should hand off via First Action instead."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
     expected_titles = {
         "Failed Workflow Runs / Range",
@@ -734,22 +740,22 @@ def test_workflow_range_cards_do_not_ship_panel_level_runbook_links() -> None:
 
     assert not offenders, (
         "Workflow selected-range summary cards must stay free of panel-level CTAs; "
-        "handoff belongs to Next Diagnostic Surface:\n" + "\n".join(offenders)
+        "handoff belongs to First Action:\n" + "\n".join(offenders)
     )
 
     next_panel = next(
         (
             panel
             for panel in get_dashboard_panels(dashboard)
-            if panel.get("title") == "Next Diagnostic Surface"
+            if panel.get("title") == "First Action"
         ),
         None,
     )
     assert next_panel is not None
     next_links = _iter_panel_data_links(next_panel)
-    assert next_links, "Workflow Next Diagnostic Surface must keep dashboard handoffs"
+    assert next_links, "Workflow First Action must keep dashboard handoffs"
     assert all(str(link.get("url", "")).startswith("/d/") for link in next_links), (
-        "Workflow Next Diagnostic Surface must stay dashboard-handoff-only"
+        "Workflow First Action must stay dashboard-handoff-only"
     )
 
 
@@ -818,27 +824,25 @@ def test_provider_dashboard_exposes_single_runtime_link() -> None:
     assert len(runtime_links) == 1
 
 
-def test_workflow_overview_next_diagnostic_surface_cta_contract() -> None:
-    """Next Diagnostic Surface panel must have exactly 5 dashboard handoffs."""
+def test_workflow_overview_first_action_cta_contract() -> None:
+    """Workflow First Action panel must have exactly 5 dashboard handoffs."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
     next_diagnostic_panel = next(
         (
             p
             for p in get_dashboard_panels(dashboard)
-            if p.get("title") == "Next Diagnostic Surface"
+            if p.get("title") == "First Action"
         ),
         None,
     )
     assert next_diagnostic_panel is not None, (
-        "Workflow Overview missing Next Diagnostic Surface panel"
+        "Workflow Overview missing First Action panel"
     )
     options = next_diagnostic_panel.get("options", {})
     links = options.get("dataLinks", [])
-    assert isinstance(links, list), (
-        "Next Diagnostic Surface panel must have dataLinks list"
-    )
+    assert isinstance(links, list), "First Action panel must have dataLinks list"
     assert len(links) == 5, (
-        f"Next Diagnostic Surface panel must have exactly 5 CTAs, got {len(links)}"
+        f"First Action panel must have exactly 5 CTAs, got {len(links)}"
     )
     expected_targets = [
         "bioetl-runtime",

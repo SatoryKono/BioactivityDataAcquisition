@@ -282,7 +282,7 @@ Canonical L0 answer-first hub using the frozen `1. Overview v3` layout as the ba
 
 ### Required panel links (dataLinks)
 - Panel `214` (Status) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
-- Panel `215` (Next Action) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
+- Panel `215` (First Action) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
 - Panel `9002` (Inputs) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
 - Panel `9003` (Runtime) → Open Runtime
 - Panel `9004` (Data Quality) → Open Data Quality
@@ -292,14 +292,14 @@ Canonical L0 answer-first hub using the frozen `1. Overview v3` layout as the ba
 - Panel `9013` (Workflow) → Open Workflow
 
 ### First-screen структура
-- **Tier 1**: `Provenance`, `Status`, `Next Action`, `ID`, `Processed Records`
+- **Tier 1**: `Provenance`, `Status`, `First Action`, `ID`, `Processed Records`
 - **Tier 2**: `Control Plane`, `Runtime`, `Data Quality`, `Provider`, `Data Validation`, `Inputs`, `Workflow`
 - **Tier 3**: collapsed `L1 Historical Trends`, collapsed `Range Evidence`
 - **Tier 4**: collapsed `Diagnostics & Docs`
 
 ### KPI ownership (canonical)
 - Status → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `0. Control Plane`, `5. Workflow`
-- Next Action → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `3. Provider Health`
+- First Action → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `3. Provider Health`
 - Inputs → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `4. Data Quality`, `0. Control Plane`
 - Data Validation → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `0. Control Plane`
 - Provider → canonical for `bioetl-overview-v2`, mirrors: `3. Provider Health`
@@ -354,6 +354,7 @@ L1/L2 replay/resume safety: manifest, ledger, checkpoint, replay, lineage, globa
 - Replay/checkpoint panels route к `checkpoint-debugging.md`
 - Manifest/ledger evidence panels route к `run-manifest-inspection.md`
 - Known Blind Spots и terminal-event evidence ниже fold в collapsed incident rows, не в first-screen trust block
+- `Known Blind Spots` и `Review: Known Missing Replay-Safety Signals` могут оставаться двумя collapsed docs panels только как non-destructive refactor phase: первый summary, второй detailed companion; оба являются limitation notes, не health signals.
 - Starts с answer-first **Trust Summary** block: replay safety state, checkpoint freshness gap, ledger/manifest consistency, telemetry presence
 
 ### Cross-scope marker contract
@@ -382,14 +383,21 @@ L2 diagnostic runtime triage: blockers, latency, backlog, error localization, ha
 - **CTAs**: Review current status, Review range evidence, Inspect top blockers, Inspect active blocker
 
 ### First-screen структура
+<<<<<<< Updated upstream
+- **Tier 1**: `First Action`, `Runtime Status`, `Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Runtime Blockers`
+- `Runtime Status` is an expanded mirror of compact shared-shell `Status`, not an independent second current-status signal.
+||||||| Stash base
 - **Tier 1**: `First Action`, `Monitor Runtime Current Status`, `Monitor Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Inspect Top Runtime Blockers`
+=======
+- **Tier 1**: `First Action`, `Runtime Status`, `Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Runtime Blockers`
+>>>>>>> Stashed changes
 - **Tier 2**: collapsed rows по сценариям: `Backlog Trends`, `Durations`, `Shutdown Diagnostics`, `Tracing-only Log Hygiene`
 - **Tier 3**: selected-range evidence ниже
 - **Tier 4**: collapsed tracing-only log hygiene
 
 ### KPI ownership (canonical mirrors)
 - Status → mirror (canonical: `bioetl-overview-v2`)
-- Next Action → mirror (canonical: `bioetl-overview-v2`)
+- First Action → mirror (canonical: `bioetl-overview-v2`)
 - Inputs → mirror (canonical: `bioetl-overview-v2`)
 - Data Validation → mirror (canonical: `bioetl-overview-v2`)
 - Replay Safety State → mirror (canonical: `bioetl-control-plane-v1`)
@@ -488,6 +496,7 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 
 ### First-screen структура
 - **Tier 1**: `Monitor DQ Current Status`, `Monitor DQ Threshold State`, `Inspect DQ Current Reasons`, `Review: First Action`
+- `Monitor DQ Current Status` is an expanded mirror of compact shared-shell `Status`, not an independent second current-status signal.
 - **Tier 2**: compact current-context band: `Monitor: Data Quality Score (Volume-weighted)`, `Monitor: Worst-Entity DQ Score`, `Monitor: Worst Data Freshness Lag (seconds)`, `Track: Records Quarantined in Range`, `Track: Soft Threshold Exceeded in Range`, `Track: Silver Filter Rejects in Range`
 - **Tier 3**: полноширинный `Track Range Evidence: Bronze -> Silver -> Gold`
 - **Tier 4**: collapsed rows: `Reject / Pareto / Fields`, `Validation Diagnostics`

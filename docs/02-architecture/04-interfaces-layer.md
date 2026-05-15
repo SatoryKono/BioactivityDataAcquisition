@@ -143,4 +143,5 @@ ______________________________________________________________________
 
 - [Composition Layer](05-composition-layer.md) — runtime bootstrap (`bootstrap_pipeline_runner`, `bootstrap_composite_runner`), фабрики
 - [CLI Reference](../04-reference/cli.md) — полная документация CLI команд
-- [RULES.md §1 "Архитектура и Слои"](../00-project/RULES.md) — матрица импортов (interfaces может импортировать всё)
+- [ADR-005](decisions/ADR-005-composition-layer-separation.md) — активная матрица импортов; `interfaces` использует `composition` и не импортирует `infrastructure` напрямую
+- [RULES.md §1 "Архитектура и Слои"](../00-project/RULES.md) — high-level layering rules и ссылки на активные ADR

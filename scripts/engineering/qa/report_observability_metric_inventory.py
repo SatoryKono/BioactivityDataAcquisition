@@ -29,14 +29,16 @@ _SRC_ROOT = _REPO_ROOT / "src"
 if str(_SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(_SRC_ROOT))
 
+from bioetl.infrastructure.observability import (  # noqa: E402
+    metrics_definitions as _metric_defs,
+)
+from bioetl.infrastructure.observability.metrics_export_names import (  # noqa: E402
+    METRICS_DEFINITION_EXPORT_NAMES,
+)
 from bioetl.infrastructure.observability.prometheus_metric_registries import (  # noqa: E402
     COUNTERS,
     GAUGES,
     HISTOGRAMS,
-)
-from bioetl.infrastructure.observability import metrics_definitions as _metric_defs  # noqa: E402
-from bioetl.infrastructure.observability.metrics_export_names import (  # noqa: E402
-    METRICS_DEFINITION_EXPORT_NAMES,
 )
 
 _CANONICAL_METRIC_RE = re.compile(r"\bbioetl_[a-z0-9_]+\b")
@@ -131,10 +133,25 @@ _CHECK_DRIFT_KEYS: Final[tuple[str, ...]] = (
     "documented_without_registry",
     "rules_without_registry",
     "runtime_cardinality_review_required",
+    "declared_risky_label_review_required",
     "runtime_label_contract_violations",
+    "runtime_label_contract_unresolved",
 )
 _ALLOWLIST_METADATA_REQUIRED_KEYS: Final[frozenset[str]] = frozenset(
-    {"runtime_cardinality_review_required"}
+    {
+        "runtime_cardinality_review_required",
+        "declared_risky_label_review_required",
+    }
+)
+_CARDINALITY_RISK_LABEL_NAMES: Final[frozenset[str]] = frozenset(
+    {
+        "endpoint",
+        "field",
+        "pipeline_context",
+        "provider_context",
+        "run_type_context",
+        "table",
+    }
 )
 _DIRECT_COLLECTOR_TERMINAL_METHODS: Final[frozenset[str]] = frozenset(
     {"inc", "observe", "set"}
@@ -187,7 +204,14 @@ def _scan_canonical_metric_mentions(
             continue
         for metric_name in sorted(set(_CANONICAL_METRIC_RE.findall(text))):
             mentions[metric_name].append(_as_repo_relative(path, repo_root))
-    return dict(mentions)
+    return _normalize_mapping_lists(mentions)
+
+
+def _normalize_mapping_lists(
+    mapping: dict[str, list[str]] | defaultdict[str, list[str]],
+) -> dict[str, list[str]]:
+    """Return a mapping with deterministically sorted unique list values."""
+    return {key: sorted(set(values)) for key, values in sorted(mapping.items())}
 
 
 def _read_runtime_candidate_text(path: Path) -> str | None:
@@ -791,9 +815,9 @@ def _scan_runtime_metric_calls(
         )
     _record_static_runtime_emitters(repo_root, canonical_mentions)
     return (
-        dict(canonical_mentions),
-        dict(helper_backed_mentions),
-        dict(alias_mentions),
+        _normalize_mapping_lists(canonical_mentions),
+        _normalize_mapping_lists(helper_backed_mentions),
+        _normalize_mapping_lists(alias_mentions),
         sorted(label_contract_violations),
         sorted(label_contract_unresolved),
     )
@@ -898,7 +922,7 @@ def _filter_documented_metric_mentions(
         ):
             continue
         filtered[metric_name] = paths
-    return filtered
+    return _normalize_mapping_lists(filtered)
 
 
 def _scan_rule_metric_mentions(repo_root: Path) -> dict[str, list[str]]:
@@ -924,7 +948,7 @@ def _scan_rule_metric_mentions(repo_root: Path) -> dict[str, list[str]]:
             continue
         for metric_name in _extract_rule_metric_names(groups):
             mentions[metric_name].append(rel_path)
-    return dict(mentions)
+    return _normalize_mapping_lists(mentions)
 
 
 def _extract_rule_metric_names(groups: list[object]) -> list[str]:
@@ -990,6 +1014,12 @@ def collect_metric_inventory(
         for metric_name, emitter_paths in combined_emitters.items()
         if len(set(emitter_paths)) >= 3
     )
+    declared_risky_label_review_required = sorted(
+        metric_name
+        for metric_name, label_names in REGISTERED_PROMETHEUS_METRIC_LABELS.items()
+        if metric_name in declared_set
+        and bool(set(label_names) & _CARDINALITY_RISK_LABEL_NAMES)
+    )
 
     report: dict[str, list[str] | dict[str, list[str]]] = {
         "declared_metrics": registered,
@@ -1003,6 +1033,9 @@ def collect_metric_inventory(
         "dashboarded_without_emission": sorted(documented_without_runtime),
         "alerted_without_emission": sorted(ruled_without_runtime),
         "runtime_cardinality_review_required": runtime_cardinality_review_required,
+        "declared_risky_label_review_required": (
+            declared_risky_label_review_required
+        ),
         "runtime_label_contract_violations": label_contract_violations,
         "runtime_label_contract_unresolved": label_contract_unresolved,
         "registered_metrics": registered,
@@ -1178,6 +1211,7 @@ def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:
         "dashboarded_without_emission",
         "alerted_without_emission",
         "runtime_cardinality_review_required",
+        "declared_risky_label_review_required",
         "runtime_label_contract_violations",
         "runtime_label_contract_unresolved",
         "live_metrics",

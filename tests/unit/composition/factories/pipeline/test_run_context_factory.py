@@ -10,6 +10,9 @@ import pytest
 
 from bioetl.domain.config import RuntimeConfig
 from bioetl.composition.factories.pipeline.run_context_factory import RunContextFactory
+from bioetl.composition.runtime_builders.run_manifest_support import (
+    RunManifestContractIdentity,
+)
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.domain.types import RunID, RunType
 
@@ -208,6 +211,42 @@ def test_run_context_factory_maps_extended_contract_identity_fields() -> None:
     )
 
     assert context.contract_ref == "chembl.activity"
+    assert context.rule_bundle_version == "rules-v1"
+    assert context.normalization_profile_ref == "chembl.activity"
+    assert context.normalization_profile_version == "1.2.3"
+    assert context.normalization_profile_hash == "profile-hash"
+
+
+def test_run_context_factory_accepts_dataclass_contract_identity() -> None:
+    """Dataclass-based manifest identity should normalize into RunContext fields."""
+    factory = RunContextFactory(
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity_type_extractor=lambda _pipeline_name: "activity",
+        config_hash_getter=lambda _yaml_config: "resolved-hash",
+        contract_identity_resolver=lambda _provider, _entity: RunManifestContractIdentity(
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            contract_schema_hash="schema-hash",
+            dq_policy_ref="dq.policy",
+            rule_bundle_version="rules-v1",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="1.2.3",
+            normalization_profile_hash="profile-hash",
+        ),
+    )
+
+    context = factory.create(
+        run_id=RunID(uuid4()),
+        runtime=_runtime(),
+        started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
+        yaml_config=_yaml_config(),
+    )
+
+    assert context.contract_ref == "chembl.activity"
+    assert context.contract_version == "1.0.0"
+    assert context.contract_schema_hash == "schema-hash"
+    assert context.dq_policy_ref == "dq.policy"
     assert context.rule_bundle_version == "rules-v1"
     assert context.normalization_profile_ref == "chembl.activity"
     assert context.normalization_profile_version == "1.2.3"

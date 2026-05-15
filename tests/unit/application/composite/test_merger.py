@@ -337,13 +337,13 @@ class TestMergeServiceJoinKeyNormalization:
 
         assert result["pmc_id"].to_list() == ["pmc1234567", "pmc7654321"]
 
-    def test_normalize_title_trims_without_lowercasing(self, merge_service):
-        """Test title join keys are trimmed but keep original casing."""
+    def test_normalize_title_cleans_without_lowercasing(self, merge_service):
+        """Test title join keys use canonical title cleanup but keep casing."""
         import polars as pl
 
         df = pl.DataFrame(
             {
-                "title": ["  UPPERCASE TITLE  ", " Another TITLE"],
+                "title": ["  <b>UPPERCASE</b>&nbsp;TITLE  ", " Another\nTITLE"],
                 "doi": ["10.1038/NATURE", "10.1000/ABC"],
             }
         )

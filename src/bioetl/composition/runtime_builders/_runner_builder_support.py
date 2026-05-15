@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from typing import Protocol, cast
 
 from bioetl.composition.observability import ObservabilityBundle
@@ -22,6 +22,13 @@ _PERSISTENCE_PROFILE_ACTIVE_LAYERS = ("bronze", "silver", "gold")
 
 class _LoggerBindableObservability(Protocol):
     logger: object
+
+
+@dataclass(frozen=True, slots=True)
+class ResolvedRunnerControlPlanePolicy:
+    manifest_enabled: bool
+    ledger_enabled: bool
+    required_profile: str
 
 
 def _normalize_required_persistence_profile(required_profile: object) -> str:
@@ -242,6 +249,34 @@ def resolve_control_plane_flags(
         missing_artifact_lineage_layers=missing_artifact_lineage_layers,
     )
     return True, ledger_enabled
+
+
+def resolve_runner_control_plane_policy(
+    settings: object,
+    *,
+    yaml_config: object | None = None,
+    skip_gold: bool = False,
+) -> ResolvedRunnerControlPlanePolicy:
+    """Return canonical control-plane policy for runner assembly."""
+    pipeline_settings = getattr(settings, "pipeline", None)
+    control_plane = getattr(pipeline_settings, "control_plane", None)
+    required_profile = _normalize_required_persistence_profile(
+        getattr(
+            control_plane,
+            "required_persistence_profile",
+            DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+        )
+    )
+    manifest_enabled, ledger_enabled = resolve_control_plane_flags(
+        settings,
+        yaml_config=yaml_config,
+        skip_gold=skip_gold,
+    )
+    return ResolvedRunnerControlPlanePolicy(
+        manifest_enabled=manifest_enabled,
+        ledger_enabled=ledger_enabled,
+        required_profile=required_profile,
+    )
 
 
 def bind_manifest_logger_context[RunnerInputsT](

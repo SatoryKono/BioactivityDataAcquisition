@@ -6,8 +6,19 @@ import asyncio
 from typing import Protocol, cast
 from urllib.parse import unquote
 
+from bioetl.interfaces.http._health_server_identity_support import (
+    build_control_plane_identity_payload,
+)
+from bioetl.interfaces.http.control_plane_selector_context import (
+    RUN_ID_NO_SELECTION,
+    build_selector_context_payload,
+    build_selector_filter_options_payload,
+)
+from bioetl.interfaces.http.processed_records_table import (
+    build_processed_records_table_payload_from_prometheus,
+)
+
 _NOT_FOUND_MESSAGE = "Not Found"
-_RUN_ID_NO_SELECTION = "-"
 
 
 class _HealthResponseSupport(Protocol):
@@ -35,6 +46,8 @@ class _HealthResponseSupport(Protocol):
 class _HealthRoutingHost(_HealthResponseSupport, Protocol):
     _quarantine_service: object | None
     _run_manifest_port: object | None
+    _run_ledger_port: object | None
+    _prometheus_base_url: str
 
     def _read_required_param(self, query: dict[str, str], name: str) -> str: ...
 
@@ -117,12 +130,52 @@ async def dispatch_control_plane_request(
         if path == "/ops/control-plane/filter-options":
             await handle_control_plane_filter_options(host, writer, query)
             return
+        if path == "/ops/control-plane/selector-context":
+            await handle_control_plane_selector_context(host, writer, query)
+            return
         if path == "/ops/control-plane/identity-table":
             await handle_control_plane_identity_table(host, writer, query)
             return
         await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
     except ValueError as exc:
         await response_support._send_response(writer, 400, str(exc))
+
+
+async def dispatch_observability_request(
+    host: _HealthRoutingHost,
+    *,
+    writer: asyncio.StreamWriter,
+    path: str,
+    query: dict[str, str],
+) -> None:
+    """Route dashboard observability helper endpoints."""
+    response_support = cast(_HealthResponseSupport, host)
+    try:
+        if path == "/ops/observability/processed-records":
+            await handle_processed_records_table(host, writer, query)
+            return
+        await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
+    except ValueError as exc:
+        await response_support._send_response(writer, 400, str(exc))
+    except RuntimeError as exc:
+        await response_support._send_response(writer, 502, str(exc))
+
+
+async def handle_processed_records_table(
+    host: _HealthRoutingHost,
+    writer: asyncio.StreamWriter,
+    query: dict[str, str],
+) -> None:
+    """Handle formatted Processed Records table rows for Grafana."""
+    pipeline = host._read_required_param(query, "pipeline")
+    run_type = host._read_optional_param(query, "run_type")
+    payload = await asyncio.to_thread(
+        build_processed_records_table_payload_from_prometheus,
+        prometheus_base_url=host._prometheus_base_url,
+        pipeline=pipeline,
+        run_type=run_type,
+    )
+    await host._send_payload_response(writer, 200, payload)
 
 
 async def handle_filtered_records(
@@ -197,36 +250,55 @@ async def handle_control_plane_filter_options(
 ) -> None:
     """Handle control-plane-backed selector options for Grafana variables."""
     assert host._run_manifest_port is not None
-    requested_pipeline = host._read_required_param(query, "pipeline")
-    selected_pipelines = host._read_scope_csv_param(query, "pipeline")
     dimension = host._read_optional_param(query, "dimension") or "run_id"
-    if dimension != "run_id":
-        raise ValueError(f"Unsupported control-plane filter dimension: {dimension}")
-
+    requested_pipeline = (
+        host._read_required_param(query, "pipeline")
+        if dimension == "run_id"
+        else host._read_optional_param(query, "pipeline")
+    )
+    selected_pipelines = host._read_scope_csv_param(query, "pipeline")
+    selected_workflows = host._read_scope_csv_param(query, "workflow")
     selected_run_types = host._read_scope_csv_param(query, "run_type")
-    run_ids = tuple(
-        str(manifest.run_id)
-        for manifest in host._run_manifest_port.list_all()
-        if (not selected_pipelines or manifest.pipeline_name in selected_pipelines)
-        and (not selected_run_types or str(manifest.run_type) in selected_run_types)
-    )
+    selected_run_statuses = host._read_scope_csv_param(query, "run_status")
+    selected_run_id = _read_selected_run_id(host, query)
     response_shape = host._read_optional_param(query, "response_shape") or "object"
-    if response_shape == "list":
-        await host._send_payload_response(
-            writer,
-            200,
-            {"items": [_RUN_ID_NO_SELECTION, *run_ids]},
-        )
-        return
-    await host._send_payload_response(
-        writer,
-        200,
-        {
-            "pipeline": requested_pipeline,
-            "run_type": list(selected_run_types),
-            "run_ids": list(run_ids),
-        },
+
+    payload = build_selector_filter_options_payload(
+        manifests=host._run_manifest_port.list_all(),
+        ledger_port=host._run_ledger_port,
+        dimension=dimension,
+        response_shape=response_shape,
+        requested_pipeline=requested_pipeline,
+        selected_workflows=selected_workflows,
+        selected_pipelines=selected_pipelines,
+        selected_run_types=selected_run_types,
+        selected_run_statuses=selected_run_statuses,
+        selected_run_id=selected_run_id,
     )
+    if response_shape != "list" and dimension == "run_id":
+        payload["run_ids"] = [
+            value for value in payload.get("items", []) if value != RUN_ID_NO_SELECTION
+        ]
+    await host._send_payload_response(writer, 200, payload)
+
+
+async def handle_control_plane_selector_context(
+    host: _HealthRoutingHost,
+    writer: asyncio.StreamWriter,
+    query: dict[str, str],
+) -> None:
+    """Resolve a coherent selector tuple for dashboard selector shells."""
+    assert host._run_manifest_port is not None
+    payload = build_selector_context_payload(
+        manifests=host._run_manifest_port.list_all(),
+        ledger_port=host._run_ledger_port,
+        selected_workflows=host._read_scope_csv_param(query, "workflow"),
+        selected_pipelines=host._read_scope_csv_param(query, "pipeline"),
+        selected_run_types=host._read_scope_csv_param(query, "run_type"),
+        selected_run_statuses=host._read_scope_csv_param(query, "run_status"),
+        selected_run_id=_read_selected_run_id(host, query),
+    )
+    await host._send_payload_response(writer, 200, payload)
 
 
 async def handle_control_plane_identity_table(
@@ -239,9 +311,7 @@ async def handle_control_plane_identity_table(
     requested_pipeline = host._read_required_param(query, "pipeline")
     selected_pipelines = host._read_scope_csv_param(query, "pipeline")
     selected_run_types = host._read_scope_csv_param(query, "run_type")
-    selected_run_id = host._read_optional_param(query, "run_id")
-    if selected_run_id == _RUN_ID_NO_SELECTION:
-        selected_run_id = None
+    selected_run_id = _read_selected_run_id(host, query)
 
     manifests = tuple(
         manifest
@@ -272,21 +342,25 @@ async def handle_control_plane_identity_table(
     await host._send_payload_response(
         writer,
         200,
-        {
-            "pipeline": requested_pipeline,
-            "run_type": list(selected_run_types),
-            "selected_run_id": selected_run_id,
-            "resolved_via": resolved_via,
-            "rows": _build_identity_rows(
-                requested_pipeline=requested_pipeline,
-                resolved_manifest=resolved_manifest,
-                selected_pipelines=selected_pipelines,
-                selected_run_id=selected_run_id,
-            ),
-        },
+        build_control_plane_identity_payload(
+            requested_pipeline=requested_pipeline,
+            resolved_manifest=resolved_manifest,
+            selected_pipelines=selected_pipelines,
+            selected_run_id=selected_run_id,
+            selected_run_types=selected_run_types,
+            resolved_via=resolved_via,
+        ),
     )
 
 
+<<<<<<< Updated upstream
+def _read_selected_run_id(
+    host: _HealthRoutingHost,
+    query: dict[str, str],
+) -> str | None:
+    selected_run_id = host._read_optional_param(query, "run_id")
+    return None if selected_run_id in {None, RUN_ID_NO_SELECTION} else selected_run_id
+||||||| Stash base
 def _build_identity_rows(
     *,
     requested_pipeline: str,
@@ -366,6 +440,89 @@ def _display(value: object | None, *, unavailable: str) -> str:
         return unavailable
     text = str(value).strip()
     return text or unavailable
+=======
+def _build_identity_rows(
+    *,
+    requested_pipeline: str,
+    resolved_manifest: object | None,
+    selected_pipelines: tuple[str, ...],
+    selected_run_id: str | None,
+) -> list[dict[str, str]]:
+    manifest_unavailable = (
+        "select one concrete pipeline or exact run_id"
+        if len(selected_pipelines) != 1 and resolved_manifest is None
+        else "not available for current scope"
+    )
+    provenance_unavailable = "not available in selected manifest"
+    code_provenance = (
+        getattr(resolved_manifest, "code_provenance", None)
+        if resolved_manifest is not None
+        else None
+    )
+    return [
+        _identity_row(
+            "manifest_id",
+            getattr(resolved_manifest, "manifest_id", None),
+            unavailable=manifest_unavailable,
+        ),
+        _identity_row(
+            "run_id",
+            getattr(resolved_manifest, "run_id", None) or selected_run_id,
+            unavailable=manifest_unavailable,
+        ),
+        _identity_row(
+            "pipeline name",
+            getattr(resolved_manifest, "pipeline_name", None) or requested_pipeline,
+            unavailable="not available for current scope",
+        ),
+        _identity_row(
+            "pipelineversion",
+            getattr(code_provenance, "pipeline_version", None),
+            unavailable=provenance_unavailable,
+        ),
+        _identity_row(
+            "git commit hash",
+            getattr(code_provenance, "git_commit", None),
+            unavailable=provenance_unavailable,
+        ),
+        _identity_row(
+            "config hash",
+            getattr(code_provenance, "config_hash", None),
+            unavailable=provenance_unavailable,
+        ),
+        _identity_row(
+            "execution fingerprint",
+            getattr(resolved_manifest, "execution_fingerprint", None),
+            unavailable=manifest_unavailable,
+        ),
+        _identity_row(
+            "schema contract",
+            getattr(code_provenance, "contract_ref", None),
+            unavailable=provenance_unavailable,
+        ),
+        _identity_row(
+            "version",
+            getattr(code_provenance, "contract_version", None),
+            unavailable=provenance_unavailable,
+        ),
+    ]
+
+
+def _identity_row(
+    parameter: str, value: object | None, *, unavailable: str
+) -> dict[str, str]:
+    return {
+        "parameter": parameter,
+        "value": _display(value, unavailable=unavailable),
+    }
+
+
+def _display(value: object | None, *, unavailable: str) -> str:
+    if value is None:
+        return unavailable
+    text = str(value).strip()
+    return text or unavailable
+>>>>>>> Stashed changes
 
 
 async def handle_filtered_record_detail(

@@ -33,13 +33,15 @@ def _iter_panel_data_links(panel: dict) -> list[dict]:
 def test_p1_p2_panels_have_data_links():
     """P1/P2 operator panels should have dataLinks where applicable."""
     # Definition of P1/P2 panels by title/role
-    p1_p2_patterns = [
+    p1_p2_patterns = {
         "Status",
+        "Runtime Status",
+        "Current Status",
         "Severity Matrix",
+        "Runtime Blockers",
         "Blockers",
         "Top Causes",
-        "Current Status",
-    ]
+    }
     # Skip panels that are trend/summary only
     skip_patterns = ["Trend", "Rate", "Overview", "Outcomes", "Events", "Duration"]
     # Skip workflow-overview entirely (different role - selected-range evidence surface)
@@ -50,7 +52,7 @@ def test_p1_p2_panels_have_data_links():
         dashboard = load_dashboard(dashboard_path)
         for panel in get_dashboard_panels(dashboard):
             title = panel.get("title", "")
-            if any(pattern in title for pattern in p1_p2_patterns):
+            if title in p1_p2_patterns:
                 # Skip trend/summary panels
                 if any(skip in title for skip in skip_patterns):
                     continue
@@ -83,9 +85,15 @@ def test_critical_panels_have_open_target_pattern():
         for panel in get_dashboard_panels(dashboard):
             title = panel.get("title", "")
             # Check for critical panels
-            if any(
-                kw in title for kw in ["Status", "Blockers", "Severity", "Top Causes"]
-            ):
+            if title in {
+                "Status",
+                "Runtime Status",
+                "Current Status",
+                "Runtime Blockers",
+                "Blockers",
+                "Severity Matrix",
+                "Top Causes",
+            }:
                 data_links = _iter_panel_data_links(panel)
                 for link in data_links:
                     link_title = link.get("title", "")

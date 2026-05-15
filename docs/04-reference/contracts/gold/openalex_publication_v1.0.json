@@ -55,11 +55,8 @@
       "description": ""
     },
     "title": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
+      "type": "string",
+      "nullable": false,
       "description": ""
     },
     "abstract": {
@@ -255,7 +252,7 @@
     },
     "is_oa": {
       "type": [
-        "boolean",
+        "object",
         "null"
       ],
       "nullable": true,
@@ -412,7 +409,8 @@
     "content_hash",
     "entity_id",
     "is_retracted",
-    "openalex_id"
+    "openalex_id",
+    "title"
   ],
   "normalization_profile": {
     "ref": "openalex.publication",

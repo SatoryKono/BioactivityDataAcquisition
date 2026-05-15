@@ -56,11 +56,11 @@ from bioetl.domain.normalization.profiles import (
     NORMALIZATION_PROFILE_REGISTRY,
     resolve_normalization_profile,
 )
-from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
-    chembl_json_fields,
-)
 from bioetl.domain.normalization.profiles._chembl_policy_registry import (
     chembl_policy_surface,
+)
+from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
+    chembl_json_fields,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_json_string,
@@ -828,7 +828,9 @@ def _inventory_mapping(
 def _classification_spec(pipeline_name: str, field_name: str) -> dict[str, str]:
     payload = _inventory_mapping(pipeline_name, "classification").get(field_name)
     if isinstance(payload, dict):
-        return {str(key): str(value) for key, value in payload.items() if value is not None}
+        return {
+            str(key): str(value) for key, value in payload.items() if value is not None
+        }
     if payload is None:
         return {}
     return {"category": str(payload)}
@@ -914,7 +916,9 @@ def _default_non_chembl_classification(
         return "strict_enum"
     if strictness == "controlled_unit" or semantic_category == "controlled_vocabulary":
         return "controlled_vocabulary"
-    if _default_identifier_family(provider=provider, entity=entity, field_name=field_name):
+    if _default_identifier_family(
+        provider=provider, entity=entity, field_name=field_name
+    ):
         return "identifier_namespace"
     semantic_policy = structured_payload_policy(f"{provider}.{entity}", field_name)
     if semantic_policy is not None:
@@ -923,11 +927,14 @@ def _default_non_chembl_classification(
             if semantic_policy.requires_raw_sidecar_before_semantic_transform
             else "structured_json_canonical_only"
         )
-    if _publication_structured_policy(
-        provider=provider,
-        entity=entity,
-        field_name=field_name,
-    ) is not None:
+    if (
+        _publication_structured_policy(
+            provider=provider,
+            entity=entity,
+            field_name=field_name,
+        )
+        is not None
+    ):
         return "structured_json_collection"
     return semantic_category
 
@@ -1054,9 +1061,8 @@ def _validate_non_chembl_row_structured_evidence(
 ) -> None:
     if row.get("raw_sidecar") and row.get("canonical_sidecar"):
         return
-    if (
-        row.get("classification") == "structured_json_canonical_only"
-        and row.get("canonical_sidecar")
+    if row.get("classification") == "structured_json_canonical_only" and row.get(
+        "canonical_sidecar"
     ):
         return
     raise ValueError(
@@ -1088,7 +1094,9 @@ def _validate_non_chembl_inventory_field(
 def _validate_non_chembl_inventory_rows(rows: list[dict[str, str]]) -> None:
     rows_by_key = {(row["pipeline_name"], row["field_name"]): row for row in rows}
     for pipeline_name in sorted(NON_CHEMBL_PIPELINES):
-        structured_fields = set(_inventory_mapping(pipeline_name, "structured_json_shapes"))
+        structured_fields = set(
+            _inventory_mapping(pipeline_name, "structured_json_shapes")
+        )
         for field_name in sorted(_inventory_fields_for_pipeline(pipeline_name)):
             _validate_non_chembl_inventory_field(
                 rows_by_key,
@@ -1107,7 +1115,9 @@ def _dq_allowed_values(
     dq_config = _load_dq_config(provider, entity)
     if dq_config is None:
         return frozenset()
-    matches = _matching_dq_enum_rules(dq_config.field_validations, field_name=field_name)
+    matches = _matching_dq_enum_rules(
+        dq_config.field_validations, field_name=field_name
+    )
     if len(matches) != 1:
         return frozenset()
     return frozenset(str(value) for value in matches[0].allowed)
@@ -1572,6 +1582,11 @@ def _normalize_summary_from_policy(*, key: str, trim: bool, lowercase: bool) -> 
         return (
             "Validate PMC identifier through the canonical domain identifier "
             "contract, then emit lowercase join-canonical text."
+        )
+    if key == "title":
+        return (
+            "Normalize fallback title join text through canonical title cleanup "
+            "while preserving case."
         )
     if key == "target_id":
         return (

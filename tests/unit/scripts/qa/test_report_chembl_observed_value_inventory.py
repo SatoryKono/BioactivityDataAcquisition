@@ -43,8 +43,15 @@ def test_build_inventory_payload_covers_all_tracked_chembl_fixtures() -> None:
         ]
         for pipeline_name in ("chembl_activity", "chembl_molecule")
     }
-    assert len(rows_by_pipeline["chembl_activity"]) > 5
-    assert len(rows_by_pipeline["chembl_molecule"]) > 5
+    assert len(rows_by_pipeline["chembl_activity"]) >= 11
+    assert len(rows_by_pipeline["chembl_molecule"]) >= 24
+    tracked_fixture_count_by_pipeline = {
+        fixture["pipeline_name"]: fixture["tracked_fixture_count"]
+        for fixture in payload["fixtures"]
+        if fixture["pipeline_name"] in {"chembl_activity", "chembl_molecule"}
+    }
+    assert tracked_fixture_count_by_pipeline["chembl_activity"] == 2
+    assert tracked_fixture_count_by_pipeline["chembl_molecule"] == 2
 
 
 def test_render_markdown_mentions_fixture_and_field_counts() -> None:

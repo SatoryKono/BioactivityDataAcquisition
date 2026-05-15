@@ -117,6 +117,64 @@ def test_record_stage_records_uses_generic_counter() -> None:
 
 
 @pytest.mark.unit
+def test_record_stage_records_allows_zero_for_series_initialization() -> None:
+    metrics = MagicMock()
+    recorder = PipelineMetricsRecorder(metrics, "chembl_activity")
+
+    recorder.record_stage_records(
+        run_type="incremental",
+        stage="silver",
+        outcome="valid",
+        count=0,
+    )
+
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_stage_records_total",
+        0,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "stage": "silver",
+            "outcome": "valid",
+        },
+    )
+
+
+@pytest.mark.unit
+def test_initialize_record_accounting_outcomes_creates_all_expected_zero_series() -> None:
+    metrics = MagicMock()
+    recorder = PipelineMetricsRecorder(metrics, "chembl_activity")
+
+    recorder.initialize_record_accounting_outcomes(run_type="incremental")
+
+    expected = [
+        ("bronze", "records"),
+        ("silver", "valid"),
+        ("silver", "quarantined"),
+        ("silver", "skipped"),
+        ("silver", "filtered_out"),
+        ("silver", "deduplicated"),
+        ("gold", "written"),
+        ("gold", "quarantined"),
+        ("gold", "skipped"),
+        ("gold", "excluded_by_contract"),
+        ("gold", "deduplicated"),
+    ]
+    assert metrics.increment_counter.call_count == len(expected)
+    for stage, outcome in expected:
+        metrics.increment_counter.assert_any_call(
+            "bioetl_stage_records_total",
+            0,
+            {
+                "pipeline": "chembl_activity",
+                "run_type": "incremental",
+                "stage": stage,
+                "outcome": outcome,
+            },
+        )
+
+
+@pytest.mark.unit
 def test_record_flow_invariant_uses_generic_counter() -> None:
     metrics = MagicMock()
     recorder = PipelineMetricsRecorder(metrics, "chembl_activity")

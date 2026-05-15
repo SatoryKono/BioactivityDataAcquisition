@@ -1,5 +1,34 @@
 {
   "fixtures": {
+    "chembl/activity:sample_edge_ontology_units_2026-05-11.jsonl": {
+      "fields": {
+        "bao_endpoint": [
+          "BAO:0000190",
+          "bao_0000218"
+        ],
+        "bao_format": [
+          "BAO_0000218",
+          "bao:0000190"
+        ],
+        "qudt_units": [
+          "mg.kg-1",
+          "nM"
+        ],
+        "standard_units": [
+          "nM",
+          "ug.mL-1"
+        ],
+        "units": [
+          "mg/kg",
+          "nanomolar"
+        ],
+        "uo_units": [
+          "UO:0000065",
+          "UO_0000064"
+        ]
+      },
+      "pipeline": "chembl_activity"
+    },
     "chembl/assay:sample_edge_ontology_namespaces_2026-05-11.jsonl": {
       "fields": {
         "bao_format": [
@@ -34,6 +63,31 @@
         ]
       },
       "pipeline": "chembl_cell_line"
+    },
+    "chembl/molecule:sample_edge_vocab_2026-05-14.jsonl": {
+      "fields": {
+        "availability_type": [
+          "-1",
+          "2"
+        ],
+        "chirality": [
+          "1",
+          "2"
+        ],
+        "molecule_type": [
+          "Antibody",
+          "Small molecule"
+        ],
+        "oral": [
+          "False",
+          "True"
+        ],
+        "withdrawn_flag": [
+          "False",
+          "True"
+        ]
+      },
+      "pipeline": "chembl_molecule"
     },
     "chembl/tissue:sample_edge_ontology_ids_2026-05-11.jsonl": {
       "fields": {

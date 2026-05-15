@@ -17,7 +17,9 @@ GOVERNANCE_PATH = ROOT / "configs" / "quality" / "observability_metric_governanc
 ALLOWLIST_PATH = (
     ROOT / "configs" / "quality" / "observability_metric_inventory_allowlist.yaml"
 )
-EVIDENCE_PATH = ROOT / "artifacts" / "observability" / "runtime_cardinality_inventory.json"
+EVIDENCE_PATH = (
+    ROOT / "artifacts" / "observability" / "runtime_cardinality_inventory.json"
+)
 
 
 @pytest.mark.architecture

@@ -140,6 +140,9 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
             contract_schema_hash="schema-hash-123",
             dq_policy_ref="composite.dq.v1",
             rule_bundle_version="dq-rules.v1.0",
+            normalization_profile_ref="composite.publication",
+            normalization_profile_version="2026.05",
+            normalization_profile_hash="sha256:normalization-123",
             pipeline_version="1.1.0",
             entity="publication",
             required_persistence_profile="replay_ready",
@@ -167,6 +170,9 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
     assert request.contract_schema_hash == "schema-hash-123"
     assert request.dq_policy_ref == "composite.dq.v1"
     assert request.rule_bundle_version == "dq-rules.v1.0"
+    assert request.normalization_profile_ref == "composite.publication"
+    assert request.normalization_profile_version == "2026.05"
+    assert request.normalization_profile_hash == "sha256:normalization-123"
     assert request.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
 
 

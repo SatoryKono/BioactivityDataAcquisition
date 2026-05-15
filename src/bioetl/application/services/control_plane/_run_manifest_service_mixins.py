@@ -239,11 +239,11 @@ class RunManifestPayloadMixin:
         run_type: RunType,
     ) -> dict[str, object]:
         """Build the canonical execution-identity payload shared across layers."""
-        snapshot_ids = sorted(
-            snapshot.snapshot_id
+        snapshots = [
+            snapshot
             for source_ref in request.source_refs
             for snapshot in source_ref.input_snapshots
-        )
+        ]
         return cast(
             dict[str, object],
             build_execution_identity_payload(
@@ -266,7 +266,7 @@ class RunManifestPayloadMixin:
                 effective_config_artifact_id=code_provenance.effective_config_artifact_id,
                 exact_replay=bool(request.launch_context.get("exact_replay")),
                 input_snapshot_fingerprint=(
-                    compute_input_snapshot_identity_fingerprint(snapshot_ids)
+                    compute_input_snapshot_identity_fingerprint(snapshots)
                 ),
                 silver_filter_compatibility_mode=str(
                     request.runtime_config.get(

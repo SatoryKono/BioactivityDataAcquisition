@@ -12,6 +12,7 @@ from bioetl.domain.normalization import (
 )
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types._checkpoint_metadata_support import (
+    coerce_snapshot_refs,
     coerce_snapshot_ids,
     extract_run_context_anchor,
     is_empty_checkpoint_metadata_value,
@@ -69,6 +70,7 @@ class CheckpointMetadata:
     normalization_profile_version: _OPTIONAL_STR = None
     normalization_profile_hash: _OPTIONAL_STR = None
     exact_replay: _OPTIONAL_BOOL = None
+    input_snapshot_refs: tuple[JsonDict, ...] = ()
     input_snapshot_ids: tuple[str, ...] = ()
     input_snapshot_fingerprint: _OPTIONAL_STR = None
     silver_filter_compatibility_mode: _OPTIONAL_STR = None
@@ -124,6 +126,9 @@ class CheckpointMetadata:
                 "normalization_profile_hash",
             ),
             exact_replay=cast(_OPTIONAL_BOOL, legacy_metadata.get("exact_replay")),
+            input_snapshot_refs=coerce_snapshot_refs(
+                legacy_metadata.get("input_snapshot_refs")
+            ),
             input_snapshot_ids=coerce_snapshot_ids(
                 legacy_metadata.get("input_snapshot_ids")
             ),
@@ -167,6 +172,7 @@ class CheckpointMetadata:
             ),
             ("normalization_profile_hash", self.normalization_profile_hash),
             ("exact_replay", self.exact_replay),
+            ("input_snapshot_refs", list(self.input_snapshot_refs)),
             ("input_snapshot_ids", list(self.input_snapshot_ids)),
             ("input_snapshot_fingerprint", self.input_snapshot_fingerprint),
             (
@@ -222,12 +228,15 @@ class CheckpointMetadata:
                 "normalization_profile_hash",
             ),
             exact_replay=cast(_OPTIONAL_BOOL, data.get("exact_replay")),
+            input_snapshot_refs=coerce_snapshot_refs(data.get("input_snapshot_refs")),
             input_snapshot_ids=coerce_snapshot_ids(data.get("input_snapshot_ids")),
             input_snapshot_fingerprint=cast(
                 _OPTIONAL_STR, data.get("input_snapshot_fingerprint")
             ),
             silver_filter_compatibility_mode=_extract_with_fallback(
-                data, "silver_filter_compatibility_mode", "silver_filter_compatibility_mode"
+                data,
+                "silver_filter_compatibility_mode",
+                "silver_filter_compatibility_mode",
             ),
             memory_decision_trace=_coerce_json_dict_sequence(
                 data.get("memory_decision_trace")
@@ -242,7 +251,7 @@ class CheckpointMetadata:
             self.input_snapshot_fingerprint
             if self.input_snapshot_fingerprint is not None
             else compute_input_snapshot_identity_fingerprint(
-                list(self.input_snapshot_ids)
+                list(self.input_snapshot_refs or self.input_snapshot_ids)
             )
         )
         normalized_payload = normalize_execution_identity_payload(
@@ -257,9 +266,7 @@ class CheckpointMetadata:
                 "contract_ref": self.contract_ref,
                 "contract_version": self.contract_version,
                 "normalization_profile_ref": self.normalization_profile_ref,
-                "normalization_profile_version": (
-                    self.normalization_profile_version
-                ),
+                "normalization_profile_version": (self.normalization_profile_version),
                 "normalization_profile_hash": self.normalization_profile_hash,
                 "effective_config_artifact_id": self.effective_config_artifact_id,
                 "exact_replay": self.exact_replay,

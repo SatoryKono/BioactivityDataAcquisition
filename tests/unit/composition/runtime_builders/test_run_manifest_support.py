@@ -16,6 +16,8 @@ from bioetl.application.services.control_plane.run_manifest_service import (
     RunManifestCreateSpec,
 )
 from bioetl.composition.runtime_builders._run_manifest_creation_support import (
+    _RunManifestCreateRequestInputs,
+    build_manifest_create_request,
     emit_replay_reconstructability_metric,
 )
 from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import (
@@ -85,6 +87,124 @@ def test_emit_replay_reconstructability_metric_is_owned_by_creation_support() ->
     assert emit_replay_reconstructability_metric.__module__.endswith(
         "_run_manifest_creation_support"
     )
+
+
+@pytest.mark.unit
+def test_build_manifest_create_request_uses_supplied_reproducibility_context(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def _fake_build_manifest_source_refs(**kwargs: object):
+        captured["required_persistence_profile"] = kwargs[
+            "required_persistence_profile"
+        ]
+        return ("source-ref",)
+
+    def _fake_build_manifest_launch_context(*, reproducibility_context: object, **_: object):
+        captured["launch_context_context"] = reproducibility_context
+        return {"required_persistence_profile": "forensic_grade", "exact_replay": False}
+
+    def _fake_build_replay_assessment(**_: object):
+        return SimpleNamespace(
+            replay_readiness_verdict=SimpleNamespace(value="rebuild_only"),
+            blocking_gaps=(),
+        )
+
+    def _fake_assemble_manifest_create_spec(**kwargs: object):
+        captured["assemble_request_inputs"] = kwargs["request_inputs"]
+        return RunManifestCreateSpec(
+            run_id=RunID(uuid4()),
+            run_type="incremental",
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity="activity",
+            launch_context=kwargs["launch_context"],
+            runtime_config={},
+            resolved_config={},
+            replay_capability=ReplayCapability.REBUILD_ONLY,
+        )
+
+    def _fake_validate_required_runtime_persistence_profile(**kwargs: object):
+        captured["validated_required_profile"] = kwargs[
+            "required_persistence_profile"
+        ]
+
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders._run_manifest_creation_support._build_manifest_source_refs",
+        _fake_build_manifest_source_refs,
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders._run_manifest_creation_support._build_manifest_launch_context",
+        _fake_build_manifest_launch_context,
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders._run_manifest_creation_support._build_replay_assessment",
+        _fake_build_replay_assessment,
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders._run_manifest_creation_support._assemble_manifest_create_spec",
+        _fake_assemble_manifest_create_spec,
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders._run_manifest_creation_support.validate_required_runtime_persistence_profile",
+        _fake_validate_required_runtime_persistence_profile,
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders._run_manifest_creation_support.resolve_code_revision_for_manifest",
+        lambda **_: "rev-1",
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders._run_manifest_creation_support._manifest_support.resolve_replay_parentage",
+        lambda **_: (None, None),
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders._run_manifest_creation_support._manifest_support.resolve_replay_capability",
+        lambda **_: ReplayCapability.REBUILD_ONLY,
+    )
+
+    reproducibility_context = SimpleNamespace(
+        required_persistence_profile="forensic_grade",
+        strict_exact_replay_supported=False,
+        family="strict",
+        replay_family_contract="strict",
+        strict_replay_runtime_verdict="rebuild_only",
+        support_scope="supported",
+        reason="fixture",
+    )
+    request = build_manifest_create_request(
+        _RunManifestCreateRequestInputs(
+            ctx=_make_run_context(),
+            inputs=SimpleNamespace(
+                cached_bronze=None,
+                runtime_config=SimpleNamespace(),
+                settings=SimpleNamespace(test_mode=False, debug=False),
+            ),
+            provider="chembl",
+            entity="activity",
+            reproducibility_context=reproducibility_context,
+            run_type_value="incremental",
+            execution_context_value="isolated",
+            config_hash="resolved-hash",
+            resolved_config_hash="resolved-hash",
+            effective_config_hash="effective-hash",
+            contract_ref="chembl.activity",
+            contract_version="1.2.3",
+            contract_schema_hash="schema-deadbeef",
+            dq_policy_ref="chembl.activity.policy",
+            rule_bundle_version="2026.04",
+            normalization_profile_ref="chembl.activity.norm",
+            normalization_profile_version="1.0.0",
+            normalization_profile_hash="f" * 64,
+            dq_contract_compatibility_hash="dq-hash",
+            effective_config_artifact_id="artifact-1",
+        )
+    )
+
+    assert request.launch_context["required_persistence_profile"] == "forensic_grade"
+    assert captured["required_persistence_profile"] == "forensic_grade"
+    assert captured["validated_required_profile"] == "forensic_grade"
+    assert captured["launch_context_context"] is reproducibility_context
 
 
 @pytest.mark.unit
@@ -434,15 +554,16 @@ entries:
 
     result = resolve_contract_identity(provider="chembl", entity="activity")
 
-    assert result == (
-        "chembl.activity",
-        "1.2.3",
-        "deadbeef",
-        "chembl.activity.policy",
-        "2026.04",
-        "chembl.activity",
-        "1.0.0",
-        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    assert result.contract_ref == "chembl.activity"
+    assert result.contract_version == "1.2.3"
+    assert result.contract_schema_hash == "deadbeef"
+    assert result.dq_policy_ref == "chembl.activity.policy"
+    assert result.rule_bundle_version == "2026.04"
+    assert result.normalization_profile_ref == "chembl.activity"
+    assert result.normalization_profile_version == "1.0.0"
+    assert (
+        result.normalization_profile_hash
+        == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     )
 
 
@@ -459,7 +580,14 @@ def test_resolve_contract_identity_falls_back_when_registry_invalid(
 
     result = resolve_contract_identity(provider="chembl", entity="activity")
 
-    assert result == ("chembl.activity", None, None, None, None, None, None, None)
+    assert result.contract_ref == "chembl.activity"
+    assert result.contract_version is None
+    assert result.contract_schema_hash is None
+    assert result.dq_policy_ref is None
+    assert result.rule_bundle_version is None
+    assert result.normalization_profile_ref is None
+    assert result.normalization_profile_version is None
+    assert result.normalization_profile_hash is None
 
 
 @pytest.mark.unit

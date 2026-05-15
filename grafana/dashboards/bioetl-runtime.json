@@ -120,7 +120,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current Runtime status for the selected pipeline/run_type scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus.",
+      "description": "Primary compact Runtime verdict for the selected pipeline/run_type scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Runtime Status below is an expanded first-screen mirror of this same current-status recording rule, not an independent second verdict.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -184,6 +184,20 @@
       },
       "options": {
         "colorMode": "background",
+        "dataLinks": [
+          {
+            "title": "Inspect Runtime Status",
+            "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=9100&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Inspect First Action",
+            "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=9991&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
+            "targetBlank": false,
+            "includeVars": false
+          }
+        ],
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
@@ -281,11 +295,8 @@
         "x": 10,
         "y": 7
       },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Selected-range processed-records evidence for the shared pipeline/run_type context. Zero values are range-summary evidence only and do not prove current OK status.",
+      "datasource": "Quarantine Explorer",
+      "description": "Current stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -311,20 +322,196 @@
                   {
                     "type": "value",
                     "options": {
-                      "1 bronze": {
-                        "text": "bronze"
+                      "01 bronze_records": {
+                        "text": "bronze [total]",
+                        "color": "#cd7f32"
                       },
-                      "2 silver [valid]": {
-                        "text": "silver [valid]"
+                      "02 silver_valid_records": {
+                        "text": "silver [valid]",
+                        "color": "#c0c0c0"
                       },
-                      "3 silver [error]": {
-                        "text": "silver [error]"
+                      "03 silver_filtered_out_records": {
+                        "text": "silver [filtered out]",
+                        "color": "#d1d5db"
                       },
-                      "4 gold [valid]": {
-                        "text": "gold [valid]"
+                      "04 silver_quarantined_records": {
+                        "text": "silver [quarantined]",
+                        "color": "#d1d5db"
                       },
-                      "5 gold [error]": {
-                        "text": "gold [error]"
+                      "05 silver_skipped_records": {
+                        "text": "silver [skipped]",
+                        "color": "#d1d5db"
+                      },
+                      "06 silver_deduplicated_records": {
+                        "text": "silver [deduplicated]",
+                        "color": "#d1d5db"
+                      },
+                      "07 gold_written_records": {
+                        "text": "gold [valid]",
+                        "color": "#d4af37"
+                      },
+                      "08 gold_excluded_by_contract_records": {
+                        "text": "gold [excluded]",
+                        "color": "#d1d5db"
+                      },
+                      "09 gold_quarantined_records": {
+                        "text": "gold [quarantined]",
+                        "color": "#d1d5db"
+                      },
+                      "10 gold_skipped_records": {
+                        "text": "gold [skipped]",
+                        "color": "#d1d5db"
+                      },
+                      "11 gold_deduplicated_records": {
+                        "text": "gold [deduplicated]",
+                        "color": "#d1d5db"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 70
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^01 bronze_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#cd7f32"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^02 silver_valid_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#c0c0c0"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^03 silver_filtered_out_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d1d5db"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^04 silver_quarantined_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d1d5db"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^05 silver_skipped_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d1d5db"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^06 silver_deduplicated_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d1d5db"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^07 gold_written_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d4af37"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^08 gold_excluded_by_contract_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d1d5db"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^09 gold_quarantined_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d1d5db"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^10 gold_skipped_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d1d5db"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^11 gold_deduplicated_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d1d5db"
                       }
                     }
                   }
@@ -335,12 +522,182 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Value"
+              "options": "percintage"
             },
             "properties": [
               {
-                "id": "decimals",
-                "value": 0
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^01 bronze_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#cd7f32"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^02 silver_valid_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#c0c0c0"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^03 silver_filtered_out_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d1d5db"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^04 silver_quarantined_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d1d5db"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^05 silver_skipped_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d1d5db"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^06 silver_deduplicated_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d1d5db"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^07 gold_written_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d4af37"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^08 gold_excluded_by_contract_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d1d5db"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^09 gold_quarantined_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d1d5db"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^10 gold_skipped_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d1d5db"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^11 gold_deduplicated_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d1d5db"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "row_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": ""
+              },
+              {
+                "id": "custom.width",
+                "value": 1
+              },
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "applyToRow": true
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "silver_deficit": {
+                        "text": "",
+                        "color": "red"
+                      },
+                      "gold_deficit": {
+                        "text": "",
+                        "color": "red"
+                      },
+                      "": {
+                        "text": "",
+                        "color": "rgba(0,0,0,0)"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           }
@@ -360,27 +717,36 @@
       },
       "targets": [
         {
-          "expr": "label_replace(round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[$__range])) or vector(0)), \"parameter\", \"1 bronze\", \"\", \"\") or label_replace(round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"silver\"}[$__range])) or vector(0)), \"parameter\", \"2 silver [valid]\", \"\", \"\") or label_replace(round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0)), \"parameter\", \"3 silver [error]\", \"\", \"\") or label_replace(round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"gold\"}[$__range])) or vector(0)), \"parameter\", \"4 gold [valid]\", \"\", \"\") or label_replace(round(clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"silver\"}[$__range])) or vector(0)) - (sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"gold\"}[$__range])) or vector(0)), 0)), \"parameter\", \"5 gold [error]\", \"\", \"\")",
-          "refId": "A",
           "format": "table",
-          "instant": true
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "rows",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
         }
       ],
       "transformations": [
         {
           "id": "organize",
           "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true
-            },
+            "excludeByName": {},
             "indexByName": {
               "parameter": 0,
-              "Value": 1
+              "value": 1,
+              "percintage": 2,
+              "row_status": 3
             },
             "renameByName": {
               "parameter": "parameter",
-              "Value": "value"
+              "value": "value",
+              "percintage": "percintage",
+              "row_status": ""
             }
           }
         }
@@ -391,7 +757,13 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
+<<<<<<< Updated upstream
+      "description": "Expanded mirror of the shared Runtime Status verdict, placed beside blocker causes for first-screen triage. Uses the same current-status recording rule as the compact Status panel: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN/no runtime status data; it is not an independent second signal. If UNKNOWN, check Runtime Telemetry Gap and Prometheus scrape/rule health before trusting zero count panels. Labels: pipeline, run_type. Next action: inspect top blocker reason, then active blocker detail or logs/traces.",
+||||||| Stash base
       "description": "Current snapshot from canonical recording rules. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN/no runtime status data. If UNKNOWN, check Monitor Runtime Telemetry Gap and Prometheus scrape/rule health before trusting zero count panels. Labels: pipeline, run_type. Next action: inspect top blocker reason, then active blocker detail or logs/traces.",
+=======
+      "description": "Current snapshot from canonical recording rules. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN/no runtime status data. If UNKNOWN, check Runtime Telemetry Gap and Prometheus scrape/rule health before trusting zero count panels. Labels: pipeline, run_type. Next action: inspect top blocker reason, then active blocker detail or logs/traces.",
+>>>>>>> Stashed changes
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -450,8 +822,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 6,
+        "w": 5,
+        "x": 0,
         "y": 13
       },
       "id": 9100,
@@ -470,7 +842,13 @@
         "textMode": "auto",
         "dataLinks": [
           {
+<<<<<<< Updated upstream
+            "title": "Open Runtime Blockers",
+||||||| Stash base
             "title": "Inspect Top Runtime Blockers",
+=======
+            "title": "Runtime Blockers",
+>>>>>>> Stashed changes
             "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=9101&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
@@ -494,7 +872,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Runtime Current Status",
+      "title": "Runtime Status",
       "type": "stat"
     },
     {
@@ -561,8 +939,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 0,
+        "w": 5,
+        "x": 15,
         "y": 19
       },
       "id": 9102,
@@ -593,7 +971,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Runtime Telemetry Gap",
+      "title": "Runtime Telemetry Gap",
       "type": "stat"
     },
     {
@@ -601,7 +979,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Top active runtime blocker reasons for the selected pipeline/run_type with severity and action_target labels. Time scope: current recording-rule snapshot. Empty table means no current blocker reason only when Monitor Runtime Current Status and Monitor Runtime Telemetry Gap are not UNKNOWN. Use the Inspect Active Runtime Blocker Detail drilldown for complete reason evidence.",
+      "description": "Top active runtime blocker reasons for the selected pipeline/run_type with severity and action_target labels. Time scope: current recording-rule snapshot. Empty table means no current blocker reason only when Runtime Status and Runtime Telemetry Gap are not UNKNOWN. Use the Inspect Active Runtime Blocker Detail drilldown for complete reason evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -649,8 +1027,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 7,
-        "x": 17,
+        "w": 18,
+        "x": 5,
         "y": 13
       },
       "id": 9101,
@@ -689,7 +1067,17 @@
           "refId": "A"
         }
       ],
-      "title": "Inspect Top Runtime Blockers",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "__name__": true
+            }
+          }
+        }
+      ],
+      "title": "Runtime Blockers",
       "type": "table"
     },
     {
@@ -736,8 +1124,8 @@
       "gridPos": {
         "h": 6,
         "w": 5,
-        "x": 12,
-        "y": 13
+        "x": 5,
+        "y": 19
       },
       "id": 16,
       "options": {
@@ -816,8 +1204,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 6,
+        "w": 4,
+        "x": 20,
         "y": 19
       },
       "id": 205,
@@ -860,7 +1248,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Failed Runs",
+      "title": "Failed Runs",
       "type": "stat"
     },
     {
@@ -912,8 +1300,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 12,
+        "w": 5,
+        "x": 10,
         "y": 19
       },
       "id": 220,
@@ -947,7 +1335,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Runtime Error Rate",
+      "title": "Runtime Error Rate",
       "type": "stat"
     },
     {
@@ -997,8 +1385,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 18,
+        "w": 5,
+        "x": 0,
         "y": 19
       },
       "id": 237,
@@ -1028,7 +1416,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Worst Stage Lag",
+      "title": "Worst Stage Lag",
       "type": "stat"
     },
     {
@@ -1037,13 +1425,13 @@
       "title": "First Action",
       "description": "First operator action for Runtime triage. Uses current snapshot panels before selected-range evidence. UNKNOWN means missing status telemetry or scrape/rule gap until proven otherwise.",
       "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 0,
-        "y": 13
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 7
       },
       "options": {
-        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> read <em>Monitor Runtime Current Status</em>, then inspect the top blocker reason. If status is CRIT, open <em>Inspect Active Runtime Blocker Detail</em>; if WARN, inspect terminal-run/stage lag evidence; if UNKNOWN, verify <em>Monitor Runtime Telemetry Gap</em> before treating zero as OK.</div>",
+        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\">Read <em>Runtime Status</em>, then inspect the top blocker reason.<br>If status is CRIT, open <em>Inspect Active Runtime Blocker Detail</em>,<br>if WARN, inspect terminal-run/stage lag evidence,<br>if UNKNOWN, verify <em>Runtime Telemetry Gap</em> before treating zero as OK.</div>",
         "mode": "html"
       },
       "links": [
@@ -1332,7 +1720,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows each active runtime blocker recording rule with its current value for the selected pipeline/run_type where the source metric exposes run_type. Empty table means no active blockers only when Monitor Runtime Current Status and Monitor Runtime Telemetry Gap are not UNKNOWN.",
+          "description": "Shows each active runtime blocker recording rule with its current value for the selected pipeline/run_type where the source metric exposes run_type. Empty table means no active blockers only when Runtime Status and Runtime Telemetry Gap are not UNKNOWN.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2922,7 +3310,7 @@
           "value": "-"
         },
         "datasource": "Quarantine Explorer",
-        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&pipeline=${pipeline}&run_type=${run_type:csv}",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
         "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs.",
         "hide": 0,
         "includeAll": false,
@@ -2949,7 +3337,7 @@
               "method": "GET",
               "data": ""
             },
-            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&pipeline=${pipeline}&run_type=${run_type:csv}"
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}"
           }
         },
         "refresh": 1,

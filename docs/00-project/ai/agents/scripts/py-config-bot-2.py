@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +22,14 @@ try:
 except ImportError:
     sys.stderr.write("ERROR: jsonschema not installed. Run: pip install jsonschema\n")
     sys.exit(2)
+
+from bioetl.infrastructure.config.composite_config_api import load_composite_config
+from bioetl.infrastructure.config.source_config_loader import (
+    normalize_source_config_payload,
+    validate_source_config_payload,
+)
+from bioetl.infrastructure.config.workflow_config_api import load_workflow_config
+from bioetl.domain.workflow import WorkflowStepConfig
 
 
 def load_schema(schema_path: Path) -> dict[str, Any]:
@@ -42,6 +51,18 @@ def _find_entity_files(entities_dir: Path) -> list[Path]:
 def _find_composite_files(composites_dir: Path) -> list[Path]:
     return [
         p for p in sorted(composites_dir.glob("*.yaml")) if not p.name.startswith("_")
+    ]
+
+
+def _find_provider_files(providers_dir: Path) -> list[Path]:
+    return [
+        p for p in sorted(providers_dir.glob("*.yaml")) if not p.name.startswith("_")
+    ]
+
+
+def _find_workflow_files(workflows_dir: Path) -> list[Path]:
+    return [
+        p for p in sorted(workflows_dir.glob("*.yaml")) if not p.name.startswith("_")
     ]
 
 
@@ -244,6 +265,244 @@ def _append_prefixed(messages: list[str], prefix: Path, items: list[str]) -> Non
     messages.extend(f"{prefix}: {item}" for item in items)
 
 
+def _pipeline_name_from_provider_entity(provider: str, entity: str) -> str:
+    return f"{provider}_{entity}"
+
+
+def _known_entity_surfaces(entity_files: Iterable[Path]) -> dict[str, set[str]]:
+    known: dict[str, set[str]] = {}
+    for path in entity_files:
+        provider = path.parent.name
+        entity = path.stem
+        known.setdefault(provider, set()).add(entity)
+    return known
+
+
+def _known_pipeline_names(entity_files: Iterable[Path]) -> set[str]:
+    return {
+        _pipeline_name_from_provider_entity(path.parent.name, path.stem)
+        for path in entity_files
+    }
+
+
+def _validate_contract_primary_keys(
+    entity_payload: dict[str, Any],
+) -> list[str]:
+    errors: list[str] = []
+    pipeline = entity_payload.get("pipeline")
+    contracts = entity_payload.get("contracts")
+    if not isinstance(pipeline, dict) or not isinstance(contracts, dict):
+        return errors
+
+    business_primary_keys = pipeline.get("business_primary_keys")
+    contract_primary_keys = contracts.get("primary_key")
+    if not isinstance(business_primary_keys, list) or not isinstance(
+        contract_primary_keys, list
+    ):
+        return errors
+
+    normalized_pipeline_keys = [str(item).strip() for item in business_primary_keys]
+    normalized_contract_keys = [str(item).strip() for item in contract_primary_keys]
+    if normalized_pipeline_keys != normalized_contract_keys:
+        errors.append(
+            "contracts.primary_key must match pipeline.business_primary_keys "
+            f"(contracts={normalized_contract_keys}, "
+            f"pipeline={normalized_pipeline_keys})"
+        )
+    return errors
+
+
+def _validate_entity_path_consistency(
+    config_path: Path, payload: dict[str, Any]
+) -> list[str]:
+    errors: list[str] = []
+    path_provider = config_path.parent.name
+    path_entity = config_path.stem
+
+    payload_provider = payload.get("provider")
+    payload_entity = payload.get("entity")
+    if payload_provider and payload_provider != path_provider:
+        errors.append(
+            f"path provider mismatch: path declares '{path_provider}' vs payload '{payload_provider}'"
+        )
+    if payload_entity and payload_entity != path_entity:
+        errors.append(
+            f"path entity mismatch: path declares '{path_entity}' vs payload '{payload_entity}'"
+        )
+    return errors
+
+
+def _validate_entity_cross_file_references(
+    config_path: Path,
+    payload: dict[str, Any],
+    *,
+    known_provider_names: set[str],
+) -> list[str]:
+    errors = _validate_entity_path_consistency(config_path, payload)
+    path_provider = config_path.parent.name
+    path_entity = config_path.stem
+
+    if path_provider not in known_provider_names:
+        errors.append(
+            f"missing provider runtime config: configs/providers/{path_provider}.yaml"
+        )
+
+    pipeline = payload.get("pipeline")
+    if isinstance(pipeline, dict):
+        expected_pipeline_name = _pipeline_name_from_provider_entity(
+            path_provider, path_entity
+        )
+        pipeline_name = pipeline.get("pipeline_name")
+        if pipeline_name and pipeline_name != expected_pipeline_name:
+            errors.append(
+                "pipeline_name mismatch: expected "
+                f"'{expected_pipeline_name}' from config path, got '{pipeline_name}'"
+            )
+
+    errors.extend(_validate_contract_primary_keys(payload))
+    return errors
+
+
+def _validate_provider_cross_file_references(
+    config_path: Path,
+    payload: dict[str, Any],
+    *,
+    known_entities: dict[str, set[str]],
+) -> list[str]:
+    errors: list[str] = []
+    provider_name = config_path.stem
+
+    top_level_provider = payload.get("provider")
+    if top_level_provider != provider_name:
+        errors.append(
+            f"provider mismatch: filename '{provider_name}' vs top-level '{top_level_provider}'"
+        )
+
+    normalized_payload: dict[str, Any] = {"source": payload.get("source", {})}
+    for key in ("entities", "entity_notes"):
+        if key in payload:
+            normalized_payload[key] = payload[key]
+
+    try:
+        validated = validate_source_config_payload(
+            normalize_source_config_payload(normalized_payload)
+        )
+    except Exception as exc:
+        errors.append(f"provider runtime validation failed: {exc}")
+        return errors
+
+    if validated.provider and validated.provider != provider_name:
+        errors.append(
+            "source.provider_config.provider mismatch: expected "
+            f"'{provider_name}', got '{validated.provider}'"
+        )
+
+    declared_entities = payload.get("entities")
+    if not isinstance(declared_entities, list) or not declared_entities:
+        errors.append("entities must be a non-empty list")
+        return errors
+
+    normalized_declared_entities = {str(item).strip() for item in declared_entities}
+    if "" in normalized_declared_entities:
+        errors.append("entities contains an empty entity name")
+
+    actual_entities = known_entities.get(provider_name, set())
+    missing_entity_configs = sorted(normalized_declared_entities - actual_entities)
+    unexpected_entity_configs = sorted(actual_entities - normalized_declared_entities)
+    if missing_entity_configs:
+        errors.append(
+            "entities references missing entity configs: "
+            + ", ".join(
+                f"configs/entities/{provider_name}/{entity}.yaml"
+                for entity in missing_entity_configs
+            )
+        )
+    if unexpected_entity_configs:
+        errors.append(
+            "provider config is missing declared entities present under configs/entities: "
+            + ", ".join(unexpected_entity_configs)
+        )
+
+    entity_notes = payload.get("entity_notes")
+    if entity_notes is not None:
+        if not isinstance(entity_notes, dict):
+            errors.append("entity_notes must be a mapping when present")
+        else:
+            note_keys = {str(key).strip() for key in entity_notes}
+            extra_notes = sorted(note_keys - normalized_declared_entities)
+            if extra_notes:
+                errors.append(
+                    "entity_notes contains undeclared entities: "
+                    + ", ".join(extra_notes)
+                )
+
+    return errors
+
+
+def _validate_composite_cross_file_references(
+    composite_name: str,
+    *,
+    config_dir: Path,
+    known_pipeline_names: set[str],
+) -> list[str]:
+    errors: list[str] = []
+    try:
+        config = load_composite_config(composite_name, config_dir=config_dir)
+    except Exception as exc:
+        return [f"composite runtime validation failed: {exc}"]
+
+    expected_name = f"composite_{composite_name}"
+    if config.name != expected_name:
+        errors.append(
+            f"composite.name mismatch: expected '{expected_name}', got '{config.name}'"
+        )
+
+    referenced_pipelines = [config.seed.pipeline]
+    referenced_pipelines.extend(
+        dependency.pipeline for dependency in config.dependencies
+    )
+    referenced_pipelines.extend(enricher.pipeline for enricher in config.enrichers)
+    missing = sorted(
+        pipeline_name
+        for pipeline_name in referenced_pipelines
+        if pipeline_name not in known_pipeline_names
+    )
+    if missing:
+        errors.append("composite references unknown pipelines: " + ", ".join(missing))
+    return errors
+
+
+def _validate_workflow_cross_file_references(
+    workflow_name: str,
+    *,
+    config_dir: Path,
+    known_pipeline_names: set[str],
+) -> list[str]:
+    errors: list[str] = []
+    try:
+        config = load_workflow_config(workflow_name, config_dir=config_dir)
+    except Exception as exc:
+        return [f"workflow runtime validation failed: {exc}"]
+
+    if config.name != workflow_name:
+        errors.append(
+            f"workflow.name mismatch: expected '{workflow_name}', got '{config.name}'"
+        )
+
+    missing_pipelines = sorted(
+        step.pipeline_name
+        for step in config.steps
+        if isinstance(step, WorkflowStepConfig)
+        and step.pipeline_name not in known_pipeline_names
+    )
+    if missing_pipelines:
+        errors.append(
+            "workflow references unknown pipeline steps: "
+            + ", ".join(missing_pipelines)
+        )
+    return errors
+
+
 def _process_entity_config(
     config_path: Path,
     *,
@@ -295,11 +554,41 @@ def _process_entity_config(
     )
 
 
+def _process_provider_config(
+    config_path: Path,
+    *,
+    verbose: bool,
+    known_entities: dict[str, set[str]],
+    errors: list[str],
+) -> None:
+    """Validate one provider runtime config and append findings."""
+    if verbose:
+        sys.stdout.write(f"Checking provider: {config_path}\n")
+    try:
+        payload = _load_yaml_payload(config_path)
+    except yaml.YAMLError as exc:
+        errors.append(f"{config_path}: YAML parse error: {exc}")
+        return
+    if payload is None:
+        errors.append(f"{config_path}: provider config must be a YAML mapping")
+        return
+    _append_prefixed(
+        errors,
+        config_path,
+        _validate_provider_cross_file_references(
+            config_path,
+            payload,
+            known_entities=known_entities,
+        ),
+    )
+
+
 def _process_composite_config(
     config_path: Path,
     *,
     verbose: bool,
     composite_schema: dict[str, Any],
+    known_pipeline_names: set[str],
     errors: list[str],
 ) -> None:
     """Validate one composite config and append findings."""
@@ -316,6 +605,45 @@ def _process_composite_config(
     valid, err_msg = _validate_yaml_schema(payload, composite_schema)
     if not valid:
         errors.append(f"{config_path}: {err_msg}")
+        return
+    _append_prefixed(
+        errors,
+        config_path,
+        _validate_composite_cross_file_references(
+            config_path.stem,
+            config_dir=config_path.parent,
+            known_pipeline_names=known_pipeline_names,
+        ),
+    )
+
+
+def _process_workflow_config(
+    config_path: Path,
+    *,
+    verbose: bool,
+    known_pipeline_names: set[str],
+    errors: list[str],
+) -> None:
+    """Validate one workflow runtime config and append findings."""
+    if verbose:
+        sys.stdout.write(f"Checking workflow: {config_path}\n")
+    try:
+        payload = _load_yaml_payload(config_path)
+    except yaml.YAMLError as exc:
+        errors.append(f"{config_path}: YAML parse error: {exc}")
+        return
+    if payload is None:
+        errors.append(f"{config_path}: workflow config must be a YAML mapping")
+        return
+    _append_prefixed(
+        errors,
+        config_path,
+        _validate_workflow_cross_file_references(
+            config_path.stem,
+            config_dir=config_path.parent,
+            known_pipeline_names=known_pipeline_names,
+        ),
+    )
 
 
 def _config_validation_depth_summary(configs_root: Path) -> dict[str, int]:
@@ -353,6 +681,100 @@ def _emit_validation_depth_summary(configs_root: Path) -> None:
     sys.stdout.write(f"Config validation surface family depths: {rendered}\n")
 
 
+def validate_config_tree(
+    configs_root: Path,
+    *,
+    verbose: bool = False,
+    skip_runtime_normalized_check: bool = False,
+) -> tuple[list[str], list[str], int]:
+    """Validate the canonical config tree and return errors, warnings, and count."""
+    schema_dir = configs_root / "_schema"
+    pipeline_schema = load_schema(schema_dir / "pipeline.json")
+    composite_schema = load_schema(schema_dir / "composite.json")
+    base_pipeline_defaults = _load_base_pipeline_defaults(configs_root)
+
+    entities_dir = configs_root / "entities"
+    composites_dir = configs_root / "composites"
+    providers_dir = configs_root / "providers"
+    workflows_dir = configs_root / "workflows"
+
+    entity_files = _find_entity_files(entities_dir) if entities_dir.exists() else []
+    composite_files = (
+        _find_composite_files(composites_dir) if composites_dir.exists() else []
+    )
+    provider_files = (
+        _find_provider_files(providers_dir) if providers_dir.exists() else []
+    )
+    workflow_files = (
+        _find_workflow_files(workflows_dir) if workflows_dir.exists() else []
+    )
+
+    known_entities = _known_entity_surfaces(entity_files)
+    known_provider_names = set(known_entities)
+    known_pipeline_names = _known_pipeline_names(entity_files)
+
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    for config_path in entity_files:
+        _process_entity_config(
+            config_path,
+            verbose=verbose,
+            pipeline_schema=pipeline_schema,
+            base_pipeline_defaults=base_pipeline_defaults,
+            skip_runtime_normalized_check=skip_runtime_normalized_check,
+            errors=errors,
+            warnings=warnings,
+        )
+        try:
+            payload = _load_yaml_payload(config_path)
+        except yaml.YAMLError:
+            payload = None
+        if payload is not None:
+            _append_prefixed(
+                errors,
+                config_path,
+                _validate_entity_cross_file_references(
+                    config_path,
+                    payload,
+                    known_provider_names=known_provider_names,
+                ),
+            )
+
+    for config_path in provider_files:
+        _process_provider_config(
+            config_path,
+            verbose=verbose,
+            known_entities=known_entities,
+            errors=errors,
+        )
+
+    for config_path in composite_files:
+        _process_composite_config(
+            config_path,
+            verbose=verbose,
+            composite_schema=composite_schema,
+            known_pipeline_names=known_pipeline_names,
+            errors=errors,
+        )
+
+    for config_path in workflow_files:
+        _process_workflow_config(
+            config_path,
+            verbose=verbose,
+            known_pipeline_names=known_pipeline_names,
+            errors=errors,
+        )
+
+    total = (
+        len(entity_files)
+        + len(provider_files)
+        + len(composite_files)
+        + len(workflow_files)
+    )
+    return errors, warnings, total
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate unified pipeline configs")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
@@ -369,35 +791,11 @@ def main() -> int:
     args = parser.parse_args()
 
     configs_root = Path("configs")
-    schema_dir = Path("configs/_schema")
-    pipeline_schema = load_schema(schema_dir / "pipeline.json")
-    composite_schema = load_schema(schema_dir / "composite.json")
-    base_pipeline_defaults = _load_base_pipeline_defaults(configs_root)
-
-    entity_files = _find_entity_files(Path("configs/entities"))
-    composite_files = _find_composite_files(Path("configs/composites"))
-
-    errors: list[str] = []
-    warnings: list[str] = []
-
-    for config_path in entity_files:
-        _process_entity_config(
-            config_path,
-            verbose=args.verbose,
-            pipeline_schema=pipeline_schema,
-            base_pipeline_defaults=base_pipeline_defaults,
-            skip_runtime_normalized_check=args.skip_runtime_normalized_check,
-            errors=errors,
-            warnings=warnings,
-        )
-
-    for config_path in composite_files:
-        _process_composite_config(
-            config_path,
-            verbose=args.verbose,
-            composite_schema=composite_schema,
-            errors=errors,
-        )
+    errors, warnings, total = validate_config_tree(
+        configs_root,
+        verbose=args.verbose,
+        skip_runtime_normalized_check=args.skip_runtime_normalized_check,
+    )
 
     _emit_validation_depth_summary(configs_root)
 
@@ -411,7 +809,6 @@ def main() -> int:
         for warn in warnings:
             sys.stdout.write(f"  {warn}\n")
 
-    total = len(entity_files) + len(composite_files)
     if not errors and not warnings:
         sys.stdout.write(f"OK: all {total} configs validated\n")
         return 0

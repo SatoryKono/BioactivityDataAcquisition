@@ -38,7 +38,9 @@ def test_target_component_types_json_vocab_custom_rule_rejects_unknown_member() 
     )
 
 
-def test_target_component_relationships_json_vocab_custom_rule_rejects_malformed_json() -> None:
+def test_target_component_relationships_json_vocab_custom_rule_rejects_malformed_json() -> (
+    None
+):
     rule = FieldValidation(
         field="component_relationships",
         validation_type="custom",

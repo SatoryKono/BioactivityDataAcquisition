@@ -116,6 +116,13 @@ For architecture-focused local runs, prefer the explicit aliases:
 - `S7-architecture-fast-boundary`
 - `S7-architecture-slow-governance`
 
+For a deterministic parallel-safe unit wave, prefer the canonical QA lane
+instead of ad hoc shard lists:
+
+```bash
+python -m scripts.engineering.qa run-tests --suite unit-parallel-safe --skip-preflight -- --no-cov
+```
+
 ## Integration And E2E Quick Paths
 
 For the tracked integration/VCR execution policy, prefer explicit replay for

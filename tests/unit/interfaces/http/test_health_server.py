@@ -5,18 +5,26 @@ from __future__ import annotations
 import asyncio
 import json
 from collections.abc import AsyncGenerator
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
 import pytest_asyncio
 
-from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
+from bioetl.domain.control_plane import (
+    RunCodeProvenance,
+    RunLedgerEntry,
+    RunManifest,
+)
+from bioetl.domain.control_plane.run_ledger import (
+    RUN_FAILED_EVENT,
+    RUN_FINISHED_EVENT,
+)
 from bioetl.domain.types import HealthStatus, RunID, RunType
 from bioetl.interfaces.http.health_server import HealthServer
 from bioetl.interfaces.http.types import HealthResponse
-from tests.helpers.control_plane import InMemoryRunManifestStore
+from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
 
 
 class TestHealthResponse:
@@ -851,14 +859,18 @@ class TestHealthServerControlPlaneSelector:
     ) -> AsyncGenerator[tuple[HealthServer, InMemoryRunManifestStore], None]:
         """Start server with an in-memory control-plane run catalog."""
         manifest_store = InMemoryRunManifestStore()
+        ledger_store = InMemoryRunLedgerStore()
         created_at = datetime(2026, 5, 12, 8, 21, tzinfo=UTC)
+        run_id_1 = RunID(uuid4())
+        run_id_2 = RunID(uuid4())
+        run_id_3 = RunID(uuid4())
         manifest_store.save(
             RunManifest(
                 manifest_id="manifest-1",
                 execution_fingerprint="fingerprint-1",
                 schema_version="1.0",
                 created_at=created_at,
-                run_id=RunID(uuid4()),
+                run_id=run_id_1,
                 run_type=RunType.INCREMENTAL,
                 pipeline_name="chembl_activity",
                 provider="chembl",
@@ -879,7 +891,7 @@ class TestHealthServerControlPlaneSelector:
                 execution_fingerprint="fingerprint-2",
                 schema_version="1.0",
                 created_at=created_at,
-                run_id=RunID(uuid4()),
+                run_id=run_id_2,
                 run_type=RunType.BACKFILL,
                 pipeline_name="chembl_activity",
                 provider="chembl",
@@ -900,7 +912,7 @@ class TestHealthServerControlPlaneSelector:
                 execution_fingerprint="fingerprint-3",
                 schema_version="1.0",
                 created_at=created_at,
-                run_id=RunID(uuid4()),
+                run_id=run_id_3,
                 run_type=RunType.INCREMENTAL,
                 pipeline_name="pubchem_compound",
                 provider="pubchem",
@@ -915,11 +927,42 @@ class TestHealthServerControlPlaneSelector:
                 ),
             )
         )
+        ledger_store.append(
+            RunLedgerEntry(
+                entry_id="ledger-1",
+                manifest_id="manifest-1",
+                run_id=run_id_1,
+                event_type=RUN_FINISHED_EVENT,
+                occurred_at=created_at + timedelta(minutes=1),
+                status="success",
+            )
+        )
+        ledger_store.append(
+            RunLedgerEntry(
+                entry_id="ledger-2",
+                manifest_id="manifest-2",
+                run_id=run_id_2,
+                event_type=RUN_FAILED_EVENT,
+                occurred_at=created_at + timedelta(minutes=5),
+                status="failed",
+            )
+        )
+        ledger_store.append(
+            RunLedgerEntry(
+                entry_id="ledger-3",
+                manifest_id="manifest-3",
+                run_id=run_id_3,
+                event_type=RUN_FINISHED_EVENT,
+                occurred_at=created_at + timedelta(minutes=3),
+                status="success",
+            )
+        )
 
         server = HealthServer(
             host="127.0.0.1",
             port=0,
             run_manifest_port=manifest_store,
+            run_ledger_port=ledger_store,
         )
         await server.start()
         yield server, manifest_store
@@ -1135,6 +1178,104 @@ class TestHealthServerControlPlaneSelector:
         assert status_code == 200
         data = json.loads(body)
         assert data == {"items": ["-", *expected_run_ids]}
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_selector_context_resolves_latest_terminal_run(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Selector context should choose latest terminal evidence for a pipeline."""
+        server, manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        latest_manifest = next(
+            manifest
+            for manifest in manifest_store.list_all()
+            if manifest.manifest_id == "manifest-2"
+        )
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/selector-context?pipeline=chembl_activity",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data["contract"] == "control_plane_selector_context_v1"
+        assert data["resolved_via"] == "latest_terminal_run_for_scope"
+        assert data["selected"]["pipeline"] == "chembl_activity"
+        assert data["selected"]["run_type"] == "backfill"
+        assert data["selected"]["run_id"] == str(latest_manifest.run_id)
+        assert data["selected"]["run_status"] == "failed"
+        assert data["selected"]["completed_at_source"] == "run_ledger_terminal_event"
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_selector_context_run_id_overrides_scope(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Exact run_id should resolve the selected manifest even with stale scope."""
+        server, manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        selected_manifest = next(
+            manifest
+            for manifest in manifest_store.list_all()
+            if manifest.manifest_id == "manifest-1"
+        )
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/selector-context?"
+            f"pipeline=pubchem_compound&run_id={selected_manifest.run_id}",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data["resolved_via"] == "selected_run_id"
+        assert data["selected"]["pipeline"] == "chembl_activity"
+        assert data["selected"]["run_type"] == "incremental"
+        assert data["selected"]["run_id"] == str(selected_manifest.run_id)
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_selector_context_supports_workflow_alias_scope(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Workflow aliases should narrow selector context to the matching pipeline."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/selector-context?workflow=workflow_chembl_activity",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data["selected"]["pipeline"] == "chembl_activity"
+        assert data["selected"]["run_type"] == "backfill"
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_filter_options_exposes_pipeline_dimension(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Selector catalog should expose non-run_id dimensions for variable shells."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/filter-options?"
+            "dimension=pipeline&response_shape=list&workflow=chembl_activity",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data == {"items": ["chembl_activity"]}
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_returns_latest_manifest_for_scope(

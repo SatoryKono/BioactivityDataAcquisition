@@ -104,8 +104,7 @@ def test_top_level_unit_root_has_no_legacy_test_modules() -> None:
 def test_tests_root_has_no_legacy_top_level_test_modules() -> None:
     """`tests/` root should not accumulate unlabeled lane-less modules."""
     top_level_tests = sorted(
-        path.relative_to(ROOT).as_posix()
-        for path in (ROOT / "tests").glob("test_*.py")
+        path.relative_to(ROOT).as_posix() for path in (ROOT / "tests").glob("test_*.py")
     )
 
     assert not top_level_tests, (

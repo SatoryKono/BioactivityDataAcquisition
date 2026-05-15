@@ -35,9 +35,7 @@ class StructuredPayloadSemanticPolicy(StrEnum):
     RAW_JSON_PLUS_CANONICAL_JSON_BEFORE_SEMANTIC_TRANSFORM = (
         "raw_json_plus_canonical_json_before_semantic_transform"
     )
-    CANONICAL_JSON_BIBLIOGRAPHIC_EVIDENCE = (
-        "canonical_json_bibliographic_evidence"
-    )
+    CANONICAL_JSON_BIBLIOGRAPHIC_EVIDENCE = "canonical_json_bibliographic_evidence"
     HASHED_PII_CANONICAL_JSON_ONLY = "hashed_pii_canonical_json_only"
     CANONICAL_JSON_COMMENT_PROJECTION = "canonical_json_comment_projection"
 

@@ -126,6 +126,11 @@ quality:
             type: required
             nullable: false
             error_message: Activity ID is required
+        -   field: canonical_smiles
+            type: custom
+            validator: smiles_validator
+            nullable: true
+            error_message: canonical_smiles must be a valid canonical SMILES value when present
         -   field: standard_value
             type: range
             min: 0
@@ -481,6 +486,7 @@ filters:
             - units
             - standard_value
             - standard_units
+            - standard_type
             - standard_flag
             - pchembl_value
             - uo_units

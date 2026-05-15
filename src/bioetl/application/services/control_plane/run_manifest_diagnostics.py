@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from typing import cast
 
 from bioetl.application.services.control_plane._run_manifest_diagnostics_base import (
@@ -10,46 +10,24 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_base im
     _resolve_base_summary_replay_context,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_base_helpers import (
-    _resolve_operator_replay_mode,
     _resolve_snapshot_status,
-    _resolve_source_posture,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_ledger import (
-    _process_ledger_entries,
+from bioetl.application.services.control_plane._run_manifest_diagnostics_finalization import (
+    attach_base_summary_runtime_views as _attach_base_summary_runtime_views,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_main_helpers import (
-    _build_unified_reproducibility_diagnostics,
-)
-from bioetl.application.services.control_plane._run_manifest_diagnostics_persistence import (
-    build_alert_signals,
-    build_next_steps,
-    build_persistence_profile,
+from bioetl.application.services.control_plane._run_manifest_diagnostics_finalization import (
+    build_final_diagnostics_summary as _build_final_diagnostics_summary,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
+    _build_operator_replay_projection,
+    _build_replay_state_projection,
     _build_resume_contract,
-    _is_composite_execution_context,
-    _resolve_broader_historical_exact_replay_state,
-    _resolve_continuation_mode,
-    _resolve_exact_replay_blockers,
-    _resolve_historical_live_run_upgrade_state,
-    _resolve_replay_capability_reason,
-    _resolve_replay_mode,
-    _resolve_replay_occurrence_kind,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
-    merge_ledger_input_snapshots_into_summary,
     resolve_post_manifest_input_snapshot_materialization_mode,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_source_refs import (
-    _attach_rich_composite_replay_support,
     _build_effective_source_refs,
-)
-from bioetl.application.services.control_plane._run_manifest_diagnostics_summary import (
-    _build_final_summary,
-    _FinalSummaryRequest,
-)
-from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring import (
-    build_reproducibility_audit_scoring,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -57,51 +35,31 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 )
 
 
-def _attach_base_summary_runtime_views(
-    manifest: RunManifest,
-    summary: dict[str, object],
-) -> None:
-    """Attach persistence, alert, and scoring overlays to base summary."""
-    persistence_profile = build_persistence_profile(
-        base_summary=summary,
-        ledger_entries_present=False,
-        artifact_refs=[],
-        lineage_fragment_ids=set(),
-        missing_link_count=0,
-    )
-    summary["persistence_profile"] = persistence_profile
-    summary["alert_signals"] = build_alert_signals(
-        latest_status=None,
-        artifact_refs=[],
-        lineage_fragment_ids=set(),
-        missing_link_count=0,
-        composite_resume_reconstructability_gap=_is_composite_execution_context(
-            manifest
-        ),
-        dq_signal_present=False,
-        cross_validation_signal_present=False,
-        required_persistence_profile_missing_requirements=cast(
-            list[str],
-            persistence_profile.get("required_profile_missing_requirements", []),
-        ),
-        replay_ready_missing_requirements=cast(
-            list[str],
-            persistence_profile.get("replay_ready_missing_requirements", []),
-        ),
-        forensic_grade_missing_requirements=cast(
-            list[str],
-            persistence_profile.get("forensic_grade_missing_requirements", []),
-        ),
-    )
-    summary["next_steps"] = build_next_steps(
-        cast(dict[str, bool], summary["alert_signals"])
-    )
-    summary["reproducibility_diagnostics"] = _build_unified_reproducibility_diagnostics(
-        summary
-    )
-    summary["reproducibility_audit_score"] = build_reproducibility_audit_scoring(
-        summary
-    )
+@dataclass(frozen=True, slots=True)
+class _ReplayRefreshContext:
+    """Replay-refresh inputs reused after snapshot materialization."""
+
+    effective_manifest: RunManifest
+    policy_assessment: object
+    input_snapshots: list[dict[str, object]]
+    resume_requested: bool
+    requested_exact_replay: bool
+
+
+@dataclass(frozen=True, slots=True)
+class _ReplayRefreshProjection:
+    """Replay-field projection built after materialized snapshot refresh."""
+
+    replay_payload: dict[str, object]
+    exact_replay_eligible: bool
+    replay_mode: str
+
+
+@dataclass(frozen=True, slots=True)
+class _ReplayRefreshSummaryUpdate:
+    """All replay-summary updates derived after snapshot materialization."""
+
+    payload: dict[str, object]
 
 
 def _build_base_summary(
@@ -123,80 +81,24 @@ def build_diagnostics_summary(
 
     if not ledger_entries:
         return base_summary
-    base_summary = merge_ledger_input_snapshots_into_summary(
-        base_summary,
-        ledger_entries,
-    )
-    base_summary = _refresh_replay_summary_from_materialized_snapshots(
+    return _build_final_diagnostics_summary(
         manifest=manifest,
-        summary=base_summary,
+        base_summary=base_summary,
+        ledger_entries=ledger_entries,
+        refresh_replay_summary_fn=_refresh_replay_summary_from_materialized_snapshots,
     )
-    base_summary = _attach_rich_composite_replay_support(
-        base_summary,
-        ledger_entries,
-    )
-
-    (
-        family_counter,
-        type_counter,
-        artifact_refs,
-        lineage_fragment_ids,
-        dq_rule_ids,
-        dq_dispositions,
-        dq_report_paths,
-        dq_violation_kinds,
-        cross_validation_rule_ids,
-        cross_validation_config_paths,
-        cross_validation_quarantine_policies,
-        cross_validation_replay_contracts,
-        occurrence_only_diagnostic_scopes,
-        dq_signal_present,
-        cross_validation_signal_present,
-        missing_link_count,
-        correlation_anchor_gaps,
-        resume_diagnostics,
-    ) = _process_ledger_entries(ledger_entries)
-
-    final_summary = _build_final_summary(
-        _FinalSummaryRequest(
-            manifest=manifest,
-            base_summary=base_summary,
-            ledger_entries=ledger_entries,
-            family_counter=family_counter,
-            type_counter=type_counter,
-            artifact_refs=artifact_refs,
-            lineage_fragment_ids=lineage_fragment_ids,
-            dq_rule_ids=dq_rule_ids,
-            dq_dispositions=dq_dispositions,
-            dq_report_paths=dq_report_paths,
-            dq_violation_kinds=dq_violation_kinds,
-            cross_validation_rule_ids=cross_validation_rule_ids,
-            cross_validation_config_paths=cross_validation_config_paths,
-            cross_validation_quarantine_policies=(cross_validation_quarantine_policies),
-            cross_validation_replay_contracts=cross_validation_replay_contracts,
-            occurrence_only_diagnostic_scopes=occurrence_only_diagnostic_scopes,
-            dq_signal_present=dq_signal_present,
-            cross_validation_signal_present=cross_validation_signal_present,
-            missing_link_count=missing_link_count,
-            correlation_anchor_gaps=correlation_anchor_gaps,
-            resume_diagnostics=resume_diagnostics,
-        )
-    )
-    final_summary["reproducibility_diagnostics"] = (
-        _build_unified_reproducibility_diagnostics(final_summary)
-    )
-    return final_summary
 
 
 def _refresh_replay_summary_build_policy_assessment(
     manifest: RunManifest,
     summary: dict[str, object],
     input_snapshots: list[object],
-) -> tuple[RunManifest, object, bool]:
+) -> _ReplayRefreshContext:
     """Build policy assessment from materialized snapshots."""
+    snapshot_payloads = cast("list[dict[str, object]]", input_snapshots)
     source_refs = _build_effective_source_refs(
         manifest=manifest,
-        input_snapshots=input_snapshots,
+        input_snapshots=snapshot_payloads,
     )
     replay_assessment_seed = cast(
         "dict[str, object]",
@@ -229,86 +131,54 @@ def _refresh_replay_summary_build_policy_assessment(
         replay_capability=policy_assessment.replay_capability,
         source_refs=source_refs,
     )
-    return effective_manifest, policy_assessment, resume_requested
+    return _ReplayRefreshContext(
+        effective_manifest=effective_manifest,
+        policy_assessment=policy_assessment,
+        input_snapshots=snapshot_payloads,
+        resume_requested=resume_requested,
+        requested_exact_replay=requested_exact_replay,
+    )
 
 
-def _refresh_replay_summary_update_replay_fields(
-    updated: dict[str, object],
-    effective_manifest: RunManifest,
-    policy_assessment: object,
-    input_snapshots: list[object],
-    resume_requested: bool,
-    requested_exact_replay: bool,
-) -> tuple[dict[str, object], bool, str, str]:
-    """Update replay-related fields in summary."""
-    updated["replay_capability"] = policy_assessment.replay_capability.value
-    updated["replay_capability_assessment"] = policy_assessment.to_dict()
-    updated["replay_capability_reason"] = _resolve_replay_capability_reason(
+def _build_refresh_replay_projection(
+    refresh_context: _ReplayRefreshContext,
+) -> _ReplayRefreshProjection:
+    """Return replay-field projection after snapshot materialization refresh."""
+    effective_manifest = refresh_context.effective_manifest
+    policy_assessment = refresh_context.policy_assessment
+    input_snapshots = refresh_context.input_snapshots
+    operator_replay_projection = _build_operator_replay_projection(
         manifest=effective_manifest,
-        input_snapshots=cast("list[dict[str, object]]", input_snapshots),
-        resume_requested=resume_requested,
+        input_snapshots=input_snapshots,
+        requested_exact_replay=refresh_context.requested_exact_replay,
+        resume_requested=refresh_context.resume_requested,
         policy_assessment=policy_assessment,
     )
-    updated["exact_replay_blockers"] = _resolve_exact_replay_blockers(
-        manifest=effective_manifest,
-        policy_assessment=policy_assessment,
+    return _ReplayRefreshProjection(
+        replay_payload={
+            "replay_capability": policy_assessment.replay_capability.value,
+            "replay_capability_assessment": policy_assessment.to_dict(),
+            **operator_replay_projection,
+            **_build_replay_state_projection(
+                manifest=effective_manifest,
+                input_snapshots=input_snapshots,
+                policy_assessment=policy_assessment,
+            ),
+        },
+        exact_replay_eligible=bool(operator_replay_projection["exact_replay_eligible"]),
+        replay_mode=str(operator_replay_projection["replay_mode"]),
     )
-    exact_replay_eligible = (
-        effective_manifest.replay_capability.value == "exact_replay_supported"
-        and not updated["exact_replay_blockers"]
-    )
-    updated["exact_replay_eligible"] = exact_replay_eligible
-    updated["replay_readiness_verdict"] = (
-        policy_assessment.replay_readiness_verdict.value
-    )
-    replay_mode = _resolve_replay_mode(
-        manifest=effective_manifest,
-        requested_exact_replay=requested_exact_replay,
-        resume_requested=resume_requested,
-    )
-    continuation_mode = _resolve_continuation_mode(
-        manifest=effective_manifest,
-        requested_exact_replay=requested_exact_replay,
-        resume_requested=resume_requested,
-    )
-    updated["replay_mode"] = replay_mode
-    updated["continuation_mode"] = continuation_mode
-    updated["operator_replay_mode"] = _resolve_operator_replay_mode(
-        replay_mode=replay_mode,
-        continuation_mode=continuation_mode,
-        replay_readiness_verdict=policy_assessment.replay_readiness_verdict.value,
-    )
-    updated["replay_occurrence_kind"] = _resolve_replay_occurrence_kind(
-        manifest=effective_manifest,
-        input_snapshots=cast("list[dict[str, object]]", input_snapshots),
-        policy_assessment=policy_assessment,
-    )
-    updated["historical_live_run_upgrade_state"] = (
-        _resolve_historical_live_run_upgrade_state(
-            manifest=effective_manifest,
-            input_snapshots=cast("list[dict[str, object]]", input_snapshots),
-            policy_assessment=policy_assessment,
-        )
-    )
-    updated["broader_historical_exact_replay_state"] = (
-        _resolve_broader_historical_exact_replay_state(
-            manifest=effective_manifest,
-            input_snapshots=cast("list[dict[str, object]]", input_snapshots),
-            policy_assessment=policy_assessment,
-        )
-    )
-    updated["source_posture"] = _resolve_source_posture(policy_assessment)
-    return updated, exact_replay_eligible, replay_mode, continuation_mode
 
 
 def _refresh_replay_summary_update_snapshot_fields(
     updated: dict[str, object],
-    input_snapshots: list[object],
+    refresh_context: _ReplayRefreshContext,
     exact_replay_eligible: bool,
     replay_mode: str,
-    policy_assessment: object,
 ) -> dict[str, object]:
     """Update snapshot-related fields in summary."""
+    input_snapshots = refresh_context.input_snapshots
+    policy_assessment = refresh_context.policy_assessment
     materialization_mode = resolve_post_manifest_input_snapshot_materialization_mode(
         cast("list[dict[str, object]]", input_snapshots)
     )
@@ -331,6 +201,30 @@ def _refresh_replay_summary_update_snapshot_fields(
     return updated
 
 
+def _build_refresh_summary_update(
+    *,
+    summary: dict[str, object],
+    refresh_context: _ReplayRefreshContext,
+) -> _ReplayRefreshSummaryUpdate:
+    """Build the full summary update after replay refresh and snapshot merge."""
+    updated = dict(summary)
+    replay_projection = _build_refresh_replay_projection(refresh_context)
+    updated.update(replay_projection.replay_payload)
+    updated = _refresh_replay_summary_update_snapshot_fields(
+        updated=updated,
+        refresh_context=refresh_context,
+        exact_replay_eligible=replay_projection.exact_replay_eligible,
+        replay_mode=replay_projection.replay_mode,
+    )
+    updated["resume_contract"] = _build_resume_contract(
+        manifest=refresh_context.effective_manifest,
+        requested_exact_replay=refresh_context.requested_exact_replay,
+        resume_requested=refresh_context.resume_requested,
+        policy_assessment=refresh_context.policy_assessment,
+    )
+    return _ReplayRefreshSummaryUpdate(payload=updated)
+
+
 def _refresh_replay_summary_from_materialized_snapshots(
     *,
     manifest: RunManifest,
@@ -340,44 +234,15 @@ def _refresh_replay_summary_from_materialized_snapshots(
     input_snapshots = summary.get("input_snapshots")
     if not isinstance(input_snapshots, list) or not input_snapshots:
         return summary
-    (
-        effective_manifest,
-        policy_assessment,
-        resume_requested,
-    ) = _refresh_replay_summary_build_policy_assessment(
+    refresh_context = _refresh_replay_summary_build_policy_assessment(
         manifest=manifest,
         summary=summary,
         input_snapshots=cast("list[object]", input_snapshots),
     )
-    requested_exact_replay = bool(summary.get("requested_exact_replay", False))
-    updated = dict(summary)
-    (
-        updated,
-        exact_replay_eligible,
-        replay_mode,
-        _continuation_mode,
-    ) = _refresh_replay_summary_update_replay_fields(
-        updated=updated,
-        effective_manifest=effective_manifest,
-        policy_assessment=policy_assessment,
-        input_snapshots=cast("list[object]", input_snapshots),
-        resume_requested=resume_requested,
-        requested_exact_replay=requested_exact_replay,
-    )
-    updated = _refresh_replay_summary_update_snapshot_fields(
-        updated=updated,
-        input_snapshots=cast("list[object]", input_snapshots),
-        exact_replay_eligible=exact_replay_eligible,
-        replay_mode=replay_mode,
-        policy_assessment=policy_assessment,
-    )
-    updated["resume_contract"] = _build_resume_contract(
-        manifest=effective_manifest,
-        requested_exact_replay=requested_exact_replay,
-        resume_requested=resume_requested,
-        policy_assessment=policy_assessment,
-    )
-    return updated
+    return _build_refresh_summary_update(
+        summary=summary,
+        refresh_context=refresh_context,
+    ).payload
 
 
 __all__ = ["build_diagnostics_summary"]

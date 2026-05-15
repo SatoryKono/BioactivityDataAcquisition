@@ -58,6 +58,51 @@
       ],
       "nullable": true,
       "description": ""
+    },
+    "publication_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Source ChEMBL publication identifier retained as lineage anchor."
+    },
+    "doi": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Canonical publication DOI used for cross-provider publication joins."
+    },
+    "pmid": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Canonical PubMed identifier used for cross-provider publication joins."
+    },
+    "pmc_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Canonical PubMed Central identifier retained for publication lineage."
+    },
+    "title": {
+      "type": "string",
+      "nullable": false,
+      "description": "Canonical-cleaned publication title retained as fallback join evidence."
+    },
+    "src_id": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Provider source identifier retained as source-scoped lineage metadata."
     }
   },
   "required": [
@@ -66,6 +111,7 @@
     "_enrichment_status",
     "_index",
     "_source_providers",
-    "entity_id"
+    "entity_id",
+    "title"
   ]
 }

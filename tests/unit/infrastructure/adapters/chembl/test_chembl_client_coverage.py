@@ -8,6 +8,7 @@ import pytest
 
 from bioetl.domain.entities.chembl import (
     ActivityRecord,
+    ChemblPublicationRecord,
     CompoundLinkRecord,
     PublicationSimilarityRecord,
     TissueRecord,
@@ -81,6 +82,14 @@ async def test_fetch_as_models_invalid_type(adapter):
     ("entity_type", "record", "expected_type"),
     (
         (
+            "publication",
+            {
+                "publication_id": "CHEMBL1234567",
+                "title": "Deterministic publication alias coverage",
+            },
+            ChemblPublicationRecord,
+        ),
+        (
             "tissue",
             {
                 "tissue_id": "CHEMBL-T1",
@@ -120,6 +129,7 @@ async def test_fetch_as_models_supports_newly_registered_chembl_dtos(
     expected_type,
 ):
     plural_key_by_entity = {
+        "publication": "documents",
         "tissue": "tissues",
         "compound_record": "compound_records",
         "publication_similarity": "document_similarities",

@@ -444,7 +444,7 @@ class TestActivityTransformerSilverContract:
         ("standard_type", "missing_field"),
         (
             ("Ratio", "standard_units"),
-            ("Relative potency", "uo_units"),
+            ("Ratio", "uo_units"),
         ),
     )
     async def test_unitless_activity_measurements_are_quarantined_when_units_missing(

@@ -59,7 +59,7 @@ from bioetl.domain.ports import (
     MetadataCoordinatorPort,
     SilverMetadataInput,
 )
-from bioetl.domain.types import RunType
+from bioetl.domain.types import BatchID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
 
 __all__ = [
@@ -175,9 +175,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             dq_policy_ref=self._context.dq_policy_ref,
             rule_bundle_version=self._context.rule_bundle_version,
             normalization_profile_ref=self._context.normalization_profile_ref,
-            normalization_profile_version=(
-                self._context.normalization_profile_version
-            ),
+            normalization_profile_version=(self._context.normalization_profile_version),
             normalization_profile_hash=self._context.normalization_profile_hash,
             dq_contract_compatibility_hash=(
                 self._context.dq_contract_compatibility_hash
@@ -259,6 +257,29 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             metadata=self.create_bronze_metadata(input_data),
             lineage_fragment=self.build_bronze_lineage_fragment(input_data),
         )
+
+    def create_bronze_lineage_sidecar(
+        self,
+        *,
+        provider: str,
+        entity: str,
+        batch_id: BatchID,
+        ingestion_ts: datetime,
+    ) -> dict[str, str]:
+        """Project canonical Bronze runtime anchors for the legacy `.meta.json` sidecar."""
+        if provider != self._context.provider or entity != self._context.entity:
+            raise ValueError(
+                "Bronze lineage sidecar projection must match MetadataCoordinator "
+                "run context provider/entity"
+            )
+        return {
+            "run_id": str(self._context.run_id),
+            "run_type": self._context.run_type.value,
+            "ingestion_ts": ingestion_ts.isoformat(),
+            "provider": provider,
+            "entity": entity,
+            "batch_id": str(batch_id),
+        }
 
     def create_silver_metadata(self, input_data: SilverMetadataInput) -> SilverMetadata:
         """Create Silver layer metadata.

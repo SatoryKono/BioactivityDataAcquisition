@@ -151,6 +151,12 @@ def test_pipeline_runtime_data_panel_titles_are_action_first() -> None:
         "Status",
         "ID",
         "Processed Records",
+        "Runtime Status",
+        "Runtime Blockers",
+        "Runtime Telemetry Gap",
+        "Runtime Error Rate",
+        "Failed Runs",
+        "Worst Stage Lag",
     }
     offenders = [
         panel.get("title", "<untitled>")
@@ -169,10 +175,10 @@ def test_pipeline_runtime_data_panel_titles_are_action_first() -> None:
 def test_pipeline_runtime_count_panels_have_window_in_title_or_description() -> None:
     titles = {
         "Monitor Runtime Blockers",
-        "Monitor Failed Runs",
+        "Failed Runs",
         "Monitor No-Records Runs",
-        "Monitor Runtime Error Rate",
-        "Monitor Worst Stage Lag",
+        "Runtime Error Rate",
+        "Worst Stage Lag",
         "Monitor Memory Pressure Active",
         "Monitor Pipeline Alert Conditions",
         "Inspect DQ Alert Conditions",
@@ -364,11 +370,11 @@ def test_runtime_current_panels_normalize_workflow_pipeline_aliases() -> None:
     """Runtime current-triage panels must resolve workflow_<pipeline> selectors back to entity scope."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
     expected_titles = {
-        "Monitor Runtime Current Status",
-        "Inspect Top Runtime Blockers",
+        "Runtime Status",
+        "Runtime Blockers",
         "Monitor Runtime Blockers",
-        "Monitor Runtime Error Rate",
-        "Monitor Worst Stage Lag",
+        "Runtime Error Rate",
+        "Worst Stage Lag",
         "Inspect Active Runtime Blocker Detail",
     }
 
@@ -382,6 +388,24 @@ def test_runtime_current_panels_normalize_workflow_pipeline_aliases() -> None:
         )
         assert 'label_replace(vector(1), "pipeline_raw", "$pipeline"' in expr
         assert '"^(?:workflow_)?(.*)$"' in expr
+
+
+def test_top_runtime_blockers_hides_prometheus_metric_name_column() -> None:
+    """Top blocker table must not expose the Prometheus __name__ service column."""
+    panels = {p.get("title"): p for p in _runtime_data_panels()}
+    panel = panels.get("Runtime Blockers")
+    assert panel is not None
+
+    organize = next(
+        (
+            transformation
+            for transformation in panel.get("transformations", [])
+            if transformation.get("id") == "organize"
+        ),
+        None,
+    )
+    assert organize is not None
+    assert organize.get("options", {}).get("excludeByName", {}).get("__name__") is True
 
 
 def test_active_runtime_blocker_detail_panel_exists() -> None:

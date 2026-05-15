@@ -17,6 +17,7 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_canonical_smiles,
+    normalize_profile_inchi_key,
     normalize_profile_quasi_enum_numeric,
     normalize_profile_reviewed_flag_code,
 )
@@ -89,6 +90,10 @@ _SPECIAL_RULES = {
     "canonical_smiles": (
         normalize_profile_canonical_smiles,
         "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",
+    ),
+    "inchi_key": (
+        normalize_profile_inchi_key,
+        "Validate InChIKey through the canonical domain value-object contract, then emit uppercase canonical text.",
     ),
     "max_phase": (
         lambda value: normalize_profile_quasi_enum_numeric(

@@ -21,9 +21,9 @@ from collections.abc import Awaitable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.composition._json_types import JsonDict
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.resilience import CircuitBreakerConfig
-from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (

@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import tempfile
-from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -28,8 +26,9 @@ from bioetl.application.services.execution.cli_run_orchestration_models import (
 from bioetl.application.services.execution.cli_run_orchestration_service import (
     CliRunOrchestrationService,
 )
+from tests.helpers.synthetic_paths import synthetic_test_root
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-cli-run-orchestration-"))
+TEST_ROOT = synthetic_test_root("cli-run-orchestration")
 CACHED_BRONZE_PATH = str(TEST_ROOT / "bronze")
 
 

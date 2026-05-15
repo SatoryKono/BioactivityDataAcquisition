@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
 import pytest
 
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
+from pathlib import Path
+from tests.helpers.golden_files import load_named_json_fixture
 
 GOLDEN_DIR = Path("tests/golden/normalization/non_chembl")
 
@@ -104,7 +103,7 @@ RAW_CASES: dict[str, tuple[str, str, dict[str, object]]] = {
 
 
 def _load_golden(name: str) -> dict[str, object]:
-    return json.loads((GOLDEN_DIR / f"{name}.json").read_text(encoding="utf-8"))
+    return load_named_json_fixture(GOLDEN_DIR, name)
 
 
 @pytest.mark.unit

@@ -18,6 +18,7 @@ if TYPE_CHECKING:
         HealthMonitorPort,
         MetricsPort,
         QuarantinePort,
+        RunLedgerPort,
         RunManifestPort,
     )
 
@@ -78,6 +79,7 @@ class HealthServerDependenciesProtocol(Protocol):
     health_monitor: HealthMonitorPort
     metrics: MetricsPort
     run_manifest_port: RunManifestPort
+    run_ledger_port: RunLedgerPort
 
 
 def __getattr__(name: str) -> object:

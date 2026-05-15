@@ -58,7 +58,8 @@ not_in_nav: |
 # Rendered SVG/PNG diagram images may be generated locally or in CI
 # (render-diagrams job). Downgrade broken-link severity so `mkdocs build --strict`
 # does not abort on temporarily missing image targets. Real doc-link integrity is
-# enforced by scripts/check_doc_links.py (runs in the same CI job before the build step).
+# enforced by `python -m scripts.docs check-links` (runs in the same CI job
+# before the build step).
 validation:
     links:
         not_found: info
