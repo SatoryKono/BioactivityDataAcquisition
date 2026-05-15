@@ -95,29 +95,16 @@ compatibility_debt_metrics:
   inventory_source: configs/quality/compatibility_facade_inventory.yaml
   sunset_source: tests/architecture/test_compat_sunset.py
   metrics:
-    retained_public_facade_count:
-      current_count: 11
-      max_count: 11
+    transition_compat_count:
+      current_count: 0
+      max_count: 0
       owner: '@bioetl-architecture'
-      linked_issue: '3354'
-      rationale: Sanctioned public facades are retained compatibility obligations;
-        they require ownership, tests, and lifecycle review even when not counted
-        as transition debt.
-      ratchet_policy: Ratchet downward only after a reviewed facade-removal or
-        public-API consolidation PR updates the compatibility inventory.
-      ratchet_schedule:
-      - effective_on: '2026-04-30'
-        max_count: 11
-        milestone: freeze-baseline
-      - effective_on: '2026-06-30'
-        max_count: 10
-        milestone: wave-1
-      - effective_on: '2026-09-30'
-        max_count: 6
-        milestone: wave-2
-      - effective_on: '2026-12-31'
-        max_count: 0
-        milestone: final-removal
+      linked_issue: '4029'
+      rationale: Transition-only compatibility shims remain the true compatibility
+        debt budget. Sanctioned public entrypoints are reviewed separately as stable
+        public API and no longer count toward compatibility debt.
+      ratchet_policy: Zero-budget fail-fast metric for curated transition-only compatibility
+        residue.
     sunset_compat_count:
       current_count: 0
       owner: '@bioetl-architecture'
@@ -136,6 +123,20 @@ compatibility_debt_metrics:
       rationale: Expired compatibility items are not allowed to persist after their
         sunset date.
       ratchet_policy: Zero-budget fail-fast metric.
+sanctioned_public_entrypoint_governance:
+  inventory_source: configs/quality/compatibility_facade_inventory.yaml
+  metrics:
+    public_entrypoint_count:
+      current_count: 11
+      owner: '@bioetl-architecture'
+      linked_issue: '4029'
+      rationale: Permanent public entrypoints remain governed as sanctioned public
+        API seams with explicit owner/review metadata, but they are not compatibility
+        debt because they are not transition shims.
+      review_cadence: quarterly
+      review_policy: Review owner metadata, allowed call sites, and sanctioned public
+        API justifications whenever the compatibility inventory changes or quarterly
+        lifecycle review runs.
 bronze_fixture_replay_debt_metrics:
   gap_source: configs/base/bronze_fixture_gaps.yaml
   manifest_source: configs/base/bronze_fixture_manifest.yaml
