@@ -710,12 +710,16 @@ Common context panels on primary dashboards outside Overview:
 | `Processed Records` | `9403` | Current Bronze -> Silver -> Gold accounting table from `/ops/observability/processed-records`, backed by `bioetl_processed_records_*` recording rules; zero-valued outcome rows are omitted and missing accounting series are UNKNOWN/no-data, not OK. |
 
 `0. Control Plane` adds Control Plane-only identity evidence panels outside the
-shared shell. Panels `9404..9407` call
-`/ops/control-plane/identity-evidence` for P0 identity anchors, identity gaps,
-checkpoint anchor compare, and copy-friendly full-value handoffs. This endpoint
-is the approved surface for `run_id`, `manifest_id`, execution/config/contract
-hashes, input snapshot IDs, replay parentage, composite identity, lineage, and
-artifact refs; none of those values may be added as Prometheus labels.
+shared shell. Panels `9404..9409` call
+`/ops/control-plane/identity-evidence` for overview anchors, P1/P2 evidence,
+identity gaps, checkpoint anchor compare, and copy-friendly full-value
+handoffs. Each row exposes `source_type`, `source_quality`, `drilldown_type`,
+and `drilldown_target` so Grafana can route to manifest, ledger, effective
+config, contract, snapshot, checkpoint, lineage, and artifact evidence. This
+endpoint is the approved surface for `run_id`, `manifest_id`,
+execution/config/contract hashes, input snapshot IDs, replay parentage,
+composite identity, lineage, and artifact refs; none of those values may be
+added as Prometheus labels.
 
 The local health server resolves `/ops/observability/processed-records` against
 Prometheus via `BIOETL_PROMETHEUS_URL` when set. Without an explicit setting it

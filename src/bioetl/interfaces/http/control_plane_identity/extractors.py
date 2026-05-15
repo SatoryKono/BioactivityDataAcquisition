@@ -49,14 +49,11 @@ def build_anchor_values(
     code = manifest.code_provenance
     snapshots = input_snapshots(manifest)
     diagnostics = identity_graph_diagnostics(manifest)
-    snapshot_fingerprint = (
-        diagnostic_value(
-            diagnostics,
-            "input_snapshot_identity_fingerprint",
-            "input_snapshot_fingerprint",
-        )
-        or input_snapshot_fingerprint(snapshots)
-    )
+    snapshot_fingerprint = diagnostic_value(
+        diagnostics,
+        "input_snapshot_identity_fingerprint",
+        "input_snapshot_fingerprint",
+    ) or input_snapshot_fingerprint(snapshots)
     return {
         "run_id": str(manifest.run_id),
         "manifest_id": manifest.manifest_id,
@@ -162,7 +159,9 @@ def identity_graph_diagnostics(manifest: RunManifest) -> dict[str, object]:
         ):
             value = payload.get(key)
             if isinstance(value, dict):
-                diagnostics.update({str(item_key): item for item_key, item in value.items()})
+                diagnostics.update(
+                    {str(item_key): item for item_key, item in value.items()}
+                )
     return diagnostics
 
 

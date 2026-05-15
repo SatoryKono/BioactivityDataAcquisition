@@ -1857,9 +1857,10 @@ class TestHealthServerControlPlaneSelector:
         assert rows["replay_of_run_id"]["missing_severity"] == "FAILING"
         assert rows["replay_of_run_id"]["ui_status"] == "CRIT"
         assert rows["replay_of_manifest_id"]["missing_severity"] == "FAILING"
-        assert "replay_of_manifest_id" in data["identity_diagnostics"][
-            "identity_gap_names"
-        ]
+        assert (
+            "replay_of_manifest_id"
+            in data["identity_diagnostics"]["identity_gap_names"]
+        )
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_evidence_checkpoint_compare_mismatch(
