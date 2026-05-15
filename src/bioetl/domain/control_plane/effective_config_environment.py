@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 AMBIENT_ENVIRONMENT_POLICY = "excluded_unless_explicitly_materialized"
+MATERIALIZED_EXECUTION_ENVIRONMENT_POLICY = "materialized_via_execution_environment"
 
 SEMANTIC_RUNTIME_ENV_DEPENDENCIES: tuple[str, ...] = (
     "settings.env",

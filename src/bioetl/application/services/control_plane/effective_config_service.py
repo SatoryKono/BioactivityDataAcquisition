@@ -63,7 +63,10 @@ class EffectiveConfigService:
             resolved_config=resolved_config,
         )
         overrides_snapshot = build_runtime_override_snapshot(runtime_overrides)
-        execution_environment = build_execution_environment_snapshot(runtime_overrides)
+        execution_environment = build_execution_environment_snapshot(
+            runtime_overrides,
+            required_persistence_profile=required_persistence_profile,
+        )
         effective_snapshot = build_effective_execution_config(
             resolved_config=resolved_config,
             runtime_overrides=runtime_overrides,

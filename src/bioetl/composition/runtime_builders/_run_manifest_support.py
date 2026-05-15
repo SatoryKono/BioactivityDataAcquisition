@@ -28,6 +28,7 @@ from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
 from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+    STRICT_PERSISTENCE_PROFILES,
     normalize_required_persistence_profile,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -76,7 +77,9 @@ def build_run_source_refs(
     required_profile = normalize_required_persistence_profile(
         required_persistence_profile
     )
-    strict_snapshot_required = bool(getattr(ctx, "exact_replay", False))
+    strict_snapshot_required = bool(getattr(ctx, "exact_replay", False)) or (
+        required_profile in STRICT_PERSISTENCE_PROFILES
+    )
     if strict_snapshot_required and not input_snapshots:
         raise RuntimeError(
             "Exact replay and strict persistence profiles require immutable "
