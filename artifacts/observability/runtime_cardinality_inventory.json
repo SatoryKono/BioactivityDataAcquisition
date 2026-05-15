@@ -59,7 +59,8 @@
     ],
     " ": [
       "src/bioetl/application/observability/observer_event_mixin.py",
-      "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
+      "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py",
+      "src/bioetl/interfaces/http/processed_records_table.py"
     ],
     " IS NOT NULL": [
       "src/bioetl/application/composite/coordinator_planning.py"
@@ -136,6 +137,9 @@
     ],
     "BooleanArray": [
       "src/bioetl/infrastructure/quarantine/operations.py"
+    ],
+    "Bronze lineage sidecar projection must match MetadataCoordinator run context provider/entity": [
+      "src/bioetl/application/services/lineage/metadata_coordinator.py"
     ],
     "Checkpoint compatibility validation failed": [
       "src/bioetl/application/services/checkpoint_compatibility_service.py"
@@ -1538,6 +1542,7 @@
     "Array",
     "AuditPort | None",
     "BooleanArray",
+    "Bronze lineage sidecar projection must match MetadataCoordinator run context provider/entity",
     "Checkpoint compatibility validation failed",
     "Checkpoint compatibility validation passed",
     "Checkpoint compatibility validation passed.",
