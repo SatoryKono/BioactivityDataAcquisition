@@ -241,6 +241,7 @@ class TestBuildPipelineContext:
         assert ctx.run_type == RunType.REBUILD
         assert ctx.limit == 100
 
+    @pytest.mark.unit
     def test_context_propagates_required_persistence_profile(self):
         """Test building context with an explicit persistence profile."""
         options = RunOptions(required_persistence_profile="degraded_observable")

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -139,12 +139,13 @@ class TestBuildContext:
 
         assert context.tracing_enabled_override is True
 
+    @pytest.mark.unit
     def test_build_context_propagates_required_persistence_profile(self) -> None:
         service = PipelineRunContextService()
 
         context = service.build_context(
             pipeline_name="chembl_publication",
-            run_id=RunID(uuid4()),
+            run_id=RunID(UUID("00000000-0000-0000-0000-000000000123")),
             options=RunOptions(
                 required_persistence_profile="degraded_observable",
             ),

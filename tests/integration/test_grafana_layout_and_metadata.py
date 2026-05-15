@@ -187,7 +187,7 @@ def test_control_plane_collapsed_row_sequence_matches_operator_flow() -> None:
         (901, "Incident Drilldown: Manifest / Ledger Integrity", 19),
         (903, "Incident Drilldown: Global Control-Plane Store Reliability", 20),
         (904, "Incident Drilldown: Audit / Lineage Completeness", 21),
-        (905, "Known missing replay-safety signals", 22),
+        (905, "Identity evidence and remaining replay-safety signals", 22),
     ], f"Control Plane row order/title drifted: {row_pairs}"
 
 
