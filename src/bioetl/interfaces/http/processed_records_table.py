@@ -13,6 +13,10 @@ from urllib.request import urlopen
 
 PROCESSED_RECORDS_TABLE_CONTRACT = "processed_records_table_v1"
 DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"
+DEFAULT_PROMETHEUS_BASE_URL_FALLBACKS = (
+    "http://prometheus:9090",
+    "http://host.docker.internal:9090",
+)
 PROMETHEUS_QUERY_TIMEOUT_SECONDS = 3.0
 
 _Denominator = Literal["constant_100", "bronze", "silver_valid"]
@@ -150,9 +154,10 @@ def fetch_processed_record_values(
 ) -> dict[str, float | None]:
     """Fetch one instant value per visible Processed Records row from Prometheus."""
     metric_values: dict[str, float | None] = {}
+    prometheus_base_urls = _candidate_prometheus_base_urls(prometheus_base_url)
     for spec in PROCESSED_RECORDS_ROW_SPECS:
-        metric_values[spec.metric] = _query_prometheus_scalar(
-            prometheus_base_url=prometheus_base_url,
+        metric_values[spec.metric] = _query_prometheus_scalar_with_fallbacks(
+            prometheus_base_urls=prometheus_base_urls,
             query=_processed_record_value_query(
                 metric=spec.metric,
                 pipeline=pipeline,
@@ -224,6 +229,31 @@ def _query_prometheus_scalar(*, prometheus_base_url: str, query: str) -> float |
     if not math.isfinite(parsed):
         return None
     return parsed
+
+
+def _query_prometheus_scalar_with_fallbacks(
+    *,
+    prometheus_base_urls: tuple[str, ...],
+    query: str,
+) -> float | None:
+    errors: list[str] = []
+    for prometheus_base_url in prometheus_base_urls:
+        try:
+            return _query_prometheus_scalar(
+                prometheus_base_url=prometheus_base_url,
+                query=query,
+            )
+        except RuntimeError as exc:
+            errors.append(f"{prometheus_base_url}: {exc}")
+    raise RuntimeError("; ".join(errors))
+
+
+def _candidate_prometheus_base_urls(prometheus_base_url: str) -> tuple[str, ...]:
+    primary = prometheus_base_url.rstrip("/")
+    candidates = [primary]
+    if primary == DEFAULT_PROMETHEUS_BASE_URL:
+        candidates.extend(DEFAULT_PROMETHEUS_BASE_URL_FALLBACKS)
+    return tuple(dict.fromkeys(candidate.rstrip("/") for candidate in candidates))
 
 
 def _selector_regex(raw: str | None) -> str:

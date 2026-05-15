@@ -710,8 +710,9 @@ Common context panels on primary dashboards outside Overview:
 | `Processed Records` | `9403` | Current Bronze -> Silver -> Gold accounting table from `/ops/observability/processed-records`, backed by `bioetl_processed_records_*` recording rules; missing accounting series are UNKNOWN/no-data, not OK. |
 
 The local health server resolves `/ops/observability/processed-records` against
-Prometheus via `BIOETL_PROMETHEUS_URL` when set, otherwise
-`http://localhost:9090`.
+Prometheus via `BIOETL_PROMETHEUS_URL` when set. Without an explicit setting it
+tries `http://localhost:9090`, then the Docker-local fallbacks
+`http://prometheus:9090` and `http://host.docker.internal:9090`.
 
 ### 6.1 `$pipeline`
 

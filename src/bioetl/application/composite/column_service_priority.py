@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class ColumnPriorityOrderingStrategy:
+class ColumnPriorityOrderingPolicy:
     """Explicit source-priority ordering helpers kept separate from the facade."""
 
     def __init__(self, logger: LoggerPort) -> None:
@@ -101,4 +101,4 @@ class ColumnPriorityOrderingStrategy:
         return get_enricher_prefix(enricher_pipeline)
 
 
-__all__ = ["ColumnPriorityOrderingStrategy"]
+__all__ = ["ColumnPriorityOrderingPolicy"]

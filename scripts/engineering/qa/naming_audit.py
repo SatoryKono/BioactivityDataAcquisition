@@ -45,13 +45,13 @@ NAMING_EXCEPTIONS_PATH = REPO_ROOT / "configs" / "naming_exceptions.yaml"
 class ViolationType(StrEnum):
     """Тип нарушения naming convention."""
 
-    CAMELCASE = "camelCase вместо PascalCase/snake_case"
-    UPPERCASE_MODULE = "UPPERCASE в имени модуля"
-    HYPHEN_IN_MODULE = "дефис в имени Python-модуля"
-    MISSING_SUFFIX = "отсутствует обязательный суффикс"
-    UNREGISTERED_ALIAS = "незарегистрированный публичный alias"
-    UNDERSCORE_IN_DOC = "underscore в имени документации"
-    UPPERCASE_DOC = "UPPER_SNAKE_CASE в документации"
+    CAMELCASE = "camelCase instead of PascalCase/snake_case"
+    UPPERCASE_MODULE = "UPPERCASE in module name"
+    HYPHEN_IN_MODULE = "hyphen in Python module name"
+    MISSING_SUFFIX = "missing required suffix"
+    UNREGISTERED_ALIAS = "unregistered public alias"
+    UNDERSCORE_IN_DOC = "underscore in documentation name"
+    UPPERCASE_DOC = "UPPER_SNAKE_CASE in documentation"
 
 
 @dataclass

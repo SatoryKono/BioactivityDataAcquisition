@@ -38,7 +38,7 @@ from bioetl.domain.composite.result import (
 
 if TYPE_CHECKING:
     from bioetl.application.composite.column_service import (
-        _ColumnPriorityOrderingStrategy,
+        ColumnPriorityOrderingPolicy,
     )
     from bioetl.application.composite.cross_validator import (
         EnrichmentCrossValidator,
@@ -76,7 +76,7 @@ class MergeService(
     _get_field_aliases = staticmethod(resolve_field_aliases_from_registry)
     _extract_base_column = staticmethod(extract_base_column)
     _priority_orderer: (
-        _ColumnPriorityOrderingStrategy | Any | None  # Any: deprecated orderer
+        ColumnPriorityOrderingPolicy | Any | None  # Any: deprecated orderer
     )
 
     def __init__(

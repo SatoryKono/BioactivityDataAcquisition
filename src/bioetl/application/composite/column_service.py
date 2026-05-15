@@ -19,7 +19,7 @@ from bioetl.application.composite.column_orderer_semantic import (
     group_columns,
 )
 from bioetl.application.composite.column_service_priority import (
-    ColumnPriorityOrderingStrategy,
+    ColumnPriorityOrderingPolicy,
 )
 from bioetl.application.composite.column_priority_orderer import get_enricher_prefix
 from bioetl.application.composite.column_service_support import (
@@ -60,13 +60,13 @@ class ColumnOrderService:
         logger: LoggerPort,
         config: ColumnOrderConfig | None = None,
         column_groups: Sequence[ColumnGroupConfig] | None = None,
-        priority_orderer: ColumnPriorityOrderingStrategy | None = None,
+        priority_orderer: ColumnPriorityOrderingPolicy | None = None,
     ) -> None:
         """Initialize unified column ordering service."""
         self._logger = logger
         self._config = config or DEFAULT_COLUMN_ORDER
         self._column_groups = tuple(column_groups) if column_groups else None
-        self._priority_orderer = priority_orderer or ColumnPriorityOrderingStrategy(
+        self._priority_orderer = priority_orderer or ColumnPriorityOrderingPolicy(
             logger
         )
 

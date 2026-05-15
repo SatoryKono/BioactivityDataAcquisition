@@ -42,7 +42,7 @@ class WorkflowExecutionState:
 
 
 @dataclass(frozen=True, slots=True)
-class ResolvedWorkflowStepTransition:
+class ResolvedWorkflowStepTransitionRecord:
     """Execution result paired with the pure transition policy."""
 
     policy: WorkflowStepTransitionPolicy
@@ -214,7 +214,7 @@ def workflow_status_to_gauge_value(status: str) -> float:
 
 
 __all__ = [
-    "ResolvedWorkflowStepTransition",
+    "ResolvedWorkflowStepTransitionRecord",
     "WorkflowExecutionState",
     "build_resume_skipped_step_result",
     "build_skipped_step_result",

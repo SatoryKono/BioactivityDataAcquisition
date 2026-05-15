@@ -14,10 +14,10 @@ from bioetl.interfaces.http.health_server_http_mixin import HealthServerHTTPMixi
 from bioetl.interfaces.http.health_server_routing_mixin import (
     HealthServerRoutingMixin,
 )
+from bioetl.interfaces.http.health_server_state_mixin import HealthServerStateMixin
 from bioetl.interfaces.http.processed_records_table import (
     DEFAULT_PROMETHEUS_BASE_URL,
 )
-from bioetl.interfaces.http.health_server_state_mixin import HealthServerStateMixin
 from bioetl.interfaces.http.types import HealthResponse
 
 if TYPE_CHECKING:

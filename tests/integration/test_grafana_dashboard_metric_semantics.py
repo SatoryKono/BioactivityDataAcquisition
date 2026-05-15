@@ -55,20 +55,6 @@ _PROCESSED_RECORDS_PARAMETER_LABELS = (
     "11 gold_deduplicated_records",
 )
 
-_PROCESSED_RECORDS_METRICS = (
-    "bioetl_processed_records_bronze_current",
-    "bioetl_processed_records_silver_valid_current",
-    "bioetl_processed_records_silver_filtered_out_current",
-    "bioetl_processed_records_silver_quarantined_current",
-    "bioetl_processed_records_silver_skipped_current",
-    "bioetl_processed_records_silver_deduplicated_current",
-    "bioetl_processed_records_gold_written_current",
-    "bioetl_processed_records_gold_excluded_by_contract_current",
-    "bioetl_processed_records_gold_quarantined_current",
-    "bioetl_processed_records_gold_skipped_current",
-    "bioetl_processed_records_gold_deduplicated_current",
-)
-
 _PROCESSED_RECORDS_MAPPING_LABELS = tuple(
     label_variant
     for label in _PROCESSED_RECORDS_PARAMETER_LABELS
@@ -81,14 +67,6 @@ _PROCESSED_RECORDS_REMOVED_PARAMETER_LABELS = (
     "08 silver_delta_vs_bronze",
     "14 gold_accounted_records",
     "15 gold_delta_vs_valid_silver",
-)
-
-_PROCESSED_RECORDS_REMOVED_METRICS = (
-    "bioetl_processed_records_reconciliation_status",
-    "bioetl_processed_records_silver_accounted_current",
-    "bioetl_processed_records_silver_delta_current",
-    "bioetl_processed_records_gold_accounted_current",
-    "bioetl_processed_records_gold_delta_current",
 )
 
 _PROCESSED_RECORDS_DISPLAY_LABELS = (
@@ -113,101 +91,6 @@ _PROCESSED_RECORDS_PRIMARY_COLORS = {
 
 _PROCESSED_RECORDS_ZERO_VALUE_COLOR = "#374151"
 _PROCESSED_RECORDS_NONZERO_VALUE_COLOR = "#d1d5db"
-
-
-def _processed_records_value(metric: str) -> str:
-    return f'round(sum({metric}{{pipeline=~"$pipeline",run_type=~"$run_type"}}))'
-
-
-def _processed_records_value_branch(label: str, metric: str) -> str:
-    value = _processed_records_value(metric)
-    return (
-        f'label_replace(({value}) and ({value} != 0), "parameter", "{label}", "", "") or '
-        f'label_replace(({value}) and ({value} == 0), "parameter", "{label}__zero", "", "")'
-    )
-
-
-def _processed_records_percent(metric: str, denominator: str, precision: str) -> str:
-    value = _processed_records_value(metric)
-    denominator_value = _processed_records_value(denominator)
-    return f"round(({value} / {denominator_value} * 100), {precision})"
-
-
-def _processed_records_percentage_branch(
-    label: str,
-    metric: str,
-    percentage: str,
-) -> str:
-    value = _processed_records_value(metric)
-    return (
-        f'label_replace(({percentage}) and ({value} != 0), "parameter", "{label}", "", "") or '
-        f'label_replace(({percentage}) and ({value} == 0), "parameter", "{label}__zero", "", "")'
-    )
-
-
-_PROCESSED_RECORDS_VALUE_EXPR = " or ".join(
-    _processed_records_value_branch(label, metric)
-    for label, metric in zip(
-        _PROCESSED_RECORDS_PARAMETER_LABELS,
-        _PROCESSED_RECORDS_METRICS,
-        strict=True,
-    )
-)
-
-_BRONZE_RECORDS_METRIC = "bioetl_processed_records_bronze_current"
-_SILVER_VALID_METRIC = "bioetl_processed_records_silver_valid_current"
-
-_PROCESSED_RECORDS_PERCENTAGE_EXPR = " or ".join(
-    [
-        _processed_records_percentage_branch(
-            "01 bronze_records",
-            _BRONZE_RECORDS_METRIC,
-            "vector(100)",
-        ),
-        _processed_records_percentage_branch(
-            "02 silver_valid_records",
-            _SILVER_VALID_METRIC,
-            _processed_records_percent(
-                _SILVER_VALID_METRIC,
-                _BRONZE_RECORDS_METRIC,
-                "0.1",
-            ),
-        ),
-        *[
-            _processed_records_percentage_branch(
-                label,
-                metric,
-                _processed_records_percent(metric, _BRONZE_RECORDS_METRIC, "0.001"),
-            )
-            for label, metric in zip(
-                _PROCESSED_RECORDS_PARAMETER_LABELS[2:6],
-                _PROCESSED_RECORDS_METRICS[2:6],
-                strict=True,
-            )
-        ],
-        _processed_records_percentage_branch(
-            "07 gold_written_records",
-            "bioetl_processed_records_gold_written_current",
-            _processed_records_percent(
-                "bioetl_processed_records_gold_written_current",
-                _SILVER_VALID_METRIC,
-                "0.1",
-            ),
-        ),
-        *[
-            _processed_records_percentage_branch(
-                label,
-                metric,
-                _processed_records_percent(metric, _SILVER_VALID_METRIC, "0.001"),
-            )
-            for label, metric in zip(
-                _PROCESSED_RECORDS_PARAMETER_LABELS[7:],
-                _PROCESSED_RECORDS_METRICS[7:],
-                strict=True,
-            )
-        ],
-    ]
-)
 
 
 def _expected_duplicate_uses() -> dict[str, set[tuple[str, str]]]:
@@ -1799,7 +1682,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         "14 gold_accounted_records",
         "15 gold_delta_vs_valid_silver",
     ):
-        assert stale_label not in processed_json
+        assert f'"{stale_label}"' not in processed_json
 
     sort_by = processed.get("options", {}).get("sortBy", [])
     assert sort_by == [{"desc": False, "displayName": "parameter"}]

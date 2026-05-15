@@ -12,7 +12,7 @@ from bioetl.application.services.workflow_runner_models import (
     WorkflowStepExecutionResult,
 )
 from bioetl.application.services.workflow_runner_support import (
-    ResolvedWorkflowStepTransition,
+    ResolvedWorkflowStepTransitionRecord,
     WorkflowExecutionState,
     build_resume_skipped_step_result,
     build_skipped_step_result,
@@ -129,7 +129,7 @@ class WorkflowRunnerService:
         transform_commit_callback: (
             Callable[[WorkflowTransformDestructiveCommit], None] | None
         ),
-    ) -> ResolvedWorkflowStepTransition:
+    ) -> ResolvedWorkflowStepTransitionRecord:
         """Resolve whether a step should run, resume-skip, or failure-skip."""
         policy = resolve_step_transition_policy(
             step,
@@ -137,7 +137,7 @@ class WorkflowRunnerService:
             completed_step_ids=completed_step_ids,
         )
         if policy.disposition == "skip_failed":
-            return ResolvedWorkflowStepTransition(
+            return ResolvedWorkflowStepTransitionRecord(
                 policy=policy,
                 result=build_skipped_step_result(
                     metrics=self.metrics,
@@ -148,7 +148,7 @@ class WorkflowRunnerService:
                 ),
             )
         if policy.disposition == "skip_completed":
-            return ResolvedWorkflowStepTransition(
+            return ResolvedWorkflowStepTransitionRecord(
                 policy=policy,
                 result=build_resume_skipped_step_result(
                     metrics=self.metrics,
@@ -157,7 +157,7 @@ class WorkflowRunnerService:
                     context_labels=workflow_context_labels,
                 ),
             )
-        return ResolvedWorkflowStepTransition(
+        return ResolvedWorkflowStepTransitionRecord(
             policy=policy,
             result=await self._run_step(
                 workflow_name=workflow_name,
@@ -175,7 +175,7 @@ class WorkflowRunnerService:
         *,
         state: WorkflowExecutionState,
         step: WorkflowStepDefinition,
-        transition: ResolvedWorkflowStepTransition,
+        transition: ResolvedWorkflowStepTransitionRecord,
         step_completed_callback: Callable[[WorkflowStepExecutionResult], None] | None,
     ) -> None:
         """Apply one resolved transition to mutable workflow execution state."""

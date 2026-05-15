@@ -16,7 +16,7 @@ from bioetl.composition.runtime_builders._runner_builder_support import (
     bind_manifest_logger_context as _bind_manifest_logger_context,
 )
 from bioetl.composition.runtime_builders._runner_builder_support import (
-    resolve_control_plane_flags as _resolve_control_plane_flags,
+    resolve_runner_control_plane_policy as _resolve_runner_control_plane_policy,
 )
 from bioetl.composition.runtime_builders._runner_builder_support import (
     validate_artifact_recorder_attachment as _validate_artifact_recorder_attachment,
@@ -91,33 +91,27 @@ def _initialize_registry(
 def _handle_control_plane_setup(
     ctx: PipelineRunContext,
     inputs: _RunnerInputs,
-) -> tuple[PipelineRunContext, _RunnerInputs, RunLedgerService | None]:
+) -> tuple[PipelineRunContext, _RunnerInputs, RunLedgerService | None, str]:
     """Handle control plane setup including manifest and ledger services."""
-    pipeline_settings = getattr(inputs.settings, "pipeline", None)
-    control_plane = getattr(pipeline_settings, "control_plane", None)
-    required_profile = getattr(
-        control_plane,
-        "required_persistence_profile",
-        "degraded_observable",
-    )
-    _validate_strict_data_root_policy(
-        settings=inputs.settings,
-        required_profile=required_profile,
-        exact_replay=bool(getattr(ctx, "exact_replay", False)),
-    )
-    manifest_enabled, ledger_enabled = _resolve_control_plane_flags(
+    control_plane_policy = _resolve_runner_control_plane_policy(
         inputs.settings,
         yaml_config=inputs.yaml_config,
         skip_gold=bool(getattr(ctx, "skip_gold", False)),
     )
+    _validate_strict_data_root_policy(
+        settings=inputs.settings,
+        required_profile=control_plane_policy.required_profile,
+        exact_replay=bool(getattr(ctx, "exact_replay", False)),
+    )
     run_ledger_service: RunLedgerService | None = None
 
-    if manifest_enabled:
+    effective_required_profile = control_plane_policy.required_profile
+    if control_plane_policy.manifest_enabled:
         control_plane_refs, run_ledger_service = (
             create_run_manifest_with_effective_config(
                 ctx=ctx,
                 inputs=inputs,
-                ledger_enabled=ledger_enabled,
+                ledger_enabled=control_plane_policy.ledger_enabled,
             )
         )
         ctx = attach_manifest_id(
@@ -128,8 +122,12 @@ def _handle_control_plane_setup(
             inputs,
             control_plane_refs.manifest_id,
         )
+        effective_required_profile = (
+            control_plane_refs.required_persistence_profile
+            or control_plane_policy.required_profile
+        )
 
-    return ctx, inputs, run_ledger_service
+    return ctx, inputs, run_ledger_service, effective_required_profile
 
 
 def _create_runner(
@@ -150,19 +148,12 @@ def _create_runner(
 def _attach_runner_control_plane_collaborators(
     *,
     runner: PipelineRunnerProtocol,
-    inputs: _RunnerInputs,
+    required_profile: str,
     run_ledger_service: RunLedgerService | None,
 ) -> None:
     """Attach optional control-plane collaborators and validate closure."""
     if run_ledger_service is None:
         return
-    pipeline_settings = getattr(inputs.settings, "pipeline", None)
-    control_plane = getattr(pipeline_settings, "control_plane", None)
-    required_profile = getattr(
-        control_plane,
-        "required_persistence_profile",
-        "degraded_observable",
-    )
     attachment_result = attach_control_plane_collaborators(
         runner,
         run_ledger_service,
@@ -249,7 +240,10 @@ def build_pipeline_runner(
         else assemble_cached_bronze_context_fn,
         prepare_runner_inputs_fn=prepare_runner_inputs,
     )
-    ctx, inputs, run_ledger_service = _handle_control_plane_setup(ctx, inputs)
+    ctx, inputs, run_ledger_service, required_profile = _handle_control_plane_setup(
+        ctx,
+        inputs,
+    )
     runner = _create_runner(
         registry=effective_registry,
         ctx=ctx,
@@ -257,7 +251,7 @@ def build_pipeline_runner(
     )
     _attach_runner_control_plane_collaborators(
         runner=runner,
-        inputs=inputs,
+        required_profile=required_profile,
         run_ledger_service=run_ledger_service,
     )
     return runner
