@@ -21,6 +21,10 @@ from bioetl.interfaces.http.control_plane_identity.severity import (
     is_identity_gap,
     ui_status,
 )
+from bioetl.interfaces.http.control_plane_identity.source_model import (
+    drilldown_target_for,
+    source_model_for,
+)
 from bioetl.interfaces.http.control_plane_identity.specs import (
     ALLOWED_LOW_CARDINALITY_LABELS,
     ANCHOR_SPECS,
@@ -63,6 +67,7 @@ def build_control_plane_identity_evidence_payload(
     summary = build_summary(
         manifest=resolved_manifest,
         anchors=anchors,
+        values=values,
         checkpoint_status=str(checkpoint_compare["status"]),
         resolved_via=resolved_via,
     )
@@ -81,6 +86,11 @@ def build_control_plane_identity_evidence_payload(
         "summary": summary,
         "anchors": anchors,
         "checkpoint_compare": checkpoint_compare,
+        "identity_diagnostics": build_identity_diagnostics(
+            anchors=anchors,
+            values=values,
+            checkpoint_status=str(checkpoint_compare["status"]),
+        ),
         "rows": rows,
         "forbidden_prometheus_label_policy": {
             "high_cardinality_ids_must_not_be_labels": True,
@@ -121,8 +131,19 @@ def build_anchor_rows(
         )
         for spec in ANCHOR_SPECS
     ]
-    gap_count = sum(1 for row in rows if row["identity_gap"] is True)
-    graph_status = "complete" if gap_count == 0 else f"incomplete ({gap_count} gaps)"
+    row_gap_count = sum(1 for row in rows if row["identity_gap"] is True)
+    row_gap_names = [str(row["name"]) for row in rows if row["identity_gap"] is True]
+    diagnostic_gap_count = gap_count_from_mapping(values.get("correlation_anchor_gaps"))
+    diagnostic_complete = values.get("identity_graph_complete")
+    gap_count = row_gap_count + diagnostic_gap_count
+    graph_complete = gap_count == 0 and diagnostic_complete is not False
+    graph_status = "complete"
+    if not graph_complete:
+        gap_names = ", ".join(row_gap_names[:6])
+        graph_status = f"incomplete ({gap_count} gaps"
+        if gap_names:
+            graph_status = f"{graph_status}: {gap_names}"
+        graph_status = f"{graph_status})"
     return [
         graph_status_row if row["name"] == "identity_graph_complete" else row
         for row in rows
@@ -162,11 +183,15 @@ def build_anchor_row(
     missing_text = "missing" if applicable else anchor_applicability
     value_full = format_full_value(value) if present else missing_text
     copy_enabled = bool(spec.copy and present and applicable)
+    source_model = source_model_for(spec.name)
+    drilldown_target = drilldown_target_for(spec.name, value_full)
     return {
         "priority": spec.priority,
         "name": spec.name,
         "label": spec.label,
         "source": spec.source,
+        "source_type": source_model.source_type,
+        "source_quality": source_model.source_quality,
         "format": spec.value_format,
         "why": spec.why,
         "rendering": spec.rendering,
@@ -176,6 +201,9 @@ def build_anchor_row(
         "copy_mode": "full_value" if copy_enabled else "none",
         "copy_value": value_full if copy_enabled else "",
         "drilldown": spec.drilldown,
+        "drilldown_type": drilldown_target.target_type,
+        "drilldown_target": drilldown_target.target_template,
+        "drilldown_label": drilldown_target.label,
         "missing_severity": domain_status,
         "ui_status": rendered_ui_status,
         "identity_gap": is_identity_gap(domain_status),
@@ -188,10 +216,12 @@ def build_summary(
     *,
     manifest: RunManifest | None,
     anchors: list[dict[str, object]],
+    values: dict[str, object | None],
     checkpoint_status: str,
     resolved_via: str,
 ) -> dict[str, object]:
     gap_rows = [row for row in anchors if row["identity_gap"] is True]
+    diagnostic_gap_count = gap_count_from_mapping(values.get("correlation_anchor_gaps"))
     critical = any(row["ui_status"] == "CRIT" for row in gap_rows)
     warning = any(row["ui_status"] == "WARN" for row in gap_rows)
     overall = "CRIT" if critical else "WARN" if warning else "OK"
@@ -199,12 +229,49 @@ def build_summary(
         overall = "UNKNOWN"
     return {
         "overall_status": overall,
-        "identity_graph_complete": not gap_rows and manifest is not None,
-        "identity_gap_count": len(gap_rows),
+        "identity_graph_complete": (
+            not gap_rows
+            and diagnostic_gap_count == 0
+            and values.get("identity_graph_complete") is not False
+            and manifest is not None
+        ),
+        "identity_gap_count": len(gap_rows) + diagnostic_gap_count,
+        "correlation_anchor_gaps": values.get("correlation_anchor_gaps") or {},
+        "exact_replay_blockers": values.get("exact_replay_blockers") or [],
         "checkpoint_anchor_status": checkpoint_status,
         "replay_mode": None if manifest is None else replay_mode(manifest),
         "resolved_via": resolved_via,
     }
+
+
+def build_identity_diagnostics(
+    *,
+    anchors: list[dict[str, object]],
+    values: dict[str, object | None],
+    checkpoint_status: str,
+) -> dict[str, object]:
+    """Return top-level diagnostics for dashboard and runbook consumers."""
+    gap_rows = [row for row in anchors if row["identity_gap"] is True]
+    return {
+        "identity_gap_names": [str(row["name"]) for row in gap_rows],
+        "identity_gap_count": len(gap_rows)
+        + gap_count_from_mapping(values.get("correlation_anchor_gaps")),
+        "correlation_anchor_gaps": values.get("correlation_anchor_gaps") or {},
+        "exact_replay_blockers": values.get("exact_replay_blockers") or [],
+        "checkpoint_anchor_status": checkpoint_status,
+    }
+
+
+def gap_count_from_mapping(value: object | None) -> int:
+    if not isinstance(value, dict):
+        return 0
+    count = 0
+    for item in value.values():
+        if isinstance(item, int | float):
+            count += int(item)
+        elif item:
+            count += 1
+    return count
 
 
 def select_rows(
