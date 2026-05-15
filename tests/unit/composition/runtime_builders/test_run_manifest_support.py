@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -29,6 +30,9 @@ from bioetl.composition.runtime_builders._run_manifest_support import (
     resolve_contract_identity,
     resolve_replay_capability,
     validate_reproducible_sink_modes,
+)
+from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
+    validate_required_runtime_persistence_profile,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunInputSnapshotRef
 from bioetl.domain.context import PipelineRunContext
@@ -310,24 +314,46 @@ def test_build_run_source_refs_fails_closed_for_exact_replay_without_snapshots()
 
 
 @pytest.mark.unit
-def test_build_run_source_refs_fails_closed_for_replay_ready_without_snapshots() -> (
-    None
-):
+def test_build_run_source_refs_allows_bounded_live_capture_without_snapshots() -> None:
     settings = _make_settings()
     ctx = _make_run_context(query=None, exact_replay=False)
 
-    with pytest.raises(
-        RuntimeError,
-        match="required persistence profile 'replay_ready'",
-    ):
-        build_run_source_refs(
-            ctx=ctx,
-            cached_bronze=None,
-            settings=settings,
-            provider="chembl",
-            entity="activity",
-            required_persistence_profile="replay_ready",
-        )
+    source_refs = build_run_source_refs(
+        ctx=ctx,
+        cached_bronze=None,
+        settings=settings,
+        provider="chembl",
+        entity="activity",
+        required_persistence_profile="replay_ready",
+    )
+
+    assert len(source_refs) == 1
+    assert source_refs[0].input_snapshots == ()
+
+
+@pytest.mark.unit
+def test_validate_required_runtime_persistence_profile_allows_bounded_live_capture() -> (
+    None
+):
+    request = _make_manifest_request(
+        exact_replay=False,
+        required_persistence_profile="replay_ready",
+        replay_capability=ReplayCapability.REBUILD_ONLY,
+    )
+    request = replace(
+        request,
+        launch_context={
+            **request.launch_context,
+            "execution_context": "pipeline",
+        },
+        source_refs=(),
+    )
+
+    validate_required_runtime_persistence_profile(
+        request=request,
+        required_persistence_profile="replay_ready",
+        strict_exact_replay_supported=True,
+    )
 
 
 @pytest.mark.unit
