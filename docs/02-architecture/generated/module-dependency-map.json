@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1853,
-    "total_internal_imports": 7386,
+    "scanned_modules": 1856,
+    "total_internal_imports": 7409,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 321,
@@ -11,37 +11,37 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 1215,
+      "imports": 1219,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1108,
+      "imports": 1109,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "application",
-      "imports": 290,
+      "imports": 291,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 620,
+      "imports": 631,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 420,
+      "imports": 424,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 340,
+      "imports": 342,
       "allowed": true
     },
     {
@@ -161,7 +161,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 59
+      "imports": 60
     },
     {
       "source": "composition.bootstrap",
@@ -256,7 +256,7 @@
     {
       "source": "composition.runtime_builders",
       "target": "domain.context",
-      "imports": 22
+      "imports": 24
     },
     {
       "source": "composition.runtime_builders",
@@ -294,6 +294,11 @@
       "imports": 20
     },
     {
+      "source": "composition.runtime_builders",
+      "target": "infrastructure.config",
+      "imports": 19
+    },
+    {
       "source": "application.core",
       "target": "domain.config",
       "imports": 18
@@ -306,11 +311,6 @@
     {
       "source": "application.services",
       "target": "domain.exceptions",
-      "imports": 18
-    },
-    {
-      "source": "composition.runtime_builders",
-      "target": "infrastructure.config",
       "imports": 18
     },
     {
