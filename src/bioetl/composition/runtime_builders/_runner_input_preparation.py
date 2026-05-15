@@ -28,6 +28,8 @@ from bioetl.composition.runtime_builders.inputs_resolution_orchestration import 
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+    is_critical_reproducibility_runtime,
+    normalize_required_persistence_profile,
 )
 
 if TYPE_CHECKING:
@@ -67,13 +69,31 @@ def _resolve_settings_for_runner(
     )
 
 
-def _resolve_required_persistence_profile(settings: Settings) -> str:
+def _resolve_required_persistence_profile(
+    *,
+    ctx: PipelineRunContext,
+    settings: Settings,
+) -> str:
+    requested_profile = getattr(ctx, "required_persistence_profile", None)
+    if requested_profile is not None and str(requested_profile).strip():
+        profile = normalize_required_persistence_profile(requested_profile)
+        if (
+            bool(getattr(ctx, "exact_replay", False))
+            or is_critical_reproducibility_runtime(
+                runtime_environment=getattr(settings, "env", None),
+                debug_mode=getattr(settings, "debug", False),
+            )
+        ) and profile == "degraded_observable":
+            return DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+        return profile
     pipeline_settings = getattr(settings, "pipeline", None)
     control_plane = getattr(pipeline_settings, "control_plane", None)
-    return getattr(
-        control_plane,
-        "required_persistence_profile",
-        DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+    return normalize_required_persistence_profile(
+        getattr(
+            control_plane,
+            "required_persistence_profile",
+            DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+        )
     )
 
 
@@ -143,7 +163,10 @@ def prepare_runner_context(
     _validate_runner_data_root_policy(
         ctx=ctx,
         settings=settings,
-        required_persistence_profile=_resolve_required_persistence_profile(settings),
+        required_persistence_profile=_resolve_required_persistence_profile(
+            ctx=ctx,
+            settings=settings,
+        ),
     )
     effective_ctx, cached_bronze = _resolve_effective_context(
         ctx=ctx,

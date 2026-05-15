@@ -63,6 +63,7 @@ class WorkflowRunOptionsConfig:
     replay_of_run_id: str | None = None
     replay_of_manifest_id: str | None = None
     exact_replay: bool | None = None
+    required_persistence_profile: str | None = None
     enable_tracing: bool | None = None
 
     def merged_with(
@@ -133,6 +134,10 @@ class WorkflowRunOptionsConfig:
                 override.replay_of_manifest_id,
             ),
             exact_replay=_prefer_override(self.exact_replay, override.exact_replay),
+            required_persistence_profile=_prefer_override(
+                self.required_persistence_profile,
+                override.required_persistence_profile,
+            ),
             enable_tracing=_prefer_override(
                 self.enable_tracing,
                 override.enable_tracing,

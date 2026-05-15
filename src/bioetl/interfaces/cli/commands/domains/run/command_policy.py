@@ -104,6 +104,7 @@ class RunCommandInput:
     replay_of_run_id: str | None = None
     replay_of_manifest_id: str | None = None
     exact_replay: bool = False
+    required_persistence_profile: str | None = None
 
 
 def prepare_run_request(
@@ -140,6 +141,9 @@ def prepare_run_request(
                 replay_of_run_id=command_input.replay_of_run_id,
                 replay_of_manifest_id=command_input.replay_of_manifest_id,
                 exact_replay=command_input.exact_replay,
+                required_persistence_profile=(
+                    command_input.required_persistence_profile
+                ),
             ),
             health_server=command_input.health_server,
             health_port=command_input.health_port,

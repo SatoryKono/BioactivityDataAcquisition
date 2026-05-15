@@ -102,6 +102,9 @@ def assemble_runtime_config_impl(
         query=ctx.query,
         dry_run=ctx.dry_run,
         exact_replay=getattr(ctx, "exact_replay", False),
+        required_persistence_profile=getattr(
+            ctx, "required_persistence_profile", None
+        ),
         replay_anchor_date=(
             ctx.cached_bronze.bronze_date
             if getattr(ctx, "exact_replay", False)

@@ -15,6 +15,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     assess_reproducibility_policy,
     is_critical_reproducibility_runtime,
+    normalize_required_persistence_profile,
     resolve_effective_required_persistence_profile,
 )
 from bioetl.domain.control_plane.reproducibility_profiles import (
@@ -69,8 +70,11 @@ def resolve_manifest_reproducibility_context(
     control_plane = getattr(
         getattr(inputs.settings, "pipeline", None), "control_plane", None
     )
-    configured_required_profile = str(
-        getattr(
+    requested_profile = getattr(ctx, "required_persistence_profile", None)
+    configured_required_profile = normalize_required_persistence_profile(
+        requested_profile
+        if requested_profile is not None and str(requested_profile).strip()
+        else getattr(
             control_plane,
             "required_persistence_profile",
             DEFAULT_REQUIRED_PERSISTENCE_PROFILE,

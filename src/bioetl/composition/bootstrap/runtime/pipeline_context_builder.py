@@ -90,5 +90,6 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         skip_gold=options.skip_gold,
         cached_bronze=_build_cached_bronze_context(options),
         exact_replay=options.exact_replay,
+        required_persistence_profile=options.required_persistence_profile,
         execution_context=ExecutionContext(options.execution_context),
     )

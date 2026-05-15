@@ -27,9 +27,94 @@ from bioetl.domain.control_plane.run_ledger import (
 )
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from bioetl.domain.types import HealthStatus, RunID, RunType
+from bioetl.interfaces.http import _health_server_identity_evidence
+from bioetl.interfaces.http.control_plane_identity import (
+    IDENTITY_EVIDENCE_CONTRACT,
+    build_control_plane_identity_evidence_payload,
+)
+from bioetl.interfaces.http.control_plane_identity.specs import (
+    ALLOWED_LOW_CARDINALITY_LABELS,
+    ANCHOR_SPECS,
+    OVERVIEW_NAMES,
+)
 from bioetl.interfaces.http.health_server import HealthServer
 from bioetl.interfaces.http.types import HealthResponse
 from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
+
+
+def test_control_plane_identity_evidence_static_contract_is_frozen() -> None:
+    """The refactored identity evidence package must preserve the audit contract."""
+    assert IDENTITY_EVIDENCE_CONTRACT == "control_plane_identity_evidence_v1"
+    assert (
+        _health_server_identity_evidence.build_control_plane_identity_evidence_payload
+        is build_control_plane_identity_evidence_payload
+    )
+
+    p0_names = {spec.name for spec in ANCHOR_SPECS if spec.priority == "P0"}
+    assert p0_names == {
+        "run_id",
+        "manifest_id",
+        "pipeline_name",
+        "provider_entity",
+        "runtime_mode",
+        "execution_fingerprint",
+        "git_commit",
+        "pipeline_version",
+        "effective_config_hash",
+        "effective_config_artifact_id",
+        "contract_ref",
+        "contract_version",
+        "contract_schema_hash",
+        "input_snapshot_identity_fingerprint",
+        "input_snapshot_count",
+        "replay_mode",
+        "replay_of_run_id",
+        "replay_of_manifest_id",
+        "checkpoint_anchor_status",
+        "composite_run_identity",
+        "identity_graph_complete",
+    }
+    assert OVERVIEW_NAMES == {
+        "run_id",
+        "manifest_id",
+        "pipeline_name",
+        "provider_entity",
+        "runtime_mode",
+        "execution_fingerprint",
+        "effective_config_hash",
+        "contract_ref",
+        "contract_version",
+        "input_snapshot_identity_fingerprint",
+        "replay_capability",
+        "replay_mode",
+        "checkpoint_anchor_status",
+        "composite_run_identity",
+        "identity_graph_complete",
+    }
+    assert OVERVIEW_NAMES - p0_names == {"replay_capability"}
+
+    forbidden_label_names = {
+        "run_id",
+        "manifest_id",
+        "execution_fingerprint",
+        "effective_config_hash",
+        "effective_config_artifact_id",
+        "config_hash",
+        "contract_schema_hash",
+        "dq_contract_compatibility_hash",
+        "input_snapshot_identity_fingerprint",
+        "input_snapshot_ids",
+        "input_snapshot_content_hashes",
+        "replay_of_run_id",
+        "replay_of_manifest_id",
+        "composite_run_identity",
+        "lineage_fragment_ids",
+        "artifact_refs",
+        "checkpoint_file_id",
+        "latest_event_id",
+        "bronze_batch_ids",
+    }
+    assert forbidden_label_names.isdisjoint(ALLOWED_LOW_CARDINALITY_LABELS)
 
 
 class TestHealthResponse:

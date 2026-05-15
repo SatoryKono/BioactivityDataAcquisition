@@ -57,7 +57,10 @@ def _build_workflow_payload(name: str) -> dict[str, Any]:
                     "kind": "pipeline",
                     "step_id": "extract",
                     "pipeline_name": "chembl_activity",
-                    "run_options": {"limit": 25},
+                    "run_options": {
+                        "limit": 25,
+                        "required_persistence_profile": "degraded_observable",
+                    },
                 },
                 {
                     "kind": "transform",
@@ -114,6 +117,7 @@ def test_load_workflow_config_loads_defaults_and_steps(tmp_path: Path) -> None:
         "dry_run": False,
         "limit": 25,
         "log_level": "DEBUG",
+        "required_persistence_profile": "degraded_observable",
     }
     assert isinstance(transform_step, TransformStepConfig)
     assert transform_step.depends_on == ("extract",)

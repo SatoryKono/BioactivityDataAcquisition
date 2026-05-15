@@ -11,6 +11,7 @@ These utilities support PipelineMetadata population as per RULES.md §2.3.
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 import subprocess  # nosec B404
 from dataclasses import dataclass
@@ -46,6 +47,74 @@ class CodeRevisionProvenance:
     dependency_lock_hash: str | None = None
 
 
+def _iter_windows_git_fallback_executables() -> tuple[str, ...]:
+    """Return explicit Windows git executable paths discovered from PATH."""
+    candidates: list[str] = []
+    seen: set[str] = set()
+    for path_entry in os.get_exec_path():
+        candidate = (Path(path_entry) / "git.exe").resolve()
+        candidate_str = str(candidate)
+        if candidate.is_file() and candidate_str not in seen:
+            seen.add(candidate_str)
+            candidates.append(candidate_str)
+    return tuple(candidates)
+
+
+def _should_try_windows_git_fallback(
+    result: subprocess.CompletedProcess[str] | None,
+    *,
+    accepted_returncodes: tuple[int, ...],
+) -> bool:
+    """Return whether a Windows-specific git executable fallback is warranted."""
+    if os.name != "nt":
+        return False
+    if result is None:
+        return True
+    if result.returncode in accepted_returncodes:
+        return False
+    # Preserve ordinary git/repo failures as-is; only recover from shim/process
+    # failures that indicate the launcher itself is unreliable.
+    return result.returncode not in {1, 128}
+
+
+def _run_git_command(
+    *arguments: str,
+    accepted_returncodes: tuple[int, ...] = (0,),
+) -> subprocess.CompletedProcess[str] | None:
+    """Run one git command, retrying explicit Windows executables when needed."""
+    last_result: subprocess.CompletedProcess[str] | None = None
+    try:
+        last_result = subprocess.run(  # nosec B603 B607
+            ["git", *arguments],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+    except (subprocess.SubprocessError, FileNotFoundError, OSError):
+        last_result = None
+    if not _should_try_windows_git_fallback(
+        last_result,
+        accepted_returncodes=accepted_returncodes,
+    ):
+        return last_result
+    for executable in _iter_windows_git_fallback_executables():
+        try:
+            candidate_result = subprocess.run(  # nosec B603
+                [executable, *arguments],
+                capture_output=True,
+                text=True,
+                timeout=5,
+                check=False,
+            )
+        except (subprocess.SubprocessError, FileNotFoundError, OSError):
+            continue
+        if candidate_result.returncode in accepted_returncodes:
+            return candidate_result
+        last_result = candidate_result
+    return last_result
+
+
 @lru_cache(maxsize=1)
 def get_git_commit() -> str | None:
     """Get the current git commit hash.
@@ -66,20 +135,11 @@ def get_git_commit() -> str | None:
         >>> commit = get_git_commit()
         >>> commit  # full HEAD SHA or None
     """
-    try:
-        result = subprocess.run(  # nosec B603 B607
-            ["git", "rev-parse", "HEAD"],
-            capture_output=True,
-            text=True,
-            timeout=5,  # Local git subprocess — 5s is generous
-            check=False,
-        )
-        if result.returncode == 0:
-            commit = result.stdout.strip().lower()
-            return commit if _FULL_GIT_SHA_RE.fullmatch(commit) else None
+    result = _run_git_command("rev-parse", "HEAD")
+    if result is None or result.returncode != 0:
         return None
-    except (subprocess.SubprocessError, FileNotFoundError, OSError):
-        return None
+    commit = result.stdout.strip().lower()
+    return commit if _FULL_GIT_SHA_RE.fullmatch(commit) else None
 
 
 @lru_cache(maxsize=1)
@@ -105,15 +165,14 @@ def get_code_revision_provenance() -> CodeRevisionProvenance:
             source_revision_state="git_unavailable",
             dependency_lock_hash=dependency_lock_hash,
         )
-    try:
-        result = subprocess.run(  # nosec B603 B607
-            ["git", "diff-index", "--quiet", "HEAD", "--"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-            check=False,
-        )
-    except (subprocess.SubprocessError, FileNotFoundError, OSError):
+    result = _run_git_command(
+        "diff-index",
+        "--quiet",
+        "HEAD",
+        "--",
+        accepted_returncodes=(0, 1),
+    )
+    if result is None:
         return CodeRevisionProvenance(
             git_commit=commit,
             source_revision_state="dirty_state_unknown",

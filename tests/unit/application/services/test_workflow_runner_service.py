@@ -120,7 +120,10 @@ async def test_workflow_runner_executes_pipeline_then_transform() -> None:
             WorkflowStepConfig(
                 step_id="extract",
                 pipeline_name="chembl_activity",
-                run_options=WorkflowRunOptionsConfig(limit=25),
+                run_options=WorkflowRunOptionsConfig(
+                    limit=25,
+                    required_persistence_profile="degraded_observable",
+                ),
             ),
             TransformStepConfig(
                 step_id="normalize",
@@ -135,6 +138,9 @@ async def test_workflow_runner_executes_pipeline_then_transform() -> None:
     assert result.status == "success"
     assert [step.step_id for step in result.steps] == ["extract", "normalize"]
     assert pipeline_runner.calls[0][0] == "chembl_activity"
+    assert pipeline_runner.calls[0][1].required_persistence_profile == (
+        "degraded_observable"
+    )
     assert metrics.gauges[-1] == (
         "bioetl_workflow_current_status",
         0.0,

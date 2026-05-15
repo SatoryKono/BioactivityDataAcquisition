@@ -122,6 +122,25 @@ def test_single_pipeline_workflow_exposes_concrete_handoff_context() -> None:
 
 
 @pytest.mark.unit
+def test_workflow_run_options_merge_required_persistence_profile() -> None:
+    base = WorkflowRunOptionsConfig(
+        limit=100,
+        required_persistence_profile="replay_ready",
+    )
+    override = WorkflowRunOptionsConfig(
+        required_persistence_profile="degraded_observable",
+    )
+
+    merged = base.merged_with(override)
+
+    assert merged.limit == 100
+    assert merged.required_persistence_profile == "degraded_observable"
+    assert merged.to_mapping()["required_persistence_profile"] == (
+        "degraded_observable"
+    )
+
+
+@pytest.mark.unit
 def test_multi_pipeline_workflow_fail_closes_handoff_context() -> None:
     config = WorkflowConfig(
         name="publication_provider_pack",

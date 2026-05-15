@@ -42,6 +42,7 @@ class RuntimeConfig:
     query: str | None = None
     dry_run: bool = False
     exact_replay: bool = False
+    required_persistence_profile: str | None = None
     replay_anchor_date: str | None = None
 
     # VACUUM automation (Phase 1 refactoring)

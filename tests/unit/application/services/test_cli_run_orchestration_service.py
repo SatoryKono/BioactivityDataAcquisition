@@ -310,6 +310,31 @@ class TestPrepareExecutionRequest:
         assert options.use_cached_bronze is True
         assert options.exact_replay is True
 
+    def test_build_options_propagates_required_persistence_profile(self) -> None:
+        service = CliRunOrchestrationService()
+
+        options = service.build_options(
+            CliRunOptionsInput(
+                run_type="incremental",
+                resume=False,
+                start_offset=None,
+                limit=10,
+                input_csv=None,
+                filter_column=None,
+                filter_field=None,
+                dry_run=False,
+                vacuum_after_run=None,
+                vacuum_retention_days=None,
+                debug=False,
+                use_cached_bronze=False,
+                cached_bronze_date=None,
+                cached_bronze_path=None,
+                required_persistence_profile="degraded_observable",
+            )
+        )
+
+        assert options.required_persistence_profile == "degraded_observable"
+
     def test_build_options_propagates_replay_parentage(self) -> None:
         service = CliRunOrchestrationService()
 

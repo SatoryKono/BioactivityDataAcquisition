@@ -42,6 +42,7 @@ class TestRunOptionsModel:
         assert options.use_cached_bronze is False
         assert options.cached_bronze_path is None
         assert options.cached_bronze_date is None
+        assert options.required_persistence_profile is None
 
     def test_extended_fields_accept_cli_overrides(self) -> None:
         options = RunOptions(
@@ -55,6 +56,7 @@ class TestRunOptionsModel:
             use_cached_bronze=True,
             cached_bronze_path="bronze/cache",
             cached_bronze_date="2026-03-19",
+            required_persistence_profile="degraded_observable",
         )
 
         assert options.filter_ids == ("10.1000/a",)
@@ -70,6 +72,7 @@ class TestRunOptionsModel:
         assert options.use_cached_bronze is True
         assert options.cached_bronze_path == "bronze/cache"
         assert options.cached_bronze_date == "2026-03-19"
+        assert options.required_persistence_profile == "degraded_observable"
 
 
 @pytest.mark.unit
