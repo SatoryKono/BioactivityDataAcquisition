@@ -17,6 +17,7 @@ TEST_FILE_LOC_EXEMPTIONS = {
 
 TEST_FUNCTION_LOC_EXEMPTIONS = {
     "tests/testing_support/neo4j_memory_sync.py::test_snapshot_contains_core_repo_surfaces": 295,
+    "tests/integration/test_grafana_dashboard_metric_semantics.py::test_exact_duplicate_promql_groups_are_only_explicitly_justified_reuse": 220,
 }
 
 
