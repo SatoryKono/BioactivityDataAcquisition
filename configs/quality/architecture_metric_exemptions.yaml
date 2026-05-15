@@ -14,7 +14,23 @@ policy:
     - expires_on
     - removal_step
 registries:
-  file_size_limits: {}
+  file_size_limits:
+    src/bioetl/interfaces/http/_health_server_routing_support.py:
+      value: 460
+      owner: "@bioetl-platform"
+      reason: "HTTP health-server routing helper is a retained interface seam pending endpoint-family extraction; current size is tracked by architecture tests."
+      classification: "temporary_structural_debt"
+      linked_rf: "RF-000"
+      expires_on: "2026-09-30"
+      removal_step: "Split endpoint routing helpers by health/control-plane family and remove this exemption."
+    src/bioetl/interfaces/http/control_plane_identity/specs.py:
+      value: 600
+      owner: "@bioetl-platform"
+      reason: "Control-plane identity HTTP specs retain generated/request-response schema surfaces in one published interface module pending schema-family split."
+      classification: "temporary_structural_debt"
+      linked_rf: "RF-000"
+      expires_on: "2026-09-30"
+      removal_step: "Move identity spec groups into smaller modules and remove this exemption."
   function_complexity: {}
   function_length: {}
   class_size: {}
