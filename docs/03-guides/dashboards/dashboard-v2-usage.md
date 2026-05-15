@@ -114,11 +114,16 @@ Gold outcomes backed by local `/ops/observability/processed-records` rows over
 status, accounted subtotal, and delta rows; missing accounting series are
 diagnostic no-data/instrumentation gaps, not green zero. The table shows
 `value` and formatted `percintage`: Bronze is always `100%`; `silver [valid]`
-and `gold [valid]` render one decimal (`91.0%`, `99.0%`); secondary Silver and
+and `gold [valid]` render one decimal (`91.0%`, `90.1%`); secondary Silver and
 Gold outcomes render up to three decimals with trailing zeroes trimmed
-(`8.51%`, `0.47%`, `0%`). Silver outcome percentages use Bronze total as
-denominator, and Gold outcome percentages use `silver [valid]` as denominator.
-It does not replace the dashboard-specific `Status` or `First Action` route.
+(`8.51%`, `0.47%`). Zero-valued outcome rows are omitted from the compact
+table. Silver and Gold outcome percentages use Bronze total as denominator. It
+formats `value` with a space as the thousands separator, left-pads shorter
+values to the displayed `bronze [total]` width, and right-aligns the `value`
+column. If Silver accounted rows sum below `bronze [total]`, visible Silver
+rows get a red row background; if Gold accounted rows sum below `silver [valid]`,
+visible Gold rows get a red row background. It does not replace the
+dashboard-specific `Status` or `First Action` route.
 
 1. `bioetl-overview-v2`, first screen (no scroll):
    `Provenance`, `Status`, `First Action`, `ID`, and `Processed Records` answer

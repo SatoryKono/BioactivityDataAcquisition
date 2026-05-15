@@ -5,6 +5,18 @@ from __future__ import annotations
 from bioetl.domain.types import JsonDict
 
 
+def coerce_snapshot_refs(value: object | None) -> tuple[JsonDict, ...]:
+    """Normalize persisted snapshot refs into an immutable tuple of mappings."""
+    if not isinstance(value, (list, tuple)):
+        return ()
+    normalized: list[JsonDict] = []
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        normalized.append({str(key): field for key, field in item.items()})
+    return tuple(normalized)
+
+
 def extract_run_context_anchor(data: JsonDict, key: str) -> str | None:
     """Backfill an optional checkpoint anchor from legacy run_context payloads."""
     run_context = data.get("run_context")
@@ -42,6 +54,7 @@ def is_empty_checkpoint_metadata_value(value: object | None) -> bool:
 
 
 __all__ = [
+    "coerce_snapshot_refs",
     "coerce_snapshot_ids",
     "extract_run_context_anchor",
     "is_empty_checkpoint_metadata_value",

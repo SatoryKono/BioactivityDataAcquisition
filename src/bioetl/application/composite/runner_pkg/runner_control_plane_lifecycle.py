@@ -160,11 +160,11 @@ def record_merge_stage_started(host: CompositeRunnerControlPlaneHostProtocol) ->
 
 
 __all__ = [
-    "CompositeRunnerControlPlaneHostProtocol",
     "DEPENDENCIES_STAGE_NAME",
     "ENRICHMENT_STAGE_NAME",
     "MERGE_STAGE_NAME",
     "SEED_STAGE_NAME",
+    "CompositeRunnerControlPlaneHostProtocol",
     "record_dependencies_stage_started",
     "record_enrichment_stage_started",
     "record_merge_stage_started",

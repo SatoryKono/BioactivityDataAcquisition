@@ -527,6 +527,11 @@ Focus on:
   `composite_run_identity`, `execution_fingerprint`, `manifest_id`,
   `effective_config_hash`, `contract_ref`, `contract_version`, `exact_replay`,
   `input_snapshot_ids`, and `input_snapshot_content_hashes`;
+- when `input_snapshot_fingerprint` is present, treat it as the canonical hash
+  of the immutable snapshot reference envelope, not just a hash of
+  `input_snapshot_ids`; content hashes, immutable URIs, and version anchors can
+  legitimately change the fingerprint even when the same logical snapshot IDs
+  are reused;
 - `dq_policy_ref`, `rule_bundle_version`, and `dq_contract_compatibility_hash` as adjacent DQ/control-plane anchors that are related but not interchangeable with manifest identity;
 - `correlation_anchor_gaps`, `alert_signals`, `next_steps`.
 

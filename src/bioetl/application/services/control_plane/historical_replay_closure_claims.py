@@ -2,9 +2,21 @@
 
 from __future__ import annotations
 
+from typing import Protocol, cast
+
 from bioetl.application.services.control_plane.historical_replay_closure_models import (
     HistoricalReplayResidualDispositionRecord,
 )
+
+
+class _ManifestRecord(Protocol):
+    manifest_id: str
+
+
+def _record_manifest_id(record: object) -> str | None:
+    if not hasattr(record, "manifest_id"):
+        return None
+    return cast(_ManifestRecord, record).manifest_id
 
 
 def build_narrowed_scope_global_claim(
@@ -24,9 +36,9 @@ def build_narrowed_scope_global_claim(
         reason = "retained_certifiable_scope_still_contains_in_scope_blockers"
     blocked_manifest_ids = [
         *[
-            getattr(record, "manifest_id")
+            manifest_id
             for record in unresolved_records
-            if hasattr(record, "manifest_id")
+            if (manifest_id := _record_manifest_id(record)) is not None
         ],
         *narrowed_scope_blockers,
     ]
@@ -114,9 +126,9 @@ def build_universal_scope_global_claim(
         "reason": reason,
         "scope": "all_retained_historical_runs",
         "blocked_manifest_ids": [
-            getattr(record, "manifest_id")
+            manifest_id
             for record in unresolved_records
-            if hasattr(record, "manifest_id")
+            if (manifest_id := _record_manifest_id(record)) is not None
         ],
     }
 

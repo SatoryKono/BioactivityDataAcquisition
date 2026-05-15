@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from bioetl.domain.normalization import compute_execution_identity_fingerprint
-from bioetl.domain.normalization import compute_degraded_runtime_anchor_fingerprint
 from bioetl.domain.normalization import build_execution_identity_payload
+from bioetl.domain.normalization import compute_degraded_runtime_anchor_fingerprint
+from bioetl.domain.normalization import compute_execution_identity_fingerprint
+from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from bioetl.domain.normalization import normalize_runtime_anchor_payload
-from bioetl.domain.normalization import normalize_control_plane_sha256
 from bioetl.domain.normalization import normalize_contract_ref
 from bioetl.domain.normalization import normalize_contract_version
+from bioetl.domain.normalization import normalize_control_plane_sha256
 
 
 def _build_payload() -> dict[str, str | None]:
@@ -101,3 +102,46 @@ def test_runtime_anchor_fingerprint_is_deterministic_for_equivalent_payloads() -
     ) == compute_degraded_runtime_anchor_fingerprint(
         normalize_runtime_anchor_payload(reordered)
     )
+
+
+def test_input_snapshot_identity_fingerprint_is_deterministic_for_equivalent_refs() -> (
+    None
+):
+    first = [
+        {
+            "snapshot_id": "snapshot-a",
+            "content_hash": "sha256:aaa",
+            "immutable_uri": "bronze://a",
+        },
+        {
+            "snapshot_id": "snapshot-b",
+            "content_hash": "sha256:bbb",
+            "immutable_uri": "bronze://b",
+        },
+    ]
+    reordered = [first[1], first[0]]
+
+    assert compute_input_snapshot_identity_fingerprint(
+        first
+    ) == compute_input_snapshot_identity_fingerprint(reordered)
+
+
+def test_input_snapshot_identity_fingerprint_drifts_when_content_changes() -> None:
+    baseline = [
+        {
+            "snapshot_id": "snapshot-a",
+            "content_hash": "sha256:aaa",
+            "immutable_uri": "bronze://a",
+        }
+    ]
+    drifted = [
+        {
+            "snapshot_id": "snapshot-a",
+            "content_hash": "sha256:bbb",
+            "immutable_uri": "bronze://a",
+        }
+    ]
+
+    assert compute_input_snapshot_identity_fingerprint(
+        baseline
+    ) != compute_input_snapshot_identity_fingerprint(drifted)

@@ -12,6 +12,9 @@ from scripts.engineering.qa.check_semantic_pair_matrix_budget import (
     DEFAULT_BUDGET_PATH,
     validate_semantic_pair_matrix_budget,
 )
+from scripts.engineering.qa.check_semantic_registry_drift import (
+    validate_semantic_registry_drift,
+)
 
 
 def test_semantic_pair_matrix_budget_gate_passes_current_repo() -> None:
@@ -140,6 +143,13 @@ def test_non_exact_semantic_clusters_are_owner_reviewed() -> None:
             unreviewed.append(cluster["cluster_id"])
 
     assert not unreviewed, sorted(unreviewed)[:20]
+
+
+def test_reviewed_semantic_registry_warnings_are_suppressed() -> None:
+    result = validate_semantic_registry_drift(Path("."))
+
+    assert result.ok
+    assert result.warnings == ()
 
 
 def test_generated_cluster_registry_does_not_keep_stale_risk_caps() -> None:

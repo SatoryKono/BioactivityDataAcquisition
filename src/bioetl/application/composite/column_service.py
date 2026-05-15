@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
-from typing import TYPE_CHECKING
 
 import polars as pl
 
@@ -18,10 +17,10 @@ from bioetl.application.composite.column_orderer_semantic import (
     get_ordered_columns,
     group_columns,
 )
+from bioetl.application.composite.column_priority_orderer import get_enricher_prefix
 from bioetl.application.composite.column_service_priority import (
     ColumnPriorityOrderingPolicy,
 )
-from bioetl.application.composite.column_priority_orderer import get_enricher_prefix
 from bioetl.application.composite.column_service_support import (
     collect_explicit_group_columns,
     collect_pattern_columns,
@@ -35,14 +34,12 @@ from bioetl.domain.composite.config import (
     EnricherConfig,
     LayerColumnConfig,
 )
+from bioetl.domain.ports import LoggerPort
 from bioetl.domain.value_objects.column_order import (
     DEFAULT_COLUMN_ORDER,
     ColumnOrderConfig,
     SemanticGroup,
 )
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
 
 __all__ = [
     "ColumnOrderService",

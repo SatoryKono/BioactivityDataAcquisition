@@ -55,11 +55,7 @@ _PROCESSED_RECORDS_PARAMETER_LABELS = (
     "11 gold_deduplicated_records",
 )
 
-_PROCESSED_RECORDS_MAPPING_LABELS = tuple(
-    label_variant
-    for label in _PROCESSED_RECORDS_PARAMETER_LABELS
-    for label_variant in (label, f"{label}__zero")
-)
+_PROCESSED_RECORDS_MAPPING_LABELS = _PROCESSED_RECORDS_PARAMETER_LABELS
 
 _PROCESSED_RECORDS_REMOVED_PARAMETER_LABELS = (
     "00 reconciliation_status",
@@ -89,8 +85,43 @@ _PROCESSED_RECORDS_PRIMARY_COLORS = {
     "07 gold_written_records": "#d4af37",
 }
 
-_PROCESSED_RECORDS_ZERO_VALUE_COLOR = "#374151"
-_PROCESSED_RECORDS_NONZERO_VALUE_COLOR = "#d1d5db"
+_PROCESSED_RECORDS_SECONDARY_VALUE_COLOR = "#d1d5db"
+_PROCESSED_RECORDS_ROW_COLORS = {
+    label: _PROCESSED_RECORDS_PRIMARY_COLORS.get(
+        label,
+        _PROCESSED_RECORDS_SECONDARY_VALUE_COLOR,
+    )
+    for label in _PROCESSED_RECORDS_PARAMETER_LABELS
+}
+
+
+def _expected_processed_records_display_token_mappings() -> list[dict[str, object]]:
+    return [
+        {
+            "type": "regex",
+            "options": {
+                "pattern": f"^{label}\\|(.*)$",
+                "result": {
+                    "text": "$1",
+                    "color": _PROCESSED_RECORDS_ROW_COLORS[label],
+                },
+            },
+        }
+        for label in _PROCESSED_RECORDS_PARAMETER_LABELS
+    ]
+
+
+def _expected_processed_records_row_status_mappings() -> list[dict[str, object]]:
+    return [
+        {
+            "type": "value",
+            "options": {
+                "": {"text": "", "color": "rgba(0,0,0,0)"},
+                "silver_deficit": {"text": "", "color": "red"},
+                "gold_deficit": {"text": "", "color": "red"},
+            },
+        }
+    ]
 
 
 def _expected_duplicate_uses() -> dict[str, set[tuple[str, str]]]:
@@ -1665,6 +1696,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert "run_id" not in processed_json
     assert "$__range" not in processed_json
     assert "or vector(0)" not in processed_json
+    assert "__zero" not in processed_json
     for removed_label in _PROCESSED_RECORDS_REMOVED_PARAMETER_LABELS:
         assert removed_label not in processed_json
 
@@ -1695,9 +1727,12 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert organize_options.get("renameByName", {}).get("parameter") == "parameter"
     assert organize_options.get("renameByName", {}).get("value") == "value"
     assert organize_options.get("renameByName", {}).get("percintage") == "percintage"
+    assert organize_options.get("renameByName", {}).get("row_status") == ""
     assert organize_options.get("indexByName", {}).get("parameter") == 0
     assert organize_options.get("indexByName", {}).get("value") == 1
     assert organize_options.get("indexByName", {}).get("percintage") == 2
+    assert organize_options.get("indexByName", {}).get("row_status") == 3
+    assert not organize_options.get("excludeByName", {}).get("row_status", False)
 
     parameter_overrides = [
         override
@@ -1714,22 +1749,8 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         _PROCESSED_RECORDS_DISPLAY_LABELS,
         strict=True,
     ):
-        zero_label = f"{label}__zero"
         assert mapping_options[label]["text"] == display_label
-        assert mapping_options[zero_label]["text"] == display_label
-        assert (
-            mapping_options[zero_label]["color"] == _PROCESSED_RECORDS_ZERO_VALUE_COLOR
-        )
-        if label in _PROCESSED_RECORDS_PRIMARY_COLORS:
-            assert (
-                mapping_options[label]["color"]
-                == _PROCESSED_RECORDS_PRIMARY_COLORS[label]
-            )
-        else:
-            assert (
-                mapping_options[label]["color"]
-                == _PROCESSED_RECORDS_NONZERO_VALUE_COLOR
-            )
+        assert mapping_options[label]["color"] == _PROCESSED_RECORDS_ROW_COLORS[label]
 
     for label, color in _PROCESSED_RECORDS_PRIMARY_COLORS.items():
         assert mapping_options[label]["color"] == color
@@ -1751,16 +1772,15 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         prop.get("id"): prop.get("value")
         for prop in value_overrides[0].get("properties", [])
     }
-    assert value_properties["custom.align"] == "left"
+    assert value_properties["custom.align"] == "right"
+    assert value_properties["custom.width"] == 70
     assert value_properties["custom.cellOptions"] == {"type": "color-text"}
-    assert value_properties["color"] == {"mode": "thresholds"}
-    assert value_properties["thresholds"] == {
-        "mode": "absolute",
-        "steps": [
-            {"color": _PROCESSED_RECORDS_ZERO_VALUE_COLOR, "value": None},
-            {"color": _PROCESSED_RECORDS_NONZERO_VALUE_COLOR, "value": 1},
-        ],
-    }
+    assert value_properties["mappings"] == (
+        _expected_processed_records_display_token_mappings()
+    )
+    assert "color" not in value_properties
+    assert "thresholds" not in value_properties
+    assert "decimals" not in value_properties
 
     percentage_overrides = [
         override
@@ -1774,14 +1794,32 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     }
     assert percentage_properties["custom.align"] == "left"
     assert percentage_properties["custom.cellOptions"] == {"type": "color-text"}
-    assert percentage_properties["color"] == {
-        "mode": "fixed",
-        "fixedColor": _PROCESSED_RECORDS_NONZERO_VALUE_COLOR,
+    assert percentage_properties["mappings"] == (
+        _expected_processed_records_display_token_mappings()
+    )
+    assert "color" not in percentage_properties
+    assert "thresholds" not in percentage_properties
+
+    row_status_overrides = [
+        override
+        for override in processed.get("fieldConfig", {}).get("overrides", [])
+        if override.get("matcher", {}).get("options") == "row_status"
+    ]
+    assert len(row_status_overrides) == 1
+    row_status_properties = {
+        prop.get("id"): prop.get("value")
+        for prop in row_status_overrides[0].get("properties", [])
     }
-    zero_mappings = percentage_properties["mappings"][0]["options"]
-    assert zero_mappings["0%"]["color"] == _PROCESSED_RECORDS_ZERO_VALUE_COLOR
-    assert zero_mappings["0.0%"]["color"] == _PROCESSED_RECORDS_ZERO_VALUE_COLOR
-    assert zero_mappings["No data"]["color"] == _PROCESSED_RECORDS_ZERO_VALUE_COLOR
+    assert row_status_properties["displayName"] == ""
+    assert row_status_properties["custom.width"] == 1
+    assert row_status_properties["custom.align"] == "center"
+    assert row_status_properties["custom.cellOptions"] == {
+        "type": "color-background",
+        "applyToRow": True,
+    }
+    assert row_status_properties["mappings"] == (
+        _expected_processed_records_row_status_mappings()
+    )
 
 
 def test_exact_duplicate_promql_groups_are_only_explicitly_justified_reuse() -> None:

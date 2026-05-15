@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.run_ledger_service import (
@@ -12,6 +13,15 @@ from bioetl.composition.factories.pipeline.registry import register_all_pipeline
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.composition.registry_api import PipelineRegistry, create_registry
+from bioetl.composition.runtime_builders._runner_builder_orchestration import (
+    attach_runner_control_plane_collaborators as _attach_runner_control_plane_collaborators,
+)
+from bioetl.composition.runtime_builders._runner_builder_orchestration import (
+    bootstrap_runner_factory as _bootstrap_runner_factory,
+)
+from bioetl.composition.runtime_builders._runner_builder_orchestration import (
+    create_runner as _create_runner,
+)
 from bioetl.composition.runtime_builders._runner_builder_support import (
     bind_manifest_logger_context as _bind_manifest_logger_context,
 )
@@ -19,13 +29,7 @@ from bioetl.composition.runtime_builders._runner_builder_support import (
     resolve_runner_control_plane_policy as _resolve_runner_control_plane_policy,
 )
 from bioetl.composition.runtime_builders._runner_builder_support import (
-    validate_artifact_recorder_attachment as _validate_artifact_recorder_attachment,
-)
-from bioetl.composition.runtime_builders._runner_builder_support import (
     validate_strict_data_root_policy as _validate_strict_data_root_policy,
-)
-from bioetl.composition.runtime_builders._runner_factory_compat import (
-    create_runner_from_factory as _create_runner_from_factory,
 )
 from bioetl.composition.runtime_builders.config_access import (
     get_settings,
@@ -49,7 +53,6 @@ from bioetl.composition.runtime_builders.inputs_resolver import (
 )
 from bioetl.composition.runtime_builders.ledger_collaborator import (
     PipelineRunnerProtocol,
-    attach_control_plane_collaborators,
 )
 from bioetl.composition.runtime_builders.observability_builder import (
     build_observability_bundle,
@@ -74,24 +77,18 @@ if TYPE_CHECKING:
 __all__ = ["PipelineRunnerProtocol", "build_pipeline_runner"]
 
 
-def _initialize_registry(
-    *,
-    registry: PipelineRegistry | None,
-    create_registry_fn: Callable[[], PipelineRegistry],
-    ensure_providers_loaded_fn: Callable[[], None],
-    register_all_pipelines_fn: Callable[..., None],
-) -> PipelineRegistry:
-    """Initialize provider/pipeline registry with optional explicit registry."""
-    effective_registry = registry if registry is not None else create_registry_fn()
-    ensure_providers_loaded_fn()
-    register_all_pipelines_fn(registry=effective_registry)
-    return effective_registry
+@dataclass(frozen=True, slots=True)
+class _ControlPlaneSetupResult:
+    ctx: PipelineRunContext
+    inputs: _RunnerInputs
+    run_ledger_service: RunLedgerService | None
+    required_profile: str
 
 
 def _handle_control_plane_setup(
     ctx: PipelineRunContext,
     inputs: _RunnerInputs,
-) -> tuple[PipelineRunContext, _RunnerInputs, RunLedgerService | None, str]:
+) -> _ControlPlaneSetupResult:
     """Handle control plane setup including manifest and ledger services."""
     control_plane_policy = _resolve_runner_control_plane_policy(
         inputs.settings,
@@ -127,46 +124,12 @@ def _handle_control_plane_setup(
             or control_plane_policy.required_profile
         )
 
-    return ctx, inputs, run_ledger_service, effective_required_profile
-
-
-def _create_runner(
-    *,
-    registry: PipelineRegistry,
-    ctx: PipelineRunContext,
-    inputs: _RunnerInputs,
-) -> PipelineRunnerProtocol:
-    """Create the runtime runner from the registered factory seam."""
-    factory = registry.get(ctx.pipeline_name).factory
-    return _create_runner_from_factory(
-        factory=factory,
+    return _ControlPlaneSetupResult(
         ctx=ctx,
         inputs=inputs,
+        run_ledger_service=run_ledger_service,
+        required_profile=effective_required_profile,
     )
-
-
-def _attach_runner_control_plane_collaborators(
-    *,
-    runner: PipelineRunnerProtocol,
-    required_profile: str,
-    run_ledger_service: RunLedgerService | None,
-) -> None:
-    """Attach optional control-plane collaborators and validate closure."""
-    if run_ledger_service is None:
-        return
-    attachment_result = attach_control_plane_collaborators(
-        runner,
-        run_ledger_service,
-    )
-    _validate_artifact_recorder_attachment(
-        required_profile=required_profile,
-        candidate_count=attachment_result.candidate_count,
-        attached_count=attachment_result.attached_count,
-        missing_attach_method_count=(attachment_result.missing_attach_method_count),
-        failed_count=attachment_result.failed_count,
-    )
-
-
 def build_pipeline_runner(
     ctx: PipelineRunContext,
     registry: PipelineRegistry | None = None,
@@ -186,32 +149,9 @@ def build_pipeline_runner(
     ]
     | None = None,
 ) -> PipelineRunnerProtocol:
-    """Assemble and return a fully configured ``PipelineRunner``.
-
-    Args:
-        ctx: Pipeline run context containing pipeline name, run type, and execution options.
-        registry: Optional PipelineRegistry for test isolation; creates a fresh
-            runtime registry when None.
-        create_registry_fn: Callable returning a fresh PipelineRegistry instance.
-        ensure_providers_loaded_fn: Callable ensuring provider adapters are loaded.
-        register_all_pipelines_fn: Callable registering all pipeline factories.
-        get_settings_fn: Callable returning global application Settings.
-        load_pipeline_config_fn: Callable loading PipelineYamlConfig by pipeline name.
-        build_observability_bundle_fn: Optional callable returning an ObservabilityBundle.
-            Uses the canonical observability builder when omitted.
-        assemble_vacuum_settings_fn: Optional callable merging CLI and YAML vacuum
-            settings. Uses the canonical runtime input resolver when omitted.
-        assemble_runtime_config_fn: Optional callable building RuntimeConfig from
-            context. Uses the canonical runtime input resolver when omitted.
-        assemble_filter_config_fn: Optional callable building InputFilterConfig from
-            YAML and CLI. Uses the canonical runtime input resolver when omitted.
-        assemble_cached_bronze_context_fn: Optional callable resolving cached bronze
-            context. Uses the canonical runtime input resolver when omitted.
-
-    Returns:
-        Fully configured PipelineRunner ready for execution.
-    """
-    effective_registry = _initialize_registry(
+    """Assemble and return a fully configured ``PipelineRunner``."""
+    factory_bootstrap = _bootstrap_runner_factory(
+        pipeline_name=ctx.pipeline_name,
         registry=registry,
         create_registry_fn=create_registry_fn,
         ensure_providers_loaded_fn=ensure_providers_loaded_fn,
@@ -240,18 +180,15 @@ def build_pipeline_runner(
         else assemble_cached_bronze_context_fn,
         prepare_runner_inputs_fn=prepare_runner_inputs,
     )
-    ctx, inputs, run_ledger_service, required_profile = _handle_control_plane_setup(
-        ctx,
-        inputs,
-    )
+    control_plane_setup = _handle_control_plane_setup(ctx, inputs)
     runner = _create_runner(
-        registry=effective_registry,
-        ctx=ctx,
-        inputs=inputs,
+        factory=factory_bootstrap.factory,
+        ctx=control_plane_setup.ctx,
+        inputs=control_plane_setup.inputs,
     )
     _attach_runner_control_plane_collaborators(
         runner=runner,
-        required_profile=required_profile,
-        run_ledger_service=run_ledger_service,
+        required_profile=control_plane_setup.required_profile,
+        run_ledger_service=control_plane_setup.run_ledger_service,
     )
     return runner

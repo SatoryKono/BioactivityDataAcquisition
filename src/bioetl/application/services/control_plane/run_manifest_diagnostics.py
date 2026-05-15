@@ -12,11 +12,11 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_base im
 from bioetl.application.services.control_plane._run_manifest_diagnostics_base_helpers import (
     _resolve_snapshot_status,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_ledger import (
-    _process_ledger_entries,
+from bioetl.application.services.control_plane._run_manifest_diagnostics_finalization import (
+    attach_base_summary_runtime_views as _attach_base_summary_runtime_views,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_main_helpers import (
-    _build_unified_reproducibility_diagnostics,
+from bioetl.application.services.control_plane._run_manifest_diagnostics_finalization import (
+    build_final_diagnostics_summary as _build_final_diagnostics_summary,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
     _build_operator_replay_projection,
@@ -24,21 +24,10 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
     _build_resume_contract,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
-    merge_ledger_input_snapshots_into_summary,
     resolve_post_manifest_input_snapshot_materialization_mode,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_source_refs import (
-    _attach_rich_composite_replay_support,
     _build_effective_source_refs,
-)
-from bioetl.application.services.control_plane._run_manifest_diagnostics_summary import (
-    _build_final_summary,
-    _build_runtime_views,
-    _FinalSummaryRequest,
-    _RuntimeViewsRequest,
-)
-from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring import (
-    build_reproducibility_audit_scoring,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -66,38 +55,11 @@ class _ReplayRefreshProjection:
     replay_mode: str
 
 
-def _attach_base_summary_runtime_views(
-    manifest: RunManifest,
-    summary: dict[str, object],
-) -> None:
-    """Attach persistence, alert, and scoring overlays to base summary."""
-    persistence_profile, alert_signals, next_steps = _build_runtime_views(
-        _RuntimeViewsRequest(
-            manifest=manifest,
-            summary=summary,
-            ledger_entries_present=False,
-            artifact_refs=[],
-            lineage_fragment_ids=set(),
-            missing_link_count=0,
-            latest_status=None,
-            dq_signal_present=False,
-            cross_validation_signal_present=False,
-        )
-    )
-    summary["persistence_profile"] = persistence_profile
-    summary["alert_signals"] = alert_signals
-    summary["next_steps"] = next_steps
-    _attach_summary_reproducibility_views(summary)
+@dataclass(frozen=True, slots=True)
+class _ReplayRefreshSummaryUpdate:
+    """All replay-summary updates derived after snapshot materialization."""
 
-
-def _attach_summary_reproducibility_views(summary: dict[str, object]) -> None:
-    """Attach canonical reproducibility diagnostics and score overlays."""
-    summary["reproducibility_diagnostics"] = _build_unified_reproducibility_diagnostics(
-        summary
-    )
-    summary["reproducibility_audit_score"] = build_reproducibility_audit_scoring(
-        summary
-    )
+    payload: dict[str, object]
 
 
 def _build_base_summary(
@@ -119,67 +81,12 @@ def build_diagnostics_summary(
 
     if not ledger_entries:
         return base_summary
-    base_summary = merge_ledger_input_snapshots_into_summary(
-        base_summary,
-        ledger_entries,
-    )
-    base_summary = _refresh_replay_summary_from_materialized_snapshots(
+    return _build_final_diagnostics_summary(
         manifest=manifest,
-        summary=base_summary,
+        base_summary=base_summary,
+        ledger_entries=ledger_entries,
+        refresh_replay_summary_fn=_refresh_replay_summary_from_materialized_snapshots,
     )
-    base_summary = _attach_rich_composite_replay_support(
-        base_summary,
-        ledger_entries,
-    )
-
-    (
-        family_counter,
-        type_counter,
-        artifact_refs,
-        lineage_fragment_ids,
-        dq_rule_ids,
-        dq_dispositions,
-        dq_report_paths,
-        dq_violation_kinds,
-        cross_validation_rule_ids,
-        cross_validation_config_paths,
-        cross_validation_quarantine_policies,
-        cross_validation_replay_contracts,
-        occurrence_only_diagnostic_scopes,
-        dq_signal_present,
-        cross_validation_signal_present,
-        missing_link_count,
-        correlation_anchor_gaps,
-        resume_diagnostics,
-    ) = _process_ledger_entries(ledger_entries)
-
-    final_summary = _build_final_summary(
-        _FinalSummaryRequest(
-            manifest=manifest,
-            base_summary=base_summary,
-            ledger_entries=ledger_entries,
-            family_counter=family_counter,
-            type_counter=type_counter,
-            artifact_refs=artifact_refs,
-            lineage_fragment_ids=lineage_fragment_ids,
-            dq_rule_ids=dq_rule_ids,
-            dq_dispositions=dq_dispositions,
-            dq_report_paths=dq_report_paths,
-            dq_violation_kinds=dq_violation_kinds,
-            cross_validation_rule_ids=cross_validation_rule_ids,
-            cross_validation_config_paths=cross_validation_config_paths,
-            cross_validation_quarantine_policies=(cross_validation_quarantine_policies),
-            cross_validation_replay_contracts=cross_validation_replay_contracts,
-            occurrence_only_diagnostic_scopes=occurrence_only_diagnostic_scopes,
-            dq_signal_present=dq_signal_present,
-            cross_validation_signal_present=cross_validation_signal_present,
-            missing_link_count=missing_link_count,
-            correlation_anchor_gaps=correlation_anchor_gaps,
-            resume_diagnostics=resume_diagnostics,
-        )
-    )
-    _attach_summary_reproducibility_views(final_summary)
-    return final_summary
 
 
 def _refresh_replay_summary_build_policy_assessment(
@@ -294,20 +201,12 @@ def _refresh_replay_summary_update_snapshot_fields(
     return updated
 
 
-def _refresh_replay_summary_from_materialized_snapshots(
+def _build_refresh_summary_update(
     *,
-    manifest: RunManifest,
     summary: dict[str, object],
-) -> dict[str, object]:
-    """Recompute replay policy after ledger-derived snapshots are merged."""
-    input_snapshots = summary.get("input_snapshots")
-    if not isinstance(input_snapshots, list) or not input_snapshots:
-        return summary
-    refresh_context = _refresh_replay_summary_build_policy_assessment(
-        manifest=manifest,
-        summary=summary,
-        input_snapshots=cast("list[object]", input_snapshots),
-    )
+    refresh_context: _ReplayRefreshContext,
+) -> _ReplayRefreshSummaryUpdate:
+    """Build the full summary update after replay refresh and snapshot merge."""
     updated = dict(summary)
     replay_projection = _build_refresh_replay_projection(refresh_context)
     updated.update(replay_projection.replay_payload)
@@ -323,7 +222,27 @@ def _refresh_replay_summary_from_materialized_snapshots(
         resume_requested=refresh_context.resume_requested,
         policy_assessment=refresh_context.policy_assessment,
     )
-    return updated
+    return _ReplayRefreshSummaryUpdate(payload=updated)
+
+
+def _refresh_replay_summary_from_materialized_snapshots(
+    *,
+    manifest: RunManifest,
+    summary: dict[str, object],
+) -> dict[str, object]:
+    """Recompute replay policy after ledger-derived snapshots are merged."""
+    input_snapshots = summary.get("input_snapshots")
+    if not isinstance(input_snapshots, list) or not input_snapshots:
+        return summary
+    refresh_context = _refresh_replay_summary_build_policy_assessment(
+        manifest=manifest,
+        summary=summary,
+        input_snapshots=cast("list[object]", input_snapshots),
+    )
+    return _build_refresh_summary_update(
+        summary=summary,
+        refresh_context=refresh_context,
+    ).payload
 
 
 __all__ = ["build_diagnostics_summary"]

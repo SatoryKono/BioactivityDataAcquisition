@@ -133,10 +133,25 @@ _CHECK_DRIFT_KEYS: Final[tuple[str, ...]] = (
     "documented_without_registry",
     "rules_without_registry",
     "runtime_cardinality_review_required",
+    "declared_risky_label_review_required",
     "runtime_label_contract_violations",
+    "runtime_label_contract_unresolved",
 )
 _ALLOWLIST_METADATA_REQUIRED_KEYS: Final[frozenset[str]] = frozenset(
-    {"runtime_cardinality_review_required"}
+    {
+        "runtime_cardinality_review_required",
+        "declared_risky_label_review_required",
+    }
+)
+_CARDINALITY_RISK_LABEL_NAMES: Final[frozenset[str]] = frozenset(
+    {
+        "endpoint",
+        "field",
+        "pipeline_context",
+        "provider_context",
+        "run_type_context",
+        "table",
+    }
 )
 _DIRECT_COLLECTOR_TERMINAL_METHODS: Final[frozenset[str]] = frozenset(
     {"inc", "observe", "set"}
@@ -999,6 +1014,12 @@ def collect_metric_inventory(
         for metric_name, emitter_paths in combined_emitters.items()
         if len(set(emitter_paths)) >= 3
     )
+    declared_risky_label_review_required = sorted(
+        metric_name
+        for metric_name, label_names in REGISTERED_PROMETHEUS_METRIC_LABELS.items()
+        if metric_name in declared_set
+        and bool(set(label_names) & _CARDINALITY_RISK_LABEL_NAMES)
+    )
 
     report: dict[str, list[str] | dict[str, list[str]]] = {
         "declared_metrics": registered,
@@ -1012,6 +1033,9 @@ def collect_metric_inventory(
         "dashboarded_without_emission": sorted(documented_without_runtime),
         "alerted_without_emission": sorted(ruled_without_runtime),
         "runtime_cardinality_review_required": runtime_cardinality_review_required,
+        "declared_risky_label_review_required": (
+            declared_risky_label_review_required
+        ),
         "runtime_label_contract_violations": label_contract_violations,
         "runtime_label_contract_unresolved": label_contract_unresolved,
         "registered_metrics": registered,
@@ -1187,6 +1211,7 @@ def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:
         "dashboarded_without_emission",
         "alerted_without_emission",
         "runtime_cardinality_review_required",
+        "declared_risky_label_review_required",
         "runtime_label_contract_violations",
         "runtime_label_contract_unresolved",
         "live_metrics",

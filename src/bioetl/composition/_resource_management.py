@@ -11,12 +11,12 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol, cast
 
+from bioetl.composition._json_types import JsonDict
 from bioetl.composition._pipeline_execution import (
     ArchiveOptions,
     VacuumOptions,
     _ensure_registrations,
 )
-from bioetl.composition._json_types import JsonDict
 from bioetl.composition.bootstrap.cli.checkpoint import (
     bootstrap_checkpoint_runtime_service,
     bootstrap_quarantine_runtime_service,

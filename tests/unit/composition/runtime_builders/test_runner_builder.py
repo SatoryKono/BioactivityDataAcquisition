@@ -21,7 +21,6 @@ from bioetl.domain.ports import PipelineCreateRunnerRequest
 SILVER_OUTPUT_PATH = "test-output/silver/chembl/activity"
 SILVER_METADATA_PATH = "test-output/silver/chembl/activity/_metadata.yaml"
 
-
 class _FakeRunner:
     def __init__(self) -> None:
         self.attached_run_ledger_service: object | None = None
@@ -273,10 +272,10 @@ def test_handle_control_plane_setup_returns_effective_manifest_profile(
         )[1],
     )
 
-    _, _, _, required_profile = runner_builder._handle_control_plane_setup(ctx, inputs)
+    result = runner_builder._handle_control_plane_setup(ctx, inputs)
 
     assert captured["manifest_id"] == "manifest-1"
-    assert required_profile == "replay_ready"
+    assert result.required_profile == "replay_ready"
 
 
 def test_build_pipeline_runner_defaults_to_provider_registry_bootstrap() -> None:

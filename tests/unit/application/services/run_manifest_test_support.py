@@ -30,7 +30,7 @@ VALID_CONFIG_HASH = "a" * 64
 VALID_RESOLVED_CONFIG_HASH = "b" * 64
 VALID_EFFECTIVE_CONFIG_HASH = "c" * 64
 SNAPSHOT_IDENTITY_FINGERPRINT = (
-    "f29f1a5c18e94a4fe614b59ae8e68c5c65afd078155b95d1e7c4aa32f6291dcd"
+    "273c9e5f598ea834b7fa778048db3ff57a0f73c9b406e4edd9db26ae9ae4fcf9"
 )
 TEST_ROOT = synthetic_test_root("run-manifest-test-support")
 DEFAULT_BRONZE_BATCH_URI = (TEST_ROOT / "bronze" / "batch_1.jsonl.zst").as_uri()

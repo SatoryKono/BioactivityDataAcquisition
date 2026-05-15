@@ -92,8 +92,8 @@ class HistoricalReplayClosureReportRecord:
 
 
 __all__ = [
+    "RESIDUAL_BLOCKED_STATUSES",
     "HistoricalReplayClaimScopeMode",
     "HistoricalReplayClosureReportRecord",
     "HistoricalReplayResidualDispositionRecord",
-    "RESIDUAL_BLOCKED_STATUSES",
 ]

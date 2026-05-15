@@ -141,6 +141,64 @@ class TestLocalCheckpointSaveLoad:
         await cp.save("test", run_id)
         assert (deep_path / "test.json").exists()
 
+    @pytest.mark.asyncio
+    async def test_save_persists_immutable_history_entry(
+        self, checkpoint: LocalCheckpointAdapter, run_id: RunID
+    ) -> None:
+        """Save should preserve immutable per-run checkpoint evidence."""
+        await checkpoint.save(
+            "chembl_activity",
+            run_id,
+            {"manifest_id": "manifest-1", "offset": 100},
+        )
+
+        history_dir = (
+            checkpoint.base_path
+            / ".history"
+            / "by_pipeline"
+            / "chembl_activity"
+            / str(run_id)
+        )
+        assert history_dir.exists()
+        history_entries = sorted(history_dir.glob("*.json"))
+        assert len(history_entries) == 1
+        assert (
+            checkpoint.base_path / ".history" / "by_manifest" / "manifest-1.json"
+        ).exists()
+
+    @pytest.mark.asyncio
+    async def test_load_for_run_reads_latest_immutable_history_entry(
+        self, checkpoint: LocalCheckpointAdapter
+    ) -> None:
+        """Run-scoped history loads should return the latest saved evidence."""
+        run_id = RunID(uuid4())
+
+        await checkpoint.save("pipeline", run_id, {"offset": 1})
+        await checkpoint.save("pipeline", run_id, {"offset": 2})
+
+        result = await checkpoint.load_for_run("pipeline", run_id)
+        assert result is not None
+        loaded_run_id, loaded_metadata = result
+        assert loaded_run_id == run_id
+        assert loaded_metadata["offset"] == 2
+
+    @pytest.mark.asyncio
+    async def test_load_for_manifest_id_uses_history_index(
+        self, checkpoint: LocalCheckpointAdapter, run_id: RunID
+    ) -> None:
+        """Manifest lookup should resolve the immutable history entry."""
+        await checkpoint.save(
+            "pipeline",
+            run_id,
+            {"manifest_id": "manifest-lookup", "offset": 3},
+        )
+
+        result = await checkpoint.load_for_manifest_id("manifest-lookup")
+        assert result is not None
+        loaded_run_id, loaded_metadata = result
+        assert loaded_run_id == run_id
+        assert loaded_metadata["offset"] == 3
+
 
 class TestLocalCheckpointDelete:
     """Tests for delete operation."""
@@ -155,6 +213,25 @@ class TestLocalCheckpointDelete:
 
         await checkpoint.delete("pipeline")
         assert not (checkpoint.base_path / "pipeline.json").exists()
+
+    @pytest.mark.asyncio
+    async def test_delete_preserves_immutable_history(
+        self, checkpoint: LocalCheckpointAdapter, run_id: RunID
+    ) -> None:
+        """Delete should only clear the mutable resume pointer."""
+        await checkpoint.save(
+            "pipeline",
+            run_id,
+            {"manifest_id": "manifest-delete", "offset": 1},
+        )
+
+        await checkpoint.delete("pipeline")
+
+        result = await checkpoint.load_for_run("pipeline", run_id)
+        assert result is not None
+        loaded_run_id, loaded_metadata = result
+        assert loaded_run_id == run_id
+        assert loaded_metadata["offset"] == 1
 
     @pytest.mark.asyncio
     async def test_delete_nonexistent_is_noop(
