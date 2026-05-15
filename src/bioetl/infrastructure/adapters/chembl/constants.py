@@ -37,12 +37,15 @@ CHEMBL_DTO_MODELS: dict[str, type[BaseModel]] = {
     "compound": MoleculeRecord,  # Alias for molecule
     "target": TargetRecord,
     "target_component": TargetComponentRecord,
+    "publication": ChemblPublicationRecord,
     "document": ChemblPublicationRecord,
     "cell_line": CellLineRecord,
     "protein_class": ProteinClassRecord,
+    "protein_classification": ProteinClassRecord,
     "tissue": TissueRecord,
     "compound_record": CompoundLinkRecord,
     "publication_similarity": PublicationSimilarityRecord,
+    "document_similarity": PublicationSimilarityRecord,
 }
 
 # Entity types that don't support limit/offset pagination

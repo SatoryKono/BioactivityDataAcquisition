@@ -9,6 +9,11 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 TARGETS = (
     "tests/helpers/metadata_fixtures.py",
+    "tests/unit/application/services/run_manifest_test_support.py",
+    "tests/unit/application/services/test_run_ledger_service.py",
+    "tests/unit/application/services/test_run_manifest_inspection_service.py",
+    "tests/unit/application/services/test_metadata_assemblers.py",
+    "tests/unit/application/services/test_metadata_assemblers_helpers.py",
     "tests/testing_support/bronze_writer.py",
     "tests/integration/test_pubchem_pipeline.py",
     "tests/integration/test_uniprot_pipeline.py",

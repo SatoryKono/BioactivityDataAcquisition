@@ -35,6 +35,9 @@ must use these `suite_name` values for comparable local and CI runs:
 
 - `smoke`: minimal dependency/import smoke lane;
 - `unit-fast`: `tests/unit/`, excluding `slow`, `benchmark`, and `memory`;
+- `unit-parallel-safe`: deterministic unit/domain/application slice routed
+  through the maintained shard inventory and excluding `slow`, `serial`,
+  `benchmark`, and `memory`;
 - `integration-replay`: `tests/integration/` in VCR replay-only mode;
 - `security`: dedicated security and secret-hygiene lane;
 - `contracts`: schema, contract, and snapshot tests;
@@ -77,10 +80,17 @@ The QA entrypoint can record named lane runs as JUnit XML plus JSON summaries:
 
 ```bash
 python -m scripts.engineering.qa run-tests --suite unit-fast --skip-preflight -- --no-cov
+python -m scripts.engineering.qa run-tests --suite unit-parallel-safe --skip-preflight -- --no-cov
 python -m scripts.engineering.qa summarize-junit --suite unit-fast --junit-glob 'reports/test-telemetry/*.xml'
 python -m scripts.engineering.qa test-health --last 30 --markdown-out reports/quality/test-runs/rollup.md
 python -m scripts.engineering.qa test-health --suite coverage-verify --run-id coverage-verify-local --junit-glob 'reports/quality/test-runs/junit/*.xml' --last 30 --markdown-out reports/quality/test-runs/rollup.md
 ```
+
+`reports/quality/test-runs/rollup.md` is historical evidence only. Current
+merge-blocking status comes from live CI plus the `coverage-verify` hard gate,
+while the committed baseline snapshot lives in
+`configs/quality/test_telemetry_baseline.yaml` and
+`docs/05-engineering/test-telemetry-baseline.md`.
 
 Failure classifications are informational and come from
 `configs/quality/test_health_classifiers.yaml`; pytest exit codes and quality

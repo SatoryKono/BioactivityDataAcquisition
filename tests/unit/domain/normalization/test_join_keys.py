@@ -37,6 +37,12 @@ def test_normalize_join_key_text_applies_trim_and_lowercase_for_doi() -> None:
     )
 
 
+def test_normalize_join_key_text_applies_publication_title_cleanup() -> None:
+    raw = "  A&nbsp;<i>Mixed</i>\x07\nTitle  "
+
+    assert normalize_join_key_text(raw, key="title") == "A Mixed Title"
+
+
 def test_normalize_join_key_scalar_preserves_non_string_values() -> None:
     assert normalize_join_key_scalar(42, key="pmid") == 42
 

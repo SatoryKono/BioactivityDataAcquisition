@@ -199,12 +199,18 @@ tracked_suite_inventory:
     - tests/integration/config/test_contract_registry_active_surface_coverage.py
     - tests/integration/config/test_deprecated_gold_contract_registry_inventory.py
     - tests/integration/config/test_dq_config_loading.py
+    - tests/integration/config/test_generic_field_ownership.py
+    - tests/integration/config/test_gold_nullable_numeric_compatibility.py
+    - tests/integration/config/test_ontology_unit_semantics.py
     - tests/integration/config/test_pipeline_data_storage_contracts.py
     - tests/integration/config/test_pubchem_enum_parity.py
     - tests/integration/config/test_pubchem_property_vocabulary_inventory.py
     - tests/integration/config/test_publication_controlled_vocab_parity.py
     - tests/integration/config/test_publication_nested_vocabulary_inventory.py
+    - tests/integration/config/test_semantic_anchor_parity.py
     - tests/integration/config/test_semantic_field_unification_contract.py
+    - tests/integration/config/test_semantic_pair_matrix_budget.py
+    - tests/integration/config/test_semantic_registry_drift.py
     - tests/integration/config/test_uniprot_semantic_payload_vocabulary_inventory.py
     - tests/integration/fixtures/test_non_chembl_edge_fixture_manifest.py
     - tests/integration/infrastructure/storage/test_atomic.py

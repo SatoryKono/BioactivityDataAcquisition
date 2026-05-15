@@ -122,23 +122,27 @@ def create_and_persist_effective_config_artifact(
     inputs: RunnerInputs,
     provider: str,
     entity: str,
+    reproducibility_context: object | None = None,
+    contract_identity: _manifest_support.RunManifestContractIdentity | None = None,
 ) -> tuple[str, str, str, str]:
     """Create effective config artifact, persist it, and return provenance fields."""
-    contract_ref = f"{provider}.{entity}"
-    reproducibility_context = resolve_manifest_reproducibility_context(
-        ctx=ctx,
-        inputs=inputs,
-        provider=provider,
-        entity=entity,
-        contract_ref=contract_ref,
-    )
-    contract_identity = _manifest_support.resolve_contract_identity(
-        provider=provider,
-        entity=entity,
-        strict=bool(getattr(ctx, "exact_replay", False))
-        or reproducibility_context.required_persistence_profile
-        in STRICT_PERSISTENCE_PROFILES,
-    )
+    if reproducibility_context is None:
+        contract_ref = f"{provider}.{entity}"
+        reproducibility_context = resolve_manifest_reproducibility_context(
+            ctx=ctx,
+            inputs=inputs,
+            provider=provider,
+            entity=entity,
+            contract_ref=contract_ref,
+        )
+    if contract_identity is None:
+        contract_identity = _manifest_support.resolve_contract_identity(
+            provider=provider,
+            entity=entity,
+            strict=bool(getattr(ctx, "exact_replay", False))
+            or reproducibility_context.required_persistence_profile
+            in STRICT_PERSISTENCE_PROFILES,
+        )
     return _create_and_persist_effective_config_artifact_payload(
         pipeline_name=ctx.pipeline_name,
         pipeline_kind="standard",
@@ -158,9 +162,9 @@ def create_and_persist_effective_config_artifact(
                 )
             )
         ),
-        normalization_profile_ref=contract_identity[5],
-        normalization_profile_version=contract_identity[6],
-        normalization_profile_hash=contract_identity[7],
+        normalization_profile_ref=contract_identity.normalization_profile_ref,
+        normalization_profile_version=contract_identity.normalization_profile_version,
+        normalization_profile_hash=contract_identity.normalization_profile_hash,
         settings=inputs.settings,
         logger=inputs.observability.logger,
         run_id=ctx.run_id,

@@ -2,19 +2,20 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from datetime import datetime
-from hashlib import sha256
 from uuid import uuid4
 
 from bioetl.application.services.control_plane import _run_ledger_rich_events
 from bioetl.application.services.control_plane._run_ledger_diagnostic_support import (
-    _RunLedgerDiagnosticRequest,
-    build_run_ledger_diagnostic_details,
     sync_manifest_contract_defaults,
     sync_manifest_runtime_defaults,
+)
+from bioetl.application.services.control_plane._run_ledger_entry_support import (
+    RunLedgerEntryRequest,
+    append_run_ledger_entry,
+    append_run_outcome,
 )
 from bioetl.domain.context import current_utc_time
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
@@ -29,142 +30,12 @@ from bioetl.domain.control_plane.run_ledger import (
     STAGE_COMPLETED_EVENT,
     STAGE_STARTED_EVENT,
     canonicalize_run_ledger_stage_name,
-    infer_ledger_event_family,
 )
-from bioetl.domain.normalization import normalize_run_ledger_payload
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID
 from bioetl.domain.types.dq_contracts import DQDisposition
 
 __all__ = ["RunLedgerService"]
-
-_IDEMPOTENCY_KEY_FIELDS = (
-    "manifest_id",
-    "run_id",
-    "event_type",
-    "event_family",
-    "status",
-    "stage",
-    "message",
-    "error_type",
-    "dataset_ref",
-    "lineage_fragment_id",
-    "metrics_snapshot",
-    "details",
-)
-
-
-def _build_run_ledger_idempotency_key(payload: Mapping[str, object]) -> str:
-    """Build a stable key for one logical lifecycle event."""
-    semantic_payload = {
-        field_name: payload.get(field_name) for field_name in _IDEMPOTENCY_KEY_FIELDS
-    }
-    serialized = json.dumps(
-        semantic_payload,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=True,
-    )
-    return f"sha256:{sha256(serialized.encode('utf-8')).hexdigest()}"
-
-
-def _validate_manifest_linkage(service: RunLedgerService) -> None:
-    """Reject lifecycle events that are not tied to a persisted manifest."""
-    manifest_id = service.manifest_id.strip()
-    if not manifest_id or manifest_id == "pending":
-        raise RuntimeError(
-            "Run ledger events require a persisted manifest_id before append"
-        )
-
-
-def _append_run_ledger_entry(
-    service: RunLedgerService,
-    *,
-    event_type: str,
-    status: str | None,
-    stage: str | None = None,
-    message: str | None = None,
-    error_type: str | None = None,
-    dataset_ref: str | None = None,
-    lineage_fragment_id: str | None = None,
-    metrics_snapshot: dict[str, int] | None = None,
-    details: dict[str, object] | None = None,
-) -> RunLedgerEntry:
-    """Create and append one ledger entry."""
-    _validate_manifest_linkage(service)
-    event_family = infer_ledger_event_family(event_type)
-    payload = normalize_run_ledger_payload(
-        {
-            "entry_id": service._entry_id_factory(),
-            "manifest_id": service.manifest_id,
-            "run_id": service.run_id,
-            "event_type": event_type,
-            "event_family": event_family,
-            "occurred_at": service._occurred_at_factory(),
-            "status": status,
-            "stage": stage,
-            "message": message,
-            "error_type": error_type,
-            "dataset_ref": dataset_ref,
-            "lineage_fragment_id": lineage_fragment_id,
-            "metrics_snapshot": metrics_snapshot,
-            "details": build_run_ledger_diagnostic_details(
-                _RunLedgerDiagnosticRequest(
-                    event_type=event_type,
-                    event_family=event_family,
-                    manifest_id=service.manifest_id,
-                    run_id=service.run_id,
-                    pipeline_name=service.pipeline_name,
-                    provider=service.provider,
-                    entity=service.entity,
-                    run_type=service.run_type,
-                    resolved_config_hash=service.resolved_config_hash,
-                    effective_config_hash=service.effective_config_hash,
-                    contract_ref=service.contract_ref,
-                    contract_version=service.contract_version,
-                    dq_policy_ref=service.dq_policy_ref,
-                    rule_bundle_version=service.rule_bundle_version,
-                    dq_contract_compatibility_hash=(
-                        service.dq_contract_compatibility_hash
-                    ),
-                    effective_config_artifact_id=service.effective_config_artifact_id,
-                    composite_run_id=service.composite_run_id,
-                    status=status,
-                    stage=stage,
-                    error_type=error_type,
-                    dataset_ref=dataset_ref,
-                    lineage_fragment_id=lineage_fragment_id,
-                    details=details,
-                )
-            ),
-        }
-    )
-    payload["idempotency_key"] = _build_run_ledger_idempotency_key(payload)
-    entry = RunLedgerEntry.from_dict(payload)
-    service.ledger_port.append(entry)
-    return entry
-
-
-def _append_run_outcome(
-    service: RunLedgerService,
-    *,
-    event_type: str,
-    status: str,
-    metrics_snapshot: dict[str, int],
-    message: str | None = None,
-    error_type: str | None = None,
-    details: dict[str, object] | None = None,
-) -> RunLedgerEntry:
-    """Append one terminal run outcome with the canonical payload shape."""
-    return _append_run_ledger_entry(
-        service,
-        event_type=event_type,
-        status=status,
-        message=message,
-        error_type=error_type,
-        metrics_snapshot=metrics_snapshot,
-        details=details,
-    )
 
 
 @dataclass(slots=True)
@@ -259,7 +130,7 @@ class RunLedgerService:
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record successful run completion."""
-        return _append_run_outcome(
+        return append_run_outcome(
             self,
             event_type=RUN_FINISHED_EVENT,
             status="success",
@@ -276,7 +147,7 @@ class RunLedgerService:
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record failed run completion."""
-        return _append_run_outcome(
+        return append_run_outcome(
             self,
             event_type=RUN_FAILED_EVENT,
             status="failed",
@@ -308,7 +179,7 @@ class RunLedgerService:
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record graceful shutdown completion."""
-        return _append_run_outcome(
+        return append_run_outcome(
             self,
             event_type=RUN_SHUTDOWN_EVENT,
             status="shutdown",
@@ -447,15 +318,17 @@ class RunLedgerService:
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Create and append one ledger entry."""
-        return _append_run_ledger_entry(
+        return append_run_ledger_entry(
             self,
-            event_type=event_type,
-            status=status,
-            stage=stage,
-            message=message,
-            error_type=error_type,
-            dataset_ref=dataset_ref,
-            lineage_fragment_id=lineage_fragment_id,
-            metrics_snapshot=metrics_snapshot,
-            details=details,
+            RunLedgerEntryRequest(
+                event_type=event_type,
+                status=status,
+                stage=stage,
+                message=message,
+                error_type=error_type,
+                dataset_ref=dataset_ref,
+                lineage_fragment_id=lineage_fragment_id,
+                metrics_snapshot=metrics_snapshot,
+                details=details,
+            ),
         )

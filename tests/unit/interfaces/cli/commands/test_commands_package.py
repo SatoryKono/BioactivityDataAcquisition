@@ -23,7 +23,6 @@ def test_commands_package_exports_reviewed_public_command_whitelist() -> None:
         "lineage",
         "lock",
         "maintenance",
-        "plan",
         "quarantine",
         "run",
         "run_all",
@@ -51,7 +50,9 @@ def test_commands_package_rejects_export_support_after_command_module_import() -
         getattr(commands_package, "export_support")
 
 
-def test_commands_package_rejects_inspection_output_after_command_module_import() -> None:
+def test_commands_package_rejects_inspection_output_after_command_module_import() -> (
+    None
+):
     """Importing public diagnostics commands must not re-expose helper submodules."""
     import bioetl.interfaces.cli.commands.diagnostics  # noqa: F401
 

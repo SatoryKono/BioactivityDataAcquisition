@@ -92,9 +92,7 @@ def evolved_records() -> list[dict[str, Any]]:
             "new_field": "extra_data",  # New field
             "_run_id": deterministic_run_id("schema_drift.evolved.entity_3"),
             "_run_type": "incremental",
-            "_source_batch_id": deterministic_batch_id(
-                "schema_drift.evolved.entity_3"
-            ),
+            "_source_batch_id": deterministic_batch_id("schema_drift.evolved.entity_3"),
             "_ingestion_ts": "2025-01-15T12:00:00Z",
         },
     ]
@@ -110,9 +108,7 @@ def reduced_records() -> list[dict[str, Any]]:
             "value": 4.0,
             "_run_id": deterministic_run_id("schema_drift.reduced.entity_4"),
             "_run_type": "incremental",
-            "_source_batch_id": deterministic_batch_id(
-                "schema_drift.reduced.entity_4"
-            ),
+            "_source_batch_id": deterministic_batch_id("schema_drift.reduced.entity_4"),
             "_ingestion_ts": "2025-01-15T12:00:00Z",
         },
     ]

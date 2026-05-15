@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 from collections.abc import Mapping
 
 from bioetl.application.services.control_plane._historical_replay_certification import (
@@ -11,7 +10,9 @@ from bioetl.application.services.control_plane._historical_replay_certification 
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import INPUT_SNAPSHOT_PUBLISHED_EVENT
-from bioetl.domain.normalization import serialize_json_canonical
+from bioetl.domain.normalization import (
+    compute_input_snapshot_identity_fingerprint as compute_snapshot_identity_fingerprint,
+)
 
 
 def lookup_mapping_path(
@@ -90,11 +91,7 @@ def compute_input_snapshot_identity_fingerprint(
     input_snapshots: list[dict[str, object]],
 ) -> str | None:
     """Compute the same stable replay-anchor fingerprint shape used by checkpoints."""
-    snapshot_ids = collect_input_snapshot_ids(input_snapshots)
-    if not snapshot_ids:
-        return None
-    encoded = serialize_json_canonical(snapshot_ids)
-    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+    return compute_snapshot_identity_fingerprint(list(input_snapshots))
 
 
 def collect_ledger_input_snapshot_refs(

@@ -174,9 +174,7 @@ class TestSilverFilterMigration:
             "standard_type",
             "standard_units",
         }
-        assert [rule.column for rule in gold_filters.range_filters] == [
-            "pchembl_value"
-        ]
+        assert [rule.column for rule in gold_filters.range_filters] == ["pchembl_value"]
         assert [rule.column for rule in gold_filters.list_contains_filters] == ["tags"]
 
     def test_existing_gold_rule_wins_when_promoted_silver_field_overlaps(self) -> None:

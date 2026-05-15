@@ -50,9 +50,7 @@ def _write_governance_files(tmp_path: Path) -> None:
         ),
         encoding="utf-8",
     )
-    routing_path = (
-        tmp_path / "configs" / "quality" / "generated_artifact_routing.yaml"
-    )
+    routing_path = tmp_path / "configs" / "quality" / "generated_artifact_routing.yaml"
     routing_path.write_text(
         yaml.safe_dump(
             {
@@ -495,7 +493,9 @@ def test_collect_reports_workspace_evidence_marks_local_only_candidates_for_prun
     assert by_path["reports/Codex"].classification == "PRUNE_CANDIDATE"
     assert by_path["reports/tmp"].classification == "PRUNE_CANDIDATE"
     assert by_path["reports/docs-audit"].classification == "PRUNE_CANDIDATE"
-    assert by_path["reports/documentation_merged.md"].classification == "PRUNE_CANDIDATE"
+    assert (
+        by_path["reports/documentation_merged.md"].classification == "PRUNE_CANDIDATE"
+    )
     assert (
         by_path["reports/tmp_module_dependency_map.json"].classification
         == "PRUNE_CANDIDATE"

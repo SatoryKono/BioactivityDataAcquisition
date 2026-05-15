@@ -166,6 +166,12 @@ class BatchMetricsRecorderService:
                 outcome="filtered_out",
                 count=count,
             )
+            self._pipeline_metrics.record_stage_records(
+                run_type=self._run_type_label,
+                stage="silver",
+                outcome="filtered_out",
+                count=count,
+            )
 
     def track_error(self, stage: str, error_type: ErrorType) -> None:
         """Record an error occurrence at a specific stage.

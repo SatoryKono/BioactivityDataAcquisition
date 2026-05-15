@@ -223,10 +223,7 @@ class TestAssembleRuntimeConfig:
         assert result.heartbeat_interval == 30
         assert result.vacuum_after_run is False
         assert result.vacuum_retention_days == 7
-        assert (
-            result.silver_filter_compatibility_mode
-            == "structural_only_auto_promote"
-        )
+        assert result.silver_filter_compatibility_mode == "structural_only_auto_promote"
 
     def test_assembles_config_with_limit(self):
         """Test that assemble_runtime_config handles limit parameter."""

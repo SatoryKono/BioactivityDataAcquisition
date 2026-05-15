@@ -23,6 +23,7 @@ __all__ = ["LocalCheckpointAdapter"]
 import asyncio
 import os
 import tempfile
+import time
 from pathlib import Path
 from uuid import UUID
 
@@ -89,24 +90,26 @@ class LocalCheckpointAdapter:
             "version": "2.0",
         }
         checkpoint_json = serialize_to_json(checkpoint_data, ensure_ascii=False)
-
-        # Atomic write: write to temp file, then replace
-        fd, temp_path = tempfile.mkstemp(
-            dir=full_path.parent,
-            prefix=".checkpoint_",
-            suffix=".tmp",
-        )
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8") as f:
-                f.write(checkpoint_json)
-            # Use Path.replace for cross-platform atomic overwrite
-            Path(temp_path).replace(full_path)
-        except (OSError, ValueError, TypeError, RuntimeError):
-            # Clean up temp file on error
-            temp_file = Path(temp_path)
-            if temp_file.exists():
-                temp_file.unlink()
-            raise
+        self._atomic_write_text(full_path, checkpoint_json)
+        history_path = self._build_history_entry_path(pipeline, run_id)
+        history_path.parent.mkdir(parents=True, exist_ok=True)
+        self._atomic_write_text(history_path, checkpoint_json)
+        manifest_id = self._extract_manifest_id(metadata or {})
+        if manifest_id is not None:
+            manifest_index = {
+                "manifest_id": manifest_id,
+                "pipeline": pipeline,
+                "run_id": str(run_id),
+                "history_path": str(history_path.relative_to(self.base_path)),
+            }
+            self._manifest_index_path(manifest_id).parent.mkdir(
+                parents=True,
+                exist_ok=True,
+            )
+            self._atomic_write_text(
+                self._manifest_index_path(manifest_id),
+                serialize_to_json(manifest_index, ensure_ascii=False),
+            )
 
     async def load(
         self, pipeline: str
@@ -143,16 +146,7 @@ class LocalCheckpointAdapter:
 
         if not full_path.exists():
             return None
-
-        with open(full_path, encoding="utf-8") as f:
-            checkpoint_json = f.read()
-
-        checkpoint_data = deserialize_from_json(checkpoint_json)
-        if not isinstance(checkpoint_data, dict):
-            raise ValueError("Checkpoint data must be a dictionary")
-        run_id = RunID(UUID(checkpoint_data["run_id"]))
-        metadata = checkpoint_data.get("metadata", {})
-        return (run_id, metadata)
+        return self._load_from_path(full_path)
 
     async def delete(self, pipeline: str) -> None:
         """Delete checkpoint.
@@ -166,7 +160,7 @@ class LocalCheckpointAdapter:
         await loop.run_in_executor(None, self._delete_sync, pipeline)
 
     def _delete_sync(self, pipeline: str) -> None:
-        """Synchronous delete implementation."""
+        """Synchronous delete implementation for the mutable resume pointer only."""
         key = self._get_key(pipeline)
         full_path = self.base_path / key
 
@@ -236,6 +230,111 @@ class LocalCheckpointAdapter:
             Filename string for the checkpoint file (e.g., 'chembl_activity.json').
         """
         return f"{pipeline}.json"
+
+    async def load_for_run(
+        self,
+        pipeline: str,
+        run_id: RunID,
+    ) -> tuple[RunID, JsonDict] | None:
+        """Load the latest immutable checkpoint evidence stored for one run."""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            None,
+            self._load_for_run_sync,
+            pipeline,
+            run_id,
+        )
+
+    def _load_for_run_sync(
+        self,
+        pipeline: str,
+        run_id: RunID,
+    ) -> tuple[RunID, JsonDict] | None:
+        history_dir = self._history_run_dir(pipeline, run_id)
+        if not history_dir.exists():
+            return None
+        candidates = sorted(
+            path for path in history_dir.iterdir() if path.suffix == ".json"
+        )
+        if not candidates:
+            return None
+        return self._load_from_path(candidates[-1])
+
+    async def load_for_manifest_id(
+        self,
+        manifest_id: str,
+    ) -> tuple[RunID, JsonDict] | None:
+        """Load immutable checkpoint evidence indexed by manifest identity."""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            None,
+            self._load_for_manifest_id_sync,
+            manifest_id,
+        )
+
+    def _load_for_manifest_id_sync(
+        self,
+        manifest_id: str,
+    ) -> tuple[RunID, JsonDict] | None:
+        index_path = self._manifest_index_path(manifest_id)
+        if not index_path.exists():
+            return None
+        index = self._read_json_file(index_path)
+        history_path = index.get("history_path") if isinstance(index, dict) else None
+        if not isinstance(history_path, str) or not history_path:
+            return None
+        full_history_path = self.base_path / history_path
+        if not full_history_path.exists():
+            return None
+        return self._load_from_path(full_history_path)
+
+    def _build_history_entry_path(self, pipeline: str, run_id: RunID) -> Path:
+        return self._history_run_dir(pipeline, run_id) / f"{time.time_ns()}.json"
+
+    def _history_run_dir(self, pipeline: str, run_id: RunID) -> Path:
+        return self.base_path / ".history" / "by_pipeline" / pipeline / str(run_id)
+
+    def _manifest_index_path(self, manifest_id: str) -> Path:
+        return self.base_path / ".history" / "by_manifest" / f"{manifest_id}.json"
+
+    def _extract_manifest_id(self, metadata: JsonDict) -> str | None:
+        manifest_id = metadata.get("manifest_id")
+        if manifest_id is None and isinstance(metadata.get("run_context"), dict):
+            manifest_id = metadata["run_context"].get("manifest_id")
+        if manifest_id is None:
+            return None
+        text = str(manifest_id).strip()
+        return text or None
+
+    def _atomic_write_text(self, path: Path, payload: str) -> None:
+        fd, temp_path = tempfile.mkstemp(
+            dir=path.parent,
+            prefix=".checkpoint_",
+            suffix=".tmp",
+        )
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                f.write(payload)
+            Path(temp_path).replace(path)
+        except (OSError, ValueError, TypeError, RuntimeError):
+            temp_file = Path(temp_path)
+            if temp_file.exists():
+                temp_file.unlink()
+            raise
+
+    def _read_json_file(self, path: Path) -> JsonDict:
+        with open(path, encoding="utf-8") as f:
+            payload = f.read()
+        data = deserialize_from_json(payload)
+        if not isinstance(data, dict):
+            raise ValueError("Checkpoint data must be a dictionary")
+        return data
+
+    def _load_from_path(self, path: Path) -> tuple[RunID, JsonDict]:
+        checkpoint_data = self._read_json_file(path)
+        run_id = RunID(UUID(checkpoint_data["run_id"]))
+        metadata = checkpoint_data.get("metadata", {})
+        return (run_id, metadata)
 
     async def aclose(self) -> None:
         """Close checkpoint storage (no-op for local filesystem)."""

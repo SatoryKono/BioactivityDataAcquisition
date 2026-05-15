@@ -322,7 +322,7 @@ def test_overview_first_screen_tier_1_panels():
     """Tier 1 panels должны быть на первом экране."""
     tier_1_panels = [
         "System Status",
-        "Next Action",
+        "First Action",
         "L0 Inputs",
     ]
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))

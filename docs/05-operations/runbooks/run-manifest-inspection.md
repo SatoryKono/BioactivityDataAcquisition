@@ -71,8 +71,8 @@ Interpretation:
   `observe` may continue only for degraded non-identity signals, while canonical
   execution-identity mismatches still block resume.
 - if `required_persistence_profile` is `replay_ready` or `forensic_grade`,
-  runtime does not allow `observe` to remain effective; the applied policy is
-  coerced to `hard_fail`.
+  runtime does not allow non-`hard_fail` checkpoint policy to remain effective;
+  the applied policy is coerced to `hard_fail`.
 - if the current run is `exact_replay=true`, runtime coerces checkpoint
   compatibility handling to `hard_fail`; exact replay is not allowed to
   continue after any compatibility mismatch.
@@ -462,10 +462,15 @@ The `diagnostics` block from `bioetl run-manifest show --format json` is the
 fastest triage surface.
 
 The current published Bronze -> Silver -> Gold lineage closure boundary for
-operator-grade trace/debug claims covers these source families:
+operator-grade trace/debug claims covers these families:
 
 - `chembl.activity`
 - `chembl.molecule`
+- `composite.activity`
+- `composite.assay`
+- `composite.molecule`
+- `composite.publication`
+- `composite.target`
 - `crossref.publication`
 - `pubchem.compound`
 - `pubmed.publication`
@@ -477,6 +482,10 @@ Inspection now exposes that boundary explicitly through
 `diagnostics.lineage_closure_boundary`; operators MUST treat
 `lineage_closure_boundary.supported=false` as a fail-closed block on
 forensic-grade trace/debug claims for that family.
+Composite runs that are inside the published lineage boundary still need full
+replay/artifact evidence before `forensic_grade` can be claimed; inspect
+`persistence_profile.forensic_grade_missing_requirements` before treating a
+composite run as fully reconstructable.
 
 Focus on:
 
@@ -518,6 +527,11 @@ Focus on:
   `composite_run_identity`, `execution_fingerprint`, `manifest_id`,
   `effective_config_hash`, `contract_ref`, `contract_version`, `exact_replay`,
   `input_snapshot_ids`, and `input_snapshot_content_hashes`;
+- when `input_snapshot_fingerprint` is present, treat it as the canonical hash
+  of the immutable snapshot reference envelope, not just a hash of
+  `input_snapshot_ids`; content hashes, immutable URIs, and version anchors can
+  legitimately change the fingerprint even when the same logical snapshot IDs
+  are reused;
 - `dq_policy_ref`, `rule_bundle_version`, and `dq_contract_compatibility_hash` as adjacent DQ/control-plane anchors that are related but not interchangeable with manifest identity;
 - `correlation_anchor_gaps`, `alert_signals`, `next_steps`.
 

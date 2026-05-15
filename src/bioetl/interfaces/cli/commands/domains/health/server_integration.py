@@ -70,6 +70,8 @@ async def health_server_context(
         port=port,
         health_monitor=deps.health_monitor,
         quarantine_service=quarantine_service,
+        run_manifest_port=deps.run_manifest_port,
+        run_ledger_port=deps.run_ledger_port,
     )
 
     try:

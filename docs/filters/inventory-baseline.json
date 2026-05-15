@@ -5,8 +5,8 @@
     "entities_total": 21,
     "entities_with_silver_filters": 21,
     "entities_with_gold_filters": 21,
-    "rules_total": 100,
-    "keep_in_silver": 81,
+    "rules_total": 101,
+    "keep_in_silver": 82,
     "move_to_gold": 5,
     "duplicate": 14,
     "conflict": 0
@@ -19,7 +19,7 @@
       "has_silver_filters": true,
       "has_gold_filters": true,
       "counts_by_action": {
-        "keep_in_silver": 28,
+        "keep_in_silver": 29,
         "move_to_gold": 3,
         "duplicate": 6,
         "conflict": 0
@@ -202,6 +202,16 @@
           "field": "standard_units",
           "silver_value": "\"standard_units\"",
           "gold_value": "\"standard_units\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "standard_type",
+          "silver_value": "\"standard_type\"",
+          "gold_value": "\"standard_type\"",
           "action": "keep_in_silver",
           "notes": "also present in gold_filters (informational)"
         },

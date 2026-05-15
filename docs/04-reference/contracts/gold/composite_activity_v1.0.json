@@ -34,6 +34,94 @@
       "type": "string",
       "nullable": false,
       "description": ""
+    },
+    "activity_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "ChEMBL activity identifier retained as activity lineage anchor."
+    },
+    "molecule_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "ChEMBL molecule identifier used as activity-to-molecule lineage anchor."
+    },
+    "assay_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "ChEMBL assay identifier used as activity-to-assay lineage anchor."
+    },
+    "target_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "ChEMBL target identifier used as activity-to-target lineage anchor."
+    },
+    "publication_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "ChEMBL publication identifier used as activity-to-publication lineage anchor."
+    },
+    "record_id": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "nullable": true,
+      "description": "ChEMBL compound record identifier retained as source-scoped lineage."
+    },
+    "src_id": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Provider source identifier retained as source-scoped lineage metadata."
+    },
+    "canonical_smiles": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Inherited molecule structure identifier retained for activity context."
+    },
+    "type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "ChEMBL raw activity measurement type, not a generic canonical type."
+    },
+    "relation": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "ChEMBL raw activity measurement relation, not a generic canonical relation."
+    },
+    "value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": "ChEMBL raw activity measurement value, not a generic canonical value."
     }
   },
   "required": [

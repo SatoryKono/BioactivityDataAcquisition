@@ -76,7 +76,7 @@ class ChEMBLPublicationGoldSchema(StrictGoldContractSchema):
     pmc_id: Series[str] = pa.Field(nullable=True)
     pmid: Series[str] = pa.Field(nullable=True)
     # patent_id excluded from unified publication schema
-    title: Series[str] = pa.Field(nullable=True)
+    title: Series[str] = pa.Field(nullable=False)
     authors: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
     affiliation_list: Series[str] = pa.Field(nullable=True)  # JSON array

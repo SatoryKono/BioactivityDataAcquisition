@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.domain.types import BatchID, JsonDict, RunID, RunType
 from bioetl.infrastructure.storage.bronze.metadata_builders import (
@@ -13,6 +13,16 @@ from bioetl.infrastructure.storage.bronze.metadata_builders import (
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import BronzeMetadata, SourceMetadata
+
+    class _BronzeLineageSidecarCoordinator(Protocol):
+        def create_bronze_lineage_sidecar(
+            self,
+            *,
+            provider: str,
+            entity: str,
+            batch_id: BatchID,
+            ingestion_ts: datetime,
+        ) -> dict[str, str]: ...
 
 
 class BronzeWriterMetadataMixin:
@@ -53,6 +63,22 @@ class BronzeWriterMetadataMixin:
         Returns:
             Dictionary of string metadata fields for Bronze lineage tracking.
         """
+        coordinator = cast(
+            "_BronzeLineageSidecarCoordinator | None",
+            getattr(self, "_metadata_coordinator", None),
+        )
+        create_sidecar = (
+            None
+            if coordinator is None
+            else getattr(coordinator, "create_bronze_lineage_sidecar", None)
+        )
+        if callable(create_sidecar):
+            return create_sidecar(
+                provider=provider,
+                entity=entity,
+                batch_id=batch_id,
+                ingestion_ts=effective_ts,
+            )
         return build_bronze_lineage_metadata(
             BronzeLineageMetadataRequest(
                 run_id=run_id,

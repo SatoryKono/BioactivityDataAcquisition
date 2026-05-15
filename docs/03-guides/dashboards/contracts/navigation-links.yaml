@@ -419,6 +419,22 @@ navigation_transition_contract:
           expected_target_uid: bioetl-dq-v2
         - title: Open Silver Reject Explorer
           expected_target_uid: bioetl-silver-reject-explorer
+    bioetl-workflow-overview:
+      panel_id: 9
+      panel_title: First Action
+      min_cta: 5
+      max_cta: 5
+      ctas:
+        - title: Open 2. Runtime
+          expected_target_uid: bioetl-runtime
+        - title: Open 4. Data Quality
+          expected_target_uid: bioetl-dq-v2
+        - title: Open 3. Provider Health
+          expected_target_uid: bioetl-provider-health-v2
+        - title: Open 0. Control Plane
+          expected_target_uid: bioetl-control-plane-v1
+        - title: Open 1. Overview
+          expected_target_uid: bioetl-overview-v2
     bioetl-silver-reject-explorer:
       panel_id: 10
       panel_title: "Review: First Action / No-Data Semantics"

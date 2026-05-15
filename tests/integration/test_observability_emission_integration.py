@@ -115,7 +115,8 @@ def test_pipeline_observer_emits_metrics_and_logs_through_recording_ports() -> N
     )
     assert any(
         name == "bioetl_phase_duration_seconds"
-        and labels == {
+        and labels
+        == {
             "pipeline": "chembl_activity",
             "phase": "preflight",
             "status": "success",

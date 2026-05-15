@@ -17,6 +17,23 @@ Commands:
     check-xwalk-missing-backlog Validate xwalk MISSING_* backlog coverage
     validate-dq-consistency Validate DQ policy/config consistency
     check-semantic-field-registry Validate semantic field registry coverage
+<<<<<<< Updated upstream
+    check-semantic-registry-drift Validate generated semantic registry drift candidates
+    check-semantic-pair-budget Validate semantic pair-matrix drift budgets
+    report-semantic-pipeline-audit Generate/check semantic pipeline audit snapshot artifacts
+    check-semantic-anchor-parity Validate semantic anchor DQ/Gold parity
+    check-gold-nullable-numeric Validate Gold nullable numeric compatibility
+    check-generic-field-ownership Validate generic semantic field ownership
+    check-ontology-unit-semantics Validate ontology/unit role separation
+||||||| Stash base
+=======
+    check-semantic-registry-drift Validate generated semantic registry drift candidates
+    check-semantic-pair-budget Validate semantic pair-matrix drift budgets
+    check-semantic-anchor-parity Validate semantic anchor DQ/Gold parity
+    check-gold-nullable-numeric Validate Gold nullable numeric compatibility
+    check-generic-field-ownership Validate generic semantic field ownership
+    check-ontology-unit-semantics Validate ontology/unit role separation
+>>>>>>> Stashed changes
     generate-debt-tasks  Generate architecture debt task backlog from exemptions registry
     reduce-architecture-debt  Build execution plan from latest architecture debt tasks JSON
     check-terminology    Terminology linting
@@ -39,7 +56,8 @@ Commands:
     summarize-junit      Aggregate existing JUnit XML into test-health JSON
     test-health          Summarize recent test-health run JSON artifacts
     check-dashboard-visual-semantics Validate Grafana status-panel visual semantic invariants
-    report-dashboard-inventory Generate/check dashboard inventory parity plus provisioning/deployed drift and health summary
+    report-dashboard-inventory Generate/check dashboard inventory parity plus
+        provisioning/deployed drift and health summary
     report-dashboard-query-duplicates Generate report-only exact/near-duplicate Grafana PromQL inventory
 """
 
@@ -63,6 +81,23 @@ COMMAND_SPECS = {
     "check-xwalk-missing-backlog": "check_xwalk_missing_backlog.py",
     "validate-dq-consistency": "validate_dq_consistency.py",
     "check-semantic-field-registry": "check_semantic_field_registry.py",
+<<<<<<< Updated upstream
+    "check-semantic-registry-drift": "check_semantic_registry_drift.py",
+    "check-semantic-pair-budget": "check_semantic_pair_matrix_budget.py",
+    "report-semantic-pipeline-audit": "generate_semantic_pipeline_audit.py",
+    "check-semantic-anchor-parity": "check_semantic_anchor_parity.py",
+    "check-gold-nullable-numeric": "check_gold_nullable_numeric_compatibility.py",
+    "check-generic-field-ownership": "check_generic_field_ownership.py",
+    "check-ontology-unit-semantics": "check_ontology_unit_semantics.py",
+||||||| Stash base
+=======
+    "check-semantic-registry-drift": "check_semantic_registry_drift.py",
+    "check-semantic-pair-budget": "check_semantic_pair_matrix_budget.py",
+    "check-semantic-anchor-parity": "check_semantic_anchor_parity.py",
+    "check-gold-nullable-numeric": "check_gold_nullable_numeric_compatibility.py",
+    "check-generic-field-ownership": "check_generic_field_ownership.py",
+    "check-ontology-unit-semantics": "check_ontology_unit_semantics.py",
+>>>>>>> Stashed changes
     "generate-debt-tasks": "generate_architecture_debt_tasks.py",
     "reduce-architecture-debt": "reduce_architecture_debt.py",
     "check-terminology": "lint_terminology.py",

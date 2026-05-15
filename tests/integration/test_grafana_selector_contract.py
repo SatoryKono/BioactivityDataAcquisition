@@ -152,6 +152,20 @@ def test_hidden_handoff_contract_matches_shipped_hidden_vars() -> None:
     assert shipped_detail == registry_detail
 
 
+def test_control_plane_selector_context_contract_is_local_only() -> None:
+    resolver = _SELECTOR_CONTRACT.get("control_plane_selector_context_contract")
+    assert isinstance(resolver, dict)
+    assert resolver.get("status") == "shipped"
+    assert resolver.get("endpoint") == "/ops/control-plane/selector-context"
+    assert resolver.get("filter_options_endpoint") == "/ops/control-plane/filter-options"
+    assert resolver.get("local_only") is True
+
+    forbidden = set(resolver.get("forbidden", []))
+    assert "prometheus_run_id_labels" in forbidden
+    assert "dashboard_to_dashboard_run_id_handoff" in forbidden
+    assert "cyclic_grafana_variable_dependencies" in forbidden
+
+
 def test_current_dashboards_do_not_ship_future_execution_selectors() -> None:
     future = _SELECTOR_CONTRACT.get("execution_selector_future_contract")
     hidden_contract = _SELECTOR_CONTRACT.get("hidden_handoff_contract")

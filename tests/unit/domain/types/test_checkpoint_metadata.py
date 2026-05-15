@@ -39,6 +39,13 @@ class TestCheckpointMetadata:
             normalization_profile_version="2.0.0",
             normalization_profile_hash="b" * 64,
             exact_replay=True,
+            input_snapshot_refs=(
+                {
+                    "snapshot_id": "snap-a",
+                    "content_hash": "sha256:snap-a",
+                    "immutable_uri": "bronze://snap-a",
+                },
+            ),
             input_snapshot_ids=("snap-a", "snap-b"),
             input_snapshot_fingerprint="snap-fingerprint",
             memory_decision_trace=(
@@ -79,6 +86,7 @@ class TestCheckpointMetadata:
         assert metadata.normalization_profile_version == "2.0.0"
         assert metadata.normalization_profile_hash == "b" * 64
         assert metadata.exact_replay is True
+        assert metadata.input_snapshot_refs[0]["snapshot_id"] == "snap-a"
         assert metadata.input_snapshot_ids == ("snap-a", "snap-b")
         assert metadata.input_snapshot_fingerprint == "snap-fingerprint"
         assert metadata.memory_decision_trace[0]["new_batch_size"] == 500
@@ -207,6 +215,13 @@ class TestCheckpointMetadata:
             "normalization_profile_version": "2.0.0",
             "normalization_profile_hash": "e" * 64,
             "exact_replay": True,
+            "input_snapshot_refs": [
+                {
+                    "snapshot_id": "snap-1",
+                    "content_hash": "sha256:snap-1",
+                    "immutable_uri": "bronze://snap-1",
+                }
+            ],
             "input_snapshot_ids": ["snap-1", "snap-2", "snap-1"],
             "memory_decision_trace": [
                 {
@@ -244,6 +259,7 @@ class TestCheckpointMetadata:
         assert metadata.normalization_profile_version == "2.0.0"
         assert metadata.normalization_profile_hash == "e" * 64
         assert metadata.exact_replay is True
+        assert metadata.input_snapshot_refs[0]["content_hash"] == "sha256:snap-1"
         assert metadata.input_snapshot_ids == ("snap-1", "snap-2")
         assert metadata.memory_decision_trace[0]["reason"] == "config_budget_exceeded"
         assert metadata.run_context == {"source": "test"}
@@ -471,6 +487,49 @@ class TestCheckpointMetadata:
             != drifted.checkpoint_execution_identity_fingerprint()
         )
 
+    def test_checkpoint_execution_identity_uses_snapshot_refs_when_present(
+        self,
+    ) -> None:
+        metadata = CheckpointMetadata(
+            records_processed=1,
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+            effective_config_hash="a" * 64,
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            exact_replay=True,
+            input_snapshot_refs=(
+                {
+                    "snapshot_id": "snapshot-1",
+                    "content_hash": "sha256:old",
+                    "immutable_uri": "bronze://snapshot-1",
+                },
+            ),
+            input_snapshot_ids=("snapshot-1",),
+        )
+        drifted = CheckpointMetadata(
+            records_processed=1,
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+            effective_config_hash="a" * 64,
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            exact_replay=True,
+            input_snapshot_refs=(
+                {
+                    "snapshot_id": "snapshot-1",
+                    "content_hash": "sha256:new",
+                    "immutable_uri": "bronze://snapshot-1",
+                },
+            ),
+            input_snapshot_ids=("snapshot-1",),
+        )
+
+        assert (
+            metadata.checkpoint_execution_identity_fingerprint()
+            != drifted.checkpoint_execution_identity_fingerprint()
+        )
+
 
 class TestCheckpointCompatibilityResult:
     """Test CheckpointCompatibilityResult domain type."""
@@ -550,6 +609,13 @@ class TestCheckpointMetadataSerialization:
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             exact_replay=True,
+            input_snapshot_refs=(
+                {
+                    "snapshot_id": "snapshot-1",
+                    "content_hash": "sha256:snapshot-1",
+                    "immutable_uri": "bronze://snapshot-1",
+                },
+            ),
             input_snapshot_ids=("snapshot-1", "snapshot-2"),
             run_context={"environment": "test", "debug": True},
         )
@@ -582,6 +648,7 @@ class TestCheckpointMetadataSerialization:
         assert original.contract_ref == deserialized.contract_ref
         assert original.contract_version == deserialized.contract_version
         assert original.exact_replay == deserialized.exact_replay
+        assert original.input_snapshot_refs == deserialized.input_snapshot_refs
         assert original.input_snapshot_ids == deserialized.input_snapshot_ids
         assert original.run_context == deserialized.run_context
 

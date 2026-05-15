@@ -491,6 +491,35 @@ class TestPrometheusMetrics:
                 6
             )
 
+    def test_stage_model_metrics_preserve_canonical_accounting_labels(
+        self, prometheus_metrics
+    ):
+        """Record-accounting labels must not collapse to ``other``."""
+        with patch.dict(
+            COUNTERS,
+            {"bioetl_stage_records_total": MagicMock()},
+        ):
+            prometheus_metrics.increment_counter(
+                name="bioetl_stage_records_total",
+                value=0,
+                labels={
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                    "stage": "silver",
+                    "outcome": "deduplicated",
+                },
+            )
+
+            COUNTERS["bioetl_stage_records_total"].labels.assert_called_once_with(
+                pipeline="chembl_activity",
+                run_type="incremental",
+                stage="silver",
+                outcome="deduplicated",
+            )
+            COUNTERS["bioetl_stage_records_total"].labels().inc.assert_called_once_with(
+                0
+            )
+
     def test_record_flow_invariant_metrics_normalize_unknown_labels(
         self, prometheus_metrics
     ):
@@ -651,7 +680,9 @@ class TestPrometheusMetrics:
                 },
             )
 
-            COUNTERS["bioetl_publication_raw_vocab_unknown_total"].labels.assert_called_once_with(
+            COUNTERS[
+                "bioetl_publication_raw_vocab_unknown_total"
+            ].labels.assert_called_once_with(
                 pipeline="pubmed_publication",
                 provider="other",
                 field="other",

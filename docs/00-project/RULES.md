@@ -1882,6 +1882,11 @@ fields:
 
 ## Приложение F: Реестр Architecture Decision Records (ADR)
 
+Этот appendix остаётся published summary surface, а canonical live ADR registry
+и generated status surfaces находятся в
+`docs/02-architecture/decisions/README.md` и `docs/02-architecture/adr-registry.md`.
+При добавлении новых ADR оба surface MUST оставаться синхронизированными.
+
 | ADR                                                                                   | Название                                   | Статус                                  | Дата       |
 | ------------------------------------------------------------------------------------- | ------------------------------------------ | --------------------------------------- | ---------- |
 | [ADR-001](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)              | Delta Lake vs Parquet                      | Accepted                                | 2025-05    |
@@ -1929,9 +1934,12 @@ fields:
 | [ADR-043](../02-architecture/decisions/ADR-043-documentation-knowledge-management.md) | Documentation & Knowledge Management       | Accepted                                | 2026-03-09 |
 | [ADR-044](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)  | Run Manifest and Run Ledger Control Plane  | Accepted                                | 2026-03-24 |
 | [ADR-045](../02-architecture/decisions/ADR-045-dq-contract-system.md)                  | Data Quality Contract System               | Accepted                                | 2026-04-02 |
+| [ADR-046](../02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md)        | Checkpoint Versus Ledger-Based Resume      | Accepted                                | 2026-05-06 |
+| [ADR-047](../02-architecture/decisions/ADR-047-workflow-control-plane.md)             | Workflow Control Plane for Declarative Workflows | Accepted                           | 2026-05-08 |
 
 ## История Изменений (Changelog)
 
+- **5.26** (2026-05-15): ADR Governance Sync. Приложение F синхронизировано с ADR-046/047 и теперь явно делегирует canonical live registry в `decisions/README.md` и `adr-registry.md`. Исправлен generated ADR registry status parsing для explicit `Status:` metadata; `mkdocs.yml` синхронизирован с активной `scripts.docs check-links` guardrail surface.
 - **5.25** (2026-04-29): Documentation Audit Stop-Loss. Исправлен published readiness endpoint (`/health/ready`), синхронизирован ADR registry с ADR-044/045, а Medallion write-mode terminology закреплена как policy-owned surface в §2.1.1-§2.1.2.
 - **5.24** (2026-03-13): Docs Governance Sync. В §6 явно закреплена active-docs модель: `docs/00-05` как source of truth, `docs/99-archive/` как non-normative historical context, и docs guardrails как обязательная проверка для active/generated docs.
 - **5.23** (2026-03-02): Dependency Policy Sync. Уточнена политика зависимостей: mixed strategy (`pyproject.toml` с диапазонами + воспроизводимость через `uv.lock`), строгие `==` оставлены как исключение для критичных инструментов.

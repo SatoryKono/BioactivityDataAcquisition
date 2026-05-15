@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import re
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 
@@ -11,6 +10,7 @@ from bioetl.domain.normalization.identifiers import (
     normalize_pmc_id,
     normalize_pmid,
 )
+from bioetl.domain.normalization.text import normalize_title
 from bioetl.domain.value_objects import InChIKey
 from bioetl.domain.value_objects.identifiers import ChemblId, UniProtId
 
@@ -74,17 +74,14 @@ def _normalize_join_key_uniprot_accession(value: str) -> str | None:
     return None if normalized is None else normalized.value
 
 
-_TITLE_WHITESPACE_RE = re.compile(r"\s+")
+def _normalize_join_key_title(value: str) -> str | None:
+    """Normalize title join text through the canonical title cleanup seam.
 
-
-def _normalize_join_key_title(value: str) -> str:
-    """Normalize title join text with whitespace-only canonicalization.
-
-    Title fallback remains case-preserving on purpose. Only trim and repeated
-    whitespace collapsing are allowed here so composite joins stay stable across
-    provider formatting drift without erasing source title semantics.
+    Title fallback remains case-preserving on purpose. HTML/entity cleanup,
+    Unicode NFC normalization, control-character removal and whitespace
+    collapsing now match provider publication title profiles.
     """
-    return _TITLE_WHITESPACE_RE.sub(" ", value.strip())
+    return normalize_title(value)
 
 
 _NOOP_POLICY = JoinKeyNormalizationPolicy()  # EXC-002: immutable module constant

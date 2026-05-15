@@ -18,6 +18,7 @@ class SemanticScholarPublicationGoldSchema(PublicationGoldCommonSchema):
     """Schema for Semantic Scholar publication in Gold layer."""
 
     paper_id: Series[str] = pa.Field(nullable=False)
+    title: Series[str] = pa.Field(nullable=False)
     corpus_id: Series[float] = pa.Field(nullable=True, coerce=True)
     tldr: Series[str] = pa.Field(nullable=True)
     page_range: Series[str] = pa.Field(nullable=True)

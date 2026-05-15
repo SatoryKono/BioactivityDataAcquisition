@@ -36,6 +36,8 @@ DOCUMENTED_SOURCE_REVISION_STATES = frozenset(
         "git_unavailable",
     }
 )
+
+
 class ReplayCapability(StrEnum):
     """Exact-replay capability classification for one manifested run."""
 
@@ -269,7 +271,9 @@ def _load_input_snapshot_ref(item: dict[str, object]) -> RunInputSnapshotRef:
         object_version_id=_load_optional_snapshot_field(item, "object_version_id"),
         etag=_load_optional_snapshot_field(item, "etag"),
         last_modified=_load_optional_snapshot_field(item, "last_modified"),
-        captured_at=_load_optional_snapshot_field(item, "captured_at", is_datetime=True),
+        captured_at=_load_optional_snapshot_field(
+            item, "captured_at", is_datetime=True
+        ),
     )
 
 

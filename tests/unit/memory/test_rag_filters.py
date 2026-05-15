@@ -8,7 +8,9 @@ from pathlib import Path
 from memory.rag.filters import _candidate_source_paths
 
 
-def test_candidate_source_paths_avoids_path_is_file(monkeypatch, tmp_path: Path) -> None:
+def test_candidate_source_paths_avoids_path_is_file(
+    monkeypatch, tmp_path: Path
+) -> None:
     docs_root = tmp_path / "docs" / "00-project"
     docs_root.mkdir(parents=True)
     (docs_root / "b.md").write_text("# B\n", encoding="utf-8")

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import hashlib
+from datetime import datetime
+from typing import Any
 from collections.abc import Mapping
 
 from bioetl.domain.normalization.json import serialize_json_canonical
@@ -33,11 +35,74 @@ def compute_execution_identity_fingerprint(payload: Mapping[str, object]) -> str
     return _hash_canonical_payload(payload)
 
 
-def compute_input_snapshot_identity_fingerprint(snapshot_ids: list[str]) -> str | None:
-    """Compute a deterministic fingerprint for a canonical snapshot-id set."""
-    if not snapshot_ids:
+_SNAPSHOT_IDENTITY_FIELDS: tuple[str, ...] = (
+    "snapshot_id",
+    "content_hash",
+    "immutable_uri",
+    "query_fingerprint",
+    "storage_provider",
+    "object_bucket",
+    "object_key",
+    "object_version_id",
+    "etag",
+    "last_modified",
+    "captured_at",
+)
+
+
+def _snapshot_field_value(snapshot: object, field_name: str) -> object | None:
+    if isinstance(snapshot, Mapping):
+        return snapshot.get(field_name)
+    return getattr(snapshot, field_name, None)
+
+
+def _normalize_snapshot_field_value(value: object | None) -> str | None:
+    if value is None:
         return None
-    return _hash_canonical_payload({"snapshot_ids": snapshot_ids})
+    if isinstance(value, datetime):
+        return value.isoformat()
+    text = str(value).strip()
+    return text or None
+
+
+def _normalize_input_snapshot_identity_record(
+    snapshot: object,
+) -> dict[str, str] | None:
+    record = {
+        field_name: normalized
+        for field_name in _SNAPSHOT_IDENTITY_FIELDS
+        for normalized in [
+            _normalize_snapshot_field_value(_snapshot_field_value(snapshot, field_name))
+        ]
+        if normalized is not None
+    }
+    if "snapshot_id" not in record:
+        return None
+    return record
+
+
+def _input_snapshot_identity_sort_key(snapshot: Mapping[str, str]) -> tuple[str, ...]:
+    return tuple(
+        snapshot.get(field_name, "") for field_name in _SNAPSHOT_IDENTITY_FIELDS
+    )
+
+
+def compute_input_snapshot_identity_fingerprint(
+    snapshots: list[object],
+) -> str | None:
+    """Compute a deterministic fingerprint for canonical immutable snapshot refs."""
+    normalized_snapshots = sorted(
+        (
+            record
+            for snapshot in snapshots
+            for record in [_normalize_input_snapshot_identity_record(snapshot)]
+            if record is not None
+        ),
+        key=_input_snapshot_identity_sort_key,
+    )
+    if not normalized_snapshots:
+        return None
+    return _hash_canonical_payload({"input_snapshots": normalized_snapshots})
 
 
 def compute_manifest_execution_fingerprint(payload: Mapping[str, object]) -> str:

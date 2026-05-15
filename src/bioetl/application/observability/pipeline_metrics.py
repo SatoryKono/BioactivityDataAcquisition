@@ -9,6 +9,21 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
 
 
+_RECORD_ACCOUNTING_OUTCOMES = (
+    ("bronze", "records"),
+    ("silver", "valid"),
+    ("silver", "quarantined"),
+    ("silver", "skipped"),
+    ("silver", "filtered_out"),
+    ("silver", "deduplicated"),
+    ("gold", "written"),
+    ("gold", "quarantined"),
+    ("gold", "skipped"),
+    ("gold", "excluded_by_contract"),
+    ("gold", "deduplicated"),
+)
+
+
 @dataclass(slots=True)
 class _PipelineMetricsRecorderCore:
     """Wrap generic metric dispatch with BioETL pipeline-level semantics.
@@ -109,7 +124,7 @@ class _PipelineMetricsRecorderCore:
         count: int = 1,
     ) -> None:
         """Increment the canonical stage-model projection counter."""
-        if self.metrics is None or count <= 0:
+        if self.metrics is None or count < 0:
             return
         self.metrics.increment_counter(
             "bioetl_stage_records_total",
@@ -121,6 +136,16 @@ class _PipelineMetricsRecorderCore:
                 "outcome": outcome,
             },
         )
+
+    def initialize_record_accounting_outcomes(self, *, run_type: str) -> None:
+        """Create zero-valued canonical accounting outcome series for a run."""
+        for stage, outcome in _RECORD_ACCOUNTING_OUTCOMES:
+            self.record_stage_records(
+                run_type=run_type,
+                stage=stage,
+                outcome=outcome,
+                count=0,
+            )
 
     def record_flow_invariant(
         self,

@@ -44,13 +44,11 @@ class RunManifestIdentityGraphAssembler:
                 diagnostics,
             )
         )
-        degraded_runtime_anchor_payload = (
-            RunManifestIdentityGraphAssembler._build_degraded_runtime_anchor_payload(
-                manifest
-            )
+        degraded_runtime_anchor_payload = _build_degraded_runtime_anchor_payload(
+            manifest
         )
         return {
-            **RunManifestIdentityGraphAssembler._build_identity_graph_core(
+            **_build_identity_graph_core(
                 manifest,
                 diagnostics,
                 code_provenance=code_provenance,
@@ -122,76 +120,6 @@ class RunManifestIdentityGraphAssembler:
         )
         return dict(payload)
 
-    @staticmethod
-    def _build_degraded_runtime_anchor_payload(
-        manifest: RunManifest,
-    ) -> dict[str, object]:
-        code_provenance = manifest.code_provenance
-        return {
-            key: value
-            for key, value in {
-                "manifest_id": manifest.manifest_id,
-                "effective_config_hash": code_provenance.effective_config_hash,
-                "contract_ref": code_provenance.contract_ref,
-                "contract_version": code_provenance.contract_version,
-                "normalization_profile_ref": code_provenance.normalization_profile_ref,
-                "normalization_profile_version": (
-                    code_provenance.normalization_profile_version
-                ),
-                "normalization_profile_hash": (
-                    code_provenance.normalization_profile_hash
-                ),
-                "effective_config_artifact_id": (
-                    code_provenance.effective_config_artifact_id
-                ),
-            }.items()
-            if value is not None
-        }
-
-    @staticmethod
-    def _build_identity_graph_core(
-        manifest: RunManifest,
-        diagnostics: dict[str, object],
-        *,
-        code_provenance: RunCodeProvenance,
-    ) -> dict[str, object]:
-        fallback_code_provenance_state = _fallback_code_provenance_state(
-            code_provenance
-        )
-        payload: dict[str, object] = {
-            "run_id": str(manifest.run_id),
-            "manifest_id": manifest.manifest_id,
-            "execution_fingerprint": manifest.execution_fingerprint,
-            "config_hash": code_provenance.config_hash,
-            "resolved_config_hash": code_provenance.resolved_config_hash,
-            "effective_config_hash": code_provenance.effective_config_hash,
-            "git_commit": code_provenance.git_commit,
-            "source_revision_state": code_provenance.source_revision_state,
-            "dependency_lock_state": (
-                "present"
-                if code_provenance.dependency_lock_hash is not None
-                else "missing"
-            ),
-            "code_provenance_state": diagnostics.get(
-                "code_provenance_state",
-                fallback_code_provenance_state,
-            ),
-            "contract_ref": code_provenance.contract_ref,
-            "contract_version": code_provenance.contract_version,
-            "normalization_profile_ref": code_provenance.normalization_profile_ref,
-            "normalization_profile_version": (
-                code_provenance.normalization_profile_version
-            ),
-            "normalization_profile_hash": code_provenance.normalization_profile_hash,
-            "replay_of_run_id": diagnostics.get("replay_of_run_id"),
-            "replay_of_manifest_id": diagnostics.get("replay_of_manifest_id"),
-            "replay_parentage": diagnostics.get("replay_parentage"),
-        }
-        if code_provenance.dependency_lock_hash is not None:
-            payload["dependency_lock_hash"] = code_provenance.dependency_lock_hash
-        return payload
-
-    @staticmethod
     def _build_identity_graph_replay_section(
         manifest: RunManifest,
         diagnostics: dict[str, object],
@@ -254,6 +182,7 @@ class RunManifestIdentityGraphAssembler:
                 manifest.replay_capability.value == "exact_replay_supported",
             ),
             "exact_replay_blockers": diagnostics.get("exact_replay_blockers", []),
+            "replay_readiness_verdict": diagnostics.get("replay_readiness_verdict"),
             "append_mode_semantic_sinks": diagnostics.get(
                 "append_mode_semantic_sinks",
                 [],
@@ -262,9 +191,7 @@ class RunManifestIdentityGraphAssembler:
             "resume_diagnostics": diagnostics.get("resume_diagnostics"),
         }
         lineage_closure_boundary = diagnostics.get("lineage_closure_boundary")
-        if lineage_closure_boundary is not None and bool(
-            diagnostics.get("total_events")
-        ):
+        if lineage_closure_boundary is not None:
             replay_section["lineage_closure_boundary"] = lineage_closure_boundary
         return replay_section
 
@@ -294,12 +221,24 @@ class RunManifestIdentityGraphAssembler:
         manifest: RunManifest,
         diagnostics: dict[str, object],
     ) -> dict[str, object]:
+        artifact_refs = diagnostics.get("artifact_refs")
+        published_artifacts = []
+        if isinstance(artifact_refs, list):
+            published_artifacts = [
+                {
+                    key: value
+                    for key, value in artifact_ref.items()
+                    if isinstance(artifact_ref, dict) and key != "artifact_id"
+                }
+                for artifact_ref in artifact_refs
+                if isinstance(artifact_ref, dict)
+            ]
         return {
             "planned_artifacts": [
                 {"layer": artifact.layer, "path": artifact.path}
                 for artifact in manifest.planned_artifacts
             ],
-            "published_artifacts": [],
+            "published_artifacts": published_artifacts,
             "produced_artifact_trace": diagnostics.get(
                 "produced_artifact_trace",
                 {},
@@ -336,6 +275,65 @@ def _fallback_code_provenance_state(
             )
             if enabled
         ],
+    }
+    if code_provenance.dependency_lock_hash is not None:
+        payload["dependency_lock_hash"] = code_provenance.dependency_lock_hash
+    return payload
+
+
+def _build_degraded_runtime_anchor_payload(
+    manifest: RunManifest,
+) -> dict[str, object]:
+    code_provenance = manifest.code_provenance
+    return {
+        key: value
+        for key, value in {
+            "manifest_id": manifest.manifest_id,
+            "effective_config_hash": code_provenance.effective_config_hash,
+            "contract_ref": code_provenance.contract_ref,
+            "contract_version": code_provenance.contract_version,
+            "normalization_profile_ref": code_provenance.normalization_profile_ref,
+            "normalization_profile_version": (
+                code_provenance.normalization_profile_version
+            ),
+            "normalization_profile_hash": code_provenance.normalization_profile_hash,
+            "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
+        }.items()
+        if value is not None
+    }
+
+
+def _build_identity_graph_core(
+    manifest: RunManifest,
+    diagnostics: dict[str, object],
+    *,
+    code_provenance: RunCodeProvenance,
+) -> dict[str, object]:
+    fallback_code_provenance_state = _fallback_code_provenance_state(code_provenance)
+    payload: dict[str, object] = {
+        "run_id": str(manifest.run_id),
+        "manifest_id": manifest.manifest_id,
+        "execution_fingerprint": manifest.execution_fingerprint,
+        "config_hash": code_provenance.config_hash,
+        "resolved_config_hash": code_provenance.resolved_config_hash,
+        "effective_config_hash": code_provenance.effective_config_hash,
+        "git_commit": code_provenance.git_commit,
+        "source_revision_state": code_provenance.source_revision_state,
+        "dependency_lock_state": (
+            "present" if code_provenance.dependency_lock_hash is not None else "missing"
+        ),
+        "code_provenance_state": diagnostics.get(
+            "code_provenance_state",
+            fallback_code_provenance_state,
+        ),
+        "contract_ref": code_provenance.contract_ref,
+        "contract_version": code_provenance.contract_version,
+        "normalization_profile_ref": code_provenance.normalization_profile_ref,
+        "normalization_profile_version": code_provenance.normalization_profile_version,
+        "normalization_profile_hash": code_provenance.normalization_profile_hash,
+        "replay_of_run_id": diagnostics.get("replay_of_run_id"),
+        "replay_of_manifest_id": diagnostics.get("replay_of_manifest_id"),
+        "replay_parentage": diagnostics.get("replay_parentage"),
     }
     if code_provenance.dependency_lock_hash is not None:
         payload["dependency_lock_hash"] = code_provenance.dependency_lock_hash

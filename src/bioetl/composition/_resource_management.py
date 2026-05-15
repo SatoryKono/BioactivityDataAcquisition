@@ -11,6 +11,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol, cast
 
+from bioetl.composition._json_types import JsonDict
 from bioetl.composition._pipeline_execution import (
     ArchiveOptions,
     VacuumOptions,
@@ -24,7 +25,6 @@ from bioetl.composition.bootstrap.cli.storage import (
     bootstrap_cleanup_service,
     bootstrap_lifecycle_service,
 )
-from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
 if TYPE_CHECKING:

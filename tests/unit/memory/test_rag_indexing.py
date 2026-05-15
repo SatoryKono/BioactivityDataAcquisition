@@ -355,6 +355,7 @@ def test_build_rag_manifests_skips_missing_tracked_source_paths(
     assert catalog["source_count"] == 1
     assert catalog["sources"][0]["source_path"] == "docs/00-project/overview.md"
     assert all(
-        chunk["source_path"] != "src/bioetl/interfaces/cli/commands/_inspection_output.py"
+        chunk["source_path"]
+        != "src/bioetl/interfaces/cli/commands/_inspection_output.py"
         for chunk in chunks
     )

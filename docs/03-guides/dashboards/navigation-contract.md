@@ -29,12 +29,12 @@ YAML также фиксирует time handoff policy в `time_handoff_requirem
 
 ## Required inbound paths (discoverable first-screen CTA)
 
-L1-target dashboards MUST be discoverable from first-screen status/KPI area on `bioetl-overview-v2` via panel `Next Action` (id `215`), located on the frozen Overview v3 first-screen layout after the provenance header panel matched by regex `^Provenance$`.
+L1-target dashboards MUST be discoverable from first-screen status/KPI area on `bioetl-overview-v2` via panel `First Action` (id `215`), located on the frozen Overview v3 first-screen layout after the provenance header panel matched by regex `^Provenance$`.
 
 | Target UID | Source UID | Source panel id | Source panel title | First-screen row matcher |
 | --- | --- | ---: | --- | --- |
-| `bioetl-runtime` | `bioetl-overview-v2` | `215` | `Next Action` | `^Provenance$` |
-| `bioetl-control-plane-v1` | `bioetl-overview-v2` | `215` | `Next Action` | `^Provenance$` |
-| `bioetl-provider-health-v2` | `bioetl-overview-v2` | `215` | `Next Action` | `^Provenance$` |
-| `bioetl-dq-v2` | `bioetl-overview-v2` | `215` | `Next Action` | `^Provenance$` |
-| `bioetl-workflow-overview` | `bioetl-overview-v2` | `215` | `Next Action` | `^Provenance$` |
+| `bioetl-runtime` | `bioetl-overview-v2` | `215` | `First Action` | `^Provenance$` |
+| `bioetl-control-plane-v1` | `bioetl-overview-v2` | `215` | `First Action` | `^Provenance$` |
+| `bioetl-provider-health-v2` | `bioetl-overview-v2` | `215` | `First Action` | `^Provenance$` |
+| `bioetl-dq-v2` | `bioetl-overview-v2` | `215` | `First Action` | `^Provenance$` |
+| `bioetl-workflow-overview` | `bioetl-overview-v2` | `215` | `First Action` | `^Provenance$` |

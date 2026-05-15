@@ -11,6 +11,7 @@ from bioetl.composition.factories.pipeline.construction_types import (
     EntityTypeExtractor,
 )
 from bioetl.composition.runtime_builders.run_manifest_support import (
+    RunManifestContractIdentity,
     resolve_contract_identity,
 )
 from bioetl.composition.services.versioning import (
@@ -29,7 +30,8 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-_ContractIdentityResult = tuple[str, ...]
+_ContractIdentityTuple = tuple[str, ...]
+_ContractIdentityResult = _ContractIdentityTuple | RunManifestContractIdentity
 _NormalizedContractIdentity = tuple[
     str,
     str | None,
@@ -74,9 +76,26 @@ def _resolve_contract_identity_snapshot(
 def _normalize_contract_identity_result(
     result: _ContractIdentityResult,
 ) -> _NormalizedContractIdentity:
-    """Accept legacy 5-field and canonical 8-field contract identity tuples."""
+    """Accept legacy tuples and canonical dataclass contract identity values."""
+    if isinstance(result, RunManifestContractIdentity):
+        return (
+            result.contract_ref,
+            result.contract_version,
+            result.contract_schema_hash,
+            result.dq_policy_ref,
+            result.rule_bundle_version,
+            result.normalization_profile_ref,
+            result.normalization_profile_version,
+            result.normalization_profile_hash,
+        )
     if len(result) == 5:
-        contract_ref, contract_version, contract_schema_hash, dq_policy_ref, rule_bundle_version = result
+        (
+            contract_ref,
+            contract_version,
+            contract_schema_hash,
+            dq_policy_ref,
+            rule_bundle_version,
+        ) = result
         return (
             contract_ref,
             contract_version,
@@ -91,7 +110,7 @@ def _normalize_contract_identity_result(
         return result  # type: ignore[return-value]
     raise RuntimeError(
         "Contract identity resolver must return either the legacy 5-field "
-        "tuple or the canonical 8-field tuple"
+        "tuple, the canonical 8-field tuple, or RunManifestContractIdentity"
     )
 
 
@@ -112,7 +131,7 @@ def _resolve_contract_identity_for_runtime(
     provider: str,
     entity: str,
     strict: bool,
-    ) -> _NormalizedContractIdentity:
+) -> _NormalizedContractIdentity:
     """Resolve identity while preserving legacy two-argument test doubles."""
     if strict:
         try:

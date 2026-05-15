@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from bioetl.composition.runtime_builders._run_manifest_support import (
     ManifestControlPlaneRefs,
+    RunManifestContractIdentity,
     build_launch_context_snapshot,
     build_planned_artifacts,
     build_run_source_refs,
@@ -19,6 +20,7 @@ from bioetl.composition.runtime_builders._run_manifest_support import (
 
 __all__ = [
     "ManifestControlPlaneRefs",
+    "RunManifestContractIdentity",
     "build_launch_context_snapshot",
     "build_planned_artifacts",
     "build_run_source_refs",

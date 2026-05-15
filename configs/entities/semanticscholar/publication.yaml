@@ -165,22 +165,25 @@ quality:
     pattern: ^10\.\d{4,}/\S+$
     nullable: true
     error_message: DOI must match format 10.XXXX/suffix (no whitespace)
+  - field: pmc_id
+    type: pattern
+    pattern: ^PMC\d+$
+    nullable: true
+    error_message: PMC identifier must match PMC format when present
   - field: title
     type: max_length
     max_length: 2000
-    nullable: true
+    nullable: false
     error_message: Title must not exceed 2000 characters
   - field: title
     type: not_null
-    nullable: true
-    severity: warn
-    error_message: "Missing title \u2014 record will be filtered before Gold"
+    nullable: false
+    error_message: Missing title is not allowed for Semantic Scholar publication Gold records
   - field: title
     type: pattern
     pattern: \S
-    nullable: true
-    severity: warn
-    error_message: Title should not be empty or whitespace-only
+    nullable: false
+    error_message: Title must not be empty or whitespace-only
   - field: publication_year
     type: range
     min: 1950

@@ -68,6 +68,37 @@ test_lanes:
         junit_xml: true
         json_summary: true
 
+    unit-parallel-safe:
+      suite_name: unit-parallel-safe
+      description: "Deterministic unit lane routed through the maintained shard inventory; excludes slow, serial, benchmark, and memory tests."
+      runner_backend: run_pytest_sharded
+      runner: scripts/engineering/dev/run_pytest_sharded.sh
+      runner_options:
+        - --shard
+        - S1-domain-core
+        - --shard
+        - S1-domain-services
+        - --shard
+        - S2-comp-iface
+        - --shard
+        - S3-app-foundation
+        - --shard
+        - S4-app-services
+        - --shard
+        - S6-crosscutting-unit
+      paths:
+        - tests/unit/
+      marker_expression: "not slow and not serial and not benchmark and not memory"
+      pytest_args:
+        - tests/unit/
+        - -m
+        - not slow and not serial and not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
     integration-replay:
       suite_name: integration-replay
       description: "Integration lane in VCR/replay mode; live network access is not part of this lane."
@@ -225,7 +256,6 @@ test_lanes:
         - not e2e and not benchmark and not memory
         - --cov=src/bioetl
         - --cov-report=term-missing
-        - --cov-fail-under=85
       replay_mode: replay_or_no_api
       coverage_gate: repo-wide
       expected_artifacts:

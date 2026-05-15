@@ -145,3 +145,60 @@ def test_active_hotspot_family_duplication_ratchets_require_confirmed_clean_hist
             f"Active family {family.get('name')} must be confirmed by the latest "
             "reviewed clean snapshots"
         )
+
+
+def test_reviewed_baseline_hotspot_families_match_reviewed_duplication_snapshot() -> (
+    None
+):
+    """Reviewed-baseline families must stay aligned with the reviewed family baseline."""
+    scorecard = _load_scorecard()
+    hotspot_policy = scorecard.get("hotspot_family_ratchets", {})
+    assert isinstance(hotspot_policy, dict)
+
+    family_baseline_path = PROJECT_ROOT / "reports/quality/hotspot-family-baseline.json"
+    baseline_payload = _load_json(family_baseline_path)
+    baseline_summary = baseline_payload.get("summary", {})
+    assert isinstance(baseline_summary, dict)
+    assert baseline_summary.get("snapshot_date") == hotspot_policy.get("snapshot_date")
+
+    baseline_families = baseline_payload.get("families", [])
+    assert isinstance(baseline_families, list)
+    baseline_family_rows = [
+        row
+        for row in baseline_families
+        if isinstance(row, dict) and row.get("ratchet_stage") == "reviewed-baseline"
+    ]
+
+    families = hotspot_policy.get("families", [])
+    assert isinstance(families, list) and families
+    reviewed_families = [
+        family
+        for family in families
+        if isinstance(family, dict) and family.get("ratchet_stage") == "reviewed-baseline"
+    ]
+    assert reviewed_families, "Expected at least one reviewed-baseline hotspot family"
+
+    for family in reviewed_families:
+        family_name = family.get("name")
+        assert isinstance(family_name, str) and family_name
+        metrics = family.get("metrics", {})
+        assert isinstance(metrics, dict)
+        matched_rows = [
+            row for row in baseline_family_rows if row.get("name") == family_name
+        ]
+        assert matched_rows, (
+            f"Reviewed-baseline family {family_name} must exist in the reviewed family baseline"
+        )
+
+        baseline_row = matched_rows[0]
+        assert baseline_row.get("ratchet_scope") == family.get("ratchet_scope")
+        assert baseline_row.get("files_ge_250_loc") == metrics.get("files_ge_250_loc")
+        assert baseline_row.get("max_internal_fan_in") == metrics.get(
+            "max_internal_fan_in"
+        )
+        assert baseline_row.get("bounded_growth_budgets") == family.get(
+            "bounded_growth_budgets"
+        ), (
+            f"Reviewed-baseline family {family_name} must keep scorecard and family "
+            "baseline budgets in sync."
+        )

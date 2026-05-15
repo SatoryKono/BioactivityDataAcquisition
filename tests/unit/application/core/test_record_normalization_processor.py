@@ -247,15 +247,12 @@ def test_profile_backed_activity_companion_fields_recompute_from_normalized_cont
 
     assert normalized["bao_endpoint"] == "BAO_0000190"
     assert (
-        normalized["bao_endpoint_iri"]
-        == "https://purl.obolibrary.org/obo/BAO_0000190"
+        normalized["bao_endpoint_iri"] == "https://purl.obolibrary.org/obo/BAO_0000190"
     )
     assert normalized["bao_endpoint_mapping_status"] == "mapped"
     assert normalized["uo_unit_iri"] == "https://purl.obolibrary.org/obo/UO_0000065"
     assert normalized["uo_unit_mapping_status"] == "mapped"
-    assert (
-        normalized["qudt_unit_iri"] == "https://qudt.org/vocab/unit/NanoMOL-PER-L"
-    )
+    assert normalized["qudt_unit_iri"] == "https://qudt.org/vocab/unit/NanoMOL-PER-L"
     assert normalized["qudt_unit_mapping_status"] == "mapped"
 
 

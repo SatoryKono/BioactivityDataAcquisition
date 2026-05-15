@@ -1453,7 +1453,7 @@
         "title": {
           "description": "",
           "dtype": "str",
-          "nullable": true
+          "nullable": false
         },
         "volume": {
           "description": "",
@@ -1949,10 +1949,65 @@
           "dtype": "str",
           "nullable": false
         },
+        "activity_id": {
+          "description": "ChEMBL activity identifier retained as activity lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_id": {
+          "description": "ChEMBL assay identifier used as activity-to-assay lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "canonical_smiles": {
+          "description": "Inherited molecule structure identifier retained for activity context.",
+          "dtype": "str",
+          "nullable": true
+        },
         "entity_id": {
           "description": "",
           "dtype": "str",
           "nullable": false
+        },
+        "molecule_id": {
+          "description": "ChEMBL molecule identifier used as activity-to-molecule lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_id": {
+          "description": "ChEMBL publication identifier used as activity-to-publication lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "record_id": {
+          "description": "ChEMBL compound record identifier retained as source-scoped lineage.",
+          "dtype": "int64",
+          "nullable": true
+        },
+        "relation": {
+          "description": "ChEMBL raw activity measurement relation, not a generic canonical relation.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "src_id": {
+          "description": "Provider source identifier retained as source-scoped lineage metadata.",
+          "dtype": "int64",
+          "nullable": true
+        },
+        "target_id": {
+          "description": "ChEMBL target identifier used as activity-to-target lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "type": {
+          "description": "ChEMBL raw activity measurement type, not a generic canonical type.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "value": {
+          "description": "ChEMBL raw activity measurement value, not a generic canonical value.",
+          "dtype": "float64",
+          "nullable": true
         }
       },
       "published_contract_path": "docs/04-reference/contracts/gold/composite_activity_v1.0.json",
@@ -1986,10 +2041,40 @@
           "dtype": "str",
           "nullable": false
         },
+        "assay_id": {
+          "description": "ChEMBL assay identifier retained as assay lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "description": {
+          "description": "ChEMBL assay description retained as source-scoped metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
         "entity_id": {
           "description": "",
           "dtype": "str",
           "nullable": false
+        },
+        "publication_id": {
+          "description": "ChEMBL publication identifier used as assay-to-publication lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "score": {
+          "description": "ChEMBL assay confidence score retained as source-scoped metadata.",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "src_id": {
+          "description": "Provider source identifier retained as source-scoped lineage metadata.",
+          "dtype": "int64",
+          "nullable": true
+        },
+        "target_id": {
+          "description": "ChEMBL target identifier used as assay-to-target lineage anchor.",
+          "dtype": "str",
+          "nullable": true
         }
       },
       "published_contract_path": "docs/04-reference/contracts/gold/composite_assay_v1.0.json",
@@ -2023,10 +2108,35 @@
           "dtype": "str",
           "nullable": false
         },
+        "canonical_smiles": {
+          "description": "Canonical SMILES string retained for structure-level joins.",
+          "dtype": "str",
+          "nullable": true
+        },
         "entity_id": {
           "description": "Stable business identifier for merged molecule entity.",
           "dtype": "str",
           "nullable": false
+        },
+        "inchi_key": {
+          "description": "Canonical InChIKey retained for cross-provider structure joins.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "molecule_id": {
+          "description": "Canonical ChEMBL molecule identifier retained as seed lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standardized_inchi_key": {
+          "description": "Provider-standardized InChIKey retained as source-scoped identifier.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "structure_parent_key": {
+          "description": "Structure parent key retained for PubChem/ChEMBL hierarchy lineage.",
+          "dtype": "str",
+          "nullable": true
         }
       },
       "published_contract_path": "docs/04-reference/contracts/gold/composite_molecule_v1.0.json",
@@ -2075,8 +2185,38 @@
           "dtype": "str",
           "nullable": false
         },
+        "doi": {
+          "description": "Canonical publication DOI used for cross-provider publication joins.",
+          "dtype": "str",
+          "nullable": true
+        },
         "entity_id": {
           "description": "Stable business identifier for merged publication entity.",
+          "dtype": "str",
+          "nullable": false
+        },
+        "pmc_id": {
+          "description": "Canonical PubMed Central identifier retained for publication lineage.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pmid": {
+          "description": "Canonical PubMed identifier used for cross-provider publication joins.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_id": {
+          "description": "Source ChEMBL publication identifier retained as lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "src_id": {
+          "description": "Provider source identifier retained as source-scoped lineage metadata.",
+          "dtype": "int64",
+          "nullable": true
+        },
+        "title": {
+          "description": "Canonical-cleaned publication title retained as fallback join evidence.",
           "dtype": "str",
           "nullable": false
         }
@@ -2112,10 +2252,30 @@
           "dtype": "str",
           "nullable": false
         },
+        "description": {
+          "description": "Target description retained as source-scoped metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
         "entity_id": {
           "description": "",
           "dtype": "str",
           "nullable": false
+        },
+        "target_id": {
+          "description": "ChEMBL target identifier retained as target lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "taxonomy_id": {
+          "description": "NCBI taxonomy identifier retained as organism lineage metadata.",
+          "dtype": "int64",
+          "nullable": true
+        },
+        "uniprot_accession": {
+          "description": "UniProt accession retained as partial cross-source protein lineage anchor.",
+          "dtype": "str",
+          "nullable": true
         }
       },
       "published_contract_path": "docs/04-reference/contracts/gold/composite_target_v1.0.json",
@@ -2352,7 +2512,7 @@
         "title": {
           "description": "",
           "dtype": "str",
-          "nullable": true
+          "nullable": false
         },
         "volume": {
           "description": "",
@@ -2624,7 +2784,7 @@
         "title": {
           "description": "",
           "dtype": "str",
-          "nullable": true
+          "nullable": false
         },
         "volume": {
           "description": "",
@@ -3435,7 +3595,7 @@
         "title": {
           "description": "",
           "dtype": "str",
-          "nullable": true
+          "nullable": false
         },
         "tldr": {
           "description": "",

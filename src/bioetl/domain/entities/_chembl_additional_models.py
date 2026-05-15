@@ -57,12 +57,8 @@ class PublicationSimilarityRecord(BaseModel):
     mol_tani: float | None = Field(
         default=None, description="Molecule similarity score"
     )
-    avg_tani: float | None = Field(
-        default=None, description="Average similarity score"
-    )
-    max_tani: float | None = Field(
-        default=None, description="Maximum similarity score"
-    )
+    avg_tani: float | None = Field(default=None, description="Average similarity score")
+    max_tani: float | None = Field(default=None, description="Maximum similarity score")
 
 
 __all__ = [

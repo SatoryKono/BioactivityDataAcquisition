@@ -256,6 +256,36 @@ def test_render_markdown_includes_trend_section_when_available() -> None:
     assert "| `src/bioetl/application/core` | 1 | 1 | +0 |" in markdown
 
 
+def test_render_markdown_handles_missing_total_delta_in_trend_summary() -> None:
+    report = TargetDuplicationReport(
+        target="src/bioetl/application/services/control_plane",
+        returncode=8,
+        duplicate_count=12,
+        clusters=(),
+        raw_duplicate_count=12,
+    )
+
+    markdown = _render_markdown(
+        [report],
+        trend_summary={
+            "status": "compared_to_previous",
+            "previous_snapshot_date": "2026-03-24",
+            "total_duplicate_cluster_delta": None,
+            "targets": [
+                {
+                    "target": "src/bioetl/application/services/control_plane",
+                    "current_duplicate_count": 12,
+                    "previous_duplicate_count": None,
+                    "delta_duplicate_count": None,
+                }
+            ],
+        },
+    )
+
+    assert "total_duplicate_cluster_delta_vs_previous: n/a" in markdown
+    assert "| `src/bioetl/application/services/control_plane` | 12 | n/a | n/a |" in markdown
+
+
 def test_top_duplicate_pairs_ranks_repeated_pairs() -> None:
     clusters = (
         DuplicateCluster(

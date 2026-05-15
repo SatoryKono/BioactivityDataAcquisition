@@ -3,10 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-import tempfile
 from datetime import UTC, datetime
-from pathlib import Path
-from uuid import uuid4
 
 from bioetl.domain.control_plane import (
     ReplayCapability,
@@ -25,15 +22,17 @@ from bioetl.domain.normalization import (
     compute_execution_identity_fingerprint,
 )
 from bioetl.domain.types import RunID, RunType
+from tests.helpers.deterministic_ids import deterministic_uuid
+from tests.helpers.synthetic_paths import synthetic_test_root
 
 FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
 VALID_CONFIG_HASH = "a" * 64
 VALID_RESOLVED_CONFIG_HASH = "b" * 64
 VALID_EFFECTIVE_CONFIG_HASH = "c" * 64
 SNAPSHOT_IDENTITY_FINGERPRINT = (
-    "f29f1a5c18e94a4fe614b59ae8e68c5c65afd078155b95d1e7c4aa32f6291dcd"
+    "273c9e5f598ea834b7fa778048db3ff57a0f73c9b406e4edd9db26ae9ae4fcf9"
 )
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-run-manifest-test-support-"))
+TEST_ROOT = synthetic_test_root("run-manifest-test-support")
 DEFAULT_BRONZE_BATCH_URI = (TEST_ROOT / "bronze" / "batch_1.jsonl.zst").as_uri()
 
 
@@ -158,7 +157,9 @@ def make_run_manifest(
 ) -> RunManifest:
     """Build a canonical run manifest for diagnostics/inspection test suites."""
     resolved_overrides = overrides or RunManifestOverrides()
-    resolved_run_id = run_id or RunID(uuid4())
+    resolved_run_id = run_id or RunID(
+        deterministic_uuid(f"run-manifest-support:{manifest_id}")
+    )
     resolved_launch_context = {"limit": limit}
     if resolved_overrides.launch_context is not None:
         resolved_launch_context = dict(resolved_overrides.launch_context)
@@ -445,10 +446,11 @@ def expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
         or "degraded_observable"
     )
     requested_policy = manifest.launch_context.get("checkpoint_compatibility_policy")
-    if (
-        not isinstance(requested_policy, str)
-        or requested_policy not in {"observe", "soft_fail", "hard_fail"}
-    ):
+    if not isinstance(requested_policy, str) or requested_policy not in {
+        "observe",
+        "soft_fail",
+        "hard_fail",
+    }:
         requested_policy = None
     applied_policy = resolve_checkpoint_policy(
         requested_exact_replay=requested_exact_replay,

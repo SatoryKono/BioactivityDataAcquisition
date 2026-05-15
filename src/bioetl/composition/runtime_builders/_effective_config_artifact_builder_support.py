@@ -8,6 +8,9 @@ from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.composition.runtime_builders._effective_config_graph_support import (
+    build_effective_config_candidate_paths,
+)
 from bioetl.composition.runtime_builders._run_manifest_refs import (
     control_plane_root as _shared_control_plane_root,
 )
@@ -302,23 +305,11 @@ def build_effective_config_source_refs(
 ) -> list[ConfigSourceRef]:
     """Build source references used to materialize effective config artifacts."""
     resolved_repo_root = repo_root or Path(__file__).resolve().parents[4]
-    candidate_paths = [
-        "configs/base/pipeline.yaml",
-        "configs/base/quality.yaml",
-        f"configs/providers/{provider}.yaml",
-        f"configs/entities/{provider}/{entity}.yaml",
-        f"configs/quality/entities/{provider}/{entity}.yaml",
-        f"configs/contracts/{provider}/{entity}.yaml",
-        "configs/base/contract_registry.yaml",
-        "pyproject.toml",
-        "uv.lock",
-        "poetry.lock",
-    ]
-    if provider == "composite":
-        candidate_paths[2:2] = [
-            f"configs/composites/{entity}.yaml",
-            f"configs/quality/entities/composite/{entity}.yaml",
-        ]
+    candidate_paths = build_effective_config_candidate_paths(
+        provider=provider,
+        entity=entity,
+        repo_root=resolved_repo_root,
+    )
     refs: list[ConfigSourceRef] = []
     priority = 1
     for relative_path in candidate_paths:

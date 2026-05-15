@@ -95,6 +95,43 @@ class ADRRegistryGenerator:
 
         return metadata
 
+    @staticmethod
+    def _extract_inline_metadata_value(
+        content: str,
+        *,
+        labels: tuple[str, ...],
+    ) -> str | None:
+        """Extract top-level metadata values from non-frontmatter ADR headers."""
+        for line in content.splitlines():
+            stripped = line.strip()
+            if not stripped:
+                continue
+            normalized = stripped.replace("**", "").strip()
+            for label in labels:
+                pattern = re.compile(rf"^{re.escape(label)}:\s*(.+)$", flags=re.IGNORECASE)
+                match = pattern.match(normalized)
+                if match is not None:
+                    value = match.group(1).strip()
+                    return value or None
+        return None
+
+    @classmethod
+    def _normalized_registry_status(cls, raw_status: str | None) -> str:
+        """Map explicit ADR statuses to registry buckets."""
+        if not raw_status:
+            return "active"
+        base_status = raw_status.split("(", 1)[0].strip().lower()
+        status_map = {
+            "accepted": "active",
+            "active": "active",
+            "added": "draft",
+            "draft": "draft",
+            "deprecated": "deprecated",
+            "superseded": "superseded",
+            "archived": "archived",
+        }
+        return status_map.get(base_status, base_status or "active")
+
     def extract_adr_sections(self, content: str) -> dict[str, str]:
         """Extract main sections from ADR content."""
 
@@ -159,7 +196,14 @@ class ADRRegistryGenerator:
 
         # Check metadata first
         if metadata.get("status"):
-            return metadata["status"].lower()
+            return self._normalized_registry_status(str(metadata["status"]))
+
+        inline_status = self._extract_inline_metadata_value(
+            content,
+            labels=("Status",),
+        )
+        if inline_status:
+            return self._normalized_registry_status(inline_status)
 
         # Check for status indicators in content
         content_lower = content.lower()
@@ -189,6 +233,20 @@ class ADRRegistryGenerator:
 
             # Parse front matter
             front_matter = self.parse_adr_front_matter(content)
+            decision_date = front_matter.get("date") or self._extract_inline_metadata_value(
+                content,
+                labels=("Date",),
+            )
+            last_reviewed = front_matter.get(
+                "last_reviewed"
+            ) or self._extract_inline_metadata_value(
+                content,
+                labels=("Last verified", "Last reviewed"),
+            )
+            owner = front_matter.get("owner") or self._extract_inline_metadata_value(
+                content,
+                labels=("Owner",),
+            )
 
             # Extract sections
             sections = self.extract_adr_sections(content)
@@ -208,8 +266,8 @@ class ADRRegistryGenerator:
                 ),
                 file_path=str(file_path.relative_to(self.adr_dir)),
                 status=status,
-                decision_date=front_matter.get("date"),
-                last_reviewed=front_matter.get("last_reviewed"),
+                decision_date=decision_date,
+                last_reviewed=last_reviewed,
                 context=sections.get("context", ""),
                 decision=sections.get("decision", ""),
                 consequences=sections.get("consequences", ""),
@@ -218,7 +276,7 @@ class ADRRegistryGenerator:
                 related=relationships.get("related", []),
                 category=front_matter.get("category", "architecture"),
                 tags=front_matter.get("tags", []),
-                owner=front_matter.get("owner", "architecture-team"),
+                owner=owner or "architecture-team",
             )
 
             return adr_metadata

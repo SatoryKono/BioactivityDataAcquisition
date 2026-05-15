@@ -18,6 +18,7 @@ class OpenAlexPublicationGoldSchema(PublicationGoldCommonSchema):
     """Schema for OpenAlex publication in Gold layer."""
 
     openalex_id: Series[str] = pa.Field(nullable=False)
+    title: Series[str] = pa.Field(nullable=False)
     subject_mesh: Series[str] = pa.Field(nullable=True)
     subject_keywords: Series[str] = pa.Field(nullable=True)
     mag_id: Series[str] = pa.Field(nullable=True)
