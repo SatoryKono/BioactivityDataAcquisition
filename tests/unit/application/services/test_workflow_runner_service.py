@@ -22,6 +22,7 @@ from bioetl.domain.workflow import (
     WorkflowConfig,
     WorkflowRunOptionsConfig,
     WorkflowStepConfig,
+    WorkflowTransformSpec,
 )
 from tests.helpers.clock import FIXED_TEST_TIME
 
@@ -309,3 +310,149 @@ async def test_workflow_runner_skips_completed_steps_on_resume() -> None:
     assert result.steps[0].error_type == "AlreadyCompletedOnResume"
     assert len(pipeline_runner.calls) == 1
     assert pipeline_runner.calls[0][0] == "chembl_assay"
+
+
+@pytest.mark.asyncio
+async def test_workflow_runner_callbacks_follow_start_then_complete_order() -> None:
+    metrics = _RecordingMetrics()
+    pipeline_runner = _PipelineRunner()
+    registry = WorkflowTransformRegistry()
+    registry.register("normalize_activity", lambda _spec, upstream: sorted(upstream))
+    service = WorkflowRunnerService(
+        pipeline_runner=pipeline_runner,  # type: ignore[arg-type]
+        transform_service=WorkflowTransformService(
+            registry=registry,
+            metrics=metrics,
+        ),
+        metrics=metrics,
+    )
+    config = WorkflowConfig(
+        name="activity_workflow",
+        steps=(
+            WorkflowStepConfig(
+                step_id="extract",
+                pipeline_name="chembl_activity",
+            ),
+            TransformStepConfig(
+                step_id="normalize",
+                transform_name="normalize_activity",
+                depends_on=("extract",),
+            ),
+        ),
+    )
+    events: list[tuple[str, str, str | None, str | None]] = []
+
+    result = await service.run_workflow(
+        config,
+        step_started_callback=lambda step, fingerprint=None: events.append(
+            ("started", step.step_id, getattr(step, "transform_name", None), fingerprint)
+        ),
+        step_completed_callback=lambda result: events.append(
+            ("completed", result.step_id, result.status, None)
+        ),
+    )
+
+    assert result.status == "success"
+    assert events[0] == ("started", "extract", None, None)
+    assert events[1] == ("completed", "extract", "success", None)
+    assert events[2][0:3] == ("started", "normalize", "normalize_activity")
+    assert isinstance(events[2][3], str)
+    assert events[3] == ("completed", "normalize", "success", None)
+
+
+@pytest.mark.asyncio
+async def test_workflow_runner_callbacks_record_failed_then_skipped_transition() -> None:
+    metrics = _RecordingMetrics()
+    service = WorkflowRunnerService(
+        pipeline_runner=_FailingPipelineRunner(),  # type: ignore[arg-type]
+        transform_service=WorkflowTransformService(
+            registry=WorkflowTransformRegistry(),
+            metrics=metrics,
+        ),
+        metrics=metrics,
+    )
+    config = WorkflowConfig(
+        name="activity_workflow",
+        steps=(
+            WorkflowStepConfig(
+                step_id="extract",
+                pipeline_name="chembl_activity",
+            ),
+            TransformStepConfig(
+                step_id="normalize",
+                transform_name="normalize_activity",
+                depends_on=("extract",),
+            ),
+        ),
+    )
+    events: list[tuple[str, str, str | None]] = []
+
+    result = await service.run_workflow(
+        config,
+        step_started_callback=lambda step, fingerprint=None: events.append(
+            ("started", step.step_id, fingerprint)
+        ),
+        step_completed_callback=lambda result: events.append(
+            ("completed", result.step_id, result.status)
+        ),
+    )
+
+    assert result.status == "failed"
+    assert events == [
+        ("started", "extract", None),
+        ("completed", "extract", "failed"),
+        ("completed", "normalize", "skipped"),
+    ]
+
+
+@pytest.mark.asyncio
+async def test_workflow_runner_transform_fingerprint_skip_still_emits_callbacks() -> None:
+    metrics = _RecordingMetrics()
+    pipeline_runner = _PipelineRunner()
+    registry = WorkflowTransformRegistry()
+    registry.register("normalize_activity", lambda _spec, _upstream: "should-not-run")
+    service = WorkflowRunnerService(
+        pipeline_runner=pipeline_runner,  # type: ignore[arg-type]
+        transform_service=WorkflowTransformService(
+            registry=registry,
+            metrics=metrics,
+        ),
+        metrics=metrics,
+    )
+    config = WorkflowConfig(
+        name="activity_workflow",
+        steps=(
+            WorkflowStepConfig(
+                step_id="extract",
+                pipeline_name="chembl_activity",
+            ),
+            TransformStepConfig(
+                step_id="normalize",
+                transform_name="normalize_activity",
+                depends_on=("extract",),
+            ),
+        ),
+    )
+    transform_step = config.get_step("normalize")
+    assert isinstance(transform_step, TransformStepConfig)
+    fingerprint = WorkflowTransformSpec.from_step(transform_step).fingerprint
+    events: list[tuple[str, str, str | None]] = []
+
+    result = await service.run_workflow(
+        config,
+        completed_transform_fingerprints={"normalize": fingerprint},
+        step_started_callback=lambda step, fingerprint=None: events.append(
+            ("started", step.step_id, fingerprint)
+        ),
+        step_completed_callback=lambda result: events.append(
+            ("completed", result.step_id, result.status)
+        ),
+    )
+
+    assert result.status == "success"
+    assert result.steps[1].status == "skipped"
+    assert events[0] == ("started", "extract", None)
+    assert events[1] == ("completed", "extract", "success")
+    assert events[2][0:2] == ("started", "normalize")
+    assert isinstance(events[2][2], str)
+    assert events[3] == ("completed", "normalize", "skipped")
