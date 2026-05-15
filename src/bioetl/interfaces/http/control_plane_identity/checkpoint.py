@@ -85,6 +85,10 @@ def checkpoint_row(
 ) -> dict[str, object]:
     return {
         "anchor": name,
+        "source_type": "checkpoint_metadata_compare",
+        "source_quality": "derived",
+        "drilldown_type": "checkpoint_compare",
+        "drilldown_target": f"checkpoint.compare:{name}",
         "current_value_short": short_value(current_value),
         "current_value_full": format_full_value(current_value),
         "checkpoint_value_short": short_value(checkpoint_value),

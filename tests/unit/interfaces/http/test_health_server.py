@@ -37,6 +37,10 @@ from bioetl.interfaces.http.control_plane_identity.specs import (
     ANCHOR_SPECS,
     OVERVIEW_NAMES,
 )
+from bioetl.interfaces.http.control_plane_identity.source_model import (
+    DRILLDOWN_TARGET_BY_NAME,
+    SOURCE_MODEL_BY_NAME,
+)
 from bioetl.interfaces.http.health_server import HealthServer
 from bioetl.interfaces.http.types import HealthResponse
 from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
@@ -92,6 +96,9 @@ def test_control_plane_identity_evidence_static_contract_is_frozen() -> None:
         "identity_graph_complete",
     }
     assert OVERVIEW_NAMES - p0_names == {"replay_capability"}
+    anchor_names = {spec.name for spec in ANCHOR_SPECS}
+    assert set(SOURCE_MODEL_BY_NAME) == anchor_names
+    assert set(DRILLDOWN_TARGET_BY_NAME) == anchor_names
 
     forbidden_label_names = {
         "run_id",
@@ -1007,6 +1014,13 @@ class TestHealthServerControlPlaneSelector:
                 launch_context={"limit": 10},
                 runtime_config={
                     "run_type": "backfill",
+                    "identity_graph_diagnostics": {
+                        "identity_graph_complete": True,
+                        "correlation_anchor_gaps": {},
+                        "exact_replay_eligible": True,
+                        "exact_replay_blockers": [],
+                        "replay_capability": "exact_replay_supported",
+                    },
                     "checkpoint_metadata": {
                         "manifest_id": "manifest-2",
                         "execution_fingerprint": "fingerprint-2",

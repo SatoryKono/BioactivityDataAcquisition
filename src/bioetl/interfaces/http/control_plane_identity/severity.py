@@ -29,10 +29,18 @@ def domain_severity(
             "OK": "OK",
             "MISMATCH": "FAILING",
             "MISSING": "DEGRADED",
+            "PARTIAL": "DEGRADED",
         }.get(
             checkpoint_status,
             "DEGRADED",
         )
+    if spec.name == "identity_graph_complete" and present:
+        rendered_value = str(value).strip().lower()
+        if rendered_value.startswith("complete"):
+            return "OK"
+        if "run_id" in rendered_value or "manifest_id" in rendered_value:
+            return "FAILING"
+        return "DEGRADED"
     if (
         spec.name == "exact_replay_eligible"
         and manifest is not None
@@ -45,9 +53,16 @@ def domain_severity(
     if spec.name == "manifest_id":
         return "FAILING" if is_terminal(ledger_entries) else "DEGRADED"
     if (
+        spec.name == "replay_of_manifest_id"
+        and manifest is not None
+        and requested_exact_replay(manifest)
+    ):
+        return "FAILING"
+    if (
         spec.name
         in {
             "effective_config_hash",
+            "effective_config_artifact_id",
             "input_snapshot_identity_fingerprint",
             "input_snapshot_ids",
             "input_snapshot_content_hashes",
