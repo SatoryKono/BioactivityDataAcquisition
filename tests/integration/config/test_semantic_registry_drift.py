@@ -49,11 +49,8 @@ def test_generated_exact_candidates_cover_mapping_and_composite_alias_surfaces()
     ) in candidate_keys
 
 
-def test_weak_same_name_audit_clusters_remain_non_blocking_warnings() -> None:
+def test_reviewed_audit_clusters_are_suppressed_from_runtime_warnings() -> None:
     result = validate_semantic_registry_drift(Path("."))
 
     assert not result.findings
-    assert any(
-        warning.kind == "weak_same_name_cluster" and warning.status == "WEAK"
-        for warning in result.warnings
-    )
+    assert result.warnings == ()

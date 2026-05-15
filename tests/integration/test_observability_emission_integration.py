@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from types import TracebackType
 
 import pytest
 
@@ -12,6 +13,79 @@ from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.types import RunType
 from tests.helpers.clock import FIXED_TEST_TIME, FixedClock
 from tests.helpers.deterministic_ids import deterministic_uuid
+
+
+@dataclass
+class RecordingSpan:
+    """Recording span handle that mirrors the OTel context-manager surface."""
+
+    name: str
+    attributes: dict[str, object]
+    entered: bool = False
+    exited: bool = False
+    exceptions: list[BaseException] = field(default_factory=list)
+
+    def __enter__(self) -> RecordingSpan:
+        self.entered = True
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        del exc_type, exc_tb
+        self.exited = True
+        if exc_val is not None:
+            self.exceptions.append(exc_val)
+
+    def set_attribute(self, key: str, value: object) -> None:
+        self.attributes[key] = value
+
+    def record_exception(self, exception: BaseException) -> None:
+        self.exceptions.append(exception)
+
+
+@dataclass
+class RecordingOtelTracer:
+    """Recording OTel-compatible tracer returned by RecordingTracing."""
+
+    spans: list[RecordingSpan] = field(default_factory=list)
+
+    def start_as_current_span(
+        self,
+        name: str,
+        *,
+        attributes: dict[str, object] | None = None,
+    ) -> RecordingSpan:
+        span = RecordingSpan(name=name, attributes=dict(attributes or {}))
+        self.spans.append(span)
+        return span
+
+
+@dataclass
+class RecordingTracing:
+    """Recording TracingPort implementation for emission-level assertions."""
+
+    is_noop = False
+    tracers: dict[str, RecordingOtelTracer] = field(default_factory=dict)
+    flushed: int = 0
+    closed: bool = False
+
+    def get_tracer(self, name: str) -> RecordingOtelTracer:
+        return self.tracers.setdefault(name, RecordingOtelTracer())
+
+    def flush(self) -> None:
+        self.flushed += 1
+
+    def close(self) -> None:
+        self.closed = True
+        self.flush()
+
+    @property
+    def spans(self) -> list[RecordingSpan]:
+        return [span for tracer in self.tracers.values() for span in tracer.spans]
 
 
 @dataclass
@@ -131,3 +205,54 @@ def test_pipeline_observer_emits_metrics_and_logs_through_recording_ports() -> N
         and context["manifest_id"] == "manifest-observability-integration"
         for level, event, context in logger.entries
     )
+
+
+@pytest.mark.integration
+def test_pipeline_observer_emits_tracing_spans_through_recording_port() -> None:
+    metrics = RecordingMetrics()
+    logger = RecordingLogger()
+    tracer = RecordingTracing()
+    observer = PipelineObserver(
+        pipeline_name="chembl_activity",
+        run_id=deterministic_uuid("observability.integration.tracing.run"),
+        run_type=RunType.BACKFILL,
+        metrics=metrics,
+        logger=logger,  # type: ignore[arg-type]
+        clock=FixedClock(FIXED_TEST_TIME),
+        tracer=tracer,  # type: ignore[arg-type]
+        manifest_id="manifest-observability-tracing",
+        contract_ref="chembl/activity/gold",
+        contract_version="1.0.0",
+    )
+
+    with observer:
+        observer.emit_event(
+            PipelineEvent.PREFLIGHT_COMPLETED,
+            LifecyclePhase.PREFLIGHT,
+            stage="preflight",
+        )
+
+    assert any(
+        name == "bioetl_traced_runs_total"
+        and labels
+        == {
+            "pipeline": "chembl_activity",
+            "run_type": RunType.BACKFILL.value,
+        }
+        for name, _value, labels in metrics.counters
+    )
+    assert len(tracer.spans) == 1
+    span = tracer.spans[0]
+    assert span.name == "pipeline.chembl_activity"
+    assert span.entered is True
+    assert span.exited is True
+    assert span.exceptions == []
+    assert tracer.flushed == 1
+    assert span.attributes["bioetl.pipeline"] == "chembl_activity"
+    assert span.attributes["bioetl.run_type"] == RunType.BACKFILL.value
+    assert span.attributes["bioetl.manifest_id"] == "manifest-observability-tracing"
+    assert span.attributes["bioetl.contract_ref"] == "chembl/activity/gold"
+    assert span.attributes["bioetl.contract_version"] == "1.0.0"
+    assert span.attributes["bioetl.preflight_completed"] is True
+    assert span.attributes["bioetl.status"] == "success"
+    assert "bioetl.duration_ms" in span.attributes

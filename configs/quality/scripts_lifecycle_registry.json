@@ -110,6 +110,24 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a historical standalone review orchestrator snapshot; prefer the governed py-review-orchestrator skill and current reports workflow instead of extending this orphan script."
     },
+    "scripts/engineering/qa/audit_pipeline_semantics.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded historical semantic-audit generator while no governed caller references it; either route it through the canonical QA/reporting surface or retire it once the newer semantic governance reports fully supersede this one-off utility."
+    },
+    "scripts/engineering/qa/check_test_audit_preflight.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded manual preflight utility for reproducible test-audit claims while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated."
+    },
+    "scripts/engineering/qa/report_test_governance_audit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded manual test-governance report utility while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated."
+    },
     "scripts/engineering/common/repo_paths.py": {
       "owner": "@bioetl-platform",
       "decision": "internal_helper_orphan",

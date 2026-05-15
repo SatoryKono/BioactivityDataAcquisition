@@ -160,9 +160,14 @@ def _resolve_ast_cache_request(
     cache_name_or_text_cache: str | dict[Path, str],
     text_cache: dict[Path, str] | None,
 ) -> tuple[str, dict[Path, str], bool]:
-    """Normalize AST-cache inputs and report whether disk caching is enabled."""
-    use_disk_cache = isinstance(cache_name_or_text_cache, str)
-    if use_disk_cache:
+    """Normalize AST-cache inputs.
+
+    Disk persistence is intentionally disabled for AST caches. Parsing in-memory
+    once per pytest session is cheaper than pickling large AST dictionaries on
+    mounted worktrees, and the latter has been a recurring timeout source for
+    architecture tests.
+    """
+    if isinstance(cache_name_or_text_cache, str):
         cache_name = cache_name_or_text_cache
         if text_cache is None:
             msg = "text_cache must be provided when cache_name is passed explicitly"
@@ -171,7 +176,7 @@ def _resolve_ast_cache_request(
     else:
         cache_name = "ad-hoc-ast"
         cached_text = cache_name_or_text_cache
-    return cache_name, cached_text, use_disk_cache
+    return cache_name, cached_text, False
 
 
 def _read_text_cache_entries_single_threaded(
@@ -233,19 +238,18 @@ def _read_ast_cache_entries(
     cached_text: dict[Path, str],
     max_workers: int,
 ) -> dict[Path, ast.Module]:
-    """Parse cached text payloads into ASTs with optional threading."""
-    result: dict[Path, ast.Module] = {}
-    if max_workers == 1:
-        for path, content in cached_text.items():
-            parsed_path, tree = _parse_ast_cache_entry((path, content))
-            if tree is not None:
-                result[parsed_path] = tree
-        return result
+    """Parse cached text payloads into ASTs.
 
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        for path, tree in executor.map(_parse_ast_cache_entry, cached_text.items()):
-            if tree is not None:
-                result[path] = tree
+    AST parsing is kept single-threaded here. Threaded shutdown on the current
+    Python/WSL stack has proven less stable than the marginal speedup it offers
+    for architecture fixtures, and fixture timeouts are more expensive than the
+    small parse cost.
+    """
+    result: dict[Path, ast.Module] = {}
+    for path, content in cached_text.items():
+        parsed_path, tree = _parse_ast_cache_entry((path, content))
+        if tree is not None:
+            result[parsed_path] = tree
     return result
 
 

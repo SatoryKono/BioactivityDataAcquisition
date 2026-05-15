@@ -196,9 +196,9 @@ class TestBootstrapPipeline:
         )
         mock_get_settings.return_value = settings
 
-        # Now raises "Configuration file not found" because load_pipeline_config is called first
+        # Runner bootstrap now resolves the factory through the registry first.
         ctx = _create_pipeline_context(pipeline_name="unknown_pipeline")
-        with pytest.raises(ValueError, match="Configuration file not found"):
+        with pytest.raises(ValueError, match="Unknown pipeline name"):
             bootstrap_pipeline_runner(ctx)
 
     @patch("bioetl.composition.bootstrap.runtime.pipeline.create_registry")

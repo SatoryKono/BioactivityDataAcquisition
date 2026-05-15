@@ -85,8 +85,8 @@ def _serialize_input_snapshot_ref(snapshot: object) -> dict[str, object]:
     """Return one checkpoint-safe serialized snapshot ref mapping."""
     captured_at = getattr(snapshot, "captured_at", None)
     return {
-        "snapshot_id": str(getattr(snapshot, "snapshot_id")),
-        "content_hash": str(getattr(snapshot, "content_hash")),
+        "snapshot_id": str(snapshot.snapshot_id),
+        "content_hash": str(snapshot.content_hash),
         "immutable_uri": _coerce_optional_str(getattr(snapshot, "immutable_uri", None)),
         "query_fingerprint": _coerce_optional_str(
             getattr(snapshot, "query_fingerprint", None)

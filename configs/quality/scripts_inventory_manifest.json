@@ -1,17 +1,17 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-15T10:53:37.637832+00:00",
+  "generated_at": "2026-05-15T14:12:31.692600+00:00",
   "summary": {
-    "total_scripts": 380,
+    "total_scripts": 383,
     "status_counts": {
       "active": 347,
-      "supporting": 33
+      "supporting": 36
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 3,
       "ci": 57,
-      "docs": 142,
+      "docs": 144,
       "scripts": 307,
       "skills": 8,
       "tests": 150
@@ -6617,25 +6617,25 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 60,
+          "line": 61,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 73,
+          "line": 74,
           "source_group": "docs",
           "text": "ignore/deselect inventory for `run_pytest_sharded.sh` lives in"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 471,
+          "line": 493,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 562,
+          "line": 584,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
@@ -7224,6 +7224,14 @@
       ]
     },
     {
+      "path": "scripts/engineering/qa/audit_pipeline_semantics.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/engineering/qa/calibrate_hotspot_budgets.py",
       "type": "py",
       "status": "active",
@@ -7421,7 +7429,7 @@
         },
         {
           "path": "docs/04-reference/contracts/canonical-field-registry.md",
-          "line": 218,
+          "line": 217,
           "source_group": "docs",
           "text": "`python3 scripts/engineering/qa/check_generic_field_ownership.py --check`"
         },
@@ -7538,7 +7546,7 @@
         },
         {
           "path": "docs/04-reference/contracts/canonical-field-registry.md",
-          "line": 220,
+          "line": 219,
           "source_group": "docs",
           "text": "`python3 scripts/engineering/qa/check_ontology_unit_semantics.py --check`"
         },
@@ -7610,7 +7618,7 @@
         },
         {
           "path": "docs/04-reference/contracts/canonical-field-registry.md",
-          "line": 216,
+          "line": 215,
           "source_group": "docs",
           "text": "`python3 scripts/engineering/qa/check_semantic_anchor_parity.py --check`"
         },
@@ -7631,7 +7639,7 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/canonical-field-registry.md",
-          "line": 210,
+          "line": 209,
           "source_group": "docs",
           "text": "- QA check: `python3 scripts/engineering/qa/check_semantic_field_registry.py --check`"
         },
@@ -7670,7 +7678,7 @@
         },
         {
           "path": "docs/04-reference/contracts/canonical-field-registry.md",
-          "line": 214,
+          "line": 213,
           "source_group": "docs",
           "text": "`python3 scripts/engineering/qa/check_semantic_pair_matrix_budget.py --check`"
         },
@@ -7709,7 +7717,7 @@
         },
         {
           "path": "docs/04-reference/contracts/canonical-field-registry.md",
-          "line": 212,
+          "line": 211,
           "source_group": "docs",
           "text": "`python3 scripts/engineering/qa/check_semantic_registry_drift.py --check`"
         },
@@ -7718,6 +7726,27 @@
           "line": 74,
           "source_group": "scripts",
           "text": "\"check-semantic-registry-drift\": \"check_semantic_registry_drift.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/qa/check_test_audit_preflight.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 106,
+          "source_group": "docs",
+          "text": "python scripts/engineering/qa/check_test_audit_preflight.py --strict"
+        },
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 110,
+          "source_group": "docs",
+          "text": "`check_test_audit_preflight.py --strict` treats missing `git-lfs`, failed"
         }
       ]
     },
@@ -8423,6 +8452,27 @@
       ]
     },
     {
+      "path": "scripts/engineering/qa/report_test_governance_audit.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 107,
+          "source_group": "docs",
+          "text": "python scripts/engineering/qa/report_test_governance_audit.py --check"
+        },
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 112,
+          "source_group": "docs",
+          "text": "claims. `report_test_governance_audit.py --check` enforces the current"
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/qa/report_vcr_metadata_catalog.py",
       "type": "py",
       "status": "active",
@@ -8437,7 +8487,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 151,
+          "line": 173,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -8728,7 +8778,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 504,
+          "line": 526,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         },
@@ -8791,7 +8841,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 505,
+          "line": 527,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -8818,7 +8868,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 149,
+          "line": 171,
           "source_group": "docs",
           "text": "- `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`"
         },
@@ -10259,7 +10309,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 116,
+          "line": 138,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
         },
@@ -10481,7 +10531,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 151,
+          "line": 173,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },

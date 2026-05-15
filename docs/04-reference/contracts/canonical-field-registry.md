@@ -80,7 +80,6 @@ review classifies them as real semantic identity rather than lexical overlap.
 - Do not treat stage-specific requiredness differences as resolved unless
   DQ, composite and Gold contract parity tests document the allowed behavior.
 
-<<<<<<< Updated upstream
 ## Semantic Anchor Parity Gate
 
 `scripts/engineering/qa/check_semantic_anchor_parity.py --check` is the
@@ -198,93 +197,6 @@ their DQ companion rules:
 - mapping status `mapped` -> canonical IRI and ontology version required;
 - ChEMBL activity standardized measurement fields keep enum/pattern DQ and
   Silver/Gold required-field filters aligned.
-
-||||||| Stash base
-=======
-## Semantic Anchor Parity Gate
-
-`scripts/engineering/qa/check_semantic_anchor_parity.py --check` is the
-targeted parity guard for join and lineage anchors where semantic identity has
-runtime consequences. The gate currently covers `doi`, `pmid`, `pmc_id`,
-`title`, `publication_id`, `assay_id`, `molecule_id`, `target_id`,
-`canonical_smiles`, `inchi_key`, `uniprot_accession`, and UniProt protein
-`accession` across entity DQ rules, Gold JSON schemas, domain join-key
-normalization policies, and composite join/fallback/output-key surfaces.
-
-The gate intentionally preserves stage-specific semantics:
-
-- `doi`, `pmid`, `title`, `publication_id`, `assay_id`, `molecule_id`,
-  `target_id`, and UniProt protein `accession` are checked as required only on
-  the provider/entity Gold contracts where current DQ and filter policy already
-  make them required.
-- `pmc_id`, activity-level `publication_id`/`target_id`, `canonical_smiles`,
-  `inchi_key`, and idmapping `uniprot_accession` are checked as nullable
-  lineage, structure, fallback, or chained-join anchors when current contracts
-  allow alternate anchors or staged filtering.
-
-## Generic Field Ownership Gate
-
-`configs/field_registry/generic_field_ownership.yaml` is the ownership registry
-for generic lexical fields such as `description`, `type`, `status`, `value`,
-`relation`, `source`, and `score`. These names are not allowed to become
-canonical semantic clusters by lexical match alone.
-
-`scripts/engineering/qa/check_generic_field_ownership.py --check` validates that
-generic fields on governed Gold and composite surfaces have explicit owner,
-semantic role, and rationale metadata. System-scoped lineage fields such as
-`_source` remain separate from business semantic canonicalization.
-
-## Semantic Registry Drift Gate
-
-`scripts/engineering/qa/check_semantic_registry_drift.py --check` regenerates
-exact alias and identity candidates from runtime mapping surfaces and verifies
-that every candidate resolves through
-`configs/field_registry/canonical_registry.json`.
-
-Blocking sources:
-
-- `src/bioetl/domain/mapping/publication_fields.py`
-- `src/bioetl/domain/mapping/molecule_fields.py`
-- `src/bioetl/domain/registry/field_aliases.py`
-- `configs/composites/molecule.yaml#composite.field_aliases`
-
-The gate intentionally treats WEAK or CONFLICTING clusters from the exhaustive
-semantic audit registry as warnings. Same-name publication, ontology, unit, and
-generic lexical clusters must not become canonical fields until an owner
-classifies them and updates the registry with explicit migration semantics.
-
-## Semantic Pair-Matrix Budget Gate
-
-`configs/field_registry/semantic_pair_matrix_budget.yaml` records the reviewed
-semantic pair-matrix drift budget from the exhaustive 2026-05-14 audit. The
-budget currently ratchets `CRITICAL` rows at 16 and `HIGH` rows at 333.
-
-`scripts/engineering/qa/check_semantic_pair_matrix_budget.py --check` validates
-that:
-
-- no new `CRITICAL` or `HIGH` rows exceed the reviewed budget;
-- every current `CRITICAL` row has owner, rationale, and expiry metadata;
-- reviewed `CRITICAL` rows are pruned when the underlying matrix row is fixed.
-
-## Ontology And Unit Role Gate
-
-`configs/field_registry/ontology_unit_semantic_roles.yaml` is the role registry
-for unit and ontology companion fields. It defines separate contract roles for
-raw unit text (`units`), standardized unit tokens (`standard_units`),
-measurement type (`standard_type`), ontology IDs (`uo_units`, `qudt_units`,
-`bao_*`, `bto_*`, `efo_*`, `uberon_*`, `clo_*`), canonical IRIs, mapping
-statuses, labels, and ontology version fields.
-
-`scripts/engineering/qa/check_ontology_unit_semantics.py --check` validates
-that those fields stay out of the canonical alias-cluster registry and retain
-their DQ companion rules:
-
-- code or unit field present -> mapping status required;
-- mapping status `mapped` -> canonical IRI and ontology version required;
-- ChEMBL activity standardized measurement fields keep enum/pattern DQ and
-  Silver/Gold required-field filters aligned.
-
->>>>>>> Stashed changes
 ## Closure Evidence
 
 Issue closure for semantic field unification is anchored by:
