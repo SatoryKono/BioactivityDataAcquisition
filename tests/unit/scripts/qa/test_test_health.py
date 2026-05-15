@@ -188,6 +188,31 @@ def test_build_run_plan_for_sharded_lane_uses_junit_dir_without_lane_paths(
     assert pytest_args[-2:] == ["-k", "TestCanonicalTestLanes"]
 
 
+def test_build_run_plan_for_parallel_safe_unit_lane_uses_curated_shards(
+    tmp_path: Path,
+) -> None:
+    plan = test_health.build_run_plan(
+        suite="unit-parallel-safe",
+        run_id="unit-parallel-safe-local",
+        reports_dir=tmp_path,
+        runner_args=["--stream"],
+        pytest_extra=["--no-cov"],
+        skip_preflight=True,
+    )
+
+    assert plan.backend == "run_pytest_sharded"
+    assert plan.junit_dir == tmp_path / "junit" / "unit-parallel-safe-local"
+    assert "--shard" in plan.command
+    assert "S1-domain-core" in plan.command
+    assert "S4-app-services" in plan.command
+    assert "S6-crosscutting-unit" in plan.command
+
+    separator = plan.command.index("--")
+    pytest_args = plan.command[separator + 1 :]
+    assert "tests/unit/" not in pytest_args
+    assert pytest_args[-1] == "--no-cov"
+
+
 def test_rollup_reads_recent_run_summaries(tmp_path: Path, capsys) -> None:
     summary = {
         "run_id": "unit-fast-1",

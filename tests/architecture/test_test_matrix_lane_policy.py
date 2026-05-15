@@ -88,6 +88,7 @@ class TestCanonicalTestLanes:
     EXPECTED_LANES = {
         "smoke",
         "unit-fast",
+        "unit-parallel-safe",
         "integration-replay",
         "security",
         "contracts",
@@ -186,6 +187,15 @@ class TestCanonicalTestLanes:
             lanes["unit-fast"]["marker_expression"]
             == "not slow and not benchmark and not memory"
         )
+        assert lanes["unit-parallel-safe"]["runner_backend"] == "run_pytest_sharded"
+        assert (
+            lanes["unit-parallel-safe"]["marker_expression"]
+            == "not slow and not serial and not benchmark and not memory"
+        )
+        assert lanes["unit-parallel-safe"]["paths"] == ["tests/unit/"]
+        assert "S1-domain-core" in lanes["unit-parallel-safe"]["runner_options"]
+        assert "S4-app-services" in lanes["unit-parallel-safe"]["runner_options"]
+        assert "S6-crosscutting-unit" in lanes["unit-parallel-safe"]["runner_options"]
         assert lanes["integration-replay"]["replay_mode"] == "vcr_replay_only"
         assert "--vcr-record=none" in lanes["integration-replay"]["pytest_args"]
         assert (

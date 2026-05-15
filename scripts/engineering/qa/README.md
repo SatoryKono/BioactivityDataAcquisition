@@ -89,6 +89,7 @@ python scripts/engineering/qa/report_provider_contract_drift.py --output reports
 python -m scripts.engineering.qa report-family-baseline --check
 python -m scripts.engineering.qa report-family-baseline --update
 python -m scripts.engineering.qa run-tests --suite unit-fast --skip-preflight -- --no-cov
+python -m scripts.engineering.qa run-tests --suite unit-parallel-safe --skip-preflight -- --no-cov
 python -m scripts.engineering.qa summarize-junit --suite unit-fast --junit-glob 'reports/test-telemetry/*.xml'
 python -m scripts.engineering.qa test-health --last 30 --markdown-out reports/quality/test-runs/rollup.md
 python -m scripts.engineering.qa test-health --suite coverage-verify --run-id coverage-verify-local --junit-glob 'reports/quality/test-runs/junit/*.xml' --last 30 --markdown-out reports/quality/test-runs/rollup.md

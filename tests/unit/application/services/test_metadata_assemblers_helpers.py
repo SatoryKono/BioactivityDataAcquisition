@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import tempfile
 from datetime import UTC, datetime
-from pathlib import Path
-from uuid import uuid4
 
 import pytest
 
@@ -34,8 +31,10 @@ from bioetl.domain.ports import GoldMetadataInput, SilverMetadataInput, SilverRe
 from bioetl.domain.types import BatchID, RunID, RunType, ScdConfig
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.run_context import RunContext
+from tests.helpers.deterministic_ids import deterministic_uuid
+from tests.helpers.synthetic_paths import synthetic_test_root
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-metadata-assemblers-helpers-"))
+TEST_ROOT = synthetic_test_root("metadata-assemblers-helpers")
 SILVER_TABLE_PATH = str(TEST_ROOT / "silver" / "table")
 GOLD_TABLE_PATH = str(TEST_ROOT / "gold" / "table")
 SILVER_REF_A_PATH = str(TEST_ROOT / "silver" / "a")
@@ -56,7 +55,9 @@ def _make_silver_input(**overrides: object) -> SilverMetadataInput:
 
 def _make_bronze_ref(relative_path: str) -> BronzeWriteResult:
     return BronzeWriteResult(
-        batch_id=BatchID(uuid4()),
+        batch_id=BatchID(
+            deterministic_uuid(f"metadata-assemblers-helpers:{relative_path}")
+        ),
         relative_path=relative_path,
         absolute_path=str(TEST_ROOT / relative_path),
         record_count=1,
@@ -201,7 +202,7 @@ def test_resolve_bronze_paths_handles_none_and_extracts_relative_paths() -> None
 @pytest.mark.unit
 def test_resolve_transform_metadata_uses_override_then_context_defaults() -> None:
     run_context = RunContext(
-        run_id=RunID(uuid4()),
+        run_id=RunID(deterministic_uuid("metadata-assemblers-helpers:override")),
         run_type=RunType.INCREMENTAL,
         started_at=datetime(2026, 3, 17, 10, 0, tzinfo=UTC),
         pipeline_name="chembl_activity",
@@ -231,7 +232,7 @@ def test_resolve_transform_metadata_uses_override_then_context_defaults() -> Non
 @pytest.mark.unit
 def test_resolve_transform_metadata_returns_empty_version_when_absent() -> None:
     run_context = RunContext(
-        run_id=RunID(uuid4()),
+        run_id=RunID(deterministic_uuid("metadata-assemblers-helpers:defaults")),
         run_type=RunType.INCREMENTAL,
         started_at=datetime(2026, 3, 17, 10, 0, tzinfo=UTC),
         pipeline_name="chembl_activity",
@@ -479,7 +480,7 @@ def test_build_gold_output_uses_composite_run_id_when_present() -> None:
 @pytest.mark.unit
 def test_build_gold_output_sets_dataset_content_hash_with_run_context() -> None:
     run_context = RunContext(
-        run_id=RunID(uuid4()),
+        run_id=RunID(deterministic_uuid("metadata-assemblers-helpers:gold-lineage")),
         run_type=RunType.INCREMENTAL,
         started_at=datetime(2026, 3, 17, 10, 0, tzinfo=UTC),
         pipeline_name="chembl_activity",
