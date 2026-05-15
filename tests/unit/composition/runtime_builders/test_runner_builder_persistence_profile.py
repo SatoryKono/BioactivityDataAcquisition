@@ -20,6 +20,7 @@ from tests.unit.composition.runtime_builders.test_runner_builder import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.unit
 def test_build_pipeline_runner_requires_exact_replay_capability_for_replay_ready_profile(
     tmp_path: Path,
 ) -> None:
@@ -65,6 +66,7 @@ def test_build_pipeline_runner_requires_exact_replay_capability_for_replay_ready
     assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
 
+@pytest.mark.unit
 def test_build_pipeline_runner_allows_runtime_degraded_profile_override(
     tmp_path: Path,
 ) -> None:
@@ -112,6 +114,7 @@ def test_build_pipeline_runner_allows_runtime_degraded_profile_override(
     )
 
 
+@pytest.mark.unit
 def test_build_pipeline_runner_keeps_exact_replay_strict_with_degraded_override(
     tmp_path: Path,
 ) -> None:
