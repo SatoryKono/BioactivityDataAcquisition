@@ -582,6 +582,10 @@ These payloads intentionally surface the resume-critical anchors
 `effective_config_hash`, `contract_ref`, `contract_version`, `exact_replay`,
 `input_snapshot_ids`) so operators can explain why resume was rejected or
 degraded without inspecting the full checkpoint blob first.
+`input_snapshot_fingerprint` is the canonical hash of the immutable snapshot
+reference envelope rather than an IDs-only digest: when present, the replay
+identity contract also incorporates replay-critical fields such as
+`content_hash`, `immutable_uri`, and persisted object-version anchors.
 
 ## Observability & Metrics
 

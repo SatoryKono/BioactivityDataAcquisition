@@ -71,10 +71,10 @@ Grafana dashboards в BioETL.
   role-specific; `Processed Records` is current compact Bronze/Silver/Gold
   stage/outcome accounting evidence from `/ops/observability/processed-records`,
   backed by `bioetl_processed_records_*` recording rules with `value` and
-  formatted `percintage` columns. It intentionally omits
-  status, accounted subtotal, and delta rows; it never introduces `run_id`
-  Prometheus labels and never replaces the dashboard-specific `Status` /
-  `First Action` decision path.
+  formatted `percintage` columns. It omits zero-valued outcome rows and
+  intentionally omits status, accounted subtotal, and delta rows; it never
+  introduces `run_id` Prometheus labels and never replaces the
+  dashboard-specific `Status` / `First Action` decision path.
 
 Если правка меняет эту модель, синхронизируй docs в том же change set.
 

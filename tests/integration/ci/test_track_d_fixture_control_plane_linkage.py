@@ -272,6 +272,10 @@ async def test_tracked_fixture_strict_replay_uses_explicit_data_dir_for_control_
         "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE",
         "replay_ready",
     )
+    monkeypatch.setenv(
+        "BIOETL_PIPELINE__CONTROL_PLANE__CHECKPOINT_COMPATIBILITY_POLICY",
+        "hard_fail",
+    )
     patch_clean_code_revision(monkeypatch)
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()

@@ -12,7 +12,7 @@ entries:
       rule_bundle_version: "dq-rules.v1.0"
       normalization_profile_ref: "chembl.molecule"
       normalization_profile_version: "1.0.0"
-      normalization_profile_hash: "aa73cd334929a47be95cabf131b18f5c19bcaac49a6d17beeba3dcc65d31e57d"
+      normalization_profile_hash: "43130724d64897560aaae8b2b275ee2d85e9207ae6a2dfa4c68f9874f7edde2c"
     status: "active"
     source_path: "../../src/bioetl/domain/contracts/gold/_chembl_molecule_protein_schemas.py"
     published_artifacts:
@@ -25,7 +25,7 @@ entries:
     rule_bundle_version: "dq-rules.v1.0"
     normalization_profile_ref: "chembl.molecule"
     normalization_profile_version: "1.0.0"
-    normalization_profile_hash: "aa73cd334929a47be95cabf131b18f5c19bcaac49a6d17beeba3dcc65d31e57d"
+    normalization_profile_hash: "43130724d64897560aaae8b2b275ee2d85e9207ae6a2dfa4c68f9874f7edde2c"
 
   chembl.activity:
     identity:

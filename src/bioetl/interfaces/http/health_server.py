@@ -6,10 +6,15 @@ Provides standard liveness and readiness probes.
 from __future__ import annotations
 
 import asyncio
-import os
 import time
-from typing import TYPE_CHECKING
 
+from bioetl.application.services.quarantine_service import QuarantineService
+from bioetl.domain.ports import (
+    HealthMonitorPort,
+    LoggerPort,
+    RunLedgerPort,
+    RunManifestPort,
+)
 from bioetl.interfaces.http.health_server_http_mixin import HealthServerHTTPMixin
 from bioetl.interfaces.http.health_server_routing_mixin import (
     HealthServerRoutingMixin,
@@ -19,15 +24,6 @@ from bioetl.interfaces.http.processed_records_table import (
     DEFAULT_PROMETHEUS_BASE_URL,
 )
 from bioetl.interfaces.http.types import HealthResponse
-
-if TYPE_CHECKING:
-    from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.domain.ports import (
-        HealthMonitorPort,
-        LoggerPort,
-        RunLedgerPort,
-        RunManifestPort,
-    )
 
 
 class HealthServer(
@@ -63,8 +59,9 @@ class HealthServer(
             run_ledger_port: Optional read-only control-plane run ledger used
                 to resolve latest terminal run completion for selector endpoints.
             prometheus_base_url: Optional Prometheus HTTP API base URL for local
-                dashboard helper endpoints such as /ops/observability/processed-records.
-                Defaults to BIOETL_PROMETHEUS_URL or http://localhost:9090.
+                dashboard helper endpoints such as
+                /ops/observability/processed-records.
+                Defaults to http://localhost:9090.
             logger: Optional LoggerPort for structured server event logging.
                 Server events are silently dropped when None.
         """
@@ -75,9 +72,7 @@ class HealthServer(
         self._run_manifest_port = run_manifest_port
         self._run_ledger_port = run_ledger_port
         self._prometheus_base_url = (
-            prometheus_base_url
-            or os.getenv("BIOETL_PROMETHEUS_URL")
-            or DEFAULT_PROMETHEUS_BASE_URL
+            prometheus_base_url or DEFAULT_PROMETHEUS_BASE_URL
         ).rstrip("/")
         self._logger = logger
         self._server: asyncio.Server | None = None

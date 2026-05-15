@@ -81,7 +81,35 @@ def _normalize_execution_identity_payload(
     )
 
 
-def _resolve_input_snapshot_ids(pipeline: BasePipeline) -> tuple[str, ...]:
+def _serialize_input_snapshot_ref(snapshot: object) -> dict[str, object]:
+    """Return one checkpoint-safe serialized snapshot ref mapping."""
+    captured_at = getattr(snapshot, "captured_at", None)
+    return {
+        "snapshot_id": str(getattr(snapshot, "snapshot_id")),
+        "content_hash": str(getattr(snapshot, "content_hash")),
+        "immutable_uri": _coerce_optional_str(getattr(snapshot, "immutable_uri", None)),
+        "query_fingerprint": _coerce_optional_str(
+            getattr(snapshot, "query_fingerprint", None)
+        ),
+        "storage_provider": _coerce_optional_str(
+            getattr(snapshot, "storage_provider", None)
+        ),
+        "object_bucket": _coerce_optional_str(getattr(snapshot, "object_bucket", None)),
+        "object_key": _coerce_optional_str(getattr(snapshot, "object_key", None)),
+        "object_version_id": _coerce_optional_str(
+            getattr(snapshot, "object_version_id", None)
+        ),
+        "etag": _coerce_optional_str(getattr(snapshot, "etag", None)),
+        "last_modified": _coerce_optional_str(getattr(snapshot, "last_modified", None)),
+        "captured_at": (
+            captured_at.isoformat() if hasattr(captured_at, "isoformat") else None
+        ),
+    }
+
+
+def _resolve_input_snapshot_refs(
+    pipeline: BasePipeline,
+) -> tuple[dict[str, object], ...]:
     """Resolve cached-Bronze snapshot identities for replay-safe checkpoints."""
     runtime = getattr(pipeline, "runtime", None)
     cached_bronze = None if runtime is None else getattr(runtime, "cached_bronze", None)
@@ -105,7 +133,7 @@ def _resolve_input_snapshot_ids(pipeline: BasePipeline) -> tuple[str, ...]:
         bronze_root=bronze_root,
         bronze_date=bronze_date,
     )
-    return tuple(snapshot.snapshot_id for snapshot in snapshot_refs)
+    return tuple(_serialize_input_snapshot_ref(snapshot) for snapshot in snapshot_refs)
 
 
 def _resolve_run_context_metadata(
@@ -144,9 +172,14 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
     """Build current execution identity metadata for checkpoint compatibility."""
     run_context_metadata = _resolve_run_context_metadata(pipeline)
     exact_replay = bool(getattr(pipeline.runtime, "exact_replay", False))
-    input_snapshot_ids = _resolve_input_snapshot_ids(pipeline)
+    input_snapshot_refs = _resolve_input_snapshot_refs(pipeline)
+    input_snapshot_ids = tuple(
+        str(snapshot["snapshot_id"])
+        for snapshot in input_snapshot_refs
+        if snapshot.get("snapshot_id") is not None
+    )
     input_snapshot_fingerprint = compute_input_snapshot_identity_fingerprint(
-        list(input_snapshot_ids)
+        list(input_snapshot_refs)
     )
 
     run_type = pipeline.runtime.run_type
@@ -210,6 +243,7 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
         normalization_profile_version=identity_payload["normalization_profile_version"],
         normalization_profile_hash=identity_payload["normalization_profile_hash"],
         exact_replay=exact_replay,
+        input_snapshot_refs=input_snapshot_refs,
         input_snapshot_ids=input_snapshot_ids,
         input_snapshot_fingerprint=input_snapshot_fingerprint,
         silver_filter_compatibility_mode=silver_filter_compatibility_mode,

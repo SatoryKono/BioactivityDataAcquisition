@@ -14,5 +14,10 @@ def _slug(value: str) -> str:
 
 
 def synthetic_test_root(label: str) -> Path:
-    """Return a stable synthetic root path without creating real temp dirs."""
-    return _ROOT / _slug(label)
+    """Return a stable absolute synthetic root path without creating temp dirs.
+
+    Callers often derive ``file://`` URIs via ``Path.as_uri()`` at import time.
+    On Windows, ``Path('/tmp/...')`` is drive-relative and therefore not a valid
+    URI source until it is resolved to an absolute path.
+    """
+    return (_ROOT / _slug(label)).resolve()

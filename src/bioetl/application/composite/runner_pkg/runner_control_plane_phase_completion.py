@@ -5,9 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runner_pkg.runner_control_plane_lifecycle import (
-    CompositeRunnerControlPlaneHostProtocol,
     DEPENDENCIES_STAGE_NAME,
     SEED_STAGE_NAME,
+    CompositeRunnerControlPlaneHostProtocol,
     record_run_metrics_event,
     record_stage_completed,
     record_with_ledger_service,

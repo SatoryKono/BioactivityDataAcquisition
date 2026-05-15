@@ -17,3 +17,80 @@ allowed:
       owner: "@bioetl-observability"
       reason: "Pipeline run terminal events are emitted by execution, observer, and composite lifecycle paths."
       review_date: "2026-09-30"
+  declared_risky_label_review_required:
+    - metric: bioetl_adapter_batch_size
+      owner: "@bioetl-observability"
+      reason: "Adapter endpoint metrics are explicitly reviewed because endpoint labels are allowed only on bounded adapter surfaces."
+      review_date: "2026-09-30"
+    - metric: bioetl_adapter_request_duration_seconds
+      owner: "@bioetl-observability"
+      reason: "Adapter endpoint latency metrics are explicitly reviewed because endpoint labels are allowed only on bounded adapter surfaces."
+      review_date: "2026-09-30"
+    - metric: bioetl_adapter_requests_total
+      owner: "@bioetl-observability"
+      reason: "Adapter endpoint request metrics are explicitly reviewed because endpoint labels are allowed only on bounded adapter surfaces."
+      review_date: "2026-09-30"
+    - metric: bioetl_gold_lifecycle_state_total
+      owner: "@bioetl-observability"
+      reason: "Gold table-scoped lifecycle metrics are retained only after explicit review of bounded table cardinality."
+      review_date: "2026-09-30"
+    - metric: bioetl_gold_validation_failures_total
+      owner: "@bioetl-observability"
+      reason: "Gold table-scoped validation metrics are retained only after explicit review of bounded table cardinality."
+      review_date: "2026-09-30"
+    - metric: bioetl_gold_write_attempts_total
+      owner: "@bioetl-observability"
+      reason: "Gold table-scoped write metrics are retained only after explicit review of bounded table cardinality."
+      review_date: "2026-09-30"
+    - metric: bioetl_gold_write_duration_seconds
+      owner: "@bioetl-observability"
+      reason: "Gold table-scoped write duration metrics are retained only after explicit review of bounded table cardinality."
+      review_date: "2026-09-30"
+    - metric: bioetl_gold_write_outcomes_total
+      owner: "@bioetl-observability"
+      reason: "Gold table-scoped write outcome metrics are retained only after explicit review of bounded table cardinality."
+      review_date: "2026-09-30"
+    - metric: bioetl_publication_raw_vocab_unknown_total
+      owner: "@bioetl-observability"
+      reason: "Publication vocabulary metrics use a reviewed bounded field label contract with normalized provider values."
+      review_date: "2026-09-30"
+    - metric: bioetl_silver_csv_export_failures_total
+      owner: "@bioetl-observability"
+      reason: "Silver export metrics are retained only after explicit review of bounded table cardinality."
+      review_date: "2026-09-30"
+    - metric: bioetl_silver_csv_export_start_total
+      owner: "@bioetl-observability"
+      reason: "Silver export metrics are retained only after explicit review of bounded table cardinality."
+      review_date: "2026-09-30"
+    - metric: bioetl_silver_csv_export_success_total
+      owner: "@bioetl-observability"
+      reason: "Silver export metrics are retained only after explicit review of bounded table cardinality."
+      review_date: "2026-09-30"
+    - metric: bioetl_silver_filter_rejections_total
+      owner: "@bioetl-observability"
+      reason: "Silver filter rejection metrics use a reviewed bounded field label contract for governed rule diagnostics."
+      review_date: "2026-09-30"
+    - metric: bioetl_silver_validation_failures_total
+      owner: "@bioetl-observability"
+      reason: "Silver validation metrics are retained only after explicit review of bounded table cardinality."
+      review_date: "2026-09-30"
+    - metric: bioetl_vacuum_files_removed_total
+      owner: "@bioetl-observability"
+      reason: "Vacuum cleanup metrics are retained only after explicit review of bounded table cardinality."
+      review_date: "2026-09-30"
+    - metric: bioetl_workflow_current_status
+      owner: "@bioetl-observability"
+      reason: "Workflow context labels are retained only after review of their bounded normalization and dashboard use."
+      review_date: "2026-09-30"
+    - metric: bioetl_workflow_runs_total
+      owner: "@bioetl-observability"
+      reason: "Workflow context labels are retained only after review of their bounded normalization and dashboard use."
+      review_date: "2026-09-30"
+    - metric: bioetl_workflow_step_duration_seconds
+      owner: "@bioetl-observability"
+      reason: "Workflow context labels are retained only after review of their bounded normalization and dashboard use."
+      review_date: "2026-09-30"
+    - metric: bioetl_workflow_step_events_total
+      owner: "@bioetl-observability"
+      reason: "Workflow context labels are retained only after review of their bounded normalization and dashboard use."
+      review_date: "2026-09-30"

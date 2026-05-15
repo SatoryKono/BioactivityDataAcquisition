@@ -42,7 +42,8 @@ local identity context and must not become a Prometheus label.
 `Processed Records` is the shared compact Bronze/Silver/Gold stage/outcome
 accounting table from `/ops/observability/processed-records`, backed by
 `bioetl_processed_records_*` recording rules with `value` and formatted
-`percintage` columns, not a `$__range` throughput summary.
+`percintage` columns, omitting zero-valued outcome rows and not acting as a
+`$__range` throughput summary.
 
 Current canonical Overview baseline:
 

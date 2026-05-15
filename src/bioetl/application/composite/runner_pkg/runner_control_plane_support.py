@@ -1,4 +1,4 @@
-"""Compatibility re-export for composite runner control-plane support seams."""
+"""Composite runner control-plane support re-exports."""
 
 from __future__ import annotations
 
@@ -25,7 +25,6 @@ from bioetl.application.composite.runner_pkg.runner_control_plane_phase_followup
     record_enrichment_stage_completed,
     record_merge_stage_completed,
 )
-
 
 __all__ = [
     "CompositeRunnerControlPlaneHostProtocol",

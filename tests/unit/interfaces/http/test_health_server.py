@@ -1564,18 +1564,62 @@ class TestProcessedRecordsTable:
         )
 
         rows = {row["parameter"]: row for row in payload["rows"]}
-        zero_rows = {
-            row["parameter"]: row for row in payload["rows"] if row["value"] == 0
-        }
 
-        assert rows["01 bronze_records"]["percintage"] == "100%"
-        assert rows["02 silver_valid_records"]["percintage"] == "91.0%"
-        assert rows["03 silver_filtered_out_records"]["percintage"] == "8.51%"
-        assert rows["04 silver_quarantined_records"]["percintage"] == "0.47%"
-        assert rows["07 gold_written_records"]["percintage"] == "99.0%"
-        assert "05 silver_skipped_records__zero" in zero_rows
-        assert zero_rows["05 silver_skipped_records__zero"]["percintage"] == "0%"
+        assert rows["01 bronze_records"]["value"] == "01 bronze_records|10 000"
+        assert rows["02 silver_valid_records"]["value"] == (
+            "02 silver_valid_records| 9 102"
+        )
+        assert rows["03 silver_filtered_out_records"]["value"] == (
+            "03 silver_filtered_out_records|   851"
+        )
+        assert rows["04 silver_quarantined_records"]["value"] == (
+            "04 silver_quarantined_records|    47"
+        )
+        assert rows["07 gold_written_records"]["value"] == (
+            "07 gold_written_records| 9 009"
+        )
+        assert rows["01 bronze_records"]["row_status"] == ""
+        assert rows["02 silver_valid_records"]["row_status"] == ""
+        assert rows["03 silver_filtered_out_records"]["row_status"] == ""
+        assert rows["04 silver_quarantined_records"]["row_status"] == ""
+        assert rows["07 gold_written_records"]["row_status"] == "gold_deficit"
+        assert rows["01 bronze_records"]["percintage"] == "01 bronze_records|100%"
+        assert rows["02 silver_valid_records"]["percintage"] == (
+            "02 silver_valid_records|91.0%"
+        )
+        assert rows["03 silver_filtered_out_records"]["percintage"] == (
+            "03 silver_filtered_out_records|8.51%"
+        )
+        assert rows["04 silver_quarantined_records"]["percintage"] == (
+            "04 silver_quarantined_records|0.47%"
+        )
+        assert (
+            rows["07 gold_written_records"]["percintage"]
+            == "07 gold_written_records|90.1%"
+        )
+        assert "05 silver_skipped_records" not in rows
+        assert len(payload["rows"]) == 5
+        assert all("__zero" not in str(row["parameter"]) for row in payload["rows"])
         assert payload["run_type"] == ["backfill"]
+
+    def test_payload_marks_silver_rows_when_accounting_is_below_bronze(self) -> None:
+        """Visible Silver rows should get deficit status when accounting is short."""
+        metric_values = dict(self._SAMPLE_VALUES)
+        metric_values["bioetl_processed_records_silver_filtered_out_current"] = 850
+
+        payload = build_processed_records_table_payload(
+            metric_values=metric_values,
+            pipeline="chembl_activity",
+            run_type="backfill",
+        )
+
+        rows = {row["parameter"]: row for row in payload["rows"]}
+
+        assert rows["01 bronze_records"]["row_status"] == ""
+        assert rows["02 silver_valid_records"]["row_status"] == "silver_deficit"
+        assert rows["03 silver_filtered_out_records"]["row_status"] == "silver_deficit"
+        assert rows["04 silver_quarantined_records"]["row_status"] == "silver_deficit"
+        assert rows["07 gold_written_records"]["row_status"] == "gold_deficit"
 
     def test_query_uses_bounded_selectors_without_run_identity_or_range(self) -> None:
         """The formatter queries current accounting metrics without run_id or $__range."""
@@ -1595,8 +1639,7 @@ class TestProcessedRecordsTable:
 
     @pytest.mark.asyncio
     async def test_observability_processed_records_endpoint_returns_rows(
-        self,
-        monkeypatch: pytest.MonkeyPatch,
+        self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Health server should expose formatted rows for the Grafana table."""
 
@@ -1612,14 +1655,10 @@ class TestProcessedRecordsTable:
             return dict(self._SAMPLE_VALUES)
 
         monkeypatch.setattr(
-            processed_records_module,
-            "fetch_processed_record_values",
-            fake_fetch,
+            processed_records_module, "fetch_processed_record_values", fake_fetch
         )
         server = HealthServer(
-            host="127.0.0.1",
-            port=0,
-            prometheus_base_url="http://prometheus.example",
+            host="127.0.0.1", port=0, prometheus_base_url="http://prometheus.example"
         )
         await server.start()
         try:
@@ -1636,8 +1675,21 @@ class TestProcessedRecordsTable:
         data = json.loads(body)
         rows = {row["parameter"]: row for row in data["rows"]}
         assert data["contract"] == "processed_records_table_v1"
-        assert rows["02 silver_valid_records"]["percintage"] == "91.0%"
-        assert rows["07 gold_written_records"]["percintage"] == "99.0%"
+        assert rows["01 bronze_records"]["value"] == "01 bronze_records|10 000"
+        assert rows["03 silver_filtered_out_records"]["value"] == (
+            "03 silver_filtered_out_records|   851"
+        )
+        assert rows["02 silver_valid_records"]["row_status"] == ""
+        assert rows["07 gold_written_records"]["row_status"] == "gold_deficit"
+        assert (
+            rows["02 silver_valid_records"]["percintage"]
+            == "02 silver_valid_records|91.0%"
+        )
+        assert (
+            rows["07 gold_written_records"]["percintage"]
+            == "07 gold_written_records|90.1%"
+        )
+        assert "05 silver_skipped_records" not in rows
 
 
 class TestHealthServerWithMonitor:

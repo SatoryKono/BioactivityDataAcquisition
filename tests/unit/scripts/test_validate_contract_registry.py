@@ -31,6 +31,9 @@ def _write_entity_config(
                 "provider": provider,
                 "entity": entity,
                 "pipeline": {
+                    "pipeline_name": f"{provider}_{entity}",
+                    "provider": provider,
+                    "entity_type": entity,
                     "sink": {
                         "gold": gold_payload,
                     }

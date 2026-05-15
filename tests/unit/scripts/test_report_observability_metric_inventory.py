@@ -438,9 +438,15 @@ def test_collect_metric_inventory_detects_direct_prometheus_collectors(
                 ")",
                 "",
                 "def emit(duration: float) -> None:",
-                "    GOLD_WRITE_ATTEMPTS_TOTAL.labels(pipeline='p', table='t', mode='append').inc()",
-                "    GOLD_WRITE_OUTCOMES_TOTAL.labels(pipeline='p', table='t', mode='append', status='success').inc()",
-                "    GOLD_WRITE_DURATION_SECONDS.labels(pipeline='p', table='t', mode='append', status='success').observe(duration)",
+                "    GOLD_WRITE_ATTEMPTS_TOTAL.labels(",
+                "        pipeline='p', table='t', mode='append'",
+                "    ).inc()",
+                "    GOLD_WRITE_OUTCOMES_TOTAL.labels(",
+                "        pipeline='p', table='t', mode='append', status='success'",
+                "    ).inc()",
+                "    GOLD_WRITE_DURATION_SECONDS.labels(",
+                "        pipeline='p', table='t', mode='append', status='success'",
+                "    ).observe(duration)",
             ]
         )
         + "\n",
@@ -658,6 +664,36 @@ def test_collect_metric_inventory_accepts_matching_direct_label_contracts(
     assert report["runtime_label_contract_violations"] == []
 
 
+def test_collect_metric_inventory_flags_declared_risky_label_review_candidates(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset(
+            {
+                "bioetl_reviewed_total",
+                "bioetl_plain_total",
+            }
+        ),
+    )
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_LABELS",
+        {
+            "bioetl_reviewed_total": frozenset({"pipeline", "table"}),
+            "bioetl_plain_total": frozenset({"pipeline", "status"}),
+        },
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert report["declared_risky_label_review_required"] == [
+        "bioetl_reviewed_total"
+    ]
+
+
 def test_validate_metric_inventory_reports_unallowed_drift() -> None:
     report = {
         "registered_without_runtime": ["bioetl_allowed_total", "bioetl_dead_total"],
@@ -666,7 +702,9 @@ def test_validate_metric_inventory_reports_unallowed_drift() -> None:
         "documented_without_registry": ["bioetl_doc_gap_total"],
         "rules_without_registry": [],
         "runtime_cardinality_review_required": ["bioetl_hotspot_total"],
+        "declared_risky_label_review_required": ["bioetl_table_total"],
         "runtime_label_contract_violations": ["bioetl_bad_total @ src/x.py:1"],
+        "runtime_label_contract_unresolved": ["bioetl_unknown_total @ src/y.py:1"],
     }
 
     violations = inventory.validate_metric_inventory(
@@ -674,16 +712,43 @@ def test_validate_metric_inventory_reports_unallowed_drift() -> None:
         allowlist={
             "registered_without_runtime": {"bioetl_allowed_total"},
             "runtime_cardinality_review_required": set(),
+            "declared_risky_label_review_required": set(),
         },
     )
 
     assert violations == {
+        "declared_risky_label_review_required": ["bioetl_table_total"],
         "documented_without_registry": ["bioetl_doc_gap_total"],
         "registered_without_runtime": ["bioetl_dead_total"],
         "runtime_without_registry": ["bioetl_runtime_gap_total"],
         "runtime_cardinality_review_required": ["bioetl_hotspot_total"],
         "runtime_label_contract_violations": ["bioetl_bad_total @ src/x.py:1"],
+        "runtime_label_contract_unresolved": ["bioetl_unknown_total @ src/y.py:1"],
     }
+
+
+def test_load_drift_allowlist_supports_metadata_entries_for_risky_labels(
+    tmp_path: Path,
+) -> None:
+    allowlist = tmp_path / "allowlist.yaml"
+    allowlist.write_text(
+        "\n".join(
+            [
+                "allowed:",
+                "  declared_risky_label_review_required:",
+                "    - metric: bioetl_table_total",
+                '      owner: "@bioetl-observability"',
+                '      reason: "Reviewed table-scoped metric with bounded storage surface"',
+                "      review_date: '2026-09-30'",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    loaded = inventory._load_drift_allowlist(allowlist)
+
+    assert loaded["declared_risky_label_review_required"] == {"bioetl_table_total"}
 
 
 def test_load_drift_allowlist_supports_metadata_entries_for_cardinality_reviews(
@@ -878,6 +943,7 @@ def test_main_write_evidence_writes_replayable_json_artifact(
             "dashboarded_without_emission": [],
             "alerted_without_emission": [],
             "runtime_cardinality_review_required": [],
+            "declared_risky_label_review_required": [],
             "runtime_label_contract_violations": [],
             "runtime_label_contract_unresolved": [],
             "live_metrics": ["bioetl_example_total"],

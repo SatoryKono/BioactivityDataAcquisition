@@ -27,7 +27,7 @@ docker ps
 
 ```powershell
 # PowerShell
-.\scripts\docker-setup.ps1 -Mode basic
+.\scripts\ops\docker-setup.ps1 -Mode basic
 
 # Или вручную
 docker compose up -d
@@ -42,7 +42,7 @@ docker compose up -d
 
 ```powershell
 # Через скрипт
-.\scripts\docker-setup.ps1 -Mode monitoring
+.\scripts\ops\docker-setup.ps1 -Mode monitoring
 
 # Или вручную
 docker compose -f docker-compose.monitoring.yml up -d
@@ -58,7 +58,7 @@ docker compose -f docker-compose.monitoring.yml up -d
 
 ```powershell
 # Через скрипт
-.\scripts\docker-setup.ps1 -Mode mcp
+.\scripts\ops\docker-setup.ps1 -Mode mcp
 
 # Или вручную
 docker compose -f docker-compose.codex.yml up -d

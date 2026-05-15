@@ -19,12 +19,17 @@ from bioetl.domain.control_plane._reproducibility_profile_types import (
 
 
 def published_supported_reproducibility_families() -> list[str]:
-    """Return the authoritative published source-family inventory."""
+    """Return the authoritative strict exact-replay source-family inventory."""
     return list(_PUBLISHED_SUPPORTED_SOURCE_FAMILIES)
 
 
 def published_production_reproducibility_families() -> list[str]:
     """Return the authoritative production-family inventory."""
+    return list(_PUBLISHED_SOURCE_FAMILIES + _PUBLISHED_COMPOSITE_FAMILIES)
+
+
+def published_supported_boundary_families() -> list[str]:
+    """Return all published families that satisfy the supported replay boundary."""
     return list(_PUBLISHED_SOURCE_FAMILIES + _PUBLISHED_COMPOSITE_FAMILIES)
 
 
@@ -101,7 +106,7 @@ def build_lineage_closure_boundary(
         "support_scope": profile.support_scope,
         "supported": profile.lineage_closure_supported,
         "reason": profile.reason,
-        "supported_families": published_supported_reproducibility_families(),
+        "supported_families": published_supported_boundary_families(),
     }
 
 
@@ -159,5 +164,5 @@ def build_replay_family_contract(
         ),
         "support_scope": profile.support_scope,
         "reason": profile.reason,
-        "supported_families": published_supported_reproducibility_families(),
+        "supported_families": published_supported_boundary_families(),
     }
