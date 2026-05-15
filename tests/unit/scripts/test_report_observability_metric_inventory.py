@@ -747,6 +747,44 @@ def test_validate_metric_inventory_allows_unresolved_label_contracts_by_metric_n
     assert violations == {}
 
 
+def test_filter_declared_label_contract_metrics_suppresses_declared_rows() -> None:
+    filtered = inventory._filter_declared_label_contract_metrics(
+        [
+            "bioetl_known_total @ src/a.py:1",
+            "bioetl_other_total @ src/b.py:2",
+        ],
+        {"bioetl_known_total"},
+    )
+
+    assert filtered == ["bioetl_other_total @ src/b.py:2"]
+
+
+def test_load_declared_metric_definitions_supports_label_contract_metrics(
+    tmp_path: Path,
+) -> None:
+    config_dir = tmp_path / "configs/quality"
+    config_dir.mkdir(parents=True)
+    (config_dir / "observability_metric_declarations.yaml").write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "policy_scope: observability_metric_declarations",
+                "recording_rule_metrics:",
+                "  - bioetl_recording_rule_total",
+                "declared_label_contract_metrics:",
+                "  - bioetl_known_total",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    loaded = inventory._load_declared_metric_definitions(tmp_path)
+
+    assert loaded["recording_rule_metrics"] == {"bioetl_recording_rule_total"}
+    assert loaded["declared_label_contract_metrics"] == {"bioetl_known_total"}
+
+
 def test_load_drift_allowlist_supports_metadata_entries_for_risky_labels(
     tmp_path: Path,
 ) -> None:

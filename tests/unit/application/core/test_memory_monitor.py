@@ -15,7 +15,7 @@ from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
 class TestMemoryConfig:
     """Tests for MemoryConfig dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_memory_config_default_values(self) -> None:
         """Test default configuration values."""
         config = MemoryConfig()
 
@@ -25,7 +25,7 @@ class TestMemoryConfig:
         assert config.check_interval_records == 100
         assert config.enable_adaptive_sizing is True
 
-    def test_custom_values(self) -> None:
+    def test_memory_config_accepts_custom_values(self) -> None:
         """Test custom configuration values."""
         config = MemoryConfig(
             max_batch_memory_mb=1024,

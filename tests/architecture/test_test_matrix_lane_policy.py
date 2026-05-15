@@ -93,6 +93,8 @@ class TestCanonicalTestLanes:
         "security",
         "contracts",
         "architecture",
+        "architecture-fast-boundary",
+        "architecture-slow-governance",
         "e2e",
         "memory",
         "performance",
@@ -209,6 +211,20 @@ class TestCanonicalTestLanes:
         assert (
             "S7-architecture-slow-governance" in lanes["architecture"]["runner_options"]
         )
+        assert lanes["architecture-fast-boundary"]["runner_backend"] == (
+            "run_pytest_sharded"
+        )
+        assert lanes["architecture-fast-boundary"]["runner_options"] == [
+            "--shard",
+            "S7-architecture-fast-boundary",
+        ]
+        assert lanes["architecture-slow-governance"]["runner_backend"] == (
+            "run_pytest_sharded"
+        )
+        assert lanes["architecture-slow-governance"]["runner_options"] == [
+            "--shard",
+            "S7-architecture-slow-governance",
+        ]
         assert lanes["memory"]["marker_expression"] == "memory and not benchmark"
         assert lanes["memory"]["paths"] == [
             "tests/smoke/test_neo4j_memory_mcp_smoke.py"

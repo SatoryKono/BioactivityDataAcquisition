@@ -45,7 +45,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 136 | Monitor: GLOBAL Control-Plane Read Failure Ratio |
 | bioetl-control-plane-v1.json | 137 | Monitor: Lineage Fragment Persistence Failures |
 | bioetl-control-plane-v1.json | 138 | Inspect: Missing Lineage Refs by Layer / Type |
-| bioetl-control-plane-v1.json | 139 | Review: Known Missing Replay-Safety Signals |
+| bioetl-control-plane-v1.json | 139 | Review: Remaining Replay-Safety Signals |
 | bioetl-control-plane-v1.json | 891 | Monitor: Replay Safety State |
 | bioetl-control-plane-v1.json | 892 | Inspect: Checkpoint Freshness Gap |
 | bioetl-control-plane-v1.json | 893 | Monitor: Manifest / Ledger Integrity |
@@ -55,6 +55,10 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 9401 | Status |
 | bioetl-control-plane-v1.json | 9402 | ID |
 | bioetl-control-plane-v1.json | 9403 | Processed Records |
+| bioetl-control-plane-v1.json | 9404 | Inspect: P0 Identity Anchors |
+| bioetl-control-plane-v1.json | 9405 | Inspect: Identity Gaps |
+| bioetl-control-plane-v1.json | 9406 | Inspect: Checkpoint Anchor Compare |
+| bioetl-control-plane-v1.json | 9407 | Inspect: Copyable Identity Handoffs |
 | bioetl-dq-v2.json | 1 | Track Range Evidence: Bronze -> Silver -> Gold |
 | bioetl-dq-v2.json | 2 | Data Quality Score (Volume-weighted) |
 | bioetl-dq-v2.json | 3 | Source Records in Range (Bronze) |

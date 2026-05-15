@@ -52,7 +52,7 @@ def _create_bootstrap_settings(
     settings.pipeline.max_concurrent_batches = None
     settings.pipeline.health_check_mode = None
     settings.pipeline.control_plane = SimpleNamespace(
-        required_persistence_profile=None,
+        required_persistence_profile="degraded_observable",
         run_manifest_enabled=True,
         run_ledger_enabled=True,
         checkpoint_compatibility_policy=None,
@@ -340,10 +340,29 @@ class TestBootstrapVacuumConfig:
         # Context without CLI vacuum options (disabled VacuumSettings)
         ctx = _create_pipeline_context()
 
-        # Mock input snapshot resolution to avoid strict persistence profile check
         with patch(
-            "bioetl.composition.runtime_builders._run_manifest_support.resolve_pipeline_input_snapshot_refs",
-            return_value=(),
+            "bioetl.composition.runtime_builders.runner_builder.create_run_manifest_with_effective_config",
+            return_value=(
+                SimpleNamespace(
+                    manifest_id="manifest-test-1",
+                    execution_fingerprint="fp-test-1",
+                    config_hash="a" * 64,
+                    resolved_config_hash="b" * 64,
+                    effective_config_hash="c" * 64,
+                    dq_contract_compatibility_hash="d" * 64,
+                    effective_config_artifact_id="eca-1",
+                    contract_ref="chembl.activity",
+                    contract_version="1.0.0",
+                    contract_schema_hash="e" * 64,
+                    dq_policy_ref="chembl.activity.dq",
+                    rule_bundle_version="dq-rules.v1",
+                    normalization_profile_ref=None,
+                    normalization_profile_version=None,
+                    normalization_profile_hash=None,
+                    required_persistence_profile="degraded_observable",
+                ),
+                None,
+            ),
         ):
             bootstrap_pipeline_runner(ctx)
 
@@ -399,10 +418,29 @@ class TestBootstrapVacuumConfig:
             vacuum=VacuumSettings(enabled=True, retention_days=30)
         )
 
-        # Mock input snapshot resolution to avoid strict persistence profile check
         with patch(
-            "bioetl.composition.runtime_builders._run_manifest_support.resolve_pipeline_input_snapshot_refs",
-            return_value=(),
+            "bioetl.composition.runtime_builders.runner_builder.create_run_manifest_with_effective_config",
+            return_value=(
+                SimpleNamespace(
+                    manifest_id="manifest-test-2",
+                    execution_fingerprint="fp-test-2",
+                    config_hash="d" * 64,
+                    resolved_config_hash="e" * 64,
+                    effective_config_hash="f" * 64,
+                    dq_contract_compatibility_hash="0" * 64,
+                    effective_config_artifact_id="eca-2",
+                    contract_ref="chembl.activity",
+                    contract_version="1.0.0",
+                    contract_schema_hash="1" * 64,
+                    dq_policy_ref="chembl.activity.dq",
+                    rule_bundle_version="dq-rules.v1",
+                    normalization_profile_ref=None,
+                    normalization_profile_version=None,
+                    normalization_profile_hash=None,
+                    required_persistence_profile="degraded_observable",
+                ),
+                None,
+            ),
         ):
             bootstrap_pipeline_runner(ctx)
 

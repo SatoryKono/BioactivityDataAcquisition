@@ -354,7 +354,7 @@ L1/L2 replay/resume safety: manifest, ledger, checkpoint, replay, lineage, globa
 - Replay/checkpoint panels route к `checkpoint-debugging.md`
 - Manifest/ledger evidence panels route к `run-manifest-inspection.md`
 - Known Blind Spots и terminal-event evidence ниже fold в collapsed incident rows, не в first-screen trust block
-- `Known Blind Spots` и `Review: Known Missing Replay-Safety Signals` могут оставаться двумя collapsed docs panels только как non-destructive refactor phase: первый summary, второй detailed companion; оба являются limitation notes, не health signals.
+- `Identity evidence and remaining replay-safety signals` ниже fold использует `/ops/control-plane/identity-evidence` для P0/P1/P2 anchors, identity gaps, checkpoint compare и copy-friendly full values; remaining replay-safety note перечисляет только сигналы вне этого endpoint.
 - Starts с answer-first **Trust Summary** block: replay safety state, checkpoint freshness gap, ledger/manifest consistency, telemetry presence
 
 ### Cross-scope marker contract

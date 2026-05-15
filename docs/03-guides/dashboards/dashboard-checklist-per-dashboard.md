@@ -240,7 +240,8 @@
 - [ ] Replay/checkpoint panels route к `checkpoint-debugging.md`
 - [ ] Manifest/ledger evidence panels route к `run-manifest-inspection.md`
 - [ ] Known Blind Spots и terminal-event evidence ниже fold в collapsed incident rows
-- [ ] `Known Blind Spots` и `Review: Known Missing Replay-Safety Signals` явно описаны как summary/detail limitation notes, not healthy signals
+- [ ] `Identity evidence and remaining replay-safety signals` exposes P0/P1/P2 anchors through `/ops/control-plane/identity-evidence` without Prometheus ID labels
+- [ ] `Review: Remaining Replay-Safety Signals` lists only evidence still outside the identity endpoint
 - [ ] Starts с answer-first Trust Summary block
 
 ### Cross-scope markers

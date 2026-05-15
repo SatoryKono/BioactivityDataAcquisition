@@ -45,6 +45,12 @@ accounting table from `/ops/observability/processed-records`, backed by
 `percintage` columns, omitting zero-valued outcome rows and not acting as a
 `$__range` throughput summary.
 
+For `0. Control Plane`, exact identity graph evidence is available in the
+collapsed `Identity evidence and remaining replay-safety signals` row. Those
+tables call `/ops/control-plane/identity-evidence` for P0/P1/P2 anchors,
+identity gaps, checkpoint anchor comparison, and copy-friendly full values;
+they are HTTP-backed forensic surfaces, not Prometheus label filters.
+
 Current canonical Overview baseline:
 
 - `bioetl-overview-v2` materializes the explicit header contract

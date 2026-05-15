@@ -107,6 +107,15 @@ for the selected pipeline scope. Replay/checkpoint panels route to
 evidence live below fold in collapsed incident rows, not in the first-screen
 trust block.
 
+Control Plane keeps the shared compact `ID` shell panel (`9402`) backed by
+`/ops/control-plane/identity-table`. The deeper collapsed
+`Identity evidence and remaining replay-safety signals` row uses
+`/ops/control-plane/identity-evidence` for P0/P1/P2 anchors, identity gaps,
+replay parentage, composite identity, checkpoint anchor comparison, and
+copy-friendly full values. This row is the dashboard-approved place for
+high-cardinality identity values; do not move those values into Prometheus
+labels.
+
 Global lookup/read-path panels stay separated in a dedicated
 **Global diagnostics (non-pipeline scoped)** block and MUST remain unfiltered by
 `$pipeline` / `$run_type`.

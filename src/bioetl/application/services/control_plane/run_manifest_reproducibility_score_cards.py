@@ -34,6 +34,22 @@ PROFILE_SCORE_THRESHOLDS: dict[str, dict[str, int]] = {
     },
 }
 
+_BLOCKER_PRIORITY_ORDER: tuple[str, ...] = (
+    "dependency_lock_hash_missing",
+    "dependency_lock_provenance",
+    "dependency_lock_provenance_missing",
+    "exact_replay_capability",
+    "exact_replay_not_eligible",
+    "identity_graph_incomplete",
+    "immutable_input_snapshots",
+    "immutable_input_snapshots_missing",
+    "missing_immutable_input_snapshots",
+    "produced_artifact_trace",
+)
+_BLOCKER_PRIORITY_INDEX: dict[str, int] = {
+    blocker: index for index, blocker in enumerate(_BLOCKER_PRIORITY_ORDER)
+}
+
 
 @dataclass(frozen=True, slots=True)
 class ScoreCardRecord:
@@ -331,7 +347,16 @@ def overall_blockers(
         )
     for card in score_cards:
         blockers.extend(card.blockers)
-    return sorted(dict.fromkeys(blockers))
+    unique_blockers = list(dict.fromkeys(blockers))
+    return sorted(
+        unique_blockers,
+        key=lambda blocker: (
+            _BLOCKER_PRIORITY_INDEX.get(
+                blocker,
+                len(_BLOCKER_PRIORITY_INDEX) + unique_blockers.index(blocker),
+            ),
+        ),
+    )
 
 
 def overall_evidence_refs(score_cards: tuple[ScoreCardRecord, ...]) -> list[str]:

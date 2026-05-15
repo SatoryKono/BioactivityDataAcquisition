@@ -418,6 +418,7 @@ def test_chembl_config_enum_surfaces_are_registry_subsets(
             values=_extraction_values(config, policy),
             registry_values=registry_values,
         )
+    assert policy.surfaces, f"{policy.label} must declare at least one enum surface"
 
 
 @pytest.mark.integration
@@ -439,6 +440,7 @@ def test_chembl_strict_dq_enum_surfaces_match_registry_exactly(
         values=_quality_allowed_values(config, policy.field),
         registry_values=registry_values,
     )
+    assert policy.surfaces == frozenset({"quality"})
 
 
 @pytest.mark.integration

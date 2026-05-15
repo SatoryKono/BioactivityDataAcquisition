@@ -482,7 +482,7 @@ def _check_no_editor_metadata_in_data(project_root: Path) -> Iterator[Violation]
         if candidate.exists():
             yield Violation(
                 category="DATA_EDITOR_STATE",
-                path=str(candidate.relative_to(project_root)),
+                path=candidate.relative_to(project_root).as_posix(),
                 message="Editor metadata inside data/ запрещена",
                 severity="MUST",
             )

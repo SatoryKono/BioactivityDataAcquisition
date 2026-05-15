@@ -543,7 +543,9 @@ def test_collect_reports_workspace_evidence_marks_local_only_candidates_for_prun
         == 7
     )
     assert (
-        by_path["reports/quality/pretest_guardrails_20260420_174602.json"].classification
+        by_path[
+            "reports/quality/pretest_guardrails_20260420_174602.json"
+        ].classification
         == "PRUNE_CANDIDATE"
     )
     assert (

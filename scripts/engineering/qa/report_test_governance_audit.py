@@ -46,6 +46,7 @@ PYTEST_ASSERTION_HELPERS = {
 BUDGET_TO_METRIC = {
     "refined_assertless_max": "refined_assertless_tests",
     "duplicate_test_names_max": "duplicate_test_names",
+    "duplicate_test_name_occurrences_max": "duplicate_test_name_occurrences",
     "compatibility_test_file_max": "compatibility_test_files",
     "markerless_test_functions_max": "markerless_test_functions",
     "uuid4_call_sites_max": "uuid4_call_sites",

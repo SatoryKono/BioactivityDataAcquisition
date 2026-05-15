@@ -13,14 +13,19 @@ import pytest
 import pytest_asyncio
 
 from bioetl.domain.control_plane import (
+    ReplayCapability,
     RunCodeProvenance,
+    RunInputSnapshotRef,
     RunLedgerEntry,
     RunManifest,
+    RunSourceRef,
 )
 from bioetl.domain.control_plane.run_ledger import (
+    COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
     RUN_FAILED_EVENT,
     RUN_FINISHED_EVENT,
 )
+from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from bioetl.domain.types import HealthStatus, RunID, RunType
 from bioetl.interfaces.http.health_server import HealthServer
 from bioetl.interfaces.http.types import HealthResponse
@@ -864,6 +869,24 @@ class TestHealthServerControlPlaneSelector:
         run_id_1 = RunID(uuid4())
         run_id_2 = RunID(uuid4())
         run_id_3 = RunID(uuid4())
+        run_id_4 = RunID(uuid4())
+        input_snapshot = RunInputSnapshotRef(
+            snapshot_id="snapshot-chembl-activity-1",
+            content_hash="hash-chembl-activity-1",
+            immutable_uri="file:///snapshots/chembl/activity/1.jsonl",
+            query_fingerprint="query-chembl-activity-1",
+        )
+        input_snapshot_fingerprint = compute_input_snapshot_identity_fingerprint(
+            [
+                {
+                    "snapshot_id": input_snapshot.snapshot_id,
+                    "content_hash": input_snapshot.content_hash,
+                    "immutable_uri": input_snapshot.immutable_uri,
+                    "query_fingerprint": input_snapshot.query_fingerprint,
+                }
+            ]
+        )
+        assert input_snapshot_fingerprint is not None
         manifest_store.save(
             RunManifest(
                 manifest_id="manifest-1",
@@ -897,13 +920,51 @@ class TestHealthServerControlPlaneSelector:
                 provider="chembl",
                 entity="activity",
                 launch_context={"limit": 10},
-                runtime_config={"run_type": "backfill"},
+                runtime_config={
+                    "run_type": "backfill",
+                    "checkpoint_metadata": {
+                        "manifest_id": "manifest-2",
+                        "execution_fingerprint": "fingerprint-2",
+                        "effective_config_hash": (
+                            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        ),
+                        "effective_config_artifact_id": (
+                            "effective-config-chembl-activity-2"
+                        ),
+                        "input_snapshot_fingerprint": input_snapshot_fingerprint,
+                    },
+                },
                 resolved_config={"pipeline_name": "chembl_activity"},
                 code_provenance=RunCodeProvenance(
                     pipeline_version="1.0.0",
                     git_commit="def5678",
                     config_hash="feedface",
+                    effective_config_hash=(
+                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    ),
+                    effective_config_artifact_id="effective-config-chembl-activity-2",
+                    contract_ref="chembl.activity",
+                    contract_version="2026.05",
+                    contract_schema_hash=(
+                        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                    ),
+                    dq_policy_ref="chembl.activity.dq",
+                    rule_bundle_version="2026.05",
+                    dq_contract_compatibility_hash=(
+                        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+                    ),
                 ),
+                replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+                source_refs=(
+                    RunSourceRef(
+                        provider="chembl",
+                        entity="activity",
+                        pipeline_name="chembl_activity",
+                        query="limit=10",
+                        input_snapshots=(input_snapshot,),
+                    ),
+                ),
+                planned_artifacts=(),
             )
         )
         manifest_store.save(
@@ -927,6 +988,47 @@ class TestHealthServerControlPlaneSelector:
                 ),
             )
         )
+        manifest_store.save(
+            RunManifest(
+                manifest_id="manifest-4",
+                execution_fingerprint="fingerprint-4",
+                schema_version="1.0",
+                created_at=created_at,
+                run_id=run_id_4,
+                run_type=RunType.REBUILD,
+                pipeline_name="composite_publication",
+                provider="composite",
+                entity="publication",
+                launch_context={"workflow_name": "workflow_composite_publication"},
+                runtime_config={
+                    "run_type": "rebuild",
+                    "exact_replay": True,
+                    "checkpoint_metadata": {
+                        "manifest_id": "manifest-4",
+                        "execution_fingerprint": "fingerprint-4",
+                        "effective_config_hash": "checkpoint-different-hash",
+                        "effective_config_artifact_id": "effective-config-composite-4",
+                        "composite_run_identity": "composite-run-4",
+                    },
+                    "cross_validation_rule_ids": ["publication-nullification-v1"],
+                },
+                resolved_config={"pipeline_name": "composite_publication"},
+                code_provenance=RunCodeProvenance(
+                    pipeline_version="2.0.0",
+                    git_commit="jkl3456",
+                    config_hash="badc0de",
+                    effective_config_hash=(
+                        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+                    ),
+                    effective_config_artifact_id="effective-config-composite-4",
+                    contract_ref="composite.publication",
+                    contract_version="2026.05",
+                    contract_schema_hash=(
+                        "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+                    ),
+                ),
+            )
+        )
         ledger_store.append(
             RunLedgerEntry(
                 entry_id="ledger-1",
@@ -935,6 +1037,17 @@ class TestHealthServerControlPlaneSelector:
                 event_type=RUN_FINISHED_EVENT,
                 occurred_at=created_at + timedelta(minutes=1),
                 status="success",
+            )
+        )
+        ledger_store.append(
+            RunLedgerEntry(
+                entry_id="ledger-4",
+                manifest_id="manifest-4",
+                run_id=run_id_4,
+                event_type=COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
+                occurred_at=created_at + timedelta(minutes=4),
+                status="success",
+                details={"component_run_id": str(run_id_1)},
             )
         )
         ledger_store.append(
@@ -1476,6 +1589,174 @@ class TestHealthServerControlPlaneSelector:
         assert status_code == 400
         assert status_text == "Missing required query parameter: pipeline"
         assert "Missing required query parameter: pipeline" in body
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_table_freezes_compact_contract(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """The shared shell ID endpoint must stay compact and backward compatible."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-table?pipeline=chembl_activity",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert [item["parameter"] for item in data["rows"]] == [
+            "manifest_id",
+            "run_id",
+            "pipeline name",
+            "pipelineversion",
+            "git commit hash",
+            "config hash",
+            "execution fingerprint",
+            "schema contract",
+            "version",
+        ]
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_evidence_returns_anchor_contract(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Dedicated identity endpoint should expose P0/P1/P2 evidence rows."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-evidence?"
+            "pipeline=chembl_activity&view=anchors",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data["contract"] == "control_plane_identity_evidence_v1"
+        assert data["resolved_via"] == "latest_manifest_for_scope"
+        rows = {item["name"]: item for item in data["anchors"]}
+        assert rows["run_id"]["priority"] == "P0"
+        assert rows["manifest_id"]["value_full"] == "manifest-2"
+        assert rows["effective_config_hash"]["value_full"] == (
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        )
+        assert rows["effective_config_hash"]["value_short"] == "aaaaaaaaaaaa"
+        assert rows["contract_ref"]["value_full"] == "chembl.activity"
+        assert rows["input_snapshot_count"]["value_full"] == "1"
+        assert rows["checkpoint_anchor_status"]["value_full"] == "OK"
+        assert rows["runtime_mode"]["copy"] is False
+        assert rows["effective_config_hash"]["copy"] is True
+        assert {item["priority"] for item in data["anchors"]} == {"P0", "P1", "P2"}
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_evidence_fail_closes_aggregate_scope(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Aggregate identity evidence must not guess one manifest without run_id."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-evidence?"
+            "pipeline=$__all&run_type=incremental&view=overview",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data["resolved_via"] == "aggregate_scope_requires_exact_run_id"
+        assert data["summary"]["overall_status"] == "UNKNOWN"
+        rows = {item["name"]: item for item in data["rows"]}
+        assert rows["run_id"]["value_full"] == "not available for current scope"
+        assert rows["manifest_id"]["value_full"] == "not available for current scope"
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_evidence_replay_parent_gap_is_critical(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Exact replay evidence must not silently ignore missing parent anchors."""
+        server, manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        composite_manifest = next(
+            manifest
+            for manifest in manifest_store.list_all()
+            if manifest.manifest_id == "manifest-4"
+        )
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-evidence?"
+            f"pipeline=$__all&run_id={composite_manifest.run_id}&view=gaps",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        rows = {item["name"]: item for item in data["rows"]}
+        assert rows["replay_of_run_id"]["missing_severity"] == "FAILING"
+        assert rows["replay_of_run_id"]["ui_status"] == "CRIT"
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_evidence_checkpoint_compare_mismatch(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Checkpoint compare view should classify current vs persisted anchors."""
+        server, manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        composite_manifest = next(
+            manifest
+            for manifest in manifest_store.list_all()
+            if manifest.manifest_id == "manifest-4"
+        )
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-evidence?"
+            f"pipeline=$__all&run_id={composite_manifest.run_id}"
+            "&view=checkpoint_compare",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data["checkpoint_compare"]["status"] == "MISMATCH"
+        rows = {item["anchor"]: item for item in data["rows"]}
+        assert rows["effective_config_hash"]["status"] == "MISMATCH"
+        assert rows["effective_config_hash"]["ui_status"] == "CRIT"
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_evidence_copy_values_are_full_values(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Copy handoffs should exist only for copyable full-value anchors."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-evidence?"
+            "pipeline=chembl_activity&view=copy_values",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        rows = {item["name"]: item for item in data["rows"]}
+        assert "runtime_mode" not in rows
+        assert rows["effective_config_hash"]["copy_value"] == (
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        )
+        assert rows["contract_ref"]["copy_value"] == "chembl.activity"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_endpoint_rejects_unknown_dimension(

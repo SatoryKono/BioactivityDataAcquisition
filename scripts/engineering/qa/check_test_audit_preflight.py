@@ -108,6 +108,17 @@ def collect_test_audit_preflight(
                 "message": git_status["stderr"] or "git status failed.",
             }
         )
+    if lfs_pointer_files:
+        blockers.append(
+            {
+                "id": "lfs_pointer_files_present",
+                "message": (
+                    f"Found {len(lfs_pointer_files)} unresolved git-lfs pointer "
+                    "files under tests/fixtures/vcr; run git lfs install/pull "
+                    "before treating VCR-backed audit evidence as reproducible."
+                ),
+            }
+        )
     if not baseline_exists:
         blockers.append(
             {

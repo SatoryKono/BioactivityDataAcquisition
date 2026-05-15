@@ -19,7 +19,6 @@ from bioetl.composition.runtime_builders import runner_builder
 from bioetl.domain.ports import PipelineCreateRunnerRequest
 SILVER_OUTPUT_PATH = "test-output/silver/chembl/activity"
 SILVER_METADATA_PATH = "test-output/silver/chembl/activity/_metadata.yaml"
-
 class _FakeRunner:
     def __init__(self) -> None:
         self.attached_run_ledger_service: object | None = None
@@ -144,6 +143,7 @@ def _build_settings(
     settings_values: dict[str, object] = {
         "pipeline": SimpleNamespace(**pipeline_values),
         "test_mode": test_mode,
+        "bronze_path": data_dir if data_dir is not None else "/tmp/bioetl-test-data",
     }
     if data_dir is not None:
         settings_values["data_dir"] = data_dir

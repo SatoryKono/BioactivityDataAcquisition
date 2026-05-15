@@ -38,6 +38,23 @@ _DQ_SENSITIVE_OUTPUTS: dict[str, dict[str, Any]] = {
             "downstream checks."
         ),
     },
+    "chembl_assay_dq_bundle": {
+        "entity": "chembl_assay",
+        "snapshot_path": "tests/fixtures/golden/gold/chembl_assay_dq_bundle_v1.json",
+        "required_columns": [
+            "entity_id",
+            "assay_id",
+            "assay_type",
+            "confidence_score",
+            "_dq_warn",
+            "_dq_error",
+            "_index",
+        ],
+        "purpose": (
+            "Bounded ChEMBL assay output bundle for DQ-sensitive assay "
+            "identity, type, and confidence checks."
+        ),
+    },
     "composite_molecule_dq_bundle": {
         "entity": "composite_molecule",
         "snapshot_path": (

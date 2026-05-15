@@ -1564,6 +1564,7 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
     payload = _load_rules()
     rule_map = _build_rule_map(payload)
     _assert_tuned_alert_expectations(rule_map)
+    assert set(_TUNED_ALERT_EXPECTATIONS) <= set(rule_map)
 
 
 def test_silver_validation_alert_groups_by_pipeline_and_table() -> None:

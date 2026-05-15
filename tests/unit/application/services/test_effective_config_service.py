@@ -129,7 +129,7 @@ class TestEffectiveConfigService:
 
         runtime_overrides = {
             "cli": {"settings": {"batch_size": 2000}},
-            "env": {"log_level": "DEBUG"},
+            "env": {"execution_environment": {"log_level": "DEBUG"}},
             "runtime": {"auto_adjust": True},
         }
 
@@ -145,7 +145,9 @@ class TestEffectiveConfigService:
         effective_config = artifact.effective_execution_config.config_data
         assert effective_config["settings"]["batch_size"] == 2000  # Overridden
         assert effective_config["settings"]["timeout"] == 30  # Not overridden
-        assert effective_config["log_level"] == "DEBUG"  # Added by override
+        assert (
+            effective_config["execution_environment"]["log_level"] == "DEBUG"
+        )  # Added by override
         assert effective_config["auto_adjust"] is True  # Added by override
 
     def test_create_artifact_with_normalization_profile_identity(self) -> None:
@@ -381,15 +383,19 @@ class TestEffectiveConfigService:
             pipeline_name="test_pipeline",
             pipeline_kind="standard",
             resolved_config={"pipeline": {"name": "test_pipeline"}},
-            runtime_overrides={"env": {"BIOETL_BATCH_LIMIT": "100"}},
+            runtime_overrides={
+                "env": {
+                    "execution_environment": {"BIOETL_BATCH_LIMIT": "100"},
+                }
+            },
             source_refs=[],
         )
 
         assert artifact.execution_environment.materialized_env_keys == (
-            "BIOETL_BATCH_LIMIT",
+            "execution_environment",
         )
         assert artifact.execution_environment.materialized_env_overrides == {
-            "BIOETL_BATCH_LIMIT": "100"
+            "execution_environment": {"BIOETL_BATCH_LIMIT": "100"}
         }
         assert artifact.execution_environment.environment_hash
 
@@ -520,7 +526,7 @@ class TestEffectiveConfigService:
 
         runtime_overrides = {
             "cli": {"settings": {"batch_size": 10000}},
-            "env": {"log_level": "INFO"},
+            "env": {"execution_environment": {"log_level": "INFO"}},
         }
 
         artifact = self.service.create_artifact_from_pipeline_config(
@@ -715,6 +721,7 @@ class TestOverrideApplication:
             resolved_config=base_config,
             runtime_overrides=overrides,
             source_refs=[],
+            required_persistence_profile="degraded_observable",
         )
 
         effective_config = artifact.effective_execution_config.config_data
@@ -746,6 +753,7 @@ class TestOverrideApplication:
             resolved_config=base_config,
             runtime_overrides=overrides,
             source_refs=[],
+            required_persistence_profile="degraded_observable",
         )
 
         effective_config = artifact.effective_execution_config.config_data
@@ -758,10 +766,13 @@ class TestOverrideApplication:
 
     def test_override_hash_computation(self) -> None:
         """Test override hash computation."""
-        overrides1 = {"cli": {"batch_size": 1000}, "env": {"log_level": "INFO"}}
+        overrides1 = {
+            "cli": {"batch_size": 1000},
+            "env": {"execution_environment": {"log_level": "INFO"}},
+        }
 
         overrides2 = {
-            "env": {"log_level": "INFO"},
+            "env": {"execution_environment": {"log_level": "INFO"}},
             "cli": {"batch_size": 1000},  # Same content, different order
         }
 

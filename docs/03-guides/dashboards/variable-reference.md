@@ -103,7 +103,12 @@ Machine-readable selector SSOT:
   - `$stage` depends on `$pipeline` and `$run_type`
 - `bioetl-control-plane-v1`
   - `$workflow`, `$pipeline`, `$run_type`, `$run_id` form the shared context shell
-  - `$run_id` affects only the shared `ID` panel
+  - `$run_id` affects only HTTP-backed identity surfaces: the shared compact
+    `ID` panel and the Control Plane-only `/ops/control-plane/identity-evidence`
+    detail row
+  - `/ops/control-plane/identity-evidence` exposes full identity values in
+    tables; those values MUST NOT be copied into Prometheus labels or
+    cross-dashboard variable handoffs
 - `bioetl-provider-health-v2`
   - `$workflow`, `$pipeline`, `$run_type`, `$run_id` form the shared context shell
   - `$provider` remains the primary provider-health business selector

@@ -479,6 +479,11 @@ class TestObservabilityPreflightValidation:
             environment="prod",
             logger=mock_logger,
             allow_noop_in_prod=True,
+            control_plane=SimpleNamespace(
+                required_persistence_profile="degraded_observable",
+                run_manifest_enabled=True,
+                run_ledger_enabled=True,
+            ),
         )
 
         # Verify both warnings were logged
@@ -545,6 +550,11 @@ class TestObservabilityPreflightValidation:
             metrics=mock_metrics,
             environment="prod",
             logger=mock_logger,
+            control_plane=SimpleNamespace(
+                required_persistence_profile="degraded_observable",
+                run_manifest_enabled=True,
+                run_ledger_enabled=True,
+            ),
         )
 
         # No warnings for real implementations

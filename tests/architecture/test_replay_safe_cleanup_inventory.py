@@ -91,11 +91,7 @@ def test_reports_quality_working_diagnostics_publish_owner_and_ttl() -> None:
     entries = payload["entries"]
     assert isinstance(entries, list)
 
-    by_id = {
-        str(entry["id"]): entry
-        for entry in entries
-        if isinstance(entry, dict)
-    }
+    by_id = {str(entry["id"]): entry for entry in entries if isinstance(entry, dict)}
 
     for entry_id, expected_ttl in (
         ("reports_quality_tmp_diagnostics", 7),

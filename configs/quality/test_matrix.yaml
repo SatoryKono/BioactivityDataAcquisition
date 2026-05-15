@@ -181,6 +181,48 @@ test_lanes:
         junit_xml: true
         json_summary: true
 
+    architecture-fast-boundary:
+      suite_name: architecture-fast-boundary
+      description: "Fast architecture boundary lane for local feedback; excludes slow repo-wide governance scans."
+      runner_backend: run_pytest_sharded
+      runner: scripts/engineering/dev/run_pytest_sharded.sh
+      runner_options:
+        - --shard
+        - S7-architecture-fast-boundary
+      paths:
+        - tests/architecture/
+      marker_expression: "architecture and not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/architecture/
+        - -m
+        - architecture and not slow and not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    architecture-slow-governance:
+      suite_name: architecture-slow-governance
+      description: "Slow repo-wide architecture governance lane for CI/full audit runs."
+      runner_backend: run_pytest_sharded
+      runner: scripts/engineering/dev/run_pytest_sharded.sh
+      runner_options:
+        - --shard
+        - S7-architecture-slow-governance
+      paths:
+        - tests/architecture/
+      marker_expression: "architecture and not benchmark and not memory"
+      pytest_args:
+        - tests/architecture/
+        - -m
+        - architecture and not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
     e2e:
       suite_name: e2e
       description: "Slow end-to-end lane; kept separate from fast feedback and coverage verification."
@@ -626,6 +668,7 @@ fixture_governance:
     update_env_var: UPDATE_SNAPSHOTS
     tracked_snapshot_paths:
       - tests/fixtures/golden/gold/chembl_activity_dq_bundle_v1.json
+      - tests/fixtures/golden/gold/chembl_assay_dq_bundle_v1.json
       - tests/fixtures/golden/gold/composite_molecule_dq_bundle_v1.json
       - tests/fixtures/golden/gold/composite_publication_dq_bundle_v1.json
       - tests/fixtures/golden/gold/pubchem_compound_dq_bundle_v1.json

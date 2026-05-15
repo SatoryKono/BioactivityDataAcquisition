@@ -95,6 +95,7 @@ def test_prepare_runner_inputs_projects_probe_mode_and_sink_disabled_skip_gold()
     logger = SimpleNamespace(info=lambda *_, **__: None)
     settings = SimpleNamespace(
         test_mode=True,
+        data_dir="data",
         pipeline=SimpleNamespace(heartbeat_interval=30, health_check_mode="strict"),
     )
     yaml_config = _make_yaml_config(sink={"gold": SimpleNamespace(enabled=False)})
@@ -119,6 +120,7 @@ def test_prepare_runner_inputs_applies_tracing_override_before_bundle_build() ->
     logger = SimpleNamespace(info=lambda *_, **__: None)
     settings = SimpleNamespace(
         test_mode=False,
+        data_dir="data",
         pipeline=SimpleNamespace(heartbeat_interval=30, health_check_mode="strict"),
         observability=SimpleNamespace(tracing_enabled=False),
     )
@@ -367,6 +369,7 @@ def test_prepare_runner_inputs_adjusts_batch_size_from_source_config_when_filter
     )
     settings = SimpleNamespace(
         test_mode=False,
+        data_dir="data",
         pipeline=SimpleNamespace(heartbeat_interval=30, health_check_mode="strict"),
     )
     yaml_config = _make_yaml_config(batch_size=100)

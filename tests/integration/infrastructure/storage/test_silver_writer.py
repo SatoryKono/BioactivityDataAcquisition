@@ -21,6 +21,28 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 pytestmark = pytest.mark.integration
 
 
+class RecordingLogger:
+    """Minimal logger that records structured events for storage tests."""
+
+    def __init__(self) -> None:
+        self.events: list[tuple[str, str, dict[str, object]]] = []
+
+    def bind(self, **_kwargs: object) -> "RecordingLogger":
+        return self
+
+    def info(self, event: str, **kwargs: object) -> None:
+        self.events.append(("info", event, kwargs))
+
+    def warning(self, event: str, **kwargs: object) -> None:
+        self.events.append(("warning", event, kwargs))
+
+    def error(self, event: str, **kwargs: object) -> None:
+        self.events.append(("error", event, kwargs))
+
+    def debug(self, event: str, **kwargs: object) -> None:
+        self.events.append(("debug", event, kwargs))
+
+
 def _create_content_hash_schema() -> pa.Schema:
     """Create the common Silver schema with content hash metadata."""
     return pa.schema(
@@ -631,10 +653,16 @@ async def test_write_silver_merged_strips_runtime_occurrence_fields(
 
 
 @pytest.mark.asyncio
-async def test_write_silver_merged_empty_records(silver_writer, noop_logger):
+async def test_write_silver_merged_empty_records(temp_delta_path: str):
     """Test write_silver_merged handles empty records gracefully."""
+    logger = RecordingLogger()
+    silver_writer = SilverWriter(base_path=temp_delta_path, logger=logger)
+
     # Should not raise, just log warning
     await silver_writer.write_silver_merged(
         table_name="test_empty",
         records=[],
     )
+
+    assert ("warning", "No records to write for merged Silver", {"table_name": "test_empty"}) in logger.events
+    assert not (Path(temp_delta_path) / "test_empty").exists()
