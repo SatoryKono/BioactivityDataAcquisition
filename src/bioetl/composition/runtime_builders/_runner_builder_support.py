@@ -36,13 +36,6 @@ def _normalize_required_persistence_profile(required_profile: object) -> str:
     return normalize_required_persistence_profile(required_profile)
 
 
-def _coerce_sink_layer_mapping(yaml_config: object) -> Mapping[str, object]:
-    sink = getattr(yaml_config, "sink", None)
-    if isinstance(sink, Mapping):
-        return sink
-    return {}
-
-
 def _resolve_sink_layer_config(yaml_config: object, layer: str) -> object | None:
     sink = getattr(yaml_config, "sink", None)
     if sink is None:
@@ -141,18 +134,6 @@ def validate_required_persistence_profile(
         )
 
 
-def requires_strict_reproducibility_context(
-    *,
-    required_profile: object,
-    exact_replay: bool = False,
-) -> bool:
-    """Return ``True`` when the runtime must satisfy strict replay guarantees."""
-    return bool(exact_replay) or (
-        _normalize_required_persistence_profile(required_profile)
-        in STRICT_PERSISTENCE_PROFILES
-    )
-
-
 def validate_strict_data_root_policy(
     *,
     settings: object,
@@ -160,14 +141,11 @@ def validate_strict_data_root_policy(
     exact_replay: bool = False,
 ) -> None:
     """Fail closed when strict reproducibility relies on fallback data roots."""
-    if not requires_strict_reproducibility_context(
-        required_profile=required_profile,
-        exact_replay=exact_replay,
-    ):
+    profile = _normalize_required_persistence_profile(required_profile)
+    if not (exact_replay or profile in STRICT_PERSISTENCE_PROFILES):
         return
     if is_explicit_data_root_configured(settings):
         return
-    profile = _normalize_required_persistence_profile(required_profile)
     mode = resolve_data_root_mode(settings)
     raise RuntimeError(
         "Strict reproducibility contexts require an explicit settings.data_dir; "

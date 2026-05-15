@@ -1,4 +1,4 @@
-"""Compatibility wrapper for Control Plane identity evidence payload helpers."""
+"""Control Plane identity evidence payload helper re-exports."""
 
 from bioetl.interfaces.http.control_plane_identity import (
     IDENTITY_EVIDENCE_CONTRACT,

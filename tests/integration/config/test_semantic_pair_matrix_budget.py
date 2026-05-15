@@ -175,9 +175,11 @@ def test_semantic_governance_workflow_runs_blocking_gates() -> None:
         "report-semantic-pipeline-audit --check",
         "check-semantic-pair-budget --check --json",
         "check-semantic-registry-drift --check --json",
+        "check-semantic-governance-policy --check --json",
         "check-semantic-anchor-parity --check --json",
         "check-generic-field-ownership --check --json",
         "check-ontology-unit-semantics --check --json",
         "tests/integration/config/test_semantic_pair_matrix_budget.py",
+        "tests/integration/config/test_semantic_governance_policy.py",
     ):
         assert command in workflow
