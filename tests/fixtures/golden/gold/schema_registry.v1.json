@@ -16,6 +16,20 @@
       ],
       "snapshot_path": "tests/fixtures/golden/gold/chembl_activity_dq_bundle_v1.json"
     },
+    "chembl_assay_dq_bundle": {
+      "entity": "chembl_assay",
+      "purpose": "Bounded ChEMBL assay output bundle for DQ-sensitive assay identity, type, and confidence checks.",
+      "required_columns": [
+        "entity_id",
+        "assay_id",
+        "assay_type",
+        "confidence_score",
+        "_dq_warn",
+        "_dq_error",
+        "_index"
+      ],
+      "snapshot_path": "tests/fixtures/golden/gold/chembl_assay_dq_bundle_v1.json"
+    },
     "composite_molecule_dq_bundle": {
       "entity": "composite_molecule",
       "purpose": "Bounded composite molecule output bundle for persisted DQ and enrichment provenance.",

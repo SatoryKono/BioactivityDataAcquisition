@@ -3653,23 +3653,256 @@
       "id": 905,
       "panels": [
         {
+          "datasource": "Quarantine Explorer",
+          "description": "HTTP-backed Control Plane identity overview from /ops/control-plane/identity-evidence. Long UUID/hash values are shortened in value_short and remain full in value_full. Status uses OK/WARN/CRIT/UNKNOWN; no run_id, manifest_id, hashes, snapshot IDs, or artifact refs are Prometheus labels.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
           "gridPos": {
-            "h": 8,
+            "h": 10,
             "w": 24,
             "x": 0,
             "y": 89
           },
+          "id": 9404,
+          "options": {
+            "footer": {
+              "show": false
+            },
+            "showHeader": true
+          },
+          "targets": [
+            {
+              "expr": "",
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "rows",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=overview&priority=P0",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "title": "Inspect: P0 Identity Anchors",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "Value": true,
+                  "copy_value": true,
+                  "format": true,
+                  "rendering": true,
+                  "source": true,
+                  "why": true
+                },
+                "indexByName": {
+                  "label": 0,
+                  "value_short": 1,
+                  "value_full": 2,
+                  "ui_status": 3,
+                  "missing_severity": 4,
+                  "drilldown": 5
+                },
+                "renameByName": {
+                  "drilldown": "drilldown",
+                  "label": "anchor",
+                  "missing_severity": "severity",
+                  "ui_status": "status",
+                  "value_full": "full value",
+                  "value_short": "short value"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": "Quarantine Explorer",
+          "description": "HTTP-backed identity gap table. Missing run_id or terminal manifest_id is CRIT; missing effective config, contract, input snapshot, replay parent, composite identity, or checkpoint anchors is explicit WARN/CRIT evidence instead of a green health signal.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 99
+          },
+          "id": 9405,
+          "options": {
+            "footer": {
+              "show": false
+            },
+            "showHeader": true
+          },
+          "targets": [
+            {
+              "expr": "",
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "rows",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=gaps",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "title": "Inspect: Identity Gaps",
+          "type": "table"
+        },
+        {
+          "datasource": "Quarantine Explorer",
+          "description": "Compares current runtime anchors with persisted checkpoint anchors from the identity evidence endpoint. Checkpoint status values are OK, MISMATCH, MISSING, PARTIAL, or UNKNOWN; MISMATCH maps to CRIT and missing/partial maps to WARN.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 99
+          },
+          "id": 9406,
+          "options": {
+            "footer": {
+              "show": false
+            },
+            "showHeader": true
+          },
+          "targets": [
+            {
+              "expr": "",
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "rows",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=checkpoint_compare",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "title": "Inspect: Checkpoint Anchor Compare",
+          "type": "table"
+        },
+        {
+          "datasource": "Quarantine Explorer",
+          "description": "Copy-friendly full-value handoffs for UUID, hash, artifact, lineage, snapshot, and checkpoint refs. Simple enum/status badges intentionally do not appear here. Use the data:text/plain link to open the raw full value without adding it as a Prometheus label.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "links": [
+                {
+                  "includeVars": false,
+                  "targetBlank": true,
+                  "title": "Open full value as plain text",
+                  "url": "data:text/plain,${__data.fields.copy_value}"
+                }
+              ],
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 109
+          },
+          "id": 9407,
+          "options": {
+            "footer": {
+              "show": false
+            },
+            "showHeader": true
+          },
+          "targets": [
+            {
+              "expr": "",
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "rows",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=copy_values",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "title": "Inspect: Copyable Identity Handoffs",
+          "type": "table"
+        },
+        {
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 119
+          },
           "id": 139,
           "options": {
-            "content": "### Missing replay-safety signals\n\nThe dashboard cannot currently verify these invariants because no repo-confirmed metric was found:\n\n- manifest_id/run_id identity table in Grafana\n- execution_fingerprint, config_hash, contract_ref, contract_version\n- source_refs, planned artifacts, published artifacts\n- ledger ordering / duplicate entries / last_event_id watermark\n- checkpoint_age <= recovery window / RPO\n- replay does not create unexplained duplicate records\n- artifact identity graph completeness\n- occurrence-only vs semantic drift classification beyond bounded replay_drift labels\n\nDo not add PromQL panels for these until metrics or a non-Prometheus evidence surface exists.\nOpen instrumentation/workflow work for:\n\n- manifest/ledger evidence table or artifact explorer handoff\n- checkpoint-age evidence metric\n- replay duplicate-record evidence metric\n- artifact/identity graph completeness evidence\n\n| Missing signal | Required future evidence | Why it matters |\n| --- | --- | --- |\n| Manifest/run identity | manifest/ledger table or artifact drilldown | Exact replay needs run_id/manifest_id evidence |\n| Contract/config compatibility | config_hash + contract_ref/version evidence | Replay eligibility depends on deterministic inputs |\n| Ledger ordering/duplicates | append-only event detail / watermark | Incomplete or duplicated ledger breaks trust |\n| Checkpoint age vs recovery window | checkpoint-age evidence metric | Cannot prove checkpoint age is within RPO |\n| Replay duplicate records | replay duplicate-record evidence metric | Cannot prove replay did not create unexplained duplicates |\n| Identity graph completeness | artifact/lineage completeness evidence | Missing links weaken forensic traceability |\n",
+            "content": "### Remaining replay-safety signals\n\nThe ID evidence endpoint now exposes manifest/run identity, execution/config/contract/input anchors, replay parentage, copy-friendly full values, and checkpoint anchor compare without adding high-cardinality Prometheus labels.\n\nSignals still intentionally outside this dashboard section:\n\n- checkpoint_age <= recovery window / RPO metric\n- replay duplicate-record evidence metric\n- occurrence-only vs semantic drift classification beyond bounded replay_drift labels\n\nDo not add PromQL panels for high-cardinality IDs. Use `/ops/control-plane/identity-evidence`, manifest inspection, ledger inspection, checkpoint diagnostics, and artifact/lineage drilldowns for full identity values.",
             "mode": "markdown"
           },
-          "title": "Review: Known Missing Replay-Safety Signals",
+          "title": "Review: Remaining Replay-Safety Signals",
           "type": "text",
-          "description": "Detailed companion to the Known Blind Spots note: replay-safety invariants not currently represented by repo-confirmed metrics. These gaps are limitations, not green health signals. Treat this as runbook/documentation evidence until a later refactor physically merges the two text panels."
+          "description": "Companion note for replay-safety evidence that remains metric- or runbook-backed after the identity evidence refactor. This text must not list anchors already available through /ops/control-plane/identity-evidence as missing."
         }
       ],
-      "title": "Known missing replay-safety signals",
+      "title": "Identity evidence and remaining replay-safety signals",
       "type": "row"
     }
   ],

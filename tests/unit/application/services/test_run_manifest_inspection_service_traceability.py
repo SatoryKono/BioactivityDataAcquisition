@@ -164,7 +164,7 @@ def test_show_surfaces_cross_validation_traceability_in_diagnostics() -> None:
         "reproducible_semantic_output_mode_gap": False,
         "produced_artifact_trace_gap": True,
         "composite_resume_reconstructability_gap": False,
-        "required_persistence_profile_gap": False,
+        "required_persistence_profile_gap": True,
         "replay_ready_gap": True,
         "forensic_grade_gap": True,
         "dq_signal_present": True,
@@ -173,6 +173,7 @@ def test_show_surfaces_cross_validation_traceability_in_diagnostics() -> None:
     assert result.diagnostics["next_steps"] == [
         "Inspect failure classification and decide retry/quarantine/escalation.",
         "Resolve concrete produced artifacts from the run ledger before claiming replay-ready reproducibility.",
+        "Current persisted surfaces do not satisfy the declared required persistence profile for this run.",
         "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
         "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",

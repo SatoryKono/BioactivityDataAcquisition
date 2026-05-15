@@ -43,6 +43,8 @@ must use these `suite_name` values for comparable local and CI runs:
 - `security`: dedicated security and secret-hygiene lane;
 - `contracts`: schema, contract, and snapshot tests;
 - `architecture`: layer boundary, contract, and governance checks;
+- `architecture-fast-boundary`: fast local architecture boundary lane;
+- `architecture-slow-governance`: slow repo-wide architecture governance lane;
 - `e2e`: dedicated slow end-to-end lane;
 - `memory`: dedicated Neo4j project-memory and MCP lane, outside coverage;
 - `performance`: benchmark-backed hotspot/performance-budget lane;
@@ -74,8 +76,11 @@ recording sharded runner details separately. The canonical shard membership and
 ignore/deselect inventory for `run_pytest_sharded.sh` lives in
 `configs/quality/pytest_shards.yaml`.
 Local architecture runs should prefer the explicit
-`S7-architecture-fast-boundary` and `S7-architecture-slow-governance` aliases
-over older implicit shard names.
+`architecture-fast-boundary` lane for fast feedback and the
+`architecture-slow-governance` lane for full audit/governance checks. The shard
+aliases behind those lanes are `S7-architecture-fast-boundary` and
+`S7-architecture-slow-governance`; prefer them over older implicit shard names
+when calling the sharded runner directly.
 
 Marker-only commands such as `pytest -m unit` are not canonical lanes and must
 not be compared as if they were `unit-fast`, `unit-parallel-safe`, or
@@ -108,11 +113,12 @@ python scripts/engineering/qa/report_test_governance_audit.py --check
 ```
 
 `check_test_audit_preflight.py --strict` treats missing `git-lfs`, failed
-`git status`, or missing telemetry baseline as blockers for main-branch audit
-claims. `report_test_governance_audit.py --check` enforces the current
-ratcheting budgets for assert-less candidates, duplicate test names,
-compatibility/legacy surface, marker/path drift, and deterministic-time/UUID
-call sites tracked in `configs/quality/test_governance_audit.yaml`.
+`git status`, unresolved git-lfs pointer files under `tests/fixtures/vcr/`, or
+missing telemetry baseline as blockers for main-branch audit claims.
+`report_test_governance_audit.py --check` enforces the current ratcheting
+budgets for assert-less candidates, duplicate test names, compatibility/legacy
+surface, marker/path drift, and deterministic-time/UUID call sites tracked in
+`configs/quality/test_governance_audit.yaml`.
 
 Failure classifications are informational and come from
 `configs/quality/test_health_classifiers.yaml`; pytest exit codes and quality

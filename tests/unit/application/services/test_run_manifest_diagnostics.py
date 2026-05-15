@@ -241,12 +241,31 @@ def _assert_provenance_only_score(
     assert score["schema_version"] == "2.0"
     assert score["contract_version"] == "1.2.0"
     assert score["scale"] == "0-10"
-    assert score["required_profile"] == "degraded_observable"
+    assert score["required_profile"] == "replay_ready"
     assert score["score_scope"] == "supported_boundary_run"
     assert score["overall_score"] == pytest.approx(7.3)
-    assert score["thresholds"] == {}
-    assert score["threshold_failures"] == []
-    assert score["thresholds_satisfied"] is True
+    assert score["thresholds"] == {
+        "checkpoint_safety": 7,
+        "replay_readiness": 7,
+        "determinism": 7,
+        "layer_consistency": 7,
+        "run_identity": 8,
+    }
+    assert score["threshold_failures"] == [
+        {
+            "actual": 6,
+            "category": "determinism",
+            "reason": "below_required_threshold",
+            "required": 7,
+        },
+        {
+            "actual": 5,
+            "category": "replay_readiness",
+            "reason": "below_required_threshold",
+            "required": 7,
+        }
+    ]
+    assert score["thresholds_satisfied"] is False
     assert score["scored_at"] == manifest.created_at.isoformat()
     assert score["source"] == "run_manifest_diagnostics"
     assert score["supported_boundary_verdict"]["scope"] == "supported_boundary_run"
@@ -262,10 +281,15 @@ def _assert_provenance_only_score(
     )
     assert score["blockers"] == [
         "dependency_lock_hash_missing",
+        "dependency_lock_provenance",
+        "dependency_lock_provenance_missing",
+        "exact_replay_capability",
         "exact_replay_not_eligible",
         "identity_graph_incomplete",
+        "immutable_input_snapshots",
         "immutable_input_snapshots_missing",
         "missing_immutable_input_snapshots",
+        "produced_artifact_trace",
     ]
     assert "diagnostics.git_commit" in score["evidence_refs"]
     assert "diagnostics.source_revision_state" in score["evidence_refs"]
@@ -336,7 +360,7 @@ def _expected_provenance_only_summary_without_score(
         "replay_of_manifest_id": None,
         "replay_parentage": _expected_replay_parentage(manifest),
         "replay_capability": "rebuild_only",
-        "required_persistence_profile": "degraded_observable",
+        "required_persistence_profile": "replay_ready",
         "requested_exact_replay": False,
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
         "replay_family_contract": _expected_replay_family_contract(manifest),
@@ -372,14 +396,17 @@ def _expected_provenance_only_summary_without_score(
         ),
         "replay_occurrence_kind": "ordinary_live_capture",
         "exact_replay_eligible": False,
-        "exact_replay_blockers": ["immutable_input_snapshots_missing"],
-        "replay_readiness_verdict": "incremental_new_run",
+        "exact_replay_blockers": [
+            "immutable_input_snapshots_missing",
+            "dependency_lock_provenance_missing",
+        ],
+        "replay_readiness_verdict": "exact_replay_blocked",
         "append_mode_semantic_sinks": [],
         "input_snapshot_ids": [],
         "input_snapshot_content_hashes": [],
         "input_snapshot_identity_fingerprint": None,
         "replay_mode": "rebuild",
-        "operator_replay_mode": "Incremental New Run",
+        "operator_replay_mode": "Exact Replay Blocked",
         "snapshot_status": "none",
         "source_posture": "live_or_unknown_inputs",
         "input_snapshot_missing_source_refs": [],
@@ -398,8 +425,8 @@ def _expected_provenance_only_summary_without_score(
         "produced_artifact_trace": _expected_missing_produced_artifact_trace(manifest),
         "persistence_profile": {
             "attained_profile": "degraded_observable",
-            "required_profile": "degraded_observable",
-            "required_profile_satisfied": True,
+            "required_profile": "replay_ready",
+            "required_profile_satisfied": False,
             "claims": {
                 "degraded_observable": True,
                 "replay_ready": False,
@@ -418,7 +445,12 @@ def _expected_provenance_only_summary_without_score(
                 "artifact_lineage_links": True,
                 "lineage_closure_boundary_support": True,
             },
-            "required_profile_missing_requirements": [],
+            "required_profile_missing_requirements": [
+                "exact_replay_capability",
+                "dependency_lock_provenance",
+                "immutable_input_snapshots",
+                "produced_artifact_trace",
+            ],
             "replay_ready_missing_requirements": [
                 "exact_replay_capability",
                 "dependency_lock_provenance",
@@ -461,7 +493,7 @@ def _expected_provenance_only_summary_without_score(
             "produced_artifact_trace_gap": True,
             "lineage_closure_boundary_gap": False,
             "composite_resume_reconstructability_gap": False,
-            "required_persistence_profile_gap": False,
+            "required_persistence_profile_gap": True,
             "replay_ready_gap": True,
             "forensic_grade_gap": True,
             "dq_signal_present": False,
@@ -470,6 +502,7 @@ def _expected_provenance_only_summary_without_score(
         "next_steps": [
             "Persist immutable cached Bronze input snapshots before treating this run as strict exact-replay capable.",
             "Resolve concrete produced artifacts from the run ledger before claiming replay-ready reproducibility.",
+            "Current persisted surfaces do not satisfy the declared required persistence profile for this run.",
             "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
             "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         ],
@@ -480,13 +513,16 @@ def _assert_provenance_only_policy(
     summary: dict[str, object], manifest: RunManifest
 ) -> None:
     assert summary["replay_capability_assessment"] == {
-        "required_persistence_profile": "degraded_observable",
+        "required_persistence_profile": "replay_ready",
         "replay_capability": "rebuild_only",
-        "strict_requirement_requested": False,
+        "strict_requirement_requested": True,
         "strict_exact_replay_supported": True,
-        "replay_readiness_verdict": "incremental_new_run",
-        "required_profile_satisfied": True,
-        "blocking_gaps": [],
+        "replay_readiness_verdict": "exact_replay_blocked",
+        "required_profile_satisfied": False,
+        "blocking_gaps": [
+            "immutable_input_snapshots",
+            "exact_replay_capability",
+        ],
         "snapshot_envelope": {
             "source_count": 0,
             "sources_with_snapshots": 0,
@@ -498,7 +534,7 @@ def _assert_provenance_only_policy(
     }
     assert (
         summary["reproducibility_diagnostics"]["policy"]["required_persistence_profile"]
-        == "degraded_observable"
+        == "replay_ready"
     )
     assert (
         summary["reproducibility_diagnostics"]["policy"]["capability_assessment"]
@@ -614,13 +650,16 @@ def test_build_diagnostics_summary_distinguishes_resume_only_runs() -> None:
         == "resume_requested_without_snapshot_backed_inputs"
     )
     assert summary["exact_replay_eligible"] is False
-    assert summary["exact_replay_blockers"] == ["immutable_input_snapshots_missing"]
+    assert summary["exact_replay_blockers"] == [
+        "immutable_input_snapshots_missing",
+        "dependency_lock_provenance_missing",
+    ]
     assert summary["input_snapshot_ids"] == []
     assert summary["input_snapshot_content_hashes"] == []
     assert summary["input_snapshot_identity_fingerprint"] is None
     assert summary["replay_mode"] == "resume"
-    assert summary["replay_readiness_verdict"] == "resume_compatible"
-    assert summary["operator_replay_mode"] == "Resume"
+    assert summary["replay_readiness_verdict"] == "exact_replay_blocked"
+    assert summary["operator_replay_mode"] == "Exact Replay Blocked"
     assert summary["continuation_mode"] == "checkpoint_snapshot_only_resume"
     assert (
         summary["resume_contract"]["continuation_mode"]
@@ -842,7 +881,7 @@ def test_build_diagnostics_summary_normalizes_removed_legacy_observe_policy() ->
 
     resume_contract = summary["resume_contract"]
     assert resume_contract["requested_checkpoint_compatibility_policy"] is None
-    assert resume_contract["applied_checkpoint_compatibility_policy"] == "observe"
+    assert resume_contract["applied_checkpoint_compatibility_policy"] == "hard_fail"
     score = summary["reproducibility_audit_score"]
     assert (
         "legacy_observe_checkpoint_policy"
@@ -947,14 +986,17 @@ def _assert_required_operator_identity_graph(
         "replay_occurrence_kind": "ordinary_live_capture",
         "replay_capability_reason": "immutable_input_snapshots_missing",
         "exact_replay_eligible": False,
-        "exact_replay_blockers": ["immutable_input_snapshots_missing"],
-        "replay_readiness_verdict": "incremental_new_run",
+        "exact_replay_blockers": [
+            "immutable_input_snapshots_missing",
+            "dependency_lock_provenance_missing",
+        ],
+        "replay_readiness_verdict": "exact_replay_blocked",
         "append_mode_semantic_sinks": [],
         "input_snapshot_ids": [],
         "input_snapshot_content_hashes": [],
         "input_snapshot_identity_fingerprint": None,
         "replay_mode": "rebuild",
-        "operator_replay_mode": "Incremental New Run",
+        "operator_replay_mode": "Exact Replay Blocked",
         "snapshot_status": "none",
         "source_posture": "live_or_unknown_inputs",
         "input_snapshot_missing_source_refs": [],
@@ -992,8 +1034,8 @@ def _assert_required_operator_persistence_profile(
 ) -> None:
     assert summary["persistence_profile"] == {
         "attained_profile": "degraded_observable",
-        "required_profile": "degraded_observable",
-        "required_profile_satisfied": True,
+        "required_profile": "replay_ready",
+        "required_profile_satisfied": False,
         "claims": {
             "degraded_observable": True,
             "replay_ready": False,
@@ -1012,7 +1054,11 @@ def _assert_required_operator_persistence_profile(
             "artifact_lineage_links": True,
             "lineage_closure_boundary_support": True,
         },
-        "required_profile_missing_requirements": [],
+        "required_profile_missing_requirements": [
+            "exact_replay_capability",
+            "dependency_lock_provenance",
+            "immutable_input_snapshots",
+        ],
         "replay_ready_missing_requirements": [
             "exact_replay_capability",
             "dependency_lock_provenance",
@@ -1057,7 +1103,7 @@ def _assert_required_operator_alert_signals(
     assert alert_signals["produced_artifact_trace_gap"] is False
     assert alert_signals["lineage_closure_boundary_gap"] is False
     assert alert_signals["composite_resume_reconstructability_gap"] is False
-    assert alert_signals["required_persistence_profile_gap"] is False
+    assert alert_signals["required_persistence_profile_gap"] is True
     assert alert_signals["replay_ready_gap"] is True
     assert alert_signals["forensic_grade_gap"] is True
     assert alert_signals["dq_signal_present"] is False
@@ -1067,6 +1113,7 @@ def _assert_required_operator_alert_signals(
         assert alert_signals["run_shutdown"] is False
         assert summary["next_steps"] == [
             "Persist immutable cached Bronze input snapshots before treating this run as strict exact-replay capable.",
+            "Current persisted surfaces do not satisfy the declared required persistence profile for this run.",
             "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
             "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         ]
@@ -1445,7 +1492,10 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
         manifest
     )
     assert summary["replay_capability_reason"] == "composite_snapshot_envelope_missing"
-    assert summary["exact_replay_blockers"] == ["immutable_input_snapshots_missing"]
+    assert summary["exact_replay_blockers"] == [
+        "immutable_input_snapshots_missing",
+        "dependency_lock_provenance_missing",
+    ]
     assert summary["persistence_profile"]["surfaces"] == {
         "control_plane_manifest": True,
         "dependency_lock_provenance": False,
@@ -1480,6 +1530,7 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
     assert summary["next_steps"] == [
         "Persist immutable cached Bronze input snapshots before treating this run as strict exact-replay capable.",
         "Resolve concrete produced artifacts from the run ledger before claiming replay-ready reproducibility.",
+        "Current persisted surfaces do not satisfy the declared required persistence profile for this run.",
         (
             "Treat composite resume as checkpoint snapshot plus ledger suffix "
             "replay only; do not expect per-provider result maps or other rich "

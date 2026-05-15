@@ -28,6 +28,12 @@ from bioetl.domain.control_plane import (
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 
 _VALID_RUN_ID = "12345678-1234-5678-1234-567812345678"
+_VALID_SHA256_A = "a" * 64
+_VALID_SHA256_B = "b" * 64
+_VALID_SHA256_C = "c" * 64
+_VALID_SHA256_D = "d" * 64
+_VALID_SHA256_E = "e" * 64
+_VALID_SHA256_F = "f" * 64
 
 
 class _MockCompositeConfig:
@@ -123,7 +129,7 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
             return_value=SimpleNamespace(
                 git_commit="abc1234",
                 source_revision_state="clean",
-                dependency_lock_hash="sha256:deps-abc1234",
+                dependency_lock_hash=_VALID_SHA256_D,
             ),
         ),
     ):
@@ -131,18 +137,18 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
             config=config,
             runtime=runtime,
             infra_context=infra_context,
-            resolved_config_hash="resolved-hash-123",
-            effective_config_hash="effective-hash-123",
-            dq_contract_compatibility_hash="dq-compat-123",
+            resolved_config_hash=_VALID_SHA256_A,
+            effective_config_hash=_VALID_SHA256_B,
+            dq_contract_compatibility_hash=_VALID_SHA256_C,
             effective_config_artifact_id="eca-123",
             contract_ref="composite.publication",
             contract_version="1.0.0",
-            contract_schema_hash="schema-hash-123",
+            contract_schema_hash=_VALID_SHA256_E,
             dq_policy_ref="composite.dq.v1",
             rule_bundle_version="dq-rules.v1.0",
             normalization_profile_ref="composite.publication",
             normalization_profile_version="2026.05",
-            normalization_profile_hash="sha256:normalization-123",
+            normalization_profile_hash=_VALID_SHA256_F,
             pipeline_version="1.1.0",
             entity="publication",
             required_persistence_profile="replay_ready",
@@ -160,19 +166,19 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
     assert request.pipeline_version == "1.1.0"
     assert request.git_commit == "abc1234"
     assert request.source_revision_state == "clean"
-    assert request.config_hash == "resolved-hash-123"
-    assert request.resolved_config_hash == "resolved-hash-123"
-    assert request.effective_config_hash == "effective-hash-123"
-    assert request.dq_contract_compatibility_hash == "dq-compat-123"
+    assert request.config_hash == _VALID_SHA256_A
+    assert request.resolved_config_hash == _VALID_SHA256_A
+    assert request.effective_config_hash == _VALID_SHA256_B
+    assert request.dq_contract_compatibility_hash == _VALID_SHA256_C
     assert request.effective_config_artifact_id == "eca-123"
     assert request.contract_ref == "composite.publication"
     assert request.contract_version == "1.0.0"
-    assert request.contract_schema_hash == "schema-hash-123"
+    assert request.contract_schema_hash == _VALID_SHA256_E
     assert request.dq_policy_ref == "composite.dq.v1"
     assert request.rule_bundle_version == "dq-rules.v1.0"
     assert request.normalization_profile_ref == "composite.publication"
     assert request.normalization_profile_version == "2026.05"
-    assert request.normalization_profile_hash == "sha256:normalization-123"
+    assert request.normalization_profile_hash == _VALID_SHA256_F
     assert request.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
 
 
@@ -276,7 +282,7 @@ def test_build_composite_control_plane_bundle_can_disable_ledger_while_keeping_m
         return_value=SimpleNamespace(
             git_commit="abc1234",
             source_revision_state="clean",
-            dependency_lock_hash="sha256:deps-abc1234",
+            dependency_lock_hash=_VALID_SHA256_D,
         ),
     ):
         bundle = build_composite_control_plane_bundle(
@@ -416,7 +422,7 @@ def test_build_composite_control_plane_bundle_allows_forensic_grade_with_full_sn
         return_value=SimpleNamespace(
             git_commit="abc1234",
             source_revision_state="clean",
-            dependency_lock_hash="sha256:deps-abc1234",
+            dependency_lock_hash=_VALID_SHA256_D,
         ),
     ):
         bundle = build_composite_control_plane_bundle(
@@ -527,7 +533,7 @@ def test_build_composite_control_plane_bundle_allows_replay_ready_with_full_snap
         return_value=SimpleNamespace(
             git_commit="abc1234",
             source_revision_state="clean",
-            dependency_lock_hash="sha256:deps-abc1234",
+            dependency_lock_hash=_VALID_SHA256_D,
         ),
     ):
         bundle = build_composite_control_plane_bundle(
@@ -589,7 +595,7 @@ def test_build_composite_control_plane_bundle_persists_manifest_created_when_led
         return_value=SimpleNamespace(
             git_commit="abc1234",
             source_revision_state="clean",
-            dependency_lock_hash="sha256:deps-abc1234",
+            dependency_lock_hash=_VALID_SHA256_D,
         ),
     ):
         bundle = build_composite_control_plane_bundle(
@@ -642,7 +648,7 @@ def test_build_composite_control_plane_bundle_persists_effective_config_artifact
         return_value=SimpleNamespace(
             git_commit="abc1234",
             source_revision_state="clean",
-            dependency_lock_hash="sha256:deps-abc1234",
+            dependency_lock_hash=_VALID_SHA256_D,
         ),
     ):
         bundle = build_composite_control_plane_bundle(

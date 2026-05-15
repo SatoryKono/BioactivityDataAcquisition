@@ -90,7 +90,7 @@ class TestProviderConfig:
 class TestHttpConfig:
     """Tests for HttpConfig dataclass."""
 
-    def test_default_values(self):
+    def test_http_config_default_values(self):
         """Verify HttpConfig default values."""
         config = HttpConfig()
 
@@ -98,7 +98,7 @@ class TestHttpConfig:
         assert config.capacity == 10
         assert config.rate_overrides == {}
 
-    def test_custom_values(self):
+    def test_http_config_accepts_custom_values(self):
         """Verify HttpConfig with custom values."""
         config = HttpConfig(
             rate=100.0,

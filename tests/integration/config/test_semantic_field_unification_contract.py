@@ -150,6 +150,7 @@ def test_entity_quality_surfaces_use_canonical_key_fields() -> None:
 
 def test_publication_field_mapping_clusters_are_registry_backed() -> None:
     registry = SemanticFieldRegistryLoader(Path("configs")).load()
+    checked_mappings = 0
 
     for mapping in PUBLICATION_FIELD_MAPPING.values():
         for raw_name, canonical_name in mapping.items():
@@ -158,6 +159,9 @@ def test_publication_field_mapping_clusters_are_registry_backed() -> None:
                 raw_name=raw_name,
                 canonical_name=canonical_name,
             )
+            checked_mappings += 1
+
+    assert checked_mappings > 0
 
 
 def test_molecule_mapping_and_alias_clusters_are_registry_backed() -> None:

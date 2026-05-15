@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
 
 import pytest
 
@@ -11,6 +10,7 @@ from bioetl.application.services.checkpoint_service import (
     CheckpointInfo,
     CheckpointService,
 )
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 
 def _assert_metric_labels(
@@ -140,7 +140,7 @@ class TestCheckpointServiceListCheckpoints:
         self, checkpoint_service, mock_checkpoint_port
     ):
         """Test listing checkpoints with existing data."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("checkpoint-service")
         mock_checkpoint_port.list_all.return_value = ["pipeline1", "pipeline2"]
         mock_checkpoint_port.load.side_effect = [
             (run_id, {"records_processed": 100}),
@@ -160,7 +160,7 @@ class TestCheckpointServiceListCheckpoints:
         self, checkpoint_service, mock_checkpoint_port
     ):
         """Test listing checkpoints when some can't be loaded."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("checkpoint-service")
         mock_checkpoint_port.list_all.return_value = ["pipeline1", "pipeline2"]
         mock_checkpoint_port.load.side_effect = [
             (run_id, {"records_processed": 100}),
@@ -215,7 +215,7 @@ class TestCheckpointServiceGetCheckpoint:
     @pytest.mark.asyncio
     async def test_get_checkpoint_found(self, checkpoint_service, mock_checkpoint_port):
         """Test getting an existing checkpoint."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("checkpoint-service")
         mock_checkpoint_port.load.return_value = (run_id, {"records_processed": 100})
 
         result = await checkpoint_service.get_checkpoint("pipeline1")
@@ -235,7 +235,7 @@ class TestCheckpointServiceGetCheckpoint:
         self, checkpoint_service, mock_checkpoint_port
     ):
         """Checkpoint get should create a bounded admin trace span."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("checkpoint-service")
         mock_checkpoint_port.load.return_value = (run_id, {"records_processed": 100})
 
         await checkpoint_service.get_checkpoint("pipeline1")
@@ -284,7 +284,7 @@ class TestCheckpointServiceDeleteCheckpoint:
         self, checkpoint_service, mock_checkpoint_port
     ):
         """Test successfully deleting a checkpoint."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("checkpoint-service")
         mock_checkpoint_port.load.return_value = (run_id, {"records_processed": 100})
 
         result = await checkpoint_service.delete_checkpoint("pipeline1")
@@ -318,7 +318,7 @@ class TestCheckpointServiceDeleteCheckpoint:
         self, checkpoint_service, mock_checkpoint_port
     ):
         """Delete failures should emit a bounded failed milestone outcome."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("checkpoint-service")
         mock_checkpoint_port.load.return_value = (run_id, {"records_processed": 100})
         mock_checkpoint_port.delete.side_effect = RuntimeError("boom")
 

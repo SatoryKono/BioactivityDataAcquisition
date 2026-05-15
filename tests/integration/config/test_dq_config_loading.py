@@ -328,8 +328,16 @@ class TestPipelineConfigLoaderWithDQResolution:
 
     def test_clear_cache_works(self, config_loader: PipelineConfigLoader) -> None:
         """clear_cache() should work without errors."""
+        config = config_loader.load_pipeline_config("chembl_activity")
+        config_loader.resolve_dq_config(config)
+        config_loader._filter_loader.load("chembl", "activity")
+        assert config_loader._dq_loader._cache
+        assert config_loader._filter_loader._cache
+
         config_loader.clear_cache()
-        # No assertion needed - just verifying no exceptions
+
+        assert config_loader._dq_loader._cache == {}
+        assert config_loader._filter_loader._cache == {}
 
 
 @pytest.mark.integration

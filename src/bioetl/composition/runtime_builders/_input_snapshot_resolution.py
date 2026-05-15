@@ -33,11 +33,10 @@ def resolve_cached_bronze_input_snapshot_refs(
         return ()
     bronze_path = getattr(cached_bronze, "bronze_path", None)
     bronze_date = getattr(cached_bronze, "bronze_date", None)
-    settings_bronze_root = Path(str(settings.bronze_path))
     bronze_root = (
         Path(str(bronze_path))
         if bronze_path is not None
-        else settings_bronze_root / provider / entity
+        else Path(str(settings.bronze_path)) / provider / entity
     )
     snapshot_refs = build_cached_bronze_input_snapshot_refs(
         bronze_root=bronze_root,

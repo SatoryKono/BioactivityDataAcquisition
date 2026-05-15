@@ -57,11 +57,19 @@ def published_production_reproducibility_families() -> list[str]:
 
 def published_supported_boundary_families() -> list[str]:
     """Return all published families that satisfy the supported replay boundary."""
-    return [
-        str(item["family"])
-        for item in registered_reproducibility_family_inventory()
-        if bool(item["strict_exact_replay_supported"])
-    ]
+    supported_families: list[str] = []
+    for family in registered_reproducibility_families():
+        provider, entity = family.split(".", maxsplit=1)
+        execution_context = _REGISTERED_FAMILY_EXECUTION_CONTEXTS[family]
+        profile = resolve_reproducibility_family_profile(
+            provider=provider,
+            entity=entity,
+            contract_ref=family,
+            execution_context=execution_context,
+        )
+        if profile.strict_exact_replay_supported:
+            supported_families.append(family)
+    return supported_families
 
 
 def published_reproducibility_family_inventory() -> list[dict[str, object]]:

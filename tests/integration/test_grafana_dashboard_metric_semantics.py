@@ -593,6 +593,56 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
     assert "${run_id}" not in dashboard_promql
 
 
+def test_control_plane_identity_evidence_uses_http_not_prometheus_labels() -> None:
+    """Full identity anchors must stay on HTTP-backed tables, not Prometheus labels."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+    identity_panels = [
+        panels["Inspect: P0 Identity Anchors"],
+        panels["Inspect: Identity Gaps"],
+        panels["Inspect: Checkpoint Anchor Compare"],
+        panels["Inspect: Copyable Identity Handoffs"],
+    ]
+
+    for panel in identity_panels:
+        assert panel.get("datasource") == "Quarantine Explorer"
+        assert get_panel_expressions({"panels": [panel]}) == []
+        target = panel.get("targets", [])[0]
+        assert "/ops/control-plane/identity-evidence?" in target.get("url", "")
+        assert target.get("root_selector") == "rows"
+
+    prometheus_expressions = "\n".join(get_panel_expressions(dashboard))
+    forbidden_label_tokens = (
+        "run_id=~",
+        "manifest_id=~",
+        "execution_fingerprint=~",
+        "effective_config_hash=~",
+        "input_snapshot_identity_fingerprint=~",
+        "composite_run_identity=~",
+    )
+    assert all(token not in prometheus_expressions for token in forbidden_label_tokens)
+
+
+def test_control_plane_identity_evidence_documents_short_full_split() -> None:
+    """The dashboard must keep short overview values and full detail values distinct."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panel = next(
+        panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title") == "Inspect: P0 Identity Anchors"
+    )
+    description = str(panel.get("description", "")).lower()
+    assert "shortened in value_short" in description
+    assert "full in value_full" in description
+    transformation_payload = json.dumps(panel.get("transformations", []))
+    assert "value_short" in transformation_payload
+    assert "value_full" in transformation_payload
+
+
 def test_runtime_selected_count_zeroes_are_scope_anchored() -> None:
     """Selected runtime count cards must keep UNKNOWN when selected scope is absent."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))

@@ -43,6 +43,7 @@ from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 from bioetl.domain.types import RunID
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.config._base import PipelineSettings
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -507,7 +508,14 @@ def test_create_and_persist_effective_config_artifact_forwards_required_profile(
         _fake_payload,
     )
 
-    settings = Settings(data_dir=Path("data"))
+    settings = Settings(
+        data_dir=Path("data"),
+        pipeline=PipelineSettings(
+            control_plane=PipelineSettings.ControlPlaneSettings(
+                required_persistence_profile="degraded_observable"
+            )
+        ),
+    )
     observability = ObservabilityBundle.create(
         logger=NoOpLogger(),
         metrics=NoOpMetrics(),
@@ -881,7 +889,14 @@ def test_create_and_persist_composite_effective_config_artifact_forwards_require
         normalization_profile_ref=None,
         normalization_profile_version=None,
         normalization_profile_hash=None,
-        settings=Settings(data_dir=Path("data")),
+        settings=Settings(
+            data_dir=Path("data"),
+            pipeline=PipelineSettings(
+                control_plane=PipelineSettings.ControlPlaneSettings(
+                    required_persistence_profile="degraded_observable"
+                )
+            ),
+        ),
         logger=NoOpLogger(),
         run_id=RunID(uuid4()),
     )

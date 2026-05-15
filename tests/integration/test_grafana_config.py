@@ -933,26 +933,56 @@ def test_control_plane_no_missing_metric_promql() -> None:
     assert "bioetl_replay_duplicate_records_total" not in expressions
 
 
-def test_control_plane_missing_signals_text_panel_exists() -> None:
+def test_control_plane_identity_evidence_panels_exist() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+
+    for title, view in {
+        "Inspect: P0 Identity Anchors": "view=overview",
+        "Inspect: Identity Gaps": "view=gaps",
+        "Inspect: Checkpoint Anchor Compare": "view=checkpoint_compare",
+        "Inspect: Copyable Identity Handoffs": "view=copy_values",
+    }.items():
+        panel = panels.get(title)
+        assert panel is not None, f"Control-plane dashboard missing {title!r}"
+        assert panel.get("datasource") == "Quarantine Explorer"
+        targets = panel.get("targets", [])
+        assert len(targets) == 1
+        target = targets[0]
+        assert target.get("parser") == "backend"
+        assert target.get("root_selector") == "rows"
+        url = str(target.get("url", ""))
+        assert "/ops/control-plane/identity-evidence?" in url
+        assert view in url
+        assert "run_id=${run_id}" in url
+
+
+def test_control_plane_remaining_replay_safety_text_is_not_stale() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panel = next(
         (
             panel
             for panel in get_dashboard_panels(dashboard)
-            if panel.get("title") == "Review: Known Missing Replay-Safety Signals"
+            if panel.get("title") == "Review: Remaining Replay-Safety Signals"
         ),
         None,
     )
 
     assert panel is not None
-    content = panel.get("options", {}).get("content", "")
+    content = str(panel.get("options", {}).get("content", ""))
+    assert "/ops/control-plane/identity-evidence" in content
+    assert "manifest/run identity" in content
+    assert "execution/config/contract/input anchors" in content
     assert "checkpoint_age <= recovery window / RPO" in content
-    assert "replay does not create unexplained duplicate records" in content
-    assert "checkpoint-age evidence metric" in content
+    assert "manifest_id/run_id identity table in Grafana" not in content
+    assert "execution_fingerprint, config_hash, contract_ref" not in content
     assert "replay duplicate-record evidence metric" in content
     description = str(panel.get("description", "")).lower()
-    assert "detailed companion" in description
-    assert "not green health signals" in description
+    assert "must not list anchors already available" in description
 
 
 def test_control_plane_dashboard_links_are_scoped() -> None:

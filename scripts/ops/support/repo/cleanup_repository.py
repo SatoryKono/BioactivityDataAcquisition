@@ -84,11 +84,15 @@ VENV_SEGMENTS: frozenset[str] = frozenset(
         "venv",
     }
 )
-PRUNED_WALK_DIRS: frozenset[str] = frozenset(VENV_SEGMENTS | {".git", ".worktrees", ".rollback"})
+PRUNED_WALK_DIRS: frozenset[str] = frozenset(
+    VENV_SEGMENTS | {".git", ".worktrees", ".rollback"}
+)
 SAFE_LOCAL_FILE_SUFFIXES: frozenset[str] = frozenset({".pyc", ".pyo"})
 DEFAULT_DETAIL_LIMIT = 25
 ROOT_HYGIENE_REVIEW_REGISTRY = Path("configs/quality/root_hygiene_review_registry.yaml")
-REPLAY_SAFE_CLEANUP_INVENTORY = Path("configs/quality/replay_safe_cleanup_inventory.yaml")
+REPLAY_SAFE_CLEANUP_INVENTORY = Path(
+    "configs/quality/replay_safe_cleanup_inventory.yaml"
+)
 REVIEW_REFERENCE_SEARCH_PATHS: tuple[str, ...] = (
     ".github",
     "docs",
@@ -114,7 +118,10 @@ REPORTS_RETAINED_DIRS: tuple[Path, ...] = (
     Path("reports/test-swarm"),
 )
 REPORTS_RETAINED_FILES: tuple[Path, ...] = (Path("reports/README.md"),)
-REPORTS_ROOT_PRUNE_PATTERNS: tuple[str, ...] = ("*_merged.md", "tmp_module_dependency_map.*")
+REPORTS_ROOT_PRUNE_PATTERNS: tuple[str, ...] = (
+    "*_merged.md",
+    "tmp_module_dependency_map.*",
+)
 REPORTS_RETAINED_DIR_TRANSIENT_PATTERNS: tuple[str, ...] = (
     "_tmp_*",
     "pretest_guardrails_*.json",
@@ -217,7 +224,9 @@ def _run_git(repo_root: Path, *git_args: str) -> subprocess.CompletedProcess[byt
 
 def _git_path_has_history(repo_root: Path, path: Path) -> bool:
     try:
-        completed = _run_git(repo_root, "log", "--format=%H", "-n", "1", "--", path.as_posix())
+        completed = _run_git(
+            repo_root, "log", "--format=%H", "-n", "1", "--", path.as_posix()
+        )
     except subprocess.CalledProcessError:
         return False
     return bool(completed.stdout.strip())
@@ -244,7 +253,9 @@ def _path_is_tracked_or_has_tracked_descendants(
     if path_text in tracked_paths:
         return True
     descendant_prefix = f"{path_text}/"
-    return any(tracked_path.startswith(descendant_prefix) for tracked_path in tracked_paths)
+    return any(
+        tracked_path.startswith(descendant_prefix) for tracked_path in tracked_paths
+    )
 
 
 def _local_status_paths(repo_root: Path) -> list[str] | None:
@@ -303,7 +314,9 @@ def _cmp_status(repo_root: Path, path: Path, canonical_path: Path | None) -> str
     return "not_applicable"
 
 
-def _is_blocked_path(path: Path, repo_root: Path, blocked_paths: frozenset[str]) -> bool:
+def _is_blocked_path(
+    path: Path, repo_root: Path, blocked_paths: frozenset[str]
+) -> bool:
     return is_within_blocked_cleanup_zone(path.relative_to(repo_root), blocked_paths)
 
 
@@ -418,7 +431,9 @@ def _local_file_category(filename: str) -> str | None:
         return "logs_temp"
     if filename in EXACT_TEMP_FILE_NAMES:
         return "logs_temp"
-    if filename.startswith(FINAL_REPORT_PREFIX) and filename.endswith(FINAL_REPORT_SUFFIX):
+    if filename.startswith(FINAL_REPORT_PREFIX) and filename.endswith(
+        FINAL_REPORT_SUFFIX
+    ):
         return "logs_temp"
     return None
 
@@ -820,7 +835,9 @@ def _reports_workspace_row(
     )
 
 
-def collect_reports_workspace_evidence(repo_root: Path) -> list[ReportsWorkspaceEvidence]:
+def collect_reports_workspace_evidence(
+    repo_root: Path,
+) -> list[ReportsWorkspaceEvidence]:
     tracked_paths = _tracked_path_set(repo_root)
     route_metadata = _reports_registered_route_metadata(repo_root)
     retention_metadata = _reports_retention_metadata(repo_root)
@@ -961,7 +978,9 @@ def _dedupe_candidates(candidates: list[CleanupCandidate]) -> list[CleanupCandid
     deduped: dict[tuple[str, str], CleanupCandidate] = {}
     for candidate in candidates:
         deduped[(candidate.category, candidate.rel_path)] = candidate
-    return sorted(deduped.values(), key=lambda candidate: (candidate.rel_path, candidate.category))
+    return sorted(
+        deduped.values(), key=lambda candidate: (candidate.rel_path, candidate.category)
+    )
 
 
 def _candidate_classification(candidate: CleanupCandidate) -> str:
@@ -1000,7 +1019,9 @@ def _summarize_root_review(
             if _review_evidence_classification(row) == "REVIEW_REQUIRED"
         ),
         "BLOCKED": sum(
-            1 for row in review_evidence if _review_evidence_classification(row) == "BLOCKED"
+            1
+            for row in review_evidence
+            if _review_evidence_classification(row) == "BLOCKED"
         ),
     }
 
@@ -1207,7 +1228,9 @@ def _apply_local_candidates(
             if target.is_dir():
                 shutil.rmtree(target, ignore_errors=True)
                 if target.exists():
-                    raise OSError(f"directory still exists after cleanup: {candidate.rel_path}")
+                    raise OSError(
+                        f"directory still exists after cleanup: {candidate.rel_path}"
+                    )
             elif target.exists():
                 target.unlink()
             deleted.append(candidate)
@@ -1372,7 +1395,9 @@ def _log_reports_workspace_evidence(
                 row.reference_hits,
                 row.generator or "n/a",
                 row.commit_policy or "n/a",
-                str(row.retention_ttl_days) if row.retention_ttl_days is not None else "n/a",
+                str(row.retention_ttl_days)
+                if row.retention_ttl_days is not None
+                else "n/a",
                 row.retention_owner or "n/a",
             )
             logger.info("      %s", row.reason)
@@ -1465,7 +1490,9 @@ def main() -> int:
     )
     _log_candidates(candidates, detail_limit=max(args.detail_limit, 0))
     review_evidence = collect_root_review_evidence(repo_root) if args.root else []
-    root_policy_mismatches = collect_root_policy_mismatches(repo_root) if args.root else []
+    root_policy_mismatches = (
+        collect_root_policy_mismatches(repo_root) if args.root else []
+    )
     reports_evidence = collect_reports_workspace_evidence(repo_root)
     if args.root:
         _log_root_policy_mismatches(
@@ -1521,13 +1548,17 @@ def main() -> int:
             reports_evidence,
         )
         apply_errors.extend(reports_errors)
-        logger.info("Deleted reports workspace prune candidates: %d", len(deleted_reports))
+        logger.info(
+            "Deleted reports workspace prune candidates: %d", len(deleted_reports)
+        )
 
     if not args.apply:
         return 1 if apply_errors else 0
 
     deleted, errors = _apply_local_candidates(repo_root, candidates)
-    skipped_review = [candidate for candidate in candidates if not candidate.apply_allowed]
+    skipped_review = [
+        candidate for candidate in candidates if not candidate.apply_allowed
+    ]
     _log_apply_summary(
         deleted=deleted,
         skipped_review=skipped_review,

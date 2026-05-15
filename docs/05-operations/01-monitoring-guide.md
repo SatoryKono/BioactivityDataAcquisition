@@ -100,6 +100,13 @@ Primary dashboards `0..5` now reuse the Overview-derived context shell:
 local identity context only; do not use it as a Prometheus label or as a
 cross-dashboard filter.
 
+`0. Control Plane` keeps the compact shared `ID` panel backed by
+`/ops/control-plane/identity-table` and adds deep identity evidence below fold
+through `/ops/control-plane/identity-evidence`. That evidence endpoint exposes
+P0/P1/P2 run anchors, short/full value rendering, replay parentage, composite
+identity, checkpoint anchor compare, identity gaps, and copy-friendly full
+values without projecting high-cardinality IDs into Prometheus labels.
+
 ### Фильтрация и Изоляция данных
 
 В верхней части каждого дашборда расположены выпадающие списки:

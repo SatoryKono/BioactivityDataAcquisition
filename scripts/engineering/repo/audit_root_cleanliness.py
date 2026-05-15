@@ -18,7 +18,9 @@ from scripts.engineering.repo import _root_governance as root_governance
 
 ALLOWLIST_FILE = root_governance.ALLOWLIST_FILE
 STRUCTURE_CATALOG_FILE = root_governance.STRUCTURE_CATALOG_FILE
-GENERATED_ARTIFACT_ROUTING_FILE = Path("configs/quality/generated_artifact_routing.yaml")
+GENERATED_ARTIFACT_ROUTING_FILE = Path(
+    "configs/quality/generated_artifact_routing.yaml"
+)
 CANONICAL_ROOT_TEXT_FILES: frozenset[str] = frozenset(
     {
         "AGENTS.md",
@@ -244,7 +246,9 @@ def _forbidden_output_roots(routing: dict[str, Any]) -> tuple[str, ...]:
     normalized_roots: list[str] = []
     for root in roots:
         if not isinstance(root, str) or not root:
-            raise RuntimeError("forbidden_output_roots entries must be non-empty strings")
+            raise RuntimeError(
+                "forbidden_output_roots entries must be non-empty strings"
+            )
         normalized_roots.append(root.rstrip("/"))
     return tuple(normalized_roots)
 
@@ -394,7 +398,9 @@ def _collect_plan_policy_violations(
     if not isinstance(plans_readme, str) or not plans_readme:
         raise RuntimeError("Structure catalog plans.readme must be a non-empty path")
     _collect_plans_readme_violation(plans_readme, tracked_set, violations)
-    _collect_plans_catalog_violations(tracked_paths, plans, plans_readme, tracked_set, violations)
+    _collect_plans_catalog_violations(
+        tracked_paths, plans, plans_readme, tracked_set, violations
+    )
     _collect_plans_lifecycle_violation(plans, violations)
 
 
@@ -618,7 +624,12 @@ def main() -> int:
 
     try:
         layout_state = collect_root_layout_state(repo_root)
-    except (OSError, RuntimeError, subprocess.CalledProcessError, yaml.YAMLError) as exc:
+    except (
+        OSError,
+        RuntimeError,
+        subprocess.CalledProcessError,
+        yaml.YAMLError,
+    ) as exc:
         sys.stderr.write(f"ERROR: failed to collect root layout state: {exc}\n")
         return 2
 
@@ -666,7 +677,12 @@ def main() -> int:
         try:
             routing = _load_generated_artifact_routing(repo_root)
             ignored_or_untracked_paths = _get_ignored_or_untracked_paths(repo_root)
-        except (OSError, RuntimeError, subprocess.CalledProcessError, yaml.YAMLError) as exc:
+        except (
+            OSError,
+            RuntimeError,
+            subprocess.CalledProcessError,
+            yaml.YAMLError,
+        ) as exc:
             sys.stderr.write(f"ERROR: failed to query local generated outputs: {exc}\n")
             return 2
         forbidden_local_outputs = _collect_forbidden_local_output_roots(

@@ -127,7 +127,6 @@ def test_run_audit_rejects_editor_metadata_inside_data(tmp_path: Path) -> None:
     result = module.run_audit(tmp_path)
 
     assert any(
-        violation.category == "DATA_EDITOR_STATE"
-        and violation.path == "data/.idea"
+        violation.category == "DATA_EDITOR_STATE" and violation.path == "data/.idea"
         for violation in result.must_violations
     )

@@ -162,8 +162,12 @@ dashboard-specific `Status` or `First Action` route.
    нули нельзя считать доказательством безопасности. `Track: Replay / Resume Blockers in Range`
    и `Inspect: Terminal Run Events by Status in Range` вынесены ниже как
    selected-range evidence, а не first-screen verdict. Replay/checkpoint
-   runbook path здесь canonical через `checkpoint-debugging.md`; exact
-   manifest/ledger identity evidence остаётся surface `run-manifest-inspection.md`.
+  runbook path здесь canonical через `checkpoint-debugging.md`; compact
+  manifest/run identity remains in the shared `ID` panel, while deeper
+  P0/P1/P2 anchors, replay parentage, composite identity, checkpoint
+  current-vs-persisted anchor compare, identity gaps, and copy-friendly full
+  values live in the collapsed `Identity evidence and remaining replay-safety
+  signals` row backed by `/ops/control-plane/identity-evidence`.
 1. `bioetl-provider-health-v2`, first-screen GLOBAL answer row:
    `GLOBAL Provider Scope`, `Monitor GLOBAL Provider Severity Matrix`,
    `Inspect Critical Providers`, `Inspect Provider Top Causes` и `First Action`
@@ -579,16 +583,12 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `2=CRIT` при `>10%`.
 - `control-plane latency p50/p95/p99`: histogram-backed panels сохраняют
   `No data` как diagnostic signal; отсутствие samples не превращается в `0s`.
-- `control-plane.Known Blind Spots` and `Review: Known Missing Replay-Safety Signals`
-  are a two-part collapsed documentation surface in this refactor phase:
-  `Known Blind Spots` is the compact summary, while `Review: Known Missing
-  Replay-Safety Signals` is the detailed companion. They are limitation notes,
-  not healthy signals, and can be physically merged in a later panel-id
-  migration.
-- `control-plane.Review: Known Missing Replay-Safety Signals`: manifest/run identity,
-  config/contract hashes, ledger ordering, checkpoint age vs RPO, replay
-  duplicate detection и identity graph completeness документируются как
-  отсутствующие evidence surfaces/метрики, а не подменяются fake PromQL.
+- `control-plane.Identity evidence and remaining replay-safety signals` is a
+  collapsed HTTP-backed forensic row. It exposes P0/P1/P2 identity anchors,
+  identity gaps, replay parentage, composite identity, checkpoint anchor compare,
+  and copy-friendly full values through `/ops/control-plane/identity-evidence`;
+  checkpoint age vs RPO, replay duplicate detection, and richer semantic drift
+  classification remain limitation notes instead of fake PromQL.
 - `dq.id=5`: red `<0.8`, yellow `>=0.8`, green `>=0.9`
 - `dq.id=8`: yellow `>=3600s`, red `>=21600s`; gauge now shows the worst stale entity in scope, not the freshest timestamp
 - `overview.id=111`: yellow `>=1`, red `>=5`

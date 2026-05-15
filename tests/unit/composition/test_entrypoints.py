@@ -35,7 +35,7 @@ CACHED_BRONZE_PATH = "test-output/bronze"
 class TestRunOptions:
     """Tests for RunOptions dataclass."""
 
-    def test_default_values(self):
+    def test_run_options_default_values(self):
         """Test RunOptions has sensible defaults."""
         options = RunOptions()
 
@@ -49,7 +49,7 @@ class TestRunOptions:
         assert options.vacuum_after_run is None
         assert options.vacuum_retention_days is None
 
-    def test_custom_values(self):
+    def test_run_options_accepts_custom_values(self):
         """Test RunOptions with custom values."""
         options = RunOptions(
             run_type="rebuild",
@@ -84,13 +84,13 @@ class TestRunOptions:
 class TestVacuumOptions:
     """Tests for VacuumOptions dataclass."""
 
-    def test_default_values(self):
+    def test_vacuum_options_default_values(self):
         """Test VacuumOptions defaults."""
         options = VacuumOptions()
         assert options.retention_days == 7
         assert options.dry_run is False
 
-    def test_custom_values(self):
+    def test_vacuum_options_accepts_custom_values(self):
         """Test VacuumOptions with custom values."""
         options = VacuumOptions(retention_days=30, dry_run=True)
         assert options.retention_days == 30

@@ -845,25 +845,51 @@ def _scan_registered_metric_names(repo_root: Path) -> frozenset[str]:
     return frozenset(metric_names)
 
 
-def _load_declared_rule_metrics(repo_root: Path) -> set[str]:
+def _load_declared_metric_definitions(repo_root: Path) -> dict[str, set[str]]:
     path = repo_root / _DEFAULT_DECLARED_METRIC_DEFINITIONS
     if not path.exists():
-        return set()
+        return {
+            "recording_rule_metrics": set(),
+            "declared_label_contract_metrics": set(),
+        }
     try:
         import yaml
     except ImportError:
-        return set()
+        return {
+            "recording_rule_metrics": set(),
+            "declared_label_contract_metrics": set(),
+        }
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
-        return set()
-    raw_metrics = payload.get("recording_rule_metrics", [])
-    if not isinstance(raw_metrics, list):
-        return set()
-    return {
-        value
-        for value in raw_metrics
-        if isinstance(value, str) and value.startswith("bioetl_")
-    }
+        return {
+            "recording_rule_metrics": set(),
+            "declared_label_contract_metrics": set(),
+        }
+
+    definitions: dict[str, set[str]] = {}
+    for field in ("recording_rule_metrics", "declared_label_contract_metrics"):
+        raw_metrics = payload.get(field, [])
+        if not isinstance(raw_metrics, list):
+            definitions[field] = set()
+            continue
+        definitions[field] = {
+            value
+            for value in raw_metrics
+            if isinstance(value, str) and value.startswith("bioetl_")
+        }
+    return definitions
+
+
+def _filter_declared_label_contract_metrics(
+    unresolved_rows: list[str],
+    declared_metric_names: set[str],
+) -> list[str]:
+    return [
+        row
+        for row in unresolved_rows
+        if _drift_allowlist_token("runtime_label_contract_unresolved", row)
+        not in declared_metric_names
+    ]
 
 
 def _resolve_imported_metric_bindings(tree: ast.AST) -> dict[str, str]:
@@ -971,7 +997,11 @@ def _extract_rule_metric_names(groups: list[object]) -> list[str]:
 def collect_metric_inventory(
     repo_root: Path,
 ) -> dict[str, list[str] | dict[str, list[str]]]:
-    declared_rule_metrics = _load_declared_rule_metrics(repo_root)
+    declared_metric_definitions = _load_declared_metric_definitions(repo_root)
+    declared_rule_metrics = declared_metric_definitions["recording_rule_metrics"]
+    declared_label_contract_metrics = declared_metric_definitions[
+        "declared_label_contract_metrics"
+    ]
     runtime_registered_set = set(REGISTERED_PROMETHEUS_METRIC_NAMES)
     declared_set = runtime_registered_set | declared_rule_metrics
     registered = sorted(declared_set)
@@ -983,6 +1013,10 @@ def collect_metric_inventory(
         label_contract_unresolved,
     ) = (
         _scan_runtime_metric_calls(repo_root)
+    )
+    label_contract_unresolved = _filter_declared_label_contract_metrics(
+        label_contract_unresolved,
+        declared_label_contract_metrics,
     )
 
     doc_paths: list[Path] = []
@@ -1036,6 +1070,7 @@ def collect_metric_inventory(
         "declared_risky_label_review_required": (
             declared_risky_label_review_required
         ),
+        "declared_label_contract_metrics": sorted(declared_label_contract_metrics),
         "runtime_label_contract_violations": label_contract_violations,
         "runtime_label_contract_unresolved": label_contract_unresolved,
         "registered_metrics": registered,

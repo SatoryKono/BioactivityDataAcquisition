@@ -709,6 +709,14 @@ Common context panels on primary dashboards outside Overview:
 | `ID` | `9402` | Quarantine Explorer HTTP identity table for `pipeline/run_type/run_id`. |
 | `Processed Records` | `9403` | Current Bronze -> Silver -> Gold accounting table from `/ops/observability/processed-records`, backed by `bioetl_processed_records_*` recording rules; zero-valued outcome rows are omitted and missing accounting series are UNKNOWN/no-data, not OK. |
 
+`0. Control Plane` adds Control Plane-only identity evidence panels outside the
+shared shell. Panels `9404..9407` call
+`/ops/control-plane/identity-evidence` for P0 identity anchors, identity gaps,
+checkpoint anchor compare, and copy-friendly full-value handoffs. This endpoint
+is the approved surface for `run_id`, `manifest_id`, execution/config/contract
+hashes, input snapshot IDs, replay parentage, composite identity, lineage, and
+artifact refs; none of those values may be added as Prometheus labels.
+
 The local health server resolves `/ops/observability/processed-records` against
 Prometheus via `BIOETL_PROMETHEUS_URL` when set. Without an explicit setting it
 tries `http://localhost:9090`, then the Docker-local fallbacks
@@ -764,8 +772,10 @@ tries `http://localhost:9090`, then the Docker-local fallbacks
   telemetry; `Inspect: Telemetry Missing` must be `0` before operator
   treats current trust cards as replay/resume-safe evidence. `Inspect: Terminal Run Events by Status in Range`
   stays below fold as selected-range terminal ledger evidence, while exact `run_id` /
-  `manifest_id`, config/contract hashes, artifact refs, and ledger ordering
-  remain run-manifest inspection evidence, not Prometheus labels. GLOBAL
+  `manifest_id`, config/contract hashes, artifact refs, replay parentage,
+  composite identity, and checkpoint anchor compare are surfaced by
+  `/ops/control-plane/identity-evidence` plus run-manifest inspection, not
+  Prometheus labels. GLOBAL
   read-path и checkpoint-operator panels не несут pipeline/run_type labels,
   поэтому не фильтруются по этим переменным.
 
