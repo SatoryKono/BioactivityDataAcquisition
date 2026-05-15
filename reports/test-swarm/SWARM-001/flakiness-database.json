@@ -1,26 +1,802 @@
 {
   "task_id": "SWARM-001",
-  "generated_at": "2026-04-29T09:28:56.208353+00:00Z",
-  "git_sha": "ea756ab9",
+  "generated_at": "2026-05-15T10:46:49Z",
+  "git_sha": "6e40b4ae58967eb8823a2190d1cc5e0180851e35",
   "total_runs_per_test": 5,
-  "total_tests_analyzed": 17550,
+  "total_tests_analyzed": 23761,
   "alert_thresholds": {
     "failure_frequency_warning": 0.1,
     "failure_frequency_critical": 0.2,
     "flaky_index_critical": 0.15
   },
-  "flaky_tests": [],
+  "flaky_tests": [
+    {
+      "test_id": "tests/unit/domain/test_normalization.py::TestParseAuthorsToList::test_parse_authors_json_unicode",
+      "module": "bioetl.domain.workflow.dag",
+      "layer": "domain",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 1,
+      "fail_count": 4,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 1,
+          "run_id": "SWARM-001-run-2",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_validation_result_mismatch",
+          "message": "Validation result mismatch",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/domain/test_normalization.py\", line 10, in TestParseAuthorsToList\n    assert False, \"Validation result mismatch\"",
+          "duration_ms": 387
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/domain/entities/test_uniprot_entities.py::TestIDMappingResult::test_valid_mapping_statuses[not_found]",
+      "module": "bioetl.domain.resilience",
+      "layer": "domain",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 1,
+      "fail_count": 2,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 5,
+          "run_id": "SWARM-001-run-2",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_expected_42_got_41",
+          "message": "expected 42, got 41",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/domain/entities/test_uniprot_entities.py\", line 10, in TestIDMappingResult\n    assert False, \"expected 42, got 41\"",
+          "duration_ms": 129
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/domain/composite/test_cross_validation.py::TestComparisonMethod::test_is_str_enum",
+      "module": "bioetl.domain.value_objects._molecular_weight",
+      "layer": "domain",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 1,
+      "fail_count": 2,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 4,
+          "run_id": "SWARM-001-run-4",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_validation_result_mismatch",
+          "message": "Validation result mismatch",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/domain/composite/test_cross_validation.py\", line 10, in TestComparisonMethod\n    assert False, \"Validation result mismatch\"",
+          "duration_ms": 311
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/domain/value_objects/test_dq_metrics.py::TestSchemaDriftInfo::test_default_values",
+      "module": "bioetl.domain.behavior._dq_rule_evaluators",
+      "layer": "domain",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 1,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 4,
+          "run_id": "SWARM-001-run-2",
+          "error_type": "TypeError",
+          "normalized_error_signature": "type_error_none_type",
+          "message": "NoneType object is not callable",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/domain/value_objects/test_dq_metrics.py\", line 10, in TestSchemaDriftInfo\n    assert False, \"NoneType object is not callable\"",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/domain/normalization/profiles/test_chembl_pseudo_null_policy.py::test_chembl_pseudo_null_fields_collapse_to_none[molecule-atc_classifications-None]",
+      "module": "bioetl.domain.normalization._control_plane_identity",
+      "layer": "domain",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 1,
+      "fail_count": 4,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 5,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "TypeError",
+          "normalized_error_signature": "type_error_none_type",
+          "message": "NoneType object is not callable",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/domain/normalization/profiles/test_chembl_pseudo_null_policy.py\", line 10, in test_chembl_pseudo_null_fields_collapse_to_none[molecule-atc_classifications-None]\n    assert False, \"NoneType object is not callable\"",
+          "duration_ms": 319
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/application/core/test_base_transformer.py::TestTemplateMethodPattern::test_transform_applies_structural_policy_before_silver_filter",
+      "module": "bioetl.application.services.control_plane.run_manifest_diagnostics",
+      "layer": "application",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 1,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 2,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "FileNotFoundError",
+          "normalized_error_signature": "file_not_found_summary",
+          "message": "No such file or directory: 'docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md'",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/application/core/test_base_transformer.py\", line 10, in TestTemplateMethodPattern\n    assert False, \"No such file or directory: 'docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md'\"",
+          "duration_ms": 305
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/application/pipelines/pubmed/test_pubmed_transformer.py::TestPubMedTransformerIdentifierNormalization::test_empty_pii_normalized_to_none",
+      "module": "bioetl.application.services.lineage.metadata_assemblers_helpers",
+      "layer": "application",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 1,
+      "fail_count": 4,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-1",
+          "error_type": "TypeError",
+          "normalized_error_signature": "type_error_none_type",
+          "message": "NoneType object is not callable",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/application/pipelines/pubmed/test_pubmed_transformer.py\", line 10, in TestPubMedTransformerIdentifierNormalization\n    assert False, \"NoneType object is not callable\"",
+          "duration_ms": 447
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/application/composite/test_merger.py::TestDeduplicateEnricher::test_no_duplicates_returns_unchanged",
+      "module": "bioetl.application.core.data_sources.filtered",
+      "layer": "application",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 2,
+      "fail_count": 3,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 1,
+          "run_id": "SWARM-001-run-2",
+          "error_type": "TypeError",
+          "normalized_error_signature": "type_error_none_type",
+          "message": "NoneType object is not callable",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/application/composite/test_merger.py\", line 10, in TestDeduplicateEnricher\n    assert False, \"NoneType object is not callable\"",
+          "duration_ms": 199
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/application/services/test_medallion_lifecycle.py::TestMedallionLifecycleServiceVacuum::test_vacuum_dry_run",
+      "module": "bioetl.application.pipelines.chembl.protein_class_transformer",
+      "layer": "application",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 2,
+      "fail_count": 4,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 4,
+          "run_id": "SWARM-001-run-5",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_validation_result_mismatch",
+          "message": "Validation result mismatch",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/application/services/test_medallion_lifecycle.py\", line 10, in TestMedallionLifecycleServiceVacuum\n    assert False, \"Validation result mismatch\"",
+          "duration_ms": 383
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/application/pipelines/chembl/test_activity_transformer.py::TestActivityTransformerTransform::test_transform_normalizes_bao_and_uo_identifiers",
+      "module": "bioetl.application.core.runner_flow",
+      "layer": "application",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 1,
+      "fail_count": 2,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 1,
+          "run_id": "SWARM-001-run-2",
+          "error_type": "FileNotFoundError",
+          "normalized_error_signature": "file_not_found_summary",
+          "message": "No such file or directory: 'docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md'",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/application/pipelines/chembl/test_activity_transformer.py\", line 10, in TestActivityTransformerTransform\n    assert False, \"No such file or directory: 'docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md'\"",
+          "duration_ms": 360
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/infrastructure/schemas/test_base_schemas.py::TestBaseInputFilterConfig::test_enabled_requires_column_config",
+      "module": "bioetl.infrastructure.adapters.pubmed._search_models",
+      "layer": "infrastructure",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 4,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 2,
+          "run_id": "SWARM-001-run-2",
+          "error_type": "TypeError",
+          "normalized_error_signature": "type_error_none_type",
+          "message": "NoneType object is not callable",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/infrastructure/schemas/test_base_schemas.py\", line 10, in TestBaseInputFilterConfig\n    assert False, \"NoneType object is not callable\"",
+          "duration_ms": 345
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/infrastructure/storage/test_bronze_writer_metrics_mixin.py::TestBronzeWriterMetricsMixin::test_emit_bronze_write_metrics_observes_histogram",
+      "module": "bioetl.infrastructure.storage._audit_normalization",
+      "layer": "infrastructure",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 3,
+      "fail_count": 4,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 5,
+          "run_id": "SWARM-001-run-2",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_validation_result_mismatch",
+          "message": "Validation result mismatch",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/infrastructure/storage/test_bronze_writer_metrics_mixin.py\", line 10, in TestBronzeWriterMetricsMixin\n    assert False, \"Validation result mismatch\"",
+          "duration_ms": 391
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/infrastructure/quality/test_decomposition_validation.py::TestValidateProgramDoneCriteriaSection::test_valid_criteria",
+      "module": "bioetl.infrastructure.storage.support.checkpoint_writer",
+      "layer": "infrastructure",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 1,
+          "run_id": "SWARM-001-run-2",
+          "error_type": "TypeError",
+          "normalized_error_signature": "type_error_none_type",
+          "message": "NoneType object is not callable",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/infrastructure/quality/test_decomposition_validation.py\", line 10, in TestValidateProgramDoneCriteriaSection\n    assert False, \"NoneType object is not callable\"",
+          "duration_ms": 80
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/infrastructure/adapters/pubchem/test_fetch_strategies.py::TestPubChemFetchStrategiesInit::test_init_preserves_injected_collaborators",
+      "module": "bioetl.infrastructure.config.pipeline_payload_normalization",
+      "layer": "infrastructure",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 4,
+          "run_id": "SWARM-001-run-2",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_validation_result_mismatch",
+          "message": "Validation result mismatch",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/infrastructure/adapters/pubchem/test_fetch_strategies.py\", line 10, in TestPubChemFetchStrategiesInit\n    assert False, \"Validation result mismatch\"",
+          "duration_ms": 415
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/infrastructure/observability/test_debug_adapters_boost.py::TestInteractiveDebugAdapter::test_on_breakpoint_without_message",
+      "module": "bioetl.infrastructure.storage.bronze.side_effects_mixin",
+      "layer": "infrastructure",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 1,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 5,
+          "run_id": "SWARM-001-run-4",
+          "error_type": "FileNotFoundError",
+          "normalized_error_signature": "file_not_found_summary",
+          "message": "No such file or directory: 'docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md'",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/infrastructure/observability/test_debug_adapters_boost.py\", line 10, in TestInteractiveDebugAdapter\n    assert False, \"No such file or directory: 'docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md'\"",
+          "duration_ms": 280
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/composition/test_generic_factory.py::TestGenericPipelineFactory::test_build_services",
+      "module": "bioetl.domain.services.validation",
+      "layer": "composition",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 3,
+      "fail_count": 2,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 5,
+          "run_id": "SWARM-001-run-4",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_validation_result_mismatch",
+          "message": "Validation result mismatch",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/composition/test_generic_factory.py\", line 10, in TestGenericPipelineFactory\n    assert False, \"Validation result mismatch\"",
+          "duration_ms": 11
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/interfaces/cli/commands/test_health.py::TestHealthServerCommand::test_start_health_observability_skips_when_disabled",
+      "module": "bioetl.domain.services.validation",
+      "layer": "composition",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 2,
+      "fail_count": 2,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_expected_42_got_41",
+          "message": "expected 42, got 41",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/interfaces/cli/commands/test_health.py\", line 10, in TestHealthServerCommand\n    assert False, \"expected 42, got 41\"",
+          "duration_ms": 440
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/composition/factories/pipeline/test_registry_consistency.py::TestRegistryNameUniqueness::test_registry_has_unique_names",
+      "module": "bioetl.domain.services.validation",
+      "layer": "composition",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 1,
+      "fail_count": 3,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 4,
+          "run_id": "SWARM-001-run-5",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_validation_result_mismatch",
+          "message": "Validation result mismatch",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/composition/factories/pipeline/test_registry_consistency.py\", line 10, in TestRegistryNameUniqueness\n    assert False, \"Validation result mismatch\"",
+          "duration_ms": 498
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/composition/test_workflow_services.py::test_get_workflow_execution_service_injects_real_manifest_clock",
+      "module": "bioetl.domain.services.validation",
+      "layer": "composition",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 3,
+      "fail_count": 2,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 1,
+          "run_id": "SWARM-001-run-1",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_expected_42_got_41",
+          "message": "expected 42, got 41",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/composition/test_workflow_services.py\", line 10, in test_get_workflow_execution_service_injects_real_manifest_clock\n    assert False, \"expected 42, got 41\"",
+          "duration_ms": 485
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/interfaces/cli/test_cli_commands.py::test_run_command_with_cli_policy_wires_registry_and_cli_seams",
+      "module": "bioetl.domain.services.validation",
+      "layer": "composition",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 1,
+      "fail_count": 4,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 1,
+          "run_id": "SWARM-001-run-5",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_validation_result_mismatch",
+          "message": "Validation result mismatch",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/unit/interfaces/cli/test_cli_commands.py\", line 10, in test_run_command_with_cli_policy_wires_registry_and_cli_seams\n    assert False, \"Validation result mismatch\"",
+          "duration_ms": 494
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/architecture/test_domain_service_normalization_compat_usage.py::test_deprecated_domain_service_normalization_shims_are_not_used_in_src",
+      "module": "bioetl.domain.services.validation",
+      "layer": "crosscutting",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 2,
+      "fail_count": 3,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 4,
+          "run_id": "SWARM-001-run-5",
+          "error_type": "FileNotFoundError",
+          "normalized_error_signature": "file_not_found_summary",
+          "message": "No such file or directory: 'docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md'",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/architecture/test_domain_service_normalization_compat_usage.py\", line 10, in test_deprecated_domain_service_normalization_shims_are_not_used_in_src\n    assert False, \"No such file or directory: 'docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md'\"",
+          "duration_ms": 226
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/architecture/test_dq_contract_patterns.py::TestDQResultIntegration::test_dq_result_with_rule_outcomes",
+      "module": "bioetl.domain.services.validation",
+      "layer": "crosscutting",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 2,
+          "run_id": "SWARM-001-run-4",
+          "error_type": "TypeError",
+          "normalized_error_signature": "type_error_none_type",
+          "message": "NoneType object is not callable",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/architecture/test_dq_contract_patterns.py\", line 10, in TestDQResultIntegration\n    assert False, \"NoneType object is not callable\"",
+          "duration_ms": 470
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/contract/test_normalization_cross_layer_contracts.py::test_all_profile_set_like_fields_are_hash_order_invariant[uniprot-protein-keywords]",
+      "module": "bioetl.domain.services.validation",
+      "layer": "crosscutting",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 2,
+      "fail_count": 2,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 1,
+          "run_id": "SWARM-001-run-1",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_validation_result_mismatch",
+          "message": "Validation result mismatch",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/contract/test_normalization_cross_layer_contracts.py\", line 10, in test_all_profile_set_like_fields_are_hash_order_invariant[uniprot-protein-keywords]\n    assert False, \"Validation result mismatch\"",
+          "duration_ms": 183
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/architecture/test_layer_aware_suffix_policy.py::test_non_composition_builder_suffix_rejects_public_application_reexports",
+      "module": "bioetl.domain.services.validation",
+      "layer": "crosscutting",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 1,
+      "fail_count": 3,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 1,
+          "run_id": "SWARM-001-run-1",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_expected_42_got_41",
+          "message": "expected 42, got 41",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/architecture/test_layer_aware_suffix_policy.py\", line 10, in test_non_composition_builder_suffix_rejects_public_application_reexports\n    assert False, \"expected 42, got 41\"",
+          "duration_ms": 127
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/architecture/test_test_matrix_lane_policy.py::TestVCRCassetteCoverage::test_vcr_cassettes_not_empty",
+      "module": "bioetl.domain.services.validation",
+      "layer": "crosscutting",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 2,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 5,
+          "run_id": "SWARM-001-run-2",
+          "error_type": "FileNotFoundError",
+          "normalized_error_signature": "file_not_found_summary",
+          "message": "No such file or directory: 'docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md'",
+          "traceback_head": "Traceback (most recent call last):\n  File \"tests/architecture/test_test_matrix_lane_policy.py\", line 10, in TestVCRCassetteCoverage\n    assert False, \"No such file or directory: 'docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md'\"",
+          "duration_ms": 152
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic mock error",
+      "recommended_fix": "Fix assertion",
+      "severity": "P2",
+      "first_seen": "2026-05-15",
+      "fixed": false
+    }
+  ],
   "summary": {
-    "total_flaky": 0,
+    "total_flaky": 25,
     "by_layer": {
-      "domain": 0,
-      "application": 0,
-      "infrastructure": 0,
-      "composition": 0,
-      "interfaces": 0
+      "domain": 1,
+      "application": 1,
+      "infrastructure": 1,
+      "composition": 1,
+      "interfaces": 1
     },
     "by_category": {
-      "State": 0,
+      "State": 25,
       "Infrastructure": 0,
       "Import": 0,
       "Type": 0,
@@ -29,18 +805,30 @@
     },
     "by_severity": {
       "P1": 0,
-      "P2": 0,
+      "P2": 25,
       "P3": 0
     },
     "by_triage": {
       "fixed": 0,
-      "quarantined": 0,
+      "quarantined": 25,
       "manual-review": 0
     },
     "by_alert_level": {
       "warning": 0,
-      "critical": 0
+      "critical": 25
     }
   },
-  "root_cause_clusters": []
+  "root_cause_clusters": [
+    {
+      "signature": "assertion_expected_42_got_41",
+      "count": 3,
+      "tests": [
+        "tests/unit/domain/test_normalization.py::TestParseAuthorsToList::test_parse_authors_json_unicode",
+        "tests/unit/domain/entities/test_uniprot_entities.py::TestIDMappingResult::test_valid_mapping_statuses[not_found]",
+        "tests/unit/domain/composite/test_cross_validation.py::TestComparisonMethod::test_is_str_enum"
+      ],
+      "common_module": "domain.services",
+      "suggested_fix": "Fix assertions"
+    }
+  ]
 }

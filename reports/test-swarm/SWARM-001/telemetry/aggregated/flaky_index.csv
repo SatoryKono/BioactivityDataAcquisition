@@ -1,1 +1,26 @@
 test_nodeid,total_runs,intermittent_fails,flaky_index,triage_status,suspected_cause
+tests/unit/domain/test_normalization.py::TestParseAuthorsToList::test_parse_authors_json_unicode,5,1,0.2,quarantined,Shared state
+tests/unit/domain/entities/test_uniprot_entities.py::TestIDMappingResult::test_valid_mapping_statuses[not_found],5,1,0.2,quarantined,Shared state
+tests/unit/domain/composite/test_cross_validation.py::TestComparisonMethod::test_is_str_enum,5,1,0.2,quarantined,Shared state
+tests/unit/domain/value_objects/test_dq_metrics.py::TestSchemaDriftInfo::test_default_values,5,1,0.2,quarantined,Shared state
+tests/unit/domain/normalization/profiles/test_chembl_pseudo_null_policy.py::test_chembl_pseudo_null_fields_collapse_to_none[molecule-atc_classifications-None],5,1,0.2,quarantined,Shared state
+tests/unit/application/core/test_base_transformer.py::TestTemplateMethodPattern::test_transform_applies_structural_policy_before_silver_filter,5,1,0.2,quarantined,Shared state
+tests/unit/application/pipelines/pubmed/test_pubmed_transformer.py::TestPubMedTransformerIdentifierNormalization::test_empty_pii_normalized_to_none,5,1,0.2,quarantined,Shared state
+tests/unit/application/composite/test_merger.py::TestDeduplicateEnricher::test_no_duplicates_returns_unchanged,5,1,0.2,quarantined,Shared state
+tests/unit/application/services/test_medallion_lifecycle.py::TestMedallionLifecycleServiceVacuum::test_vacuum_dry_run,5,1,0.2,quarantined,Shared state
+tests/unit/application/pipelines/chembl/test_activity_transformer.py::TestActivityTransformerTransform::test_transform_normalizes_bao_and_uo_identifiers,5,1,0.2,quarantined,Shared state
+tests/unit/infrastructure/schemas/test_base_schemas.py::TestBaseInputFilterConfig::test_enabled_requires_column_config,5,1,0.2,quarantined,Shared state
+tests/unit/infrastructure/storage/test_bronze_writer_metrics_mixin.py::TestBronzeWriterMetricsMixin::test_emit_bronze_write_metrics_observes_histogram,5,1,0.2,quarantined,Shared state
+tests/unit/infrastructure/quality/test_decomposition_validation.py::TestValidateProgramDoneCriteriaSection::test_valid_criteria,5,1,0.2,quarantined,Shared state
+tests/unit/infrastructure/adapters/pubchem/test_fetch_strategies.py::TestPubChemFetchStrategiesInit::test_init_preserves_injected_collaborators,5,1,0.2,quarantined,Shared state
+tests/unit/infrastructure/observability/test_debug_adapters_boost.py::TestInteractiveDebugAdapter::test_on_breakpoint_without_message,5,1,0.2,quarantined,Shared state
+tests/unit/composition/test_generic_factory.py::TestGenericPipelineFactory::test_build_services,5,1,0.2,quarantined,Shared state
+tests/unit/interfaces/cli/commands/test_health.py::TestHealthServerCommand::test_start_health_observability_skips_when_disabled,5,1,0.2,quarantined,Shared state
+tests/unit/composition/factories/pipeline/test_registry_consistency.py::TestRegistryNameUniqueness::test_registry_has_unique_names,5,1,0.2,quarantined,Shared state
+tests/unit/composition/test_workflow_services.py::test_get_workflow_execution_service_injects_real_manifest_clock,5,1,0.2,quarantined,Shared state
+tests/unit/interfaces/cli/test_cli_commands.py::test_run_command_with_cli_policy_wires_registry_and_cli_seams,5,1,0.2,quarantined,Shared state
+tests/architecture/test_domain_service_normalization_compat_usage.py::test_deprecated_domain_service_normalization_shims_are_not_used_in_src,5,1,0.2,quarantined,Shared state
+tests/architecture/test_dq_contract_patterns.py::TestDQResultIntegration::test_dq_result_with_rule_outcomes,5,1,0.2,quarantined,Shared state
+tests/contract/test_normalization_cross_layer_contracts.py::test_all_profile_set_like_fields_are_hash_order_invariant[uniprot-protein-keywords],5,1,0.2,quarantined,Shared state
+tests/architecture/test_layer_aware_suffix_policy.py::test_non_composition_builder_suffix_rejects_public_application_reexports,5,1,0.2,quarantined,Shared state
+tests/architecture/test_test_matrix_lane_policy.py::TestVCRCassetteCoverage::test_vcr_cassettes_not_empty,5,1,0.2,quarantined,Shared state

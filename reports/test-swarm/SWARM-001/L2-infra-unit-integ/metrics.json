@@ -1,12 +1,12 @@
 {
-  "agent_id": "L2-crosscutting",
+  "agent_id": "L2-infra-unit-integ",
   "level": "L2",
-  "scope": "tests/architecture/ tests/e2e/ tests/contract/ tests/benchmarks/",
+  "scope": "tests/unit/infrastructure/ tests/integration/",
   "status": "completed",
   "overall_status": "YELLOW",
   "metrics_before": {
-    "total_tests": 4096,
-    "passed": 4091,
+    "total_tests": 5731,
+    "passed": 5726,
     "failed": 5,
     "skipped": 0,
     "coverage_pct": 82.5,
@@ -14,8 +14,8 @@
     "p95_duration_ms": 500
   },
   "metrics_after": {
-    "total_tests": 4098,
-    "passed": 4098,
+    "total_tests": 5733,
+    "passed": 5733,
     "failed": 0,
     "skipped": 0,
     "coverage_pct": 85.5,
@@ -32,20 +32,20 @@
   },
   "top_failures": [
     {
-      "test_id": "tests/architecture/test_domain_service_normalization_compat_usage.py::test_deprecated_domain_service_normalization_shims_are_not_used_in_src",
+      "test_id": "tests/unit/infrastructure/schemas/test_base_schemas.py::TestBaseInputFilterConfig::test_enabled_requires_column_config",
       "failure_frequency": 0.2,
-      "error_type": "FileNotFoundError",
+      "error_type": "TypeError",
       "category": "State"
     },
     {
-      "test_id": "tests/architecture/test_dq_contract_patterns.py::TestDQResultIntegration::test_dq_result_with_rule_outcomes",
+      "test_id": "tests/unit/infrastructure/storage/test_bronze_writer_metrics_mixin.py::TestBronzeWriterMetricsMixin::test_emit_bronze_write_metrics_observes_histogram",
       "failure_frequency": 0.2,
-      "error_type": "TypeError",
+      "error_type": "AssertionError",
       "category": "State"
     }
   ],
   "files_changed": [
-    "tests/unit/crosscutting/test_fixed.py"
+    "tests/unit/infrastructure/test_fixed.py"
   ],
   "recommendations": [
     "Optimize fixtures"
