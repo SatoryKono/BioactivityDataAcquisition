@@ -114,7 +114,7 @@
     },
     "reviewed": {
       "type": [
-        "boolean",
+        "object",
         "null"
       ],
       "nullable": true,
@@ -149,6 +149,6 @@
   "normalization_profile": {
     "ref": "uniprot.idmapping",
     "version": "1.0.0",
-    "hash": "237855bebc49825d7711a40b5d55d9602460633f1ddd65d1c055f5d251330c10"
+    "hash": "dde8b599b87fec84cdbe023cc4098b782b7f452c64163655dddaa6f3a7322a5b"
   }
 }

@@ -745,6 +745,23 @@ def test_runtime_dashboard_recording_rules_exist_and_reference_source_metrics() 
         "bioetl_silver_filter_rejects_stage_total_15m": "bioetl_records_processed_total",
         "bioetl_silver_filter_rejections_breakdown_total_15m": "bioetl_silver_filter_rejections_total",
         "bioetl_silver_filter_reject_total_mismatch_15m": "bioetl_silver_filter_rejects_stage_total_15m",
+        "bioetl_processed_records_bronze_current": "bioetl_stage_records_total",
+        "bioetl_processed_records_silver_valid_current": "bioetl_stage_records_total",
+        "bioetl_processed_records_silver_quarantined_current": "bioetl_stage_records_total",
+        "bioetl_processed_records_silver_skipped_current": "bioetl_stage_records_total",
+        "bioetl_processed_records_silver_filtered_out_current": "bioetl_stage_records_total",
+        "bioetl_processed_records_silver_deduplicated_current": "bioetl_stage_records_total",
+        "bioetl_processed_records_silver_accounted_current": "bioetl_stage_records_total",
+        "bioetl_processed_records_silver_delta_current": "bioetl_processed_records_silver_accounted_current",
+        "bioetl_processed_records_gold_written_current": "bioetl_stage_records_total",
+        "bioetl_processed_records_gold_quarantined_current": "bioetl_stage_records_total",
+        "bioetl_processed_records_gold_skipped_current": "bioetl_stage_records_total",
+        "bioetl_processed_records_gold_excluded_by_contract_current": "bioetl_stage_records_total",
+        "bioetl_processed_records_gold_deduplicated_current": "bioetl_stage_records_total",
+        "bioetl_processed_records_gold_accounted_current": "bioetl_stage_records_total",
+        "bioetl_processed_records_gold_delta_current": "bioetl_processed_records_gold_accounted_current",
+        "bioetl_processed_records_delta_abs_current": "bioetl_processed_records_silver_delta_current",
+        "bioetl_processed_records_reconciliation_status": "bioetl_processed_records_delta_abs_current",
     }
 
     missing = [name for name in expected if name not in record_map]
@@ -755,6 +772,39 @@ def test_runtime_dashboard_recording_rules_exist_and_reference_source_metrics() 
         assert source_metric in expr, (
             f"{record_name} must reference {source_metric} to avoid semantic drift"
         )
+
+
+def test_processed_records_reconciliation_rules_preserve_semantic_contract() -> None:
+    payload = _load_rules()
+    record_map = _build_record_map(payload)
+    rules = {
+        name: rule
+        for name, rule in record_map.items()
+        if name.startswith("bioetl_processed_records_")
+    }
+    assert rules
+
+    for record_name, rule in rules.items():
+        expr = rule.get("expr", "")
+        assert "run_id" not in expr
+        assert "manifest_id" not in expr
+        assert "payload_hash" not in expr
+        assert "raw_path" not in expr
+        assert "error_message" not in expr
+        assert "$__range" not in expr
+        assert "or vector(0)" not in expr
+        assert "run_id" not in str(rule.get("labels", {}))
+        assert "run_id" not in str(rule.get("annotations", {}))
+        assert "bioetl_records_processed_total" not in expr, (
+            f"{record_name} must use canonical stage/outcome accounting, "
+            "not legacy processed-record stage counters"
+        )
+
+    status_expr = str(
+        record_map["bioetl_processed_records_reconciliation_status"].get("expr", "")
+    )
+    assert "bioetl_overview_pipeline_run_type_universe * 0" in status_expr
+    assert 'status=~"success|completed|failed|shutdown"' in status_expr
 
 
 def test_control_plane_current_status_recording_rules_exist_and_reference_source_metrics() -> (

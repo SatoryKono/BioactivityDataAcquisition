@@ -319,7 +319,7 @@ Current rollout semantics:
    `hard_fail` raises an error.
 1. `required_persistence_profile=replay_ready` or
    `required_persistence_profile=forensic_grade` is stricter than the requested
-   compatibility policy: runtime coerces `observe` up to `hard_fail` so strict
+   compatibility policy: runtime coerces any non-`hard_fail` policy up to `hard_fail` so strict
    persistence contexts never continue on an unproven resume identity.
 1. `exact_replay=true` is stricter than the requested compatibility policy:
    runtime coerces checkpoint compatibility handling to `hard_fail` so an
@@ -382,12 +382,14 @@ runtime:
 - Default operator-facing fail-closed resume behavior
 - Recovery scenarios where incompatibility should block resume without aborting
   the whole process
-- Strict persistence profiles below `exact_replay` minimum coercion
+- Non-strict persistence profiles where fail-closed blocking is sufficient
 
 **Use `hard_fail` when:**
 
 - Critical integrity requirements
 - Production steady-state
+- `required_persistence_profile` is `replay_ready` or `forensic_grade`
+- `exact_replay=true`
 - Exact replay requirements
 
 Historical manifests may still preserve removed checkpoint policy values in raw
@@ -1024,10 +1026,15 @@ supported boundary. Until the published contract changes, the platform does not
 claim universal exact reproducibility outside the supported boundary.
 
 Current published lineage closure boundary for Bronze -> Silver -> Gold
-operator-grade trace/debug support covers these source families:
+operator-grade trace/debug support covers these families:
 
 - `chembl.activity`
 - `chembl.molecule`
+- `composite.activity`
+- `composite.assay`
+- `composite.molecule`
+- `composite.publication`
+- `composite.target`
 - `crossref.publication`
 - `pubchem.compound`
 - `pubmed.publication`
@@ -1048,6 +1055,9 @@ The diagnostics payload therefore publishes an explicit
 `lineage_closure_boundary.supported=false`, the run must not be treated as
 forensic-grade even if replay-ready and ledger/linkage anchors are otherwise
 present.
+Published support for composite lineage closure does not by itself grant
+forensic-grade attainment; composite runs still require the richer replay and
+artifact surfaces exposed by `persistence_profile.forensic_grade_missing_requirements`.
 
 For the supported MVP surface, sidecar/lineage bundles MUST satisfy this
 minimal identity contract:

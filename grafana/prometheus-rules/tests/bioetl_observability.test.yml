@@ -622,3 +622,65 @@ tests:
               summary: Checkpoint operator latency is elevated
               description: Checkpoint operator p95 exceeded 1s for operation=list over the last 30m.
               runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
+  - name: processed-records-reconciliation-ok
+    interval: 1m
+    input_series:
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="bronze",outcome="records"}'
+        values: '100+0x20'
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="silver",outcome="valid"}'
+        values: '80+0x20'
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="silver",outcome="quarantined"}'
+        values: '10+0x20'
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="silver",outcome="filtered_out"}'
+        values: '10+0x20'
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="gold",outcome="written"}'
+        values: '80+0x20'
+    promql_expr_test:
+      - expr: bioetl_processed_records_silver_delta_current{pipeline="chembl",run_type="incremental"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_processed_records_silver_delta_current",pipeline="chembl",run_type="incremental"}'
+            value: 0
+      - expr: bioetl_processed_records_gold_delta_current{pipeline="chembl",run_type="incremental"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_processed_records_gold_delta_current",pipeline="chembl",run_type="incremental"}'
+            value: 0
+      - expr: bioetl_processed_records_reconciliation_status{pipeline="chembl",run_type="incremental"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_processed_records_reconciliation_status",pipeline="chembl",run_type="incremental"}'
+            value: 1
+
+  - name: processed-records-reconciliation-terminal-delta-failing
+    interval: 1m
+    input_series:
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="bronze",outcome="records"}'
+        values: '100+0x20'
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="silver",outcome="valid"}'
+        values: '70+0x20'
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="silver",outcome="quarantined"}'
+        values: '10+0x20'
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="silver",outcome="filtered_out"}'
+        values: '5+0x20'
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="gold",outcome="written"}'
+        values: '60+0x20'
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: '1+0x20'
+    promql_expr_test:
+      - expr: bioetl_processed_records_silver_delta_current{pipeline="chembl",run_type="incremental"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_processed_records_silver_delta_current",pipeline="chembl",run_type="incremental"}'
+            value: -15
+      - expr: bioetl_processed_records_gold_delta_current{pipeline="chembl",run_type="incremental"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_processed_records_gold_delta_current",pipeline="chembl",run_type="incremental"}'
+            value: -10
+      - expr: bioetl_processed_records_reconciliation_status{pipeline="chembl",run_type="incremental"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_processed_records_reconciliation_status",pipeline="chembl",run_type="incremental"}'
+            value: 3

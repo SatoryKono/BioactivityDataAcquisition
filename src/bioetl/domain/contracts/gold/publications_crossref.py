@@ -16,6 +16,7 @@ class CrossRefPublicationGoldSchema(PublicationGoldCommonSchema):
     """Schema for CrossRef publication in Gold layer."""
 
     doi: Series[str] = pa.Field(nullable=False, str_matches=DOI_REGEX_PATTERN)
+    title: Series[str] = pa.Field(nullable=False)
     issn: Series[str] = pa.Field(nullable=True)
     issn_list: Series[str] = pa.Field(nullable=True)
     publisher: Series[str] = pa.Field(nullable=True)

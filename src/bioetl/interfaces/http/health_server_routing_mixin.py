@@ -10,13 +10,19 @@ from bioetl.domain.context import current_utc_time
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.interfaces.http._health_server_routing_support import (
     dispatch_control_plane_request,
+    dispatch_observability_request,
     dispatch_quarantine_request,
 )
 from bioetl.interfaces.http.types import HealthResponse
 
 if TYPE_CHECKING:
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.domain.ports import ClockPort, HealthMonitorPort, RunManifestPort
+    from bioetl.domain.ports import (
+        ClockPort,
+        HealthMonitorPort,
+        RunLedgerPort,
+        RunManifestPort,
+    )
 
 _NOT_FOUND_MESSAGE = "Not Found"
 
@@ -67,7 +73,9 @@ class HealthServerRoutingMixin:
     _health_monitor: HealthMonitorPort | None
     _quarantine_service: QuarantineService | None
     _run_manifest_port: RunManifestPort | None
+    _run_ledger_port: RunLedgerPort | None
     _clock: ClockPort | None
+    _prometheus_base_url: str
 
     @property
     def uptime_seconds(self) -> float:
@@ -109,6 +117,14 @@ class HealthServerRoutingMixin:
             return
         if route_path.startswith("/ops/control-plane/"):
             await dispatch_control_plane_request(
+                self,
+                writer=writer,
+                path=route_path,
+                query=query,
+            )
+            return
+        if route_path.startswith("/ops/observability/"):
+            await dispatch_observability_request(
                 self,
                 writer=writer,
                 path=route_path,

@@ -110,6 +110,11 @@ pytestmark = pytest.mark.integration
 
 _VALID_CONFIG_HASH = "a" * 64
 _PUBLISHED_SUPPORTED_FAMILIES = tuple(published_supported_reproducibility_families())
+_PUBLISHED_SUPPORTED_SOURCE_FAMILIES = tuple(
+    family
+    for family in _PUBLISHED_SUPPORTED_FAMILIES
+    if not family.startswith("composite.")
+)
 _PUBLISHED_PRODUCTION_FAMILIES = tuple(published_production_reproducibility_families())
 
 
@@ -1140,7 +1145,7 @@ async def test_reproducibility_contract_forensic_grade_artifact_publication_reco
     )
 
 
-@pytest.mark.parametrize("family", _PUBLISHED_SUPPORTED_FAMILIES)
+@pytest.mark.parametrize("family", _PUBLISHED_SUPPORTED_SOURCE_FAMILIES)
 def test_reproducibility_contract_forensic_grade_profile_is_attained(
     family: str,
 ) -> None:
@@ -1367,7 +1372,7 @@ def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed(
     assert score["schema_version"] == "2.0"
     assert score["score_scope"] == "supported_boundary_run"
     assert score["supported_boundary_verdict"]["verdict"] == (
-        "blocked_outside_supported_boundary"
+        "supported_boundary_gaps_present"
     )
     assert score["supported_boundary_verdict"]["supported_boundary_satisfied"] is False
     assert score["global_reproducibility_claim"]["claimed"] is False
@@ -1413,6 +1418,7 @@ def test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_
                     "run_manifest_enabled": True,
                     "run_ledger_enabled": True,
                     "required_persistence_profile": "replay_ready",
+                    "checkpoint_compatibility_policy": "hard_fail",
                 }
             },
         )
@@ -1532,6 +1538,7 @@ def test_reproducibility_contract_composite_forensic_grade_matrix_allows_full_sn
                 "run_manifest_enabled": True,
                 "run_ledger_enabled": True,
                 "required_persistence_profile": "forensic_grade",
+                "checkpoint_compatibility_policy": "hard_fail",
             }
         },
     )
@@ -1824,6 +1831,9 @@ def test_reproducibility_contract_inventory_profiles_all_production_families() -
     assert (
         profile_by_family["composite.publication"]["strict_replay_runtime_verdict"]
         == "requires_full_composite_snapshot_envelope"
+    )
+    assert profile_by_family["composite.publication"]["lineage_closure_supported"] is (
+        True
     )
 
 

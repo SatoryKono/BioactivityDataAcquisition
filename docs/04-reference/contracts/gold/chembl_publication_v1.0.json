@@ -84,11 +84,8 @@
       "description": ""
     },
     "title": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
+      "type": "string",
+      "nullable": false,
       "description": ""
     },
     "authors": {
@@ -229,7 +226,7 @@
     },
     "is_oa": {
       "type": [
-        "boolean",
+        "object",
         "null"
       ],
       "nullable": true,
@@ -306,11 +303,12 @@
     "_index",
     "content_hash",
     "entity_id",
-    "publication_id"
+    "publication_id",
+    "title"
   ],
   "normalization_profile": {
     "ref": "chembl.publication",
     "version": "1.0.0",
-    "hash": "7b78a001bd25f2891bcb3d4164384d20062a281d578a9a18c0f2fa6002988b6d"
+    "hash": "246540c988a939fa049cd6620efca5345dce3e277b3113d3cc97d4ff2599e6f2"
   }
 }

@@ -198,11 +198,28 @@ dashboards `0. Control Plane`, `2. Runtime`, `3. Provider Health`,
 | `Provenance` | `9400` | Question banner | Visible text contains only the primary dashboard question; workflow, pipeline, run_type, run_id, and selected-time context stay in the panel tooltip/description. |
 | `Status` | `9401` | Compact dashboard verdict | Prometheus status for the dashboard role; no `$run_id` Prometheus filtering. `5. Workflow` is selected-range evidence and must say so. |
 | `ID` | `9402` | Local control-plane identity | HTTP/Infinity `Quarantine Explorer` table from `/ops/control-plane/identity-table`; exact `run_id` is local identity context only. |
-| `Processed Records` | `9403` | Selected-range evidence | Prometheus table over `bioetl_records_processed_total` with `[$__range]`; zero values do not prove current OK status. |
+| `Processed Records` | `9403` | Current stage/outcome accounting evidence | HTTP/Infinity table from `/ops/observability/processed-records`, backed by compact `bioetl_processed_records_*` recording rules and canonical `bioetl_stage_records_total` outcomes. It shows Bronze, Silver outcome, and Gold outcome rows only, with `value` plus formatted `percintage` columns. Bronze is `100%`; `silver [valid]` and `gold [valid]` use one decimal; secondary outcomes use up to three decimals with trailing zeroes trimmed. Silver percentages use Bronze total; Gold percentages use `silver [valid]`. Status, accounted subtotal, and delta rows stay out of the compact table. Missing accounting series are no-data/instrumentation gaps, not OK. |
 
 Normative rules:
 - `run_id` MUST NOT be added to Prometheus label filters.
-- `Processed Records` MUST remain selected-range evidence, not current verdict.
+- Primary dashboard `run_id` option lists MUST be loaded through the local
+  control-plane selector catalog (`/ops/control-plane/filter-options`) using
+  the visible `workflow`, `pipeline`, and `run_type` shell context. Coherent
+  selector tuple resolution belongs to `/ops/control-plane/selector-context`,
+  not to Prometheus labels.
+- `Processed Records` MUST show bounded Bronze/Silver/Gold stage/outcome
+  accounting evidence. It intentionally omits reconciliation status, accounted
+  subtotal, and delta rows, and MUST NOT replace the dashboard role-specific
+  `Status` or `First Action` decision path.
+- `Processed Records` percentage evidence MUST stay denominator-explicit:
+  Bronze renders `100%`, Silver outcome rows divide by `bronze [total]`, and
+  Gold outcome rows divide by `silver [valid]`. Zero-valued rows may be visually
+  muted across numeric columns, but missing accounting series remain no-data,
+  not zero. The visible `percintage` field is formatted by the local HTTP
+  helper so primary rows can render `91.0%`/`99.0%` while secondary outcome
+  rows render compact values such as `8.51%`, `0.47%`, and `0%`.
+- `Processed Records` current reconciliation MUST NOT use `$__range`,
+  `or vector(0)`, or `run_id`/manifest/raw payload labels in Prometheus.
 - Provider Health keeps `$provider` as the primary current-status selector even
   though the shared shell also exposes `$pipeline` and `$run_type`.
 - Workflow keeps `$status`, `$step_status`, and `$step_kind` as workflow-local

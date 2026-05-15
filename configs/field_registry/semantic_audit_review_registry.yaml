@@ -1,0 +1,57 @@
+version: "1.1.0"
+reviewed_on: "2026-05-15"
+owner: BioETL Team
+source_matrix: reports/semantic_pipeline_audit/semantic_pair_matrix_2026-05-15.csv
+
+# Risk reviews are intentionally empty: the semantic pair matrix now reports
+# CRITICAL=0, HIGH=0, MEDIUM=0 without reviewed risk caps.
+risk_reviews: []
+
+semantic_reviews:
+  - id: partial_identity_policy_review
+    issue: 4133
+    owner: BioETL Team
+    expires_on: "2026-11-15"
+    semantic_statuses:
+      - PARTIAL
+    clusters:
+      - canonical_smiles_identifier
+      - chembl_target_identifier
+      - inchi_key_identifier
+      - pmc_identifier
+      - uniprot_accession_identifier
+    rationale: >
+      PARTIAL identity clusters are intentionally not promoted to EXACT because
+      they mix provider-owned identifiers, composite lineage projections, and
+      join/reference anchors. Each listed cluster is valid only with explicit
+      join/lineage semantics in the pair matrix and semantic anchor gates.
+
+warning_reviews:
+  - id: weak_same_name_inventory_review
+    issue: 4133
+    owner: BioETL Team
+    expires_on: "2026-11-15"
+    semantic_statuses:
+      - WEAK
+    rationale: >
+      WEAK same-name clusters are inventory evidence only. They are reviewed
+      as non-blocking because they do not assert cross-pipeline semantic
+      identity until an owner promotes a cluster into a canonical exact/partial
+      semantic field family.
+
+  - id: generic_collision_inventory_review
+    issue: 4133
+    owner: BioETL Team
+    expires_on: "2026-11-15"
+    semantic_statuses:
+      - CONFLICTING
+    clusters:
+      - shared_description
+      - shared_relation
+      - shared_score
+      - shared_type
+      - shared_value
+    rationale: >
+      Generic fields are lexical collisions, not canonical business identities.
+      They require explicit ownership metadata instead of canonicalization by
+      field name.

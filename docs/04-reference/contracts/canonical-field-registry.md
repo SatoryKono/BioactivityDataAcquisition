@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-14'
+  Last verified: '2026-05-15'
 
 ______________________________________________________________________
 
@@ -127,23 +127,58 @@ Blocking sources:
 - `src/bioetl/domain/registry/field_aliases.py`
 - `configs/composites/molecule.yaml#composite.field_aliases`
 
-The gate intentionally treats WEAK or CONFLICTING clusters from the exhaustive
-semantic audit registry as warnings. Same-name publication, ontology, unit, and
-generic lexical clusters must not become canonical fields until an owner
-classifies them and updates the registry with explicit migration semantics.
+The gate intentionally treats `PARTIAL`, `WEAK`, or `CONFLICTING` clusters from
+the exhaustive semantic audit registry as non-blocking only when they are
+covered by `configs/field_registry/semantic_audit_review_registry.yaml`.
+Same-name publication, ontology, unit, and generic lexical clusters must not
+become canonical fields until an owner classifies them and updates the registry
+with explicit migration semantics.
 
 ## Semantic Pair-Matrix Budget Gate
 
 `configs/field_registry/semantic_pair_matrix_budget.yaml` records the reviewed
-semantic pair-matrix drift budget from the exhaustive 2026-05-14 audit. The
-budget currently ratchets `CRITICAL` rows at 16 and `HIGH` rows at 333.
+semantic pair-matrix drift budget from the exhaustive 2026-05-15 audit. The
+budget currently ratchets `CRITICAL`, `HIGH`, and `MEDIUM` rows at 0, blocks
+unreviewed `Normalization=DIFFERENT`, `Typing=CONFLICTING`, and
+`Validation=STRICTNESS_MISMATCH` rows, and freezes growth in the reviewed
+non-blocking inventories:
+
+- `Semantic Status=PARTIAL`: maximum 67 rows, all owner-reviewed;
+- `Semantic Status=WEAK`: maximum 439 rows, all owner-reviewed;
+- `Semantic Status=CONFLICTING`: maximum 20 rows, all owner-reviewed;
+- `Normalization=COMPATIBLE`: maximum 900 rows;
+- `Validation=COMPATIBLE`: maximum 1053 rows;
+- `Typing=COMPATIBLE`: maximum 664 rows.
+
+The generated semantic cluster registry also attaches owner review metadata to
+all remaining `PARTIAL`, `WEAK`, and `CONFLICTING` clusters. Those rows are
+policy-reviewed semantic inventory, not blockers; they may decrease without a
+budget change, but growth requires an intentional budget update and owner
+review.
 
 `scripts/engineering/qa/check_semantic_pair_matrix_budget.py --check` validates
 that:
 
-- no new `CRITICAL` or `HIGH` rows exceed the reviewed budget;
-- every current `CRITICAL` row has owner, rationale, and expiry metadata;
-- reviewed `CRITICAL` rows are pruned when the underlying matrix row is fixed.
+- no `CRITICAL`, `HIGH`, or `MEDIUM` rows appear in the current matrix;
+- blocking status budgets remain at zero;
+- reviewed non-exact and compatible-row inventories do not grow silently;
+- every non-exact semantic cluster in the generated registry has owner,
+  rationale, review id, and expiry metadata.
+
+The generated audit also publishes
+`reports/semantic_pipeline_audit/base_config_semantic_coverage_2026-05-15.json`
+so `configs/base/**` remains visible alongside entity and composite pipeline
+surfaces. That artifact tracks base DQ defaults, contract registry identity
+metadata, Medallion sort/default settings, and fixture/gap governance.
+
+The generated audit additionally publishes
+`reports/semantic_pipeline_audit/semantic_residual_backlog_2026-05-15.json` and
+`reports/semantic_pipeline_audit/semantic_residual_backlog_2026-05-15.md`.
+Those artifacts are the canonical residual-task register for the audit. They
+currently report zero blocking tasks and list the reviewed partial-identity,
+weak-inventory, generic-collision, compatible-normalization,
+compatible-validation, compatible-typing, and base-config-coverage ratchets.
+Review entries expire on `2026-11-15` unless renewed or burned down.
 
 ## Ontology And Unit Role Gate
 

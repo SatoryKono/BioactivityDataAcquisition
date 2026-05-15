@@ -22,3 +22,28 @@ class CompositePublicationGoldSchema(CompositeGoldCommonSchema):
     source: Series[str] = pa.Field(nullable=True, alias="_source")
     lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+
+    publication_id: Series[str] = pa.Field(
+        nullable=True,
+        description="Source ChEMBL publication identifier retained as lineage anchor.",
+    )
+    doi: Series[str] = pa.Field(
+        nullable=True,
+        description="Canonical publication DOI used for cross-provider publication joins.",
+    )
+    pmid: Series[str] = pa.Field(
+        nullable=True,
+        description="Canonical PubMed identifier used for cross-provider publication joins.",
+    )
+    pmc_id: Series[str] = pa.Field(
+        nullable=True,
+        description="Canonical PubMed Central identifier retained for publication lineage.",
+    )
+    title: Series[str] = pa.Field(
+        nullable=False,
+        description="Canonical-cleaned publication title retained as fallback join evidence.",
+    )
+    src_id: Series[int] = pa.Field(
+        nullable=True,
+        description="Provider source identifier retained as source-scoped lineage metadata.",
+    )

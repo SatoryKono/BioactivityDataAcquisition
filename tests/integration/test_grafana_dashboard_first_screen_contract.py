@@ -218,6 +218,30 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             )
 
 
+def test_expanded_current_status_panels_are_documented_as_mirrors() -> None:
+    """Expanded first-screen status panels must not look like independent verdicts."""
+    expectations = {
+        "bioetl-runtime.json": ("Status", "Runtime Status"),
+        "bioetl-dq-v2.json": ("Status", "Monitor DQ Current Status"),
+    }
+
+    for dashboard_name, (compact_title, expanded_title) in expectations.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+        compact_description = str(panels[compact_title].get("description", "")).lower()
+        expanded_description = str(
+            panels[expanded_title].get("description", "")
+        ).lower()
+
+        assert "expanded first-screen mirror" in compact_description
+        assert "expanded mirror" in expanded_description
+        assert "not an independent second" in expanded_description
+
+
 def test_overview_and_control_plane_first_screens_use_role_appropriate_queries() -> (
     None
 ):

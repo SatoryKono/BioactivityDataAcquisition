@@ -52,11 +52,8 @@
       "description": ""
     },
     "title": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
+      "type": "string",
+      "nullable": false,
       "description": ""
     },
     "abstract": {
@@ -279,7 +276,7 @@
     },
     "content_domain_crossmark_restriction": {
       "type": [
-        "boolean",
+        "object",
         "null"
       ],
       "nullable": true,
@@ -366,7 +363,8 @@
     "_source",
     "content_hash",
     "doi",
-    "entity_id"
+    "entity_id",
+    "title"
   ],
   "normalization_profile": {
     "ref": "crossref.publication",

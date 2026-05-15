@@ -122,23 +122,7 @@ def _handle_control_plane_setup(
         )
         ctx = attach_manifest_id(
             ctx,
-            control_plane_refs.manifest_id,
-            execution_fingerprint=control_plane_refs.execution_fingerprint,
-            config_hash=control_plane_refs.config_hash,
-            resolved_config_hash=control_plane_refs.resolved_config_hash,
-            effective_config_hash=control_plane_refs.effective_config_hash,
-            dq_contract_compatibility_hash=control_plane_refs.dq_contract_compatibility_hash,
-            effective_config_artifact_id=control_plane_refs.effective_config_artifact_id,
-            contract_ref=control_plane_refs.contract_ref,
-            contract_version=control_plane_refs.contract_version,
-            contract_schema_hash=control_plane_refs.contract_schema_hash,
-            dq_policy_ref=control_plane_refs.dq_policy_ref,
-            rule_bundle_version=control_plane_refs.rule_bundle_version,
-            normalization_profile_ref=control_plane_refs.normalization_profile_ref,
-            normalization_profile_version=(
-                control_plane_refs.normalization_profile_version
-            ),
-            normalization_profile_hash=control_plane_refs.normalization_profile_hash,
+            control_plane_refs=control_plane_refs,
         )
         inputs = _bind_manifest_logger_context(
             inputs,

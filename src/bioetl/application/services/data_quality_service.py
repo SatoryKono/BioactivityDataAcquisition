@@ -55,6 +55,12 @@ class _DataQualityThresholdMixin:
             outcome="quarantined",
             count=quarantined_count,
         )
+        self._pipeline_metrics.record_stage_records(
+            run_type=self._run_type,
+            stage="silver",
+            outcome="quarantined",
+            count=quarantined_count,
+        )
         self._pipeline_metrics.record_record_flow(
             run_type=self._run_type,
             flow_stage="quarantined",

@@ -186,13 +186,13 @@
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as the legacy root Windows wrapper while Docker setup documentation and operator habits still invoke scripts/docker-setup.ps1; remove it after docs switch to the canonical scripts/ops entrypoint and the compatibility window expires."
+      "next_step": "Project docs now point to scripts/ops/docker-setup.ps1 as the canonical Windows entrypoint; retain this root wrapper only for external caller compatibility, then remove it after one reviewed compatibility window with no direct callers."
     },
     "scripts/docker-setup.sh": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as the legacy root shell wrapper while Docker setup guidance and operator habits still invoke scripts/docker-setup.sh; remove it after docs switch to the canonical scripts/ops entrypoint and the compatibility window expires."
+      "next_step": "Project docs now point to scripts/ops/docker-setup.sh as the canonical shell entrypoint; retain this root wrapper only for external caller compatibility, then remove it after one reviewed compatibility window with no direct callers."
     },
     "scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh": {
       "owner": "@bioetl-platform",

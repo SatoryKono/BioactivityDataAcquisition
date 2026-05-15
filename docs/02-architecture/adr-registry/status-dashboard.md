@@ -2,17 +2,14 @@
 
 Quick overview of ADR status and distribution.
 
-**Last Updated**: 2026-05-13 09:01:38
+**Last Updated**: 2026-05-15 07:59:42
 
 ## 📈 Status Distribution
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `active` | 39 | 83.0% |
-| `archived` | 1 | 2.1% |
-| `deprecated` | 3 | 6.4% |
-| `draft` | 1 | 2.1% |
-| `superseded` | 3 | 6.4% |
+| `active` | 46 | 97.9% |
+| `superseded` | 1 | 2.1% |
 
 ## 🏷️  Category Distribution
 
@@ -24,14 +21,14 @@ Quick overview of ADR status and distribution.
 
 Last 5 updated ADRs:
 
-- **ADR-001**: delta lake vs parquet (Unknown)
-- **ADR-002**: medallion architecture (Unknown)
-- **ADR-003**: in memory locking strategy (Unknown)
-- **ADR-004**: pydantic vs dataclasses (Unknown)
-- **ADR-005**: composition layer separation (Unknown)
+- **ADR-033**: publication validation strategy (<YYYY-MM-DD>)
+- **ADR-047**: workflow control plane (2026-05-08)
+- **ADR-046**: checkpoint vs ledger resume (2026-05-06)
+- **ADR-045**: dq contract system (2026-03-26)
+- **ADR-044**: run manifest ledger control plane (2026-03-24)
 
 ## 🎯 Health Metrics
 
-- **Active ADRs**: 39/47 (83.0%)
-- **Maintenance Ratio**: 39:8
+- **Active ADRs**: 46/47 (97.9%)
+- **Maintenance Ratio**: 46:1
 - **Average ADRs/Year**: 15.7 (assuming 3-year project)

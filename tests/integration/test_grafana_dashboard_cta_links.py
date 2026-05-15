@@ -74,7 +74,7 @@ def test_runtime_first_screen_status_panels_expose_actionable_drilldowns() -> No
     current_status_urls = {
         str(link.get("title")): str(link.get("url")) for link in current_status_links
     }
-    assert "viewPanel=9101" in current_status_urls["Runtime Blockers"]
+    assert "viewPanel=9101" in current_status_urls["Open Runtime Blockers"]
     assert (
         "viewPanel=242" in current_status_urls["Inspect Active Runtime Blocker Detail"]
     )

@@ -386,6 +386,16 @@ class TestDataQualityServiceThresholds:
             },
         )
         mock_metrics.increment_counter.assert_any_call(
+            "bioetl_stage_records_total",
+            4,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "unknown",
+                "stage": "silver",
+                "outcome": "quarantined",
+            },
+        )
+        mock_metrics.increment_counter.assert_any_call(
             "bioetl_record_flow_records_total",
             4,
             {
@@ -436,6 +446,16 @@ class TestDataQualityServiceThresholds:
                 "pipeline": "test_pipeline",
                 "run_type": "unknown",
                 "stage": "validation",
+                "outcome": "quarantined",
+            },
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_stage_records_total",
+            7,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "unknown",
+                "stage": "silver",
                 "outcome": "quarantined",
             },
         )

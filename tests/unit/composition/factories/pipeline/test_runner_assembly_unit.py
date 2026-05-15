@@ -282,15 +282,27 @@ def test_build_checkpoint_manager_coerces_soft_fail_to_hard_fail_for_exact_repla
 
 
 @pytest.mark.unit
-def test_build_checkpoint_manager_coerces_observe_to_hard_fail_for_replay_ready() -> (
-    None
-):
+@pytest.mark.parametrize(
+    ("required_profile", "requested_policy"),
+    [
+        ("replay_ready", "observe"),
+        ("replay_ready", "soft_fail"),
+        ("forensic_grade", "observe"),
+        ("forensic_grade", "soft_fail"),
+    ],
+)
+def test_build_checkpoint_manager_coerces_non_hard_fail_for_strict_profiles(
+    required_profile: str,
+    requested_policy: str,
+) -> None:
     pipeline = cast(Any, _make_pipeline())
     logger = MagicMock()
     pipeline.settings.pipeline.control_plane.required_persistence_profile = (
-        "replay_ready"
+        required_profile
     )
-    pipeline.settings.pipeline.control_plane.checkpoint_compatibility_policy = "observe"
+    pipeline.settings.pipeline.control_plane.checkpoint_compatibility_policy = (
+        requested_policy
+    )
 
     with (
         patch(
@@ -312,6 +324,6 @@ def test_build_checkpoint_manager_coerces_observe_to_hard_fail_for_replay_ready(
     assert mock_create_manager.call_args.kwargs["compatibility_policy"] == "hard_fail"
     logger.warning.assert_called_once()
     warning_kwargs = logger.warning.call_args.kwargs
-    assert warning_kwargs["required_persistence_profile"] == "replay_ready"
-    assert warning_kwargs["requested_policy"] == "observe"
+    assert warning_kwargs["required_persistence_profile"] == required_profile
+    assert warning_kwargs["requested_policy"] == requested_policy
     assert warning_kwargs["applied_policy"] == "hard_fail"

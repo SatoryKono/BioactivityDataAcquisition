@@ -39,6 +39,9 @@ schema:
         -   name: identifiers
             fields:
                 - publication_id
+                - doi
+                - pmid
+                - pmc_id
                 - publication_doi
                 - publication_pmid
                 - publication_pmc_id
@@ -136,6 +139,21 @@ quality:
             pattern: ^CHEMBL\d+$
             nullable: false
             error_message: publication_id must match CHEMBL format
+        -   field: doi
+            type: pattern
+            pattern: ^10\.\d{4,}/\S+$
+            nullable: true
+            error_message: doi must match the canonical DOI format when present
+        -   field: pmid
+            type: pattern
+            pattern: ^[1-9]\d{0,9}$
+            nullable: true
+            error_message: pmid must be a canonical positive numeric string when present
+        -   field: pmc_id
+            type: pattern
+            pattern: ^PMC\d+$
+            nullable: true
+            error_message: pmc_id must match PMC identifier format when present
         -   field: publication_type
             type: enum
             allowed:
@@ -159,11 +177,10 @@ quality:
             severity: warn
             error_message: "Publication year before 1950 \u2014 will be filtered at Gold stage"
         -   field: publication_pmid
-            type: range
-            min: 1
-            max: 10000000000
+            type: pattern
+            pattern: ^[1-9]\d{0,9}$
             nullable: true
-            error_message: PubMed ID must be a positive integer
+            error_message: publication_pmid must be a canonical positive numeric string
         -   field: publication_doi
             type: pattern
             pattern: ^10\.\d{4,}/\S+$
@@ -232,10 +249,14 @@ quality:
             fields:
                 - publication_pmid
                 - publication_doi
+                - publication_pmc_id
+                - pmid
+                - doi
+                - pmc_id
             condition: any_present
             severity: warn
-            error_message: Publication should have at least one external identifier (PMID
-                or DOI)
+            error_message: Publication should have at least one external identifier
+                (PMID, DOI, or PMC ID)
     entity_conditional_validations:
         -   name: publication_requires_title
             condition_field: publication_type

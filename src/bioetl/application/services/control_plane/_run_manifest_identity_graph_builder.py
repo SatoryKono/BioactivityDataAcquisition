@@ -254,6 +254,7 @@ class RunManifestIdentityGraphAssembler:
                 manifest.replay_capability.value == "exact_replay_supported",
             ),
             "exact_replay_blockers": diagnostics.get("exact_replay_blockers", []),
+            "replay_readiness_verdict": diagnostics.get("replay_readiness_verdict"),
             "append_mode_semantic_sinks": diagnostics.get(
                 "append_mode_semantic_sinks",
                 [],
@@ -262,9 +263,7 @@ class RunManifestIdentityGraphAssembler:
             "resume_diagnostics": diagnostics.get("resume_diagnostics"),
         }
         lineage_closure_boundary = diagnostics.get("lineage_closure_boundary")
-        if lineage_closure_boundary is not None and bool(
-            diagnostics.get("total_events")
-        ):
+        if lineage_closure_boundary is not None:
             replay_section["lineage_closure_boundary"] = lineage_closure_boundary
         return replay_section
 
@@ -294,12 +293,24 @@ class RunManifestIdentityGraphAssembler:
         manifest: RunManifest,
         diagnostics: dict[str, object],
     ) -> dict[str, object]:
+        artifact_refs = diagnostics.get("artifact_refs")
+        published_artifacts = []
+        if isinstance(artifact_refs, list):
+            published_artifacts = [
+                {
+                    key: value
+                    for key, value in artifact_ref.items()
+                    if isinstance(artifact_ref, dict) and key != "artifact_id"
+                }
+                for artifact_ref in artifact_refs
+                if isinstance(artifact_ref, dict)
+            ]
         return {
             "planned_artifacts": [
                 {"layer": artifact.layer, "path": artifact.path}
                 for artifact in manifest.planned_artifacts
             ],
-            "published_artifacts": [],
+            "published_artifacts": published_artifacts,
             "produced_artifact_trace": diagnostics.get(
                 "produced_artifact_trace",
                 {},

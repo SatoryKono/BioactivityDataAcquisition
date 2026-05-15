@@ -633,6 +633,80 @@ groups:
       - record: bioetl_silver_filter_reject_total_mismatch_15m
         expr: sum by (pipeline, run_type) (abs((bioetl_silver_filter_rejects_stage_total_15m or (bioetl_silver_filter_rejections_breakdown_total_15m * 0)) - (bioetl_silver_filter_rejections_breakdown_total_15m or (bioetl_silver_filter_rejects_stage_total_15m * 0))) > bool 0)
 
+      - record: bioetl_processed_records_bronze_current
+        expr: sum by (pipeline, run_type) (max_over_time(bioetl_stage_records_total{stage="bronze", outcome="records"}[15m]))
+
+      - record: bioetl_processed_records_silver_valid_current
+        expr: sum by (pipeline, run_type) (max_over_time(bioetl_stage_records_total{stage="silver", outcome="valid"}[15m]))
+
+      - record: bioetl_processed_records_silver_quarantined_current
+        expr: sum by (pipeline, run_type) (max_over_time(bioetl_stage_records_total{stage="silver", outcome="quarantined"}[15m]))
+
+      - record: bioetl_processed_records_silver_skipped_current
+        expr: sum by (pipeline, run_type) (max_over_time(bioetl_stage_records_total{stage="silver", outcome="skipped"}[15m]))
+
+      - record: bioetl_processed_records_silver_filtered_out_current
+        expr: sum by (pipeline, run_type) (max_over_time(bioetl_stage_records_total{stage="silver", outcome="filtered_out"}[15m]))
+
+      - record: bioetl_processed_records_silver_deduplicated_current
+        expr: sum by (pipeline, run_type) (max_over_time(bioetl_stage_records_total{stage="silver", outcome="deduplicated"}[15m]))
+
+      - record: bioetl_processed_records_silver_accounted_current
+        expr: sum by (pipeline, run_type) (max_over_time(bioetl_stage_records_total{stage="silver", outcome=~"valid|quarantined|skipped|filtered_out|deduplicated"}[15m]))
+
+      - record: bioetl_processed_records_silver_delta_current
+        expr: bioetl_processed_records_silver_accounted_current - bioetl_processed_records_bronze_current
+
+      - record: bioetl_processed_records_gold_written_current
+        expr: sum by (pipeline, run_type) (max_over_time(bioetl_stage_records_total{stage="gold", outcome="written"}[15m]))
+
+      - record: bioetl_processed_records_gold_quarantined_current
+        expr: sum by (pipeline, run_type) (max_over_time(bioetl_stage_records_total{stage="gold", outcome="quarantined"}[15m]))
+
+      - record: bioetl_processed_records_gold_skipped_current
+        expr: sum by (pipeline, run_type) (max_over_time(bioetl_stage_records_total{stage="gold", outcome="skipped"}[15m]))
+
+      - record: bioetl_processed_records_gold_excluded_by_contract_current
+        expr: sum by (pipeline, run_type) (max_over_time(bioetl_stage_records_total{stage="gold", outcome="excluded_by_contract"}[15m]))
+
+      - record: bioetl_processed_records_gold_deduplicated_current
+        expr: sum by (pipeline, run_type) (max_over_time(bioetl_stage_records_total{stage="gold", outcome="deduplicated"}[15m]))
+
+      - record: bioetl_processed_records_gold_accounted_current
+        expr: sum by (pipeline, run_type) (max_over_time(bioetl_stage_records_total{stage="gold", outcome=~"written|quarantined|skipped|excluded_by_contract|deduplicated"}[15m]))
+
+      - record: bioetl_processed_records_gold_delta_current
+        expr: bioetl_processed_records_gold_accounted_current - bioetl_processed_records_silver_valid_current
+
+      - record: bioetl_processed_records_delta_abs_current
+        expr: abs(bioetl_processed_records_silver_delta_current) + abs(bioetl_processed_records_gold_delta_current)
+
+      - record: bioetl_processed_records_reconciliation_status
+        expr: >-
+          (((bioetl_processed_records_delta_abs_current == bool 0) > 0) * 1)
+          or
+          (
+            (
+              ((bioetl_processed_records_delta_abs_current > bool 0) > 0)
+              and on (pipeline, run_type)
+              (sum by (pipeline, run_type) (max_over_time(bioetl_pipeline_runs_total{status=~"success|completed|failed|shutdown"}[15m])) > bool 0)
+            ) * 3
+          )
+          or
+          (
+            (
+              ((bioetl_processed_records_delta_abs_current > bool 0) > 0)
+              unless on (pipeline, run_type)
+              (sum by (pipeline, run_type) (max_over_time(bioetl_pipeline_runs_total{status=~"success|completed|failed|shutdown"}[15m])) > bool 0)
+            ) * 2
+          )
+          or
+          (
+            (bioetl_overview_pipeline_run_type_universe * 0)
+            unless on (pipeline, run_type)
+            bioetl_processed_records_delta_abs_current
+          )
+
   - name: bioetl_monitoring_stack_observability
     rules:
       - alert: BioETLMetricsEndpointUnavailable

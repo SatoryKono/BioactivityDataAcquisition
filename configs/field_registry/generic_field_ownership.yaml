@@ -36,6 +36,17 @@ entries:
     rationale: Composite activity groups raw measurement columns under original_values to keep them scoped away from standardized activity semantics.
 
   - surface: gold_json_property
+    path: docs/04-reference/contracts/gold/composite_activity_v1.0.json
+    context: properties
+    fields:
+      - type
+      - value
+      - relation
+    owner: BioETL Team
+    semantic_role: chembl_activity_raw_measurement_terms
+    rationale: Composite activity Gold publishes raw ChEMBL measurement fields as source-scoped activity terms, not cross-pipeline canonical aliases.
+
+  - surface: gold_json_property
     path: docs/04-reference/contracts/gold/chembl_assay_parameters_v1.0.json
     context: properties
     fields:
@@ -67,6 +78,16 @@ entries:
     rationale: Composite assay keeps source-specific descriptive metadata in an explicit description group.
 
   - surface: gold_json_property
+    path: docs/04-reference/contracts/gold/composite_assay_v1.0.json
+    context: properties
+    fields:
+      - description
+      - score
+    owner: BioETL Team
+    semantic_role: chembl_assay_descriptive_metadata
+    rationale: Composite assay Gold publishes source-specific assay description and score without promoting generic names to global aliases.
+
+  - surface: gold_json_property
     path: docs/04-reference/contracts/gold/chembl_target_v1.0.json
     context: properties
     fields:
@@ -83,6 +104,15 @@ entries:
     owner: BioETL Team
     semantic_role: chembl_target_descriptive_metadata
     rationale: Composite target places source-specific target description in the descriptors group instead of canonicalizing generic description globally.
+
+  - surface: gold_json_property
+    path: docs/04-reference/contracts/gold/composite_target_v1.0.json
+    context: properties
+    fields:
+      - description
+    owner: BioETL Team
+    semantic_role: chembl_target_descriptive_metadata
+    rationale: Composite target Gold publishes source-specific target description as scoped metadata, not a global description alias.
 
   - surface: gold_json_property
     path: docs/04-reference/contracts/gold/chembl_target_component_v1.0.json

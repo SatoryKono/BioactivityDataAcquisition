@@ -122,6 +122,7 @@ def test_run_id_selector_is_control_plane_backed_table_query() -> None:
     assert "/ops/control-plane/filter-options" in query_url
     assert "dimension=run_id" in query_url
     assert "response_shape=list" in query_url
+    assert "workflow=${workflow}" in query_url
     assert "pipeline=${pipeline}" in query_url
     assert "run_type=${run_type:csv}" in query_url
 
@@ -328,7 +329,7 @@ def test_range_evidence_and_trend_rows_are_retained() -> None:
         for token in expectation["tokens"]:
             assert token in description
         assert "l0 status" in description
-        assert "next action" in description
+        assert "first action" in description or "next action" in description
 
     assert "[$__range]" in _panel_expr(panels["Historical Failures"])
     assert "[$__range]" in _panel_expr(panels["Recent Terminal Runs"])

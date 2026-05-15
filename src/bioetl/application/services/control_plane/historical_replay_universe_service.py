@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
-import json
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -12,6 +10,11 @@ from bioetl.application.runtime_clock import RuntimeClockService
 from bioetl.application.services.control_plane.historical_replay_corpus_service import (
     HistoricalReplayCertifiabilityInventory,
     HistoricalReplayCorpusService,
+)
+from bioetl.application.services.control_plane.historical_replay_universe_policy import (
+    build_durable_coverage_claim,
+    build_universal_claim,
+    build_universe_report_id,
 )
 
 __all__ = [
@@ -194,9 +197,9 @@ class HistoricalReplayUniverseService:
         external_records: tuple[HistoricalReplayUniverseExternalRecord, ...] = (),
     ) -> HistoricalReplayUniverseClosureReportRecord:
         inventory = self.build_universe_inventory(external_records=external_records)
-        universal_claim = self._build_universal_claim(inventory)
-        durable_claim = self._build_durable_coverage_claim(inventory)
-        report_id = self._build_report_id(
+        universal_claim = build_universal_claim(inventory)
+        durable_claim = build_durable_coverage_claim(inventory)
+        report_id = build_universe_report_id(
             inventory=inventory,
             universal_claim=universal_claim,
             durable_claim=durable_claim,
@@ -256,67 +259,6 @@ class HistoricalReplayUniverseService:
             )
             for record in records
         ]
-
-    def _build_universal_claim(
-        self,
-        inventory: HistoricalReplayUniverseInventorySnapshot,
-    ) -> dict[str, object]:
-        blocked = [
-            record.manifest_id
-            for record in inventory.records
-            if record.certification_status not in _CLOSED_CERTIFICATION_STATUSES
-        ]
-        claimed = inventory.manifest_count > 0 and not blocked
-        return {
-            "claimed": claimed,
-            "verdict": "claim_supported" if claimed else "claim_blocked",
-            "reason": (
-                "all_known_historical_runs_are_exact_replayable"
-                if claimed
-                else "known_historical_universe_still_contains_unresolved_replay_blockers"
-            ),
-            "scope": "all_known_historical_runs",
-            "blocked_manifest_ids": blocked,
-        }
-
-    def _build_durable_coverage_claim(
-        self,
-        inventory: HistoricalReplayUniverseInventorySnapshot,
-    ) -> dict[str, object]:
-        blocked = [
-            record.manifest_id
-            for record in inventory.records
-            if not record.durable_evidence_coverage
-        ]
-        claimed = inventory.manifest_count > 0 and not blocked
-        return {
-            "claimed": claimed,
-            "verdict": "claim_supported" if claimed else "claim_blocked",
-            "reason": (
-                "every_known_historical_run_has_durable_evidence_coverage"
-                if claimed
-                else "known_historical_universe_still_contains_non_durable_evidence_paths"
-            ),
-            "scope": "all_known_historical_runs",
-            "blocked_manifest_ids": blocked,
-        }
-
-    def _build_report_id(
-        self,
-        *,
-        inventory: HistoricalReplayUniverseInventorySnapshot,
-        universal_claim: dict[str, object],
-        durable_claim: dict[str, object],
-    ) -> str:
-        payload = {
-            "inventory": inventory.to_dict(),
-            "universal_claim": universal_claim,
-            "durable_evidence_coverage_claim": durable_claim,
-        }
-        digest = hashlib.sha256(
-            json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
-        ).hexdigest()
-        return f"historical-replay-universe-{digest[:16]}"
 
 
 # Public aliases keep the exported control-plane surface stable while allowing
