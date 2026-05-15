@@ -5,11 +5,11 @@
 
 ## Summary
 
-- Scanned modules: `1858`
-- Internal import edges (raw): `7417`
+- Scanned modules: `1867`
+- Internal import edges (raw): `7443`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `321`
+- Cross-layer module-group edges (total): `322`
 - Cross-layer module-group edges (top 60): `60`
 
 ## Layer Dependency Graph
@@ -32,8 +32,8 @@ flowchart LR
     infrastructure -->|954 OK| infrastructure
     interfaces -->|76 OK| application
     interfaces -->|65 OK| composition
-    interfaces -->|42 OK| domain
-    interfaces -->|195 OK| interfaces
+    interfaces -->|50 OK| domain
+    interfaces -->|213 OK| interfaces
 ```
 
 ## Layer Edge Table
@@ -51,8 +51,8 @@ flowchart LR
 | `infrastructure` | `infrastructure` |     954 | allowed |
 | `interfaces`     | `application`    |      76 | allowed |
 | `interfaces`     | `composition`    |      65 | allowed |
-| `interfaces`     | `domain`         |      42 | allowed |
-| `interfaces`     | `interfaces`     |     195 | allowed |
+| `interfaces`     | `domain`         |      50 | allowed |
+| `interfaces`     | `interfaces`     |     213 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
