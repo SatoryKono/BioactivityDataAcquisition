@@ -122,27 +122,10 @@ def _validate_strict_input_snapshots(request: RunManifestCreateSpec) -> None:
     )
     if launch_time_snapshot_envelope_present:
         return
-    if _allows_bounded_live_capture_without_launch_snapshots(request):
-        return
     raise RuntimeError(
         "Run manifest requires immutable input snapshots for exact "
         "replay, replay_ready, and forensic_grade contexts"
     )
-
-
-def _allows_bounded_live_capture_without_launch_snapshots(
-    request: RunManifestCreateSpec,
-) -> bool:
-    """Allow ordinary strict live captures to persist bounded replay evidence."""
-    if bool(request.launch_context.get("exact_replay")):
-        return False
-    if request.replay_of_run_id is not None or request.replay_of_manifest_id is not None:
-        return False
-    if str(request.launch_context.get("execution_context") or "").strip().lower() == (
-        "composite"
-    ):
-        return False
-    return True
 
 
 def _validate_exact_replay_snapshot_claim(request: RunManifestCreateSpec) -> None:

@@ -24,6 +24,7 @@ from bioetl.domain.control_plane.effective_config_artifact import (
 )
 from bioetl.domain.control_plane.effective_config_environment import (
     AMBIENT_ENVIRONMENT_POLICY,
+    MATERIALIZED_EXECUTION_ENVIRONMENT_POLICY,
     semantic_runtime_env_dependencies,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -203,6 +204,21 @@ def validate_runtime_environment_provenance(
             f"overrides for required persistence profile '{profile}': "
             f"{', '.join(unsupported_keys)}"
         )
+    execution_environment = env_overrides.get("execution_environment")
+    if execution_environment is None:
+        raise ValueError(
+            "runtime_overrides.env.execution_environment must be materialized "
+            f"for required persistence profile '{profile}'"
+        )
+    if not isinstance(execution_environment, dict):
+        raise TypeError(
+            "runtime_overrides.env.execution_environment must be a mapping"
+        )
+    if not execution_environment:
+        raise ValueError(
+            "runtime_overrides.env.execution_environment must be non-empty for "
+            f"required persistence profile '{profile}'"
+        )
 
 
 def build_runtime_override_snapshot(
@@ -218,6 +234,8 @@ def build_runtime_override_snapshot(
 
 def build_execution_environment_snapshot(
     runtime_overrides: JsonDict,
+    *,
+    required_persistence_profile: object | None = None,
 ) -> ExecutionEnvironmentSnapshot:
     """Materialize explicit execution-affecting environment overrides."""
     env_overrides = coerce_runtime_override_layer(runtime_overrides, "env")
@@ -225,16 +243,31 @@ def build_execution_environment_snapshot(
         str(key): to_jsonable(value)
         for key, value in sorted(env_overrides.items(), key=lambda item: str(item[0]))
     }
-    semantic_dependencies = semantic_runtime_env_dependencies()
+    profile = normalize_required_persistence_profile(required_persistence_profile)
+    execution_environment = env_overrides.get("execution_environment")
+    execution_environment_materialized = isinstance(execution_environment, dict) and bool(
+        execution_environment
+    )
+    semantic_dependencies = (
+        ()
+        if execution_environment_materialized
+        else semantic_runtime_env_dependencies()
+    )
+    ambient_environment_policy = (
+        MATERIALIZED_EXECUTION_ENVIRONMENT_POLICY
+        if execution_environment_materialized
+        else AMBIENT_ENVIRONMENT_POLICY
+    )
     snapshot_payload = {
         "materialized_env_overrides": materialized_env_overrides,
         "non_materialized_semantic_env_dependencies": semantic_dependencies,
-        "ambient_environment_policy": AMBIENT_ENVIRONMENT_POLICY,
+        "ambient_environment_policy": ambient_environment_policy,
+        "required_persistence_profile": profile,
     }
     return ExecutionEnvironmentSnapshot(
         materialized_env_keys=tuple(materialized_env_overrides),
         materialized_env_overrides=materialized_env_overrides,
-        ambient_environment_policy=AMBIENT_ENVIRONMENT_POLICY,
+        ambient_environment_policy=ambient_environment_policy,
         non_materialized_semantic_env_dependencies=semantic_dependencies,
         environment_hash=stable_hash(snapshot_payload),
     )

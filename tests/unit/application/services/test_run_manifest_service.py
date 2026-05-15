@@ -363,38 +363,41 @@ def test_create_manifest_requires_input_snapshots_for_explicit_exact_replay() ->
     assert store.get("manifest-missing-snapshots") is None
 
 
-def test_create_manifest_allows_bounded_live_capture_without_snapshots_for_replay_ready_profile() -> (
+def test_create_manifest_rejects_replay_ready_profile_without_launch_snapshots() -> (
     None
 ):
     store = _InMemoryRunManifestStore()
     service = RunManifestService(
         manifest_port=store,
-        _manifest_id_factory=lambda: "manifest-replay-ready-bounded-live-capture",
+        _manifest_id_factory=lambda: "manifest-replay-ready-missing-snapshots",
     )
 
-    manifest = service.create_manifest(
-        replace(
-            _make_request(),
-            source_refs=(
-                RunSourceRef(
-                    provider="chembl",
-                    entity="activity",
-                    pipeline_name="chembl_activity",
-                    query="assay_type=B",
-                    input_snapshots=(),
+    with pytest.raises(
+        RuntimeError,
+        match="requires immutable input snapshots",
+    ):
+        service.create_manifest(
+            replace(
+                _make_request(),
+                source_refs=(
+                    RunSourceRef(
+                        provider="chembl",
+                        entity="activity",
+                        pipeline_name="chembl_activity",
+                        query="assay_type=B",
+                        input_snapshots=(),
+                    ),
                 ),
-            ),
-            replay_capability=ReplayCapability.REBUILD_ONLY,
-            launch_context={
-                "limit": 100,
-                "resume": False,
-                "required_persistence_profile": "replay_ready",
-            },
+                replay_capability=ReplayCapability.REBUILD_ONLY,
+                launch_context={
+                    "limit": 100,
+                    "resume": False,
+                    "required_persistence_profile": "replay_ready",
+                },
+            )
         )
-    )
 
-    assert manifest.source_refs[0].input_snapshots == ()
-    assert store.get("manifest-replay-ready-bounded-live-capture") == manifest
+    assert store.get("manifest-replay-ready-missing-snapshots") is None
 
 
 def test_create_manifest_persists_explicit_replay_parentage() -> None:

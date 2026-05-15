@@ -314,25 +314,26 @@ def test_build_run_source_refs_fails_closed_for_exact_replay_without_snapshots()
 
 
 @pytest.mark.unit
-def test_build_run_source_refs_allows_bounded_live_capture_without_snapshots() -> None:
+def test_build_run_source_refs_rejects_strict_profile_without_snapshots() -> None:
     settings = _make_settings()
     ctx = _make_run_context(query=None, exact_replay=False)
 
-    source_refs = build_run_source_refs(
-        ctx=ctx,
-        cached_bronze=None,
-        settings=settings,
-        provider="chembl",
-        entity="activity",
-        required_persistence_profile="replay_ready",
-    )
-
-    assert len(source_refs) == 1
-    assert source_refs[0].input_snapshots == ()
+    with pytest.raises(
+        RuntimeError,
+        match="strict persistence profiles require immutable input snapshots",
+    ):
+        build_run_source_refs(
+            ctx=ctx,
+            cached_bronze=None,
+            settings=settings,
+            provider="chembl",
+            entity="activity",
+            required_persistence_profile="replay_ready",
+        )
 
 
 @pytest.mark.unit
-def test_validate_required_runtime_persistence_profile_allows_bounded_live_capture() -> (
+def test_validate_required_runtime_persistence_profile_rejects_bounded_live_capture() -> (
     None
 ):
     request = _make_manifest_request(
@@ -349,11 +350,15 @@ def test_validate_required_runtime_persistence_profile_allows_bounded_live_captu
         source_refs=(),
     )
 
-    validate_required_runtime_persistence_profile(
-        request=request,
-        required_persistence_profile="replay_ready",
-        strict_exact_replay_supported=True,
-    )
+    with pytest.raises(
+        RuntimeError,
+        match="cannot satisfy required persistence profile 'replay_ready'",
+    ):
+        validate_required_runtime_persistence_profile(
+            request=request,
+            required_persistence_profile="replay_ready",
+            strict_exact_replay_supported=True,
+        )
 
 
 @pytest.mark.unit

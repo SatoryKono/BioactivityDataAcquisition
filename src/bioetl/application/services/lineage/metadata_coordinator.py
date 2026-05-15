@@ -274,11 +274,14 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             )
         return {
             "run_id": str(self._context.run_id),
+            "manifest_id": self._context.manifest_id or "",
             "run_type": self._context.run_type.value,
             "ingestion_ts": ingestion_ts.isoformat(),
             "provider": provider,
             "entity": entity,
             "batch_id": str(batch_id),
+            "execution_fingerprint": self._context.execution_fingerprint or "",
+            "effective_config_hash": self._context.effective_config_hash or "",
         }
 
     def create_silver_metadata(self, input_data: SilverMetadataInput) -> SilverMetadata:

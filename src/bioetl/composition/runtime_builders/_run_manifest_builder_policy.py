@@ -143,34 +143,12 @@ def validate_required_runtime_persistence_profile(
             "Pipeline execution is outside the published strict exact-replay "
             "support boundary for this run family"
         )
-    if _allows_bounded_live_capture_without_launch_snapshots(
-        request=request,
-        assessment=assessment,
-    ):
-        return
     if "exact_replay_capability" in assessment.blocking_gaps:
         raise RuntimeError(
             "Pipeline execution cannot satisfy required persistence profile "
             f"'{required_persistence_profile}' because immutable input snapshots "
             "and exact replay capability are not available for this run"
         )
-
-
-def _allows_bounded_live_capture_without_launch_snapshots(
-    *,
-    request: RunManifestCreateSpec,
-    assessment: object,
-) -> bool:
-    if bool(request.launch_context.get("exact_replay")):
-        return False
-    if request.replay_of_run_id is not None or request.replay_of_manifest_id is not None:
-        return False
-    if str(request.launch_context.get("execution_context") or "").strip().lower() == (
-        "composite"
-    ):
-        return False
-    blocking_gaps = set(getattr(assessment, "blocking_gaps", ()))
-    return blocking_gaps <= {"immutable_input_snapshots", "exact_replay_capability"}
 
 
 __all__ = [
