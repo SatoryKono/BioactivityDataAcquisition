@@ -112,7 +112,11 @@ Control Plane keeps the shared compact `ID` shell panel (`9402`) backed by
 `Identity evidence and remaining replay-safety signals` row uses
 `/ops/control-plane/identity-evidence` for P0/P1/P2 anchors, identity gaps,
 replay parentage, composite identity, checkpoint anchor comparison, and
-copy-friendly full values. This row is the dashboard-approved place for
+copy-friendly full values. The HTTP rows include typed `source_type`,
+`source_quality`, `drilldown_type`, and `drilldown_target` fields so operators
+can route from anchors to manifest, ledger, effective config, contract,
+snapshot, checkpoint, lineage, and artifact evidence without PromQL joins. This
+row is the dashboard-approved place for
 high-cardinality identity values; do not move those values into Prometheus
 labels.
 

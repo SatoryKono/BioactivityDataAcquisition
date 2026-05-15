@@ -32,6 +32,9 @@ from bioetl.interfaces.http.control_plane_identity import (
     IDENTITY_EVIDENCE_CONTRACT,
     build_control_plane_identity_evidence_payload,
 )
+from bioetl.interfaces.http.control_plane_identity.checkpoint import (
+    build_checkpoint_compare,
+)
 from bioetl.interfaces.http.control_plane_identity.specs import (
     ALLOWED_LOW_CARDINALITY_LABELS,
     ANCHOR_SPECS,
@@ -122,6 +125,43 @@ def test_control_plane_identity_evidence_static_contract_is_frozen() -> None:
         "bronze_batch_ids",
     }
     assert forbidden_label_names.isdisjoint(ALLOWED_LOW_CARDINALITY_LABELS)
+
+
+def test_control_plane_identity_checkpoint_compare_classifies_partial() -> None:
+    """Persisted checkpoint anchors can be present but incomplete."""
+    manifest = RunManifest(
+        manifest_id="manifest-partial",
+        execution_fingerprint="fingerprint-partial",
+        schema_version="1.0",
+        created_at=datetime(2026, 5, 12, 8, 21, tzinfo=UTC),
+        run_id=RunID(uuid4()),
+        run_type=RunType.REBUILD,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        runtime_config={
+            "checkpoint_metadata": {
+                "manifest_id": "manifest-partial",
+                "execution_fingerprint": "fingerprint-partial",
+            }
+        },
+        code_provenance=RunCodeProvenance(
+            pipeline_version="1.0.0",
+            git_commit="abc1234",
+            effective_config_hash=(
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            ),
+            effective_config_artifact_id="effective-config-partial",
+        ),
+    )
+
+    compare = build_checkpoint_compare(manifest)
+    rows = {str(item["anchor"]): item for item in compare["rows"]}
+
+    assert compare["status"] == "PARTIAL"
+    assert rows["manifest_id"]["status"] == "OK"
+    assert rows["effective_config_hash"]["status"] == "MISSING"
+    assert rows["effective_config_hash"]["ui_status"] == "WARN"
 
 
 class TestHealthResponse:
@@ -1745,9 +1785,23 @@ class TestHealthServerControlPlaneSelector:
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         )
         assert rows["effective_config_hash"]["value_short"] == "aaaaaaaaaaaa"
+        assert rows["effective_config_hash"]["source_type"] == (
+            "effective_config_artifact"
+        )
+        assert rows["effective_config_hash"]["source_quality"] == "authoritative"
+        assert rows["effective_config_hash"]["drilldown_type"] == "effective_config"
+        assert rows["effective_config_hash"]["drilldown_target"] == (
+            "effective_config.hash:"
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        )
         assert rows["contract_ref"]["value_full"] == "chembl.activity"
         assert rows["input_snapshot_count"]["value_full"] == "1"
         assert rows["checkpoint_anchor_status"]["value_full"] == "OK"
+        assert rows["identity_graph_complete"]["value_full"] == "complete"
+        assert rows["identity_graph_complete"]["missing_severity"] == "OK"
+        assert data["summary"]["identity_graph_complete"] is True
+        assert data["summary"]["correlation_anchor_gaps"] == {}
+        assert data["identity_diagnostics"]["checkpoint_anchor_status"] == "OK"
         assert rows["runtime_mode"]["copy"] is False
         assert rows["effective_config_hash"]["copy"] is True
         assert {item["priority"] for item in data["anchors"]} == {"P0", "P1", "P2"}
@@ -1802,6 +1856,10 @@ class TestHealthServerControlPlaneSelector:
         rows = {item["name"]: item for item in data["rows"]}
         assert rows["replay_of_run_id"]["missing_severity"] == "FAILING"
         assert rows["replay_of_run_id"]["ui_status"] == "CRIT"
+        assert rows["replay_of_manifest_id"]["missing_severity"] == "FAILING"
+        assert "replay_of_manifest_id" in data["identity_diagnostics"][
+            "identity_gap_names"
+        ]
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_evidence_checkpoint_compare_mismatch(
@@ -1831,6 +1889,12 @@ class TestHealthServerControlPlaneSelector:
         rows = {item["anchor"]: item for item in data["rows"]}
         assert rows["effective_config_hash"]["status"] == "MISMATCH"
         assert rows["effective_config_hash"]["ui_status"] == "CRIT"
+        assert rows["effective_config_hash"]["source_type"] == (
+            "checkpoint_metadata_compare"
+        )
+        assert rows["effective_config_hash"]["drilldown_target"] == (
+            "checkpoint.compare:effective_config_hash"
+        )
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_evidence_copy_values_are_full_values(

@@ -942,10 +942,12 @@ def test_control_plane_identity_evidence_panels_exist() -> None:
     }
 
     for title, view in {
-        "Inspect: P0 Identity Anchors": "view=overview",
+        "Inspect: Overview Identity Anchors": "view=overview",
         "Inspect: Identity Gaps": "view=gaps",
         "Inspect: Checkpoint Anchor Compare": "view=checkpoint_compare",
         "Inspect: Copyable Identity Handoffs": "view=copy_values",
+        "Inspect: P1 Replay and Evidence Anchors": "view=anchors",
+        "Inspect: P2 Forensic Anchors": "view=anchors",
     }.items():
         panel = panels.get(title)
         assert panel is not None, f"Control-plane dashboard missing {title!r}"
@@ -959,6 +961,13 @@ def test_control_plane_identity_evidence_panels_exist() -> None:
         assert "/ops/control-plane/identity-evidence?" in url
         assert view in url
         assert "run_id=${run_id}" in url
+
+    assert "priority=P1" in str(
+        panels["Inspect: P1 Replay and Evidence Anchors"]["targets"][0]["url"]
+    )
+    assert "priority=P2" in str(
+        panels["Inspect: P2 Forensic Anchors"]["targets"][0]["url"]
+    )
 
 
 def test_control_plane_remaining_replay_safety_text_is_not_stale() -> None:

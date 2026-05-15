@@ -3654,7 +3654,7 @@
       "panels": [
         {
           "datasource": "Quarantine Explorer",
-          "description": "HTTP-backed Control Plane identity overview from /ops/control-plane/identity-evidence. Long UUID/hash values are shortened in value_short and remain full in value_full. Status uses OK/WARN/CRIT/UNKNOWN; no run_id, manifest_id, hashes, snapshot IDs, or artifact refs are Prometheus labels.",
+          "description": "HTTP-backed Control Plane identity overview from /ops/control-plane/identity-evidence. Long UUID/hash values are shortened in value_short and remain full in value_full. The overview contains the P0 identity anchors plus the P1 replay_capability card required for replay triage. Status uses OK/WARN/CRIT/UNKNOWN; no run_id, manifest_id, hashes, snapshot IDs, or artifact refs are Prometheus labels.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3690,14 +3690,14 @@
               "root_selector": "rows",
               "source": "url",
               "type": "json",
-              "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=overview&priority=P0",
+              "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=overview",
               "url_options": {
                 "data": "",
                 "method": "GET"
               }
             }
           ],
-          "title": "Inspect: P0 Identity Anchors",
+          "title": "Inspect: Overview Identity Anchors",
           "transformations": [
             {
               "id": "organize",
@@ -3709,7 +3709,6 @@
                   "copy_value": true,
                   "format": true,
                   "rendering": true,
-                  "source": true,
                   "why": true
                 },
                 "indexByName": {
@@ -3718,12 +3717,20 @@
                   "value_full": 2,
                   "ui_status": 3,
                   "missing_severity": 4,
-                  "drilldown": 5
+                  "source_type": 5,
+                  "source_quality": 6,
+                  "drilldown_type": 7,
+                  "drilldown_target": 8,
+                  "drilldown": 9
                 },
                 "renameByName": {
                   "drilldown": "drilldown",
+                  "drilldown_target": "drilldown target",
+                  "drilldown_type": "drilldown type",
                   "label": "anchor",
                   "missing_severity": "severity",
+                  "source_quality": "source quality",
+                  "source_type": "source type",
                   "ui_status": "status",
                   "value_full": "full value",
                   "value_short": "short value"
@@ -3886,11 +3893,107 @@
           "type": "table"
         },
         {
+          "datasource": "Quarantine Explorer",
+          "description": "P1 support anchors from the identity evidence endpoint: source config, DQ policy/rule bundle, input snapshot IDs and content hashes, replay eligibility/blockers, lineage fragments, artifact refs, and ledger watermark. Full values stay in HTTP table data and are not Prometheus labels.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 119
+          },
+          "id": 9408,
+          "options": {
+            "footer": {
+              "show": false
+            },
+            "showHeader": true
+          },
+          "targets": [
+            {
+              "expr": "",
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "rows",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=anchors&priority=P1",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "title": "Inspect: P1 Replay and Evidence Anchors",
+          "type": "table"
+        },
+        {
+          "datasource": "Quarantine Explorer",
+          "description": "P2 forensic anchors from the identity evidence endpoint: launch/runtime config hashes, planned and published artifacts, composite component run IDs, checkpoint file, lock owner, DQ reports, cross-validation rules, and Bronze batch IDs. These fields are details-only and must not become Prometheus labels.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 119
+          },
+          "id": 9409,
+          "options": {
+            "footer": {
+              "show": false
+            },
+            "showHeader": true
+          },
+          "targets": [
+            {
+              "expr": "",
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "rows",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=anchors&priority=P2",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "title": "Inspect: P2 Forensic Anchors",
+          "type": "table"
+        },
+        {
           "gridPos": {
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 119
+            "y": 129
           },
           "id": 139,
           "options": {

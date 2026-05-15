@@ -602,10 +602,12 @@ def test_control_plane_identity_evidence_uses_http_not_prometheus_labels() -> No
         if panel.get("title")
     }
     identity_panels = [
-        panels["Inspect: P0 Identity Anchors"],
+        panels["Inspect: Overview Identity Anchors"],
         panels["Inspect: Identity Gaps"],
         panels["Inspect: Checkpoint Anchor Compare"],
         panels["Inspect: Copyable Identity Handoffs"],
+        panels["Inspect: P1 Replay and Evidence Anchors"],
+        panels["Inspect: P2 Forensic Anchors"],
     ]
 
     for panel in identity_panels:
@@ -633,7 +635,7 @@ def test_control_plane_identity_evidence_documents_short_full_split() -> None:
     panel = next(
         panel
         for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") == "Inspect: P0 Identity Anchors"
+        if panel.get("title") == "Inspect: Overview Identity Anchors"
     )
     description = str(panel.get("description", "")).lower()
     assert "shortened in value_short" in description
@@ -641,6 +643,8 @@ def test_control_plane_identity_evidence_documents_short_full_split() -> None:
     transformation_payload = json.dumps(panel.get("transformations", []))
     assert "value_short" in transformation_payload
     assert "value_full" in transformation_payload
+    assert "source_type" in transformation_payload
+    assert "drilldown_target" in transformation_payload
 
 
 def test_runtime_selected_count_zeroes_are_scope_anchored() -> None:

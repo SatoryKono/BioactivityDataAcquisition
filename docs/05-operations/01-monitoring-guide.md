@@ -104,8 +104,9 @@ cross-dashboard filter.
 `/ops/control-plane/identity-table` and adds deep identity evidence below fold
 through `/ops/control-plane/identity-evidence`. That evidence endpoint exposes
 P0/P1/P2 run anchors, short/full value rendering, replay parentage, composite
-identity, checkpoint anchor compare, identity gaps, and copy-friendly full
-values without projecting high-cardinality IDs into Prometheus labels.
+identity, checkpoint anchor compare, identity gaps, typed source/drilldown
+metadata, and copy-friendly full values without projecting high-cardinality IDs
+into Prometheus labels.
 
 ### Фильтрация и Изоляция данных
 
