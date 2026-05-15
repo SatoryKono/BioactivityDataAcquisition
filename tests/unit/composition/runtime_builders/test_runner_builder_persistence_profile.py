@@ -17,6 +17,8 @@ from tests.unit.composition.runtime_builders.test_runner_builder import (
     _call_build_pipeline_runner,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_build_pipeline_runner_requires_exact_replay_capability_for_replay_ready_profile(
     tmp_path: Path,
