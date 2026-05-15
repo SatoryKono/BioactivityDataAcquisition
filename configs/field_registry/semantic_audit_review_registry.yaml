@@ -1,4 +1,4 @@
-version: "1.1.0"
+version: "1.2.0"
 reviewed_on: "2026-05-15"
 owner: BioETL Team
 source_matrix: reports/semantic_pipeline_audit/semantic_pair_matrix_2026-05-15.csv
@@ -55,3 +55,689 @@ warning_reviews:
       Generic fields are lexical collisions, not canonical business identities.
       They require explicit ownership metadata instead of canonicalization by
       field name.
+
+partial_cluster_policies:
+  - cluster_id: canonical_smiles_identifier
+    canonical_field: canonical_smiles
+    owner: BioETL Team
+    business_owner_role: provider_owned_structure_identifier
+    composite_role: composite_join_key_and_lineage_anchor
+    lineage_role: inherited_molecule_context_for_activity
+    promotion_policy: require_explicit_owner_split_before_exact
+    rationale: >
+      canonical_smiles is provider-owned structure text in ChEMBL molecule and
+      PubChem compound, but the composite molecule pipeline also uses it as a
+      join key and lineage anchor, while composite activity inherits it as
+      molecule context. Shared normalization is not enough to collapse these
+      roles into one EXACT ownership surface.
+
+  - cluster_id: chembl_target_identifier
+    canonical_field: target_chembl_id
+    owner: BioETL Team
+    business_owner_role: provider_owned_target_identifier
+    composite_role: chained_target_reference
+    lineage_role: publication_and_component_reference_anchor
+    promotion_policy: require_explicit_owner_split_before_exact
+    rationale: >
+      target_chembl_id stays PARTIAL because it mixes target ownership,
+      component chaining, and reference-anchor semantics across ChEMBL and
+      composite target flows.
+
+  - cluster_id: inchi_key_identifier
+    canonical_field: inchi_key
+    owner: BioETL Team
+    business_owner_role: provider_owned_structure_identifier
+    composite_role: composite_primary_join_key
+    lineage_role: structure_lineage_anchor
+    promotion_policy: require_explicit_owner_split_before_exact
+    rationale: >
+      InChIKey is normalized identically, but it remains both a provider
+      structure identifier and the primary composite molecule join key.
+      Promotion to EXACT requires explicit owner-role separation rather than
+      inference from shared normalization alone.
+
+  - cluster_id: pmc_identifier
+    canonical_field: pmc_id
+    owner: BioETL Team
+    business_owner_role: provider_owned_publication_identifier
+    composite_role: optional_publication_reference
+    lineage_role: publication_anchor_with_fallback_identity_policy
+    promotion_policy: require_explicit_owner_split_before_exact
+    rationale: >
+      pmc_id participates in publication identity, but only as one optional
+      identifier beside DOI and PMID. The field remains PARTIAL because it is
+      not the universal primary identity anchor across all publication sources.
+
+  - cluster_id: uniprot_accession_identifier
+    canonical_field: accession
+    owner: BioETL Team
+    business_owner_role: provider_owned_uniprot_primary_identifier
+    composite_role: chained_component_reference
+    lineage_role: component_evidence_anchor
+    promotion_policy: require_explicit_owner_split_before_exact
+    rationale: >
+      UniProt accession is a true primary key in UniProt protein data but only
+      a component/reference anchor in ChEMBL target component and composite
+      chaining surfaces. It must stay PARTIAL until owner semantics are split
+      explicitly.
+
+weak_cluster_policy:
+  weak_decision_min_rows: 3
+  owner: BioETL Team
+
+weak_cluster_decisions:
+  - cluster_id: shared_abstract
+    field_name: abstract
+    decision: promotable_candidate
+    owner: BioETL Team
+    rationale: >
+      Publication providers expose similarly named abstract text, but the
+      repository has not yet promoted one canonical ownership registry for it.
+      This stays WEAK until publication-owner semantics are made explicit.
+
+  - cluster_id: shared_authors
+    field_name: authors
+    decision: promotable_candidate
+    owner: BioETL Team
+    rationale: >
+      authors appears across publication providers and composite publication,
+      but author-shape and provenance semantics still need explicit ownership
+      and normalization guarantees before promotion.
+
+  - cluster_id: shared_issue
+    field_name: issue
+    decision: promotable_candidate
+    owner: BioETL Team
+    rationale: >
+      issue is a likely publication cluster candidate, but it remains WEAK
+      until owner evidence proves shared business meaning across provider and
+      composite publication surfaces.
+
+  - cluster_id: shared_pref_name
+    field_name: pref_name
+    decision: source_owned_same_name
+    owner: BioETL Team
+    rationale: >
+      pref_name appears in multiple entity families with source-specific meaning
+      and should not be promoted by name alone.
+
+  - cluster_id: shared_publication_class
+    field_name: publication_class
+    decision: promotable_candidate
+    owner: BioETL Team
+    rationale: >
+      publication_class is publication-specific and may become canonical later,
+      but it requires explicit owner review and Gold/DQ parity evidence first.
+
+  - cluster_id: shared_publication_date
+    field_name: publication_date
+    decision: promotable_candidate
+    owner: BioETL Team
+    rationale: >
+      publication_date likely belongs to one publication semantic family, but
+      promotion requires clear ownership and typing guarantees.
+
+  - cluster_id: shared_publication_subclass
+    field_name: publication_subclass
+    decision: promotable_candidate
+    owner: BioETL Team
+    rationale: >
+      publication_subclass is publication-scoped but not yet promoted because
+      owner semantics and vocabulary expectations are not centralized.
+
+  - cluster_id: shared_publication_type_unified
+    field_name: publication_type_unified
+    decision: promotable_candidate
+    owner: BioETL Team
+    rationale: >
+      publication_type_unified is a strong candidate for canonical ownership,
+      but it needs explicit registry promotion rather than implicit same-name
+      inference.
+
+  - cluster_id: shared_volume
+    field_name: volume
+    decision: promotable_candidate
+    owner: BioETL Team
+    rationale: >
+      volume appears publication-like across providers, but its canonical
+      ownership remains unproven and therefore stays WEAK.
+
+  - cluster_id: shared_author_keys
+    field_name: author_keys
+    decision: source_owned_same_name
+    owner: BioETL Team
+    rationale: >
+      author_keys carries source-specific nested/derived semantics and should
+      not be promoted into a canonical field family by name only.
+
+  - cluster_id: shared_author_orcids
+    field_name: author_orcids
+    decision: source_owned_same_name
+    owner: BioETL Team
+    rationale: >
+      author_orcids remains a source-scoped author metadata surface until the
+      repository introduces canonical author identity governance.
+
+  - cluster_id: shared_is_oa
+    field_name: is_oa
+    decision: source_owned_same_name
+    owner: BioETL Team
+    rationale: >
+      is_oa shares lexical overlap across publication sources but still depends
+      on source-specific open-access semantics and evidence shape.
+
+  - cluster_id: shared_language
+    field_name: language
+    decision: source_owned_same_name
+    owner: BioETL Team
+    rationale: >
+      language is semantically close across publication sources, but explicit
+      owner policy is still required before canonical promotion.
+
+  - cluster_id: shared_assay_type
+    field_name: assay_type
+    decision: source_owned_same_name
+    owner: BioETL Team
+    rationale: >
+      assay_type exists across activity/assay surfaces with related but not
+      yet owner-centralized semantics.
+
+  - cluster_id: shared_bao_format
+    field_name: bao_format
+    decision: source_owned_same_name
+    owner: BioETL Team
+    rationale: >
+      bao_format is ontology-linked assay metadata that remains source-scoped
+      until a stronger canonical ontology role registry is introduced.
+
+  - cluster_id: shared_bao_label
+    field_name: bao_label
+    decision: source_owned_same_name
+    owner: BioETL Team
+    rationale: >
+      bao_label is derived ontology companion text and therefore remains
+      source-owned rather than canonically promoted.
+
+  - cluster_id: shared_issn
+    field_name: issn
+    decision: source_owned_same_name
+    owner: BioETL Team
+    rationale: >
+      issn overlaps across publication sources, but the repository still treats
+      raw ISSN surfaces as source-owned pending stronger canonical policy.
+
+  - cluster_id: shared_oa_status
+    field_name: oa_status
+    decision: source_owned_same_name
+    owner: BioETL Team
+    rationale: >
+      oa_status remains source-owned because open-access status vocabularies are
+      not yet centralized into one canonical publication ownership surface.
+
+  - cluster_id: shared_annotation_score
+    field_name: annotation_score
+    decision: source_owned_same_name
+    owner: BioETL Team
+    rationale: >
+      annotation_score appears across target-style surfaces with source-specific
+      meaning and therefore stays WEAK by policy.
+
+  - cluster_id: shared_cross_references
+    field_name: cross_references
+    decision: source_owned_same_name
+    owner: BioETL Team
+    rationale: >
+      cross_references is a nested/source-scoped metadata field whose meaning is
+      not canonicalized across entity families.
+
+generic_collision_policies:
+  - cluster_id: shared_description
+    lexical_field: description
+    owner: BioETL Team
+    semantic_scope: provider_scoped_generic_text
+    promotion_policy: forbidden_without_owner_registry
+    rationale: >
+      description is a lexical collision across assay, target, and component
+      metadata. It cannot become a canonical alias without explicit owner
+      registry and split-by-meaning documentation.
+
+  - cluster_id: shared_relation
+    lexical_field: relation
+    owner: BioETL Team
+    semantic_scope: provider_scoped_measurement_operator
+    promotion_policy: forbidden_without_owner_registry
+    rationale: >
+      relation is raw measurement/operator semantics in activity-like surfaces,
+      not a cross-pipeline canonical business field.
+
+  - cluster_id: shared_score
+    lexical_field: score
+    owner: BioETL Team
+    semantic_scope: provider_scoped_descriptive_or_annotation_score
+    promotion_policy: forbidden_without_owner_registry
+    rationale: >
+      score means different things across assay and target-style metadata and
+      must remain explicitly owner-scoped.
+
+  - cluster_id: shared_type
+    lexical_field: type
+    owner: BioETL Team
+    semantic_scope: provider_scoped_raw_type_term
+    promotion_policy: forbidden_without_owner_registry
+    rationale: >
+      type is a generic lexical field with multiple source-specific meanings and
+      must not be promoted by string equality.
+
+  - cluster_id: shared_value
+    lexical_field: value
+    owner: BioETL Team
+    semantic_scope: provider_scoped_raw_value_term
+    promotion_policy: forbidden_without_owner_registry
+    rationale: >
+      value is a generic lexical collision across raw measurement/property
+      surfaces and requires explicit owner registry before any canonicalization.
+
+composite_unknown_typing_reviews:
+  - id: composite_system_fields_unknown_schema
+    pipelines:
+      - composite_activity
+      - composite_assay
+      - composite_molecule
+      - composite_publication
+      - composite_target
+    fields:
+      - entity_id
+      - content_hash
+      - _index
+      - _source
+      - _run_id
+      - _run_type
+      - _state
+      - _lookup_method
+      - _original_id
+      - _source_batch_id
+      - _ingestion_ts
+      - _dq_error
+      - _dq_warn
+    disposition: technical_metadata_passthrough
+    schema_authority: medallion_system_metadata_contract
+    owner: BioETL Team
+    rationale: >
+      System/meta fields intentionally stay outside business-schema typing in
+      composite surfaces and inherit technical contract semantics instead.
+
+  - id: composite_activity_unknown_schema
+    pipelines: [composite_activity]
+    fields:
+      - action_type_description
+      - action_type_parent_type
+      - activity_comment
+      - activity_id
+      - activity_properties
+      - assay_description
+      - assay_id
+      - assay_type
+      - assay_variant_accession
+      - assay_variant_mutation
+      - bao_endpoint
+      - bao_format
+      - bao_label
+      - canonical_smiles
+      - compound_key
+      - compound_name
+      - data_validity_comment
+      - data_validity_description
+      - ligand_efficiency_bei
+      - ligand_efficiency_le
+      - ligand_efficiency_lle
+      - ligand_efficiency_sei
+      - manual_curation_flag
+      - molecule_id
+      - molecule_pref_name
+      - original_activity_id
+      - parent_molecule_id
+      - pchembl_value
+      - potential_duplicate
+      - publication_id
+      - qudt_units
+      - record_id
+      - relation
+      - src_compound_id
+      - src_id
+      - standard_flag
+      - standard_relation
+      - standard_text_value
+      - standard_type
+      - standard_units
+      - standard_upper_value
+      - standard_value
+      - target_id
+      - target_organism
+      - target_pref_name
+      - taxonomy_id
+      - text_value
+      - toid
+      - type
+      - units
+      - uo_units
+      - upper_value
+      - value
+    disposition: upstream_inherited_activity_semantics
+    schema_authority: seed_and_provider_gold_contracts
+    owner: BioETL Team
+    rationale: >
+      Composite activity inherits provider-normalized activity, molecule, and
+      publication context fields; unknown local schema typing is reviewed and
+      accepted where provider/Gold contracts remain the authoritative type seam.
+
+  - id: composite_assay_unknown_schema
+    pipelines: [composite_assay]
+    fields:
+      - aidx
+      - assay_category
+      - assay_cell_type
+      - assay_classifications
+      - assay_group
+      - assay_id
+      - assay_organism
+      - assay_parameters
+      - assay_pref_name
+      - assay_strain
+      - assay_subcellular_fraction
+      - assay_taxonomy_id
+      - assay_test_type
+      - assay_tissue
+      - assay_type
+      - bao_format
+      - bao_label
+      - cell_description
+      - cell_id
+      - cell_name
+      - cell_source_organism
+      - cell_source_taxonomy_id
+      - cell_source_tissue
+      - cell_type
+      - cellosaurus_id
+      - cl_lincs_id
+      - clo_id
+      - confidence_description
+      - confidence_score
+      - description
+      - publication_id
+      - relationship_description
+      - relationship_type
+      - score
+      - src_assay_id
+      - src_id
+      - target_id
+      - tissue_id
+      - variant_accession
+      - variant_isoform
+      - variant_mutation
+      - variant_organism
+      - variant_sequence
+      - variant_sequence_json
+      - variant_taxonomy_id
+    disposition: upstream_inherited_assay_semantics
+    schema_authority: seed_and_provider_gold_contracts
+    owner: BioETL Team
+    rationale: >
+      Composite assay remains a merge/orchestration surface over provider-owned
+      assay, cell, and target metadata; unknown local schema typing is reviewed
+      as inherited rather than ungoverned.
+
+  - id: composite_molecule_unknown_schema
+    pipelines: [composite_molecule]
+    fields:
+      - aromatic_ring_count
+      - atc_classifications
+      - availability_type
+      - black_box_warning
+      - canonical_smiles
+      - chirality
+      - cross_references
+      - dosed_ingredient
+      - first_approval
+      - first_in_class
+      - hba_count
+      - hbd_count
+      - heavy_atom_count
+      - helm_notation
+      - hierarchy_active_chembl_id
+      - hierarchy_child_chembl_id
+      - hierarchy_parent_chembl_id
+      - inchi
+      - inchi_key
+      - inorganic_flag
+      - isomeric_smiles
+      - iupac_name
+      - logp
+      - logp_method
+      - max_phase
+      - molecular_formula
+      - molecular_weight
+      - molecule_hierarchy
+      - molecule_id
+      - molecule_synonyms
+      - molecule_type
+      - natural_product
+      - oral
+      - parenteral
+      - polar_surface_area
+      - polymer_flag
+      - pref_name
+      - prodrug
+      - rotatable_bond_count
+      - standard_inchi
+      - standardized_inchi_key
+      - structure_parent_key
+      - structure_type
+      - therapeutic_flag
+      - topical
+      - usan_stem
+      - usan_stem_definition
+      - usan_substem
+      - usan_year
+      - withdrawn_flag
+    disposition: upstream_inherited_molecule_semantics
+    schema_authority: seed_and_provider_gold_contracts
+    owner: BioETL Team
+    rationale: >
+      Composite molecule is intentionally driven by merge priorities and alias
+      rules over ChEMBL and PubChem structure/property contracts; local unknown
+      typing is reviewed as inherited semantics, not missing governance.
+
+  - id: composite_publication_unknown_schema
+    pipelines: [composite_publication]
+    fields:
+      - abstract
+      - abstract_structured
+      - affiliation_list
+      - affiliation_structured
+      - alternative_id
+      - author_count
+      - author_details
+      - author_h_indices
+      - author_openalex_ids
+      - author_orcids
+      - author_s2_ids
+      - authors
+      - authors_with_affiliations
+      - chembl_release
+      - chemical_count
+      - chemicals
+      - citation_contexts
+      - citation_subset
+      - citations_made
+      - citations_received
+      - content_domain_crossmark_restriction
+      - content_domain_domains
+      - corpus_id
+      - country
+      - creation_date
+      - databanks
+      - date_completed
+      - date_revised
+      - dblp_id
+      - doi
+      - fwci
+      - gene_symbols
+      - grant_count
+      - grants
+      - influential_citation_count
+      - institution_country_codes
+      - institution_ids
+      - is_oa
+      - is_retracted
+      - issn
+      - issn_electronic
+      - issn_list
+      - issn_print
+      - issue
+      - journal
+      - journal_iso_abbrev
+      - journal_issn_type
+      - journal_name_short
+      - keyword_count
+      - language
+      - license_url
+      - mag_id
+      - medline_pgn
+      - mesh_heading_count
+      - nlm_unique_id
+      - oa_status
+      - open_access_url
+      - openalex_id
+      - page_first
+      - page_last
+      - page_range
+      - paper_id
+      - pmc_id
+      - pmid
+      - primary_topic
+      - pub_date
+      - pub_day
+      - pub_month
+      - publication_class
+      - publication_date
+      - publication_id
+      - publication_status
+      - publication_subclass
+      - publication_type
+      - publication_type_unified
+      - publication_types
+      - publication_year
+      - publisher
+      - references
+      - ror_ids
+      - src_id
+      - subject_fields
+      - subject_keywords
+      - subject_mesh
+      - subject_topics
+      - title
+      - tldr
+      - volume
+      - year
+    disposition: upstream_inherited_publication_semantics
+    schema_authority: seed_and_provider_gold_contracts
+    owner: BioETL Team
+    rationale: >
+      Composite publication is a governed join surface over DOI/PMID/title and
+      provider enrichers. Unknown local schema typing is reviewed as inherited
+      publication semantics rather than missing type policy.
+
+  - id: composite_target_unknown_schema
+    pipelines: [composite_target]
+    fields:
+      - activity_regulation
+      - annotation_score
+      - catalytic_activity
+      - chembl_ids
+      - component_accessions
+      - component_descriptions
+      - component_ids
+      - component_relationships
+      - component_type
+      - component_types
+      - description
+      - disease_involvement
+      - downgraded
+      - drugbank_ids
+      - function_comment
+      - gene_primary
+      - go_terms
+      - guidetopharmacology_ids
+      - interpro_xrefs
+      - keywords
+      - mapping_status
+      - organism
+      - pathway
+      - pdb_xrefs
+      - pfam_xrefs
+      - pipeline_stages
+      - pref_name
+      - primary_component_id
+      - protein_classification_id
+      - protein_classification_ids
+      - protein_existence
+      - protein_name
+      - reactome_xrefs
+      - reviewed
+      - sequence_length
+      - sequence_mass
+      - species_group_flag
+      - subcellular_location
+      - subunit
+      - target_component_synonyms
+      - target_id
+      - target_type
+      - taxonomy_id
+      - tissue_specificity
+      - uniprot_accession
+    disposition: upstream_inherited_target_semantics
+    schema_authority: seed_and_provider_gold_contracts
+    owner: BioETL Team
+    rationale: >
+      Composite target chains ChEMBL and UniProt-style target evidence and keeps
+      unknown local typing only where provider/Gold contracts remain the source
+      of truth.
+
+promotion_requirements:
+  PARTIAL:
+    required_evidence:
+      - business_owner_identity
+      - composite_role
+      - join_semantics
+      - lineage_role
+      - normalization_parity
+      - dq_parity
+      - gold_contract_compatibility
+    allowed_outcomes:
+      - remain_partial
+      - promote_to_exact_after_owner_split
+    enforcement_owner: BioETL Team
+
+  WEAK:
+    required_evidence:
+      - canonical_owner
+      - ontology_meaning
+      - join_usage_proof
+      - lineage_role
+      - normalization_parity
+      - dq_parity
+      - gold_contract_compatibility
+    allowed_outcomes:
+      - remain_weak
+      - promote_to_exact
+      - split_cluster_family
+    enforcement_owner: BioETL Team
+
+  CONFLICTING:
+    required_evidence:
+      - explicit_owner_registry
+      - non_aliasability_rationale
+    allowed_outcomes:
+      - remain_conflicting
+      - split_cluster_family
+    enforcement_owner: BioETL Team
