@@ -6,7 +6,6 @@ import json
 import os
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, call
-from uuid import uuid4
 
 import pytest
 
@@ -19,6 +18,7 @@ from bioetl.domain.control_plane.run_ledger import (
 from bioetl.domain.exceptions import StorageError
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane import FileRunLedgerStore
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 _FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
 
@@ -28,7 +28,7 @@ def _raise_index_write_error(*_args: object, **_kwargs: object) -> None:
 
 
 def test_file_store_round_trips_entries_by_manifest_and_run_id(tmp_path) -> None:
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
     first = RunLedgerEntry(
         entry_id="entry-1",
@@ -59,7 +59,7 @@ def test_file_store_round_trips_entries_by_manifest_and_run_id(tmp_path) -> None
 
 def test_file_store_emits_ledger_append_metric(tmp_path) -> None:
     metrics = MagicMock()
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     store = FileRunLedgerStore(
         base_path=tmp_path / "run_ledger",
         metrics=metrics,
@@ -119,7 +119,7 @@ def test_file_store_emits_terminal_metric_for_all_terminal_outcomes(
     terminal_status: str,
 ) -> None:
     metrics = MagicMock()
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     store = FileRunLedgerStore(
         base_path=tmp_path / "run_ledger",
         metrics=metrics,
@@ -150,7 +150,7 @@ def test_file_store_noops_duplicate_idempotency_key_without_terminal_recount(
     tmp_path,
 ) -> None:
     metrics = MagicMock()
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     store = FileRunLedgerStore(
         base_path=tmp_path / "run_ledger",
         metrics=metrics,
@@ -213,7 +213,7 @@ def test_file_store_does_not_emit_terminal_metric_for_non_terminal_events(
     tmp_path,
 ) -> None:
     metrics = MagicMock()
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     store = FileRunLedgerStore(
         base_path=tmp_path / "run_ledger",
         metrics=metrics,
@@ -246,7 +246,7 @@ def test_file_store_does_not_emit_terminal_metric_for_non_terminal_events(
 
 def test_file_store_emits_ledger_read_metric_on_list_success(tmp_path) -> None:
     metrics = MagicMock()
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     store = FileRunLedgerStore(
         base_path=tmp_path / "run_ledger",
         metrics=metrics,
@@ -300,7 +300,7 @@ def test_file_store_emits_ledger_read_metric_on_miss(tmp_path) -> None:
 
 def test_file_store_emits_ledger_append_failure_metric(tmp_path, monkeypatch) -> None:
     metrics = MagicMock()
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     store = FileRunLedgerStore(
         base_path=tmp_path / "run_ledger",
         metrics=metrics,
@@ -345,7 +345,7 @@ def test_file_store_emits_ledger_append_failure_metric(tmp_path, monkeypatch) ->
 
 
 def test_file_store_preserves_append_only_jsonl_order(tmp_path) -> None:
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
     first = RunLedgerEntry(
         entry_id="entry-1",
@@ -379,8 +379,8 @@ def test_file_store_wraps_partial_append_failure_and_preserves_existing_events(
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    initial_run_id = RunID(uuid4())
-    failed_run_id = RunID(uuid4())
+    initial_run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
+    failed_run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
     initial = RunLedgerEntry(
         entry_id="entry-1",
@@ -431,7 +431,7 @@ def test_file_store_rolls_back_ledger_append_when_run_index_write_fails(
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
     entry = RunLedgerEntry(
         entry_id="entry-1",
@@ -459,7 +459,7 @@ def test_file_store_rolls_back_ledger_append_when_run_index_write_fails(
 
 
 def test_file_store_rejects_run_id_remap_to_different_manifest(tmp_path) -> None:
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
     first = RunLedgerEntry(
         entry_id="entry-1",
@@ -491,8 +491,8 @@ def test_file_store_rejects_run_id_remap_to_different_manifest(tmp_path) -> None
 def test_file_store_fails_closed_when_manifest_ledger_contains_multiple_run_ids(
     tmp_path,
 ) -> None:
-    run_id = RunID(uuid4())
-    other_run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
+    other_run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
     first = RunLedgerEntry(
         entry_id="entry-1",
@@ -529,7 +529,7 @@ def test_file_store_fails_closed_when_manifest_ledger_contains_multiple_run_ids(
 
 
 def test_file_store_fails_closed_on_truncated_tail_line_during_reads(tmp_path) -> None:
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
     entry = RunLedgerEntry(
         entry_id="entry-1",
@@ -568,7 +568,7 @@ def test_file_store_fails_closed_on_truncated_tail_line_during_reads(tmp_path) -
 
 
 def test_file_store_fails_closed_on_invalid_json_line_during_reads(tmp_path) -> None:
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
     entry = RunLedgerEntry(
         entry_id="entry-1",
@@ -589,7 +589,7 @@ def test_file_store_fails_closed_on_invalid_json_line_during_reads(tmp_path) -> 
 
 
 def test_file_store_lists_entries_after_watermark(tmp_path) -> None:
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
     first = RunLedgerEntry(
         entry_id="entry-1",

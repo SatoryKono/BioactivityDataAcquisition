@@ -320,6 +320,9 @@ class TestBootstrapVacuumConfig:
         )
 
         settings = _create_bootstrap_settings()
+        settings.pipeline.control_plane.required_persistence_profile = (
+            "degraded_observable"
+        )
         mock_get_settings.return_value = settings
 
         mock_bootstrap_observability_bundle.return_value = (
@@ -337,7 +340,12 @@ class TestBootstrapVacuumConfig:
         # Context without CLI vacuum options (disabled VacuumSettings)
         ctx = _create_pipeline_context()
 
-        bootstrap_pipeline_runner(ctx)
+        # Mock input snapshot resolution to avoid strict persistence profile check
+        with patch(
+            "bioetl.composition.runtime_builders._run_manifest_support.resolve_pipeline_input_snapshot_refs",
+            return_value=(),
+        ):
+            bootstrap_pipeline_runner(ctx)
 
         # Verify runtime config was passed with YAML values
         call_args = mock_factory.create_runner.call_args
@@ -368,6 +376,9 @@ class TestBootstrapVacuumConfig:
         )
 
         settings = _create_bootstrap_settings()
+        settings.pipeline.control_plane.required_persistence_profile = (
+            "degraded_observable"
+        )
         mock_get_settings.return_value = settings
 
         mock_bootstrap_observability_bundle.return_value = (
@@ -388,7 +399,12 @@ class TestBootstrapVacuumConfig:
             vacuum=VacuumSettings(enabled=True, retention_days=30)
         )
 
-        bootstrap_pipeline_runner(ctx)
+        # Mock input snapshot resolution to avoid strict persistence profile check
+        with patch(
+            "bioetl.composition.runtime_builders._run_manifest_support.resolve_pipeline_input_snapshot_refs",
+            return_value=(),
+        ):
+            bootstrap_pipeline_runner(ctx)
 
         # Verify runtime config was passed with CLI values (overriding YAML)
         call_args = mock_factory.create_runner.call_args

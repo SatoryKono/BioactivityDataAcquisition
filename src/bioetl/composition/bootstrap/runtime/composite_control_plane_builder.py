@@ -50,6 +50,9 @@ from bioetl.composition.runtime_builders.runner_builder_support import (
     validate_required_persistence_profile,
 )
 from bioetl.composition.services.versioning import get_code_revision_provenance
+from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+)
 from bioetl.domain.control_plane.run_manifest import RunManifest
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.control_plane import FileRunManifestStore
@@ -76,7 +79,7 @@ def resolve_composite_control_plane_flags(settings: object) -> tuple[bool, bool]
     required_profile = getattr(
         control_plane,
         "required_persistence_profile",
-        "degraded_observable",
+        DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     )
     effective_required_profile = _resolve_composite_required_persistence_profile(
         settings,

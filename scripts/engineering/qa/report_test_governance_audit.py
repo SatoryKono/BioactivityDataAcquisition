@@ -6,7 +6,7 @@ import argparse
 import ast
 import json
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, cast
 
@@ -27,6 +27,16 @@ ASSERT_METHOD_NAMES = {
     "assert_called_with",
     "assert_has_calls",
     "assert_not_called",
+}
+ASSERTLESS_CATEGORY_RULES = {
+    "architecture_helper_guard": (
+        "architecture policy tests whose assertions are delegated to shared guard "
+        "helpers or pytest.fail paths"
+    ),
+    "benchmark_or_performance": "performance/benchmark tests where measurement is the assertion surface",
+    "intentional_no_exception_contract": "explicit no-op/smoke/does-not-raise contract tests",
+    "helper_asserted": "tests that delegate verification to check/validate/verify helper calls",
+    "weak_no_value": "candidate tests that need later assertion strengthening or removal review",
 }
 PYTEST_ASSERTION_HELPERS = {
     "pytest.fail",
@@ -80,6 +90,8 @@ class _TestBodyVisitor(ast.NodeVisitor):
         self.has_assertion_signal = False
         self.uuid4_call_sites = 0
         self.date_today_call_sites = 0
+        self.helper_assertion_calls: list[str] = []
+        self.called_names: list[str] = []
 
     def visit_Assert(self, node: ast.Assert) -> None:
         self.has_assertion_signal = True
@@ -93,6 +105,11 @@ class _TestBodyVisitor(ast.NodeVisitor):
             self.has_assertion_signal = True
         if leaf in ASSERT_METHOD_NAMES or leaf.startswith("assert_"):
             self.has_assertion_signal = True
+        if leaf.startswith(("check_", "validate_", "verify_", "expect_")):
+            self.helper_assertion_calls.append(qualified)
+
+        if qualified:
+            self.called_names.append(qualified)
 
         if qualified in {"uuid.uuid4", "uuid4"}:
             self.uuid4_call_sites += 1
@@ -112,12 +129,48 @@ def _test_functions(tree: ast.Module) -> list[ast.FunctionDef | ast.AsyncFunctio
     return functions
 
 
+def _classify_assertless_candidate(
+    *,
+    relative_path: str,
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+    visitor: _TestBodyVisitor,
+) -> str:
+    name = function.name
+    lower_name = name.lower()
+    if "tests/architecture/" in relative_path:
+        return "architecture_helper_guard"
+    if "tests/performance/" in relative_path or "benchmark" in {
+        arg.arg for arg in function.args.args
+    }:
+        return "benchmark_or_performance"
+    if any(
+        token in lower_name
+        for token in (
+            "noop",
+            "no_op",
+            "does_not_raise",
+            "no_error",
+            "smoke",
+            "skip",
+            "skips",
+            "close",
+            "aclose",
+        )
+    ):
+        return "intentional_no_exception_contract"
+    if visitor.helper_assertion_calls:
+        return "helper_asserted"
+    return "weak_no_value"
+
+
 def collect_test_governance_report(root: Path = ROOT) -> dict[str, Any]:
     """Collect deterministic static counts used as remediation budgets."""
     root = root.resolve()
     test_files = _iter_test_files(root)
     test_name_locations: dict[str, list[str]] = defaultdict(list)
     assertless_examples: list[str] = []
+    assertless_candidates: list[dict[str, str]] = []
+    assertless_category_counts: Counter[str] = Counter()
     compatibility_files: list[str] = []
     parse_errors: list[dict[str, str]] = []
 
@@ -151,6 +204,21 @@ def collect_test_governance_report(root: Path = ROOT) -> dict[str, Any]:
 
             if not visitor.has_assertion_signal:
                 refined_assertless_tests += 1
+                category = _classify_assertless_candidate(
+                    relative_path=relative,
+                    function=function,
+                    visitor=visitor,
+                )
+                assertless_category_counts[category] += 1
+                assertless_candidates.append(
+                    {
+                        "path": relative,
+                        "line": str(function.lineno),
+                        "test_name": function.name,
+                        "category": category,
+                        "rationale": ASSERTLESS_CATEGORY_RULES[category],
+                    }
+                )
                 if len(assertless_examples) < 25:
                     assertless_examples.append(location)
 
@@ -179,6 +247,8 @@ def collect_test_governance_report(root: Path = ROOT) -> dict[str, Any]:
         "total_test_files": len(test_files),
         "total_test_functions": total_functions,
         "refined_assertless_tests": refined_assertless_tests,
+        "assertless_category_counts": dict(sorted(assertless_category_counts.items())),
+        "assertless_candidates": assertless_candidates,
         "assertless_examples": assertless_examples,
         "duplicate_test_names": len(duplicate_names),
         "duplicate_test_name_occurrences": sum(
@@ -186,6 +256,7 @@ def collect_test_governance_report(root: Path = ROOT) -> dict[str, Any]:
         ),
         "top_duplicate_test_names": top_duplicate_names,
         "compatibility_test_files": len(compatibility_files),
+        "compatibility_files": compatibility_files,
         "compatibility_examples": compatibility_files[:25],
         "markerless_test_functions": markerless_test_functions,
         "uuid4_call_sites": uuid4_call_sites,

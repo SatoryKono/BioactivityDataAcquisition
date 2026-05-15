@@ -302,10 +302,13 @@ Interpretation:
   `outside_universal_claim_scope`.
 - for a literal universal historical replay claim, use the full-universe
   artifact rather than the retained-corpus artifact. The full-universe
-  artifact publishes both `universal_claim` and
+  artifact publishes `authoritative_truth_surface`, `universal_claim`, and
   `durable_evidence_coverage_claim`; both must be `claimed=true` before
   top-level project wording can say that **any historical run** is exact
   replayable.
+- `authoritative_truth_surface.claim_kind=literal_any_run_exact_replay` is the
+  machine-readable guardrail that marks the full-universe report as the only
+  valid basis for literal **any historical run** wording.
 - in the full-universe artifact, `universal_claim.scope=all_known_historical_runs`
   is the only published scope that may justify wording about **any historical
   run**. Retained-only and narrowed certifiable scopes are weaker and must stay

@@ -1,9 +1,9 @@
 {
   "summary": {
     "snapshot_date": "2026-05-15",
-    "families": 3,
+    "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
-    "budget_warnings": 6
+    "budget_warnings": 10
   },
   "families": [
     {
@@ -42,7 +42,7 @@
       ],
       "duplication_clusters": 0,
       "files": 41,
-      "total_loc": 5527,
+      "total_loc": 5552,
       "files_ge_250_loc": 5,
       "helper_function_ratio": 0.338,
       "max_internal_fan_in": 7,
@@ -67,9 +67,9 @@
       ],
       "duplication_clusters": 0,
       "files": 30,
-      "total_loc": 4123,
+      "total_loc": 4189,
       "files_ge_250_loc": 3,
-      "helper_function_ratio": 0.417,
+      "helper_function_ratio": 0.431,
       "max_internal_fan_in": 4,
       "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.control_plane_artifacts",
       "bounded_growth_budgets": {
@@ -79,6 +79,56 @@
       "budget_warnings": [
         "at_budget:files_ge_250_loc=3/3",
         "at_budget:max_internal_fan_in=4/4"
+      ]
+    },
+    {
+      "name": "application_services_control_plane",
+      "owner": "@bioetl-platform",
+      "linked_rf": "RF-023",
+      "ratchet_stage": "reviewed-baseline",
+      "ratchet_scope": "duplication-report-plus-bounded-growth",
+      "path_prefixes": [
+        "src/bioetl/application/services/control_plane/"
+      ],
+      "duplication_clusters": null,
+      "files": 56,
+      "total_loc": 12116,
+      "files_ge_250_loc": 18,
+      "helper_function_ratio": 0.504,
+      "max_internal_fan_in": 4,
+      "max_internal_fan_in_module": "bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support",
+      "bounded_growth_budgets": {
+        "files_ge_250_loc": 20,
+        "max_internal_fan_in": 4
+      },
+      "budget_warnings": [
+        "near_budget:files_ge_250_loc=18/20",
+        "at_budget:max_internal_fan_in=4/4"
+      ]
+    },
+    {
+      "name": "composition_runtime_builders",
+      "owner": "@bioetl-platform",
+      "linked_rf": "RF-023",
+      "ratchet_stage": "reviewed-baseline",
+      "ratchet_scope": "duplication-report-plus-bounded-growth",
+      "path_prefixes": [
+        "src/bioetl/composition/runtime_builders/"
+      ],
+      "duplication_clusters": null,
+      "files": 36,
+      "total_loc": 5450,
+      "files_ge_250_loc": 6,
+      "helper_function_ratio": 0.487,
+      "max_internal_fan_in": 11,
+      "max_internal_fan_in_module": "bioetl.composition.runtime_builders.inputs_resolver",
+      "bounded_growth_budgets": {
+        "files_ge_250_loc": 7,
+        "max_internal_fan_in": 11
+      },
+      "budget_warnings": [
+        "near_budget:files_ge_250_loc=6/7",
+        "at_budget:max_internal_fan_in=11/11"
       ]
     }
   ]

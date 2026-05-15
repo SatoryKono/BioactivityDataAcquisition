@@ -1,6 +1,18 @@
 version: 1
 policy_scope: observability_metric_declarations
 recording_rule_metrics:
+  - bioetl_processed_records_bronze_current
+  - bioetl_processed_records_gold_deduplicated_current
+  - bioetl_processed_records_gold_excluded_by_contract_current
+  - bioetl_processed_records_gold_quarantined_current
+  - bioetl_processed_records_gold_skipped_current
+  - bioetl_processed_records_gold_written_current
+  - bioetl_processed_records_reconciliation_status
+  - bioetl_processed_records_silver_deduplicated_current
+  - bioetl_processed_records_silver_filtered_out_current
+  - bioetl_processed_records_silver_quarantined_current
+  - bioetl_processed_records_silver_skipped_current
+  - bioetl_processed_records_silver_valid_current
   - bioetl_dq_current_status
   - bioetl_l0_input_status
   - bioetl_l0_status

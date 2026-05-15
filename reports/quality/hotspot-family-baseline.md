@@ -4,10 +4,12 @@
 > Use this artifact as the reviewed RF-06 family baseline for non-regression checks.
 
 - snapshot_date: `2026-05-15`
-- families: `3`
+- families: `5`
 
 | Family | Files | Total LOC | Files >=250 LOC | Helper ratio | Duplication | Max fan-in | Max fan-in module | Budgets | Budget warnings |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |
 | `application_core` | 165 | 20385 | 14 | 0.366 | 0 | 15 | `bioetl.application.core.pipeline_services` | `files_ge_250_loc=14, max_internal_fan_in=15` | `at_budget:files_ge_250_loc=14/14, at_budget:max_internal_fan_in=15/15` |
-| `composition_bootstrap_runtime` | 41 | 5527 | 5 | 0.338 | 0 | 7 | `bioetl.composition.bootstrap.runtime.composite_support_services_factory` | `files_ge_250_loc=6, max_internal_fan_in=7` | `near_budget:files_ge_250_loc=5/6, at_budget:max_internal_fan_in=7/7` |
-| `composition_factories_pipeline` | 30 | 4123 | 3 | 0.417 | 0 | 4 | `bioetl.composition.factories.pipeline.control_plane_artifacts` | `files_ge_250_loc=3, max_internal_fan_in=4` | `at_budget:files_ge_250_loc=3/3, at_budget:max_internal_fan_in=4/4` |
+| `composition_bootstrap_runtime` | 41 | 5552 | 5 | 0.338 | 0 | 7 | `bioetl.composition.bootstrap.runtime.composite_support_services_factory` | `files_ge_250_loc=6, max_internal_fan_in=7` | `near_budget:files_ge_250_loc=5/6, at_budget:max_internal_fan_in=7/7` |
+| `composition_factories_pipeline` | 30 | 4189 | 3 | 0.431 | 0 | 4 | `bioetl.composition.factories.pipeline.control_plane_artifacts` | `files_ge_250_loc=3, max_internal_fan_in=4` | `at_budget:files_ge_250_loc=3/3, at_budget:max_internal_fan_in=4/4` |
+| `application_services_control_plane` | 56 | 12116 | 18 | 0.504 | - | 4 | `bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support` | `files_ge_250_loc=20, max_internal_fan_in=4` | `near_budget:files_ge_250_loc=18/20, at_budget:max_internal_fan_in=4/4` |
+| `composition_runtime_builders` | 36 | 5450 | 6 | 0.487 | - | 11 | `bioetl.composition.runtime_builders.inputs_resolver` | `files_ge_250_loc=7, max_internal_fan_in=11` | `near_budget:files_ge_250_loc=6/7, at_budget:max_internal_fan_in=11/11` |

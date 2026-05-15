@@ -6,10 +6,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.domain.types import BatchID, JsonDict, RunID, RunType
-from bioetl.infrastructure.storage.bronze.metadata_builders import (
-    BronzeLineageMetadataRequest,
-    build_bronze_lineage_metadata,
-)
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import BronzeMetadata, SourceMetadata
@@ -27,6 +23,26 @@ if TYPE_CHECKING:
 
 class BronzeWriterMetadataMixin:
     """Mixin with bronze metadata construction helpers."""
+
+    @staticmethod
+    def _build_legacy_bronze_lineage_sidecar(
+        *,
+        run_id: RunID,
+        run_type: RunType,
+        effective_ts: datetime,
+        provider: str,
+        entity: str,
+        batch_id: BatchID,
+    ) -> dict[str, str]:
+        """Build the baseline `.meta.json` payload without coordinator services."""
+        return {
+            "run_id": str(run_id),
+            "run_type": run_type.value,
+            "ingestion_ts": effective_ts.isoformat(),
+            "provider": provider,
+            "entity": entity,
+            "batch_id": str(batch_id),
+        }
 
     @staticmethod
     def _raise_legacy_bronze_metadata_builder_error(
@@ -79,15 +95,13 @@ class BronzeWriterMetadataMixin:
                 batch_id=batch_id,
                 ingestion_ts=effective_ts,
             )
-        return build_bronze_lineage_metadata(
-            BronzeLineageMetadataRequest(
-                run_id=run_id,
-                run_type=run_type,
-                effective_ts=effective_ts,
-                provider=provider,
-                entity=entity,
-                batch_id=batch_id,
-            ),
+        return self._build_legacy_bronze_lineage_sidecar(
+            run_id=run_id,
+            run_type=run_type,
+            effective_ts=effective_ts,
+            provider=provider,
+            entity=entity,
+            batch_id=batch_id,
         )
 
     def _build_full_bronze_metadata(

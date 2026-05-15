@@ -15,7 +15,6 @@ from collections import deque
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
 
 import pytest
 
@@ -35,6 +34,7 @@ from bioetl.domain.events import PipelineEvent
 from bioetl.domain.ports.noop import NoOpTracing
 from tests.helpers.clock import FixedClock
 from bioetl.domain.types import RunType
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 _NOOP_TRACER = NoOpTracing()
 
@@ -361,7 +361,7 @@ class TestPipelineRunnerLifecycle:
         )
         runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             run_type=RunType.REBUILD,
             logger=mock_logger,
         )
@@ -481,7 +481,7 @@ class TestPipelineRunnerLifecycle:
         )
         runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             run_type=RunType.REBUILD,
             logger=mock_logger,
         )
@@ -563,7 +563,7 @@ class TestPipelineRunnerLifecycle:
         )
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             run_type=RunType.INCREMENTAL,
             logger=mock_logger,
         )
@@ -645,7 +645,7 @@ class TestPipelineRunnerLifecycle:
         )
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             run_type=RunType.INCREMENTAL,
             logger=mock_logger,
         )
@@ -723,7 +723,7 @@ class TestPipelineRunnerLifecycle:
         )
         runtime = RuntimeConfig(run_type=RunType.BACKFILL, limit=None)
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             run_type=RunType.BACKFILL,
             logger=mock_logger,
         )
@@ -807,7 +807,7 @@ class TestPipelineRunnerLifecycle:
         )
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             run_type=RunType.INCREMENTAL,
             logger=mock_logger,
         )
@@ -892,7 +892,7 @@ class TestPipelineRunnerLifecycle:
         )
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             run_type=RunType.INCREMENTAL,
             logger=mock_logger,
         )
@@ -987,7 +987,7 @@ class TestPipelineRunnerLifecycle:
         )
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             run_type=RunType.INCREMENTAL,
             logger=mock_logger,
         )
@@ -1122,7 +1122,7 @@ class TestPipelineRunnerLifecycle:
             vacuum_retention_days=7,
         )
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             run_type=RunType.INCREMENTAL,
             logger=mock_logger,
         )

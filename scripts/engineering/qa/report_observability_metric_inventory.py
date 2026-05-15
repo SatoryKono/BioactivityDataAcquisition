@@ -1191,10 +1191,24 @@ def validate_metric_inventory(
         values = report.get(key, [])
         if not isinstance(values, list):
             continue
-        unallowed = sorted(set(values) - allowed.get(key, set()))
+        allowed_values = allowed.get(key, set())
+        unallowed = sorted(
+            {
+                value
+                for value in values
+                if _drift_allowlist_token(key, value) not in allowed_values
+            }
+        )
         if unallowed:
             violations[key] = unallowed
     return violations
+
+
+def _drift_allowlist_token(key: str, value: str) -> str:
+    """Normalize drift rows for allowlist comparison."""
+    if key == "runtime_label_contract_unresolved":
+        return value.split(" @ ", 1)[0]
+    return value
 
 
 def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:

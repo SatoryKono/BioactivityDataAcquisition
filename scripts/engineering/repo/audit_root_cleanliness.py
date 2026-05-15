@@ -54,6 +54,7 @@ FORBIDDEN_TRACKED_ROOT_FILES: frozenset[str] = frozenset(
         "trivy-results.sarif",
     }
 )
+FORBIDDEN_DATA_SUBPATH_PREFIXES: tuple[str, ...] = ("data/.idea/",)
 
 ALLOWED_ROOT_DIRECTORIES: frozenset[str] = root_governance.BASE_ALLOWED_ROOT_DIRECTORIES
 
@@ -496,6 +497,11 @@ def _collect_structure_policy_violations(
     _collect_docs_policy_violations(tracked_paths, catalog, violations)
     _collect_plan_policy_violations(tracked_paths, catalog, violations)
     _collect_src_policy_violations(tracked_paths, catalog, violations)
+    for path in sorted(tracked_paths):
+        if path == "data/.idea" or path.startswith(FORBIDDEN_DATA_SUBPATH_PREFIXES):
+            violations.append(
+                f"{path}: IDE metadata must not live inside governed data/ surfaces"
+            )
     _collect_blocked_cleanup_violations(repo_root, catalog, violations)
 
     return violations

@@ -89,6 +89,7 @@ PRUNED_RECURSION_DIRS: frozenset[str] = frozenset(
 PRUNED_SUBTREE_DIRS: frozenset[str] = frozenset(
     TECHNICAL_DIRS | GENERATED_DIRS | LOCAL_TOLERATED_ROOT_DIRS
 )
+FORBIDDEN_DATA_EDITOR_DIRS: frozenset[str] = frozenset({".idea"})
 
 # Allowed Python paths
 ALLOWED_PYTHON_PATHS: tuple[str, ...] = (
@@ -470,6 +471,23 @@ def _check_no_python_in_data(project_root: Path) -> Iterator[Violation]:
         )
 
 
+def _check_no_editor_metadata_in_data(project_root: Path) -> Iterator[Violation]:
+    """Проверка отсутствия editor metadata внутри governed data/ surface."""
+    data_path = project_root / "data"
+    if not data_path.exists():
+        return
+
+    for dirname in sorted(FORBIDDEN_DATA_EDITOR_DIRS):
+        candidate = data_path / dirname
+        if candidate.exists():
+            yield Violation(
+                category="DATA_EDITOR_STATE",
+                path=str(candidate.relative_to(project_root)),
+                message="Editor metadata inside data/ запрещена",
+                severity="MUST",
+            )
+
+
 def run_audit(project_root: Path) -> AuditResult:
     """Выполнить полный аудит структуры проекта."""
     result = AuditResult()
@@ -498,6 +516,7 @@ def run_audit(project_root: Path) -> AuditResult:
         _check_no_python_in_docs,
         _check_no_python_in_configs,
         _check_no_python_in_data,
+        _check_no_editor_metadata_in_data,
     ]
 
     for check in checks:

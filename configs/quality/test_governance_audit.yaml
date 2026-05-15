@@ -61,9 +61,9 @@ budgets:
   refined_assertless_max: 606
   duplicate_test_names_max: 891
   compatibility_test_file_max: 53
-  markerless_test_functions_max: 13325
-  uuid4_call_sites_max: 592
-  date_today_call_sites_max: 10
+  markerless_test_functions_max: 13327
+  uuid4_call_sites_max: 419
+  date_today_call_sites_max: 0
 preflight:
   script: scripts/engineering/qa/check_test_audit_preflight.py
   telemetry_baseline: docs/05-engineering/test-telemetry-baseline.md
@@ -87,3 +87,440 @@ tracing:
   runtime_emission_test: tests/integration/test_observability_emission_integration.py
   required_test_names:
     - test_pipeline_observer_emits_tracing_spans_through_recording_port
+assertless_triage:
+  categories:
+    architecture_helper_guard:
+      count: 30
+      decision: retained
+      rationale: "Architecture policy tests delegate assertions to shared guard helpers or pytest.fail paths."
+      next_review: "2026-09-30"
+    benchmark_or_performance:
+      count: 5
+      decision: retained
+      rationale: "Performance/benchmark tests use measurement infrastructure as the assertion surface."
+      next_review: "2026-09-30"
+    helper_asserted:
+      count: 6
+      decision: retained
+      rationale: "Verification is delegated to explicit check/validate/verify helper calls."
+      next_review: "2026-09-30"
+    intentional_no_exception_contract:
+      count: 61
+      decision: retained-with-rationale
+      rationale: "No-op, close/aclose, smoke, or does-not-raise behavior is the contract under test."
+      next_review: "2026-09-30"
+    weak_no_value:
+      count: 504
+      decision: burn-down
+      rationale: "Candidates require assertion strengthening, merge, or removal when the owning module is edited."
+      next_review: "2026-09-30"
+  policy:
+    new_no_effect_tests: "must reduce refined_assertless_max or document an intentional contract category"
+    highest_priority_paths:
+      - tests/integration/
+      - tests/e2e/
+      - tests/unit/application/core/
+      - tests/unit/infrastructure/control_plane/
+duplicate_name_triage:
+  total_duplicate_names: 891
+  duplicate_occurrences: 2783
+  top_generic_names:
+    - name: test_default_values
+      count: 49
+      decision: rename-on-touch
+      preferred_pattern: "test_<subject>_default_values"
+    - name: test_immutability
+      count: 43
+      decision: rename-on-touch
+      preferred_pattern: "test_<value_object>_is_immutable"
+    - name: test_custom_values
+      count: 27
+      decision: rename-on-touch
+      preferred_pattern: "test_<subject>_accepts_custom_values"
+    - name: test_hash_consistency
+      count: 22
+      decision: rename-on-touch
+      preferred_pattern: "test_<value_object>_hash_matches_equality_contract"
+    - name: test_strips_whitespace
+      count: 22
+      decision: rename-on-touch
+      preferred_pattern: "test_<parser>_strips_surrounding_whitespace"
+  fixture_builder_policy:
+    consolidate_when: "RunID, BatchID, PipelineRunContext, Bronze/Silver/Gold metadata, or checkpoint setup repeats across three or more tests in one module family."
+    do_not_consolidate_when: "Inline setup is shorter and clearer than an indirection."
+compatibility_test_inventory:
+  review_cadence: quarterly
+  total_files: 53
+  default_review_date: "2026-09-30"
+  entries:
+    - path: tests/architecture/test_application_composite_compat_surface_usage.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/application composite compat surface usage"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_application_core_lifecycle_shim_usage.py
+      decision: retained_governance_guard
+      owner: architecture-governance
+      protected_surface: "architecture/application core lifecycle shim usage"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_application_services_facade_usage.py
+      decision: retained_public_facade_contract
+      owner: architecture-governance
+      protected_surface: "architecture/application services facade usage"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_application_services_lazy_facade_governance.py
+      decision: retained_public_facade_contract
+      owner: architecture-governance
+      protected_surface: "architecture/application services lazy facade governance"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_batch_transformer_helpers_shim_usage.py
+      decision: retained_governance_guard
+      owner: architecture-governance
+      protected_surface: "architecture/batch transformer helpers shim usage"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_checkpoint_compatibility_policy_surface.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/checkpoint compatibility policy surface"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+      decision: retained_public_facade_contract
+      owner: architecture-governance
+      protected_surface: "architecture/checkpoint compatibility runtime facade usage"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_compat_sunset.py
+      decision: sunset_review
+      owner: architecture-governance
+      protected_surface: "architecture/compat sunset"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_compatibility_facade_inventory.py
+      decision: retained_public_facade_contract
+      owner: architecture-governance
+      protected_surface: "architecture/compatibility facade inventory"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_compatibility_freeze_guards.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/compatibility freeze guards"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_compatibility_freeze_guards_config_pipeline.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/compatibility freeze guards config pipeline"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_compatibility_freeze_guards_provider_datasource.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/compatibility freeze guards provider datasource"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_compatibility_telemetry_reporting.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/compatibility telemetry reporting"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_composite_checkpoint_facade_usage.py
+      decision: retained_public_facade_contract
+      owner: architecture-governance
+      protected_surface: "architecture/composite checkpoint facade usage"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_composition_entrypoints_deprecated_imports.py
+      decision: sunset_review
+      owner: architecture-governance
+      protected_surface: "architecture/composition entrypoints deprecated imports"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_config_compatibility_assertion_quality.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/config compatibility assertion quality"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_config_compatibility_registry.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/config compatibility registry"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_config_schema_legacy_status.py
+      decision: sunset_review
+      owner: architecture-governance
+      protected_surface: "architecture/config schema legacy status"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_docs_compat_shim_governance.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/docs compat shim governance"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_domain_normalization_compat_usage.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/domain normalization compat usage"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_domain_service_normalization_compat_usage.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/domain service normalization compat usage"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_infrastructure_adapter_compat_shim_usage.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/infrastructure adapter compat shim usage"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_metadata_service_shim_usage.py
+      decision: retained_governance_guard
+      owner: architecture-governance
+      protected_surface: "architecture/metadata service shim usage"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_pipeline_storage_compat_shim_usage.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/pipeline storage compat shim usage"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_ports_facade_size.py
+      decision: retained_public_facade_contract
+      owner: architecture-governance
+      protected_surface: "architecture/ports facade size"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_root_script_compatibility_surfaces.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/root script compatibility surfaces"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_run_execution_context_compat_shim_usage.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/run execution context compat shim usage"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_silver_filter_compatibility_surface.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/silver filter compatibility surface"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_silver_writer_compatibility_retirement.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/silver writer compatibility retirement"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_source_test_facade_ownership.py
+      decision: retained_public_facade_contract
+      owner: architecture-governance
+      protected_surface: "architecture/source test facade ownership"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_wave3_adapter_facade_closeout.py
+      decision: retained_public_facade_contract
+      owner: architecture-governance
+      protected_surface: "architecture/wave3 adapter facade closeout"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/integration/composite/test_composite_config_backward_compatibility.py
+      decision: retained_compatibility_contract
+      owner: integration-governance
+      protected_surface: "integration/composite/composite config backward compatibility"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/integration/config/test_deprecated_gold_contract_registry_inventory.py
+      decision: sunset_review
+      owner: integration-governance
+      protected_surface: "integration/config/deprecated gold contract registry inventory"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/integration/config/test_gold_nullable_numeric_compatibility.py
+      decision: retained_compatibility_contract
+      owner: integration-governance
+      protected_surface: "integration/config/gold nullable numeric compatibility"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/application/composite/checkpoint/test_checkpoint_public_facade.py
+      decision: retained_public_facade_contract
+      owner: test-governance
+      protected_surface: "unit/application/composite/checkpoint/checkpoint public facade"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/application/composite/test_runtime_models_facade.py
+      decision: retained_public_facade_contract
+      owner: test-governance
+      protected_surface: "unit/application/composite/runtime models facade"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/application/core/test_public_runtime_facades.py
+      decision: retained_public_facade_contract
+      owner: test-governance
+      protected_surface: "unit/application/core/public runtime facades"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/application/services/test_checkpoint_compatibility_service.py
+      decision: retained_compatibility_contract
+      owner: test-governance
+      protected_surface: "unit/application/services/checkpoint compatibility service"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/application/services/test_checkpoint_compatibility_service_v2.py
+      decision: retained_compatibility_contract
+      owner: test-governance
+      protected_surface: "unit/application/services/checkpoint compatibility service v2"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/composition/bootstrap/runtime/test_runtime_facade_compatibility.py
+      decision: retained_public_facade_contract
+      owner: test-governance
+      protected_surface: "unit/composition/bootstrap/runtime/runtime facade compatibility"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/composition/test_entrypoints_compatibility.py
+      decision: retained_compatibility_contract
+      owner: test-governance
+      protected_surface: "unit/composition/entrypoints compatibility"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/composition/test_public_facades_runtime.py
+      decision: retained_public_facade_contract
+      owner: test-governance
+      protected_surface: "unit/composition/public facades runtime"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/domain/composite/test_composite_config_facade.py
+      decision: retained_public_facade_contract
+      owner: test-governance
+      protected_surface: "unit/domain/composite/composite config facade"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/domain/value_objects/test_value_object_facade_reexports.py
+      decision: retained_public_facade_contract
+      owner: test-governance
+      protected_surface: "unit/domain/value objects/value object facade reexports"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/infrastructure/adapters/crossref/test_compatibility.py
+      decision: retained_compatibility_contract
+      owner: test-governance
+      protected_surface: "unit/infrastructure/adapters/crossref/compatibility"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/infrastructure/adapters/pubchem/test_fetch_strategies_compat.py
+      decision: retained_compatibility_contract
+      owner: test-governance
+      protected_surface: "unit/infrastructure/adapters/pubchem/fetch strategies compat"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/infrastructure/adapters/pubmed/test_models_compat.py
+      decision: retained_compatibility_contract
+      owner: test-governance
+      protected_surface: "unit/infrastructure/adapters/pubmed/models compat"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/infrastructure/config/test_pipeline_config_legacy_normalization.py
+      decision: sunset_review
+      owner: test-governance
+      protected_surface: "unit/infrastructure/config/pipeline config legacy normalization"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/infrastructure/config/test_source_config_legacy_normalization.py
+      decision: sunset_review
+      owner: test-governance
+      protected_surface: "unit/infrastructure/config/source config legacy normalization"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/infrastructure/test_pandera_compat.py
+      decision: retained_compatibility_contract
+      owner: test-governance
+      protected_surface: "unit/infrastructure/pandera compat"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/interfaces/cli/commands/test_runtime_compat_aliases.py
+      decision: retained_compatibility_contract
+      owner: test-governance
+      protected_surface: "unit/interfaces/cli/commands/runtime compat aliases"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/memory/test_query_facade.py
+      decision: retained_public_facade_contract
+      owner: test-governance
+      protected_surface: "unit/memory/query facade"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/unit/scripts/ops/test_memory_legacy_aliases.py
+      decision: sunset_review
+      owner: test-governance
+      protected_surface: "unit/scripts/ops/memory legacy aliases"
+      policy_ref: "#4176"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."

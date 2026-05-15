@@ -5,6 +5,7 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 import pytest
+from bioetl.domain.control_plane import RunInputSnapshotRef
 
 from bioetl.composition.bootstrap.runtime._composite_control_plane_payloads import (
     build_composite_launch_context_snapshot,
@@ -88,6 +89,33 @@ def test_build_composite_source_refs_preserves_seed_dependency_and_enricher_orde
         ("crossref", "publications"),
         ("openalex", "publications"),
     ]
+
+
+@pytest.mark.unit
+def test_build_composite_source_refs_accepts_manifest_backed_snapshot_resolution(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = _build_config()
+    runtime = _build_runtime()
+    runtime.use_cached_bronze = False
+    runtime.replay_of_manifest_id = "manifest-parent-1"
+    manifest_snapshot = RunInputSnapshotRef(
+        snapshot_id="sha256:manifest-snapshot",
+        content_hash="manifest-snapshot",
+        immutable_uri="bronze://pubmed/publications/manifest.jsonl.zst",
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.bootstrap.runtime._composite_control_plane_payloads.resolve_manifest_input_snapshot_refs",
+        lambda **_: (manifest_snapshot,),
+    )
+
+    result = build_composite_source_refs(
+        config,
+        runtime=runtime,
+        settings=SimpleNamespace(),
+    )
+
+    assert all(ref.input_snapshots == (manifest_snapshot,) for ref in result)
 
 
 @pytest.mark.unit

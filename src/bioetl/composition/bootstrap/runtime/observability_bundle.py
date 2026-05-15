@@ -23,6 +23,9 @@ from bioetl.composition.bootstrap.runtime.observability_assembly import (
 from bioetl.composition.observability import (
     ObservabilityBundle,
 )
+from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+)
 from bioetl.domain.ports import (
     AuditPort,
     LoggerPort,
@@ -321,9 +324,9 @@ def _control_plane_settings(*, control_plane: object | None) -> tuple[str, bool,
         getattr(
             control_plane,
             "required_persistence_profile",
-            "degraded_observable",
+            DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
         )
-        or "degraded_observable"
+        or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
     )
     manifest_enabled = bool(getattr(control_plane, "run_manifest_enabled", True))
     ledger_enabled = bool(getattr(control_plane, "run_ledger_enabled", True))

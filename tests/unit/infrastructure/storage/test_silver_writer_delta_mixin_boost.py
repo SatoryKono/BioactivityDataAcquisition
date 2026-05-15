@@ -138,7 +138,6 @@ def test_build_merge_update_predicate_ignores_run_type_precedence() -> None:
 
     assert "source.content_hash <> target.content_hash" in predicate
     assert "_run_type" not in predicate
-
     @pytest.mark.asyncio
     async def test_write_delete_with_partition_cols(self) -> None:
         """Lines 69-70: partition_cols passed through."""

@@ -88,6 +88,19 @@ used operationally.
 | `reports/**` | Bounded working outputs | Clean only generated, non-curated, non-referenced outputs after dry-run. |
 | `docs/99-archive/**` | Historical traceability | Keep by default; remove only duplicate/corrupt artifacts with explicit proof. |
 
+### `reports/quality` TTL subclasses
+
+The machine-readable inventory also defines owner/TTL subclasses for working
+diagnostics under `reports/quality/`:
+
+| Path family | Owner | TTL | Notes |
+| --- | --- | --- | --- |
+| `reports/quality/_tmp_*` | `Engineering / Quality` | 7 days | Transitional local diagnostics inside a retained reports surface |
+| `reports/quality/pretest_guardrails_*.json` | `Engineering / Quality` | 30 days | Timestamped pretest guardrail snapshots kept for short-lived review/history |
+
+These TTL classes do not override the fail-closed review model. They narrow the
+approved candidate families for bounded prune waves.
+
 ## Procedure
 
 ### 1. Inventory

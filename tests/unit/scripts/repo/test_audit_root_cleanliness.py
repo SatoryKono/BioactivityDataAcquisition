@@ -200,6 +200,47 @@ def test_collect_structure_policy_violations_rejects_unapproved_src_root(
     ]
 
 
+def test_collect_structure_policy_violations_rejects_ide_metadata_inside_data(
+    tmp_path: Path,
+) -> None:
+    catalog = {
+        "docs_drafts": {"allowed_files": []},
+        "plans": {
+            "readme": "docs/plans/README.md",
+            "max_active_backlog": 1,
+            "allowed_files": [
+                {
+                    "path": "docs/plans/consolidated-open-tasks-plan-2026-03-21.md",
+                    "lifecycle": "active_backlog",
+                }
+            ],
+        },
+        "src_sidecars": {
+            "approved_roots": [
+                {"path": "src/bioetl"},
+                {"path": "src/tools"},
+                {"path": "src/memory"},
+            ]
+        },
+        "blocked_cleanup_zones": [{"path": "data"}],
+    }
+    (tmp_path / "data").mkdir(parents=True)
+    tracked_paths = [
+        "docs/plans/README.md",
+        "docs/plans/consolidated-open-tasks-plan-2026-03-21.md",
+        "src/bioetl/__init__.py",
+        "data/.idea/workspace.xml",
+    ]
+
+    violations = module._collect_structure_policy_violations(
+        tmp_path, tracked_paths, catalog
+    )
+
+    assert violations == [
+        "data/.idea/workspace.xml: IDE metadata must not live inside governed data/ surfaces"
+    ]
+
+
 def test_approved_root_directories_include_tests_without_extra_catalog_root() -> None:
     catalog = {}
 

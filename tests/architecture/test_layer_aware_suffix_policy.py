@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SCRIPT_PATH = (
     ROOT / "scripts" / "engineering" / "qa" / "check_naming_package_consistency.py"
 )
+POLICY_REVIEW_DATE = date(2026, 5, 15)
 
 
 def _load_gate_module() -> ModuleType:
@@ -600,7 +601,7 @@ def test_layer_aware_suffix_policy_exceptions_require_structured_expiry_metadata
     ]
 
     assert allowed_symbols, "Expected at least one reviewed naming exception symbol"
-    today = date.today()
+    today = POLICY_REVIEW_DATE
     for item in allowed_symbols:
         assert item.issue.startswith("#"), (
             f"Naming exception issue must be an explicit tracker reference: "

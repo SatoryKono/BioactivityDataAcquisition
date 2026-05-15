@@ -31,6 +31,8 @@
     "bioetl_pipeline_health_check_passed",
     "bioetl_pipeline_runs_total",
     "bioetl_pipeline_stage_expected",
+    "bioetl_processed_records_bronze_current",
+    "bioetl_processed_records_silver_valid_current",
     "bioetl_provider_health_status",
     "bioetl_rate_limiter_tokens_available",
     "bioetl_record_flow_invariants_total",
@@ -792,9 +794,6 @@
     ],
     "degraded_evidence_count": [
       "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py"
-    ],
-    "degraded_observable": [
-      "src/bioetl/composition/bootstrap/runtime/observability_bundle.py"
     ],
     "delta_version_after": [
       "src/bioetl/infrastructure/storage/metadata_writer_helpers.py"
@@ -1752,7 +1751,6 @@
     "debug",
     "degraded_evidence",
     "degraded_evidence_count",
-    "degraded_observable",
     "delta_version_after",
     "dependencies must be provided",
     "dependencies_completed",
@@ -2070,6 +2068,7 @@
     "bioetl_policy_violations_total",
     "bioetl_postrun_phase_duration_seconds",
     "bioetl_postrun_phase_events_total",
+    "bioetl_processed_records_reconciliation_status",
     "bioetl_provider_current_status",
     "bioetl_provider_health_status",
     "bioetl_publication_raw_vocab_unknown_total",
@@ -2100,9 +2099,7 @@
     "bioetl_workflow_step_duration_seconds",
     "bioetl_workflow_step_events_total"
   ],
-  "dashboarded_without_declaration": [
-    "bioetl_processed_records_reconciliation_status"
-  ],
+  "dashboarded_without_declaration": [],
   "dashboarded_without_emission": [],
   "dead_metrics": [],
   "declared_metrics": [
@@ -2226,6 +2223,18 @@
     "bioetl_postrun_phase_duration_seconds",
     "bioetl_postrun_phase_events_total",
     "bioetl_probe_mode_fallback_total",
+    "bioetl_processed_records_bronze_current",
+    "bioetl_processed_records_gold_deduplicated_current",
+    "bioetl_processed_records_gold_excluded_by_contract_current",
+    "bioetl_processed_records_gold_quarantined_current",
+    "bioetl_processed_records_gold_skipped_current",
+    "bioetl_processed_records_gold_written_current",
+    "bioetl_processed_records_reconciliation_status",
+    "bioetl_processed_records_silver_deduplicated_current",
+    "bioetl_processed_records_silver_filtered_out_current",
+    "bioetl_processed_records_silver_quarantined_current",
+    "bioetl_processed_records_silver_skipped_current",
+    "bioetl_processed_records_silver_valid_current",
     "bioetl_provider_current_status",
     "bioetl_provider_health_status",
     "bioetl_publication_raw_vocab_unknown_total",
@@ -3128,9 +3137,7 @@
     ]
   },
   "documented_only_metrics": [],
-  "documented_without_registry": [
-    "bioetl_processed_records_reconciliation_status"
-  ],
+  "documented_without_registry": [],
   "documented_without_runtime": [],
   "emitted_metrics": [
     "bioetl_adapter_batch_size",
@@ -3243,6 +3250,17 @@
     "bioetl_postrun_phase_duration_seconds",
     "bioetl_postrun_phase_events_total",
     "bioetl_probe_mode_fallback_total",
+    "bioetl_processed_records_bronze_current",
+    "bioetl_processed_records_gold_deduplicated_current",
+    "bioetl_processed_records_gold_excluded_by_contract_current",
+    "bioetl_processed_records_gold_quarantined_current",
+    "bioetl_processed_records_gold_skipped_current",
+    "bioetl_processed_records_gold_written_current",
+    "bioetl_processed_records_silver_deduplicated_current",
+    "bioetl_processed_records_silver_filtered_out_current",
+    "bioetl_processed_records_silver_quarantined_current",
+    "bioetl_processed_records_silver_skipped_current",
+    "bioetl_processed_records_silver_valid_current",
     "bioetl_provider_health_status",
     "bioetl_publication_raw_vocab_unknown_total",
     "bioetl_quarantine_operator_duration_seconds",
@@ -3285,19 +3303,7 @@
     "bioetl_workflow_step_duration_seconds",
     "bioetl_workflow_step_events_total"
   ],
-  "emitted_without_declaration": [
-    "bioetl_processed_records_bronze_current",
-    "bioetl_processed_records_gold_deduplicated_current",
-    "bioetl_processed_records_gold_excluded_by_contract_current",
-    "bioetl_processed_records_gold_quarantined_current",
-    "bioetl_processed_records_gold_skipped_current",
-    "bioetl_processed_records_gold_written_current",
-    "bioetl_processed_records_silver_deduplicated_current",
-    "bioetl_processed_records_silver_filtered_out_current",
-    "bioetl_processed_records_silver_quarantined_current",
-    "bioetl_processed_records_silver_skipped_current",
-    "bioetl_processed_records_silver_valid_current"
-  ],
+  "emitted_without_declaration": [],
   "helper_backed_emitters": {
     "bioetl_circuit_breaker_failure_total": [
       "src/bioetl/infrastructure/adapters/http/_circuit_breaker_support.py"
@@ -3361,7 +3367,18 @@
     "bioetl_circuit_breaker_success_total",
     "bioetl_circuit_breaker_trips_total",
     "bioetl_postrun_phase_duration_seconds",
-    "bioetl_postrun_phase_events_total"
+    "bioetl_postrun_phase_events_total",
+    "bioetl_processed_records_bronze_current",
+    "bioetl_processed_records_gold_deduplicated_current",
+    "bioetl_processed_records_gold_excluded_by_contract_current",
+    "bioetl_processed_records_gold_quarantined_current",
+    "bioetl_processed_records_gold_skipped_current",
+    "bioetl_processed_records_gold_written_current",
+    "bioetl_processed_records_silver_deduplicated_current",
+    "bioetl_processed_records_silver_filtered_out_current",
+    "bioetl_processed_records_silver_quarantined_current",
+    "bioetl_processed_records_silver_skipped_current",
+    "bioetl_processed_records_silver_valid_current"
   ],
   "live_metrics": [
     "bioetl_adapter_batch_size",
@@ -3474,6 +3491,17 @@
     "bioetl_postrun_phase_duration_seconds",
     "bioetl_postrun_phase_events_total",
     "bioetl_probe_mode_fallback_total",
+    "bioetl_processed_records_bronze_current",
+    "bioetl_processed_records_gold_deduplicated_current",
+    "bioetl_processed_records_gold_excluded_by_contract_current",
+    "bioetl_processed_records_gold_quarantined_current",
+    "bioetl_processed_records_gold_skipped_current",
+    "bioetl_processed_records_gold_written_current",
+    "bioetl_processed_records_silver_deduplicated_current",
+    "bioetl_processed_records_silver_filtered_out_current",
+    "bioetl_processed_records_silver_quarantined_current",
+    "bioetl_processed_records_silver_skipped_current",
+    "bioetl_processed_records_silver_valid_current",
     "bioetl_provider_health_status",
     "bioetl_publication_raw_vocab_unknown_total",
     "bioetl_quarantine_operator_duration_seconds",
@@ -3637,6 +3665,18 @@
     "bioetl_postrun_phase_duration_seconds",
     "bioetl_postrun_phase_events_total",
     "bioetl_probe_mode_fallback_total",
+    "bioetl_processed_records_bronze_current",
+    "bioetl_processed_records_gold_deduplicated_current",
+    "bioetl_processed_records_gold_excluded_by_contract_current",
+    "bioetl_processed_records_gold_quarantined_current",
+    "bioetl_processed_records_gold_skipped_current",
+    "bioetl_processed_records_gold_written_current",
+    "bioetl_processed_records_reconciliation_status",
+    "bioetl_processed_records_silver_deduplicated_current",
+    "bioetl_processed_records_silver_filtered_out_current",
+    "bioetl_processed_records_silver_quarantined_current",
+    "bioetl_processed_records_silver_skipped_current",
+    "bioetl_processed_records_silver_valid_current",
     "bioetl_provider_current_status",
     "bioetl_provider_health_status",
     "bioetl_publication_raw_vocab_unknown_total",
@@ -3780,6 +3820,12 @@
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_pipeline_stage_expected": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_processed_records_bronze_current": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_processed_records_silver_valid_current": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_provider_health_status": [
@@ -4333,8 +4379,8 @@
     "bioetl_quarantine_operator_operations_total @ src/bioetl/application/services/quarantine_service.py:126",
     "bioetl_rate_limiter_tokens_available @ src/bioetl/infrastructure/adapters/http/rate_limiter.py:114",
     "bioetl_rate_limiter_wait_seconds @ src/bioetl/infrastructure/adapters/http/rate_limiter.py:120",
-    "bioetl_replay_drift_events_total @ src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py:293",
-    "bioetl_replay_lag_seconds @ src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py:287",
+    "bioetl_replay_drift_events_total @ src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py:294",
+    "bioetl_replay_lag_seconds @ src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py:288",
     "bioetl_workflow_current_status @ src/bioetl/application/services/workflow_runner_support.py:60",
     "bioetl_workflow_runs_total @ src/bioetl/application/services/workflow_runner_support.py:68",
     "bioetl_workflow_step_duration_seconds @ src/bioetl/application/services/workflow_runner_support.py:158",
@@ -4343,18 +4389,6 @@
     "bioetl_workflow_step_events_total @ src/bioetl/application/services/workflow_transform_service.py:153"
   ],
   "runtime_label_contract_violations": [],
-  "runtime_without_registry": [
-    "bioetl_processed_records_bronze_current",
-    "bioetl_processed_records_gold_deduplicated_current",
-    "bioetl_processed_records_gold_excluded_by_contract_current",
-    "bioetl_processed_records_gold_quarantined_current",
-    "bioetl_processed_records_gold_skipped_current",
-    "bioetl_processed_records_gold_written_current",
-    "bioetl_processed_records_silver_deduplicated_current",
-    "bioetl_processed_records_silver_filtered_out_current",
-    "bioetl_processed_records_silver_quarantined_current",
-    "bioetl_processed_records_silver_skipped_current",
-    "bioetl_processed_records_silver_valid_current"
-  ],
+  "runtime_without_registry": [],
   "unused_declared_metrics": []
 }

@@ -70,6 +70,32 @@ def _write_governance_files(tmp_path: Path) -> None:
         ),
         encoding="utf-8",
     )
+    replay_inventory_path = (
+        tmp_path / "configs" / "quality" / "replay_safe_cleanup_inventory.yaml"
+    )
+    replay_inventory_path.write_text(
+        yaml.safe_dump(
+            {
+                "version": 1,
+                "entries": [
+                    {
+                        "id": "reports_quality_tmp_diagnostics",
+                        "path": "reports/quality/_tmp_*",
+                        "owner": "Engineering / Quality",
+                        "ttl_days": 7,
+                    },
+                    {
+                        "id": "reports_quality_pretest_guardrails_history",
+                        "path": "reports/quality/pretest_guardrails_*.json",
+                        "owner": "Engineering / Quality",
+                        "ttl_days": 30,
+                    },
+                ],
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
 
 
 def _write_review_registry(tmp_path: Path, lanes: list[dict[str, object]]) -> None:
@@ -477,6 +503,10 @@ def test_collect_reports_workspace_evidence_marks_local_only_candidates_for_prun
         "field,value\n",
         encoding="utf-8",
     )
+    (quality_dir / "pretest_guardrails_20260420_174602.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
     monkeypatch.setattr(
         module,
         "_tracked_paths",
@@ -503,6 +533,30 @@ def test_collect_reports_workspace_evidence_marks_local_only_candidates_for_prun
     assert (
         by_path["reports/quality/_tmp_field_level_diagnostics.csv"].classification
         == "PRUNE_CANDIDATE"
+    )
+    assert (
+        by_path["reports/quality/_tmp_field_level_diagnostics.csv"].retention_entry_id
+        == "reports_quality_tmp_diagnostics"
+    )
+    assert (
+        by_path["reports/quality/_tmp_field_level_diagnostics.csv"].retention_ttl_days
+        == 7
+    )
+    assert (
+        by_path["reports/quality/pretest_guardrails_20260420_174602.json"].classification
+        == "PRUNE_CANDIDATE"
+    )
+    assert (
+        by_path[
+            "reports/quality/pretest_guardrails_20260420_174602.json"
+        ].retention_entry_id
+        == "reports_quality_pretest_guardrails_history"
+    )
+    assert (
+        by_path[
+            "reports/quality/pretest_guardrails_20260420_174602.json"
+        ].retention_ttl_days
+        == 30
     )
 
 
@@ -542,3 +596,4 @@ def test_build_root_review_and_reports_workspace_reports_include_new_sections(
     assert root_review_report["root_policy_mismatches"][0]["path"] == "conftest.py"
     assert reports_report["summary"]["PRUNE_CANDIDATE"] == 1
     assert reports_report["reports_workspace_evidence"][0]["path"] == "reports/Codex"
+    assert reports_report["reports_workspace_evidence"][0]["retention_entry_id"] is None

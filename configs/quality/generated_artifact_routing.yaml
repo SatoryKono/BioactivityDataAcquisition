@@ -184,6 +184,14 @@ routes:
       - reports/quality/ci-quality-metrics.json
     notes: Merge-gate quality metrics are emitted under reports/quality.
 
+  - id: pretest-guardrails-quality-report
+    generator: scripts/engineering/dev/pretest_guardrails.sh
+    output_kind: working_report
+    commit_policy: working_output
+    outputs:
+      - reports/quality/pretest_guardrails_*.json
+    notes: Timestamped pretest guardrail snapshots are working diagnostics retained under TTL policy.
+
   - id: pytest-resilient-telemetry-report
     generator: scripts/engineering/ci/run_pytest_resilient.py
     output_kind: working_report

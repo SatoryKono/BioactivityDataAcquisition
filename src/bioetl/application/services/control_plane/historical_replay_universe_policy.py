@@ -12,12 +12,29 @@ if TYPE_CHECKING:
     )
 
 __all__ = [
+    "build_authoritative_truth_surface",
     "build_durable_coverage_claim",
     "build_universal_claim",
     "build_universe_report_id",
 ]
 
 _CLOSED_CERTIFICATION_STATUSES = frozenset({"already_replayable", "already_certified"})
+
+
+def build_authoritative_truth_surface() -> dict[str, object]:
+    """Return the canonical truth surface for literal any-run replay claims."""
+    return {
+        "surface": "historical_replay_universe_closure_report",
+        "scope": "all_known_historical_runs",
+        "claim_kind": "literal_any_run_exact_replay",
+        "authoritative": True,
+        "required_inputs": (
+            "local_retained_control_plane_inventory",
+            "external_archived_universe_records",
+            "durable_evidence_coverage_verdicts",
+            "historical_replay_certification_statuses",
+        ),
+    }
 
 
 def build_universal_claim(
@@ -67,11 +84,13 @@ def build_durable_coverage_claim(
 def build_universe_report_id(
     *,
     inventory: HistoricalReplayUniverseInventorySnapshot,
+    authoritative_truth_surface: dict[str, object],
     universal_claim: dict[str, object],
     durable_claim: dict[str, object],
 ) -> str:
     payload = {
         "inventory": inventory.to_dict(),
+        "authoritative_truth_surface": authoritative_truth_surface,
         "universal_claim": universal_claim,
         "durable_evidence_coverage_claim": durable_claim,
     }

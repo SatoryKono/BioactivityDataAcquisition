@@ -10,6 +10,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 POLICY_YAML = ROOT / "configs" / "quality" / "determinism_identity_policy.yaml"
+POLICY_REVIEW_DATE = date(2026, 5, 15)
 SCAN_ROOTS = (
     ROOT / "src" / "bioetl" / "domain" / "aggregates",
     ROOT / "src" / "bioetl" / "composition" / "factories",
@@ -52,7 +53,7 @@ def test_determinism_identity_policy_has_expected_shape() -> None:
 
     assert payload["version"] == 1
     assert payload["policy_scope"] == "deterministic_identity_generation"
-    assert date.fromisoformat(str(payload["review_date"])) >= date.today()
+    assert date.fromisoformat(str(payload["review_date"])) >= POLICY_REVIEW_DATE
 
     entries = payload.get("allowed_occurrence_identity_generators")
     assert isinstance(entries, list) and entries

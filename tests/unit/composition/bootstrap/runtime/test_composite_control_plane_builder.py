@@ -260,6 +260,7 @@ def test_build_composite_control_plane_bundle_can_disable_ledger_while_keeping_m
                     control_plane=SimpleNamespace(
                         run_manifest_enabled=True,
                         run_ledger_enabled=False,
+                        required_persistence_profile="degraded_observable",
                     )
                 ),
             ),
@@ -572,6 +573,7 @@ def test_build_composite_control_plane_bundle_persists_manifest_created_when_led
                     control_plane=SimpleNamespace(
                         run_manifest_enabled=True,
                         run_ledger_enabled=True,
+                        required_persistence_profile="degraded_observable",
                     )
                 ),
             ),
@@ -624,6 +626,7 @@ def test_build_composite_control_plane_bundle_persists_effective_config_artifact
                     control_plane=SimpleNamespace(
                         run_manifest_enabled=True,
                         run_ledger_enabled=False,
+                        required_persistence_profile="degraded_observable",
                     )
                 ),
             ),

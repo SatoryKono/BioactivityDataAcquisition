@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
 
 import pytest
 
@@ -18,6 +17,7 @@ from bioetl.domain.types.checkpoint_metadata import (
     CheckpointCompatibilityResult,
     CheckpointMetadata,
 )
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 
 @pytest.fixture
@@ -60,7 +60,7 @@ def compatible_checkpoint_compatibility_service():
 @pytest.fixture
 def checkpoint_manager(mock_checkpoint_port, mock_logger):
     """Create CheckpointRuntimeService instance."""
-    run_id = uuid4()
+    run_id = deterministic_uuid_from_callsite("replay-sensitive")
     return CheckpointRuntimeService(
         checkpoint_port=mock_checkpoint_port,
         logger=mock_logger,
@@ -76,7 +76,7 @@ class TestCheckpointManagerInit:
 
     def test_init_with_all_params(self, mock_checkpoint_port, mock_logger):
         """Test initialization with all parameters."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("replay-sensitive")
         manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -101,13 +101,13 @@ class TestCheckpointManagerLoadCheckpoint:
         compatible_checkpoint_compatibility_service,
     ):
         """Test load_checkpoint when resuming and checkpoint exists."""
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 1000},
         )
 
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("replay-sensitive")
         manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -133,7 +133,7 @@ class TestCheckpointManagerLoadCheckpoint:
         compatible_checkpoint_compatibility_service,
     ) -> None:
         """Typed resume metadata keeps adaptive-memory trace entries for replay."""
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {
@@ -162,7 +162,7 @@ class TestCheckpointManagerLoadCheckpoint:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             checkpoint_compatibility_service=(
                 compatible_checkpoint_compatibility_service
@@ -188,7 +188,7 @@ class TestCheckpointManagerLoadCheckpoint:
         compatible_checkpoint_compatibility_service,
     ):
         """Successful resume emits bounded checkpoint load status."""
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 1000},
@@ -198,7 +198,7 @@ class TestCheckpointManagerLoadCheckpoint:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             metrics=mock_metrics,
             checkpoint_compatibility_service=(
@@ -222,7 +222,7 @@ class TestCheckpointManagerLoadCheckpoint:
         """Test load_checkpoint when resuming but no checkpoint exists."""
         mock_checkpoint_port.load.return_value = None
 
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("replay-sensitive")
         manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -239,7 +239,7 @@ class TestCheckpointManagerLoadCheckpoint:
     async def test_load_checkpoint_fails_closed_without_compatibility_context(
         self, mock_checkpoint_port, mock_logger, mock_metrics
     ) -> None:
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 1000},
@@ -249,7 +249,7 @@ class TestCheckpointManagerLoadCheckpoint:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             metrics=mock_metrics,
         )
@@ -289,7 +289,7 @@ class TestCheckpointManagerLoadCheckpoint:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             metrics=mock_metrics,
         )
@@ -307,7 +307,7 @@ class TestCheckpointManagerLoadCheckpoint:
         self, mock_checkpoint_port, mock_logger
     ):
         """Test load_checkpoint when not resuming."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("replay-sensitive")
         manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -375,13 +375,13 @@ class TestCheckpointManagerFullScanOnly:
         """Test load_checkpoint returns None when loading_strategy=FULL_SCAN_ONLY."""
         from bioetl.domain.medallion import LoadingStrategy
 
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 1000},
         )
 
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("replay-sensitive")
         manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -409,7 +409,7 @@ class TestCheckpointManagerFullScanOnly:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_publication",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             loading_strategy=LoadingStrategy.FULL_SCAN_ONLY,
             metrics=mock_metrics,
@@ -430,7 +430,7 @@ class TestCheckpointManagerFullScanOnly:
         """Test that warning includes pipeline name in extra context."""
         from bioetl.domain.medallion import LoadingStrategy
 
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("replay-sensitive")
         manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -452,13 +452,13 @@ class TestCheckpointManagerFullScanOnly:
         compatible_checkpoint_compatibility_service,
     ):
         """Test load_checkpoint works normally when no loading_strategy set."""
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 1000},
         )
 
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("replay-sensitive")
         manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -484,7 +484,7 @@ class TestCheckpointManagerFullScanOnly:
         """Test no warning when resume=False, even with full_scan_only."""
         from bioetl.domain.medallion import LoadingStrategy
 
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("replay-sensitive")
         manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -506,13 +506,13 @@ class TestCheckpointManagerFullScanOnly:
         compatible_checkpoint_compatibility_service,
     ):
         """Test that loading_strategy defaults to None (allows resume)."""
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 500},
         )
 
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("replay-sensitive")
         manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -541,13 +541,13 @@ class TestCheckpointManagerLoadingStrategy:
         """Test load_checkpoint returns None when loading_strategy=FULL_SCAN_ONLY."""
         from bioetl.domain.medallion import LoadingStrategy
 
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 1000},
         )
 
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("replay-sensitive")
         manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -572,13 +572,13 @@ class TestCheckpointManagerLoadingStrategy:
     ):
         """Test loading_strategy=None allows normal checkpoint resume."""
 
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 1000},
         )
 
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("replay-sensitive")
         manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -604,7 +604,7 @@ class TestCheckpointManagerLoadingStrategy:
         """Test that warning message references ADR-031."""
         from bioetl.domain.medallion import LoadingStrategy
 
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("replay-sensitive")
         manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -626,7 +626,7 @@ class TestCheckpointManagerLoadingStrategy:
         await asyncio.sleep(0)
         from bioetl.domain.medallion import LoadingStrategy
 
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("replay-sensitive")
         # Note: CheckpointRuntimeService receives LoadingStrategy enum from PipelineConfig
         # This test verifies the enum-based behavior
         manager = CheckpointRuntimeService(
@@ -648,7 +648,7 @@ class TestCheckpointManagerCompatibilityPolicy:
     async def test_soft_fail_policy_blocks_resume_on_incompatibility(
         self, mock_checkpoint_port, mock_logger, mock_metrics
     ) -> None:
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 42, "effective_config_hash": "old"},
@@ -667,7 +667,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             metrics=mock_metrics,
             checkpoint_compatibility_service=compatibility_service,
@@ -691,7 +691,7 @@ class TestCheckpointManagerCompatibilityPolicy:
     async def test_observe_policy_allows_resume_on_incompatibility(
         self, mock_checkpoint_port, mock_logger, mock_metrics
     ) -> None:
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 84, "effective_config_hash": "old"},
@@ -710,7 +710,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             metrics=mock_metrics,
             checkpoint_compatibility_service=compatibility_service,
@@ -742,7 +742,7 @@ class TestCheckpointManagerCompatibilityPolicy:
     async def test_observe_policy_still_allows_resume_on_non_identity_mismatch(
         self, mock_checkpoint_port, mock_logger, mock_metrics
     ) -> None:
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 84, "dq_contract_compatibility_hash": "old"},
@@ -761,7 +761,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             metrics=mock_metrics,
             checkpoint_compatibility_service=compatibility_service,
@@ -792,7 +792,7 @@ class TestCheckpointManagerCompatibilityPolicy:
     async def test_hard_fail_policy_raises_on_incompatibility(
         self, mock_checkpoint_port, mock_logger, mock_metrics
     ) -> None:
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 84, "effective_config_hash": "old"},
@@ -811,7 +811,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             metrics=mock_metrics,
             checkpoint_compatibility_service=compatibility_service,
@@ -840,7 +840,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=False,
             current_metadata=CheckpointMetadata(
                 records_processed=0,
@@ -895,7 +895,7 @@ class TestCheckpointManagerCompatibilityPolicy:
     async def test_soft_fail_resume_logs_checkpoint_identity_payload(
         self, mock_checkpoint_port, mock_logger
     ) -> None:
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {
@@ -922,7 +922,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             checkpoint_compatibility_service=compatibility_service,
             current_metadata=CheckpointMetadata(
@@ -953,7 +953,7 @@ class TestCheckpointManagerCompatibilityPolicy:
     async def test_soft_fail_resume_blocks_when_current_metadata_is_missing(
         self, mock_checkpoint_port, mock_logger, mock_metrics
     ) -> None:
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 42, "manifest_id": "manifest-old"},
@@ -964,7 +964,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             metrics=mock_metrics,
             checkpoint_compatibility_service=compatibility_service,
@@ -995,7 +995,7 @@ class TestCheckpointManagerCompatibilityPolicy:
     async def test_hard_fail_resume_raises_when_context_missing(
         self, mock_checkpoint_port, mock_logger, mock_metrics
     ) -> None:
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 42},
@@ -1005,7 +1005,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             metrics=mock_metrics,
             compatibility_policy="hard_fail",
@@ -1029,7 +1029,7 @@ class TestCheckpointManagerCompatibilityPolicy:
     async def test_observe_resume_blocks_unproven_identity_with_diagnostic(
         self, mock_checkpoint_port, mock_logger, mock_metrics
     ) -> None:
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 42},
@@ -1039,7 +1039,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             metrics=mock_metrics,
             checkpoint_compatibility_service=CheckpointCompatibilityService(
@@ -1068,7 +1068,7 @@ class TestCheckpointManagerCompatibilityPolicy:
     async def test_hard_fail_policy_raises_on_manifest_identity_mismatch(
         self, mock_checkpoint_port, mock_logger
     ) -> None:
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 100, "manifest_id": "manifest-old"},
@@ -1078,7 +1078,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             checkpoint_compatibility_service=CheckpointCompatibilityService(
                 logger=mock_logger
@@ -1096,7 +1096,7 @@ class TestCheckpointManagerCompatibilityPolicy:
     async def test_hard_fail_policy_raises_on_contract_reference_mismatch(
         self, mock_checkpoint_port, mock_logger
     ) -> None:
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {
@@ -1110,7 +1110,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             checkpoint_compatibility_service=CheckpointCompatibilityService(
                 logger=mock_logger
@@ -1129,7 +1129,7 @@ class TestCheckpointManagerCompatibilityPolicy:
     async def test_hard_fail_policy_raises_on_exact_replay_snapshot_mismatch(
         self, mock_checkpoint_port, mock_logger
     ) -> None:
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {
@@ -1143,7 +1143,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             checkpoint_compatibility_service=CheckpointCompatibilityService(
                 logger=mock_logger
@@ -1162,7 +1162,7 @@ class TestCheckpointManagerCompatibilityPolicy:
     async def test_hard_fail_policy_allows_exact_replay_resume_with_memory_trace(
         self, mock_checkpoint_port, mock_logger
     ) -> None:
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         decision_trace = [
             {
                 "decision_index": 1,
@@ -1202,7 +1202,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             checkpoint_compatibility_service=CheckpointCompatibilityService(
                 logger=mock_logger
@@ -1240,7 +1240,7 @@ class TestCheckpointManagerCompatibilityPolicy:
     async def test_hard_fail_policy_raises_on_composite_run_identity_mismatch(
         self, mock_checkpoint_port, mock_logger
     ) -> None:
-        saved_run_id = uuid4()
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {
@@ -1253,7 +1253,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             checkpoint_compatibility_service=CheckpointCompatibilityService(
                 logger=mock_logger

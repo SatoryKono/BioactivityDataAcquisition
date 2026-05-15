@@ -5,9 +5,10 @@ from __future__ import annotations
 from dataclasses import asdict
 
 from bioetl.domain.control_plane._reproducibility_profile_builders import (
-    _PUBLISHED_COMPOSITE_FAMILIES,
-    _PUBLISHED_SOURCE_FAMILIES,
     _PUBLISHED_SUPPORTED_SOURCE_FAMILIES,
+    _REGISTERED_COMPOSITE_FAMILIES,
+    _REGISTERED_FAMILY_EXECUTION_CONTEXTS,
+    _REGISTERED_SOURCE_FAMILIES,
     _build_composite_reproducibility_family_profile,
     _build_source_reproducibility_family_profile,
     resolve_reproducibility_family,
@@ -18,6 +19,32 @@ from bioetl.domain.control_plane._reproducibility_profile_types import (
 )
 
 
+def registered_reproducibility_families() -> list[str]:
+    """Return every registered reproducibility family in the repository."""
+    return list(_REGISTERED_SOURCE_FAMILIES + _REGISTERED_COMPOSITE_FAMILIES)
+
+
+def registered_reproducibility_family_inventory() -> list[dict[str, object]]:
+    """Return certification verdicts for every registered pipeline family."""
+    inventory: list[dict[str, object]] = []
+    for family, execution_context in sorted(
+        _REGISTERED_FAMILY_EXECUTION_CONTEXTS.items(),
+        key=lambda item: (str(item[1]), str(item[0])),
+    ):
+        provider, entity = family.split(".", maxsplit=1)
+        inventory.append(
+            asdict(
+                resolve_reproducibility_family_profile(
+                    provider=provider,
+                    entity=entity,
+                    contract_ref=family,
+                    execution_context=execution_context,
+                )
+            )
+        )
+    return inventory
+
+
 def published_supported_reproducibility_families() -> list[str]:
     """Return the authoritative strict exact-replay source-family inventory."""
     return list(_PUBLISHED_SUPPORTED_SOURCE_FAMILIES)
@@ -25,42 +52,21 @@ def published_supported_reproducibility_families() -> list[str]:
 
 def published_production_reproducibility_families() -> list[str]:
     """Return the authoritative production-family inventory."""
-    return list(_PUBLISHED_SOURCE_FAMILIES + _PUBLISHED_COMPOSITE_FAMILIES)
+    return registered_reproducibility_families()
 
 
 def published_supported_boundary_families() -> list[str]:
     """Return all published families that satisfy the supported replay boundary."""
-    return list(_PUBLISHED_SOURCE_FAMILIES + _PUBLISHED_COMPOSITE_FAMILIES)
+    return [
+        str(item["family"])
+        for item in registered_reproducibility_family_inventory()
+        if bool(item["strict_exact_replay_supported"])
+    ]
 
 
 def published_reproducibility_family_inventory() -> list[dict[str, object]]:
     """Return reproducibility-profile verdicts for every published family."""
-    inventory: list[dict[str, object]] = []
-    for family in _PUBLISHED_SOURCE_FAMILIES:
-        provider, entity = family.split(".", maxsplit=1)
-        inventory.append(
-            asdict(
-                resolve_reproducibility_family_profile(
-                    provider=provider,
-                    entity=entity,
-                    contract_ref=family,
-                    execution_context="source",
-                )
-            )
-        )
-    for family in _PUBLISHED_COMPOSITE_FAMILIES:
-        provider, entity = family.split(".", maxsplit=1)
-        inventory.append(
-            asdict(
-                resolve_reproducibility_family_profile(
-                    provider=provider,
-                    entity=entity,
-                    contract_ref=family,
-                    execution_context="composite",
-                )
-            )
-        )
-    return inventory
+    return registered_reproducibility_family_inventory()
 
 
 def resolve_reproducibility_family_profile(

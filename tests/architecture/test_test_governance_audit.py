@@ -85,6 +85,66 @@ def test_static_test_governance_report_stays_within_committed_budgets() -> None:
 
 
 @pytest.mark.architecture
+def test_assertless_triage_matches_static_report_categories() -> None:
+    payload = _load_yaml(CONFIG_PATH)
+    report = collect_test_governance_report(ROOT)
+    triage = cast(YamlMap, payload["assertless_triage"])
+    categories = cast(YamlMap, triage["categories"])
+
+    configured_counts = {
+        category: int(cast(YamlMap, entry)["count"])
+        for category, entry in categories.items()
+    }
+    assert configured_counts == report["assertless_category_counts"]
+    assert sum(configured_counts.values()) == report["refined_assertless_tests"]
+    assert cast(YamlMap, triage["policy"])["new_no_effect_tests"]
+
+
+@pytest.mark.architecture
+def test_duplicate_name_triage_tracks_top_generic_names() -> None:
+    payload = _load_yaml(CONFIG_PATH)
+    report = collect_test_governance_report(ROOT)
+    triage = cast(YamlMap, payload["duplicate_name_triage"])
+
+    assert triage["total_duplicate_names"] == report["duplicate_test_names"]
+    assert triage["duplicate_occurrences"] == report["duplicate_test_name_occurrences"]
+    configured_top = {
+        cast(str, entry["name"]): int(cast(int, entry["count"]))
+        for entry in cast(list[YamlMap], triage["top_generic_names"])
+    }
+    report_top = {
+        cast(str, entry["name"]): int(cast(int, entry["count"]))
+        for entry in report["top_duplicate_test_names"][: len(configured_top)]
+    }
+    assert configured_top == report_top
+    assert cast(YamlMap, triage["fixture_builder_policy"])["consolidate_when"]
+
+
+@pytest.mark.architecture
+def test_compatibility_inventory_covers_every_detected_compatibility_test_file() -> None:
+    payload = _load_yaml(CONFIG_PATH)
+    report = collect_test_governance_report(ROOT)
+    inventory = cast(YamlMap, payload["compatibility_test_inventory"])
+    entries = cast(list[YamlMap], inventory["entries"])
+    configured_paths = {cast(str, entry["path"]) for entry in entries}
+
+    assert inventory["total_files"] == report["compatibility_test_files"]
+    assert configured_paths == set(report["compatibility_files"])
+    for entry in entries:
+        assert entry["decision"] in {
+            "retained_compatibility_contract",
+            "retained_governance_guard",
+            "retained_public_facade_contract",
+            "sunset_review",
+        }
+        assert cast(str, entry["owner"])
+        assert cast(str, entry["protected_surface"])
+        assert cast(str, entry["policy_ref"]) == "#4176"
+        assert cast(str, entry["review_date"]) >= "2026-05-15"
+        assert cast(str, entry["rationale"]).strip()
+
+
+@pytest.mark.architecture
 def test_preflight_reports_missing_git_lfs_as_strict_reproducibility_blocker() -> None:
     def fake_git_runner(args: list[str]) -> subprocess.CompletedProcess[str]:
         values = {

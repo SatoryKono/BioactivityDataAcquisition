@@ -58,6 +58,31 @@ class _DeltaWriteDispatchPolicy:
 _MERGE_UPDATE_POLICY = "content_hash_only"
 
 
+@dataclass(frozen=True, slots=True)
+class ReplaySafeRerunContract:
+    """Machine-readable Silver rerun contract for merge-based semantic writes."""
+
+    merge_update_policy: str
+    requires_content_hash: bool
+    external_guards: tuple[str, ...]
+    strict_replay_safe: bool
+
+
+def build_replay_safe_rerun_contract(
+    records: pa.Table | pa.RecordBatchReader,
+) -> ReplaySafeRerunContract:
+    """Describe the actual replay-safe rerun guarantees of one merge input."""
+    has_content_hash = "content_hash" in records.schema.names
+    return ReplaySafeRerunContract(
+        merge_update_policy=(
+            _MERGE_UPDATE_POLICY if has_content_hash else "full_row_update"
+        ),
+        requires_content_hash=has_content_hash,
+        external_guards=("lifecycle_cleanup", "exclusive_locks"),
+        strict_replay_safe=has_content_hash,
+    )
+
+
 def _build_content_changed_predicate(
     source_alias: str = "source",
     target_alias: str = "target",
@@ -75,12 +100,12 @@ def _build_merge_update_predicate(records: pa.Table | pa.RecordBatchReader) -> s
 
     Silver/Gold physical Delta rows intentionally exclude occurrence-scoped runtime
     anchors such as ``_run_type`` via ``drop_nondeterministic_persisted_fields``.
-    Row-level update decisions therefore remain content-hash based; rebuild/backfill
-    semantics are enforced by lifecycle cleanup and exclusive locks, not by a
-    run-type precedence predicate inside the persisted Delta merge.
+    Row-level update decisions therefore remain content-hash based; the effective
+    storage contract is exposed via ``build_replay_safe_rerun_contract()`` instead
+    of a hidden run-type precedence predicate inside the persisted Delta merge.
     """
-    schema = records.schema
-    if "content_hash" not in schema.names:
+    contract = build_replay_safe_rerun_contract(records)
+    if not contract.requires_content_hash:
         return "true"
 
     content_changed = _build_content_changed_predicate()

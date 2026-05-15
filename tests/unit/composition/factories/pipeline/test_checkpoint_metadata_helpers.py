@@ -7,6 +7,8 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, cast
 from uuid import uuid4
 
+import pytest
+
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
 
@@ -21,10 +23,16 @@ from bioetl.composition.factories.pipeline.checkpoint_metadata_helpers import (
     build_current_checkpoint_metadata,
 )
 from bioetl.domain.context import CachedBronzeContext
-from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
+from bioetl.domain.control_plane import (
+    ReplayCapability,
+    RunInputSnapshotRef,
+    RunSourceRef,
+)
 from bioetl.domain.types import RunType
 from bioetl.domain.value_objects.run_context import RunContext
 from tests.helpers.control_plane import InMemoryRunManifestStore
+
+pytestmark = pytest.mark.unit
 
 
 def _make_pipeline(**overrides: object) -> object:
@@ -193,3 +201,55 @@ def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
     )
 
     assert checkpoint_metadata.execution_fingerprint == manifest.execution_fingerprint
+
+
+def test_build_current_checkpoint_metadata_prefers_manifest_snapshot_identity(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Checkpoint metadata should reuse persisted manifest snapshot refs first."""
+    run_context = RunContext.create(
+        run_id=uuid4(),
+        run_type=RunType.INCREMENTAL,
+        started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+        provider="chembl",
+        entity="activity",
+        pipeline_version="1.2.3",
+        git_commit="test-commit-hash",
+        dependency_lock_hash="sha256:deps-001",
+        config_hash="a" * 64,
+        effective_config_hash="a" * 64,
+        manifest_id="manifest-1",
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+        normalization_profile_ref="chembl.activity",
+        normalization_profile_version="2.0.0",
+        normalization_profile_hash="p" * 64,
+        dq_contract_compatibility_hash="dq-hash",
+        effective_config_artifact_id="artifact-1",
+    )
+    pipeline = _make_pipeline(
+        runtime=SimpleNamespace(
+            run_type=RunType.INCREMENTAL,
+            exact_replay=True,
+            cached_bronze=CachedBronzeContext.disabled(),
+        ),
+        services=SimpleNamespace(
+            metadata_coordinator=SimpleNamespace(run_context=run_context)
+        ),
+    )
+    manifest_snapshot = RunInputSnapshotRef(
+        snapshot_id="sha256:manifest-snapshot",
+        content_hash="manifest-snapshot",
+        immutable_uri="bronze://chembl/activity/manifest.jsonl.zst",
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.factories.pipeline.checkpoint_metadata_helpers.resolve_manifest_input_snapshot_refs",
+        lambda **_: (manifest_snapshot,),
+    )
+
+    metadata = build_current_checkpoint_metadata(pipeline)
+
+    assert metadata.input_snapshot_ids == ("sha256:manifest-snapshot",)
+    assert metadata.input_snapshot_refs[0]["immutable_uri"] == (
+        "bronze://chembl/activity/manifest.jsonl.zst"
+    )

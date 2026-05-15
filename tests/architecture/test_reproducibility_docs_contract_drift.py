@@ -100,8 +100,8 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
     assert "### Input snapshot identity vs locator" in text
     assert "`snapshot_id` is content-addressed as `sha256:{content_hash}`" in text
     assert "`bronze://{relative_path_from_bronze_root}`" in text
-    assert "Supported production and debug-critical launches inherit" in text
-    assert "this effective default is `replay_ready`" in text
+    assert "Executable launches default to `replay_ready`" in text
+    assert "effective profile is promoted to the published strict" in text
     assert "The effective default is fail-closed" in text
     assert "post-capture replayable parent evidence" in text
     assert "live_capture_snapshot_materialized" in text

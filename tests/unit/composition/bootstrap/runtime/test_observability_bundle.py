@@ -88,6 +88,7 @@ class TestValidateObservabilityPreflightImpl:
             environment="prod",
             logger=logger,
             allow_noop_in_prod=True,
+            control_plane=_settings("prod").pipeline.control_plane,
         )
 
         event_names = [call[0][0] for call in logger.warning.call_args_list]
@@ -320,6 +321,7 @@ class TestValidateObservabilityPreflightImpl:
             metrics=MagicMock(),
             environment="prod",
             logger=logger,
+            control_plane=_settings("prod").pipeline.control_plane,
         )
 
         logger.warning.assert_not_called()

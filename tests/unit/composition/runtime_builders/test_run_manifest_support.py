@@ -30,7 +30,7 @@ from bioetl.composition.runtime_builders._run_manifest_support import (
     resolve_replay_capability,
     validate_reproducible_sink_modes,
 )
-from bioetl.domain.control_plane import ReplayCapability
+from bioetl.domain.control_plane import ReplayCapability, RunInputSnapshotRef
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.config import Settings
@@ -101,7 +101,9 @@ def test_build_manifest_create_request_uses_supplied_reproducibility_context(
         ]
         return ("source-ref",)
 
-    def _fake_build_manifest_launch_context(*, reproducibility_context: object, **_: object):
+    def _fake_build_manifest_launch_context(
+        *, reproducibility_context: object, **_: object
+    ):
         captured["launch_context_context"] = reproducibility_context
         return {"required_persistence_profile": "forensic_grade", "exact_replay": False}
 
@@ -126,9 +128,7 @@ def test_build_manifest_create_request_uses_supplied_reproducibility_context(
         )
 
     def _fake_validate_required_runtime_persistence_profile(**kwargs: object):
-        captured["validated_required_profile"] = kwargs[
-            "required_persistence_profile"
-        ]
+        captured["validated_required_profile"] = kwargs["required_persistence_profile"]
 
     monkeypatch.setattr(
         "bioetl.composition.runtime_builders._run_manifest_creation_support._build_manifest_source_refs",
@@ -328,6 +328,35 @@ def test_build_run_source_refs_fails_closed_for_replay_ready_without_snapshots()
             entity="activity",
             required_persistence_profile="replay_ready",
         )
+
+
+@pytest.mark.unit
+def test_build_run_source_refs_accepts_manifest_backed_snapshot_refs(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = _make_settings()
+    ctx = _make_run_context(query=None, exact_replay=True)
+    manifest_snapshot = RunInputSnapshotRef(
+        snapshot_id="sha256:manifest-snapshot",
+        content_hash="manifest-snapshot",
+        immutable_uri="bronze://chembl/activity/manifest.jsonl.zst",
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders._run_manifest_support.resolve_pipeline_input_snapshot_refs",
+        lambda **_: (manifest_snapshot,),
+    )
+
+    source_refs = build_run_source_refs(
+        ctx=ctx,
+        cached_bronze=None,
+        settings=settings,
+        provider="chembl",
+        entity="activity",
+        required_persistence_profile="replay_ready",
+    )
+
+    assert len(source_refs) == 1
+    assert source_refs[0].input_snapshots == (manifest_snapshot,)
 
 
 @pytest.mark.unit

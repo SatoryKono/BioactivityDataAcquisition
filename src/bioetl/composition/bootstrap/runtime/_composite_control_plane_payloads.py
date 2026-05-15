@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
-    build_cached_bronze_input_snapshot_refs,
+from bioetl.composition.runtime_builders.input_snapshot_resolution import (
+    resolve_cached_bronze_input_snapshot_refs,
+    resolve_manifest_input_snapshot_refs,
 )
 from bioetl.composition.runtime_builders.run_manifest_support import (
     to_serializable_mapping,
@@ -123,8 +125,18 @@ def _build_composite_input_snapshots(
     entity: str,
     pipeline_name: str,
 ) -> tuple[RunInputSnapshotRef, ...]:
-    """Resolve cached-Bronze snapshots for one composite member pipeline."""
-    if runtime is None or not runtime.use_cached_bronze:
+    """Resolve immutable snapshot refs for one composite member pipeline."""
+    if runtime is None:
+        return ()
+    replay_of_manifest_id = getattr(runtime, "replay_of_manifest_id", None)
+    replay_of_run_id = getattr(runtime, "replay_of_run_id", None)
+    if replay_of_manifest_id or replay_of_run_id:
+        return resolve_manifest_input_snapshot_refs(
+            settings=settings,
+            manifest_id=replay_of_manifest_id,
+            run_id=replay_of_run_id,
+        )
+    if not runtime.use_cached_bronze:
         return ()
     bronze_root = _resolve_composite_bronze_root(
         runtime=runtime,
@@ -133,9 +145,15 @@ def _build_composite_input_snapshots(
         entity=entity,
         pipeline_name=pipeline_name,
     )
-    return build_cached_bronze_input_snapshot_refs(
-        bronze_root=bronze_root,
-        bronze_date=runtime.cached_bronze_date,
+    return resolve_cached_bronze_input_snapshot_refs(
+        cached_bronze=SimpleNamespace(
+            enabled=True,
+            bronze_path=str(bronze_root),
+            bronze_date=runtime.cached_bronze_date,
+        ),
+        settings=settings,
+        provider=provider,
+        entity=entity,
     )
 
 

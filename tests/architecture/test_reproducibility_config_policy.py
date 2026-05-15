@@ -8,6 +8,11 @@ from typing import cast
 import pytest
 import yaml
 
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    registered_reproducibility_families,
+)
+from bioetl.infrastructure.config import PipelineSettings
+
 ROOT = Path(__file__).resolve().parents[2]
 PUBLISHED_ENTITY_CONFIGS = ROOT / "configs" / "entities"
 PUBLISHED_COMPOSITE_CONFIGS = ROOT / "configs" / "composites"
@@ -61,3 +66,28 @@ def test_published_production_configs_do_not_enable_append_semantic_sinks() -> N
         "Published production configs must not enable append-mode Silver/Gold "
         f"semantic sinks: {violations}"
     )
+
+
+@pytest.mark.architecture
+def test_registered_reproducibility_family_inventory_matches_repo_configs() -> None:
+    """Registered reproducibility families must cover every executable repo config."""
+    configured_source_families = {
+        f"{path.parent.name}.{path.stem}"
+        for path in sorted(PUBLISHED_ENTITY_CONFIGS.glob("*/*.yaml"))
+    }
+    configured_composite_families = {
+        f"composite.{path.stem}"
+        for path in sorted(PUBLISHED_COMPOSITE_CONFIGS.glob("*.yaml"))
+    }
+    configured_families = configured_source_families | configured_composite_families
+
+    assert set(registered_reproducibility_families()) == configured_families
+
+
+@pytest.mark.architecture
+def test_pipeline_settings_default_to_replay_grade_floor() -> None:
+    """Executable runs should default to replay-grade persistence guarantees."""
+    settings = PipelineSettings()
+
+    assert settings.control_plane.required_persistence_profile == "replay_ready"
+    assert settings.control_plane.checkpoint_compatibility_policy == "hard_fail"

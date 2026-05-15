@@ -13,7 +13,7 @@ from bioetl.domain.control_plane._reproducibility_profile_types import (
     StrictReplayRuntimeVerdict,
 )
 
-_PUBLISHED_SOURCE_FAMILIES = (
+_REGISTERED_SOURCE_FAMILIES = (
     "chembl.activity",
     "chembl.assay",
     "chembl.assay_parameters",
@@ -36,14 +36,28 @@ _PUBLISHED_SOURCE_FAMILIES = (
     "uniprot.idmapping",
     "uniprot.protein",
 )
-_PUBLISHED_COMPOSITE_FAMILIES = (
+_REGISTERED_COMPOSITE_FAMILIES = (
     "composite.activity",
     "composite.assay",
     "composite.molecule",
     "composite.publication",
     "composite.target",
 )
-_PUBLISHED_SUPPORTED_SOURCE_FAMILIES = _PUBLISHED_SOURCE_FAMILIES
+_REGISTERED_STRICT_SOURCE_FAMILIES = _REGISTERED_SOURCE_FAMILIES
+_REGISTERED_STRICT_COMPOSITE_FAMILIES = _REGISTERED_COMPOSITE_FAMILIES
+_REGISTERED_FAMILY_EXECUTION_CONTEXTS = dict.fromkeys(
+    _REGISTERED_SOURCE_FAMILIES,
+    "source",
+) | dict.fromkeys(
+    _REGISTERED_COMPOSITE_FAMILIES,
+    "composite",
+)
+
+# Compatibility aliases retained for generated docs/tests that still use the
+# older published-* naming while the runtime moves to repo-wide certification.
+_PUBLISHED_SOURCE_FAMILIES = _REGISTERED_SOURCE_FAMILIES
+_PUBLISHED_COMPOSITE_FAMILIES = _REGISTERED_COMPOSITE_FAMILIES
+_PUBLISHED_SUPPORTED_SOURCE_FAMILIES = _REGISTERED_STRICT_SOURCE_FAMILIES
 
 
 def _normalized_text(value: object) -> str:
@@ -121,8 +135,8 @@ def _build_source_reproducibility_family_profile(
     family: str | None,
     execution_context: ReproducibilityExecutionContext,
 ) -> ReproducibilityFamilyProfile:
-    supported = family in _PUBLISHED_SUPPORTED_SOURCE_FAMILIES
-    published = family in _PUBLISHED_SOURCE_FAMILIES
+    supported = family in _REGISTERED_STRICT_SOURCE_FAMILIES
+    published = family in _REGISTERED_SOURCE_FAMILIES
     return ReproducibilityFamilyProfile(
         family=family,
         execution_context=execution_context,
@@ -240,6 +254,11 @@ __all__ = [
     "_PUBLISHED_COMPOSITE_FAMILIES",
     "_PUBLISHED_SOURCE_FAMILIES",
     "_PUBLISHED_SUPPORTED_SOURCE_FAMILIES",
+    "_REGISTERED_COMPOSITE_FAMILIES",
+    "_REGISTERED_FAMILY_EXECUTION_CONTEXTS",
+    "_REGISTERED_SOURCE_FAMILIES",
+    "_REGISTERED_STRICT_COMPOSITE_FAMILIES",
+    "_REGISTERED_STRICT_SOURCE_FAMILIES",
     "_build_composite_reproducibility_family_profile",
     "_build_source_reproducibility_family_profile",
     "resolve_reproducibility_family",

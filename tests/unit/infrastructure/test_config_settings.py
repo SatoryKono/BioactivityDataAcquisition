@@ -48,10 +48,8 @@ class TestPipelineSettings:
         )
         assert settings.control_plane.run_manifest_enabled is True
         assert settings.control_plane.run_ledger_enabled is True
-        assert settings.control_plane.checkpoint_compatibility_policy == "soft_fail"
-        assert (
-            settings.control_plane.required_persistence_profile == "degraded_observable"
-        )
+        assert settings.control_plane.checkpoint_compatibility_policy == "hard_fail"
+        assert settings.control_plane.required_persistence_profile == "replay_ready"
 
     def test_custom_values(self) -> None:
         """Test custom pipeline settings."""
@@ -114,6 +112,7 @@ class TestPipelineSettings:
         settings = PipelineSettings(
             control_plane={
                 "checkpoint_compatibility_policy": "observe",
+                "required_persistence_profile": "degraded_observable",
             }
         )
         assert settings.control_plane.checkpoint_compatibility_policy == "observe"

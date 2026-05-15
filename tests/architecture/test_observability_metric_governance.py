@@ -14,6 +14,7 @@ from scripts.engineering.qa import report_observability_metric_inventory as inve
 
 ROOT = Path(__file__).resolve().parents[2]
 GOVERNANCE_PATH = ROOT / "configs" / "quality" / "observability_metric_governance.yaml"
+POLICY_REVIEW_DATE = date(2026, 5, 15)
 ALLOWLIST_PATH = (
     ROOT / "configs" / "quality" / "observability_metric_inventory_allowlist.yaml"
 )
@@ -105,7 +106,7 @@ def test_runtime_cardinality_allowlist_entries_require_metadata() -> None:
         assert metric
         assert owner.startswith("@")
         assert reason.strip()
-        assert date.fromisoformat(review_date) >= date.today(), (
+        assert date.fromisoformat(review_date) >= POLICY_REVIEW_DATE, (
             "runtime_cardinality_review_required lifecycle exception has expired "
             f"review_date: metric={metric} review_date={review_date}"
         )

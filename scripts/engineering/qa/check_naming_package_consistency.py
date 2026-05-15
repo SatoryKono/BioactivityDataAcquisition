@@ -224,16 +224,19 @@ def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
                     details="\n".join(registry_errors[:30]),
                 )
             ]
+        module_trees = naming_audit._build_python_module_tree_cache(repo_root / SRC_ROOT)
         results = naming_audit.run_audit(
             repo_root / SRC_ROOT,
             docs_skip_path,
             repo_root / "configs",
             registry,
+            module_trees=module_trees,
         )
         ambiguity_groups = naming_audit.build_ambiguity_groups(
             repo_root / SRC_ROOT,
             repo_root / "configs",
             registry,
+            module_trees=module_trees,
         )
     except Exception as exc:  # pragma: no cover - defensive CLI failure path
         return [

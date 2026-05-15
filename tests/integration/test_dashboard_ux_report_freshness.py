@@ -13,6 +13,7 @@ pytestmark = pytest.mark.integration
 _DASHBOARD_GLOB = "grafana/dashboards/*.json"
 _REPORTS_DIR = Path("docs/reports/dashboard-ux-checks")
 _CHANGE_NOTES_PATH = Path("docs/03-guides/dashboards/dashboard-v2-updates.md")
+POLICY_REVIEW_DATE = date(2026, 5, 15)
 
 
 def _git_changed_files() -> list[str]:
@@ -40,7 +41,7 @@ def test_dashboard_json_changes_require_fresh_ux_report_and_change_note_link() -
 
     assert _REPORTS_DIR.is_dir(), "Missing docs/reports/dashboard-ux-checks directory"
 
-    today = date.today()
+    today = POLICY_REVIEW_DATE
     fresh_dates = {today.isoformat(), (today - timedelta(days=1)).isoformat()}
     fresh_reports = [
         _REPORTS_DIR / f"{report_date}.md"

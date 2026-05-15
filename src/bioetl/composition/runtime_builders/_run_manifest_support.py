@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
-from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import (
-    build_cached_bronze_input_snapshot_refs,
+from bioetl.composition.runtime_builders._input_snapshot_resolution import (
+    resolve_pipeline_input_snapshot_refs,
 )
 from bioetl.composition.runtime_builders._run_manifest_refs import (
     ManifestControlPlaneRefs,
@@ -26,12 +25,9 @@ from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     RunManifestContractIdentity,
     resolve_contract_identity,
 )
-from bioetl.domain.control_plane import (
-    ReplayCapability,
-    RunInputSnapshotRef,
-    RunSourceRef,
-)
+from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
 from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,
     normalize_required_persistence_profile,
 )
@@ -69,9 +65,10 @@ def build_run_source_refs(
     settings: Settings,
     provider: str,
     entity: str,
-    required_persistence_profile: object = "degraded_observable",
+    required_persistence_profile: object = DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
 ) -> tuple[RunSourceRef, ...]:
-    input_snapshots = _build_cached_bronze_snapshot_refs(
+    input_snapshots = resolve_pipeline_input_snapshot_refs(
+        ctx=ctx,
         cached_bronze=cached_bronze,
         settings=settings,
         provider=provider,
@@ -159,34 +156,6 @@ def validate_reproducible_sink_modes(
             f"semantic outputs ({details}); use merge/upsert, overwrite, or SCD2 "
             "semantics with stable keys instead"
         )
-
-
-def _build_cached_bronze_snapshot_refs(
-    *,
-    cached_bronze: object | None,
-    settings: Settings,
-    provider: str,
-    entity: str,
-) -> tuple[RunInputSnapshotRef, ...]:
-    """Build immutable snapshot refs for cached-Bronze executions."""
-    if cached_bronze is None or not getattr(cached_bronze, "enabled", False):
-        return ()
-    bronze_path = getattr(cached_bronze, "bronze_path", None)
-    bronze_date = getattr(cached_bronze, "bronze_date", None)
-    bronze_root = (
-        Path(str(bronze_path))
-        if bronze_path is not None
-        else settings.bronze_path / provider / entity
-    )
-    snapshot_refs = build_cached_bronze_input_snapshot_refs(
-        bronze_root=bronze_root,
-        bronze_date=cast("str | None", bronze_date),
-    )
-    if not snapshot_refs:
-        raise RuntimeError(
-            "Cached Bronze execution requires at least one persisted batch file for snapshot provenance"
-        )
-    return snapshot_refs
 
 
 def _sink_layer_enabled(layer_config: object) -> bool:
