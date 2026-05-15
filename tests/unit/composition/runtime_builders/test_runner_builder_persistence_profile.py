@@ -18,6 +18,51 @@ from tests.unit.composition.runtime_builders.test_runner_builder import (
 )
 
 
+def test_build_pipeline_runner_requires_exact_replay_capability_for_replay_ready_profile(
+    tmp_path: Path,
+) -> None:
+    """Replay-ready profile must fail when the run has no immutable snapshots."""
+    fake_factory, fake_registry = _build_factory_registry()
+
+    with (
+        patch(
+            "bioetl.composition.runtime_builders._run_manifest_builder_policy.get_code_revision_provenance",
+            return_value=SimpleNamespace(
+                git_commit="deadbeef" * 5,
+                source_revision_state="clean",
+                dependency_lock_hash="sha256:test-lock",
+            ),
+        ),
+        pytest.raises(RuntimeError, match="requires immutable input snapshots"),
+    ):
+        _call_build_pipeline_runner(
+            _build_context(limit=25, exact_replay=False),
+            registry=fake_registry,
+            settings=_build_settings(
+                data_dir=str(tmp_path),
+                control_plane=SimpleNamespace(
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=True,
+                    required_persistence_profile="replay_ready",
+                ),
+            ),
+            pipeline_config=_build_pipeline_config(
+                sink={
+                    "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                    "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                    "gold": SimpleNamespace(enabled=True, save_metadata=True),
+                },
+            ),
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental"
+            ),
+        )
+
+    assert fake_factory.kwargs is None
+    assert not (tmp_path / "output" / "control" / "run_manifest").exists()
+    assert not (tmp_path / "output" / "control" / "run_ledger").exists()
+
+
 def test_build_pipeline_runner_allows_runtime_degraded_profile_override(
     tmp_path: Path,
 ) -> None:
