@@ -93,6 +93,7 @@ class PipelineRunContextService:
             log_level=options.log_level,
             cached_bronze=cached_bronze,
             exact_replay=options.exact_replay,
+            required_persistence_profile=options.required_persistence_profile,
             tracing_enabled_override=options.enable_tracing,
         )
 

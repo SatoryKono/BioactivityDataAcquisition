@@ -283,6 +283,9 @@ def _build_run_command_input_from_options(
         replay_of_run_id=cast(str | None, options["replay_of_run_id"]),
         replay_of_manifest_id=cast(str | None, options["replay_of_manifest_id"]),
         exact_replay=cast("bool", options["exact_replay"]),
+        required_persistence_profile=cast(
+            str | None, options["required_persistence_profile"]
+        ),
     )
 
 

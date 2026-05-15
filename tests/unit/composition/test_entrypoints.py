@@ -241,6 +241,13 @@ class TestBuildPipelineContext:
         assert ctx.run_type == RunType.REBUILD
         assert ctx.limit == 100
 
+    def test_context_propagates_required_persistence_profile(self):
+        """Test building context with an explicit persistence profile."""
+        options = RunOptions(required_persistence_profile="degraded_observable")
+        ctx = build_pipeline_context("chembl_publication", options)
+
+        assert ctx.required_persistence_profile == "degraded_observable"
+
     def test_context_with_input_filter(self):
         """Test building context with input filter."""
         options = RunOptions(

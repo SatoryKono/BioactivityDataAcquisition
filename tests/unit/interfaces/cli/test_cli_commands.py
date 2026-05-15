@@ -1634,6 +1634,7 @@ def test_run_callback_delegates_to_input_builder_and_cli_policy() -> None:
             replay_of_run_id=None,
             replay_of_manifest_id=None,
             exact_replay=False,
+            required_persistence_profile="degraded_observable",
         )
 
     mock_build_input.assert_called_once()
@@ -1661,6 +1662,7 @@ def test_run_callback_delegates_to_input_builder_and_cli_policy() -> None:
             replay_of_run_id=None,
             replay_of_manifest_id=None,
             exact_replay=False,
+            required_persistence_profile="degraded_observable",
         ),
     )
     assert mock_build_input.call_args.kwargs == {}

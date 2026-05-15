@@ -14,6 +14,7 @@ from bioetl.composition.runtime_builders._run_manifest_refs import (
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,
+    is_critical_reproducibility_runtime,
     normalize_required_persistence_profile,
 )
 
@@ -219,6 +220,9 @@ def resolve_control_plane_flags(
     *,
     yaml_config: object | None = None,
     skip_gold: bool = False,
+    required_profile_override: object | None = None,
+    exact_replay: bool = False,
+    critical_runtime: bool | None = None,
 ) -> tuple[bool, bool]:
     """Resolve control-plane feature flags for executable pipeline runs."""
     pipeline_settings = getattr(settings, "pipeline", None)
@@ -230,6 +234,20 @@ def resolve_control_plane_flags(
         "required_persistence_profile",
         DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     )
+    if required_profile_override is not None and str(required_profile_override).strip():
+        required_profile = required_profile_override
+    critical = (
+        is_critical_reproducibility_runtime(
+            runtime_environment=getattr(settings, "env", None),
+            debug_mode=getattr(settings, "debug", False),
+        )
+        if critical_runtime is None
+        else critical_runtime
+    )
+    if (exact_replay or critical) and _normalize_required_persistence_profile(
+        required_profile
+    ) == "degraded_observable":
+        required_profile = DEFAULT_REQUIRED_PERSISTENCE_PROFILE
     if not manifest_enabled:
         raise RuntimeError(
             "Pipeline execution requires run manifests; set "
@@ -256,21 +274,43 @@ def resolve_runner_control_plane_policy(
     *,
     yaml_config: object | None = None,
     skip_gold: bool = False,
+    required_profile_override: object | None = None,
+    exact_replay: bool = False,
 ) -> ResolvedRunnerControlPlanePolicy:
     """Return canonical control-plane policy for runner assembly."""
     pipeline_settings = getattr(settings, "pipeline", None)
     control_plane = getattr(pipeline_settings, "control_plane", None)
-    required_profile = _normalize_required_persistence_profile(
-        getattr(
-            control_plane,
-            "required_persistence_profile",
-            DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
-        )
+    configured_profile = getattr(
+        control_plane,
+        "required_persistence_profile",
+        DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     )
+    requested_profile = (
+        required_profile_override
+        if required_profile_override is not None
+        and str(required_profile_override).strip()
+        else configured_profile
+    )
+    critical_runtime = is_critical_reproducibility_runtime(
+        runtime_environment=getattr(settings, "env", None),
+        debug_mode=getattr(settings, "debug", False),
+    )
+    if (exact_replay or critical_runtime) and _normalize_required_persistence_profile(
+        requested_profile
+    ) == "degraded_observable":
+        requested_profile = DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+    required_profile = _normalize_required_persistence_profile(requested_profile)
     manifest_enabled, ledger_enabled = resolve_control_plane_flags(
         settings,
         yaml_config=yaml_config,
         skip_gold=skip_gold,
+        exact_replay=exact_replay,
+        critical_runtime=critical_runtime,
+        required_profile_override=(
+            requested_profile
+            if requested_profile != configured_profile
+            else None
+        )
     )
     return ResolvedRunnerControlPlanePolicy(
         manifest_enabled=manifest_enabled,

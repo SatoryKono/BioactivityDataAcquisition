@@ -139,6 +139,20 @@ class TestBuildContext:
 
         assert context.tracing_enabled_override is True
 
+    def test_build_context_propagates_required_persistence_profile(self) -> None:
+        service = PipelineRunContextService()
+
+        context = service.build_context(
+            pipeline_name="chembl_publication",
+            run_id=RunID(uuid4()),
+            options=RunOptions(
+                required_persistence_profile="degraded_observable",
+            ),
+            started_at=FIXED_STARTED_AT,
+        )
+
+        assert context.required_persistence_profile == "degraded_observable"
+
     def test_build_context_propagates_exact_replay(self) -> None:
         service = PipelineRunContextService()
 

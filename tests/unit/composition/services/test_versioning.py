@@ -59,6 +59,25 @@ def test_get_git_commit_returns_none_on_exception(mock_run: MagicMock) -> None:
 
 
 @pytest.mark.unit
+@patch("bioetl.composition.services.versioning._iter_windows_git_fallback_executables")
+@patch("bioetl.composition.services.versioning.os.name", "nt")
+@patch("bioetl.composition.services.versioning.subprocess.run")
+def test_get_git_commit_falls_back_to_explicit_windows_git_executable(
+    mock_run: MagicMock,
+    mock_candidates: MagicMock,
+) -> None:
+    full_hash = "d" * 40
+    mock_candidates.return_value = ("C:/Program Files/Git/cmd/git.exe",)
+    mock_run.side_effect = [
+        SimpleNamespace(returncode=4294967295, stdout="", stderr=""),
+        SimpleNamespace(returncode=0, stdout=f"{full_hash}\n", stderr=""),
+    ]
+
+    assert versioning.get_git_commit() == full_hash
+    assert mock_run.call_count == 2
+
+
+@pytest.mark.unit
 @patch("bioetl.composition.services.versioning.subprocess.run")
 def test_get_code_revision_provenance_reports_clean_state(
     mock_run: MagicMock,
@@ -106,6 +125,30 @@ def test_get_code_revision_provenance_reports_documented_git_unavailable_state(
     assert provenance.git_commit is None
     assert provenance.source_revision_state == "git_unavailable"
     assert provenance.source_revision_state in DOCUMENTED_SOURCE_REVISION_STATES
+
+
+@pytest.mark.unit
+@patch("bioetl.composition.services.versioning._iter_windows_git_fallback_executables")
+@patch("bioetl.composition.services.versioning.os.name", "nt")
+@patch("bioetl.composition.services.versioning.subprocess.run")
+def test_get_code_revision_provenance_uses_same_windows_git_fallback_for_dirty_check(
+    mock_run: MagicMock,
+    mock_candidates: MagicMock,
+) -> None:
+    full_hash = "e" * 40
+    mock_candidates.return_value = ("C:/Program Files/Git/cmd/git.exe",)
+    mock_run.side_effect = [
+        SimpleNamespace(returncode=4294967295, stdout="", stderr=""),
+        SimpleNamespace(returncode=0, stdout=f"{full_hash}\n", stderr=""),
+        SimpleNamespace(returncode=4294967295, stdout="", stderr=""),
+        SimpleNamespace(returncode=0, stdout="", stderr=""),
+    ]
+
+    provenance = versioning.get_code_revision_provenance()
+
+    assert provenance.git_commit == full_hash
+    assert provenance.source_revision_state == "clean"
+    assert provenance.dependency_lock_hash is not None
 
 
 @pytest.mark.unit

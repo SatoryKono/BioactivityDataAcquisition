@@ -229,6 +229,7 @@ class PipelineRunContext:
         default_factory=CachedBronzeContext.disabled
     )
     exact_replay: bool = False
+    required_persistence_profile: str | None = None
 
     limit: int | None = None
     query: str | None = None

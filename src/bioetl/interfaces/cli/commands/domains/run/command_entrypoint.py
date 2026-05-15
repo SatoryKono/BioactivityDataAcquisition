@@ -197,6 +197,26 @@ def _add_replay_parentage_options() -> CommandDecorator:
     return decorator
 
 
+def _add_persistence_profile_options() -> CommandDecorator:
+    """Add per-run control-plane persistence profile options."""
+
+    def decorator(cmd: CommandCallback) -> CommandCallback:
+        cmd = click.option(
+            "--required-persistence-profile",
+            type=click.Choice(
+                ["degraded_observable", "replay_ready", "forensic_grade"]
+            ),
+            default=None,
+            help=(
+                "Override the required control-plane persistence profile for "
+                "this run"
+            ),
+        )(cmd)
+        return cmd
+
+    return decorator
+
+
 def build_run_click_command(
     *,
     validate_pipeline_name: Callable[..., object],
@@ -220,6 +240,7 @@ def build_run_click_command(
     callback = _add_tracing_options()(callback)
     callback = _add_cache_options()(callback)
     callback = _add_replay_parentage_options()(callback)
+    callback = _add_persistence_profile_options()(callback)
 
     return click.command()(click.pass_context(callback))
 

@@ -112,6 +112,7 @@ class CliRunOrchestrationService:
             replay_of_run_id=request.replay_of_run_id,
             replay_of_manifest_id=request.replay_of_manifest_id,
             exact_replay=request.exact_replay,
+            required_persistence_profile=request.required_persistence_profile,
             enable_tracing=request.enable_tracing,
         )
 

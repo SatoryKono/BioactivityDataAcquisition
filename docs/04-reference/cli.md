@@ -86,6 +86,7 @@ bioetl workflow status <NAME> [OPTIONS]
 | `--cached-bronze-path` | Явный Bronze cache path у pipeline steps |
 | `--cached-bronze-date` | Bronze cache date filter у pipeline steps |
 | `--exact-replay/--no-exact-replay` | Override strict exact replay request у pipeline steps |
+| `--required-persistence-profile <profile>` | Per-run override for the control-plane persistence profile (`degraded_observable`, `replay_ready`, `forensic_grade`) |
 | `--replay-of-run-id` | Explicit parent `run_id` for exact replay pipeline steps |
 | `--replay-of-manifest-id` | Explicit parent `manifest_id` for exact replay pipeline steps |
 | `--tracing/--no-tracing` | Override distributed tracing for pipeline steps |
@@ -121,7 +122,12 @@ bioetl workflow status <NAME> [OPTIONS]
   after the CLI process exits.
 - `workflow run` now accepts the same non-conflicting pipeline runtime
   overrides as `bioetl run`, such as `--limit`, CSV/filter options,
-  cache/replay options, vacuum overrides, and tracing overrides.
+  cache/replay options, vacuum overrides, tracing overrides, and
+  `--required-persistence-profile`.
+- `--required-persistence-profile degraded_observable` is a local/live-run
+  opt-down from the default `replay_ready` evidence floor. `--exact-replay`
+  still promotes the effective profile back to the strict published family
+  default and cannot be used to bypass exact-replay guardrails.
 - pipeline-level `--resume` is intentionally not exposed on `workflow run`;
   workflow control-plane resume stays on `--resume-last`.
 - `--resume-last` использует semantic `execution_fingerprint`, а не только имя workflow.
@@ -135,6 +141,7 @@ bioetl workflow run chembl_activity --dry-run
 bioetl workflow run chembl_activity --limit 1000
 bioetl workflow run chembl_activity --input-csv data/filter-ids.csv --filter-column molecule_id --filter-field molecule_chembl_id
 bioetl workflow run chembl_activity --use-cached-bronze --exact-replay --replay-of-run-id parent-run-1 --replay-of-manifest-id manifest-parent-1
+bioetl workflow run chembl_publication --limit 1000 --required-persistence-profile degraded_observable
 bioetl workflow status chembl_activity
 bioetl workflow run publication_provider_pack --dry-run
 bioetl workflow run chembl_core --dry-run
@@ -187,6 +194,7 @@ bioetl run --pipeline <NAME> [OPTIONS]
 | `--cached-bronze-date`                   | str    | None          | Фильтровать Bronze cache по дате `YYYY-MM-DD`                                             |
 | `--cached-bronze-path`                   | path   | None          | Явный путь к каталогу Bronze cache                                                        |
 | `--exact-replay/--no-exact-replay`       | flag   | False         | Включить strict exact replay внутри опубликованной support boundary с fail-closed policy  |
+| `--required-persistence-profile`         | choice | None          | Per-run override для control-plane persistence profile (`degraded_observable`, `replay_ready`, `forensic_grade`) |
 | `--replay-of-run-id`                     | str    | None          | Явный parent `run_id` для exact replay                                                    |
 | `--replay-of-manifest-id`                | str    | None          | Явный parent `manifest_id` для exact replay                                               |
 
@@ -225,6 +233,9 @@ bioetl run --pipeline chembl_activity --debug
 
 # Запуск из локального Bronze cache
 bioetl run --pipeline chembl_activity --use-cached-bronze
+
+# Локальный observable live/backfill запуск без replay_ready evidence claim
+bioetl run --pipeline chembl_publication --limit 1000 --required-persistence-profile degraded_observable
 
 # Strict exact replay с явным ancestry
 bioetl run --pipeline chembl_activity \

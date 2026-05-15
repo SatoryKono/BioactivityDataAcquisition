@@ -109,6 +109,17 @@ lifecycle и artifact publication events, связанную через `manifes
   `run_ledger_enabled=true`, и replay-ready / lineage-closure surfaces внутри
   той же опубликованной boundary.
 
+Для локального live/backfill запуска, который должен остаться observable, но
+не заявлять `replay_ready` evidence floor, используйте per-run override:
+
+```bash
+bioetl workflow run chembl_publication --limit 1000 --required-persistence-profile degraded_observable
+```
+
+`--exact-replay` всё равно повышает degraded override обратно к strict
+published family default, поэтому этот флаг не является обходом exact-replay
+guardrails.
+
 Для inspection используются команды:
 
 ```bash

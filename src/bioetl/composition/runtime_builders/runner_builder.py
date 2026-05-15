@@ -94,6 +94,8 @@ def _handle_control_plane_setup(
         inputs.settings,
         yaml_config=inputs.yaml_config,
         skip_gold=bool(getattr(ctx, "skip_gold", False)),
+        required_profile_override=getattr(ctx, "required_persistence_profile", None),
+        exact_replay=bool(getattr(ctx, "exact_replay", False)),
     )
     _validate_strict_data_root_policy(
         settings=inputs.settings,

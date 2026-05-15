@@ -172,6 +172,12 @@ def workflow() -> None:
     help="Override strict exact replay request for workflow pipeline steps",
 )
 @click.option(
+    "--required-persistence-profile",
+    type=click.Choice(["degraded_observable", "replay_ready", "forensic_grade"]),
+    default=None,
+    help="Override required control-plane persistence profile for workflow steps",
+)
+@click.option(
     "--replay-of-run-id",
     type=str,
     help="Explicit parent run_id for exact replay workflow pipeline steps",
@@ -229,6 +235,7 @@ def run_workflow_command(
     cached_bronze_path: str | None,
     cached_bronze_date: str | None,
     exact_replay: bool | None,
+    required_persistence_profile: str | None,
     replay_of_run_id: str | None,
     replay_of_manifest_id: str | None,
     enable_tracing: bool | None,
@@ -260,6 +267,7 @@ def run_workflow_command(
         cached_bronze_path=cached_bronze_path,
         cached_bronze_date=cached_bronze_date,
         exact_replay=exact_replay,
+        required_persistence_profile=required_persistence_profile,
         replay_of_run_id=replay_of_run_id,
         replay_of_manifest_id=replay_of_manifest_id,
         enable_tracing=enable_tracing,

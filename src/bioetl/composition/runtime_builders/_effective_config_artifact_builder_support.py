@@ -194,6 +194,9 @@ def build_runtime_overrides_snapshot(
         "ignore_yaml_filter": getattr(ctx, "ignore_yaml_filter", False),
         "skip_gold": getattr(ctx, "skip_gold", False),
         "exact_replay": getattr(ctx, "exact_replay", False),
+        "required_persistence_profile": getattr(
+            ctx, "required_persistence_profile", None
+        ),
         "input_filter": _to_serializable_mapping(getattr(ctx, "input_filter", None)),
         "cached_bronze": _to_serializable_mapping(getattr(ctx, "cached_bronze", None)),
         "vacuum": _to_serializable_mapping(getattr(ctx, "vacuum", None)),
@@ -219,6 +222,9 @@ def build_runtime_overrides_snapshot(
             "ignore_yaml_filter": getattr(ctx, "ignore_yaml_filter", False),
             "skip_gold": getattr(ctx, "skip_gold", False),
             "execution_context": execution_context_value,
+            "required_persistence_profile": getattr(
+                ctx, "required_persistence_profile", None
+            ),
             "vacuum": _to_serializable_mapping(getattr(ctx, "vacuum", None)),
             "input_filter": _to_serializable_mapping(
                 getattr(ctx, "input_filter", None)
