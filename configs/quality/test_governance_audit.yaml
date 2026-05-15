@@ -58,7 +58,7 @@ issues:
       - scripts/engineering/qa/report_test_governance_audit.py
       - tests/architecture/test_test_governance_audit.py
 budgets:
-  refined_assertless_max: 600
+  refined_assertless_max: 601
   duplicate_test_names_max: 891
   duplicate_test_name_occurrences_max: 2775
   compatibility_test_file_max: 53
@@ -103,7 +103,7 @@ assertless_triage:
       rationale: "Performance/benchmark tests use measurement infrastructure as the assertion surface."
       next_review: "2026-09-30"
     helper_asserted:
-      count: 6
+      count: 7
       decision: retained
       rationale: "Verification is delegated to explicit check/validate/verify helper calls."
       next_review: "2026-09-30"
