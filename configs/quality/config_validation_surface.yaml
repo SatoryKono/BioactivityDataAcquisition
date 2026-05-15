@@ -29,8 +29,8 @@ families:
     path_prefixes:
       - configs/composites/
     owner: "@bioetl-composite"
-    validation_mechanism: composite_config_loader_and_schema_tests
-    validation_depth: schema_level
+    validation_mechanism: composite_config_loader_and_pipeline_reference_checks
+    validation_depth: cross_file
     enforcing_surfaces:
       - tests/architecture/test_config_validation_surface.py
   - family_id: provider_contracts
@@ -45,8 +45,8 @@ families:
     path_prefixes:
       - configs/entities/
     owner: "@bioetl-pipelines"
-    validation_mechanism: pipeline_config_loader_schema
-    validation_depth: semantic
+    validation_mechanism: pipeline_config_loader_and_contract_reference_checks
+    validation_depth: cross_file
     enforcing_surfaces:
       - tests/architecture/test_config_validation_surface.py
   - family_id: field_registry_semantics
@@ -73,8 +73,8 @@ families:
     path_prefixes:
       - configs/providers/
     owner: "@bioetl-infrastructure"
-    validation_mechanism: provider_registry_and_config_loader
-    validation_depth: schema_level
+    validation_mechanism: source_config_loader_and_entity_registry_cross_checks
+    validation_depth: cross_file
     enforcing_surfaces:
       - tests/architecture/test_config_validation_surface.py
   - family_id: quality_governance
@@ -91,14 +91,16 @@ families:
     owner: "@bioetl-domain"
     validation_mechanism: vocabulary_snapshot_tests
     validation_depth: snapshot
+    depth_rationale: Snapshot-backed vocab inventories remain governed by deterministic extracted artifacts today; semantic drift is validated by downstream contract suites rather than this family alone.
+    migration_path: Promote vocabulary_sources to semantic or cross_file once a canonical loader can validate provider inventories directly against their extracted source fixtures and field registries.
     enforcing_surfaces:
       - tests/architecture/test_config_validation_surface.py
   - family_id: workflow_runtime
     path_prefixes:
       - configs/workflows/
     owner: "@bioetl-platform"
-    validation_mechanism: workflow_config_loader_schema
-    validation_depth: schema_level
+    validation_mechanism: workflow_config_loader_and_pipeline_reference_checks
+    validation_depth: cross_file
     enforcing_surfaces:
       - tests/architecture/test_config_validation_surface.py
   - family_id: config_readme
