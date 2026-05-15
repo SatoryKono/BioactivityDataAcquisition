@@ -110,6 +110,14 @@ This inventory is split into two curated ledgers:
   They are governed here for import-discipline purposes, but they are not counted as
   transition compatibility debt.
 
+Scorecard alignment:
+
+- `configs/quality/debt_scorecard.yaml` now treats only `transition_debt` rows plus
+  active/expired sunset shims as compatibility debt.
+- `public-entrypoint` rows remain visible through this inventory and a separate
+  sanctioned-public-entrypoint governance metric, but they are not technical debt
+  unless they regress back into transition-only compatibility shims.
+
 ### Transition Debt Ledger
 
 | Path                                                        | Compatibility role | Canonical target | Status | Owner | Introduced in | Allowed call sites | Remove by / review date | Migration path | Exit criteria |
@@ -151,6 +159,8 @@ operational; do not copy generated snapshot counters back into it by hand.
 - `deprecated-warn`, `compat-shim`, and `mixed-module` rows in the transition debt ledger
   count toward the zero-compatibility target for the current cycle and must only
   shrink unless the registry is explicitly reviewed first.
+- Scorecard compatibility debt MUST stay synchronized with the transition ledger,
+  not with the sanctioned public-entrypoint ledger.
 - `mixed-module` rows require symbol-level migration, not whole-module deletion by default.
 - `retained-entrypoint` and `public-entrypoint` rows live in the sanctioned public-entrypoint
   ledger and are not counted as transition compatibility debt for the current cycle.

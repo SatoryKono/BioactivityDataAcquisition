@@ -288,7 +288,7 @@ def test_debt_scorecard_declares_explicit_coarse_budget_sync() -> None:
 
 
 def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
-    """Compatibility facades and sunset shims must be visible scorecard debt."""
+    """Only transition/sunset compatibility residue should remain scorecard debt."""
     scorecard = load_debt_scorecard()
     compatibility = scorecard.get("compatibility_debt_metrics", {})
     assert isinstance(compatibility, dict)
@@ -306,7 +306,9 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
     inventory_path = ROOT / "configs/quality/compatibility_facade_inventory.yaml"
     inventory_payload = yaml.safe_load(inventory_path.read_text(encoding="utf-8"))
     assert isinstance(inventory_payload, dict)
+    transition_debt = inventory_payload.get("transition_debt")
     retained_entrypoints = inventory_payload.get("retained_entrypoints")
+    assert isinstance(transition_debt, list)
     assert isinstance(retained_entrypoints, list)
 
     sunset_module = _load_module(
@@ -317,7 +319,7 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
     expired_count = 0 if date.today() <= sunset_module.SUNSET_DATE else sunset_count
 
     expected_counts = {
-        "retained_public_facade_count": len(retained_entrypoints),
+        "transition_compat_count": len(transition_debt),
         "sunset_compat_count": sunset_count,
         "expired_compat_count": expired_count,
     }
@@ -336,6 +338,34 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
 
     expired_metric = metrics["expired_compat_count"]
     assert expired_metric.get("max_count") == 0
+
+
+def test_debt_scorecard_declares_public_entrypoint_governance_kpis() -> None:
+    """Sanctioned public entrypoints must stay visible as governance, not debt."""
+    scorecard = load_debt_scorecard()
+    governance = scorecard.get("sanctioned_public_entrypoint_governance", {})
+    assert isinstance(governance, dict)
+    assert (
+        governance.get("inventory_source")
+        == "configs/quality/compatibility_facade_inventory.yaml"
+    )
+
+    inventory_path = ROOT / "configs/quality/compatibility_facade_inventory.yaml"
+    inventory_payload = yaml.safe_load(inventory_path.read_text(encoding="utf-8"))
+    assert isinstance(inventory_payload, dict)
+    retained_entrypoints = inventory_payload.get("retained_entrypoints")
+    assert isinstance(retained_entrypoints, list)
+
+    metrics = governance.get("metrics", {})
+    assert isinstance(metrics, dict)
+    metric = metrics.get("public_entrypoint_count")
+    assert isinstance(metric, dict)
+    assert metric.get("current_count") == len(retained_entrypoints)
+    assert isinstance(metric.get("owner"), str) and metric["owner"]
+    assert isinstance(metric.get("linked_issue"), str) and metric["linked_issue"]
+    assert isinstance(metric.get("rationale"), str) and metric["rationale"]
+    assert metric.get("review_cadence") == "quarterly"
+    assert isinstance(metric.get("review_policy"), str) and metric["review_policy"]
 
 
 def test_debt_scorecard_bronze_fixture_replay_metrics_match_sources() -> None:
@@ -404,49 +434,21 @@ def test_debt_scorecard_bronze_fixture_replay_metrics_match_sources() -> None:
         )
 
 
-def test_compatibility_facade_budget_declares_dated_downward_ratchet_schedule() -> None:
-    """Retained compatibility facade budget must carry a dated downward ratchet."""
+def test_transition_compatibility_budget_is_zero_budget_fail_fast() -> None:
+    """Transition compatibility residue must remain a zero-budget fail-fast metric."""
     scorecard = load_debt_scorecard()
     compatibility = scorecard.get("compatibility_debt_metrics", {})
     assert isinstance(compatibility, dict)
     metrics = compatibility.get("metrics", {})
     assert isinstance(metrics, dict)
 
-    retained = metrics.get("retained_public_facade_count")
-    assert isinstance(retained, dict)
-    assert isinstance(retained.get("current_count"), int)
-    assert isinstance(retained.get("max_count"), int)
-    assert retained["max_count"] >= retained["current_count"]
-
-    schedule = retained.get("ratchet_schedule")
-    assert isinstance(schedule, list) and schedule, (
-        "retained_public_facade_count must declare a non-empty ratchet_schedule"
-    )
-
-    parsed: list[tuple[date, int]] = []
-    for item in schedule:
-        assert isinstance(item, dict)
-        effective_on_raw = item.get("effective_on")
-        max_count = item.get("max_count")
-        milestone = item.get("milestone")
-        assert isinstance(effective_on_raw, str) and effective_on_raw
-        assert isinstance(max_count, int)
-        assert isinstance(milestone, str) and milestone
-        parsed.append((date.fromisoformat(effective_on_raw), max_count))
-
-    effective_dates = [item[0] for item in parsed]
-    limits = [item[1] for item in parsed]
-    assert effective_dates == sorted(effective_dates), (
-        "ratchet_schedule dates must be chronological"
-    )
-    assert all(prev >= nxt for prev, nxt in pairwise(limits)), (
-        "ratchet_schedule max_count values must be monotonically non-increasing"
-    )
-    assert limits[0] == retained["max_count"], (
-        "first ratchet_schedule max_count must equal retained_public_facade_count.max_count"
-    )
-    assert limits[-1] == 0, (
-        "final ratchet_schedule target must reach zero retained public compatibility facades"
+    transition_metric = metrics.get("transition_compat_count")
+    assert isinstance(transition_metric, dict)
+    assert transition_metric.get("current_count") == 0
+    assert transition_metric.get("max_count") == 0
+    assert (
+        transition_metric.get("ratchet_policy")
+        == "Zero-budget fail-fast metric for curated transition-only compatibility residue."
     )
 
 
