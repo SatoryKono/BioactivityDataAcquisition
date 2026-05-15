@@ -659,7 +659,7 @@ def test_probe_mode_fallback_counter_exists() -> None:
 
 GROUP_EDGE_LIMIT = 60
 GROUP_EDGE_TOTAL_BUDGET = (
-    324  # ratchet: current control-plane/workflow provider-seam baseline
+    321  # ratchet: reduced by removing composition root JsonDict facade imports
 )
 
 _dep_map_module = None
