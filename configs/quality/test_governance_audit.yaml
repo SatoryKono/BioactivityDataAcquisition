@@ -1,0 +1,89 @@
+schema_version: 1
+audit_date: "2026-05-15"
+source: configs/quality/test_governance_audit.yaml
+issues:
+  - id: "4159"
+    priority: P0
+    title: "main-branch test audit reproducibility with git-lfs"
+    evidence_paths:
+      - scripts/engineering/qa/check_test_audit_preflight.py
+      - docs/05-engineering/test-telemetry-baseline.md
+  - id: "4161"
+    priority: P1
+    title: "assert-less / no-effect tests triage"
+    evidence_paths:
+      - scripts/engineering/qa/report_test_governance_audit.py
+      - tests/architecture/test_test_governance_audit.py
+  - id: "4163"
+    priority: P1
+    title: "pytest lane contract and marker/path drift"
+    evidence_paths:
+      - configs/quality/test_matrix.yaml
+      - tests/architecture/test_test_matrix_lane_policy.py
+      - docs/03-guides/testing.md
+  - id: "4165"
+    priority: P1
+    title: "Gold DQ golden bundles coverage"
+    evidence_paths:
+      - tests/fixtures/golden/gold/schema_registry.v1.json
+      - tests/fixtures/golden/gold/pubchem_compound_dq_bundle_v1.json
+      - tests/contract/test_gold_dq_golden_snapshots.py
+  - id: "4167"
+    priority: P1
+    title: "deterministic uuid4 / date.today cleanup"
+    evidence_paths:
+      - scripts/engineering/qa/report_test_governance_audit.py
+      - tests/architecture/test_test_governance_audit.py
+  - id: "4169"
+    priority: P1
+    title: "slow architecture governance vs fast boundary split"
+    evidence_paths:
+      - configs/quality/test_matrix.yaml
+      - docs/03-guides/testing.md
+  - id: "4172"
+    priority: P2
+    title: "duplicate test names and fixture builder consolidation"
+    evidence_paths:
+      - scripts/engineering/qa/report_test_governance_audit.py
+      - tests/architecture/test_test_governance_audit.py
+  - id: "4174"
+    priority: P1
+    title: "tracing emission-level observability tests"
+    evidence_paths:
+      - tests/integration/test_observability_emission_integration.py
+  - id: "4176"
+    priority: P2
+    title: "compatibility / legacy test surface retirement budget"
+    evidence_paths:
+      - scripts/engineering/qa/report_test_governance_audit.py
+      - tests/architecture/test_test_governance_audit.py
+budgets:
+  refined_assertless_max: 606
+  duplicate_test_names_max: 891
+  compatibility_test_file_max: 53
+  markerless_test_functions_max: 13325
+  uuid4_call_sites_max: 592
+  date_today_call_sites_max: 10
+preflight:
+  script: scripts/engineering/qa/check_test_audit_preflight.py
+  telemetry_baseline: docs/05-engineering/test-telemetry-baseline.md
+  strict_blockers:
+    - missing_git_lfs
+    - git_status_failed
+    - missing_telemetry_baseline
+lane_policy:
+  canonical_source: configs/quality/test_matrix.yaml
+  docs: docs/03-guides/testing.md
+  marker_only_commands_are_not_canonical: true
+gold_dq:
+  min_dq_sensitive_outputs: 5
+  required_bundles:
+    - chembl_activity_dq_bundle
+    - composite_molecule_dq_bundle
+    - composite_publication_dq_bundle
+    - pubchem_compound_dq_bundle
+    - pubmed_publication_dq_bundle
+tracing:
+  runtime_emission_test: tests/integration/test_observability_emission_integration.py
+  required_test_names:
+    - test_pipeline_observer_emits_tracing_spans_through_recording_port

@@ -159,7 +159,6 @@ def test_render_and_write_baseline_outputs(tmp_path: Path) -> None:
     assert output_md.exists()
     assert "test_telemetry_baseline" in output_yaml.read_text(encoding="utf-8")
     assert "Test Telemetry Baseline" in output_md.read_text(encoding="utf-8")
-<<<<<<< Updated upstream
 
 
 def test_build_baseline_payload_marks_duration_only_refresh_as_captured(
@@ -225,69 +224,3 @@ def test_build_baseline_payload_uses_fallback_coverage_and_junit(
     assert payload["coverage"]["threshold_satisfied"] is True
     assert payload["duration_telemetry"]["total_cases"] == 2
     assert payload["artifact_inputs"]["junit_inputs"] == [str(junit_path)]
-||||||| Stash base
-=======
-
-
-def test_build_baseline_payload_marks_duration_only_refresh_as_captured(
-    tmp_path: Path,
-) -> None:
-    slowest_json = tmp_path / "slowest-tests.json"
-    slowest_json.write_text(
-        json.dumps({"total_cases": 0, "top_slowest": []}),
-        encoding="utf-8",
-    )
-
-    payload = build_baseline_payload(
-        coverage_xml_path=tmp_path / "missing-coverage.xml",
-        coverage_percent=None,
-        coverage_log_path=tmp_path / "missing-parallel.log",
-        slowest_json_path=slowest_json,
-        junit_paths=[],
-        source_branch="main",
-        source_commit="abc123",
-        source_run_id="run-42",
-        coverage_threshold=85.0,
-    )
-
-    assert payload["refresh_status"] == "captured"
-    assert payload["duration_telemetry"]["total_cases"] == 0
-
-
-def test_build_baseline_payload_uses_fallback_coverage_and_junit(tmp_path: Path) -> None:
-    coverage_log = tmp_path / "parallel.log"
-    coverage_log.write_text(
-        "TOTAL  42248  2218  8880  1084  92.81%\n",
-        encoding="utf-8",
-    )
-    junit_path = tmp_path / "junit_parallel.xml"
-    junit_path.write_text(
-        """
-<testsuites>
-  <testsuite name="suite">
-    <testcase classname="tests.example" name="test_fast" time="0.200" />
-    <testcase classname="tests.example" name="test_slow" time="5.500" />
-  </testsuite>
-</testsuites>
-""".strip(),
-        encoding="utf-8",
-    )
-
-    payload = build_baseline_payload(
-        coverage_xml_path=tmp_path / "missing-coverage.xml",
-        coverage_percent=None,
-        coverage_log_path=coverage_log,
-        slowest_json_path=tmp_path / "missing-slowest.json",
-        junit_paths=[junit_path],
-        source_branch="main",
-        source_commit="abc123",
-        source_run_id="run-42",
-        coverage_threshold=85.0,
-    )
-
-    assert payload["refresh_status"] == "captured"
-    assert payload["coverage"]["actual_percent"] == pytest.approx(92.81)
-    assert payload["coverage"]["threshold_satisfied"] is True
-    assert payload["duration_telemetry"]["total_cases"] == 2
-    assert payload["artifact_inputs"]["junit_inputs"] == [str(junit_path)]
->>>>>>> Stashed changes

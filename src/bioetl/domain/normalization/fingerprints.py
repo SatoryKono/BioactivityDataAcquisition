@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import hashlib
-from datetime import datetime
-from typing import Any
 from collections.abc import Mapping
+from datetime import datetime
 
 from bioetl.domain.normalization.json import serialize_json_canonical
 

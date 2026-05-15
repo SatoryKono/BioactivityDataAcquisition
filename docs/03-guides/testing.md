@@ -27,6 +27,7 @@ Source of truth для тестовой governance:
 
 - [ADR-042](../02-architecture/decisions/ADR-042-testing-strategy-matrix.md)
 - `configs/quality/test_matrix.yaml`
+- `configs/quality/test_governance_audit.yaml`
 - `configs/quality/integration_vcr_policy.yaml`
 
 Canonical named pytest lanes are defined in
@@ -76,6 +77,12 @@ Local architecture runs should prefer the explicit
 `S7-architecture-fast-boundary` and `S7-architecture-slow-governance` aliases
 over older implicit shard names.
 
+Marker-only commands such as `pytest -m unit` are not canonical lanes and must
+not be compared as if they were `unit-fast`, `unit-parallel-safe`, or
+`coverage-verify`. Comparable test-health evidence must preserve the
+`suite_name` from `configs/quality/test_matrix.yaml`; raw marker/path commands
+are acceptable only as local diagnostics.
+
 The QA entrypoint can record named lane runs as JUnit XML plus JSON summaries:
 
 ```bash
@@ -91,6 +98,21 @@ merge-blocking status comes from live CI plus the `coverage-verify` hard gate,
 while the committed baseline snapshot lives in
 `configs/quality/test_telemetry_baseline.yaml` and
 `docs/05-engineering/test-telemetry-baseline.md`.
+
+Before using a local checkout as source evidence for broad test audits, run the
+reproducibility preflight and static governance budget report:
+
+```bash
+python scripts/engineering/qa/check_test_audit_preflight.py --strict
+python scripts/engineering/qa/report_test_governance_audit.py --check
+```
+
+`check_test_audit_preflight.py --strict` treats missing `git-lfs`, failed
+`git status`, or missing telemetry baseline as blockers for main-branch audit
+claims. `report_test_governance_audit.py --check` enforces the current
+ratcheting budgets for assert-less candidates, duplicate test names,
+compatibility/legacy surface, marker/path drift, and deterministic-time/UUID
+call sites tracked in `configs/quality/test_governance_audit.yaml`.
 
 Failure classifications are informational and come from
 `configs/quality/test_health_classifiers.yaml`; pytest exit codes and quality

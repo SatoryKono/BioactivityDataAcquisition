@@ -132,7 +132,6 @@ dashboard-specific `Status` or `First Action` route.
    recent activity; missing current evidence remains `UNKNOWN`, not green zero.
 1. `bioetl-runtime`, first-screen answer area (без скролла):
    `Provenance`, `Status`, `ID`, `Processed Records`, then
-<<<<<<< Updated upstream
    `Runtime Status`, `Runtime Blockers` и
    `First Action` отвечают на L2 current-cause вопрос и next operator move.
    `Status` is the compact shared-shell verdict; `Runtime Status` is an
@@ -143,24 +142,6 @@ dashboard-specific `Status` or `First Action` route.
    `Runtime Telemetry Gap` и `Failed Runs`; selected-range risk
    markers не определяют current status. Non-zero/UNKNOWN telemetry gap делает
    zero-count cards недоказательными.
-||||||| Stash base
-   `First Action`, `Monitor Runtime Current Status`,
-   `Monitor Runtime Blockers`, `Inspect Top Runtime Blockers` и
-   `Monitor Runtime Telemetry Gap` отвечают на L2 вопрос «что блокирует
-   выполнение сейчас и куда идти дальше». Selected-range KPI evidence
-   (`Monitor Failed Runs`, `Monitor Runtime Error Rate`,
-   `Monitor Worst Stage Lag`) находится ниже answer row и не определяет
-   current status; non-zero/UNKNOWN telemetry gap делает zero-count cards
-   недоказательными.
-=======
-   `Runtime Status`, `Runtime Blockers` и
-   `First Action` отвечают на L2 current-cause вопрос и next operator move.
-   Compact evidence row содержит `Worst Stage Lag`,
-   `Monitor Runtime Blockers`, `Runtime Error Rate`,
-   `Runtime Telemetry Gap` и `Failed Runs`; selected-range risk
-   markers не определяют current status. Non-zero/UNKNOWN telemetry gap делает
-   zero-count cards недоказательными.
->>>>>>> Stashed changes
    Datasource trust markers are targeted: `Runtime` keeps this explicit
    telemetry-gap panel first-screen, `Control Plane` uses
    `Inspect: Telemetry Missing`, while `Silver Reject Explorer` relies on

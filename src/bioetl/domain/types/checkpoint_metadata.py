@@ -12,8 +12,8 @@ from bioetl.domain.normalization import (
 )
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types._checkpoint_metadata_support import (
-    coerce_snapshot_refs,
     coerce_snapshot_ids,
+    coerce_snapshot_refs,
     extract_run_context_anchor,
     is_empty_checkpoint_metadata_value,
 )
@@ -246,7 +246,6 @@ class CheckpointMetadata:
 
     def checkpoint_execution_identity_payload(self) -> JsonDict:
         """Return the canonical checkpoint execution-identity fallback payload."""
-
         snapshot_fingerprint = (
             self.input_snapshot_fingerprint
             if self.input_snapshot_fingerprint is not None

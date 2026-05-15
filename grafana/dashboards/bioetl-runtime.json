@@ -757,13 +757,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-<<<<<<< Updated upstream
       "description": "Expanded mirror of the shared Runtime Status verdict, placed beside blocker causes for first-screen triage. Uses the same current-status recording rule as the compact Status panel: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN/no runtime status data; it is not an independent second signal. If UNKNOWN, check Runtime Telemetry Gap and Prometheus scrape/rule health before trusting zero count panels. Labels: pipeline, run_type. Next action: inspect top blocker reason, then active blocker detail or logs/traces.",
-||||||| Stash base
-      "description": "Current snapshot from canonical recording rules. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN/no runtime status data. If UNKNOWN, check Monitor Runtime Telemetry Gap and Prometheus scrape/rule health before trusting zero count panels. Labels: pipeline, run_type. Next action: inspect top blocker reason, then active blocker detail or logs/traces.",
-=======
-      "description": "Current snapshot from canonical recording rules. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN/no runtime status data. If UNKNOWN, check Runtime Telemetry Gap and Prometheus scrape/rule health before trusting zero count panels. Labels: pipeline, run_type. Next action: inspect top blocker reason, then active blocker detail or logs/traces.",
->>>>>>> Stashed changes
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -842,13 +836,7 @@
         "textMode": "auto",
         "dataLinks": [
           {
-<<<<<<< Updated upstream
             "title": "Open Runtime Blockers",
-||||||| Stash base
-            "title": "Inspect Top Runtime Blockers",
-=======
-            "title": "Runtime Blockers",
->>>>>>> Stashed changes
             "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=9101&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false

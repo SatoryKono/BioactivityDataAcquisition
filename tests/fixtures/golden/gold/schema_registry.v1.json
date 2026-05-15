@@ -45,6 +45,22 @@
       ],
       "snapshot_path": "tests/fixtures/golden/gold/composite_publication_dq_bundle_v1.json"
     },
+    "pubchem_compound_dq_bundle": {
+      "entity": "pubchem_compound",
+      "purpose": "Bounded PubChem compound output bundle for DQ- and chemical-standardization-sensitive Gold checks.",
+      "required_columns": [
+        "entity_id",
+        "molecule_id",
+        "canonical_smiles",
+        "molecular_formula",
+        "molecular_weight",
+        "chemical_standardization_status",
+        "_dq_warn",
+        "_dq_error",
+        "_index"
+      ],
+      "snapshot_path": "tests/fixtures/golden/gold/pubchem_compound_dq_bundle_v1.json"
+    },
     "pubmed_publication_dq_bundle": {
       "entity": "pubmed_publication",
       "purpose": "Bounded strict Gold publication output bundle for DQ-sensitive publication inspection paths.",

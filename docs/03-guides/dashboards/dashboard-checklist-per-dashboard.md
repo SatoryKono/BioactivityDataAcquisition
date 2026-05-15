@@ -273,14 +273,8 @@
 - [ ] CTA: Inspect active blocker
 
 ### First-screen структура
-<<<<<<< Updated upstream
 - [ ] Tier 1 включает: First Action, Runtime Status, Runtime Telemetry Gap, Monitor Runtime Blockers, Runtime Blockers
 - [ ] `Runtime Status` описан как mirror of shared-shell `Status`, not independent second signal
-||||||| Stash base
-- [ ] Tier 1 включает: First Action, Monitor Runtime Current Status, Monitor Runtime Telemetry Gap, Monitor Runtime Blockers, Inspect Top Runtime Blockers
-=======
-- [ ] Tier 1 включает: First Action, Runtime Status, Runtime Telemetry Gap, Monitor Runtime Blockers, Runtime Blockers
->>>>>>> Stashed changes
 - [ ] Tier 2 collapsed rows по сценариям: Backlog Trends, Durations, Shutdown Diagnostics, Tracing-only Log Hygiene
 - [ ] Tier 3: selected-range evidence ниже
 - [ ] Tier 4 collapsed: tracing-only log hygiene

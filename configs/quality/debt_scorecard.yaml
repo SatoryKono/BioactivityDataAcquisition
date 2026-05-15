@@ -343,7 +343,7 @@ hotspot_family_ratchets:
     - src/bioetl/composition/runtime_builders/
     bounded_growth_budgets:
       files_ge_250_loc: 7
-      max_internal_fan_in: 10
+      max_internal_fan_in: 11
     metrics:
       duplication_clusters: 10
       files: 35

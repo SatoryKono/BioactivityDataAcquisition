@@ -54,8 +54,8 @@ def is_empty_checkpoint_metadata_value(value: object | None) -> bool:
 
 
 __all__ = [
-    "coerce_snapshot_refs",
     "coerce_snapshot_ids",
+    "coerce_snapshot_refs",
     "extract_run_context_anchor",
     "is_empty_checkpoint_metadata_value",
 ]
