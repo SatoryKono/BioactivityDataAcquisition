@@ -383,8 +383,14 @@ L2 diagnostic runtime triage: blockers, latency, backlog, error localization, ha
 - **CTAs**: Review current status, Review range evidence, Inspect top blockers, Inspect active blocker
 
 ### First-screen структура
+<<<<<<< Updated upstream
 - **Tier 1**: `First Action`, `Runtime Status`, `Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Runtime Blockers`
 - `Runtime Status` is an expanded mirror of compact shared-shell `Status`, not an independent second current-status signal.
+||||||| Stash base
+- **Tier 1**: `First Action`, `Monitor Runtime Current Status`, `Monitor Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Inspect Top Runtime Blockers`
+=======
+- **Tier 1**: `First Action`, `Runtime Status`, `Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Runtime Blockers`
+>>>>>>> Stashed changes
 - **Tier 2**: collapsed rows по сценариям: `Backlog Trends`, `Durations`, `Shutdown Diagnostics`, `Tracing-only Log Hygiene`
 - **Tier 3**: selected-range evidence ниже
 - **Tier 4**: collapsed tracing-only log hygiene

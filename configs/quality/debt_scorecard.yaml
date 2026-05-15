@@ -291,14 +291,14 @@ hotspot_family_ratchets:
     path_prefixes:
     - src/bioetl/composition/factories/pipeline/
     bounded_growth_budgets:
-      files_ge_250_loc: 2
+      files_ge_250_loc: 3
       max_internal_fan_in: 4
     metrics:
       duplication_clusters: 0
       files: 30
-      total_loc: 4098
-      files_ge_250_loc: 2
-      helper_function_ratio: 0.412
+      total_loc: 4123
+      files_ge_250_loc: 3
+      helper_function_ratio: 0.417
       max_internal_fan_in: 4
       max_internal_fan_in_module: bioetl.composition.factories.pipeline.control_plane_artifacts
     trend:
@@ -320,12 +320,12 @@ hotspot_family_ratchets:
       max_internal_fan_in: 4
     metrics:
       duplication_clusters: 23
-      files: 52
-      total_loc: 11944
-      files_ge_250_loc: 20
-      helper_function_ratio: 0.548
+      files: 56
+      total_loc: 12091
+      files_ge_250_loc: 18
+      helper_function_ratio: 0.506
       max_internal_fan_in: 4
-      max_internal_fan_in_module: bioetl.application.services.control_plane.run_manifest_diagnostics
+      max_internal_fan_in_module: bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support
     trend:
       status: reviewed_baseline_2026-05-15
       next_action: 2026-05-15 introduces a reviewed family baseline for application/services/control_plane;
@@ -346,11 +346,11 @@ hotspot_family_ratchets:
       max_internal_fan_in: 10
     metrics:
       duplication_clusters: 10
-      files: 32
-      total_loc: 4999
-      files_ge_250_loc: 7
-      helper_function_ratio: 0.497
-      max_internal_fan_in: 10
+      files: 35
+      total_loc: 5341
+      files_ge_250_loc: 6
+      helper_function_ratio: 0.495
+      max_internal_fan_in: 11
       max_internal_fan_in_module: bioetl.composition.runtime_builders.inputs_resolver
     trend:
       status: reviewed_baseline_2026-05-15

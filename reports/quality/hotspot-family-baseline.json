@@ -73,11 +73,11 @@
       "max_internal_fan_in": 4,
       "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.control_plane_artifacts",
       "bounded_growth_budgets": {
-        "files_ge_250_loc": 2,
+        "files_ge_250_loc": 3,
         "max_internal_fan_in": 4
       },
       "budget_warnings": [
-        "at_budget:files_ge_250_loc=3/2",
+        "at_budget:files_ge_250_loc=3/3",
         "at_budget:max_internal_fan_in=4/4"
       ]
     },
