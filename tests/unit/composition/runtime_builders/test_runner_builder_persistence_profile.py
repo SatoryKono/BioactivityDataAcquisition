@@ -21,21 +21,27 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.unit
-def test_build_pipeline_runner_allows_replay_ready_bounded_live_capture(
+def test_build_pipeline_runner_rejects_replay_ready_bounded_live_capture(
     tmp_path: Path,
 ) -> None:
-    """Replay-ready live captures can persist bounded evidence before snapshots."""
+    """Replay-ready live captures must fail closed without launch snapshots."""
     fake_factory, fake_registry = _build_factory_registry()
 
-    with patch(
-        "bioetl.composition.runtime_builders._run_manifest_builder_policy.get_code_revision_provenance",
-        return_value=SimpleNamespace(
-            git_commit="deadbeef" * 5,
-            source_revision_state="clean",
-            dependency_lock_hash="sha256:test-lock",
+    with (
+        patch(
+            "bioetl.composition.runtime_builders._run_manifest_builder_policy.get_code_revision_provenance",
+            return_value=SimpleNamespace(
+                git_commit="deadbeef" * 5,
+                source_revision_state="clean",
+                dependency_lock_hash="sha256:test-lock",
+            ),
+        ),
+        pytest.raises(
+            RuntimeError,
+            match="require immutable input snapshots",
         ),
     ):
-        result = _call_build_pipeline_runner(
+        _call_build_pipeline_runner(
             _build_context(limit=25, exact_replay=False),
             registry=fake_registry,
             settings=_build_settings(
@@ -58,14 +64,7 @@ def test_build_pipeline_runner_allows_replay_ready_bounded_live_capture(
             ),
         )
 
-    assert result == "runner-instance"
-    assert isinstance(fake_factory.kwargs, dict)
-    manifest_id = fake_factory.kwargs["manifest_id"]
-    manifest_path = (
-        tmp_path / "output" / "control" / "run_manifest" / f"{manifest_id}.json"
-    )
-    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-    assert payload["launch_context"]["required_persistence_profile"] == "replay_ready"
+    assert fake_factory.kwargs is None
 
 
 @pytest.mark.unit

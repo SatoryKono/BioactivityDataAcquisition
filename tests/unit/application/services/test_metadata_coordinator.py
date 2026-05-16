@@ -129,6 +129,34 @@ class TestMetadataCoordinator:
         assert coordinator.run_context.provider == "chembl"
         assert coordinator.run_context.entity == "activity"
 
+    def test_create_bronze_lineage_sidecar_projects_minimum_control_plane_anchors(
+        self,
+    ) -> None:
+        """Legacy Bronze sidecar must carry the minimum control-plane anchors."""
+        context = RunContext.create(
+            run_id=RunID(deterministic_uuid_from_callsite("bronze-sidecar")),
+            run_type=RunType.INCREMENTAL,
+            started_at=_FIXED_TIME,
+            provider="chembl",
+            entity="activity",
+            manifest_id="manifest-sidecar-001",
+            execution_fingerprint="fingerprint-sidecar-001",
+            effective_config_hash="e" * 64,
+        )
+        coordinator = MetadataCoordinator(context)
+
+        sidecar = coordinator.create_bronze_lineage_sidecar(
+            provider="chembl",
+            entity="activity",
+            batch_id=BatchID("batch-001"),
+            ingestion_ts=_FIXED_TIME,
+        )
+
+        assert sidecar["run_id"] == str(context.run_id)
+        assert sidecar["manifest_id"] == "manifest-sidecar-001"
+        assert sidecar["execution_fingerprint"] == "fingerprint-sidecar-001"
+        assert sidecar["effective_config_hash"] == "e" * 64
+
     def test_environment_metadata_cached(self, run_context: RunContext) -> None:
         """Test that environment metadata is cached at class level."""
         MetadataCoordinator.reset_environment_cache()

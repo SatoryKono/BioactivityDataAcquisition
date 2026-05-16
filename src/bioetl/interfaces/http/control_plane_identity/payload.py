@@ -131,8 +131,9 @@ def build_anchor_rows(
         )
         for spec in ANCHOR_SPECS
     ]
-    row_gap_count = sum(1 for row in rows if row["identity_gap"] is True)
-    row_gap_names = [str(row["name"]) for row in rows if row["identity_gap"] is True]
+    graph_gap_rows = identity_graph_gap_rows(rows)
+    row_gap_count = len(graph_gap_rows)
+    row_gap_names = [str(row["name"]) for row in graph_gap_rows]
     diagnostic_gap_count = gap_count_from_mapping(values.get("correlation_anchor_gaps"))
     diagnostic_complete = values.get("identity_graph_complete")
     gap_count = row_gap_count + diagnostic_gap_count
@@ -221,6 +222,7 @@ def build_summary(
     resolved_via: str,
 ) -> dict[str, object]:
     gap_rows = [row for row in anchors if row["identity_gap"] is True]
+    graph_gap_rows = identity_graph_gap_rows(anchors)
     diagnostic_gap_count = gap_count_from_mapping(values.get("correlation_anchor_gaps"))
     critical = any(row["ui_status"] == "CRIT" for row in gap_rows)
     warning = any(row["ui_status"] == "WARN" for row in gap_rows)
@@ -230,7 +232,7 @@ def build_summary(
     return {
         "overall_status": overall,
         "identity_graph_complete": (
-            not gap_rows
+            not graph_gap_rows
             and diagnostic_gap_count == 0
             and values.get("identity_graph_complete") is not False
             and manifest is not None
@@ -242,6 +244,18 @@ def build_summary(
         "replay_mode": None if manifest is None else replay_mode(manifest),
         "resolved_via": resolved_via,
     }
+
+
+def identity_graph_gap_rows(
+    anchors: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    """Return gaps that make the identity graph incomplete, not optional detail gaps."""
+    return [
+        row
+        for row in anchors
+        if row["identity_gap"] is True
+        and (row["priority"] == "P0" or row["missing_severity"] == "FAILING")
+    ]
 
 
 def build_identity_diagnostics(

@@ -13,7 +13,6 @@ TEST_FILE_LOC_EXEMPTIONS = {
     "tests/testing_support/neo4j_memory_sync.py": 3250,
     "tests/integration/test_grafana_dashboard_links.py": 2350,
     "tests/integration/test_grafana_config.py": 2460,
-    "tests/unit/interfaces/http/test_health_server.py": 2230,
 }
 
 TEST_FUNCTION_LOC_EXEMPTIONS = {

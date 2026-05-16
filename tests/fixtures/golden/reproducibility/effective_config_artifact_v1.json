@@ -1,5 +1,5 @@
 {
-  "artifact_id": "effective-config-37dd9a51ea4514e5",
+  "artifact_id": "effective-config-508b6892f3d839a5",
   "occurrence_envelope": {
     "created_at": "2025-01-01T12:00:00+00:00",
     "effective_execution_timestamp": "2025-01-01T12:00:00+00:00",
@@ -7,16 +7,26 @@
   },
   "schema_version": "1.0",
   "semantic_artifact": {
-    "artifact_id": "effective-config-37dd9a51ea4514e5",
+    "artifact_id": "effective-config-508b6892f3d839a5",
     "contract_refs": [],
     "dq_contract_compatibility_hash": "no_dq_policies",
     "dq_policy_refs": [],
     "dq_policy_snapshots": [],
     "dq_rule_bundle_versions": {},
-    "effective_config_hash": "a580ca1cdd3c40668a31f3d3c416b88609362ec0d0c6c18c64090a210cdfb590",
+    "effective_config_hash": "d96ea15540795a51ba4ea97c6cda14fae901824d5fbb947cb41709de4aeba54b",
     "effective_execution_config": {
       "config_data": {
         "exact_replay": true,
+        "execution_environment": {
+          "data_root_mode": "explicit",
+          "debug": false,
+          "dependency_lock_hash": "sha256:test-lock-golden",
+          "dependency_lock_present": true,
+          "schema_version": "execution-environment-v1",
+          "settings_env": "prod",
+          "settings_snapshot_hash": "sha256:settings-golden",
+          "test_mode": false
+        },
         "limit": 25,
         "pipeline": {
           "name": "chembl_activity",
@@ -27,42 +37,27 @@
           "limit": 25
         }
       },
-      "effective_hash": "a580ca1cdd3c40668a31f3d3c416b88609362ec0d0c6c18c64090a210cdfb590"
+      "effective_hash": "d96ea15540795a51ba4ea97c6cda14fae901824d5fbb947cb41709de4aeba54b"
     },
     "execution_environment": {
-      "ambient_environment_policy": "excluded_unless_explicitly_materialized",
-      "environment_hash": "cd6edd25ec62f83dcf013a77ae7b41800aaf706b158ad3f1f8c47ba5f8936643",
-      "materialized_env_keys": [],
-      "materialized_env_overrides": {},
-      "non_materialized_semantic_env_dependencies": [
-        "settings.env",
-        "settings.debug",
-        "settings.test_mode",
-        "settings.data_dir",
-        "settings.strict_error_handling",
-        "settings.strict_medallion",
-        "settings.silver_dedup_timeout_seconds",
-        "settings.pii_salt_rotation_active",
-        "settings.json_encoder",
-        "settings.default_email",
-        "settings.pii_salt_current",
-        "settings.pii_salt_next",
-        "settings.pubmed_api_key",
-        "settings.uniprot_api_key",
-        "settings.openalex_api_key",
-        "settings.semanticscholar_api_key",
-        "settings.pipeline.batch_size",
-        "settings.pipeline.checkpoint_interval",
-        "settings.pipeline.relaxed_dq",
-        "settings.pipeline.health_check_mode",
-        "settings.pipeline.control_plane.required_persistence_profile",
-        "settings.pipeline.control_plane.run_manifest_enabled",
-        "settings.pipeline.control_plane.run_ledger_enabled",
-        "settings.pipeline.control_plane.checkpoint_compatibility_policy",
-        "settings.observability.metrics_enabled",
-        "settings.observability.tracing_enabled",
-        "settings.observability.audit_enabled"
-      ]
+      "ambient_environment_policy": "materialized_via_execution_environment",
+      "environment_hash": "e8887fb2ed52c00aaab8cd39c7866b56aa5f30dd900bff6f777678571fc3c092",
+      "materialized_env_keys": [
+        "execution_environment"
+      ],
+      "materialized_env_overrides": {
+        "execution_environment": {
+          "data_root_mode": "explicit",
+          "debug": false,
+          "dependency_lock_hash": "sha256:test-lock-golden",
+          "dependency_lock_present": true,
+          "schema_version": "execution-environment-v1",
+          "settings_env": "prod",
+          "settings_snapshot_hash": "sha256:settings-golden",
+          "test_mode": false
+        }
+      },
+      "non_materialized_semantic_env_dependencies": []
     },
     "normalization_profile_hash": null,
     "normalization_profile_ref": null,
@@ -94,7 +89,19 @@
       "cli_overrides": {
         "limit": 25
       },
-      "override_hash": "93fb19ce6ead597d5fe6e5f411c86dc4c1d71d805c765e915ede100b2a10687d",
+      "env_overrides": {
+        "execution_environment": {
+          "data_root_mode": "explicit",
+          "debug": false,
+          "dependency_lock_hash": "sha256:test-lock-golden",
+          "dependency_lock_present": true,
+          "schema_version": "execution-environment-v1",
+          "settings_env": "prod",
+          "settings_snapshot_hash": "sha256:settings-golden",
+          "test_mode": false
+        }
+      },
+      "override_hash": "7c4da5359f69587a89533156428175fd5d8c212a89ae51c48aba85352cb4fa14",
       "runtime_adjustments": {
         "exact_replay": true
       }
