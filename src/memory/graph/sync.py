@@ -3859,7 +3859,11 @@ def resolve_neo4j_connection(
         )
         auth_username, auth_password = _parse_auth_pair(env.get("NEO4J_AUDIT_AUTH"))
         username = username or auth_username or "neo4j"
-        password = password or auth_password or "audit_secure_password"
+        password = password or auth_password
+        if not password:
+            raise RuntimeError(
+                "Neo4j audit password not found in NEO4J_AUDIT_PASSWORD or NEO4J_AUDIT_AUTH"
+            )
         http_uri = (
             explicit_http_uri
             or env.get("NEO4J_AUDIT_HTTP_URI")
@@ -3872,7 +3876,11 @@ def resolve_neo4j_connection(
         database = env.get("NEO4J_DATABASE", "neo4j")
         auth_username, auth_password = _parse_auth_pair(env.get("NEO4J_AUTH"))
         username = username or auth_username or "neo4j"
-        password = password or auth_password or "bioetl_secure_password"
+        password = password or auth_password
+        if not password:
+            raise RuntimeError(
+                "Neo4j password not found in NEO4J_PASSWORD, NEO4J_AUTH_PASSWORD, or NEO4J_AUTH"
+            )
         http_uri = (
             explicit_http_uri or env.get("NEO4J_HTTP_URI") or derive_http_uri(bolt_uri)
         )
