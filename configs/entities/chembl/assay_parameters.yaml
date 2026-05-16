@@ -250,6 +250,7 @@ filters:
     - assay_id
     - assay_param_id
     - parameter_type
+    - type
   gold_filters:
     required_fields:
     - assay_id
