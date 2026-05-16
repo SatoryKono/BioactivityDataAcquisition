@@ -20,8 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| 1 | `tests/unit/application/pipelines/test_activity_transformer_base.py::TestActivityTransformerTransform::test_transform_with_action_type_null` | State | Uninitialized variable | Initialized | `src/bioetl/application/runtime_timestamps.py:10` |
-
+| - | - | - | - | - | - |
 
 ## Regression Tests Added (for fixed bugs)
 | # | Test | Covers Bug | File |

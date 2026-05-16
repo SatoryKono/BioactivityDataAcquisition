@@ -20,8 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| 1 | `tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py::TestPmidBaseValidation::test_pmid_valid` | Data | Validation failure | Fixed boundary condition | `src/bioetl/domain/schemas/constants.py:42` |
-
+| - | - | - | - | - | - |
 
 ## Regression Tests Added (for fixed bugs)
 | # | Test | Covers Bug | File |

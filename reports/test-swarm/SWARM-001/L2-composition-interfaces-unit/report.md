@@ -20,8 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| 1 | `tests/unit/composition/factories/services/test_builder_unit.py::TestServicesBuilderCreateCheckpointManager::test_passes_loading_strategy` | State | Uninitialized variable | Initialized | `src/bioetl/composition/registry_default.py:10` |
-
+| - | - | - | - | - | - |
 
 ## Regression Tests Added (for fixed bugs)
 | # | Test | Covers Bug | File |

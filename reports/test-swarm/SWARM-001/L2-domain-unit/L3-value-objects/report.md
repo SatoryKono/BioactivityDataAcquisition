@@ -20,8 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| 1 | `tests/unit/domain/value_objects/test_academic_ids.py::TestOpenAlexId::test_valid_creation` | Data | Validation failure | Fixed boundary condition | `src/bioetl/domain/value_objects/activity_values.py:42` |
-
+| - | - | - | - | - | - |
 
 ## Regression Tests Added (for fixed bugs)
 | # | Test | Covers Bug | File |

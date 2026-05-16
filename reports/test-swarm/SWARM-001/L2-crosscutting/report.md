@@ -20,8 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| 1 | `tests/architecture/test_transformer_signatures.py::TestTransformerSignatures::test_has_metrics_parameter[PubChemCompoundTransformer]` | State | Uninitialized variable | Initialized | `file.py:10` |
-
+| - | - | - | - | - | - |
 
 ## Regression Tests Added (for fixed bugs)
 | # | Test | Covers Bug | File |

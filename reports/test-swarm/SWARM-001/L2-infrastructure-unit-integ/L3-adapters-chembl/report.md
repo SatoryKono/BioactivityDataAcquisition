@@ -20,8 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| 1 | `tests/unit/infrastructure/adapters/chembl/test_chembl_client.py::test_post_init_preserves_injected_base_collaborators` | Data | Validation failure | Fixed boundary condition | `src/bioetl/infrastructure/adapters/chembl/fetch_multi_filter_mixin.py:42` |
-
+| - | - | - | - | - | - |
 
 ## Regression Tests Added (for fixed bugs)
 | # | Test | Covers Bug | File |

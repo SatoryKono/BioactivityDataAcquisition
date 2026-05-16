@@ -20,8 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| 1 | `tests/unit/domain/services/test_activity_aggregator.py::TestActivityAggregatorBasic::test_aggregate_mean` | Data | Validation failure | Fixed boundary condition | `file.py:42` |
-
+| - | - | - | - | - | - |
 
 ## Regression Tests Added (for fixed bugs)
 | # | Test | Covers Bug | File |

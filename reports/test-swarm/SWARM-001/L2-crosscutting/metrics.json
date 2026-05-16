@@ -23,7 +23,7 @@
     "p95_duration_ms": 1000
   },
   "actions": {
-    "tests_fixed": 1,
+    "tests_fixed": 0,
     "tests_added": 0,
     "tests_optimized": 0,
     "flaky_found": 0,

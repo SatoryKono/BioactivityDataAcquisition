@@ -130,6 +130,9 @@ jobs:
             BIOETL_TEST_MODE: "true"
             BIOETL_PIPELINE__HEALTH_CHECK_MODE: "probe"
 
+            NEO4J_PASSWORD: test_password
+            NEO4J_AUDIT_PASSWORD: test_audit_password
+
         steps:
             -   name: Checkout code
                 uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -390,6 +393,9 @@ jobs:
         env:
             BIOETL_TEST_MODE: "true"
             BIOETL_PIPELINE__HEALTH_CHECK_MODE: "probe"
+
+            NEO4J_PASSWORD: test_password
+            NEO4J_AUDIT_PASSWORD: test_audit_password
             BIOETL_TEST_RELAXED_DQ: "1"
 
         steps:

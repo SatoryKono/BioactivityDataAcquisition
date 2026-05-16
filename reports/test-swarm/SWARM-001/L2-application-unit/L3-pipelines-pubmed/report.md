@@ -20,8 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| 1 | `tests/unit/application/pipelines/pubmed/test_abstract_extractor.py::TestExtractAbstract::test_simple_abstract` | Data | Validation failure | Fixed boundary condition | `src/bioetl/application/pipelines/pubmed/xml_parser.py:42` |
-
+| - | - | - | - | - | - |
 
 ## Regression Tests Added (for fixed bugs)
 | # | Test | Covers Bug | File |

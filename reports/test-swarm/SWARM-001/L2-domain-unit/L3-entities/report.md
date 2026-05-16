@@ -20,8 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| 1 | `tests/unit/domain/entities/test_base_entity.py::TestBaseEntity::test_valid_creation` | Data | Validation failure | Fixed boundary condition | `src/bioetl/domain/entities/_chembl_additional_models.py:42` |
-
+| - | - | - | - | - | - |
 
 ## Regression Tests Added (for fixed bugs)
 | # | Test | Covers Bug | File |

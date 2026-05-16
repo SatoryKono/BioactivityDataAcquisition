@@ -20,8 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| 1 | `tests/unit/domain/types/test_enums.py::TestRunType::test_priority_ordering` | State | Uninitialized variable | Initialized | `src/bioetl/domain/_observability_contract_primitives.py:10` |
-
+| - | - | - | - | - | - |
 
 ## Regression Tests Added (for fixed bugs)
 | # | Test | Covers Bug | File |

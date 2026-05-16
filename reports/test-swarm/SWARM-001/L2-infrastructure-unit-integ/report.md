@@ -20,8 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| 1 | `tests/unit/infrastructure/observability/test_prometheus_metrics.py::TestPrometheusMetrics::test_normalize_adapter_operation_label[fetch_filtered_with_fallback-fetch_filtered_with_fallback]` | State | Uninitialized variable | Initialized | `src/bioetl/infrastructure/config_loader_filtering.py:10` |
-
+| - | - | - | - | - | - |
 
 ## Regression Tests Added (for fixed bugs)
 | # | Test | Covers Bug | File |

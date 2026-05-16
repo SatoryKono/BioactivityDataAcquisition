@@ -20,8 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| 1 | `tests/unit/application/pipelines/chembl/test_activity_schema_gap.py::test_transform_populates_extended_fields` | Data | Validation failure | Fixed boundary condition | `src/bioetl/application/pipelines/chembl/target_component_transformer.py:42` |
-
+| - | - | - | - | - | - |
 
 ## Regression Tests Added (for fixed bugs)
 | # | Test | Covers Bug | File |

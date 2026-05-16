@@ -20,8 +20,7 @@
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| 1 | `tests/unit/domain/ports/test_noop.py::TestNoOpSpan::test_context_manager_enter_returns_self` | Data | Validation failure | Fixed boundary condition | `src/bioetl/domain/ports/delta_reader.py:42` |
-
+| - | - | - | - | - | - |
 
 ## Regression Tests Added (for fixed bugs)
 | # | Test | Covers Bug | File |
