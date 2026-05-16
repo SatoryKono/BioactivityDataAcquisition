@@ -1,0 +1,6 @@
+policy_scope: non_canonical_evidence_summary
+owner: eng
+freshness_window_days: 7
+last_verified: "2026-05-16"
+allowed_interpretation: backlog_signal_only
+canonical_sources: ["test"]
