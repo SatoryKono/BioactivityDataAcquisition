@@ -118,6 +118,15 @@
     "required": false,
     "unique": false
   },
+  "assay_description": {
+    "checks": [],
+    "coerce": false,
+    "description": "Assay description.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
   "assay_group": {
     "checks": [
       {
@@ -373,15 +382,6 @@
     "required": true,
     "unique": false
   },
-  "description": {
-    "checks": [],
-    "coerce": false,
-    "description": "Assay description.",
-    "dtype": "str",
-    "nullable": false,
-    "required": true,
-    "unique": false
-  },
   "entity_id": {
     "checks": [],
     "coerce": false,
@@ -426,15 +426,6 @@
     "dtype": "str",
     "nullable": false,
     "required": true,
-    "unique": false
-  },
-  "score": {
-    "checks": [],
-    "coerce": false,
-    "description": "Score.",
-    "dtype": "float64",
-    "nullable": true,
-    "required": false,
     "unique": false
   },
   "src_assay_id": {

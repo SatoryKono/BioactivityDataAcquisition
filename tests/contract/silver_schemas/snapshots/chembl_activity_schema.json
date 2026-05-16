@@ -145,6 +145,33 @@
     "required": false,
     "unique": false
   },
+  "activity_relation": {
+    "checks": [],
+    "coerce": false,
+    "description": "Original operator.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "activity_type": {
+    "checks": [],
+    "coerce": false,
+    "description": "Original type.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "activity_value": {
+    "checks": [],
+    "coerce": false,
+    "description": "Original value.",
+    "dtype": "float64",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
   "assay_description": {
     "checks": [],
     "coerce": false,
@@ -603,15 +630,6 @@
     "required": true,
     "unique": false
   },
-  "relation": {
-    "checks": [],
-    "coerce": false,
-    "description": "Original operator.",
-    "dtype": "str",
-    "nullable": false,
-    "required": true,
-    "unique": false
-  },
   "src_id": {
     "checks": [],
     "coerce": false,
@@ -768,15 +786,6 @@
     "required": false,
     "unique": false
   },
-  "type": {
-    "checks": [],
-    "coerce": false,
-    "description": "Original type.",
-    "dtype": "str",
-    "nullable": true,
-    "required": false,
-    "unique": false
-  },
   "units": {
     "checks": [],
     "coerce": false,
@@ -844,15 +853,6 @@
     "dtype": "float64",
     "nullable": true,
     "required": false,
-    "unique": false
-  },
-  "value": {
-    "checks": [],
-    "coerce": false,
-    "description": "Original value.",
-    "dtype": "float64",
-    "nullable": false,
-    "required": true,
     "unique": false
   }
 }

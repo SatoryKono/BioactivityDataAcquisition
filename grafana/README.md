@@ -774,7 +774,7 @@ tries `http://localhost:9090`, then the Docker-local fallbacks
   control-plane-specific trust panels for manifest/ledger/checkpoint/replay/lineage.
   `Next Action: Replay Diagnostics` now occupies the rightmost shared-shell slot
   beside `ID` and `Processed Records`, while the four compact trust cards remain
-  grouped below the `Trust Summary (Answer-First)` separator.
+  directly below the shared context shell.
   First-screen trust panels preserve `UNKNOWN` for missing
   telemetry; `Inspect: Telemetry Missing` must be `0` before operator
   treats current trust cards as replay/resume-safe evidence. `Inspect: Terminal Run Events by Status in Range`

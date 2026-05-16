@@ -145,15 +145,6 @@
     "required": false,
     "unique": false
   },
-  "description": {
-    "checks": [],
-    "coerce": false,
-    "description": "Target description.",
-    "dtype": "str",
-    "nullable": true,
-    "required": false,
-    "unique": false
-  },
   "downgraded": {
     "checks": [],
     "coerce": false,
@@ -244,6 +235,15 @@
     "checks": [],
     "coerce": false,
     "description": "JSON string of target components.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_description": {
+    "checks": [],
+    "coerce": false,
+    "description": "Target description.",
     "dtype": "str",
     "nullable": true,
     "required": false,

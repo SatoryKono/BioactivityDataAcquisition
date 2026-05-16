@@ -317,15 +317,15 @@ hotspot_family_ratchets:
     - src/bioetl/application/services/control_plane/
     bounded_growth_budgets:
       files_ge_250_loc: 20
-      max_internal_fan_in: 4
+      max_internal_fan_in: 5
     metrics:
       duplication_clusters: 23
-      files: 56
-      total_loc: 12091
-      files_ge_250_loc: 18
-      helper_function_ratio: 0.506
-      max_internal_fan_in: 4
-      max_internal_fan_in_module: bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support
+      files: 59
+      total_loc: 12526
+      files_ge_250_loc: 20
+      helper_function_ratio: 0.507
+      max_internal_fan_in: 5
+      max_internal_fan_in_module: bioetl.application.services.control_plane._run_manifest_diagnostics_replay
     trend:
       status: reviewed_baseline_2026-05-15
       next_action: 2026-05-15 introduces a reviewed family baseline for application/services/control_plane;

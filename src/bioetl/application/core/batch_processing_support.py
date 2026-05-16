@@ -163,6 +163,11 @@ class BatchProcessingSupportService:
             outcome="gold_ready",
             count=len(transform_result.gold_records),
         )
+        self._batch_metrics.track_stage_records(
+            stage="gold",
+            outcome="excluded_by_contract",
+            count=transform_result.gold_excluded_by_contract_count,
+        )
         return transform_result
 
     async def write_silver_gold_concurrent(
