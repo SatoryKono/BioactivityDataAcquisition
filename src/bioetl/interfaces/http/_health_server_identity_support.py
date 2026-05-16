@@ -51,9 +51,7 @@ def _build_identity_rows(
         else "not available for current scope"
     )
     manifest = (
-        cast(RunManifest, resolved_manifest)
-        if resolved_manifest is not None
-        else None
+        cast(RunManifest, resolved_manifest) if resolved_manifest is not None else None
     )
     values = _anchor_values(manifest)
     rows = [

@@ -267,12 +267,11 @@ def input_snapshot_fingerprint(
 
 
 def source_ref_values(source_refs: Sequence[RunSourceRef]) -> list[str]:
-    values: list[str] = []
-    for item in source_refs:
-        value = join_non_empty((item.provider, item.entity, item.pipeline_name), "/")
-        if value:
-            values.append(value)
-    return values
+    return [
+        value
+        for item in source_refs
+        if (value := join_non_empty((item.provider, item.entity, item.pipeline_name), "/"))
+    ]
 
 
 def artifact_ref_values(artifacts: Sequence[RunArtifactRef]) -> list[str]:
@@ -288,9 +287,7 @@ def artifact_refs(
     ledger_entries: tuple[RunLedgerEntry, ...],
 ) -> list[str]:
     values = published_artifacts(ledger_entries)
-    if values:
-        return values
-    return artifact_ref_values(manifest.planned_artifacts)
+    return values or artifact_ref_values(manifest.planned_artifacts)
 
 
 def published_artifacts(ledger_entries: tuple[RunLedgerEntry, ...]) -> list[str]:
@@ -426,26 +423,29 @@ def first_payload_value(manifest: RunManifest, *keys: str) -> object | None:
 
 
 def runtime_mode(manifest: RunManifest) -> str:
-    flags = []
-    for name in (
-        "execution_context",
-        "resume",
-        "dry_run",
-        "exact_replay",
-        "use_cached_bronze",
-    ):
-        value = first_payload_value(manifest, name)
-        if value not in (None, False, "", [], {}):
-            flags.append(f"{name}={value}")
+    flags = [
+        f"{name}={value}"
+        for name in (
+            "execution_context",
+            "resume",
+            "dry_run",
+            "exact_replay",
+            "use_cached_bronze",
+        )
+        if (value := first_payload_value(manifest, name))
+        not in (None, False, "", [], {})
+    ]
     return " | ".join([manifest.run_type.value, *flags])
 
 
 def replay_mode(manifest: RunManifest) -> str:
-    if requested_exact_replay(manifest):
-        return "exact_replay"
-    if manifest.replay_of_run_id or manifest.replay_of_manifest_id:
-        return "replay"
-    return manifest.run_type.value
+    return (
+        "exact_replay"
+        if requested_exact_replay(manifest)
+        else "replay"
+        if manifest.replay_of_run_id or manifest.replay_of_manifest_id
+        else manifest.run_type.value
+    )
 
 
 def exact_replay_eligible(
@@ -468,22 +468,16 @@ def requested_exact_replay(manifest: RunManifest) -> bool:
 
 
 def is_replay(manifest: RunManifest) -> bool:
-    return (
-        bool(manifest.replay_of_run_id)
-        or bool(manifest.replay_of_manifest_id)
-        or requested_exact_replay(manifest)
+    return bool(manifest.replay_of_run_id or manifest.replay_of_manifest_id) or (
+        requested_exact_replay(manifest)
     )
 
 
 def is_composite(manifest: RunManifest) -> bool:
-    return (
-        manifest.pipeline_name.startswith("composite_")
-        or manifest.provider == "composite"
-        or bool(composite_run_identity(manifest))
+    return manifest.pipeline_name.startswith("composite_") or (
+        manifest.provider == "composite" or bool(composite_run_identity(manifest))
     )
 
 
 def is_terminal(ledger_entries: tuple[RunLedgerEntry, ...]) -> bool:
-    return any(
-        str(entry.status or "").lower() in TERMINAL_STATUSES for entry in ledger_entries
-    )
+    return any(str(entry.status or "").lower() in TERMINAL_STATUSES for entry in ledger_entries)

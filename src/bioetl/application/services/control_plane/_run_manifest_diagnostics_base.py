@@ -18,7 +18,6 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_persist
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
     _assess_manifest_reproducibility_policy,
-    _build_operator_replay_projection,
     _build_replay_parentage,
     _build_replay_state_projection,
     _build_resume_contract,
@@ -27,6 +26,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
     _collect_append_mode_semantic_sinks,
+)
+from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection import (
+    _build_operator_replay_projection,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
     collect_input_snapshot_content_hashes as _collect_input_snapshot_content_hashes,
@@ -124,9 +126,7 @@ def _resolve_base_summary_replay_context(
             operator_replay_projection["replay_readiness_verdict"]
         ),
         exact_replay_support_boundary=_resolve_exact_replay_support_boundary(manifest),
-        exact_replay_blockers=list(
-            operator_replay_projection["exact_replay_blockers"]
-        ),
+        exact_replay_blockers=list(operator_replay_projection["exact_replay_blockers"]),
         resume_contract=_build_resume_contract(
             manifest=manifest,
             requested_exact_replay=requested_exact_replay,

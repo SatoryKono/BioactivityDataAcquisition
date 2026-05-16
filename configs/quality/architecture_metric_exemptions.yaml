@@ -25,15 +25,15 @@ registries:
       removal_step: "Split endpoint routing helpers by health/control-plane family and remove this exemption."
     src/bioetl/interfaces/http/control_plane_identity/specs.py:
       value: 600
-      owner: "@bioetl-platform"
+      owner: "@bioetl-architecture"
       reason: "Control-plane identity HTTP specs retain generated/request-response schema surfaces in one published interface module pending schema-family split."
       classification: "technical_debt"
       linked_rf: "RF-000"
       expires_on: "2026-09-30"
       removal_step: "Move identity spec groups into smaller modules and remove this exemption."
     src/bioetl/interfaces/http/control_plane_identity/extractors.py:
-      value: 480
-      owner: "@bioetl-platform"
+      value: 483
+      owner: "@bioetl-architecture"
       reason: "Control-plane identity extraction helpers are mid-refactor and currently retain anchor, artifact, checkpoint, and replay extractors in one interface module."
       classification: "technical_debt"
       linked_rf: "RF-000"
