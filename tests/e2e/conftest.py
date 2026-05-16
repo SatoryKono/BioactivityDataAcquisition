@@ -197,12 +197,33 @@ def e2e_environment():
 @pytest.fixture
 def relaxed_dq_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
     """Enable relaxed DQ thresholds explicitly for replay-heavy E2E tests."""
+    del monkeypatch  # fixture signature retained for compatibility
+    with relaxed_dq_environment():
+        yield
+
+
+@contextmanager
+def relaxed_dq_environment() -> Generator[None, None, None]:
+    """Temporarily force relaxed DQ mode across arbitrary fixture scopes."""
+    previous_test_relaxed = os.environ.get("BIOETL_TEST_RELAXED_DQ")
+    previous_pipeline_relaxed = os.environ.get("BIOETL_PIPELINE__RELAXED_DQ")
+
     _clear_runtime_config_caches()
-    monkeypatch.setenv("BIOETL_TEST_RELAXED_DQ", "1")
-    monkeypatch.setenv("BIOETL_PIPELINE__RELAXED_DQ", "1")
+    os.environ["BIOETL_TEST_RELAXED_DQ"] = "1"
+    os.environ["BIOETL_PIPELINE__RELAXED_DQ"] = "1"
     _clear_runtime_config_caches()
-    yield
-    _clear_runtime_config_caches()
+    try:
+        yield
+    finally:
+        if previous_test_relaxed is None:
+            os.environ.pop("BIOETL_TEST_RELAXED_DQ", None)
+        else:
+            os.environ["BIOETL_TEST_RELAXED_DQ"] = previous_test_relaxed
+        if previous_pipeline_relaxed is None:
+            os.environ.pop("BIOETL_PIPELINE__RELAXED_DQ", None)
+        else:
+            os.environ["BIOETL_PIPELINE__RELAXED_DQ"] = previous_pipeline_relaxed
+        _clear_runtime_config_caches()
 
 
 @pytest.fixture
@@ -832,37 +853,46 @@ def _build_table_name_variants(table_name: str) -> list[str]:
 
 def _resolve_silver_table_path(data_dir: Path, table_name: str) -> Path:
     """Resolve Silver Delta table path across naming/layout variants."""
-    silver_base = data_dir / "output" / "silver"
     variants = _build_table_name_variants(table_name)
+    silver_bases = [
+        data_dir / "output" / "silver",
+        data_dir / "silver",
+    ]
 
-    # Prefer explicit logical-name candidates first.
-    for variant in variants:
-        candidate = silver_base / variant.replace(".", "/")
-        if candidate.exists() and (candidate / "_delta_log").exists():
-            return candidate
-
-    # Flat-structure Delta table at layer root.
-    if silver_base.exists() and (silver_base / "_delta_log").exists():
-        return silver_base
-
-    # Fallback: discover existing delta tables and match by relative path variants.
-    if silver_base.exists():
-        discovered = sorted({p.parent for p in silver_base.rglob("_delta_log")})
-        variant_set = set(variants)
-        for candidate in discovered:
-            rel = candidate.relative_to(silver_base).as_posix()
-            candidate_variants = {
-                rel,
-                rel.replace("/", "."),
-                rel.replace("/", "_"),
-            }
-            if candidate_variants & variant_set:
+    for silver_base in silver_bases:
+        # Prefer explicit logical-name candidates first.
+        for variant in variants:
+            candidate = silver_base / variant.replace(".", "/")
+            if candidate.exists() and (candidate / "_delta_log").exists():
                 return candidate
 
-    checked = [str(silver_base / variant.replace(".", "/")) for variant in variants]
+        # Flat-structure Delta table at layer root.
+        if silver_base.exists() and (silver_base / "_delta_log").exists():
+            return silver_base
+
+        # Fallback: discover existing delta tables and match by relative path variants.
+        if silver_base.exists():
+            discovered = sorted({p.parent for p in silver_base.rglob("_delta_log")})
+            variant_set = set(variants)
+            for candidate in discovered:
+                rel = candidate.relative_to(silver_base).as_posix()
+                candidate_variants = {
+                    rel,
+                    rel.replace("/", "."),
+                    rel.replace("/", "_"),
+                }
+                if candidate_variants & variant_set:
+                    return candidate
+
+    checked = [
+        str(silver_base / variant.replace(".", "/"))
+        for silver_base in silver_bases
+        for variant in variants
+    ]
     raise AssertionError(
         "Silver table does not exist. "
-        f"table_name={table_name}, checked={checked}, flat={silver_base}"
+        f"table_name={table_name}, checked={checked}, "
+        f"flat={', '.join(str(base) for base in silver_bases)}"
     )
 
 
@@ -883,9 +913,10 @@ def assert_silver_table_has_records(
         AssertionError: Если таблица пуста или записей меньше expected_min
 
     Note:
-        Handles both standard layout (data_dir/output/silver/{table_name}/)
-        and flat_structure layout (data_dir/output/silver/) for pipelines
-        with flat_structure: true in their config.
+        Handles both current layout
+        (data_dir/output/silver/{table_name}/) and legacy root layout
+        (data_dir/silver/{table_name}/), plus flat_structure tables at either
+        silver layer root for pipelines with flat_structure: true in config.
     """
     table_path = _resolve_silver_table_path(data_dir, table_name)
 
@@ -918,21 +949,32 @@ def assert_gold_table_has_records(
         AssertionError: Если таблица пуста или записей меньше expected_min
 
     Note:
-        Handles both standard and flat_structure layouts.
+        Handles both current output-root layout and legacy root layout, plus
+        flat_structure tables at either gold layer root.
     """
-    # Standard path: data_dir/output/gold/{table_name}/
-    table_path = data_dir / "output" / "gold" / table_name
+    gold_bases = [
+        data_dir / "output" / "gold",
+        data_dir / "gold",
+    ]
+    table_path: Path | None = None
 
-    # Flat structure path: data_dir/output/gold/ (Delta table at root)
-    flat_path = data_dir / "output" / "gold"
-
-    # Check both locations - standard path first, then flat structure
-    if not table_path.exists():
-        # Try flat_structure path (check for _delta_log at root)
+    for gold_base in gold_bases:
+        standard_path = gold_base / table_name
+        flat_path = gold_base
+        if standard_path.exists():
+            table_path = standard_path
+            break
         if flat_path.exists() and (flat_path / "_delta_log").exists():
             table_path = flat_path
-        else:
-            raise AssertionError(f"Gold table does not exist: {table_path}")
+            break
+
+    if table_path is None:
+        checked = [str(gold_base / table_name) for gold_base in gold_bases]
+        raise AssertionError(
+            "Gold table does not exist: "
+            f"table_name={table_name}, checked={checked}, "
+            f"flat={', '.join(str(base) for base in gold_bases)}"
+        )
 
     dt = _load_delta_table()(str(table_path))
     count = len(dt.to_pyarrow_table())

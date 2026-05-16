@@ -12,7 +12,6 @@ Part of architecture review refactoring plan (R2).
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Generator
 from datetime import UTC
 from pathlib import Path
 from uuid import uuid4
@@ -26,10 +25,8 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from .conftest import (
     _resolve_silver_table_path,
     assert_silver_table_has_records,
-    clone_e2e_data_dir_snapshot,
     create_test_context,
     get_silver_records,
-    managed_e2e_data_dir,
     run_pipeline_or_skip_transient,
 )
 
@@ -45,62 +42,11 @@ def vcr_cassette_dir() -> Path:
     )
 
 
-@pytest.fixture(scope="module")
-def chembl_activity_seed_limit3_dir(
-    tmp_path_factory: pytest.TempPathFactory,
-) -> Generator[Path, None, None]:
-    """Build one reusable chembl_activity seed with limit=3."""
-    data_dir = tmp_path_factory.mktemp("advanced_scenarios_seed_limit3") / "bioetl_data"
-    with managed_e2e_data_dir(data_dir) as prepared_dir:
-        ctx = create_test_context("chembl_activity", limit=3)
-        asyncio.run(run_pipeline_or_skip_transient(ctx))
-        assert_silver_table_has_records(
-            prepared_dir,
-            "chembl_activity",
-            expected_min=1,
-        )
-        yield prepared_dir
-
-
-@pytest.fixture
-def chembl_activity_seed_limit3_clone(
-    tmp_path: Path,
-    chembl_activity_seed_limit3_dir: Path,
-) -> Generator[Path, None, None]:
-    """Clone the limit=3 seed into an isolated temp directory."""
-    data_dir = tmp_path / "bioetl_data"
-    clone_e2e_data_dir_snapshot(chembl_activity_seed_limit3_dir, data_dir)
-    with managed_e2e_data_dir(data_dir) as prepared_dir:
-        yield prepared_dir
-
-
-@pytest.fixture(scope="module")
-def chembl_activity_seed_limit5_dir(
-    tmp_path_factory: pytest.TempPathFactory,
-) -> Generator[Path, None, None]:
-    """Build one reusable chembl_activity seed with limit=5."""
-    data_dir = tmp_path_factory.mktemp("advanced_scenarios_seed_limit5") / "bioetl_data"
-    with managed_e2e_data_dir(data_dir) as prepared_dir:
-        ctx = create_test_context("chembl_activity", limit=5)
-        asyncio.run(run_pipeline_or_skip_transient(ctx))
-        assert_silver_table_has_records(
-            prepared_dir,
-            "chembl_activity",
-            expected_min=1,
-        )
-        yield prepared_dir
-
-
-@pytest.fixture
-def chembl_activity_seed_limit5_clone(
-    tmp_path: Path,
-    chembl_activity_seed_limit5_dir: Path,
-) -> Generator[Path, None, None]:
-    """Clone the limit=5 seed into an isolated temp directory."""
-    data_dir = tmp_path / "bioetl_data"
-    clone_e2e_data_dir_snapshot(chembl_activity_seed_limit5_dir, data_dir)
-    with managed_e2e_data_dir(data_dir) as prepared_dir:
-        yield prepared_dir
+async def _seed_chembl_activity_silver(data_dir: Path, *, limit: int = 10) -> int:
+    """Materialize one local chembl_activity Silver seed inside active test VCR."""
+    ctx = create_test_context("chembl_activity", limit=limit)
+    await run_pipeline_or_skip_transient(ctx)
+    return assert_silver_table_has_records(data_dir, "chembl_activity", expected_min=1)
 
 
 # ============================================================================
@@ -153,27 +99,27 @@ async def test_vacuum_runs_after_successful_pipeline(e2e_data_dir: Path):
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)  # Multiple pipeline runs need more time
 async def test_vacuum_respects_retention_days(
-    chembl_activity_seed_limit3_clone: Path,
+    e2e_data_dir: Path,
 ):
     """E2E: VACUUM retention period is respected.
 
     Files newer than retention_days should not be deleted.
     """
-    # Seed fixture provides the first run; execute one more to create a new version.
-    ctx = create_test_context("chembl_activity", limit=3)
+    await _seed_chembl_activity_silver(e2e_data_dir)
+
+    # Execute one more run to create a new version.
+    ctx = create_test_context("chembl_activity", limit=5)
     await run_pipeline_or_skip_transient(ctx)
     await asyncio.sleep(0.1)  # Small delay between runs
 
     # Verify table has records
     count = assert_silver_table_has_records(
-        chembl_activity_seed_limit3_clone, "chembl_activity", expected_min=1
+        e2e_data_dir, "chembl_activity", expected_min=1
     )
     assert count >= 1
 
     # VACUUM with 7 day retention shouldn't delete anything recent
-    table_path = _resolve_silver_table_path(
-        chembl_activity_seed_limit3_clone, "chembl_activity"
-    )
+    table_path = _resolve_silver_table_path(e2e_data_dir, "chembl_activity")
     dt = DeltaTable(str(table_path))
 
     # Check history - should have multiple operations
@@ -383,15 +329,13 @@ async def test_pipeline_resumes_from_checkpoint(e2e_data_dir: Path):
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)  # Two pipeline runs need more time
 async def test_failed_run_preserves_partial_data(
-    chembl_activity_seed_limit3_clone: Path,
+    e2e_data_dir: Path,
 ):
     """E2E: Partial data is preserved when pipeline fails mid-run.
 
     Tests that Bronze/Silver data written before failure is retained.
     """
-    initial_count = assert_silver_table_has_records(
-        chembl_activity_seed_limit3_clone, "chembl_activity", expected_min=1
-    )
+    initial_count = await _seed_chembl_activity_silver(e2e_data_dir)
 
     # Seed fixture already provides the first run; execute the follow-up run only.
     ctx2 = create_test_context("chembl_activity", limit=5)
@@ -399,9 +343,7 @@ async def test_failed_run_preserves_partial_data(
 
     # Data should be preserved/incremented
     final_count = assert_silver_table_has_records(
-        chembl_activity_seed_limit3_clone,
-        "chembl_activity",
-        expected_min=initial_count,
+        e2e_data_dir, "chembl_activity", expected_min=initial_count
     )
     assert final_count >= initial_count, "Data should be preserved"
 
@@ -416,7 +358,7 @@ async def test_failed_run_preserves_partial_data(
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)  # Two pipeline runs need more time
 async def test_rebuild_clears_existing_data(
-    chembl_activity_seed_limit3_clone: Path,
+    e2e_data_dir: Path,
 ):
     """E2E: REBUILD run type clears existing Silver/Gold data.
 
@@ -424,9 +366,7 @@ async def test_rebuild_clears_existing_data(
     - REBUILD should clear Silver and Gold before writing
     - Bronze is append-only (never cleared)
     """
-    assert_silver_table_has_records(
-        chembl_activity_seed_limit3_clone, "chembl_activity", expected_min=1
-    )
+    await _seed_chembl_activity_silver(e2e_data_dir)
 
     # Rebuild run - should clear and recreate
     ctx2 = create_test_context(
@@ -438,7 +378,7 @@ async def test_rebuild_clears_existing_data(
 
     # After rebuild, count should be from the new run only
     rebuild_count = assert_silver_table_has_records(
-        chembl_activity_seed_limit3_clone, "chembl_activity", expected_min=1
+        e2e_data_dir, "chembl_activity", expected_min=1
     )
 
     # Verify rebuild happened (new data, not accumulated)
@@ -450,7 +390,7 @@ async def test_rebuild_clears_existing_data(
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)  # Two pipeline runs need more time
 async def test_backfill_clears_silver_only(
-    chembl_activity_seed_limit5_clone: Path,
+    e2e_data_dir: Path,
 ):
     """E2E: BACKFILL run type clears Silver but keeps Gold unchanged.
 
@@ -458,9 +398,7 @@ async def test_backfill_clears_silver_only(
     - BACKFILL should clear Silver
     - Gold is not cleared during backfill
     """
-    assert_silver_table_has_records(
-        chembl_activity_seed_limit5_clone, "chembl_activity", expected_min=1
-    )
+    await _seed_chembl_activity_silver(e2e_data_dir)
 
     # Backfill run
     ctx2 = create_test_context(
@@ -472,5 +410,5 @@ async def test_backfill_clears_silver_only(
 
     # Silver should have records from backfill
     assert_silver_table_has_records(
-        chembl_activity_seed_limit5_clone, "chembl_activity", expected_min=1
+        e2e_data_dir, "chembl_activity", expected_min=1
     )

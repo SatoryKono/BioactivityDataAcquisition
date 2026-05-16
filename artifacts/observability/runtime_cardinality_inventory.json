@@ -2878,41 +2878,34 @@
     "bioetl_l0_status": [
       "docs/03-guides/dashboards/design-system.md",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-overview-v3.json"
+      "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l1_control_plane_current_status": [
       "grafana/README.md",
-      "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-overview-v3.json"
+      "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l1_dq_status": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-overview-v3.json"
+      "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l1_gold_lifecycle_status": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-overview-v3.json"
+      "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l1_provider_global_status": [
       "grafana/README.md",
-      "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-overview-v3.json"
+      "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l1_runtime_blocker_status": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-overview-v3.json"
+      "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l1_workflow_global_status": [
       "grafana/README.md",
-      "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-overview-v3.json"
+      "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_lineage_fragments_emitted_total": [
       "docs/03-guides/metrics-monitoring.md",
@@ -2980,7 +2973,6 @@
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-overview-v3.json",
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_pipeline_stage_expected": [
@@ -3076,7 +3068,6 @@
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json",
       "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-overview-v3.json",
       "grafana/dashboards/bioetl-provider-health-v2.json",
       "grafana/dashboards/bioetl-runtime.json",
       "grafana/dashboards/bioetl-silver-reject-explorer.json",
@@ -3173,7 +3164,6 @@
       "grafana/dashboards/bioetl-control-plane-v1.json",
       "grafana/dashboards/bioetl-dq-v2.json",
       "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-overview-v3.json",
       "grafana/dashboards/bioetl-provider-health-v2.json",
       "grafana/dashboards/bioetl-runtime.json",
       "grafana/dashboards/bioetl-workflow-overview.json"
