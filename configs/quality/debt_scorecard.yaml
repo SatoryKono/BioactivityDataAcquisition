@@ -472,8 +472,8 @@ owner_decomposition_targets:
     '@bioetl-data-model': 9
 - quarter: 2026-Q2
   allocations:
-    '@bioetl-architecture': 9
-    '@bioetl-platform': 1
+    '@bioetl-architecture': 7
+    '@bioetl-platform': 3
 expiry_decomposition_targets:
 - quarter: 2026-Q1
   max_entries_expiring_in_quarter: 29
