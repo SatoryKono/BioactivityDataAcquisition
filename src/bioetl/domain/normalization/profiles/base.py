@@ -107,6 +107,28 @@ def _validate_meta_fields(
     )
 
 
+def _normalize_profile_contract(
+    *,
+    field_rules: Mapping[str, FieldRule],
+    field_aliases: Mapping[str, str],
+    meta_fields: frozenset[str],
+) -> tuple[dict[str, FieldRule], dict[str, str]]:
+    normalized_rules = _normalize_field_rules(field_rules)
+    normalized_aliases = _normalize_field_aliases(field_aliases)
+    if not normalized_rules:
+        raise ValueError("field_rules cannot be empty")
+    _validate_field_rule_keys(normalized_rules)
+    _validate_field_aliases(
+        field_rules=normalized_rules,
+        field_aliases=normalized_aliases,
+    )
+    _validate_meta_fields(
+        meta_fields=meta_fields,
+        field_rules=normalized_rules,
+    )
+    return normalized_rules, normalized_aliases
+
+
 @dataclass(frozen=True, slots=True)
 class FieldRuleIdentity:
     """Deterministic compatibility surface for one normalized field."""
@@ -178,18 +200,10 @@ class NormalizationProfile:
     description: str | None = None
 
     def __post_init__(self) -> None:
-        normalized_rules = _normalize_field_rules(self.field_rules)
-        normalized_aliases = _normalize_field_aliases(self.field_aliases)
-        if not normalized_rules:
-            raise ValueError("field_rules cannot be empty")
-        _validate_field_rule_keys(normalized_rules)
-        _validate_field_aliases(
-            field_rules=normalized_rules,
-            field_aliases=normalized_aliases,
-        )
-        _validate_meta_fields(
+        normalized_rules, normalized_aliases = _normalize_profile_contract(
+            field_rules=self.field_rules,
+            field_aliases=self.field_aliases,
             meta_fields=self.meta_fields,
-            field_rules=normalized_rules,
         )
         object.__setattr__(self, "field_rules", normalized_rules)
         object.__setattr__(self, "field_aliases", normalized_aliases)
