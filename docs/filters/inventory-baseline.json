@@ -5,8 +5,8 @@
     "entities_total": 21,
     "entities_with_silver_filters": 21,
     "entities_with_gold_filters": 21,
-    "rules_total": 101,
-    "keep_in_silver": 82,
+    "rules_total": 102,
+    "keep_in_silver": 83,
     "move_to_gold": 5,
     "duplicate": 14,
     "conflict": 0
@@ -559,7 +559,7 @@
       "has_silver_filters": true,
       "has_gold_filters": true,
       "counts_by_action": {
-        "keep_in_silver": 3,
+        "keep_in_silver": 4,
         "move_to_gold": 0,
         "duplicate": 0,
         "conflict": 0
@@ -594,6 +594,16 @@
           "gold_value": "\"parameter_type\"",
           "action": "keep_in_silver",
           "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay_parameters",
+          "rule_type": "required_fields",
+          "field": "type",
+          "silver_value": "\"type\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
         }
       ]
     },

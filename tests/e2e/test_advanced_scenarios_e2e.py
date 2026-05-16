@@ -442,7 +442,7 @@ async def test_backfill_clears_silver_only(
     - BACKFILL should clear Silver
     - Gold is not cleared during backfill
     """
-    await _seed_chembl_activity_silver(e2e_data_dir)
+    initial_count = await _seed_chembl_activity_silver(e2e_data_dir)
 
     # Backfill run
     ctx2 = create_test_context(
@@ -452,8 +452,10 @@ async def test_backfill_clears_silver_only(
     )
     await run_pipeline_or_skip_transient(ctx2)
 
-    # Silver should have records from backfill
-    _assert_chembl_activity_silver_or_skip(
+    # Silver should be recreated from the bounded backfill run, not accumulated.
+    backfill_count = _assert_chembl_activity_silver_or_skip(
         e2e_data_dir,
         expected_min=1,
     )
+    assert backfill_count <= 5
+    assert backfill_count <= initial_count

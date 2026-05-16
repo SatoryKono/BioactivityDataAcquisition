@@ -53,6 +53,7 @@ chembl,assay,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no
 chembl,assay_parameters,required_fields,assay_id,"""assay_id""","""assay_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,assay_parameters,required_fields,assay_param_id,"""assay_param_id""",,keep_in_silver,structural rule stays in silver_filters
 chembl,assay_parameters,required_fields,parameter_type,"""parameter_type""","""parameter_type""",keep_in_silver,also present in gold_filters (informational)
+chembl,assay_parameters,required_fields,type,"""type""",,keep_in_silver,structural rule stays in silver_filters
 chembl,cell_line,required_fields,cell_id,"""cell_id""",,keep_in_silver,structural rule stays in silver_filters
 chembl,cell_line,required_fields,cell_name,"""cell_name""","""cell_name""",keep_in_silver,also present in gold_filters (informational)
 chembl,compound_record,required_fields,molecule_id,"""molecule_id""","""molecule_id""",keep_in_silver,also present in gold_filters (informational)
