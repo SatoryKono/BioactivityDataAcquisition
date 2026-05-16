@@ -146,7 +146,10 @@ DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
         ChemblControlledVocabularyFamily(
             family_name="assay_parameter_types",
             invalid_value_mode="preserve_unknown_uppercase_lexeme",
-            fields=("chembl_assay_parameters.type",),
+            fields=(
+                "chembl_assay_parameters.type",
+                "chembl_assay_parameters.parameter_type",
+            ),
         ),
         ChemblControlledVocabularyFamily(
             family_name="assay_categories",

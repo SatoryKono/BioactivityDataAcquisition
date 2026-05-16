@@ -96,6 +96,19 @@ def test_chembl_activity_meta_fields_use_passthrough_normalizer() -> None:
     )
 
 
+def test_chembl_activity_profile_resolves_reviewed_silver_alias_fields() -> None:
+    relation_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("relation")
+    type_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("type")
+    value_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("value")
+
+    assert relation_rule is not None
+    assert relation_rule.normalizer(" between ") == "between"
+    assert type_rule is not None
+    assert type_rule.normalizer(" ic50 ") == "ic50"
+    assert value_rule is not None
+    assert value_rule.normalizer("1.25") == 1.25
+
+
 def test_chembl_activity_bao_identifier_rules_are_profile_visible() -> None:
     endpoint_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("bao_endpoint")
     format_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("bao_format")

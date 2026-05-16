@@ -111,7 +111,10 @@ evidence live below fold in collapsed incident rows, not in the first-screen
 trust block.
 
 Control Plane keeps the shared compact `ID` shell panel (`9402`) backed by
-`/ops/control-plane/identity-table`. The deeper collapsed
+`/ops/control-plane/identity-table`. The shell panel is a two-column summary of
+run/manifest identity, Provider.Entity version, contract schema, execution
+flags, replay capability and mode, checkpoint anchors, optional composite run
+identity, and identity health. The deeper collapsed
 `Identity evidence and remaining replay-safety signals` row uses
 `/ops/control-plane/identity-evidence` for P0/P1/P2 anchors, identity gaps,
 replay parentage, composite identity, checkpoint anchor comparison, and

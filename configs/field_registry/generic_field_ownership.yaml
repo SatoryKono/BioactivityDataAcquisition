@@ -24,17 +24,6 @@ entries:
     semantic_role: chembl_activity_raw_measurement_terms
     rationale: ChEMBL activity Gold keeps provider-native raw measurement fields beside standardized activity fields; these are not cross-pipeline canonical aliases.
 
-  - surface: composite_column_group_field
-    path: configs/composites/activity.yaml
-    context: original_values
-    fields:
-      - type
-      - value
-      - relation
-    owner: BioETL Team
-    semantic_role: chembl_activity_raw_measurement_terms
-    rationale: Composite activity groups raw measurement columns under original_values to keep them scoped away from standardized activity semantics.
-
   - surface: gold_json_property
     path: docs/04-reference/contracts/gold/composite_activity_v1.0.json
     context: properties
@@ -67,16 +56,6 @@ entries:
     semantic_role: chembl_assay_descriptive_metadata
     rationale: Assay description and score are ChEMBL assay metadata fields with source-specific meaning.
 
-  - surface: composite_column_group_field
-    path: configs/composites/assay.yaml
-    context: description
-    fields:
-      - description
-      - score
-    owner: BioETL Team
-    semantic_role: chembl_assay_descriptive_metadata
-    rationale: Composite assay keeps source-specific descriptive metadata in an explicit description group.
-
   - surface: gold_json_property
     path: docs/04-reference/contracts/gold/composite_assay_v1.0.json
     context: properties
@@ -95,15 +74,6 @@ entries:
     owner: BioETL Team
     semantic_role: chembl_target_descriptive_metadata
     rationale: Target description is source-specific biological target text and must not be treated as a generic cross-entity description alias.
-
-  - surface: composite_column_group_field
-    path: configs/composites/target.yaml
-    context: descriptors
-    fields:
-      - description
-    owner: BioETL Team
-    semantic_role: chembl_target_descriptive_metadata
-    rationale: Composite target places source-specific target description in the descriptors group instead of canonicalizing generic description globally.
 
   - surface: gold_json_property
     path: docs/04-reference/contracts/gold/composite_target_v1.0.json

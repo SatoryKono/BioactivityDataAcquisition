@@ -159,8 +159,8 @@
           "provider": "chembl",
           "entity": "activity",
           "rule_type": "required_fields",
-          "field": "relation",
-          "silver_value": "\"relation\"",
+          "field": "activity_relation",
+          "silver_value": "\"activity_relation\"",
           "gold_value": "",
           "action": "keep_in_silver",
           "notes": "structural rule stays in silver_filters"
@@ -169,8 +169,8 @@
           "provider": "chembl",
           "entity": "activity",
           "rule_type": "required_fields",
-          "field": "value",
-          "silver_value": "\"value\"",
+          "field": "activity_value",
+          "silver_value": "\"activity_value\"",
           "gold_value": "",
           "action": "keep_in_silver",
           "notes": "structural rule stays in silver_filters"
@@ -444,11 +444,11 @@
           "provider": "chembl",
           "entity": "assay",
           "rule_type": "required_fields",
-          "field": "description",
-          "silver_value": "\"description\"",
-          "gold_value": "\"description\"",
+          "field": "assay_description",
+          "silver_value": "\"assay_description\"",
+          "gold_value": "",
           "action": "keep_in_silver",
-          "notes": "also present in gold_filters (informational)"
+          "notes": "structural rule stays in silver_filters"
         },
         {
           "provider": "chembl",
@@ -589,9 +589,9 @@
           "provider": "chembl",
           "entity": "assay_parameters",
           "rule_type": "required_fields",
-          "field": "type",
-          "silver_value": "\"type\"",
-          "gold_value": "\"type\"",
+          "field": "parameter_type",
+          "silver_value": "\"parameter_type\"",
+          "gold_value": "\"parameter_type\"",
           "action": "keep_in_silver",
           "notes": "also present in gold_filters (informational)"
         }

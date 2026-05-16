@@ -32,7 +32,7 @@ FLOAT_FIELDS = frozenset(
     {
         "standard_value",
         "pchembl_value",
-        "value",
+        "activity_value",
         "upper_value",
         "standard_upper_value",
         "toid",

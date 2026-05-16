@@ -1379,6 +1379,8 @@ def _strictness(
     notes: str,
 ) -> str:
     normalized_notes = notes.casefold()
+    if field_name in {"relation", "activity_relation", "parameter_relation"}:
+        return "strict_operator"
     if normalization_source == "composite_join_key_policy":
         return "join_key_policy"
     if normalization_source == "upstream_inherited":
@@ -1471,6 +1473,8 @@ def _row_policy_metadata(
         field_name=field_name,
         strictness=strictness,
     )
+    if semantic_category == "free_text" and "controlled-vocabulary" in notes.casefold():
+        semantic_category = "controlled_vocabulary"
     policy_scope = _policy_scope(
         provider=provider,
         entity=entity,
@@ -1564,6 +1568,7 @@ def _load_dq_config(provider: str, entity: str) -> Any | None:
 
 def _dq_coverage(
     *,
+    pipeline_name: str,
     provider: str,
     entity: str,
     field_name: str,
@@ -1571,7 +1576,11 @@ def _dq_coverage(
 ) -> str:
     if provider != "composite" and _load_dq_config(provider, entity) is None:
         return "dq_config:unavailable"
-    coverage = _dq_rule_coverage_by_field(provider, entity).get(field_name)
+    profile_lookup_field = _profile_lookup_field_name(
+        pipeline_name=pipeline_name,
+        field_name=field_name,
+    )
+    coverage = _dq_rule_coverage_by_field(provider, entity).get(profile_lookup_field)
     if coverage is None:
         if strictness == "strict_json":
             return "runtime_warning:malformed_json_normalized_to_null"
@@ -1759,26 +1768,57 @@ def _build_entity_rows_for_pipeline(
                     profile_rule=profile_rule,
                 )
             )
-            continue
-
-        source, normalizer, summary = _fallback_contract(
-            rule_set,
-            field_name=field_name,
-            field_type=field_type,
-        )
-        rows.append(
-            _entity_fallback_row(
-                provider=provider,
-                entity=entity,
-                pipeline_name=pipeline_name,
+        else:
+            source, normalizer, summary = _fallback_contract(
+                rule_set,
                 field_name=field_name,
                 field_type=field_type,
-                arrow_nullable=field.nullable,
-                source=source,
-                normalizer=normalizer,
-                summary=summary,
             )
-        )
+            rows.append(
+                _entity_fallback_row(
+                    provider=provider,
+                    entity=entity,
+                    pipeline_name=pipeline_name,
+                    field_name=field_name,
+                    field_type=field_type,
+                    arrow_nullable=field.nullable,
+                    source=source,
+                    normalizer=normalizer,
+                    summary=summary,
+                )
+            )
+        if profile_lookup_field != field_name:
+            if profile_rule is not None:
+                rows.append(
+                    _entity_profile_row(
+                        provider=provider,
+                        entity=entity,
+                        pipeline_name=pipeline_name,
+                        field_name=profile_lookup_field,
+                        field_type=field_type,
+                        arrow_nullable=field.nullable,
+                        profile_rule=profile_rule,
+                    )
+                )
+            else:
+                source, normalizer, summary = _fallback_contract(
+                    rule_set,
+                    field_name=profile_lookup_field,
+                    field_type=field_type,
+                )
+                rows.append(
+                    _entity_fallback_row(
+                        provider=provider,
+                        entity=entity,
+                        pipeline_name=pipeline_name,
+                        field_name=profile_lookup_field,
+                        field_type=field_type,
+                        arrow_nullable=field.nullable,
+                        source=source,
+                        normalizer=normalizer,
+                        summary=summary,
+                    )
+                )
     return rows
 
 
@@ -1852,6 +1892,7 @@ def _entity_profile_row(
             arrow_nullable=arrow_nullable,
         ),
         "dq_coverage": _dq_coverage(
+            pipeline_name=pipeline_name,
             provider=provider,
             entity=entity,
             field_name=field_name,
@@ -1939,6 +1980,7 @@ def _entity_fallback_row(
             arrow_nullable=arrow_nullable,
         ),
         "dq_coverage": _dq_coverage(
+            pipeline_name=pipeline_name,
             provider=provider,
             entity=entity,
             field_name=field_name,

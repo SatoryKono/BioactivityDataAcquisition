@@ -117,7 +117,6 @@ shared_databanks,databanks,WEAK,2,"Same field name appears across pipelines, but
 shared_date_completed,date_completed,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_date_revised,date_revised,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_dblp_id,dblp_id,EXACT,2,Same identifier-like field name appears across pipeline schemas.
-shared_description,description,CONFLICTING,5,Generic lexical field has source-specific meaning and requires explicit ownership before canonical aliasing.
 shared_disease_involvement,disease_involvement,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_dosed_ingredient,dosed_ingredient,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_downgraded,downgraded,WEAK,3,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
@@ -226,7 +225,6 @@ shared_qudt_units,qudt_units,WEAK,2,"Same field name appears across pipelines, b
 shared_reactome_xrefs,reactome_xrefs,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_record_id,record_id,EXACT,3,Same identifier-like field name appears across pipeline schemas.
 shared_references,references,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
-shared_relation,relation,CONFLICTING,3,Generic lexical field has source-specific meaning and requires explicit ownership before canonical aliasing.
 shared_relationship_description,relationship_description,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_relationship_type,relationship_type,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_reviewed,reviewed,WEAK,3,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
@@ -234,7 +232,6 @@ shared_ror_ids,ror_ids,WEAK,2,"Same field name appears across pipelines, but no 
 shared_rotatable_bond_count,rotatable_bond_count,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_run_id,_run_id,EXACT,21,Shared system/lineage field name across active pipeline schemas.
 shared_run_type,_run_type,EXACT,21,Shared system/lineage field name across active pipeline schemas.
-shared_score,score,CONFLICTING,2,Generic lexical field has source-specific meaning and requires explicit ownership before canonical aliasing.
 shared_sequence_length,sequence_length,WEAK,3,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_sequence_mass,sequence_mass,WEAK,3,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_source,_source,EXACT,10,Shared system/lineage field name across active pipeline schemas.
@@ -267,7 +264,6 @@ shared_tissue_specificity,tissue_specificity,WEAK,2,"Same field name appears acr
 shared_tldr,tldr,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_toid,toid,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_topical,topical,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
-shared_type,type,CONFLICTING,3,Generic lexical field has source-specific meaning and requires explicit ownership before canonical aliasing.
 shared_units,units,WEAK,3,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_uo_units,uo_units,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_upper_value,upper_value,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
@@ -275,7 +271,6 @@ shared_usan_stem,usan_stem,WEAK,2,"Same field name appears across pipelines, but
 shared_usan_stem_definition,usan_stem_definition,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_usan_substem,usan_substem,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_usan_year,usan_year,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
-shared_value,value,CONFLICTING,3,Generic lexical field has source-specific meaning and requires explicit ownership before canonical aliasing.
 shared_variant_accession,variant_accession,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_variant_isoform,variant_isoform,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_variant_mutation,variant_mutation,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."

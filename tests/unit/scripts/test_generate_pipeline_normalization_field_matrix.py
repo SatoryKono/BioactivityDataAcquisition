@@ -63,6 +63,21 @@ def _row(
 
 
 def _assert_activity_governance_rows(rows: list[dict[str, str]]) -> None:
+    activity_relation = _row(rows, "chembl_activity", "relation")
+    assert activity_relation["normalization_source"] == "profile"
+    assert activity_relation["normalizer"] == "normalize_profile_text"
+    assert "domain_schema:present" in activity_relation["schema_coverage"]
+
+    activity_type = _row(rows, "chembl_activity", "type")
+    assert activity_type["normalization_source"] == "profile"
+    assert activity_type["normalizer"] == "normalize_profile_text"
+    assert "domain_schema:present" in activity_type["schema_coverage"]
+
+    activity_value = _row(rows, "chembl_activity", "value")
+    assert activity_value["normalization_source"] == "profile"
+    assert activity_value["normalizer"] == "normalize_profile_float"
+    assert "domain_schema:present" in activity_value["schema_coverage"]
+
     standard_relation = _row(rows, "chembl_activity", "standard_relation")
     assert standard_relation["controlled_vocabulary_source"] == (
         "configs/enums/chembl.yaml"
@@ -215,6 +230,16 @@ def _assert_assay_parameter_rows(rows: list[dict[str, str]]) -> None:
     assert assay_parameter_type_raw["normalizer"] == "normalize_profile_text"
     assert assay_parameter_type_raw["semantic_category"] == "free_text"
 
+    assay_parameter_relation = _row(rows, "chembl_assay_parameters", "relation")
+    assert assay_parameter_relation["normalization_source"] == "profile"
+    assert assay_parameter_relation["normalizer"] == "normalize_profile_text"
+    assert "domain_schema:present" in assay_parameter_relation["schema_coverage"]
+
+    assay_parameter_value = _row(rows, "chembl_assay_parameters", "value")
+    assert assay_parameter_value["normalization_source"] == "profile"
+    assert assay_parameter_value["normalizer"] == "normalize_profile_float"
+    assert "domain_schema:present" in assay_parameter_value["schema_coverage"]
+
     assay_fraction_raw = _row(rows, "chembl_assay", "assay_subcellular_fraction_raw")
     assert assay_fraction_raw["normalizer"] == "normalize_profile_text"
 
@@ -267,6 +292,18 @@ def _assert_publication_and_target_rows(rows: list[dict[str, str]]) -> None:
     assert target_component_relationships["set_like"] == "true"
     assert target_component_relationships["hash_ordering"] == "set_like"
     assert target_component_relationships["dq_coverage"] == "custom:error"
+
+    target_description = _row(rows, "chembl_target", "description")
+    assert target_description["normalization_source"] == "profile"
+    assert target_description["normalizer"] == "normalize_profile_null"
+    assert "domain_schema:present" in target_description["schema_coverage"]
+
+    target_component_description = _row(
+        rows, "chembl_target_component", "description"
+    )
+    assert target_component_description["normalization_source"] == "profile"
+    assert target_component_description["normalizer"] == "normalize_profile_null"
+    assert "domain_schema:present" in target_component_description["schema_coverage"]
 
     component_type = _row(rows, "chembl_target_component", "component_type")
     assert component_type["controlled_vocabulary_source"] == (
@@ -484,6 +521,12 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
 
     chembl_assay_description = _row(rows, "chembl_assay", "description")
     assert chembl_assay_description["normalizer"] == "normalize_profile_null"
+    assert "domain_schema:present" in chembl_assay_description["schema_coverage"]
+
+    chembl_assay_score = _row(rows, "chembl_assay", "score")
+    assert chembl_assay_score["normalization_source"] == "profile"
+    assert chembl_assay_score["normalizer"] == "normalize_profile_int"
+    assert "domain_schema:present" in chembl_assay_score["schema_coverage"]
 
     chembl_target_component_id = _row(
         rows, "chembl_target_component", "protein_classification_id"

@@ -37,44 +37,43 @@ _COMPOSITE_EVENTS = frozenset(
 )
 
 
-def build_anchor_values(
-    manifest: RunManifest | None,
-    *,
-    ledger_entries: tuple[RunLedgerEntry, ...],
-    checkpoint_status: str,
-) -> dict[str, object | None]:
-    """Extract raw anchor values from manifest, ledger, and derived diagnostics."""
-    if manifest is None:
-        return {}
-    code = manifest.code_provenance
-    snapshots = input_snapshots(manifest)
-    diagnostics = identity_graph_diagnostics(manifest)
-    snapshot_fingerprint = diagnostic_value(
+def _anchor_snapshot_fingerprint(
+    diagnostics: dict[str, object],
+    snapshots: tuple[RunInputSnapshotRef, ...],
+) -> object | None:
+    """Return canonical input-snapshot identity fingerprint from diagnostics or data."""
+    return diagnostic_value(
         diagnostics,
         "input_snapshot_identity_fingerprint",
         "input_snapshot_fingerprint",
     ) or input_snapshot_fingerprint(snapshots)
+
+
+def _manifest_anchor_values(
+    *,
+    manifest: RunManifest,
+    diagnostics: dict[str, object],
+    snapshots: tuple[RunInputSnapshotRef, ...],
+    checkpoint_status: str,
+    snapshot_fingerprint: object | None,
+) -> dict[str, object | None]:
+    """Return manifest-backed anchor values without ledger-derived enrichments."""
+    code = manifest.code_provenance
+    exact_replay_supported = diagnostic_value(diagnostics, "exact_replay_eligible")
     return {
         "run_id": str(manifest.run_id),
         "manifest_id": manifest.manifest_id,
         "pipeline_name": manifest.pipeline_name,
         "provider_entity": join_non_empty((manifest.provider, manifest.entity), "."),
         "runtime_mode": runtime_mode(manifest),
-        "execution_fingerprint": diagnostic_value(
-            diagnostics,
-            "execution_fingerprint",
-        )
+        "execution_fingerprint": diagnostic_value(diagnostics, "execution_fingerprint")
         or manifest.execution_fingerprint,
         "git_commit": code.git_commit,
         "pipeline_version": code.pipeline_version,
-        "effective_config_hash": diagnostic_value(
-            diagnostics,
-            "effective_config_hash",
-        )
+        "effective_config_hash": diagnostic_value(diagnostics, "effective_config_hash")
         or code.effective_config_hash,
         "effective_config_artifact_id": diagnostic_value(
-            diagnostics,
-            "effective_config_artifact_id",
+            diagnostics, "effective_config_artifact_id"
         )
         or code.effective_config_artifact_id,
         "contract_ref": code.contract_ref,
@@ -96,38 +95,28 @@ def build_anchor_values(
         "input_snapshot_content_hashes": [item.content_hash for item in snapshots],
         "replay_capability": diagnostic_value(diagnostics, "replay_capability")
         or manifest.replay_capability.value,
-        "exact_replay_eligible": diagnostic_value(
-            diagnostics,
-            "exact_replay_eligible",
-        )
-        if diagnostic_value(diagnostics, "exact_replay_eligible") is not None
+        "exact_replay_eligible": exact_replay_supported
+        if exact_replay_supported is not None
         else exact_replay_eligible(manifest, snapshots),
         "resume_contract": first_payload_value(
             manifest,
             "resume_contract",
             "checkpoint_resume_contract",
         ),
-        "lineage_fragment_ids": lineage_fragment_ids(ledger_entries),
-        "artifact_refs": artifact_refs(manifest, ledger_entries),
-        "latest_event_id": ledger_entries[-1].entry_id if ledger_entries else None,
         "launch_context_hash": stable_hash(manifest.launch_context),
         "runtime_config_hash": stable_hash(manifest.runtime_config),
         "planned_artifacts": artifact_ref_values(manifest.planned_artifacts),
-        "published_artifacts": published_artifacts(ledger_entries),
-        "component_run_ids": component_run_ids(ledger_entries),
         "checkpoint_file_id": checkpoint_value(
             manifest, "checkpoint_file_id", "checkpoint_path"
         ),
         "lock_owner_id": first_payload_value(
             manifest, "lock_owner_id", "fencing_token"
         ),
-        "dq_report_paths": dq_report_paths(manifest, ledger_entries),
         "cross_validation_rule_ids": first_payload_value(
             manifest,
             "cross_validation_rule_ids",
             "cross_validation_rules",
         ),
-        "bronze_batch_ids": bronze_batch_ids(manifest, ledger_entries),
         "identity_graph_complete": diagnostic_value(
             diagnostics,
             "identity_graph_complete",
@@ -139,6 +128,50 @@ def build_anchor_values(
             snapshots,
             diagnostics,
             snapshot_fingerprint=snapshot_fingerprint,
+        ),
+    }
+
+
+def _ledger_anchor_values(
+    *,
+    manifest: RunManifest,
+    ledger_entries: tuple[RunLedgerEntry, ...],
+) -> dict[str, object | None]:
+    """Return anchor values derived from ledger or published artifact surfaces."""
+    return {
+        "lineage_fragment_ids": lineage_fragment_ids(ledger_entries),
+        "artifact_refs": artifact_refs(manifest, ledger_entries),
+        "latest_event_id": ledger_entries[-1].entry_id if ledger_entries else None,
+        "published_artifacts": published_artifacts(ledger_entries),
+        "component_run_ids": component_run_ids(ledger_entries),
+        "dq_report_paths": dq_report_paths(manifest, ledger_entries),
+        "bronze_batch_ids": bronze_batch_ids(manifest, ledger_entries),
+    }
+
+
+def build_anchor_values(
+    manifest: RunManifest | None,
+    *,
+    ledger_entries: tuple[RunLedgerEntry, ...],
+    checkpoint_status: str,
+) -> dict[str, object | None]:
+    """Extract raw anchor values from manifest, ledger, and derived diagnostics."""
+    if manifest is None:
+        return {}
+    snapshots = input_snapshots(manifest)
+    diagnostics = identity_graph_diagnostics(manifest)
+    snapshot_fingerprint = _anchor_snapshot_fingerprint(diagnostics, snapshots)
+    return {
+        **_manifest_anchor_values(
+            manifest=manifest,
+            diagnostics=diagnostics,
+            snapshots=snapshots,
+            checkpoint_status=checkpoint_status,
+            snapshot_fingerprint=snapshot_fingerprint,
+        ),
+        **_ledger_anchor_values(
+            manifest=manifest,
+            ledger_entries=ledger_entries,
         ),
     }
 

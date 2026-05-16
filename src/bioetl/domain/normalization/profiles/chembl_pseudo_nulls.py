@@ -42,7 +42,7 @@ CHEMBL_PSEUDO_NULL_FIELDS = MappingProxyType(
                 "units",
                 "uo_units",
                 "upper_value",
-                "value",
+                "activity_value",
             }
         ),
         "assay": frozenset(
@@ -63,7 +63,7 @@ CHEMBL_PSEUDO_NULL_FIELDS = MappingProxyType(
                 "bao_label",
                 "cell_id",
                 "confidence_description",
-                "description",
+                "assay_description",
                 "publication_id",
                 "relationship_description",
                 "relationship_type",
@@ -81,16 +81,15 @@ CHEMBL_PSEUDO_NULL_FIELDS = MappingProxyType(
         "assay_parameters": frozenset(
             {
                 "comments",
-                "relation",
                 "standard_relation",
                 "standard_text_value",
                 "standard_type",
                 "standard_units",
                 "standard_value",
                 "text_value",
-                "type",
+                "parameter_type",
                 "units",
-                "value",
+                "parameter_value",
             }
         ),
         "cell_line": frozenset(
@@ -204,7 +203,6 @@ CHEMBL_PSEUDO_NULL_FIELDS = MappingProxyType(
                 "component_relationships",
                 "component_types",
                 "cross_references",
-                "description",
                 "organism",
                 "organism_class",
                 "pipeline_stages",
@@ -212,6 +210,7 @@ CHEMBL_PSEUDO_NULL_FIELDS = MappingProxyType(
                 "primary_component_id",
                 "target_component_synonyms",
                 "target_components",
+                "target_description",
                 "taxonomy_id",
             }
         ),
@@ -219,7 +218,7 @@ CHEMBL_PSEUDO_NULL_FIELDS = MappingProxyType(
             {
                 "accession",
                 "component_type",
-                "description",
+                "component_description",
                 "organism",
                 "protein_classification_id",
                 "protein_classification_ids",

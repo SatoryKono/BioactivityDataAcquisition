@@ -16,7 +16,7 @@ budgets:
 status_budgets:
   - column: Semantic Status
     value: PARTIAL
-    max_count: 67
+    max_count: 68
     require_reviewed_clusters: true
     ratchet_only: true
   - column: Semantic Status
@@ -26,7 +26,7 @@ status_budgets:
     ratchet_only: true
   - column: Semantic Status
     value: CONFLICTING
-    max_count: 20
+    max_count: 0
     require_reviewed_clusters: true
     ratchet_only: true
   - column: Normalization
@@ -35,7 +35,7 @@ status_budgets:
     require_reviewed_clusters: true
   - column: Normalization
     value: COMPATIBLE
-    max_count: 900
+    max_count: 886
     ratchet_only: true
   - column: Typing
     value: CONFLICTING
@@ -43,7 +43,7 @@ status_budgets:
     require_reviewed_clusters: true
   - column: Typing
     value: COMPATIBLE
-    max_count: 664
+    max_count: 662
     ratchet_only: true
   - column: Validation
     value: STRICTNESS_MISMATCH
@@ -51,6 +51,6 @@ status_budgets:
     require_reviewed_clusters: true
   - column: Validation
     value: COMPATIBLE
-    max_count: 1053
+    max_count: 1039
     ratchet_only: true
 reviewed_critical_rows: []

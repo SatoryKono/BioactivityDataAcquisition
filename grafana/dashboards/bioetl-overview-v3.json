@@ -2481,7 +2481,7 @@
         "x": 0,
         "y": 7
       },
-      "description": "Identity table for the current control-plane scope. It resolves manifest_id and run_id from the local run-manifest catalog, treats Run Type = All as an unbounded run_type filter, prefers the selected run_id when present, and otherwise falls back to the latest persisted manifest only for a concrete pipeline scope. Aggregate Pipeline = All scope requires an exact run_id before this panel claims one manifest identity.",
+      "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels.",
       "datasource": "Quarantine Explorer",
       "fieldConfig": {
         "defaults": {

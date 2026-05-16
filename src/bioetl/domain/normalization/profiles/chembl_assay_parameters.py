@@ -48,16 +48,12 @@ _META_FIELDS = frozenset(
     }
 )
 _INT_FIELDS = frozenset({"assay_param_id"})
-_FLOAT_FIELDS = frozenset({"standard_value", "value"})
+_FLOAT_FIELDS = frozenset({"standard_value", "parameter_value"})
 _OPERATOR_FIELDS = chembl_controlled_family_fields(
     "operators", entity="assay_parameters"
 )
 _RAW_UNIT_FIELDS = chembl_controlled_family_fields(
     "raw_units", entity="assay_parameters"
-)
-_TYPE_FIELDS = chembl_controlled_family_fields(
-    "assay_parameter_types",
-    entity="assay_parameters",
 )
 _REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("assay_parameters")
 
@@ -89,10 +85,11 @@ _TYPE_RULE = (
 
 _SPECIAL_RULE_COMPONENTS = {
     **_REFERENCE_IDENTIFIER_RULES,
+    "parameter_type": _TYPE_RULE,
     "type_raw": (
         normalize_profile_text,
         "Preserve the raw assay-parameter type provider lexeme as trimmed text "
-        "before canonical controlled-vocabulary normalization.",
+        "before canonical assay-parameter type normalization.",
     ),
     "comments": (
         normalize_profile_text,
@@ -111,7 +108,6 @@ _SPECIAL_RULE_COMPONENTS = {
         "published ChEMBL standard-unit enum after canonical unit "
         "alias collapse; unknown values collapse to None.",
     ),
-    **dict.fromkeys(sorted(_TYPE_FIELDS), _TYPE_RULE),
 }
 
 CHEMBL_ASSAY_PARAMETERS_PROFILE = build_standard_profile(
@@ -121,6 +117,11 @@ CHEMBL_ASSAY_PARAMETERS_PROFILE = build_standard_profile(
     meta_fields=_META_FIELDS,
     int_fields=_INT_FIELDS,
     float_fields=_FLOAT_FIELDS,
+    field_aliases={
+        "relation": "parameter_relation",
+        "type": "parameter_type",
+        "value": "parameter_value",
+    },
     operator_fields=_OPERATOR_FIELDS,
     enum_fields={
         "standard_type": ASSAY_PARAMETER_STANDARD_TYPES,

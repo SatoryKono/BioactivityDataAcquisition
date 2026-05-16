@@ -213,7 +213,7 @@
         "y": 7
       },
       "datasource": "Quarantine Explorer",
-      "description": "Local control-plane identity table for the shared context shell. Exact selected run_id wins; concrete pipeline scope may resolve latest manifest; aggregate pipeline scope without exact run_id must not guess one manifest identity.",
+      "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels.",
       "fieldConfig": {
         "defaults": {
           "custom": {

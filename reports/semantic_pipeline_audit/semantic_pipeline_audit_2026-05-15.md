@@ -4,8 +4,8 @@ Generated: `2026-05-15`
 
 ## Executive Summary
 
-- Semantic clusters: `287`
-- Pair rows: `3248`
+- Semantic clusters: `282`
+- Pair rows: `3233`
 - Base config files covered: `5`
 - Base config semantic surfaces: `286`
 - CRITICAL drift risks: `0`
@@ -13,12 +13,12 @@ Generated: `2026-05-15`
 - Normalization mismatches: `0`
 - Validation strictness mismatches: `0`
 - Typing conflicts: `0`
-- Reviewed PARTIAL rows: `67`
+- Reviewed PARTIAL rows: `68`
 - Reviewed WEAK inventory rows: `439`
-- Reviewed generic collision rows: `20`
-- Compatible normalization rows: `900`
-- Compatible validation rows: `1053`
-- Compatible typing rows: `664`
+- Reviewed generic collision rows: `0`
+- Compatible normalization rows: `886`
+- Compatible validation rows: `1039`
+- Compatible typing rows: `662`
 - Residual blocking tasks: `0`
 
 ## Artifact Index

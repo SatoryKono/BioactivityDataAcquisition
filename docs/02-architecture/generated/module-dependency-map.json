@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1868,
-    "total_internal_imports": 7446,
+    "scanned_modules": 1870,
+    "total_internal_imports": 7457,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 322,
@@ -11,13 +11,13 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 1219,
+      "imports": 1225,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1109,
+      "imports": 1110,
       "allowed": true
     },
     {
@@ -53,7 +53,7 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 784,
+      "imports": 785,
       "allowed": true
     },
     {
@@ -77,13 +77,13 @@
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 51,
+      "imports": 52,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 215,
+      "imports": 217,
       "allowed": true
     }
   ],
@@ -294,14 +294,14 @@
       "imports": 20
     },
     {
-      "source": "composition.runtime_builders",
-      "target": "infrastructure.config",
+      "source": "application.core",
+      "target": "domain.config",
       "imports": 19
     },
     {
-      "source": "application.core",
-      "target": "domain.config",
-      "imports": 18
+      "source": "composition.runtime_builders",
+      "target": "infrastructure.config",
+      "imports": 19
     },
     {
       "source": "application.pipelines",
@@ -356,7 +356,7 @@
     {
       "source": "infrastructure.schemas",
       "target": "domain.config",
-      "imports": 14
+      "imports": 15
     },
     {
       "source": "application.pipelines",

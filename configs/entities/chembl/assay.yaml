@@ -332,7 +332,6 @@ hash_policy:
             - src_assay_id
             - publication_id
             - assay_pref_name
-            - confidence_score
             - cell_id
             - tissue_id
             - bao_format

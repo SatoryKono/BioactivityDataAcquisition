@@ -89,7 +89,9 @@ Pushgateway publication на завершении run. Это позволяет
 Canonical `1. Overview` (`bioetl-overview-v2`) now uses the frozen Overview v3
 layout for this transition: explicit provenance header, aggregate-first status
 cards, visible `workflow`/`run_id` context, and local control-plane identity
-handoff in the `ID` panel (`manifest_id` / `run_id`) within the current
+handoff in the compact `ID` panel. The panel shows `Run ID`, `Manifest ID`,
+`Provider.Entity`, `Contract`, `Execution`, replay capability/mode, checkpoint
+anchors, optional composite run identity, and identity health for the current
 control-plane scope. `Run Type=All` трактуется как unbounded run-type filter;
 `Pipeline=All` без exact `run_id` не должен притворяться одним manifest
 identity.
@@ -101,12 +103,14 @@ local identity context only; do not use it as a Prometheus label or as a
 cross-dashboard filter.
 
 `0. Control Plane` keeps the compact shared `ID` panel backed by
-`/ops/control-plane/identity-table` and adds deep identity evidence below fold
-through `/ops/control-plane/identity-evidence`. That evidence endpoint exposes
-P0/P1/P2 run anchors, short/full value rendering, replay parentage, composite
-identity, checkpoint anchor compare, identity gaps, typed source/drilldown
-metadata, and copy-friendly full values without projecting high-cardinality IDs
-into Prometheus labels.
+`/ops/control-plane/identity-table`. It is a two-column operator summary, not a
+Prometheus surface: full high-cardinality values stay in the HTTP table rows,
+while dashboard stats and PromQL labels stay bounded. The deeper identity
+evidence below fold uses `/ops/control-plane/identity-evidence` for P0/P1/P2
+anchors, short/full value rendering, replay parentage, composite identity,
+checkpoint anchor compare, identity gaps, typed source/drilldown metadata, and
+copy-friendly full values without projecting high-cardinality IDs into
+Prometheus labels.
 
 ### Фильтрация и Изоляция данных
 

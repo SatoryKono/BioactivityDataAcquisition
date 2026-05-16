@@ -45,16 +45,11 @@ warning_reviews:
     expires_on: "2026-11-15"
     semantic_statuses:
       - CONFLICTING
-    clusters:
-      - shared_description
-      - shared_relation
-      - shared_score
-      - shared_type
-      - shared_value
     rationale: >
-      Generic fields are lexical collisions, not canonical business identities.
-      They require explicit ownership metadata instead of canonicalization by
-      field name.
+      Historical generic lexical collisions have been retired from the current
+      semantic snapshot. owner-scoped naming and generic_field_ownership.yaml
+      remain the governance source that prevents these fields from being
+      reintroduced as canonical business identities.
 
 partial_cluster_policies:
   - cluster_id: canonical_smiles_identifier
@@ -290,60 +285,7 @@ weak_cluster_decisions:
       cross_references is a nested/source-scoped metadata field whose meaning is
       not canonicalized across entity families.
 
-generic_collision_policies:
-  - cluster_id: shared_description
-    lexical_field: description
-    owner: BioETL Team
-    semantic_scope: provider_scoped_generic_text
-    promotion_policy: forbidden_without_owner_registry
-    rationale: >
-      description was a lexical collision across assay, target, and component
-      metadata. Fields have been renamed to assay_description, target_description,
-      and component_description to make ownership explicit. The original generic
-      description cluster remains as a historical reference only.
-
-  - cluster_id: shared_relation
-    lexical_field: relation
-    owner: BioETL Team
-    semantic_scope: provider_scoped_measurement_operator
-    promotion_policy: forbidden_without_owner_registry
-    rationale: >
-      relation was a lexical collision across activity and assay_parameter surfaces.
-      Fields have been renamed to activity_relation and parameter_relation to make
-      ownership explicit. The original generic relation cluster remains as a
-      historical reference only.
-
-  - cluster_id: shared_score
-    lexical_field: score
-    owner: BioETL Team
-    semantic_scope: provider_scoped_descriptive_or_annotation_score
-    promotion_policy: forbidden_without_owner_registry
-    rationale: >
-      score was a lexical collision in assay metadata. The field has been renamed
-      to confidence_score to make its semantic meaning explicit. The original
-      generic score cluster remains as a historical reference only.
-
-  - cluster_id: shared_type
-    lexical_field: type
-    owner: BioETL Team
-    semantic_scope: provider_scoped_raw_type_term
-    promotion_policy: forbidden_without_owner_registry
-    rationale: >
-      type was a lexical collision across activity and assay_parameter surfaces.
-      Fields have been renamed to activity_type and parameter_type to make
-      ownership explicit. The original generic type cluster remains as a
-      historical reference only.
-
-  - cluster_id: shared_value
-    lexical_field: value
-    owner: BioETL Team
-    semantic_scope: provider_scoped_raw_value_term
-    promotion_policy: forbidden_without_owner_registry
-    rationale: >
-      value was a lexical collision across activity and assay_parameter surfaces.
-      Fields have been renamed to activity_value and parameter_value to make
-      ownership explicit. The original generic value cluster remains as a
-      historical reference only.
+generic_collision_policies: []
 
 composite_unknown_typing_reviews:
   - id: composite_system_fields_unknown_schema

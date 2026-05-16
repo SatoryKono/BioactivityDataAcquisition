@@ -46,6 +46,24 @@ CSV_COLUMNS = (
 )
 
 _PROPOSED_NORMALIZATION_OVERRIDES: dict[str, str] = {}
+_LEGACY_ACTIVITY_SCHEMA_ALIASES: dict[str, str] = {
+    "relation": "activity_relation",
+    "type": "activity_type",
+    "value": "activity_value",
+}
+
+
+def _canonical_activity_field_name(field_name: str) -> str:
+    """Resolve one reviewed Silver legacy activity field to the canonical profile name."""
+    return _LEGACY_ACTIVITY_SCHEMA_ALIASES.get(field_name, field_name)
+
+
+def _silver_activity_field_name(field_name: str) -> str:
+    """Resolve one canonical activity profile field to the reviewed Silver schema name."""
+    for silver_name, canonical_name in _LEGACY_ACTIVITY_SCHEMA_ALIASES.items():
+        if canonical_name == field_name:
+            return silver_name
+    return field_name
 
 
 def _normalizer_name(normalizer: Any) -> str:
@@ -84,15 +102,19 @@ def _render_proposed_normalization(field_name: str, current_normalization: str) 
 def build_field_matrix_rows() -> list[dict[str, str]]:
     """Build one deterministic field matrix from the canonical schema + profile."""
     schema_fields = tuple(CHEMBL_ACTIVITY_SCHEMA.names)
+    canonical_schema_fields = tuple(
+        sorted(_canonical_activity_field_name(field_name) for field_name in schema_fields)
+    )
     profile_fields = tuple(sorted(CHEMBL_ACTIVITY_SCHEMA_FIELDS))
-    if tuple(sorted(schema_fields)) != profile_fields:
+    if canonical_schema_fields != profile_fields:
         raise ValueError("CHEMBL_ACTIVITY_SCHEMA and profile fields are out of sync")
     rows: list[dict[str, str]] = []
-    for field_name in sorted(schema_fields):
+    for field_name in profile_fields:
+        silver_field_name = _silver_activity_field_name(field_name)
         rule = CHEMBL_ACTIVITY_PROFILE.rule_for(field_name)
         if rule is None:
             raise ValueError(f"Missing profile rule for {field_name}")
-        field = CHEMBL_ACTIVITY_SCHEMA.field(field_name)
+        field = CHEMBL_ACTIVITY_SCHEMA.field(silver_field_name)
         normalizer_name = _normalizer_name(rule.normalizer)
         current_normalization = _render_current_normalization(
             normalizer_name=_current_normalization_name(

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 __all__ = ["BatchCheckpointRecoveryService"]
 
-
 import time
 from typing import TYPE_CHECKING, cast
 
