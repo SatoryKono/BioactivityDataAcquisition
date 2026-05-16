@@ -35,8 +35,10 @@ def domain_severity(
             "DEGRADED",
         )
     if spec.name == "identity_graph_complete" and present:
+        if value is True:
+            return "OK"
         rendered_value = str(value).strip().lower()
-        if rendered_value.startswith("complete"):
+        if rendered_value in {"true", "ok"} or rendered_value.startswith("complete"):
             return "OK"
         if "run_id" in rendered_value or "manifest_id" in rendered_value:
             return "FAILING"

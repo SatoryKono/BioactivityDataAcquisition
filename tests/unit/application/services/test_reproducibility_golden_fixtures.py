@@ -203,6 +203,18 @@ def _make_effective_config_artifact_payload() -> dict[str, object]:
         },
         runtime_overrides={
             "cli": {"limit": 25},
+            "env": {
+                "execution_environment": {
+                    "schema_version": "execution-environment-v1",
+                    "settings_env": "prod",
+                    "debug": False,
+                    "test_mode": False,
+                    "data_root_mode": "explicit",
+                    "dependency_lock_hash": "sha256:test-lock-golden",
+                    "dependency_lock_present": True,
+                    "settings_snapshot_hash": "sha256:settings-golden",
+                }
+            },
             "runtime": {"exact_replay": True},
         },
         source_refs=[

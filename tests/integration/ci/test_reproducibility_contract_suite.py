@@ -51,7 +51,6 @@ from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane import (
     ReplayCapability,
     RunLedgerEntry,
-    RunArtifactRef,
     RunCodeProvenance,
     RunManifest,
     RunInputSnapshotRef,
@@ -794,6 +793,7 @@ def test_reproducibility_contract_effective_config_semantic_payload_is_stable() 
         ],
         "dq_config": dq_config,
         "artifact_id": "eca-stable",
+        "required_persistence_profile": "degraded_observable",
     }
     first = service.create_effective_config_artifact(**kwargs)
     second = service.create_effective_config_artifact(**kwargs)

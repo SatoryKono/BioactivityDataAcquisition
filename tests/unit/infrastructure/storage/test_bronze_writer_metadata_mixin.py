@@ -26,38 +26,41 @@ class TestBronzeWriterMetadataMixin:
     """Tests for Bronze metadata construction helpers."""
 
     def test_build_bronze_metadata_returns_expected_keys(self) -> None:
-        """_build_bronze_metadata should fail closed without MetadataCoordinator."""
+        """_build_bronze_metadata should fall back to the legacy sidecar contract."""
         host = _Host()
         ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
-        with pytest.raises(
-            RuntimeError,
-            match="MetadataCoordinator with create_bronze_lineage_sidecar is required",
-        ):
-            host._build_bronze_metadata(
-                run_id=RunID("run-123"),
-                run_type=RunType.INCREMENTAL,
-                effective_ts=ts,
-                provider="chembl",
-                entity="activity",
-                batch_id=BatchID("batch-001"),
-            )
+        metadata = host._build_bronze_metadata(
+            run_id=RunID("run-123"),
+            run_type=RunType.INCREMENTAL,
+            effective_ts=ts,
+            provider="chembl",
+            entity="activity",
+            batch_id=BatchID("batch-001"),
+        )
+
+        assert metadata == {
+            "run_id": "run-123",
+            "run_type": "incremental",
+            "ingestion_ts": ts.isoformat(),
+            "provider": "chembl",
+            "entity": "activity",
+            "batch_id": "batch-001",
+        }
 
     def test_build_bronze_metadata_backfill_run_type(self) -> None:
-        """Missing coordinator should fail closed regardless of run type."""
+        """Legacy fallback should preserve run_type semantics without a coordinator."""
         host = _Host()
         ts = datetime(2025, 3, 1, 0, 0, 0, tzinfo=UTC)
-        with pytest.raises(
-            RuntimeError,
-            match="MetadataCoordinator with create_bronze_lineage_sidecar is required",
-        ):
-            host._build_bronze_metadata(
-                run_id=RunID("run-456"),
-                run_type=RunType.BACKFILL,
-                effective_ts=ts,
-                provider="pubmed",
-                entity="publication",
-                batch_id=BatchID("batch-002"),
-            )
+        metadata = host._build_bronze_metadata(
+            run_id=RunID("run-456"),
+            run_type=RunType.BACKFILL,
+            effective_ts=ts,
+            provider="pubmed",
+            entity="publication",
+            batch_id=BatchID("batch-002"),
+        )
+
+        assert metadata["run_type"] == "backfill"
 
     def test_build_bronze_metadata_prefers_coordinator_projection(self) -> None:
         """Coordinator-backed Bronze writers should project the legacy sidecar centrally."""
@@ -66,11 +69,14 @@ class TestBronzeWriterMetadataMixin:
         host._metadata_coordinator = MagicMock()
         host._metadata_coordinator.create_bronze_lineage_sidecar.return_value = {
             "run_id": "run-coordinator",
+            "manifest_id": "manifest-coordinator",
             "run_type": "incremental",
             "ingestion_ts": ts.isoformat(),
             "provider": "chembl",
             "entity": "activity",
             "batch_id": "batch-003",
+            "execution_fingerprint": "fingerprint-coordinator",
+            "effective_config_hash": "a" * 64,
         }
 
         result = host._build_bronze_metadata(
@@ -83,6 +89,9 @@ class TestBronzeWriterMetadataMixin:
         )
 
         assert result["run_id"] == "run-coordinator"
+        assert result["manifest_id"] == "manifest-coordinator"
+        assert result["execution_fingerprint"] == "fingerprint-coordinator"
+        assert result["effective_config_hash"] == "a" * 64
         host._metadata_coordinator.create_bronze_lineage_sidecar.assert_called_once()
 
     def test_build_bronze_metadata_payload_returns_dict_with_runtime_key(self) -> None:

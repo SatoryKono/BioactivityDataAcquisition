@@ -24,12 +24,27 @@ from bioetl.domain.control_plane.effective_config_artifact import (
 from bioetl.domain.types.dq_contracts import DQDisposition
 
 
+def _create_service_with_degraded_default() -> EffectiveConfigService:
+    """Keep generic service tests focused on artifact mechanics, not strict runtime policy."""
+    service = create_effective_config_service()
+    original_create = service.create_effective_config_artifact
+
+    def _create_effective_config_artifact(*args, **kwargs):
+        kwargs.setdefault("required_persistence_profile", "degraded_observable")
+        return original_create(*args, **kwargs)
+
+    service.create_effective_config_artifact = (  # type: ignore[assignment]
+        _create_effective_config_artifact
+    )
+    return service
+
+
 class TestEffectiveConfigService:
     """Tests for EffectiveConfigService."""
 
     def setup_method(self) -> None:
         """Set up test fixtures."""
-        self.service = create_effective_config_service()
+        self.service = _create_service_with_degraded_default()
 
     def test_service_creation(self) -> None:
         """Test service factory function."""
@@ -178,6 +193,23 @@ class TestEffectiveConfigService:
                 pipeline_kind="standard",
                 resolved_config={"pipeline": {"name": "test_pipeline"}},
                 runtime_overrides={"env": {"BIOETL_PUBMED_API_KEY": "secret"}},
+                source_refs=[],
+                required_persistence_profile="replay_ready",
+            )
+
+    def test_create_artifact_requires_materialized_execution_environment_in_strict_context(
+        self,
+    ) -> None:
+        """Strict reproducibility contexts must materialize semantic env values."""
+        with pytest.raises(
+            ValueError,
+            match=r"runtime_overrides\.env\.execution_environment must be materialized",
+        ):
+            self.service.create_effective_config_artifact(
+                pipeline_name="test_pipeline",
+                pipeline_kind="standard",
+                resolved_config={"pipeline": {"name": "test_pipeline"}},
+                runtime_overrides={},
                 source_refs=[],
                 required_persistence_profile="replay_ready",
             )
@@ -389,6 +421,7 @@ class TestEffectiveConfigService:
                 }
             },
             source_refs=[],
+            required_persistence_profile="replay_ready",
         )
 
         assert artifact.execution_environment.materialized_env_keys == (
@@ -397,6 +430,13 @@ class TestEffectiveConfigService:
         assert artifact.execution_environment.materialized_env_overrides == {
             "execution_environment": {"BIOETL_BATCH_LIMIT": "100"}
         }
+        assert artifact.execution_environment.ambient_environment_policy == (
+            "materialized_via_execution_environment"
+        )
+        assert (
+            artifact.execution_environment.non_materialized_semantic_env_dependencies
+            == ()
+        )
         assert artifact.execution_environment.environment_hash
 
     def test_semantic_serialization_omits_empty_runtime_override_sections(
@@ -591,7 +631,7 @@ class TestDQPolicyIntegration:
 
     def setup_method(self) -> None:
         """Set up test fixtures."""
-        self.service = create_effective_config_service()
+        self.service = _create_service_with_degraded_default()
 
     def test_dq_policy_snapshot_creation(self) -> None:
         """Test DQ policy snapshot creation from DQ config."""
@@ -699,7 +739,7 @@ class TestOverrideApplication:
 
     def setup_method(self) -> None:
         """Set up test fixtures."""
-        self.service = create_effective_config_service()
+        self.service = _create_service_with_degraded_default()
 
     def test_deep_override_application(self) -> None:
         """Test deep nested override application."""

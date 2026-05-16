@@ -253,6 +253,7 @@ def test_effective_config_artifact_publishes_semantic_runtime_env_dependencies()
             "runtime": {"exact_replay": True},
         },
         source_refs=[],
+        required_persistence_profile="degraded_observable",
     )
 
     assert artifact.execution_environment.materialized_env_keys == ()
@@ -389,6 +390,7 @@ def test_effective_config_source_refs_ignore_yaml_formatting_for_semantic_identi
         resolved_config={"pipeline": {"name": "chembl_activity"}},
         runtime_overrides={},
         source_refs=refs_left,
+        required_persistence_profile="degraded_observable",
     )
     artifact_right = service.create_effective_config_artifact(
         pipeline_name="chembl_activity",
@@ -396,6 +398,7 @@ def test_effective_config_source_refs_ignore_yaml_formatting_for_semantic_identi
         resolved_config={"pipeline": {"name": "chembl_activity"}},
         runtime_overrides={},
         source_refs=refs_right,
+        required_persistence_profile="degraded_observable",
     )
 
     assert artifact_left.source_fingerprint == artifact_right.source_fingerprint
@@ -451,6 +454,7 @@ def test_effective_config_source_fingerprint_changes_when_provider_config_change
         resolved_config={"pipeline": {"name": "chembl_activity"}},
         runtime_overrides={},
         source_refs=refs_left,
+        required_persistence_profile="degraded_observable",
     )
     artifact_right = service.create_effective_config_artifact(
         pipeline_name="chembl_activity",
@@ -458,6 +462,7 @@ def test_effective_config_source_fingerprint_changes_when_provider_config_change
         resolved_config={"pipeline": {"name": "chembl_activity"}},
         runtime_overrides={},
         source_refs=refs_right,
+        required_persistence_profile="degraded_observable",
     )
 
     assert artifact_left.source_fingerprint != artifact_right.source_fingerprint
