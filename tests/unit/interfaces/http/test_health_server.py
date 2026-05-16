@@ -10,6 +10,7 @@ from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
+import pytest_asyncio
 
 from bioetl.domain.types import HealthStatus, RunType
 from bioetl.interfaces.http.health_server import HealthServer

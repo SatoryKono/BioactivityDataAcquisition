@@ -45,8 +45,9 @@ ______________________________________________________________________
 - Переменные `dq/runtime`: `$pipeline`, `$run_type`, `$stage`.
 - Переменные `provider-health-v2`: `$provider`, `$adapter`.
 - Переменные `workflow-overview`: `$workflow`, `$status`.
-- В Prometheus-backed dashboards отсутствуют forensic variables `$run_id` и `execution`.
-- `bioetl-silver-reject-explorer` остаётся единственным shipped exception для `$run_id`/`$payload_hash`.
+- В Prometheus-backed dashboards отсутствуют forensic variables `$quarantine_run_id` и `execution`.
+- Primary `$run_id` сохраняется между primary dashboards только как HTTP identity context.
+- `bioetl-silver-reject-explorer` остаётся единственным shipped exception для `$quarantine_run_id`/`$payload_hash`.
 
 ## Исправления, внесенные в JSON
 

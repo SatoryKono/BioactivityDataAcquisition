@@ -162,7 +162,8 @@ def test_control_plane_selector_context_contract_is_local_only() -> None:
 
     forbidden = set(resolver.get("forbidden", []))
     assert "prometheus_run_id_labels" in forbidden
-    assert "dashboard_to_dashboard_run_id_handoff" in forbidden
+    assert "blanket_includevars_run_id_handoff" in forbidden
+    assert "run_id_handoff_to_forensic_explorer" in forbidden
     assert "cyclic_grafana_variable_dependencies" in forbidden
 
 

@@ -74,7 +74,8 @@ ______________________________________________________________________
 - shipped dashboards используют unified selector taxonomy by dashboard family,
   а не один flat universal selector list
 - cross-dashboard handoffs явно передают общий `workflow/pipeline/run_type`
-  shell через `var-*`; exact identity selectors остаются local-only.
+  shell через `var-*`; primary `run_id` additionally preserves exact HTTP
+  identity between dashboards that expose that selector.
 
 ## First-screen policy header
 
@@ -137,7 +138,7 @@ row or in collapsed diagnostic rows.
 `bioetl-overview-v2` exposes visible `workflow`, `pipeline`, `run_type`, and
 `run_id` selectors. Pipeline/run_type remain the canonical current-status
 Prometheus scope; `workflow` is evidence context, and `run_id` is a
-control-plane-backed identity selector for the local `ID` panel only.
+control-plane-backed identity selector preserved for HTTP `ID`/details panels.
 `Silver Reject Explorer` uses `quarantine_run_id` for its forensic run selector
 so it cannot collide with the Control Plane `run_id` shell.
 

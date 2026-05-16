@@ -11194,9 +11194,11 @@
     },
     {
       "aliases": [
-        "description"
+        "assay_description",
+        "target_description",
+        "component_description"
       ],
-      "canonical_field": "description",
+      "canonical_field": "assay_description",
       "cluster_id": "shared_description",
       "member_count": 5,
       "members": [
@@ -11208,7 +11210,7 @@
           "dq_coverage": "not_configured",
           "dq_rules": [],
           "entity": "assay",
-          "field": "description",
+          "field": "assay_description",
           "field_type": "string",
           "gold_path": "docs/04-reference/contracts/gold/chembl_assay_v1.0.json",
           "gold_required": false,
@@ -11232,7 +11234,7 @@
           "dq_coverage": "not_configured",
           "dq_rules": [],
           "entity": "target",
-          "field": "description",
+          "field": "target_description",
           "field_type": "string",
           "gold_path": "docs/04-reference/contracts/gold/chembl_target_v1.0.json",
           "gold_required": false,
@@ -11255,7 +11257,7 @@
           "dq_coverage": "not_configured",
           "dq_rules": [],
           "entity": "target_component",
-          "field": "description",
+          "field": "component_description",
           "field_type": "string",
           "gold_path": "docs/04-reference/contracts/gold/chembl_target_component_v1.0.json",
           "gold_required": false,
@@ -11278,7 +11280,7 @@
           "dq_coverage": "not_applicable",
           "dq_rules": [],
           "entity": "assay",
-          "field": "description",
+          "field": "assay_description",
           "field_type": "unknown",
           "gold_path": "docs/04-reference/contracts/gold/composite_assay_v1.0.json",
           "gold_required": false,
@@ -22513,9 +22515,10 @@
     },
     {
       "aliases": [
-        "relation"
+        "activity_relation",
+        "parameter_relation"
       ],
-      "canonical_field": "relation",
+      "canonical_field": "activity_relation",
       "cluster_id": "shared_relation",
       "member_count": 3,
       "members": [
@@ -22525,7 +22528,7 @@
           "dq_coverage": "not_configured",
           "dq_rules": [],
           "entity": "activity",
-          "field": "relation",
+          "field": "activity_relation",
           "field_type": "string",
           "gold_path": "docs/04-reference/contracts/gold/chembl_activity_v1.0.json",
           "gold_required": false,
@@ -22548,7 +22551,7 @@
           "dq_coverage": "not_configured",
           "dq_rules": [],
           "entity": "assay_parameters",
-          "field": "relation",
+          "field": "parameter_relation",
           "field_type": "string",
           "gold_path": "docs/04-reference/contracts/gold/chembl_assay_parameters_v1.0.json",
           "gold_required": false,
@@ -23947,9 +23950,9 @@
     },
     {
       "aliases": [
-        "score"
+        "confidence_score"
       ],
-      "canonical_field": "score",
+      "canonical_field": "confidence_score",
       "cluster_id": "shared_score",
       "member_count": 2,
       "members": [
@@ -23959,7 +23962,7 @@
           "dq_coverage": "not_configured",
           "dq_rules": [],
           "entity": "assay",
-          "field": "score",
+          "field": "confidence_score",
           "field_type": "double",
           "gold_path": "docs/04-reference/contracts/gold/chembl_assay_v1.0.json",
           "gold_required": false,
@@ -23982,7 +23985,7 @@
           "dq_coverage": "not_applicable",
           "dq_rules": [],
           "entity": "assay",
-          "field": "score",
+          "field": "confidence_score",
           "field_type": "unknown",
           "gold_path": "docs/04-reference/contracts/gold/composite_assay_v1.0.json",
           "gold_required": false,
@@ -27181,9 +27184,10 @@
     },
     {
       "aliases": [
-        "type"
+        "activity_type",
+        "parameter_type"
       ],
-      "canonical_field": "type",
+      "canonical_field": "activity_type",
       "cluster_id": "shared_type",
       "member_count": 3,
       "members": [
@@ -27193,7 +27197,7 @@
           "dq_coverage": "not_configured",
           "dq_rules": [],
           "entity": "activity",
-          "field": "type",
+          "field": "activity_type",
           "field_type": "string",
           "gold_path": "docs/04-reference/contracts/gold/chembl_activity_v1.0.json",
           "gold_required": false,
@@ -27218,7 +27222,7 @@
             "enum:error"
           ],
           "entity": "assay_parameters",
-          "field": "type",
+          "field": "parameter_type",
           "field_type": "string",
           "gold_path": "docs/04-reference/contracts/gold/chembl_assay_parameters_v1.0.json",
           "gold_required": true,
@@ -27760,9 +27764,10 @@
     },
     {
       "aliases": [
-        "value"
+        "activity_value",
+        "parameter_value"
       ],
-      "canonical_field": "value",
+      "canonical_field": "activity_value",
       "cluster_id": "shared_value",
       "member_count": 3,
       "members": [
@@ -27772,7 +27777,7 @@
           "dq_coverage": "not_configured",
           "dq_rules": [],
           "entity": "activity",
-          "field": "value",
+          "field": "activity_value",
           "field_type": "double",
           "gold_path": "docs/04-reference/contracts/gold/chembl_activity_v1.0.json",
           "gold_required": false,
@@ -27795,7 +27800,7 @@
           "dq_coverage": "not_configured",
           "dq_rules": [],
           "entity": "assay_parameters",
-          "field": "value",
+          "field": "parameter_value",
           "field_type": "double",
           "gold_path": "docs/04-reference/contracts/gold/chembl_assay_parameters_v1.0.json",
           "gold_required": false,

@@ -19,6 +19,7 @@ pytestmark = pytest.mark.integration
 
 _DASHBOARD_UID_RE = re.compile(r"^/d/([^\\/?]+)")
 _LINK_VAR_RE = re.compile(r"[?&]var-(\w+)=")
+_LINK_VAR_VALUE_RE = re.compile(r"[?&]var-(\w+)=([^&#]+)")
 _NAV_LINK_CONTRACT_PATH = Path(
     "docs/03-guides/dashboards/contracts/navigation-links.yaml"
 )
@@ -92,6 +93,9 @@ def _load_navigation_links_contract() -> dict[str, object]:
         "cross_scope_marker_contract": raw_contract.get(
             "cross_scope_marker_contract", {}
         ),
+        "preserved_identity_handoff": raw_contract.get(
+            "preserved_identity_handoff", {}
+        ),
         "navigation_transition_contract": raw_contract.get(
             "navigation_transition_contract", {}
         ),
@@ -116,6 +120,7 @@ _CANONICAL_GITHUB_BLOB_PREFIX = (
 )
 _REQUIRED_PANEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_panel_links_by_uid"]
 _CROSS_SCOPE_MARKER_CONTRACT = _NAV_LINK_CONTRACT["cross_scope_marker_contract"]
+_PRESERVED_IDENTITY_HANDOFF = _NAV_LINK_CONTRACT["preserved_identity_handoff"]
 _KPI_OWNERSHIP = _NAV_LINK_CONTRACT["kpi_ownership"]
 
 
@@ -163,6 +168,10 @@ def _extract_dashboard_uid(url: str) -> str | None:
 
 def _extract_link_vars(url: str) -> set[str]:
     return set(_LINK_VAR_RE.findall(url))
+
+
+def _extract_link_var_values(url: str) -> dict[str, str]:
+    return {name: value for name, value in _LINK_VAR_VALUE_RE.findall(url)}
 
 
 def _is_logs_drilldown_url(url: str) -> bool:
@@ -589,6 +598,46 @@ def _assert_dashboard_link_vars_required(
     )
 
 
+def _assert_preserved_identity_handoff(
+    *,
+    dashboard_name: str,
+    current_uid: str,
+    target_uid: str,
+    url: str,
+    passed_vars: set[str],
+) -> None:
+    if current_uid == target_uid:
+        return
+    spec = _PRESERVED_IDENTITY_HANDOFF
+    assert isinstance(spec, dict), "preserved_identity_handoff must be a mapping"
+    selector = spec.get("selector")
+    required_value = spec.get("required_value")
+    source_uids = set(spec.get("source_uids", []))
+    target_uids = set(spec.get("target_uids", []))
+    excluded_source_uids = set(spec.get("excluded_source_uids", []))
+    excluded_target_uids = set(spec.get("excluded_target_uids", []))
+    assert selector == "run_id", "preserved identity selector must be run_id"
+    assert required_value == "$run_id", "preserved run_id handoff value must be $run_id"
+
+    if current_uid in source_uids and target_uid in target_uids:
+        values = _extract_link_var_values(url)
+        assert selector in passed_vars, (
+            f"{dashboard_name} link to {target_uid} must preserve exact Run ID "
+            f"with var-{selector}={required_value}: {url}"
+        )
+        assert values.get(selector) == required_value, (
+            f"{dashboard_name} link to {target_uid} must use "
+            f"var-{selector}={required_value}, got {values.get(selector)!r}: {url}"
+        )
+        return
+
+    if current_uid in excluded_source_uids or target_uid in excluded_target_uids:
+        assert selector not in passed_vars, (
+            f"{dashboard_name} link to {target_uid} must not pass primary "
+            f"var-{selector} across excluded identity boundary: {url}"
+        )
+
+
 def _assert_top_level_cross_dashboard_handoff(
     *,
     dashboard_name: str,
@@ -635,6 +684,13 @@ def _assert_cross_dashboard_link_policy(
         passed_vars=passed_vars,
     )
     _assert_dashboard_link_vars_required(
+        dashboard_name=dashboard_name,
+        current_uid=current_uid,
+        target_uid=target_uid,
+        url=url,
+        passed_vars=passed_vars,
+    )
+    _assert_preserved_identity_handoff(
         dashboard_name=dashboard_name,
         current_uid=current_uid,
         target_uid=target_uid,

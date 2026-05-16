@@ -1502,7 +1502,14 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
         pipeline_name="chembl_activity",
         pipeline_kind="standard",
         resolved_config={"provider": "chembl", "entity_type": "activity"},
-        runtime_overrides={"cli": {"limit": 25}},
+        runtime_overrides={
+            "cli": {"limit": 25},
+            "env": {
+                "execution_environment": {
+                    "settings.env": "test",
+                }
+            },
+        },
         source_refs=[
             ConfigSourceRef(
                 source_type="fixture",
@@ -1744,7 +1751,14 @@ def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
         pipeline_name="chembl_activity",
         pipeline_kind="standard",
         resolved_config={"provider": "chembl", "entity_type": "activity"},
-        runtime_overrides={"cli": {"limit": 25}},
+        runtime_overrides={
+            "cli": {"limit": 25},
+            "env": {
+                "execution_environment": {
+                    "settings.env": "test",
+                }
+            },
+        },
         source_refs=[
             ConfigSourceRef(
                 source_type="fixture",

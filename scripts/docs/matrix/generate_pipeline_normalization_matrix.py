@@ -269,6 +269,34 @@ ENTITY_DOMAIN_SCHEMA_REGISTRY: dict[str, Any] = {
     "uniprot_protein": UniprotTargetSchema,
 }
 
+# Reviewed Silver/domain naming seams. The shipped Silver schemas still expose a
+# handful of historical generic field names, while the domain schemas and
+# normalization profiles track their owner-specific canonical names. Matrix and
+# fallback reporting must bridge those aliases before classifying a field as
+# fallback debt.
+ENTITY_PROFILE_FIELD_ALIASES: dict[str, dict[str, str]] = {
+    "chembl_activity": {
+        "relation": "activity_relation",
+        "type": "activity_type",
+        "value": "activity_value",
+    },
+    "chembl_assay": {
+        "description": "assay_description",
+        "score": "confidence_score",
+    },
+    "chembl_assay_parameters": {
+        "relation": "parameter_relation",
+        "type": "parameter_type",
+        "value": "parameter_value",
+    },
+    "chembl_target": {
+        "description": "target_description",
+    },
+    "chembl_target_component": {
+        "description": "component_description",
+    },
+}
+
 _CHEMBL_ENUM_CONFIG = "configs/enums/chembl.yaml"
 _PUBCHEM_ENUM_CONFIG = "configs/enums/pubchem.yaml"
 _UNIPROT_ENUM_CONFIG = "configs/enums/uniprot.yaml"
@@ -1496,8 +1524,12 @@ def _schema_coverage(
     field_name: str,
     arrow_nullable: bool,
 ) -> str:
+    profile_lookup_field = _profile_lookup_field_name(
+        pipeline_name=pipeline_name,
+        field_name=field_name,
+    )
     domain_coverage = _domain_schema_field_coverage_by_pipeline(pipeline_name).get(
-        field_name
+        profile_lookup_field
     )
     if domain_coverage is None:
         return f"silver_arrow:present(nullable={arrow_nullable});domain_schema:missing"
@@ -1708,7 +1740,13 @@ def _build_entity_rows_for_pipeline(
     for field_name in schema.names:
         field = schema.field(field_name)
         field_type = str(field.type)
-        profile_rule = None if profile is None else profile.rule_for(field_name)
+        profile_lookup_field = _profile_lookup_field_name(
+            pipeline_name=pipeline_name,
+            field_name=field_name,
+        )
+        profile_rule = (
+            None if profile is None else profile.rule_for(profile_lookup_field)
+        )
         if profile_rule is not None:
             rows.append(
                 _entity_profile_row(
@@ -1742,6 +1780,14 @@ def _build_entity_rows_for_pipeline(
             )
         )
     return rows
+
+
+def _profile_lookup_field_name(*, pipeline_name: str, field_name: str) -> str:
+    """Resolve reviewed Silver legacy aliases to canonical profile/schema fields."""
+    return ENTITY_PROFILE_FIELD_ALIASES.get(pipeline_name, {}).get(
+        field_name,
+        field_name,
+    )
 
 
 def _entity_profile_row(

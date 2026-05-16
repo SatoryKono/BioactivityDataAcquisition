@@ -88,6 +88,7 @@ def test_pre_task_workflow_refreshes_if_manifests_are_missing(
     tmp_path: Path, monkeypatch
 ) -> None:
     refresh_calls: list[tuple[Path, Path]] = []
+    session_note_path = tmp_path / "session-refresh.md"
 
     def _fake_refresh_all(
         root: Path,
@@ -154,6 +155,7 @@ def test_pre_task_workflow_refreshes_if_manifests_are_missing(
         title="Refresh before retrieval",
         query=None,
         source_refs=["src/memory/README.md"],
+        session_note_path=session_note_path,
         refresh_output_root=tmp_path / "refresh",
         limit=5,
     )
@@ -215,6 +217,7 @@ def test_pre_task_workflow_refreshes_if_event_projection_dir_is_empty(
     tmp_path: Path, monkeypatch
 ) -> None:
     refresh_calls: list[Path] = []
+    session_note_path = tmp_path / "session-empty-events.md"
     chunks_path = tmp_path / "chunks.jsonl"
     chunks_path.write_text(
         json.dumps(
@@ -286,6 +289,7 @@ def test_pre_task_workflow_refreshes_if_event_projection_dir_is_empty(
         title="Refresh empty events",
         query="workflow memory",
         source_refs=["src/memory/README.md"],
+        session_note_path=session_note_path,
         refresh_output_root=tmp_path / "refresh",
         chunks_path=chunks_path,
         events_dir=events_dir,
