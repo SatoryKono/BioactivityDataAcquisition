@@ -15,6 +15,7 @@ pipeline:
       - organism_scientific
     gold:
       mode: scd2
+      idempotency_contract: scd2
       scd_config:
         valid_from_col: _valid_from
         valid_to_col: _valid_to

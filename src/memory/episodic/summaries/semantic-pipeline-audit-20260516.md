@@ -2,13 +2,13 @@
 id: semantic-pipeline-audit-20260516
 title: Exhaustive semantic audit of BioETL ETL pipelines
 task_id: semantic-pipeline-audit-20260516
-created_at: '2026-05-16T07:52:37Z'
+created_at: '2026-05-16T08:08:27Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
-summary: Revalidated the latest exhaustive semantic ETL audit snapshot against the
-  2026-05-16 repository state and recorded a dated revalidation artifact.
+summary: Fixed semantic audit seed bootstrap and reduced semantic matrix cold-start
+  cost; generated and verified fresh 2026-05-16 semantic audit artifacts.
 ---
 
 # Episodic summary
@@ -19,7 +19,7 @@ summary: Revalidated the latest exhaustive semantic ETL audit snapshot against t
 
 ## Outcome
 
-- Revalidated the latest exhaustive semantic ETL audit snapshot against the 2026-05-16 repository state and recorded a dated revalidation artifact.
+- Fixed semantic audit seed bootstrap and reduced semantic matrix cold-start cost; generated and verified fresh 2026-05-16 semantic audit artifacts.
 
 ## Lessons learned
 

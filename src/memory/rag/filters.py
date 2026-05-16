@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 from fnmatch import fnmatch
 from pathlib import Path
@@ -23,6 +24,27 @@ DEFAULT_SOURCE_PATHS = (
     Path("grafana"),
     Path("scripts/engineering"),
 )
+
+DEFAULT_SELECTED_SOURCE_IDS = (
+    "active_docs",
+    "planning_docs",
+    "accepted_adrs",
+    "devin_wiki",
+    "runtime_code",
+    "memory_implementation",
+    "tests",
+    "project_configs",
+    "operational_assets",
+)
+WORKFLOW_RAG_SOURCE_IDS = (
+    "active_docs",
+    "accepted_adrs",
+    "runtime_code",
+    "memory_implementation",
+    "project_configs",
+    "operational_assets",
+)
+WORKFLOW_RAG_MAX_SOURCES = 160
 
 MARKDOWN_SUFFIXES = {".md"}
 PYTHON_SUFFIXES = {".py"}
@@ -54,55 +76,34 @@ def _load_exclusion_patterns() -> list[str]:
     return patterns
 
 
-def _load_source_paths() -> tuple[Path, ...]:
-    registry = load_yaml_resource(CATALOG_DIR / "source_registry.yaml")
-    selected_ids = {
-        "active_docs",
-        "planning_docs",
-        "accepted_adrs",
-        "devin_wiki",
-        "runtime_code",
-        "memory_implementation",
-        "tests",
-        "project_configs",
-        "operational_assets",
-    }
-    paths: list[Path] = []
-    for item in registry.get("sources", []):
-        if not isinstance(item, dict) or item.get("id") not in selected_ids:
-            continue
-        for raw_path in item.get("paths", []):
-            if isinstance(raw_path, str):
-                paths.append(Path(raw_path))
-    return tuple(paths) or DEFAULT_SOURCE_PATHS
+def _load_source_priority_order() -> tuple[str, ...]:
+    payload = load_yaml_resource(POLICY_DIR / "source_priority.yaml")
+    ordered_sources = payload.get("ordered_sources", [])
+    priority_order = tuple(
+        source_id for source_id in ordered_sources if isinstance(source_id, str)
+    )
+    return priority_order or DEFAULT_SELECTED_SOURCE_IDS
 
 
-def _load_source_specs() -> list[tuple[str, Path]]:
+def _load_source_specs(
+    *,
+    selected_ids: tuple[str, ...] = DEFAULT_SELECTED_SOURCE_IDS,
+) -> list[tuple[str, Path]]:
     registry = load_yaml_resource(CATALOG_DIR / "source_registry.yaml")
-    selected_ids = {
-        "active_docs",
-        "planning_docs",
-        "accepted_adrs",
-        "devin_wiki",
-        "runtime_code",
-        "memory_implementation",
-        "tests",
-        "project_configs",
-        "operational_assets",
-    }
+    selected_id_set = set(selected_ids)
     specs: list[tuple[str, Path]] = []
     for item in registry.get("sources", []):
         if not isinstance(item, dict):
             continue
         source_id = item.get("id")
-        if source_id not in selected_ids:
+        if source_id not in selected_id_set:
             continue
         for raw_path in item.get("paths", []):
             if isinstance(raw_path, str):
                 specs.append((str(source_id), Path(raw_path)))
     if specs:
         return specs
-    return [
+    fallback = [
         ("active_docs", Path("docs/00-project")),
         ("active_docs", Path("docs/01-requirements")),
         ("accepted_adrs", Path("docs/02-architecture/decisions")),
@@ -117,6 +118,7 @@ def _load_source_specs() -> list[tuple[str, Path]]:
         ("operational_assets", Path("grafana")),
         ("operational_assets", Path("scripts/engineering")),
     ]
+    return [item for item in fallback if item[0] in selected_id_set]
 
 
 def _is_excluded(rel_path: str, patterns: list[str]) -> bool:
@@ -192,12 +194,43 @@ def _should_include_source(
     return "/notes/" not in rel_path
 
 
-def iter_rag_sources(root: Path) -> list[Path]:
+def _tokenize_focus_query(query: str | None) -> tuple[str, ...]:
+    if not query:
+        return ()
+    tokens = {
+        token.lower()
+        for token in re.findall(r"[A-Za-z0-9_./:-]+", query)
+        if len(token) >= 3
+    }
+    return tuple(sorted(tokens))
+
+
+def _workflow_focus_score(
+    *,
+    source_id: str,
+    rel_path: str,
+    focus_tokens: tuple[str, ...],
+    priority_index: dict[str, int],
+) -> tuple[int, int, str]:
+    lowered_path = rel_path.lower()
+    token_hits = sum(token in lowered_path for token in focus_tokens)
+    direct_bonus = 1 if any(f"/{token}" in lowered_path for token in focus_tokens) else 0
+    source_priority = priority_index.get(source_id, len(priority_index))
+    return (-(token_hits + direct_bonus), source_priority, rel_path)
+
+
+def iter_rag_sources(
+    root: Path,
+    *,
+    selected_ids: tuple[str, ...] = DEFAULT_SELECTED_SOURCE_IDS,
+    workflow_focus_query: str | None = None,
+    max_sources: int | None = None,
+) -> list[Path]:
     """Return deterministic repository-relative RAG source paths."""
     exclusion_patterns = _load_exclusion_patterns()
-    results: list[Path] = []
+    entries: list[tuple[str, Path]] = []
     seen: set[str] = set()
-    for source_id, base in _load_source_specs():
+    for source_id, base in _load_source_specs(selected_ids=selected_ids):
         for path in _candidate_source_paths(root=root, source_id=source_id, base=base):
             rel_path = path.as_posix()
             if not _should_include_source(
@@ -207,8 +240,38 @@ def iter_rag_sources(root: Path) -> list[Path]:
             ):
                 continue
             seen.add(rel_path)
-            results.append(path)
-    return results
+            entries.append((source_id, path))
+
+    if not entries:
+        return []
+
+    if max_sources is None:
+        return [path for _, path in entries]
+
+    focus_tokens = _tokenize_focus_query(workflow_focus_query)
+    priority_order = _load_source_priority_order()
+    priority_index = {
+        source_id: index for index, source_id in enumerate(priority_order)
+    }
+    if focus_tokens:
+        ranked_entries = sorted(
+            entries,
+            key=lambda item: _workflow_focus_score(
+                source_id=item[0],
+                rel_path=item[1].as_posix(),
+                focus_tokens=focus_tokens,
+                priority_index=priority_index,
+            ),
+        )
+    else:
+        ranked_entries = sorted(
+            entries,
+            key=lambda item: (
+                priority_index.get(item[0], len(priority_index)),
+                item[1].as_posix(),
+            ),
+        )
+    return [path for _, path in ranked_entries[:max_sources]]
 
 
 def iter_markdown_sources(root: Path) -> list[Path]:

@@ -15,6 +15,7 @@ pipeline:
       - type
     gold:
       mode: scd2
+      idempotency_contract: scd2
       scd_config:
         valid_from_col: _valid_from
         valid_to_col: _valid_to
@@ -39,9 +40,9 @@ schema:
     - assay_param_id
     - assay_id
     - type_raw
-    - type
-    - relation
-    - value
+    - parameter_type
+    - parameter_relation
+    - parameter_value
     - units
     - text_value
     - comments
@@ -199,7 +200,7 @@ quality:
   - field: assay_param_id
     key_type: merge
     nullable: false
-  - field: type
+  - field: parameter_type
     key_type: partition
     nullable: false
 filters:
@@ -216,11 +217,11 @@ filters:
     required_fields:
     - assay_id
     - assay_param_id
-    - type
+    - parameter_type
   gold_filters:
     required_fields:
     - assay_id
-    - type
+    - parameter_type
 contracts:
   primary_key:
   - assay_param_id

@@ -39,7 +39,7 @@ composite:
       - target_id           # FK to target (for context)
       - publication_id      # FK to publication (for context)
       - assay_type          # Classification
-      - description         # For logging/debugging
+      - assay_description   # For logging/debugging
     silver_table: silver/chembl/assay
 
   # ---------------------------------------------------------------------------
@@ -167,8 +167,8 @@ composite:
       # === Assay description ===
       - name: description
         fields:
-          - description
-          - score
+          - assay_description
+          - confidence_score
         provider_order: [chembl]
 
       # === BAO ontology ===

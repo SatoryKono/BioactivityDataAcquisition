@@ -18,6 +18,11 @@ APPEND_SAFE_CONTRACTS = {
     "partition_append_with_stable_partition_key",
     "occurrence_only",
 }
+EXPECTED_NON_APPEND_CONTRACTS = {
+    ("silver", "merge"): "merge_upsert",
+    ("gold", "scd2"): "scd2",
+    ("gold", "overwrite"): "overwrite_rebuild",
+}
 
 
 def _iter_pipeline_configs() -> list[Path]:
@@ -60,6 +65,31 @@ def test_append_mode_requires_explicit_idempotency_contract() -> None:
             assert contract in APPEND_SAFE_CONTRACTS, (
                 f"{config_path.relative_to(ROOT)}: sink.{layer_name}.mode=append "
                 f"requires append-safe idempotency_contract; got {contract!r}"
+            )
+
+
+def test_explicit_sink_mode_requires_matching_explicit_idempotency_contract() -> None:
+    for config_path in _iter_pipeline_configs():
+        sink = _pipeline_sink(_load_yaml(config_path))
+        for layer_name in ("silver", "gold"):
+            layer = sink.get(layer_name)
+            if not isinstance(layer, dict) or "mode" not in layer:
+                continue
+            mode = str(layer.get("mode", "")).strip().lower()
+            if mode == "append":
+                continue
+            expected_contract = EXPECTED_NON_APPEND_CONTRACTS.get((layer_name, mode))
+            if expected_contract is None:
+                continue
+            assert layer.get("idempotency_contract"), (
+                f"{config_path.relative_to(ROOT)}: explicit sink.{layer_name}.mode={mode} "
+                f"requires explicit sink.{layer_name}.idempotency_contract"
+            )
+            contract = str(layer.get("idempotency_contract") or "").strip().lower()
+            assert contract == expected_contract, (
+                f"{config_path.relative_to(ROOT)}: explicit sink.{layer_name}.mode={mode} "
+                f"requires sink.{layer_name}.idempotency_contract={expected_contract!r}; "
+                f"got {contract!r}"
             )
 
 

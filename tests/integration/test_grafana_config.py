@@ -78,7 +78,7 @@ EXPECTED_VARS_BY_DASHBOARD = {
         "run_type",
         "reason_code",
         "field",
-        "run_id",
+        "quarantine_run_id",
         "payload_hash",
     },
 }
@@ -1009,6 +1009,7 @@ def test_control_plane_dashboard_links_are_scoped() -> None:
     assert "0. Control Plane" not in links
     for title in ("1. Overview", "2. Runtime", "4. Data Quality"):
         url = str(links[title].get("url", ""))
+        assert "var-workflow=$workflow" in url
         assert "var-pipeline=$pipeline" in url
         assert "var-run_type=$run_type" in url
         assert "${__url_time_range}" in url

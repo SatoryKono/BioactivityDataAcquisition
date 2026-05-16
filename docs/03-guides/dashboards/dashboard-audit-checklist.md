@@ -68,7 +68,7 @@ uv run python -m scripts.engineering.qa report-dashboard-inventory --check --jso
 ### 2.4 Variable Handoff in Links (MUST)
 - [ ] All links have `includeVars: false`
 - [ ] Target-scoped variables passed explicitly in URL (`var-*`)
-- [ ] Forensic IDs (`run_id`, `payload_hash`) NOT passed to non-target dashboards
+- [ ] Forensic IDs (`quarantine_run_id`, `payload_hash`) NOT passed to non-target dashboards
 - [ ] Cross-scope links have tooltip with `Scope reset: ...` suffix
 - [ ] Same-scope links have tooltip: `Preserves selected scope and time range.`
 
@@ -94,7 +94,7 @@ Check against `contracts/selector-contracts.yaml` → `shipped_selector_registry
 
 **Pipeline summary dashboards** (`bioetl-control-plane-v1`, `bioetl-overview-v2`, `bioetl-runtime`, `bioetl-dq-v2`):
 - [ ] Visible selectors: `pipeline`, `run_type` (plus optional `stage` for runtime/dq)
-- [ ] No forensic identifiers (`run_id`, `payload_hash`)
+- [ ] No forensic identifiers (`quarantine_run_id`, `payload_hash`)
 - [ ] No exact run selection without run catalog
 
 **Provider-first** (`bioetl-provider-health-v2`):
@@ -108,7 +108,7 @@ Check against `contracts/selector-contracts.yaml` → `shipped_selector_registry
 - [ ] No visible `pipeline` / `run_type` selectors
 
 **Forensic explorer** (`bioetl-silver-reject-explorer`):
-- [ ] Visible selectors: `pipeline`, `run_type`, `reason_code`, `field`, `run_id`, `payload_hash`
+- [ ] Visible selectors: `pipeline`, `run_type`, `reason_code`, `field`, `quarantine_run_id`, `payload_hash`
 - [ ] Forensic selectors do NOT leak into Prometheus dashboards
 
 ### 3.3 Variable Defaults and Selection Modes (MUST)
@@ -116,7 +116,7 @@ Check against `contracts/selector-contracts.yaml` → `shipped_selector_registry
 - [ ] `$run_type`: multi-select with Include All, default `All`/`$__all` (NOT `unknown`)
 - [ ] `$provider`: single-select, default `unknown` (provider-health only)
 - [ ] `$stage`: multi-select with Include All (runtime/dq only)
-- [ ] Forensic variables (`run_id`, `payload_hash`): local to explorer, NOT in cross-dashboard links
+- [ ] Forensic variables (`quarantine_run_id`, `payload_hash`): local to explorer, NOT in cross-dashboard links
 
 ### 3.4 Hidden Context Variables (MUST)
 - [ ] Hidden vars justified by return-path or detail-only scope
@@ -364,9 +364,9 @@ Run: `uv run python -m scripts.engineering.qa report-dashboard-query-duplicates`
 Check against `contracts/navigation-links.yaml` → `required_panel_links_by_uid`:
 
 **bioetl-overview-v2**:
-- [ ] Panel `214` (System Status) → dataLinks to: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
-- [ ] Panel `215` (First Action) → dataLinks to: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
-- [ ] Panel `9002` (L0 Inputs) → dataLinks to: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
+- [ ] Panel `214` (System Status) → dataLinks to: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow
+- [ ] Panel `215` (First Action) → dataLinks to: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow
+- [ ] Panel `9002` (L0 Inputs) → dataLinks to: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow
 - [ ] Panel `9003` (Runtime Blockers) → dataLink to: Open Runtime
 - [ ] Panel `9004` (DQ Status) → dataLink to: Open Data Quality
 - [ ] Panel `9005` (Gold Lifecycle) → dataLink to: Open Runtime
@@ -419,7 +419,7 @@ pytest tests/integration/test_grafana_variable_reference.py
 - [ ] Variable contract test passes
 - [ ] Selector taxonomy test passes
 - [ ] Variable reference mirror test passes
-- [ ] Exact-id isolation test passes (`run_id`/`payload_hash` forbidden in
+- [ ] Exact-id isolation test passes (`run_id`/`quarantine_run_id`/`payload_hash` forbidden in
   Prometheus labels and cross-dashboard links; Overview v3 local `run_id`
   exception remains control-plane-backed)
 

@@ -63,7 +63,7 @@ Human-readable selector references:
 - `bioetl-workflow-overview`: `$workflow`, `$pipeline`, `$run_type`,
   `$run_id`, `$status`, `$step_status`, `$step_kind`, hidden
   `$pipeline_context`, `$run_type_context`, `$provider_context`
-- `bioetl-silver-reject-explorer`: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
+- `bioetl-silver-reject-explorer`: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$quarantine_run_id`, `$payload_hash`
 - `bioetl-overview-v2` intentionally ships with `Workflow=All`,
   `Pipeline=All`, `Run Type=All`, and `Run ID=-` как default entry scope.
 - Primary dashboards `0..5` now expose the shared context shell
@@ -86,10 +86,11 @@ Human-readable selector references:
 - Для `bioetl-silver-reject-explorer` `$pipeline` также остаётся scoped
   single-select, потому что quarantine API fail-closed требует явный
   `pipeline` параметр.
-- Переменная `execution` не используется; `$payload_hash` остаётся только в
-  `bioetl-silver-reject-explorer`, а `$run_id` в primary dashboards `0..5`
-  используется только для local control-plane `ID` panel и не становится
-  Prometheus label или cross-dashboard filter.
+- Переменная `execution` не используется; `$quarantine_run_id` и
+  `$payload_hash` остаются только в `bioetl-silver-reject-explorer`, а
+  `$run_id` в primary dashboards `0..5` используется только для local
+  control-plane `ID` panel и не становится Prometheus label или
+  cross-dashboard filter.
 
 ## Что смотреть в первую очередь
 
@@ -296,7 +297,7 @@ Compact evidence ниже первого экрана:
      threshold state, reasons, invalid-record-policy note), чтобы определить
      severity и первое действие.
   1. **L1 cause narrowing:** раскройте collapsed rows `Reject / Pareto / Fields` и `Validation Diagnostics`, проверьте `Inspect: Top Silver Reject Reasons (Pareto)` / `Inspect: Top Silver Reject Fields` и связанные diagnostics.
-  1. **L2 explorer:** откройте `Silver Reject Explorer` через top-level link в `4. Data Quality` для record-level списка, выбора `reason_code/field/run_id` и detail по `payload_hash`.
+  1. **L2 explorer:** откройте `Silver Reject Explorer` через top-level link в `4. Data Quality` для record-level списка, выбора `reason_code/field/quarantine_run_id` и detail по `payload_hash`.
   1. **L2 no-data gate:** считайте `0` rejects нормой только когда `Review: First Action / No-Data Semantics` подтверждает конкретный pipeline, доступный Quarantine Explorer и ненулевой Bronze denominator; zero-reject workflow run is a valid empty explorer state only after those checks pass. Zero matching rows остаются empty-result состоянием, а plugin errors, unsupported filter chains, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN/error.
   1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и финального подтверждения remediation.
 - Эти панели отвечают на вопросы:
@@ -352,10 +353,13 @@ Variable handoff policy for dashboard links remains strict and bounded:
 
 - `includeVars=false` for every link (no implicit variable leakage).
 - Pass only target-scoped variables directly in URL (`var-*`) when required by the destination dashboard.
-- For overview/runtime/dq flows pass only `$pipeline/$run_type` unless destination needs another explicit scope.
-- For provider flow pass only `$provider/$adapter` (or explicit `All` defaults when opening non-provider dashboards).
+- For primary operator dashboards pass the shared shell explicitly as
+  `workflow/pipeline/run_type`; Silver Explorer remains a bounded exception and
+  receives only `pipeline/run_type`.
+- For provider flow pass `provider/pipeline_context` plus the shared shell;
+  `adapter` remains detail-only and may fall back to its target default.
 - Workflow-specific state variables (`$status`, `$step_status`, `$step_kind`)
-  and forensic IDs (`$run_id`, `$payload_hash`) MUST NOT be propagated into
+  and forensic IDs (`$run_id`, `$quarantine_run_id`, `$payload_hash`) MUST NOT be propagated into
   non-target dashboards. `$workflow` may appear as shared context, but links
   still pass only target-scoped variables explicitly.
 - Top-level links дополнительно маркируются приоритетом (`primary`, `secondary`, `contextual`) через contract block `top_level_link_priority_by_uid`; приоритет должен быть виден в `title`/`tooltip` для неоднозначных маршрутов.
@@ -463,7 +467,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `default 24h forensic window`; при шуме или слишком большом объёме данных
   окно можно сузить вручную до operational range.
 - Для очень редких инцидентов оператор MAY оставить 24h окно и уточнить
-  контекст через `reason_code`, `field`, `run_id` и `payload_hash` перед
+  контекст через `reason_code`, `field`, `quarantine_run_id` и `payload_hash` перед
   action-операциями в CLI.
 - `bioetl-workflow-overview`: dashboard links `0. Control Plane`,
   `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`;
@@ -484,7 +488,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - `bioetl-silver-reject-explorer`: `Review: First Action / No-Data Semantics`
   now also carries bounded CTA row links (`Review total rejects`,
   `Review scoped summary`, `Open Data Quality`) so the first-screen forensic
-  interpretation panel remains actionable without leaking `run_id` or
+  interpretation panel remains actionable without leaking `quarantine_run_id` or
   `payload_hash` into cross-dashboard handoffs.
 
   **First 2 clicks (L1):**
@@ -524,7 +528,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
 ## Важные пороги (из JSON)
 
 - `overview.id=214 (Status)`: `CRIT` при runtime blocker `>0`, DQ hard fail `>0`, blocking data-validation lifecycle или control-plane blocker `>0`; `WARN` при non-fatal warning-only сигналах; `UNKNOWN` при no recent samples. Panel links route directly to Runtime / Control Plane / Data Quality / Provider Health / Workflow with the current time range.
-- `overview.id=215 (First Action)`: priority order `Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor`. If the selected scope is missing from `bioetl_overview_pipeline_run_type_universe` (aliased from the runtime pipeline/run_type universe), the panel falls back to `NO_ROUTE` instead of rendering empty. Next action: open the first non-OK surface via the matching panel link. Runtime / Control Plane / DQ handoffs preserve `$pipeline/$run_type`; Provider Health fail-closes to `provider=unknown` while preserving `pipeline_context`; Workflow accepts the shared context shell but workflow-only state filters are reset.
+- `overview.id=215 (First Action)`: priority order `Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor`. If the selected scope is missing from `bioetl_overview_pipeline_run_type_universe` (aliased from the runtime pipeline/run_type universe), the panel falls back to `NO_ROUTE` instead of rendering empty. Next action: open the first non-OK surface via the matching panel link. Runtime / Control Plane / DQ / Workflow handoffs preserve `workflow/pipeline/run_type`; Provider Health fail-closes to `provider=unknown` while preserving `pipeline_context`; workflow-only state filters are not propagated.
 - `overview` first-screen selected-scope cards normalize a manually selected `workflow_<pipeline>` value back to the entity pipeline before reading `bioetl_l0_*` / `bioetl_l1_*` summary recording rules. For example, `workflow_chembl_assay` resolves to the same current-state summary rows as `chembl_assay`.
 - `dq.id=2 (DQ Score Snapshot)`: no-data остается `UNKNOWN`, не `0`; hard-fail signals блокируют promotion, warning-only означает drift. Next action: hard-fail -> reject/quarantine diagnostics; warning-only -> trend + top reasons.
 - `overview.id=9002 (Inputs)`: использует `max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"})`. Это compact projected selected-scope surface: first-screen таблица держит одну worst-status строку на operator input, чтобы не требовать scroll на default `Workflow=All/Pipeline=All/Run Type=All`.

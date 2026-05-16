@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from bioetl.application.services.checkpoint_service import CheckpointInfo
+from bioetl.application.services.control_plane._run_manifest_replay_taxonomy import (
+    resolve_replay_taxonomy_projection,
+)
 from bioetl.application.services.control_plane.run_manifest_inspection_service import (
     RunManifestInspectionResult,
 )
@@ -258,18 +261,17 @@ def _replay_context(
             "operator_replay_mode": None,
             "replay_readiness_verdict": None,
         }
-    diagnostics = run_manifest.diagnostics
-    identity_graph = run_manifest.identity_graph
+    replay_taxonomy = resolve_replay_taxonomy_projection(
+        run_manifest.diagnostics,
+        fallback=run_manifest.identity_graph,
+    )
     return {
-        "replay_capability": _replay_capability(run_manifest),
-        "replay_mode": diagnostics.get("replay_mode")
-        or identity_graph.get("replay_mode"),
-        "continuation_mode": diagnostics.get("continuation_mode")
-        or identity_graph.get("continuation_mode"),
-        "operator_replay_mode": diagnostics.get("operator_replay_mode")
-        or identity_graph.get("operator_replay_mode"),
-        "replay_readiness_verdict": diagnostics.get("replay_readiness_verdict")
-        or identity_graph.get("replay_readiness_verdict"),
+        "replay_capability": replay_taxonomy.get("replay_capability")
+        or _replay_capability(run_manifest),
+        "replay_mode": replay_taxonomy.get("replay_mode"),
+        "continuation_mode": replay_taxonomy.get("continuation_mode"),
+        "operator_replay_mode": replay_taxonomy.get("operator_replay_mode"),
+        "replay_readiness_verdict": replay_taxonomy.get("replay_readiness_verdict"),
     }
 
 

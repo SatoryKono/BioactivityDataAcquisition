@@ -47,9 +47,16 @@ python -m memory.tooling.workflow pre-task \
 What it does:
 
 - runs local retrieval through `memory.query all`
-- auto-refreshes rebuild-only RAG and timeline artifacts if manifests are
-  missing or if the timeline directory has no generated `*.jsonl` projections
+- auto-refreshes only the missing rebuild-only surfaces; timeline recovery no
+  longer waits on a full RAG rebuild
+- uses a bounded workflow-time RAG rebuild when temporary chunk manifests are
+  needed, instead of rebuilding the full deterministic corpus during every
+  pre-task call
 - creates an episodic session note in `src/memory/episodic/sessions/`
+
+If refresh is skipped with `--skip-refresh-if-missing`, the workflow still
+returns catalog context and creates the session note, but marks the payload as
+degraded when RAG or timeline artifacts are absent.
 
 Use `--profile` to align ranking with the task type: `general`,
 `architecture`, `implementation`, `operations`, or `audit`.
@@ -117,12 +124,20 @@ What it does:
 - creates an episodic summary note in `src/memory/episodic/summaries/`
 - validates the memory subsystem
 - refreshes rebuild-only RAG and timeline artifacts into a temporary output root
-- optionally runs episodic prune in dry-run mode
+  with the same bounded workflow-time RAG scope used by `pre-task`
+- treats partial refresh failures as degraded follow-up signals instead of
+  blocking summary-note creation
+- optionally runs episodic prune in dry-run mode, using the policy-backed
+  density threshold from `src/memory/policy/retention.yaml`
 
-Use `python -m memory.tooling.prune --max-active <N> --json` when you need an
-explicit density report for active episodic notes. Use
+Use `python -m memory.tooling.prune --json` for the policy-default density
+report or `python -m memory.tooling.prune --max-active <N> --json` for an
+explicit override. The default cadence is a dry-run review every 7 days with a
+target ceiling of 1000 active episodic notes. Use
 `python -m memory.tooling.validate --include-working-tree-junk` when local
-Python cache files under `src/memory/` should fail validation.
+Python cache files under `src/memory/` should fail validation. Memory tooling
+processes disable Python bytecode writes by default, and dev wrappers should
+preserve `PYTHONDONTWRITEBYTECODE=1`.
 
 If the outcome is durable, promote the summary:
 
@@ -158,6 +173,7 @@ What it does:
 - reviews active curated notes
 - classifies them as `current`, `due`, or `stale`
 - highlights review candidates such as duplicate themes or thin provenance
+  (default minimum: 2 source refs)
 - points you toward `keep`, `review`, or `review_or_archive`
 
 Use it to keep curated memory small and durable:

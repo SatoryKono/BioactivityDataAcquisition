@@ -40,6 +40,12 @@ def _review_every_days() -> int:
     return int(retention["artifact_classes"]["curated_note"]["review_every_days"])
 
 
+def _minimum_source_refs() -> int:
+    memory_root = discover_memory_root()
+    retention = load_yaml_resource(memory_root / "policy" / "retention.yaml")
+    return int(retention["artifact_classes"]["curated_note"].get("min_source_refs", 2))
+
+
 def _parse_iso_datetime(value: str | None) -> datetime | None:
     if not value or not isinstance(value, str):
         return None
@@ -128,11 +134,15 @@ def _duplicate_reasons(
     return reasons
 
 
-def _quality_reasons(metadata: dict[str, Any]) -> tuple[int, list[str]]:
+def _quality_reasons(
+    metadata: dict[str, Any],
+    *,
+    minimum_source_refs: int,
+) -> tuple[int, list[str]]:
     reasons: list[str] = []
     source_refs = metadata.get("source_refs")
     source_ref_count = len(source_refs) if isinstance(source_refs, list) else 0
-    if source_ref_count < 2:
+    if source_ref_count < minimum_source_refs:
         reasons.append("source_refs:thin")
 
     summary = str(metadata.get("summary") or "")
@@ -158,6 +168,7 @@ def _build_review_record(
     *,
     current_time: datetime,
     review_every_days: int,
+    minimum_source_refs: int,
     normalized_titles: dict[str, list[Path]],
     ids: dict[str, list[Path]],
 ) -> CuratedReviewRecord:
@@ -177,7 +188,10 @@ def _build_review_record(
             ids=ids,
         )
     )
-    source_ref_count, quality_reasons = _quality_reasons(metadata)
+    source_ref_count, quality_reasons = _quality_reasons(
+        metadata,
+        minimum_source_refs=minimum_source_refs,
+    )
     reasons.extend(quality_reasons)
     recommendation = _review_recommendation(recommendation, reasons)
 
@@ -220,6 +234,7 @@ def review_curated_notes(
     """Build a review report for active curated memory."""
     current_time = now or datetime.now(UTC)
     review_every_days = _review_every_days()
+    minimum_source_refs = _minimum_source_refs()
     notes_root = root or _curated_root()
     raw_notes, normalized_titles, ids = _collect_curated_note_indexes(notes_root)
     records = [
@@ -228,6 +243,7 @@ def review_curated_notes(
             metadata,
             current_time=current_time,
             review_every_days=review_every_days,
+            minimum_source_refs=minimum_source_refs,
             normalized_titles=normalized_titles,
             ids=ids,
         )

@@ -568,6 +568,27 @@ def _assert_dashboard_link_vars_not_forbidden(
     )
 
 
+def _assert_dashboard_link_vars_required(
+    *,
+    dashboard_name: str,
+    current_uid: str,
+    target_uid: str,
+    url: str,
+    passed_vars: set[str],
+) -> None:
+    if current_uid == target_uid:
+        return
+    required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID.get(target_uid)
+    assert required_vars is not None, (
+        f"Link target {target_uid} must be declared in required vars map"
+    )
+    missing_vars = required_vars - passed_vars
+    assert not missing_vars, (
+        f"{dashboard_name} link to {target_uid} missing required handoff vars: "
+        f"{sorted(missing_vars)} via {url}"
+    )
+
+
 def _assert_top_level_cross_dashboard_handoff(
     *,
     dashboard_name: str,
@@ -609,6 +630,13 @@ def _assert_cross_dashboard_link_policy(
     )
     _assert_dashboard_link_vars_not_forbidden(
         dashboard_name=dashboard_name,
+        target_uid=target_uid,
+        url=url,
+        passed_vars=passed_vars,
+    )
+    _assert_dashboard_link_vars_required(
+        dashboard_name=dashboard_name,
+        current_uid=current_uid,
         target_uid=target_uid,
         url=url,
         passed_vars=passed_vars,
@@ -780,6 +808,30 @@ def test_dashboard_queries_do_not_filter_by_payload_hash_label(
     )
 
 
+@pytest.mark.parametrize(
+    "forbidden_label",
+    ("manifest_id", "execution_fingerprint", "quarantine_run_id"),
+)
+@pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
+def test_dashboard_queries_do_not_filter_by_high_cardinality_identity_labels(
+    dashboard_path: Path, forbidden_label: str
+) -> None:
+    """Control-plane identity anchors must stay out of Prometheus label filters."""
+    dashboard = load_dashboard(dashboard_path)
+    expressions = get_panel_expressions(dashboard)
+
+    offenders = [
+        expr
+        for expr in expressions
+        if re.search(rf"\b{re.escape(forbidden_label)}\s*(=|=~|!=|!~)\s*", expr)
+        is not None
+    ]
+    assert not offenders, (
+        f"Dashboard {dashboard_path.name} must not filter by {forbidden_label} label.\n"
+        + "\n".join(offenders[:10])
+    )
+
+
 def test_exact_identifier_variables_do_not_leak_into_other_dashboards() -> None:
     """Exact-id variables must remain isolated to explicitly contracted dashboards."""
     local_identity_dashboards = {
@@ -799,14 +851,19 @@ def test_exact_identifier_variables_do_not_leak_into_other_dashboards() -> None:
             if variable.get("name")
         }
         if dashboard_path.name == "bioetl-silver-reject-explorer.json":
-            assert {"run_id", "payload_hash"} <= variables
+            assert {"quarantine_run_id", "payload_hash"} <= variables
+            assert "run_id" not in variables
             continue
         if dashboard_path.name in local_identity_dashboards:
             assert "run_id" in variables
+            assert "quarantine_run_id" not in variables
             assert "payload_hash" not in variables
             continue
         assert "run_id" not in variables, (
             f"{dashboard_path.name} must not define uncontracted variable run_id"
+        )
+        assert "quarantine_run_id" not in variables, (
+            f"{dashboard_path.name} must not define uncontracted variable quarantine_run_id"
         )
         assert "payload_hash" not in variables, (
             f"{dashboard_path.name} must not define uncontracted variable payload_hash"
@@ -1663,7 +1720,7 @@ def test_navigation_dashboards_expose_silver_reject_explorer_handoff() -> None:
             "tooltip_token": "bounded pipeline/run_type",
         },
         "bioetl-provider-health-v2.json": {
-            "url_tokens": ("var-pipeline=$pipeline_context", "var-run_type=All"),
+            "url_tokens": ("var-pipeline=$pipeline_context", "var-run_type=$run_type"),
             "tooltip_token": "Context mapping",
         },
         "bioetl-workflow-overview.json": {

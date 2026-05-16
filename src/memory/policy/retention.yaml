@@ -25,6 +25,9 @@ artifact_classes:
   curated_note:
     ttl_days: null
     review_every_days: 90
+    min_source_refs: 2
   episodic_note:
     ttl_days: 14
     rebuildable: false
+    max_active: 1000
+    prune_review_every_days: 7

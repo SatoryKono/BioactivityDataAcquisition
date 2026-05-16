@@ -77,7 +77,9 @@ def pipeline_config():
         table=TableConfig(
             primary_keys=["activity_id"],
             silver_table="test_silver",
+            silver_idempotency_contract="merge_upsert",
             gold_write_mode="scd2",
+            gold_idempotency_contract="scd2",
         ),
     )
 
@@ -766,7 +768,9 @@ class TestValidateWriteModes:
                 primary_keys=["id"],
                 silver_table="silver",
                 silver_write_mode="merge",
+                silver_idempotency_contract="merge_upsert",
                 gold_write_mode="scd2",
+                gold_idempotency_contract="scd2",
             ),
         )
         service = PreflightService(
@@ -789,7 +793,9 @@ class TestValidateWriteModes:
                 primary_keys=["id"],
                 silver_table="silver",
                 silver_write_mode="append",
+                silver_idempotency_contract="append_log",
                 gold_write_mode="scd2",
+                gold_idempotency_contract="scd2",
             ),
         )
         service = PreflightService(
@@ -819,7 +825,9 @@ class TestValidateWriteModes:
                     primary_keys=["id"],
                     silver_table="silver",
                     silver_write_mode="overwrite",
+                    silver_idempotency_contract="merge_upsert",
                     gold_write_mode="scd2",
+                    gold_idempotency_contract="scd2",
                 ),
             )
 
@@ -835,7 +843,9 @@ class TestValidateWriteModes:
             table=TableConfig(
                 primary_keys=["id"],
                 silver_table="silver",
+                silver_idempotency_contract="merge_upsert",
                 gold_write_mode="scd2",
+                gold_idempotency_contract="scd2",
             ),
         )
         service = PreflightService(
@@ -860,6 +870,8 @@ class TestValidateWriteModes:
                 primary_keys=["id"],
                 silver_table="silver",
                 gold_write_mode="overwrite",
+                silver_idempotency_contract="merge_upsert",
+                gold_idempotency_contract="overwrite_rebuild",
             ),
         )
         service = PreflightService(
@@ -881,7 +893,9 @@ class TestValidateWriteModes:
             table=TableConfig(
                 primary_keys=["id"],
                 silver_table="silver",
+                silver_idempotency_contract="merge_upsert",
                 gold_write_mode="scd2",
+                gold_idempotency_contract="scd2",
             ),
         )
         service = PreflightService(
@@ -918,6 +932,8 @@ class TestValidateWriteModes:
                 primary_keys=["id"],
                 silver_table="silver",
                 gold_write_mode="append",
+                silver_idempotency_contract="merge_upsert",
+                gold_idempotency_contract="append_log",
             ),
         )
         service = PreflightService(
@@ -948,7 +964,9 @@ class TestValidateWriteModes:
                 primary_keys=["id"],
                 silver_table="silver",
                 silver_write_mode=SilverWriteMode.DELETE,
+                silver_idempotency_contract="merge_upsert",
                 gold_write_mode="scd2",
+                gold_idempotency_contract="scd2",
             ),
         )
         service = PreflightService(
@@ -1094,7 +1112,9 @@ class TestValidatePreflight:
                 primary_keys=["id"],
                 silver_table="silver",
                 silver_write_mode=SilverWriteMode.DELETE,
+                silver_idempotency_contract="merge_upsert",
                 gold_write_mode="scd2",
+                gold_idempotency_contract="scd2",
             ),
         )
         service = PreflightService(

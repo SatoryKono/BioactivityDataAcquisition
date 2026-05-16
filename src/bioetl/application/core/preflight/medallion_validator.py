@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.preflight.medallion_validator_runtime import (
+    validate_idempotency_contracts,
     validate_key_nullability_policies,
     validate_layer_formats,
     validate_medallion_policy_consistency,
@@ -117,6 +118,12 @@ class MedallionConfigValidator:
                 rule="RULES §2.1: Gold layer allowed modes",
                 actual_mode=gold_mode_value,
                 expected_suffix=", scd2",
+            ),
+            *validate_idempotency_contracts(
+                silver_mode=silver_mode_value,
+                gold_mode=gold_mode_value,
+                silver_contract=self._config.table.silver_idempotency_contract,
+                gold_contract=self._config.table.gold_idempotency_contract,
             ),
         ]
         self._log_write_mode_validation_result(

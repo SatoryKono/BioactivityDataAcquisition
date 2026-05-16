@@ -178,9 +178,9 @@ class ActivitySchema(ETLRecordSchema):
     record_id: Series[int] = pa.Field(
         nullable=False, description="FK to compound_record."
     )
-    type: Series[str] | None = pa.Field(nullable=True, description="Original type.")
-    relation: Series[str] = pa.Field(nullable=False, description="Original operator.")
-    value: Series[float] = pa.Field(nullable=False, description="Original value.")
+    activity_type: Series[str] | None = pa.Field(nullable=True, description="Original type.")
+    activity_relation: Series[str] = pa.Field(nullable=False, description="Original operator.")
+    activity_value: Series[float] = pa.Field(nullable=False, description="Original value.")
     units: Series[str] = pa.Field(nullable=False, description="Original units.")
     text_value: Series[str] | None = pa.Field(nullable=True, description="Text value.")
     standard_text_value: Series[str] | None = pa.Field(

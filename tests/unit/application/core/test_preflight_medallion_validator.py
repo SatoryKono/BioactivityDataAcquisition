@@ -37,7 +37,9 @@ def mock_config() -> MagicMock:
     """Minimal pipeline config mock with valid defaults."""
     config = MagicMock()
     config.table.silver_write_mode = "merge"
-    config.table.gold_write_mode = "merge"
+    config.table.gold_write_mode = "overwrite"
+    config.table.silver_idempotency_contract = "merge_upsert"
+    config.table.gold_idempotency_contract = "overwrite_rebuild"
     config.table.primary_keys = ["record_id"]
     config.table.partition_cols = []
     config.dq.key_nullability_rules = []
@@ -186,6 +188,67 @@ class TestLayerFormatValidation:
         fields = [e.field for e in errors]
         assert "sink.silver.format" in fields
         assert "sink.gold.format" in fields
+
+
+@pytest.mark.unit
+class TestIdempotencyContractValidation:
+    """Tests for explicit sink idempotency-contract validation."""
+
+    def test_matching_contracts_pass(
+        self,
+        validator: _MedallionConfigValidator,
+    ) -> None:
+        assert validator.validate_write_modes() == []
+
+    def test_append_mode_requires_append_safe_contract(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        mock_config.table.silver_write_mode = "append"
+        mock_config.table.silver_idempotency_contract = "merge_upsert"
+        validator = _build_validator(config=mock_config, logger=mock_logger)
+
+        errors = validator.validate_write_modes()
+
+        assert any(
+            error.field == "sink.silver.idempotency_contract"
+            and error.actual == "merge_upsert"
+            for error in errors
+        )
+
+    def test_missing_contract_fails(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        mock_config.table.silver_idempotency_contract = None
+        validator = _build_validator(config=mock_config, logger=mock_logger)
+
+        errors = validator.validate_write_modes()
+
+        assert any(
+            error.field == "sink.silver.idempotency_contract"
+            and error.actual == "missing"
+            for error in errors
+        )
+
+    def test_overwrite_requires_overwrite_rebuild_contract(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        mock_config.table.gold_write_mode = "overwrite"
+        mock_config.table.gold_idempotency_contract = "append_log"
+        validator = _build_validator(config=mock_config, logger=mock_logger)
+
+        errors = validator.validate_write_modes()
+
+        assert any(
+            error.field == "sink.gold.idempotency_contract"
+            and error.expected == "overwrite_rebuild"
+            for error in errors
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -444,6 +507,8 @@ class TestWriteModeValidation:
         config = MagicMock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "merge"
+        config.table.silver_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "merge_upsert"
         validator = _build_validator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
@@ -452,6 +517,8 @@ class TestWriteModeValidation:
         config = MagicMock()
         config.table.silver_write_mode = "append"
         config.table.gold_write_mode = "merge"
+        config.table.silver_idempotency_contract = "append_log"
+        config.table.gold_idempotency_contract = "merge_upsert"
         validator = _build_validator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
@@ -460,6 +527,8 @@ class TestWriteModeValidation:
         config = MagicMock()
         config.table.silver_write_mode = "overwrite"
         config.table.gold_write_mode = "merge"
+        config.table.silver_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "merge_upsert"
         validator = _build_validator(config=config, logger=mock_logger)
         errors = validator.validate_write_modes()
         assert len(errors) == 1
@@ -470,6 +539,8 @@ class TestWriteModeValidation:
         config = MagicMock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "merge"
+        config.table.silver_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "merge_upsert"
         validator = _build_validator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
@@ -478,6 +549,8 @@ class TestWriteModeValidation:
         config = MagicMock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "scd2"
+        config.table.silver_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "scd2"
         validator = _build_validator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
@@ -486,6 +559,8 @@ class TestWriteModeValidation:
         config = MagicMock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "overwrite"
+        config.table.silver_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "overwrite_rebuild"
         validator = _build_validator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
@@ -494,6 +569,8 @@ class TestWriteModeValidation:
         config = MagicMock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "invalid_mode"
+        config.table.silver_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "merge_upsert"
         validator = _build_validator(config=config, logger=mock_logger)
         errors = validator.validate_write_modes()
         assert len(errors) == 1
@@ -506,6 +583,8 @@ class TestWriteModeValidation:
         config = MagicMock()
         config.table.silver_write_mode = "invalid_silver"
         config.table.gold_write_mode = "invalid_gold"
+        config.table.silver_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "merge_upsert"
         validator = _build_validator(config=config, logger=mock_logger)
         errors = validator.validate_write_modes()
         assert len(errors) == 2
@@ -566,6 +645,8 @@ class TestMedallionValidatorLogging:
         config = MagicMock()
         config.table.silver_write_mode = "overwrite"
         config.table.gold_write_mode = "merge"
+        config.table.silver_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "merge_upsert"
         validator = _build_validator(config=config, logger=mock_logger)
 
         validator.validate_write_modes()
@@ -577,6 +658,8 @@ class TestMedallionValidatorLogging:
         config = MagicMock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "merge"
+        config.table.silver_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "merge_upsert"
         validator = _build_validator(config=config, logger=mock_logger)
 
         validator.validate_write_modes()

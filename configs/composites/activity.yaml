@@ -153,9 +153,9 @@ composite:
       # === Original (non-standardized) values ===
       - name: original_values
         fields:
-          - type
-          - relation
-          - value
+          - activity_type
+          - activity_relation
+          - activity_value
           - units
           - text_value
           - standard_text_value

@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-03'
+  Last verified: '2026-05-16'
 
 ______________________________________________________________________
 
 # Variables Guide (Grafana Dashboards)
 
-Дата сверки: **2026-05-03**  
+Дата сверки: **2026-05-16**
 Источник истины: `grafana/dashboards/*.json`
 
 ## Нормативный источник
@@ -47,19 +47,20 @@ ______________________________________________________________________
 - Variable contract checks: `tests/integration/test_grafana_config.py` + `tests/integration/_grafana_test_support.py`
 - Selector taxonomy / registry checks: `tests/integration/test_grafana_selector_contract.py`
 - Variable reference mirror checks: `tests/integration/test_grafana_variable_reference.py`
-- Exact-id isolation checks: `run_id`/`payload_hash` запрещены в Prometheus
-  label filtering and cross-dashboard links; `bioetl-overview-v2` exposes
-  control-plane-backed `run_id=-` for its local `ID` panel.
+- Exact-id isolation checks: primary `run_id`, Silver `quarantine_run_id`, and
+  `payload_hash` запрещены в Prometheus label filtering and generic
+  cross-dashboard links; `bioetl-overview-v2` exposes control-plane-backed
+  `run_id=-` for its local `ID` panel.
 
 ## UID → Variables (inventory parity reference)
 
 | Dashboard UID | Variables |
 |---|---|
-| `bioetl-control-plane-v1` | `$pipeline`, `$run_type` |
-| `bioetl-dq-v2` | `$pipeline`, `$run_type`, `$stage` |
+| `bioetl-control-plane-v1` | `$pipeline`, `$run_id`, `$run_type`, `$workflow` |
+| `bioetl-dq-v2` | `$pipeline`, `$run_id`, `$run_type`, `$stage`, `$workflow` |
 | `bioetl-overview-v2` | `$pipeline`, `$run_id`, `$run_type`, `$workflow` |
 | `bioetl-overview-v3` | `$pipeline`, `$run_id`, `$run_type`, `$workflow` |
-| `bioetl-provider-health-v2` | `$adapter`, `$pipeline_context`, `$provider` |
-| `bioetl-runtime` | `$pipeline`, `$run_type`, `$stage` |
-| `bioetl-silver-reject-explorer` | `$field`, `$payload_hash`, `$pipeline`, `$reason_code`, `$run_id`, `$run_type` |
-| `bioetl-workflow-overview` | `$pipeline_context`, `$provider_context`, `$run_type_context`, `$status`, `$step_kind`, `$step_status`, `$workflow` |
+| `bioetl-provider-health-v2` | `$adapter`, `$pipeline`, `$pipeline_context`, `$provider`, `$run_id`, `$run_type`, `$workflow` |
+| `bioetl-runtime` | `$pipeline`, `$run_id`, `$run_type`, `$stage`, `$workflow` |
+| `bioetl-silver-reject-explorer` | `$field`, `$payload_hash`, `$pipeline`, `$quarantine_run_id`, `$reason_code`, `$run_type` |
+| `bioetl-workflow-overview` | `$pipeline`, `$pipeline_context`, `$provider_context`, `$run_id`, `$run_type`, `$run_type_context`, `$status`, `$step_kind`, `$step_status`, `$workflow` |

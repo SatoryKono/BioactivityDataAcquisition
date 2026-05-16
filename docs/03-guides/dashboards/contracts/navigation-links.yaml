@@ -105,32 +105,32 @@ top_level_link_priority_by_uid:
       semantics: runtime_cross_scope_all_defaults
 
 required_link_vars_by_target_uid:
-  bioetl-overview-v2: [pipeline, run_type]
+  bioetl-overview-v2: [workflow, pipeline, run_type]
   bioetl-overview-v3: [workflow, pipeline, run_type]
-  bioetl-control-plane-v1: [pipeline, run_type]
-  bioetl-runtime: [pipeline, run_type]
-  bioetl-dq-v2: [pipeline, run_type]
-  bioetl-provider-health-v2: [provider, pipeline_context]
+  bioetl-control-plane-v1: [workflow, pipeline, run_type]
+  bioetl-runtime: [workflow, pipeline, run_type]
+  bioetl-dq-v2: [workflow, pipeline, run_type]
+  bioetl-provider-health-v2: [workflow, pipeline, run_type, provider, pipeline_context]
   bioetl-silver-reject-explorer: [pipeline, run_type]
-  bioetl-workflow-overview: []
+  bioetl-workflow-overview: [workflow, pipeline, run_type]
 allowed_dashboard_link_vars:
-  bioetl-overview-v2: [pipeline, run_type]
-  bioetl-overview-v3: [pipeline, run_type]
-  bioetl-dq-v2: [pipeline, run_type, stage]
-  bioetl-runtime: [pipeline, run_type, stage]
-  bioetl-provider-health-v2: [provider, pipeline_context, adapter]
-  bioetl-control-plane-v1: [pipeline, run_type]
-  bioetl-workflow-overview: [workflow, status, step_status, step_kind, pipeline_context, run_type_context, provider_context]
-  bioetl-silver-reject-explorer: [pipeline, run_type, reason_code, field, run_id, payload_hash]
+  bioetl-overview-v2: [workflow, pipeline, run_type]
+  bioetl-overview-v3: [workflow, pipeline, run_type]
+  bioetl-dq-v2: [workflow, pipeline, run_type, stage]
+  bioetl-runtime: [workflow, pipeline, run_type, stage]
+  bioetl-provider-health-v2: [workflow, pipeline, run_type, provider, pipeline_context, adapter]
+  bioetl-control-plane-v1: [workflow, pipeline, run_type]
+  bioetl-workflow-overview: [workflow, pipeline, run_type, status, step_status, step_kind, pipeline_context, run_type_context, provider_context]
+  bioetl-silver-reject-explorer: [pipeline, run_type, reason_code, field, quarantine_run_id, payload_hash]
 forbidden_dashboard_link_vars_by_target_uid:
-  bioetl-overview-v2: [run_id, payload_hash]
-  bioetl-overview-v3: [run_id, payload_hash]
-  bioetl-control-plane-v1: [run_id, payload_hash]
-  bioetl-runtime: [run_id, payload_hash]
-  bioetl-dq-v2: [run_id, payload_hash]
-  bioetl-provider-health-v2: [run_id, payload_hash]
-  bioetl-workflow-overview: [run_id, payload_hash]
-  bioetl-silver-reject-explorer: []
+  bioetl-overview-v2: [run_id, quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
+  bioetl-overview-v3: [run_id, quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
+  bioetl-control-plane-v1: [run_id, quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
+  bioetl-runtime: [run_id, quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
+  bioetl-dq-v2: [run_id, quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
+  bioetl-provider-health-v2: [run_id, quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
+  bioetl-workflow-overview: [run_id, quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
+  bioetl-silver-reject-explorer: [run_id, manifest_id, execution_fingerprint]
 
 required_discoverable_inbound_paths: {}
 
@@ -150,7 +150,7 @@ required_panel_links_by_uid:
       link_titles: [Open Provider Health]
     - panel_id: 214
       target_uid: bioetl-workflow-overview
-      link_titles: [Open Workflow (Reset Scope)]
+      link_titles: [Open Workflow]
     - panel_id: 215
       target_uid: bioetl-runtime
       link_titles: [Open Runtime]
@@ -165,7 +165,7 @@ required_panel_links_by_uid:
       link_titles: [Open Provider Health]
     - panel_id: 215
       target_uid: bioetl-workflow-overview
-      link_titles: [Open Workflow (Reset Scope)]
+      link_titles: [Open Workflow]
     - panel_id: 9002
       target_uid: bioetl-runtime
       link_titles: [Open Runtime]
@@ -180,7 +180,7 @@ required_panel_links_by_uid:
       link_titles: [Open Provider Health]
     - panel_id: 9002
       target_uid: bioetl-workflow-overview
-      link_titles: [Open Workflow (Reset Scope)]
+      link_titles: [Open Workflow]
     - panel_id: 9003
       target_uid: bioetl-runtime
       link_titles: [Open Runtime]
@@ -214,7 +214,7 @@ required_panel_links_by_uid:
       link_titles: [Open Provider Health]
     - panel_id: 214
       target_uid: bioetl-workflow-overview
-      link_titles: [Open Workflow (Reset Scope)]
+      link_titles: [Open Workflow]
     - panel_id: 215
       target_uid: bioetl-runtime
       link_titles: [Open Runtime]
@@ -229,7 +229,7 @@ required_panel_links_by_uid:
       link_titles: [Open Provider Health]
     - panel_id: 215
       target_uid: bioetl-workflow-overview
-      link_titles: [Open Workflow (Reset Scope)]
+      link_titles: [Open Workflow]
     - panel_id: 9002
       target_uid: bioetl-runtime
       link_titles: [Open Runtime]
@@ -244,7 +244,7 @@ required_panel_links_by_uid:
       link_titles: [Open Provider Health]
     - panel_id: 9002
       target_uid: bioetl-workflow-overview
-      link_titles: [Open Workflow (Reset Scope)]
+      link_titles: [Open Workflow]
     - panel_id: 9003
       target_uid: bioetl-runtime
       link_titles: [Open Runtime]
@@ -338,44 +338,44 @@ navigation_transition_contract:
     bioetl-control-plane-v1->bioetl-runtime: scoped_handoff
     bioetl-control-plane-v1->bioetl-provider-health-v2: context_mapping
     bioetl-control-plane-v1->bioetl-dq-v2: scoped_handoff
-    bioetl-control-plane-v1->bioetl-silver-reject-explorer: scoped_handoff
-    bioetl-control-plane-v1->bioetl-workflow-overview: global_navigation
+    bioetl-control-plane-v1->bioetl-silver-reject-explorer: context_mapping
+    bioetl-control-plane-v1->bioetl-workflow-overview: context_mapping
     bioetl-overview-v2->bioetl-control-plane-v1: scoped_handoff
     bioetl-overview-v2->bioetl-runtime: scoped_handoff
     bioetl-overview-v2->bioetl-provider-health-v2: context_mapping
     bioetl-overview-v2->bioetl-dq-v2: scoped_handoff
-    bioetl-overview-v2->bioetl-silver-reject-explorer: scoped_handoff
-    bioetl-overview-v2->bioetl-workflow-overview: global_navigation
+    bioetl-overview-v2->bioetl-silver-reject-explorer: context_mapping
+    bioetl-overview-v2->bioetl-workflow-overview: context_mapping
     bioetl-runtime->bioetl-control-plane-v1: scoped_handoff
     bioetl-runtime->bioetl-overview-v2: scoped_handoff
     bioetl-runtime->bioetl-provider-health-v2: context_mapping
     bioetl-runtime->bioetl-dq-v2: scoped_handoff
-    bioetl-runtime->bioetl-silver-reject-explorer: scoped_handoff
-    bioetl-runtime->bioetl-workflow-overview: global_navigation
+    bioetl-runtime->bioetl-silver-reject-explorer: context_mapping
+    bioetl-runtime->bioetl-workflow-overview: context_mapping
     bioetl-provider-health-v2->bioetl-control-plane-v1: context_mapping
     bioetl-provider-health-v2->bioetl-overview-v2: context_mapping
     bioetl-provider-health-v2->bioetl-runtime: context_mapping
     bioetl-provider-health-v2->bioetl-dq-v2: context_mapping
     bioetl-provider-health-v2->bioetl-silver-reject-explorer: context_mapping
-    bioetl-provider-health-v2->bioetl-workflow-overview: global_navigation
+    bioetl-provider-health-v2->bioetl-workflow-overview: context_mapping
     bioetl-dq-v2->bioetl-control-plane-v1: scoped_handoff
     bioetl-dq-v2->bioetl-overview-v2: scoped_handoff
     bioetl-dq-v2->bioetl-runtime: scoped_handoff
     bioetl-dq-v2->bioetl-provider-health-v2: context_mapping
-    bioetl-dq-v2->bioetl-workflow-overview: global_navigation
-    bioetl-dq-v2->bioetl-silver-reject-explorer: scoped_handoff
-    bioetl-silver-reject-explorer->bioetl-control-plane-v1: scoped_handoff
-    bioetl-silver-reject-explorer->bioetl-overview-v2: scoped_handoff
-    bioetl-silver-reject-explorer->bioetl-runtime: scoped_handoff
+    bioetl-dq-v2->bioetl-workflow-overview: context_mapping
+    bioetl-dq-v2->bioetl-silver-reject-explorer: context_mapping
+    bioetl-silver-reject-explorer->bioetl-control-plane-v1: context_mapping
+    bioetl-silver-reject-explorer->bioetl-overview-v2: context_mapping
+    bioetl-silver-reject-explorer->bioetl-runtime: context_mapping
     bioetl-silver-reject-explorer->bioetl-provider-health-v2: context_mapping
-    bioetl-silver-reject-explorer->bioetl-dq-v2: scoped_handoff
-    bioetl-silver-reject-explorer->bioetl-workflow-overview: global_navigation
+    bioetl-silver-reject-explorer->bioetl-dq-v2: context_mapping
+    bioetl-silver-reject-explorer->bioetl-workflow-overview: context_mapping
     bioetl-workflow-overview->bioetl-control-plane-v1: scoped_handoff
     bioetl-workflow-overview->bioetl-overview-v2: scoped_handoff
     bioetl-workflow-overview->bioetl-runtime: scoped_handoff
     bioetl-workflow-overview->bioetl-provider-health-v2: context_mapping
     bioetl-workflow-overview->bioetl-dq-v2: scoped_handoff
-    bioetl-workflow-overview->bioetl-silver-reject-explorer: scoped_handoff
+    bioetl-workflow-overview->bioetl-silver-reject-explorer: context_mapping
   incident_critical_reciprocal_paths:
     - [bioetl-runtime, bioetl-control-plane-v1]
     - [bioetl-control-plane-v1, bioetl-dq-v2]
@@ -447,22 +447,17 @@ navigation_transition_contract:
           expected_target_uid: bioetl-silver-reject-explorer
   cross_scope_marker_contract:
     required_markers:
-      reset_scope: "Reset scope"
       context_mapping: "Context mapping"
     required_titles_by_transition:
       bioetl-control-plane-v1->bioetl-provider-health-v2: context_mapping
-      bioetl-control-plane-v1->bioetl-workflow-overview: reset_scope
       bioetl-provider-health-v2->bioetl-overview-v2: context_mapping
       bioetl-provider-health-v2->bioetl-runtime: context_mapping
       bioetl-provider-health-v2->bioetl-control-plane-v1: context_mapping
       bioetl-provider-health-v2->bioetl-dq-v2: context_mapping
-      bioetl-provider-health-v2->bioetl-workflow-overview: reset_scope
+      bioetl-provider-health-v2->bioetl-workflow-overview: context_mapping
       bioetl-overview-v2->bioetl-provider-health-v2: context_mapping
-      bioetl-overview-v2->bioetl-workflow-overview: reset_scope
       bioetl-runtime->bioetl-provider-health-v2: context_mapping
-      bioetl-runtime->bioetl-workflow-overview: reset_scope
       bioetl-dq-v2->bioetl-provider-health-v2: context_mapping
-      bioetl-dq-v2->bioetl-workflow-overview: reset_scope
       bioetl-provider-health-v2->bioetl-silver-reject-explorer: context_mapping
       bioetl-silver-reject-explorer->bioetl-provider-health-v2: context_mapping
       bioetl-workflow-overview->bioetl-provider-health-v2: context_mapping
@@ -483,10 +478,8 @@ navigation_transition_contract:
       bioetl-silver-reject-explorer:
         provider_value: unknown
         adapter_value: unknown
-      bioetl-silver-reject-explorer->bioetl-workflow-overview: reset_scope
       bioetl-workflow-overview->bioetl-provider-health-v2: context_mapping
     required_tooltip_tokens:
-      reset_scope: ["Reset scope"]
       context_mapping: ["Context mapping"]
   kpi_ownership:
     failed_runs_in_range:

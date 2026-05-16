@@ -344,7 +344,7 @@ def test_build_rag_manifests_skips_missing_tracked_source_paths(
     monkeypatch.setattr(
         rag_indexing,
         "iter_rag_sources",
-        lambda root: [
+        lambda root, **_: [
             Path("docs/00-project/overview.md"),
             Path("src/bioetl/interfaces/cli/commands/_inspection_output.py"),
         ],
@@ -359,3 +359,71 @@ def test_build_rag_manifests_skips_missing_tracked_source_paths(
         != "src/bioetl/interfaces/cli/commands/_inspection_output.py"
         for chunk in chunks
     )
+
+
+def test_build_rag_manifests_workflow_scope_limits_to_focus_matches(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "src/bioetl/application/pipelines").mkdir(parents=True)
+    (tmp_path / "src/memory/tooling").mkdir(parents=True)
+    (tmp_path / "tests/unit").mkdir(parents=True)
+    (tmp_path / "docs/00-project").mkdir(parents=True)
+
+    (tmp_path / "src/bioetl/application/pipelines/chembl_activity.py").write_text(
+        "def run_chembl_activity() -> None:\n    return None\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "src/bioetl/application/pipelines/pubchem_compound.py").write_text(
+        "def run_pubchem_compound() -> None:\n    return None\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "src/memory/tooling/workflow.py").write_text(
+        "def workflow_refresh() -> None:\n    return None\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "tests/unit/test_memory_flow.py").write_text(
+        "def test_memory() -> None:\n    assert True\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "docs/00-project/overview.md").write_text(
+        "# Overview\nContext\n",
+        encoding="utf-8",
+    )
+
+    catalog, chunks = build_rag_manifests(
+        tmp_path,
+        build_scope="workflow",
+        focus_query="chembl_activity",
+        max_sources=2,
+    )
+
+    assert catalog["build_scope"] == "workflow"
+    assert catalog["focus_query"] == "chembl_activity"
+    assert catalog["source_count"] == 2
+    assert "src/bioetl/application/pipelines/chembl_activity.py" in {
+        item["source_path"] for item in catalog["sources"]
+    }
+    assert all("tests/unit/test_memory_flow.py" != chunk["source_path"] for chunk in chunks)
+
+
+def test_write_rag_manifests_persists_build_scope_metadata(tmp_path: Path) -> None:
+    (tmp_path / "src/memory/tooling").mkdir(parents=True)
+    (tmp_path / "src/memory/tooling/workflow.py").write_text(
+        "def workflow_refresh() -> None:\n    return None\n",
+        encoding="utf-8",
+    )
+
+    output_dir = tmp_path / "out"
+    catalog_path, _ = write_rag_manifests(
+        tmp_path,
+        output_dir,
+        build_scope="workflow",
+        focus_query="workflow",
+        max_sources=1,
+    )
+
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+
+    assert catalog["build_scope"] == "workflow"
+    assert catalog["focus_query"] == "workflow"
+    assert catalog["source_count"] == 1

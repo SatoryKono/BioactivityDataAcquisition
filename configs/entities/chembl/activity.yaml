@@ -13,6 +13,7 @@ pipeline:
     sink:
         silver:
             mode: merge
+            idempotency_contract: merge_upsert
         gold:
             enabled: true
 schema:
@@ -59,9 +60,9 @@ schema:
                 - qudt_ontology_version
                 - src_id
                 - record_id
-                - type
-                - relation
-                - value
+                - activity_type
+                - activity_relation
+                - activity_value
                 - units
                 - text_value
                 - standard_text_value
@@ -481,8 +482,8 @@ filters:
             - bao_endpoint
             - bao_format
             - bao_label
-            - relation
-            - value
+            - activity_relation
+            - activity_value
             - units
             - standard_value
             - standard_units

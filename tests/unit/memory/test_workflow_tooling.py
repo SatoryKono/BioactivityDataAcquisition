@@ -96,8 +96,18 @@ def test_pre_task_workflow_refreshes_if_manifests_are_missing(
         include_rag: bool = True,
         include_timeline: bool = True,
         include_graph_export: bool = False,
+        rag_build_scope: str = "full",
+        rag_focus_query: str | None = None,
+        rag_max_sources: int | None = None,
+        allow_partial: bool = False,
     ) -> dict[str, object]:
         refresh_calls.append((root, output_root))
+        assert include_rag is True
+        assert include_timeline is True
+        assert rag_build_scope == "workflow"
+        assert rag_focus_query == "Refresh before retrieval"
+        assert rag_max_sources == 160
+        assert allow_partial is True
         rag_dir = output_root / "rag" / "manifests"
         rag_dir.mkdir(parents=True, exist_ok=True)
         (rag_dir / "chunks.jsonl").write_text(
@@ -155,7 +165,7 @@ def test_pre_task_workflow_refreshes_if_manifests_are_missing(
     assert len(payload["retrieval"]["results"]["rag"]) == 1
 
 
-def test_pre_task_workflow_skip_refresh_if_missing_degrades_to_empty_results(
+def test_pre_task_workflow_skip_refresh_if_missing_preserves_catalog_results(
     tmp_path: Path,
 ) -> None:
     session_note_path = tmp_path / "session.md"
@@ -163,7 +173,7 @@ def test_pre_task_workflow_skip_refresh_if_missing_degrades_to_empty_results(
     payload = workflow.pre_task_workflow(
         task_id="task-skip-missing",
         title="Skip missing memory artifacts",
-        query="missing artifacts",
+        query="sources",
         source_refs=["src/memory/README.md"],
         session_note_path=session_note_path,
         chunks_path=tmp_path / "missing-rag" / "chunks.jsonl",
@@ -178,11 +188,9 @@ def test_pre_task_workflow_skip_refresh_if_missing_degrades_to_empty_results(
     assert payload["refresh_report"] is None
     assert payload["retrieval"]["degraded"] is True
     assert payload["retrieval"]["profile"] == "implementation"
-    assert payload["retrieval"]["results"] == {
-        "catalog": [],
-        "rag": [],
-        "timeline": [],
-    }
+    assert payload["retrieval"]["results"]["catalog"]
+    assert payload["retrieval"]["results"]["rag"] == []
+    assert payload["retrieval"]["results"]["timeline"] == []
     assert [
         artifact["kind"] for artifact in payload["retrieval"]["missing_artifacts"]
     ] == ["rag_chunks", "timeline_events"]
@@ -236,8 +244,18 @@ def test_pre_task_workflow_refreshes_if_event_projection_dir_is_empty(
         include_rag: bool = True,
         include_timeline: bool = True,
         include_graph_export: bool = False,
+        rag_build_scope: str = "full",
+        rag_focus_query: str | None = None,
+        rag_max_sources: int | None = None,
+        allow_partial: bool = False,
     ) -> dict[str, object]:
         refresh_calls.append(output_root)
+        assert include_rag is False
+        assert include_timeline is True
+        assert rag_build_scope == "workflow"
+        assert rag_focus_query == "workflow memory"
+        assert rag_max_sources == 160
+        assert allow_partial is True
         rag_dir = output_root / "rag" / "manifests"
         rag_dir.mkdir(parents=True, exist_ok=True)
         (rag_dir / "chunks.jsonl").write_text(chunks_path.read_text(encoding="utf-8"))
@@ -296,8 +314,18 @@ def test_post_task_workflow_writes_summary_and_promotes_note(
         include_rag: bool = True,
         include_timeline: bool = True,
         include_graph_export: bool = False,
+        rag_build_scope: str = "full",
+        rag_focus_query: str | None = None,
+        rag_max_sources: int | None = None,
+        allow_partial: bool = False,
     ) -> dict[str, object]:
         refresh_calls.append((root, output_root))
+        assert include_rag is True
+        assert include_timeline is True
+        assert rag_build_scope == "workflow"
+        assert rag_focus_query == "Wire memory into daily engineering"
+        assert rag_max_sources == 160
+        assert allow_partial is True
         return {"ok": True, "artifacts": [{"kind": "rag"}]}
 
     def _fake_prune(*, apply: bool = False) -> dict[str, object]:
@@ -336,6 +364,7 @@ def test_post_task_workflow_writes_summary_and_promotes_note(
     )
 
     assert payload["ok"] is True
+    assert payload["degraded"] is False
     assert summary_note_path.exists()
     assert refresh_calls
     assert prune_calls == [False]

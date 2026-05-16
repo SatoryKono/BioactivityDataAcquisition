@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from bioetl.application.services.control_plane._run_manifest_replay_taxonomy import (
+    resolve_replay_taxonomy_projection,
+)
 from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
@@ -124,76 +127,19 @@ class RunManifestIdentityGraphAssembler:
         manifest: RunManifest,
         diagnostics: dict[str, object],
     ) -> dict[str, object]:
-        replay_section = {
-            "replay_capability": diagnostics.get(
-                "replay_capability",
-                manifest.replay_capability.value,
-            ),
-            "requested_exact_replay": diagnostics.get(
-                "requested_exact_replay",
-                bool(manifest.launch_context.get("exact_replay")),
-            ),
-            "exact_replay_support_boundary": diagnostics.get(
-                "exact_replay_support_boundary",
-                "snapshot_backed_source_runs_only",
-            ),
-            "replay_family_contract": diagnostics.get("replay_family_contract"),
-            "replay_support_state": diagnostics.get("replay_support_state"),
-            "post_capture_replayable_parent_supported": diagnostics.get(
-                "post_capture_replayable_parent_supported"
-            ),
-            "post_capture_replayable_parent_boundary": diagnostics.get(
-                "post_capture_replayable_parent_boundary"
-            ),
-            "historical_live_run_upgrade_policy": diagnostics.get(
-                "historical_live_run_upgrade_policy"
-            ),
-            "historical_live_run_upgrade_boundary": diagnostics.get(
-                "historical_live_run_upgrade_boundary"
-            ),
-            "historical_live_run_upgrade_reason": diagnostics.get(
-                "historical_live_run_upgrade_reason"
-            ),
-            "broader_historical_exact_replay_policy": diagnostics.get(
-                "broader_historical_exact_replay_policy"
-            ),
-            "broader_historical_exact_replay_boundary": diagnostics.get(
-                "broader_historical_exact_replay_boundary"
-            ),
-            "broader_historical_exact_replay_reason": diagnostics.get(
-                "broader_historical_exact_replay_reason"
-            ),
-            "broader_historical_exact_replay_state": diagnostics.get(
-                "broader_historical_exact_replay_state"
-            ),
-            "historical_live_run_upgrade_state": diagnostics.get(
-                "historical_live_run_upgrade_state"
-            ),
-            "replay_occurrence_kind": diagnostics.get("replay_occurrence_kind"),
-            "source_posture": diagnostics.get("source_posture"),
-            "input_snapshot_missing_source_refs": diagnostics.get(
-                "input_snapshot_missing_source_refs",
-                [],
-            ),
-            "replay_capability_reason": diagnostics.get("replay_capability_reason"),
-            "continuation_mode": diagnostics.get("continuation_mode"),
-            "exact_replay_eligible": diagnostics.get(
-                "exact_replay_eligible",
-                manifest.replay_capability.value == "exact_replay_supported",
-            ),
-            "exact_replay_blockers": diagnostics.get("exact_replay_blockers", []),
-            "replay_readiness_verdict": diagnostics.get("replay_readiness_verdict"),
-            "append_mode_semantic_sinks": diagnostics.get(
-                "append_mode_semantic_sinks",
-                [],
-            ),
-            "resume_contract": diagnostics.get("resume_contract"),
-            "resume_diagnostics": diagnostics.get("resume_diagnostics"),
-        }
-        lineage_closure_boundary = diagnostics.get("lineage_closure_boundary")
-        if lineage_closure_boundary is not None:
-            replay_section["lineage_closure_boundary"] = lineage_closure_boundary
-        return replay_section
+        return resolve_replay_taxonomy_projection(
+            diagnostics,
+            defaults={
+                "replay_capability": manifest.replay_capability.value,
+                "requested_exact_replay": bool(
+                    manifest.launch_context.get("exact_replay")
+                ),
+                "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+                "exact_replay_eligible": (
+                    manifest.replay_capability.value == "exact_replay_supported"
+                ),
+            },
+        )
 
     @staticmethod
     def _build_identity_graph_snapshot_section(
@@ -208,10 +154,7 @@ class RunManifestIdentityGraphAssembler:
             "input_snapshot_identity_fingerprint": diagnostics.get(
                 "input_snapshot_identity_fingerprint"
             ),
-            "replay_mode": diagnostics.get("replay_mode", "rebuild"),
-            "operator_replay_mode": diagnostics.get("operator_replay_mode"),
             "snapshot_status": diagnostics.get("snapshot_status"),
-            "continuation_mode": diagnostics.get("continuation_mode"),
             "input_snapshot_count": diagnostics.get("input_snapshot_count", 0),
             "input_snapshots": diagnostics.get("input_snapshots", []),
         }

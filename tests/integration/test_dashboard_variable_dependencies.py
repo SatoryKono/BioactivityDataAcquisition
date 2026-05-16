@@ -84,8 +84,8 @@ def test_silver_reject_explorer_variable_dependencies():
     )
 
     # Check forensic variables
-    assert "run_id" in variables, (
-        "bioetl-silver-reject-explorer must have $run_id variable"
+    assert "quarantine_run_id" in variables, (
+        "bioetl-silver-reject-explorer must have $quarantine_run_id variable"
     )
     assert "payload_hash" in variables, (
         "bioetl-silver-reject-explorer must have $payload_hash variable"

@@ -15,8 +15,10 @@ from memory.query import (
     DEFAULT_RAG_CHUNKS,
     DEFAULT_TIMELINE_DIR,
     TASK_PROFILES,
+    query_catalog,
     query_all,
 )
+from memory.rag.filters import WORKFLOW_RAG_MAX_SOURCES
 from memory.resources import discover_memory_root, discover_repo_root
 from memory.tooling.promote_note import promote_note
 from memory.tooling.prune import prune_episodic_notes
@@ -95,6 +97,9 @@ def _refresh_pre_task_surfaces(
     *,
     output_root: Path | None,
     refresh_repo_root: Path | None,
+    retrieval_query: str,
+    include_rag: bool,
+    include_timeline: bool,
 ) -> tuple[Path, Path, Path, dict[str, Any]]:
     resolved_output_root = output_root or Path(
         tempfile.mkdtemp(prefix="memory-pre-task-")
@@ -105,9 +110,13 @@ def _refresh_pre_task_surfaces(
     refresh_report = refresh_all(
         repo_root.resolve(),
         resolved_output_root.resolve(),
-        include_rag=True,
-        include_timeline=True,
+        include_rag=include_rag,
+        include_timeline=include_timeline,
         include_graph_export=False,
+        rag_build_scope="workflow",
+        rag_focus_query=retrieval_query,
+        rag_max_sources=WORKFLOW_RAG_MAX_SOURCES,
+        allow_partial=True,
     )
     return (
         resolved_output_root,
@@ -124,24 +133,32 @@ def _resolve_pre_task_surfaces(
     refresh_output_root: Path | None,
     refresh_repo_root: Path | None,
     run_refresh_if_missing: bool,
+    retrieval_query: str,
 ) -> tuple[Path, Path, Path | None, dict[str, Any] | None]:
     output_root = refresh_output_root
     resolved_chunks_path, resolved_events_dir = _pre_task_surfaces(
         chunks_path=chunks_path, events_dir=events_dir, output_root=output_root
     )
+    chunks_ready = rag_chunks_ready(resolved_chunks_path)
+    events_ready = timeline_events_ready(resolved_events_dir)
     if not run_refresh_if_missing:
         return resolved_chunks_path, resolved_events_dir, output_root, None
-    if rag_chunks_ready(resolved_chunks_path) and timeline_events_ready(
-        resolved_events_dir
-    ):
+    if chunks_ready and events_ready:
         return resolved_chunks_path, resolved_events_dir, output_root, None
 
-    output_root, resolved_chunks_path, resolved_events_dir, refresh_report = (
+    output_root, refreshed_chunks_path, refreshed_events_dir, refresh_report = (
         _refresh_pre_task_surfaces(
             output_root=output_root,
             refresh_repo_root=refresh_repo_root,
+            retrieval_query=retrieval_query,
+            include_rag=not chunks_ready,
+            include_timeline=not events_ready,
         )
     )
+    if not chunks_ready and rag_chunks_ready(refreshed_chunks_path):
+        resolved_chunks_path = refreshed_chunks_path
+    if not events_ready and timeline_events_ready(refreshed_events_dir):
+        resolved_events_dir = refreshed_events_dir
     return resolved_chunks_path, resolved_events_dir, output_root, refresh_report
 
 
@@ -176,6 +193,15 @@ def _empty_pre_task_retrieval(
     events_dir: Path,
     missing_artifacts: list[dict[str, str]],
 ) -> dict[str, Any]:
+    catalog_hits: list[dict[str, Any]] = []
+    lowered_query = query.lower()
+    for view in ("sources", "owners", "zones", "placement"):
+        payload = query_catalog(view)
+        haystack = json.dumps(
+            payload["payload"], sort_keys=True, ensure_ascii=True
+        ).lower()
+        if lowered_query in haystack:
+            catalog_hits.append(payload)
     return {
         "kind": "all",
         "query": query,
@@ -185,7 +211,7 @@ def _empty_pre_task_retrieval(
         "refresh_output_root": None,
         "refresh_report": None,
         "results": {
-            "catalog": [],
+            "catalog": catalog_hits,
             "rag": [],
             "timeline": [],
         },
@@ -220,13 +246,14 @@ def pre_task_workflow(
             refresh_output_root=refresh_output_root,
             refresh_repo_root=refresh_repo_root,
             run_refresh_if_missing=run_refresh_if_missing,
+            retrieval_query=retrieval_query,
         )
     )
 
     missing_artifacts = _pre_task_missing_artifacts(
         resolved_chunks_path, resolved_events_dir
     )
-    if missing_artifacts and not run_refresh_if_missing:
+    if missing_artifacts:
         retrieval = _empty_pre_task_retrieval(
             query=retrieval_query,
             profile=profile,
@@ -335,6 +362,10 @@ def post_task_workflow(
             include_rag=True,
             include_timeline=True,
             include_graph_export=False,
+            rag_build_scope="workflow",
+            rag_focus_query=title,
+            rag_max_sources=WORKFLOW_RAG_MAX_SOURCES,
+            allow_partial=True,
         )
 
     prune_report = prune_episodic_notes(apply=False) if run_prune else None
@@ -357,7 +388,8 @@ def post_task_workflow(
         "refresh_report": refresh_report,
         "prune_report": prune_report,
         "promoted_note": str(curated_path) if curated_path else None,
-        "ok": True if refresh_report is None else bool(refresh_report.get("ok", False)),
+        "degraded": bool(refresh_report and not refresh_report.get("ok", True)),
+        "ok": True,
     }
 
 
@@ -461,6 +493,8 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
             print(f"- refresh output root: {payload['refresh_output_root']}")
         if payload.get("promoted_note"):
             print(f"- promoted note: {payload['promoted_note']}")
+        if payload.get("degraded"):
+            print("- degraded: refresh completed with partial artifact failures")
     return _payload_exit_code(payload)
 
 

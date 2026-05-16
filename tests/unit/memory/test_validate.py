@@ -216,6 +216,20 @@ def test_memory_scaffold_validation_can_flag_working_tree_python_cache(
     )
 
 
+def test_memory_scaffold_validation_tolerates_root_init_bootstrap_cache(
+    tmp_path: Path,
+) -> None:
+    memory_root = tmp_path / "memory"
+    shutil.copytree(MEMORY_ROOT, memory_root)
+    cache_file = memory_root / "__pycache__" / "__init__.cpython-313.pyc"
+    cache_file.parent.mkdir(parents=True, exist_ok=True)
+    cache_file.write_bytes(b"cache")
+
+    issues = validate_memory_scaffold(memory_root, include_working_tree_junk=True)
+
+    assert not any(issue.path == str(cache_file) for issue in issues)
+
+
 def test_validate_note_placement_does_not_resolve_paths(monkeypatch) -> None:
     memory_root = Path("/tmp/memory-root")
     note_path = memory_root / "curated" / "lessons" / "lesson.md"

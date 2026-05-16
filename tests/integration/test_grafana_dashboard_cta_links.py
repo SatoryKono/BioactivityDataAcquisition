@@ -388,27 +388,36 @@ def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected = {
         "Review current status": (
+            "var-workflow=$workflow",
             "var-pipeline=$pipeline",
             "var-run_type=$run_type",
             "var-stage=$stage",
         ),
         "Review range evidence": (
+            "var-workflow=$workflow",
             "var-pipeline=$pipeline",
             "var-run_type=$run_type",
             "var-stage=$stage",
         ),
         "Inspect top blockers": (
+            "var-workflow=$workflow",
             "var-pipeline=$pipeline",
             "var-run_type=$run_type",
             "var-stage=$stage",
         ),
         "Inspect active blocker": (
+            "var-workflow=$workflow",
             "var-pipeline=$pipeline",
             "var-run_type=$run_type",
             "var-stage=$stage",
         ),
     }
-    forbidden = ("var-workflow=", "var-status=", "var-run_id=", "var-payload_hash=")
+    forbidden = (
+        "var-status=",
+        "var-run_id=",
+        "var-quarantine_run_id=",
+        "var-payload_hash=",
+    )
 
     panel = _find_panel_by_id(dashboard, 9991)
     assert panel is not None, "Runtime First Action panel id=9991 must exist"

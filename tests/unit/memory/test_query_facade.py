@@ -448,8 +448,18 @@ def test_query_timeline_auto_refreshes_empty_event_projection_dir(
         include_rag: bool = True,
         include_timeline: bool = True,
         include_graph_export: bool = False,
+        rag_build_scope: str = "full",
+        rag_focus_query: str | None = None,
+        rag_max_sources: int | None = None,
+        allow_partial: bool = False,
     ) -> dict[str, object]:
         refresh_calls.append(output_root)
+        assert include_rag is False
+        assert include_timeline is True
+        assert rag_build_scope == "workflow"
+        assert rag_focus_query == "memory"
+        assert rag_max_sources == 160
+        assert allow_partial is True
         refreshed_events = output_root / "timeline" / "events"
         refreshed_events.mkdir(parents=True, exist_ok=True)
         (refreshed_events / "runs.jsonl").write_text(
@@ -486,6 +496,82 @@ def test_query_timeline_auto_refreshes_empty_event_projection_dir(
     assert refresh_calls == [tmp_path / "refresh"]
     assert payload["refresh_output_root"] == str(tmp_path / "refresh")
     assert len(payload["results"]) == 1
+
+
+def test_query_all_auto_refresh_degrades_when_rag_partial_refresh_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    events_dir = tmp_path / "events"
+    events_dir.mkdir()
+
+    def _fake_refresh_all(
+        root: Path,
+        output_root: Path,
+        *,
+        include_rag: bool = True,
+        include_timeline: bool = True,
+        include_graph_export: bool = False,
+        rag_build_scope: str = "full",
+        rag_focus_query: str | None = None,
+        rag_max_sources: int | None = None,
+        allow_partial: bool = False,
+    ) -> dict[str, object]:
+        assert include_rag is True
+        assert include_timeline is True
+        assert rag_build_scope == "workflow"
+        assert rag_focus_query == "memory"
+        assert rag_max_sources == 160
+        assert allow_partial is True
+        refreshed_events = output_root / "timeline" / "events"
+        refreshed_events.mkdir(parents=True, exist_ok=True)
+        (refreshed_events / "runs.jsonl").write_text(
+            json.dumps(
+                {
+                    "id": "run-1",
+                    "event_type": "run.completed",
+                    "event_family": "run",
+                    "severity": "info",
+                    "occurred_at": "2026-04-20T00:00:00Z",
+                    "source_refs": ["data/output/control/run_manifest/m1.json"],
+                    "payload": {"pipeline_name": "memory"},
+                },
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        return {
+            "ok": False,
+            "artifacts": [
+                {
+                    "kind": "rag",
+                    "paths": [],
+                    "error": "TimeoutError: synthetic rag timeout",
+                },
+                {
+                    "kind": "timeline",
+                    "paths": [str(refreshed_events / "runs.jsonl")],
+                },
+            ],
+        }
+
+    monkeypatch.setattr(query_module, "refresh_all", _fake_refresh_all)
+
+    payload = query_all(
+        query="memory",
+        chunks_path=tmp_path / "missing" / "chunks.jsonl",
+        events_dir=events_dir,
+        limit=5,
+        auto_refresh=True,
+        refresh_output_root=tmp_path / "refresh",
+        refresh_repo_root=tmp_path,
+    )
+
+    assert payload["degraded"] is True
+    assert payload["refresh_report"]["ok"] is False
+    assert payload["results"]["timeline"]
+    assert payload["results"]["rag"] == []
+    assert [item["kind"] for item in payload["missing_artifacts"]] == ["rag_chunks"]
 
 
 def test_query_timeline_reports_empty_event_projection_dir_without_auto_refresh(

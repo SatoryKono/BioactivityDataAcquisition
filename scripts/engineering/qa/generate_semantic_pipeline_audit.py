@@ -31,6 +31,8 @@ DEFAULT_REVIEW_REGISTRY = (
 )
 BASE_CONFIG_DIR = REPO_ROOT / "configs" / "base"
 DEFAULT_SOURCE_DATE = "2026-05-15"
+PAIR_MATRIX_PREFIX = "semantic_pair_matrix_"
+CLUSTER_REGISTRY_PREFIX = "semantic_cluster_registry_"
 PAIR_COLUMNS = (
     "Cluster ID",
     "Pipeline A",
@@ -235,6 +237,36 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 def _repo_rel(path: Path) -> str:
     return path.relative_to(REPO_ROOT).as_posix()
+
+
+def _seed_artifact_filename(prefix: str, source_date: str, suffix: str) -> str:
+    return f"{prefix}{source_date}{suffix}"
+
+
+def _latest_seed_artifact(out_dir: Path, prefix: str, suffix: str) -> Path | None:
+    candidates = sorted(out_dir.glob(f"{prefix}*{suffix}"))
+    return candidates[-1] if candidates else None
+
+
+def _resolve_seed_artifact(
+    explicit: Path | None,
+    *,
+    out_dir: Path,
+    prefix: str,
+    source_date: str,
+    suffix: str,
+) -> Path:
+    if explicit is not None:
+        return explicit
+    dated_candidate = out_dir / _seed_artifact_filename(prefix, source_date, suffix)
+    if dated_candidate.exists():
+        return dated_candidate
+    fallback = _latest_seed_artifact(out_dir, prefix, suffix)
+    if fallback is not None:
+        return fallback
+    raise FileNotFoundError(
+        f"Unable to resolve seed artifact for {prefix}*{suffix} in {out_dir}"
+    )
 
 
 def _normalize_newlines(payload: str) -> str:
@@ -1427,13 +1459,19 @@ def _build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
     out_dir = args.out_dir if args.out_dir.is_absolute() else REPO_ROOT / args.out_dir
-    seed_pair_matrix = (
-        args.seed_pair_matrix
-        or out_dir / f"semantic_pair_matrix_{args.source_date}.csv"
+    seed_pair_matrix = _resolve_seed_artifact(
+        args.seed_pair_matrix,
+        out_dir=out_dir,
+        prefix=PAIR_MATRIX_PREFIX,
+        source_date=args.source_date,
+        suffix=".csv",
     )
-    seed_cluster_registry = (
-        args.seed_cluster_registry
-        or out_dir / f"semantic_cluster_registry_{args.source_date}.json"
+    seed_cluster_registry = _resolve_seed_artifact(
+        args.seed_cluster_registry,
+        out_dir=out_dir,
+        prefix=CLUSTER_REGISTRY_PREFIX,
+        source_date=args.source_date,
+        suffix=".json",
     )
     review_registry = (
         args.review_registry

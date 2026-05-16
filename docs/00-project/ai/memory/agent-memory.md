@@ -39,9 +39,14 @@ ______________________________________________________________________
 > `python -m memory.tooling.workflow post-task ...`
 > после задачи. Session/summary notes должны жить в `src/memory/episodic/`,
 > а durable lessons — промоутиться в `src/memory/curated/`.
+> Workflow-time refresh теперь обязан быть surface-aware: timeline recovery не
+> должна ждать full RAG rebuild, а временный RAG refresh должен оставаться
+> bounded и query-focused.
 > На регулярной cadence и перед release/governance review запускай
 > `python -m memory.tooling.workflow review-curated`
 > и архивируй superseded curated notes вместо тихого накопления stale memory.
+> Episodic density по умолчанию проверяется через policy-backed prune dry-run:
+> `max_active=1000`, review cadence `7` days.
 
 ______________________________________________________________________
 

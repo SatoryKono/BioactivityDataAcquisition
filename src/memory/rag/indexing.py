@@ -16,11 +16,18 @@ from memory.rag.chunking import (
     infer_source_type,
 )
 from memory.rag.devin_wiki import build_devin_wiki_records
-from memory.rag.filters import iter_rag_sources
+from memory.rag.filters import (
+    DEFAULT_SELECTED_SOURCE_IDS,
+    WORKFLOW_RAG_MAX_SOURCES,
+    WORKFLOW_RAG_SOURCE_IDS,
+    iter_rag_sources,
+)
 from memory.resources import CATALOG_DIR, MEMORY_ROOT, load_yaml_resource
 
 DEFAULT_OUTPUT_DIR = MEMORY_ROOT / "rag" / "manifests"
 GENERATOR_VERSION = 1
+DEFAULT_BUILD_SCOPE = "full"
+WORKFLOW_BUILD_SCOPE = "workflow"
 
 
 def _load_owner_specs() -> list[tuple[str, tuple[str, ...]]]:
@@ -79,9 +86,47 @@ def _lookup_repo_zone(
     return "unclassified"
 
 
-def build_rag_manifests(root: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+def _resolve_rag_sources(
+    root: Path,
+    *,
+    build_scope: str,
+    focus_query: str | None,
+    max_sources: int | None,
+) -> list[Path]:
+    if build_scope == WORKFLOW_BUILD_SCOPE:
+        source_limit = (
+            WORKFLOW_RAG_MAX_SOURCES if max_sources is None else max_sources
+        )
+        return iter_rag_sources(
+            root,
+            selected_ids=WORKFLOW_RAG_SOURCE_IDS,
+            workflow_focus_query=focus_query,
+            max_sources=source_limit,
+        )
+    if build_scope != DEFAULT_BUILD_SCOPE:
+        raise ValueError(f"unsupported RAG build scope: {build_scope}")
+    return iter_rag_sources(
+        root,
+        selected_ids=DEFAULT_SELECTED_SOURCE_IDS,
+        workflow_focus_query=None,
+        max_sources=max_sources,
+    )
+
+
+def build_rag_manifests(
+    root: Path,
+    *,
+    build_scope: str = DEFAULT_BUILD_SCOPE,
+    focus_query: str | None = None,
+    max_sources: int | None = None,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """Build deterministic corpus catalog and chunk records for project sources."""
-    sources = iter_rag_sources(root)
+    sources = _resolve_rag_sources(
+        root,
+        build_scope=build_scope,
+        focus_query=focus_query,
+        max_sources=max_sources,
+    )
     owner_specs = _load_owner_specs()
     zone_specs = _load_repo_zone_specs()
     corpus_sources: list[dict[str, Any]] = []
@@ -163,6 +208,8 @@ def build_rag_manifests(root: Path) -> tuple[dict[str, Any], list[dict[str, Any]
 
     catalog = {
         "generator_version": GENERATOR_VERSION,
+        "build_scope": build_scope,
+        "focus_query": focus_query,
         "source_count": len(corpus_sources),
         "chunk_count": len(chunk_records),
         "sources": corpus_sources,
@@ -170,10 +217,22 @@ def build_rag_manifests(root: Path) -> tuple[dict[str, Any], list[dict[str, Any]
     return catalog, chunk_records
 
 
-def write_rag_manifests(root: Path, output_dir: Path) -> tuple[Path, Path]:
+def write_rag_manifests(
+    root: Path,
+    output_dir: Path,
+    *,
+    build_scope: str = DEFAULT_BUILD_SCOPE,
+    focus_query: str | None = None,
+    max_sources: int | None = None,
+) -> tuple[Path, Path]:
     """Write deterministic corpus catalog and chunk manifests."""
     output_dir.mkdir(parents=True, exist_ok=True)
-    catalog, chunks = build_rag_manifests(root)
+    catalog, chunks = build_rag_manifests(
+        root,
+        build_scope=build_scope,
+        focus_query=focus_query,
+        max_sources=max_sources,
+    )
     catalog_path = output_dir / "corpus_catalog.json"
     chunks_path = output_dir / "chunks.jsonl"
     catalog_path.write_text(
@@ -207,6 +266,24 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print a short build summary after generation.",
     )
+    parser.add_argument(
+        "--build-scope",
+        choices=(DEFAULT_BUILD_SCOPE, WORKFLOW_BUILD_SCOPE),
+        default=DEFAULT_BUILD_SCOPE,
+        help="Choose the deterministic source scope for the generated manifests.",
+    )
+    parser.add_argument(
+        "--focus-query",
+        type=str,
+        default=None,
+        help="Optional query text used to prioritize workflow-scope sources.",
+    )
+    parser.add_argument(
+        "--max-sources",
+        type=int,
+        default=None,
+        help="Optional deterministic cap on indexed source files.",
+    )
     return parser
 
 
@@ -214,7 +291,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
     catalog_path, chunks_path = write_rag_manifests(
-        args.root.resolve(), args.output_dir
+        args.root.resolve(),
+        args.output_dir,
+        build_scope=args.build_scope,
+        focus_query=args.focus_query,
+        max_sources=args.max_sources,
     )
     if args.print_summary:
         catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
