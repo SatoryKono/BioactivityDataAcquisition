@@ -171,6 +171,7 @@ pipelines:
           - assay_id
           - assay_param_id
           - parameter_type
+          - type
   chembl_cell_line:
     downstream_role: composite_enricher
     downstream_pipelines: [composite_assay]

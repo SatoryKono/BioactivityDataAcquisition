@@ -224,6 +224,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the canonical shell Docker setup implementation. User-facing docs now reference scripts/ops/docker-setup.sh directly; keep the root wrapper only for external compatibility until the reviewed removal window closes."
     },
+    "scripts/engineering/qa/import_graph_inventory.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the shared first-party import-graph helper consumed by QA inventory reports; fold it into a broader canonical graph helper surface only if the inventory/reporting pipeline is consolidated."
+    },
     "src/tools/neo4j_audit.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
