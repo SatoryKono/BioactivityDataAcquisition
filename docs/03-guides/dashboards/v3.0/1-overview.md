@@ -54,7 +54,7 @@ Current defaults:
 - `run_type=All`
 - `run_id=-`
 
-Current shipped draft (`bioetl-overview-v3`) keeps this exact selector set.
+Current shipped baseline (`bioetl-overview-v2`) keeps this exact selector set.
 
 Current semantics:
 
@@ -140,9 +140,9 @@ Row 4: Optional Resolved-Run Context
 - may include identity and record movement;
 - does not replace aggregate L0 status.
 
-Current shipped draft behavior:
+Current shipped baseline behavior:
 
-- `bioetl-overview-v3` shows a control-plane-backed `Run Identity` block with
+- `bioetl-overview-v2` shows a control-plane-backed `Run Identity` block with
   compact rows for run/manifest IDs, Provider.Entity version, contract schema,
   execution flags, replay capability/mode, checkpoint anchors, optional
   composite run identity, and identity health for the current control-plane

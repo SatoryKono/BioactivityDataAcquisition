@@ -44,7 +44,6 @@ def test_variable_reference_documents_all_shipped_dashboard_variables() -> None:
         "$step_status",
         "$step_kind",
         "bioetl-overview-v2",
-        "bioetl-overview-v3",
         "bioetl-runtime",
         "bioetl-provider-health-v2",
         "bioetl-dq-v2",
@@ -81,14 +80,6 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     assert overview["run_id"].get("multi") is False
     assert overview["run_id"].get("includeAll") is False
     assert overview["run_id"].get("current", {}).get("value") == "-"
-
-    overview_v3 = _variables("bioetl-overview-v3.json")
-    assert overview_v3["workflow"].get("includeAll") is True
-    assert overview_v3["pipeline"].get("includeAll") is True
-    assert overview_v3["run_type"].get("includeAll") is True
-    assert overview_v3["run_id"].get("multi") is False
-    assert overview_v3["run_id"].get("includeAll") is False
-    assert overview_v3["run_id"].get("current", {}).get("value") == "-"
 
     for dashboard_name in (
         "bioetl-control-plane-v1.json",

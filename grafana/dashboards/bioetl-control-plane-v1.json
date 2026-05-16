@@ -209,7 +209,7 @@
       "type": "table",
       "title": "ID",
       "gridPos": {
-        "h": 6,
+        "h": 10,
         "w": 10,
         "x": 0,
         "y": 7
@@ -277,7 +277,7 @@
       "type": "table",
       "title": "Processed Records",
       "gridPos": {
-        "h": 6,
+        "h": 10,
         "w": 6,
         "x": 10,
         "y": 7
@@ -318,40 +318,32 @@
                         "color": "#c0c0c0"
                       },
                       "03 silver_filtered_out_records": {
-                        "text": "silver [filtered out]",
-                        "color": "#d1d5db"
+                        "text": "silver [filtered out]"
                       },
                       "04 silver_quarantined_records": {
-                        "text": "silver [quarantined]",
-                        "color": "#d1d5db"
+                        "text": "silver [quarantined]"
                       },
                       "05 silver_skipped_records": {
-                        "text": "silver [skipped]",
-                        "color": "#d1d5db"
+                        "text": "silver [skipped]"
                       },
                       "06 silver_deduplicated_records": {
-                        "text": "silver [deduplicated]",
-                        "color": "#d1d5db"
+                        "text": "silver [deduplicated]"
                       },
                       "07 gold_written_records": {
                         "text": "gold [valid]",
                         "color": "#d4af37"
                       },
                       "08 gold_excluded_by_contract_records": {
-                        "text": "gold [excluded]",
-                        "color": "#d1d5db"
+                        "text": "gold [excluded]"
                       },
                       "09 gold_quarantined_records": {
-                        "text": "gold [quarantined]",
-                        "color": "#d1d5db"
+                        "text": "gold [quarantined]"
                       },
                       "10 gold_skipped_records": {
-                        "text": "gold [skipped]",
-                        "color": "#d1d5db"
+                        "text": "gold [skipped]"
                       },
                       "11 gold_deduplicated_records": {
-                        "text": "gold [deduplicated]",
-                        "color": "#d1d5db"
+                        "text": "gold [deduplicated]"
                       }
                     }
                   }
@@ -417,8 +409,7 @@
                     "options": {
                       "pattern": "^03 silver_filtered_out_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -427,8 +418,7 @@
                     "options": {
                       "pattern": "^04 silver_quarantined_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -437,8 +427,7 @@
                     "options": {
                       "pattern": "^05 silver_skipped_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -447,8 +436,7 @@
                     "options": {
                       "pattern": "^06 silver_deduplicated_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -467,8 +455,7 @@
                     "options": {
                       "pattern": "^08 gold_excluded_by_contract_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -477,8 +464,7 @@
                     "options": {
                       "pattern": "^09 gold_quarantined_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -487,8 +473,7 @@
                     "options": {
                       "pattern": "^10 gold_skipped_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -497,8 +482,7 @@
                     "options": {
                       "pattern": "^11 gold_deduplicated_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   }
@@ -550,8 +534,7 @@
                     "options": {
                       "pattern": "^03 silver_filtered_out_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -560,8 +543,7 @@
                     "options": {
                       "pattern": "^04 silver_quarantined_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -570,8 +552,7 @@
                     "options": {
                       "pattern": "^05 silver_skipped_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -580,8 +561,7 @@
                     "options": {
                       "pattern": "^06 silver_deduplicated_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -600,8 +580,7 @@
                     "options": {
                       "pattern": "^08 gold_excluded_by_contract_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -610,8 +589,7 @@
                     "options": {
                       "pattern": "^09 gold_quarantined_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -620,8 +598,7 @@
                     "options": {
                       "pattern": "^10 gold_skipped_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -630,8 +607,7 @@
                     "options": {
                       "pattern": "^11 gold_deduplicated_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   }
@@ -700,7 +676,8 @@
         ],
         "footer": {
           "show": false
-        }
+        },
+        "cellHeight": "sm"
       },
       "targets": [
         {
@@ -745,7 +722,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 17
       },
       "id": 890,
       "panels": [],
@@ -818,7 +795,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 14
+        "y": 18
       },
       "id": 891,
       "options": {
@@ -871,7 +848,7 @@
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 14
+        "y": 18
       },
       "id": 892,
       "options": {
@@ -949,7 +926,7 @@
         "h": 4,
         "w": 6,
         "x": 12,
-        "y": 14
+        "y": 18
       },
       "id": 893,
       "options": {
@@ -1050,7 +1027,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 14
+        "y": 18
       },
       "id": 907,
       "options": {
@@ -1090,7 +1067,7 @@
       "type": "text",
       "title": "Next Action: Replay Diagnostics",
       "gridPos": {
-        "h": 6,
+        "h": 10,
         "w": 8,
         "x": 16,
         "y": 7
@@ -1116,7 +1093,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 22
       },
       "id": 902,
       "panels": [
@@ -1287,7 +1264,7 @@
             "h": 6,
             "w": 8,
             "x": 0,
-            "y": 16
+            "y": 22
           },
           "id": 3,
           "options": {
@@ -1378,7 +1355,7 @@
             "h": 6,
             "w": 8,
             "x": 8,
-            "y": 16
+            "y": 22
           },
           "id": 104,
           "options": {
@@ -1469,7 +1446,7 @@
             "h": 6,
             "w": 8,
             "x": 16,
-            "y": 16
+            "y": 22
           },
           "id": 120,
           "options": {
@@ -1560,7 +1537,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 40
+            "y": 46
           },
           "id": 101,
           "options": {
@@ -1651,7 +1628,7 @@
             "h": 6,
             "w": 6,
             "x": 6,
-            "y": 40
+            "y": 46
           },
           "id": 102,
           "options": {
@@ -1742,7 +1719,7 @@
             "h": 6,
             "w": 6,
             "x": 12,
-            "y": 40
+            "y": 46
           },
           "id": 103,
           "options": {
@@ -1833,7 +1810,7 @@
             "h": 6,
             "w": 6,
             "x": 18,
-            "y": 40
+            "y": 46
           },
           "id": 121,
           "options": {
@@ -1895,7 +1872,7 @@
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 46
+            "y": 52
           },
           "id": 5,
           "options": {
@@ -1960,7 +1937,7 @@
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 46
+            "y": 52
           },
           "id": 134,
           "options": {
@@ -2028,7 +2005,7 @@
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 46
+            "y": 52
           },
           "id": 135,
           "options": {
@@ -2096,7 +2073,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 54
+            "y": 60
           },
           "id": 105,
           "options": {
@@ -2174,7 +2151,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 54
+            "y": 60
           },
           "id": 106,
           "options": {
@@ -2218,7 +2195,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 23
       },
       "id": 901,
       "panels": [
@@ -2482,7 +2459,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 16
+            "y": 22
           },
           "id": 131,
           "options": {
@@ -2533,7 +2510,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 16
+            "y": 22
           },
           "id": 7,
           "options": {
@@ -2613,7 +2590,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 24
+            "y": 30
           },
           "id": 132,
           "options": {
@@ -2704,7 +2681,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 24
+            "y": 30
           },
           "id": 133,
           "options": {
@@ -2749,7 +2726,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 24
       },
       "id": 903,
       "panels": [
@@ -2809,7 +2786,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 56
+            "y": 62
           },
           "id": 4,
           "options": {
@@ -2900,7 +2877,7 @@
             "h": 6,
             "w": 6,
             "x": 6,
-            "y": 56
+            "y": 62
           },
           "id": 136,
           "options": {
@@ -2962,7 +2939,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 56
+            "y": 62
           },
           "id": 6,
           "options": {
@@ -3030,7 +3007,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 62
+            "y": 68
           },
           "id": 111,
           "options": {
@@ -3074,7 +3051,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 25
       },
       "id": 904,
       "panels": [
@@ -3226,7 +3203,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 88
+            "y": 94
           },
           "id": 137,
           "options": {
@@ -3305,7 +3282,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 88
+            "y": 94
           },
           "id": 138,
           "options": {
@@ -3356,7 +3333,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 72
+            "y": 78
           },
           "id": 107,
           "options": {
@@ -3407,7 +3384,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 72
+            "y": 78
           },
           "id": 108,
           "options": {
@@ -3475,7 +3452,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 80
+            "y": 86
           },
           "id": 109,
           "options": {
@@ -3553,7 +3530,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 80
+            "y": 86
           },
           "id": 110,
           "options": {
@@ -3614,7 +3591,7 @@
             "h": 6,
             "w": 6,
             "x": 6,
-            "y": 88
+            "y": 94
           },
           "id": 112,
           "options": {
@@ -3648,7 +3625,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 26
       },
       "id": 905,
       "panels": [
@@ -3672,7 +3649,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 89
+            "y": 95
           },
           "id": 9404,
           "options": {
@@ -3760,7 +3737,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 99
+            "y": 105
           },
           "id": 9405,
           "options": {
@@ -3808,7 +3785,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 99
+            "y": 105
           },
           "id": 9406,
           "options": {
@@ -3864,7 +3841,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 109
+            "y": 115
           },
           "id": 9407,
           "options": {
@@ -3912,7 +3889,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 119
+            "y": 125
           },
           "id": 9408,
           "options": {
@@ -3960,7 +3937,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 119
+            "y": 125
           },
           "id": 9409,
           "options": {
@@ -3993,7 +3970,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 129
+            "y": 135
           },
           "id": 139,
           "options": {

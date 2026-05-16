@@ -71,7 +71,7 @@
 
 **Семейства дашбордов:**
 - **pipeline_summary**: `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-dq-v2`
-- **hybrid_overview**: `bioetl-overview-v2` (canonical frozen Overview v3 baseline), `bioetl-overview-v3` (retained snapshot/draft)
+- **hybrid_overview**: `bioetl-overview-v2` (canonical frozen Overview v3 baseline)
 - **provider_first**: `bioetl-provider-health-v2`
 - **workflow_evidence**: `bioetl-workflow-overview`
 - **forensic_explorer**: `bioetl-silver-reject-explorer`

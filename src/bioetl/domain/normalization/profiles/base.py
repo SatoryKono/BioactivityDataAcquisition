@@ -301,6 +301,4 @@ class NormalizationProfile:
             parts.append(f"missing={sorted(missing)}")
         if extra:
             parts.append(f"extra={sorted(extra)}")
-        raise ValueError(
-            f"{self.profile_name} does not cover schema fields exactly: {'; '.join(parts)}"
-        )
+        raise ValueError(f"{self.profile_name} does not cover schema fields exactly: {'; '.join(parts)}")

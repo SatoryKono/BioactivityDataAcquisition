@@ -222,7 +222,7 @@
       "type": "table",
       "title": "ID",
       "gridPos": {
-        "h": 6,
+        "h": 10,
         "w": 10,
         "x": 0,
         "y": 7
@@ -290,7 +290,7 @@
       "type": "table",
       "title": "Processed Records",
       "gridPos": {
-        "h": 6,
+        "h": 10,
         "w": 6,
         "x": 10,
         "y": 7
@@ -331,40 +331,32 @@
                         "color": "#c0c0c0"
                       },
                       "03 silver_filtered_out_records": {
-                        "text": "silver [filtered out]",
-                        "color": "#d1d5db"
+                        "text": "silver [filtered out]"
                       },
                       "04 silver_quarantined_records": {
-                        "text": "silver [quarantined]",
-                        "color": "#d1d5db"
+                        "text": "silver [quarantined]"
                       },
                       "05 silver_skipped_records": {
-                        "text": "silver [skipped]",
-                        "color": "#d1d5db"
+                        "text": "silver [skipped]"
                       },
                       "06 silver_deduplicated_records": {
-                        "text": "silver [deduplicated]",
-                        "color": "#d1d5db"
+                        "text": "silver [deduplicated]"
                       },
                       "07 gold_written_records": {
                         "text": "gold [valid]",
                         "color": "#d4af37"
                       },
                       "08 gold_excluded_by_contract_records": {
-                        "text": "gold [excluded]",
-                        "color": "#d1d5db"
+                        "text": "gold [excluded]"
                       },
                       "09 gold_quarantined_records": {
-                        "text": "gold [quarantined]",
-                        "color": "#d1d5db"
+                        "text": "gold [quarantined]"
                       },
                       "10 gold_skipped_records": {
-                        "text": "gold [skipped]",
-                        "color": "#d1d5db"
+                        "text": "gold [skipped]"
                       },
                       "11 gold_deduplicated_records": {
-                        "text": "gold [deduplicated]",
-                        "color": "#d1d5db"
+                        "text": "gold [deduplicated]"
                       }
                     }
                   }
@@ -430,8 +422,7 @@
                     "options": {
                       "pattern": "^03 silver_filtered_out_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -440,8 +431,7 @@
                     "options": {
                       "pattern": "^04 silver_quarantined_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -450,8 +440,7 @@
                     "options": {
                       "pattern": "^05 silver_skipped_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -460,8 +449,7 @@
                     "options": {
                       "pattern": "^06 silver_deduplicated_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -480,8 +468,7 @@
                     "options": {
                       "pattern": "^08 gold_excluded_by_contract_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -490,8 +477,7 @@
                     "options": {
                       "pattern": "^09 gold_quarantined_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -500,8 +486,7 @@
                     "options": {
                       "pattern": "^10 gold_skipped_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -510,8 +495,7 @@
                     "options": {
                       "pattern": "^11 gold_deduplicated_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   }
@@ -563,8 +547,7 @@
                     "options": {
                       "pattern": "^03 silver_filtered_out_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -573,8 +556,7 @@
                     "options": {
                       "pattern": "^04 silver_quarantined_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -583,8 +565,7 @@
                     "options": {
                       "pattern": "^05 silver_skipped_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -593,8 +574,7 @@
                     "options": {
                       "pattern": "^06 silver_deduplicated_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -613,8 +593,7 @@
                     "options": {
                       "pattern": "^08 gold_excluded_by_contract_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -623,8 +602,7 @@
                     "options": {
                       "pattern": "^09 gold_quarantined_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -633,8 +611,7 @@
                     "options": {
                       "pattern": "^10 gold_skipped_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   },
@@ -643,8 +620,7 @@
                     "options": {
                       "pattern": "^11 gold_deduplicated_records\\|(.*)$",
                       "result": {
-                        "text": "$1",
-                        "color": "#d1d5db"
+                        "text": "$1"
                       }
                     }
                   }
@@ -713,7 +689,8 @@
         ],
         "footer": {
           "show": false
-        }
+        },
+        "cellHeight": "sm"
       },
       "targets": [
         {
@@ -800,7 +777,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 36
       },
       "id": 1,
       "options": {
@@ -913,7 +890,7 @@
         "h": 7,
         "w": 5,
         "x": 0,
-        "y": 13
+        "y": 17
       },
       "id": 9100,
       "options": {
@@ -1012,7 +989,7 @@
         "h": 7,
         "w": 5,
         "x": 5,
-        "y": 13
+        "y": 17
       },
       "id": 9101,
       "options": {
@@ -1092,7 +1069,7 @@
         "h": 7,
         "w": 10,
         "x": 10,
-        "y": 13
+        "y": 17
       },
       "id": 9102,
       "options": {
@@ -1133,7 +1110,7 @@
       "type": "text",
       "title": "Review: First Action",
       "gridPos": {
-        "h": 6,
+        "h": 10,
         "w": 8,
         "x": 16,
         "y": 7
@@ -1218,7 +1195,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 20
+        "y": 24
       },
       "id": 2,
       "options": {
@@ -1297,7 +1274,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 41
+        "y": 45
       },
       "id": 3,
       "options": {
@@ -1366,7 +1343,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 41
+        "y": 45
       },
       "id": 4,
       "options": {
@@ -1445,7 +1422,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 20
+        "y": 24
       },
       "id": 5,
       "options": {
@@ -1519,7 +1496,7 @@
         "h": 5,
         "w": 8,
         "x": 0,
-        "y": 27
+        "y": 31
       },
       "id": 6,
       "options": {
@@ -1600,7 +1577,7 @@
         "h": 5,
         "w": 8,
         "x": 8,
-        "y": 27
+        "y": 31
       },
       "id": 7,
       "options": {
@@ -1689,7 +1666,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 20
+        "y": 24
       },
       "id": 8,
       "options": {
@@ -1772,7 +1749,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 41
+        "y": 45
       },
       "id": 154,
       "options": {
@@ -1863,7 +1840,7 @@
         "h": 7,
         "w": 4,
         "x": 20,
-        "y": 13
+        "y": 17
       },
       "id": 101,
       "options": {
@@ -1945,7 +1922,7 @@
         "h": 5,
         "w": 8,
         "x": 16,
-        "y": 27
+        "y": 31
       },
       "id": 117,
       "options": {
@@ -1988,7 +1965,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 48
+        "y": 52
       },
       "id": 220,
       "panels": [
@@ -2034,7 +2011,7 @@
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 26
+            "y": 32
           },
           "id": 152,
           "options": {
@@ -2122,7 +2099,7 @@
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 26
+            "y": 32
           },
           "id": 118,
           "options": {
@@ -2196,7 +2173,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 34
+            "y": 40
           },
           "id": 121,
           "options": {
@@ -2272,7 +2249,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 34
+            "y": 40
           },
           "id": 122,
           "options": {
@@ -2308,7 +2285,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 49
+        "y": 53
       },
       "id": 221,
       "panels": [
@@ -2332,7 +2309,7 @@
             "h": 8,
             "w": 10,
             "x": 0,
-            "y": 42
+            "y": 48
           },
           "id": 9,
           "options": {
@@ -2414,7 +2391,7 @@
             "h": 9,
             "w": 14,
             "x": 10,
-            "y": 42
+            "y": 48
           },
           "id": 10,
           "options": {
@@ -2490,7 +2467,7 @@
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 51
+            "y": 57
           },
           "id": 11,
           "options": {
@@ -2558,7 +2535,7 @@
             "h": 8,
             "w": 6,
             "x": 12,
-            "y": 51
+            "y": 57
           },
           "id": 12,
           "options": {
@@ -2633,7 +2610,7 @@
             "h": 8,
             "w": 6,
             "x": 18,
-            "y": 51
+            "y": 57
           },
           "id": 116,
           "options": {
@@ -2719,7 +2696,7 @@
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 60
+            "y": 66
           },
           "id": 153,
           "options": {
@@ -2800,7 +2777,7 @@
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 60
+            "y": 66
           },
           "id": 155,
           "options": {
@@ -2846,7 +2823,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 70
+            "y": 76
           },
           "id": 150,
           "description": "Operator note that redirects aggregate control-plane symptoms to the Control Plane dashboard and runbook surfaces; no datasource query is expected.",
@@ -2898,7 +2875,7 @@
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 74
+            "y": 80
           },
           "id": 151,
           "options": {

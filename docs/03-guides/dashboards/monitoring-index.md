@@ -43,7 +43,7 @@ become a Prometheus label.
 `Processed Records` is the shared compact Bronze/Silver/Gold stage/outcome
 accounting table from `/ops/observability/processed-records`, backed by
 `bioetl_processed_records_*` recording rules with `value` and formatted
-`percintage` columns, omitting zero-valued outcome rows and not acting as a
+`percintage` columns, including zero-valued outcome rows and not acting as a
 `$__range` throughput summary.
 
 For `0. Control Plane`, exact identity graph evidence is available in the

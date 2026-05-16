@@ -69,7 +69,7 @@ class TestProcessedRecordsTable:
             await writer.wait_closed()
 
     def test_payload_formats_row_specific_percentage_precision(self) -> None:
-        """Primary rows keep one decimal while outcome rows trim to three decimals."""
+        """Primary rows keep one decimal while zero-valued outcomes stay visible."""
         payload = build_processed_records_table_payload(
             metric_values=self._SAMPLE_VALUES,
             pipeline="chembl_activity",
@@ -88,14 +88,42 @@ class TestProcessedRecordsTable:
         assert rows["04 silver_quarantined_records"]["value"] == (
             "04 silver_quarantined_records|    47"
         )
+        assert rows["05 silver_skipped_records"]["value"] == (
+            "05 silver_skipped_records|     0"
+        )
+        assert rows["06 silver_deduplicated_records"]["value"] == (
+            "06 silver_deduplicated_records|     0"
+        )
         assert rows["07 gold_written_records"]["value"] == (
             "07 gold_written_records| 9 009"
+        )
+        assert rows["08 gold_excluded_by_contract_records"]["value"] == (
+            "08 gold_excluded_by_contract_records|     0"
+        )
+        assert rows["09 gold_quarantined_records"]["value"] == (
+            "09 gold_quarantined_records|     0"
+        )
+        assert rows["10 gold_skipped_records"]["value"] == (
+            "10 gold_skipped_records|     0"
+        )
+        assert rows["11 gold_deduplicated_records"]["value"] == (
+            "11 gold_deduplicated_records|     0"
         )
         assert rows["01 bronze_records"]["row_status"] == ""
         assert rows["02 silver_valid_records"]["row_status"] == ""
         assert rows["03 silver_filtered_out_records"]["row_status"] == ""
         assert rows["04 silver_quarantined_records"]["row_status"] == ""
+        assert rows["05 silver_skipped_records"]["row_status"] == ""
+        assert rows["06 silver_deduplicated_records"]["row_status"] == ""
         assert rows["07 gold_written_records"]["row_status"] == "gold_deficit"
+        assert rows["08 gold_excluded_by_contract_records"]["row_status"] == (
+            "gold_deficit"
+        )
+        assert rows["09 gold_quarantined_records"]["row_status"] == "gold_deficit"
+        assert rows["10 gold_skipped_records"]["row_status"] == "gold_deficit"
+        assert rows["11 gold_deduplicated_records"]["row_status"] == (
+            "gold_deficit"
+        )
         assert rows["01 bronze_records"]["percintage"] == "01 bronze_records|100%"
         assert rows["02 silver_valid_records"]["percintage"] == (
             "02 silver_valid_records|91.0%"
@@ -110,8 +138,25 @@ class TestProcessedRecordsTable:
             rows["07 gold_written_records"]["percintage"]
             == "07 gold_written_records|90.1%"
         )
-        assert "05 silver_skipped_records" not in rows
-        assert len(payload["rows"]) == 5
+        assert rows["05 silver_skipped_records"]["percintage"] == (
+            "05 silver_skipped_records|0%"
+        )
+        assert rows["06 silver_deduplicated_records"]["percintage"] == (
+            "06 silver_deduplicated_records|0%"
+        )
+        assert rows["08 gold_excluded_by_contract_records"]["percintage"] == (
+            "08 gold_excluded_by_contract_records|0%"
+        )
+        assert rows["09 gold_quarantined_records"]["percintage"] == (
+            "09 gold_quarantined_records|0%"
+        )
+        assert rows["10 gold_skipped_records"]["percintage"] == (
+            "10 gold_skipped_records|0%"
+        )
+        assert rows["11 gold_deduplicated_records"]["percintage"] == (
+            "11 gold_deduplicated_records|0%"
+        )
+        assert len(payload["rows"]) == 11
         assert all("__zero" not in str(row["parameter"]) for row in payload["rows"])
         assert payload["run_type"] == ["backfill"]
 
@@ -202,4 +247,9 @@ class TestProcessedRecordsTable:
             rows["07 gold_written_records"]["percintage"]
             == "07 gold_written_records|90.1%"
         )
-        assert "05 silver_skipped_records" not in rows
+        assert rows["05 silver_skipped_records"]["value"] == (
+            "05 silver_skipped_records|     0"
+        )
+        assert rows["11 gold_deduplicated_records"]["value"] == (
+            "11 gold_deduplicated_records|     0"
+        )

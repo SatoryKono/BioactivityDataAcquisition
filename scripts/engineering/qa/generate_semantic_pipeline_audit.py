@@ -12,7 +12,7 @@ import sys
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
@@ -1201,6 +1201,7 @@ def _render_report(
     *,
     base_config_coverage: dict[str, Any],
     residual_backlog: dict[str, Any],
+    review_registry: dict[str, Any],
     source_date: str,
 ) -> str:
     risk_counts = Counter(row["Drift Risk"] for row in rows)
@@ -1211,50 +1212,155 @@ def _render_report(
     normalization_mismatches = normalization_counts.get(
         "DIFFERENT", 0
     ) + normalization_counts.get("CONFLICTING", 0)
-    return "\n".join(
-        [
-            "# Semantic Pipeline Audit",
-            "",
-            f"Generated: `{source_date}`",
-            "",
-            "## Executive Summary",
-            "",
-            f"- Semantic clusters: `{len(registry.get('clusters', []))}`",
-            f"- Pair rows: `{len(rows)}`",
-            f"- Base config files covered: `{base_config_coverage.get('base_config_count', 0)}`",
-            f"- Base config semantic surfaces: `{base_config_coverage.get('semantic_surface_count', 0)}`",
-            f"- CRITICAL drift risks: `{risk_counts.get('CRITICAL', 0)}`",
-            f"- HIGH drift risks: `{risk_counts.get('HIGH', 0)}`",
-            f"- Normalization mismatches: `{normalization_mismatches}`",
-            f"- Validation strictness mismatches: `{validation_counts.get('STRICTNESS_MISMATCH', 0)}`",
-            f"- Typing conflicts: `{typing_counts.get('CONFLICTING', 0)}`",
-            f"- Reviewed PARTIAL rows: `{semantic_counts.get('PARTIAL', 0)}`",
-            f"- Reviewed WEAK inventory rows: `{semantic_counts.get('WEAK', 0)}`",
-            f"- Reviewed generic collision rows: `{semantic_counts.get('CONFLICTING', 0)}`",
-            f"- Compatible normalization rows: `{normalization_counts.get('COMPATIBLE', 0)}`",
-            f"- Compatible validation rows: `{validation_counts.get('COMPATIBLE', 0)}`",
-            f"- Compatible typing rows: `{typing_counts.get('COMPATIBLE', 0)}`",
-            f"- Residual blocking tasks: `{residual_backlog['summary']['blocking_task_count']}`",
-            "",
-            "## Artifact Index",
-            "",
-            f"- `semantic_pair_matrix_{source_date}.csv`",
-            f"- `semantic_cluster_registry_{source_date}.json`",
-            f"- `critical_inconsistencies_{source_date}.md`",
-            f"- `recommended_canonical_fields_{source_date}.csv`",
-            f"- `base_config_semantic_coverage_{source_date}.json`",
-            f"- `semantic_residual_backlog_{source_date}.json`",
-            f"- `semantic_residual_backlog_{source_date}.md`",
-            f"- `semantic_pipeline_audit_manifest_{source_date}.json`",
-            "",
-            "## Notes",
-            "",
-            "This generated snapshot refreshes member evidence from active pipeline configs, "
-            "base config defaults, normalization profiles, DQ visibility, "
-            "Pandera-derived Gold contracts, and the reviewed semantic cluster registry.",
-            "",
-        ]
+    composite_unknown_typing = _reviewed_composite_unknown_typing_summary(
+        rows,
+        review_registry=review_registry,
     )
+    report_lines = [
+        "# Semantic Pipeline Audit",
+        "",
+        f"Generated: `{source_date}`",
+        "",
+        "## Executive Summary",
+        "",
+        f"- Semantic clusters: `{len(registry.get('clusters', []))}`",
+        f"- Pair rows: `{len(rows)}`",
+        f"- Base config files covered: `{base_config_coverage.get('base_config_count', 0)}`",
+        f"- Base config semantic surfaces: `{base_config_coverage.get('semantic_surface_count', 0)}`",
+        f"- CRITICAL drift risks: `{risk_counts.get('CRITICAL', 0)}`",
+        f"- HIGH drift risks: `{risk_counts.get('HIGH', 0)}`",
+        f"- Normalization mismatches: `{normalization_mismatches}`",
+        f"- Validation strictness mismatches: `{validation_counts.get('STRICTNESS_MISMATCH', 0)}`",
+        f"- Typing conflicts: `{typing_counts.get('CONFLICTING', 0)}`",
+        f"- Reviewed PARTIAL rows: `{semantic_counts.get('PARTIAL', 0)}`",
+        f"- Reviewed WEAK inventory rows: `{semantic_counts.get('WEAK', 0)}`",
+        f"- Reviewed generic collision rows: `{semantic_counts.get('CONFLICTING', 0)}`",
+        f"- Compatible normalization rows: `{normalization_counts.get('COMPATIBLE', 0)}`",
+        f"- Compatible validation rows: `{validation_counts.get('COMPATIBLE', 0)}`",
+        f"- Compatible typing rows: `{typing_counts.get('COMPATIBLE', 0)}`",
+        f"- Residual blocking tasks: `{residual_backlog['summary']['blocking_task_count']}`",
+        "",
+        "## Artifact Index",
+        "",
+        f"- `semantic_pair_matrix_{source_date}.csv`",
+        f"- `semantic_cluster_registry_{source_date}.json`",
+        f"- `critical_inconsistencies_{source_date}.md`",
+        f"- `recommended_canonical_fields_{source_date}.csv`",
+        f"- `base_config_semantic_coverage_{source_date}.json`",
+        f"- `semantic_residual_backlog_{source_date}.json`",
+        f"- `semantic_residual_backlog_{source_date}.md`",
+        f"- `semantic_pipeline_audit_manifest_{source_date}.json`",
+        "",
+        "## Notes",
+        "",
+        "This generated snapshot refreshes member evidence from active pipeline configs, "
+        "base config defaults, normalization profiles, DQ visibility, "
+        "Pandera-derived Gold contracts, and the reviewed semantic cluster registry.",
+        "",
+    ]
+    if composite_unknown_typing["row_count"]:
+        report_lines.extend(
+            [
+                "## Reviewed Composite Typing Residuals",
+                "",
+                f"- Reviewed residual rows with composite `unknown` typing: `{composite_unknown_typing['row_count']}`",
+                f"- Covered by review registry: `{composite_unknown_typing['covered_row_count']}`",
+                f"- Uncovered residual rows: `{len(composite_unknown_typing['uncovered'])}`",
+                "",
+                "| Review ID | Rows | Schema authority | Owner | Residual fields |",
+                "| --- | ---: | --- | --- | --- |",
+            ]
+        )
+        for entry in composite_unknown_typing["reviews"]:
+            report_lines.append(
+                "| {review_id} | {row_count} | `{schema_authority}` | {owner} | {fields} |".format(
+                    **entry,
+                )
+            )
+        if composite_unknown_typing["uncovered"]:
+            report_lines.append("")
+            report_lines.append("Uncovered residuals:")
+            for pipeline_name, field_name in composite_unknown_typing["uncovered"]:
+                report_lines.append(f"- `{pipeline_name}.{field_name}`")
+        report_lines.append("")
+    return "\n".join(report_lines)
+
+
+def _reviewed_composite_unknown_typing_summary(
+    rows: list[dict[str, str]],
+    *,
+    review_registry: dict[str, Any],
+) -> dict[str, object]:
+    lookup: dict[tuple[str, str], dict[str, str]] = {}
+    entries = review_registry.get("composite_unknown_typing_reviews", [])
+    if isinstance(entries, list):
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            review_id = str(entry.get("id") or "<unknown>")
+            schema_authority = str(entry.get("schema_authority") or "")
+            owner = str(entry.get("owner") or "")
+            pipelines = entry.get("pipelines", [])
+            fields = entry.get("fields", [])
+            if not isinstance(pipelines, list) or not isinstance(fields, list):
+                continue
+            metadata = {
+                "review_id": review_id,
+                "schema_authority": schema_authority,
+                "owner": owner,
+            }
+            for pipeline_name in pipelines:
+                if not isinstance(pipeline_name, str):
+                    continue
+                for field_name in fields:
+                    if isinstance(field_name, str):
+                        lookup[(pipeline_name, field_name)] = metadata
+
+    reviews: dict[str, dict[str, object]] = {}
+    uncovered: set[tuple[str, str]] = set()
+    row_count = 0
+    covered_row_count = 0
+    for row in rows:
+        if row.get("Typing") != "COMPATIBLE":
+            continue
+        for side in ("A", "B"):
+            pipeline_name = row.get(f"Pipeline {side}", "")
+            field_name = row.get(f"Field {side}", "")
+            field_type = str(row.get(f"Type {side}", "")).strip().lower()
+            if not pipeline_name.startswith("composite_") or field_type != "unknown":
+                continue
+            row_count += 1
+            metadata = lookup.get((pipeline_name, field_name))
+            if metadata is None:
+                uncovered.add((pipeline_name, field_name))
+                continue
+            covered_row_count += 1
+            review_id = metadata["review_id"]
+            review_entry = reviews.setdefault(
+                review_id,
+                {
+                    "review_id": review_id,
+                    "schema_authority": metadata["schema_authority"],
+                    "owner": metadata["owner"],
+                    "row_count": 0,
+                    "fields": set(),
+                },
+            )
+            review_entry["row_count"] = int(review_entry["row_count"]) + 1
+            cast(set[str], review_entry["fields"]).add(f"{pipeline_name}.{field_name}")
+
+    return {
+        "row_count": row_count,
+        "covered_row_count": covered_row_count,
+        "uncovered": sorted(uncovered),
+        "reviews": [
+            {
+                **entry,
+                "fields": ", ".join(sorted(cast(set[str], entry["fields"]))),
+            }
+            for _, entry in sorted(reviews.items())
+        ],
+    }
 
 
 def _manifest(
@@ -1370,6 +1476,7 @@ def build_artifacts(
             registry,
             base_config_coverage=base_config_coverage,
             residual_backlog=residual_backlog,
+            review_registry=review_payload,
             source_date=source_date,
         ),
         f"semantic_pipeline_audit_manifest_{source_date}.json": json.dumps(

@@ -23,15 +23,6 @@ required_top_level_links_by_uid:
     - Explore Logs
     - Explore Traces
     - Silver Reject Explorer
-  bioetl-overview-v3:
-    - 0. Control Plane
-    - 2. Runtime
-    - 3. Provider Health
-    - 4. Data Quality
-    - 5. Workflow
-    - Explore Logs
-    - Explore Traces
-    - Silver Reject Explorer
   bioetl-runtime:
     - 0. Control Plane
     - 1. Overview
@@ -106,7 +97,6 @@ top_level_link_priority_by_uid:
 
 required_link_vars_by_target_uid:
   bioetl-overview-v2: [workflow, pipeline, run_type]
-  bioetl-overview-v3: [workflow, pipeline, run_type]
   bioetl-control-plane-v1: [workflow, pipeline, run_type]
   bioetl-runtime: [workflow, pipeline, run_type]
   bioetl-dq-v2: [workflow, pipeline, run_type]
@@ -115,7 +105,6 @@ required_link_vars_by_target_uid:
   bioetl-workflow-overview: [workflow, pipeline, run_type]
 allowed_dashboard_link_vars:
   bioetl-overview-v2: [workflow, pipeline, run_type, run_id]
-  bioetl-overview-v3: [workflow, pipeline, run_type, run_id]
   bioetl-dq-v2: [workflow, pipeline, run_type, run_id, stage]
   bioetl-runtime: [workflow, pipeline, run_type, run_id, stage]
   bioetl-provider-health-v2: [workflow, pipeline, run_type, run_id, provider, pipeline_context, adapter]
@@ -124,7 +113,6 @@ allowed_dashboard_link_vars:
   bioetl-silver-reject-explorer: [pipeline, run_type, reason_code, field, quarantine_run_id, payload_hash]
 forbidden_dashboard_link_vars_by_target_uid:
   bioetl-overview-v2: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
-  bioetl-overview-v3: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
   bioetl-control-plane-v1: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
   bioetl-runtime: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
   bioetl-dq-v2: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
@@ -139,7 +127,6 @@ preserved_identity_handoff:
     - bioetl-control-plane-v1
     - bioetl-dq-v2
     - bioetl-overview-v2
-    - bioetl-overview-v3
     - bioetl-provider-health-v2
     - bioetl-runtime
     - bioetl-workflow-overview
@@ -147,7 +134,6 @@ preserved_identity_handoff:
     - bioetl-control-plane-v1
     - bioetl-dq-v2
     - bioetl-overview-v2
-    - bioetl-overview-v3
     - bioetl-provider-health-v2
     - bioetl-runtime
     - bioetl-workflow-overview
@@ -166,70 +152,6 @@ required_discoverable_inbound_paths: {}
 
 required_panel_links_by_uid:
   bioetl-overview-v2:
-    - panel_id: 214
-      target_uid: bioetl-runtime
-      link_titles: [Open Runtime]
-    - panel_id: 214
-      target_uid: bioetl-control-plane-v1
-      link_titles: [Open Control Plane]
-    - panel_id: 214
-      target_uid: bioetl-dq-v2
-      link_titles: [Open Data Quality]
-    - panel_id: 214
-      target_uid: bioetl-provider-health-v2
-      link_titles: [Open Provider Health]
-    - panel_id: 214
-      target_uid: bioetl-workflow-overview
-      link_titles: [Open Workflow]
-    - panel_id: 215
-      target_uid: bioetl-runtime
-      link_titles: [Open Runtime]
-    - panel_id: 215
-      target_uid: bioetl-control-plane-v1
-      link_titles: [Open Control Plane]
-    - panel_id: 215
-      target_uid: bioetl-dq-v2
-      link_titles: [Open Data Quality]
-    - panel_id: 215
-      target_uid: bioetl-provider-health-v2
-      link_titles: [Open Provider Health]
-    - panel_id: 215
-      target_uid: bioetl-workflow-overview
-      link_titles: [Open Workflow]
-    - panel_id: 9002
-      target_uid: bioetl-runtime
-      link_titles: [Open Runtime]
-    - panel_id: 9002
-      target_uid: bioetl-control-plane-v1
-      link_titles: [Open Control Plane]
-    - panel_id: 9002
-      target_uid: bioetl-dq-v2
-      link_titles: [Open Data Quality]
-    - panel_id: 9002
-      target_uid: bioetl-provider-health-v2
-      link_titles: [Open Provider Health]
-    - panel_id: 9002
-      target_uid: bioetl-workflow-overview
-      link_titles: [Open Workflow]
-    - panel_id: 9003
-      target_uid: bioetl-runtime
-      link_titles: [Open Runtime]
-    - panel_id: 9004
-      target_uid: bioetl-dq-v2
-      link_titles: [Open Data Quality]
-    - panel_id: 9005
-      target_uid: bioetl-runtime
-      link_titles: [Open Runtime]
-    - panel_id: 9006
-      target_uid: bioetl-control-plane-v1
-      link_titles: [Open Control Plane]
-    - panel_id: 9007
-      target_uid: bioetl-provider-health-v2
-      link_titles: [Open Provider Health]
-    - panel_id: 9013
-      target_uid: bioetl-workflow-overview
-      link_titles: [Open Workflow]
-  bioetl-overview-v3:
     - panel_id: 214
       target_uid: bioetl-runtime
       link_titles: [Open Runtime]
