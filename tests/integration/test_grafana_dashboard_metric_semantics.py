@@ -142,66 +142,6 @@ def _expected_duplicate_uses() -> dict[str, set[tuple[str, str]]]:
             ("bioetl-runtime.json", "Runtime Status"),
             ("bioetl-runtime.json", "Status"),
         },
-        '(sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
-        'run_type=~"$run_type",stage="filtered_out"}[$__range])) or vector(0)) / '
-        'clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
-        'run_type=~"$run_type",stage="bronze"}[$__range])) or vector(0)), 1)': {
-            ("bioetl-overview-v2.json", "Silver Rejects + Rate"),
-        },
-        'bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"}': {
-            ("bioetl-overview-v2.json", "DQ Status Trend"),
-        },
-        'bioetl_l1_gold_lifecycle_status{pipeline=~"$pipeline",run_type=~"$run_type"}': {
-            ("bioetl-overview-v2.json", "Gold Lifecycle Trend"),
-        },
-        "bioetl_l1_provider_global_status": {
-            ("bioetl-overview-v2.json", "Provider Global"),
-        },
-        'bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",run_type=~"$run_type"}': {
-            ("bioetl-overview-v2.json", "Runtime Blockers Trend"),
-        },
-        'max by (pipeline) (bioetl_l1_control_plane_current_status{pipeline=~"$pipeline",'
-        'run_type=~"$run_type"} or ((bioetl_l1_control_plane_current_status{run_type=~"$run_type"}) '
-        'and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
-        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
-            ("bioetl-overview-v2.json", "Control Plane"),
-        },
-        'max by (pipeline) (bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"} '
-        'or ((bioetl_l1_dq_status{run_type=~"$run_type"}) and on(pipeline) '
-        'label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
-        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
-            ("bioetl-overview-v2.json", "DQ Status"),
-        },
-        'max by (pipeline) (bioetl_l1_gold_lifecycle_status{pipeline=~"$pipeline",'
-        'run_type=~"$run_type"} or ((bioetl_l1_gold_lifecycle_status{run_type=~"$run_type"}) '
-        'and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
-        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
-            ("bioetl-overview-v2.json", "Gold Lifecycle"),
-        },
-        'max by (pipeline) (bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",'
-        'run_type=~"$run_type"} or ((bioetl_l1_runtime_blocker_status{run_type=~"$run_type"}) '
-        'and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
-        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
-            ("bioetl-overview-v2.json", "Runtime Blockers"),
-        },
-        'max(bioetl_l0_status{pipeline=~"$pipeline",run_type=~"$run_type"} or '
-        '((bioetl_l0_status{run_type=~"$run_type"}) and on(pipeline) '
-        'label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
-        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
-            ("bioetl-overview-v2.json", "System Status"),
-        },
-        'round(sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
-        'run_type=~"$run_type",stage="filtered_out"}[$__range])) or vector(0))': {
-            ("bioetl-overview-v2.json", "Silver Rejects + Rate"),
-        },
-        'sum by (pipeline, run_type) (max_over_time(bioetl_pipeline_runs_total{status="failed",'
-        'pipeline=~"(${pipeline:regex}|workflow_${pipeline:regex})",run_type=~"$run_type"}[$__range]))': {
-            ("bioetl-overview-v2.json", "Historical Failures"),
-        },
-        'sum by (pipeline, status) (max_over_time(bioetl_pipeline_runs_total{pipeline=~"(${pipeline:regex}|'
-        'workflow_${pipeline:regex})",run_type=~"$run_type",status!="success"}[$__range]))': {
-            ("bioetl-overview-v2.json", "Recent Terminal Runs"),
-        },
     }
 
 

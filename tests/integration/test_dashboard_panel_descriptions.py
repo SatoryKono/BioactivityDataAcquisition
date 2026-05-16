@@ -1,7 +1,5 @@
 """Integration tests for Grafana dashboard panel descriptions."""
 
-from pathlib import Path
-
 import pytest
 
 from tests.integration._grafana_test_support import (
@@ -20,7 +18,6 @@ def test_panels_have_descriptions():
         "Navigation",
         "Scope",
         "Dashboard Navigation",
-        "Trust Summary",
         "Known",
     ]
     for dashboard_path in get_dashboard_files():

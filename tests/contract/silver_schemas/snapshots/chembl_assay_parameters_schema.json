@@ -137,11 +137,29 @@
     "required": true,
     "unique": false
   },
-  "relation": {
+  "parameter_relation": {
     "checks": [],
     "coerce": true,
     "description": "Relation operator (=, <, >, ~, >=, <=).",
     "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "parameter_type": {
+    "checks": [],
+    "coerce": true,
+    "description": "Parameter type (e.g., CONC, PH, TEMP, TIME).",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "parameter_value": {
+    "checks": [],
+    "coerce": true,
+    "description": "Numeric value.",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -210,15 +228,6 @@
     "required": false,
     "unique": false
   },
-  "type": {
-    "checks": [],
-    "coerce": true,
-    "description": "Parameter type (e.g., CONC, PH, TEMP, TIME).",
-    "dtype": "str",
-    "nullable": true,
-    "required": false,
-    "unique": false
-  },
   "type_raw": {
     "checks": [],
     "coerce": true,
@@ -233,15 +242,6 @@
     "coerce": true,
     "description": "Original units (e.g., uM, nM, %).",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
-    "unique": false
-  },
-  "value": {
-    "checks": [],
-    "coerce": true,
-    "description": "Numeric value.",
-    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false

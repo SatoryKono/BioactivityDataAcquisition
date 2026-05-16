@@ -102,9 +102,9 @@ below the current answer rows, and diagnostics routing lives under the collapsed
 `Diagnostics & Docs (Logs / Traces / Raw Metrics)` row.
 
 `bioetl-control-plane-v1` is the `0. Control Plane` surface. It
-now starts with an answer-first **Trust Summary** block: replay safety state,
-checkpoint freshness gap, ledger/manifest consistency, and telemetry presence
-for the selected pipeline scope. Replay/checkpoint panels route to
+starts with answer-first trust cards for replay safety state, checkpoint
+freshness gap, ledger/manifest consistency, and telemetry presence for the
+selected pipeline scope. Replay/checkpoint panels route to
 `checkpoint-debugging.md`, while manifest/ledger evidence panels route to
 `run-manifest-inspection.md`. **Known Blind Spots** and terminal-event
 evidence live below fold in collapsed incident rows, not in the first-screen

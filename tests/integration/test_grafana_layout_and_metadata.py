@@ -183,11 +183,11 @@ def test_control_plane_collapsed_row_sequence_matches_operator_flow() -> None:
         )
     ]
     assert row_pairs == [
-        (902, "Incident Drilldown: Replay Safety (Checkpoint / Replay)", 18),
-        (901, "Incident Drilldown: Manifest / Ledger Integrity", 19),
-        (903, "Incident Drilldown: Global Control-Plane Store Reliability", 20),
-        (904, "Incident Drilldown: Audit / Lineage Completeness", 21),
-        (905, "Identity evidence and remaining replay-safety signals", 22),
+        (902, "Incident Drilldown: Replay Safety (Checkpoint / Replay)", 21),
+        (901, "Incident Drilldown: Manifest / Ledger Integrity", 22),
+        (903, "Incident Drilldown: Global Control-Plane Store Reliability", 23),
+        (904, "Incident Drilldown: Audit / Lineage Completeness", 24),
+        (905, "Identity evidence and remaining replay-safety signals", 25),
     ], f"Control Plane row order/title drifted: {row_pairs}"
 
 
@@ -312,7 +312,7 @@ def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> No
     assert trio_xs == [0, 8, 16], (
         f"Unexpected replay-safety KPI placement: xs={trio_xs}"
     )
-    assert trio_ys == {16}
+    assert trio_ys == {22}
 
 
 def test_control_plane_lineage_top_band_uses_full_row_width() -> None:

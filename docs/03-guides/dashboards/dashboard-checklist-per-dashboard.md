@@ -242,7 +242,7 @@
 - [ ] Known Blind Spots и terminal-event evidence ниже fold в collapsed incident rows
 - [ ] `Identity evidence and remaining replay-safety signals` exposes P0/P1/P2 anchors through `/ops/control-plane/identity-evidence` without Prometheus ID labels
 - [ ] `Review: Remaining Replay-Safety Signals` lists only evidence still outside the identity endpoint
-- [ ] Starts с answer-first Trust Summary block
+- [ ] Starts с answer-first trust cards
 
 ### Cross-scope markers
 - [ ] Переходы в `bioetl-provider-health-v2` используют маркер `Context mapping`

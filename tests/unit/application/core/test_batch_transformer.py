@@ -60,6 +60,7 @@ class TestBatchTransformerTransform:
         assert len(result.silver_records) == 2
         assert len(result.gold_records) == 1
         assert result.quarantined_count == 0
+        assert result.gold_excluded_by_contract_count == 1
 
     async def test_transform_batch_empty_records(self, batch_transformer):
         """Test transformation with empty records list."""
@@ -352,6 +353,7 @@ class TestBatchTransformerTransform:
         assert len(result.silver_records) == 2
         assert len(result.gold_records) == 2
         assert result.quarantined_count == 1
+        assert result.gold_excluded_by_contract_count == 0
         assert result.filtered_out_count == 0
         mock_quarantine_manager.quarantine_records.assert_called_once()
 
@@ -835,8 +837,28 @@ class TestBatchTransformerAggregationHelpers:
         assert len(state.filtered_records) == 1
         assert len(state.dq_records) == 1
         assert result.quarantined_count == 1
+        assert result.gold_excluded_by_contract_count == 0
         assert result.filtered_out_count == 1
         assert result.records_quarantine_failed == 3
+
+    def test_apply_transform_outcome_tracks_gold_excluded_by_contract(self) -> None:
+        """Batch aggregation should count records excluded from Gold by contract."""
+        state = create_transform_aggregation_state()
+
+        apply_transform_outcome_to_state(
+            state=state,
+            attempt=RecordTransformOutcome(
+                silver_record={"entity_id": "1"},
+                gold_record=None,
+                gold_excluded_by_contract=True,
+            ),
+        )
+
+        result = build_transform_result(state)
+
+        assert len(result.silver_records) == 1
+        assert len(result.gold_records) == 0
+        assert result.gold_excluded_by_contract_count == 1
 
     async def test_finalize_batch_transform_result_flushes_and_builds_result(
         self,
@@ -905,7 +927,28 @@ class TestBatchTransformerAggregationHelpers:
         assert len(result.silver_records) == 1
         assert len(result.gold_records) == 1
         assert result.quarantined_count == 1
+        assert result.gold_excluded_by_contract_count == 0
         assert result.records_quarantine_failed == 1
+
+    def test_apply_stream_transform_result_tracks_gold_excluded_by_contract(self) -> None:
+        """Stream aggregation should count records excluded from Gold by contract."""
+        state = create_transform_aggregation_state()
+
+        apply_stream_transform_result_to_state(
+            state=state,
+            result=TransformedRecord(
+                silver_record={"entity_id": "1"},
+                gold_record=None,
+                is_quarantined=False,
+                gold_excluded_by_contract=True,
+            ),
+        )
+
+        result = build_transform_result(state)
+
+        assert len(result.silver_records) == 1
+        assert len(result.gold_records) == 0
+        assert result.gold_excluded_by_contract_count == 1
 
     @pytest.mark.asyncio
     async def test_finalize_stream_transform_result_builds_result(
@@ -939,6 +982,7 @@ class TestBatchTransformerAggregationHelpers:
         )
 
         assert len(result.silver_records) == 1
+        assert result.gold_excluded_by_contract_count == 0
         assert result.filtered_out_count == 0
         assert result.quarantined_count == 0
 

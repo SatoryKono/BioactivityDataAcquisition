@@ -38,12 +38,14 @@ def _make_transform_result(
     silver: list | None = None,
     gold: list | None = None,
     quarantined: int = 0,
+    gold_excluded_by_contract: int = 0,
     filtered_out: int = 0,
 ) -> TransformResult:
     return TransformResult(
         silver_records=silver or [],
         gold_records=gold or [],
         quarantined_count=quarantined,
+        gold_excluded_by_contract_count=gold_excluded_by_contract,
         filtered_out_count=filtered_out,
     )
 

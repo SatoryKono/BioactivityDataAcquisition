@@ -360,7 +360,7 @@ def test_control_plane_global_diagnostics_block_exists():
     # и что они не фильтруются по $pipeline/$run_type
 
 def test_control_plane_first_screen_trust_summary():
-    """First screen должен начинаться с Trust Summary block."""
+    """First screen должен начинаться с answer-first trust cards."""
     trust_summary_panels = [
         "Monitor: Replay Safety State",
         "Inspect: Checkpoint Freshness Gap",

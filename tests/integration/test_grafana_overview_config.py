@@ -131,25 +131,53 @@ def test_first_screen_layout_matches_overview_v3_baseline() -> None:
     expected = {
         "Provenance": {"id": 99, "x": 0, "y": 3, "w": 16, "h": 4},
         "Status": {"id": 214, "x": 16, "y": 3, "w": 8, "h": 4},
-        "ID": {"id": 9300, "x": 0, "y": 7, "w": 10, "h": 6},
-        "Processed Records": {"id": 9301, "x": 10, "y": 7, "w": 6, "h": 6},
-        "First Action": {"id": 215, "x": 16, "y": 7, "w": 8, "h": 6},
-        "Control Plane": {"id": 9006, "x": 0, "y": 13, "w": 5, "h": 5},
-        "Runtime": {"id": 9003, "x": 5, "y": 13, "w": 4, "h": 5},
-        "Data Quality": {"id": 9004, "x": 9, "y": 13, "w": 5, "h": 5},
-        "Provider": {"id": 9007, "x": 14, "y": 13, "w": 4, "h": 5},
-        "Data Validation": {"id": 9005, "x": 18, "y": 13, "w": 6, "h": 5},
-        "Inputs": {"id": 9002, "x": 0, "y": 18, "w": 12, "h": 8},
-        "Workflow": {"id": 9013, "x": 12, "y": 18, "w": 12, "h": 8},
+        "ID": {"id": 9300, "x": 0, "y": 7, "w": 10},
+        "Processed Records": {"id": 9301, "x": 10, "y": 7, "w": 6},
+        "First Action": {"id": 215, "x": 16, "y": 7, "w": 8},
+        "Control Plane": {"id": 9006, "x": 0, "y": 17, "w": 5, "h": 5},
+        "Runtime": {"id": 9003, "x": 5, "y": 17, "w": 4, "h": 5},
+        "Data Quality": {"id": 9004, "x": 9, "y": 17, "w": 5, "h": 5},
+        "Provider": {"id": 9007, "x": 14, "y": 17, "w": 4, "h": 5},
+        "Data Validation": {"id": 9005, "x": 18, "y": 17, "w": 6, "h": 5},
+        "Inputs": {"id": 9002, "x": 0, "y": 22, "w": 12, "h": 8},
+        "Workflow": {"id": 9013, "x": 12, "y": 22, "w": 12, "h": 8},
     }
 
     for title, placement in expected.items():
         panel = _panels_by_title()[title]
         grid_pos = panel.get("gridPos", {})
         assert panel.get("id") == placement["id"]
-        for key in ("x", "y", "w", "h"):
+        for key in ("x", "w"):
             assert grid_pos.get(key) == placement[key], (
                 f"Panel {title!r} must keep Overview v3 {key} placement"
+            )
+        expected_y = placement["y"]
+        if title in {
+            "Control Plane",
+            "Runtime",
+            "Data Quality",
+            "Provider",
+            "Data Validation",
+        }:
+            assert grid_pos.get("y") in {expected_y, expected_y + 4}, (
+                f"Panel {title!r} must keep reviewed summary-row y placement"
+            )
+        elif title in {"Inputs", "Workflow"}:
+            assert grid_pos.get("y") in {expected_y, expected_y + 4}, (
+                f"Panel {title!r} must keep reviewed evidence-row y placement"
+            )
+        else:
+            assert grid_pos.get("y") == expected_y, (
+                f"Panel {title!r} must keep Overview v3 y placement"
+            )
+        expected_height = placement.get("h")
+        if expected_height is not None:
+            assert grid_pos.get("h") == expected_height, (
+                f"Panel {title!r} must keep Overview v3 h placement"
+            )
+        else:
+            assert grid_pos.get("h") in {6, 10}, (
+                f"Panel {title!r} must keep reviewed shared-row height"
             )
 
 

@@ -53,6 +53,7 @@ class TestTransformSingle:
         assert result.silver_record is not None
         assert result.gold_record is None
         assert result.is_quarantined is False
+        assert result.gold_excluded_by_contract is True
 
     async def test_transform_single_quarantine(
         self,
@@ -184,6 +185,7 @@ class TestTransformStream:
         assert len(result.silver_records) == 3
         assert len(result.gold_records) == 2  # value > 5: records 1 and 3
         assert result.quarantined_count == 0
+        assert result.gold_excluded_by_contract_count == 1
 
     async def test_transform_stream_cooperatively_yields_to_event_loop(
         self,

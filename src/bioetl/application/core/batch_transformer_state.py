@@ -30,6 +30,7 @@ class RecordTransformOutcome:
 
     silver_record: BronzeRecord | None
     gold_record: GoldRecord | None
+    gold_excluded_by_contract: bool = False
     filtered_entry: FilteredQuarantineEntry | None = None
     dq_entry: DQQuarantineEntry | None = None
 
@@ -41,6 +42,7 @@ class TransformResult:
     silver_records: list[BronzeRecord]
     gold_records: list[GoldRecord]
     quarantined_count: int
+    gold_excluded_by_contract_count: int = 0
     filtered_out_count: int = 0
     records_quarantine_failed: int = 0
 
@@ -52,6 +54,7 @@ class TransformedRecord:
     silver_record: BronzeRecord | None
     gold_record: GoldRecord | None
     is_quarantined: bool
+    gold_excluded_by_contract: bool = False
     is_filtered_out: bool = False
     quarantine_write_failed: bool = False
 
@@ -65,6 +68,7 @@ class TransformAggregationState:
     filtered_records: list[FilteredQuarantineEntry] = field(default_factory=list)
     dq_records: list[DQQuarantineEntry] = field(default_factory=list)
     quarantined_count: int = 0
+    gold_excluded_by_contract_count: int = 0
     filtered_out_count: int = 0
     records_quarantine_failed: int = 0
 
@@ -114,6 +118,12 @@ def apply_transform_outcome_to_state(
     )
     state.quarantined_count += quarantined_delta
     state.filtered_out_count += filtered_delta
+    if (
+        attempt.silver_record is not None
+        and attempt.gold_record is None
+        and attempt.gold_excluded_by_contract
+    ):
+        state.gold_excluded_by_contract_count += 1
 
 
 def accumulate_stream_transform_result(
@@ -151,6 +161,12 @@ def apply_stream_transform_result_to_state(
     state.quarantined_count += quarantined_delta
     state.filtered_out_count += filtered_delta
     state.records_quarantine_failed += failed_delta
+    if (
+        result.silver_record is not None
+        and result.gold_record is None
+        and result.gold_excluded_by_contract
+    ):
+        state.gold_excluded_by_contract_count += 1
 
 
 def build_transform_result(state: TransformAggregationState) -> TransformResult:
@@ -159,6 +175,7 @@ def build_transform_result(state: TransformAggregationState) -> TransformResult:
         silver_records=state.silver_records,
         gold_records=state.gold_records,
         quarantined_count=state.quarantined_count,
+        gold_excluded_by_contract_count=state.gold_excluded_by_contract_count,
         filtered_out_count=state.filtered_out_count,
         records_quarantine_failed=state.records_quarantine_failed,
     )

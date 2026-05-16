@@ -91,6 +91,7 @@ async def route_single_transform_attempt(
             silver_record=attempt.silver_record,
             gold_record=attempt.gold_record,
             is_quarantined=False,
+            gold_excluded_by_contract=attempt.gold_excluded_by_contract,
         )
     if attempt.filtered_entry is not None:
         failed = await flush_filtered_records(

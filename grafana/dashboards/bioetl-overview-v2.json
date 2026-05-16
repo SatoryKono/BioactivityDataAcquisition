@@ -515,7 +515,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 22
+        "y": 26
       },
       "datasource": {
         "type": "prometheus",
@@ -932,7 +932,7 @@
         "h": 5,
         "w": 5,
         "x": 9,
-        "y": 17
+        "y": 21
       },
       "datasource": {
         "type": "prometheus",
@@ -1108,7 +1108,7 @@
         "h": 5,
         "w": 6,
         "x": 18,
-        "y": 17
+        "y": 21
       },
       "datasource": {
         "type": "prometheus",
@@ -1284,7 +1284,7 @@
         "h": 5,
         "w": 5,
         "x": 0,
-        "y": 17
+        "y": 21
       },
       "datasource": {
         "type": "prometheus",
@@ -1460,7 +1460,7 @@
         "h": 5,
         "w": 4,
         "x": 14,
-        "y": 17
+        "y": 21
       },
       "datasource": {
         "type": "prometheus",
@@ -1636,7 +1636,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 22
+        "y": 26
       },
       "datasource": {
         "type": "prometheus",
@@ -1812,7 +1812,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 34
       },
       "collapsed": false
     },
@@ -1824,7 +1824,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 31
+        "y": 35
       },
       "datasource": {
         "type": "prometheus",
@@ -1941,7 +1941,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 31
+        "y": 35
       },
       "datasource": {
         "type": "prometheus",
@@ -2056,7 +2056,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 31
+        "y": 35
       },
       "datasource": {
         "type": "prometheus",
@@ -2177,7 +2177,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 39
+        "y": 43
       },
       "collapsed": true,
       "panels": [
@@ -2447,7 +2447,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 40
+        "y": 44
       },
       "collapsed": true,
       "panels": [

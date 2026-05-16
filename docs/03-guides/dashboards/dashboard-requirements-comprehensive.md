@@ -355,7 +355,7 @@ L1/L2 replay/resume safety: manifest, ledger, checkpoint, replay, lineage, globa
 - Manifest/ledger evidence panels route к `run-manifest-inspection.md`
 - Known Blind Spots и terminal-event evidence ниже fold в collapsed incident rows, не в first-screen trust block
 - `Identity evidence and remaining replay-safety signals` ниже fold использует `/ops/control-plane/identity-evidence` для overview/P1/P2 anchors, typed source/drilldown metadata, identity gaps, checkpoint compare и copy-friendly full values; remaining replay-safety note перечисляет только сигналы вне этого endpoint.
-- Starts с answer-first **Trust Summary** block: replay safety state, checkpoint freshness gap, ledger/manifest consistency, telemetry presence
+- Starts с answer-first trust cards: replay safety state, checkpoint freshness gap, ledger/manifest consistency, telemetry presence
 
 ### Cross-scope marker contract
 - Переходы в `bioetl-provider-health-v2` используют маркер `Context mapping`

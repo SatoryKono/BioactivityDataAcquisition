@@ -28,12 +28,30 @@ _QUERY_WINDOW_FUNC_RE = re.compile(
     r"\b(?:rate|increase|count_over_time|max_over_time|histogram_quantile)\b"
 )
 _ALLOWED_DASHBOARD_LINK_VARS = {
-    "bioetl-overview-v2": frozenset({"pipeline", "run_type"}),
-    "bioetl-dq-v2": frozenset({"pipeline", "run_type", "stage"}),
-    "bioetl-runtime": frozenset({"pipeline", "run_type", "stage"}),
-    "bioetl-provider-health-v2": frozenset({"provider", "pipeline_context", "adapter"}),
-    "bioetl-control-plane-v1": frozenset({"pipeline", "run_type"}),
-    "bioetl-workflow-overview": frozenset({"pipeline", "run_type"}),
+    "bioetl-overview-v2": frozenset({"workflow", "pipeline", "run_type", "run_id"}),
+    "bioetl-dq-v2": frozenset(
+        {"workflow", "pipeline", "run_type", "run_id", "stage"}
+    ),
+    "bioetl-runtime": frozenset(
+        {"workflow", "pipeline", "run_type", "run_id", "stage"}
+    ),
+    "bioetl-provider-health-v2": frozenset(
+        {
+            "workflow",
+            "pipeline",
+            "run_type",
+            "run_id",
+            "provider",
+            "pipeline_context",
+            "adapter",
+        }
+    ),
+    "bioetl-control-plane-v1": frozenset(
+        {"workflow", "pipeline", "run_type", "run_id"}
+    ),
+    "bioetl-workflow-overview": frozenset(
+        {"workflow", "pipeline", "run_type", "run_id"}
+    ),
     "bioetl-silver-reject-explorer": frozenset({"pipeline", "run_type"}),
 }
 

@@ -92,15 +92,15 @@ def _build_gold_record(
     silver_record: dict[str, object],
     gold_filter: GoldFilterCallback,
     gold_transform: GoldTransformCallback,
-) -> dict[str, object] | None:
-    """Create a Gold record when the finalized Silver record passes filtering."""
+) -> tuple[dict[str, object] | None, bool]:
+    """Create a Gold record and report contract-based exclusion."""
     if not gold_filter(context, silver_record):
-        return None
+        return None, True
     gold_record = cast(
         dict[str, object] | None,
         gold_transform(context, silver_record),
     )
-    return gold_record
+    return gold_record, False
 
 
 def _resolve_invalid_record_policy(dq_config: DQConfig | None) -> str:
@@ -251,7 +251,7 @@ async def _build_transform_success_outcome(
         silver_record=finalized_record,
         dq_config=dq_config,
     )
-    gold_record = _build_gold_record(
+    gold_record, gold_excluded_by_contract = _build_gold_record(
         context=context,
         silver_record=finalized_record,
         gold_filter=gold_filter,
@@ -260,6 +260,7 @@ async def _build_transform_success_outcome(
     return RecordTransformOutcome(
         silver_record=finalized_record,
         gold_record=gold_record,
+        gold_excluded_by_contract=gold_excluded_by_contract,
     )
 
 
