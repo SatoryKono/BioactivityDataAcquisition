@@ -44,7 +44,7 @@ class AssayParametersSchema(ETLRecordSchema):
         coerce=True,
         description="Additional comments.",
     )
-    relation: Series[str] | None = pa.Field(
+    parameter_relation: Series[str] | None = pa.Field(
         nullable=True,
         coerce=True,
         description="Relation operator (=, <, >, ~, >=, <=).",
@@ -54,7 +54,7 @@ class AssayParametersSchema(ETLRecordSchema):
         coerce=True,
         description="Text value for non-numeric parameters.",
     )
-    type: Series[str] | None = pa.Field(
+    parameter_type: Series[str] | None = pa.Field(
         nullable=True,
         coerce=True,
         description="Parameter type (e.g., CONC, PH, TEMP, TIME).",
@@ -69,7 +69,7 @@ class AssayParametersSchema(ETLRecordSchema):
         coerce=True,
         description="Original units (e.g., uM, nM, %).",
     )
-    value: Series[float] | None = pa.Field(
+    parameter_value: Series[float] | None = pa.Field(
         nullable=True,
         coerce=True,
         description="Numeric value.",
