@@ -122,11 +122,21 @@ class NormalizationProfile:
     field_rules: Mapping[str, FieldRule]
     profile_version: str = "1.0.0"
     meta_fields: frozenset[str] = field(default_factory=frozenset)
+    field_aliases: Mapping[str, str] = field(default_factory=dict)
     description: str | None = None
 
     def __post_init__(self) -> None:
         normalized_rules = dict(
             sorted(self.field_rules.items(), key=lambda item: item[0])
+        )
+        normalized_aliases = dict(
+            sorted(
+                (
+                    (str(alias), str(target))
+                    for alias, target in self.field_aliases.items()
+                ),
+                key=lambda item: item[0],
+            )
         )
         if not normalized_rules:
             raise ValueError("field_rules cannot be empty")
@@ -135,16 +145,32 @@ class NormalizationProfile:
                 raise ValueError(
                     f"FieldRule key {field_name!r} does not match field_name {rule.field_name!r}"
                 )
+        for alias, target in normalized_aliases.items():
+            if alias in normalized_rules:
+                raise ValueError(
+                    f"field_aliases cannot shadow canonical field {alias!r}"
+                )
+            if target not in normalized_rules:
+                raise ValueError(
+                    f"field_alias target {target!r} is missing from field_rules"
+                )
         if not self.meta_fields.issubset(normalized_rules.keys()):
             missing = sorted(self.meta_fields.difference(normalized_rules.keys()))
             raise ValueError(
                 f"meta_fields must be present in field_rules: {', '.join(missing)}"
             )
         object.__setattr__(self, "field_rules", normalized_rules)
+        object.__setattr__(self, "field_aliases", normalized_aliases)
 
     def rule_for(self, field_name: str) -> FieldRule | None:
         """Return the rule for one field when present."""
-        return self.field_rules.get(field_name)
+        rule = self.field_rules.get(field_name)
+        if rule is not None:
+            return rule
+        alias_target = self.field_aliases.get(field_name)
+        if alias_target is None:
+            return None
+        return self.field_rules.get(alias_target)
 
     def field_identity(self, field_name: str) -> FieldRuleIdentity | None:
         """Return deterministic compatibility metadata for one field."""
@@ -188,6 +214,10 @@ class NormalizationProfile:
             "profile_name": self.profile_name,
             "profile_version": self.profile_version,
             "meta_fields": sorted(self.meta_fields),
+            "field_aliases": [
+                {"alias": alias, "target": target}
+                for alias, target in sorted(self.field_aliases.items())
+            ],
             "field_rules": [
                 {
                     "field_name": rule_identity.field_name,

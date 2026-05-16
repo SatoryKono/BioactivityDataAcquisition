@@ -64,8 +64,8 @@ pipelines:
           - bao_endpoint
           - bao_format
           - bao_label
-          - relation
-          - value
+          - activity_relation
+          - activity_value
           - units
           - standard_value
           - standard_flag
@@ -144,7 +144,7 @@ pipelines:
       required_fields:
         structural:
           - assay_id
-          - description
+          - assay_description
           - bao_format
         join_safety:
           - target_id
@@ -170,7 +170,7 @@ pipelines:
         structural:
           - assay_id
           - assay_param_id
-          - type
+          - parameter_type
   chembl_cell_line:
     downstream_role: composite_enricher
     downstream_pipelines: [composite_assay]

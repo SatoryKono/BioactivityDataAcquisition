@@ -6,37 +6,34 @@ Defines the TableConfig value object for database table and key settings.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import Literal
 
 from bioetl.domain.config._converters import convert_write_mode, freeze_sequences
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 
-IdempotencyContract = Literal[
-    "merge_upsert",
-    "scd2",
-    "overwrite_rebuild",
-    "append_log",
-    "partition_append_with_stable_partition_key",
-    "occurrence_only",
-    "disallowed",
-]
+
+class IdempotencyContract(StrEnum):
+    """Canonical idempotency contract values for table write behavior."""
+
+    MERGE_UPSERT = "merge_upsert"
+    SCD2 = "scd2"
+    OVERWRITE_REBUILD = "overwrite_rebuild"
+    APPEND_LOG = "append_log"
+    PARTITION_APPEND_WITH_STABLE_PARTITION_KEY = (
+        "partition_append_with_stable_partition_key"
+    )
+    OCCURRENCE_ONLY = "occurrence_only"
+    DISALLOWED = "disallowed"
 
 IDEMPOTENCY_CONTRACT_VALUES: frozenset[str] = frozenset(
-    {
-        "merge_upsert",
-        "scd2",
-        "overwrite_rebuild",
-        "append_log",
-        "partition_append_with_stable_partition_key",
-        "occurrence_only",
-        "disallowed",
-    }
+    contract.value for contract in IdempotencyContract
 )
 APPEND_SAFE_IDEMPOTENCY_CONTRACTS: frozenset[str] = frozenset(
     {
-        "append_log",
-        "partition_append_with_stable_partition_key",
-        "occurrence_only",
+        IdempotencyContract.APPEND_LOG.value,
+        IdempotencyContract.PARTITION_APPEND_WITH_STABLE_PARTITION_KEY.value,
+        IdempotencyContract.OCCURRENCE_ONLY.value,
     }
 )
 
@@ -111,4 +108,4 @@ def _normalize_idempotency_contract(
         raise ValueError(
             f"Invalid idempotency contract: '{value}'. Valid values: {valid_values}"
         )
-    return normalized  # type: ignore[return-value]
+    return IdempotencyContract(normalized)

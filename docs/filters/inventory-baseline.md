@@ -43,8 +43,8 @@ Source: `configs/entities/chembl/activity.yaml`
 | required_fields | `bao_endpoint` | `"bao_endpoint"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
 | required_fields | `bao_format` | `"bao_format"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
 | required_fields | `bao_label` | `"bao_label"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
-| required_fields | `relation` | `"relation"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
-| required_fields | `value` | `"value"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
+| required_fields | `activity_relation` | `"activity_relation"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
+| required_fields | `activity_value` | `"activity_value"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
 | required_fields | `units` | `"units"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
 | required_fields | `standard_value` | `"standard_value"` | `"standard_value"` | **keep_in_silver** | also present in gold_filters (informational) |
 | required_fields | `standard_units` | `"standard_units"` | `"standard_units"` | **keep_in_silver** | also present in gold_filters (informational) |
@@ -79,7 +79,7 @@ Source: `configs/entities/chembl/assay.yaml`
 | --- | --- | --- | --- | --- | --- |
 | required_fields | `assay_id` | `"assay_id"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
 | required_fields | `assay_type` | `"assay_type"` | `"assay_type"` | **keep_in_silver** | also present in gold_filters (informational) |
-| required_fields | `description` | `"description"` | `"description"` | **keep_in_silver** | also present in gold_filters (informational) |
+| required_fields | `assay_description` | `"assay_description"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
 | required_fields | `target_id` | `"target_id"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
 | required_fields | `publication_id` | `"publication_id"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
 | required_fields | `bao_format` | `"bao_format"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
@@ -101,7 +101,7 @@ Source: `configs/entities/chembl/assay_parameters.yaml`
 | --- | --- | --- | --- | --- | --- |
 | required_fields | `assay_id` | `"assay_id"` | `"assay_id"` | **keep_in_silver** | also present in gold_filters (informational) |
 | required_fields | `assay_param_id` | `"assay_param_id"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
-| required_fields | `type` | `"type"` | `"type"` | **keep_in_silver** | also present in gold_filters (informational) |
+| required_fields | `parameter_type` | `"parameter_type"` | `"parameter_type"` | **keep_in_silver** | also present in gold_filters (informational) |
 
 ### `chembl.cell_line`
 

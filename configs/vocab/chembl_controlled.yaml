@@ -62,6 +62,7 @@ controlled_vocabularies:
     invalid_value_mode: preserve_unknown_uppercase_lexeme
     fields:
       - chembl_assay_parameters.type
+      - chembl_assay_parameters.parameter_type
   assay_categories:
     canonicalizer: normalize_profile_governed_vocabulary
     invalid_value_mode: reject_unknown_lexeme

@@ -74,6 +74,13 @@ GENERIC_COLLISION_CLUSTERS = frozenset(
         "shared_value",
     }
 )
+GENERIC_COLLISION_LEXICAL_FIELDS = {
+    "shared_description": "description",
+    "shared_relation": "relation",
+    "shared_score": "score",
+    "shared_type": "type",
+    "shared_value": "value",
+}
 OPTIONAL_COMPOSITE_LINEAGE_CLUSTERS = frozenset(
     {
         "shared_record_id",
@@ -475,6 +482,12 @@ def _refresh_clusters(
             cluster_id=cluster_id,
             semantic_status=semantic_status,
         )
+        lexical_field = GENERIC_COLLISION_LEXICAL_FIELDS.get(cluster_id)
+        if lexical_field is not None and members:
+            if not any(str(member.get("field") or "") == lexical_field for member in members):
+                continue
+        if not members:
+            continue
         if review is not None:
             refreshed_cluster["review"] = _review_metadata(review)
         refreshed_cluster["member_count"] = len(members)
@@ -764,97 +777,85 @@ def _drift_risk(
     return previous_risk if previous_risk in {"HIGH", "MEDIUM"} else "MEDIUM"
 
 
-def _member(
-    facts: dict[tuple[str, str], dict[str, Any]],
-    old_row: dict[str, str],
-    side: str,
-) -> dict[str, Any]:
-    pipeline = old_row[f"Pipeline {side}"]
-    field = old_row[f"Field {side}"]
-    return facts.get(
-        (pipeline, field),
-        {
-            "pipeline": pipeline,
-            "field": field,
-            "field_type": old_row.get(f"Type {side}", ""),
-            "gold_path": old_row.get(f"Gold Contract {side}", ""),
-            "normalizer": old_row.get(f"Normalizer {side}", ""),
-            "roles": old_row.get(f"Join Semantics {side}", "").split(";"),
-            "dq_coverage": "",
-        },
-    )
-
-
 def _refresh_pair_rows(
-    seed_rows: list[dict[str, str]],
-    facts: dict[tuple[str, str], dict[str, Any]],
+    registry: dict[str, Any],
     review_lookup: dict[str, dict[str, Any]],
 ) -> list[dict[str, str]]:
     refreshed: list[dict[str, str]] = []
-    for old_row in seed_rows:
-        member_a = _member(facts, old_row, "A")
-        member_b = _member(facts, old_row, "B")
-        semantic_status = old_row.get("Semantic Status", "")
-        cluster_id = old_row["Cluster ID"]
-        normalization = _normalization_status(
-            member_a,
-            member_b,
-            cluster_id=cluster_id,
-            semantic_status=semantic_status,
+    for cluster in registry.get("clusters", []):
+        if not isinstance(cluster, dict):
+            continue
+        cluster_id = str(cluster.get("cluster_id") or "")
+        semantic_status = str(cluster.get("semantic_status") or "")
+        members = cluster.get("members", [])
+        if not isinstance(members, list) or len(members) < 2:
+            continue
+        ordered_members = sorted(
+            [
+                member
+                for member in members
+                if isinstance(member, dict)
+                and isinstance(member.get("pipeline"), str)
+                and isinstance(member.get("field"), str)
+            ],
+            key=lambda member: (
+                str(member.get("pipeline") or ""),
+                str(member.get("field") or ""),
+            ),
         )
-        validation = _validation_status(
-            member_a,
-            member_b,
-            semantic_status=semantic_status,
-        )
-        typing = _typing_status(member_a, member_b)
-        drift_risk = _drift_risk(
-            cluster_id=cluster_id,
-            semantic_status=semantic_status,
-            normalization=normalization,
-            validation=validation,
-            typing=typing,
-            previous_risk=old_row.get("Drift Risk", "LOW"),
-        )
-        row = {
-            "Cluster ID": cluster_id,
-            "Pipeline A": old_row["Pipeline A"],
-            "Field A": old_row["Field A"],
-            "Pipeline B": old_row["Pipeline B"],
-            "Field B": old_row["Field B"],
-            "Semantic Status": semantic_status,
-            "Normalization": normalization,
-            "Validation": validation,
-            "Typing": typing,
-            "Drift Risk": _apply_reviewed_risk_cap(
-                drift_risk,
-                cluster_id=cluster_id,
-                review_lookup=review_lookup,
-            ),
-            "Join Semantics A": _join_semantics(
-                member_a, old_row.get("Join Semantics A", "")
-            ),
-            "Join Semantics B": _join_semantics(
-                member_b, old_row.get("Join Semantics B", "")
-            ),
-            "Normalizer A": str(member_a.get("normalizer") or ""),
-            "Normalizer B": str(member_b.get("normalizer") or ""),
-            "Validation Evidence A": _validation_evidence(member_a),
-            "Validation Evidence B": _validation_evidence(member_b),
-            "Type A": str(member_a.get("field_type") or old_row.get("Type A", "")),
-            "Type B": str(member_b.get("field_type") or old_row.get("Type B", "")),
-            "Gold Contract A": str(member_a.get("gold_path") or ""),
-            "Gold Contract B": str(member_b.get("gold_path") or ""),
-            "Evidence A": str(
-                member_a.get("config_path") or old_row.get("Evidence A", "")
-            ),
-            "Evidence B": str(
-                member_b.get("config_path") or old_row.get("Evidence B", "")
-            ),
-            "Row Key": "",
-        }
-        row["Row Key"] = _row_key(row)
-        refreshed.append(row)
+        for index, member_a in enumerate(ordered_members):
+            for member_b in ordered_members[index + 1 :]:
+                normalization = _normalization_status(
+                    member_a,
+                    member_b,
+                    cluster_id=cluster_id,
+                    semantic_status=semantic_status,
+                )
+                validation = _validation_status(
+                    member_a,
+                    member_b,
+                    semantic_status=semantic_status,
+                )
+                typing = _typing_status(member_a, member_b)
+                drift_risk = _drift_risk(
+                    cluster_id=cluster_id,
+                    semantic_status=semantic_status,
+                    normalization=normalization,
+                    validation=validation,
+                    typing=typing,
+                    previous_risk="LOW",
+                )
+                row = {
+                    "Cluster ID": cluster_id,
+                    "Pipeline A": str(member_a.get("pipeline") or ""),
+                    "Field A": str(member_a.get("field") or ""),
+                    "Pipeline B": str(member_b.get("pipeline") or ""),
+                    "Field B": str(member_b.get("field") or ""),
+                    "Semantic Status": semantic_status,
+                    "Normalization": normalization,
+                    "Validation": validation,
+                    "Typing": typing,
+                    "Drift Risk": _apply_reviewed_risk_cap(
+                        drift_risk,
+                        cluster_id=cluster_id,
+                        review_lookup=review_lookup,
+                    ),
+                    "Join Semantics A": _join_semantics(member_a, ""),
+                    "Join Semantics B": _join_semantics(member_b, ""),
+                    "Normalizer A": str(member_a.get("normalizer") or ""),
+                    "Normalizer B": str(member_b.get("normalizer") or ""),
+                    "Validation Evidence A": _validation_evidence(member_a),
+                    "Validation Evidence B": _validation_evidence(member_b),
+                    "Type A": str(member_a.get("field_type") or ""),
+                    "Type B": str(member_b.get("field_type") or ""),
+                    "Gold Contract A": str(member_a.get("gold_path") or ""),
+                    "Gold Contract B": str(member_b.get("gold_path") or ""),
+                    "Evidence A": str(member_a.get("config_path") or ""),
+                    "Evidence B": str(member_b.get("config_path") or ""),
+                    "Row Key": "",
+                }
+                row["Row Key"] = _row_key(row)
+                refreshed.append(row)
     return refreshed
 
 
@@ -1301,11 +1302,10 @@ def _manifest(
 def build_artifacts(
     *,
     source_date: str,
-    seed_pair_matrix: Path,
+    _seed_pair_matrix: Path,
     seed_cluster_registry: Path,
     review_registry: Path = DEFAULT_REVIEW_REGISTRY,
 ) -> dict[str, str]:
-    seed_rows = _load_csv(seed_pair_matrix)
     seed_registry = _load_json(seed_cluster_registry)
     review_payload = _load_yaml(review_registry)
     review_lookup = _risk_cap_lookup(review_payload)
@@ -1317,7 +1317,7 @@ def build_artifacts(
         review_registry=review_payload,
         source_date=source_date,
     )
-    pair_rows = _refresh_pair_rows(seed_rows, facts, review_lookup)
+    pair_rows = _refresh_pair_rows(registry, review_lookup)
     residual_backlog = _build_residual_backlog(
         pair_rows,
         registry,
@@ -1392,7 +1392,7 @@ def write_artifacts(
 ) -> dict[str, Any]:
     artifacts = build_artifacts(
         source_date=source_date,
-        seed_pair_matrix=seed_pair_matrix,
+        _seed_pair_matrix=seed_pair_matrix,
         seed_cluster_registry=seed_cluster_registry,
         review_registry=review_registry,
     )
@@ -1421,7 +1421,7 @@ def check_artifacts(
 ) -> int:
     artifacts = build_artifacts(
         source_date=source_date,
-        seed_pair_matrix=seed_pair_matrix,
+        _seed_pair_matrix=seed_pair_matrix,
         seed_cluster_registry=seed_cluster_registry,
         review_registry=review_registry,
     )

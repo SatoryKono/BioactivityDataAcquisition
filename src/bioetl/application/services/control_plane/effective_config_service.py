@@ -34,6 +34,94 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 from bioetl.domain.types import JsonDict
 
 
+def _build_effective_config_context(
+    *,
+    pipeline_name: str,
+    pipeline_kind: str,
+    resolved_config: JsonDict,
+    runtime_overrides: JsonDict,
+    source_refs: list[ConfigSourceRef],
+    dq_config: DQConfig | None,
+    resolution_policy: ConfigResolutionPolicy | None,
+    required_persistence_profile: str,
+    normalization_profile_ref: str | None,
+    normalization_profile_version: str | None,
+    normalization_profile_hash: str | None,
+) -> dict[str, object]:
+    """Build the derived snapshots and semantic payload context for one artifact."""
+    resolved_policy = resolve_resolution_policy(resolution_policy)
+    resolved_snapshot = build_resolved_config_snapshot(
+        pipeline_kind=pipeline_kind,
+        resolved_config=resolved_config,
+    )
+    overrides_snapshot = build_runtime_override_snapshot(runtime_overrides)
+    execution_environment = build_execution_environment_snapshot(
+        runtime_overrides,
+        required_persistence_profile=required_persistence_profile,
+    )
+    effective_snapshot = build_effective_execution_config(
+        resolved_config=resolved_config,
+        runtime_overrides=runtime_overrides,
+    )
+    dq_policy_refs, dq_policy_snapshots, dq_rule_bundle_versions = build_dq_components(
+        dq_config
+    )
+    dq_contract_compatibility_hash = (
+        "no_dq_policies"
+        if not dq_policy_refs
+        else ":".join(
+            sorted(
+                ref.policy_hash
+                for ref in dq_policy_refs
+                if ref.policy_hash is not None and ref.policy_hash
+            )
+        )
+        or "no_dq_policy_hashes"
+    )
+    source_fingerprint = compute_source_fingerprint(source_refs)
+    contract_refs = extract_contract_refs(dq_config)
+    source_class_provenance = build_source_class_provenance()
+    semantic_identity_payload = build_semantic_identity_payload(
+        request=SemanticIdentityPayloadContext(
+            pipeline_name=pipeline_name,
+            pipeline_kind=pipeline_kind,
+            source_refs=source_refs,
+            source_class_provenance=source_class_provenance,
+            resolution_policy=resolved_policy,
+            resolved_config=resolved_snapshot,
+            runtime_overrides=overrides_snapshot,
+            execution_environment=execution_environment,
+            effective_execution_config=effective_snapshot,
+            resolved_config_hash=resolved_snapshot.config_hash,
+            effective_config_hash=effective_snapshot.effective_hash,
+            source_fingerprint=source_fingerprint,
+            contract_refs=contract_refs,
+            normalization_profile_ref=normalization_profile_ref,
+            normalization_profile_version=normalization_profile_version,
+            normalization_profile_hash=normalization_profile_hash,
+            dq_policy_refs=dq_policy_refs,
+            dq_rule_bundle_versions=dq_rule_bundle_versions,
+            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+            dq_policy_snapshots=dq_policy_snapshots,
+        ),
+    )
+    return {
+        "contract_refs": contract_refs,
+        "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
+        "dq_policy_refs": dq_policy_refs,
+        "dq_policy_snapshots": dq_policy_snapshots,
+        "dq_rule_bundle_versions": dq_rule_bundle_versions,
+        "effective_snapshot": effective_snapshot,
+        "execution_environment": execution_environment,
+        "overrides_snapshot": overrides_snapshot,
+        "resolved_policy": resolved_policy,
+        "resolved_snapshot": resolved_snapshot,
+        "semantic_identity_payload": semantic_identity_payload,
+        "source_class_provenance": source_class_provenance,
+        "source_fingerprint": source_fingerprint,
+    }
+
+
 class EffectiveConfigService:
     """Create and compare effective configuration artifacts."""
 
@@ -57,88 +145,44 @@ class EffectiveConfigService:
             runtime_overrides=runtime_overrides,
             required_persistence_profile=required_persistence_profile,
         )
-        resolved_policy = resolve_resolution_policy(resolution_policy)
-        resolved_snapshot = build_resolved_config_snapshot(
+        context = _build_effective_config_context(
+            pipeline_name=pipeline_name,
             pipeline_kind=pipeline_kind,
             resolved_config=resolved_config,
-        )
-        overrides_snapshot = build_runtime_override_snapshot(runtime_overrides)
-        execution_environment = build_execution_environment_snapshot(
-            runtime_overrides,
-            required_persistence_profile=required_persistence_profile,
-        )
-        effective_snapshot = build_effective_execution_config(
-            resolved_config=resolved_config,
             runtime_overrides=runtime_overrides,
-        )
-
-        dq_policy_refs, dq_policy_snapshots, dq_rule_bundle_versions = (
-            build_dq_components(dq_config)
-        )
-        dq_contract_compatibility_hash = (
-            "no_dq_policies"
-            if not dq_policy_refs
-            else ":".join(
-                sorted(
-                    ref.policy_hash
-                    for ref in dq_policy_refs
-                    if ref.policy_hash is not None and ref.policy_hash
-                )
-            )
-            or "no_dq_policy_hashes"
-        )
-        resolved_source_fingerprint = compute_source_fingerprint(source_refs)
-        resolved_contract_refs = extract_contract_refs(dq_config)
-        source_class_provenance = build_source_class_provenance()
-        semantic_identity_payload = build_semantic_identity_payload(
-            request=SemanticIdentityPayloadContext(
-                pipeline_name=pipeline_name,
-                pipeline_kind=pipeline_kind,
-                source_refs=source_refs,
-                source_class_provenance=source_class_provenance,
-                resolution_policy=resolved_policy,
-                resolved_config=resolved_snapshot,
-                runtime_overrides=overrides_snapshot,
-                execution_environment=execution_environment,
-                effective_execution_config=effective_snapshot,
-                resolved_config_hash=resolved_snapshot.config_hash,
-                effective_config_hash=effective_snapshot.effective_hash,
-                source_fingerprint=resolved_source_fingerprint,
-                contract_refs=resolved_contract_refs,
-                normalization_profile_ref=normalization_profile_ref,
-                normalization_profile_version=normalization_profile_version,
-                normalization_profile_hash=normalization_profile_hash,
-                dq_policy_refs=dq_policy_refs,
-                dq_rule_bundle_versions=dq_rule_bundle_versions,
-                dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-                dq_policy_snapshots=dq_policy_snapshots,
-            ),
+            source_refs=source_refs,
+            dq_config=dq_config,
+            resolution_policy=resolution_policy,
+            required_persistence_profile=required_persistence_profile,
+            normalization_profile_ref=normalization_profile_ref,
+            normalization_profile_version=normalization_profile_version,
+            normalization_profile_hash=normalization_profile_hash,
         )
         resolved_artifact_id = artifact_id or build_effective_config_artifact_id(
-            semantic_identity_payload
+            context["semantic_identity_payload"]
         )
         return EffectiveConfigArtifact(
             artifact_id=resolved_artifact_id,
             pipeline_name=pipeline_name,
             pipeline_kind=pipeline_kind,
             source_refs=source_refs,
-            source_class_provenance=source_class_provenance,
-            resolution_policy=resolved_policy,
-            resolved_config=resolved_snapshot,
-            runtime_overrides=overrides_snapshot,
-            execution_environment=execution_environment,
-            effective_execution_config=effective_snapshot,
-            resolved_config_hash=resolved_snapshot.config_hash,
-            effective_config_hash=effective_snapshot.effective_hash,
-            source_fingerprint=resolved_source_fingerprint,
-            contract_refs=resolved_contract_refs,
+            source_class_provenance=context["source_class_provenance"],
+            resolution_policy=context["resolved_policy"],
+            resolved_config=context["resolved_snapshot"],
+            runtime_overrides=context["overrides_snapshot"],
+            execution_environment=context["execution_environment"],
+            effective_execution_config=context["effective_snapshot"],
+            resolved_config_hash=context["resolved_snapshot"].config_hash,
+            effective_config_hash=context["effective_snapshot"].effective_hash,
+            source_fingerprint=context["source_fingerprint"],
+            contract_refs=context["contract_refs"],
             normalization_profile_ref=normalization_profile_ref,
             normalization_profile_version=normalization_profile_version,
             normalization_profile_hash=normalization_profile_hash,
-            dq_policy_refs=dq_policy_refs,
-            dq_rule_bundle_versions=dq_rule_bundle_versions,
-            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-            dq_policy_snapshots=dq_policy_snapshots,
+            dq_policy_refs=context["dq_policy_refs"],
+            dq_rule_bundle_versions=context["dq_rule_bundle_versions"],
+            dq_contract_compatibility_hash=context["dq_contract_compatibility_hash"],
+            dq_policy_snapshots=context["dq_policy_snapshots"],
         )
 
     def serialize_artifact(self, artifact: EffectiveConfigArtifact) -> str:

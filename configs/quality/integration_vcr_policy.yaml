@@ -209,6 +209,7 @@ tracked_suite_inventory:
     - tests/integration/config/test_publication_nested_vocabulary_inventory.py
     - tests/integration/config/test_semantic_anchor_parity.py
     - tests/integration/config/test_semantic_field_unification_contract.py
+    - tests/integration/config/test_semantic_governance_policy.py
     - tests/integration/config/test_semantic_pair_matrix_budget.py
     - tests/integration/config/test_semantic_registry_drift.py
     - tests/integration/config/test_uniprot_semantic_payload_vocabulary_inventory.py

@@ -3,28 +3,27 @@
   "source_date": "2026-05-15",
   "summary": {
     "blocking_task_count": 0,
-    "clusters": 287,
+    "clusters": 282,
     "normalization_counts": {
-      "COMPATIBLE": 900,
-      "IDENTICAL": 2348
+      "COMPATIBLE": 886,
+      "IDENTICAL": 2347
     },
-    "pair_rows": 3248,
+    "pair_rows": 3233,
     "risk_counts": {
-      "LOW": 3248
+      "LOW": 3233
     },
     "semantic_status_counts": {
-      "CONFLICTING": 20,
-      "EXACT": 2722,
-      "PARTIAL": 67,
+      "EXACT": 2726,
+      "PARTIAL": 68,
       "WEAK": 439
     },
     "typing_counts": {
-      "COMPATIBLE": 664,
-      "IDENTICAL": 2584
+      "COMPATIBLE": 662,
+      "IDENTICAL": 2571
     },
     "validation_counts": {
-      "COMPATIBLE": 1053,
-      "IDENTICAL": 2195
+      "COMPATIBLE": 1039,
+      "IDENTICAL": 2194
     }
   },
   "tasks": [
@@ -50,12 +49,12 @@
       "gate": "uv run python -m scripts.engineering.qa check-semantic-registry-drift --check --json",
       "id": "partial_identity_policy_review",
       "priority": "P2",
-      "row_count": 67,
+      "row_count": 68,
       "status": "reviewed_until_expiry",
       "top_clusters": [
         {
           "cluster_id": "pmc_identifier",
-          "row_count": 27
+          "row_count": 28
         },
         {
           "cluster_id": "chembl_target_identifier",
@@ -136,41 +135,20 @@
     },
     {
       "definition_of_done": "Generic lexical collisions remain explicit owner-reviewed warnings instead of canonical fields.",
-      "expires_on": "2026-11-15",
+      "expires_on": "",
       "gate": "uv run python -m scripts.engineering.qa check-generic-field-ownership --check --json",
       "id": "generic_collision_inventory_review",
       "priority": "P2",
-      "row_count": 20,
+      "row_count": 0,
       "status": "reviewed_until_expiry",
-      "top_clusters": [
-        {
-          "cluster_id": "shared_description",
-          "row_count": 10
-        },
-        {
-          "cluster_id": "shared_type",
-          "row_count": 3
-        },
-        {
-          "cluster_id": "shared_value",
-          "row_count": 3
-        },
-        {
-          "cluster_id": "shared_relation",
-          "row_count": 3
-        },
-        {
-          "cluster_id": "shared_score",
-          "row_count": 1
-        }
-      ]
+      "top_clusters": []
     },
     {
       "definition_of_done": "Compatible normalization rows may decrease, but must not grow without an intentional budget update.",
       "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
       "id": "compatible_normalization_ratchet",
       "priority": "P2",
-      "row_count": 900,
+      "row_count": 886,
       "status": "ratcheted",
       "top_clusters": [
         {
@@ -202,10 +180,6 @@
           "row_count": 14
         },
         {
-          "cluster_id": "shared_src_id",
-          "row_count": 12
-        },
-        {
           "cluster_id": "publication_publication_type",
           "row_count": 12
         },
@@ -215,6 +189,10 @@
         },
         {
           "cluster_id": "shared_publication_id",
+          "row_count": 12
+        },
+        {
+          "cluster_id": "shared_src_id",
           "row_count": 12
         },
         {
@@ -228,7 +206,7 @@
       "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
       "id": "compatible_validation_ratchet",
       "priority": "P2",
-      "row_count": 1053,
+      "row_count": 1039,
       "status": "ratcheted",
       "top_clusters": [
         {
@@ -286,7 +264,7 @@
       "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
       "id": "compatible_typing_ratchet",
       "priority": "P2",
-      "row_count": 664,
+      "row_count": 662,
       "status": "ratcheted",
       "top_clusters": [
         {
@@ -306,11 +284,11 @@
           "row_count": 18
         },
         {
-          "cluster_id": "shared_src_id",
+          "cluster_id": "shared_publication_id",
           "row_count": 15
         },
         {
-          "cluster_id": "shared_publication_id",
+          "cluster_id": "shared_src_id",
           "row_count": 15
         },
         {

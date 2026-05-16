@@ -147,6 +147,7 @@ def build_standard_profile(
         profile_name=profile_spec.profile_name,
         description=profile_spec.description,
         meta_fields=normalized_meta_fields,
+        field_aliases=profile_spec.field_aliases,
         field_rules=field_rules,
     )
 

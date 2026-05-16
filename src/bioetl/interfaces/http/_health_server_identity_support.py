@@ -2,6 +2,17 @@
 
 from __future__ import annotations
 
+from typing import cast
+
+from bioetl.domain.control_plane import RunManifest
+from bioetl.interfaces.http.control_plane_identity.checkpoint import (
+    build_checkpoint_compare,
+)
+from bioetl.interfaces.http.control_plane_identity.extractors import (
+    build_anchor_values,
+    is_composite,
+)
+
 
 def build_control_plane_identity_payload(
     *,
@@ -39,59 +50,235 @@ def _build_identity_rows(
         if len(selected_pipelines) != 1 and resolved_manifest is None
         else "not available for current scope"
     )
-    provenance_unavailable = "not available in selected manifest"
-    code_provenance = (
-        getattr(resolved_manifest, "code_provenance", None)
+    manifest = (
+        cast(RunManifest, resolved_manifest)
         if resolved_manifest is not None
         else None
     )
-    return [
+    values = _anchor_values(manifest)
+    rows = [
         _identity_row(
-            "manifest_id",
-            getattr(resolved_manifest, "manifest_id", None),
+            "Run ID [Pipeline]",
+            values.get("run_id") or selected_run_id,
             unavailable=manifest_unavailable,
         ),
         _identity_row(
-            "run_id",
-            getattr(resolved_manifest, "run_id", None) or selected_run_id,
+            "Manifest ID [Control Plane]",
+            values.get("manifest_id"),
             unavailable=manifest_unavailable,
         ),
         _identity_row(
-            "pipeline name",
-            getattr(resolved_manifest, "pipeline_name", None) or requested_pipeline,
+            "Provider.Entity [Version]",
+            _provider_entity_version(
+                requested_pipeline=requested_pipeline,
+                values=values,
+            ),
             unavailable="not available for current scope",
         ),
         _identity_row(
-            "pipelineversion",
-            getattr(code_provenance, "pipeline_version", None),
-            unavailable=provenance_unavailable,
+            "Contract [Schema]",
+            _contract_schema(values),
+            unavailable="not available in selected manifest",
         ),
         _identity_row(
-            "git commit hash",
-            getattr(code_provenance, "git_commit", None),
-            unavailable=provenance_unavailable,
-        ),
-        _identity_row(
-            "config hash",
-            getattr(code_provenance, "config_hash", None),
-            unavailable=provenance_unavailable,
-        ),
-        _identity_row(
-            "execution fingerprint",
-            getattr(resolved_manifest, "execution_fingerprint", None),
+            "Execution [Type|Context|Git]",
+            _execution_summary(manifest, values),
             unavailable=manifest_unavailable,
         ),
         _identity_row(
-            "schema contract",
-            getattr(code_provenance, "contract_ref", None),
-            unavailable=provenance_unavailable,
+            "Resume|Dry run|Cached Bronze",
+            _execution_flags(manifest),
+            unavailable=manifest_unavailable,
         ),
         _identity_row(
-            "version",
-            getattr(code_provenance, "contract_version", None),
-            unavailable=provenance_unavailable,
+            "Replay [Capability.Mode]",
+            _replay_summary(values),
+            unavailable=manifest_unavailable,
+        ),
+        _identity_row(
+            "Checkpoint [Anchors]",
+            values.get("checkpoint_anchor_status"),
+            unavailable=manifest_unavailable,
         ),
     ]
+    if manifest is not None and is_composite(manifest):
+        rows.append(
+            _identity_row(
+                "Composite Run",
+                values.get("composite_run_identity"),
+                unavailable="not available in selected manifest",
+            )
+        )
+    rows.append(
+        _identity_row(
+            "Identity Health [Gaps]",
+            _identity_health(values) if manifest is not None else None,
+            unavailable=manifest_unavailable,
+        )
+    )
+    return rows
+
+
+def _anchor_values(manifest: RunManifest | None) -> dict[str, object | None]:
+    if manifest is None:
+        return {}
+    checkpoint_status = str(build_checkpoint_compare(manifest).get("status") or "")
+    return build_anchor_values(
+        manifest,
+        ledger_entries=(),
+        checkpoint_status=checkpoint_status,
+    )
+
+
+def _provider_entity_version(
+    *,
+    requested_pipeline: str,
+    values: dict[str, object | None],
+) -> str | None:
+    scope = _text(values.get("provider_entity")) or requested_pipeline
+    version = _text(values.get("pipeline_version"))
+    return f"{scope} [{version}]" if version else scope
+
+
+def _contract_schema(values: dict[str, object | None]) -> str | None:
+    contract_ref = _text(values.get("contract_ref"))
+    contract_version = _text(values.get("contract_version"))
+    schema_hash = _text(values.get("contract_schema_hash"))
+    contract = (
+        f"{contract_ref}.{contract_version}"
+        if contract_ref and contract_version
+        else contract_ref or (f"version={contract_version}" if contract_version else "")
+    )
+    if contract and schema_hash:
+        return f"{contract} [{schema_hash}]"
+    return contract or (f"schema={schema_hash}" if schema_hash else None)
+
+
+def _execution_summary(
+    manifest: RunManifest | None,
+    values: dict[str, object | None],
+) -> str | None:
+    if manifest is None:
+        return None
+    run_type = _text(getattr(manifest.run_type, "value", manifest.run_type))
+    context = _payload_value(manifest, "execution_context")
+    if not context:
+        context = "composite" if is_composite(manifest) else "isolated"
+    git_commit = _text(values.get("git_commit"))
+    parts = [item for item in (run_type, context) if item]
+    if git_commit:
+        parts.append(f"git={git_commit}")
+    return " | ".join(parts)
+
+
+def _execution_flags(manifest: RunManifest | None) -> str | None:
+    if manifest is None:
+        return None
+    return " | ".join(
+        (
+            _yes_no(_payload_value(manifest, "resume")),
+            _yes_no(_payload_value(manifest, "dry_run")),
+            _yes_no(_payload_value(manifest, "use_cached_bronze")),
+        )
+    )
+
+
+def _replay_summary(values: dict[str, object | None]) -> str | None:
+    if not values:
+        return None
+    eligible = _display_eligible(values.get("exact_replay_eligible"))
+    capability = _display_capability(values.get("replay_capability"))
+    mode = _display_replay_mode(values.get("replay_mode"))
+    return f"{eligible} [{capability}.{mode}]"
+
+
+def _identity_health(values: dict[str, object | None]) -> str:
+    gaps = values.get("correlation_anchor_gaps")
+    gap_count = _gap_count(gaps)
+    complete = values.get("identity_graph_complete")
+    if complete is True or str(complete).strip().lower() == "complete":
+        status = "Complete"
+    elif complete is False or gap_count:
+        status = "Incomplete"
+    else:
+        status = "Unknown"
+    return f"{status} [{gap_count} gaps]"
+
+
+def _payload_value(manifest: RunManifest, *keys: str) -> str | None:
+    for payload in (
+        manifest.runtime_config,
+        manifest.launch_context,
+        manifest.resolved_config,
+    ):
+        for key in keys:
+            value = payload.get(key)
+            if value not in (None, False, "", [], {}):
+                return str(value)
+    return None
+
+
+def _yes_no(value: object | None) -> str:
+    if value is True:
+        return "Yes"
+    if isinstance(value, str) and value.strip().lower() in {"true", "yes", "1"}:
+        return "Yes"
+    return "No"
+
+
+def _display_eligible(value: object | None) -> str:
+    if value is True:
+        return "Yes"
+    if isinstance(value, str) and value.strip().lower() in {"true", "yes", "1"}:
+        return "Yes"
+    if value is False or value is not None:
+        return "No"
+    return "Unknown"
+
+
+def _display_capability(value: object | None) -> str:
+    normalized = _normalized_token(value)
+    return {
+        "exact_replay_supported": "Supported",
+        "resume_only": "Resume only",
+        "rebuild_only": "Rebuild only",
+    }.get(normalized, _title_token(normalized))
+
+
+def _display_replay_mode(value: object | None) -> str:
+    normalized = _normalized_token(value)
+    return {
+        "exact_replay": "Exact Replay",
+        "replay": "Replay",
+        "backfill": "Backfill",
+        "rebuild": "Rebuild",
+        "incremental": "Incremental",
+    }.get(normalized, _title_token(normalized))
+
+
+def _normalized_token(value: object | None) -> str:
+    raw_value = getattr(value, "value", value)
+    return str(raw_value or "unknown").strip().lower().replace("-", "_")
+
+
+def _title_token(value: str) -> str:
+    return value.replace("_", " ").title() if value else "Unknown"
+
+
+def _gap_count(value: object | None) -> int:
+    if isinstance(value, dict):
+        total = 0
+        for item in value.values():
+            if isinstance(item, (int, float, bool)):
+                total += int(item)
+            elif isinstance(item, list | tuple | set | dict):
+                total += len(item)
+            elif item:
+                total += 1
+        return total
+    if isinstance(value, list | tuple | set):
+        return len(value)
+    return 0
 
 
 def _identity_row(
@@ -108,3 +295,10 @@ def _display(value: object | None, *, unavailable: str) -> str:
         return unavailable
     text = str(value).strip()
     return text or unavailable
+
+
+def _text(value: object | None) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None

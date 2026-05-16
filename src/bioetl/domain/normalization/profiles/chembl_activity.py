@@ -246,6 +246,11 @@ CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
     set_like_fields=SET_LIKE_FIELDS,
     strict_json_fields=_STRICT_JSON_FIELDS,
     ontology_id_fields=_ONTOLOGY_ID_FIELDS,
+    field_aliases={
+        "relation": "activity_relation",
+        "type": "activity_type",
+        "value": "activity_value",
+    },
     enum_fields={
         "standard_relation": STANDARD_RELATIONS,
         "standard_type": ACTIVITY_STANDARD_TYPES,

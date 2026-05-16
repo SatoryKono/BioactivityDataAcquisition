@@ -37,6 +37,7 @@ class StandardProfileSpec:
     flag_fields: Collection[str] = field(default_factory=tuple)
     operator_fields: Collection[str] = field(default_factory=tuple)
     ontology_id_fields: Collection[str] = field(default_factory=tuple)
+    field_aliases: Mapping[str, str] = field(default_factory=dict)
     enum_fields: Mapping[str, frozenset[str]] | None = None
     case_fields: Mapping[str, frozenset[str] | None] | None = None
     unit_fields: Collection[str] | None = None
@@ -67,6 +68,7 @@ _STANDARD_PROFILE_OPTIONAL_DEFAULTS: dict[str, object] = {
     "flag_fields": (),
     "operator_fields": (),
     "ontology_id_fields": (),
+    "field_aliases": {},
     "enum_fields": None,
     "case_fields": None,
     "unit_fields": None,
@@ -99,6 +101,7 @@ class _StandardProfileSpecKwargs(TypedDict):
     flag_fields: Collection[str]
     operator_fields: Collection[str]
     ontology_id_fields: Collection[str]
+    field_aliases: Mapping[str, str]
     enum_fields: Mapping[str, frozenset[str]] | None
     case_fields: Mapping[str, frozenset[str] | None] | None
     unit_fields: Collection[str] | None

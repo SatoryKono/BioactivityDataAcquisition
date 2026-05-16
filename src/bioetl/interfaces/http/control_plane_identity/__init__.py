@@ -1,5 +1,7 @@
 """Control-plane identity evidence payload assembly."""
 
+from __future__ import annotations
+
 from bioetl.interfaces.http.control_plane_identity.payload import (
     build_control_plane_identity_evidence_payload,
 )

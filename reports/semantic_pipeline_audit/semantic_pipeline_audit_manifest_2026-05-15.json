@@ -338,50 +338,49 @@
       ],
       "semantic_surface_count": 286
     },
-    "clusters": 287,
-    "fields": 1154,
+    "clusters": 282,
+    "fields": 1152,
     "normalization": {
-      "COMPATIBLE": 900,
-      "IDENTICAL": 2348
+      "COMPATIBLE": 886,
+      "IDENTICAL": 2347
     },
-    "pairs": 3248,
+    "pairs": 3233,
     "pipelines": 26,
     "residual_backlog": {
       "blocking_task_count": 0,
-      "clusters": 287,
+      "clusters": 282,
       "normalization_counts": {
-        "COMPATIBLE": 900,
-        "IDENTICAL": 2348
+        "COMPATIBLE": 886,
+        "IDENTICAL": 2347
       },
-      "pair_rows": 3248,
+      "pair_rows": 3233,
       "risk_counts": {
-        "LOW": 3248
+        "LOW": 3233
       },
       "semantic_status_counts": {
-        "CONFLICTING": 20,
-        "EXACT": 2722,
-        "PARTIAL": 67,
+        "EXACT": 2726,
+        "PARTIAL": 68,
         "WEAK": 439
       },
       "typing_counts": {
-        "COMPATIBLE": 664,
-        "IDENTICAL": 2584
+        "COMPATIBLE": 662,
+        "IDENTICAL": 2571
       },
       "validation_counts": {
-        "COMPATIBLE": 1053,
-        "IDENTICAL": 2195
+        "COMPATIBLE": 1039,
+        "IDENTICAL": 2194
       }
     },
     "risk": {
-      "LOW": 3248
+      "LOW": 3233
     },
     "typing": {
-      "COMPATIBLE": 664,
-      "IDENTICAL": 2584
+      "COMPATIBLE": 662,
+      "IDENTICAL": 2571
     },
     "validation": {
-      "COMPATIBLE": 1053,
-      "IDENTICAL": 2195
+      "COMPATIBLE": 1039,
+      "IDENTICAL": 2194
     }
   },
   "generated_at": "2026-05-15T00:00:00Z",

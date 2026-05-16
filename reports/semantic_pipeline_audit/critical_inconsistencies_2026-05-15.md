@@ -7,7 +7,7 @@ Generated: `2026-05-15`
 - CRITICAL: `0`
 - HIGH: `0`
 - MEDIUM: `0`
-- LOW: `3248`
+- LOW: `3233`
 
 ## CRITICAL And HIGH Rows
 

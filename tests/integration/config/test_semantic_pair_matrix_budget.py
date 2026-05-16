@@ -52,15 +52,15 @@ def test_reviewed_critical_rows_are_timeboxed_and_owned() -> None:
         (row["column"], row["value"]): row["max_count"]
         for row in payload["status_budgets"]
     } == {
-        ("Semantic Status", "PARTIAL"): 67,
+        ("Semantic Status", "PARTIAL"): 68,
         ("Semantic Status", "WEAK"): 439,
-        ("Semantic Status", "CONFLICTING"): 20,
+        ("Semantic Status", "CONFLICTING"): 0,
         ("Normalization", "DIFFERENT"): 0,
-        ("Normalization", "COMPATIBLE"): 900,
+        ("Normalization", "COMPATIBLE"): 886,
         ("Typing", "CONFLICTING"): 0,
-        ("Typing", "COMPATIBLE"): 664,
+        ("Typing", "COMPATIBLE"): 662,
         ("Validation", "STRICTNESS_MISMATCH"): 0,
-        ("Validation", "COMPATIBLE"): 1053,
+        ("Validation", "COMPATIBLE"): 1039,
     }
     assert len(reviewed_rows) == payload["budgets"]["CRITICAL"]["max_count"]
     for row in reviewed_rows:

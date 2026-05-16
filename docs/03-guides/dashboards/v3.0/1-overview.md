@@ -143,11 +143,13 @@ Row 4: Optional Resolved-Run Context
 Current shipped draft behavior:
 
 - `bioetl-overview-v3` shows a control-plane-backed `Run Identity` block with
-  `manifest_id` / `run_id` for the current control-plane scope. `Run Type=All`
-  is treated as an unbounded run-type filter; `Pipeline=All` still keeps L0
-  status aggregate-first and needs an exact `run_id` before the identity block
-  claims one manifest, while aggregate L0 status remains pipeline/run_type
-  scoped;
+  compact rows for run/manifest IDs, Provider.Entity version, contract schema,
+  execution flags, replay capability/mode, checkpoint anchors, optional
+  composite run identity, and identity health for the current control-plane
+  scope. `Run Type=All` is treated as an unbounded run-type filter;
+  `Pipeline=All` still keeps L0 status aggregate-first and needs an exact
+  `run_id` before the identity block claims one manifest, while aggregate L0
+  status remains pipeline/run_type scoped;
 - `Records / Invariants` documents the accounting model and routes the operator
   to `4. Data Quality` / `Silver Reject Explorer` for exact bounded evidence.
 

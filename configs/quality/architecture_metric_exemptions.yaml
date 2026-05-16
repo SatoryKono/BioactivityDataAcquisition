@@ -19,7 +19,7 @@ registries:
       value: 460
       owner: "@bioetl-platform"
       reason: "HTTP health-server routing helper is a retained interface seam pending endpoint-family extraction; current size is tracked by architecture tests."
-      classification: "temporary_structural_debt"
+      classification: "technical_debt"
       linked_rf: "RF-000"
       expires_on: "2026-09-30"
       removal_step: "Split endpoint routing helpers by health/control-plane family and remove this exemption."
@@ -27,7 +27,7 @@ registries:
       value: 600
       owner: "@bioetl-platform"
       reason: "Control-plane identity HTTP specs retain generated/request-response schema surfaces in one published interface module pending schema-family split."
-      classification: "temporary_structural_debt"
+      classification: "technical_debt"
       linked_rf: "RF-000"
       expires_on: "2026-09-30"
       removal_step: "Move identity spec groups into smaller modules and remove this exemption."
@@ -35,7 +35,7 @@ registries:
       value: 480
       owner: "@bioetl-platform"
       reason: "Control-plane identity extraction helpers are mid-refactor and currently retain anchor, artifact, checkpoint, and replay extractors in one interface module."
-      classification: "temporary_structural_debt"
+      classification: "technical_debt"
       linked_rf: "RF-000"
       expires_on: "2026-09-30"
       removal_step: "Split checkpoint/replay/artifact extraction helpers into focused control-plane identity modules and remove this exemption."

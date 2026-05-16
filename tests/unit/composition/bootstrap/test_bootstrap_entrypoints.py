@@ -207,10 +207,14 @@ class TestBootstrapPipeline:
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
     )
+    @patch(
+        "bioetl.composition.runtime_builders.runner_builder.create_run_manifest_with_effective_config"
+    )
     @patch("bioetl.infrastructure.config.get_settings")
     def test_bootstrap_pipeline_creates_runner_without_starting_server(
         self,
         mock_get_settings: MagicMock,
+        mock_create_run_manifest: MagicMock,
         mock_bootstrap_observability_bundle: MagicMock,
         mock_load_config: MagicMock,
         mock_assemble_filter: MagicMock,
@@ -235,6 +239,27 @@ class TestBootstrapPipeline:
         mock_bootstrap_observability_bundle.return_value = _create_observability_bundle(
             mock_logger
         )
+        mock_create_run_manifest.return_value = (
+            SimpleNamespace(
+                manifest_id="manifest-bootstrap-test",
+                execution_fingerprint="fp-bootstrap-test",
+                config_hash="a" * 64,
+                resolved_config_hash="b" * 64,
+                effective_config_hash="c" * 64,
+                dq_contract_compatibility_hash="d" * 64,
+                effective_config_artifact_id="eca-bootstrap-test",
+                contract_ref="chembl.activity",
+                contract_version="1.0.0",
+                contract_schema_hash="e" * 64,
+                dq_policy_ref="chembl.activity.dq",
+                rule_bundle_version="dq-rules.v1",
+                normalization_profile_ref=None,
+                normalization_profile_version=None,
+                normalization_profile_hash=None,
+                required_persistence_profile="degraded_observable",
+            ),
+            None,
+        )
 
         mock_assemble_filter.return_value = None
 
@@ -258,8 +283,12 @@ class TestBootstrapPipeline:
     @patch("bioetl.composition.bootstrap.runtime.pipeline.ensure_providers_loaded")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
+    @patch(
+        "bioetl.composition.runtime_builders.runner_builder.create_run_manifest_with_effective_config"
+    )
     def test_bootstrap_pipeline_chembl_activity(
         self,
+        mock_create_run_manifest,
         mock_load_config,
         mock_register_pipelines,
         mock_ensure_loaded,
@@ -279,6 +308,27 @@ class TestBootstrapPipeline:
         mock_load_config.return_value = _create_pipeline_yaml_config()
         mock_observability_bundle.return_value = _create_observability_bundle(
             mock_logger
+        )
+        mock_create_run_manifest.return_value = (
+            SimpleNamespace(
+                manifest_id="manifest-bootstrap-chembl-activity",
+                execution_fingerprint="fp-bootstrap-chembl-activity",
+                config_hash="f" * 64,
+                resolved_config_hash="e" * 64,
+                effective_config_hash="d" * 64,
+                dq_contract_compatibility_hash="c" * 64,
+                effective_config_artifact_id="eca-bootstrap-chembl-activity",
+                contract_ref="chembl.activity",
+                contract_version="1.0.0",
+                contract_schema_hash="b" * 64,
+                dq_policy_ref="chembl.activity.dq",
+                rule_bundle_version="dq-rules.v1",
+                normalization_profile_ref=None,
+                normalization_profile_version=None,
+                normalization_profile_hash=None,
+                required_persistence_profile="degraded_observable",
+            ),
+            None,
         )
         _, mock_factory, mock_runner = _configure_registry_with_runner(
             mock_create_registry

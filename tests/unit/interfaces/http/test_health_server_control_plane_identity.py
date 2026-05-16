@@ -137,12 +137,14 @@ def test_control_plane_identity_checkpoint_compare_classifies_partial() -> None:
         pipeline_name="chembl_activity",
         provider="chembl",
         entity="activity",
+        launch_context={},
         runtime_config={
             "checkpoint_metadata": {
                 "manifest_id": "manifest-partial",
                 "execution_fingerprint": "fingerprint-partial",
             }
         },
+        resolved_config={},
         code_provenance=RunCodeProvenance(
             pipeline_version="1.0.0",
             git_commit="abc1234",
@@ -733,13 +735,20 @@ class TestHealthServerControlPlaneSelector:
         data = json.loads(body)
         rows = {item["parameter"]: item["value"] for item in data["rows"]}
         assert data["resolved_via"] == "latest_manifest_for_scope"
-        assert rows["manifest_id"] == "manifest-2"
-        assert rows["pipeline name"] == "chembl_activity"
-        assert rows["run_id"]
-        assert rows["pipelineversion"] == "1.0.0"
-        assert rows["git commit hash"] == "def5678"
-        assert rows["config hash"] == "feedface"
-        assert rows["execution fingerprint"] == "fingerprint-2"
+        assert rows["Manifest ID [Control Plane]"] == "manifest-2"
+        assert rows["Provider.Entity [Version]"] == "chembl.activity [1.0.0]"
+        assert rows["Run ID [Pipeline]"]
+        assert rows["Contract [Schema]"] == (
+            "chembl.activity.2026.05 "
+            "[bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb]"
+        )
+        assert rows["Execution [Type|Context|Git]"] == (
+            "backfill | isolated | git=def5678"
+        )
+        assert rows["Resume|Dry run|Cached Bronze"] == "No | No | No"
+        assert rows["Replay [Capability.Mode]"] == "Yes [Supported.Backfill]"
+        assert rows["Checkpoint [Anchors]"] == "OK"
+        assert rows["Identity Health [Gaps]"] == "Complete [0 gaps]"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_treats_all_run_type_as_unbounded_scope(
@@ -761,8 +770,8 @@ class TestHealthServerControlPlaneSelector:
         data = json.loads(body)
         rows = {item["parameter"]: item["value"] for item in data["rows"]}
         assert data["resolved_via"] == "latest_manifest_for_scope"
-        assert rows["manifest_id"] == "manifest-2"
-        assert rows["pipeline name"] == "chembl_activity"
+        assert rows["Manifest ID [Control Plane]"] == "manifest-2"
+        assert rows["Provider.Entity [Version]"] == "chembl.activity [1.0.0]"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_treats_run_id_dash_as_unselected(
@@ -783,8 +792,8 @@ class TestHealthServerControlPlaneSelector:
         data = json.loads(body)
         rows = {item["parameter"]: item["value"] for item in data["rows"]}
         assert data["resolved_via"] == "latest_manifest_for_scope"
-        assert rows["manifest_id"] == "manifest-2"
-        assert rows["pipeline name"] == "chembl_activity"
+        assert rows["Manifest ID [Control Plane]"] == "manifest-2"
+        assert rows["Provider.Entity [Version]"] == "chembl.activity [1.0.0]"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_prefers_selected_run_id(
@@ -811,9 +820,11 @@ class TestHealthServerControlPlaneSelector:
         data = json.loads(body)
         rows = {item["parameter"]: item["value"] for item in data["rows"]}
         assert data["resolved_via"] == "selected_run_id"
-        assert rows["manifest_id"] == "manifest-1"
-        assert rows["run_id"] == str(selected_manifest.run_id)
-        assert rows["execution fingerprint"] == "fingerprint-1"
+        assert rows["Manifest ID [Control Plane]"] == "manifest-1"
+        assert rows["Run ID [Pipeline]"] == str(selected_manifest.run_id)
+        assert rows["Execution [Type|Context|Git]"] == (
+            "incremental | isolated | git=abc1234"
+        )
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_supports_all_pipeline_with_selected_run_id(
@@ -840,9 +851,9 @@ class TestHealthServerControlPlaneSelector:
         data = json.loads(body)
         rows = {item["parameter"]: item["value"] for item in data["rows"]}
         assert data["resolved_via"] == "selected_run_id"
-        assert rows["manifest_id"] == "manifest-3"
-        assert rows["pipeline name"] == "pubchem_compound"
-        assert rows["run_id"] == str(selected_manifest.run_id)
+        assert rows["Manifest ID [Control Plane]"] == "manifest-3"
+        assert rows["Provider.Entity [Version]"] == "pubchem.compound [1.0.0]"
+        assert rows["Run ID [Pipeline]"] == str(selected_manifest.run_id)
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_requires_exact_run_id_for_all_pipeline_scope(
@@ -863,9 +874,14 @@ class TestHealthServerControlPlaneSelector:
         data = json.loads(body)
         rows = {item["parameter"]: item["value"] for item in data["rows"]}
         assert data["resolved_via"] == "aggregate_scope_requires_exact_run_id"
-        assert rows["manifest_id"] == "select one concrete pipeline or exact run_id"
-        assert rows["run_id"] == "select one concrete pipeline or exact run_id"
-        assert rows["pipeline name"] == "$__all"
+        assert (
+            rows["Manifest ID [Control Plane]"]
+            == "select one concrete pipeline or exact run_id"
+        )
+        assert rows["Run ID [Pipeline]"] == (
+            "select one concrete pipeline or exact run_id"
+        )
+        assert rows["Provider.Entity [Version]"] == "$__all"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_treats_brace_expanded_pipeline_scope_as_aggregate(
@@ -888,10 +904,15 @@ class TestHealthServerControlPlaneSelector:
         data = json.loads(body)
         rows = {item["parameter"]: item["value"] for item in data["rows"]}
         assert data["resolved_via"] == "aggregate_scope_requires_exact_run_id"
-        assert rows["manifest_id"] == "select one concrete pipeline or exact run_id"
-        assert rows["run_id"] == "select one concrete pipeline or exact run_id"
         assert (
-            rows["pipeline name"]
+            rows["Manifest ID [Control Plane]"]
+            == "select one concrete pipeline or exact run_id"
+        )
+        assert rows["Run ID [Pipeline]"] == (
+            "select one concrete pipeline or exact run_id"
+        )
+        assert (
+            rows["Provider.Entity [Version]"]
             == "{chembl_activity,chembl_assay,chembl_publication,chembl_target,test_pipe}"
         )
 
@@ -932,16 +953,46 @@ class TestHealthServerControlPlaneSelector:
         assert status_code == 200
         data = json.loads(body)
         assert [item["parameter"] for item in data["rows"]] == [
-            "manifest_id",
-            "run_id",
-            "pipeline name",
-            "pipelineversion",
-            "git commit hash",
-            "config hash",
-            "execution fingerprint",
-            "schema contract",
-            "version",
+            "Run ID [Pipeline]",
+            "Manifest ID [Control Plane]",
+            "Provider.Entity [Version]",
+            "Contract [Schema]",
+            "Execution [Type|Context|Git]",
+            "Resume|Dry run|Cached Bronze",
+            "Replay [Capability.Mode]",
+            "Checkpoint [Anchors]",
+            "Identity Health [Gaps]",
         ]
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_table_adds_composite_row_conditionally(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Composite run identity belongs in the compact shell only for composite runs."""
+        server, manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        composite_manifest = next(
+            manifest
+            for manifest in manifest_store.list_all()
+            if manifest.manifest_id == "manifest-4"
+        )
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-table?"
+            f"pipeline=$__all&run_id={composite_manifest.run_id}",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        rows = {item["parameter"]: item["value"] for item in data["rows"]}
+        assert rows["Composite Run"] == "composite-run-4"
+        assert rows["Execution [Type|Context|Git]"] == (
+            "rebuild | composite | git=jkl3456"
+        )
+        assert rows["Replay [Capability.Mode]"] == "No [Rebuild only.Exact Replay]"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_evidence_returns_anchor_contract(
