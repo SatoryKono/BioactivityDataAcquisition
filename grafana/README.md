@@ -685,14 +685,15 @@ Primary dashboards `0..5` используют общий operator context shell
 
 `$run_id` в primary dashboards остаётся HTTP-backed local identity selector
 для панели `ID`; он не используется в Prometheus label filtering и не
-передаётся как cross-dashboard filter.
+становится Prometheus-backed cross-dashboard filter. Между primary dashboards
+он передаётся как exact HTTP identity context.
 Его option list строится через `/ops/control-plane/filter-options` с текущими
 `workflow/pipeline/run_type`, а coherent tuple для будущей selector-shell
 интеграции отдаёт `/ops/control-plane/selector-context`. Native Grafana
 variables не умеют безопасно auto-write sibling selectors без custom shell.
 Dashboard-to-dashboard links поэтому явно передают общий shell
-`workflow/pipeline/run_type` и target-specific bounded vars через `var-*`,
-без `includeVars=true`.
+`workflow/pipeline/run_type`, preserved identity `run_id` для primary targets
+и target-specific bounded vars через `var-*`, без `includeVars=true`.
 
 ### 6.0 Shared context shell
 
@@ -701,7 +702,7 @@ Dashboard-to-dashboard links поэтому явно передают общий
 | `$workflow` | `0..5` | `label_values(bioetl_workflow_runs_total, workflow)` | Context/evidence unless a panel documents truthful current-status intersection. |
 | `$pipeline` | `0..5` | Dashboard-bounded Prometheus universe: Overview/DQ/Provider/Workflow use `bioetl_records_processed_total`; Runtime uses `bioetl_runtime_pipeline_run_type_universe`; Control Plane uses `bioetl_control_plane_run_type_universe`. | Canonical pipeline context; Overview may default to `All`, non-Overview dashboards fail-close to `unknown`. |
 | `$run_type` | `0..5` | Same bounded universe as `$pipeline` for the dashboard role. | Multi-select Include All; missing context is `All`, not `unknown`. |
-| `$run_id` | `0..5` | Quarantine Explorer HTTP `/ops/control-plane/filter-options?dimension=run_id...&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}` | Local control-plane identity context only; no Include All; default `-`. |
+| `$run_id` | `0..5` | Quarantine Explorer HTTP `/ops/control-plane/filter-options?dimension=run_id...&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}` | Preserved HTTP identity context for `ID`/details panels; no Include All; default `-`; never a Prometheus label. |
 
 Common context panels on primary dashboards outside Overview:
 

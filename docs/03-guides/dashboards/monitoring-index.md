@@ -38,7 +38,8 @@ First-screen policy rule: every operator dashboard should expose one
 Primary dashboards `0..5` share the Overview-derived context shell
 (`workflow`, `pipeline`, `run_type`, `run_id`) and common
 `Provenance` / `Status` / `ID` / `Processed Records` panels. `run_id` remains
-local identity context and must not become a Prometheus label.
+HTTP identity context, is preserved between primary dashboards, and must not
+become a Prometheus label.
 `Processed Records` is the shared compact Bronze/Silver/Gold stage/outcome
 accounting table from `/ops/observability/processed-records`, backed by
 `bioetl_processed_records_*` recording rules with `value` and formatted
@@ -55,7 +56,8 @@ Current canonical Overview baseline:
 
 - `bioetl-overview-v2` materializes the explicit header contract
 - it remains aggregate-first and routes exact run forensics to Control Plane /
-  Silver Reject Explorer; its local `run_id` selector feeds only the `ID` panel
+  Silver Reject Explorer; its primary `run_id` selector feeds HTTP identity
+  panels and is not mapped to Silver `quarantine_run_id` by generic links
 
 ## If X symptom → open dashboard Y → panel Z
 

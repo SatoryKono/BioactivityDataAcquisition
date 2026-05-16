@@ -53,8 +53,9 @@ Grafana dashboards в BioETL.
   only for secondary or noisy detail.
 - Primary dashboards `0..5` expose the shared operator context shell:
   `$workflow`, `$pipeline`, `$run_type`, `$run_id`, plus role-specific
-  extensions. `run_id` remains local to the control-plane-backed `ID` panel and
-  MUST NOT leak into Prometheus queries or cross-dashboard links.
+  extensions. `run_id` remains HTTP-backed identity context for the `ID` panel,
+  is preserved between primary dashboards, and MUST NOT leak into Prometheus
+  queries or Silver forensic selectors.
 - `1. Overview` intentionally ships with `Workflow=All`, `Pipeline=All`,
   `Run Type=All`, and `Run ID=-` as its default entry scope.
 - Во всех остальных pipeline/provider dashboards `$pipeline` и `$provider`
@@ -87,11 +88,11 @@ Grafana dashboards в BioETL.
   `ONE BIG QUESTION`, current scope, provenance summary и `First action`.
 - Для cross-dashboard links не полагайся на blanket `includeVars=true`:
   передавай только target-scoped `var-*` параметры. Для primary dashboards это
-  общий `workflow/pipeline/run_type` shell; для Silver Explorer это bounded
-  `pipeline/run_type`.
-- Не копируй exact identifiers (`run_id`, `quarantine_run_id`, `payload_hash`)
-  в Prometheus dashboards, summary panels или generic drilldowns. Shared
-  `run_id` is allowed only as HTTP-backed identity context.
+  общий `workflow/pipeline/run_type` shell плюс preserved `run_id`; для Silver
+  Explorer это bounded `pipeline/run_type`.
+- Не копируй forensic identifiers (`quarantine_run_id`, `payload_hash`) в
+  Prometheus dashboards, summary panels или generic drilldowns. Shared `run_id`
+  is allowed only as HTTP-backed identity context between primary dashboards.
 - Не используй encoded Loki interpolation по `$pipeline/$provider` как источник истины.
 - Не превращай `Alert Conditions` в “real alert engine”, если datasource/state этого не поддерживает.
 - Не добавляй datasource health tiles по умолчанию. Сначала докажи, что без

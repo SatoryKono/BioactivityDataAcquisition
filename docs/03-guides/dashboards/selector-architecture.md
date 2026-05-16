@@ -41,7 +41,8 @@ Shared visible context shell:
 - `run_id`
 
 Role-specific extensions remain dashboard-owned. `run_id` is HTTP-backed
-control-plane identity context only and MUST NOT become a Prometheus label.
+control-plane identity context, is preserved between primary dashboards that
+expose the same selector, and MUST NOT become a Prometheus label.
 The control-plane selector resolver exposes `/ops/control-plane/selector-context`
 for coherent local selector tuples and `/ops/control-plane/filter-options` for
 Grafana option lists.
@@ -67,7 +68,7 @@ selectors include the shared context shell and optional role-specific filters:
 - `workflow` as context/evidence
 - `pipeline`
 - `run_type`
-- `run_id` as local identity context only
+- `run_id` as preserved HTTP identity context
 - optional `stage`
 - Grafana time range
 
@@ -82,7 +83,7 @@ context shell for provenance, identity, and processed-record evidence:
 
 - `workflow` as context/evidence
 - `pipeline` / `run_type` as context shell
-- `run_id` as local identity context only
+- `run_id` as preserved HTTP identity context
 - visible `provider`
 - hidden `pipeline_context`
 - hidden detail-only `adapter`
@@ -102,7 +103,7 @@ triage. It ships the shared context shell plus workflow-local filters:
 
 - `workflow`
 - `pipeline` / `run_type` as context shell
-- `run_id` as local identity context only
+- `run_id` as preserved HTTP identity context
 - `status`
 - `step_status`
 - `step_kind`
@@ -160,9 +161,10 @@ Execution-aware selectors include:
 - `execution_fingerprint`
 
 `run_id` is shipped in the primary context shell, backed by the local
-control-plane HTTP surface. It selects local identity/provenance rows, not
-Prometheus time-series. `run_selector_mode`, `started_at`, `manifest_id`, and
-`execution_fingerprint` remain future/local-catalog candidates.
+control-plane HTTP surface. It is preserved across primary dashboard links for
+identity/provenance rows, not Prometheus time-series. `run_selector_mode`,
+`started_at`, `manifest_id`, and `execution_fingerprint` remain
+future/local-catalog candidates.
 
 `bioetl-overview-v2` is the current hybrid Overview baseline and
 `bioetl-overview-v3` remains a draft/snapshot for the same selector shape.
@@ -228,6 +230,8 @@ Rules:
 - hidden vars preserve context or detail-only scope
 - hidden vars do not automatically become visible selectors
 - forensic identifiers do not propagate across dashboards by default
+- primary `run_id` propagates only between primary dashboards that expose the
+  same selector and is never mapped to Silver `quarantine_run_id`
 - no blanket `includeVars=true` semantics for cross-dashboard navigation
 
 ## Why exact execution filtering is not shipped everywhere today
@@ -239,10 +243,11 @@ The repo already has canonical execution anchors such as:
 - `execution_fingerprint`
 - `PipelineContext.started_at`
 
-`run_id` is now exposed through the shared context shell, but it remains local
-identity/provenance context. The other anchors live in control-plane artifacts,
-manifests, sidecars, and diagnostic surfaces. They do not currently exist as a
-universal Grafana filtering model for Prometheus-backed current-status panels.
+`run_id` is now exposed through the shared context shell and preserved as
+identity/provenance context between primary dashboards. The other anchors live
+in control-plane artifacts, manifests, sidecars, and diagnostic surfaces. They
+do not currently exist as a universal Grafana filtering model for
+Prometheus-backed current-status panels.
 
 Prometheus is also the wrong place to solve this because project rules forbid
 high-cardinality runtime identifiers such as `run_id`, `manifest_id`, and
@@ -282,7 +287,8 @@ Not allowed:
 
 - Prometheus label explosion for execution identifiers
 - cyclic Grafana variable dependencies
-- dashboard-to-dashboard propagation of `run_id`
+- blanket `includeVars=true` propagation of `run_id`
+- mapping primary `run_id` into Silver `quarantine_run_id` on generic links
 
 Native Grafana query variables can consume resolver option lists, but they
 cannot safely auto-write sibling visible selectors. Full bidirectional

@@ -114,23 +114,53 @@ required_link_vars_by_target_uid:
   bioetl-silver-reject-explorer: [pipeline, run_type]
   bioetl-workflow-overview: [workflow, pipeline, run_type]
 allowed_dashboard_link_vars:
-  bioetl-overview-v2: [workflow, pipeline, run_type]
-  bioetl-overview-v3: [workflow, pipeline, run_type]
-  bioetl-dq-v2: [workflow, pipeline, run_type, stage]
-  bioetl-runtime: [workflow, pipeline, run_type, stage]
-  bioetl-provider-health-v2: [workflow, pipeline, run_type, provider, pipeline_context, adapter]
-  bioetl-control-plane-v1: [workflow, pipeline, run_type]
-  bioetl-workflow-overview: [workflow, pipeline, run_type, status, step_status, step_kind, pipeline_context, run_type_context, provider_context]
+  bioetl-overview-v2: [workflow, pipeline, run_type, run_id]
+  bioetl-overview-v3: [workflow, pipeline, run_type, run_id]
+  bioetl-dq-v2: [workflow, pipeline, run_type, run_id, stage]
+  bioetl-runtime: [workflow, pipeline, run_type, run_id, stage]
+  bioetl-provider-health-v2: [workflow, pipeline, run_type, run_id, provider, pipeline_context, adapter]
+  bioetl-control-plane-v1: [workflow, pipeline, run_type, run_id]
+  bioetl-workflow-overview: [workflow, pipeline, run_type, run_id, status, step_status, step_kind, pipeline_context, run_type_context, provider_context]
   bioetl-silver-reject-explorer: [pipeline, run_type, reason_code, field, quarantine_run_id, payload_hash]
 forbidden_dashboard_link_vars_by_target_uid:
-  bioetl-overview-v2: [run_id, quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
-  bioetl-overview-v3: [run_id, quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
-  bioetl-control-plane-v1: [run_id, quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
-  bioetl-runtime: [run_id, quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
-  bioetl-dq-v2: [run_id, quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
-  bioetl-provider-health-v2: [run_id, quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
-  bioetl-workflow-overview: [run_id, quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
+  bioetl-overview-v2: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
+  bioetl-overview-v3: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
+  bioetl-control-plane-v1: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
+  bioetl-runtime: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
+  bioetl-dq-v2: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
+  bioetl-provider-health-v2: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
+  bioetl-workflow-overview: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
   bioetl-silver-reject-explorer: [run_id, manifest_id, execution_fingerprint]
+
+preserved_identity_handoff:
+  selector: run_id
+  required_value: "$run_id"
+  source_uids:
+    - bioetl-control-plane-v1
+    - bioetl-dq-v2
+    - bioetl-overview-v2
+    - bioetl-overview-v3
+    - bioetl-provider-health-v2
+    - bioetl-runtime
+    - bioetl-workflow-overview
+  target_uids:
+    - bioetl-control-plane-v1
+    - bioetl-dq-v2
+    - bioetl-overview-v2
+    - bioetl-overview-v3
+    - bioetl-provider-health-v2
+    - bioetl-runtime
+    - bioetl-workflow-overview
+  excluded_source_uids:
+    - bioetl-silver-reject-explorer
+  excluded_target_uids:
+    - bioetl-silver-reject-explorer
+  semantics: |
+    Preserve exact primary Run ID only when both source and target dashboards
+    expose the primary control-plane `run_id` selector. The handoff keeps HTTP
+    identity/details panels focused on the selected run; Prometheus status and
+    current-state panels remain pipeline/run_type scoped. Generic links MUST
+    NOT map primary `run_id` to Silver `quarantine_run_id`.
 
 required_discoverable_inbound_paths: {}
 

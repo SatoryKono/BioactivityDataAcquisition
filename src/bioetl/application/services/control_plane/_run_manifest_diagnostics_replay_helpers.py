@@ -5,6 +5,8 @@ Extracted from _run_manifest_diagnostics_replay.py to meet file size limits.
 
 from __future__ import annotations
 
+from typing import Literal
+
 from bioetl.application.services.control_plane._historical_replay_certification import (
     HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
@@ -19,6 +21,11 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     ReproducibilityPolicyAssessment,
     normalize_required_persistence_profile,
+)
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    ReproducibilityFamilyProfile,
+    build_replay_family_contract,
+    resolve_reproducibility_family_profile,
 )
 
 
@@ -230,6 +237,52 @@ def _requires_dependency_lock_provenance(
     ):
         return False
     return not manifest.code_provenance.dependency_lock_hash
+
+
+def _resolve_reproducibility_profile(
+    manifest: RunManifest,
+) -> ReproducibilityFamilyProfile:
+    """Resolve the canonical reproducibility profile for one manifested run."""
+    execution_context: Literal["source", "composite"] = (
+        "composite" if _is_composite_execution_context(manifest) else "source"
+    )
+    return resolve_reproducibility_family_profile(
+        provider=manifest.provider,
+        entity=manifest.entity,
+        contract_ref=manifest.code_provenance.contract_ref,
+        execution_context=execution_context,
+    )
+
+
+def _resolve_replay_family_contract(manifest: RunManifest) -> dict[str, object]:
+    """Return the canonical per-family replay contract for one manifested run."""
+    execution_context: Literal["source", "composite"] = (
+        "composite" if _is_composite_execution_context(manifest) else "source"
+    )
+    return build_replay_family_contract(
+        provider=manifest.provider,
+        entity=manifest.entity,
+        contract_ref=manifest.code_provenance.contract_ref,
+        execution_context=execution_context,
+    )
+
+
+def _resolve_exact_replay_support_boundary(manifest: RunManifest) -> str:
+    """Return the supported exact-replay boundary for one manifested run."""
+    return _resolve_reproducibility_profile(manifest).exact_replay_support_boundary
+
+
+def _build_replay_parentage(manifest: RunManifest) -> dict[str, object]:
+    """Return explicit replay ancestry for one manifested run."""
+    replay_of_run_id = manifest.replay_of_run_id
+    replay_of_manifest_id = manifest.replay_of_manifest_id
+    return {
+        "is_exact_replay": (
+            replay_of_run_id is not None or replay_of_manifest_id is not None
+        ),
+        "replay_of_run_id": replay_of_run_id,
+        "replay_of_manifest_id": replay_of_manifest_id,
+    }
 
 
 def _resolve_required_persistence_profile(manifest: RunManifest) -> str:

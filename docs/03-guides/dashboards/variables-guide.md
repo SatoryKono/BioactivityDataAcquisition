@@ -47,9 +47,10 @@ ______________________________________________________________________
 - Variable contract checks: `tests/integration/test_grafana_config.py` + `tests/integration/_grafana_test_support.py`
 - Selector taxonomy / registry checks: `tests/integration/test_grafana_selector_contract.py`
 - Variable reference mirror checks: `tests/integration/test_grafana_variable_reference.py`
-- Exact-id isolation checks: primary `run_id`, Silver `quarantine_run_id`, and
+- Exact-id isolation checks: primary `run_id` is preserved only between
+  primary dashboards as HTTP identity context; Silver `quarantine_run_id` and
   `payload_hash` запрещены в Prometheus label filtering and generic
-  cross-dashboard links; `bioetl-overview-v2` exposes control-plane-backed
+  cross-dashboard links. `bioetl-overview-v2` exposes control-plane-backed
   `run_id=-` for its local `ID` panel.
 
 ## UID → Variables (inventory parity reference)

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.run_ledger_service import (
@@ -101,6 +101,10 @@ def _handle_control_plane_setup(
         settings=inputs.settings,
         required_profile=control_plane_policy.required_profile,
         exact_replay=bool(getattr(ctx, "exact_replay", False)),
+    )
+    ctx = replace(
+        ctx,
+        required_persistence_profile=control_plane_policy.required_profile,
     )
     run_ledger_service: RunLedgerService | None = None
 

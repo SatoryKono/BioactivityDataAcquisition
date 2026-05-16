@@ -274,7 +274,7 @@ Canonical L0 answer-first hub using the frozen `1. Overview v3` layout as the ba
 - **Видимые**: `workflow` (single-select with Include All, default `All`), `pipeline` (single-select with Include All, default `All`), `run_type` (multi-select with Include All, default `All`), `run_id` (single-select, default `-`)
 - **Семейство**: hybrid_overview
 - **Query sources**: `bioetl_workflow_runs_total`, `bioetl_records_processed_total`, local control-plane `/ops/control-plane/filter-options?dimension=run_id&response_shape=list`
-- **Run ID semantics**: `run_id` is local to the `ID` panel and MUST NOT appear in Prometheus queries or cross-dashboard links.
+- **Run ID semantics**: `run_id` is preserved between primary dashboards for HTTP `ID`/details panels and MUST NOT appear in Prometheus queries or generic Silver Explorer links.
 
 ### Навигация (required_top_level_links)
 - `0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`

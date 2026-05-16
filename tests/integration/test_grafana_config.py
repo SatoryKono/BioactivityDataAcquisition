@@ -1012,6 +1012,7 @@ def test_control_plane_dashboard_links_are_scoped() -> None:
         assert "var-workflow=$workflow" in url
         assert "var-pipeline=$pipeline" in url
         assert "var-run_type=$run_type" in url
+        assert "var-run_id=$run_id" in url
         assert "${__url_time_range}" in url
 
 

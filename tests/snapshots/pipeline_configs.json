@@ -53,9 +53,9 @@
           "qudt_ontology_version",
           "src_id",
           "record_id",
-          "type",
-          "relation",
-          "value",
+          "activity_type",
+          "activity_relation",
+          "activity_value",
           "units",
           "text_value",
           "standard_text_value",
@@ -257,8 +257,8 @@
         "bao_endpoint",
         "bao_format",
         "bao_label",
-        "relation",
-        "value",
+        "activity_relation",
+        "activity_value",
         "units",
         "standard_value",
         "standard_units",
@@ -275,6 +275,7 @@
       ]
     },
     "table": {
+      "gold_idempotency_contract": "scd2",
       "gold_table": "chembl.activity",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
@@ -282,6 +283,7 @@
       "primary_keys": [
         "activity_id"
       ],
+      "silver_idempotency_contract": "merge_upsert",
       "silver_table": "chembl.activity",
       "silver_write_mode": "merge"
     },
@@ -487,6 +489,7 @@
       ]
     },
     "table": {
+      "gold_idempotency_contract": "scd2",
       "gold_table": "chembl.molecule",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
@@ -494,6 +497,7 @@
       "primary_keys": [
         "molecule_id"
       ],
+      "silver_idempotency_contract": "merge_upsert",
       "silver_table": "chembl.molecule",
       "silver_write_mode": "merge"
     },
@@ -632,6 +636,7 @@
       ]
     },
     "table": {
+      "gold_idempotency_contract": "overwrite_rebuild",
       "gold_table": "chembl.publication_term",
       "gold_write_mode": "overwrite",
       "on_schema_mismatch": "evolve",
@@ -641,6 +646,7 @@
         "term_type",
         "term"
       ],
+      "silver_idempotency_contract": "merge_upsert",
       "silver_table": "chembl.publication_term",
       "silver_write_mode": "merge"
     },
@@ -982,6 +988,7 @@
       ]
     },
     "table": {
+      "gold_idempotency_contract": "scd2",
       "gold_table": "crossref.publication",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
@@ -989,6 +996,7 @@
       "primary_keys": [
         "doi"
       ],
+      "silver_idempotency_contract": "merge_upsert",
       "silver_table": "crossref.publication",
       "silver_write_mode": "merge"
     },
@@ -1382,6 +1390,7 @@
       ]
     },
     "table": {
+      "gold_idempotency_contract": "scd2",
       "gold_table": "openalex.publication",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
@@ -1389,6 +1398,7 @@
       "primary_keys": [
         "openalex_id"
       ],
+      "silver_idempotency_contract": "merge_upsert",
       "silver_table": "openalex.publication",
       "silver_write_mode": "merge"
     },
@@ -1553,6 +1563,7 @@
       ]
     },
     "table": {
+      "gold_idempotency_contract": "scd2",
       "gold_table": "pubchem.compound",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
@@ -1560,6 +1571,7 @@
       "primary_keys": [
         "molecule_id"
       ],
+      "silver_idempotency_contract": "merge_upsert",
       "silver_table": "pubchem.compound",
       "silver_write_mode": "merge"
     },
@@ -1935,6 +1947,7 @@
       ]
     },
     "table": {
+      "gold_idempotency_contract": "scd2",
       "gold_table": "pubmed.publication",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
@@ -1942,6 +1955,7 @@
       "primary_keys": [
         "pmid"
       ],
+      "silver_idempotency_contract": "merge_upsert",
       "silver_table": "pubmed.publication",
       "silver_write_mode": "merge"
     },
@@ -2269,6 +2283,7 @@
       ]
     },
     "table": {
+      "gold_idempotency_contract": "scd2",
       "gold_table": "semanticscholar.publication",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
@@ -2276,6 +2291,7 @@
       "primary_keys": [
         "paper_id"
       ],
+      "silver_idempotency_contract": "merge_upsert",
       "silver_table": "semanticscholar.publication",
       "silver_write_mode": "merge"
     },
@@ -2407,6 +2423,7 @@
       ]
     },
     "table": {
+      "gold_idempotency_contract": "scd2",
       "gold_table": "uniprot.idmapping",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
@@ -2414,6 +2431,7 @@
       "primary_keys": [
         "target_id"
       ],
+      "silver_idempotency_contract": "merge_upsert",
       "silver_table": "uniprot.idmapping",
       "silver_write_mode": "merge"
     },
@@ -2624,6 +2642,7 @@
       ]
     },
     "table": {
+      "gold_idempotency_contract": "scd2",
       "gold_table": "uniprot.protein",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
@@ -2631,6 +2650,7 @@
       "primary_keys": [
         "accession"
       ],
+      "silver_idempotency_contract": "merge_upsert",
       "silver_table": "uniprot.protein",
       "silver_write_mode": "merge"
     },

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Literal
-
 from bioetl.application.services.control_plane._run_manifest_diagnostics_base_helpers import (
     _resolve_operator_replay_mode,
     _resolve_source_posture,
@@ -13,6 +11,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_persist
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
     _append_mode_exact_replay_blockers,
+    _build_replay_parentage,
     _collect_append_mode_semantic_sinks,
     _dependency_lock_exact_replay_blockers,
     _has_historical_composite_certified_snapshots,
@@ -24,6 +23,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
     _profile_exact_replay_blockers,
     _requires_resume_without_snapshot_reason,
     _resolve_applied_checkpoint_compatibility_policy,
+    _resolve_exact_replay_support_boundary,
+    _resolve_replay_family_contract,
+    _resolve_reproducibility_profile,
     _resolve_exact_replay_supported_reason,
     _resolve_requested_checkpoint_compatibility_policy,
     _resolve_required_persistence_profile,
@@ -40,12 +42,6 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     assess_reproducibility_policy,
     resolve_replay_readiness_verdict,
 )
-from bioetl.domain.control_plane.reproducibility_profiles import (
-    ReproducibilityFamilyProfile,
-    build_replay_family_contract,
-    resolve_reproducibility_family_profile,
-)
-
 
 def _resolve_replay_mode(
     *,
@@ -375,25 +371,6 @@ def _resolve_exact_replay_blockers(
     ]
     return blockers
 
-
-def _resolve_exact_replay_support_boundary(manifest: RunManifest) -> str:
-    """Return the supported exact-replay boundary for one manifested run."""
-    return _resolve_reproducibility_profile(manifest).exact_replay_support_boundary
-
-
-def _resolve_replay_family_contract(manifest: RunManifest) -> dict[str, object]:
-    """Return the canonical per-family replay contract for one manifested run."""
-    execution_context: Literal["source", "composite"] = (
-        "composite" if _is_composite_execution_context(manifest) else "source"
-    )
-    return build_replay_family_contract(
-        provider=manifest.provider,
-        entity=manifest.entity,
-        contract_ref=manifest.code_provenance.contract_ref,
-        execution_context=execution_context,
-    )
-
-
 def _assess_manifest_reproducibility_policy(
     *,
     manifest: RunManifest,
@@ -455,35 +432,6 @@ def _resolve_manifest_replay_readiness_verdict(
         debug_only=not profile.strict_exact_replay_supported,
         lifecycle_projection_only=lifecycle_projection_only,
     )
-
-
-def _resolve_reproducibility_profile(
-    manifest: RunManifest,
-) -> ReproducibilityFamilyProfile:
-    """Resolve the canonical reproducibility profile for one manifested run."""
-    execution_context: Literal["source", "composite"] = (
-        "composite" if _is_composite_execution_context(manifest) else "source"
-    )
-    return resolve_reproducibility_family_profile(
-        provider=manifest.provider,
-        entity=manifest.entity,
-        contract_ref=manifest.code_provenance.contract_ref,
-        execution_context=execution_context,
-    )
-
-
-def _build_replay_parentage(manifest: RunManifest) -> dict[str, object]:
-    """Return explicit replay ancestry for one manifested run."""
-    replay_of_run_id = manifest.replay_of_run_id
-    replay_of_manifest_id = manifest.replay_of_manifest_id
-    return {
-        "is_exact_replay": (
-            replay_of_run_id is not None or replay_of_manifest_id is not None
-        ),
-        "replay_of_run_id": replay_of_run_id,
-        "replay_of_manifest_id": replay_of_manifest_id,
-    }
-
 
 def _build_resume_contract(
     *,
