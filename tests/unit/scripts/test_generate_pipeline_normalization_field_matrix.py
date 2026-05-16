@@ -546,9 +546,14 @@ def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields(
 ):
     rows = build_field_matrix_rows()
 
+    assay_id = _row(rows, "composite_activity", "assay_id")
+    assert assay_id["field_type"] == "string"
+    assert assay_id["schema_coverage"] == "gold_contract:inherited"
+
     molecule_id = _row(rows, "composite_activity", "molecule_id")
     assert molecule_id["provider"] == "composite"
     assert molecule_id["entity"] == "activity"
+    assert molecule_id["field_type"] == "string"
     assert molecule_id["normalization_source"] == "composite_join_key_policy"
     assert molecule_id["normalizer"] == "join_key_policy"
     assert molecule_id["strictness"] == "join_key_policy"
@@ -560,8 +565,25 @@ def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields(
     )
 
     standard_type = _row(rows, "composite_activity", "standard_type")
+    assert standard_type["field_type"] == "string"
     assert standard_type["normalization_source"] == "upstream_inherited"
     assert standard_type["normalizer"] == "none"
+
+    hba_count = _row(rows, "composite_molecule", "hba_count")
+    assert hba_count["field_type"] == "int64"
+    assert hba_count["normalization_source"] == "upstream_inherited"
+
+    logp = _row(rows, "composite_molecule", "logp")
+    assert logp["field_type"] == "double"
+
+    standard_inchi = _row(rows, "composite_molecule", "standard_inchi")
+    assert standard_inchi["field_type"] == "string"
+
+    composite_year = _row(rows, "composite_publication", "year")
+    assert composite_year["field_type"] == "int64"
+
+    composite_target_downgraded = _row(rows, "composite_target", "downgraded")
+    assert composite_target_downgraded["field_type"] == "bool"
 
 
 def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> None:

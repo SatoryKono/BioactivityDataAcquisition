@@ -149,8 +149,6 @@ def build_processed_records_table_payload(
 
     for spec in PROCESSED_RECORDS_ROW_SPECS:
         raw_value = _as_float(metric_values.get(spec.metric))
-        if raw_value == 0:
-            continue
 
         value_text = _padded_count_text(raw_value, value_width)
         percentage_text = _format_percentage(

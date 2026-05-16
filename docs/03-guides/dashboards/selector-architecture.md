@@ -166,8 +166,7 @@ identity/provenance rows, not Prometheus time-series. `run_selector_mode`,
 `started_at`, `manifest_id`, and `execution_fingerprint` remain
 future/local-catalog candidates.
 
-`bioetl-overview-v2` is the current hybrid Overview baseline and
-`bioetl-overview-v3` remains a draft/snapshot for the same selector shape.
+`bioetl-overview-v2` is the current hybrid Overview baseline.
 
 ### Hidden context selectors
 

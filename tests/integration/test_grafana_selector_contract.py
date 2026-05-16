@@ -81,7 +81,6 @@ def test_dashboard_families_cover_all_shipped_dashboards() -> None:
     [
         ("bioetl-control-plane-v1.json", "bioetl-control-plane-v1"),
         ("bioetl-overview-v2.json", "bioetl-overview-v2"),
-        ("bioetl-overview-v3.json", "bioetl-overview-v3"),
         ("bioetl-runtime.json", "bioetl-runtime"),
         ("bioetl-provider-health-v2.json", "bioetl-provider-health-v2"),
         ("bioetl-dq-v2.json", "bioetl-dq-v2"),

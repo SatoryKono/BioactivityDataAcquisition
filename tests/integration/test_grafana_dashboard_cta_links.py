@@ -910,8 +910,7 @@ def test_pipeline_and_provider_variables_are_single_select_unknown_default() -> 
             current = variable.get("current", {})
             assert isinstance(current, dict)
             if (
-                dashboard_path.name
-                in {"bioetl-overview-v2.json", "bioetl-overview-v3.json"}
+                dashboard_path.name == "bioetl-overview-v2.json"
                 and variable_name == "pipeline"
             ):
                 assert variable.get("includeAll") is True, (

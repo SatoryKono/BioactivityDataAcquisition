@@ -60,7 +60,6 @@ ______________________________________________________________________
 | `bioetl-control-plane-v1` | `$pipeline`, `$run_id`, `$run_type`, `$workflow` |
 | `bioetl-dq-v2` | `$pipeline`, `$run_id`, `$run_type`, `$stage`, `$workflow` |
 | `bioetl-overview-v2` | `$pipeline`, `$run_id`, `$run_type`, `$workflow` |
-| `bioetl-overview-v3` | `$pipeline`, `$run_id`, `$run_type`, `$workflow` |
 | `bioetl-provider-health-v2` | `$adapter`, `$pipeline`, `$pipeline_context`, `$provider`, `$run_id`, `$run_type`, `$workflow` |
 | `bioetl-runtime` | `$pipeline`, `$run_id`, `$run_type`, `$stage`, `$workflow` |
 | `bioetl-silver-reject-explorer` | `$field`, `$payload_hash`, `$pipeline`, `$quarantine_run_id`, `$reason_code`, `$run_type` |

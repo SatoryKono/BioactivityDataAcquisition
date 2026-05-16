@@ -893,7 +893,6 @@ def test_exact_identifier_variables_do_not_leak_into_other_dashboards() -> None:
     local_identity_dashboards = {
         "bioetl-control-plane-v1.json",
         "bioetl-overview-v2.json",
-        "bioetl-overview-v3.json",
         "bioetl-runtime.json",
         "bioetl-provider-health-v2.json",
         "bioetl-dq-v2.json",
@@ -1040,7 +1039,6 @@ def test_dashboard_titles_match_home_dashboard_navigation_names() -> None:
     expected_titles_by_uid = {
         "bioetl-control-plane-v1": "0. Control Plane",
         "bioetl-overview-v2": "1. Overview",
-        "bioetl-overview-v3": "1. Overview v3",
         "bioetl-runtime": "2. Runtime",
         "bioetl-provider-health-v2": "3. Provider Health",
         "bioetl-dq-v2": "4. Data Quality",
@@ -1356,7 +1354,6 @@ def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -
     expected_current_title = {
         "bioetl-control-plane-v1": "0. Control Plane",
         "bioetl-overview-v2": "1. Overview",
-        "bioetl-overview-v3": "1. Overview v3",
         "bioetl-runtime": "2. Runtime",
         "bioetl-provider-health-v2": "3. Provider Health",
         "bioetl-dq-v2": "4. Data Quality",

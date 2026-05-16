@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -69,3 +70,20 @@ def test_resolve_seed_artifact_raises_when_no_seed_exists(tmp_path: Path) -> Non
             source_date="2026-05-16",
             suffix=".json",
         )
+
+
+def test_build_current_member_facts_exposes_composite_inherited_field_types() -> None:
+    seed_registry = json.loads(
+        Path(
+            "reports/semantic_pipeline_audit/semantic_cluster_registry_2026-05-16.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    facts = audit._build_current_member_facts(seed_registry)
+
+    assert facts[("composite_activity", "assay_id")]["field_type"] == "string"
+    assert facts[("composite_activity", "molecule_id")]["field_type"] == "string"
+    assert facts[("composite_molecule", "hba_count")]["field_type"] == "int64"
+    assert facts[("composite_molecule", "logp")]["field_type"] == "double"
+    assert facts[("composite_publication", "year")]["field_type"] == "int64"
+    assert facts[("composite_target", "downgraded")]["field_type"] == "bool"

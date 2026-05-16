@@ -43,7 +43,6 @@ NAVIGATION_CONTRACT_PATH = Path(
 )
 EXPECTED_VARS_BY_DASHBOARD = {
     "bioetl-overview-v2.json": {"workflow", "pipeline", "run_type", "run_id"},
-    "bioetl-overview-v3.json": {"workflow", "pipeline", "run_type", "run_id"},
     "bioetl-dq-v2.json": {"workflow", "pipeline", "run_type", "run_id", "stage"},
     "bioetl-runtime.json": {"workflow", "pipeline", "run_type", "run_id", "stage"},
     "bioetl-provider-health-v2.json": {
@@ -533,7 +532,7 @@ def test_variable_query_sources(dashboard_path):
         assert "bioetl_workflow_step_events_total" in step_kind_query.get("query", "")
         return
 
-    if dashboard_path.name in {"bioetl-overview-v2.json", "bioetl-overview-v3.json"}:
+    if dashboard_path.name == "bioetl-overview-v2.json":
         workflow_var = variable_map["workflow"]
         workflow_query = workflow_var.get("query", {})
         workflow_query_text = (
@@ -1294,7 +1293,7 @@ def test_workflow_dashboard_collapses_step_diagnostics_below_first_screen() -> N
     assert next_grid.get("x") == 16
     assert next_grid.get("y") == 7
     assert next_grid.get("w") == 8
-    assert next_grid.get("h") == 6
+    assert next_grid.get("h") == 10
     data_links = next_panel.get("options", {}).get("dataLinks", [])
     assert data_links, "Workflow First Action must expose actionable dataLinks"
     observed_titles = {

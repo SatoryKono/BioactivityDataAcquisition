@@ -22,15 +22,14 @@ shipped dashboards in `grafana/dashboards/*.json`.
 v3.0 documents an execution-aware dashboard family and a concrete
 `1. Overview` hybrid L0 specification.
 
-Current shipped draft surface:
+Current shipped baseline:
 
-- `bioetl-overview-v3` already exists in `grafana/dashboards/*.json`
-- it materializes the v3 first-screen header and hybrid layout
-- it now exposes visible `workflow`, `pipeline`, `run_type`, and `run_id`
+- `bioetl-overview-v2` remains the canonical shipped Overview dashboard
+- it preserves the frozen v3 first-screen header and hybrid layout baseline
+- it exposes visible `workflow`, `pipeline`, `run_type`, and `run_id`
   selectors
 - it keeps `pipeline` + `run_type` as the truthful current-status scope
-- it does not yet ship a local run catalog; current `run_id` remains a visible
-  execution-hint bridge, not an exact selector
+- `run_id` remains a visible execution-hint bridge, not an exact selector
 
 The shipped dashboard source of truth remains:
 

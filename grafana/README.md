@@ -40,8 +40,8 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-> Примечание: в репозитории сейчас поставляются `bioetl-runtime.json`,
-> `*-v2.json`; `bioetl-overview-v3.json` сохранён как retained snapshot/draft.
+> Примечание: в репозитории сейчас поставляются `bioetl-runtime.json`
+> и `*-v2.json`.
 > Исторические v1 surfaces ниже сведены к краткой archival note, без подробного operator walkthrough.
 >
 > Роль этого документа: setup/reference для monitoring stack.
@@ -110,7 +110,7 @@ ______________________________________________________________________
 │  ┌──────────────────────────────────────────────────────────┐    │
 │  │  Provisioning (автоматическая загрузка)                    │    │
 │  │  - Datasources: Prometheus + Quarantine Explorer          │    │
-│  │  - Dashboards: 8 JSON файлов (bioetl.yaml)               │    │
+│  │  - Dashboards: 7 JSON файлов (bioetl.yaml)               │    │
 │  │  - Обновление каждые 30 секунд                            │    │
 │  │  - allowUiUpdates: false для production dashboard-as-code  │    │
 │  └──────────────────────────────────────────────────────────┘    │
@@ -161,7 +161,6 @@ grafana/
 │       └── bioetl.yaml                # Dashboard provisioning config
 └── dashboards/
     ├── bioetl-overview-v2.json        # 1. Overview, canonical frozen v3 baseline
-    ├── bioetl-overview-v3.json        # Retained hybrid L0 overview snapshot/draft
     ├── bioetl-dq-v2.json              # Data Quality для последнего запуска (v2)
     ├── bioetl-runtime.json            # L2 runtime triage: blockers, latency, backlog, handoffs
     ├── bioetl-provider-health-v2.json # Здоровье провайдеров (v2)
@@ -711,7 +710,7 @@ Common context panels on primary dashboards outside Overview:
 | `Provenance` | `9400` | Visible question-only banner; selected context stays in the panel tooltip/description. |
 | `Status` | `9401` | Role-specific compact status; no Prometheus `$run_id` filtering. |
 | `ID` | `9402` | Quarantine Explorer HTTP identity table for `pipeline/run_type/run_id`. |
-| `Processed Records` | `9403` | Current Bronze -> Silver -> Gold accounting table from `/ops/observability/processed-records`, backed by `bioetl_processed_records_*` recording rules; zero-valued outcome rows are omitted and missing accounting series are UNKNOWN/no-data, not OK. |
+| `Processed Records` | `9403` | Current Bronze -> Silver -> Gold accounting table from `/ops/observability/processed-records`, backed by `bioetl_processed_records_*` recording rules; zero-valued outcome rows remain visible and missing accounting series are UNKNOWN/no-data, not OK. |
 
 `0. Control Plane` adds Control Plane-only identity evidence panels outside the
 shared shell. Panels `9404..9409` call
@@ -875,7 +874,7 @@ ______________________________________________________________________
 | 214 | Status                         | Stat       | `max(bioetl_l0_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                                                         | `UNKNOWN`/`OK`/`WARN`/`CRIT`; null/no-series remain `UNKNOWN` via explicit null mapping. Panel-level links duplicate the canonical Runtime / Control Plane / Data Quality / Provider Health / Workflow handoff. |
 | 215 | Next Action                    | Table      | `topk(1, bioetl_l0_next_action_route{pipeline=~"$pipeline",run_type=~"$run_type"} or label_replace(... vector(0) ...))`     | Shows `action_target`, `action_reason`, and `action_dashboard_uid`; invalid/missing selected scope falls back to `NO_ROUTE`. Routing priority remains Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Runtime / Control Plane / DQ preserve scope; Provider Health fail-closes to `provider=unknown`; Workflow link explicitly resets scope. |
 | 9300 | ID                            | Table      | HTTP `/ops/control-plane/identity-table?...&run_id=${run_id}`                                                                | Compact two-column identity summary: run/manifest IDs, Provider.Entity version, contract schema, execution flags, replay capability/mode, checkpoint anchors, optional composite run, and identity health. Exact selected `run_id` wins; no Prometheus `run_id`. |
-| 9301 | Processed Records             | Table      | HTTP `/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}`                                  | Current compact Bronze/Silver/Gold accounting evidence. Shows non-zero rows with space-grouped, left-padded, right-aligned `value` plus formatted `percintage`; Silver/Gold accounting deficits set red row backgrounds; reconciliation status, subtotal, and delta rows stay out of the compact table; no `$__range` and no Prometheus `run_id`. |
+| 9301 | Processed Records             | Table      | HTTP `/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}`                                  | Current compact Bronze/Silver/Gold accounting evidence. Shows all configured rows, including zero values, with space-grouped, left-padded, right-aligned `value` plus formatted `percintage`; Silver/Gold accounting deficits set red row backgrounds; reconciliation status, subtotal, and delta rows stay out of the compact table; no `$__range` and no Prometheus `run_id`. |
 | 9002 | Inputs                        | Table      | `max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"})`                              | Compact L0 input summary: one worst-status row per operator input so the first screen fits without scroll while preserving selected-scope UNKNOWN rows.                       |
 | 9003 | Runtime                       | Table      | `max by (pipeline) (bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                         | Compact current runtime blocker summary: worst current status per pipeline across the selected run-type scope.                                                                  |
 | 9004 | Data Quality                  | Table      | `max by (pipeline) (bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                                      | Compact selected-scope DQ summary: worst current status per pipeline across the selected run-type scope.                                                                        |

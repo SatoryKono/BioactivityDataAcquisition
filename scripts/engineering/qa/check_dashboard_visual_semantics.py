@@ -62,9 +62,6 @@ SCALAR_TREND_TIMESERIES_PANELS = {
     ("bioetl-overview-v2.json", "Runtime Blockers Trend"),
     ("bioetl-overview-v2.json", "DQ Status Trend"),
     ("bioetl-overview-v2.json", "Gold Lifecycle Trend"),
-    ("bioetl-overview-v3.json", "Runtime Blockers Trend"),
-    ("bioetl-overview-v3.json", "DQ Status Trend"),
-    ("bioetl-overview-v3.json", "Gold Lifecycle Trend"),
 }
 ALLOWED_TABLE_CELL_OPTION_TYPES = {"auto", "color-background", "color-text"}
 EXPLICIT_VALUE_MAPPING_STAT_PANELS = {

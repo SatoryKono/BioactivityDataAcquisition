@@ -14,28 +14,10 @@ from tests.integration._grafana_test_support import (
 
 
 pytestmark = pytest.mark.integration
-
-
-def _is_overview_snapshot_duplicate(uses: set[tuple[str, str]]) -> bool:
-    dashboards = {dashboard_name for dashboard_name, _title in uses}
-    return dashboards == {"bioetl-overview-v2.json", "bioetl-overview-v3.json"}
-
-
-def _filter_overview_snapshot_duplicates(
-    uses_by_expr: dict[str, set[tuple[str, str]]],
-) -> dict[str, set[tuple[str, str]]]:
-    return {
-        expr: uses
-        for expr, uses in uses_by_expr.items()
-        if not _is_overview_snapshot_duplicate(uses)
-    }
-
-
 _PROCESSED_RECORDS_DASHBOARDS = (
     "bioetl-control-plane-v1.json",
     "bioetl-dq-v2.json",
     "bioetl-overview-v2.json",
-    "bioetl-overview-v3.json",
     "bioetl-provider-health-v2.json",
     "bioetl-runtime.json",
     "bioetl-workflow-overview.json",
@@ -85,30 +67,29 @@ _PROCESSED_RECORDS_PRIMARY_COLORS = {
     "07 gold_written_records": "#d4af37",
 }
 
-_PROCESSED_RECORDS_SECONDARY_VALUE_COLOR = "#d1d5db"
-_PROCESSED_RECORDS_ROW_COLORS = {
-    label: _PROCESSED_RECORDS_PRIMARY_COLORS.get(
-        label,
-        _PROCESSED_RECORDS_SECONDARY_VALUE_COLOR,
-    )
+_PROCESSED_RECORDS_SECONDARY_LABELS = {
+    label
     for label in _PROCESSED_RECORDS_PARAMETER_LABELS
+    if label not in _PROCESSED_RECORDS_PRIMARY_COLORS
 }
 
 
 def _expected_processed_records_display_token_mappings() -> list[dict[str, object]]:
-    return [
-        {
-            "type": "regex",
-            "options": {
-                "pattern": f"^{label}\\|(.*)$",
-                "result": {
-                    "text": "$1",
-                    "color": _PROCESSED_RECORDS_ROW_COLORS[label],
+    mappings: list[dict[str, object]] = []
+    for label in _PROCESSED_RECORDS_PARAMETER_LABELS:
+        result = {"text": "$1"}
+        if label in _PROCESSED_RECORDS_PRIMARY_COLORS:
+            result["color"] = _PROCESSED_RECORDS_PRIMARY_COLORS[label]
+        mappings.append(
+            {
+                "type": "regex",
+                "options": {
+                    "pattern": f"^{label}\\|(.*)$",
+                    "result": result,
                 },
-            },
-        }
-        for label in _PROCESSED_RECORDS_PARAMETER_LABELS
-    ]
+            }
+        )
+    return mappings
 
 
 def _expected_processed_records_row_status_mappings() -> list[dict[str, object]]:
@@ -166,73 +147,60 @@ def _expected_duplicate_uses() -> dict[str, set[tuple[str, str]]]:
         'clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
         'run_type=~"$run_type",stage="bronze"}[$__range])) or vector(0)), 1)': {
             ("bioetl-overview-v2.json", "Silver Rejects + Rate"),
-            ("bioetl-overview-v3.json", "Silver Rejects + Rate"),
         },
         'bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"}': {
             ("bioetl-overview-v2.json", "DQ Status Trend"),
-            ("bioetl-overview-v3.json", "DQ Status Trend"),
         },
         'bioetl_l1_gold_lifecycle_status{pipeline=~"$pipeline",run_type=~"$run_type"}': {
             ("bioetl-overview-v2.json", "Gold Lifecycle Trend"),
-            ("bioetl-overview-v3.json", "Gold Lifecycle Trend"),
         },
         "bioetl_l1_provider_global_status": {
             ("bioetl-overview-v2.json", "Provider Global"),
-            ("bioetl-overview-v3.json", "Provider"),
         },
         'bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",run_type=~"$run_type"}': {
             ("bioetl-overview-v2.json", "Runtime Blockers Trend"),
-            ("bioetl-overview-v3.json", "Runtime Blockers Trend"),
         },
         'max by (pipeline) (bioetl_l1_control_plane_current_status{pipeline=~"$pipeline",'
         'run_type=~"$run_type"} or ((bioetl_l1_control_plane_current_status{run_type=~"$run_type"}) '
         'and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
         '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
             ("bioetl-overview-v2.json", "Control Plane"),
-            ("bioetl-overview-v3.json", "Control Plane"),
         },
         'max by (pipeline) (bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"} '
         'or ((bioetl_l1_dq_status{run_type=~"$run_type"}) and on(pipeline) '
         'label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
         '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
             ("bioetl-overview-v2.json", "DQ Status"),
-            ("bioetl-overview-v3.json", "Data Quality"),
         },
         'max by (pipeline) (bioetl_l1_gold_lifecycle_status{pipeline=~"$pipeline",'
         'run_type=~"$run_type"} or ((bioetl_l1_gold_lifecycle_status{run_type=~"$run_type"}) '
         'and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
         '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
             ("bioetl-overview-v2.json", "Gold Lifecycle"),
-            ("bioetl-overview-v3.json", "Data Validation"),
         },
         'max by (pipeline) (bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",'
         'run_type=~"$run_type"} or ((bioetl_l1_runtime_blocker_status{run_type=~"$run_type"}) '
         'and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
         '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
             ("bioetl-overview-v2.json", "Runtime Blockers"),
-            ("bioetl-overview-v3.json", "Runtime"),
         },
         'max(bioetl_l0_status{pipeline=~"$pipeline",run_type=~"$run_type"} or '
         '((bioetl_l0_status{run_type=~"$run_type"}) and on(pipeline) '
         'label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
         '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")))': {
             ("bioetl-overview-v2.json", "System Status"),
-            ("bioetl-overview-v3.json", "Status"),
         },
         'round(sum(max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline",'
         'run_type=~"$run_type",stage="filtered_out"}[$__range])) or vector(0))': {
             ("bioetl-overview-v2.json", "Silver Rejects + Rate"),
-            ("bioetl-overview-v3.json", "Silver Rejects + Rate"),
         },
         'sum by (pipeline, run_type) (max_over_time(bioetl_pipeline_runs_total{status="failed",'
         'pipeline=~"(${pipeline:regex}|workflow_${pipeline:regex})",run_type=~"$run_type"}[$__range]))': {
             ("bioetl-overview-v2.json", "Historical Failures"),
-            ("bioetl-overview-v3.json", "Historical Failures"),
         },
         'sum by (pipeline, status) (max_over_time(bioetl_pipeline_runs_total{pipeline=~"(${pipeline:regex}|'
         'workflow_${pipeline:regex})",run_type=~"$run_type",status!="success"}[$__range]))': {
             ("bioetl-overview-v2.json", "Recent Terminal Runs"),
-            ("bioetl-overview-v3.json", "Recent Terminal Runs"),
         },
     }
 
@@ -448,7 +416,6 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
 
     for dashboard_path in (
         Path("grafana/dashboards/bioetl-overview-v2.json"),
-        Path("grafana/dashboards/bioetl-overview-v3.json"),
     ):
         dashboard = load_dashboard(dashboard_path)
         panels = {
@@ -1777,6 +1744,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
 
     sort_by = processed.get("options", {}).get("sortBy", [])
     assert sort_by == [{"desc": False, "displayName": "parameter"}]
+    assert processed.get("options", {}).get("cellHeight") == "sm"
 
     transformations = processed.get("transformations", [])
     assert [transformation.get("id") for transformation in transformations] == [
@@ -1809,10 +1777,17 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         strict=True,
     ):
         assert mapping_options[label]["text"] == display_label
-        assert mapping_options[label]["color"] == _PROCESSED_RECORDS_ROW_COLORS[label]
+        if label in _PROCESSED_RECORDS_PRIMARY_COLORS:
+            assert mapping_options[label]["color"] == (
+                _PROCESSED_RECORDS_PRIMARY_COLORS[label]
+            )
+        else:
+            assert "color" not in mapping_options[label]
 
     for label, color in _PROCESSED_RECORDS_PRIMARY_COLORS.items():
         assert mapping_options[label]["color"] == color
+    for label in _PROCESSED_RECORDS_SECONDARY_LABELS:
+        assert "color" not in mapping_options[label]
 
     parameter_properties = {
         prop.get("id"): prop.get("value")
@@ -1903,12 +1878,7 @@ def test_exact_duplicate_promql_groups_are_only_explicitly_justified_reuse() -> 
     duplicate_uses_by_expr = {
         expr: uses for expr, uses in observed_uses_by_expr.items() if len(uses) > 1
     }
-    duplicate_uses_by_expr = _filter_overview_snapshot_duplicates(
-        duplicate_uses_by_expr
-    )
-    expected_duplicate_uses = _filter_overview_snapshot_duplicates(
-        _expected_duplicate_uses()
-    )
+    expected_duplicate_uses = _expected_duplicate_uses()
     assert duplicate_uses_by_expr == expected_duplicate_uses, (
         "Dashboard exact PromQL duplication drifted outside the audited allowlist: "
         f"{duplicate_uses_by_expr}"

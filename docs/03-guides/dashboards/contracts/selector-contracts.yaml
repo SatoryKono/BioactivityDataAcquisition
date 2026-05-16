@@ -114,7 +114,6 @@ dashboard_families:
   hybrid_overview:
     uids:
       - bioetl-overview-v2
-      - bioetl-overview-v3
     allowed_visible_selectors:
       - workflow
       - pipeline
@@ -122,8 +121,7 @@ dashboard_families:
       - run_id
     notes: |
       The canonical Overview dashboard (`bioetl-overview-v2`) uses the frozen
-      Overview v3 hybrid layout as its baseline; `bioetl-overview-v3` remains
-      as the retained snapshot/draft surface. Hybrid Overview keeps pipeline-
+      Overview v3 hybrid layout as its baseline. Hybrid Overview keeps pipeline-
       summary current-status semantics, adds a visible workflow evidence-
       context selector, and exposes run_id from the local control-plane run-
       manifest catalog for identity handoff. Grafana `All` values MAY expand
@@ -212,25 +210,6 @@ shipped_selector_registry:
       run_type: prometheus_control_plane_universe
       run_id: control_plane_filter_options_api
   bioetl-overview-v2:
-    family: hybrid_overview
-    visible_selectors:
-      - workflow
-      - pipeline
-      - run_type
-      - run_id
-    hidden_context_selectors: []
-    hidden_detail_selectors: []
-    top_bar_order:
-      - workflow
-      - pipeline
-      - run_type
-      - run_id
-    query_source_families:
-      workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_records_processed_total
-      run_type: prometheus_records_processed_total
-      run_id: control_plane_filter_options_api
-  bioetl-overview-v3:
     family: hybrid_overview
     visible_selectors:
       - workflow
@@ -388,13 +367,6 @@ ship_now_selector_contract_by_uid:
       - run_id
     time_range: grafana_builtin
   bioetl-overview-v2:
-    visible_selectors:
-      - workflow
-      - pipeline
-      - run_type
-      - run_id
-    time_range: grafana_builtin
-  bioetl-overview-v3:
     visible_selectors:
       - workflow
       - pipeline

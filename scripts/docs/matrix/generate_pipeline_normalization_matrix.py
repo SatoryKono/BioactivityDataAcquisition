@@ -7,6 +7,7 @@ from __future__ import annotations
 import argparse
 import csv
 import io
+import json
 import sys
 from datetime import UTC, datetime
 from functools import cache
@@ -14,6 +15,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
+import pyarrow as pa
 import yaml
 
 if __package__ in {None, ""}:
@@ -126,9 +128,6 @@ from bioetl.infrastructure.schemas.silver import (
     UNIPROT_ID_MAPPING_SCHEMA,
     UNIPROT_PROTEIN_SCHEMA,
 )
-
-if TYPE_CHECKING:
-    import pyarrow as pa
 
 DEFAULT_OUT_DIR = Path("docs/reports/generated/pipeline_normalization_field_matrix")
 CSV_NAME = "pipeline_normalization_field_matrix.csv"
@@ -640,13 +639,205 @@ ENUM_REGISTRY_UNIONS: dict[tuple[str, tuple[str, ...]], tuple[tuple[str, ...], .
     ),
 }
 
-COMPOSITE_GOLD_SCHEMA_TYPE_REGISTRY: dict[str, str] = {
-    "composite_activity": "unknown",
-    "composite_assay": "unknown",
-    "composite_molecule": "unknown",
-    "composite_publication": "unknown",
-    "composite_target": "unknown",
+_JSON_SCHEMA_TYPE_TO_MATRIX_TYPE: dict[str, str] = {
+    "string": "string",
+    "integer": "int64",
+    "number": "float64",
+    "boolean": "bool",
+    "object": "object",
+    "array": "list",
 }
+
+COMPOSITE_SOURCE_FIELD_TYPE_ALIAS_HINTS: dict[tuple[str, str], tuple[str, ...]] = {
+    ("composite_publication", "year"): ("publication_year",),
+}
+
+
+@cache
+def _composite_gold_contract_properties(
+    pipeline_name: str,
+) -> dict[str, dict[str, object]]:
+    contract_path = (
+        Path("docs/04-reference/contracts/gold") / f"{pipeline_name}_v1.0.json"
+    )
+    payload = json.loads(contract_path.read_text(encoding="utf-8"))
+    properties = payload.get("properties", {})
+    if not isinstance(properties, dict):
+        return {}
+    return {
+        field_name: spec
+        for field_name, spec in properties.items()
+        if isinstance(field_name, str) and isinstance(spec, dict)
+    }
+
+
+def _matrix_field_type_from_json_schema(type_payload: object) -> str:
+    values: list[str]
+    if isinstance(type_payload, list):
+        values = [str(value).strip().lower() for value in type_payload]
+    elif isinstance(type_payload, str):
+        values = [type_payload.strip().lower()]
+    else:
+        return "unknown"
+    non_null = [value for value in values if value and value != "null"]
+    if len(non_null) != 1:
+        return "unknown"
+    return _JSON_SCHEMA_TYPE_TO_MATRIX_TYPE.get(non_null[0], non_null[0] or "unknown")
+
+
+def _composite_field_type(pipeline_name: str, field_name: str) -> str:
+    properties = _composite_gold_contract_properties(pipeline_name)
+    spec = properties.get(field_name)
+    if isinstance(spec, dict):
+        contract_type = _matrix_field_type_from_json_schema(spec.get("type"))
+        if contract_type != "unknown":
+            return contract_type
+    return "unknown"
+
+
+@cache
+def _entity_schema_field_type(pipeline_name: str, field_name: str) -> str:
+    schema_object = ENTITY_SILVER_SCHEMA_REGISTRY.get(pipeline_name)
+    if schema_object is None:
+        return "unknown"
+    if isinstance(schema_object, pa.Schema):
+        schema = schema_object
+    elif hasattr(schema_object, "to_schema"):
+        schema = schema_object.to_schema()
+    else:
+        return "unknown"
+    try:
+        return str(schema.field(field_name).type)
+    except KeyError:
+        return "unknown"
+
+
+def _composite_source_pipeline_names(payload: dict[str, object]) -> tuple[str, ...]:
+    composite = payload.get("composite")
+    if not isinstance(composite, dict):
+        return ()
+    names: list[str] = []
+    seed = composite.get("seed")
+    if isinstance(seed, dict):
+        pipeline = seed.get("pipeline")
+        if isinstance(pipeline, str) and pipeline:
+            names.append(pipeline)
+    for key in ("dependencies", "enrichers"):
+        entries = composite.get(key)
+        if not isinstance(entries, list):
+            continue
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            pipeline = entry.get("pipeline")
+            if isinstance(pipeline, str) and pipeline:
+                names.append(pipeline)
+    return tuple(dict.fromkeys(names))
+
+
+def _composite_field_provider_order(
+    payload: dict[str, object],
+    field_name: str,
+) -> tuple[str, ...]:
+    composite = payload.get("composite")
+    if not isinstance(composite, dict):
+        return ()
+    merge = composite.get("merge")
+    if not isinstance(merge, dict):
+        return ()
+    column_groups = merge.get("column_groups")
+    if not isinstance(column_groups, list):
+        return ()
+    for entry in column_groups:
+        if not isinstance(entry, dict):
+            continue
+        fields = entry.get("fields")
+        if not isinstance(fields, list) or field_name not in fields:
+            continue
+        provider_order = entry.get("provider_order")
+        if not isinstance(provider_order, list):
+            return ()
+        providers = [
+            provider
+            for provider in provider_order
+            if isinstance(provider, str) and provider
+        ]
+        return tuple(dict.fromkeys(providers))
+    return ()
+
+
+def _composite_source_field_candidates(
+    payload: dict[str, object],
+    *,
+    pipeline_name: str,
+    field_name: str,
+    provider_name: str,
+) -> tuple[str, ...]:
+    composite = payload.get("composite")
+    if not isinstance(composite, dict):
+        return (field_name,)
+    candidates: list[str] = [field_name]
+    merge = composite.get("merge")
+
+    provider_lookup_fields = None
+    lineage = composite.get("lineage")
+    if isinstance(lineage, dict):
+        provider_lookup_fields = lineage.get("provider_lookup_fields")
+    if isinstance(provider_lookup_fields, dict):
+        provider_entry = provider_lookup_fields.get(provider_name)
+        if isinstance(provider_entry, dict):
+            alias = provider_entry.get(field_name)
+            if isinstance(alias, str) and alias:
+                candidates.append(alias)
+
+    if isinstance(merge, dict):
+        field_mappings = merge.get("field_mappings")
+        if isinstance(field_mappings, dict):
+            for source_ref, target_field in field_mappings.items():
+                if target_field != field_name or not isinstance(source_ref, str):
+                    continue
+                parts = source_ref.split(".")
+                if len(parts) == 3 and parts[0] == provider_name and parts[2]:
+                    candidates.append(parts[2])
+
+    candidates.extend(
+        COMPOSITE_SOURCE_FIELD_TYPE_ALIAS_HINTS.get((pipeline_name, field_name), ())
+    )
+    return tuple(dict.fromkeys(candidate for candidate in candidates if candidate))
+
+
+def _composite_inherited_field_type(
+    *,
+    pipeline_name: str,
+    field_name: str,
+    payload: dict[str, object],
+) -> str:
+    contract_type = _composite_field_type(pipeline_name, field_name)
+    if contract_type != "unknown":
+        return contract_type
+    provider_order = _composite_field_provider_order(payload, field_name)
+    single_provider_field = len(provider_order) == 1
+    inherited_types: set[str] = set()
+    for source_pipeline in _composite_source_pipeline_names(payload):
+        provider_name = source_pipeline.split("_", maxsplit=1)[0]
+        if provider_order and provider_name not in provider_order:
+            continue
+        for candidate_field in _composite_source_field_candidates(
+            payload,
+            pipeline_name=pipeline_name,
+            field_name=field_name,
+            provider_name=provider_name,
+        ):
+            field_type = _entity_schema_field_type(source_pipeline, candidate_field)
+            if field_type != "unknown":
+                if single_provider_field:
+                    return field_type
+                inherited_types.add(field_type)
+                break
+    inherited_types.discard("unknown")
+    if len(inherited_types) == 1:
+        return next(iter(inherited_types))
+    return "unknown"
 
 
 @cache
@@ -2063,7 +2254,7 @@ def _build_composite_rows_for_pipeline(
     join_keys = _iter_composite_join_keys(payload)
     rows: list[dict[str, str]] = []
     for field_name in _iter_composite_fields(payload):
-        rows.append(_composite_row(pipeline_name, field_name, join_keys))
+        rows.append(_composite_row(pipeline_name, field_name, join_keys, payload))
     return rows
 
 
@@ -2071,6 +2262,7 @@ def _composite_row(
     pipeline_name: str,
     field_name: str,
     join_keys: set[str],
+    payload: dict[str, object],
 ) -> dict[str, str]:
     """Build one composite matrix row."""
     source, normalizer, summary, notes = _composite_field_policy(field_name, join_keys)
@@ -2086,7 +2278,11 @@ def _composite_row(
         "pipeline_kind": COMPOSITE_PIPELINE_KIND,
         "entity": pipeline_name.removeprefix("composite_"),
         "field_name": field_name,
-        "field_type": COMPOSITE_GOLD_SCHEMA_TYPE_REGISTRY.get(pipeline_name, "unknown"),
+        "field_type": _composite_inherited_field_type(
+            pipeline_name=pipeline_name,
+            field_name=field_name,
+            payload=payload,
+        ),
         "normalization_source": source,
         "normalizer": normalizer,
         "normalization_summary": summary,
