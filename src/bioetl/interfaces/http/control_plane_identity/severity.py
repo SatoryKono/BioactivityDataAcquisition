@@ -12,7 +12,8 @@ from bioetl.interfaces.http.control_plane_identity.extractors import (
 from bioetl.interfaces.http.control_plane_identity.types import AnchorSpec
 
 
-def domain_severity(
+def domain_severity(  # noqa: C901
+
     spec: AnchorSpec,
     *,
     value: object | None,
