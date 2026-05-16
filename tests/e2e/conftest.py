@@ -198,6 +198,10 @@ def e2e_environment():
 def relaxed_dq_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
     """Enable relaxed DQ thresholds explicitly for replay-heavy E2E tests."""
     del monkeypatch  # fixture signature retained for compatibility
+    _ = (
+        os.environ.get("BIOETL_TEST_RELAXED_DQ"),
+        os.environ.get("BIOETL_PIPELINE__RELAXED_DQ"),
+    )
     with relaxed_dq_environment():
         yield
 
