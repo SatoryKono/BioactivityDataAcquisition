@@ -92,8 +92,6 @@ class TestChemblSchemas:
                     "uo_units": "UO_0000065",
                     "src_id": 1,
                     "record_id": 100,
-                    "relation": "=",
-                    "value": 10.5,
                     "units": "nM",
                     "canonical_smiles": "CC",
                     "target_organism": "Homo sapiens",
@@ -111,7 +109,7 @@ class TestChemblSchemas:
                 "publication_id",
                 {
                     "assay_id": "CHEMBL123",
-                    "description": "Binding assay",
+                    "assay_description": "Binding assay",
                     "assay_type": "B",
                     "assay_type_description": "Binding",
                     "target_id": "CHEMBL456",
@@ -126,7 +124,7 @@ class TestChemblSchemas:
                 "bao_format",
                 {
                     "assay_id": "CHEMBL123",
-                    "description": "Binding assay",
+                    "assay_description": "Binding assay",
                     "assay_type": "B",
                     "assay_type_description": "Binding",
                     "target_id": "CHEMBL456",
@@ -141,7 +139,7 @@ class TestChemblSchemas:
                 "assay_type_description",
                 {
                     "assay_id": "CHEMBL123",
-                    "description": "Binding assay",
+                    "assay_description": "Binding assay",
                     "assay_type": "B",
                     "assay_type_description": "Binding",
                     "target_id": "CHEMBL456",
@@ -156,7 +154,6 @@ class TestChemblSchemas:
                 "relationship_type",
                 {
                     "assay_id": "CHEMBL123",
-                    "description": "Binding assay",
                     "assay_type": "B",
                     "assay_type_description": "Binding",
                     "target_id": "CHEMBL456",
@@ -171,7 +168,6 @@ class TestChemblSchemas:
                 "confidence_score",
                 {
                     "assay_id": "CHEMBL123",
-                    "description": "Binding assay",
                     "assay_type": "B",
                     "assay_type_description": "Binding",
                     "target_id": "CHEMBL456",
@@ -323,8 +319,6 @@ class TestChemblSchemas:
             "uo_units": "UO_0000065",
             "src_id": 1,
             "record_id": 100,
-            "relation": "=",
-            "value": 10.5,
             "units": "nM",
             "canonical_smiles": "CC",
             "target_organism": "Homo sapiens",

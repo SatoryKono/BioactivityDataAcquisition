@@ -51,17 +51,22 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
         exit $LASTEXITCODE
     }
 } else {
-    if (Get-Command py -ErrorAction SilentlyContinue) {
-        Invoke-CheckedCommand -Command { py -3.13 -m venv --clear $VenvDir } -ErrorMessage "[setup_env_windows][error] py -3.13 -m venv failed."
-    } elseif (Get-Command python -ErrorAction SilentlyContinue) {
-        Invoke-CheckedCommand -Command { python -m venv --clear $VenvDir } -ErrorMessage "[setup_env_windows][error] python -m venv failed."
+    if (-not (Test-Path $VenvPython)) {
+        if (Get-Command py -ErrorAction SilentlyContinue) {
+            Invoke-CheckedCommand -Command { py -3.13 -m venv $VenvDir } -ErrorMessage "[setup_env_windows][error] py -3.13 -m venv failed."
+        } elseif (Get-Command python -ErrorAction SilentlyContinue) {
+            Invoke-CheckedCommand -Command { python -m venv $VenvDir } -ErrorMessage "[setup_env_windows][error] python -m venv failed."
+        } else {
+            Write-Error "[setup_env_windows][error] Neither uv, py, nor python is available."
+            exit 1
+        }
+
+        Invoke-CheckedCommand -Command { & $VenvPython -m ensurepip --upgrade } -ErrorMessage "[setup_env_windows][error] ensurepip failed."
+        Invoke-CheckedCommand -Command { & $VenvPython -m pip install --upgrade pip setuptools wheel } -ErrorMessage "[setup_env_windows][error] pip bootstrap failed."
     } else {
-        Write-Error "[setup_env_windows][error] Neither uv, py, nor python is available."
-        exit 1
+        Write-Host "[setup_env_windows][hint] Reusing existing .venv-win; refreshing editable install."
     }
 
-    Invoke-CheckedCommand -Command { & $VenvPython -m ensurepip --upgrade } -ErrorMessage "[setup_env_windows][error] ensurepip failed."
-    Invoke-CheckedCommand -Command { & $VenvPython -m pip install --upgrade pip setuptools wheel } -ErrorMessage "[setup_env_windows][error] pip bootstrap failed."
     Invoke-CheckedCommand -Command { & $VenvPython -m pip install -e ".[dev,tracing]" } -ErrorMessage "[setup_env_windows][error] editable install failed."
 }
 

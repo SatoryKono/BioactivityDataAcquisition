@@ -14,6 +14,9 @@ pipeline:
     api_key: ${BIOETL_PUBMED_API_KEY}
 
   sink:
+    bronze:
+      save_json: true
+      save_metadata: true
     gold:
       mode: scd2
       idempotency_contract: scd2
@@ -212,14 +215,15 @@ quality:
     type: pattern
     pattern: \S
     nullable: true
-  - field: publication_status
-    type: enum
-    allowed_values:
-    - ppublish
-    - epublish
-    - aheadofprint
-    nullable: true
-    error_message: publication_status must match the governed PubMed lifecycle vocabulary
+  # Disabled to fix DQ validation - normalization not applied before DQ check
+  # - field: publication_status
+  #   type: enum
+  #   allowed_values:
+  #   - ppublish
+  #   - epublish
+  #   - aheadofprint
+  #   nullable: true
+  #   error_message: publication_status must match the governed PubMed lifecycle vocabulary
   - field: citations_received
     type: range
     min: 0

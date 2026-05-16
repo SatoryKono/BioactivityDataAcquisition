@@ -49,6 +49,7 @@ _META_FIELDS = frozenset(
     }
 )
 _TITLE_FIELDS = frozenset({"pref_name"})
+_ABSTRACT_FIELDS = frozenset({"target_description"})
 _INT_FIELDS = frozenset({"taxonomy_id"})
 _FLOAT_FIELDS = frozenset({"primary_component_id"})
 _BOOLEAN_FIELDS = chembl_boolean_family_fields("bool_like", entity="target")
@@ -94,6 +95,7 @@ CHEMBL_TARGET_PROFILE = build_standard_profile(
     schema_fields=CHEMBL_TARGET_SCHEMA_FIELDS,
     meta_fields=_META_FIELDS,
     title_fields=_TITLE_FIELDS,
+    abstract_fields=_ABSTRACT_FIELDS,
     int_fields=_INT_FIELDS,
     float_fields=_FLOAT_FIELDS,
     set_like_fields=_SET_LIKE_FIELDS,

@@ -185,7 +185,7 @@ class TargetTransformer(BaseChemblTransformer):
             # Shared domain normalization owns deterministic cellularity derivation.
             "organism_class": record.get("organism_class"),
             "species_group_flag": record.get("species_group_flag"),
-            "description": record.get("target_description")
+            "target_description": record.get("target_description")
             or record.get("description"),
             # Keep provider raw value here; shared bool coercion lives in the
             # domain normalization profile and must preserve null semantics.
