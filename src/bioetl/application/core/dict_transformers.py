@@ -106,15 +106,7 @@ def aggregate_nested_lists(
         return None
 
     if deduplicate:
-        seen: set[str] = set()
-        unique: list[
-            object
-        ] = []  # object: nested list elements have heterogeneous types
-        for val in values:
-            key = str(val)
-            if key not in seen:
-                seen.add(key)
-                unique.append(val)
+        unique = list(dict.fromkeys(values))
         return unique if unique else None
 
     return values
