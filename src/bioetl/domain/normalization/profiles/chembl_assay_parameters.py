@@ -95,6 +95,14 @@ _SPECIAL_RULE_COMPONENTS = {
         normalize_profile_text,
         "Normalize assay parameter comments as plain text; comments are not JSON-canonicalized by default.",
     ),
+    "parameter_relation": (
+        normalize_profile_operator,
+        "Normalize assay-parameter relation to a canonical ASCII operator enum.",
+    ),
+    "relation": (
+        normalize_profile_operator,
+        "Normalize assay-parameter relation to a canonical ASCII operator enum.",
+    ),
     "standard_relation": (
         lambda value: normalize_profile_operator(
             value,

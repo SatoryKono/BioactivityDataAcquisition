@@ -109,7 +109,7 @@ async def test_pipeline_resume_from_checkpoint(e2e_data_dir: Path):
     Verifies that a pipeline run can be interrupted and resumed.
     """
     # Arrange - First run with limit
-    ctx1 = create_test_context("chembl_activity", limit=3, resume=False)
+    ctx1 = create_test_context("chembl_activity", limit=5, resume=False)
     runner1 = bootstrap_pipeline_runner(ctx1)
     await runner1.run()
 
@@ -118,7 +118,7 @@ async def test_pipeline_resume_from_checkpoint(e2e_data_dir: Path):
     )
 
     # Arrange - Second run with resume
-    ctx2 = create_test_context("chembl_activity", limit=3, resume=True)
+    ctx2 = create_test_context("chembl_activity", limit=5, resume=True)
     runner2 = bootstrap_pipeline_runner(ctx2)
     await runner2.run()
 
