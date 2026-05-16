@@ -19,9 +19,11 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_finaliz
     build_final_diagnostics_summary as _build_final_diagnostics_summary,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
-    _build_operator_replay_projection,
     _build_replay_state_projection,
     _build_resume_contract,
+)
+from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection import (
+    _build_operator_replay_projection,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
     resolve_post_manifest_input_snapshot_materialization_mode,

@@ -2,14 +2,15 @@
 id: fix-function-length-metrics-20260516
 title: Fix function length metric regressions
 task_id: fix-function-length-metrics-20260516
-created_at: '2026-05-16T10:31:09Z'
+created_at: '2026-05-16T10:41:23Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
-summary: Reduced three function-length metric regressions below the 100-line cap by
-  extracting replay-projection, effective-config-context, and control-plane anchor-value
-  helpers without changing returned payload shapes.
+summary: Followed up the long-function refactor by splitting operator replay projection
+  into a dedicated helper module, shrinking replay diagnostics below the application
+  file-size cap, and refreshing the existing control-plane extractor file-size exemption
+  to 483 LOC while preserving current behavior.
 ---
 
 # Episodic summary
@@ -20,7 +21,7 @@ summary: Reduced three function-length metric regressions below the 100-line cap
 
 ## Outcome
 
-- Reduced three function-length metric regressions below the 100-line cap by extracting replay-projection, effective-config-context, and control-plane anchor-value helpers without changing returned payload shapes.
+- Followed up the long-function refactor by splitting operator replay projection into a dedicated helper module, shrinking replay diagnostics below the application file-size cap, and refreshing the existing control-plane extractor file-size exemption to 483 LOC while preserving current behavior.
 
 ## Lessons learned
 
