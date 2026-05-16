@@ -30,7 +30,7 @@ from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects.taxonomy_id import validate_taxonomy_id
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord, PrimaryId
+    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
 
 # Mapping for ligand efficiency fields extraction (nested dict)
@@ -242,6 +242,25 @@ class ActivityTransformer(BaseChemblTransformer):
             for target_field, aliases in _PUBLICATION_IDENTIFIER_ALIASES.items()
         }
 
+    @staticmethod
+    def _coalesce_activity_relation(
+        business_data: GoldRecord,
+    ) -> object | None:
+        """Prefer the raw relation operator, but fall back to standard_relation.
+
+        Recent ChEMBL activity payloads may omit ``relation`` while still
+        populating ``standard_relation``. The Silver contract requires the
+        canonical ``activity_relation`` field, so preserve replayable coverage
+        by reusing the standardized operator when the raw operator is absent.
+        """
+        relation = business_data.get("relation")
+        if isinstance(relation, str):
+            if relation.strip():
+                return relation
+        elif relation is not None:
+            return relation
+        return business_data.get("standard_relation")
+
     def _extract_business_data(
         self,
         record: BronzeRecord,
@@ -293,6 +312,7 @@ class ActivityTransformer(BaseChemblTransformer):
                 record.get("activity_properties")
             ),
         }
+        business_data["relation"] = self._coalesce_activity_relation(business_data)
 
         # Support both unified and legacy FK source fields from input record
         business_data["target_id"] = business_data.get("target_id") or record.get(
@@ -305,3 +325,28 @@ class ActivityTransformer(BaseChemblTransformer):
             "publication_id"
         ) or record.get("publication_id")
         return business_data
+
+    def _postprocess_pre_silver_record(
+        self,
+        silver_record: SilverRecord,
+        *,
+        business_data: JsonDict,
+    ) -> SilverRecord:
+        """Project canonical original activity fields before structural policy checks."""
+        relation = silver_record.get("relation")
+        if isinstance(relation, str) and not relation.strip():
+            relation = None
+        silver_record["activity_type"] = (
+            silver_record.get("type")
+            if silver_record.get("type") is not None
+            else business_data.get("standard_type")
+        )
+        silver_record["activity_relation"] = (
+            relation if relation is not None else business_data.get("standard_relation")
+        )
+        silver_record["activity_value"] = (
+            silver_record.get("value")
+            if silver_record.get("value") is not None
+            else business_data.get("standard_value")
+        )
+        return cast("SilverRecord", silver_record)

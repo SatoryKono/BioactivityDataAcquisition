@@ -508,6 +508,38 @@ class TestActivityTransformerSilverContract:
         assert result["_state"] == "validated"
         assert validation_result.valid, validation_result.errors
 
+    @pytest.mark.asyncio
+    async def test_transform_falls_back_to_standard_relation_when_raw_relation_missing(
+        self,
+        mock_context,
+    ) -> None:
+        """Missing raw relation should not quarantine when standard_relation exists."""
+        loader = PipelineConfigLoader(Path("configs"))
+        yaml_config = loader.load_pipeline_config("chembl_activity")
+        domain_config = resolve_domain_pipeline_config(yaml_config)
+        dependencies = dataclasses.replace(
+            build_test_transformer_dependencies(),
+            structural_policy=build_structural_policy(
+                domain_config=domain_config,
+                pandera_silver_schema=ActivitySchema,
+            ),
+        )
+        transformer = ActivityTransformer(
+            provider="chembl",
+            silver_filters=domain_config.silver_filters,
+            gold_filters=domain_config.gold_filters,
+            dependencies=dependencies,
+        )
+
+        record = self._valid_contract_record()
+        record.pop("relation")
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["activity_relation"] == "="
+        assert result["standard_relation"] == "="
+
     def test_activity_arrow_schema_marks_contract_fields_non_nullable(self) -> None:
         """Committed Arrow schema should reflect the stricter Silver nullability."""
         expected_non_nullable = (
