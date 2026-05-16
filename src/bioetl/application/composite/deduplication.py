@@ -120,29 +120,23 @@ class EnricherDeduplicatorService:
         agg_exprs: list[pl.Expr] = []
         for col in non_key_columns:
             agg_exprs.append(
-                pl.col(col).drop_nulls().n_unique().alias(f"{col}__n_unique")
+                (
+                    (pl.col(col).drop_nulls().n_unique() > 1)
+                    | (pl.col(col).is_null().any() & ~pl.col(col).is_null().all())
+                ).alias(col)
             )
-            agg_exprs.append(pl.col(col).is_null().any().alias(f"{col}__has_null"))
-            agg_exprs.append(pl.col(col).is_null().all().alias(f"{col}__all_null"))
 
         aggregated = df.group_by(key_columns).agg(agg_exprs)
 
-        # Classify each column based on the single aggregation result
+        # Check if any group had a conflict for each column in a single query
+        global_conflicts = aggregated.select(
+            [pl.col(col).any().alias(col) for col in non_key_columns]
+        ).row(0)
+
         columns_with_conflicts: list[str] = []
         columns_without_conflicts: list[str] = []
-        for col in non_key_columns:
-            n_unique_col = f"{col}__n_unique"
-            has_null_col = f"{col}__has_null"
-            all_null_col = f"{col}__all_null"
 
-            has_conflict = (
-                aggregated.filter(
-                    (pl.col(n_unique_col) > 1)
-                    | (pl.col(has_null_col) & ~pl.col(all_null_col))
-                ).height
-                > 0
-            )
-
+        for col, has_conflict in zip(non_key_columns, global_conflicts, strict=True):
             if has_conflict:
                 columns_with_conflicts.append(col)
             else:
