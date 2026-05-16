@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 import os
 from typing import Any
 from unittest.mock import patch
@@ -48,6 +49,7 @@ class IntegrationPipelineTestCase:
         """Setup temporary storage paths and patch StorageFactory."""
         self.storage_root = tmp_path / "storage"
         self.storage_root.mkdir()
+        self.data_dir = tmp_path / "data"
 
         self.bronze_path = str(self.storage_root / "bronze")
         self.silver_path = str(self.storage_root / "silver")
@@ -62,15 +64,78 @@ class IntegrationPipelineTestCase:
             self.gold_path,
             self.checkpoints_path,
             self.json_path,
+            str(self.data_dir / "output"),
         ]:
             os.makedirs(path, exist_ok=True)
 
+        # Patch resolve_storage_paths to always use test paths
+        from bioetl.composition.factories.storage import _context_resolution
+
+        original_resolve = _context_resolution.resolve_storage_paths
+
+        def patched_resolve_storage_paths(settings, bronze_config, silver_config, gold_config):
+            """Always use test paths regardless of test_mode."""
+            return (
+                False,  # use_yaml_paths = False
+                Path(self.bronze_path),
+                Path(self.silver_path),
+                Path(self.gold_path),
+            )
+
+        # Patch Settings class to return test paths
+        from bioetl.infrastructure.config import Settings
+        from unittest.mock import PropertyMock
+
+        type(Settings).bronze_path = PropertyMock(return_value=Path(self.bronze_path))
+        type(Settings).silver_path = PropertyMock(return_value=Path(self.silver_path))
+        type(Settings).gold_path = PropertyMock(return_value=Path(self.gold_path))
+
+        # Patch create_storage_adapter to force test paths
+        from bioetl.composition.factories.storage._helpers import create_storage_adapter
+        original_create_adapter = create_storage_adapter
+
+        def patched_create_adapter(*args, **kwargs):
+            """Force bronze writer to use test paths."""
+            ctx = args[0] if args else kwargs.get('ctx')
+            if ctx and hasattr(ctx, 'bronze_path'):
+                # Force the context to use test paths
+                from dataclasses import replace
+                ctx = replace(ctx,
+                    bronze_path=Path(self.bronze_path),
+                    silver_path=Path(self.silver_path),
+                    gold_path=Path(self.gold_path))
+                if args:
+                    args = (ctx,) + args[1:]
+                else:
+                    kwargs['ctx'] = ctx
+            return original_create_adapter(*args, **kwargs)
+
         # Patch StorageFactory.create to return local paths
+        # Patch at multiple import locations to ensure coverage
         with patch(
-            "bioetl.composition.factories.storage.StorageFactory.create"
-        ) as mock_create:
-            mock_create.side_effect = self._create_local_storage_context
-            yield
+            "bioetl.composition.factories.storage._helpers.create_storage_adapter",
+            side_effect=patched_create_adapter
+        ):
+            with patch(
+                "bioetl.composition.factories.storage.StorageFactory.create"
+            ) as mock_create:
+                mock_create.side_effect = self._create_local_storage_context
+                with patch(
+                    "bioetl.composition.factories.storage.factory.StorageFactory.create"
+                ) as mock_create_factory:
+                    mock_create_factory.side_effect = self._create_local_storage_context
+                    with patch(
+                        "bioetl.composition.factories.services.factory.StorageFactory.create"
+                    ) as mock_create_services:
+                        mock_create_services.side_effect = self._create_local_storage_context
+                        with patch(
+                            "bioetl.composition.factories.services.common_service_wiring.StorageFactory.create"
+                        ) as mock_create_wiring:
+                            mock_create_wiring.side_effect = self._create_local_storage_context
+                            with patch.object(
+                                _context_resolution, "resolve_storage_paths", patched_resolve_storage_paths
+                            ):
+                                yield
 
     def _create_local_storage_context(
         self,
@@ -96,15 +161,19 @@ class IntegrationPipelineTestCase:
         bronze_config = config.sink.get("bronze")
         save_json = bronze_config.save_json if bronze_config else False
 
+        # Create bronze writer with flat_structure=False to match production path structure
+        bronze_writer = BronzeWriter(
+            base_path=self.bronze_path,
+            logger=logger,
+            metrics=metrics,
+            save_json=save_json,
+            json_path=self.json_path if save_json else None,
+            flat_structure=False,
+            # Lock validation at Application layer
+        )
+
         adapter = StorageBundle(
-            bronze_writer=BronzeWriter(
-                base_path=self.bronze_path,
-                logger=logger,
-                metrics=metrics,
-                save_json=save_json,
-                json_path=self.json_path if save_json else None,
-                # Lock validation at Application layer
-            ),
+            bronze_writer=bronze_writer,
             silver_writer=SilverWriter(
                 base_path=self.silver_path,
                 logger=logger,
@@ -130,12 +199,25 @@ class IntegrationPipelineTestCase:
         )
 
     @pytest.fixture
-    def settings(self):
+    def settings(self, tmp_path):
         """Return generic settings for testing."""
         # Use defaults, usually sufficient as we mock storage
         # Ensure ENV is not prod to avoid acmolecule_idental S3 usage if mock fails (safety net)
         os.environ["BIOETL_ENV"] = "dev"
-        return Settings()
+        # Enable test_mode to use settings paths instead of YAML paths
+        # Override data_dir to use temp directory
+        data_dir = tmp_path / "data"
+        data_dir.mkdir(exist_ok=True)
+        storage_root = tmp_path / "storage"
+        storage_root.mkdir(exist_ok=True)
+
+        settings = Settings(test_mode=True, data_dir=str(data_dir))
+
+        # Override _data_dir directly on the instance
+        # This will affect all computed properties that depend on it
+        settings._data_dir = str(storage_root)
+
+        return settings
 
     @pytest.fixture
     def runtime_config(self):

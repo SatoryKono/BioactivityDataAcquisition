@@ -217,7 +217,8 @@ timeout = 60
 timeout_method = "thread"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "module"
-cache_dir = "/tmp/bioetl-pytest-cache"
+# Relative cache keeps local/IDE runs portable; run_pytest.{ps1,sh} may override on CI/WSL.
+cache_dir = ".pytest_cache"
 filterwarnings = [
     "error",
     "ignore::DeprecationWarning",

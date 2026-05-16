@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, is_dataclass, replace
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.run_ledger_service import (
@@ -77,6 +78,18 @@ if TYPE_CHECKING:
 __all__ = ["PipelineRunnerProtocol", "build_pipeline_runner"]
 
 
+def _set_context_attribute(
+    ctx: object,
+    attr_name: str,
+    attr_value: object,
+) -> object:
+    """Set an attribute on a context object, handling both dataclass and SimpleNamespace."""
+    if is_dataclass(ctx):
+        return replace(ctx, **{attr_name: attr_value})
+    setattr(ctx, attr_name, attr_value)
+    return ctx
+
+
 @dataclass(frozen=True, slots=True)
 class _ControlPlaneSetupResult:
     ctx: PipelineRunContext
@@ -102,9 +115,10 @@ def _handle_control_plane_setup(
         required_profile=control_plane_policy.required_profile,
         exact_replay=bool(getattr(ctx, "exact_replay", False)),
     )
-    ctx = replace(
+    ctx = _set_context_attribute(
         ctx,
-        required_persistence_profile=control_plane_policy.required_profile,
+        "required_persistence_profile",
+        control_plane_policy.required_profile,
     )
     run_ledger_service: RunLedgerService | None = None
 

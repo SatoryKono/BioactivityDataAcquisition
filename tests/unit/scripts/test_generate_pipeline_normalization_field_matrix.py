@@ -232,7 +232,7 @@ def _assert_assay_parameter_rows(rows: list[dict[str, str]]) -> None:
 
     assay_parameter_relation = _row(rows, "chembl_assay_parameters", "relation")
     assert assay_parameter_relation["normalization_source"] == "profile"
-    assert assay_parameter_relation["normalizer"] == "normalize_profile_text"
+    assert assay_parameter_relation["normalizer"] == "normalize_profile_operator"
     assert "domain_schema:present" in assay_parameter_relation["schema_coverage"]
 
     assay_parameter_value = _row(rows, "chembl_assay_parameters", "value")

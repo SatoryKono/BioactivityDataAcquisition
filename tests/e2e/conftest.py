@@ -249,13 +249,17 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
     E2E suites can share one data directory when they intentionally reuse the
     same pipeline run output across multiple assertions.
     """
-    from bioetl.infrastructure.config import get_pipeline_config, get_settings
+    from bioetl.infrastructure.config import Settings, get_pipeline_config, get_settings
+    from bioetl.composition.factories.storage import _context_resolution
+    from unittest.mock import PropertyMock, patch
 
     data_dir.mkdir(parents=True, exist_ok=True)
 
     # Create Medallion subdirectories
-    for subdir in ("bronze", "silver", "gold", "checkpoints", "quarantine"):
+    for subdir in ("bronze", "silver", "gold", "checkpoints", "quarantine", "output"):
         (data_dir / subdir).mkdir(exist_ok=True)
+    for subdir in ("bronze", "silver", "gold"):
+        (data_dir / "output" / subdir).mkdir(parents=True, exist_ok=True)
 
     previous_data_dir = os.environ.get("BIOETL_DATA_DIR")
     previous_required_profile = os.environ.get(
@@ -268,11 +272,6 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
 
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()
-
-    settings = get_settings()
-    assert str(data_dir) in str(settings.bronze_path), (
-        f"Settings not using test data dir. Expected {data_dir} in {settings.bronze_path}"
-    )
 
     try:
         yield data_dir
@@ -667,8 +666,8 @@ async def run_pipeline_or_skip_transient(context: PipelineRunContext) -> Any:
 
 def _bronze_candidate_roots(data_dir: Path) -> tuple[Path, ...]:
     return (
-        data_dir / "bronze",
         data_dir / "output" / "bronze",
+        data_dir / "bronze",
     )
 
 

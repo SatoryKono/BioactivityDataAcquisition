@@ -60,20 +60,20 @@ entries:
       rule_bundle_version: "dq-rules.v1.0"
       normalization_profile_ref: "chembl.assay"
       normalization_profile_version: "1.0.0"
-      normalization_profile_hash: "31ded28e4645fc602af4c83459b1ce7aefa18656a185564a145da06c3513cc77"
+      normalization_profile_hash: "838abbbd84f03e1e652a62a8a453ebf101d95ac20c8890879b5d93ac180b8894"
     status: "active"
     source_path: "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py"
     published_artifacts:
       - "../../docs/04-reference/contracts/gold/chembl_assay_v1.0.json"
     supported_versions: ["1.0.0"]
     migration_guides: {}
-    last_updated: "2026-04-23T00:00:00Z"
+    last_updated: "2026-05-16T00:00:00Z"
     owners: ["chembl-team"]
     dq_policy_ref: "chembl.dq.v1"
     rule_bundle_version: "dq-rules.v1.0"
     normalization_profile_ref: "chembl.assay"
     normalization_profile_version: "1.0.0"
-    normalization_profile_hash: "31ded28e4645fc602af4c83459b1ce7aefa18656a185564a145da06c3513cc77"
+    normalization_profile_hash: "838abbbd84f03e1e652a62a8a453ebf101d95ac20c8890879b5d93ac180b8894"
 
   chembl.assay_parameters:
     identity:
@@ -84,20 +84,20 @@ entries:
       rule_bundle_version: "dq-rules.v1.0"
       normalization_profile_ref: "chembl.assay_parameters"
       normalization_profile_version: "1.0.0"
-      normalization_profile_hash: "f1043e28c2d1639985041fa27a97173ccafe4bc5310fa4051ea7a51ad646417f"
+      normalization_profile_hash: "4469175e88e4c0f5e9e7709910c79820515a10e5ffb0c264d07e0b941d3d73df"
     status: "active"
     source_path: "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py"
     published_artifacts:
       - "../../docs/04-reference/contracts/gold/chembl_assay_parameters_v1.0.json"
     supported_versions: ["1.0.0"]
     migration_guides: {}
-    last_updated: "2026-05-06T00:00:00Z"
+    last_updated: "2026-05-16T00:00:00Z"
     owners: ["chembl-team"]
     dq_policy_ref: "chembl.dq.v1"
     rule_bundle_version: "dq-rules.v1.0"
     normalization_profile_ref: "chembl.assay_parameters"
     normalization_profile_version: "1.0.0"
-    normalization_profile_hash: "f1043e28c2d1639985041fa27a97173ccafe4bc5310fa4051ea7a51ad646417f"
+    normalization_profile_hash: "4469175e88e4c0f5e9e7709910c79820515a10e5ffb0c264d07e0b941d3d73df"
 
   chembl.cell_line:
     identity:
@@ -276,7 +276,7 @@ entries:
       rule_bundle_version: "dq-rules.v1.0"
       normalization_profile_ref: "chembl.target"
       normalization_profile_version: "1.0.0"
-      normalization_profile_hash: "29ead7ac5524a4c21a13c05abe5c59bde3045de5485e2b08f55b4bd293417739"
+      normalization_profile_hash: "ab77e762d9feca77c27d819a7f2c96bb1940c411c33d2a37b5c9c055cb8952a0"
     status: "active"
     source_path: "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
     published_artifacts:
