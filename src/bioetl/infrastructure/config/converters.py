@@ -58,6 +58,26 @@ def _extract_write_modes(
     return silver_mode, gold_mode
 
 
+def _extract_idempotency_contracts(
+    yaml_config: PipelineYamlConfig,
+) -> tuple[str | None, str | None]:
+    """Extract effective sink idempotency contracts from merged config."""
+    silver_config = yaml_config.sink.get("silver")
+    gold_config = yaml_config.sink.get("gold")
+
+    silver_contract = (
+        str(silver_config.idempotency_contract).strip().lower()
+        if silver_config and silver_config.idempotency_contract is not None
+        else None
+    )
+    gold_contract = (
+        str(gold_config.idempotency_contract).strip().lower()
+        if gold_config and gold_config.idempotency_contract is not None
+        else None
+    )
+    return silver_contract or None, gold_contract or None
+
+
 def _build_silver_filters(yaml_config: PipelineYamlConfig) -> SilverFilterConfig:
     """Build structural Silver layer filter config from YAML config.
 
@@ -132,6 +152,7 @@ def yaml_config_to_domain(
     """
     source_fields = _extract_source_fields(yaml_config)
     write_mode, gold_write_mode = _extract_write_modes(yaml_config)
+    silver_contract, gold_contract = _extract_idempotency_contracts(yaml_config)
     silver_filters = _build_silver_filters(yaml_config)
     gold_filters = _build_gold_filters(yaml_config)
     silver_sink = yaml_config.sink.get("silver")
@@ -152,6 +173,8 @@ def yaml_config_to_domain(
         gold_table=yaml_config.gold_table,
         silver_write_mode=write_mode,
         gold_write_mode=gold_write_mode,
+        silver_idempotency_contract=silver_contract,
+        gold_idempotency_contract=gold_contract,
         on_schema_mismatch=on_schema_mismatch,
     )
 

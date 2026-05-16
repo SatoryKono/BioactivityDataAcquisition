@@ -109,7 +109,7 @@ class TargetSchema(ETLRecordSchema):
         coerce=False,
         description="Species group flag.",
     )
-    description: Series[str] | None = pa.Field(
+    target_description: Series[str] | None = pa.Field(
         nullable=True, description="Target description."
     )
     downgraded: Series[pd.BooleanDtype] | None = pa.Field(

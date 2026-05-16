@@ -24,12 +24,6 @@ else:
 
 ensure_repo_imports(include_src=True)
 
-from bioetl.composition.bootstrap.runtime.normalization_policy_init import (
-    initialize_chembl_policy_registry as initialize_bootstrap_chembl_policy_registry,
-)
-
-initialize_bootstrap_chembl_policy_registry(Path("configs"))
-
 from bioetl.application.composite.checkpoint import (
     create_expected_checkpoint_context,
     merge_expected_anchors,
@@ -45,6 +39,9 @@ from bioetl.application.core.normalization_fallbacks import (
     is_smiles_field,
 )
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
+from bioetl.composition.bootstrap.runtime.normalization_policy_init import (
+    initialize_chembl_policy_registry as initialize_bootstrap_chembl_policy_registry,
+)
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
@@ -622,6 +619,13 @@ COMPOSITE_GOLD_SCHEMA_TYPE_REGISTRY: dict[str, str] = {
     "composite_publication": "unknown",
     "composite_target": "unknown",
 }
+
+
+@cache
+def _ensure_chembl_policy_registry_initialized() -> None:
+    initialize_bootstrap_chembl_policy_registry(Path("configs"))
+
+
 COMPOSITE_SENSITIVE_SOURCE_FIELDS: dict[str, tuple[tuple[str, str], ...]] = {
     "activity_id": (("chembl", "activity"),),
     "assay_id": (("chembl", "activity"), ("chembl", "assay")),
@@ -792,6 +796,9 @@ def _registry_values(
     if not isinstance(current, list):
         return frozenset()
     return frozenset(str(value) for value in current)
+
+
+_registry_values = cache(_registry_values)
 
 
 @cache
@@ -1123,6 +1130,9 @@ def _dq_allowed_values(
     return frozenset(str(value) for value in matches[0].allowed)
 
 
+_dq_allowed_values = cache(_dq_allowed_values)
+
+
 def _matching_dq_enum_rules(
     field_validations: list[object], *, field_name: str
 ) -> list[object]:
@@ -1197,6 +1207,9 @@ def _filter_values(
             filters, filter_key="gold_filters", field_name=field_name
         )
     )
+
+
+_filter_values = cache(_filter_values)
 
 
 def _policy_scope(
@@ -2036,6 +2049,7 @@ def _composite_field_policy(
 
 
 def build_field_matrix_rows() -> list[dict[str, str]]:
+    _ensure_chembl_policy_registry_initialized()
     rows: list[dict[str, str]] = []
     rows.extend(_entity_field_matrix_rows())
     rows.extend(_composite_field_matrix_rows())

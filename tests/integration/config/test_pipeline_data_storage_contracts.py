@@ -94,14 +94,63 @@ def test_req_data_006_007_silver_is_delta(config_path):
 
 
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
-def test_req_data_008_silver_is_merge(config_path):
-    """Silver strategy must be merge or append (with post-run dedup)."""
+def test_req_data_008_silver_declares_explicit_idempotency_contract(config_path):
+    """Silver strategy must expose an explicit compatible idempotency contract."""
     config = load_config_with_defaults(config_path)
 
     silver_sink = config.get("sink", {}).get("silver", {})
     mode = silver_sink.get("mode", "merge")
     assert mode in {"merge", "append"}, (
         f"Silver mode in {config_path} is '{mode}', expected 'merge' or 'append'"
+    )
+    contract = silver_sink.get("idempotency_contract")
+    assert contract, (
+        f"Silver sink in {config_path} must declare idempotency_contract after defaults merge"
+    )
+    if mode == "merge":
+        assert contract == "merge_upsert", (
+            f"Silver merge mode in {config_path} requires "
+            f"idempotency_contract='merge_upsert', got {contract!r}"
+        )
+    else:
+        assert contract in {
+            "append_log",
+            "occurrence_only",
+            "partition_append_with_stable_partition_key",
+        }, (
+            f"Silver append mode in {config_path} requires append-safe "
+            f"idempotency_contract, got {contract!r}"
+        )
+
+
+@pytest.mark.parametrize("config_path", get_all_pipeline_configs())
+def test_gold_declares_explicit_idempotency_contract(config_path):
+    """Gold strategy must expose an explicit compatible idempotency contract."""
+    config = load_config_with_defaults(config_path)
+
+    gold_sink = config.get("sink", {}).get("gold", {})
+    if not gold_sink or gold_sink.get("enabled", True) is False:
+        return
+    mode = gold_sink.get("mode", "scd2")
+    contract = gold_sink.get("idempotency_contract")
+    assert contract, (
+        f"Gold sink in {config_path} must declare idempotency_contract after defaults merge"
+    )
+    expected = {
+        "append": {
+            "append_log",
+            "occurrence_only",
+            "partition_append_with_stable_partition_key",
+        },
+        "overwrite": {"overwrite_rebuild"},
+        "scd2": {"scd2"},
+    }.get(mode)
+    assert expected is not None, (
+        f"Gold mode in {config_path} is '{mode}', expected append/overwrite/scd2"
+    )
+    assert contract in expected, (
+        f"Gold mode {mode!r} in {config_path} requires idempotency_contract in "
+        f"{sorted(expected)!r}, got {contract!r}"
     )
 
 

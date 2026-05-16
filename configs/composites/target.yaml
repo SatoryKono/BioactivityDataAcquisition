@@ -229,7 +229,7 @@ composite:
       - name: descriptors
         fields:
           - pref_name
-          - description
+          - target_description
           - downgraded
         provider_order: [chembl]
 

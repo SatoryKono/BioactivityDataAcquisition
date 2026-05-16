@@ -5,6 +5,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 
+from bioetl.application.services.control_plane._run_manifest_replay_taxonomy import (
+    resolve_replay_taxonomy_projection,
+)
 from bioetl.application.services.control_plane.run_manifest_inspection_models import (
     RunManifestInspectionResult,
 )
@@ -67,23 +70,27 @@ def _resolve_replay_claims(
     diagnostics: Mapping[str, object],
     identity_graph: Mapping[str, object],
     persistence_profile: Mapping[str, object],
+    *,
+    replay_capability_default: object,
+    requested_exact_replay_default: object,
 ) -> ReplayClaimSnapshot:
     """Resolve replay claims from diagnostics and identity-graph fallbacks."""
+    replay_taxonomy = resolve_replay_taxonomy_projection(
+        diagnostics,
+        fallback=identity_graph,
+        defaults={
+            "replay_capability": replay_capability_default,
+            "requested_exact_replay": requested_exact_replay_default,
+        },
+    )
     return ReplayClaimSnapshot(
-        replay_capability=diagnostics.get("replay_capability")
-        or identity_graph.get("replay_capability"),
-        replay_readiness_verdict=diagnostics.get("replay_readiness_verdict")
-        or identity_graph.get("replay_readiness_verdict"),
-        exact_replay_support_boundary=diagnostics.get("exact_replay_support_boundary")
-        or identity_graph.get("exact_replay_support_boundary"),
-        replay_family_contract=diagnostics.get("replay_family_contract")
-        or identity_graph.get("replay_family_contract"),
-        exact_replay_eligible=bool(
-            diagnostics.get(
-                "exact_replay_eligible",
-                identity_graph.get("exact_replay_eligible", False),
-            )
+        replay_capability=replay_taxonomy.get("replay_capability"),
+        replay_readiness_verdict=replay_taxonomy.get("replay_readiness_verdict"),
+        exact_replay_support_boundary=replay_taxonomy.get(
+            "exact_replay_support_boundary"
         ),
+        replay_family_contract=replay_taxonomy.get("replay_family_contract"),
+        exact_replay_eligible=bool(replay_taxonomy.get("exact_replay_eligible", False)),
         required_profile=persistence_profile.get("required_profile")
         or diagnostics.get("required_persistence_profile"),
     )
@@ -221,6 +228,8 @@ def build_run_replay_bundle_descriptor(
         diagnostics,
         identity_graph,
         persistence_profile,
+        replay_capability_default=manifest.replay_capability.value,
+        requested_exact_replay_default=bool(manifest.launch_context.get("exact_replay")),
     )
     bundle = _build_replay_bundle(
         result,

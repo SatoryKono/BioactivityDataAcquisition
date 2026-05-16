@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-15'
+  Last verified: '2026-05-16'
 
 ______________________________________________________________________
 
 # Grafana Dashboard Variable Reference
 
-Дата сверки: **2026-05-15**
+Дата сверки: **2026-05-16**
 Источник истины: `grafana/dashboards/*.json`
 
 Этот документ фиксирует канонический contract для dashboard variables:
@@ -47,7 +47,7 @@ Machine-readable selector SSOT:
   Its option list is constrained by the current `workflow`, `pipeline`, and
   `run_type` shell context through `/ops/control-plane/filter-options`; this
   does not make current-status PromQL exact-run scoped.
-- Exact forensic identifiers (`$run_id`, `$payload_hash`) in
+- Exact forensic identifiers (`$quarantine_run_id`, `$payload_hash`) in
   `bioetl-silver-reject-explorer` remain explorer-only narrowing filters.
 - Hidden context variables are allowed only when they preserve return-path or
   detail-only scope, например `$pipeline_context` и `$adapter`.
@@ -75,7 +75,7 @@ Machine-readable selector SSOT:
 | `$adapter` | `bioetl-provider-health-v2` | Multi-select with Include All | Dynamic Grafana selection | Detail-only provider breakdown; links may omit it and let target fall back to all adapters. |
 | `$reason_code` | `bioetl-silver-reject-explorer` | Multi-select with Include All | `All` / `$__all` | Explorer-only forensic narrowing for bounded reject causes. |
 | `$field` | `bioetl-silver-reject-explorer` | Multi-select with Include All | `All` / `$__all` | Explorer-only forensic narrowing for rejected fields. |
-| `$run_id` | `bioetl-silver-reject-explorer` | Single-select | Empty until selected | Explorer-only forensic selector; MUST NOT appear in Prometheus queries or cross-dashboard links. |
+| `$quarantine_run_id` | `bioetl-silver-reject-explorer` | Single-select | Empty until selected | Explorer-only forensic selector backed by Quarantine API `dimension=run_id`; MUST NOT appear in Prometheus queries or generic cross-dashboard links. |
 | `$payload_hash` | `bioetl-silver-reject-explorer` | Visible textbox | Empty string | Forensic exact-record selector; visible only in the explorer and MUST NOT propagate into other dashboards. |
 | `$status` | `bioetl-workflow-overview` | Multi-select with Include All | `All` / `$__all` | Workflow run-status filter. |
 | `$pipeline_context` | `bioetl-workflow-overview` | Hidden context var | `unknown` | Preserves single-pipeline handoff scope for downstream dashboards; multi-pipeline workflows fail-close to `unknown`. |
@@ -116,7 +116,7 @@ Machine-readable selector SSOT:
   - `$adapter` is optional detail scope, not required on handoff
 - `bioetl-silver-reject-explorer`
   - `$pipeline` is required before Quarantine Explorer reads are trustworthy
-  - `$reason_code`, `$field`, `$run_id`, `$payload_hash` are explorer-only narrowing filters
+  - `$reason_code`, `$field`, `$quarantine_run_id`, `$payload_hash` are explorer-only narrowing filters
 - `bioetl-overview-v2`
   - `$workflow`, `$pipeline`, and `$run_type` define the aggregate L0 context
   - `$run_id` is loaded from `/ops/control-plane/filter-options` using
@@ -165,7 +165,7 @@ Machine-readable selector SSOT:
 ### Explorer forensics
 
 - `bioetl-silver-reject-explorer` requires single-select `$pipeline`.
-- `$run_id` and `$payload_hash` remain local forensic selectors and do not
+- `$quarantine_run_id` and `$payload_hash` remain local forensic selectors and do not
   participate in Prometheus label filtering.
 
 ## Validation checklist

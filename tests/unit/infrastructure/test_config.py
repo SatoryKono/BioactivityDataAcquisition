@@ -36,6 +36,8 @@ def test_yaml_config_to_domain_mapping():
     # Table config verification
     assert domain_config.table.silver_write_mode is SilverWriteMode.APPEND
     assert domain_config.table.silver_table == "silver.test"
+    assert domain_config.table.silver_idempotency_contract is None
+    assert domain_config.table.gold_idempotency_contract is None
 
 
 def test_yaml_config_to_domain_default_mode():
@@ -52,6 +54,34 @@ def test_yaml_config_to_domain_default_mode():
     domain_config = yaml_config_to_domain(yaml_config)
 
     assert domain_config.table.silver_write_mode is SilverWriteMode.MERGE
+
+
+def test_yaml_config_to_domain_maps_sink_idempotency_contracts() -> None:
+    """Explicit sink idempotency contracts must be preserved in domain config."""
+    yaml_config = PipelineYamlConfig(
+        pipeline_name="test_pipeline",
+        provider="test",
+        entity_type="entity",
+        business_primary_keys=["id"],
+        silver_table="silver.test",
+        sink={
+            "silver": SinkLayerConfig(
+                mode="append",
+                idempotency_contract="append_log",
+                sort_by=["id"],
+            ),
+            "gold": SinkLayerConfig(
+                mode="overwrite",
+                idempotency_contract="overwrite_rebuild",
+                sort_by=["id"],
+            ),
+        },
+    )
+
+    domain_config = yaml_config_to_domain(yaml_config)
+
+    assert domain_config.table.silver_idempotency_contract == "append_log"
+    assert domain_config.table.gold_idempotency_contract == "overwrite_rebuild"
 
 
 def test_pipeline_yaml_config_promotes_semantic_silver_filters_to_gold() -> None:

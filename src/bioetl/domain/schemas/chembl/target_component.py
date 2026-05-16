@@ -34,7 +34,7 @@ class TargetComponentSchema(ETLRecordSchema):
         isin=list(TARGET_COMPONENT_TYPES),
         description="Component type (PROTEIN, DNA, RNA).",
     )
-    description: Series[str] | None = pa.Field(
+    component_description: Series[str] | None = pa.Field(
         nullable=True, description="Component description."
     )
     organism: Series[str] | None = pa.Field(

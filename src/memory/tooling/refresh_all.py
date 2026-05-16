@@ -12,7 +12,7 @@ from memory.graph.importers.expanded_json import (
     default_expanded_graph_path,
     write_expanded_graph_relation_artifacts,
 )
-from memory.rag.indexing import write_rag_manifests
+from memory.rag.indexing import DEFAULT_BUILD_SCOPE, write_rag_manifests
 from memory.resources import MEMORY_ROOT
 from memory.timeline.ingest_ci import write_ci_events
 from memory.timeline.ingest_incidents import write_incident_events
@@ -78,44 +78,84 @@ def refresh_all(
     include_graph_export: bool = False,
     include_graph_relations: bool = False,
     expanded_graph_path: Path | None = None,
+    rag_build_scope: str = DEFAULT_BUILD_SCOPE,
+    rag_focus_query: str | None = None,
+    rag_max_sources: int | None = None,
+    allow_partial: bool = False,
 ) -> dict[str, Any]:
     """Refresh supported memory artifacts and return a summary."""
     summary: dict[str, Any] = {"ok": True, "artifacts": []}
 
-    if include_rag:
-        rag_dir = output_root / "rag" / "manifests"
-        catalog_path, chunks_path = write_rag_manifests(root, rag_dir)
+    def _record_failure(kind: str, error: Exception) -> None:
+        summary["ok"] = False
         summary["artifacts"].append(
             {
-                "kind": "rag",
-                "paths": [str(catalog_path), str(chunks_path)],
+                "kind": kind,
+                "paths": [],
+                "error": f"{error.__class__.__name__}: {error}",
             }
         )
+
+    if include_rag:
+        try:
+            rag_dir = output_root / "rag" / "manifests"
+            catalog_path, chunks_path = write_rag_manifests(
+                root,
+                rag_dir,
+                build_scope=rag_build_scope,
+                focus_query=rag_focus_query,
+                max_sources=rag_max_sources,
+            )
+            summary["artifacts"].append(
+                {
+                    "kind": "rag",
+                    "paths": [str(catalog_path), str(chunks_path)],
+                    "build_scope": rag_build_scope,
+                    "focus_query": rag_focus_query,
+                    "max_sources": rag_max_sources,
+                }
+            )
+        except Exception as exc:
+            if not allow_partial:
+                raise
+            _record_failure("rag", exc)
 
     if include_timeline:
-        timeline_dir = output_root / "timeline" / "events"
-        run_path = write_run_events(root, timeline_dir / "runs.jsonl")
-        ci_path = write_ci_events(root, timeline_dir / "ci.jsonl")
-        incident_path = write_incident_events(root, timeline_dir / "incidents.jsonl")
-        summary["artifacts"].append(
-            {
-                "kind": "timeline",
-                "paths": [str(run_path), str(ci_path), str(incident_path)],
-            }
-        )
+        try:
+            timeline_dir = output_root / "timeline" / "events"
+            run_path = write_run_events(root, timeline_dir / "runs.jsonl")
+            ci_path = write_ci_events(root, timeline_dir / "ci.jsonl")
+            incident_path = write_incident_events(
+                root, timeline_dir / "incidents.jsonl"
+            )
+            summary["artifacts"].append(
+                {
+                    "kind": "timeline",
+                    "paths": [str(run_path), str(ci_path), str(incident_path)],
+                }
+            )
+        except Exception as exc:
+            if not allow_partial:
+                raise
+            _record_failure("timeline", exc)
 
     if include_graph_export:
-        graph_export = output_root / "graph" / "exports" / "repo_snapshot.json"
-        snapshot = graph_sync.build_snapshot(root)
-        graph_sync._write_export(graph_export, snapshot)
-        summary["artifacts"].append(
-            {
-                "kind": "graph",
-                "paths": [str(graph_export)],
-                "node_count": len(snapshot.nodes),
-                "relation_count": len(snapshot.relations),
-            }
-        )
+        try:
+            graph_export = output_root / "graph" / "exports" / "repo_snapshot.json"
+            snapshot = graph_sync.build_snapshot(root)
+            graph_sync._write_export(graph_export, snapshot)
+            summary["artifacts"].append(
+                {
+                    "kind": "graph",
+                    "paths": [str(graph_export)],
+                    "node_count": len(snapshot.nodes),
+                    "relation_count": len(snapshot.relations),
+                }
+            )
+        except Exception as exc:
+            if not allow_partial:
+                raise
+            _record_failure("graph", exc)
 
     if include_graph_relations:
         snapshot_path = expanded_graph_path or default_expanded_graph_path(root)

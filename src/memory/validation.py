@@ -163,6 +163,18 @@ def _is_working_tree_junk(path: Path) -> bool:
     return "__pycache__" in path.parts or path.suffix == ".pyc"
 
 
+def _is_tolerated_memory_bootstrap_cache(path: Path, memory_root: Path) -> bool:
+    try:
+        rel_path = path.relative_to(memory_root)
+    except ValueError:
+        return False
+    return (
+        rel_path.parts == ("__pycache__", path.name)
+        and path.name.startswith("__init__.")
+        and path.suffix == ".pyc"
+    )
+
+
 def _validate_working_tree_junk(
     memory_root: Path,
     issues: list[ValidationIssue],
@@ -170,6 +182,8 @@ def _validate_working_tree_junk(
     if not memory_root.exists():
         return
     for path in sorted(memory_root.rglob("*")):
+        if _is_tolerated_memory_bootstrap_cache(path, memory_root):
+            continue
         if path.is_file() and _is_working_tree_junk(path):
             issues.append(
                 ValidationIssue(

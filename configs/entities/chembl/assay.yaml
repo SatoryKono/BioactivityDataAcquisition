@@ -17,6 +17,7 @@ pipeline:
         gold:
             enabled: true
             mode: scd2
+            idempotency_contract: scd2
             scd_config:
                 valid_from_col: _valid_from
                 valid_to_col: _valid_to
@@ -39,7 +40,7 @@ schema:
         -   name: business
             fields:
                 - assay_id
-                - description
+                - assay_description
                 - assay_type
                 - assay_type_description
                 - assay_test_type
@@ -61,7 +62,6 @@ schema:
                 - src_assay_id
                 - publication_id
                 - assay_pref_name
-                - score
                 - cell_id
                 - tissue_id
                 - bao_format
@@ -210,9 +210,9 @@ quality:
         -   name: assay_identifiable
             fields:
                 - assay_id
-                - description
+                - assay_description
             condition: all_present
-            error_message: Assay must have ID and description
+            error_message: Assay must have ID and assay_description
         -   name: bao_format_requires_mapping_status
             fields:
                 - bao_format
@@ -273,7 +273,7 @@ filters:
         required_fields:
             - assay_id
             - assay_type
-            - description
+            - assay_description
             - target_id
             - publication_id
             - bao_format
@@ -310,7 +310,7 @@ hash_policy:
         canonicalization: provider + canonical_json_dumps(normalized_record)
         include_fields:
             - assay_id
-            - description
+            - assay_description
             - assay_type
             - assay_type_description
             - assay_test_type
@@ -332,7 +332,7 @@ hash_policy:
             - src_assay_id
             - publication_id
             - assay_pref_name
-            - score
+            - confidence_score
             - cell_id
             - tissue_id
             - bao_format

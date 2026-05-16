@@ -18,11 +18,19 @@ as a replacement for runtime truth.
 
 1. Run `python -m memory.tooling.workflow pre-task ...` before substantial work,
    using `--profile` when a task-specific ranking profile applies.
+   If rebuild-only artifacts are missing, the workflow refreshes only the
+   missing surfaces and uses a bounded workflow-time RAG rebuild instead of a
+   full deterministic corpus rebuild.
 1. Read retrieved context in the order `catalog -> graph -> rag -> source`.
 1. Cross-check important claims with repo search, active docs, configs, tests,
    and accepted ADRs.
 1. Run `python -m memory.tooling.workflow post-task ...` after the task.
 1. Promote only durable lessons, incidents, or decisions.
+
+If `pre-task` runs in degraded mode, treat that as a retrieval warning, not as
+permission to skip canonical source verification. Session notes should still be
+created, and catalog context may still be available even when RAG or timeline
+artifacts are absent.
 
 ## Conflict Priority
 

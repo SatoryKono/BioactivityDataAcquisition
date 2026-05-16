@@ -41,7 +41,7 @@ selector_taxonomy:
   forensic_only:
     - reason_code
     - field
-    - run_id
+    - quarantine_run_id
     - payload_hash
     - manifest_id
     - execution_fingerprint
@@ -57,6 +57,12 @@ operator_context_shell:
     - pipeline
     - run_type
     - run_id
+  cross_dashboard_handoff_selectors:
+    - workflow
+    - pipeline
+    - run_type
+  local_identity_selectors:
+    - run_id
   semantics: |
     The operator context shell standardizes the top-level context controls
     across primary dashboards. It does not make every selector a first-class
@@ -64,7 +70,10 @@ operator_context_shell:
     dashboard explicitly documents truthful intersection semantics. `run_id` is
     local control-plane identity context only: it is loaded from the local
     run-manifest catalog and MUST NOT be used as a Prometheus label or a
-    cross-dashboard handoff variable.
+    blanket cross-dashboard handoff variable. Dashboard-to-dashboard links pass
+    the shared shell (`workflow`, `pipeline`, `run_type`) explicitly with
+    target-scoped `var-*` parameters; native Grafana variable copying by label
+    or semantic meaning is not relied on.
   primary_selector_rule: |
     Dashboard families retain their role-specific primary selectors. Provider
     Health remains provider-first; Workflow remains selected-range workflow
@@ -167,12 +176,16 @@ dashboard_families:
       - run_type
       - reason_code
       - field
-      - run_id
+      - quarantine_run_id
       - payload_hash
     notes: |
       Silver Reject Explorer is the only shipped forensic explorer. It may
-      surface exact reject/run selectors, but those selectors MUST NOT leak
-      into Prometheus dashboards or dashboard-to-dashboard links.
+      surface exact reject/run selectors, but those selectors MUST use
+      forensic-specific names such as `quarantine_run_id` and MUST NOT leak into
+      Prometheus dashboards or generic dashboard-to-dashboard links. The
+      backend API parameter can still be `run_id`; the Grafana variable name is
+      deliberately not `run_id` to avoid colliding with the Control Plane
+      identity shell.
 
 shipped_selector_registry:
   bioetl-control-plane-v1:
@@ -343,7 +356,7 @@ shipped_selector_registry:
       - run_type
       - reason_code
       - field
-      - run_id
+      - quarantine_run_id
       - payload_hash
     hidden_context_selectors: []
     hidden_detail_selectors: []
@@ -352,14 +365,14 @@ shipped_selector_registry:
       - run_type
       - reason_code
       - field
-      - run_id
+      - quarantine_run_id
       - payload_hash
     query_source_families:
       pipeline: prometheus_records_processed_total
       run_type: quarantine_filter_options_api
       reason_code: quarantine_filter_options_api
       field: quarantine_filter_options_api
-      run_id: quarantine_filter_options_api
+      quarantine_run_id: quarantine_filter_options_api
       payload_hash: textbox_forensic_selector
 
 ship_now_selector_contract_by_uid:
@@ -432,7 +445,7 @@ ship_now_selector_contract_by_uid:
       - run_type
       - reason_code
       - field
-      - run_id
+      - quarantine_run_id
       - payload_hash
     time_range: grafana_builtin
 
@@ -450,6 +463,7 @@ hidden_handoff_contract:
     - selected_started_at
   forbidden_cross_dashboard_forensic_vars:
     - run_id
+    - quarantine_run_id
     - payload_hash
     - manifest_id
     - execution_fingerprint

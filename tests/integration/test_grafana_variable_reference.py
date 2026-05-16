@@ -35,6 +35,7 @@ def test_variable_reference_documents_all_shipped_dashboard_variables() -> None:
         "$reason_code",
         "$field",
         "$run_id",
+        "$quarantine_run_id",
         "$payload_hash",
         "$workflow",
         "$status",
@@ -151,8 +152,8 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     assert workflow["provider_context"].get("current", {}).get("value") == "unknown"
 
     explorer = _variables("bioetl-silver-reject-explorer.json")
-    assert explorer["run_id"].get("multi") is False
-    assert explorer["run_id"].get("includeAll") is False
+    assert explorer["quarantine_run_id"].get("multi") is False
+    assert explorer["quarantine_run_id"].get("includeAll") is False
     assert explorer["payload_hash"].get("type") == "textbox"
     assert explorer["payload_hash"].get("current", {}).get("value") == ""
 
@@ -165,6 +166,7 @@ def test_variable_reference_explains_role_specific_exceptions() -> None:
         "`$run_type_context` | `bioetl-workflow-overview` | Hidden context var",
         "`$provider_context` | `bioetl-workflow-overview` | Hidden context var",
         "`bioetl-silver-reject-explorer` requires single-select `$pipeline`",
+        "`$quarantine_run_id` | `bioetl-silver-reject-explorer` | Single-select",
         "`$payload_hash` | `bioetl-silver-reject-explorer` | Visible textbox",
         "run_type` always uses include-all fallback",
         "Primary operator dashboards `0..5` expose the shared context shell",

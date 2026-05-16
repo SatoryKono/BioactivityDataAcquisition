@@ -52,7 +52,7 @@
 - Все ссылки открываются в том же окне (`targetBlank: false`)
 - Запрещены дублирующие dashboard-to-dashboard ссылки в один и тот же target dashboard
 - Все ссылки используют `includeVars: false`, переменные передаются явно в URL через `var-*`
-- Forensic IDs (`run_id`, `payload_hash`) НЕ передаются в non-target dashboards
+- Forensic IDs (`quarantine_run_id`, `payload_hash`) НЕ передаются в non-target dashboards
 - Cross-scope ссылки имеют tooltip с явным suffix: `Scope reset: ...` или `Preserves selected scope and time range.`
 - Time handoff: dashboard links включают `${__url_time_range}`, Explore links включают `from=${__from}`, `to=${__to}`
 
@@ -64,7 +64,7 @@
 
 **MUST:**
 - Каждая переменная в `templating.list` имеет непустой `description`
-- Forensic переменные (`run_id`, `payload_hash`) НЕ leak в Prometheus dashboards или dashboard-to-dashboard links
+- Forensic переменные (`quarantine_run_id`, `payload_hash`) НЕ leak в Prometheus dashboards или dashboard-to-dashboard links
 - Скрытые переменные justified только для return-path или detail-only scope
 - Скрытые переменные НЕ автоматически становятся visible selectors
 - Нет blanket `includeVars=true` semantics для cross-dashboard navigation
@@ -281,9 +281,9 @@ Canonical L0 answer-first hub using the frozen `1. Overview v3` layout as the ba
 - `Explore Logs`, `Explore Traces`, `Silver Reject Explorer`
 
 ### Required panel links (dataLinks)
-- Panel `214` (Status) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
-- Panel `215` (First Action) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
-- Panel `9002` (Inputs) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow (Reset Scope)
+- Panel `214` (Status) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow
+- Panel `215` (First Action) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow
+- Panel `9002` (Inputs) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow
 - Panel `9003` (Runtime) → Open Runtime
 - Panel `9004` (Data Quality) → Open Data Quality
 - Panel `9005` (Data Validation) → Open Runtime
@@ -564,9 +564,9 @@ Selected-range declarative workflow run/step evidence and transform-step latency
 Record-level explorer для `filtered_out`/`FILTERED_OUT_SILVER` записей (quarantine-backed)
 
 ### Переменные
-- **Видимые**: `pipeline` (single-select, required), `run_type` (multi-select with Include All, default `All`), `reason_code` (multi-select with Include All, default `All`), `field` (multi-select with Include All, default `All`), `run_id` (single-select, empty until selected), `payload_hash` (visible textbox, empty string)
+- **Видимые**: `pipeline` (single-select, required), `run_type` (multi-select with Include All, default `All`), `reason_code` (multi-select with Include All, default `All`), `field` (multi-select with Include All, default `All`), `quarantine_run_id` (single-select, empty until selected; backend `dimension=run_id`), `payload_hash` (visible textbox, empty string)
 - **Семейство**: forensic_explorer
-- **Query sources**: `prometheus_records_processed_total` (pipeline), `quarantine_filter_options_api` (run_type, reason_code, field, run_id), `textbox_forensic_selector` (payload_hash)
+- **Query sources**: `prometheus_records_processed_total` (pipeline), `quarantine_filter_options_api` (run_type, reason_code, field, quarantine_run_id backed by `dimension=run_id`), `textbox_forensic_selector` (payload_hash)
 - **Dependency chains**: `$pipeline` required before Quarantine Explorer reads, forensic selectors local only
 
 ### Навигация (required_top_level_links)
@@ -586,7 +586,7 @@ Record-level explorer для `filtered_out`/`FILTERED_OUT_SILVER` записей
 
 ### Специфические требования
 - API-backed forensic surface
-- Forensic selectors (`run_id`, `payload_hash`) НЕ leak в Prometheus dashboards или dashboard-to-dashboard links
+- Forensic selectors (`quarantine_run_id`, `payload_hash`) НЕ leak в Prometheus dashboards или dashboard-to-dashboard links
 - Default 24h forensic window (explicit explanatory banner)
 - HTTP-backed surface MUST различать: valid empty result vs invalid filter chain vs backend failure
 - First-screen CTA includes bounded row links: `Review total rejects`, `Review scoped summary`, `Open Data Quality`

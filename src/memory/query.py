@@ -38,6 +38,7 @@ from memory.graph.importers.expanded_json import (
     query_module_relations as _query_module_relations,
 )
 from memory.rag.retrieval import TASK_PROFILES, load_chunk_manifest, rank_chunks
+from memory.rag.filters import WORKFLOW_RAG_MAX_SOURCES
 from memory.resources import CATALOG_DIR, MEMORY_ROOT, POLICY_DIR, load_yaml_resource
 from memory.timeline._common import read_jsonl
 from memory.tooling.refresh_all import refresh_all
@@ -112,6 +113,19 @@ def query_catalog(view: str) -> dict[str, Any]:
     return {"kind": "catalog", "view": view, "payload": payload}
 
 
+def _catalog_hits_for_query(query: str) -> list[dict[str, Any]]:
+    catalog_hits: list[dict[str, Any]] = []
+    lowered_query = query.lower()
+    for view in ("sources", "owners", "zones", "placement"):
+        payload = query_catalog(view)
+        haystack = json.dumps(
+            payload["payload"], sort_keys=True, ensure_ascii=True
+        ).lower()
+        if lowered_query in haystack:
+            catalog_hits.append(payload)
+    return catalog_hits
+
+
 def _missing_manifest_error(path: Path, artifact: str) -> FileNotFoundError:
     return FileNotFoundError(
         f"Missing {artifact} memory artifact at {path}. {MISSING_MANIFEST_HINT}"
@@ -133,15 +147,22 @@ def _refresh_query_artifacts(
     *,
     refresh_output_root: Path | None,
     refresh_repo_root: Path | None,
+    include_rag: bool,
+    include_timeline: bool,
+    retrieval_query: str | None = None,
 ) -> tuple[Path, dict[str, Any]]:
     output_root = _resolve_refresh_output_root(refresh_output_root)
     repo_root = refresh_repo_root or Path(__file__).resolve().parents[2]
     report = refresh_all(
         repo_root.resolve(),
         output_root.resolve(),
-        include_rag=True,
-        include_timeline=True,
+        include_rag=include_rag,
+        include_timeline=include_timeline,
         include_graph_export=False,
+        rag_build_scope="workflow",
+        rag_focus_query=retrieval_query,
+        rag_max_sources=WORKFLOW_RAG_MAX_SOURCES,
+        allow_partial=True,
     )
     return output_root, report
 
@@ -273,28 +294,39 @@ def _resolve_query_paths(
     auto_refresh: bool,
     refresh_output_root: Path | None,
     refresh_repo_root: Path | None,
+    retrieval_query: str | None = None,
     require_chunks: bool = True,
     require_events: bool = True,
 ) -> tuple[Path, Path, Path | None, dict[str, Any] | None]:
-    chunks_ready = not require_chunks or rag_chunks_ready(chunks_path)
-    events_ready = not require_events or timeline_events_ready(events_dir)
-    if chunks_ready and events_ready:
+    chunks_ready = rag_chunks_ready(chunks_path)
+    events_ready = timeline_events_ready(events_dir)
+    required_chunks_ready = not require_chunks or chunks_ready
+    required_events_ready = not require_events or events_ready
+    if required_chunks_ready and required_events_ready:
         return chunks_path, events_dir, None, None
     if not auto_refresh:
-        if require_chunks and not rag_chunks_ready(chunks_path):
+        if require_chunks and not chunks_ready:
             raise _missing_manifest_error(chunks_path, "RAG chunk manifest")
         raise _missing_manifest_error(events_dir, "timeline event projections")
 
     output_root, report = _refresh_query_artifacts(
         refresh_output_root=refresh_output_root,
         refresh_repo_root=refresh_repo_root,
+        include_rag=require_chunks and not chunks_ready,
+        include_timeline=require_events and not events_ready,
+        retrieval_query=retrieval_query,
     )
-    return (
-        output_root / "rag" / "manifests" / "chunks.jsonl",
-        output_root / "timeline" / "events",
-        output_root,
-        report,
-    )
+    resolved_chunks_path = chunks_path
+    if require_chunks and not chunks_ready:
+        refreshed_chunks_path = output_root / "rag" / "manifests" / "chunks.jsonl"
+        if rag_chunks_ready(refreshed_chunks_path):
+            resolved_chunks_path = refreshed_chunks_path
+    resolved_events_dir = events_dir
+    if require_events and not events_ready:
+        refreshed_events_dir = output_root / "timeline" / "events"
+        if timeline_events_ready(refreshed_events_dir):
+            resolved_events_dir = refreshed_events_dir
+    return resolved_chunks_path, resolved_events_dir, output_root, report
 
 
 def query_file_refs(
@@ -635,8 +667,11 @@ def query_rag(options: RagQueryOptions) -> dict[str, Any]:
         auto_refresh=options.auto_refresh,
         refresh_output_root=options.refresh_output_root,
         refresh_repo_root=options.refresh_repo_root,
+        retrieval_query=options.query,
         require_events=False,
     )
+    if not rag_chunks_ready(resolved_chunks_path):
+        raise _missing_manifest_error(resolved_chunks_path, "RAG chunk manifest")
     chunks = load_chunk_manifest(resolved_chunks_path)
     resolved_file_context, related_file_paths, file_relation_context = (
         _rag_file_relation_context(
@@ -830,8 +865,13 @@ def query_timeline(
         auto_refresh=auto_refresh,
         refresh_output_root=refresh_output_root,
         refresh_repo_root=refresh_repo_root,
+        retrieval_query=query,
         require_chunks=False,
     )
+    if not timeline_events_ready(resolved_events_dir):
+        raise _missing_manifest_error(
+            resolved_events_dir, "timeline event projections"
+        )
     matches: list[dict[str, Any]] = []
     lowered_query = query.lower() if query is not None else None
     for path in _iter_timeline_paths(resolved_events_dir):
@@ -891,41 +931,59 @@ def query_all(
             auto_refresh=auto_refresh,
             refresh_output_root=refresh_output_root,
             refresh_repo_root=refresh_repo_root,
+            retrieval_query=query,
         )
     )
-    rag_payload = query_rag(
-        RagQueryOptions(
+    missing_artifacts: list[dict[str, str]] = []
+    rag_results: list[dict[str, Any]] = []
+    timeline_results: list[dict[str, Any]] = []
+    file_relation_context: dict[str, Any] | None = None
+
+    if rag_chunks_ready(resolved_chunks_path):
+        rag_payload = query_rag(
+            RagQueryOptions(
+                query=query,
+                chunks_path=resolved_chunks_path,
+                limit=limit,
+                profile=profile,
+                file_context=file_context,
+                file_relation_index_path=file_relation_index_path,
+                expanded_graph_path=expanded_graph_path,
+                file_context_depth=file_context_depth,
+                auto_refresh=False,
+                refresh_output_root=output_root or refresh_output_root,
+                refresh_repo_root=refresh_repo_root,
+            )
+        )
+        rag_results = rag_payload["results"]
+        file_relation_context = rag_payload.get("file_relation_context")
+    else:
+        missing_artifacts.append(
+            {
+                "kind": "rag_chunks",
+                "path": str(resolved_chunks_path),
+                "reason": "missing_or_empty_rag_chunk_manifest",
+            }
+        )
+
+    if timeline_events_ready(resolved_events_dir):
+        timeline_payload = query_timeline(
             query=query,
-            chunks_path=resolved_chunks_path,
+            event_family=None,
+            event_type=None,
+            events_dir=resolved_events_dir,
             limit=limit,
             profile=profile,
-            file_context=file_context,
-            file_relation_index_path=file_relation_index_path,
-            expanded_graph_path=expanded_graph_path,
-            file_context_depth=file_context_depth,
-            auto_refresh=auto_refresh,
-            refresh_output_root=output_root or refresh_output_root,
-            refresh_repo_root=refresh_repo_root,
         )
-    )
-    timeline_payload = query_timeline(
-        query=query,
-        event_family=None,
-        event_type=None,
-        events_dir=resolved_events_dir,
-        limit=limit,
-        profile=profile,
-    )
-
-    catalog_hits: list[dict[str, Any]] = []
-    lowered_query = query.lower()
-    for view in ("sources", "owners", "zones", "placement"):
-        payload = query_catalog(view)
-        haystack = json.dumps(
-            payload["payload"], sort_keys=True, ensure_ascii=True
-        ).lower()
-        if lowered_query in haystack:
-            catalog_hits.append(payload)
+        timeline_results = timeline_payload["results"]
+    else:
+        missing_artifacts.append(
+            {
+                "kind": "timeline_events",
+                "path": str(resolved_events_dir),
+                "reason": "missing_or_empty_timeline_event_projections",
+            }
+        )
 
     return {
         "kind": "all",
@@ -935,12 +993,14 @@ def query_all(
         "events_dir": str(resolved_events_dir),
         "refresh_output_root": str(output_root) if output_root else None,
         "refresh_report": refresh_report,
+        "degraded": bool(missing_artifacts),
+        "missing_artifacts": missing_artifacts,
         "results": {
-            "catalog": catalog_hits,
-            "rag": rag_payload["results"],
-            "timeline": timeline_payload["results"],
+            "catalog": _catalog_hits_for_query(query),
+            "rag": rag_results,
+            "timeline": timeline_results,
         },
-        "file_relation_context": rag_payload.get("file_relation_context"),
+        "file_relation_context": file_relation_context,
     }
 
 

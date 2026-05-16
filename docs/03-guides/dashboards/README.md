@@ -73,6 +73,8 @@ ______________________________________________________________________
 - human-readable mirrors: `variable-reference.md` и `selector-architecture.md`
 - shipped dashboards используют unified selector taxonomy by dashboard family,
   а не один flat universal selector list
+- cross-dashboard handoffs явно передают общий `workflow/pipeline/run_type`
+  shell через `var-*`; exact identity selectors остаются local-only.
 
 ## First-screen policy header
 
@@ -136,6 +138,8 @@ row or in collapsed diagnostic rows.
 `run_id` selectors. Pipeline/run_type remain the canonical current-status
 Prometheus scope; `workflow` is evidence context, and `run_id` is a
 control-plane-backed identity selector for the local `ID` panel only.
+`Silver Reject Explorer` uses `quarantine_run_id` for its forensic run selector
+so it cannot collide with the Control Plane `run_id` shell.
 
 ## KPI ownership (canonical vs mirrors)
 

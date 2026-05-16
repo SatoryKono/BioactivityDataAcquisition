@@ -48,7 +48,12 @@ from bioetl.domain.config.pipeline import (
     PipelineConfig,
 )
 from bioetl.domain.config.runtime import RuntimeConfig, SilverFilterCompatibilityMode
-from bioetl.domain.config.table import TableConfig
+from bioetl.domain.config.table import (
+    APPEND_SAFE_IDEMPOTENCY_CONTRACTS,
+    IDEMPOTENCY_CONTRACT_VALUES,
+    IdempotencyContract,
+    TableConfig,
+)
 from bioetl.domain.config.validation import (
     DEFAULT_VALIDATION_CONFIG,
     ConditionalValidation,
@@ -58,7 +63,9 @@ from bioetl.domain.config.validation import (
 )
 
 __all__ = [
+    "APPEND_SAFE_IDEMPOTENCY_CONTRACTS",
     "DEFAULT_VALIDATION_CONFIG",
+    "IDEMPOTENCY_CONTRACT_VALUES",
     "BaseClientConfig",
     "BaseProviderConfig",
     "ConditionalValidation",
@@ -68,6 +75,7 @@ __all__ = [
     "FieldCoercionPolicy",
     "FieldPolicyConfig",
     "FieldValidation",
+    "IdempotencyContract",
     "KeyNullabilityRule",
     "MemoryConfig",
     "PipelineConfig",

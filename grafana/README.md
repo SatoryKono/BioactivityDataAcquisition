@@ -690,6 +690,9 @@ Primary dashboards `0..5` используют общий operator context shell
 `workflow/pipeline/run_type`, а coherent tuple для будущей selector-shell
 интеграции отдаёт `/ops/control-plane/selector-context`. Native Grafana
 variables не умеют безопасно auto-write sibling selectors без custom shell.
+Dashboard-to-dashboard links поэтому явно передают общий shell
+`workflow/pipeline/run_type` и target-specific bounded vars через `var-*`,
+без `includeVars=true`.
 
 ### 6.0 Shared context shell
 
@@ -1023,8 +1026,9 @@ The shipped Grafana bootstrap entrypoint also removes a stale local
 renderer mode is active, preventing restart loops caused by old persistent
 plugin state.
 
-**Фильтры:** `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash` + стандартный Grafana time picker.
-`$pipeline` здесь intentionally single-select/no-All. `$run_id` и
+**Фильтры:** `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$quarantine_run_id`, `$payload_hash` + стандартный Grafana time picker.
+`$pipeline` здесь intentionally single-select/no-All. `$quarantine_run_id`
+передаётся в Quarantine API как backend `dimension=run_id`; он и
 `$payload_hash` остаются Explorer-only forensic filters и не должны протекать в
 Prometheus labels, summary dashboards или cross-dashboard handoffs.
 
@@ -1108,7 +1112,7 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 - **Audience:** SRE, developer, data engineer
 - **Primary question:** где runtime теряет время, падает, копит backlog или даёт warning/error signals
 - **Variables:** shared `$workflow`, `$pipeline`, `$run_type`, `$run_id` plus bounded `$stage`
-- **Forbidden Prometheus labels:** `run_id`, `payload_hash`, `record_id`
+- **Forbidden Prometheus labels:** `run_id`, `quarantine_run_id`, `payload_hash`, `manifest_id`, `execution_fingerprint`, `record_id`
 - **Top links:** navigation bus `0. Control Plane`, `1. Overview`, `3. Provider Health`,
   `4. Data Quality`, `5. Workflow`, `Explore Logs`, `Explore Traces`
 - **Known blocked panels:** `Retry vs Failure` и `Batch Size Distribution`

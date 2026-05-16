@@ -8,6 +8,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_base_he
     _resolve_operator_replay_mode,
     _resolve_source_posture,
 )
+from bioetl.application.services.control_plane._run_manifest_diagnostics_persistence import (
+    build_lineage_closure_boundary,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
     _append_mode_exact_replay_blockers,
     _collect_append_mode_semantic_sinks,
@@ -25,6 +28,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
     _resolve_requested_checkpoint_compatibility_policy,
     _resolve_required_persistence_profile,
     _snapshot_exact_replay_blockers,
+)
+from bioetl.application.services.control_plane._run_manifest_replay_taxonomy import (
+    build_replay_taxonomy_projection,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -244,6 +250,7 @@ def _build_operator_replay_projection(
     policy_assessment: ReproducibilityPolicyAssessment,
 ) -> dict[str, object]:
     """Return canonical operator-facing replay projection fields."""
+    replay_family_contract = _resolve_replay_family_contract(manifest)
     exact_replay_blockers = _resolve_exact_replay_blockers(
         manifest=manifest,
         policy_assessment=policy_assessment,
@@ -269,24 +276,80 @@ def _build_operator_replay_projection(
         continuation_mode=continuation_mode,
         policy_assessment=policy_assessment,
     ).value
-    return {
-        "replay_capability_reason": _resolve_replay_capability_reason(
+    return build_replay_taxonomy_projection(
+        replay_capability=manifest.replay_capability.value,
+        requested_exact_replay=requested_exact_replay,
+        exact_replay_support_boundary=_resolve_exact_replay_support_boundary(manifest),
+        replay_family_contract=replay_family_contract,
+        replay_support_state=replay_family_contract.get("support_state"),
+        post_capture_replayable_parent_supported=replay_family_contract.get(
+            "post_capture_replayable_parent_supported"
+        ),
+        post_capture_replayable_parent_boundary=replay_family_contract.get(
+            "post_capture_replayable_parent_boundary"
+        ),
+        historical_live_run_upgrade_policy=replay_family_contract.get(
+            "historical_live_run_upgrade_policy"
+        ),
+        historical_live_run_upgrade_boundary=replay_family_contract.get(
+            "historical_live_run_upgrade_boundary"
+        ),
+        historical_live_run_upgrade_reason=replay_family_contract.get(
+            "historical_live_run_upgrade_reason"
+        ),
+        broader_historical_exact_replay_policy=replay_family_contract.get(
+            "broader_historical_exact_replay_policy"
+        ),
+        broader_historical_exact_replay_boundary=replay_family_contract.get(
+            "broader_historical_exact_replay_boundary"
+        ),
+        broader_historical_exact_replay_reason=replay_family_contract.get(
+            "broader_historical_exact_replay_reason"
+        ),
+        broader_historical_exact_replay_state=_resolve_broader_historical_exact_replay_state(
+            manifest=manifest,
+            input_snapshots=input_snapshots,
+            policy_assessment=policy_assessment,
+        ),
+        historical_live_run_upgrade_state=_resolve_historical_live_run_upgrade_state(
+            manifest=manifest,
+            input_snapshots=input_snapshots,
+            policy_assessment=policy_assessment,
+        ),
+        replay_occurrence_kind=_resolve_replay_occurrence_kind(
+            manifest=manifest,
+            input_snapshots=input_snapshots,
+            policy_assessment=policy_assessment,
+        ),
+        source_posture=_resolve_source_posture(policy_assessment),
+        input_snapshot_missing_source_refs=list(
+            policy_assessment.snapshot_envelope.missing_snapshot_source_refs
+        ),
+        replay_capability_reason=_resolve_replay_capability_reason(
             manifest=manifest,
             input_snapshots=input_snapshots,
             resume_requested=resume_requested,
             policy_assessment=policy_assessment,
         ),
-        "exact_replay_blockers": exact_replay_blockers,
-        "exact_replay_eligible": exact_replay_eligible,
-        "replay_readiness_verdict": replay_readiness_verdict,
-        "replay_mode": replay_mode,
-        "continuation_mode": continuation_mode,
-        "operator_replay_mode": _resolve_operator_replay_mode(
+        replay_mode=replay_mode,
+        continuation_mode=continuation_mode,
+        operator_replay_mode=_resolve_operator_replay_mode(
             replay_mode=replay_mode,
             continuation_mode=continuation_mode,
             replay_readiness_verdict=replay_readiness_verdict,
         ),
-    }
+        exact_replay_eligible=exact_replay_eligible,
+        exact_replay_blockers=exact_replay_blockers,
+        replay_readiness_verdict=replay_readiness_verdict,
+        append_mode_semantic_sinks=_collect_append_mode_semantic_sinks(manifest),
+        resume_contract=None,
+        resume_diagnostics=None,
+        lineage_closure_boundary=build_lineage_closure_boundary(
+            provider=manifest.provider,
+            entity=manifest.entity,
+            contract_ref=manifest.code_provenance.contract_ref,
+        ),
+    )
 
 
 def _resolve_exact_replay_blockers(

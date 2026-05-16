@@ -476,7 +476,12 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
             assert any(expected_metric in expr for expr in expressions), dashboard_path
             assert all(
                 forbidden not in "\n".join(expressions)
-                for forbidden in ("run_id", "payload_hash", "error_message")
+                for forbidden in (
+                    "run_id",
+                    "quarantine_run_id",
+                    "payload_hash",
+                    "error_message",
+                )
             )
             assert "selected-range" in description
             assert "evidence" in description

@@ -22,6 +22,8 @@ class TestTableConfig:
         assert config.gold_table is None
         assert config.silver_write_mode == SilverWriteMode.MERGE
         assert config.gold_write_mode == GoldWriteMode.SCD2
+        assert config.silver_idempotency_contract is None
+        assert config.gold_idempotency_contract is None
         assert config.partition_cols == ()
         assert config.on_schema_mismatch == "error"
 
@@ -48,6 +50,20 @@ class TestTableConfig:
         )
         assert config.silver_write_mode == SilverWriteMode.MERGE
         assert config.gold_write_mode == GoldWriteMode.SCD2
+
+    def test_idempotency_contract_normalization(self) -> None:
+        config = TableConfig(
+            silver_idempotency_contract=" merge_upsert ",  # type: ignore[arg-type]
+            gold_idempotency_contract="SCD2",  # type: ignore[arg-type]
+        )
+        assert config.silver_idempotency_contract == "merge_upsert"
+        assert config.gold_idempotency_contract == "scd2"
+
+    def test_invalid_idempotency_contract_raises(self) -> None:
+        with pytest.raises(ValueError, match="Invalid idempotency contract"):
+            TableConfig(
+                silver_idempotency_contract="not-a-contract",  # type: ignore[arg-type]
+            )
 
     def test_custom_tables(self) -> None:
         config = TableConfig(

@@ -9,6 +9,8 @@ repeatable knowledge that remains helpful across future tasks.
 - Run `python -m memory.tooling.workflow review-curated` as the canonical ritual command.
 - `python -m memory.tooling.review_curated` remains available as the lower-level report command.
 - Use the policy cadence from `src/memory/policy/retention.yaml` as the baseline.
+- Keep curated notes at or above the policy minimum provenance threshold
+  (currently `2` source refs).
 - Treat `due` notes as needing verification.
 - Treat `stale` notes as review-or-archive candidates.
 

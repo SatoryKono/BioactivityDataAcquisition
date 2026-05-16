@@ -297,9 +297,10 @@ generic_collision_policies:
     semantic_scope: provider_scoped_generic_text
     promotion_policy: forbidden_without_owner_registry
     rationale: >
-      description is a lexical collision across assay, target, and component
-      metadata. It cannot become a canonical alias without explicit owner
-      registry and split-by-meaning documentation.
+      description was a lexical collision across assay, target, and component
+      metadata. Fields have been renamed to assay_description, target_description,
+      and component_description to make ownership explicit. The original generic
+      description cluster remains as a historical reference only.
 
   - cluster_id: shared_relation
     lexical_field: relation
@@ -307,8 +308,10 @@ generic_collision_policies:
     semantic_scope: provider_scoped_measurement_operator
     promotion_policy: forbidden_without_owner_registry
     rationale: >
-      relation is raw measurement/operator semantics in activity-like surfaces,
-      not a cross-pipeline canonical business field.
+      relation was a lexical collision across activity and assay_parameter surfaces.
+      Fields have been renamed to activity_relation and parameter_relation to make
+      ownership explicit. The original generic relation cluster remains as a
+      historical reference only.
 
   - cluster_id: shared_score
     lexical_field: score
@@ -316,8 +319,9 @@ generic_collision_policies:
     semantic_scope: provider_scoped_descriptive_or_annotation_score
     promotion_policy: forbidden_without_owner_registry
     rationale: >
-      score means different things across assay and target-style metadata and
-      must remain explicitly owner-scoped.
+      score was a lexical collision in assay metadata. The field has been renamed
+      to confidence_score to make its semantic meaning explicit. The original
+      generic score cluster remains as a historical reference only.
 
   - cluster_id: shared_type
     lexical_field: type
@@ -325,8 +329,10 @@ generic_collision_policies:
     semantic_scope: provider_scoped_raw_type_term
     promotion_policy: forbidden_without_owner_registry
     rationale: >
-      type is a generic lexical field with multiple source-specific meanings and
-      must not be promoted by string equality.
+      type was a lexical collision across activity and assay_parameter surfaces.
+      Fields have been renamed to activity_type and parameter_type to make
+      ownership explicit. The original generic type cluster remains as a
+      historical reference only.
 
   - cluster_id: shared_value
     lexical_field: value
@@ -334,8 +340,10 @@ generic_collision_policies:
     semantic_scope: provider_scoped_raw_value_term
     promotion_policy: forbidden_without_owner_registry
     rationale: >
-      value is a generic lexical collision across raw measurement/property
-      surfaces and requires explicit owner registry before any canonicalization.
+      value was a lexical collision across activity and assay_parameter surfaces.
+      Fields have been renamed to activity_value and parameter_value to make
+      ownership explicit. The original generic value cluster remains as a
+      historical reference only.
 
 composite_unknown_typing_reviews:
   - id: composite_system_fields_unknown_schema

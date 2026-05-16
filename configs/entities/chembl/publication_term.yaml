@@ -20,6 +20,7 @@ pipeline:
       - term_type
     gold:
       mode: overwrite
+      idempotency_contract: overwrite_rebuild
 schema:
   content_hash:
     include: []

@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-15'
+  Last verified: '2026-05-16'
 
 ______________________________________________________________________
 
 # Grafana Selector Architecture
 
-Дата сверки: **2026-05-15**
+Дата сверки: **2026-05-16**
 Источник истины: `grafana/dashboards/*.json`
 
 Machine-readable SSOT:
@@ -45,6 +45,9 @@ control-plane identity context only and MUST NOT become a Prometheus label.
 The control-plane selector resolver exposes `/ops/control-plane/selector-context`
 for coherent local selector tuples and `/ops/control-plane/filter-options` for
 Grafana option lists.
+Dashboard-to-dashboard navigation passes only the shared shell
+`workflow/pipeline/run_type` plus target-specific bounded vars; it does not rely
+on native Grafana semantic variable copying.
 
 ## Dashboard families
 
@@ -117,11 +120,14 @@ This surface is API-backed and forensic by design. It ships:
 - `run_type`
 - `reason_code`
 - `field`
-- `run_id`
+- `quarantine_run_id`
 - `payload_hash`
 - Grafana time range
 
-These selectors must stay isolated from Prometheus dashboards.
+These selectors must stay isolated from Prometheus dashboards. The
+`quarantine_run_id` variable calls the Quarantine API with backend
+`dimension=run_id`, but its Grafana name is intentionally distinct from the
+Control Plane `run_id` identity selector.
 
 ## Selector taxonomy
 
@@ -179,7 +185,7 @@ Future reserved:
 
 - `reason_code`
 - `field`
-- `run_id`
+- `quarantine_run_id`
 - `payload_hash`
 - `manifest_id`
 - `execution_fingerprint`
@@ -200,7 +206,7 @@ The current shipped selector model is:
 - `5. Workflow`: `workflow`, `pipeline`, `run_type`, `run_id`, `status`,
   `step_status`, `step_kind`, time range
 - `Silver Reject Explorer`: `pipeline`, `run_type`, `reason_code`, `field`,
-  `run_id`, `payload_hash`, time range
+  `quarantine_run_id`, `payload_hash`, time range
 
 This contract is unified by the shared context shell, taxonomy, and family
 rules. It does not force every Status panel to consume every visible selector.

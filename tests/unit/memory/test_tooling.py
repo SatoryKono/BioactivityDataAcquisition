@@ -179,6 +179,24 @@ def test_prune_episodic_notes_reports_density_review(tmp_path: Path) -> None:
     assert report["density_excess"] == 1
 
 
+def test_prune_episodic_notes_uses_policy_backed_max_active(tmp_path: Path) -> None:
+    for index in range(1001):
+        note = tmp_path / f"active-{index}.yaml"
+        note.write_text(
+            "task_id: t-active\ncreated_at: 2026-04-19T00:00:00Z\nttl_days: 14\n",
+            encoding="utf-8",
+        )
+
+    report = prune_episodic_notes(
+        tmp_path,
+        now=datetime(2026, 4, 20, tzinfo=UTC),
+    )
+
+    assert report["max_active"] == 1000
+    assert report["density_status"] == "review"
+    assert report["density_excess"] == 1
+
+
 def test_memory_tooling_package_exports_submodules_lazily() -> None:
     tooling = importlib.reload(importlib.import_module("memory.tooling"))
     for name in ("workflow", "refresh_all"):

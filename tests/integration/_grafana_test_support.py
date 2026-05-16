@@ -509,7 +509,7 @@ def _assert_silver_reject_explorer_variable_contract(
         f"Dashboard {dashboard_path.name} 'pipeline' must be single-select"
     )
 
-    for variable_name in ("run_type", "reason_code", "field", "run_id"):
+    for variable_name in ("run_type", "reason_code", "field", "quarantine_run_id"):
         variable = variable_map.get(variable_name)
         assert variable is not None, (
             f"Dashboard {dashboard_path.name} must define '{variable_name}' variable"
@@ -548,7 +548,7 @@ def _assert_silver_reject_explorer_variable_contract(
             "run_type": "$.run_types",
             "reason_code": "$.reason_codes",
             "field": "$.fields",
-            "run_id": "$.run_ids",
+            "quarantine_run_id": "$.run_ids",
         }[variable_name]
         assert infinity_query.get("root_selector") == expected_root_selector, (
             f"Dashboard {dashboard_path.name} '{variable_name}' query must select "
@@ -566,13 +566,18 @@ def _assert_silver_reject_explorer_variable_contract(
             f"Dashboard {dashboard_path.name} '{variable_name}' query must pass "
             "one concrete pipeline value"
         )
+        if variable_name == "quarantine_run_id":
+            assert "dimension=run_id" in query_url, (
+                f"Dashboard {dashboard_path.name} 'quarantine_run_id' must keep "
+                "the backend run_id dimension"
+            )
 
-    run_id_var = variable_map["run_id"]
-    assert run_id_var.get("includeAll") is False, (
-        f"Dashboard {dashboard_path.name} 'run_id' must disable All scope"
+    quarantine_run_id_var = variable_map["quarantine_run_id"]
+    assert quarantine_run_id_var.get("includeAll") is False, (
+        f"Dashboard {dashboard_path.name} 'quarantine_run_id' must disable All scope"
     )
-    assert run_id_var.get("multi") is False, (
-        f"Dashboard {dashboard_path.name} 'run_id' must stay bounded as single-select"
+    assert quarantine_run_id_var.get("multi") is False, (
+        f"Dashboard {dashboard_path.name} 'quarantine_run_id' must stay bounded as single-select"
     )
 
     payload_hash_var = variable_map.get("payload_hash")

@@ -35,6 +35,14 @@ def _default_ttl_days() -> int:
     return int(retention["artifact_classes"]["episodic_note"]["ttl_days"])
 
 
+def _default_max_active() -> int | None:
+    retention = load_yaml_resource(POLICY_DIR / "retention.yaml")
+    raw_value = retention["artifact_classes"]["episodic_note"].get("max_active")
+    if raw_value is None:
+        return None
+    return int(raw_value)
+
+
 def _parse_iso_datetime(value: str) -> datetime | None:
     normalized = value.strip().replace("Z", "+00:00")
     try:
@@ -125,17 +133,18 @@ def prune_episodic_notes(
             if candidate_path.exists():
                 candidate_path.unlink()
                 removed_paths.append(candidate.path)
+    effective_max_active = _default_max_active() if max_active is None else max_active
     density_status = "not_checked"
     density_excess = 0
-    if max_active is not None:
-        density_excess = max(active_count - max_active, 0)
+    if effective_max_active is not None:
+        density_excess = max(active_count - effective_max_active, 0)
         density_status = "review" if density_excess else "ok"
     return {
         "apply": apply,
         "candidate_count": len(candidates),
         "total_count": total_count,
         "active_count": active_count,
-        "max_active": max_active,
+        "max_active": effective_max_active,
         "density_status": density_status,
         "density_excess": density_excess,
         "removed_count": len(removed_paths),
@@ -196,11 +205,11 @@ def main(argv: list[str] | None = None) -> int:
     else:
         mode = "apply" if args.apply else "dry-run"
         print(f"Episodic prune {mode}: {report['candidate_count']} candidate(s)")
-        if args.max_active is not None:
+        if report["max_active"] is not None:
             print(
                 "Episodic density: "
                 f"{report['active_count']} active "
-                f"(max_active={args.max_active}, status={report['density_status']})"
+                f"(max_active={report['max_active']}, status={report['density_status']})"
             )
         if args.apply:
             print(f"Removed: {report['removed_count']}")

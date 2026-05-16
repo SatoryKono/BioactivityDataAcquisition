@@ -8,6 +8,7 @@ from typing import Literal
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
 
+from bioetl.domain.config.table import IdempotencyContract
 from bioetl.domain.filtering import SilverFilterConfig
 from bioetl.domain.types import ScdConfig as DomainScdConfig
 from bioetl.infrastructure.schemas.base_schemas import (
@@ -139,18 +140,7 @@ class SinkLayerConfig(BaseModel):
     path: str | None = None
     format: Literal["jsonl", "delta", "parquet"] = "delta"
     mode: str | None = None
-    idempotency_contract: (
-        Literal[
-            "merge_upsert",
-            "scd2",
-            "overwrite_rebuild",
-            "append_log",
-            "partition_append_with_stable_partition_key",
-            "occurrence_only",
-            "disallowed",
-        ]
-        | None
-    ) = Field(
+    idempotency_contract: IdempotencyContract | None = Field(
         default=None,
         description="Explicit idempotency classification for sink write-mode governance.",
     )
