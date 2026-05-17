@@ -30,12 +30,7 @@ _ORDER_SENSITIVE_FUNCTIONS = frozenset(
 
 def _deduplicate_columns(columns: list[str]) -> list[str]:
     """Return columns in first-seen order with duplicates removed."""
-    deduped: list[str] = []
-    for column in columns:
-        if column in deduped:
-            continue
-        deduped.append(column)
-    return deduped
+    return list(dict.fromkeys(columns))
 
 
 class EnricherAggregator:
