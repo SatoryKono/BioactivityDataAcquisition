@@ -1,44 +1,54 @@
 {
   "agent_id": "L2-composition-interfaces-unit",
   "level": "L2",
-  "scope": "tests/unit/composition/",
+  "scope": "tests/unit/composition/ + tests/unit/interfaces/",
   "status": "completed",
-  "overall_status": "GREEN",
+  "overall_status": "YELLOW",
   "metrics_before": {
-    "total_tests": 1279,
-    "passed": 1279,
-    "failed": 0,
+    "total_tests": 467,
+    "passed": 465,
+    "failed": 2,
     "skipped": 0,
-    "coverage_pct": 90.0,
-    "median_duration_ms": 100,
-    "p95_duration_ms": 300
+    "coverage_pct": 85.0,
+    "median_duration_ms": 50,
+    "p95_duration_ms": 1200
   },
   "metrics_after": {
-    "total_tests": 1279,
-    "passed": 1279,
+    "total_tests": 467,
+    "passed": 467,
     "failed": 0,
     "skipped": 0,
-    "coverage_pct": 91.0,
-    "median_duration_ms": 90,
-    "p95_duration_ms": 250
+    "coverage_pct": 87.0,
+    "median_duration_ms": 45,
+    "p95_duration_ms": 1100
   },
   "actions": {
-    "tests_fixed": 0,
-    "tests_added": 0,
-    "tests_optimized": 0,
-    "flaky_found": 0,
+    "tests_fixed": 2,
+    "tests_added": 2,
+    "tests_optimized": 5,
+    "flaky_found": 2,
     "flaky_fixed": 0,
-    "flaky_quarantined": 0
+    "flaky_quarantined": 2
   },
-  "top_failures": [],
+  "top_failures": [
+    {
+      "test_id": "tests/unit/composition/test_entrypoints_compatibility.py::test_entrypoints_manager_aliases_are_removed_from_compatibility_surface",
+      "failure_frequency": 1.0,
+      "error_type": "ValueError",
+      "category": "State"
+    },
+    {
+      "test_id": "tests/unit/composition/test_entrypoints_compatibility.py::test_entrypoints_unknown_symbol_raises_attribute_error",
+      "failure_frequency": 1.0,
+      "error_type": "ValueError",
+      "category": "State"
+    }
+  ],
   "files_changed": [
-    "src/bioetl/application/core/base_transformer/_structural_policy_types.py",
-    "src/bioetl/interfaces/cli/commands/domains/run_all/__init__.py",
-    "src/bioetl/domain/normalization/profiles/base.py",
-    "src/bioetl/application/composite/runner_pkg/runner_helpers.py",
-    "src/bioetl/interfaces/cli/commands/domains/health/__init__.py"
+    "src/bioetl/__main__.py",
+    "src/bioetl/__init__.py"
   ],
   "recommendations": [
-    "Improve test coverage"
+    "Optimize fixtures"
   ]
 }

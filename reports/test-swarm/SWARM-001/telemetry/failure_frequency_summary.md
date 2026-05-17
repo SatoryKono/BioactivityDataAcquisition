@@ -1,3 +1,2 @@
 # Failure Frequency Summary
-
-All tests passed successfully.
+Aggregated from events.

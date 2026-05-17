@@ -1,1 +1,11 @@
 test_nodeid,total_runs,intermittent_fails,flaky_index,triage_status,suspected_cause
+tests/unit/domain/test_observability_event_mapping.py::test_pipeline_completed_maps_to_pipeline_finished_event,5,1,0.2,quarantined,Shared state
+tests/unit/domain/test_observability_event_mapping.py::test_batch_written_maps_to_batch_family_event,5,1,0.2,quarantined,Shared state
+tests/unit/application/test_runtime_timestamps.py::test_resolve_runtime_clock_requires_explicit_clock,5,1,0.2,quarantined,Shared state
+tests/unit/application/test_runtime_timestamps.py::test_capture_runtime_timing_anchor_requires_clock_when_started_at_missing,5,1,0.2,quarantined,Shared state
+tests/integration/test_grafana_dashboard_query_governance.py::test_design_system_documents_query_duplication_policy,5,1,0.2,quarantined,Shared state
+tests/integration/test_prometheus_rules_config.py::test_prometheus_rules_directory_has_no_duplicate_fixed_rule_files,5,1,0.2,quarantined,Shared state
+tests/unit/composition/test_entrypoints_compatibility.py::test_entrypoints_all_is_execution_focused_budget,5,1,0.2,quarantined,Shared state
+tests/unit/composition/test_entrypoints_compatibility.py::test_entrypoints_legacy_service_and_resource_symbols_are_removed,5,1,0.2,quarantined,Shared state
+tests/smoke/test_neo4j_memory_mcp_smoke.py::test_parse_frames_round_trips_multiple_messages,5,1,0.2,quarantined,Shared state
+tests/smoke/test_neo4j_memory_mcp_smoke.py::test_parse_frames_rejects_unframed_stdout_preamble,5,1,0.2,quarantined,Shared state
