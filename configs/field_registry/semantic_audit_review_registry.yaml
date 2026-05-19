@@ -217,100 +217,81 @@ weak_cluster_decisions:
       cross_references is a nested/source-scoped metadata field whose meaning is
       not canonicalized across entity families.
 
+  - cluster_id: shared_abstract
+    field_name: abstract
+    decision: promotable_candidate
+    owner: BioETL Team
+    rationale: >
+      abstract is already normalized across publication providers but still
+      lacks an explicit canonical publication-content ownership registry, so it
+      remains a reviewed promotion candidate rather than an implicit exact field.
+
+  - cluster_id: shared_authors
+    field_name: authors
+    decision: promotable_candidate
+    owner: BioETL Team
+    rationale: >
+      authors appears across publication providers with converging semantics,
+      but canonical author-content ownership and list-shape guarantees are not
+      yet centralized strongly enough for automatic exact-field promotion.
+
+  - cluster_id: shared_issue
+    field_name: issue
+    decision: promotable_candidate
+    owner: BioETL Team
+    rationale: >
+      issue behaves like shared publication bibliographic metadata, but the
+      repository still tracks it as a reviewed promotion candidate until an
+      explicit canonical publication-metadata owner registry is introduced.
+
+  - cluster_id: shared_publication_class
+    field_name: publication_class
+    decision: promotable_candidate
+    owner: BioETL Team
+    rationale: >
+      publication_class is derived through the shared publication taxonomy and
+      is a strong convergence candidate, but it remains reviewed debt until its
+      owner contract is promoted from taxonomy evidence into canonical registry.
+
+  - cluster_id: shared_publication_date
+    field_name: publication_date
+    decision: promotable_candidate
+    owner: BioETL Team
+    rationale: >
+      publication_date is normalized consistently enough to be tracked as a
+      promotion candidate, but canonical date ownership across provider and
+      composite publication surfaces is not yet declared explicitly.
+
+  - cluster_id: shared_publication_subclass
+    field_name: publication_subclass
+    decision: promotable_candidate
+    owner: BioETL Team
+    rationale: >
+      publication_subclass is emitted from the shared publication-type
+      classification taxonomy and therefore belongs in the reviewed promotion
+      backlog until canonical owner semantics are published explicitly.
+
+  - cluster_id: shared_publication_type_unified
+    field_name: publication_type_unified
+    decision: promotable_candidate
+    owner: BioETL Team
+    rationale: >
+      publication_type_unified already reflects cross-provider normalization,
+      but the registry still treats it as reviewed residual debt until the
+      canonical publication taxonomy surface is promoted into exact governance.
+
+  - cluster_id: shared_volume
+    field_name: volume
+    decision: promotable_candidate
+    owner: BioETL Team
+    rationale: >
+      volume is shared bibliographic metadata with converging semantics across
+      publication providers, but explicit owner policy is still required before
+      it can leave the reviewed WEAK inventory family.
+
 generic_collision_policies: []
 
-composite_unknown_typing_reviews:
-  - id: composite_system_fields_unknown_schema
-    pipelines:
-      - composite_activity
-      - composite_assay
-      - composite_molecule
-      - composite_publication
-      - composite_target
-    fields:
-      - entity_id
-      - content_hash
-      - _index
-      - _source
-      - _run_id
-      - _run_type
-      - _state
-      - _lookup_method
-      - _original_id
-      - _source_batch_id
-      - _ingestion_ts
-      - _dq_error
-      - _dq_warn
-    disposition: technical_metadata_passthrough
-    schema_authority: medallion_system_metadata_contract
-    owner: BioETL Team
-    rationale: >
-      System/meta fields intentionally stay outside business-schema typing in
-      composite surfaces and inherit technical contract semantics instead.
-
-  - id: composite_activity_unknown_schema
-    pipelines: [composite_activity]
-    fields:
-      - action_type_description
-      - action_type_parent_type
-      - activity_comment
-      - activity_id
-      - activity_properties
-      - assay_description
-      - assay_id
-      - assay_type
-      - assay_variant_accession
-      - assay_variant_mutation
-      - bao_endpoint
-      - bao_format
-      - bao_label
-      - canonical_smiles
-      - compound_key
-      - compound_name
-      - data_validity_comment
-      - data_validity_description
-      - ligand_efficiency_bei
-      - ligand_efficiency_le
-      - ligand_efficiency_lle
-      - ligand_efficiency_sei
-      - manual_curation_flag
-      - molecule_id
-      - molecule_pref_name
-      - original_activity_id
-      - parent_molecule_id
-      - pchembl_value
-      - potential_duplicate
-      - publication_id
-      - qudt_units
-      - record_id
-      - relation
-      - src_compound_id
-      - src_id
-      - standard_flag
-      - standard_relation
-      - standard_text_value
-      - standard_type
-      - standard_units
-      - standard_upper_value
-      - standard_value
-      - target_id
-      - target_organism
-      - target_pref_name
-      - taxonomy_id
-      - text_value
-      - toid
-      - type
-      - units
-      - uo_units
-      - upper_value
-      - value
-    disposition: upstream_inherited_activity_semantics
-    schema_authority: seed_and_provider_gold_contracts
-    owner: BioETL Team
-    rationale: >
-      Composite activity inherits provider-normalized activity, molecule, and
-      publication context fields; unknown local schema typing is reviewed and
-      accepted where provider/Gold contracts remain the authoritative type seam.
+composite_unknown_typing_reviews: []
 
 promotion_requirements:
   PARTIAL:

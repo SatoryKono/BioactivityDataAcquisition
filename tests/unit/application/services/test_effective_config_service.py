@@ -259,6 +259,45 @@ class TestEffectiveConfigService:
 
         assert artifact1.artifact_id == artifact2.artifact_id
 
+    def test_source_refs_order_does_not_change_semantic_identity(self) -> None:
+        """Equivalent source-ref sets must not perturb effective-config identity."""
+        first_refs = [
+            ConfigSourceRef(
+                source_type="file",
+                source_path="configs/entities/test/override.yaml",
+                source_hash="override-hash",
+                priority=20,
+            ),
+            ConfigSourceRef(
+                source_type="file",
+                source_path="configs/base/pipeline.yaml",
+                source_hash="base-hash",
+                priority=10,
+            ),
+        ]
+        second_refs = list(reversed(first_refs))
+        kwargs = {
+            "pipeline_name": "test_pipeline",
+            "pipeline_kind": "standard",
+            "resolved_config": {"pipeline": {"name": "test_pipeline"}},
+            "runtime_overrides": {"runtime": {"limit": 5}},
+        }
+
+        first = self.service.create_effective_config_artifact(
+            **kwargs,
+            source_refs=first_refs,
+        )
+        second = self.service.create_effective_config_artifact(
+            **kwargs,
+            source_refs=second_refs,
+        )
+
+        assert first.artifact_id == second.artifact_id
+        assert first.source_fingerprint == second.source_fingerprint
+        assert self.service.serialize_semantic_artifact(
+            first
+        ) == self.service.serialize_semantic_artifact(second)
+
     def test_stable_hash_uses_canonical_json_serializer_contract(self) -> None:
         """Effective-config hashes must share control-plane canonical JSON semantics."""
         payload = {"z": [3, 2, 1], "a": {"b": "café"}}

@@ -711,7 +711,13 @@
       },
       {
         "fields": [
-          "authors"
+          "authors",
+          "author_keys",
+          "author_orcids",
+          "author_details",
+          "author_details_raw_json",
+          "author_details_canonical_json",
+          "affiliation_list"
         ],
         "name": "authors",
         "pattern": null,
@@ -806,7 +812,10 @@
       {
         "fields": [
           "citations_received",
-          "citations_made"
+          "citations_made",
+          "references",
+          "references_raw_json",
+          "references_canonical_json"
         ],
         "name": "citations",
         "pattern": null,

@@ -33,6 +33,33 @@ from bioetl.domain.schemas.constants import (
     TARGET_COMPONENT_TYPES,
 )
 
+TARGET_XREF_SOURCE_DB_VALUES = frozenset(
+    {
+        "AlphaFoldDB",
+        "ChEBI",
+        "DrugBank",
+        "ExpressionAtlas",
+        "Gene3D",
+        "GoComponent",
+        "GoFunction",
+        "GoProcess",
+        "HGNC",
+        "IntAct",
+        "InterPro",
+        "OpenTargets",
+        "PANTHER",
+        "PDB",
+        "PDBe",
+        "Pfam",
+        "PharmGKB",
+        "Pharos",
+        "Reactome",
+        "SUPFAM",
+        "TreeFam",
+        "UniProt",
+    }
+)
+
 if TYPE_CHECKING:
     from bioetl.domain.config.validation import (
         CrossFieldValidation,
@@ -111,6 +138,18 @@ def _custom_rule_violated(
             value,
             allowed_values=target_vocabulary,
         )
+    target_xref_vocabulary = _target_xref_json_vocabulary(validator_name)
+    if target_xref_vocabulary is not None:
+        return _target_xref_json_vocabulary_rule_violated(
+            value,
+            allowed_values=target_xref_vocabulary,
+        )
+    publication_taxonomy = _publication_taxonomy_vocabulary(validator_name)
+    if publication_taxonomy is not None:
+        return _publication_taxonomy_rule_violated(
+            value,
+            allowed_values=publication_taxonomy,
+        )
     if validator_name == "validate_hierarchy_no_self_reference":
         return _custom_cross_rule_violated(
             record,
@@ -124,6 +163,35 @@ def _target_json_vocabulary(validator_name: str | None) -> frozenset[str] | None
         return TARGET_COMPONENT_TYPES
     if validator_name == "validate_target_component_relationships_json_vocab":
         return TARGET_COMPONENT_RELATIONSHIPS
+    return None
+
+
+def _publication_taxonomy_vocabulary(
+    validator_name: str | None,
+) -> frozenset[str] | None:
+    from bioetl.domain.mapping.publication_type_classification import (
+        publication_classification_values,
+    )
+
+    mapping = {
+        "validate_publication_type_unified_taxonomy": "publication_type_unified",
+        "validate_publication_subclass_taxonomy": "publication_subclass",
+        "validate_publication_class_taxonomy": "publication_class",
+    }
+    field_name = mapping.get(validator_name)
+    if field_name is None:
+        return None
+    return publication_classification_values(field_name)
+
+
+def _target_xref_json_vocabulary(
+    validator_name: str | None,
+) -> frozenset[str] | None:
+    if validator_name in {
+        "validate_target_xref_src_db_json_vocab",
+        "validate_target_component_xref_src_db_json_vocab",
+    }:
+        return TARGET_XREF_SOURCE_DB_VALUES
     return None
 
 
@@ -238,6 +306,31 @@ def _target_json_vocabulary_rule_violated(
     return any(
         not isinstance(item, str) or item not in allowed_values for item in list_like
     )
+
+
+def _publication_taxonomy_rule_violated(
+    value: object,
+    *,
+    allowed_values: frozenset[str],
+) -> bool:
+    return not isinstance(value, str) or value not in allowed_values
+
+
+def _target_xref_json_vocabulary_rule_violated(
+    value: object,
+    *,
+    allowed_values: frozenset[str],
+) -> bool:
+    list_like = _coerce_target_json_list(value)
+    if list_like is None:
+        return True
+    for item in list_like:
+        if not isinstance(item, dict):
+            return True
+        source_value = item.get("xref_src_db")
+        if not isinstance(source_value, str) or source_value not in allowed_values:
+            return True
+    return False
 
 
 def _coerce_target_json_list(value: object) -> list[object] | None:

@@ -6,7 +6,7 @@ import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from uuid import UUID
 
 import pytest
 
@@ -140,8 +140,8 @@ class TestStorageBundleWriteBronze:
         """Test that write_bronze delegates to bronze writer."""
         records = iter([b'{"id": 1}\n', b'{"id": 2}\n'])
         date = datetime(2024, 1, 15)
-        batch_id = uuid4()
-        run_id = uuid4()
+        batch_id = UUID("00000000-0000-0000-0000-000000000101")
+        run_id = UUID("00000000-0000-0000-0000-000000000102")
         run_type = RunType.INCREMENTAL
         # Fixed timestamp for deterministic tests (ADR-014)
         ingestion_ts = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)

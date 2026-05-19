@@ -39,6 +39,14 @@ registries:
       linked_rf: "RF-000"
       expires_on: "2026-09-30"
       removal_step: "Split checkpoint/replay/artifact extraction helpers into focused control-plane identity modules and remove this exemption."
+    src/bioetl/application/services/_observability_workflow_support.py:
+      value: 520
+      owner: "@bioetl-platform"
+      reason: "Observability workflow support module provides diagnostic workflow helpers for audit, checkpoint, and run-manifest inspection. The size is justified by the breadth of diagnostic orchestration patterns and error handling across multiple observability surfaces."
+      classification: "intentional_exception"
+      linked_rf: "RF-000"
+      expires_on: "2026-09-30"
+      removal_step: "Consider extracting specialized workflow helpers (e.g., audit-specific, checkpoint-specific) if the module grows beyond 520 lines."
   function_complexity: {}
   function_length: {}
   class_size: {}

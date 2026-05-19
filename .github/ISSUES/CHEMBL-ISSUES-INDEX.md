@@ -37,3 +37,26 @@ session because:
 ### Follow-up umbrella
 
 16. `CHEMBL-016-Close-Remaining-Chembl-Normalization-Governance-Gaps.md`
+
+## Residual Follow-Up Drafts After 2026-05-19 Audit
+
+These drafts are based on the architecture-strict ChEMBL normalization audit
+performed on `main` at `2026-05-19`.
+
+### Residual P1
+
+17. `CHEMBL-017-Govern-ChEMBL-Molecule-Provider-Code-Surfaces-Availability-Type-And-Chirality.md`
+18. `CHEMBL-018-Add-Optional-Unit-Ontology-Companion-Bundle-For-ChEMBL-Assay-Parameters.md`
+19. `CHEMBL-019-Enforce-Nested-ChEMBL-Xref-Source-Vocabulary-In-Target-Structured-Fields.md`
+
+### Residual P2
+
+20. `CHEMBL-020-Expand-Observed-Value-Inventory-For-Weakly-Covered-ChEMBL-Reference-Pipelines.md`
+21. `CHEMBL-021-Sync-ChEMBL-Provider-Docs-With-Active-Normalization-Surfaces.md`
+
+## Notes
+
+- The 2026-05-19 audit did not confirm a new P0 defect in determinism,
+  `content_hash`, or Gold contract safety.
+- The residual pack is intentionally narrower than `CHEMBL-016` and converts
+  the remaining evidence-backed gaps into independently closable issues.

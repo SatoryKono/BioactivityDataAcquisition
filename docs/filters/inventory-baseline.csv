@@ -39,7 +39,7 @@ chembl,activity,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,n
 chembl,activity,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 chembl,assay,required_fields,assay_id,"""assay_id""",,keep_in_silver,structural rule stays in silver_filters
 chembl,assay,required_fields,assay_type,"""assay_type""","""assay_type""",keep_in_silver,also present in gold_filters (informational)
-chembl,assay,required_fields,assay_description,"""assay_description""",,keep_in_silver,structural rule stays in silver_filters
+chembl,assay,required_fields,assay_description,"""assay_description""","""assay_description""",keep_in_silver,also present in gold_filters (informational)
 chembl,assay,required_fields,target_id,"""target_id""",,keep_in_silver,structural rule stays in silver_filters
 chembl,assay,required_fields,publication_id,"""publication_id""",,keep_in_silver,structural rule stays in silver_filters
 chembl,assay,required_fields,bao_format,"""bao_format""",,keep_in_silver,structural rule stays in silver_filters

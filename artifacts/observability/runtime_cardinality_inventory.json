@@ -161,12 +161,6 @@
     "Checkpoint minimum compatibility validation passed (lenient mode)": [
       "src/bioetl/application/services/checkpoint_compatibility_service.py"
     ],
-    "Checkpoint not found": [
-      "src/bioetl/application/services/checkpoint_service.py"
-    ],
-    "Checkpoint not found for deletion": [
-      "src/bioetl/application/services/checkpoint_service.py"
-    ],
     "Checkpoint pre-check failed with domain error": [
       "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py"
     ],
@@ -222,8 +216,7 @@
       "src/bioetl/infrastructure/storage/gold/writer_support.py"
     ],
     "Deleted checkpoint": [
-      "src/bioetl/application/composite/checkpoint/persistence_service.py",
-      "src/bioetl/application/services/checkpoint_service.py"
+      "src/bioetl/application/composite/checkpoint/persistence_service.py"
     ],
     "Deleted orphaned checkpoint": [
       "src/bioetl/application/composite/checkpoint/persistence_service.py"
@@ -288,11 +281,14 @@
     "Getting checkpoint": [
       "src/bioetl/application/services/checkpoint_service.py"
     ],
+    "Getting checkpoint for manifest": [
+      "src/bioetl/application/services/checkpoint_service.py"
+    ],
+    "Getting checkpoint for run": [
+      "src/bioetl/application/services/checkpoint_service.py"
+    ],
     "GoldRecord": [
       "src/bioetl/application/core/_base_transformer_structural_support.py"
-    ],
-    "Got checkpoint": [
-      "src/bioetl/application/services/checkpoint_service.py"
     ],
     "Ledger append produced an empty write": [
       "src/bioetl/infrastructure/control_plane/file_run_ledger_store.py"
@@ -302,9 +298,6 @@
     ],
     "LineageStorePort | None": [
       "src/bioetl/infrastructure/storage/gold/writer_support.py"
-    ],
-    "Listed checkpoints": [
-      "src/bioetl/application/services/checkpoint_service.py"
     ],
     "Listing all checkpoints": [
       "src/bioetl/application/services/checkpoint_service.py"
@@ -704,6 +697,12 @@
       "src/bioetl/application/services/checkpoint_service.py"
     ],
     "checkpoint.get": [
+      "src/bioetl/application/services/checkpoint_service.py"
+    ],
+    "checkpoint.get_for_manifest_id": [
+      "src/bioetl/application/services/checkpoint_service.py"
+    ],
+    "checkpoint.get_for_run": [
       "src/bioetl/application/services/checkpoint_service.py"
     ],
     "checkpoint.list": [
@@ -1545,8 +1544,6 @@
     "Checkpoint incompatible with current runtime anchors",
     "Checkpoint minimum compatibility validation failed (lenient mode)",
     "Checkpoint minimum compatibility validation passed (lenient mode)",
-    "Checkpoint not found",
-    "Checkpoint not found for deletion",
     "Checkpoint pre-check failed with domain error",
     "Checkpoint resume blocked for full_scan_only pipeline. Each run performs a full scan; deduplication via content_hash on Silver. See ADR-031 for details.",
     "Checkpoint save failed during exception handling",
@@ -1587,12 +1584,12 @@
     "Filtered quarantine record lookup requires a scoped pipeline",
     "Found compatible checkpoint",
     "Getting checkpoint",
+    "Getting checkpoint for manifest",
+    "Getting checkpoint for run",
     "GoldRecord",
-    "Got checkpoint",
     "Ledger append produced an empty write",
     "LineageGraphFragment | None",
     "LineageStorePort | None",
-    "Listed checkpoints",
     "Listing all checkpoints",
     "Loaded checkpoint",
     "Lock released",
@@ -1719,6 +1716,8 @@
     "checkpoint",
     "checkpoint.delete",
     "checkpoint.get",
+    "checkpoint.get_for_manifest_id",
+    "checkpoint.get_for_run",
     "checkpoint.list",
     "checkpoint_compatibility_service",
     "checkpoint_missing_manifest_anchor",
@@ -2676,7 +2675,6 @@
     "bioetl_data_freshness_seconds": [
       "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
       "docs/02-architecture/observability-layers.md",
-      "docs/03-guides/dashboards/dashboard-v2-updates.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/05-operations/01-monitoring-guide.md",
@@ -2727,7 +2725,6 @@
       "docs/03-guides/dashboards/README.md",
       "docs/03-guides/dashboards/dashboard-checklist-per-dashboard.md",
       "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
-      "docs/03-guides/dashboards/dashboard-v2-updates.md",
       "docs/03-guides/dashboards/design-system.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json"
@@ -2773,7 +2770,6 @@
       "grafana/dashboards/bioetl-dq-v2.json"
     ],
     "bioetl_dq_validation_record_count": [
-      "docs/03-guides/dashboards/dashboard-v2-updates.md",
       "docs/05-operations/runbooks/dq-failure-investigation.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json"
@@ -3000,7 +2996,6 @@
       "docs/03-guides/dashboards/README.md",
       "docs/03-guides/dashboards/dashboard-checklist-per-dashboard.md",
       "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
-      "docs/03-guides/dashboards/dashboard-v2-updates.md",
       "docs/03-guides/dashboards/design-system.md",
       "docs/05-operations/01-monitoring-guide.md",
       "grafana/README.md",
@@ -3051,7 +3046,6 @@
     "bioetl_records_processed_total": [
       "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
       "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
-      "docs/03-guides/dashboards/dashboard-v2-updates.md",
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/variable-reference.md",
       "docs/03-guides/metrics-monitoring.md",
@@ -3084,7 +3078,6 @@
       "docs/03-guides/dashboards/README.md",
       "docs/03-guides/dashboards/dashboard-checklist-per-dashboard.md",
       "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
-      "docs/03-guides/dashboards/dashboard-v2-updates.md",
       "docs/03-guides/dashboards/design-system.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-runtime.json"
@@ -3105,7 +3098,6 @@
       "grafana/dashboards/bioetl-dq-v2.json"
     ],
     "bioetl_silver_validation_failures_total": [
-      "docs/03-guides/dashboards/dashboard-v2-updates.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/05-operations/01-monitoring-guide.md",
       "docs/05-operations/sli-slo-baseline.md",

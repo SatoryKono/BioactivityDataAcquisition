@@ -116,7 +116,8 @@ class _CrossRefMetadataBlock:
     def extract(self, record: BronzeRecord) -> JsonDict:
         content_domain = extract_content_domain(record)
         raw_references = extract_references(record)
-        references = self.serialize_json(raw_references)
+        references_raw_json = self.serialize_json(raw_references)
+        references_canonical_json = self.serialize_json(raw_references)
 
         return {
             **extract_page_info(record),
@@ -129,7 +130,19 @@ class _CrossRefMetadataBlock:
             "content_domain_crossmark_restriction": content_domain.get(
                 "content_domain_crossmark_restriction"
             ),
-            "references": references if isinstance(references, str) else None,
+            "references": (
+                references_canonical_json
+                if isinstance(references_canonical_json, str)
+                else None
+            ),
+            "references_raw_json": (
+                references_raw_json if isinstance(references_raw_json, str) else None
+            ),
+            "references_canonical_json": (
+                references_canonical_json
+                if isinstance(references_canonical_json, str)
+                else None
+            ),
         }
 
 
@@ -221,7 +234,8 @@ class _CrossRefAuthorBlock:
         hashed_details = [self._hash_author_detail(a) for a in raw_author_details]
         affiliations_input = self._extract_affiliations(raw_author_details)
 
-        author_details = self.serialize_json(hashed_details)
+        author_details_raw_json = self.serialize_json(raw_author_details)
+        author_details_canonical_json = self.serialize_json(hashed_details)
         author_orcids = extract_author_orcids(record)
         serialized_orcids = self.serialize_json_list(author_orcids)
 
@@ -233,9 +247,21 @@ class _CrossRefAuthorBlock:
             "authors": authors_json,
             "author_keys": author_keys,
             "author_orcids": serialized_orcids,
-            "author_details": author_details
-            if isinstance(author_details, str)
-            else None,
+            "author_details": (
+                author_details_canonical_json
+                if isinstance(author_details_canonical_json, str)
+                else None
+            ),
+            "author_details_raw_json": (
+                author_details_raw_json
+                if isinstance(author_details_raw_json, str)
+                else None
+            ),
+            "author_details_canonical_json": (
+                author_details_canonical_json
+                if isinstance(author_details_canonical_json, str)
+                else None
+            ),
             "affiliation_list": affiliations_json,
         }
 

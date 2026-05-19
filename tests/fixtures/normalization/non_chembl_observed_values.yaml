@@ -368,14 +368,14 @@ pipelines:
         - epublish
         - aheadofprint
       publication_type_unified:
-        - article
-        - review
+        - Journal Article
+        - Review
       publication_subclass:
-        - primary_research
-        - review_article
+        - Original Experimental Data
+        - Reviews & Syntheses
       publication_class:
-        - article_like
-        - review_like
+        - EXP
+        - REV
     structured_json_shapes:
       authors_with_affiliations:
         semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
@@ -450,25 +450,26 @@ pipelines:
         - 10.1000/abc
     expected_controlled_values:
       publication_type_unified:
-        - article
-        - book_chapter
+        - Book Chapter
+        - Journal Article
+        - Preprint
       publication_subclass:
-        - primary_research
-        - book_contribution
+        - Books & Monographs
+        - Original Experimental Data
       publication_class:
-        - article_like
-        - chapter_like
+        - EXP
+        - REV
     structured_json_shapes:
       author_details:
-        semantic_policy: hashed_pii_canonical_json_only
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
         collection_semantics: ordered_sequence
-        raw_sidecar_field: null
-        canonical_sidecar_field: author_details
+        raw_sidecar_field: author_details_raw_json
+        canonical_sidecar_field: author_details_canonical_json
       references:
-        semantic_policy: canonical_json_bibliographic_evidence
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
         collection_semantics: ordered_sequence
-        raw_sidecar_field: null
-        canonical_sidecar_field: references
+        raw_sidecar_field: references_raw_json
+        canonical_sidecar_field: references_canonical_json
     classification:
       doi:
         category: identifier_namespace
@@ -492,14 +493,16 @@ pipelines:
         collection_semantics: scalar
         composite_usage: composite_publication:upstream_inherited
       author_details:
-        category: structured_json_canonical_only
+        category: structured_json_sidecar
         collection_semantics: ordered_sequence
-        canonical_sidecar: author_details
+        raw_sidecar: author_details_raw_json
+        canonical_sidecar: author_details_canonical_json
         composite_usage: composite_publication:upstream_inherited
       references:
-        category: structured_json_canonical_only
+        category: structured_json_sidecar
         collection_semantics: ordered_sequence
-        canonical_sidecar: references
+        raw_sidecar: references_raw_json
+        canonical_sidecar: references_canonical_json
         composite_usage: composite_publication:upstream_inherited
 
   openalex_publication:
@@ -544,14 +547,16 @@ pipelines:
         - bronze
         - closed
       publication_type_unified:
-        - article
-        - review
+        - Book Chapter
+        - Journal Article
+        - Review
       publication_subclass:
-        - primary_research
-        - review_article
+        - Books & Monographs
+        - Original Experimental Data
+        - Reviews & Syntheses
       publication_class:
-        - article_like
-        - review_like
+        - EXP
+        - REV
     structured_json_shapes:
       grants:
         semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
@@ -657,14 +662,14 @@ pipelines:
         - bronze
         - closed
       publication_type_unified:
-        - article
-        - review
+        - Journal Article
+        - Review
       publication_subclass:
-        - primary_research
-        - review_article
+        - Original Experimental Data
+        - Reviews & Syntheses
       publication_class:
-        - article_like
-        - review_like
+        - EXP
+        - REV
     structured_json_shapes:
       author_h_indices:
         semantic_policy: raw_json_plus_canonical_json_before_semantic_transform

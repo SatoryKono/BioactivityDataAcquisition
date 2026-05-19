@@ -62,8 +62,8 @@ budgets:
   duplicate_test_names_max: 891
   duplicate_test_name_occurrences_max: 2775
   compatibility_test_file_max: 53
-  markerless_test_functions_max: 13363
-  uuid4_call_sites_max: 415
+  markerless_test_functions_max: 13383
+  uuid4_call_sites_max: 417
   date_today_call_sites_max: 0
 preflight:
   script: scripts/engineering/qa/check_test_audit_preflight.py

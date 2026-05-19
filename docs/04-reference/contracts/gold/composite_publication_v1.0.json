@@ -10,6 +10,14 @@
       "nullable": false,
       "description": "Stable business identifier for merged publication entity."
     },
+    "_source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Source-family lineage marker retained as composite metadata."
+    },
     "_dq_warn": {
       "type": "boolean",
       "nullable": false,
@@ -35,21 +43,13 @@
       "nullable": false,
       "description": ""
     },
-    "_source": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
     "_lookup_method": {
       "type": [
         "string",
         "null"
       ],
       "nullable": true,
-      "description": ""
+      "description": "Lookup strategy retained as inherited provider/composite lineage metadata."
     },
     "_original_id": {
       "type": [
@@ -57,7 +57,7 @@
         "null"
       ],
       "nullable": true,
-      "description": ""
+      "description": "Original provider lookup identifier retained as lineage metadata."
     },
     "publication_id": {
       "type": [

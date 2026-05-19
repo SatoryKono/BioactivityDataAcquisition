@@ -42,10 +42,6 @@ from bioetl.composition.runtime_builders.control_plane import (
 )
 from bioetl.composition.runtime_builders.inputs_resolver import (
     ResolvedVacuumSettings,
-    assemble_cached_bronze_context,
-    assemble_filter_config,
-    assemble_runtime_config,
-    assemble_vacuum_settings,
     prepare_runner_inputs,
 )
 from bioetl.composition.runtime_builders.inputs_resolver import (
@@ -53,9 +49,6 @@ from bioetl.composition.runtime_builders.inputs_resolver import (
 )
 from bioetl.composition.runtime_builders.ledger_collaborator import (
     PipelineRunnerProtocol,
-)
-from bioetl.composition.runtime_builders.observability_builder import (
-    build_observability_bundle,
 )
 from bioetl.composition.runtime_builders.runner_input_assembly import (
     prepare_runner_context_and_inputs as _prepare_runner_context_and_inputs,
@@ -149,6 +142,8 @@ def _handle_control_plane_setup(
         run_ledger_service=run_ledger_service,
         required_profile=effective_required_profile,
     )
+
+
 def build_pipeline_runner(
     ctx: PipelineRunContext,
     registry: PipelineRegistry | None = None,
@@ -182,21 +177,11 @@ def build_pipeline_runner(
         get_settings_fn=get_settings_fn,
         load_pipeline_config_fn=load_pipeline_config_fn,
         load_source_config_fn=load_source_config_fn,
-        build_observability_bundle_fn=build_observability_bundle
-        if build_observability_bundle_fn is None
-        else build_observability_bundle_fn,
-        assemble_vacuum_settings_fn=assemble_vacuum_settings
-        if assemble_vacuum_settings_fn is None
-        else assemble_vacuum_settings_fn,
-        assemble_runtime_config_fn=assemble_runtime_config
-        if assemble_runtime_config_fn is None
-        else assemble_runtime_config_fn,
-        assemble_filter_config_fn=assemble_filter_config
-        if assemble_filter_config_fn is None
-        else assemble_filter_config_fn,
-        assemble_cached_bronze_context_fn=assemble_cached_bronze_context
-        if assemble_cached_bronze_context_fn is None
-        else assemble_cached_bronze_context_fn,
+        build_observability_bundle_fn=build_observability_bundle_fn,
+        assemble_vacuum_settings_fn=assemble_vacuum_settings_fn,
+        assemble_runtime_config_fn=assemble_runtime_config_fn,
+        assemble_filter_config_fn=assemble_filter_config_fn,
+        assemble_cached_bronze_context_fn=assemble_cached_bronze_context_fn,
         prepare_runner_inputs_fn=prepare_runner_inputs,
     )
     control_plane_setup = _handle_control_plane_setup(ctx, inputs)

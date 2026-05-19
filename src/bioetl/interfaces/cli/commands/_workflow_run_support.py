@@ -243,11 +243,14 @@ def _validate_workflow_pipeline_replay_prerequisites(config: WorkflowConfig) -> 
     for step in config.pipeline_steps:
         exact_replay = _resolve_step_option(config, step, "exact_replay")
         use_cached_bronze = _resolve_step_option(config, step, "use_cached_bronze")
-        required_profile = _resolve_step_option(
-            config,
-            step,
-            "required_persistence_profile",
-        ) or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+        required_profile = (
+            _resolve_step_option(
+                config,
+                step,
+                "required_persistence_profile",
+            )
+            or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+        )
 
         if bool(exact_replay) and not bool(use_cached_bronze):
             raise ValueError(
@@ -256,9 +259,8 @@ def _validate_workflow_pipeline_replay_prerequisites(config: WorkflowConfig) -> 
                 "--exact-replay is enabled"
             )
 
-        if (
-            str(required_profile) in STRICT_PERSISTENCE_PROFILES
-            and not bool(use_cached_bronze)
+        if str(required_profile) in STRICT_PERSISTENCE_PROFILES and not bool(
+            use_cached_bronze
         ):
             raise ValueError(
                 f"Workflow step '{step.step_id}' requests required_persistence_profile="
@@ -276,7 +278,7 @@ def _resolve_step_option(
     field_name: str,
 ) -> object:
     """Resolve one workflow step run option with workflow defaults fallback."""
-    step_options = getattr(step, "run_options")
+    step_options = step.run_options
     step_value = getattr(step_options, field_name)
     if step_value is not None:
         return step_value

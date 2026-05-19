@@ -68,6 +68,41 @@ def test_append_mode_requires_explicit_idempotency_contract() -> None:
             )
 
 
+def test_append_mode_requires_executable_or_machine_readable_idempotency_evidence() -> (
+    None
+):
+    for config_path in _iter_pipeline_configs():
+        sink = _pipeline_sink(_load_yaml(config_path))
+        for layer_name in ("silver", "gold"):
+            layer = sink.get(layer_name)
+            if not isinstance(layer, dict):
+                continue
+            if str(layer.get("mode", "")).strip().lower() != "append":
+                continue
+            contract = str(layer.get("idempotency_contract") or "").strip().lower()
+            if contract == "occurrence_only":
+                continue
+            evidence = layer.get("idempotency_evidence")
+            assert isinstance(evidence, dict), (
+                f"{config_path.relative_to(ROOT)}: sink.{layer_name}.mode=append "
+                "requires machine-readable idempotency_evidence"
+            )
+            assert any(
+                evidence.get(key)
+                for key in (
+                    "occurrence_identity_fields",
+                    "append_log_identity_fields",
+                    "stable_partition_keys",
+                    "partition_keys",
+                    "executable_tests",
+                )
+            ), (
+                f"{config_path.relative_to(ROOT)}: sink.{layer_name}.mode=append "
+                "idempotency_evidence must name identity fields, partition keys, "
+                "or executable_tests"
+            )
+
+
 def test_explicit_sink_mode_requires_matching_explicit_idempotency_contract() -> None:
     for config_path in _iter_pipeline_configs():
         sink = _pipeline_sink(_load_yaml(config_path))

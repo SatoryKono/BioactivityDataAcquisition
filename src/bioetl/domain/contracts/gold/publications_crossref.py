@@ -39,7 +39,11 @@ class CrossRefPublicationGoldSchema(PublicationGoldCommonSchema):
     author_keys: Series[str] = pa.Field(nullable=True)
     author_orcids: Series[str] = pa.Field(nullable=True)
     author_details: Series[str] = pa.Field(nullable=True)
+    author_details_raw_json: Series[str] = pa.Field(nullable=True)
+    author_details_canonical_json: Series[str] = pa.Field(nullable=True)
     references: Series[str] = pa.Field(nullable=True)
+    references_raw_json: Series[str] = pa.Field(nullable=True)
+    references_canonical_json: Series[str] = pa.Field(nullable=True)
 
 
 __all__ = ["CrossRefPublicationGoldSchema"]

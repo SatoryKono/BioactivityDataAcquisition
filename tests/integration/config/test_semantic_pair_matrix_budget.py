@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 from datetime import date
 import json
 from pathlib import Path
@@ -58,9 +59,9 @@ def test_reviewed_critical_rows_are_timeboxed_and_owned() -> None:
         ("Normalization", "DIFFERENT"): 0,
         ("Normalization", "COMPATIBLE"): 886,
         ("Typing", "CONFLICTING"): 0,
-        ("Typing", "COMPATIBLE"): 654,
+        ("Typing", "COMPATIBLE"): 621,
         ("Validation", "STRICTNESS_MISMATCH"): 0,
-        ("Validation", "COMPATIBLE"): 1039,
+        ("Validation", "COMPATIBLE"): 1028,
     }
     assert len(reviewed_rows) == payload["budgets"]["CRITICAL"]["max_count"]
     for row in reviewed_rows:
@@ -143,6 +144,27 @@ def test_non_exact_semantic_clusters_are_owner_reviewed() -> None:
             unreviewed.append(cluster["cluster_id"])
 
     assert not unreviewed, sorted(unreviewed)[:20]
+
+
+def test_regenerated_snapshot_has_no_unknown_composite_typing_rows() -> None:
+    matrix_path = Path("reports/semantic_pipeline_audit/semantic_pair_matrix_2026-05-19.csv")
+    rows = validate_semantic_pair_matrix_budget(
+        repo_root=Path("."),
+        today=date(2026, 5, 19),
+    )
+
+    assert rows.ok
+    unknown_pairs = set()
+    with matrix_path.open(encoding="utf-8", newline="") as handle:
+        for row in csv.DictReader(handle):
+            for side in ("A", "B"):
+                if (
+                    row[f"Pipeline {side}"].startswith("composite_")
+                    and row[f"Type {side}"] == "unknown"
+                ):
+                    unknown_pairs.add((row[f"Pipeline {side}"], row[f"Field {side}"]))
+
+    assert unknown_pairs == set()
 
 
 def test_reviewed_semantic_registry_warnings_are_suppressed() -> None:

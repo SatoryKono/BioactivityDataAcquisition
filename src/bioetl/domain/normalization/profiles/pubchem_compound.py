@@ -13,6 +13,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_canonical_smiles,
     normalize_profile_inchi_key,
     normalize_profile_isomeric_smiles,
+    normalize_profile_pubchem_cid,
 )
 from bioetl.domain.schemas.pubchem.compound import PubchemMoleculeSchema
 
@@ -67,6 +68,10 @@ _ENUM_FIELDS = {
 }
 
 _SPECIAL_RULES = {
+    "molecule_id": (
+        normalize_profile_pubchem_cid,
+        "Canonicalize PubChem CID before identity, hashing, and composite boundary evaluation.",
+    ),
     "canonical_smiles": (
         normalize_profile_canonical_smiles,
         "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",

@@ -170,6 +170,10 @@ CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
         # Primary identifier (surrogate)
         pa.field("assay_param_id", pa.int64(), nullable=False),
         pa.field("comments", pa.string()),
+        pa.field("qudt_ontology_version", pa.string()),
+        pa.field("qudt_unit_iri", pa.string()),
+        pa.field("qudt_unit_mapping_status", pa.string()),
+        pa.field("qudt_units", pa.string()),
         # Raw values
         pa.field("relation", pa.string()),
         # Standardized values
@@ -182,6 +186,10 @@ CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
         # Parameter type
         pa.field("type", pa.string()),
         pa.field("type_raw", pa.string()),
+        pa.field("uo_ontology_version", pa.string()),
+        pa.field("uo_unit_iri", pa.string()),
+        pa.field("uo_unit_mapping_status", pa.string()),
+        pa.field("uo_units", pa.string()),
         pa.field("units", pa.string()),
         pa.field("value", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===

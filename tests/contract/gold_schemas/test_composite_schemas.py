@@ -8,8 +8,11 @@ from pathlib import Path
 import pytest
 
 from bioetl.domain.contracts.gold.composite import (
+    CompositeActivityGoldSchema,
+    CompositeAssayGoldSchema,
     CompositeMoleculeGoldSchema,
     CompositePublicationGoldSchema,
+    CompositeTargetGoldSchema,
 )
 
 CONTRACTS_DIR = Path("docs/04-reference/contracts/gold")
@@ -37,7 +40,13 @@ class TestCompositeGoldSchemaContract:
 
     @pytest.mark.parametrize(
         "schema_cls",
-        [CompositePublicationGoldSchema, CompositeMoleculeGoldSchema],
+        [
+            CompositeActivityGoldSchema,
+            CompositeAssayGoldSchema,
+            CompositeMoleculeGoldSchema,
+            CompositePublicationGoldSchema,
+            CompositeTargetGoldSchema,
+        ],
     )
     def test_schema_has_required_columns(self, schema_cls: type) -> None:
         """Composite DataFrameModel contains mandatory persisted DQ/lineage fields."""
@@ -48,7 +57,13 @@ class TestCompositeGoldSchemaContract:
 
     @pytest.mark.parametrize(
         "schema_cls",
-        [CompositePublicationGoldSchema, CompositeMoleculeGoldSchema],
+        [
+            CompositeActivityGoldSchema,
+            CompositeAssayGoldSchema,
+            CompositeMoleculeGoldSchema,
+            CompositePublicationGoldSchema,
+            CompositeTargetGoldSchema,
+        ],
     )
     def test_schema_strict_mode_true(self, schema_cls: type) -> None:
         """Composite Gold contracts are strict like the rest of the Gold layer."""
@@ -93,3 +108,11 @@ class TestCompositeGoldJsonContracts:
         assert not missing, f"{filename} missing contract properties: {missing}"
 
         assert properties["entity_id"]["description"] == entity_description
+
+    def test_composite_activity_taxonomy_id_is_published_with_integer_typing(self) -> None:
+        path = CONTRACTS_DIR / "composite_activity_v1.0.json"
+        contract = json.loads(path.read_text(encoding="utf-8"))
+        taxonomy = contract["properties"]["taxonomy_id"]
+
+        assert taxonomy["type"] == ["integer", "null"]
+        assert taxonomy["nullable"] is True

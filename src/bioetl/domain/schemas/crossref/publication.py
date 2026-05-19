@@ -158,11 +158,27 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
         nullable=True,
         description="JSON array of author objects with given, family, orcid, sequence, affiliations",
     )
+    author_details_raw_json: Series[str] = pa.Field(
+        nullable=True,
+        description="Raw CrossRef author-detail JSON array for replay/debug evidence.",
+    )
+    author_details_canonical_json: Series[str] = pa.Field(
+        nullable=True,
+        description="Canonical author-detail JSON companion used for structured payload governance.",
+    )
 
     # === Bibliographic References ===
     references: Series[str] = pa.Field(
         nullable=True,
         description="JSON array of cited references with DOI, title, author, year, etc.",
+    )
+    references_raw_json: Series[str] = pa.Field(
+        nullable=True,
+        description="Raw CrossRef bibliographic references JSON array for replay/debug evidence.",
+    )
+    references_canonical_json: Series[str] = pa.Field(
+        nullable=True,
+        description="Canonical references JSON companion used for structured payload governance.",
     )
 
     class Config:

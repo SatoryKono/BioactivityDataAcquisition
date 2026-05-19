@@ -54,6 +54,7 @@ def test_build_manifest_create_request_uses_named_contract_identity_fields(
         execution_context_value="isolated",
         resolved_config_hash="resolved-hash",
         effective_config_hash="effective-hash",
+        source_fingerprint="source-fingerprint-1",
         dq_contract_compatibility_hash="dq-hash",
         effective_config_artifact_id="artifact-1",
         contract_identity=identity,
@@ -81,6 +82,7 @@ def test_build_manifest_create_request_uses_named_contract_identity_fields(
     assert request_inputs.reproducibility_context.required_persistence_profile == (
         "replay_ready"
     )
+    assert request_inputs.source_fingerprint == "source-fingerprint-1"
 
 
 def test_create_control_plane_refs_uses_named_contract_identity_fields() -> None:
@@ -94,6 +96,7 @@ def test_create_control_plane_refs_uses_named_contract_identity_fields() -> None
         ),
         resolved_config_hash="resolved-hash",
         effective_config_hash="effective-hash",
+        source_fingerprint="source-fingerprint-1",
         dq_contract_compatibility_hash="dq-hash",
         effective_config_artifact_id="artifact-1",
         contract_identity=identity,
@@ -112,6 +115,7 @@ def test_create_control_plane_refs_uses_named_contract_identity_fields() -> None
     )
     assert refs.normalization_profile_hash == identity.normalization_profile_hash
     assert refs.required_persistence_profile == "replay_ready"
+    assert refs.source_fingerprint == "source-fingerprint-1"
 
 
 def test_build_manifest_create_request_passes_through_reproducibility_context(
@@ -144,6 +148,7 @@ def test_build_manifest_create_request_passes_through_reproducibility_context(
         execution_context_value="isolated",
         resolved_config_hash="resolved-hash",
         effective_config_hash="effective-hash",
+        source_fingerprint="source-fingerprint-1",
         dq_contract_compatibility_hash="dq-hash",
         effective_config_artifact_id="artifact-1",
         contract_identity=_make_contract_identity(),

@@ -200,6 +200,18 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a Windows-side compatibility launcher while Codex runtime startup guidance still references this PowerShell entrypoint; remove it after docs and operators fully migrate to the governed scripts.ai/canonical launcher surface."
     },
+    "scripts/ai/codex/cursor-launch.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an unreferenced Windows compatibility launcher during the reviewed retirement window; remove it once an external-caller audit confirms no out-of-repo Cursor bootstrap consumers remain."
+    },
+    "scripts/ai/codex/fix-nodejs.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded manual repair script for legacy local Node.js bootstrap incidents; retire it if the governed Codex setup flow no longer needs an emergency fallback."
+    },
     "scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_helper_orphan",
@@ -229,6 +241,18 @@
       "decision": "shared_helper_module",
       "review_by": "2026-07-15",
       "next_step": "Retain as the shared first-party import-graph helper consumed by QA inventory reports; fold it into a broader canonical graph helper surface only if the inventory/reporting pipeline is consolidated."
+    },
+    "scripts/docs/generate_pipeline_normalization_validation_table.py": {
+      "owner": "@bioetl-docs",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded historical docs-generation utility while no governed caller references it; either route it through the canonical scripts.docs matrix/reporting surface or retire it after caller audit."
+    },
+    "scripts/ops/install-codex-cmd.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an unreferenced Windows compatibility installer during the reviewed retirement window; remove it once external bootstrap docs and local operator flows no longer depend on the old Codex command shim."
     },
     "src/tools/neo4j_audit.py": {
       "owner": "@bioetl-platform",

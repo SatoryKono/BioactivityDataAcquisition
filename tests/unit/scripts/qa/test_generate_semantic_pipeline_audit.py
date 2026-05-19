@@ -117,3 +117,25 @@ def test_build_current_member_facts_exposes_composite_inherited_field_types() ->
     assert facts[("composite_molecule", "logp")]["field_type"] == "double"
     assert facts[("composite_publication", "year")]["field_type"] == "int64"
     assert facts[("composite_target", "downgraded")]["field_type"] == "bool"
+
+
+def test_build_current_member_facts_exposes_composite_authority_shim_types() -> None:
+    seed_registry = json.loads(
+        Path(
+            "reports/semantic_pipeline_audit/semantic_cluster_registry_2026-05-19.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    facts = audit._build_current_member_facts(seed_registry)
+
+    assert facts[("composite_activity", "taxonomy_id")]["field_type"] == "int64"
+    assert facts[("composite_activity", "_source")]["field_type"] == "string"
+    assert facts[("composite_activity", "_lookup_method")]["field_type"] == "string"
+    assert facts[("composite_activity", "_original_id")]["field_type"] == "string"
+    assert facts[("composite_assay", "_source")]["field_type"] == "string"
+    assert facts[("composite_assay", "_lookup_method")]["field_type"] == "string"
+    assert facts[("composite_assay", "_original_id")]["field_type"] == "string"
+    assert facts[("composite_molecule", "_source")]["field_type"] == "string"
+    assert facts[("composite_target", "_source")]["field_type"] == "string"
+    assert facts[("composite_target", "_lookup_method")]["field_type"] == "string"
+    assert facts[("composite_target", "_original_id")]["field_type"] == "string"

@@ -10,22 +10,26 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_persist
     build_lineage_closure_boundary,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
-    _resolve_broader_historical_exact_replay_state,
-    _resolve_continuation_mode,
-    _resolve_exact_replay_blockers,
-    _resolve_historical_live_run_upgrade_state,
     _resolve_manifest_replay_readiness_verdict,
-    _resolve_replay_capability_reason,
-    _resolve_replay_mode,
-    _resolve_replay_occurrence_kind,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
     _collect_append_mode_semantic_sinks,
     _resolve_exact_replay_support_boundary,
     _resolve_replay_family_contract,
 )
+from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_state import (
+    _resolve_broader_historical_exact_replay_state,
+    _resolve_continuation_mode,
+    _resolve_exact_replay_blockers,
+    _resolve_historical_live_run_upgrade_state,
+    _resolve_replay_capability_reason,
+    _resolve_replay_mode,
+    _resolve_replay_occurrence_kind,
+)
 from bioetl.application.services.control_plane._run_manifest_replay_taxonomy import (
     build_replay_taxonomy_projection,
+    resolve_replay_next_action,
+    resolve_replay_resume_rebuild_verdict,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -106,6 +110,12 @@ def _build_operator_replay_projection_payload(
     replay_inputs: dict[str, object],
 ) -> dict[str, object]:
     """Return kwargs payload for the operator-facing replay taxonomy projection."""
+    replay_resume_rebuild_verdict = resolve_replay_resume_rebuild_verdict(
+        replay_capability=manifest.replay_capability.value,
+        replay_mode=replay_inputs["replay_mode"],
+        continuation_mode=replay_inputs["continuation_mode"],
+        replay_readiness_verdict=replay_inputs["replay_readiness_verdict"],
+    )
     return {
         "replay_capability": manifest.replay_capability.value,
         "requested_exact_replay": requested_exact_replay,
@@ -162,6 +172,8 @@ def _build_operator_replay_projection_payload(
             continuation_mode=str(replay_inputs["continuation_mode"]),
             replay_readiness_verdict=str(replay_inputs["replay_readiness_verdict"]),
         ),
+        "replay_resume_rebuild_verdict": replay_resume_rebuild_verdict,
+        "replay_next_action": resolve_replay_next_action(replay_resume_rebuild_verdict),
         "exact_replay_eligible": replay_inputs["exact_replay_eligible"],
         "exact_replay_blockers": replay_inputs["exact_replay_blockers"],
         "replay_readiness_verdict": replay_inputs["replay_readiness_verdict"],

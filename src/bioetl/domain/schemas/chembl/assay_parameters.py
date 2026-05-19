@@ -12,6 +12,7 @@ from pandera.typing import Series
 from bioetl.domain.schemas.base import ETLRecordSchema
 from bioetl.domain.schemas.constants import (
     ASSAY_PARAMETER_STANDARD_TYPES,
+    ONTOLOGY_MAPPING_STATUSES,
     STANDARD_RELATIONS,
 )
 
@@ -68,6 +69,48 @@ class AssayParametersSchema(ETLRecordSchema):
         nullable=True,
         coerce=True,
         description="Original units (e.g., uM, nM, %).",
+    )
+    uo_units: Series[str] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        description="Optional Units Ontology identifier sidecar when published by the provider/runtime.",
+    )
+    uo_unit_iri: Series[str] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        description="Optional canonical Units Ontology IRI companion for uo_units.",
+    )
+    uo_unit_mapping_status: Series[str] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        isin=list(ONTOLOGY_MAPPING_STATUSES),
+        description="Optional Units Ontology mapping-status companion.",
+    )
+    uo_ontology_version: Series[str] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        description="Optional Units Ontology version companion for uo_units.",
+    )
+    qudt_units: Series[str] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        description="Optional QUDT unit token/IRI sidecar when published by the provider/runtime.",
+    )
+    qudt_unit_iri: Series[str] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        description="Optional canonical QUDT IRI companion for qudt_units.",
+    )
+    qudt_unit_mapping_status: Series[str] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        isin=list(ONTOLOGY_MAPPING_STATUSES),
+        description="Optional QUDT mapping-status companion.",
+    )
+    qudt_ontology_version: Series[str] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        description="Optional QUDT ontology version companion for qudt_units.",
     )
     parameter_value: Series[float] | None = pa.Field(
         nullable=True,

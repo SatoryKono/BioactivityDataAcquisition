@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Literal, TypeVar
+from dataclasses import replace
+from typing import Literal
 
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
-
-_CheckpointTupleItem = TypeVar("_CheckpointTupleItem")
 
 CheckpointCompatibilityPolicy = Literal["observe", "soft_fail", "hard_fail"]
 CheckpointCompatibilityDisposition = Literal[
@@ -80,12 +79,120 @@ def _prefer_identity_flag(
     return current_value if current_value is not None else identity_value
 
 
-def _prefer_identity_sequence(
-    current_value: tuple[_CheckpointTupleItem, ...],
-    identity_value: tuple[_CheckpointTupleItem, ...],
-) -> tuple[_CheckpointTupleItem, ...]:
+def _prefer_identity_sequence[T](
+    current_value: tuple[T, ...],
+    identity_value: tuple[T, ...],
+) -> tuple[T, ...]:
     """Prefer persisted non-empty tuple values, otherwise use identity fallback."""
     return current_value if current_value else identity_value
+
+
+def _build_core_identity_overrides(
+    metadata: CheckpointMetadata,
+    identity: CheckpointMetadata,
+) -> dict[str, object]:
+    """Build core execution-identity overrides for checkpoint enrichment."""
+    return {
+        "dq_contract_compatibility_hash": _prefer_identity_value(
+            metadata.dq_contract_compatibility_hash,
+            identity.dq_contract_compatibility_hash,
+        ),
+        "dq_policy_hash": _prefer_identity_value(
+            metadata.dq_policy_hash,
+            identity.dq_policy_hash,
+        ),
+        "dq_rule_bundle_version": _prefer_identity_value(
+            metadata.dq_rule_bundle_version,
+            identity.dq_rule_bundle_version,
+        ),
+        "pipeline_name": _prefer_identity_value(
+            metadata.pipeline_name,
+            identity.pipeline_name,
+        ),
+        "run_type": _prefer_identity_value(metadata.run_type, identity.run_type),
+        "pipeline_version": _prefer_identity_value(
+            metadata.pipeline_version,
+            identity.pipeline_version,
+        ),
+        "git_commit": _prefer_identity_value(metadata.git_commit, identity.git_commit),
+        "dependency_lock_hash": _prefer_identity_value(
+            metadata.dependency_lock_hash,
+            identity.dependency_lock_hash,
+        ),
+        "effective_config_hash": _prefer_identity_value(
+            metadata.effective_config_hash,
+            identity.effective_config_hash,
+        ),
+        "effective_config_artifact_id": _prefer_identity_value(
+            metadata.effective_config_artifact_id,
+            identity.effective_config_artifact_id,
+        ),
+    }
+
+
+def _build_replay_identity_overrides(
+    metadata: CheckpointMetadata,
+    identity: CheckpointMetadata,
+) -> dict[str, object]:
+    """Build replay and traceability identity overrides for checkpoint enrichment."""
+    return {
+        "execution_fingerprint": _prefer_identity_value(
+            metadata.execution_fingerprint,
+            identity.execution_fingerprint,
+        ),
+        "composite_run_identity": _prefer_identity_value(
+            metadata.composite_run_identity,
+            identity.composite_run_identity,
+        ),
+        "manifest_id": _prefer_identity_value(
+            metadata.manifest_id,
+            identity.manifest_id,
+        ),
+        "contract_ref": _prefer_identity_value(
+            metadata.contract_ref,
+            identity.contract_ref,
+        ),
+        "contract_version": _prefer_identity_value(
+            metadata.contract_version,
+            identity.contract_version,
+        ),
+        "normalization_profile_ref": _prefer_identity_value(
+            metadata.normalization_profile_ref,
+            identity.normalization_profile_ref,
+        ),
+        "normalization_profile_version": _prefer_identity_value(
+            metadata.normalization_profile_version,
+            identity.normalization_profile_version,
+        ),
+        "normalization_profile_hash": _prefer_identity_value(
+            metadata.normalization_profile_hash,
+            identity.normalization_profile_hash,
+        ),
+        "exact_replay": _prefer_identity_flag(
+            metadata.exact_replay,
+            identity.exact_replay,
+        ),
+        "input_snapshot_refs": _prefer_identity_sequence(
+            metadata.input_snapshot_refs,
+            identity.input_snapshot_refs,
+        ),
+        "input_snapshot_ids": _prefer_identity_sequence(
+            metadata.input_snapshot_ids,
+            identity.input_snapshot_ids,
+        ),
+        "input_snapshot_fingerprint": _prefer_identity_value(
+            metadata.input_snapshot_fingerprint,
+            identity.input_snapshot_fingerprint,
+        ),
+        "silver_filter_compatibility_mode": _prefer_identity_value(
+            metadata.silver_filter_compatibility_mode,
+            identity.silver_filter_compatibility_mode,
+        ),
+        "memory_decision_trace": (
+            metadata.memory_decision_trace or identity.memory_decision_trace
+        ),
+        "run_context": metadata.run_context or identity.run_context,
+    }
 
 
 def enrich_metadata_with_execution_identity(
@@ -96,101 +203,10 @@ def enrich_metadata_with_execution_identity(
     """Fill checkpoint metadata gaps from current execution identity."""
     if identity is None:
         return metadata
-    return CheckpointMetadata(
-        records_processed=metadata.records_processed,
-        dq_contract_compatibility_hash=_prefer_identity_value(
-            metadata.dq_contract_compatibility_hash,
-            identity.dq_contract_compatibility_hash,
-        ),
-        dq_policy_hash=_prefer_identity_value(
-            metadata.dq_policy_hash,
-            identity.dq_policy_hash,
-        ),
-        dq_rule_bundle_version=_prefer_identity_value(
-            metadata.dq_rule_bundle_version,
-            identity.dq_rule_bundle_version,
-        ),
-        pipeline_name=_prefer_identity_value(
-            metadata.pipeline_name,
-            identity.pipeline_name,
-        ),
-        run_type=_prefer_identity_value(
-            metadata.run_type,
-            identity.run_type,
-        ),
-        pipeline_version=_prefer_identity_value(
-            metadata.pipeline_version,
-            identity.pipeline_version,
-        ),
-        git_commit=_prefer_identity_value(metadata.git_commit, identity.git_commit),
-        dependency_lock_hash=_prefer_identity_value(
-            metadata.dependency_lock_hash,
-            identity.dependency_lock_hash,
-        ),
-        effective_config_hash=_prefer_identity_value(
-            metadata.effective_config_hash,
-            identity.effective_config_hash,
-        ),
-        effective_config_artifact_id=_prefer_identity_value(
-            metadata.effective_config_artifact_id,
-            identity.effective_config_artifact_id,
-        ),
-        execution_fingerprint=_prefer_identity_value(
-            metadata.execution_fingerprint,
-            identity.execution_fingerprint,
-        ),
-        composite_run_identity=_prefer_identity_value(
-            metadata.composite_run_identity,
-            identity.composite_run_identity,
-        ),
-        manifest_id=_prefer_identity_value(
-            metadata.manifest_id,
-            identity.manifest_id,
-        ),
-        contract_ref=_prefer_identity_value(
-            metadata.contract_ref,
-            identity.contract_ref,
-        ),
-        contract_version=_prefer_identity_value(
-            metadata.contract_version,
-            identity.contract_version,
-        ),
-        normalization_profile_ref=_prefer_identity_value(
-            metadata.normalization_profile_ref,
-            identity.normalization_profile_ref,
-        ),
-        normalization_profile_version=_prefer_identity_value(
-            metadata.normalization_profile_version,
-            identity.normalization_profile_version,
-        ),
-        normalization_profile_hash=_prefer_identity_value(
-            metadata.normalization_profile_hash,
-            identity.normalization_profile_hash,
-        ),
-        exact_replay=_prefer_identity_flag(
-            metadata.exact_replay,
-            identity.exact_replay,
-        ),
-        input_snapshot_refs=_prefer_identity_sequence(
-            metadata.input_snapshot_refs,
-            identity.input_snapshot_refs,
-        ),
-        input_snapshot_ids=_prefer_identity_sequence(
-            metadata.input_snapshot_ids,
-            identity.input_snapshot_ids,
-        ),
-        input_snapshot_fingerprint=_prefer_identity_value(
-            metadata.input_snapshot_fingerprint,
-            identity.input_snapshot_fingerprint,
-        ),
-        silver_filter_compatibility_mode=_prefer_identity_value(
-            metadata.silver_filter_compatibility_mode,
-            identity.silver_filter_compatibility_mode,
-        ),
-        memory_decision_trace=(
-            metadata.memory_decision_trace or identity.memory_decision_trace
-        ),
-        run_context=metadata.run_context or identity.run_context,
+    return replace(
+        metadata,
+        **_build_core_identity_overrides(metadata, identity),
+        **_build_replay_identity_overrides(metadata, identity),
     )
 
 

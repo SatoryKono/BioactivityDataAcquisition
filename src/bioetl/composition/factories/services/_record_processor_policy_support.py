@@ -79,6 +79,11 @@ def extract_hash_policy_by_version(
     rollout = getattr(contract_policy, "rollout", None)
     write_versions = getattr(rollout, "write_versions", None)
     affects_hash = bool(getattr(rollout, "affects_hash", False))
+    datetime_policy = str(
+        getattr(contract_policy, "hash_datetime_policy", "v1_date") or "v1_date"
+    ).strip()
+    if datetime_policy not in {"v1_date", "v2_datetime_utc"}:
+        datetime_policy = "v1_date"
 
     normalized_active_version = (
         str(active_version).strip() if active_version is not None else ""
@@ -104,6 +109,7 @@ def extract_hash_policy_by_version(
                 version=version,
                 include_fields=include_fields,
                 exclude_fields=exclude_fields,
+                datetime_policy=datetime_policy,
             )
             for version in versions
         ),

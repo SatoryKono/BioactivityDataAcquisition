@@ -79,6 +79,19 @@ ______________________________________________________________________
 | `standard_relation`   | `str`   | Стандартизированное отношение          |
 | `standard_units`      | `str`   | Стандартизированные единицы            |
 
+### Optional unit ontology companion bundle
+
+`chembl_assay_parameters` now exposes additive nullable ontology companion
+fields that mirror the reviewed shape used by `chembl_activity` when
+provider/runtime context publishes unit ontology metadata:
+
+- `uo_units`, `uo_unit_iri`, `uo_unit_mapping_status`, `uo_ontology_version`
+- `qudt_units`, `qudt_unit_iri`, `qudt_unit_mapping_status`, `qudt_ontology_version`
+
+`standard_units` remains the authoritative token-level analytical surface; the
+ontology sidecars extend traceability and DQ without replacing the historical
+unit-token contract.
+
 ______________________________________________________________________
 
 ## 3. Трансформация

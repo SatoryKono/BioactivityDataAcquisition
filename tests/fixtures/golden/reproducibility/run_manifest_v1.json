@@ -16,6 +16,7 @@
     "pipeline_version": "1.0.0",
     "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
     "rule_bundle_version": "2026.03",
+    "source_fingerprint": "1750d384e3efab89c50eff0b4808a22adc1f4023c3f023e011cc50d41a2431a9",
     "source_revision_state": "clean"
   },
   "created_at": "2025-01-01T12:00:00Z",

@@ -247,6 +247,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "config_hash": _VALID_CONFIG_HASH,
         "resolved_config_hash": _VALID_RESOLVED_CONFIG_HASH,
         "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
+        "source_fingerprint": manifest.code_provenance.source_fingerprint,
         "git_commit": "abc1234",
         "source_revision_state": "clean",
         "dependency_lock_state": "present",
@@ -308,6 +309,11 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
         "replay_readiness_verdict": "exact_replay_ready",
+        "replay_resume_rebuild_verdict": "exact_replay_ready",
+        "replay_next_action": (
+            "Use exact replay with manifest, execution fingerprint, "
+            "and input snapshots."
+        ),
         "append_mode_semantic_sinks": [],
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
@@ -420,6 +426,7 @@ def _expected_identity_graph_without_ledger(
         "config_hash": _VALID_CONFIG_HASH,
         "resolved_config_hash": _VALID_RESOLVED_CONFIG_HASH,
         "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
+        "source_fingerprint": manifest.code_provenance.source_fingerprint,
         "git_commit": "abc1234",
         "source_revision_state": "clean",
         "dependency_lock_state": "present",
@@ -481,6 +488,11 @@ def _expected_identity_graph_without_ledger(
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
         "replay_readiness_verdict": "exact_replay_ready",
+        "replay_resume_rebuild_verdict": "exact_replay_ready",
+        "replay_next_action": (
+            "Use exact replay with manifest, execution fingerprint, "
+            "and input snapshots."
+        ),
         "append_mode_semantic_sinks": [],
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
@@ -523,6 +535,7 @@ def _expected_diagnostics_without_ledger(
         "config_hash": _VALID_CONFIG_HASH,
         "resolved_config_hash": _VALID_RESOLVED_CONFIG_HASH,
         "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
+        "source_fingerprint": manifest.code_provenance.source_fingerprint,
         "pipeline_version": "1.0.0",
         "git_commit": "abc1234",
         "source_revision_state": "clean",
@@ -541,6 +554,7 @@ def _expected_diagnostics_without_ledger(
         "required_persistence_profile": "replay_ready",
         "requested_exact_replay": True,
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+        "replay_control_plane_state": "exact_replay_supported",
         "replay_family_contract": _expected_replay_family_contract(manifest),
         "replay_support_state": "exact_replay_supported",
         "source_posture": "immutable_snapshot_envelope",
@@ -576,6 +590,11 @@ def _expected_diagnostics_without_ledger(
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
         "replay_readiness_verdict": "exact_replay_ready",
+        "replay_resume_rebuild_verdict": "exact_replay_ready",
+        "replay_next_action": (
+            "Use exact replay with manifest, execution fingerprint, "
+            "and input snapshots."
+        ),
         "append_mode_semantic_sinks": [],
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
@@ -606,6 +625,7 @@ def _expected_diagnostics_without_ledger(
             manifest,
             ledger_entries_present=False,
         ),
+        "artifact_publication_closure": "disabled",
         "identity_graph": identity_graph,
         "persistence_profile": {
             "attained_profile": "degraded_observable",
@@ -1607,6 +1627,7 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
     assert result.diagnostics["artifact_refs"] == [
         {
             "event_type": "artifact_published",
+            "publication_status": "published",
             "stage": "silver",
             "artifact_id": "silver:chembl.activity@1",
             "dataset_ref": "silver:chembl.activity@1",

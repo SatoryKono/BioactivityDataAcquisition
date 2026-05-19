@@ -47,6 +47,9 @@ ______________________________________________________________________
 | `title`     | `str \| None` | Название публикации                     |
 | `abstract`  | `str \| None` | Аннотация (HTML-теги удалены)           |
 | `authors`   | `str \| None` | JSON-массив авторов в формате "given family" |
+| `author_details` | `str \| None` | Canonical JSON author payload with hashed personal-name fields |
+| `author_details_raw_json` | `str \| None` | Raw structured author payload retained for replay/debug evidence |
+| `author_details_canonical_json` | `str \| None` | Explicit canonical author sidecar paired with raw JSON evidence |
 | `journal`   | `str \| None` | Название журнала (container-title)      |
 | `publisher` | `str \| None` | Издатель                                |
 
@@ -68,12 +71,18 @@ ______________________________________________________________________
 | -------------------- | ------------- | ----------------------------------------------- |
 | `citations_received` | `int \| None` | Количество цитирований (is-referenced-by-count) |
 | `citations_made`     | `int \| None` | Количество ссылок в публикации                  |
+| `references` | `str \| None` | Canonical JSON библиографических ссылок |
+| `references_raw_json` | `str \| None` | Raw CrossRef reference payload for replay/debug |
+| `references_canonical_json` | `str \| None` | Explicit canonical reference sidecar |
 
 ### Классификация
 
 | Поле               | Тип           | Описание                                    |
 | ------------------ | ------------- | ------------------------------------------- |
 | `publication_type` | `str`         | Тип документа: `PUBLICATION` или `PREPRINT` |
+| `publication_type_unified` | `str \| None` | Unified publication taxonomy label (`Journal Article`, `Review`, `Preprint`, ...) |
+| `publication_subclass` | `str \| None` | Shared publication taxonomy subclass |
+| `publication_class` | `str \| None` | Shared publication taxonomy class code (`EXP`, `REV`, `PEER`) |
 | `issn`             | `list[str]`   | Список ISSN журнала                         |
 | `language`         | `str \| None` | Код языка публикации                        |
 | `license_url`      | `str \| None` | URL лицензии                                |
@@ -117,6 +126,9 @@ entity_id = f"crossref:{normalized_doi}"
 
 - Исключаются occurrence-scoped provenance anchors (`_run_id`, `_run_type`,
   `_source_batch_id`, `_ingestion_ts` и др.)
+- Raw structured sidecars `author_details_raw_json` и `references_raw_json`
+  intentionally excluded from hash; canonical analytical fields remain the
+  hash-stable contract surfaces
 - Эти anchors могут фигурировать в config/hash-policy inventories, но не входят
   в persisted Silver/Gold row contract и публикуются через sidecar/control-plane
   artifacts

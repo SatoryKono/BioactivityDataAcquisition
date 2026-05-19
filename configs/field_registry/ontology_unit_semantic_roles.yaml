@@ -88,6 +88,28 @@ ontology_role_families:
     required_cross_field_validation: qudt_unit_requires_mapping_status
     required_conditional_validation: mapped_qudt_unit_requires_bundle
 
+  - family_id: chembl_assay_parameters_uo_unit_roles
+    path: configs/entities/chembl/assay_parameters.yaml
+    ontology: UO
+    code_field: uo_units
+    iri_field: uo_unit_iri
+    mapping_status_field: uo_unit_mapping_status
+    ontology_version_field: uo_ontology_version
+    required_code_validation_type: pattern
+    required_cross_field_validation: uo_unit_requires_mapping_status
+    required_conditional_validation: mapped_uo_unit_requires_bundle
+
+  - family_id: chembl_assay_parameters_qudt_unit_roles
+    path: configs/entities/chembl/assay_parameters.yaml
+    ontology: QUDT
+    code_field: qudt_units
+    iri_field: qudt_unit_iri
+    mapping_status_field: qudt_unit_mapping_status
+    ontology_version_field: qudt_ontology_version
+    required_code_validation_type: pattern
+    required_cross_field_validation: qudt_unit_requires_mapping_status
+    required_conditional_validation: mapped_qudt_unit_requires_bundle
+
   - family_id: chembl_assay_bao_format_roles
     path: configs/entities/chembl/assay.yaml
     ontology: BAO

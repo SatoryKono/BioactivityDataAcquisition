@@ -43,6 +43,8 @@ def _diagnostics_replay_items(
     return _items_from_keys(
         diagnostics,
         "replay_readiness_verdict",
+        "replay_resume_rebuild_verdict",
+        "replay_next_action",
         "effective_config_artifact_id",
         "dq_contract_compatibility_hash",
         "operator_replay_mode",
@@ -178,6 +180,8 @@ def render_identity_graph_section(
             "operator_replay_mode",
             "requested_exact_replay",
             "replay_readiness_verdict",
+            "replay_resume_rebuild_verdict",
+            "replay_next_action",
             "exact_replay_support_boundary",
             "replay_family_contract",
             "strict_replay_runtime_verdict",

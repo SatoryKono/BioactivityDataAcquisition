@@ -427,6 +427,10 @@ def _expected_provenance_only_summary_without_score(
             "dependency_lock_provenance_missing",
         ],
         "replay_readiness_verdict": "exact_replay_blocked",
+        "replay_resume_rebuild_verdict": "rebuild_only",
+        "replay_next_action": (
+            "Rebuild from source state; exact replay evidence is unavailable."
+        ),
         "append_mode_semantic_sinks": [],
         "input_snapshot_ids": [],
         "input_snapshot_content_hashes": [],
@@ -1019,6 +1023,10 @@ def _assert_required_operator_identity_graph(
             "dependency_lock_provenance_missing",
         ],
         "replay_readiness_verdict": "exact_replay_blocked",
+        "replay_resume_rebuild_verdict": "rebuild_only",
+        "replay_next_action": (
+            "Rebuild from source state; exact replay evidence is unavailable."
+        ),
         "append_mode_semantic_sinks": [],
         "input_snapshot_ids": [],
         "input_snapshot_content_hashes": [],

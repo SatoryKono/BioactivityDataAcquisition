@@ -16,12 +16,24 @@ PUBLICATION_STRUCTURED_FIELD_POLICY_SPECS: tuple[
 ] = (
     (CROSSREF_PUBLICATION, "affiliation_list", UNORDERED_SET, None, None),
     (CROSSREF_PUBLICATION, "alternative_id", UNORDERED_SET, None, None),
-    (CROSSREF_PUBLICATION, "author_details", ORDERED_SEQUENCE, None, None),
+    (
+        CROSSREF_PUBLICATION,
+        "author_details",
+        ORDERED_SEQUENCE,
+        None,
+        "author_details_raw_json",
+    ),
     (CROSSREF_PUBLICATION, "author_orcids", UNORDERED_SET, ORCID, None),
     (CROSSREF_PUBLICATION, "issn_list", UNORDERED_SET, "issn", None),
     (CROSSREF_PUBLICATION, "authors", ORDERED_SEQUENCE, None, None),
     (CROSSREF_PUBLICATION, "content_domain_domains", UNORDERED_SET, None, None),
-    (CROSSREF_PUBLICATION, "references", ORDERED_SEQUENCE, None, None),
+    (
+        CROSSREF_PUBLICATION,
+        "references",
+        ORDERED_SEQUENCE,
+        None,
+        "references_raw_json",
+    ),
     (CROSSREF_PUBLICATION, "subject_keywords", UNORDERED_SET, None, None),
     (OPENALEX_PUBLICATION, "affiliation_list", UNORDERED_SET, None, None),
     (

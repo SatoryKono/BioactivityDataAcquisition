@@ -16,9 +16,14 @@ __all__ = [
 ]
 
 from collections.abc import Awaitable, Callable
-from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, cast
 
+from bioetl.application.core.runner_flow_metrics import (
+    record_flow_invariants as _record_flow_invariants_impl,
+)
+from bioetl.application.core.runner_flow_metrics import (
+    record_output_ready as _record_output_ready_impl,
+)
 from bioetl.domain.context import current_utc_time
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.types import JsonDict
@@ -29,9 +34,6 @@ if TYPE_CHECKING:
         CheckpointRuntimeService,
     )
     from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.application.observability.pipeline_metrics import (
-        PipelineMetricsRecorder,
-    )
     from bioetl.application.services.control_plane.run_ledger_service import (
         RunLedgerService,
     )
@@ -198,28 +200,7 @@ def record_run_finished(host: _PipelineRunnerFlowHostProtocol) -> None:
 
 
 def _record_output_ready(host: _PipelineRunnerFlowHostProtocol) -> None:
-    """Project the terminal output-ready count into the canonical stage model."""
-    from bioetl.application.observability.pipeline_metrics import (
-        PipelineMetricsRecorder,
-    )
-
-    output_count = max(
-        0,
-        host.execution_metrics.get("records_gold", 0),
-        host.execution_metrics.get("records_silver", 0),
-        host.execution_metrics.get("records_bronze", 0),
-    )
-    if output_count <= 0:
-        return
-    PipelineMetricsRecorder(
-        host._services.metrics,
-        host._config.pipeline_name,
-    ).record_stage_records(
-        run_type=host._runtime.run_type.value,
-        stage="output",
-        outcome="ready",
-        count=output_count,
-    )
+    return _record_output_ready_impl(host)
 
 
 def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:
@@ -255,169 +236,4 @@ def record_run_failed(
 
 
 def _record_flow_invariants(host: _PipelineRunnerFlowHostProtocol) -> None:
-    """Project terminal record-flow invariants and backlog gauges."""
-    from bioetl.application.observability.pipeline_metrics import (
-        PipelineMetricsRecorder,
-    )
-
-    pipeline_metrics = PipelineMetricsRecorder(
-        host._services.metrics,
-        host._config.pipeline_name,
-    )
-    run_type = host._runtime.run_type.value
-    metrics = host.execution_metrics
-
-    fetched = max(0, int(metrics.get("records_fetched", 0)))
-    bronze = max(0, int(metrics.get("records_bronze", 0)))
-    silver = max(0, int(metrics.get("records_silver", 0)))
-    gold = max(0, int(metrics.get("records_gold", 0)))
-    gold_excluded_by_contract = max(
-        0,
-        int(metrics.get("records_gold_excluded_by_contract", 0)),
-    )
-    quarantined = max(0, int(metrics.get("records_quarantined", 0)))
-    filtered_out = max(0, int(metrics.get("records_filtered_out", 0)))
-
-    _record_count_flow_invariants(
-        host=host,
-        pipeline_metrics=pipeline_metrics,
-        run_type=run_type,
-        fetched=fetched,
-        bronze=bronze,
-        silver=silver,
-        gold=gold,
-        gold_excluded_by_contract=gold_excluded_by_contract,
-        quarantined=quarantined,
-        filtered_out=filtered_out,
-    )
-
-    config = host._config
-    scd_config = getattr(config, "scd_config", None)
-    table = getattr(config, "table", None)
-    gold_write_mode = getattr(table, "gold_write_mode", None)
-    gold_schema = getattr(config, "gold_schema", None)
-
-    gold_expected = scd_config is not None or (
-        gold_write_mode is not None and gold_schema is not None
-    )
-    pipeline_metrics.record_pipeline_stage_expected(stage="bronze", expected=True)
-    pipeline_metrics.record_pipeline_stage_expected(stage="silver", expected=True)
-    pipeline_metrics.record_pipeline_stage_expected(
-        stage="gold", expected=gold_expected
-    )
-
-    pipeline_metrics.record_stage_backlog(
-        run_type=run_type,
-        stage="ingestion",
-        count=max(fetched - bronze, 0),
-    )
-    pipeline_metrics.record_stage_backlog(
-        run_type=run_type,
-        stage="validation",
-        count=quarantined,
-    )
-    pipeline_metrics.record_stage_backlog(
-        run_type=run_type,
-        stage="output",
-        count=max(silver - gold - gold_excluded_by_contract, 0),
-    )
-
-
-def _record_count_flow_invariants(
-    *,
-    host: _PipelineRunnerFlowHostProtocol,
-    pipeline_metrics: object,
-    run_type: str,
-    fetched: int,
-    bronze: int,
-    silver: int,
-    gold: int,
-    gold_excluded_by_contract: int,
-    quarantined: int,
-    filtered_out: int,
-) -> None:
-    """Record record-count invariant results for one completed run."""
-    typed_pipeline_metrics = cast("PipelineMetricsRecorder", pipeline_metrics)
-
-    fetched_equals_bronze = "unknown"
-    if fetched > 0 or bronze > 0:
-        fetched_equals_bronze = "passed" if fetched == bronze else "violated"
-    typed_pipeline_metrics.record_flow_invariant(
-        run_type=run_type,
-        invariant="fetched_equals_bronze",
-        status=fetched_equals_bronze,
-    )
-
-    bronze_partitioned = "unknown"
-    partition_total = silver + quarantined + filtered_out
-    if bronze > 0 or partition_total > 0:
-        bronze_partitioned = "passed" if bronze == partition_total else "violated"
-    typed_pipeline_metrics.record_flow_invariant(
-        run_type=run_type,
-        invariant="bronze_partitioned",
-        status=bronze_partitioned,
-    )
-
-    silver_gold_monotonic = "unknown"
-    if silver > 0 or gold > 0:
-        silver_gold_monotonic = "passed" if silver >= gold else "violated"
-    typed_pipeline_metrics.record_flow_invariant(
-        run_type=run_type,
-        invariant="silver_gold_monotonic",
-        status=silver_gold_monotonic,
-    )
-
-    gold_terminal = gold + gold_excluded_by_contract
-    silver_gold_terminal_accounted = "unknown"
-    if silver > 0 or gold_terminal > 0:
-        silver_gold_terminal_accounted = (
-            "passed" if silver >= gold_terminal else "violated"
-        )
-    typed_pipeline_metrics.record_flow_invariant(
-        run_type=run_type,
-        invariant="silver_gold_terminal_accounted",
-        status=silver_gold_terminal_accounted,
-    )
-
-    _record_stage_lag_gauges(
-        host=host,
-        pipeline_metrics=pipeline_metrics,
-        run_type=run_type,
-        ingestion_backlog=max(fetched - bronze, 0),
-        validation_backlog=quarantined,
-        output_backlog=max(silver - gold_terminal, 0),
-    )
-
-
-def _record_stage_lag_gauges(
-    *,
-    host: _PipelineRunnerFlowHostProtocol,
-    pipeline_metrics: object,
-    run_type: str,
-    ingestion_backlog: int,
-    validation_backlog: int,
-    output_backlog: int,
-) -> None:
-    """Project unresolved stage lag gauges using the runtime wall-clock anchor."""
-    started_at = getattr(getattr(host, "_context", None), "started_at", None)
-    if not isinstance(started_at, datetime):
-        lag_seconds = 0.0
-    else:
-        lag_seconds = max(0.0, (current_utc_time() - started_at).total_seconds())
-
-    typed_pipeline_metrics = cast("PipelineMetricsRecorder", pipeline_metrics)
-    typed_pipeline_metrics.record_stage_lag_seconds(
-        run_type=run_type,
-        stage="ingestion",
-        seconds=lag_seconds if ingestion_backlog > 0 else 0.0,
-    )
-    typed_pipeline_metrics.record_stage_lag_seconds(
-        run_type=run_type,
-        stage="validation",
-        seconds=lag_seconds if validation_backlog > 0 else 0.0,
-    )
-    typed_pipeline_metrics.record_stage_lag_seconds(
-        run_type=run_type,
-        stage="output",
-        seconds=lag_seconds if output_backlog > 0 else 0.0,
-    )
+    return _record_flow_invariants_impl(host, current_time_fn=current_utc_time)

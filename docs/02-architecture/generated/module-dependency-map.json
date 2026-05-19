@@ -1,23 +1,23 @@
 {
   "summary": {
-    "scanned_modules": 1871,
-    "total_internal_imports": 7467,
+    "scanned_modules": 1872,
+    "total_internal_imports": 7489,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
-    "cross_layer_group_edges_total": 322,
+    "cross_layer_group_edges_total": 323,
     "violations": 0
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1231,
+      "imports": 1245,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1114,
+      "imports": 1119,
       "allowed": true
     },
     {
@@ -35,7 +35,7 @@
     {
       "source": "composition",
       "target": "domain",
-      "imports": 429,
+      "imports": 430,
       "allowed": true
     },
     {
@@ -47,13 +47,13 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1276,
+      "imports": 1278,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 785,
+      "imports": 784,
       "allowed": true
     },
     {
@@ -77,13 +77,13 @@
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 52,
+      "imports": 54,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 217,
+      "imports": 216,
       "allowed": true
     }
   ],
@@ -136,7 +136,7 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.types",
-      "imports": 71
+      "imports": 70
     },
     {
       "source": "infrastructure.storage",
@@ -146,17 +146,17 @@
     {
       "source": "application.services",
       "target": "domain.types",
-      "imports": 63
+      "imports": 65
+    },
+    {
+      "source": "application.services",
+      "target": "domain.control_plane",
+      "imports": 64
     },
     {
       "source": "composition.factories",
       "target": "domain.ports",
       "imports": 63
-    },
-    {
-      "source": "application.services",
-      "target": "domain.control_plane",
-      "imports": 62
     },
     {
       "source": "interfaces.cli",
@@ -194,14 +194,14 @@
       "imports": 40
     },
     {
-      "source": "composition.factories",
-      "target": "infrastructure.storage",
+      "source": "application.core",
+      "target": "domain.context",
       "imports": 38
     },
     {
-      "source": "application.core",
-      "target": "domain.context",
-      "imports": 37
+      "source": "composition.factories",
+      "target": "infrastructure.storage",
+      "imports": 38
     },
     {
       "source": "composition.factories",

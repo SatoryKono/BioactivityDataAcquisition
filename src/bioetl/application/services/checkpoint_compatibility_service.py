@@ -35,6 +35,21 @@ _STRICT_REQUIRED_CHECKPOINT_FIELDS: tuple[str, ...] = (
     "normalization_profile_hash",
     "exact_replay",
 )
+_LENIENT_CANONICAL_RESUME_ANCHORS: tuple[str, ...] = (
+    "execution_fingerprint",
+    "manifest_id",
+    "effective_config_hash",
+    "effective_config_artifact_id",
+    "contract_ref",
+    "contract_version",
+    "dq_contract_compatibility_hash",
+    "pipeline_version",
+    "git_commit",
+    "dependency_lock_hash",
+    "normalization_profile_ref",
+    "normalization_profile_version",
+    "normalization_profile_hash",
+)
 
 
 def _strict_anchor_policy_requested(
@@ -274,6 +289,38 @@ def _validate_lenient_pipeline_compatibility(
     return pipeline_compatible, [message]
 
 
+def _missing_lenient_resume_anchor_pairs(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> tuple[str, ...]:
+    """Return canonical anchors not proven on both sides of a lenient resume."""
+    missing: list[str] = []
+    for field_name in _LENIENT_CANONICAL_RESUME_ANCHORS:
+        current_value = getattr(current_metadata, field_name, None)
+        checkpoint_value = getattr(checkpoint_metadata, field_name, None)
+        if current_value and checkpoint_value:
+            continue
+        missing.append(field_name)
+    return tuple(missing)
+
+
+def _lenient_resume_degraded_messages(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> tuple[str, ...]:
+    missing = _missing_lenient_resume_anchor_pairs(
+        current_metadata,
+        checkpoint_metadata,
+    )
+    if not missing:
+        return ()
+    return (
+        "resume_only_degraded: lenient checkpoint resume is operationally "
+        "compatible, but canonical execution identity is incomplete; missing "
+        f"anchor pairs: {', '.join(missing)}",
+    )
+
+
 def _log_result(logger: LoggerPort, *, compatible: bool, messages: list[str]) -> None:
     if compatible:
         logger.info(
@@ -416,6 +463,17 @@ class CheckpointCompatibilityService:
         compatible = (
             dq_compatible and pipeline_compatible and execution_identity_compatible
         )
+        degraded_messages = (
+            _lenient_resume_degraded_messages(current_metadata, checkpoint_metadata)
+            if compatible
+            else ()
+        )
+        messages = [*messages, *degraded_messages]
+        resume_verdict = (
+            "resume_only_degraded"
+            if degraded_messages
+            else ("resume_only" if compatible else "non_replayable")
+        )
         _log_lenient_result(self._logger, compatible=compatible, messages=messages)
         _emit_checkpoint_metric(
             self._metrics,
@@ -431,6 +489,8 @@ class CheckpointCompatibilityService:
             messages=messages,
             execution_identity_compatible=execution_identity_compatible,
             identity_continuity_proven=identity_continuity_proven,
+            resume_verdict=resume_verdict,
+            degraded_resume_reasons=degraded_messages,
         )
 
 

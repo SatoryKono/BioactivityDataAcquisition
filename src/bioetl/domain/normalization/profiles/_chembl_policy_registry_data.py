@@ -216,17 +216,41 @@ DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
         ),
         ChemblOntologyPolicyFamily(
             family_name="uo",
-            fields=("chembl_activity.uo_units",),
-            iri_fields=("chembl_activity.uo_unit_iri",),
-            mapping_status_fields=("chembl_activity.uo_unit_mapping_status",),
-            version_fields=("chembl_activity.uo_ontology_version",),
+            fields=(
+                "chembl_activity.uo_units",
+                "chembl_assay_parameters.uo_units",
+            ),
+            iri_fields=(
+                "chembl_activity.uo_unit_iri",
+                "chembl_assay_parameters.uo_unit_iri",
+            ),
+            mapping_status_fields=(
+                "chembl_activity.uo_unit_mapping_status",
+                "chembl_assay_parameters.uo_unit_mapping_status",
+            ),
+            version_fields=(
+                "chembl_activity.uo_ontology_version",
+                "chembl_assay_parameters.uo_ontology_version",
+            ),
         ),
         ChemblOntologyPolicyFamily(
             family_name="qudt",
-            fields=("chembl_activity.qudt_units",),
-            iri_fields=("chembl_activity.qudt_unit_iri",),
-            mapping_status_fields=("chembl_activity.qudt_unit_mapping_status",),
-            version_fields=("chembl_activity.qudt_ontology_version",),
+            fields=(
+                "chembl_activity.qudt_units",
+                "chembl_assay_parameters.qudt_units",
+            ),
+            iri_fields=(
+                "chembl_activity.qudt_unit_iri",
+                "chembl_assay_parameters.qudt_unit_iri",
+            ),
+            mapping_status_fields=(
+                "chembl_activity.qudt_unit_mapping_status",
+                "chembl_assay_parameters.qudt_unit_mapping_status",
+            ),
+            version_fields=(
+                "chembl_activity.qudt_ontology_version",
+                "chembl_assay_parameters.qudt_ontology_version",
+            ),
         ),
         ChemblOntologyPolicyFamily(
             family_name="bto",

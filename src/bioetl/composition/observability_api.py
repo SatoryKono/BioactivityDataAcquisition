@@ -204,21 +204,21 @@ def delete_metrics_from_gateway(
 
 def get_audit_service() -> AuditInspectionService:
     """Load the audit diagnostics service through composition on demand."""
-    from bioetl.composition.services_api import get_audit_service as _impl
+    from bioetl.composition._services import get_audit_service as _impl
 
     return _impl()
 
 
 def get_checkpoint_service() -> CheckpointService:
     """Load the checkpoint diagnostics service through composition on demand."""
-    from bioetl.composition.services_api import get_checkpoint_service as _impl
+    from bioetl.composition._services import get_checkpoint_service as _impl
 
     return _impl()
 
 
 def get_metrics_service() -> MetricsService:
     """Load the metrics diagnostics service through composition on demand."""
-    from bioetl.composition.services_api import get_metrics_service as _impl
+    from bioetl.composition._services import get_metrics_service as _impl
 
     return _impl()
 
@@ -277,7 +277,7 @@ def get_metrics_operator_profile() -> MetricsOperatorProfile:
 
 def get_observability_workflow_service() -> ObservabilityWorkflowService:
     """Load the canonical observability workflow service on demand."""
-    from bioetl.composition.services_api import (
+    from bioetl.composition._services import (
         get_observability_workflow_service as _impl,
     )
 
@@ -299,28 +299,28 @@ async def inspect_run_dossier(
 
 def get_health_service() -> HealthService:
     """Load the health diagnostics service through composition on demand."""
-    from bioetl.composition.services_api import get_health_service as _impl
+    from bioetl.composition._services import get_health_service as _impl
 
     return _impl()
 
 
 def get_quarantine_service() -> QuarantineService:
     """Load the quarantine diagnostics service through composition on demand."""
-    from bioetl.composition.services_api import get_quarantine_service as _impl
+    from bioetl.composition._services import get_quarantine_service as _impl
 
     return _impl()
 
 
 def get_run_manifest_service() -> RunManifestInspectionService:
     """Load the run-manifest diagnostics service through composition on demand."""
-    from bioetl.composition.services_api import get_run_manifest_service as _impl
+    from bioetl.composition._services import get_run_manifest_service as _impl
 
     return _impl()
 
 
 def get_lineage_service() -> LineageInspectionService:
     """Load the lineage diagnostics service through composition on demand."""
-    from bioetl.composition.services_api import get_lineage_service as _impl
+    from bioetl.composition._services import get_lineage_service as _impl
 
     return _impl()
 

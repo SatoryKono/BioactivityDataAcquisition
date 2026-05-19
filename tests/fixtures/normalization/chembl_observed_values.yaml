@@ -141,6 +141,12 @@ observed_values:
       - "%"
       - ug.mL-1
   molecule:
+    availability_type:
+      - -1
+      - 2
+    chirality:
+      - 1
+      - 2
     max_phase:
       - -1
       - 0
@@ -178,6 +184,25 @@ observed_values:
       - -1
       - 0
       - 1
+  compound_record:
+    molecule_id:
+      - CHEMBL3349687
+      - CHEMBL3349799
+    publication_id:
+      - CHEMBL1126670
+    src_id:
+      - 1
+  protein_class:
+    downgraded:
+      - 0
+      - 1
+  publication_similarity:
+    pubmed_id1:
+      - "14695814"
+      - "12345678"
+    pubmed_id2:
+      - "14695826"
+      - "87654321"
   target:
     target_type:
       - SINGLE PROTEIN
@@ -298,9 +323,24 @@ policy_values:
       - Selectivity assay
       - Thermal shift assay
   molecule:
+    availability_type:
+      - -2
+      - -1
+      - 0
+      - 1
+      - 2
+    chirality:
+      - -1
+      - 0
+      - 1
+      - 2
     ro3_pass:
       - Y
       - N
+  protein_class:
+    downgraded:
+      - 0
+      - 1
   target_component:
     component_type:
       - PROTEIN
@@ -343,6 +383,17 @@ dq_only_subsets:
       - ug.mL-1
       - mg.kg-1
   molecule:
+    availability_type:
+      - -2
+      - -1
+      - 0
+      - 1
+      - 2
+    chirality:
+      - -1
+      - 0
+      - 1
+      - 2
     ro3_pass:
       - Y
       - N
@@ -419,6 +470,12 @@ negative_values:
       - input: "{not json}"
         expected: null
   molecule:
+    availability_type:
+      - input: 9
+        expected: null
+    chirality:
+      - input: 3
+        expected: null
     first_in_class:
       - input: 2
         expected: null
@@ -456,6 +513,10 @@ negative_values:
     author_orcids:
       - input: "{not json}"
         expected: null
+  publication_similarity:
+    pubmed_id1:
+      - input: PMID:1234
+        expected: "1234"
 
 json_ordering_cases:
   set_like:

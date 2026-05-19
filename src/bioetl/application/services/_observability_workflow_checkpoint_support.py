@@ -7,6 +7,8 @@ from bioetl.application.services.control_plane.run_manifest_inspection_service i
     RunManifestInspectionResult,
 )
 from bioetl.application.services.control_plane.run_manifest_replay_taxonomy import (
+    resolve_replay_next_action,
+    resolve_replay_resume_rebuild_verdict,
     resolve_replay_taxonomy_projection,
 )
 
@@ -38,6 +40,11 @@ def build_checkpoint_compatibility_section(
             missing_anchor="checkpoint",
         )
     if _checkpoint_payload_is_corrupt(checkpoint):
+        replay_context = _with_compatibility_verdict(
+            replay_context,
+            compatible=False,
+            missing_anchors=(),
+        )
         return {
             "status": "corruption",
             "compatible": False,
@@ -84,6 +91,12 @@ def build_checkpoint_compatibility_section(
                 "manifest": replay_context.get("continuation_mode"),
             },
         ]
+    resume_semantics_only = taxonomy == "exact_replay_blocked_resume_semantics"
+    replay_context = _with_compatibility_verdict(
+        replay_context,
+        compatible=compatible or resume_semantics_only,
+        missing_anchors=missing,
+    )
     return {
         "status": "compatible" if compatible else "incompatible",
         "compatible": compatible,
@@ -103,6 +116,11 @@ def _checkpoint_compatibility_missing(
     replay_context: dict[str, object],
     missing_anchor: str,
 ) -> dict[str, object]:
+    replay_context = _with_compatibility_verdict(
+        replay_context,
+        compatible=False,
+        missing_anchors=(missing_anchor,),
+    )
     return {
         "status": "missing_evidence",
         "compatible": False,
@@ -295,6 +313,8 @@ def _replay_context(
             "continuation_mode": None,
             "operator_replay_mode": None,
             "replay_readiness_verdict": None,
+            "replay_resume_rebuild_verdict": "non_replayable",
+            "replay_next_action": resolve_replay_next_action("non_replayable"),
         }
     replay_taxonomy = resolve_replay_taxonomy_projection(
         run_manifest.diagnostics,
@@ -307,6 +327,34 @@ def _replay_context(
         "continuation_mode": replay_taxonomy.get("continuation_mode"),
         "operator_replay_mode": replay_taxonomy.get("operator_replay_mode"),
         "replay_readiness_verdict": replay_taxonomy.get("replay_readiness_verdict"),
+        "replay_resume_rebuild_verdict": replay_taxonomy.get(
+            "replay_resume_rebuild_verdict"
+        ),
+        "replay_next_action": replay_taxonomy.get("replay_next_action"),
+    }
+
+
+def _with_compatibility_verdict(
+    replay_context: dict[str, object],
+    *,
+    compatible: bool,
+    missing_anchors: object,
+) -> dict[str, object]:
+    """Overlay the checkpoint-specific mutually exclusive replay verdict."""
+    if not compatible:
+        verdict = "non_replayable"
+    else:
+        verdict = resolve_replay_resume_rebuild_verdict(
+            replay_capability=replay_context.get("replay_capability"),
+            replay_mode=replay_context.get("replay_mode"),
+            continuation_mode=replay_context.get("continuation_mode"),
+            replay_readiness_verdict=replay_context.get("replay_readiness_verdict"),
+            missing_anchors=missing_anchors,
+        )
+    return {
+        **replay_context,
+        "replay_resume_rebuild_verdict": verdict,
+        "replay_next_action": resolve_replay_next_action(verdict),
     }
 
 

@@ -7,21 +7,17 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.contracts.gold._composite_gold_common_schema import (
-    CompositeGoldCommonSchema,
+    CompositeLookupLineageSchema,
 )
 
 
-class CompositePublicationGoldSchema(CompositeGoldCommonSchema):
+class CompositePublicationGoldSchema(CompositeLookupLineageSchema):
     """Schema for Composite Publication in Gold layer."""
 
     entity_id: Series[str] = pa.Field(
         nullable=False,
         description="Stable business identifier for merged publication entity.",
     )
-
-    source: Series[str] = pa.Field(nullable=True, alias="_source")
-    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
-    original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     publication_id: Series[str] = pa.Field(
         nullable=True,

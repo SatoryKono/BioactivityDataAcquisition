@@ -305,6 +305,10 @@ _PUBLICATION_TYPE_CLASSIFICATION_SOURCE = (
     "configs/enums/publication_type_classification.csv"
 )
 _CHEMBL_REFERENCE_SOURCES_CONFIG = "configs/vocab/chembl_reference_sources.yaml"
+_CHEMBL_ONTOLOGY_CONFIG = "configs/vocab/chembl_ontology.yaml"
+_COMPOSITE_SCHEMA_AUTHORITY_REGISTRY = (
+    "configs/field_registry/composite_schema_authority_registry.yaml"
+)
 _REFERENCE_ID_SOURCE = "domain.normalization.reference_ids"
 _OA_STATUS_SOURCE = "domain.schemas.common.publication_base.OA_STATUS_VALUES"
 
@@ -326,6 +330,10 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("chembl", "cell_line", "efo_mapping_status"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay_parameters", "standard_relation"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay_parameters", "standard_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "assay_parameters", "qudt_unit_mapping_status"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "assay_parameters", "uo_unit_mapping_status"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "molecule", "availability_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "molecule", "chirality"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "tissue", "bto_mapping_status"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "tissue", "efo_mapping_status"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "tissue", "uberon_mapping_status"): _CHEMBL_ENUM_CONFIG,
@@ -372,6 +380,8 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
 }
 
 REFERENCE_ID_SOURCES: dict[tuple[str, str, str], str] = {
+    ("chembl", "assay_parameters", "qudt_units"): _CHEMBL_ONTOLOGY_CONFIG,
+    ("chembl", "assay_parameters", "uo_units"): _CHEMBL_ONTOLOGY_CONFIG,
     ("crossref", "publication", "author_orcids"): _REFERENCE_ID_SOURCE,
     ("crossref", "publication", "issn"): _REFERENCE_ID_SOURCE,
     ("crossref", "publication", "issn_electronic"): _REFERENCE_ID_SOURCE,
@@ -510,10 +520,23 @@ ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
         "assay",
         "parameter_standard_type_universe",
     ),
+    ("chembl", "assay_parameters", "qudt_unit_mapping_status"): (
+        "activity",
+        "mapping_statuses",
+    ),
     ("chembl", "assay_parameters", "standard_units"): (
         "activity",
         "standard_units",
     ),
+    ("chembl", "assay_parameters", "uo_unit_mapping_status"): (
+        "activity",
+        "mapping_statuses",
+    ),
+    ("chembl", "molecule", "availability_type"): (
+        "molecule",
+        "availability_type_values",
+    ),
+    ("chembl", "molecule", "chirality"): ("molecule", "chirality_values"),
     ("chembl", "molecule", "max_phase"): ("molecule", "max_phase_values"),
     ("chembl", "molecule", "molecule_type"): ("molecule", "types"),
     ("chembl", "molecule", "ro3_pass"): ("molecule", "ro3_pass_values"),
@@ -696,6 +719,48 @@ def _composite_field_type(pipeline_name: str, field_name: str) -> str:
 
 
 @cache
+def _composite_schema_authority_lookup() -> dict[tuple[str, str], dict[str, str]]:
+    payload = yaml.safe_load(
+        Path(_COMPOSITE_SCHEMA_AUTHORITY_REGISTRY).read_text(encoding="utf-8")
+    )
+    if not isinstance(payload, dict):
+        return {}
+    entries = payload.get("authorities", [])
+    if not isinstance(entries, list):
+        return {}
+
+    lookup: dict[tuple[str, str], dict[str, str]] = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        authority_id = entry.get("id")
+        pipelines = entry.get("pipelines")
+        field_types = entry.get("field_types")
+        if not isinstance(authority_id, str):
+            continue
+        if not isinstance(pipelines, list) or not isinstance(field_types, dict):
+            continue
+        for pipeline_name in pipelines:
+            if not isinstance(pipeline_name, str) or not pipeline_name:
+                continue
+            for field_name, field_type in field_types.items():
+                if not isinstance(field_name, str) or not isinstance(field_type, str):
+                    continue
+                lookup[(pipeline_name, field_name)] = {
+                    "authority_id": authority_id,
+                    "field_type": field_type,
+                }
+    return lookup
+
+
+def _composite_schema_authority_override(
+    pipeline_name: str,
+    field_name: str,
+) -> dict[str, str] | None:
+    return _composite_schema_authority_lookup().get((pipeline_name, field_name))
+
+
+@cache
 def _entity_schema_field_type(pipeline_name: str, field_name: str) -> str:
     schema_object = ENTITY_SILVER_SCHEMA_REGISTRY.get(pipeline_name)
     if schema_object is None:
@@ -815,6 +880,12 @@ def _composite_inherited_field_type(
     contract_type = _composite_field_type(pipeline_name, field_name)
     if contract_type != "unknown":
         return contract_type
+    authority_override = _composite_schema_authority_override(
+        pipeline_name,
+        field_name,
+    )
+    if authority_override is not None:
+        return authority_override["field_type"]
     provider_order = _composite_field_provider_order(payload, field_name)
     single_provider_field = len(provider_order) == 1
     inherited_types: set[str] = set()
@@ -838,6 +909,18 @@ def _composite_inherited_field_type(
     if len(inherited_types) == 1:
         return next(iter(inherited_types))
     return "unknown"
+
+
+def _composite_schema_coverage(pipeline_name: str, field_name: str) -> str:
+    if _composite_field_type(pipeline_name, field_name) != "unknown":
+        return "gold_contract:explicit"
+    authority_override = _composite_schema_authority_override(
+        pipeline_name,
+        field_name,
+    )
+    if authority_override is not None:
+        return f"authority_registry:{authority_override['authority_id']}"
+    return "gold_contract:inherited"
 
 
 @cache
@@ -1593,6 +1676,7 @@ def _strictness(
         "normalize_profile_doi",
         "normalize_profile_pmid",
         "normalize_profile_pmc_id",
+        "normalize_profile_pubchem_cid",
     }:
         return "canonical_identifier"
     if normalizer_name == "normalize_profile_json_string":
@@ -1973,7 +2057,7 @@ def _build_entity_rows_for_pipeline(
                     normalizer=normalizer,
                     summary=summary,
                 )
-                )
+            )
         for alias_field_name in _alias_field_names(
             pipeline_name=pipeline_name,
             field_name=field_name,
@@ -2365,7 +2449,7 @@ def _composite_row(
         "set_like": FALSE_TEXT,
         "hash_ordering": "not_applicable",
         "strictness": strictness,
-        "schema_coverage": "gold_contract:inherited",
+        "schema_coverage": _composite_schema_coverage(pipeline_name, field_name),
         "dq_coverage": "not_applicable",
         "notes": notes,
     }

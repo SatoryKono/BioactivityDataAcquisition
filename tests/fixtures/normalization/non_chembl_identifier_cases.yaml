@@ -14,6 +14,13 @@ publication_identifier_arrays:
   semanticscholar_author_ids:
     input: '["ABCDEFABCDEFABCDEFABCDEFABCDEFABCDEFABCD","abcdefabcdefabcdefabcdefabcdefabcdefabcd"]'
     expected: '["abcdefabcdefabcdefabcdefabcdefabcdefabcd"]'
+pubchem_identifier_fields:
+  canonical_cid_with_prefix:
+    profile: pubchem.compound
+    field: molecule_id
+    input: " CID:2244 "
+    expected: "2244"
+    policy: canonical_identifier
 uniprot_identifier_arrays:
   all_mappings:
     input: '["p00742","P00742","q9y6k9"]'
@@ -92,6 +99,47 @@ publication_structured_field_policy:
     collection_semantics: unordered_set
     representation: canonical_json_string
     raw_sidecar_field: publication_type
+publication_taxonomy_policy:
+  crossref_journal_article:
+    profile: crossref.publication
+    raw_field: publication_type
+    raw_input: journal-article
+    unified_field: publication_type_unified
+    unified_expected: Journal Article
+    subclass_field: publication_subclass
+    subclass_expected: Original Experimental Data
+    class_field: publication_class
+    class_expected: EXP
+  openalex_book_chapter:
+    profile: openalex.publication
+    raw_field: publication_type
+    raw_input: book-chapter
+    unified_field: publication_type_unified
+    unified_expected: Book Chapter
+    subclass_field: publication_subclass
+    subclass_expected: Books & Monographs
+    class_field: publication_class
+    class_expected: REV
+  pubmed_review:
+    profile: pubmed.publication
+    raw_field: publication_type
+    raw_input: Review
+    unified_field: publication_type_unified
+    unified_expected: Review
+    subclass_field: publication_subclass
+    subclass_expected: Reviews & Syntheses
+    class_field: publication_class
+    class_expected: REV
+  semanticscholar_preprint_unknown_stays_open_world:
+    profile: semanticscholar.publication
+    raw_field: publication_type
+    raw_input: FutureSemanticScholarType
+    unified_field: publication_type_unified
+    unified_expected: null
+    subclass_field: publication_subclass
+    subclass_expected: null
+    class_field: publication_class
+    class_expected: null
 composite_publication_join_keys:
   doi_primary:
     composite: composite_publication

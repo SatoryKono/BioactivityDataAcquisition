@@ -160,6 +160,8 @@ MOLECULE_TYPES: frozenset[str] = frozenset(
 STRUCTURE_TYPES: frozenset[str] = frozenset(["MOL", "SEQ", "BOTH", "NONE"])
 RO3_PASS_VALUES: frozenset[str] = frozenset(["Y", "N"])
 MAX_PHASE_VALUES: tuple[float, ...] = (-1, 0, 0.5, 1, 2, 3, 4)
+CHIRALITY_VALUES: tuple[int, ...] = (-1, 0, 1, 2)
+AVAILABILITY_TYPE_VALUES: tuple[int, ...] = (-2, -1, 0, 1, 2)
 TARGET_TYPES: frozenset[str] = frozenset(
     [
         "SINGLE PROTEIN",
@@ -245,6 +247,10 @@ CHEMBL_ENUM_CATALOG: dict[tuple[str, str], frozenset[str]] = {
     ("assay_parameters", "standard_relation"): STANDARD_RELATIONS,
     ("assay_parameters", "standard_type"): ASSAY_PARAMETER_STANDARD_TYPES,
     ("assay_parameters", "standard_units"): ACTIVITY_STANDARD_UNITS,
+    ("molecule", "availability_type"): frozenset(
+        str(value) for value in AVAILABILITY_TYPE_VALUES
+    ),
+    ("molecule", "chirality"): frozenset(str(value) for value in CHIRALITY_VALUES),
     ("molecule", "ro3_pass"): RO3_PASS_VALUES,
     ("publication", "oa_status"): frozenset(OA_STATUS_VALUES),
     ("target", "component_relationships"): TARGET_COMPONENT_RELATIONSHIPS,
@@ -263,7 +269,9 @@ __all__ = [
     "ASSAY_PARAMETER_STANDARD_TYPES",
     "ASSAY_TEST_TYPES",
     "ASSAY_TYPES",
+    "AVAILABILITY_TYPE_VALUES",
     "CHEMBL_ENUM_CATALOG",
+    "CHIRALITY_VALUES",
     "CONFIDENCE_DESCRIPTIONS",
     "DATA_VALIDITY_COMMENTS",
     "MAX_PHASE_VALUES",

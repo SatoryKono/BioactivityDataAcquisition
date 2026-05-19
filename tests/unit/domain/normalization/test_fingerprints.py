@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 from bioetl.domain.normalization import build_execution_identity_payload
-from bioetl.domain.normalization import compute_degraded_runtime_anchor_fingerprint
 from bioetl.domain.normalization import compute_execution_identity_fingerprint
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from bioetl.domain.normalization import normalize_runtime_anchor_payload
 from bioetl.domain.normalization import normalize_contract_ref
 from bioetl.domain.normalization import normalize_contract_version
 from bioetl.domain.normalization import normalize_control_plane_sha256
+from bioetl.domain.normalization.legacy_fingerprints import (
+    compute_degraded_runtime_anchor_fingerprint,
+)
 
 
 def _build_payload() -> dict[str, str | None]:

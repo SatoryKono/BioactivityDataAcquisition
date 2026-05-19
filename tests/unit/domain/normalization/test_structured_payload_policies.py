@@ -13,6 +13,8 @@ from bioetl.domain.normalization.structured_payload_policies import (
 
 def test_semantic_sensitive_payload_registry_declares_reviewed_policy_shapes() -> None:
     raw_sidecar_fields = {
+        ("crossref.publication", "author_details"),
+        ("crossref.publication", "references"),
         ("openalex.publication", "grants"),
         ("openalex.publication", "primary_topic"),
         ("pubmed.publication", "affiliation_structured"),
@@ -27,10 +29,7 @@ def test_semantic_sensitive_payload_registry_declares_reviewed_policy_shapes() -
         ("uniprot.protein", "features_json"),
         ("uniprot.protein", "reactions"),
     }
-    canonical_only_fields = {
-        ("crossref.publication", "author_details"),
-        ("crossref.publication", "references"),
-    }
+    canonical_only_fields: set[tuple[str, str]] = set()
 
     for profile_name, field_name in raw_sidecar_fields | canonical_only_fields:
         policy = structured_payload_policy(profile_name, field_name)
@@ -142,7 +141,7 @@ def test_semantic_sensitive_payload_registry_exposes_canonical_only_semantic_mod
     assert crossref_references is not None
     assert (
         crossref_references.semantic_policy
-        is StructuredPayloadSemanticPolicy.CANONICAL_JSON_BIBLIOGRAPHIC_EVIDENCE
+        is StructuredPayloadSemanticPolicy.RAW_JSON_PLUS_CANONICAL_JSON_BEFORE_SEMANTIC_TRANSFORM
     )
 
     crossref_author_details = structured_payload_policy(
@@ -152,7 +151,7 @@ def test_semantic_sensitive_payload_registry_exposes_canonical_only_semantic_mod
     assert crossref_author_details is not None
     assert (
         crossref_author_details.semantic_policy
-        is StructuredPayloadSemanticPolicy.HASHED_PII_CANONICAL_JSON_ONLY
+        is StructuredPayloadSemanticPolicy.RAW_JSON_PLUS_CANONICAL_JSON_BEFORE_SEMANTIC_TRANSFORM
     )
 
     uniprot_alternative_products = structured_payload_policy(

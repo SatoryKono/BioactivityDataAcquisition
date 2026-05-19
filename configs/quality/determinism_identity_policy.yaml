@@ -56,3 +56,23 @@ content_hash_datetime_policy:
   - Existing content_hash values must not be silently rewritten.
   - Versioned hash policy must be recorded before changing defaults.
   - META_FIELDS and underscore-prefixed runtime fields remain excluded.
+  timestamp_sensitive_entity_inventory:
+  - provider: uniprot
+    entity: protein
+    fields:
+    - entry_created
+    - entry_modified
+    - sequence_modified
+    configured_policy: v2_datetime_utc
+    status: migrated
+    rationale: UniProt revision timestamps participate in business identity and
+      must distinguish same-day changes when represented as datetime values.
+  date_only_entity_inventory:
+  - provider: chembl
+    entity: publication
+    fields:
+    - creation_date
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: ChEMBL publication creation_date is a source date, not a
+      sub-day timestamp identity.

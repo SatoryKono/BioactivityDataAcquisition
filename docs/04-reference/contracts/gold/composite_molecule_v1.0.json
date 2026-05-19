@@ -10,6 +10,14 @@
       "nullable": false,
       "description": "Stable business identifier for merged molecule entity."
     },
+    "_source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Source-family lineage marker retained as composite metadata."
+    },
     "_dq_warn": {
       "type": "boolean",
       "nullable": false,

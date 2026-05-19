@@ -40,6 +40,10 @@ def _build_result_with_conflicting_identity_graph() -> RunManifestInspectionResu
         "continuation_mode": "exact_replay",
         "operator_replay_mode": "Exact Replay",
         "replay_readiness_verdict": "exact_replay_ready",
+        "replay_resume_rebuild_verdict": "exact_replay_ready",
+        "replay_next_action": (
+            "Use exact replay with manifest, execution fingerprint, and input snapshots."
+        ),
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
         "append_mode_semantic_sinks": [],
@@ -58,6 +62,10 @@ def _build_result_with_conflicting_identity_graph() -> RunManifestInspectionResu
         "continuation_mode": "checkpoint_snapshot_only_resume",
         "operator_replay_mode": "Resume",
         "replay_readiness_verdict": "lifecycle_projection_only",
+        "replay_resume_rebuild_verdict": "resume_only",
+        "replay_next_action": (
+            "Use checkpoint resume only; do not treat this as exact replay."
+        ),
         "exact_replay_support_boundary": "stale-boundary",
         "replay_family_contract": {"contract": "stale"},
         "exact_replay_eligible": False,
@@ -73,15 +81,18 @@ def _build_result_with_conflicting_identity_graph() -> RunManifestInspectionResu
 def test_identity_graph_replay_section_uses_canonical_diagnostics_projection() -> None:
     result = _build_result_with_conflicting_identity_graph()
 
-    replay_section = RunManifestIdentityGraphAssembler._build_identity_graph_replay_section(  # type: ignore[attr-defined]
-        result.manifest,
-        result.diagnostics,
+    replay_section = (
+        RunManifestIdentityGraphAssembler._build_identity_graph_replay_section(  # type: ignore[attr-defined]
+            result.manifest,
+            result.diagnostics,
+        )
     )
 
     assert replay_section["replay_mode"] == "exact_replay"
     assert replay_section["continuation_mode"] == "exact_replay"
     assert replay_section["operator_replay_mode"] == "Exact Replay"
     assert replay_section["replay_readiness_verdict"] == "exact_replay_ready"
+    assert replay_section["replay_resume_rebuild_verdict"] == "exact_replay_ready"
     assert replay_section["exact_replay_eligible"] is True
 
 
@@ -109,4 +120,8 @@ def test_checkpoint_replay_context_prefers_canonical_diagnostics_projection() ->
         "continuation_mode": "exact_replay",
         "operator_replay_mode": "Exact Replay",
         "replay_readiness_verdict": "exact_replay_ready",
+        "replay_resume_rebuild_verdict": "exact_replay_ready",
+        "replay_next_action": (
+            "Use exact replay with manifest, execution fingerprint, and input snapshots."
+        ),
     }

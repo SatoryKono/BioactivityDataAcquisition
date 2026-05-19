@@ -138,9 +138,27 @@ def compute_source_fingerprint(source_refs: list[ConfigSourceRef]) -> str:
                 "hash": src.source_hash or "no_hash",
                 "priority": src.priority,
             }
-            for src in sorted(source_refs, key=lambda item: item.source_path)
+            for src in canonical_source_refs(source_refs)
         ]
     )
+
+
+def _source_ref_sort_key(
+    src: ConfigSourceRef,
+) -> tuple[int, str, str, str, str]:
+    """Return the canonical source-ref ordering key for identity surfaces."""
+    return (
+        src.priority,
+        src.source_type,
+        src.source_path,
+        src.source_hash or "",
+        src.raw_source_hash or "",
+    )
+
+
+def canonical_source_refs(source_refs: list[ConfigSourceRef]) -> list[ConfigSourceRef]:
+    """Return source refs in the deterministic order used by semantic identity."""
+    return sorted(source_refs, key=_source_ref_sort_key)
 
 
 def semantic_source_refs_payload(source_refs: list[ConfigSourceRef]) -> list[JsonDict]:
@@ -152,7 +170,7 @@ def semantic_source_refs_payload(source_refs: list[ConfigSourceRef]) -> list[Jso
             "source_hash_strategy": src.source_hash_strategy,
             "priority": src.priority,
         }
-        for src in source_refs
+        for src in canonical_source_refs(source_refs)
     ]
 
 
@@ -211,9 +229,7 @@ def validate_runtime_environment_provenance(
             f"for required persistence profile '{profile}'"
         )
     if not isinstance(execution_environment, dict):
-        raise TypeError(
-            "runtime_overrides.env.execution_environment must be a mapping"
-        )
+        raise TypeError("runtime_overrides.env.execution_environment must be a mapping")
     if not execution_environment:
         raise ValueError(
             "runtime_overrides.env.execution_environment must be non-empty for "
@@ -245,9 +261,9 @@ def build_execution_environment_snapshot(
     }
     profile = normalize_required_persistence_profile(required_persistence_profile)
     execution_environment = env_overrides.get("execution_environment")
-    execution_environment_materialized = isinstance(execution_environment, dict) and bool(
-        execution_environment
-    )
+    execution_environment_materialized = isinstance(
+        execution_environment, dict
+    ) and bool(execution_environment)
     semantic_dependencies = (
         ()
         if execution_environment_materialized
@@ -445,7 +461,9 @@ def semantic_artifact_payload(artifact: EffectiveConfigArtifact) -> JsonDict:
         "schema_version": artifact.schema_version,
         "pipeline_name": artifact.pipeline_name,
         "pipeline_kind": artifact.pipeline_kind,
-        "source_refs": [to_jsonable(src) for src in artifact.source_refs],
+        "source_refs": [
+            to_jsonable(src) for src in canonical_source_refs(artifact.source_refs)
+        ],
         "source_class_provenance": [
             to_jsonable(item) for item in artifact.source_class_provenance
         ],

@@ -83,7 +83,7 @@ ______________________________________________________________________
 41. **Infrastructure Components** - Component - Все adapters и implementations
 01. **Storage Architecture** - Component - Bronze/Silver/Gold writers
 01. **HTTP Infrastructure** - Component - UnifiedHTTPClient и компоненты
-01. **Provider Adapters Overview** - Component - 7 провайдеров
+01. **Provider Adapters Overview** - Component - 7 external API adapters + ID mapping provider seam
 01. **Base Adapter Classes** - Class - BaseHttpAdapter, BaseSyncAdapter
 01. **Checkpoint & Quarantine** - Component - State persistence
 01. **Serialization Layer** - Component - JSON encoding/decoding
@@ -335,7 +335,7 @@ ______________________________________________________________________
 001. **PipelineRegistry** - Class - Registry implementation
 001. **FilterConfigBuilder** - Class - Filter building
 001. **ConfigurationLoader** - Class - YAML loading
-001. **ProviderRegistration** - Sequence - 7 providers
+001. **ProviderRegistration** - Sequence - 8 provider registrations, including `uniprot_idmapping`
 
 ### 4.4 Infrastructure Components (25)
 

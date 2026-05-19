@@ -10,6 +10,14 @@
       "nullable": false,
       "description": ""
     },
+    "_source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Source-family lineage marker retained as composite metadata."
+    },
     "_dq_warn": {
       "type": "boolean",
       "nullable": false,
@@ -34,6 +42,22 @@
       "type": "string",
       "nullable": false,
       "description": ""
+    },
+    "_lookup_method": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Lookup strategy retained as inherited provider/composite lineage metadata."
+    },
+    "_original_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Original provider lookup identifier retained as lineage metadata."
     },
     "activity_id": {
       "type": [
@@ -66,6 +90,14 @@
       ],
       "nullable": true,
       "description": "ChEMBL target identifier used as activity-to-target lineage anchor."
+    },
+    "taxonomy_id": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "nullable": true,
+      "description": "NCBI taxonomy identifier retained as inherited target lineage metadata."
     },
     "publication_id": {
       "type": [

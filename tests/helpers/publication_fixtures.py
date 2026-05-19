@@ -159,7 +159,11 @@ CROSSREF_SPECIFIC = [
     "issn_print",
     "issn_electronic",
     "author_details",
+    "author_details_raw_json",
+    "author_details_canonical_json",
     "references",
+    "references_raw_json",
+    "references_canonical_json",
 ]
 
 

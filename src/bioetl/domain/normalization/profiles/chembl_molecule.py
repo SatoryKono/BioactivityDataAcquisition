@@ -23,6 +23,8 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 )
 from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
 from bioetl.domain.schemas.constants import (
+    AVAILABILITY_TYPE_VALUES,
+    CHIRALITY_VALUES,
     MAX_PHASE_VALUES,
     MOLECULE_TYPES,
     STRUCTURE_TYPES,
@@ -103,6 +105,26 @@ _SPECIAL_RULES = {
         "Normalize max_phase as a reviewed quasi-enum numeric provider code; "
         "preserve canonical values including 0.5 and collapse out-of-universe "
         "inputs to None.",
+    ),
+    "availability_type": (
+        lambda value: normalize_profile_quasi_enum_numeric(
+            value,
+            allowed_values=AVAILABILITY_TYPE_VALUES,
+        ),
+        "Normalize availability_type as a reviewed ChEMBL molecule provider-code "
+        "enum-like surface with the canonical enum universe {-2, -1, 0, 1, 2}; "
+        "out-of-universe inputs collapse to None instead of flowing through as "
+        "open numerics.",
+    ),
+    "chirality": (
+        lambda value: normalize_profile_quasi_enum_numeric(
+            value,
+            allowed_values=CHIRALITY_VALUES,
+        ),
+        "Normalize chirality as a reviewed ChEMBL molecule provider-code "
+        "enum-like surface with the canonical enum universe {-1, 0, 1, 2}; "
+        "out-of-universe inputs collapse to None instead of flowing through as "
+        "open numerics.",
     ),
     "first_in_class": (
         normalize_profile_reviewed_flag_code,

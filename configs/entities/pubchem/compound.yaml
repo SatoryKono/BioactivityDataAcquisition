@@ -108,9 +108,10 @@ quality:
   entity: compound
   entity_field_validations:
   - field: molecule_id
-    type: required
+    type: pattern
+    pattern: ^[1-9]\d*$
     nullable: false
-    error_message: CID is required
+    error_message: CID must be a canonical positive integer string
   - field: molecular_formula
     type: pattern
     pattern: ^[A-Z][A-Za-z0-9]*$

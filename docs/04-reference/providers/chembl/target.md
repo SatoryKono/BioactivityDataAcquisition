@@ -94,6 +94,11 @@ Silver schema.
 - `downgraded` как bool-нормализацию входного значения
 - `target_components`, `target_component_synonyms`, `cross_references`, `pipeline_stages` как JSON-строки
 
+Nested `cross_references[].xref_src_db` namespaces are now runtime-governed via
+the shared registry `configs/vocab/chembl_reference_sources.yaml`; malformed
+JSON or unknown source namespaces fail the custom DQ validator instead of
+remaining offline-only governance surfaces.
+
 Текущий runtime boundary намеренно разделён так:
 
 - transformer only extracts raw/provider-facing source fields;

@@ -79,7 +79,7 @@ Source: `configs/entities/chembl/assay.yaml`
 | --- | --- | --- | --- | --- | --- |
 | required_fields | `assay_id` | `"assay_id"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
 | required_fields | `assay_type` | `"assay_type"` | `"assay_type"` | **keep_in_silver** | also present in gold_filters (informational) |
-| required_fields | `assay_description` | `"assay_description"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
+| required_fields | `assay_description` | `"assay_description"` | `"assay_description"` | **keep_in_silver** | also present in gold_filters (informational) |
 | required_fields | `target_id` | `"target_id"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
 | required_fields | `publication_id` | `"publication_id"` | `` | **keep_in_silver** | structural rule stays in silver_filters |
 | required_fields | `bao_format` | `"bao_format"` | `` | **keep_in_silver** | structural rule stays in silver_filters |

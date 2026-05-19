@@ -76,12 +76,13 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
         field_name="author_details",
         representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
         collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
-        semantic_policy=StructuredPayloadSemanticPolicy.HASHED_PII_CANONICAL_JSON_ONLY,
-        raw_sidecar_field=None,
-        canonical_sidecar_field="author_details",
+        semantic_policy=StructuredPayloadSemanticPolicy.RAW_JSON_PLUS_CANONICAL_JSON_BEFORE_SEMANTIC_TRANSFORM,
+        raw_sidecar_field="author_details_raw_json",
+        canonical_sidecar_field="author_details_canonical_json",
         rationale=(
-            "CrossRef author-detail payloads already persist a hashed-PII-safe "
-            "canonical JSON evidence surface; no separate raw companion is shipped."
+            "CrossRef author-detail payloads now retain raw provider envelopes plus "
+            "hashed canonical companions so replay/debug evidence matches the shared "
+            "semantic sidecar posture used across publication providers."
         ),
     ),
     StructuredPayloadPolicy(
@@ -89,12 +90,13 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
         field_name="references",
         representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
         collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
-        semantic_policy=StructuredPayloadSemanticPolicy.CANONICAL_JSON_BIBLIOGRAPHIC_EVIDENCE,
-        raw_sidecar_field=None,
-        canonical_sidecar_field="references",
+        semantic_policy=StructuredPayloadSemanticPolicy.RAW_JSON_PLUS_CANONICAL_JSON_BEFORE_SEMANTIC_TRANSFORM,
+        raw_sidecar_field="references_raw_json",
+        canonical_sidecar_field="references_canonical_json",
         rationale=(
-            "CrossRef bibliographic reference objects are persisted as the ratified "
-            "canonical JSON evidence surface without a dedicated raw sidecar."
+            "CrossRef bibliographic reference objects retain raw provider payloads "
+            "plus canonical companions before future semantic transforms replace "
+            "or derive downstream evidence."
         ),
     ),
     StructuredPayloadPolicy(

@@ -245,6 +245,22 @@ def _assert_assay_parameter_rows(rows: list[dict[str, str]]) -> None:
     assert assay_parameter_relation["normalizer"] == "normalize_profile_operator"
     assert "domain_schema:present" in assay_parameter_relation["schema_coverage"]
 
+    assay_parameter_uo_units = _row(rows, "chembl_assay_parameters", "uo_units")
+    assert assay_parameter_uo_units["semantic_category"] == "ontology_reference_identifier"
+    assert assay_parameter_uo_units["strictness"] == "controlled_unit"
+    assert assay_parameter_uo_units["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_ontology.yaml"
+    )
+
+    assay_parameter_qudt_status = _row(
+        rows, "chembl_assay_parameters", "qudt_unit_mapping_status"
+    )
+    assert assay_parameter_qudt_status["controlled_vocabulary_source"] == (
+        "configs/enums/chembl.yaml"
+    )
+    assert assay_parameter_qudt_status["strictness"] == "strict_enum"
+    assert assay_parameter_qudt_status["dq_coverage"] == "enum:error"
+
     assay_parameter_value = _row(rows, "chembl_assay_parameters", "value")
     assert assay_parameter_value["normalization_source"] == "profile"
     assert assay_parameter_value["normalizer"] == "normalize_profile_float"
@@ -286,10 +302,7 @@ def _assert_publication_and_target_rows(rows: list[dict[str, str]]) -> None:
         target_cross_references["normalizer"] == "normalize_profile_json_string_strict"
     )
     assert target_cross_references["strictness"] == "strict_json"
-    assert (
-        target_cross_references["dq_coverage"]
-        == "runtime_warning:malformed_json_normalized_to_null"
-    )
+    assert target_cross_references["dq_coverage"] == "custom:error"
 
     target_component_types = _row(rows, "chembl_target", "component_types")
     assert target_component_types["set_like"] == "true"
@@ -558,7 +571,7 @@ def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields(
 
     assay_id = _row(rows, "composite_activity", "assay_id")
     assert assay_id["field_type"] == "string"
-    assert assay_id["schema_coverage"] == "gold_contract:inherited"
+    assert assay_id["schema_coverage"] == "gold_contract:explicit"
 
     molecule_id = _row(rows, "composite_activity", "molecule_id")
     assert molecule_id["provider"] == "composite"
@@ -594,6 +607,20 @@ def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields(
 
     composite_target_downgraded = _row(rows, "composite_target", "downgraded")
     assert composite_target_downgraded["field_type"] == "bool"
+
+    composite_activity_taxonomy_id = _row(rows, "composite_activity", "taxonomy_id")
+    assert composite_activity_taxonomy_id["field_type"] == "int64"
+    assert composite_activity_taxonomy_id["schema_coverage"] == "gold_contract:explicit"
+
+    composite_activity_source = _row(rows, "composite_activity", "_source")
+    assert composite_activity_source["field_type"] == "string"
+    assert composite_activity_source["schema_coverage"] == "gold_contract:explicit"
+
+    composite_activity_lookup_method = _row(
+        rows, "composite_activity", "_lookup_method"
+    )
+    assert composite_activity_lookup_method["field_type"] == "string"
+    assert composite_activity_lookup_method["schema_coverage"] == "gold_contract:explicit"
 
 
 def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> None:
@@ -720,6 +747,10 @@ def test_build_field_matrix_rows_exposes_non_chembl_governance_sources() -> None
     assert uniprot_all_mappings["hash_ordering"] == "set_like"
     assert uniprot_all_mappings["identifier_family"] == "mixed_identifier_set"
 
+    pubchem_cid = _row(rows, "pubchem_compound", "molecule_id")
+    assert pubchem_cid["normalizer"] == "normalize_profile_pubchem_cid"
+    assert pubchem_cid["identifier_family"] == "pubchem_cid"
+
 
 def test_non_chembl_offline_fixture_cases_are_visible_in_matrix() -> None:
     fixture_path = (
@@ -745,6 +776,20 @@ def test_non_chembl_offline_fixture_cases_are_visible_in_matrix() -> None:
             "domain.schemas.common.publication_base.OA_STATUS_VALUES"
         )
         assert row["strictness"] == "strict_enum"
+
+    for case in cases["pubchem_identifier_fields"].values():
+        row = _row(rows, case["profile"].replace(".", "_"), case["field"])
+        assert row["identifier_family"] == "pubchem_cid"
+        assert row["normalizer"] == "normalize_profile_pubchem_cid"
+        assert row["semantic_category"] == "canonical_identifier"
+        assert row["strictness"] == "canonical_identifier"
+
+    for case in cases["publication_taxonomy_policy"].values():
+        row = _row(rows, case["profile"].replace(".", "_"), case["unified_field"])
+        assert row["controlled_vocabulary_source"] == (
+            "configs/enums/publication_type_classification.csv"
+        )
+        assert row["classification"] == "derived_vocabulary"
 
     for case in cases["publication_structured_field_policy"].values():
         row = _row(rows, case["profile"].replace(".", "_"), case["field"])
@@ -901,6 +946,7 @@ def test_build_field_matrix_rows_exposes_target_cross_reference_source_registry(
         "configs/vocab/chembl_reference_sources.yaml"
     )
     assert cross_references["strictness"] == "strict_json"
+    assert cross_references["dq_coverage"] == "custom:error"
 
     target_component_xrefs = _row(
         rows, "chembl_target_component", "target_component_xrefs"
@@ -909,6 +955,7 @@ def test_build_field_matrix_rows_exposes_target_cross_reference_source_registry(
         "configs/vocab/chembl_reference_sources.yaml"
     )
     assert target_component_xrefs["strictness"] == "strict_json"
+    assert target_component_xrefs["dq_coverage"] == "custom:error"
 
 
 def test_build_field_matrix_rows_explicitly_shows_no_governed_fields_for_audit_gap_pipelines() -> (
@@ -926,6 +973,20 @@ def test_build_field_matrix_rows_explicitly_shows_no_governed_fields_for_audit_g
         "chembl_compound_record": "configs/vocab/chembl_reference_identifiers.yaml",
         "chembl_protein_class": "configs/vocab/chembl_controlled.yaml",
     }
+
+
+def test_build_field_matrix_rows_surfaces_reviewed_molecule_provider_codes() -> None:
+    rows = build_field_matrix_rows()
+
+    availability_type = _row(rows, "chembl_molecule", "availability_type")
+    assert availability_type["controlled_vocabulary_source"] == "configs/enums/chembl.yaml"
+    assert availability_type["strictness"] == "strict_enum"
+    assert availability_type["dq_coverage"] == "enum:error"
+
+    chirality = _row(rows, "chembl_molecule", "chirality")
+    assert chirality["controlled_vocabulary_source"] == "configs/enums/chembl.yaml"
+    assert chirality["strictness"] == "strict_enum"
+    assert chirality["dq_coverage"] == "enum:error"
 
 
 def test_build_field_matrix_rows_aligns_chembl_taxonomy_fields_to_integer_contract() -> (
@@ -1181,9 +1242,9 @@ def test_non_chembl_rows_include_inventory_evidence_columns() -> None:
     assert uniprot_features["canonical_sidecar"] == "features_canonical_json"
 
     crossref_references = _row(rows, "crossref_publication", "references")
-    assert crossref_references["classification"] == "structured_json_canonical_only"
-    assert crossref_references["raw_sidecar"] == ""
-    assert crossref_references["canonical_sidecar"] == "references"
+    assert crossref_references["classification"] == "structured_json_sidecar"
+    assert crossref_references["raw_sidecar"] == "references_raw_json"
+    assert crossref_references["canonical_sidecar"] == "references_canonical_json"
 
 
 def test_non_chembl_taxonomy_rows_use_shared_ncbi_identifier_normalizer() -> None:

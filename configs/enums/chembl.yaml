@@ -188,6 +188,21 @@ molecule:
         - 3
         - 4
 
+    # Reviewed provider-code surfaces: numeric universes remain provider-owned
+    # but must not stay as silent open numerics in profile/DQ/matrix artifacts.
+    chirality_values:
+        - -1
+        - 0
+        - 1
+        - 2
+
+    availability_type_values:
+        - -2
+        - -1
+        - 0
+        - 1
+        - 2
+
 # =============================================================================
 # Target
 # =============================================================================

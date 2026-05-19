@@ -26,7 +26,16 @@
       "file": "docs/04-reference/contracts/gold/chembl_assay_parameters_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [],
+        "added_properties": [
+          "qudt_ontology_version",
+          "qudt_unit_iri",
+          "qudt_unit_mapping_status",
+          "qudt_units",
+          "uo_ontology_version",
+          "uo_unit_iri",
+          "uo_unit_mapping_status",
+          "uo_units"
+        ],
         "removed_properties": [],
         "changed_properties": [],
         "required_changed": false
@@ -196,7 +205,12 @@
       "file": "docs/04-reference/contracts/gold/crossref_publication_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [],
+        "added_properties": [
+          "author_details_canonical_json",
+          "author_details_raw_json",
+          "references_canonical_json",
+          "references_raw_json"
+        ],
         "removed_properties": [],
         "changed_properties": [],
         "required_changed": false
@@ -256,16 +270,7 @@
       "file": "docs/04-reference/contracts/gold/uniprot_protein_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "alternative_products_canonical_json",
-          "alternative_products_raw_json",
-          "biophysicochemical_properties_canonical_json",
-          "biophysicochemical_properties_raw_json",
-          "cofactors_canonical_json",
-          "cofactors_raw_json",
-          "reactions_canonical_json",
-          "reactions_raw_json"
-        ],
+        "added_properties": [],
         "removed_properties": [],
         "changed_properties": [],
         "required_changed": false

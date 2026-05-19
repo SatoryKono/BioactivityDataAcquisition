@@ -346,7 +346,39 @@
       "nullable": true,
       "description": ""
     },
+    "author_details_raw_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "author_details_canonical_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "references": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "references_raw_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "references_canonical_json": {
       "type": [
         "string",
         "null"
@@ -369,6 +401,6 @@
   "normalization_profile": {
     "ref": "crossref.publication",
     "version": "1.0.0",
-    "hash": "f97fd6a0e2d07662c140fa6d08fe1098097bcd112478c6ff46a721611a2f1405"
+    "hash": "93dd3266e12e5c4ba8125968e070afaa3ff387d3f31148a037ba926b195c62c1"
   }
 }

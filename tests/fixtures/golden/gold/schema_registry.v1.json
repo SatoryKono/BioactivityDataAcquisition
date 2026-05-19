@@ -720,6 +720,26 @@
           "dtype": "str",
           "nullable": false
         },
+        "qudt_ontology_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "qudt_unit_iri": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "qudt_unit_mapping_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "qudt_units": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "relation": {
           "description": "",
           "dtype": "str",
@@ -761,6 +781,26 @@
           "nullable": false
         },
         "units": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "uo_ontology_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "uo_unit_iri": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "uo_unit_mapping_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "uo_units": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -1974,6 +2014,21 @@
           "dtype": "int64",
           "nullable": false
         },
+        "_lookup_method": {
+          "description": "Lookup strategy retained as inherited provider/composite lineage metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_original_id": {
+          "description": "Original provider lookup identifier retained as lineage metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source": {
+          "description": "Source-family lineage marker retained as composite metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
         "_source_providers": {
           "description": "",
           "dtype": "str",
@@ -2029,6 +2084,11 @@
           "dtype": "str",
           "nullable": true
         },
+        "taxonomy_id": {
+          "description": "NCBI taxonomy identifier retained as inherited target lineage metadata.",
+          "dtype": "int64",
+          "nullable": true
+        },
         "type": {
           "description": "ChEMBL raw activity measurement type, not a generic canonical type.",
           "dtype": "str",
@@ -2065,6 +2125,21 @@
           "description": "",
           "dtype": "int64",
           "nullable": false
+        },
+        "_lookup_method": {
+          "description": "Lookup strategy retained as inherited provider/composite lineage metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_original_id": {
+          "description": "Original provider lookup identifier retained as lineage metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source": {
+          "description": "Source-family lineage marker retained as composite metadata.",
+          "dtype": "str",
+          "nullable": true
         },
         "_source_providers": {
           "description": "",
@@ -2133,6 +2208,11 @@
           "dtype": "int64",
           "nullable": false
         },
+        "_source": {
+          "description": "Source-family lineage marker retained as composite metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
         "_source_providers": {
           "description": "",
           "dtype": "str",
@@ -2196,17 +2276,17 @@
           "nullable": false
         },
         "_lookup_method": {
-          "description": "",
+          "description": "Lookup strategy retained as inherited provider/composite lineage metadata.",
           "dtype": "str",
           "nullable": true
         },
         "_original_id": {
-          "description": "",
+          "description": "Original provider lookup identifier retained as lineage metadata.",
           "dtype": "str",
           "nullable": true
         },
         "_source": {
-          "description": "",
+          "description": "Source-family lineage marker retained as composite metadata.",
           "dtype": "str",
           "nullable": true
         },
@@ -2276,6 +2356,21 @@
           "description": "",
           "dtype": "int64",
           "nullable": false
+        },
+        "_lookup_method": {
+          "description": "Lookup strategy retained as inherited provider/composite lineage metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_original_id": {
+          "description": "Original provider lookup identifier retained as lineage metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source": {
+          "description": "Source-family lineage marker retained as composite metadata.",
+          "dtype": "str",
+          "nullable": true
         },
         "_source_providers": {
           "description": "",

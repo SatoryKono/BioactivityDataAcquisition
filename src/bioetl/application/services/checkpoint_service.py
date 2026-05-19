@@ -10,7 +10,6 @@ from __future__ import annotations
 
 __all__ = ["CheckpointInfo", "CheckpointService"]
 
-
 from collections.abc import Mapping
 from dataclasses import dataclass
 from time import perf_counter
@@ -20,18 +19,23 @@ from bioetl.application.observability.span_attribute_values import (
     coerce_span_attribute_value,
 )
 from bioetl.application.observability.span_helpers import traced_async_operation
+from bioetl.application.services._checkpoint_service_runtime import (
+    delete_checkpoint_impl,
+    get_checkpoint_for_manifest_id_impl,
+    get_checkpoint_for_run_impl,
+    get_checkpoint_impl,
+    list_checkpoints_impl,
+)
 from bioetl.application.services._checkpoint_service_support import (
     _CHECKPOINT_OPERATOR_DURATION_METRIC,
-    _CHECKPOINT_OPERATOR_ERRORS,
     _CHECKPOINT_OPERATOR_OPERATIONS_METRIC,
 )
+from bioetl.domain.types import JsonDict, RunID
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
     from bioetl.domain.ports import CheckpointPort, LoggerPort, MetricsPort, TracingPort
-from bioetl.domain.types import JsonDict
-from bioetl.domain.types import RunID
 
 
 @dataclass(frozen=True, slots=True)
@@ -147,68 +151,20 @@ class CheckpointService:
         self.logger.debug("Listing all checkpoints")
         start_time = perf_counter()
         if self.tracer is None:
-            return await self._list_checkpoints_impl(start_time=start_time)
+            return await list_checkpoints_impl(self, start_time=start_time)
         async with traced_async_operation(
             self.tracer,
             "checkpoint.list",
             self._trace_attributes(operation="list"),
             tracer_name=self.TRACER_NAME,
         ) as span:
-            checkpoints = await self._list_checkpoints_impl(start_time=start_time)
+            checkpoints = await list_checkpoints_impl(self, start_time=start_time)
             self._set_trace_result(
                 span,
                 success=True,
                 attributes={"bioetl.checkpoint_count": len(checkpoints)},
             )
             return checkpoints
-
-    async def _list_checkpoints_impl(
-        self,
-        *,
-        start_time: float,
-    ) -> list[CheckpointInfo]:
-        """List checkpoints and emit bounded observability signals."""
-        try:
-            pipeline_names = await self.checkpoint_port.list_all()
-            checkpoints: list[CheckpointInfo] = []
-
-            for pipeline_name in pipeline_names:
-                checkpoint_data = await self.checkpoint_port.load(pipeline_name)
-                if checkpoint_data:
-                    run_id, metadata = checkpoint_data
-                    checkpoints.append(
-                        CheckpointInfo(
-                            pipeline_name=pipeline_name,
-                            run_id=str(run_id),
-                            metadata=metadata,
-                        )
-                    )
-                else:
-                    checkpoints.append(
-                        CheckpointInfo(
-                            pipeline_name=pipeline_name,
-                            run_id=None,
-                            metadata={},
-                        )
-                    )
-
-            self.logger.info(
-                "Listed checkpoints",
-                checkpoint_count=len(checkpoints),
-            )
-            self._record_operator_metrics(
-                operation="list",
-                status="success",
-                duration_seconds=perf_counter() - start_time,
-            )
-            return checkpoints
-        except _CHECKPOINT_OPERATOR_ERRORS:
-            self._record_operator_metrics(
-                operation="list",
-                status="failed",
-                duration_seconds=perf_counter() - start_time,
-            )
-            raise
 
     async def get_checkpoint(self, pipeline_name: str) -> CheckpointInfo | None:
         """Get checkpoint for a specific pipeline.
@@ -222,7 +178,8 @@ class CheckpointService:
         self.logger.debug("Getting checkpoint", pipeline=pipeline_name)
         start_time = perf_counter()
         if self.tracer is None:
-            return await self._get_checkpoint_impl(
+            return await get_checkpoint_impl(
+                self,
                 pipeline_name=pipeline_name,
                 start_time=start_time,
             )
@@ -232,7 +189,8 @@ class CheckpointService:
             self._trace_attributes(operation="get", pipeline=pipeline_name),
             tracer_name=self.TRACER_NAME,
         ) as span:
-            checkpoint = await self._get_checkpoint_impl(
+            checkpoint = await get_checkpoint_impl(
+                self,
                 pipeline_name=pipeline_name,
                 start_time=start_time,
             )
@@ -242,47 +200,6 @@ class CheckpointService:
                 attributes={"bioetl.checkpoint_found": checkpoint is not None},
             )
             return checkpoint
-
-    async def _get_checkpoint_impl(
-        self,
-        *,
-        pipeline_name: str,
-        start_time: float,
-    ) -> CheckpointInfo | None:
-        """Get a checkpoint and emit bounded observability signals."""
-        try:
-            checkpoint_data = await self.checkpoint_port.load(pipeline_name)
-            if checkpoint_data is None:
-                self.logger.debug("Checkpoint not found", pipeline=pipeline_name)
-                self._record_operator_metrics(
-                    operation="get",
-                    status="missing",
-                    duration_seconds=perf_counter() - start_time,
-                )
-                return None
-
-            run_id, metadata = checkpoint_data
-            self.logger.info(
-                "Got checkpoint",
-                pipeline=pipeline_name,
-                run_id=str(run_id),
-            )
-            self._record_operator_metrics(
-                operation="get",
-                status="success",
-                duration_seconds=perf_counter() - start_time,
-            )
-            return self._checkpoint_info_from_data(
-                pipeline_name=pipeline_name,
-                checkpoint_data=(run_id, metadata),
-            )
-        except _CHECKPOINT_OPERATOR_ERRORS:
-            self._record_operator_metrics(
-                operation="get",
-                status="failed",
-                duration_seconds=perf_counter() - start_time,
-            )
-            raise
 
     async def get_checkpoint_for_run(
         self,
@@ -297,7 +214,8 @@ class CheckpointService:
         )
         start_time = perf_counter()
         if self.tracer is None:
-            return await self._get_checkpoint_for_run_impl(
+            return await get_checkpoint_for_run_impl(
+                self,
                 pipeline_name=pipeline_name,
                 run_id=run_id,
                 start_time=start_time,
@@ -312,7 +230,8 @@ class CheckpointService:
             ),
             tracer_name=self.TRACER_NAME,
         ) as span:
-            checkpoint = await self._get_checkpoint_for_run_impl(
+            checkpoint = await get_checkpoint_for_run_impl(
+                self,
                 pipeline_name=pipeline_name,
                 run_id=run_id,
                 start_time=start_time,
@@ -323,53 +242,6 @@ class CheckpointService:
                 attributes={"bioetl.checkpoint_found": checkpoint is not None},
             )
             return checkpoint
-
-    async def _get_checkpoint_for_run_impl(
-        self,
-        *,
-        pipeline_name: str,
-        run_id: str,
-        start_time: float,
-    ) -> CheckpointInfo | None:
-        """Get immutable checkpoint evidence by run_id."""
-        try:
-            checkpoint_data = await self.checkpoint_port.load_for_run(
-                pipeline_name,
-                RunID(run_id),
-            )
-            if checkpoint_data is None:
-                self.logger.debug(
-                    "Checkpoint not found for run",
-                    pipeline=pipeline_name,
-                    run_id=run_id,
-                )
-                self._record_operator_metrics(
-                    operation="get_for_run",
-                    status="missing",
-                    duration_seconds=perf_counter() - start_time,
-                )
-                return None
-            self.logger.info(
-                "Got checkpoint for run",
-                pipeline=pipeline_name,
-                run_id=run_id,
-            )
-            self._record_operator_metrics(
-                operation="get_for_run",
-                status="success",
-                duration_seconds=perf_counter() - start_time,
-            )
-            return self._checkpoint_info_from_data(
-                pipeline_name=pipeline_name,
-                checkpoint_data=checkpoint_data,
-            )
-        except _CHECKPOINT_OPERATOR_ERRORS:
-            self._record_operator_metrics(
-                operation="get_for_run",
-                status="failed",
-                duration_seconds=perf_counter() - start_time,
-            )
-            raise
 
     async def get_checkpoint_for_manifest_id(
         self,
@@ -384,7 +256,8 @@ class CheckpointService:
         )
         start_time = perf_counter()
         if self.tracer is None:
-            return await self._get_checkpoint_for_manifest_id_impl(
+            return await get_checkpoint_for_manifest_id_impl(
+                self,
                 pipeline_name=pipeline_name,
                 manifest_id=manifest_id,
                 start_time=start_time,
@@ -399,7 +272,8 @@ class CheckpointService:
             ),
             tracer_name=self.TRACER_NAME,
         ) as span:
-            checkpoint = await self._get_checkpoint_for_manifest_id_impl(
+            checkpoint = await get_checkpoint_for_manifest_id_impl(
+                self,
                 pipeline_name=pipeline_name,
                 manifest_id=manifest_id,
                 start_time=start_time,
@@ -410,52 +284,6 @@ class CheckpointService:
                 attributes={"bioetl.checkpoint_found": checkpoint is not None},
             )
             return checkpoint
-
-    async def _get_checkpoint_for_manifest_id_impl(
-        self,
-        *,
-        pipeline_name: str,
-        manifest_id: str,
-        start_time: float,
-    ) -> CheckpointInfo | None:
-        """Get immutable checkpoint evidence by manifest_id."""
-        try:
-            checkpoint_data = await self.checkpoint_port.load_for_manifest_id(
-                manifest_id
-            )
-            if checkpoint_data is None:
-                self.logger.debug(
-                    "Checkpoint not found for manifest",
-                    pipeline=pipeline_name,
-                    manifest_id=manifest_id,
-                )
-                self._record_operator_metrics(
-                    operation="get_for_manifest_id",
-                    status="missing",
-                    duration_seconds=perf_counter() - start_time,
-                )
-                return None
-            self.logger.info(
-                "Got checkpoint for manifest",
-                pipeline=pipeline_name,
-                manifest_id=manifest_id,
-            )
-            self._record_operator_metrics(
-                operation="get_for_manifest_id",
-                status="success",
-                duration_seconds=perf_counter() - start_time,
-            )
-            return self._checkpoint_info_from_data(
-                pipeline_name=pipeline_name,
-                checkpoint_data=checkpoint_data,
-            )
-        except _CHECKPOINT_OPERATOR_ERRORS:
-            self._record_operator_metrics(
-                operation="get_for_manifest_id",
-                status="failed",
-                duration_seconds=perf_counter() - start_time,
-            )
-            raise
 
     async def delete_checkpoint(self, pipeline_name: str) -> bool:
         """Delete checkpoint for a specific pipeline.
@@ -469,7 +297,8 @@ class CheckpointService:
         self.logger.debug("Deleting checkpoint", pipeline=pipeline_name)
         start_time = perf_counter()
         if self.tracer is None:
-            return await self._delete_checkpoint_impl(
+            return await delete_checkpoint_impl(
+                self,
                 pipeline_name=pipeline_name,
                 start_time=start_time,
             )
@@ -479,7 +308,8 @@ class CheckpointService:
             self._trace_attributes(operation="delete", pipeline=pipeline_name),
             tracer_name=self.TRACER_NAME,
         ) as span:
-            deleted = await self._delete_checkpoint_impl(
+            deleted = await delete_checkpoint_impl(
+                self,
                 pipeline_name=pipeline_name,
                 start_time=start_time,
             )
@@ -489,42 +319,6 @@ class CheckpointService:
                 attributes={"bioetl.checkpoint_deleted": deleted},
             )
             return deleted
-
-    async def _delete_checkpoint_impl(
-        self,
-        *,
-        pipeline_name: str,
-        start_time: float,
-    ) -> bool:
-        """Delete a checkpoint and emit bounded observability signals."""
-        try:
-            existing = await self.checkpoint_port.load(pipeline_name)
-            if existing is None:
-                self.logger.debug(
-                    "Checkpoint not found for deletion", pipeline=pipeline_name
-                )
-                self._record_operator_metrics(
-                    operation="delete",
-                    status="missing",
-                    duration_seconds=perf_counter() - start_time,
-                )
-                return False
-
-            await self.checkpoint_port.delete(pipeline_name)
-            self.logger.info("Deleted checkpoint", pipeline=pipeline_name)
-            self._record_operator_metrics(
-                operation="delete",
-                status="success",
-                duration_seconds=perf_counter() - start_time,
-            )
-            return True
-        except _CHECKPOINT_OPERATOR_ERRORS:
-            self._record_operator_metrics(
-                operation="delete",
-                status="failed",
-                duration_seconds=perf_counter() - start_time,
-            )
-            raise
 
     async def aclose(self) -> None:
         """Close the service and release resources."""

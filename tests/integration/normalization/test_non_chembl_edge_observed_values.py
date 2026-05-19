@@ -76,6 +76,32 @@ def test_crossref_edge_fixture_covers_structured_author_and_reference_payloads()
     assert all(
         isinstance(row.get("reference"), list) and row["reference"] for row in rows
     )
+    assert any(
+        isinstance(author, dict) and author.get("ORCID")
+        for row in rows
+        for author in row.get("author", [])
+    )
+
+
+def test_publication_edge_fixtures_cover_identifier_and_taxonomy_inventory_hooks() -> (
+    None
+):
+    crossref_rows = _load_jsonl(
+        "tests/fixtures/bronze/crossref/publication/sample_edge_structured_payloads_2026-05-12.jsonl"
+    )
+    semanticscholar_rows = _load_jsonl(
+        "tests/fixtures/bronze/semanticscholar/publication/sample_edge_publication_types_citations_2026-05-05.jsonl"
+    )
+
+    assert {"journal-article", "posted-content"} <= {
+        row["type"] for row in crossref_rows
+    }
+    assert any(
+        (author.get("externalIds") or {}).get("ORCID")
+        for row in semanticscholar_rows
+        for author in row.get("authors", [])
+        if isinstance(author, dict)
+    )
 
 
 def test_uniprot_protein_edge_fixture_covers_nested_comment_feature_and_keyword_vocab() -> (

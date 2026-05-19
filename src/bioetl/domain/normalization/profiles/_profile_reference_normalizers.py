@@ -26,6 +26,7 @@ from bioetl.domain.normalization.reference_ids import (
     normalize_orcid_reference_id,
     normalize_pdb_reference_id,
     normalize_pfam_reference_id,
+    normalize_pubchem_cid_reference_id,
     normalize_reactome_reference_id,
     normalize_ror_reference_id,
     normalize_semantic_scholar_reference_id,
@@ -53,6 +54,7 @@ __all__ = [
     "normalize_profile_orcid_ids",
     "normalize_profile_pdb_references",
     "normalize_profile_pfam_references",
+    "normalize_profile_pubchem_cid",
     "normalize_profile_publication_type",
     "normalize_profile_publication_type_raw",
     "normalize_profile_reactome_references",
@@ -127,6 +129,11 @@ def normalize_profile_issn_ids(value: object) -> object:
         value,
         item_normalizer=normalize_issn_reference_id,
     )
+
+
+def normalize_profile_pubchem_cid(value: object) -> object:
+    """Canonicalize one PubChem CID identifier value."""
+    return normalize_pubchem_cid_reference_id(value)
 
 
 def normalize_profile_inchi_key(value: object) -> object:

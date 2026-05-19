@@ -59,6 +59,7 @@ def test_show_surfaces_supported_gold_trace_path_in_diagnostics() -> None:
     assert result.diagnostics["artifact_refs"] == [
         {
             "event_type": "artifact_published",
+            "publication_status": "success",
             "stage": "gold",
             "artifact_id": "gold:chembl.activity",
             "dataset_ref": "gold:chembl.activity",

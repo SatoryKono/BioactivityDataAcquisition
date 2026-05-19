@@ -123,6 +123,8 @@ def _render_replay_view_lines(replay_view: dict[str, object]) -> list[str]:
     ) = _extract_persistence_profile_details(replay_view)
     return [
         f"  mode: {replay_view.get('operator_replay_mode')}",
+        f"  replay_resume_rebuild_verdict: {replay_view.get('replay_resume_rebuild_verdict')}",
+        f"  replay_next_action: {replay_view.get('replay_next_action')}",
         f"  replay_capability: {replay_view.get('replay_capability')}",
         f"  requested_exact_replay: {replay_view.get('requested_exact_replay')}",
         f"  continuation_mode: {replay_view.get('continuation_mode')}",
@@ -195,6 +197,8 @@ def _render_checkpoint_compatibility_lines(payload: dict[str, object]) -> list[s
         f"  compatibility_continuation_mode: {compatibility.get('continuation_mode')}",
         f"  compatibility_operator_replay_mode: {compatibility.get('operator_replay_mode')}",
         f"  compatibility_replay_readiness_verdict: {compatibility.get('replay_readiness_verdict')}",
+        f"  compatibility_replay_resume_rebuild_verdict: {compatibility.get('replay_resume_rebuild_verdict')}",
+        f"  compatibility_replay_next_action: {compatibility.get('replay_next_action')}",
         f"  compatibility_matched_anchors: {compatibility.get('matched_anchors')}",
         f"  compatibility_mismatched_anchors: {compatibility.get('mismatched_anchors')}",
         f"  compatibility_missing_anchors: {compatibility.get('missing_anchors')}",

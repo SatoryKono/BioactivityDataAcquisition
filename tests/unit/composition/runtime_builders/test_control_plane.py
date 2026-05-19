@@ -203,3 +203,36 @@ def test_attach_manifest_id_accepts_control_plane_refs_object() -> None:
     assert ctx.contract_ref == "chembl.activity"
     assert ctx.normalization_profile_ref == "chembl.activity.norm"
     assert ctx.source_fingerprint == "c" * 64
+
+
+def test_attach_manifest_id_accepts_legacy_refs_without_source_fingerprint() -> None:
+    """Legacy mock-like refs may omit newly added optional provenance fields."""
+    ctx = SimpleNamespace(manifest_id=None)
+    control_plane_refs = SimpleNamespace(
+        manifest_id="manifest-legacy",
+        execution_fingerprint="fingerprint-legacy",
+        config_hash="a" * 64,
+        resolved_config_hash="b" * 64,
+        effective_config_hash="c" * 64,
+        dq_contract_compatibility_hash="d" * 64,
+        effective_config_artifact_id="artifact-legacy",
+        contract_ref="chembl.activity",
+        contract_version="1.2.3",
+        contract_schema_hash="deadbeef",
+        dq_policy_ref="chembl.activity.policy",
+        rule_bundle_version="2026.04",
+        normalization_profile_ref=None,
+        normalization_profile_version=None,
+        normalization_profile_hash=None,
+    )
+
+    updated = control_plane.attach_manifest_id(
+        ctx,
+        control_plane_refs=control_plane_refs,
+    )
+
+    assert updated is ctx
+    assert ctx.manifest_id == "manifest-legacy"
+    assert ctx.execution_fingerprint == "fingerprint-legacy"
+    assert ctx.contract_ref == "chembl.activity"
+    assert getattr(ctx, "source_fingerprint", None) is None

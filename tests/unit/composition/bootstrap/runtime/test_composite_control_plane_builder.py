@@ -139,6 +139,7 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
             infra_context=infra_context,
             resolved_config_hash=_VALID_SHA256_A,
             effective_config_hash=_VALID_SHA256_B,
+            source_fingerprint=_VALID_SHA256_D,
             dq_contract_compatibility_hash=_VALID_SHA256_C,
             effective_config_artifact_id="eca-123",
             contract_ref="composite.publication",

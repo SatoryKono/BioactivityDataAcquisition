@@ -36,6 +36,14 @@ ______________________________________________________________________
 - Current canonical field names are snake_case, for example
   `publication_doi`, `publication_year`, `page_first`, `page_last`,
   `citations_received`, `citations_made`, `publication_type`.
+- Structured semantic payloads now follow the shared raw/canonical sidecar
+  contract used across non-ChEMBL publication providers:
+  `author_details_raw_json` / `author_details_canonical_json` and
+  `references_raw_json` / `references_canonical_json`.
+- Derived publication taxonomy fields
+  `publication_type_unified`, `publication_subclass`, and `publication_class`
+  are validated against the shared Cross-provider taxonomy rather than ad-hoc
+  per-provider enums.
 - This page no longer republishes older API-shape and mixed-case labels such as
   `DOI`, `container-title`, `published-print`, `license-url`, or `doc-type`
   as the active contract.

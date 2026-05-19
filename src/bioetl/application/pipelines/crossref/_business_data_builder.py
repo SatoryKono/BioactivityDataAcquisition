@@ -126,7 +126,8 @@ def _extract_author_bundle(
         raw_author_details,
         hash_pii_value=hash_pii_value,
     )
-    author_details = serialize_json(hashed_author_details)
+    author_details_raw_json = serialize_json(raw_author_details)
+    author_details_canonical_json = serialize_json(hashed_author_details)
 
     author_orcids = extract_author_orcids(record)
     serialized_orcids = serialize_json_list(author_orcids)
@@ -156,7 +157,21 @@ def _extract_author_bundle(
         "authors": authors_json,
         "author_keys": author_keys,
         "author_orcids": serialized_orcids,
-        "author_details": author_details if isinstance(author_details, str) else None,
+        "author_details": (
+            author_details_canonical_json
+            if isinstance(author_details_canonical_json, str)
+            else None
+        ),
+        "author_details_raw_json": (
+            author_details_raw_json
+            if isinstance(author_details_raw_json, str)
+            else None
+        ),
+        "author_details_canonical_json": (
+            author_details_canonical_json
+            if isinstance(author_details_canonical_json, str)
+            else None
+        ),
         "affiliation_list": affiliations_json,
     }
 
@@ -227,11 +242,15 @@ def _build_crossref_reference_fields(
     *,
     record: JsonDict,
     references: str | None,
+    references_raw_json: str | None,
+    references_canonical_json: str | None,
 ) -> GoldRecord:
     """Build reference and DQ fields for CrossRef payloads."""
     del record
     return {
         "references": references,
+        "references_raw_json": references_raw_json,
+        "references_canonical_json": references_canonical_json,
         # DQ flags (MUST be last, per RULES.md §2.4)
         "_dq_warn": False,
         "_dq_error": False,
@@ -287,7 +306,8 @@ def build_crossref_business_data(
     )
     raw_year = extract_publication_year_candidate(record)
     raw_references = extract_references(record)
-    references = serialize_json(raw_references)
+    references_raw_json = serialize_json(raw_references)
+    references_canonical_json = serialize_json(raw_references)
 
     return {
         **_build_crossref_identity_fields(
@@ -310,6 +330,20 @@ def build_crossref_business_data(
         ),
         **_build_crossref_reference_fields(
             record=record,
-            references=references if isinstance(references, str) else None,
+            references=(
+                references_canonical_json
+                if isinstance(references_canonical_json, str)
+                else None
+            ),
+            references_raw_json=(
+                references_raw_json
+                if isinstance(references_raw_json, str)
+                else None
+            ),
+            references_canonical_json=(
+                references_canonical_json
+                if isinstance(references_canonical_json, str)
+                else None
+            ),
         ),
     }

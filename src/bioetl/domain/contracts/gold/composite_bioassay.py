@@ -7,11 +7,11 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.contracts.gold._composite_gold_common_schema import (
-    CompositeGoldCommonSchema,
+    CompositeLookupLineageSchema,
 )
 
 
-class CompositeActivityGoldSchema(CompositeGoldCommonSchema):
+class CompositeActivityGoldSchema(CompositeLookupLineageSchema):
     """Schema for Composite Activity in Gold layer."""
 
     activity_id: Series[str] = pa.Field(
@@ -29,6 +29,10 @@ class CompositeActivityGoldSchema(CompositeGoldCommonSchema):
     target_id: Series[str] = pa.Field(
         nullable=True,
         description="ChEMBL target identifier used as activity-to-target lineage anchor.",
+    )
+    taxonomy_id: Series[int] = pa.Field(
+        nullable=True,
+        description="NCBI taxonomy identifier retained as inherited target lineage metadata.",
     )
     publication_id: Series[str] = pa.Field(
         nullable=True,
@@ -60,7 +64,7 @@ class CompositeActivityGoldSchema(CompositeGoldCommonSchema):
     )
 
 
-class CompositeAssayGoldSchema(CompositeGoldCommonSchema):
+class CompositeAssayGoldSchema(CompositeLookupLineageSchema):
     """Schema for Composite Assay in Gold layer."""
 
     assay_id: Series[str] = pa.Field(
@@ -89,7 +93,7 @@ class CompositeAssayGoldSchema(CompositeGoldCommonSchema):
     )
 
 
-class CompositeTargetGoldSchema(CompositeGoldCommonSchema):
+class CompositeTargetGoldSchema(CompositeLookupLineageSchema):
     """Schema for Composite Target in Gold layer."""
 
     target_id: Series[str] = pa.Field(

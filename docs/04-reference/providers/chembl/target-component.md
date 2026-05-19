@@ -56,6 +56,10 @@ ______________________________________________________________________
 | ------------------------- | ------------ | ----------------------- |
 | `protein_classifications` | `list[dict]` | Классификация по ChEMBL |
 
+`target_component_xrefs` persists as a canonical JSON string surface in Silver,
+and nested `xref_src_db` namespaces are validated against the shared registry
+`configs/vocab/chembl_reference_sources.yaml`.
+
 ______________________________________________________________________
 
 ## 3. Трансформация
