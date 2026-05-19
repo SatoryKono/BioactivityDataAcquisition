@@ -241,8 +241,12 @@ class SharedActivityTransformerTransformTests:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["type"] == "IC50"
-        assert result["value"] == pytest.approx(10.5)
+        assert result["activity_type"] == "IC50"
+        assert result["activity_relation"] == "="
+        assert result["activity_value"] == pytest.approx(10.5)
+        assert "type" not in result
+        assert "relation" not in result
+        assert "value" not in result
         assert result["standard_value"] == pytest.approx(10.5)
         assert result["standard_flag"] == 1
 

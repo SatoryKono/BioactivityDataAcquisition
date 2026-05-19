@@ -20,6 +20,7 @@ def normalize_to_file_format(
     """
     result = copy.deepcopy(merged)
     _normalize_thresholds(result)
+    _normalize_allowed_value_aliases(result)
     return result
 
 
@@ -45,3 +46,23 @@ def _normalize_thresholds(
         thresholds["hard_fail"] = result.pop("hard_fail_threshold")
 
     result["thresholds"] = thresholds
+
+
+def _normalize_allowed_value_aliases(value: object) -> None:
+    """Rewrite legacy ``allowed_values`` keys to ``allowed`` in-place.
+
+    Standalone DQ config schemas accept ``allowed`` for enum validations, while
+    several provider/entity YAML surfaces still use the more explicit
+    ``allowed_values`` spelling. Preserve backward compatibility by normalizing
+    the legacy key before Pydantic validation.
+    """
+    if isinstance(value, dict):
+        if "allowed_values" in value and "allowed" not in value:
+            value["allowed"] = value.pop("allowed_values")
+        for nested in value.values():
+            _normalize_allowed_value_aliases(nested)
+        return
+
+    if isinstance(value, list):
+        for item in value:
+            _normalize_allowed_value_aliases(item)

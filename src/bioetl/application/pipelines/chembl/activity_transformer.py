@@ -30,6 +30,7 @@ from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects.taxonomy_id import validate_taxonomy_id
 
 if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
 
@@ -349,4 +350,19 @@ class ActivityTransformer(BaseChemblTransformer):
             if silver_record.get("value") is not None
             else business_data.get("standard_value")
         )
+        silver_record.pop("type", None)
+        silver_record.pop("relation", None)
+        silver_record.pop("value", None)
         return cast("SilverRecord", silver_record)
+
+    def transform_for_gold(
+        self,
+        context: PipelineContext,
+        silver_record: GoldRecord,
+    ) -> GoldRecord:
+        """Project canonical Silver aliases back to the published Gold contract."""
+        gold_record = super().transform_for_gold(context, silver_record)
+        gold_record["type"] = gold_record.pop("activity_type", None)
+        gold_record["relation"] = gold_record.pop("activity_relation", None)
+        gold_record["value"] = gold_record.pop("activity_value", None)
+        return gold_record

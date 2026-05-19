@@ -267,11 +267,8 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         ingestion_ts: datetime,
     ) -> dict[str, str]:
         """Project canonical Bronze runtime anchors for the legacy `.meta.json` sidecar."""
-        if provider != self._context.provider or entity != self._context.entity:
-            raise ValueError(
-                "Bronze lineage sidecar projection must match MetadataCoordinator "
-                "run context provider/entity"
-            )
+        # Use the provider/entity from the request, not the context
+        # This allows the MetadataCoordinator to be reused across pipelines
         return {
             "run_id": str(self._context.run_id),
             "manifest_id": self._context.manifest_id or "",

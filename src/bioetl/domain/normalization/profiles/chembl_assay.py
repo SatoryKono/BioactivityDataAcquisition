@@ -123,9 +123,9 @@ _ENUM_FIELDS = {
 }
 _SPECIAL_RULE_COMPONENTS = {
     **_REFERENCE_IDENTIFIER_RULES,
-    "description": (
+    "assay_description": (
         normalize_profile_text,
-        "Normalize the assay business-data description alias as trimmed text before Silver field finalization.",
+        "Normalize assay_description as trimmed text under the explicit assay profile contract.",
     ),
     "assay_type_description": (
         normalize_profile_text,

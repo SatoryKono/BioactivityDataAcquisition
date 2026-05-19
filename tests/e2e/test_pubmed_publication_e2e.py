@@ -8,6 +8,7 @@ Cassettes location: tests/fixtures/vcr/pubmed/
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -183,24 +184,33 @@ async def test_pubmed_publication_classification_fields(e2e_data_dir: Path):
     records = get_silver_records(e2e_data_dir, "pubmed_publication")
 
     for record in records:
-        # Keywords and mesh_terms should be lists (possibly empty)
+        # Silver stores structured classification payloads as JSON arrays.
         keywords = record.get("subject_keywords")
         mesh_terms = record.get("subject_mesh")
         pub_types = record.get("publication_types")
 
         if keywords is not None:
-            assert isinstance(keywords, list), (
-                f"keywords should be list, got {type(keywords)}"
+            assert isinstance(keywords, str), (
+                f"subject_keywords should be JSON string, got {type(keywords)}"
+            )
+            assert isinstance(json.loads(keywords), list), (
+                "subject_keywords should decode to list"
             )
 
         if mesh_terms is not None:
-            assert isinstance(mesh_terms, list), (
-                f"mesh_terms should be list, got {type(mesh_terms)}"
+            assert isinstance(mesh_terms, str), (
+                f"subject_mesh should be JSON string, got {type(mesh_terms)}"
+            )
+            assert isinstance(json.loads(mesh_terms), list), (
+                "subject_mesh should decode to list"
             )
 
         if pub_types is not None:
-            assert isinstance(pub_types, list), (
-                f"publication_types should be list, got {type(pub_types)}"
+            assert isinstance(pub_types, str), (
+                f"publication_types should be JSON string, got {type(pub_types)}"
+            )
+            assert isinstance(json.loads(pub_types), list), (
+                "publication_types should decode to list"
             )
 
 

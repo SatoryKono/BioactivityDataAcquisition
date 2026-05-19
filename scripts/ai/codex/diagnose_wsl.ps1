@@ -6,7 +6,6 @@ param(
 )
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$WslDistro = if ($env:BIOETL_WSL_DISTRO) { $env:BIOETL_WSL_DISTRO } else { "Ubuntu" }
 
 function ConvertTo-WslPath {
     param([string]$WindowsPath)
@@ -22,5 +21,10 @@ if ($Verbose) {
     $ArgsList += "--verbose"
 }
 
-wsl -d $WslDistro -e bash -- $LauncherWSL @ArgsList
+if ($env:BIOETL_WSL_DISTRO) {
+    wsl -d $env:BIOETL_WSL_DISTRO -e bash -- $LauncherWSL @ArgsList
+}
+else {
+    wsl -e bash -- $LauncherWSL @ArgsList
+}
 exit $LASTEXITCODE

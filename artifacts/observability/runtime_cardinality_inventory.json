@@ -140,9 +140,6 @@
     "BooleanArray": [
       "src/bioetl/infrastructure/quarantine/operations.py"
     ],
-    "Bronze lineage sidecar projection must match MetadataCoordinator run context provider/entity": [
-      "src/bioetl/application/services/lineage/metadata_coordinator.py"
-    ],
     "Checkpoint compatibility validation failed": [
       "src/bioetl/application/services/checkpoint_compatibility_service.py"
     ],
@@ -1541,7 +1538,6 @@
     "Array",
     "AuditPort | None",
     "BooleanArray",
-    "Bronze lineage sidecar projection must match MetadataCoordinator run context provider/entity",
     "Checkpoint compatibility validation failed",
     "Checkpoint compatibility validation passed",
     "Checkpoint compatibility validation passed.",

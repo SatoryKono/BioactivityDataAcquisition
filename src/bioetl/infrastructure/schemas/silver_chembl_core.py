@@ -94,6 +94,9 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("activity_comment", pa.string()),
         pa.field("activity_id", pa.string(), nullable=False),
         pa.field("activity_properties", pa.string()),  # JSON string
+        pa.field("activity_relation", pa.string(), nullable=False),
+        pa.field("activity_type", pa.string()),
+        pa.field("activity_value", pa.float64(), nullable=False),
         pa.field("assay_id", pa.string(), nullable=False),
         pa.field("assay_description", pa.string(), nullable=False),
         pa.field("assay_type", pa.string(), nullable=False),
@@ -132,7 +135,6 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("qudt_unit_mapping_status", pa.string()),
         pa.field("qudt_units", pa.string()),
         pa.field("record_id", pa.int64(), nullable=False),
-        pa.field("relation", pa.string(), nullable=False),
         pa.field("src_id", pa.int64(), nullable=False),
         pa.field("standard_flag", pa.int64(), nullable=False),
         pa.field("standard_relation", pa.string(), nullable=False),
@@ -147,14 +149,12 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("target_taxonomy_id", pa.int64(), nullable=False),
         pa.field("text_value", pa.string()),
         pa.field("toid", pa.float64()),  # Float for nullable int (Pandas convention)
-        pa.field("type", pa.string()),
         pa.field("units", pa.string(), nullable=False),
         pa.field("uo_ontology_version", pa.string()),
         pa.field("uo_unit_iri", pa.string()),
         pa.field("uo_unit_mapping_status", pa.string()),
         pa.field("uo_units", pa.string(), nullable=False),
         pa.field("upper_value", pa.float64()),
-        pa.field("value", pa.float64(), nullable=False),
         # === DQ_FIELDS_SUFFIX ===
         *build_silver_dq_suffix_fields(),
     ]
@@ -194,7 +194,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("cell_id", pa.string()),
         pa.field("confidence_description", pa.string()),
         pa.field("confidence_score", pa.int64()),
-        pa.field("description", pa.string(), nullable=False),
+        pa.field("assay_description", pa.string(), nullable=False),
         pa.field("publication_id", pa.string()),
         pa.field("relationship_description", pa.string()),
         pa.field("relationship_type", pa.string()),

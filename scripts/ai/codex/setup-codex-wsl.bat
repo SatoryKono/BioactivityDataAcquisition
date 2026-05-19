@@ -5,8 +5,29 @@ REM This wrapper runs the complete setup script in WSL
 setlocal EnableExtensions
 setlocal EnableDelayedExpansion
 
-set "WSL_DISTRO=Ubuntu"
+set "WSL_DISTRO=%BIOETL_WSL_DISTRO%"
 set "SCRIPT_DIR=%~dp0"
+set "WSL_EXE=wsl"
+
+where wsl >nul 2>nul
+if errorlevel 1 (
+    if exist "%WINDIR%\System32\wsl.exe" (
+        set "WSL_EXE=%WINDIR%\System32\wsl.exe"
+    ) else (
+        echo [ERROR] WSL executable not found
+        echo [INFO] Install WSL or ensure wsl.exe is available from %%WINDIR%%\System32
+        exit /b 1
+    )
+)
+
+if defined WSL_DISTRO (
+    "%WSL_EXE%" -d "%WSL_DISTRO%" -- true >nul 2>nul
+    if errorlevel 1 (
+        echo [ERROR] WSL distro "%WSL_DISTRO%" not found
+        echo [INFO] Clear BIOETL_WSL_DISTRO to use the default WSL distro or install it with: wsl --install -d Debian
+        exit /b 1
+    )
+)
 
 echo [codex-setup] Starting WSL Codex setup...
 echo.
@@ -19,7 +40,11 @@ set "REPO_WIN=%CD%"
 popd >nul
 
 REM Try to convert path using wslpath
-for /f "usebackq delims=" %%I in (`wsl -d %WSL_DISTRO% -- wslpath -a "%REPO_WIN%" 2^>nul`) do set "REPO_WSL=%%I"
+if defined WSL_DISTRO (
+    for /f "usebackq delims=" %%I in (`"%WSL_EXE%" -d "%WSL_DISTRO%" -- wslpath -a "%REPO_WIN%" 2^>nul`) do set "REPO_WSL=%%I"
+) else (
+    for /f "usebackq delims=" %%I in (`"%WSL_EXE%" -- wslpath -a "%REPO_WIN%" 2^>nul`) do set "REPO_WSL=%%I"
+)
 
 REM If wslpath failed, construct path manually
 if not defined REPO_WSL (
@@ -45,7 +70,11 @@ echo [codex-setup] WSL path: %REPO_WSL%
 echo.
 
 REM Run the complete setup script in WSL
-wsl -d %WSL_DISTRO% -- bash "%REPO_WSL%/scripts/ai/codex/helper/setup-wsl-complete.sh"
+if defined WSL_DISTRO (
+    "%WSL_EXE%" -d "%WSL_DISTRO%" -- bash "%REPO_WSL%/scripts/ai/codex/helper/setup-wsl-complete.sh"
+) else (
+    "%WSL_EXE%" -- bash "%REPO_WSL%/scripts/ai/codex/helper/setup-wsl-complete.sh"
+)
 
 if errorlevel 1 (
     echo.

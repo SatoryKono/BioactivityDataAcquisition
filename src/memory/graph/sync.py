@@ -183,9 +183,16 @@ DEFAULT_FILE_STRUCTURE_REPO_ZONES: dict[str, tuple[str, ...]] = {
 DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES: tuple[str, ...] = (
     "docs/99-archive",
     "docs/exports",
+    "docs/reports",
     "docs/reports/generated",
+    "docs/00-project/ai/agents/agents",
+    "docs/00-project/ai/agents/runtime",
+    "docs/00-project/ai/prompts",
+    "docs/00-project/ai/rules",
+    "docs/00-project/ai/skills",
     "docs/02-architecture/generated",
     "docs/02-architecture/diagrams/bundles",
+    "docs/02-architecture/diagrams/descriptions",
     "docs/02-architecture/diagrams/manifests",
     "docs/02-architecture/diagrams/png",
     "docs/02-architecture/diagrams/tooling",
@@ -2329,14 +2336,7 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _read_text(path: Path) -> str:
-    chunks: list[str] = []
-    with path.open(encoding="utf-8") as handle:
-        while True:
-            chunk = handle.read(1024 * 1024)
-            if not chunk:
-                break
-            chunks.append(chunk)
-    return "".join(chunks)
+    return path.read_text(encoding="utf-8")
 
 
 def _read_yaml(path: Path) -> dict[str, object]:
@@ -2707,7 +2707,7 @@ def _git_last_commit_age_days_bulk(
     today: date,
     cache: dict[str, int | None],
     *,
-    chunk_size: int = 128,
+    chunk_size: int = 16,
 ) -> dict[str, int | None]:
     unique_paths = [path for path in dict.fromkeys(relative_paths) if path]
     if not unique_paths:
@@ -5888,12 +5888,16 @@ def _relation_backed_file_structure_labels() -> set[str]:
 
 
 def _relation_backed_parent_relative(root: Path, source_path_value: str) -> str | None:
-    target_path = root / source_path_value
+    normalized_path = source_path_value.replace("\\", "/").rstrip("/")
+    if not normalized_path:
+        return None
+    target_path = root / normalized_path
     if target_path.is_dir():
-        return source_path_value
-    if target_path.is_file():
-        return _rel_path(root, target_path.parent)
-    return None
+        return normalized_path
+    # Relation-backed labels here are file-oriented. Prefer the lexical parent
+    # after the directory check to avoid expensive repeated file stats during
+    # snapshot assembly on large or partially materialized trees.
+    return str(Path(normalized_path).parent)
 
 
 def _link_relation_backed_directory_housing(
@@ -9460,6 +9464,17 @@ _DOCS_REFERENCE_ALLOWED_PREFIXES = (
 )
 
 _DOC_LIKE_LABELS = {"doc_source_surface", "doc_artifact", "policy_surface"}
+_DOCS_DRIFT_TEXT_EXTENSIONS = {".md", ".rst", ".txt", ".yaml", ".yml"}
+_DOCS_DRIFT_EXCLUDED_PREFIXES = (
+    ".github/ISSUES",
+    ".github/ISSUE_TEMPLATE",
+    ".github/actions",
+    ".github/workflows",
+    "docs/00-project/ai",
+    "docs/02-architecture/diagrams/descriptions",
+    "docs/reports/evidence",
+    "docs/reports",
+)
 
 
 def _trim_docs_reference_candidate(raw_ref: str) -> str:
@@ -9786,16 +9801,18 @@ def _docs_drift_sources(
         source_path = node.properties.get("source_path")
         if not isinstance(source_path, str):
             continue
+        normalized_source_path = source_path.strip("/")
+        if any(
+            normalized_source_path == prefix
+            or normalized_source_path.startswith(f"{prefix}/")
+            for prefix in _DOCS_DRIFT_EXCLUDED_PREFIXES
+        ):
+            continue
         if _is_excluded_file_structure_path(source_path, config):
             continue
-        try:
-            doc_path = root / source_path
-            is_file = doc_path.is_file()
-        except OSError:
-            # File or directory is corrupted or unreadable, skip it
+        if Path(source_path).suffix.lower() not in _DOCS_DRIFT_TEXT_EXTENSIONS:
             continue
-        if not is_file:
-            continue
+        doc_path = root / source_path
         text = cached_text.get(source_path)
         if text is None:
             try:

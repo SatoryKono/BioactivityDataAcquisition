@@ -194,6 +194,37 @@ def e2e_environment():
         pass
 
 
+@pytest.fixture(autouse=True)
+def preserve_bronze_payloads_for_e2e() -> Generator[None, None, None]:
+    """Keep Bronze payloads available for post-run E2E assertions.
+
+    E2E suites validate raw Bronze artifacts after a full pipeline run. The
+    production postrun path performs Bronze retention cleanup, which can delete
+    the only payload before the assertion executes. Mirror the integration-test
+    behavior and disable cleanup within E2E only.
+    """
+    from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+
+    original_cleanup = BronzeWriter.cleanup_old_files
+
+    async def _noop_cleanup(
+        self: BronzeWriter,  # pragma: no cover - exercised through pipeline runs
+        cutoff_date,
+        provider: str,
+        entity: str,
+        dry_run: bool = False,
+        **kwargs: object,
+    ) -> dict[str, int]:
+        del self, cutoff_date, provider, entity, dry_run, kwargs
+        return {"files_removed": 0, "bytes_freed": 0, "dirs_removed": 0}
+
+    BronzeWriter.cleanup_old_files = _noop_cleanup
+    try:
+        yield
+    finally:
+        BronzeWriter.cleanup_old_files = original_cleanup
+
+
 @pytest.fixture
 def relaxed_dq_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
     """Enable relaxed DQ thresholds explicitly for replay-heavy E2E tests."""
@@ -273,24 +304,41 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()
 
-    try:
-        yield data_dir
-    finally:
-        if previous_data_dir is None:
-            os.environ.pop("BIOETL_DATA_DIR", None)
-        else:
-            os.environ["BIOETL_DATA_DIR"] = previous_data_dir
-        if previous_required_profile is None:
-            os.environ.pop(
-                "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE",
-                None,
-            )
-        else:
-            os.environ[
-                "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE"
-            ] = previous_required_profile
-        get_settings.cache_clear()
-        get_pipeline_config.cache_clear()
+    # Patch Settings properties to use output/ subdirectory
+    with patch.object(
+        Settings,
+        "bronze_path",
+        new_callable=PropertyMock,
+        return_value=data_dir / "output" / "bronze",
+    ), patch.object(
+        Settings,
+        "silver_path",
+        new_callable=PropertyMock,
+        return_value=data_dir / "output" / "silver",
+    ), patch.object(
+        Settings,
+        "gold_path",
+        new_callable=PropertyMock,
+        return_value=data_dir / "output" / "gold",
+    ):
+        try:
+            yield data_dir
+        finally:
+            if previous_data_dir is None:
+                os.environ.pop("BIOETL_DATA_DIR", None)
+            else:
+                os.environ["BIOETL_DATA_DIR"] = previous_data_dir
+            if previous_required_profile is None:
+                os.environ.pop(
+                    "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE",
+                    None,
+                )
+            else:
+                os.environ[
+                    "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE"
+                ] = previous_required_profile
+            get_settings.cache_clear()
+            get_pipeline_config.cache_clear()
 
 
 def clone_e2e_data_dir_snapshot(snapshot_dir: Path, target_dir: Path) -> None:

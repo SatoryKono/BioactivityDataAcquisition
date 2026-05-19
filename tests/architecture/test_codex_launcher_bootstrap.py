@@ -132,5 +132,7 @@ def test_powershell_codex_launcher_is_thin_transport_to_canonical_wsl_entrypoint
     )
 
     assert "run-codex.sh" in launcher_ps1
-    assert "wsl -d $WslDistro -e bash -- $LauncherWSL" in launcher_ps1
+    assert "Invoke-CodexInWsl" in launcher_ps1
+    assert "& $wslExe -d $wslDistro -e bash -- $LauncherWSL" in launcher_ps1
+    assert "& $wslExe -e bash -- $LauncherWSL" in launcher_ps1
     assert "npm install -g @openai/codex" not in launcher_ps1

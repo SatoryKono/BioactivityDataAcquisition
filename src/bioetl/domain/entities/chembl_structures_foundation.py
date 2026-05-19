@@ -64,7 +64,7 @@ class Target(BaseEntity):
     taxonomy_id: int | None = None
     organism_class: str | None = None
     species_group_flag: bool | None = None
-    description: str | None = None
+    target_description: str | None = None
     downgraded: bool | None = None
     pipeline_stages: str | None = None
     target_components: str | None = None

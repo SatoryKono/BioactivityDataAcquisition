@@ -248,6 +248,54 @@ quality:
         config = loader.load("test_provider", "test_entity")
         assert "entity_field" in [fv.field for fv in config.field_validations]
 
+    def test_load_enum_allowed_values_alias_from_entity_file(
+        self, tmp_path: Path
+    ) -> None:
+        """Legacy ``allowed_values`` keys should populate runtime enum rules."""
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "quality.yaml").write_text(
+            """
+version: "1.0.0"
+thresholds:
+  soft_fail: 0.05
+  hard_fail: 0.20
+strict_validation: false
+invalid_record_policy: quarantine
+common_field_validations: []
+common_cross_field_validations: []
+"""
+        )
+
+        entities_root = tmp_path / "entities" / "test_provider"
+        entities_root.mkdir(parents=True)
+        (entities_root / "test_entity.yaml").write_text(
+            """
+version: "1.0.0"
+provider: test_provider
+entity: test_entity
+quality:
+  entity_field_validations:
+    - field: publication_status
+      type: enum
+      allowed_values:
+        - ppublish
+        - epublish
+        - aheadofprint
+      nullable: true
+"""
+        )
+
+        loader = DQConfigLoader(tmp_path)
+        config = loader.load("test_provider", "test_entity")
+
+        enum_rule = next(
+            rule
+            for rule in config.field_validations
+            if rule.field == "publication_status" and rule.validation_type == "enum"
+        )
+        assert enum_rule.allowed == ("ppublish", "epublish", "aheadofprint")
+
 
 class TestDQConfigLoaderMerge:
     """Tests for merge behavior in DQConfigLoader."""

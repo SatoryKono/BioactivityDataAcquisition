@@ -70,7 +70,7 @@ class Assay(BaseEntity):
     bao_ontology_version: str | None = None
 
     # Description and confidence
-    description: str | None = None
+    assay_description: str | None = None
     confidence_score: int | None = None
     confidence_description: str | None = None
     relationship_type: str | None = None

@@ -7,7 +7,6 @@ param(
 )
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$WslDistro = if ($env:BIOETL_WSL_DISTRO) { $env:BIOETL_WSL_DISTRO } else { "Ubuntu" }
 
 function ConvertTo-WslPath {
     param([string]$WindowsPath)
@@ -45,17 +44,38 @@ Examples:
 "@
 }
 
+function Resolve-WslExecutable {
+    $wsl = Get-Command wsl -ErrorAction SilentlyContinue
+    if ($wsl) {
+        return $wsl.Source
+    }
+
+    $fallback = Join-Path $env:WINDIR "System32\wsl.exe"
+    if (Test-Path -LiteralPath $fallback) {
+        return $fallback
+    }
+
+    return $null
+}
+
 function Invoke-CodexInWsl {
     param([string[]]$LauncherArgs)
 
-    if (-not (Get-Command wsl -ErrorAction SilentlyContinue)) {
+    $wslExe = Resolve-WslExecutable
+    if (-not $wslExe) {
         Write-Error (
             "WSL is required for run-codex.ps1. Install WSL or run bash run-codex.sh from Linux/WSL."
         )
         return 1
     }
 
-    & wsl -d $WslDistro -e bash -- $LauncherWSL @LauncherArgs
+    $wslDistro = $env:BIOETL_WSL_DISTRO
+    if ($wslDistro) {
+        & $wslExe -d $wslDistro -e bash -- $LauncherWSL @LauncherArgs
+    }
+    else {
+        & $wslExe -e bash -- $LauncherWSL @LauncherArgs
+    }
     if ($LASTEXITCODE -ne $null) {
         return $LASTEXITCODE
     }

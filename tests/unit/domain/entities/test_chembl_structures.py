@@ -141,9 +141,11 @@ class TestTarget:
             target_type="SINGLE PROTEIN",
             organism="Homo sapiens",
             taxonomy_id=9606,
+            target_description="Serine protease target",
         )
         assert t.pref_name == "Thrombin"
         assert t.taxonomy_id == 9606
+        assert t.target_description == "Serine protease target"
 
     def test_empty_target_id_raises(self) -> None:
         from bioetl.domain.entities.chembl_structures import Target

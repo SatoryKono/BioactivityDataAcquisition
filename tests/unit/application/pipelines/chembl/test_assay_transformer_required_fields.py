@@ -94,8 +94,13 @@ class TestAssayTransformerRequiredFields:
         record = _valid_contract_record()
         record.pop(missing_field)
 
+        transformed = await transformer._transform_impl(mock_context, record, 0)
+
         with pytest.raises(FilteredOutError) as exc_info:
-            await transformer.transform(mock_context, record, index=0)
+            structured = transformer._apply_structural_policy(
+                mock_context, transformed, 0
+            )
+            transformer._apply_silver_filter(mock_context, structured, 0)
 
         details = exc_info.value.details
         assert details["policy_stage"] == "structural"

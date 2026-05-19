@@ -63,17 +63,27 @@ def _row(
 
 
 def _assert_activity_governance_rows(rows: list[dict[str, str]]) -> None:
-    activity_relation = _row(rows, "chembl_activity", "relation")
+    activity_relation = _row(rows, "chembl_activity", "activity_relation")
     assert activity_relation["normalization_source"] == "profile"
     assert activity_relation["normalizer"] == "normalize_profile_text"
     assert "domain_schema:present" in activity_relation["schema_coverage"]
 
-    activity_type = _row(rows, "chembl_activity", "type")
+    relation_alias = _row(rows, "chembl_activity", "relation")
+    assert relation_alias["normalization_source"] == "profile"
+    assert relation_alias["normalizer"] == "normalize_profile_text"
+    assert relation_alias["strictness"] == "strict_operator"
+    assert relation_alias["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_controlled.yaml"
+    )
+    assert "domain_schema:present" in relation_alias["schema_coverage"]
+    assert relation_alias["dq_coverage"] == "not_configured"
+
+    activity_type = _row(rows, "chembl_activity", "activity_type")
     assert activity_type["normalization_source"] == "profile"
     assert activity_type["normalizer"] == "normalize_profile_text"
     assert "domain_schema:present" in activity_type["schema_coverage"]
 
-    activity_value = _row(rows, "chembl_activity", "value")
+    activity_value = _row(rows, "chembl_activity", "activity_value")
     assert activity_value["normalization_source"] == "profile"
     assert activity_value["normalizer"] == "normalize_profile_float"
     assert "domain_schema:present" in activity_value["schema_coverage"]
@@ -293,7 +303,7 @@ def _assert_publication_and_target_rows(rows: list[dict[str, str]]) -> None:
     assert target_component_relationships["hash_ordering"] == "set_like"
     assert target_component_relationships["dq_coverage"] == "custom:error"
 
-    target_description = _row(rows, "chembl_target", "description")
+    target_description = _row(rows, "chembl_target", "target_description")
     assert target_description["normalization_source"] == "profile"
     assert target_description["normalizer"] == "normalize_profile_null"
     assert "domain_schema:present" in target_description["schema_coverage"]
@@ -519,13 +529,13 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
     )
     assert chembl_cell_line_cellosaurus["strictness"] == "canonical_identifier"
 
-    chembl_assay_description = _row(rows, "chembl_assay", "description")
-    assert chembl_assay_description["normalizer"] == "normalize_profile_null"
+    chembl_assay_description = _row(rows, "chembl_assay", "assay_description")
+    assert chembl_assay_description["normalizer"] == "normalize_profile_text"
     assert "domain_schema:present" in chembl_assay_description["schema_coverage"]
 
     chembl_assay_score = _row(rows, "chembl_assay", "score")
     assert chembl_assay_score["normalization_source"] == "profile"
-    assert chembl_assay_score["normalizer"] == "normalize_profile_int"
+    assert chembl_assay_score["normalizer"] == "normalize_profile_float"
     assert "domain_schema:present" in chembl_assay_score["schema_coverage"]
 
     chembl_target_component_id = _row(

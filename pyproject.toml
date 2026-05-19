@@ -172,10 +172,13 @@ python_files = ["test_*.py"]
 python_functions = ["test_*"]
 # Local default is serial for stability.
 # CI commands explicitly enable xdist where needed.
-# For benchmarks: pytest -p no:xdist -m benchmark
+# Regular runs disable pytest-benchmark because its VCS probe shells out to
+# `git describe`, which can stall on large/partial worktrees. For benchmarks,
+# opt in explicitly: pytest -p benchmark -p no:xdist -m benchmark
 addopts = [
     "-ra",
     "-q",
+    "-p", "no:benchmark",
     "--strict-markers",
     "--strict-config",
     "-m", "not benchmark and not slow",

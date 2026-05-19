@@ -36,12 +36,12 @@ class TestAssay:
             assay_type="B",
             assay_organism="Homo sapiens",
             confidence_score=9,
-            description="In vitro binding assay",
+            assay_description="In vitro binding assay",
             bao_format="BAO_0000357",
         )
         assert a.assay_type == "B"
         assert a.confidence_score == 9
-        assert a.description == "In vitro binding assay"
+        assert a.assay_description == "In vitro binding assay"
 
     def test_empty_assay_id_raises(self) -> None:
         with pytest.raises(ValueError, match="Assay ChEMBL ID is required"):

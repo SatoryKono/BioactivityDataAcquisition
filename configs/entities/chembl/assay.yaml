@@ -212,7 +212,7 @@ quality:
                 - assay_id
                 - assay_description
             condition: all_present
-            error_message: Assay must have ID and assay_description
+            error_message: Assay must have ID and description
         -   name: bao_format_requires_mapping_status
             fields:
                 - bao_format

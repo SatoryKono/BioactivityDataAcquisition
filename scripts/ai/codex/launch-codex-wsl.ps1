@@ -4,7 +4,7 @@
     Simplified Codex launcher for WSL without hanging on interactive prompts.
 
 .DESCRIPTION
-    Launches Codex in WSL Ubuntu distro with non-interactive mode and skip-update behavior.
+    Launches Codex in the configured WSL distro with non-interactive mode and skip-update behavior.
 
 .PARAMETER Command
     Command to run: start, exec, check, setup, mcp-check, mcp-setup, login, device-login, help
@@ -25,9 +25,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Configuration
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$WslDistro = "Ubuntu"
 $CodexDir = "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/codex"
 
 # Helper: Convert Windows path to WSL path
@@ -60,7 +58,7 @@ Examples:
   .\launch-codex-wsl.ps1 check
 
 Environment Variables:
-  BIOETL_WSL_DISTRO  Override WSL distro (default: Ubuntu)
+  BIOETL_WSL_DISTRO  Override WSL distro (otherwise use the default WSL distro)
   OPENAI_API_KEY     Your OpenAI API key (set in .env.codex)
 "@ | Write-Host
 }
@@ -83,7 +81,12 @@ if ($Prompt.Count -gt 0) {
     $CmdArgs += $Prompt
 }
 
-Write-Host "🚀 Launching Codex in WSL ($WslDistro)..." -ForegroundColor Cyan
+if ($env:BIOETL_WSL_DISTRO) {
+    Write-Host "🚀 Launching Codex in WSL ($($env:BIOETL_WSL_DISTRO))..." -ForegroundColor Cyan
+}
+else {
+    Write-Host "🚀 Launching Codex in the default WSL distro..." -ForegroundColor Cyan
+}
 Write-Host "   Command: $Command" -ForegroundColor Gray
 
 # Launch with skip-update and non-interactive flags
@@ -92,7 +95,12 @@ $BashCmd = "cd $CodexDir && CODEX_SKIP_MCP_SETUP=0 bash ./run-codex.sh $($CmdArg
 
 try {
     # Use echo "2" to auto-skip update prompt (option 2 = Skip)
-    $process = wsl -d $WslDistro bash -c "echo '2' | $BashCmd"
+    if ($env:BIOETL_WSL_DISTRO) {
+        $process = wsl -d $env:BIOETL_WSL_DISTRO bash -c "echo '2' | $BashCmd"
+    }
+    else {
+        $process = wsl bash -c "echo '2' | $BashCmd"
+    }
     exit $LASTEXITCODE
 }
 catch {

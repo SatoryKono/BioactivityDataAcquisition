@@ -90,6 +90,15 @@ class IntegrationPipelineTestCase:
         type(Settings).silver_path = PropertyMock(return_value=Path(self.silver_path))
         type(Settings).gold_path = PropertyMock(return_value=Path(self.gold_path))
 
+        # Patch bronze cleanup at the class level to prevent file removal during tests
+        from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+        original_bronze_cleanup = BronzeWriter.cleanup_old_files
+
+        async def no_op_bronze_cleanup(self, *args, **kwargs):
+            return {"files_removed": 0, "bytes_freed": 0, "directories_removed": 0}
+
+        BronzeWriter.cleanup_old_files = no_op_bronze_cleanup
+
         # Patch create_storage_adapter to force test paths
         from bioetl.composition.factories.storage._helpers import create_storage_adapter
         original_create_adapter = create_storage_adapter
@@ -136,6 +145,9 @@ class IntegrationPipelineTestCase:
                                 _context_resolution, "resolve_storage_paths", patched_resolve_storage_paths
                             ):
                                 yield
+
+        # Restore original bronze cleanup
+        BronzeWriter.cleanup_old_files = original_bronze_cleanup
 
     def _create_local_storage_context(
         self,

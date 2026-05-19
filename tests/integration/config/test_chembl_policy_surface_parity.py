@@ -30,6 +30,7 @@ from scripts.docs.generate_pipeline_normalization_field_matrix import (
     build_field_matrix_rows,
 )
 from scripts.docs.matrix.generate_pipeline_normalization_matrix import (
+    ENTITY_PROFILE_FIELD_ALIASES,
     ENUM_REGISTRY_PATHS,
 )
 
@@ -67,11 +68,20 @@ def _normalize_source_path(path: str) -> str:
 
 
 def _matrix_row_lookup(rows: list[dict[str, str]]) -> dict[str, dict[str, str]]:
-    return {
+    lookup = {
         f"{row['pipeline_name']}.{row['field_name']}": row
         for row in rows
         if row["pipeline_name"].startswith("chembl_")
     }
+    for pipeline_name, aliases in ENTITY_PROFILE_FIELD_ALIASES.items():
+        if not pipeline_name.startswith("chembl_"):
+            continue
+        for alias_field, canonical_field in aliases.items():
+            canonical_ref = f"{pipeline_name}.{canonical_field}"
+            alias_ref = f"{pipeline_name}.{alias_field}"
+            if alias_ref not in lookup and canonical_ref in lookup:
+                lookup[alias_ref] = lookup[canonical_ref]
+    return lookup
 
 
 def _row_classification(row: dict[str, str]) -> str:
