@@ -41,7 +41,7 @@ _PUBLIC_EXPORTS: dict[str, str] = {
 
 def __getattr__(
     name: str,
-) -> Any:
+) -> Any:  # Any: Dynamic attribute resolution returns various types
     """Resolve one approved bootstrap entrypoint lazily."""
     module_name = _PUBLIC_EXPORTS.get(name)
     if module_name is None:

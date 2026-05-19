@@ -130,32 +130,51 @@ def _custom_rule_violated(
 ) -> bool:
     from bioetl.domain.validation.chemical import validate_smiles
 
+    # Special case: SMILES validation
     if validator_name == "smiles_validator":
         return value is not None and not validate_smiles(str(value))
-    target_vocabulary = _target_json_vocabulary(validator_name)
-    if target_vocabulary is not None:
-        return _target_json_vocabulary_rule_violated(
-            value,
-            allowed_values=target_vocabulary,
-        )
-    target_xref_vocabulary = _target_xref_json_vocabulary(validator_name)
-    if target_xref_vocabulary is not None:
-        return _target_xref_json_vocabulary_rule_violated(
-            value,
-            allowed_values=target_xref_vocabulary,
-        )
-    publication_taxonomy = _publication_taxonomy_vocabulary(validator_name)
-    if publication_taxonomy is not None:
-        return _publication_taxonomy_rule_violated(
-            value,
-            allowed_values=publication_taxonomy,
-        )
+
+    # Dispatch to vocabulary validation strategy
+    strategy = _resolve_custom_validation_strategy(validator_name)
+    if strategy is not None:
+        return strategy(value, validator_name)
+
+    # Special case: cross-field validation
     if validator_name == "validate_hierarchy_no_self_reference":
-        return _custom_cross_rule_violated(
-            record,
-            validator_name,
-        )
+        return _custom_cross_rule_violated(record, validator_name)
+
     return False
+
+
+def _resolve_custom_validation_strategy(validator_name: str | None) -> object | None:
+    """Resolve the validation strategy for a given validator name."""
+    if _target_json_vocabulary(validator_name) is not None:
+        return _target_json_vocabulary_strategy
+    if _target_xref_json_vocabulary(validator_name) is not None:
+        return _target_xref_json_vocabulary_strategy
+    if _publication_taxonomy_vocabulary(validator_name) is not None:
+        return _publication_taxonomy_strategy
+    return None
+
+
+def _target_json_vocabulary_strategy(value: object, validator_name: str | None) -> bool:
+    """Validate against target component JSON vocabulary."""
+    vocab = _target_json_vocabulary(validator_name)
+    return _target_json_vocabulary_rule_violated(value, allowed_values=vocab)
+
+
+def _target_xref_json_vocabulary_strategy(
+    value: object, validator_name: str | None
+) -> bool:
+    """Validate against target xref JSON vocabulary."""
+    xref_vocab = _target_xref_json_vocabulary(validator_name)
+    return _target_xref_json_vocabulary_rule_violated(value, allowed_values=xref_vocab)
+
+
+def _publication_taxonomy_strategy(value: object, validator_name: str | None) -> bool:
+    """Validate against publication taxonomy vocabulary."""
+    pub_taxonomy = _publication_taxonomy_vocabulary(validator_name)
+    return _publication_taxonomy_rule_violated(value, allowed_values=pub_taxonomy)
 
 
 def _target_json_vocabulary(validator_name: str | None) -> frozenset[str] | None:
@@ -324,13 +343,14 @@ def _target_xref_json_vocabulary_rule_violated(
     list_like = _coerce_target_json_list(value)
     if list_like is None:
         return True
-    for item in list_like:
-        if not isinstance(item, dict):
-            return True
-        source_value = item.get("xref_src_db")
-        if not isinstance(source_value, str) or source_value not in allowed_values:
-            return True
-    return False
+    return any(_is_invalid_xref_item(item, allowed_values) for item in list_like)
+
+
+def _is_invalid_xref_item(item: object, allowed_values: frozenset[str]) -> bool:
+    if not isinstance(item, dict):
+        return True
+    source_value = item.get("xref_src_db")
+    return not isinstance(source_value, str) or source_value not in allowed_values
 
 
 def _coerce_target_json_list(value: object) -> list[object] | None:

@@ -52,7 +52,7 @@ def build_silver_filter_compatibility_snapshot() -> JsonDict:
 
 
 def normalize_silver_gold_filter_payload(
-    payload: Mapping[str, Any],
+    payload: Mapping[str, Any],  # Any: Filter payloads have heterogeneous value types
 ) -> JsonDict:
     """Promote semantic Silver rules into Gold and leave Silver structural-only."""
     result = deepcopy(dict(payload))

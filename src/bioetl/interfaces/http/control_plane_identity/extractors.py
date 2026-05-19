@@ -1,4 +1,4 @@
-"""Compatibility facade for Control Plane identity extraction helpers."""
+"""Control Plane identity extraction helpers aggregation module."""
 
 from __future__ import annotations
 

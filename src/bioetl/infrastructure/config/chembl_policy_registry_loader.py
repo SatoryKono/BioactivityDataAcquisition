@@ -72,7 +72,7 @@ class ChemblPolicyRegistryLoader:
 
     @staticmethod
     def _load_ontology_families(
-        payload: dict[str, Any],
+        payload: dict[str, Any],  # Any: YAML scalar/sequence leaf types remain heterogeneous
     ) -> tuple[ChemblOntologyPolicyFamily, ...]:
         families = payload.get("families", {})
         if not isinstance(families, dict):
@@ -125,7 +125,7 @@ class ChemblPolicyRegistryLoader:
 
     @staticmethod
     def _merge_unit_companion_policies(
-        families: dict[str, dict[str, Any]],
+        families: dict[str, dict[str, Any]],  # Any: YAML scalar/sequence leaf types remain heterogeneous
         unit_companion_policies: object,
     ) -> None:
         if not isinstance(unit_companion_policies, dict):
@@ -157,7 +157,7 @@ class ChemblPolicyRegistryLoader:
     @staticmethod
     def _merge_unit_companion_family(
         *,
-        family_payload: dict[str, Any],
+        family_payload: dict[str, Any],  # Any: YAML scalar/sequence leaf types remain heterogeneous
         family_name: str,
         policy_fields: tuple[str, ...],
     ) -> None:

@@ -9,6 +9,6 @@ from __future__ import annotations
 
 from typing import Any
 
-type JsonDict = dict[str, Any]
+type JsonDict = dict[str, Any]  # Any: JSON values are inherently heterogeneous
 
 __all__ = ["JsonDict"]
