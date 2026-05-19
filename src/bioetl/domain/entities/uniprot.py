@@ -169,6 +169,8 @@ class UniprotTarget(BaseEntity):
     subcellular_location: str | None = None
     tissue_specificity: str | None = None
     alternative_products: str | None = None
+    alternative_products_raw_json: str | None = None
+    alternative_products_canonical_json: str | None = None
     disease_involvement: str | None = None
     pharmaceutical_use: str | None = None
     similarity_comment: str | None = None
@@ -176,9 +178,13 @@ class UniprotTarget(BaseEntity):
 
     # Biochemical properties (JSON)
     cofactors: str | None = None  # JSON array of cofactors with name and ChEBI ID
+    cofactors_raw_json: str | None = None
+    cofactors_canonical_json: str | None = None
     biophysicochemical_properties: str | None = (
         None  # JSON object with pH, temp, kinetics
     )
+    biophysicochemical_properties_raw_json: str | None = None
+    biophysicochemical_properties_canonical_json: str | None = None
     induction: str | None = None  # JSON array of induction conditions
 
     # Cross-references (JSON arrays)
@@ -192,7 +198,9 @@ class UniprotTarget(BaseEntity):
     reactome_xrefs: str | None = None  # JSON array of Reactome pathway entries
 
     # Features & Keywords (JSON arrays)
+    features_canonical_json: str | None = None  # Canonical JSON companion
     features_json: str | None = None  # All features combined (forensic)
+    features_raw_json: str | None = None  # Raw provider JSON companion
     domains: str | None = None  # ft_domain features
     binding_sites: str | None = None  # ft_binding features
     active_sites: str | None = None  # ft_act_site features
@@ -230,6 +238,8 @@ class UniprotTarget(BaseEntity):
 
     # Reaction data (parsed from CATALYTIC ACTIVITY)
     reactions: str | None = None  # JSON array
+    reactions_raw_json: str | None = None
+    reactions_canonical_json: str | None = None
     reaction_ec_numbers: str | None = None  # JSON array
 
     # Counts
