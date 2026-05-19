@@ -114,6 +114,8 @@ def test_workflow_run_dry_run_smoke_uses_canonical_example_without_network(
             "--dry-run",
             "--only-steps",
             "summarize_core_extracts",
+            "--required-persistence-profile",
+            "degraded_observable",
         ],
     )
 
@@ -306,7 +308,15 @@ def test_workflow_run_starts_metrics_server_and_publishes_metrics(
 
     result = cli_runner.invoke(
         cli,
-        ["workflow", "run", "chembl_activity", "--limit", "5"],
+        [
+            "workflow",
+            "run",
+            "chembl_activity",
+            "--limit",
+            "5",
+            "--required-persistence-profile",
+            "degraded_observable",
+        ],
     )
 
     assert result.exit_code == 0, result.output
@@ -373,7 +383,16 @@ def test_workflow_run_publishes_metrics_even_when_workflow_fails(
         raising=True,
     )
 
-    result = cli_runner.invoke(cli, ["workflow", "run", "chembl_activity"])
+    result = cli_runner.invoke(
+        cli,
+        [
+            "workflow",
+            "run",
+            "chembl_activity",
+            "--required-persistence-profile",
+            "degraded_observable",
+        ],
+    )
 
     assert result.exit_code == ExitCode.PIPELINE_ERROR
     assert published_calls == [
@@ -386,6 +405,23 @@ def test_workflow_run_publishes_metrics_even_when_workflow_fails(
             },
         }
     ]
+
+
+def test_workflow_run_rejects_strict_profile_without_cached_bronze(
+    cli_runner: CliRunner,
+) -> None:
+    from bioetl.interfaces.cli.exit_codes import ExitCode
+
+    result = cli_runner.invoke(
+        cli,
+        ["workflow", "run", "chembl_activity", "--limit", "5"],
+    )
+
+    assert result.exit_code == ExitCode.CONFIG_ERROR
+    assert "Workflow configuration error" in result.output
+    assert "requires immutable snapshot-backed Bronze inputs" in result.output
+    assert "--use-cached-bronze" in result.output
+    assert "degraded_observable" in result.output
 
 
 def test_workflow_status_json_payload_includes_explicit_limits(

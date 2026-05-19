@@ -8,6 +8,10 @@ from typing import TYPE_CHECKING
 
 import click
 
+from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+    STRICT_PERSISTENCE_PROFILES,
+)
 from bioetl.interfaces.cli.commands._workflow_support import (
     apply_cli_overrides,
     parse_only_steps,
@@ -81,7 +85,7 @@ def _load_and_apply_workflow_config(
     try:
         config = load_workflow_config_fn(name)
         config = select_workflow_steps(config, only_steps)
-        return apply_cli_overrides(
+        config = apply_cli_overrides(
             config,
             dry_run=dry_run,
             run_type=run_type,
@@ -105,6 +109,8 @@ def _load_and_apply_workflow_config(
             replay_of_manifest_id=replay_of_manifest_id,
             enable_tracing=enable_tracing,
         )
+        _validate_workflow_pipeline_replay_prerequisites(config)
+        return config
     except (FileNotFoundError, ValueError) as exc:
         echo_error("Workflow configuration error", str(exc))
         raise click.exceptions.Exit(ExitCode.CONFIG_ERROR) from exc
@@ -200,3 +206,48 @@ def _workflow_failure_message(result: object) -> str:
         if isinstance(error_message, str) and error_message:
             return error_message
     return "Unknown error"
+
+
+def _validate_workflow_pipeline_replay_prerequisites(config: WorkflowConfig) -> None:
+    """Fail fast when workflow pipeline steps request strict replay without snapshots."""
+    for step in config.pipeline_steps:
+        exact_replay = _resolve_step_option(config, step, "exact_replay")
+        use_cached_bronze = _resolve_step_option(config, step, "use_cached_bronze")
+        required_profile = _resolve_step_option(
+            config,
+            step,
+            "required_persistence_profile",
+        ) or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+
+        if bool(exact_replay) and not bool(use_cached_bronze):
+            raise ValueError(
+                f"Workflow step '{step.step_id}' currently requires "
+                "--use-cached-bronze with snapshot-backed Bronze inputs when "
+                "--exact-replay is enabled"
+            )
+
+        if (
+            str(required_profile) in STRICT_PERSISTENCE_PROFILES
+            and not bool(use_cached_bronze)
+        ):
+            raise ValueError(
+                f"Workflow step '{step.step_id}' requests required_persistence_profile="
+                f"'{required_profile}', which requires immutable snapshot-backed "
+                "Bronze inputs. Use --use-cached-bronze "
+                "(optionally with --cached-bronze-path/--cached-bronze-date), or "
+                "lower --required-persistence-profile to degraded_observable for "
+                "bounded live extraction."
+            )
+
+
+def _resolve_step_option(
+    config: WorkflowConfig,
+    step: object,
+    field_name: str,
+) -> object:
+    """Resolve one workflow step run option with workflow defaults fallback."""
+    step_options = getattr(step, "run_options")
+    step_value = getattr(step_options, field_name)
+    if step_value is not None:
+        return step_value
+    return getattr(config.defaults, field_name)
