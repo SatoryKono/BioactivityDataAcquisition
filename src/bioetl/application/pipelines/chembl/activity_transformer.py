@@ -119,8 +119,11 @@ _MOLECULE_TARGET_ASSAY = FieldGroup(
 _RAW_VALUES = FieldGroup(
     name="raw_values",
     fields=(
-        *simple_fields("type", "units", "relation", "text_value"),
-        *float_fields("value", "upper_value"),
+        FieldSpec("type", target="activity_type"),
+        FieldSpec("relation", target="activity_relation"),
+        FieldSpec("value", target="activity_value", converter=safe_float),
+        *simple_fields("units", "text_value"),
+        *float_fields("upper_value"),
     ),
 )
 
@@ -313,7 +316,9 @@ class ActivityTransformer(BaseChemblTransformer):
                 record.get("activity_properties")
             ),
         }
-        business_data["relation"] = self._coalesce_activity_relation(business_data)
+        business_data["activity_relation"] = self._coalesce_activity_relation(
+            business_data
+        )
 
         # Support both unified and legacy FK source fields from input record
         business_data["target_id"] = business_data.get("target_id") or record.get(
@@ -334,20 +339,20 @@ class ActivityTransformer(BaseChemblTransformer):
         business_data: JsonDict,
     ) -> SilverRecord:
         """Project canonical original activity fields before structural policy checks."""
-        relation = silver_record.get("relation")
+        relation = silver_record.get("activity_relation")
         if isinstance(relation, str) and not relation.strip():
             relation = None
         silver_record["activity_type"] = (
-            silver_record.get("type")
-            if silver_record.get("type") is not None
+            silver_record.get("activity_type")
+            if silver_record.get("activity_type") is not None
             else business_data.get("standard_type")
         )
         silver_record["activity_relation"] = (
             relation if relation is not None else business_data.get("standard_relation")
         )
         silver_record["activity_value"] = (
-            silver_record.get("value")
-            if silver_record.get("value") is not None
+            silver_record.get("activity_value")
+            if silver_record.get("activity_value") is not None
             else business_data.get("standard_value")
         )
         silver_record.pop("type", None)
