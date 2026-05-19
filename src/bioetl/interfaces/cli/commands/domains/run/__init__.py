@@ -7,7 +7,7 @@ __all__ = ["run"]
 
 def __getattr__(name: str) -> object:
     if name == "run":
-        from bioetl.interfaces.cli.commands.domains.run.command import run
+        from bioetl.interfaces.cli.commands.run import run
 
         return run
     raise AttributeError(name)

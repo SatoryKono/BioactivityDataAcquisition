@@ -55,9 +55,7 @@ def __getattr__(name: str) -> ModuleType:
     if name not in _PUBLIC_COMMAND_MODULES:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
-    module = import_module(f"{__name__}.{name}")
-    globals()[name] = module
-    return module
+    return import_module(f"{__name__}.{name}")
 
 
 sys.modules[__name__].__class__ = _CommandsModule

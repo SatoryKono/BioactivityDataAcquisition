@@ -36,7 +36,7 @@ import pytest
         (
             "src/bioetl/interfaces/cli/commands/domains/run/__init__.py",
             "run",
-            "bioetl.interfaces.cli.commands.domains.run.command",
+            "bioetl.interfaces.cli.commands.run",
         ),
         (
             "src/bioetl/interfaces/cli/commands/domains/run_all/__init__.py",

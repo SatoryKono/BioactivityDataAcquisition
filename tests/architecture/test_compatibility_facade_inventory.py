@@ -414,6 +414,36 @@ def test_retired_maintenance_domain_wrapper_modules_are_absent() -> None:
 
 
 @pytest.mark.architecture
+def test_retired_run_domain_wrapper_module_is_absent() -> None:
+    """Run command compatibility wrapper must stay retired after seam collapse."""
+    retired_path = (
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "run"
+        / "command.py"
+    )
+    assert not retired_path.exists(), (
+        "Run command compatibility wrapper was retired; "
+        "domain package lazy loading must target the public run module directly."
+    )
+
+
+@pytest.mark.architecture
+def test_placeholder_orchestration_package_is_absent() -> None:
+    """Placeholder orchestration package should not remain importable or shipped."""
+    retired_path = ROOT / "src" / "bioetl" / "interfaces" / "orchestration"
+    assert not retired_path.exists(), (
+        "Reserved interfaces.orchestration placeholder package was retired and must "
+        "not return to the public runtime surface."
+    )
+
+
+@pytest.mark.architecture
 def test_cli_sys_modules_alias_helper_is_retired() -> None:
     """CLI command wrappers must not rely on runtime `sys.modules` aliasing."""
     helper_path = (

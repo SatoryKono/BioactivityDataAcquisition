@@ -91,6 +91,14 @@ def test_registry_contains_expected_semantic_clusters() -> None:
     assert registry.get_by_canonical_name("pmid") is not None
     assert registry.get_by_canonical_name("title") is not None
     assert registry.get_by_canonical_name("doi") is not None
+    assert registry.get_by_canonical_name("abstract") is not None
+    assert registry.get_by_canonical_name("authors") is not None
+    assert registry.get_by_canonical_name("issue") is not None
+    assert registry.get_by_canonical_name("publication_class") is not None
+    assert registry.get_by_canonical_name("publication_date") is not None
+    assert registry.get_by_canonical_name("publication_subclass") is not None
+    assert registry.get_by_canonical_name("publication_type_unified") is not None
+    assert registry.get_by_canonical_name("volume") is not None
 
 
 def test_input_filters_map_legacy_provider_columns_to_canonical_runtime_fields() -> (

@@ -76,9 +76,7 @@ def __getattr__(
     module_name = _PUBLIC_SYMBOL_TARGETS.get(name)
     if module_name is not None:
         module = import_module(module_name)
-        value = getattr(module, name)
-        globals()[name] = value
-        return value
+        return getattr(module, name)
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 

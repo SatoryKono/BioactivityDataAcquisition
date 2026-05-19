@@ -390,7 +390,7 @@ class TestRunPipelineIntegration:
 
         with (
             patch(
-                "bioetl.composition._pipeline_execution.create_pipeline_runner",
+                "bioetl.composition._pipeline_execution._create_pipeline_runner_from_context",
                 return_value=mock_runner,
             ),
             patch(
@@ -425,7 +425,7 @@ class TestRunPipelineIntegration:
 
         with (
             patch(
-                "bioetl.composition._pipeline_execution.create_pipeline_runner",
+                "bioetl.composition._pipeline_execution._create_pipeline_runner_from_context",
                 return_value=mock_runner,
             ),
             patch(
@@ -448,7 +448,7 @@ class TestRunPipelineIntegration:
 
         with (
             patch(
-                "bioetl.composition._pipeline_execution.create_pipeline_runner",
+                "bioetl.composition._pipeline_execution._create_pipeline_runner_from_context",
                 return_value=mock_runner,
             ),
             patch(
@@ -478,7 +478,7 @@ class TestRunPipelineIntegration:
         mock_runner.run = AsyncMock(side_effect=RuntimeError("Mid-run failure"))
 
         with patch(
-            "bioetl.composition._pipeline_execution.create_pipeline_runner",
+            "bioetl.composition._pipeline_execution._create_pipeline_runner_from_context",
             return_value=mock_runner,
         ):
             result = await run_pipeline("test_pipeline", RunOptions())
@@ -494,7 +494,7 @@ class TestRunPipelineIntegration:
 
         with (
             patch(
-                "bioetl.composition._pipeline_execution.create_pipeline_runner",
+                "bioetl.composition._pipeline_execution._create_pipeline_runner_from_context",
                 return_value=mock_runner,
             ),
             patch(
@@ -514,7 +514,7 @@ class TestRunPipelineIntegration:
 
         with (
             patch(
-                "bioetl.composition._pipeline_execution.create_pipeline_runner",
+                "bioetl.composition._pipeline_execution._create_pipeline_runner_from_context",
                 return_value=mock_runner,
             ),
             patch(
@@ -549,7 +549,7 @@ class TestRunPipelineIntegration:
 
         with (
             patch(
-                "bioetl.composition._pipeline_execution.create_pipeline_runner",
+                "bioetl.composition._pipeline_execution._create_pipeline_runner_from_context",
                 return_value=mock_runner,
             ),
             patch(
@@ -584,7 +584,7 @@ class TestRunPipelineIntegration:
         runner = MinimalRunner()
         with (
             patch(
-                "bioetl.composition._pipeline_execution.create_pipeline_runner",
+                "bioetl.composition._pipeline_execution._create_pipeline_runner_from_context",
                 return_value=runner,
             ),
             patch(
@@ -613,7 +613,7 @@ class TestRunPipelineIntegration:
 
         with (
             patch(
-                "bioetl.composition._pipeline_execution.create_pipeline_runner",
+                "bioetl.composition._pipeline_execution._create_pipeline_runner_from_context",
                 side_effect=ValueError("invalid pipeline config"),
             ),
             patch(

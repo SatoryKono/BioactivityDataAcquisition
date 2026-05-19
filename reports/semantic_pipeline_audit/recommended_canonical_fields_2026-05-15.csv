@@ -30,7 +30,7 @@ publication_subject_mesh,subject_mesh,EXACT,3,PubMed mesh_terms normalize to sub
 publication_subject_topics,subject_topics,EXACT,2,OpenAlex topics normalize to subject_topics.
 publication_title,title,EXACT,6,All normalized publication configs and composite join paths use title. Historical provider-prefixed title aliases are retained only as migration references in registry/docs.
 pubmed_identifier,pmid,EXACT,8,"PubMed provider input still arrives as pubmed_id, but normalized schema, join keys and DQ contracts use pmid."
-shared_abstract,abstract,WEAK,6,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
+publication_abstract,abstract,EXACT,6,Canonical publication abstract is normalized across provider and composite publication surfaces.
 shared_abstract_structured,abstract_structured,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_action_type_description,action_type_description,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_action_type_parent_type,action_type_parent_type,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
@@ -66,7 +66,7 @@ shared_author_keys,author_keys,WEAK,5,"Same field name appears across pipelines,
 shared_author_openalex_ids,author_openalex_ids,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_author_orcids,author_orcids,WEAK,5,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_author_s2_ids,author_s2_ids,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
-shared_authors,authors,WEAK,6,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
+publication_authors,authors,EXACT,6,Canonical publication authors payload is normalized across provider and composite publication surfaces.
 shared_authors_with_affiliations,authors_with_affiliations,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_availability_type,availability_type,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_bao_endpoint,bao_endpoint,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
@@ -157,7 +157,7 @@ shared_issn,issn,WEAK,4,"Same field name appears across pipelines, but no canoni
 shared_issn_electronic,issn_electronic,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_issn_list,issn_list,WEAK,3,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_issn_print,issn_print,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
-shared_issue,issue,WEAK,6,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
+publication_issue,issue,EXACT,6,Canonical publication issue value is normalized across provider and composite publication surfaces.
 shared_iupac_name,iupac_name,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_journal_iso_abbrev,journal_iso_abbrev,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_journal_issn_type,journal_issn_type,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
@@ -213,12 +213,12 @@ shared_protein_name,protein_name,WEAK,3,"Same field name appears across pipeline
 shared_pub_date,pub_date,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_pub_day,pub_day,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_pub_month,pub_month,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
-shared_publication_class,publication_class,WEAK,6,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
-shared_publication_date,publication_date,WEAK,6,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
+publication_publication_class,publication_class,EXACT,6,Canonical publication class vocabulary is normalized across provider and composite publication surfaces.
+publication_publication_date,publication_date,EXACT,6,Canonical publication date is normalized across provider and composite publication surfaces.
 shared_publication_id,publication_id,EXACT,8,Same identifier-like field name appears across pipeline schemas.
 shared_publication_status,publication_status,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
-shared_publication_subclass,publication_subclass,WEAK,6,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
-shared_publication_type_unified,publication_type_unified,WEAK,6,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
+publication_publication_subclass,publication_subclass,EXACT,6,Canonical publication subclass vocabulary is normalized across provider and composite publication surfaces.
+publication_publication_type_unified,publication_type_unified,EXACT,6,Canonical unified publication type vocabulary is normalized across provider and composite publication surfaces.
 shared_publication_types,publication_types,WEAK,3,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_publisher,publisher,WEAK,3,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_qudt_units,qudt_units,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
@@ -278,6 +278,6 @@ shared_variant_organism,variant_organism,WEAK,2,"Same field name appears across 
 shared_variant_sequence,variant_sequence,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_variant_sequence_json,variant_sequence_json,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 shared_variant_taxonomy_id,variant_taxonomy_id,EXACT,2,Same identifier-like field name appears across pipeline schemas.
-shared_volume,volume,WEAK,6,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
+publication_volume,volume,EXACT,6,Canonical publication volume value is normalized across provider and composite publication surfaces.
 shared_withdrawn_flag,withdrawn_flag,WEAK,2,"Same field name appears across pipelines, but no canonical registry or mapping module proves business identity."
 uniprot_accession_identifier,accession,PARTIAL,4,"UniProt accession identity is PARTIAL across ChEMBL component evidence, UniProt idmapping output, composite target chaining, and UniProt protein primary keys. Direct joins use idmapping/protein accessions; ChEMBL component accession remains lineage evidence."
