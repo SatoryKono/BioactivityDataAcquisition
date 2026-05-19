@@ -6,13 +6,13 @@ and initializes the domain classification module.
 
 from __future__ import annotations
 
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 
 from bioetl.domain.mapping.classification_data import ClassificationData
 
 
-@lru_cache(maxsize=None)
+@cache
 def _load_publication_type_classification_data(
     configs_root_key: str,
 ) -> ClassificationData:

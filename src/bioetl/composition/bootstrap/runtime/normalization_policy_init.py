@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 
 from bioetl.domain.normalization.profiles.chembl_policy_registry_data import (
@@ -10,7 +10,7 @@ from bioetl.domain.normalization.profiles.chembl_policy_registry_data import (
 )
 
 
-@lru_cache(maxsize=None)
+@cache
 def _load_chembl_policy_registry_data(
     configs_root_key: str,
 ) -> ChemblPolicyRegistryData:

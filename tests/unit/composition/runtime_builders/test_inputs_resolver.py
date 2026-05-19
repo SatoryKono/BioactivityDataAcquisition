@@ -421,3 +421,33 @@ def test_prepare_runner_inputs_adjusts_batch_size_from_source_config_when_filter
         "adjusted": 25,
         "reason": "input_filter_active",
     }
+
+
+def test_validate_pk_contract_requires_business_primary_keys() -> None:
+    config = SimpleNamespace(
+        business_primary_keys=[],
+        technical_primary_key="entity_id",
+    )
+
+    with pytest.raises(ValueError, match="business_primary_keys must be non-empty"):
+        inputs_resolver.validate_pk_contract(config)
+
+
+def test_validate_pk_contract_ignores_legacy_attribute_when_present() -> None:
+    config = SimpleNamespace(
+        business_primary_keys=["entity_id"],
+        primary_keys=["legacy_id"],
+        technical_primary_key="entity_id",
+    )
+
+    inputs_resolver.validate_pk_contract(config)
+
+
+def test_validate_pk_contract_requires_technical_primary_key() -> None:
+    config = SimpleNamespace(
+        business_primary_keys=["entity_id"],
+        technical_primary_key="",
+    )
+
+    with pytest.raises(ValueError, match="technical_primary_key must be non-empty"):
+        inputs_resolver.validate_pk_contract(config)

@@ -1980,33 +1980,3 @@ def test_canonical_observability_builder_configures_dq_monitor_thresholds() -> N
     assert result.dq_monitor is dq_monitor
     assert dq_monitor.detector.min_baseline_samples == 12
     assert dq_monitor.detector.set_threshold.call_count == 2
-
-
-def test_validate_pk_contract_requires_business_primary_keys() -> None:
-    config = SimpleNamespace(
-        business_primary_keys=[],
-        technical_primary_key="entity_id",
-    )
-
-    with pytest.raises(ValueError, match="business_primary_keys must be non-empty"):
-        inputs_resolver.validate_pk_contract(config)
-
-
-def test_validate_pk_contract_ignores_legacy_attribute_when_present() -> None:
-    config = SimpleNamespace(
-        business_primary_keys=["entity_id"],
-        primary_keys=["legacy_id"],
-        technical_primary_key="entity_id",
-    )
-
-    inputs_resolver.validate_pk_contract(config)
-
-
-def test_validate_pk_contract_requires_technical_primary_key() -> None:
-    config = SimpleNamespace(
-        business_primary_keys=["entity_id"],
-        technical_primary_key="",
-    )
-
-    with pytest.raises(ValueError, match="technical_primary_key must be non-empty"):
-        inputs_resolver.validate_pk_contract(config)
