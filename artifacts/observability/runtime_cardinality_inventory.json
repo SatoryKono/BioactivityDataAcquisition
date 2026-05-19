@@ -947,6 +947,9 @@
     "freshness_anchor_timestamp": [
       "src/bioetl/application/services/data_quality_service.py"
     ],
+    "generated_at must be provided for deterministic export manifests; operator-only exports must opt into non-deterministic generated_at": [
+      "src/bioetl/application/services/export_manifests.py"
+    ],
     "get_last_pressure_state": [
       "src/bioetl/application/core/batch_memory_manager.py"
     ],
@@ -1792,6 +1795,7 @@
     "forensic_profile",
     "fragment_ids",
     "freshness_anchor_timestamp",
+    "generated_at must be provided for deterministic export manifests; operator-only exports must opt into non-deterministic generated_at",
     "get_last_pressure_state",
     "get_monitor_mode",
     "gold",

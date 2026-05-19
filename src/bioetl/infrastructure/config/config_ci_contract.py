@@ -162,6 +162,7 @@ CONTRACT_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
         "rename_map",
         "hash_include",
         "hash_exclude",
+        "hash_datetime_policy",
         "scd_type",
         "gold_business_rules",
     }

@@ -113,6 +113,51 @@ def _apply_manifest_updates_to_mutable_context(
     return ctx
 
 
+def _extract_optional_updates_from_refs(
+    control_plane_refs: _ManifestControlPlaneRefs,
+) -> tuple[tuple[str, str], ...]:
+    """Extract optional control-plane updates from manifest refs."""
+    return _iter_optional_control_plane_updates(
+        execution_fingerprint=getattr(
+            control_plane_refs, "execution_fingerprint", None
+        ),
+        config_hash=getattr(control_plane_refs, "config_hash", None),
+        resolved_config_hash=getattr(
+            control_plane_refs, "resolved_config_hash", None
+        ),
+        effective_config_hash=getattr(
+            control_plane_refs, "effective_config_hash", None
+        ),
+        source_fingerprint=getattr(
+            control_plane_refs, "source_fingerprint", None
+        ),
+        dq_contract_compatibility_hash=getattr(
+            control_plane_refs, "dq_contract_compatibility_hash", None
+        ),
+        effective_config_artifact_id=getattr(
+            control_plane_refs, "effective_config_artifact_id", None
+        ),
+        contract_ref=getattr(control_plane_refs, "contract_ref", None),
+        contract_version=getattr(control_plane_refs, "contract_version", None),
+        contract_schema_hash=getattr(
+            control_plane_refs, "contract_schema_hash", None
+        ),
+        dq_policy_ref=getattr(control_plane_refs, "dq_policy_ref", None),
+        rule_bundle_version=getattr(
+            control_plane_refs, "rule_bundle_version", None
+        ),
+        normalization_profile_ref=getattr(
+            control_plane_refs, "normalization_profile_ref", None
+        ),
+        normalization_profile_version=getattr(
+            control_plane_refs, "normalization_profile_version", None
+        ),
+        normalization_profile_hash=getattr(
+            control_plane_refs, "normalization_profile_hash", None
+        ),
+    )
+
+
 def attach_manifest_id(
     ctx: PipelineRunContext,
     manifest_id: str | None = None,
@@ -137,45 +182,7 @@ def attach_manifest_id(
     """Return context carrying manifest/control-plane provenance values."""
     if control_plane_refs is not None:
         manifest_id = control_plane_refs.manifest_id
-        optional_updates = _iter_optional_control_plane_updates(
-            execution_fingerprint=getattr(
-                control_plane_refs, "execution_fingerprint", None
-            ),
-            config_hash=getattr(control_plane_refs, "config_hash", None),
-            resolved_config_hash=getattr(
-                control_plane_refs, "resolved_config_hash", None
-            ),
-            effective_config_hash=getattr(
-                control_plane_refs, "effective_config_hash", None
-            ),
-            source_fingerprint=getattr(
-                control_plane_refs, "source_fingerprint", None
-            ),
-            dq_contract_compatibility_hash=getattr(
-                control_plane_refs, "dq_contract_compatibility_hash", None
-            ),
-            effective_config_artifact_id=getattr(
-                control_plane_refs, "effective_config_artifact_id", None
-            ),
-            contract_ref=getattr(control_plane_refs, "contract_ref", None),
-            contract_version=getattr(control_plane_refs, "contract_version", None),
-            contract_schema_hash=getattr(
-                control_plane_refs, "contract_schema_hash", None
-            ),
-            dq_policy_ref=getattr(control_plane_refs, "dq_policy_ref", None),
-            rule_bundle_version=getattr(
-                control_plane_refs, "rule_bundle_version", None
-            ),
-            normalization_profile_ref=getattr(
-                control_plane_refs, "normalization_profile_ref", None
-            ),
-            normalization_profile_version=getattr(
-                control_plane_refs, "normalization_profile_version", None
-            ),
-            normalization_profile_hash=getattr(
-                control_plane_refs, "normalization_profile_hash", None
-            ),
-        )
+        optional_updates = _extract_optional_updates_from_refs(control_plane_refs)
     else:
         if manifest_id is None:
             raise TypeError(

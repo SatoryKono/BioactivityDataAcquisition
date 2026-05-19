@@ -319,6 +319,7 @@ ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES_BY_MODULE = {
     "bioetl.composition._services": frozenset(
         {
             ROOT / "tests" / "unit" / "composition" / "test_services_entrypoints.py",
+            ROOT / "tests" / "unit" / "composition" / "test_observability_api.py",
         }
     ),
 }

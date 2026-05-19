@@ -132,25 +132,7 @@ def _extract_author_bundle(
     author_orcids = extract_author_orcids(record)
     serialized_orcids = serialize_json_list(author_orcids)
 
-    affiliation_strings: list[str] = []
-    affiliation_dicts: list[JsonDict] = []
-    for author in raw_author_details:
-        raw_affiliations = author.get("affiliations", [])
-        if not isinstance(raw_affiliations, list):
-            continue
-        for affiliation in raw_affiliations:
-            if isinstance(affiliation, str):
-                affiliation_strings.append(affiliation)
-            elif isinstance(affiliation, dict):
-                affiliation_dicts.append(affiliation)
-
-    if affiliation_dicts:
-        affiliations_input: list[str] | list[JsonDict] | None = affiliation_dicts
-    elif affiliation_strings:
-        affiliations_input = affiliation_strings
-    else:
-        affiliations_input = None
-
+    affiliations_input = _extract_affiliations_input(raw_author_details)
     affiliations_json = data_normalizer.normalize_affiliations(affiliations_input)
 
     return {
@@ -174,6 +156,29 @@ def _extract_author_bundle(
         ),
         "affiliation_list": affiliations_json,
     }
+
+
+def _extract_affiliations_input(
+    raw_author_details: list[JsonDict],
+) -> list[str] | list[JsonDict] | None:
+    """Extract affiliations from author details, preferring dicts over strings."""
+    affiliation_strings: list[str] = []
+    affiliation_dicts: list[JsonDict] = []
+    for author in raw_author_details:
+        raw_affiliations = author.get("affiliations", [])
+        if not isinstance(raw_affiliations, list):
+            continue
+        for affiliation in raw_affiliations:
+            if isinstance(affiliation, str):
+                affiliation_strings.append(affiliation)
+            elif isinstance(affiliation, dict):
+                affiliation_dicts.append(affiliation)
+
+    if affiliation_dicts:
+        return affiliation_dicts
+    if affiliation_strings:
+        return affiliation_strings
+    return None
 
 
 def _build_crossref_identity_fields(

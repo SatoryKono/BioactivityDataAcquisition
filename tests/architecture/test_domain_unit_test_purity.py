@@ -132,6 +132,14 @@ _ALLOWED_RUNTIME_SEAMS: dict[tuple[str, str], str] = {
         "tests/unit/domain/schemas/test_constants_yaml.py",
         "yaml",
     ): "schema constants sync contract parses canonical enum YAML",
+    (
+        "tests/unit/domain/normalization/profiles/test_publication_identifier_profiles.py",
+        "read_text",
+    ): "publication taxonomy fixture contract reads canonical identifier YAML",
+    (
+        "tests/unit/domain/normalization/profiles/test_publication_identifier_profiles.py",
+        "yaml",
+    ): "publication taxonomy fixture contract parses canonical identifier YAML",
 }
 
 
@@ -254,16 +262,24 @@ def _relative_repo_path(project_root: Path, file_path: Path) -> str:
     return file_path.relative_to(project_root).as_posix()
 
 
+def _repo_root_from_project_root(project_root: Path) -> Path:
+    """Convert tests/ project_root to actual repository root for exemption lookup."""
+    if project_root.name == "tests":
+        return project_root.parent
+    return project_root
+
+
 def _filter_allowed_runtime_seams(
     *,
     project_root: Path,
     violations: list[RuntimeSeamViolation],
 ) -> list[RuntimeSeamViolation]:
+    repo_root = _repo_root_from_project_root(project_root)
     return [
         violation
         for violation in violations
         if (
-            _relative_repo_path(project_root, violation.file_path),
+            _relative_repo_path(repo_root, violation.file_path),
             violation.seam,
         )
         not in _ALLOWED_RUNTIME_SEAMS

@@ -169,23 +169,41 @@ def resolve_replay_resume_rebuild_verdict(
     mode = str(replay_mode or "").strip()
     continuation = str(continuation_mode or "").strip()
     readiness = str(replay_readiness_verdict or "").strip()
-    if (
-        capability == "exact_replay_supported"
-        and readiness == "exact_replay_ready"
-        and (mode == "exact_replay" or continuation == "exact_replay")
-    ):
+
+    if _is_exact_replay_ready(capability, readiness, mode, continuation):
         return "exact_replay_ready"
     if _has_missing_anchors(missing_anchors):
         return "resume_only_degraded"
-    if capability == "resume_only" or mode == "resume" or "resume" in continuation:
+    if _is_resume_only(capability, mode, continuation):
         return "resume_only"
-    if capability == "rebuild_only" or mode in {
+    if _is_rebuild_only(capability, mode):
+        return "rebuild_only"
+    return "non_replayable"
+
+
+def _is_exact_replay_ready(
+    capability: str,
+    readiness: str,
+    mode: str,
+    continuation: str,
+) -> bool:
+    return (
+        capability == "exact_replay_supported"
+        and readiness == "exact_replay_ready"
+        and (mode == "exact_replay" or continuation == "exact_replay")
+    )
+
+
+def _is_resume_only(capability: str, mode: str, continuation: str) -> bool:
+    return capability == "resume_only" or mode == "resume" or "resume" in continuation
+
+
+def _is_rebuild_only(capability: str, mode: str) -> bool:
+    return capability == "rebuild_only" or mode in {
         "rebuild",
         "same_data_state_recovery",
         "full_scan_idempotent_rebuild",
-    }:
-        return "rebuild_only"
-    return "non_replayable"
+    }
 
 
 def resolve_replay_next_action(verdict: object) -> str:
