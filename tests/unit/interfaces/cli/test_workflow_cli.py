@@ -19,13 +19,15 @@ from bioetl.interfaces.cli.main import cli
 @dataclass
 class _FakeWorkflowRunnerService:
     received_config: object | None = None
+    received_kwargs: dict[str, object] | None = None
 
     async def run_workflow(
         self,
         config: object,
-        **_: object,
+        **kwargs: object,
     ) -> WorkflowRunExecutionResult:
         self.received_config = config
+        self.received_kwargs = kwargs
         return WorkflowRunExecutionResult(
             workflow_name="chembl_core",
             status="success",
@@ -275,6 +277,61 @@ def test_workflow_run_accepts_pipeline_style_runtime_overrides(
     assert all(
         getattr(step.run_options, "enable_tracing", None) is True
         for step in pipeline_steps
+    )
+
+
+def test_workflow_run_forwards_occurrence_pinned_resume_selectors(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    import bioetl.interfaces.cli.commands.workflow as workflow_cmd
+
+    fake_service = _FakeWorkflowRunnerService()
+    monkeypatch.setattr(
+        workflow_cmd,
+        "get_workflow_execution_service",
+        lambda registry=None: fake_service,
+        raising=True,
+    )
+
+    result = cli_runner.invoke(
+        cli,
+        [
+            "workflow",
+            "run",
+            "chembl_core",
+            "--resume-manifest-id",
+            "manifest-123",
+            "--required-persistence-profile",
+            "degraded_observable",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert fake_service.received_kwargs is not None
+    assert fake_service.received_kwargs["resume_last"] is False
+    assert fake_service.received_kwargs["resume_manifest_id"] == "manifest-123"
+    assert fake_service.received_kwargs["resume_run_id"] is None
+
+
+def test_workflow_run_rejects_conflicting_resume_selectors(
+    cli_runner: CliRunner,
+) -> None:
+    result = cli_runner.invoke(
+        cli,
+        [
+            "workflow",
+            "run",
+            "chembl_core",
+            "--resume-last",
+            "--resume-manifest-id",
+            "manifest-123",
+        ],
+    )
+
+    assert result.exit_code != 0
+    assert "--resume-last cannot be used together with --resume-manifest-id" in (
+        result.output
     )
 
 

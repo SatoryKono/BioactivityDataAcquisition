@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 import click
 
@@ -12,6 +13,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,
 )
+from bioetl.domain.types import RunID
 from bioetl.interfaces.cli.commands._workflow_support import (
     apply_cli_overrides,
     parse_only_steps,
@@ -33,15 +35,39 @@ __all__ = [
 
 
 def _validate_run_workflow_options(
+    *,
     incremental: bool,
     resume_last: bool,
+    resume_manifest_id: str | None,
+    resume_run_id: UUID | None,
     start_offset: int | None,
 ) -> None:
     """Validate mutually exclusive workflow run options."""
-    if incremental and resume_last:
+    explicit_resume_requested = (
+        resume_last or resume_manifest_id is not None or resume_run_id is not None
+    )
+    if resume_last and resume_manifest_id is not None:
         echo_error(
             "Invalid options",
-            "--incremental cannot be used together with --resume-last",
+            "--resume-last cannot be used together with --resume-manifest-id",
+        )
+        raise click.exceptions.Exit(ExitCode.CONFIG_ERROR)
+    if resume_last and resume_run_id is not None:
+        echo_error(
+            "Invalid options",
+            "--resume-last cannot be used together with --resume-run-id",
+        )
+        raise click.exceptions.Exit(ExitCode.CONFIG_ERROR)
+    if resume_manifest_id is not None and resume_run_id is not None:
+        echo_error(
+            "Invalid options",
+            "--resume-manifest-id cannot be used together with --resume-run-id",
+        )
+        raise click.exceptions.Exit(ExitCode.CONFIG_ERROR)
+    if incremental and explicit_resume_requested:
+        echo_error(
+            "Invalid options",
+            "--incremental cannot be used together with resume selectors",
         )
         raise click.exceptions.Exit(ExitCode.CONFIG_ERROR)
     if incremental and start_offset is not None:
@@ -126,6 +152,8 @@ def _execute_workflow_and_publish_metrics(
     dry_run: bool,
     only_steps: str | None,
     resume_last: bool,
+    resume_manifest_id: str | None,
+    resume_run_id: UUID | None,
     force_steps: str | None,
     repair_steps: str | None,
     incremental: bool,
@@ -138,6 +166,8 @@ def _execute_workflow_and_publish_metrics(
             config,
             launch_context={"only_steps": list(parse_only_steps(only_steps) or ())},
             resume_last=resume_last,
+            resume_manifest_id=resume_manifest_id,
+            resume_run_id=RunID(resume_run_id) if resume_run_id is not None else None,
             force_steps=parsed_force_steps,
             repair_steps=parsed_repair_steps,
             incremental=incremental,

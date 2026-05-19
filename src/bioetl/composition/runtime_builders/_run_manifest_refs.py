@@ -19,6 +19,13 @@ if TYPE_CHECKING:
 DataRootMode = Literal["explicit", "repo_default", "private_cache", "tmp"]
 
 
+def legacy_config_hash_from_resolved_config_hash(
+    resolved_config_hash: str | None,
+) -> str | None:
+    """Return the legacy manifest config-hash alias for older consumers."""
+    return resolved_config_hash
+
+
 def is_explicit_data_root_configured(settings: Settings) -> bool:
     """Return ``True`` when settings declare an explicit non-empty data root."""
     configured_root = getattr(settings, "data_dir", None)
@@ -172,7 +179,9 @@ def create_control_plane_refs(
     return ManifestControlPlaneRefs(
         manifest_id=manifest_id,
         execution_fingerprint=execution_fingerprint,
-        config_hash=resolved_config_hash,
+        config_hash=legacy_config_hash_from_resolved_config_hash(
+            resolved_config_hash
+        ),
         resolved_config_hash=resolved_config_hash,
         effective_config_hash=effective_config_hash,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,

@@ -12,6 +12,7 @@ from bioetl.composition.factories.pipeline.construction_types import (
 )
 from bioetl.composition.runtime_builders.run_manifest_support import (
     RunManifestContractIdentity,
+    legacy_config_hash_from_resolved_config_hash,
     resolve_contract_identity,
 )
 from bioetl.composition.services.versioning import (
@@ -226,7 +227,11 @@ class RunContextFactory:
             if resolved_config_hash is None
             else resolved_config_hash
         )
-        legacy_config_hash = config_hash if config_hash is not None else resolved_hash
+        legacy_config_hash = (
+            config_hash
+            if config_hash is not None
+            else legacy_config_hash_from_resolved_config_hash(resolved_hash)
+        )
         return RunContext.create(
             RunContextCreateInput(
                 run_id=run_id,

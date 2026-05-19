@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from uuid import UUID
 from typing import TYPE_CHECKING
 
 import click
@@ -199,6 +200,16 @@ def workflow() -> None:
     help="Resume the latest incomplete or failed execution for this workflow",
 )
 @click.option(
+    "--resume-manifest-id",
+    type=str,
+    help="Resume one specific workflow execution state selected by manifest_id",
+)
+@click.option(
+    "--resume-run-id",
+    type=click.UUID,
+    help="Resume one specific workflow execution state selected by workflow run_id",
+)
+@click.option(
     "--force-steps",
     help="Comma-separated step IDs to force even when resume would normally skip them",
 )
@@ -211,7 +222,7 @@ def workflow() -> None:
     is_flag=True,
     default=False,
     help="Auto-increment start_offset from last successful execution. "
-    "Cannot be used with --resume-last or --start-offset.",
+    "Cannot be used with resume selectors or --start-offset.",
 )
 @click.pass_obj
 def run_workflow_command(
@@ -240,12 +251,20 @@ def run_workflow_command(
     replay_of_manifest_id: str | None,
     enable_tracing: bool | None,
     resume_last: bool,
+    resume_manifest_id: str | None,
+    resume_run_id: UUID | None,
     force_steps: str | None,
     repair_steps: str | None,
     incremental: bool,
 ) -> None:
     """Execute one declarative workflow config sequentially."""
-    _validate_run_workflow_options(incremental, resume_last, start_offset)
+    _validate_run_workflow_options(
+        incremental=incremental,
+        resume_last=resume_last,
+        resume_manifest_id=resume_manifest_id,
+        resume_run_id=resume_run_id,
+        start_offset=start_offset,
+    )
     config = _load_and_apply_workflow_config(
         load_workflow_config_fn=load_workflow_config,
         name=name,
@@ -281,6 +300,8 @@ def run_workflow_command(
         dry_run=dry_run,
         only_steps=only_steps,
         resume_last=resume_last,
+        resume_manifest_id=resume_manifest_id,
+        resume_run_id=resume_run_id,
         force_steps=force_steps,
         repair_steps=repair_steps,
         incremental=incremental,

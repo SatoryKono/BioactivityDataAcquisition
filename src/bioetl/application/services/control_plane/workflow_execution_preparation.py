@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 from datetime import datetime
+from uuid import UUID
 
 from bioetl.application.services.control_plane.workflow_manifest_models import (
     WorkflowManifestCreateSpec,
@@ -44,6 +45,8 @@ def prepare_workflow_execution(
     config: WorkflowConfig,
     launch_context: dict[str, object],
     resume_last: bool,
+    resume_manifest_id: str | None,
+    resume_run_id: RunID | str | None,
     force_steps: tuple[str, ...],
     repair_steps: tuple[str, ...],
     manifest_service: WorkflowManifestService,
@@ -66,7 +69,7 @@ def prepare_workflow_execution(
         launch_context=launch_context,
     )
     current_fingerprint = manifest_service.compute_execution_fingerprint(request)
-    if not resume_last:
+    if not (resume_last or resume_manifest_id or resume_run_id):
         return _prepare_new_execution(
             manifest_service=manifest_service,
             workflow_state_port=workflow_state_port,
@@ -75,6 +78,8 @@ def prepare_workflow_execution(
     return _prepare_resumed_execution(
         config=config,
         current_fingerprint=current_fingerprint,
+        resume_manifest_id=resume_manifest_id,
+        resume_run_id=resume_run_id,
         force_steps=force_steps,
         repair_steps=repair_steps,
         manifest_service=manifest_service,
@@ -106,6 +111,8 @@ def _prepare_resumed_execution(
     *,
     config: WorkflowConfig,
     current_fingerprint: str,
+    resume_manifest_id: str | None,
+    resume_run_id: RunID | str | None,
     force_steps: tuple[str, ...],
     repair_steps: tuple[str, ...],
     manifest_service: WorkflowManifestService,
@@ -115,6 +122,8 @@ def _prepare_resumed_execution(
     latest_state = _load_resume_state(
         workflow_state_port=workflow_state_port,
         workflow_name=config.name,
+        resume_manifest_id=resume_manifest_id,
+        resume_run_id=resume_run_id,
     )
     _validate_resume_state(
         latest_state=latest_state,
@@ -154,13 +163,39 @@ def _load_resume_state(
     *,
     workflow_state_port: WorkflowExecutionStatePort,
     workflow_name: str,
+    resume_manifest_id: str | None,
+    resume_run_id: RunID | str | None,
 ) -> WorkflowExecutionState:
+    if resume_run_id is not None:
+        resolved_run_id = _coerce_resume_run_id(resume_run_id)
+        state = workflow_state_port.get_by_run_id(resolved_run_id)
+        if state is None:
+            raise RuntimeError(
+                f"Workflow '{workflow_name}' has no persisted execution state for "
+                f"--resume-run-id={resolved_run_id}"
+            )
+        return state
+    if resume_manifest_id is not None:
+        state = workflow_state_port.get_by_manifest_id(resume_manifest_id)
+        if state is None:
+            raise RuntimeError(
+                f"Workflow '{workflow_name}' has no persisted execution state for "
+                f"--resume-manifest-id={resume_manifest_id}"
+            )
+        return state
     latest_state = workflow_state_port.get_latest(workflow_name)
     if latest_state is None:
         raise RuntimeError(
             f"Workflow '{workflow_name}' has no persisted execution state for --resume-last"
         )
     return latest_state
+
+
+def _coerce_resume_run_id(resume_run_id: RunID | str) -> RunID:
+    """Normalize external resume selectors into the RunID domain type."""
+    if isinstance(resume_run_id, UUID):
+        return RunID(resume_run_id)
+    return RunID(UUID(str(resume_run_id)))
 
 
 def _validate_resume_state(

@@ -69,6 +69,8 @@ class WorkflowExecutionService:
         *,
         launch_context: dict[str, object] | None = None,
         resume_last: bool = False,
+        resume_manifest_id: str | None = None,
+        resume_run_id: RunID | str | None = None,
         force_steps: tuple[str, ...] = (),
         repair_steps: tuple[str, ...] = (),
         incremental: bool = False,
@@ -77,6 +79,8 @@ class WorkflowExecutionService:
         resolved_launch_context = _resolve_launch_context(
             launch_context=launch_context,
             resume_last=resume_last,
+            resume_manifest_id=resume_manifest_id,
+            resume_run_id=resume_run_id,
             force_steps=force_steps,
             repair_steps=repair_steps,
         )
@@ -84,6 +88,8 @@ class WorkflowExecutionService:
             config=config,
             launch_context=resolved_launch_context,
             resume_last=resume_last,
+            resume_manifest_id=resume_manifest_id,
+            resume_run_id=resume_run_id,
             force_steps=force_steps,
             repair_steps=repair_steps,
             manifest_service=self.manifest_service,
@@ -135,11 +141,17 @@ def _resolve_launch_context(
     *,
     launch_context: dict[str, object] | None,
     resume_last: bool,
+    resume_manifest_id: str | None,
+    resume_run_id: RunID | str | None,
     force_steps: tuple[str, ...],
     repair_steps: tuple[str, ...],
 ) -> dict[str, object]:
     resolved_launch_context = dict(launch_context or {})
     resolved_launch_context["resume_last"] = resume_last
+    resolved_launch_context["resume_manifest_id"] = resume_manifest_id
+    resolved_launch_context["resume_run_id"] = (
+        str(resume_run_id) if resume_run_id is not None else None
+    )
     resolved_launch_context["force_steps"] = list(force_steps)
     resolved_launch_context["repair_steps"] = list(repair_steps)
     return resolved_launch_context
