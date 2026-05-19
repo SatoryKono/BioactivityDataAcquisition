@@ -7,24 +7,17 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.services.execution.pipeline_runner_models import (
-    PipelineRunResult,
-    RunResult,
-)
-from bioetl.application.services.execution.cli_run_orchestration_contracts import (
-    MetricsFlushCallable,
-    RunCoroutineCallable,
-    RunPreparedPipelineCallable,
-)
 from bioetl.application.services.execution.cli_run_orchestration_models import (
     CliRunOptionsInput,
     CliRunPreparationInput,
     RunExecutionRequest,
-    RunPreparationResult,
-    StartOffsetValidationResult,
 )
 from bioetl.application.services.execution.cli_run_orchestration_service import (
     CliRunOrchestrationService,
+)
+from bioetl.application.services.execution.pipeline_runner_models import (
+    PipelineRunResult,
+    RunResult,
 )
 from tests.helpers.synthetic_paths import synthetic_test_root
 
@@ -364,6 +357,33 @@ class TestPrepareExecutionRequest:
         assert options.replay_of_run_id == "run-parent"
         assert options.replay_of_manifest_id == "manifest-parent"
 
+    def test_build_options_promotes_occurrence_pinned_resume_selectors(self) -> None:
+        service = CliRunOrchestrationService()
+
+        options = service.build_options(
+            CliRunOptionsInput(
+                run_type="incremental",
+                resume=False,
+                start_offset=None,
+                limit=10,
+                input_csv=None,
+                filter_column=None,
+                filter_field=None,
+                dry_run=False,
+                vacuum_after_run=None,
+                vacuum_retention_days=None,
+                debug=False,
+                use_cached_bronze=False,
+                cached_bronze_date=None,
+                cached_bronze_path=None,
+                resume_run_id="run-occurrence-1",
+            )
+        )
+
+        assert options.resume is True
+        assert options.resume_run_id == "run-occurrence-1"
+        assert options.resume_manifest_id is None
+
     def test_prepare_execution_request_propagates_replay_parentage(self) -> None:
         service = CliRunOrchestrationService()
 
@@ -398,6 +418,110 @@ class TestPrepareExecutionRequest:
         assert result.request is not None
         assert result.request.options.replay_of_run_id == "run-parent"
         assert result.request.options.replay_of_manifest_id == "manifest-parent"
+
+    def test_prepare_execution_request_rejects_resume_flag_with_explicit_selector(
+        self,
+    ) -> None:
+        service = CliRunOrchestrationService()
+
+        result = service.prepare_execution_request(
+            CliRunPreparationInput(
+                pipeline="chembl_activity",
+                options=CliRunOptionsInput(
+                    run_type="incremental",
+                    resume=True,
+                    start_offset=None,
+                    limit=None,
+                    input_csv=None,
+                    filter_column=None,
+                    filter_field=None,
+                    dry_run=False,
+                    vacuum_after_run=None,
+                    vacuum_retention_days=None,
+                    debug=False,
+                    use_cached_bronze=False,
+                    cached_bronze_date=None,
+                    cached_bronze_path=None,
+                    resume_manifest_id="manifest-123",
+                ),
+                health_server=True,
+                health_port=8080,
+            )
+        )
+
+        assert result.is_valid is False
+        assert (
+            result.error_message
+            == "--resume cannot be used together with --resume-run-id/--resume-manifest-id"
+        )
+
+    def test_prepare_execution_request_rejects_both_resume_selectors(self) -> None:
+        service = CliRunOrchestrationService()
+
+        result = service.prepare_execution_request(
+            CliRunPreparationInput(
+                pipeline="chembl_activity",
+                options=CliRunOptionsInput(
+                    run_type="incremental",
+                    resume=False,
+                    start_offset=None,
+                    limit=None,
+                    input_csv=None,
+                    filter_column=None,
+                    filter_field=None,
+                    dry_run=False,
+                    vacuum_after_run=None,
+                    vacuum_retention_days=None,
+                    debug=False,
+                    use_cached_bronze=False,
+                    cached_bronze_date=None,
+                    cached_bronze_path=None,
+                    resume_run_id="run-123",
+                    resume_manifest_id="manifest-123",
+                ),
+                health_server=True,
+                health_port=8080,
+            )
+        )
+
+        assert result.is_valid is False
+        assert (
+            result.error_message
+            == "--resume-run-id and --resume-manifest-id cannot be used together"
+        )
+
+    def test_prepare_execution_request_accepts_manifest_pinned_resume(self) -> None:
+        service = CliRunOrchestrationService()
+
+        result = service.prepare_execution_request(
+            CliRunPreparationInput(
+                pipeline="chembl_activity",
+                options=CliRunOptionsInput(
+                    run_type="incremental",
+                    resume=False,
+                    start_offset=None,
+                    limit=25,
+                    input_csv=None,
+                    filter_column=None,
+                    filter_field=None,
+                    dry_run=False,
+                    vacuum_after_run=None,
+                    vacuum_retention_days=None,
+                    debug=False,
+                    use_cached_bronze=False,
+                    cached_bronze_date=None,
+                    cached_bronze_path=None,
+                    resume_manifest_id="manifest-123",
+                ),
+                health_server=False,
+                health_port=8081,
+            )
+        )
+
+        assert result.is_valid is True
+        assert result.request is not None
+        assert result.request.options.resume is True
+        assert result.request.options.resume_manifest_id == "manifest-123"
 
 
 class TestExecutePipeline:

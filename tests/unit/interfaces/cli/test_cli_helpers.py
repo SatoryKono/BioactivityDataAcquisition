@@ -251,6 +251,8 @@ class TestCliCommands:
         assert "--pipeline" in result.output
         assert "--run-type" in result.output
         assert "--resume" in result.output
+        assert "--resume-run-id" in result.output
+        assert "--resume-manifest-id" in result.output
         assert "--limit" in result.output
 
     def test_quarantine_help(self, cli_runner):
@@ -415,6 +417,110 @@ class TestCliCommands:
         assert pipeline_name == "chembl_activity"
         assert isinstance(options, RunOptions)
         assert options.resume is True
+
+    @patch("bioetl.interfaces.cli.main.register_all_pipelines")
+    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
+    @patch("bioetl.interfaces.cli.commands.run.ensure_metrics_server_started")
+    def test_run_with_resume_manifest_id(
+        self,
+        mock_ensure_metrics,
+        mock_get_service,
+        mock_register,
+        cli_runner,
+        mock_registry,
+    ):
+        """Explicit manifest-pinned resume must be forwarded for ordinary pipelines."""
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+            RunOptions,
+            RunResult,
+        )
+
+        mock_service = MagicMock()
+        mock_result = RunResult(
+            status=PipelineRunResult.SUCCESS,
+            pipeline_name="chembl_activity",
+            run_id="test-run-id",
+            run_type="incremental",
+        )
+        mock_service.run = AsyncMock(return_value=mock_result)
+        mock_get_service.return_value = mock_service
+
+        with patch(
+            "bioetl.interfaces.cli.commands.run.asyncio.run",
+            side_effect=lambda coro: asyncio.new_event_loop().run_until_complete(coro),
+        ):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "run",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--resume-manifest-id",
+                    "manifest-123",
+                    "--no-health-server",
+                ],
+            )
+
+        assert result.exit_code == 0, f"Command failed: {result.output}"
+        call_args = mock_service.run.call_args
+        assert call_args is not None, "service.run was not called"
+        options = call_args[1]["options"]
+        assert isinstance(options, RunOptions)
+        assert options.resume is True
+        assert options.resume_manifest_id == "manifest-123"
+
+    @patch("bioetl.interfaces.cli.main.register_all_pipelines")
+    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
+    @patch("bioetl.interfaces.cli.commands.run.ensure_metrics_server_started")
+    def test_run_with_resume_run_id(
+        self,
+        mock_ensure_metrics,
+        mock_get_service,
+        mock_register,
+        cli_runner,
+        mock_registry,
+    ):
+        """Explicit run-pinned resume must be forwarded for ordinary pipelines."""
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+            RunOptions,
+            RunResult,
+        )
+
+        mock_service = MagicMock()
+        mock_result = RunResult(
+            status=PipelineRunResult.SUCCESS,
+            pipeline_name="chembl_activity",
+            run_id="test-run-id",
+            run_type="incremental",
+        )
+        mock_service.run = AsyncMock(return_value=mock_result)
+        mock_get_service.return_value = mock_service
+
+        with patch(
+            "bioetl.interfaces.cli.commands.run.asyncio.run",
+            side_effect=lambda coro: asyncio.new_event_loop().run_until_complete(coro),
+        ):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "run",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--resume-run-id",
+                    "run-123",
+                    "--no-health-server",
+                ],
+            )
+
+        assert result.exit_code == 0, f"Command failed: {result.output}"
+        call_args = mock_service.run.call_args
+        assert call_args is not None, "service.run was not called"
+        options = call_args[1]["options"]
+        assert isinstance(options, RunOptions)
+        assert options.resume is True
+        assert options.resume_run_id == "run-123"
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     @patch("bioetl.interfaces.cli.commands.run.asyncio.run")

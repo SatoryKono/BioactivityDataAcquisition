@@ -72,6 +72,11 @@ def add_checkpoint_workflow_options(
         click.option("--pipeline", required=True, help="Pipeline name"),
         click.option("--run-id", default=None, help="Optional RUN_ID override"),
         click.option(
+            "--manifest-id",
+            default=None,
+            help="Optional MANIFEST_ID override for immutable checkpoint lookup",
+        ),
+        click.option(
             "--audit-limit",
             default=100,
             show_default=True,

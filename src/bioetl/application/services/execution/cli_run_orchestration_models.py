@@ -45,6 +45,8 @@ class CliRunOptionsSpec:
     cached_bronze_path: str | None
     replay_of_run_id: str | None = None
     replay_of_manifest_id: str | None = None
+    resume_run_id: str | None = None
+    resume_manifest_id: str | None = None
     exact_replay: bool = False
     required_persistence_profile: str | None = None
     enable_tracing: bool | None = None

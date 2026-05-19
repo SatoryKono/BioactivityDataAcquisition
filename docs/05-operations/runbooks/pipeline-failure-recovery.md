@@ -85,12 +85,23 @@ For recoverable failures or interrupted runs:
 bioetl run --pipeline <pipeline-name> --resume
 ```
 
+If operators must resume one explicit historical checkpoint occurrence instead
+of trusting the mutable latest pointer:
+
+```bash
+bioetl run --pipeline <pipeline-name> --resume-run-id <run-id>
+bioetl run --pipeline <pipeline-name> --resume-manifest-id <manifest-id>
+```
+
 Use resume only when:
 
 - checkpoint belongs to the expected pipeline/run family
 - storage layout is still intact
 - there is no evidence of schema or write-side corruption
 - operators only need checkpoint continuation rather than strict exact replay
+
+Prefer the occurrence-pinned selectors for forensic/debug workflows where the
+run family is known and the latest pointer is not trustworthy enough.
 
 Do not interpret `--resume` as exact replay proof. It is a recovery path for the
 current execution family and relies on checkpoint compatibility policy.

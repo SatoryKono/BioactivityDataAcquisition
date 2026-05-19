@@ -65,6 +65,7 @@ def build_manifest_create_spec(
         config_hash=request_inputs.config_hash,
         resolved_config_hash=request_inputs.resolved_config_hash,
         effective_config_hash=request_inputs.effective_config_hash,
+        source_fingerprint=request_inputs.source_fingerprint,
         contract_ref=request_inputs.contract_ref,
         contract_version=request_inputs.contract_version,
         contract_schema_hash=request_inputs.contract_schema_hash,

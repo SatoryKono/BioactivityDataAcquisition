@@ -173,6 +173,7 @@ class RunManifestService(
             config_hash=request.config_hash,
             resolved_config_hash=request.resolved_config_hash,
             effective_config_hash=request.effective_config_hash,
+            source_fingerprint=request.source_fingerprint,
             contract_ref=request.contract_ref,
             contract_version=request.contract_version,
             contract_schema_hash=request.contract_schema_hash,

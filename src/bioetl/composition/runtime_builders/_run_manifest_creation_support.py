@@ -46,6 +46,7 @@ class _RunManifestCreateRequestInputs:
     config_hash: str
     resolved_config_hash: str
     effective_config_hash: str
+    source_fingerprint: str | None
     contract_ref: str
     contract_version: str | None
     contract_schema_hash: str | None

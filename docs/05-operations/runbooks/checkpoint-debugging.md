@@ -153,7 +153,10 @@ Use the workflow-backed CLI view before deciding whether a checkpoint can be
 used for resume or exact replay:
 
 ```bash
+bioetl checkpoint inspect --pipeline chembl_activity --manifest-id "$MANIFEST_ID"
 bioetl checkpoint inspect --pipeline chembl_activity --run-id "$RUN_ID"
+bioetl run --pipeline chembl_activity --resume-run-id "$RUN_ID"
+bioetl run --pipeline chembl_activity --resume-manifest-id "$MANIFEST_ID"
 bioetl checkpoint inspect --pipeline chembl_activity --run-id "$RUN_ID" --format json
 bioetl checkpoint audit-run --run-id "$RUN_ID"
 ```
@@ -174,6 +177,10 @@ The text and JSON payloads expose:
   lifecycle reconstruction, or exact replay;
 - anchor diff lists: matched, mismatched, and missing checkpoint-vs-manifest
   anchors.
+
+For ordinary pipelines, `--resume` still means "follow the latest checkpoint
+pointer", while `--resume-run-id` / `--resume-manifest-id` means "pin resume to
+this exact checkpoint occurrence and then apply the same compatibility gates".
 
 Examples:
 

@@ -81,6 +81,7 @@ def _make_request() -> RunManifestCreateRequest:
         config_hash="a" * 64,
         resolved_config_hash="b" * 64,
         effective_config_hash="c" * 64,
+        source_fingerprint="s" * 64,
         contract_ref="chembl.activity",
         contract_version="1.0.0",
         contract_schema_hash="abc123",
@@ -168,6 +169,7 @@ def test_create_manifest_preserves_distinct_config_hash_surfaces() -> None:
         config_hash="c" * 64,
         resolved_config_hash="a" * 64,
         effective_config_hash="b" * 64,
+        source_fingerprint="d" * 64,
     )
 
     manifest = service.create_manifest(request)
@@ -176,8 +178,10 @@ def test_create_manifest_preserves_distinct_config_hash_surfaces() -> None:
     assert provenance.config_hash == "c" * 64
     assert provenance.resolved_config_hash == "a" * 64
     assert provenance.effective_config_hash == "b" * 64
+    assert provenance.source_fingerprint == "d" * 64
     assert manifest.to_dict()["code_provenance"]["resolved_config_hash"] == "a" * 64
     assert manifest.to_dict()["code_provenance"]["effective_config_hash"] == "b" * 64
+    assert manifest.to_dict()["code_provenance"]["source_fingerprint"] == "d" * 64
 
 
 def test_create_manifest_does_not_alias_missing_effective_hash() -> None:

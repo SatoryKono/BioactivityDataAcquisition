@@ -915,6 +915,126 @@ def test_reproducibility_contract_gold_bundle_keeps_sidecar_and_fragment_identit
     )
 
 
+def test_reproducibility_contract_cross_surface_identity_parity_suite() -> None:
+    """Manifest, checkpoint, sidecar, and lineage surfaces must agree on run identity."""
+    started_at = datetime(2025, 1, 1, tzinfo=UTC)
+    run_id = RunID(UUID("00000000-0000-0000-0000-000000000907"))
+    manifest_id = "manifest-cross-surface-identity"
+    execution_fingerprint = "fp-cross-surface-identity"
+    run_context = RunContext.create(
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        started_at=started_at,
+        provider="chembl",
+        entity="activity",
+        manifest_id=manifest_id,
+        pipeline_version="1.0.0",
+        git_commit="abc1234",
+        dependency_lock_hash="sha256:test-lock-hash",
+        config_hash=_VALID_CONFIG_HASH,
+        resolved_config_hash="b" * 64,
+        effective_config_hash="c" * 64,
+        effective_config_artifact_id="eca-123",
+        execution_fingerprint=execution_fingerprint,
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+        contract_schema_hash="schema-hash-1",
+        dq_policy_ref="chembl.activity.dq",
+        rule_bundle_version="dq-rules.v1",
+        dq_contract_compatibility_hash="compat-hash-1",
+    )
+    coordinator = MetadataCoordinator(run_context)
+    silver_bundle = coordinator.create_silver_metadata_bundle(
+        SilverMetadataInput(
+            table_path="silver/chembl/activity",
+            primary_keys=["activity_id"],
+            mode=SilverWriteMode.MERGE,
+            records=[{"activity_id": 1, "_source_batch_id": "batch-a"}],
+            version_after=4,
+            started_at=started_at,
+            completed_at=started_at + timedelta(seconds=2),
+        )
+    )
+    manifest = _make_manifest(
+        manifest_id=manifest_id,
+        run_id=run_id,
+        execution_fingerprint=execution_fingerprint,
+    )
+    checkpoint = CheckpointMetadata(
+        records_processed=1,
+        dq_contract_compatibility_hash="compat-hash-1",
+        pipeline_name="chembl_activity",
+        run_type="incremental",
+        pipeline_version="1.0.0",
+        git_commit="abc1234",
+        dependency_lock_hash="sha256:test-lock-hash",
+        effective_config_hash="c" * 64,
+        effective_config_artifact_id="eca-123",
+        execution_fingerprint=execution_fingerprint,
+        manifest_id=manifest_id,
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+        run_context={
+            "run_id": str(run_id),
+            "manifest_id": manifest_id,
+            "execution_fingerprint": execution_fingerprint,
+            "effective_config_hash": "c" * 64,
+            "effective_config_artifact_id": "eca-123",
+        },
+    )
+
+    lineage_run_node = next(
+        node
+        for node in silver_bundle.lineage_fragment.nodes
+        if node.node_type == LineageNodeType.RUN
+    )
+    lineage_manifest_node = next(
+        node
+        for node in silver_bundle.lineage_fragment.nodes
+        if node.node_type == LineageNodeType.MANIFEST
+    )
+
+    assert silver_bundle.metadata.runtime.run_id == str(run_id)
+    assert silver_bundle.metadata.runtime.manifest_id == manifest.manifest_id
+    assert silver_bundle.lineage_fragment.run_id == str(run_id)
+    assert silver_bundle.lineage_fragment.manifest_id == manifest.manifest_id
+    assert checkpoint.run_context == {
+        "run_id": str(run_id),
+        "manifest_id": manifest_id,
+        "execution_fingerprint": execution_fingerprint,
+        "effective_config_hash": "c" * 64,
+        "effective_config_artifact_id": "eca-123",
+    }
+    assert (
+        manifest.code_provenance.effective_config_hash
+        == checkpoint.effective_config_hash
+        == silver_bundle.metadata.pipeline.effective_config_hash
+        == lineage_run_node.attributes["effective_config_hash"]
+        == lineage_manifest_node.attributes["effective_config_hash"]
+    )
+    assert (
+        manifest.code_provenance.effective_config_artifact_id
+        == checkpoint.effective_config_artifact_id
+        == silver_bundle.metadata.pipeline.effective_config_artifact_id
+        == lineage_run_node.attributes["effective_config_artifact_id"]
+        == lineage_manifest_node.attributes["effective_config_artifact_id"]
+    )
+    assert (
+        manifest.execution_fingerprint
+        == checkpoint.execution_fingerprint
+        == silver_bundle.metadata.pipeline.execution_fingerprint
+        == lineage_run_node.attributes["execution_fingerprint"]
+        == lineage_manifest_node.attributes["execution_fingerprint"]
+    )
+    assert (
+        manifest.code_provenance.contract_ref
+        == checkpoint.contract_ref
+        == silver_bundle.metadata.pipeline.contract_ref
+        == lineage_run_node.attributes["contract_ref"]
+        == lineage_manifest_node.attributes["contract_ref"]
+    )
+
+
 def test_reproducibility_contract_historical_live_runs_without_snapshot_evidence_stay_bounded() -> (
     None
 ):

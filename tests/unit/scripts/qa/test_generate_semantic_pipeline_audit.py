@@ -61,7 +61,14 @@ def test_resolve_seed_artifact_honors_explicit_override(tmp_path: Path) -> None:
     assert resolved == explicit
 
 
-def test_resolve_seed_artifact_raises_when_no_seed_exists(tmp_path: Path) -> None:
+def test_resolve_seed_artifact_raises_when_no_seed_exists(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    empty_canonical_out_dir = tmp_path / "canonical-empty"
+    empty_canonical_out_dir.mkdir()
+    monkeypatch.setattr(audit, "DEFAULT_OUT_DIR", empty_canonical_out_dir)
+
     with pytest.raises(FileNotFoundError, match="Unable to resolve seed artifact"):
         audit._resolve_seed_artifact(
             None,
@@ -70,6 +77,29 @@ def test_resolve_seed_artifact_raises_when_no_seed_exists(tmp_path: Path) -> Non
             source_date="2026-05-16",
             suffix=".json",
         )
+
+
+def test_resolve_seed_artifact_falls_back_to_canonical_out_dir_for_custom_output(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    canonical_out_dir = tmp_path / "canonical"
+    canonical_out_dir.mkdir()
+    latest = canonical_out_dir / "semantic_pair_matrix_2026-05-15.csv"
+    latest.write_text("header\n", encoding="utf-8")
+    custom_out_dir = tmp_path / "custom"
+    custom_out_dir.mkdir()
+    monkeypatch.setattr(audit, "DEFAULT_OUT_DIR", canonical_out_dir)
+
+    resolved = audit._resolve_seed_artifact(
+        None,
+        out_dir=custom_out_dir,
+        prefix=audit.PAIR_MATRIX_PREFIX,
+        source_date="2026-05-19",
+        suffix=".csv",
+    )
+
+    assert resolved == latest
 
 
 def test_build_current_member_facts_exposes_composite_inherited_field_types() -> None:

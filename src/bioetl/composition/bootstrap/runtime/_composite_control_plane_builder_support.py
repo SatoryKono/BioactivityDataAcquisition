@@ -102,6 +102,7 @@ def _build_composite_control_plane_config_artifacts(
         effective_config_artifact_id,
         resolved_config_hash,
         effective_config_hash,
+        source_fingerprint,
         dq_contract_compatibility_hash,
     ) = create_and_persist_composite_effective_config_artifact(
         pipeline_name=config.name,
@@ -119,6 +120,7 @@ def _build_composite_control_plane_config_artifacts(
         effective_config_artifact_id,
         resolved_config_hash,
         effective_config_hash,
+        source_fingerprint,
         dq_contract_compatibility_hash,
         contract_ref,
         contract_entity,

@@ -45,6 +45,18 @@ def _add_core_options(
             help="Resume from last checkpoint state; not a strict exact replay",
         )(cmd)
         cmd = click.option(
+            "--resume-run-id",
+            type=str,
+            default=None,
+            help="Resume one specific checkpoint occurrence selected by RUN_ID",
+        )(cmd)
+        cmd = click.option(
+            "--resume-manifest-id",
+            type=str,
+            default=None,
+            help="Resume one specific checkpoint occurrence selected by MANIFEST_ID",
+        )(cmd)
+        cmd = click.option(
             "--start-offset",
             type=int,
             default=None,

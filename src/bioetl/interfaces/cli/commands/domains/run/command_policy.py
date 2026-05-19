@@ -103,6 +103,8 @@ class RunCommandInput:
     cached_bronze_path: str | None
     replay_of_run_id: str | None = None
     replay_of_manifest_id: str | None = None
+    resume_run_id: str | None = None
+    resume_manifest_id: str | None = None
     exact_replay: bool = False
     required_persistence_profile: str | None = None
 
@@ -140,6 +142,8 @@ def prepare_run_request(
                 cached_bronze_path=command_input.cached_bronze_path,
                 replay_of_run_id=command_input.replay_of_run_id,
                 replay_of_manifest_id=command_input.replay_of_manifest_id,
+                resume_run_id=command_input.resume_run_id,
+                resume_manifest_id=command_input.resume_manifest_id,
                 exact_replay=command_input.exact_replay,
                 required_persistence_profile=(
                     command_input.required_persistence_profile

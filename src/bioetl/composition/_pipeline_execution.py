@@ -168,9 +168,6 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     Returns:
         RunResult with execution status, record counts, and timing information.
     """
-    settings = get_settings()
-    maybe_start_metrics_server(settings)
-
     run_context = build_pipeline_context(name, options)
     started_at, started_monotonic = capture_runtime_timing_anchor(
         started_at=run_context.started_at,
@@ -190,7 +187,6 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
         runner = _require_execution_metrics_runner(
             _create_pipeline_runner_from_context(run_context)
         )
-        run_id = str(runner.run_id)
     except (
         BioETLError,
         ImportError,
@@ -240,6 +236,7 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
         error_message=error_message,
         error_type=error_type,
     )
+    settings = get_settings()
     if settings.observability.metrics_enabled:
         push_metrics_to_gateway(
             run_label="bioetl",

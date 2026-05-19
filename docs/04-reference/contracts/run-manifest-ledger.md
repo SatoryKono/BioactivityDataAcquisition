@@ -106,6 +106,7 @@ The published `RunCodeProvenance` schema currently includes:
 - `config_hash`
 - `resolved_config_hash`
 - `effective_config_hash`
+- `source_fingerprint`
 - `contract_ref`
 - `contract_version`
 - `contract_schema_hash`
