@@ -72,10 +72,10 @@ class Bioactivity(BaseEntity):
     bao_label: str | None = None
     bao_ontology_version: str | None = None
 
-    type: str | None = None
-    value: float | None = None
+    activity_type: str | None = None
+    activity_value: float | None = None
     units: str | None = None
-    relation: str | None = None
+    activity_relation: str | None = None
     upper_value: float | None = None
     text_value: str | None = None
 
