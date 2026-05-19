@@ -2,27 +2,32 @@ ______________________________________________________________________
 
 ## UX report artifact requirement
 
-Для любого PR с изменениями `grafana/dashboards/*.json` change notes MUST содержать
-ссылку на UX artifact: `docs/reports/dashboard-ux-checks/YYYY-MM-DD.md`.
+Для любого PR с изменениями `grafana/dashboards/*.json` change notes MUST
+содержать ссылку на UX artifact:
+`docs/reports/dashboard-ux-checks/YYYY-MM-DD.md`.
 
 Latest dashboard UX artifact for current shipped JSON changes:
-`docs/reports/dashboard-ux-checks/2026-05-07.md`
+`docs/reports/dashboard-ux-checks/2026-05-19.md`
 
 
-Version: 1.0.1
+Version: 1.0.2
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-03'
+  Last verified: '2026-05-19'
 
 ______________________________________________________________________
 
-# Dashboard v2 Updates (Audit 2026-03-29)
+# Dashboard v2 Updates (Shipped Surface 2026-05-19)
 
 Источник истины: `grafana/dashboards/bioetl-*.json`
+
+Этот changelog описывает **текущий shipped contract**, а не historical patch
+notes. Если prose ниже расходится с JSON, править нужно prose, потому что JSON
+остаётся SSOT.
 
 ## Проверенные дашборды
 
@@ -34,233 +39,101 @@ ______________________________________________________________________
 - `bioetl-silver-reject-explorer`
 - `bioetl-workflow-overview`
 
-## Подтверждено по JSON
+## Current shipped baseline
 
-- Все shipped dashboards, кроме `bioetl-silver-reject-explorer`, используют `refresh: 30s`.
-- `bioetl-silver-reject-explorer` использует `refresh: 1m` и `time.from: now-24h`.
-- `time.from` для `overview/runtime/provider-health/dq/workflow` = `now-12h`.
-- `time.from` для `control-plane-v1` = `now-12h`.
-- Переменные `overview`: `$pipeline`, `$run_type`.
-- Переменные `control-plane-v1`: `$pipeline`, `$run_type`.
-- Переменные `dq/runtime`: `$pipeline`, `$run_type`, `$stage`.
-- Переменные `provider-health-v2`: `$provider`, `$adapter`.
-- Переменные `workflow-overview`: `$workflow`, `$status`.
-- В Prometheus-backed dashboards отсутствуют forensic variables `$quarantine_run_id` и `execution`.
-- Primary `$run_id` сохраняется между primary dashboards только как HTTP identity context.
-- `bioetl-silver-reject-explorer` остаётся единственным shipped exception для `$quarantine_run_id`/`$payload_hash`.
+- Все primary operator dashboards `0..5` используют `refresh: 30s` и
+  `time.from=now-12h`.
+- `bioetl-silver-reject-explorer` остаётся forensic exception с `refresh: 1m`
+  и `time.from=now-24h`.
+- Primary dashboards `0..5` используют shared context shell
+  `$workflow`, `$pipeline`, `$run_type`, `$run_id`.
+- `$workflow` теперь single-select with Include All на всех primary
+  dashboards, включая `bioetl-workflow-overview`.
+- `$pipeline` остаётся single-select; `bioetl-overview-v2` intentionally
+  defaults to `All`, остальные pipeline-scoped dashboards fail-close к
+  `unknown`.
+- `$run_type` остаётся multi-select with Include All.
+- `$run_id` остаётся HTTP-backed identity context через
+  `/ops/control-plane/filter-options`; это не Prometheus label и не Silver
+  forensic selector.
+- `bioetl-workflow-overview` добавляет visible `$status`, `$step_status`,
+  `$step_kind` и hidden handoff vars `$pipeline_context`, `$run_type_context`,
+  `$provider_context`.
+- `bioetl-silver-reject-explorer` остаётся единственным shipped dashboard с
+  exact forensic narrowing selectors `$quarantine_run_id` и `$payload_hash`.
 
-## Исправления, внесенные в JSON
+## Navigation contract now in force
 
-1. Удалены устаревшие forensic variables `run_id`/`execution` из всех
-   Prometheus-backed dashboards; они остались только в
-   `bioetl-silver-reject-explorer`.
-1. Удалены вводящие в заблуждение формулировки про "Latest Run Only".
-1. Исправлен DQ panel `id=12`:
+- Каноническая top-level шина — text navigation panel `id=1000`.
+- Dashboard-to-dashboard links используют `includeVars=false` и передают только
+  allowlisted `var-*` target scope.
+- Same-tab navigation остаётся обязательной для shipped dashboard handoff.
+- Большинство shipped navigation panels `id=1000` после bus `0..5` содержат
+  global adjunct links `Silver Reject Explorer`, `Explore Logs`,
+  `Explore Traces`.
+- `bioetl-control-plane-v1` является intentional exception: top-level
+  navigation не уводит оператора напрямую в `Explore Logs` / `Explore Traces`,
+  а удерживает first screen в dashboard/runbook triage flow.
+- `Explore Traces` uses the explicit search-first Tempo route with bounded
+  initial window `now-150m..now`, `var-ds=tempo`,
+  `var-groupBy=resource.service.name`, and stable low-cardinality TraceQL
+  scope.
 
-```promql
-sum(increase(bioetl_silver_validation_failures_total{pipeline=~"$pipeline"}[24h]))
-```
+## First-screen / panel-title updates
 
-4. Упрощён `3. Provider Health`:
+- `bioetl-overview-v2` canonical CTA panel title = `First Action`
+  (`id=215`).
+- `bioetl-workflow-overview` removed the old `Workflow Scope` banner and now
+  uses `First Action` (`id=9`) as the single justified first-screen
+  dashboard-handoff CTA.
+- Workflow selected-range evidence remains on the first screen:
+  `Failed Workflow Runs / Range`, `Failed Pipeline Steps / Range`,
+  `Failed Transform Steps / Range`, `Skipped Step Events / Range`,
+  `Workflow Run Outcomes / Range`, `First Action`.
+- `bioetl-runtime` keeps `Runtime Telemetry Gap` as a first-screen datasource
+  trust marker and now reserves readable dashboard width for that panel.
+- `bioetl-control-plane-v1` keeps first-screen trust evidence dashboard-first:
+  replay safety, checkpoint freshness, manifest/ledger integrity, telemetry
+  missing, and `Next Action: Replay Diagnostics`.
 
-- removed legacy `Pipeline`/`Execution Timestamp` header section;
-- removed duplicate repeated latency gauge `id=103`;
-- switched summary counters to 15-minute operational windows;
-- kept provider-only filtering because health-check metrics are provider-labeled, not pipeline-labeled.
+## Current key surfaces
 
-5. Актуальный repeated latency gauge:
+- `bioetl-overview-v2`: `id=99`, `214`, `215`, `9300`, `9301`,
+  `9002..9007`, `9013`, `9018..9021`
+- `bioetl-control-plane-v1`: `id=891..894`, `906`, `907`, `908`, `130`,
+  `9400..9407`
+- `bioetl-runtime`: `id=9400..9403`, `9991`, `9100..9102`, `16`, `205`,
+  `220`, `237`, `242`, `250..258`
+- `bioetl-dq-v2`: `id=9400..9403`, `9100..9103`, `1`, `121`, `153..155`
+- `bioetl-provider-health-v2`: `id=9400..9403`, `9002`, `9100..9103`,
+  `1`, `2`, `7`, `31`, `32`, `102`, `104..114`
+- `bioetl-workflow-overview`: `id=9400..9403`, `1..9`,
+  collapsed `Step Diagnostics (collapsed)`
+- `bioetl-silver-reject-explorer`: `id=1..10`
 
-```promql
-histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~"$provider"}[5m])))
-```
+## 2026-05-19 remediation set
 
-6. Добавлен operator drilldown surface:
+1. Formalized the `bioetl-control-plane-v1` navigation exception in active
+   operator docs and removed the universal-doc claim that every `id=1000`
+   must expose direct Explore adjunct links.
+2. Synced selector docs to the shipped `$workflow` contract:
+   single-select with Include All across primary dashboards.
+3. Promoted workflow CTA naming from stale `Next Diagnostic Surface` mirrors to
+   shipped `First Action`.
+4. Updated panel-title/checklist/requirements/test-proposal mirrors to the
+   current shipped workflow and overview titles.
+5. Widened `bioetl-runtime` first-screen `Runtime Telemetry Gap` panel so the
+   trust marker remains readable above fold.
+6. Added fresh UX evidence and CI guards for active dashboard-doc drift.
 
-- `bioetl-overview-v2`, `bioetl-dq-v2`, `bioetl-provider-health-v2` теперь содержат
-  dashboard links `Explore Logs` и `Explore Traces`;
-- `overview.id=1`, `dq.id=1`, `provider.id=1` дублируют этот handoff через data links;
-- Loki links используют low-cardinality entrypoint `{job="bioetl"}` без encoded
-  interpolation dashboard variables внутри Explore payload;
-- Tempo links сохраняют текущее time range и используют bounded TraceQL filters
-  по текущему dashboard scope: `pipeline/run_type` для pipeline dashboards и
-  `provider` для provider dashboard.
+## Validation pointers
 
-7. Добавлен отдельный runtime dashboard:
-
-- `bioetl-runtime` собирает Loki-backed `Inspect Warning Logs`,
-  `Inspect GLOBAL Unstructured Logs` и `Inspect Top Warning Events by Message / Range`
-  за выбранный Grafana time range;
-- panel `Track GLOBAL Log Hygiene Trend` является GLOBAL timeseries и
-  использует adaptive bucket size через `$__interval`;
-- Prometheus-backed панели `Alert Conditions` привязаны к тем же fixed windows, что и
-  shipped rule pack, но по-прежнему не являются real firing-state alert engine;
-- runtime dashboard содержит top-level bus links
-  `0. Control Plane`, `1. Overview`, `3. Provider Health`,
-  `4. Data Quality`, `5. Workflow` и Explore surfaces; переходы к соседним
-  dashboards выполняются напрямую через эту шину с сохранением scope/time.
-
-8. Исправлена selected-range семантика counter-панелей:
-
-- `bioetl-overview-v2` и `bioetl-dq-v2` больше не используют сырые cumulative
-  значения `bioetl_records_processed_total` для range-based KPI;
-- range summaries и distributions используют `increase(...[$__range])`, а trend-панели
-  используют `increase(...[$__interval])`.
-
-9. Убрана misleading зависимость от Prometheus `*_created`:
-
-- панели `Execution Timestamp` заменены на `Latest Data Timestamp`;
-- источником теперь служит доменная gauge-метрика `bioetl_data_freshness_seconds`,
-  а не bookkeeping series клиента Prometheus.
-
-10. Исправлена семантика aggregate DQ score:
-
-- panel `Data Quality Score` переименована в `Data Quality Score (Volume-weighted)`;
-- aggregate score больше не является простым `avg(...)` по сущностям;
-- для weighting используется новая gauge-метрика
-  `bioetl_dq_validation_record_count`.
-
-11. Уточнён scope control-plane lookup panels:
-
-- `Control-plane Lookup Failures`, `Control-plane Lookup Outcomes` и
-  `Control-plane Lookup p95` переименованы в `Global ...`;
-- operator UI больше не намекает, что эти панели фильтруются по `$pipeline`,
-  потому что underlying metrics имеют только `store/operation/status`.
-
-8. Синхронизирована dashboard-навигация:
-
-- `1. Overview` содержит links `2. Runtime`, `3. Provider Health`,
-  `4. Data Quality`, `0. Control Plane`, `5. Workflow`, `Explore Logs`,
-  `Explore Traces`;
-- `2. Runtime`, `3. Provider Health`, `4. Data Quality` и
-  `5. Workflow` встроены в shipped operator flow и используют
-  target-scoped handoffs без variable leakage.
-
-
-12. Усилен DQ surface для deliverability и reject-triage:
-
-- добавлен KPI `DQ Impact on Deliverability (Blocked Share)` (panel `id=154`) — доля записей, заблокированных DQ;
-- добавлен тренд `DQ Impact on Deliverability Trend (Blocked Share %)` (panel `id=155`) для изменения blocked-share во времени по выбранному scope;
-- добавлен отдельный `Data Quality Score Trend (Volume-weighted)` (panel `id=153`) и явно разведён с operational gating indicators;
-- operational gating indicators оставлены в panel `id=1` (`Data Flow in Range: Bronze -> Silver -> Gold`), а quality score вынесен в отдельный trend-panel `id=153`;
-- `Top Silver Reject Reasons` обновлён до `Top Silver Reject Reasons (Pareto)` с dashboard drilldown в `bioetl-silver-reject-explorer`.
-
-13. Внедрён first-screen responsibility contract для L2 dashboards:
-
-- `2. Runtime`: первый экран теперь содержит `First Action`,
-  `Runtime Status`, `Monitor Runtime Blockers` и
-  `Runtime Blockers`; aggregate blockers потребляют
-  `bioetl_runtime_current_blocker_reason` в selected `pipeline/run_type` scope,
-  а inline PromQL aggregation вынесена в recording rules.
-- `3. Provider Health`: первый экран начинается с `GLOBAL Provider Scope`,
-  `Monitor GLOBAL Provider Severity Matrix`, `Inspect Critical Providers`,
-  `Inspect Provider Top Causes` и `First Action`; range counters/trends
-  перенесены ниже first screen.
-- `4. Data Quality`: первый экран начинается с `Monitor DQ Current Status`,
-  `Monitor DQ Threshold State`, `Inspect DQ Current Reasons` и
-  `Review: First Action`; `Data Flow in Range` переименован в
-  `Track Range Evidence: Bronze -> Silver -> Gold` и больше не является L0/L1
-  status source.
-- Добавлены canonical current-status recording rules:
-  `bioetl_runtime_current_status`, `bioetl_provider_current_status`,
-  `bioetl_dq_current_status` и соответствующие reason/cause records.
-
-14. Уточнён Runtime false-zero contract:
-
-- `Runtime Telemetry Gap` теперь проверяет не только scrape и
-  evaluation failures, но также наличие и свежесть rule group
-  `bioetl_observability.yml;bioetl_runtime_dashboard_recording`.
-- `Failed Runs`, `Monitor No-Records Runs` и Runtime handoff cards
-  показывают `0` только при подтверждённом selected runtime universe или GLOBAL
-  provider current-status telemetry; missing scope остаётся `UNKNOWN`.
-- `Inspect GLOBAL Unstructured Logs` использует корректное LogQL поле
-  `{{.__error__}}` после `| json`.
-
-## 2026-05-08 UX/layout consolidation
-
-UX report artifact: `docs/reports/dashboard-ux-checks/2026-05-08.md`.
-
-- All shipped dashboard JSON files now have non-overlapping top-level `gridPos`
-  rectangles; navigation/scope/current-status/range/collapsed rows occupy
-  explicit bands.
-- Data Quality keeps current status and current reasons on the first screen,
-  while selected-range evidence starts below the first-screen current-state
-  band.
-- Provider Health first-screen tables start below the GLOBAL scope banner and
-  expose a provider incident runbook CTA from the severity matrix.
-- Silver Reject Explorer summary/reason/field/signature panels expose explicit
-  Quarantine Management runbook CTAs without duplicating the dashboard bus.
-- Data Quality Explore links disclose the optional tracing profile dependency
-  via tooltips.
-
-## Актуальные ключевые панели
-
-- `bioetl-overview-v2`: `id=99`, `id=101`, `id=1..4`, `id=110..114`, `id=116`, `id=118..120`, `id=221`
-- `bioetl-control-plane-v1`: checkpoint/replay/audit/global-read + lineage detail
-- `bioetl-dq-v2`: `id=99`, `id=101`, `id=9100..9103`, `id=1..12`, `id=116`, `id=121`, `id=153..155`
-- `bioetl-provider-health-v2`: first-screen `id=9100..9103`, `id=9002`, row `id=91` + evidence panels `1,2,104,7,102`
-- `bioetl-runtime`: first-screen `id=1`, `id=9991`, `id=9100..9102`, `id=16`, links в `Explore`
-- `bioetl-workflow-overview`: `id=1..9` с `$workflow/$status/$step_status/$step_kind` scope
-
-## Canonical decision: default time windows (single source for docs sync)
-
-- Decision ID: `DASH-TIMEWINDOW-2026-05-03`
-- Canonical source: `grafana/dashboards/*.json` (dashboard-as-code), validated by
-  `tests/integration/test_grafana_config.py`.
-- Rule:
-  - L0/L1 operator dashboards (`bioetl-overview-v2`, `bioetl-runtime`,
-    `bioetl-dq-v2`, `bioetl-provider-health-v2`, `bioetl-workflow-overview`,
-    `bioetl-control-plane-v1`) MUST keep `time.from=now-12h`, `time.to=now`,
-    `refresh=30s`.
-  - Forensic dashboard `bioetl-silver-reject-explorer` is the explicit
-    exception with `time.from=now-24h`, `time.to=now`, `refresh=1m`.
-- Rationale: единый операторский baseline снижает когнитивный drift между
-  дашбордами и уменьшает риск ложной интерпретации при cross-dashboard triage;
-  forensic surface сохраняет более длинный горизонт для редких reject-инцидентов.
-
-## Примечание по старым гайдам
-
-Документы в `docs/03-guides/dashboards/`, где фигурируют `$run_id`, `execution` или "latest run only", относятся к устаревшей версии и не описывают текущее состояние JSON.
-
-## Lightweight Manual Validation Process (Dashboard UX)
-
-Применяется после любых изменений dashboard UX, навигации, panel copy,
-dashboard links или Explore handoff.
-
-### Incident scenario checklist (3–5 обязательных сценариев)
-
-1. **Runtime деградация**: оператор из `1. Overview` должен корректно перейти в
-   `2. Runtime`/Explore и зафиксировать первую action.
-2. **Provider latency/health инцидент**: оператор из `1. Overview` должен
-   перейти в `3. Provider Health` и получить root-cause signal.
-3. **DQ regression**: оператор из `1. Overview` должен перейти в
-   `4. Data Quality` и найти failing dimension/pipeline.
-4. **Replay safety/blocker**: оператор из `1. Overview` должен перейти в
-   `0. Control Plane` и подтвердить blocker state.
-5. **Workflow failure/skip** (если затронут workflow surface): оператор должен
-   перейти в `5. Workflow` и локализовать failing step/status.
-
-### KPI фиксация по каждому сценарию
-
-Для каждого сценария зафиксировать в changelog:
-
-- `time-to-first-action` (сек);
-- `click-depth to root cause` (кол-во кликов);
-- `first-hop accuracy from Overview` (`yes/no` + короткое пояснение).
-
-Рекомендуемый шаблон записи:
-
-```md
-- Scenario: <name>
-  - time-to-first-action: <N sec>
-  - click-depth to root cause: <N>
-  - first-hop accuracy from Overview: <yes/no> (<note>)
-```
-
-## Merge Gate: KPI Checklist Required
-
-Dashboard change считается **complete** только если:
-
-1. обновлён этот changelog (`dashboard-v2-updates.md`) с результатами
-   lightweight manual validation;
-2. заполнен KPI-чеклист минимум по 3 и максимум по 5 инцидентным сценариям;
-3. для каждого сценария явно зафиксирован `first-hop accuracy from Overview`.
+- JSON SSOT: `grafana/dashboards/*.json`
+- Navigation contract: `docs/03-guides/dashboards/contracts/navigation-links.yaml`
+- Selector contract: `docs/03-guides/dashboards/contracts/selector-contracts.yaml`
+- Active operator docs:
+  - `docs/03-guides/dashboards/README.md`
+  - `docs/03-guides/dashboards/dashboard-v2-usage.md`
+  - `docs/03-guides/dashboards/variable-reference.md`
+  - `docs/05-operations/01-monitoring-guide.md`
+  - `grafana/README.md`

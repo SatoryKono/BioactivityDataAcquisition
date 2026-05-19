@@ -334,10 +334,14 @@ The canonical shipped surface is navigation panel `id=1000`, so
 variables. Any duplicate dashboard-to-dashboard link from one dashboard to the
 same target dashboard is forbidden.
 
-Every shipped navigation panel `id=1000` also exposes global adjunct links
+Every shipped navigation panel `id=1000`, except
+`bioetl-control-plane-v1`, also exposes global adjunct links
 `Silver Reject Explorer`, `Explore Logs`, and `Explore Traces` after bus
 `0..5`. These navigation-panel links open in the same window, not in a new
-tab.
+tab. `bioetl-control-plane-v1` is the intentional exception: its top-level
+navigation keeps the operator on dashboard/runbook surfaces first, and deeper
+dashboard handoffs or runbook steps start logs/traces investigation when
+needed.
 `Explore Logs` is a baseline-first adjunct surface: zero lines can legitimately
 mean Loki shipping is disabled, no BioETL streams were shipped in range, or the
 operator still needs to refine scope inside Explore.
@@ -479,11 +483,11 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - `bioetl-workflow-overview`: first screen keeps `Failed Workflow Runs / Range`,
   `Failed Pipeline Steps / Range`, `Failed Transform Steps / Range`,
   `Skipped Step Events / Range`, `Workflow Run Outcomes / Range`, and
-  `Next Diagnostic Surface`; deeper step evidence now lives under collapsed
+  `First Action`; deeper step evidence now lives under collapsed
   row `Step Diagnostics (collapsed)` with
   `Step Outcomes by Kind / Step Status / Range` and
   `Step Duration p95 by Kind / Step Status / Range`.
-- `bioetl-workflow-overview`: `Next Diagnostic Surface` is the only justified
+- `bioetl-workflow-overview`: `First Action` is the only justified
   panel-level handoff exception. Although the header bus already exists, this
   panel remains the sole first-screen workflow CTA and therefore exposes
   bounded `Open ...` dataLinks to neighboring dashboards while preserving the

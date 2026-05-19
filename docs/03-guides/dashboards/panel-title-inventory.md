@@ -184,7 +184,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-silver-reject-explorer.json | 7 | Inspect Top Reason Signatures |
 | bioetl-silver-reject-explorer.json | 8 | Inspect Filtered Records Table |
 | bioetl-silver-reject-explorer.json | 9 | Inspect Selected Record Details |
-| bioetl-workflow-overview.json | 1 | Workflow Scope |
+| bioetl-workflow-overview.json | 1 | Failed Workflow Runs / Range |
 | bioetl-workflow-overview.json | 2 | Failed Workflow Runs / Range |
 | bioetl-workflow-overview.json | 3 | Failed Pipeline Steps / Range |
 | bioetl-workflow-overview.json | 4 | Workflow Run Outcomes / Range |
@@ -192,7 +192,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-workflow-overview.json | 6 | Failed Transform Steps / Range |
 | bioetl-workflow-overview.json | 7 | Skipped Step Events / Range |
 | bioetl-workflow-overview.json | 8 | Step Duration p95 by Kind / Step Status / Range |
-| bioetl-workflow-overview.json | 9 | Next Diagnostic Surface |
+| bioetl-workflow-overview.json | 9 | First Action |
 | bioetl-workflow-overview.json | 9400 | Provenance |
 | bioetl-workflow-overview.json | 9401 | Status |
 | bioetl-workflow-overview.json | 9402 | ID |

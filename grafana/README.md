@@ -703,6 +703,10 @@ Dashboard-to-dashboard links поэтому явно передают общий
 | `$run_type` | `0..5` | Same bounded universe as `$pipeline` for the dashboard role. | Multi-select Include All; missing context is `All`, not `unknown`. |
 | `$run_id` | `0..5` | Quarantine Explorer HTTP `/ops/control-plane/filter-options?dimension=run_id...&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}` | Preserved HTTP identity context for `ID`/details panels; no Include All; default `-`; never a Prometheus label. |
 
+`$workflow` stays single-select with Include All across primary dashboards,
+including `bioetl-workflow-overview`, so one coherent workflow shell value is
+preserved during handoff while aggregate `All` scope remains available.
+
 Common context panels on primary dashboards outside Overview:
 
 | Panel | ID | Contract |
@@ -808,6 +812,9 @@ tries `http://localhost:9090`, then the Docker-local fallbacks
   now occupies the rightmost shared-shell slot beside `ID` and `Processed Records`
   and also carries the selected-range-only interpretation contract for this
   dashboard after the removal of the separate `Workflow Scope` banner.
+  `$workflow` remains single-select with Include All here as well; workflow
+  evidence can aggregate to `All`, but operator handoff still preserves one
+  exact workflow shell value whenever a concrete workflow is selected.
   Shipped workflow panels aggregate per-run published series with
   `max_over_time(...)`, because workflow jobs are short-lived and must remain
   queryable after the CLI process exits. `$pipeline/$run_type/$run_id` are
@@ -872,7 +879,7 @@ ______________________________________________________________________
 | --- | ------------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 99  | Provenance                     | Text       | n/a                                                                                                                          | Primary question, scope, provenance, known limitations.                                                                                                                         |
 | 214 | Status                         | Stat       | `max(bioetl_l0_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                                                         | `UNKNOWN`/`OK`/`WARN`/`CRIT`; null/no-series remain `UNKNOWN` via explicit null mapping. Panel-level links duplicate the canonical Runtime / Control Plane / Data Quality / Provider Health / Workflow handoff. |
-| 215 | Next Action                    | Table      | `topk(1, bioetl_l0_next_action_route{pipeline=~"$pipeline",run_type=~"$run_type"} or label_replace(... vector(0) ...))`     | Shows `action_target`, `action_reason`, and `action_dashboard_uid`; invalid/missing selected scope falls back to `NO_ROUTE`. Routing priority remains Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Runtime / Control Plane / DQ preserve scope; Provider Health fail-closes to `provider=unknown`; Workflow link explicitly resets scope. |
+| 215 | First Action                  | Table      | `topk(1, bioetl_l0_next_action_route{pipeline=~"$pipeline",run_type=~"$run_type"} or label_replace(... vector(0) ...))`     | Shows `action_target`, `action_reason`, and `action_dashboard_uid`; invalid/missing selected scope falls back to `NO_ROUTE`. Routing priority remains Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Runtime / Control Plane / DQ preserve scope; Provider Health fail-closes to `provider=unknown`; Workflow link explicitly resets scope. |
 | 9300 | ID                            | Table      | HTTP `/ops/control-plane/identity-table?...&run_id=${run_id}`                                                                | Compact two-column identity summary: run/manifest IDs, Provider.Entity version, contract schema, execution flags, replay capability/mode, checkpoint anchors, optional composite run, and identity health. Exact selected `run_id` wins; no Prometheus `run_id`. |
 | 9301 | Processed Records             | Table      | HTTP `/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}`                                  | Current compact Bronze/Silver/Gold accounting evidence. Shows all configured rows, including zero values, with space-grouped, left-padded, right-aligned `value` plus formatted `percintage`; Silver/Gold accounting deficits set red row backgrounds; reconciliation status, subtotal, and delta rows stay out of the compact table; no `$__range` and no Prometheus `run_id`. |
 | 9002 | Inputs                        | Table      | `max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"})`                              | Compact L0 input summary: one worst-status row per operator input so the first screen fits without scroll while preserving selected-scope UNKNOWN rows.                       |

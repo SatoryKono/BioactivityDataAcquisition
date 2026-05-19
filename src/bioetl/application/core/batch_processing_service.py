@@ -202,4 +202,7 @@ class BatchProcessingService:
             gold_records=transform_result.gold_records,
             quarantined_count=transform_result.quarantined_count,
             filtered_out_count=transform_result.filtered_out_count,
+            gold_excluded_by_contract_count=(
+                transform_result.gold_excluded_by_contract_count
+            ),
         )

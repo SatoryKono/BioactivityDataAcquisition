@@ -71,6 +71,7 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     overview = _variables("bioetl-overview-v2.json")
     assert set(overview) == {"workflow", "pipeline", "run_type", "run_id"}
     assert overview["workflow"].get("includeAll") is True
+    assert overview["workflow"].get("multi") is False
     assert overview["workflow"].get("current", {}).get("text") == "All"
     assert overview["pipeline"].get("multi") is False
     assert overview["pipeline"].get("includeAll") is True
@@ -127,6 +128,7 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     for name in ("workflow", "status", "step_status", "step_kind"):
         assert workflow[name].get("includeAll") is True
         assert workflow[name].get("current", {}).get("value") == "$__all"
+    assert workflow["workflow"].get("multi") is False
     assert workflow["pipeline"].get("multi") is False
     assert workflow["pipeline"].get("includeAll") is False
     assert workflow["pipeline"].get("current", {}).get("value") == "unknown"
@@ -161,6 +163,7 @@ def test_variable_reference_explains_role_specific_exceptions() -> None:
         "`$payload_hash` | `bioetl-silver-reject-explorer` | Visible textbox",
         "run_type` always uses include-all fallback",
         "Primary operator dashboards `0..5` expose the shared context shell",
+        "single-select with Include All across primary dashboards",
         "Pipeline-scoped operator dashboards use single-select `$pipeline`, except",
         "`bioetl-overview-v2` uses control-plane-backed `$run_id=-`",
     }

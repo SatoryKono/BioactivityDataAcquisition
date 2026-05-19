@@ -134,6 +134,28 @@ def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
     assert first_action_grid["x"] + first_action_grid["w"] == 24
 
 
+def test_runtime_telemetry_gap_panel_keeps_readable_first_screen_width() -> None:
+    """Runtime datasource trust marker must stay legible on the first-screen evidence row."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in dashboard.get("panels", [])
+        if isinstance(panel.get("title"), str)
+    }
+
+    panel = panels["Runtime Telemetry Gap"]
+    grid = panel.get("gridPos", {})
+    failed_runs_grid = panels["Failed Runs"]["gridPos"]
+
+    assert grid["y"] == 23
+    assert grid["w"] >= 4, (
+        "Runtime Telemetry Gap must reserve readable width on the first screen"
+    )
+    assert failed_runs_grid["y"] == grid["y"]
+    assert grid["x"] + grid["w"] == failed_runs_grid["x"]
+    assert failed_runs_grid["x"] + failed_runs_grid["w"] == 24
+
+
 def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping() -> (
     None
 ):

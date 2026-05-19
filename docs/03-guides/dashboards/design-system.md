@@ -480,7 +480,7 @@ Implementation guardrails:
   runbook links.
 - `bioetl-workflow-overview` является selected-range evidence surface. Его
   четыре summary counters selected-range evidence не требуют panel-level
-  runbook links; shipped `Next Diagnostic Surface` остаётся единственным
+  runbook links; shipped `First Action` остаётся единственным
   оправданным dashboard-handoff CTA exception на этой странице.
 - Если используется runbook link, URL MUST follow canonical GitHub blob pattern:
   `https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/<name>.md`

@@ -132,6 +132,9 @@ class PipelineRunner(PipelineRunnerSupportMixin):
             "records_bronze": int(self._executor.records_bronze),
             "records_silver": int(self._executor.records_silver),
             "records_gold": int(self._executor.records_gold),
+            "records_gold_excluded_by_contract": int(
+                getattr(self._executor, "records_gold_excluded_by_contract", 0)
+            ),
             "records_quarantined": int(self._executor.records_quarantined),
             "records_filtered_out": int(self._executor.records_filtered_out),
         }

@@ -292,7 +292,7 @@ filters:
                 - D
         required_fields:
             - assay_type
-            - description
+            - assay_description
 contracts:
     primary_key:
         - assay_id

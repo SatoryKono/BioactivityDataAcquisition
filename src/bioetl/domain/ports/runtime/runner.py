@@ -77,6 +77,7 @@ class ExecutionMetricsReadablePort(Protocol):
         - ``records_bronze``
         - ``records_silver``
         - ``records_gold``
+        - ``records_gold_excluded_by_contract``
         - ``records_quarantined``
         """
         ...

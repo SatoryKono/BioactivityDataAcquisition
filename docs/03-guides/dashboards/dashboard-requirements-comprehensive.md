@@ -530,10 +530,10 @@ Selected-range declarative workflow run/step evidence and transform-step latency
 - `Explore Logs`, `Explore Traces`, `Silver Reject Explorer`
 
 ### Required panel links
-- Panel `9` (Next Diagnostic Surface) → Open 2. Runtime, Open 4. Data Quality, Open 3. Provider Health, Open 0. Control Plane, Open 1. Overview
+- Panel `9` (First Action) → Open 2. Runtime, Open 4. Data Quality, Open 3. Provider Health, Open 0. Control Plane, Open 1. Overview
 
 ### First-screen структура
-- **Tier 1**: `Failed Workflow Runs / Range`, `Failed Pipeline Steps / Range`, `Failed Transform Steps / Range`, `Skipped Step Events / Range`, `Workflow Run Outcomes / Range`, `Next Diagnostic Surface`
+- **Tier 1**: `Failed Workflow Runs / Range`, `Failed Pipeline Steps / Range`, `Failed Transform Steps / Range`, `Skipped Step Events / Range`, `Workflow Run Outcomes / Range`, `First Action`
 - **Tier 2**: collapsed row `Step Diagnostics (collapsed)` с `Step Outcomes by Kind / Step Status / Range` и `Step Duration p95 by Kind / Step Status / Range`
 - **Tier 3**: selected-range evidence
 - **Tier 4**: collapsed diagnostics
@@ -547,10 +547,10 @@ Selected-range declarative workflow run/step evidence and transform-step latency
 - НЕ использует visible `pipeline` / `run_type` selectors
 - Hidden context variables preserve single-pipeline handoff scope
 - Multi-pipeline workflows fail-close к `unknown` / `All` для hidden context vars
-- `Next Diagnostic Surface` — единственный оправданный panel-level handoff exception
+- `First Action` — единственный оправданный panel-level handoff exception
 - Selected-range evidence counters НЕ требуют panel-level runbook links
 - Prometheus panels используют только bounded workflow labels (`workflow`, `status`, `step_status`, `step_kind`), не требуют `run_id`/`step_id` labels
-- Shipped `Next Diagnostic Surface` остаётся единственным оправданным dashboard-handoff CTA exception
+- Shipped `First Action` остаётся единственным оправданным dashboard-handoff CTA exception
 
 ### Cross-scope marker contract
 - Переходы в `bioetl-provider-health-v2` используют маркер `Context mapping`

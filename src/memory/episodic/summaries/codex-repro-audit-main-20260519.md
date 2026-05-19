@@ -1,33 +1,30 @@
 ---
 id: codex-repro-audit-main-20260519
-title: Audit pipeline reproducibility on main
+title: Audit reproducibility architecture on main after closure wave
 task_id: codex-repro-audit-main-20260519
-created_at: '2026-05-19T03:43:55Z'
+created_at: '2026-05-19T04:58:18Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- git:503d48a8782663c0d6a239dc4af1491dbe98615a
-summary: 'Audited reproducibility on current main baseline. Strong immutable control-plane
-  exists around run manifest, ledger, effective-config artifacts, execution fingerprint,
-  and lineage metadata. Exact replay is bounded to snapshot-backed and certified historical
-  boundaries rather than guaranteed for any arbitrary run occurrence. Critical finding:
-  checkpoint metadata enrichment drops normalization profile anchors required by strict
-  checkpoint compatibility, creating identity drift risk for resume/replay. Secondary
-  findings: ordinary resume uses mutable pipeline checkpoint pointer rather than occurrence-pinned
-  checkpoint selection; config_hash vs resolved_config_hash semantics remain blurred
-  in manifest construction; bronze live snapshot metadata mixes content identity with
-  filesystem-derived captured_at evidence.'
+- <add-source-ref>
+summary: 'Re-audited reproducibility architecture on main at 288c5c0 after closure
+  of #4261-#4264. Confirmed checkpoint enrichment now carries normalization profile
+  and snapshot anchors; Bronze live snapshots no longer use filesystem mtime as replay
+  evidence; workflow resume supports manifest_id/run_id selectors excluded from semantic
+  execution fingerprint. Remaining architectural gap: contract still does not claim
+  universal exact reproducibility for every historical run, and ordinary pipeline
+  checkpoint resume still loads mutable latest checkpoint pointer by pipeline name.'
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Audit pipeline reproducibility on main
+- Title: Audit reproducibility architecture on main after closure wave
 
 ## Outcome
 
-- Audited reproducibility on current main baseline. Strong immutable control-plane exists around run manifest, ledger, effective-config artifacts, execution fingerprint, and lineage metadata. Exact replay is bounded to snapshot-backed and certified historical boundaries rather than guaranteed for any arbitrary run occurrence. Critical finding: checkpoint metadata enrichment drops normalization profile anchors required by strict checkpoint compatibility, creating identity drift risk for resume/replay. Secondary findings: ordinary resume uses mutable pipeline checkpoint pointer rather than occurrence-pinned checkpoint selection; config_hash vs resolved_config_hash semantics remain blurred in manifest construction; bronze live snapshot metadata mixes content identity with filesystem-derived captured_at evidence.
+- Re-audited reproducibility architecture on main at 288c5c0 after closure of #4261-#4264. Confirmed checkpoint enrichment now carries normalization profile and snapshot anchors; Bronze live snapshots no longer use filesystem mtime as replay evidence; workflow resume supports manifest_id/run_id selectors excluded from semantic execution fingerprint. Remaining architectural gap: contract still does not claim universal exact reproducibility for every historical run, and ordinary pipeline checkpoint resume still loads mutable latest checkpoint pointer by pipeline name.
 
 ## Lessons learned
 

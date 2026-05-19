@@ -37,6 +37,7 @@ class BatchExecutionStateOutcome:
     bronze_count: int
     silver_count: int
     gold_count: int
+    gold_excluded_by_contract_count: int
     quarantined_count: int
     filtered_out_count: int
     source_batch_id: str
@@ -64,6 +65,7 @@ def build_batch_execution_state_update(
         bronze_count=input_record_count,
         silver_count=len(output.silver_records),
         gold_count=len(output.gold_records),
+        gold_excluded_by_contract_count=output.gold_excluded_by_contract_count,
         quarantined_count=output.quarantined_count,
         filtered_out_count=output.filtered_out_count,
         source_batch_id=str(output.batch_id),
@@ -98,6 +100,9 @@ def apply_batch_execution_state_update(
     state.records_bronze += state_update.bronze_count
     state.records_silver += state_update.silver_count
     state.records_gold += state_update.gold_count
+    state.records_gold_excluded_by_contract += (
+        state_update.gold_excluded_by_contract_count
+    )
     state.records_quarantined += state_update.quarantined_count
     state.records_filtered_out += state_update.filtered_out_count
     state._source_batch_ids.append(state_update.source_batch_id)
@@ -147,6 +152,7 @@ def build_run_statistics(
     records_bronze: int,
     records_silver: int,
     records_gold: int,
+    records_gold_excluded_by_contract: int,
     records_quarantined: int,
     records_filtered_out: int,
     source_batch_ids: list[str],
@@ -157,6 +163,7 @@ def build_run_statistics(
         "records_bronze": records_bronze,
         "records_silver": records_silver,
         "records_gold": records_gold,
+        "records_gold_excluded_by_contract": records_gold_excluded_by_contract,
         "records_quarantined": records_quarantined,
         "records_filtered_out": records_filtered_out,
         "source_batch_ids": list(dict.fromkeys(source_batch_ids)),

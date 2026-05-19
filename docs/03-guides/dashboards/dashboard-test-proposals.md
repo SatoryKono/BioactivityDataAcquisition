@@ -477,12 +477,12 @@ def test_dq_silver_reject_link_exists():
 ```python
 # test_grafana_workflow_dashboard_json_valid.py (существующий, расширить)
 
-def test_workflow_overview_next_diagnostic_surface_links():
+def test_workflow_overview_first_action_links():
     """Panel 9 должна иметь 5 CTA."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
     panel = _find_panel_by_id(dashboard, 9)
     assert panel is not None
-    assert panel.get("title") == "Next Diagnostic Surface"
+    assert panel.get("title") == "First Action"
     options = panel.get("options", {})
     links = options.get("dataLinks", [])
     assert len(links) == 5

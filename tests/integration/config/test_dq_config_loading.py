@@ -216,6 +216,18 @@ class TestPipelineConfigLoaderWithDQResolution:
         assert "relationship_type" in required_fields
         assert "confidence_score" in required_fields
 
+    def test_chembl_assay_gold_filters_reference_canonical_silver_fields(
+        self, config_loader: PipelineConfigLoader
+    ) -> None:
+        """chembl_assay gold gate should target canonical Silver field names."""
+        yaml_config = config_loader.load_pipeline_config("chembl_assay")
+        domain_config = resolve_domain_pipeline_config(yaml_config)
+
+        required_fields = set(domain_config.gold_filters.required_fields)
+
+        assert "assay_description" in required_fields
+        assert "description" not in required_fields
+
     def test_chembl_publication_required_fields_include_runtime_contract_fields(
         self, config_loader: PipelineConfigLoader
     ) -> None:

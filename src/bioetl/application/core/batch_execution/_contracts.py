@@ -17,6 +17,7 @@ class BatchExecutionCountersSnapshot(Protocol):
     records_bronze: int
     records_silver: int
     records_gold: int
+    records_gold_excluded_by_contract: int
     records_quarantined: int
 
 

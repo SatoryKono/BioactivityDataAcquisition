@@ -38,7 +38,7 @@ The Assay entity contains **43 fields**. Key fields include:
 | ----------------------- | -------- | -------- | ------------------------------------------------ |
 | `assay_id`              | `string` | **Yes**  | Unique assay ID (e.g., `CHEMBL1234`)             |
 | `assay_type`            | `string` | **Yes**  | Type code: `B` (Binding), `F` (Functional), etc. |
-| `description`           | `string` | No       | Text description of the assay                    |
+| `assay_description`     | `string` | No       | Text description of the assay                    |
 | `assay_organism`        | `string` | No       | Organism name (e.g., `Homo sapiens`)             |
 | `confidence_score`      | `int`    | No       | Quality score (0-9)                              |
 | `assay_pref_name`       | `string` | No       | Preferred assay name (if available)              |
