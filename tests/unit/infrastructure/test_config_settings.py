@@ -12,6 +12,7 @@ from pydantic import ValidationError
 from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.config import PipelineConfig
 from bioetl.infrastructure.config import (
+    ObservabilitySettings,
     PipelineSettings,
     Settings,
     get_settings,
@@ -204,6 +205,17 @@ class TestPipelineSettings:
 
         with pytest.raises(ValidationError):
             PipelineSettings(heartbeat_interval=61)
+
+
+@pytest.mark.unit
+class TestObservabilitySettings:
+    """Tests for observability settings defaults."""
+
+    def test_dq_monitor_enabled_by_default(self) -> None:
+        """DQ anomaly monitoring is enabled unless explicitly disabled."""
+        settings = ObservabilitySettings()
+
+        assert settings.dq_monitor_enabled is True
 
 
 @pytest.mark.unit

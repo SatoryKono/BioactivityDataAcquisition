@@ -48,6 +48,13 @@ groups:
           )
           or on (pipeline, run_type) (bioetl_overview_pipeline_run_type_universe * 0)
 
+      - record: bioetl_gold_terminal_records_15m
+        expr: >-
+          sum by (pipeline, run_type) (
+            max_over_time(bioetl_stage_records_total{stage="gold", outcome=~"written|quarantined|skipped|excluded_by_contract|deduplicated"}[15m])
+          )
+          or on (pipeline, run_type) (bioetl_overview_pipeline_run_type_universe * 0)
+
       - record: bioetl_runtime_alert_condition_no_terminal_run_30m
         expr: >-
           (
@@ -195,7 +202,7 @@ groups:
       - record: bioetl_l0_input_status
         labels:
           input: gold
-        expr: (bioetl_runtime_alert_condition_gold_write_missing_15m > bool 0) * 2 + ((bioetl_runtime_alert_condition_gold_write_missing_15m == bool 0) * (sum by (pipeline, run_type) (max_over_time(bioetl_records_processed_total{stage="gold"}[15m])) > bool 0)) * 0
+        expr: (bioetl_runtime_alert_condition_gold_write_missing_15m > bool 0) * 2 + ((bioetl_runtime_alert_condition_gold_write_missing_15m == bool 0) * (bioetl_gold_terminal_records_15m > bool 0)) * 0
       - record: bioetl_l0_input_status_selected
         labels:
           input: runtime
@@ -346,16 +353,18 @@ groups:
           (
             (
               (
-                sum by (pipeline, run_type) (max_over_time(bioetl_pipeline_runs_total[15m])) > bool 0
+                (
+                  sum by (pipeline, run_type) (max_over_time(bioetl_pipeline_runs_total[15m])) > bool 0
+                )
+                unless on (pipeline, run_type)
+                (bioetl_gold_terminal_records_15m > 0)
               )
               unless on (pipeline, run_type)
-              (sum by (pipeline, run_type) (max_over_time(bioetl_records_processed_total{stage="gold"}[15m])) > bool 0)
+              (bioetl_runtime_alert_condition_gold_write_missing_15m > 0)
+            )
+            unless on (pipeline, run_type)
+            (bioetl_l0_input_status_selected{input="runtime"} == 2)
           )
-          unless on (pipeline, run_type)
-          (bioetl_runtime_alert_condition_gold_write_missing_15m > bool 0)
-          )
-          unless on (pipeline, run_type)
-          (bioetl_l0_input_status_selected{input="runtime"} == bool 2)
           * on (pipeline) group_left() max by (pipeline) (bioetl_pipeline_stage_expected{stage="gold"} == bool 1) * 1
       - record: bioetl_l1_gold_lifecycle_status
         labels:
@@ -367,9 +376,24 @@ groups:
         labels:
           lifecycle_state: healthy_recent_gold
         expr: >-
-          ((sum by (pipeline, run_type) (max_over_time(bioetl_records_processed_total{stage="gold"}[15m])) > bool 0)
-          unless on (pipeline, run_type) (bioetl_runtime_alert_condition_gold_write_missing_15m > bool 0))
-          unless on (pipeline, run_type) (bioetl_l0_input_status_selected{input="runtime"} == bool 2) * 0
+          (
+            (
+              (sum by (pipeline, run_type) (max_over_time(bioetl_stage_records_total{stage="gold", outcome="written"}[15m])) > 0)
+              unless on (pipeline, run_type) (bioetl_runtime_alert_condition_gold_write_missing_15m > 0)
+            )
+            unless on (pipeline, run_type) (bioetl_l0_input_status_selected{input="runtime"} == 2)
+          ) * 0
+      - record: bioetl_l1_gold_lifecycle_status
+        labels:
+          lifecycle_state: terminal_contract_excluded
+        expr: >-
+          (
+            (
+              (sum by (pipeline, run_type) (max_over_time(bioetl_stage_records_total{stage="gold", outcome="excluded_by_contract"}[15m])) > 0)
+              unless on (pipeline, run_type) (bioetl_runtime_alert_condition_gold_write_missing_15m > 0)
+            )
+            unless on (pipeline, run_type) (bioetl_l0_input_status_selected{input="runtime"} == 2)
+          ) * 0
       - record: bioetl_l1_control_plane_current_status
         expr: bioetl_l0_input_status_selected{input="control_plane"}
       - record: bioetl_l1_provider_global_status

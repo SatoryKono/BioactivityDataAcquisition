@@ -405,6 +405,7 @@ class TestBatchExecutorInit:
         assert batch_executor.records_bronze == 0
         assert batch_executor.records_silver == 0
         assert batch_executor.records_gold == 0
+        assert batch_executor.records_gold_excluded_by_contract == 0
         assert batch_executor.records_quarantined == 0
 
 
@@ -727,6 +728,7 @@ class TestBatchExecutorProcessBatch:
         batch_executor.records_bronze = 5
         batch_executor.records_silver = 4
         batch_executor.records_gold = 2
+        batch_executor.records_gold_excluded_by_contract = 1
         batch_executor.records_quarantined = 1
         batch_executor.records_filtered_out = 1
         batch_executor._source_batch_ids = ["batch-002", "batch-001", "batch-002"]
@@ -738,6 +740,7 @@ class TestBatchExecutorProcessBatch:
             "records_bronze": 5,
             "records_silver": 4,
             "records_gold": 2,
+            "records_gold_excluded_by_contract": 1,
             "records_quarantined": 1,
             "records_filtered_out": 1,
             "source_batch_ids": ["batch-002", "batch-001"],
@@ -957,6 +960,7 @@ class TestBatchExecutorHelpers:
             bronze_count=1,
             silver_count=1,
             gold_count=1,
+            gold_excluded_by_contract_count=0,
             quarantined_count=2,
             filtered_out_count=3,
             source_batch_id=str(batch_id),
@@ -968,6 +972,7 @@ class TestBatchExecutorHelpers:
             records_bronze=10,
             records_silver=8,
             records_gold=6,
+            records_gold_excluded_by_contract=2,
             records_quarantined=1,
             records_filtered_out=2,
             _source_batch_ids=["batch-001"],
@@ -979,6 +984,7 @@ class TestBatchExecutorHelpers:
                 bronze_count=3,
                 silver_count=2,
                 gold_count=1,
+                gold_excluded_by_contract_count=6,
                 quarantined_count=4,
                 filtered_out_count=5,
                 source_batch_id="batch-002",
@@ -988,6 +994,7 @@ class TestBatchExecutorHelpers:
         assert state.records_bronze == 13
         assert state.records_silver == 10
         assert state.records_gold == 7
+        assert state.records_gold_excluded_by_contract == 8
         assert state.records_quarantined == 5
         assert state.records_filtered_out == 7
         assert state._source_batch_ids == ["batch-001", "batch-002"]
@@ -998,6 +1005,7 @@ class TestBatchExecutorHelpers:
             records_bronze=10,
             records_silver=8,
             records_gold=6,
+            records_gold_excluded_by_contract=2,
             records_quarantined=1,
             records_filtered_out=2,
             _source_batch_ids=["batch-001"],
@@ -1012,6 +1020,7 @@ class TestBatchExecutorHelpers:
                 gold_records=[],
                 quarantined_count=4,
                 filtered_out_count=5,
+                gold_excluded_by_contract_count=3,
             ),
         )
 
@@ -1020,6 +1029,7 @@ class TestBatchExecutorHelpers:
         assert state.records_bronze == 11
         assert state.records_silver == 9
         assert state.records_gold == 6
+        assert state.records_gold_excluded_by_contract == 5
         assert state.records_quarantined == 5
         assert state.records_filtered_out == 7
         assert state._source_batch_ids == [
@@ -1040,6 +1050,7 @@ class TestBatchExecutorHelpers:
             records_bronze=0,
             records_silver=0,
             records_gold=0,
+            records_gold_excluded_by_contract=0,
             records_quarantined=0,
             records_filtered_out=0,
             _source_batch_ids=[],

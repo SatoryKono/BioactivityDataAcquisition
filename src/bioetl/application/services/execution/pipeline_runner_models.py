@@ -31,6 +31,7 @@ class RunResult:
     records_bronze: int = 0
     records_silver: int = 0
     records_gold: int = 0
+    records_gold_excluded_by_contract: int = 0
     records_quarantined: int = 0
     records_filtered_out: int = 0
     started_at: datetime = MISSING_RUNTIME_TIMESTAMP
@@ -83,6 +84,8 @@ class RunOptions:
     cached_bronze_date: str | None = None
     replay_of_run_id: str | None = None
     replay_of_manifest_id: str | None = None
+    resume_run_id: str | None = None
+    resume_manifest_id: str | None = None
     exact_replay: bool = False
     required_persistence_profile: str | None = None
     enable_tracing: bool | None = None

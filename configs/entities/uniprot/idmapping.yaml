@@ -100,6 +100,12 @@ quality:
     pattern: ^[A-Z0-9]{6,10}$
     nullable: true
     error_message: UniProt accession must be 6-10 alphanumeric chars
+  - field: all_mappings
+    type: pattern
+    pattern: '^\[("[A-Za-z0-9:/._-]+"(,"[A-Za-z0-9:/._-]+")*)?\]$'
+    nullable: true
+    severity: warn
+    error_message: all_mappings must be a canonical JSON string array of normalized provider identifiers
   entity_cross_field_validations: []
   entity_conditional_validations:
   - name: found_has_accession

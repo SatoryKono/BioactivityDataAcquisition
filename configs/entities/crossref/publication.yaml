@@ -190,6 +190,12 @@ quality:
     nullable: true
     severity: warn
     error_message: issn_list must be a canonical JSON string array of ISSN values
+  - field: author_orcids
+    type: pattern
+    pattern: '^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'
+    nullable: true
+    severity: warn
+    error_message: author_orcids must be a canonical JSON string array of ORCID identifiers
   - field: citations_received
     type: range
     min: 0

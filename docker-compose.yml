@@ -28,6 +28,7 @@ services:
       BIOETL_METRICS_ADDR: 0.0.0.0
       BIOETL_OBSERVABILITY__METRICS_ENABLED: "true"
       BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED: "true"
+      BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED: "true"
     command: ["quarantine", "serve", "--host", "0.0.0.0", "--port", "8081"]
     networks:
       - warp-network

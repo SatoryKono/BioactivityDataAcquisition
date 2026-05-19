@@ -53,6 +53,21 @@ class CheckpointPort(Protocol):
         """
         ...
 
+    async def load_for_run(
+        self,
+        pipeline: str,
+        run_id: RunID,
+    ) -> tuple[RunID, MetaDict] | None:
+        """Load immutable checkpoint evidence for one specific run occurrence."""
+        ...
+
+    async def load_for_manifest_id(
+        self,
+        manifest_id: str,
+    ) -> tuple[RunID, MetaDict] | None:
+        """Load immutable checkpoint evidence for one specific manifest."""
+        ...
+
     async def list_all(self) -> list[str]:
         """List all pipelines that have checkpoints.
 

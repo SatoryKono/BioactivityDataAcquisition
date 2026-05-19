@@ -68,11 +68,19 @@ class UniProtProteinGoldSchema(StrictGoldContractSchema):
     # Functional annotations
     activity_regulation: Series[str] = pa.Field(nullable=True)
     alternative_products: Series[str] = pa.Field(nullable=True)
+    alternative_products_raw_json: Series[str] = pa.Field(nullable=True)
+    alternative_products_canonical_json: Series[str] = pa.Field(nullable=True)
     biophysicochemical_properties: Series[str] = pa.Field(nullable=True)
+    biophysicochemical_properties_raw_json: Series[str] = pa.Field(nullable=True)
+    biophysicochemical_properties_canonical_json: Series[str] = pa.Field(
+        nullable=True
+    )
     caution: Series[str] = pa.Field(nullable=True)
     catalytic_activity: Series[str] = pa.Field(nullable=True)
     cellular_component: Series[str] = pa.Field(nullable=True)  # GO aspect C
     cofactors: Series[str] = pa.Field(nullable=True)
+    cofactors_raw_json: Series[str] = pa.Field(nullable=True)
+    cofactors_canonical_json: Series[str] = pa.Field(nullable=True)
     disease_involvement: Series[str] = pa.Field(nullable=True)
     function_comment: Series[str] = pa.Field(nullable=True)
     induction: Series[str] = pa.Field(nullable=True)
@@ -81,6 +89,8 @@ class UniProtProteinGoldSchema(StrictGoldContractSchema):
     pharmaceutical_use: Series[str] = pa.Field(nullable=True)
     reaction_ec_numbers: Series[str] = pa.Field(nullable=True)
     reactions: Series[str] = pa.Field(nullable=True)
+    reactions_raw_json: Series[str] = pa.Field(nullable=True)
+    reactions_canonical_json: Series[str] = pa.Field(nullable=True)
     similarity_comment: Series[str] = pa.Field(nullable=True)
     subunit: Series[str] = pa.Field(nullable=True)
     subcellular_location: Series[str] = pa.Field(nullable=True)

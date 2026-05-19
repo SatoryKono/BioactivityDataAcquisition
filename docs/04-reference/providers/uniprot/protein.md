@@ -47,6 +47,10 @@ ______________________________________________________________________
 
 - Дедупликация записей.
 - Валидация схемы.
+- Semantic-sensitive comment payloads retain additive raw/canonical JSON
+  companions for replay/debug and future semantic extraction:
+  `alternative_products_*`, `biophysicochemical_properties_*`,
+  `cofactors_*`, `features_*`, `reactions_*`.
 
 ### 3.3. Load
 

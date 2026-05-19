@@ -116,8 +116,8 @@ class ObservabilitySettings(BaseSettings):
     """Optional override path for audit JSONL files."""
 
     # Data Quality Monitor settings
-    dq_monitor_enabled: bool = Field(default=False)
-    """Enable data quality monitoring. Disabled by default."""
+    dq_monitor_enabled: bool = Field(default=True)
+    """Enable data quality monitoring. Enabled by default for all pipelines."""
 
     dq_baseline_window: int = Field(default=7, ge=1, le=30)
     """Number of recent runs to use for baseline calculation."""

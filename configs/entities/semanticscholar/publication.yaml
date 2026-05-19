@@ -197,6 +197,34 @@ quality:
     nullable: true
     severity: warn
     error_message: Unexpected raw publication_type format
+  - field: oa_status
+    type: enum
+    allowed_values:
+    - gold
+    - green
+    - hybrid
+    - bronze
+    - closed
+    nullable: true
+    error_message: oa_status must match the shared publication open-access registry
+  - field: author_s2_ids
+    type: pattern
+    pattern: '^\[("[0-9a-f]{40}"(,"[0-9a-f]{40}")*)?\]$'
+    nullable: true
+    severity: warn
+    error_message: author_s2_ids must be a canonical JSON string array of Semantic Scholar author IDs
+  - field: author_orcids
+    type: pattern
+    pattern: '^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'
+    nullable: true
+    severity: warn
+    error_message: author_orcids must be a canonical JSON string array of ORCID identifiers
+  - field: issn_list
+    type: pattern
+    pattern: '^\[("[0-9Xx-]+"(,"[0-9Xx-]+")*)?\]$'
+    nullable: true
+    severity: warn
+    error_message: issn_list must be a canonical JSON string array of ISSN values
   - field: citations_received
     type: range
     min: 0

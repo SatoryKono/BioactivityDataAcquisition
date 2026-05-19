@@ -73,16 +73,22 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("active_sites", pa.string()),  # JSON: ft_act_site features
         pa.field("activity_regulation", pa.string()),  # cc_activity_regulation
         pa.field("alternative_products", pa.string()),  # cc_alternative_products
+        pa.field("alternative_products_canonical_json", pa.string()),
+        pa.field("alternative_products_raw_json", pa.string()),
         pa.field("annotation_score", pa.int64()),  # Quality score 1-5
         pa.field("binding_sites", pa.string()),  # JSON: ft_binding features
+        pa.field("biophysicochemical_properties_canonical_json", pa.string()),
         pa.field(
             "biophysicochemical_properties", pa.string()
         ),  # cc_biophysicochemical_properties
+        pa.field("biophysicochemical_properties_raw_json", pa.string()),
         pa.field("catalytic_activity", pa.string()),  # cc_catalytic_activity
         pa.field("caution", pa.string()),  # cc_caution
         pa.field("cellular_component", pa.string()),  # GO aspect C
         pa.field("chembl_ids", pa.string()),  # ChEMBL target cross-refs (JSON array)
         pa.field("cofactors", pa.string()),  # cc_cofactor
+        pa.field("cofactors_canonical_json", pa.string()),
+        pa.field("cofactors_raw_json", pa.string()),
         pa.field("cross_reference_count", pa.int64()),  # Cross-reference count
         pa.field("disease_involvement", pa.string()),  # cc_disease
         pa.field("disulfide_bond", pa.string()),  # PTM: disulfide bonds
@@ -136,6 +142,8 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("publication_count", pa.int64()),  # Publication count
         pa.field("reaction_ec_numbers", pa.string()),  # EC numbers from reactions
         pa.field("reactions", pa.string()),  # Reaction names from catalytic activity
+        pa.field("reactions_canonical_json", pa.string()),
+        pa.field("reactions_raw_json", pa.string()),
         pa.field("reactome_xrefs", pa.string()),  # Reactome pathway IDs (JSON array)
         pa.field("reviewed", pa.bool_()),  # Swiss-Prot (true) vs TrEMBL (false)
         pa.field("secondary_accessions", pa.string()),  # Secondary UniProt accessions

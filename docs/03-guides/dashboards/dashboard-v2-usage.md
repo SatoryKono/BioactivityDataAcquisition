@@ -271,7 +271,9 @@ Compact evidence ниже первого экрана:
 - `Gold Lifecycle Trend` (`id=9020`): selected-range L1 data-validation
   lifecycle evidence over `bioetl_l1_gold_lifecycle_status` with
   `lifecycle_state`; disabled Gold stage may be OK, but missing series is still
-  diagnostic; handoffs `Open Runtime` and `Open Control Plane`.
+  diagnostic. Contract-excluded Gold records (`outcome="excluded_by_contract"`)
+  are terminal lifecycle evidence via `lifecycle_state="terminal_contract_excluded"`;
+  handoffs `Open Runtime` and `Open Control Plane`.
 - `Historical Failures` (`id=9010`): selected-range historical failure table
   over `bioetl_pipeline_runs_total`; zero matching rows only means no failed-run
   samples in the selected range, not current OK; handoff `Open Runtime`.
@@ -570,7 +572,9 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - `overview.Data Validation`: first-screen table now aggregates the worst
   current gold lifecycle status by `pipeline` across the selected `run_type`
   scope. Exact `lifecycle_state` detail remains available in Runtime / trend
-  surfaces; the Overview card stays compact so it does not require scroll.
+  surfaces; contract-excluded Gold records are treated as terminal OK evidence,
+  not missing Gold. The Overview card stays compact so it does not require
+  scroll.
 - `overview.Workflow`: workflow summary is
   projected from `bioetl_workflow_runs_total` via fixed-window
   `max_over_time(...)` evidence so short-lived successful workflow runs remain

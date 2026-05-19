@@ -126,6 +126,24 @@
     "required": false,
     "unique": false
   },
+  "alternative_products_canonical_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Canonical JSON companion for alternative-products comments",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "alternative_products_raw_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Raw provider JSON for alternative-products comments",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "annotation_score": {
     "checks": [
       {
@@ -152,6 +170,24 @@
     "checks": [],
     "coerce": false,
     "description": "JSON object with pH/temp optima, kinetics, redox potential",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "biophysicochemical_properties_canonical_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Canonical JSON companion for biophysicochemical-property comments",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "biophysicochemical_properties_raw_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Raw provider JSON for biophysicochemical-property comments",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -197,6 +233,24 @@
     "checks": [],
     "coerce": false,
     "description": "JSON array of cofactors with name and ChEBI ID",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "cofactors_canonical_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Canonical JSON companion for cofactor comments",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "cofactors_raw_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Raw provider JSON for cofactor comments",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -737,6 +791,24 @@
     "checks": [],
     "coerce": false,
     "description": "JSON array of reaction names from catalytic activity",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "reactions_canonical_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Canonical JSON companion for reaction comment payloads",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "reactions_raw_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Raw provider JSON for catalytic-activity comments",
     "dtype": "str",
     "nullable": true,
     "required": false,

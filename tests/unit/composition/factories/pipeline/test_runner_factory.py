@@ -403,6 +403,7 @@ class TestMetricsExtractor:
             "records_bronze": 95,
             "records_silver": 90,
             "records_gold": 85,
+            "records_gold_excluded_by_contract": 4,
             "records_quarantined": 10,
             "records_filtered_out": 7,
         }
@@ -414,6 +415,7 @@ class TestMetricsExtractor:
             "records_bronze": 95,
             "records_silver": 90,
             "records_gold": 85,
+            "records_gold_excluded_by_contract": 4,
             "records_quarantined": 10,
             "records_filtered_out": 7,
         }

@@ -116,6 +116,14 @@ class UniprotFeatureSchema(pa.DataFrameModel):  # Pandera typing limitation
         nullable=True,
         description="JSON array of reaction names from catalytic activity",
     )
+    reactions_raw_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Raw provider JSON for catalytic-activity comments",
+    )
+    reactions_canonical_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Canonical JSON companion for reaction comment payloads",
+    )
     reaction_ec_numbers: Series[str] | None = pa.Field(
         nullable=True,
         description="JSON array of EC numbers from catalytic activity reactions",

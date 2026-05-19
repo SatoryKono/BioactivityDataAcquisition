@@ -139,22 +139,30 @@ pipelines:
         - Inferred from homology
     structured_json_shapes:
       alternative_products:
-        semantic_policy: canonical_json_comment_projection
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
         collection_semantics: ordered_sequence
+        raw_sidecar_field: alternative_products_raw_json
+        canonical_sidecar_field: alternative_products_canonical_json
       biophysicochemical_properties:
-        semantic_policy: canonical_json_comment_projection
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
         collection_semantics: ordered_sequence
+        raw_sidecar_field: biophysicochemical_properties_raw_json
+        canonical_sidecar_field: biophysicochemical_properties_canonical_json
       cofactors:
-        semantic_policy: canonical_json_comment_projection
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
         collection_semantics: unordered_set
+        raw_sidecar_field: cofactors_raw_json
+        canonical_sidecar_field: cofactors_canonical_json
       features_json:
         semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
         collection_semantics: ordered_sequence
         raw_sidecar_field: features_raw_json
         canonical_sidecar_field: features_canonical_json
       reactions:
-        semantic_policy: canonical_json_comment_projection
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
         collection_semantics: ordered_sequence
+        raw_sidecar_field: reactions_raw_json
+        canonical_sidecar_field: reactions_canonical_json
     classification:
       accession:
         category: identifier_namespace
@@ -229,24 +237,28 @@ pipelines:
         canonical_sidecar: features_canonical_json
         composite_usage: composite_target:upstream_inherited
       alternative_products:
-        category: structured_json_canonical_only
+        category: structured_json_sidecar
         collection_semantics: ordered_sequence
-        canonical_sidecar: alternative_products
+        raw_sidecar: alternative_products_raw_json
+        canonical_sidecar: alternative_products_canonical_json
         composite_usage: composite_target:upstream_inherited
       biophysicochemical_properties:
-        category: structured_json_canonical_only
+        category: structured_json_sidecar
         collection_semantics: ordered_sequence
-        canonical_sidecar: biophysicochemical_properties
+        raw_sidecar: biophysicochemical_properties_raw_json
+        canonical_sidecar: biophysicochemical_properties_canonical_json
         composite_usage: composite_target:upstream_inherited
       cofactors:
-        category: structured_json_canonical_only
+        category: structured_json_sidecar
         collection_semantics: unordered_set
-        canonical_sidecar: cofactors
+        raw_sidecar: cofactors_raw_json
+        canonical_sidecar: cofactors_canonical_json
         composite_usage: composite_target:upstream_inherited
       reactions:
-        category: structured_json_canonical_only
+        category: structured_json_sidecar
         collection_semantics: ordered_sequence
-        canonical_sidecar: reactions
+        raw_sidecar: reactions_raw_json
+        canonical_sidecar: reactions_canonical_json
         composite_usage: composite_target:upstream_inherited
 
   uniprot_idmapping:

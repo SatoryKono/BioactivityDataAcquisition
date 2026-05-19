@@ -198,6 +198,8 @@ class MetricsExtractorPort(Protocol):
             - records_bronze: Records written to Bronze
             - records_silver: Records written to Silver
             - records_gold: Records written to Gold
+            - records_gold_excluded_by_contract: Silver records terminally
+              excluded from Gold by contract
             - records_quarantined: Records sent to quarantine
         """
         ...

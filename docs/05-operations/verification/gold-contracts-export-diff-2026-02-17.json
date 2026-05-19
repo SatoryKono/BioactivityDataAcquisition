@@ -78,44 +78,8 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [
-          {
-            "property": "is_oa",
-            "before": {
-              "type": [
-                "boolean",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": [
-                "object",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            }
-          },
-          {
-            "property": "title",
-            "before": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": "string",
-              "nullable": false,
-              "description": ""
-            }
-          }
-        ],
-        "required_changed": true
+        "changed_properties": [],
+        "required_changed": false
       }
     },
     "chembl_publication_similarity": {
@@ -164,27 +128,7 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [
-          {
-            "property": "downgraded",
-            "before": {
-              "type": [
-                "boolean",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": [
-                "object",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            }
-          }
-        ],
+        "changed_properties": [],
         "required_changed": false
       }
     },
@@ -202,19 +146,7 @@
       "file": "docs/04-reference/contracts/gold/composite_activity_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "activity_id",
-          "assay_id",
-          "canonical_smiles",
-          "molecule_id",
-          "publication_id",
-          "record_id",
-          "relation",
-          "src_id",
-          "target_id",
-          "type",
-          "value"
-        ],
+        "added_properties": [],
         "removed_properties": [],
         "changed_properties": [],
         "required_changed": false
@@ -224,14 +156,7 @@
       "file": "docs/04-reference/contracts/gold/composite_assay_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "assay_id",
-          "description",
-          "publication_id",
-          "score",
-          "src_id",
-          "target_id"
-        ],
+        "added_properties": [],
         "removed_properties": [],
         "changed_properties": [],
         "required_changed": false
@@ -241,13 +166,7 @@
       "file": "docs/04-reference/contracts/gold/composite_molecule_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "canonical_smiles",
-          "inchi_key",
-          "molecule_id",
-          "standardized_inchi_key",
-          "structure_parent_key"
-        ],
+        "added_properties": [],
         "removed_properties": [],
         "changed_properties": [],
         "required_changed": false
@@ -257,29 +176,17 @@
       "file": "docs/04-reference/contracts/gold/composite_publication_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "doi",
-          "pmc_id",
-          "pmid",
-          "publication_id",
-          "src_id",
-          "title"
-        ],
+        "added_properties": [],
         "removed_properties": [],
         "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "composite_target": {
       "file": "docs/04-reference/contracts/gold/composite_target_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "description",
-          "target_id",
-          "taxonomy_id",
-          "uniprot_accession"
-        ],
+        "added_properties": [],
         "removed_properties": [],
         "changed_properties": [],
         "required_changed": false
@@ -291,44 +198,8 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [
-          {
-            "property": "content_domain_crossmark_restriction",
-            "before": {
-              "type": [
-                "boolean",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": [
-                "object",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            }
-          },
-          {
-            "property": "title",
-            "before": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": "string",
-              "nullable": false,
-              "description": ""
-            }
-          }
-        ],
-        "required_changed": true
+        "changed_properties": [],
+        "required_changed": false
       }
     },
     "openalex_publication": {
@@ -337,44 +208,8 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [
-          {
-            "property": "is_oa",
-            "before": {
-              "type": [
-                "boolean",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": [
-                "object",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            }
-          },
-          {
-            "property": "title",
-            "before": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": "string",
-              "nullable": false,
-              "description": ""
-            }
-          }
-        ],
-        "required_changed": true
+        "changed_properties": [],
+        "required_changed": false
       }
     },
     "pubchem_compound": {
@@ -403,44 +238,8 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [
-          {
-            "property": "is_oa",
-            "before": {
-              "type": [
-                "boolean",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": [
-                "object",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            }
-          },
-          {
-            "property": "title",
-            "before": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": "string",
-              "nullable": false,
-              "description": ""
-            }
-          }
-        ],
-        "required_changed": true
+        "changed_properties": [],
+        "required_changed": false
       }
     },
     "uniprot_idmapping": {
@@ -449,27 +248,7 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [
-          {
-            "property": "reviewed",
-            "before": {
-              "type": [
-                "boolean",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": [
-                "object",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            }
-          }
-        ],
+        "changed_properties": [],
         "required_changed": false
       }
     },
@@ -477,29 +256,18 @@
       "file": "docs/04-reference/contracts/gold/uniprot_protein_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [],
-        "removed_properties": [],
-        "changed_properties": [
-          {
-            "property": "reviewed",
-            "before": {
-              "type": [
-                "boolean",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": [
-                "object",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            }
-          }
+        "added_properties": [
+          "alternative_products_canonical_json",
+          "alternative_products_raw_json",
+          "biophysicochemical_properties_canonical_json",
+          "biophysicochemical_properties_raw_json",
+          "cofactors_canonical_json",
+          "cofactors_raw_json",
+          "reactions_canonical_json",
+          "reactions_raw_json"
         ],
+        "removed_properties": [],
+        "changed_properties": [],
         "required_changed": false
       }
     }

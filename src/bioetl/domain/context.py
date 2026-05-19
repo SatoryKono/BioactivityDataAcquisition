@@ -204,11 +204,14 @@ class PipelineRunContext:
     started_at: datetime = field(default=MISSING_RUNTIME_TIMESTAMP)
     replay_of_run_id: str | None = None
     replay_of_manifest_id: str | None = None
+    resume_run_id: str | None = None
+    resume_manifest_id: str | None = None
     manifest_id: str | None = None
     execution_fingerprint: str | None = None
     config_hash: str | None = None
     resolved_config_hash: str | None = None
     effective_config_hash: str | None = None
+    source_fingerprint: str | None = None
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
     contract_ref: str | None = None

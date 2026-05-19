@@ -3,15 +3,15 @@ accession,§3.2 #1,YES (PK),MISSING,transformer.py:124,uniprot.py:128,uniprot.py
 acetylation,MISSING,MISSING,MISSING,transformer.py:387,uniprot.py:230,MISSING,/uniprotkb/,string,true,false,MISSING_DOC DENORM
 active_sites,MISSING,MISSING,MISSING,transformer.py:345,uniprot.py:205,uniprot.py:35,/uniprotkb/,string,true,false,MISSING_DOC DENORM
 activity_regulation,MISSING,MISSING,MISSING,transformer.py:291,uniprot.py:173,uniprot.py:41,/uniprotkb/,string,true,false,MISSING_DOC DENORM
-alternative_products,MISSING,MISSING,MISSING,transformer.py:302,uniprot.py:178,MISSING,/uniprotkb/,string,true,false,MISSING_DOC DENORM
+alternative_products,Notes,MISSING,MISSING,transformer.py:302,uniprot.py:178,uniprot.py:70,/uniprotkb/,string,true,false,DENORM with additive raw/canonical JSON sidecars for replay/debug evidence
 annotation_score,§5.1,MISSING,MISSING,transformer.py:237,uniprot.py:155,uniprot.py:68,/uniprotkb/,integer,true,false,OK
 binding_sites,MISSING,MISSING,MISSING,transformer.py:344,uniprot.py:204,uniprot.py:36,/uniprotkb/,string,true,false,MISSING_DOC DENORM
-biophysicochemical_properties,MISSING,MISSING,MISSING,transformer.py:315,uniprot.py:186,MISSING,/uniprotkb/,string,true,false,MISSING_DOC DENORM
+biophysicochemical_properties,Notes,MISSING,MISSING,transformer.py:315,uniprot.py:186,uniprot.py:73,/uniprotkb/,string,true,false,DENORM with additive raw/canonical JSON sidecars for replay/debug evidence
 catalytic_activity,§5.1,MISSING,MISSING,transformer.py:288,uniprot.py:172,uniprot.py:42,/uniprotkb/,string,true,false,DENORM
 caution,MISSING,MISSING,MISSING,transformer.py:311,uniprot.py:182,MISSING,/uniprotkb/,string,true,false,MISSING_DOC DENORM
 cellular_component,MISSING,MISSING,MISSING,transformer.py:372,uniprot.py:215,MISSING,/uniprotkb/,string,true,false,MISSING_DOC DERIVED GO aspect C
 chembl_ids,§5.1,MISSING,MISSING,transformer.py:325,uniprot.py:194,uniprot.py:51,/uniprotkb/,string,true,false,DENORM
-cofactors,MISSING,MISSING,MISSING,transformer.py:314,uniprot.py:185,MISSING,/uniprotkb/,string,true,false,MISSING_DOC DENORM
+cofactors,Notes,MISSING,MISSING,transformer.py:314,uniprot.py:185,uniprot.py:81,/uniprotkb/,string,true,false,DENORM with additive raw/canonical JSON sidecars for replay/debug evidence
 cross_reference_count,MISSING,MISSING,MISSING,transformer.py:353,uniprot.py:243,MISSING,/uniprotkb/,integer,true,false,MISSING_DOC DERIVED count
 disease_involvement,§5.1,MISSING,MISSING,transformer.py:305,uniprot.py:179,uniprot.py:43,/uniprotkb/,string,true,false,DENORM
 disulfide_bond,MISSING,MISSING,MISSING,transformer.py:384,uniprot.py:227,MISSING,/uniprotkb/,string,true,false,MISSING_DOC DENORM
@@ -23,7 +23,7 @@ entry_name,§3.2 #2,MISSING,MISSING,transformer.py:125,uniprot.py:129,uniprot.py
 entry_type,§3.2 #3,MISSING,MISSING,transformer.py:185,uniprot.py:130,MISSING,/uniprotkb/,string,true,false,MISSING_GOLD
 entry_version,MISSING,MISSING,MISSING,transformer.py:266,uniprot.py:166,MISSING,/uniprotkb/,integer,true,false,MISSING_DOC NESTED
 feature_count,MISSING,MISSING,MISSING,transformer.py:354,uniprot.py:244,MISSING,/uniprotkb/,integer,true,false,MISSING_DOC DERIVED count
-features_json,§5.1,MISSING,MISSING,transformer.py:341,uniprot.py:202,uniprot.py:38,/uniprotkb/,string,true,false,DENORM
+features_json,Notes,MISSING,MISSING,transformer.py:341,uniprot.py:202,uniprot.py:38,/uniprotkb/,string,true,false,DENORM with additive raw/canonical JSON sidecars for replay/debug evidence
 flag,MISSING,MISSING,MISSING,transformer.py:207,uniprot.py:138,MISSING,/uniprotkb/,string,true,false,MISSING_DOC
 function_comment,§5.1,MISSING,MISSING,transformer.py:285,uniprot.py:171,uniprot.py:44,/uniprotkb/,string,true,false,DENORM
 gene_names,MISSING,MISSING,MISSING,transformer.py:212,uniprot.py:141,uniprot.py:60,/uniprotkb/,object,true,false,MISSING_SILVER_SCHEMA
@@ -65,7 +65,7 @@ protein_short_names,MISSING,MISSING,MISSING,transformer.py:200,uniprot.py:135,MI
 publication_count,MISSING,MISSING,MISSING,MISSING,uniprot.py:246,MISSING,/uniprotkb/,integer,true,false,MISSING_DOC MISSING_CODE always None
 reactome_xrefs,MISSING,MISSING,MISSING,transformer.py:333,uniprot.py:199,uniprot.py:57,/uniprotkb/,string,true,false,MISSING_DOC DENORM
 reaction_ec_numbers,MISSING,MISSING,MISSING,transformer.py:402,uniprot.py:240,MISSING,/uniprotkb/,string,true,false,MISSING_DOC DERIVED
-reactions,MISSING,MISSING,MISSING,transformer.py:401,uniprot.py:239,MISSING,/uniprotkb/,string,true,false,MISSING_DOC DERIVED
+reactions,Notes,MISSING,MISSING,transformer.py:401,uniprot.py:239,uniprot.py:91,/uniprotkb/,string,true,false,DERIVED from catalytic activity with additive raw/canonical JSON sidecars for replay/debug evidence
 reviewed,§5.1,MISSING,MISSING,transformer.py:238,uniprot.py:156,uniprot.py:72,/uniprotkb/,boolean,false,false,DERIVED from entryType
 secondary_accessions,§3.2 #4,MISSING,MISSING,transformer.py:186,uniprot.py:131,MISSING,/uniprotkb/,string,true,false,DENORM from array
 sequence,§4.2,MISSING,MISSING,transformer.py:242,uniprot.py:159,MISSING,/uniprotkb/,string,false,false,NESTED MISSING_GOLD

@@ -89,6 +89,6 @@
   "normalization_profile": {
     "ref": "chembl.compound_record",
     "version": "1.0.0",
-    "hash": "f81c526539515ebb768ecbdb73bc6d3bf210c822fbe9f6057c08ca794f02ffeb"
+    "hash": "4d390e95942a44acee6d92ac13086f4ada5cfa763a97aa00fca6c3778114c85a"
   }
 }

@@ -654,6 +654,25 @@ class TestSilverRequiredFieldsCoverage:
 
 
 # ---------------------------------------------------------------------------
+# INV-CFG-007B: Gold filters are evaluated against pre-Gold/Silver field shape
+# ---------------------------------------------------------------------------
+class TestGoldFilterFieldShape:
+    """INV-CFG-007B: gold_filters.required_fields use pre-Gold/Silver fields."""
+
+    def test_chembl_assay_gold_filter_uses_silver_description_field(self) -> None:
+        config_path = ENTITIES_DIR / "chembl" / "assay.yaml"
+        filters = _load_yaml(config_path).get("filters", {})
+        assert isinstance(filters, dict)
+        gold_filters = filters.get("gold_filters", {})
+        assert isinstance(gold_filters, dict)
+
+        required_fields = gold_filters.get("required_fields", [])
+
+        assert "assay_description" in required_fields
+        assert "description" not in required_fields
+
+
+# ---------------------------------------------------------------------------
 # INV-CFG-008: effective_optional_v1 must match current config surface
 # ---------------------------------------------------------------------------
 class TestEffectiveOptionalityResolution:
