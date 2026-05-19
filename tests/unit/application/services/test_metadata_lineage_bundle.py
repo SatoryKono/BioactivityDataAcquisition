@@ -41,6 +41,7 @@ def _make_produced_fragment(
     *,
     artifact_id: str = "bronze_batch:batch-1",
     fragment_id: str = "fragment-1",
+    manifest_id: str | None = "manifest-1",
 ) -> LineageGraphFragment:
     """Build one minimal fragment exposing a produced Bronze artifact node."""
     batch_node = LineageNodeRef(
@@ -56,7 +57,7 @@ def _make_produced_fragment(
     return LineageGraphFragment(
         fragment_id=fragment_id,
         run_id="run-1",
-        manifest_id="manifest-1",
+        manifest_id=manifest_id,
         nodes=(batch_node, run_node),
         edges=(
             LineageEdge(
@@ -64,7 +65,7 @@ def _make_produced_fragment(
                 source=batch_node,
                 target=run_node,
                 run_id="run-1",
-                manifest_id="manifest-1",
+                manifest_id=manifest_id,
             ),
         ),
     )
@@ -122,3 +123,53 @@ def test_metadata_lineage_bundle_rejects_preexisting_fragment_id_mismatch() -> N
         match=r"Sidecar output\.lineage_fragment_id does not match lineage fragment fragment_id",
     ):
         MetadataLineageBundleResult(metadata=metadata, lineage_fragment=fragment)
+
+
+def test_metadata_lineage_bundle_requires_runtime_manifest_id_for_strict_closure() -> (
+    None
+):
+    metadata = _make_bronze_metadata()
+    metadata.runtime.manifest_id = None
+    fragment = _make_produced_fragment()
+
+    with pytest.raises(
+        ValueError,
+        match=r"Strict sidecar lineage closure requires runtime\.manifest_id",
+    ):
+        MetadataLineageBundleResult(
+            metadata=metadata,
+            lineage_fragment=fragment,
+            strict_manifest_id_required=True,
+        )
+
+
+def test_metadata_lineage_bundle_requires_fragment_manifest_id_for_strict_closure() -> (
+    None
+):
+    metadata = _make_bronze_metadata()
+    fragment = _make_produced_fragment(manifest_id=None)
+
+    with pytest.raises(
+        ValueError,
+        match="Strict sidecar lineage closure requires lineage fragment manifest_id",
+    ):
+        MetadataLineageBundleResult(
+            metadata=metadata,
+            lineage_fragment=fragment,
+            strict_manifest_id_required=True,
+        )
+
+
+def test_metadata_lineage_bundle_allows_legacy_missing_manifest_id_without_strict_closure() -> (
+    None
+):
+    metadata = _make_bronze_metadata()
+    metadata.runtime.manifest_id = None
+    fragment = _make_produced_fragment(manifest_id=None)
+
+    bundle = MetadataLineageBundleResult(
+        metadata=metadata,
+        lineage_fragment=fragment,
+    )
+
+    assert bundle.metadata.output.artifact_id == "bronze_batch:batch-1"

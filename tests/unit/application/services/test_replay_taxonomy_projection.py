@@ -8,6 +8,9 @@ from bioetl.application.services._observability_workflow_checkpoint_support impo
 from bioetl.application.services.control_plane._run_manifest_identity_graph_builder import (
     RunManifestIdentityGraphAssembler,
 )
+from bioetl.application.services.control_plane._run_manifest_replay_taxonomy import (
+    resolve_replay_resume_rebuild_verdict,
+)
 from bioetl.application.services.control_plane.replay_bundle_descriptor_service import (
     build_run_replay_bundle_descriptor,
 )
@@ -124,4 +127,33 @@ def test_checkpoint_replay_context_prefers_canonical_diagnostics_projection() ->
         "replay_next_action": (
             "Use exact replay with manifest, execution fingerprint, and input snapshots."
         ),
+        "exact_replay_eligible": True,
     }
+
+
+@pytest.mark.unit
+def test_replay_resume_rebuild_verdict_requires_exact_replay_capability_for_exact_ready() -> (
+    None
+):
+    verdict = resolve_replay_resume_rebuild_verdict(
+        replay_capability="rebuild_only",
+        replay_mode="exact_replay",
+        continuation_mode="exact_replay",
+        replay_readiness_verdict="exact_replay_ready",
+    )
+
+    assert verdict == "rebuild_only"
+
+
+@pytest.mark.unit
+def test_replay_resume_rebuild_verdict_keeps_resume_separate_from_exact_replay() -> (
+    None
+):
+    verdict = resolve_replay_resume_rebuild_verdict(
+        replay_capability="resume_only",
+        replay_mode="resume",
+        continuation_mode="checkpoint_snapshot_only_resume",
+        replay_readiness_verdict="resume_only_ready",
+    )
+
+    assert verdict == "resume_only"

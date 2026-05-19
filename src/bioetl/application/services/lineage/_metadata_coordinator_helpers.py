@@ -33,11 +33,13 @@ def create_metadata_bundle[_MetadataT: (BronzeMetadata, SilverMetadata, GoldMeta
     *,
     metadata: _MetadataT,
     lineage_fragment: LineageGraphFragment,
+    strict_manifest_id_required: bool = False,
 ) -> MetadataLineageBundleResult[_MetadataT]:
     """Bundle sidecar metadata with its canonical lineage fragment."""
     return MetadataLineageBundleResult(
         metadata=metadata,
         lineage_fragment=lineage_fragment,
+        strict_manifest_id_required=strict_manifest_id_required,
     )
 
 

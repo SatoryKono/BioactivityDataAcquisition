@@ -86,12 +86,18 @@ def _normalized_attr(target: object, attribute_name: str) -> str:
 def _validate_runtime_identity_contract(
     metadata: object,
     fragment: LineageGraphFragment,
+    *,
+    strict_manifest_id_required: bool,
 ) -> None:
     """Validate runtime-side lineage anchors against the fragment identity."""
     runtime = getattr(metadata, "runtime", None)
     runtime_run_id = _require_runtime_run_id(runtime)
     _validate_runtime_run_id_matches_fragment(runtime_run_id, fragment)
-    _validate_runtime_manifest_matches_fragment(runtime, fragment)
+    _validate_runtime_manifest_matches_fragment(
+        runtime,
+        fragment,
+        strict_manifest_id_required=strict_manifest_id_required,
+    )
 
 
 def _require_runtime_run_id(runtime: object) -> str:
@@ -117,13 +123,29 @@ def _validate_runtime_run_id_matches_fragment(
 def _validate_runtime_manifest_matches_fragment(
     runtime: object,
     fragment: LineageGraphFragment,
+    *,
+    strict_manifest_id_required: bool,
 ) -> None:
     """Ensure runtime.manifest_id matches the lineage fragment manifest identity."""
     runtime_manifest_id = _normalized_attr(runtime, "manifest_id")
     fragment_manifest_id = str(fragment.manifest_id or "").strip()
+    if strict_manifest_id_required:
+        _require_non_empty_manifest_id(runtime_manifest_id, fragment_manifest_id)
     if _non_empty_mismatch(runtime_manifest_id, fragment_manifest_id):
         raise ValueError(
             "Sidecar runtime.manifest_id does not match lineage fragment manifest_id"
+        )
+
+
+def _require_non_empty_manifest_id(
+    runtime_manifest_id: str,
+    fragment_manifest_id: str,
+) -> None:
+    if not runtime_manifest_id:
+        raise ValueError("Strict sidecar lineage closure requires runtime.manifest_id")
+    if not fragment_manifest_id:
+        raise ValueError(
+            "Strict sidecar lineage closure requires lineage fragment manifest_id"
         )
 
 
@@ -167,9 +189,15 @@ def _validate_bundle_identity_contract(
     metadata: object,
     fragment: LineageGraphFragment,
     artifact_id: str,
+    *,
+    strict_manifest_id_required: bool,
 ) -> None:
     """Validate the minimal cross-layer sidecar identity contract."""
-    _validate_runtime_identity_contract(metadata, fragment)
+    _validate_runtime_identity_contract(
+        metadata,
+        fragment,
+        strict_manifest_id_required=strict_manifest_id_required,
+    )
     _validate_output_identity_contract(metadata, fragment, artifact_id)
 
 
@@ -181,6 +209,7 @@ class MetadataLineageBundleResult[
 
     metadata: MetadataT
     lineage_fragment: LineageGraphFragment
+    strict_manifest_id_required: bool = False
 
     def __post_init__(self) -> None:
         """Keep sidecar summary and full lineage fragment explicitly linked."""
@@ -194,6 +223,7 @@ class MetadataLineageBundleResult[
             metadata=self.metadata,
             fragment=self.lineage_fragment,
             artifact_id=artifact_id,
+            strict_manifest_id_required=self.strict_manifest_id_required,
         )
 
 

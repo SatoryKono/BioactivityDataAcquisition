@@ -197,6 +197,40 @@ async def test_export_can_disable_sidecar_manifests(export_service):
 
 
 @pytest.mark.asyncio
+async def test_export_requires_generated_at_when_nondeterministic_manifest_timestamp_disabled(
+    export_service,
+) -> None:
+    options = ExportOptions(
+        allow_nondeterministic_manifest_timestamp=False,
+    )
+
+    result = await export_service.export(
+        "chembl.activity", layer="silver", options=options
+    )
+
+    assert not result.success
+    assert result.error is not None
+    assert "generated_at must be provided" in result.error
+
+
+@pytest.mark.asyncio
+async def test_export_accepts_explicit_deterministic_manifest_timestamp(
+    export_service,
+) -> None:
+    options = ExportOptions(
+        manifest_generated_at="2026-05-16T00:00:00Z",
+        allow_nondeterministic_manifest_timestamp=False,
+    )
+
+    result = await export_service.export(
+        "chembl.activity", layer="silver", options=options
+    )
+
+    assert result.success
+    assert len(result.manifest_paths) == 3
+
+
+@pytest.mark.asyncio
 async def test_export_tsv(export_service, mock_reader):
     """Test export to TSV."""
     options = ExportOptions(format="tsv")

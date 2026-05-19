@@ -53,6 +53,7 @@ class ExportOptions:
     include_manifests: bool = True
     manifest_strict: bool = False
     manifest_generated_at: str | None = None
+    allow_nondeterministic_manifest_timestamp: bool = True
     run_ids: tuple[str, ...] = ()
     code_revision: str | None = None
 

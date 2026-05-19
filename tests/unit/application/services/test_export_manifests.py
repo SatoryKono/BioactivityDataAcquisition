@@ -95,6 +95,33 @@ def test_build_export_sidecar_payloads_unknown_provider_strict_mode_fails() -> N
         )
 
 
+def test_build_export_sidecar_payloads_requires_generated_at_by_default() -> None:
+    with pytest.raises(ValueError, match="generated_at must be provided"):
+        build_export_sidecar_payloads(
+            table_name="chembl.activity",
+            layer="silver",
+            export_format="csv",
+            row_count=2,
+            columns=("activity_id",),
+            data_fingerprint=_fingerprint(),
+        )
+
+
+def test_build_export_sidecar_payloads_allows_operator_timestamp_opt_in() -> None:
+    sidecars = build_export_sidecar_payloads(
+        table_name="chembl.activity",
+        layer="silver",
+        export_format="csv",
+        row_count=2,
+        columns=("activity_id",),
+        data_fingerprint=_fingerprint(),
+        allow_nondeterministic_generated_at=True,
+    )
+
+    assert isinstance(sidecars.provenance_manifest["generated_at"], str)
+    assert sidecars.provenance_manifest["generated_at"]
+
+
 def test_build_export_checksum_manifest_lists_data_and_sidecar_files() -> None:
     payload = build_export_checksum_manifest(
         dataset_bundle_id="bundle-1",
@@ -119,3 +146,12 @@ def test_build_export_checksum_manifest_lists_data_and_sidecar_files() -> None:
             "sha256": "a" * 64,
         },
     ]
+
+
+def test_build_export_checksum_manifest_requires_generated_at_by_default() -> None:
+    with pytest.raises(ValueError, match="generated_at must be provided"):
+        build_export_checksum_manifest(
+            dataset_bundle_id="bundle-1",
+            generated_at=None,
+            fingerprints=(_fingerprint("exports/data.csv"),),
+        )

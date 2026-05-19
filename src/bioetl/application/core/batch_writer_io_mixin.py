@@ -23,6 +23,17 @@ _WRITE_SPAN_ERRORS = OPERATION_ERRORS
 class BatchWriterIOMixin:
     """Layer write orchestration extracted from BatchWriter."""
 
+    def _resolve_gold_ingestion_ts(self) -> datetime:
+        """Return the deterministic timestamp anchor for Gold write side effects."""
+        replay_timestamp_anchor = getattr(
+            self._context, "replay_timestamp_anchor", None
+        )
+        return (
+            replay_timestamp_anchor
+            if replay_timestamp_anchor is not None
+            else self._context.started_at
+        )
+
     async def write_bronze(
         self,
         records: list[BronzeRecord],
@@ -166,7 +177,7 @@ class BatchWriterIOMixin:
                 mode=self._gold_mode,
                 scd_config=self._config.scd_config,
                 column_order=column_order,
-                ingestion_ts=self._context.started_at,
+                ingestion_ts=self._resolve_gold_ingestion_ts(),
                 run_id=self._context.run_id,
                 silver_refs=silver_refs,
             )

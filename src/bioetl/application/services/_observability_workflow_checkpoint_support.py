@@ -315,6 +315,7 @@ def _replay_context(
             "replay_readiness_verdict": None,
             "replay_resume_rebuild_verdict": "non_replayable",
             "replay_next_action": resolve_replay_next_action("non_replayable"),
+            "exact_replay_eligible": False,
         }
     replay_taxonomy = resolve_replay_taxonomy_projection(
         run_manifest.diagnostics,
@@ -331,6 +332,9 @@ def _replay_context(
             "replay_resume_rebuild_verdict"
         ),
         "replay_next_action": replay_taxonomy.get("replay_next_action"),
+        "exact_replay_eligible": bool(
+            replay_taxonomy.get("exact_replay_eligible", False)
+        ),
     }
 
 

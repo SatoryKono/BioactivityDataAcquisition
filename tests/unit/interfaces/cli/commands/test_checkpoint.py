@@ -70,6 +70,7 @@ class _FakeWorkflowService:
                         "continuation_mode": "exact_replay",
                         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
                         "replay_capability_reason": "immutable_input_snapshots_present",
+                        "exact_replay_eligible": True,
                         "exact_replay_blockers": [],
                         "snapshot_status": "full",
                         "input_snapshot_ids": ["snapshot-1"],
@@ -114,6 +115,7 @@ class _FakeWorkflowService:
                     "operator_replay_mode": "Exact Replay",
                     "replay_readiness_verdict": "exact_replay_ready",
                     "replay_resume_rebuild_verdict": "exact_replay_ready",
+                    "exact_replay_eligible": True,
                     "replay_next_action": (
                         "Use exact replay with manifest, execution fingerprint, "
                         "and input snapshots."
@@ -184,6 +186,7 @@ class _FakeWorkflowService:
                         "continuation_mode": "checkpoint_snapshot_only_resume",
                         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
                         "replay_capability_reason": "checkpoint_resume_without_exact_replay_request",
+                        "exact_replay_eligible": False,
                         "exact_replay_blockers": ["exact_replay_not_requested"],
                         "snapshot_status": "partial",
                         "input_snapshot_ids": ["snapshot-2"],
@@ -213,6 +216,7 @@ class _FakeWorkflowService:
                     "operator_replay_mode": "Resume",
                     "replay_readiness_verdict": "resume_only_ready",
                     "replay_resume_rebuild_verdict": "resume_only_degraded",
+                    "exact_replay_eligible": False,
                     "replay_next_action": (
                         "Resume is best-effort/degraded; collect missing anchors "
                         "before replay claims."
@@ -424,12 +428,14 @@ class TestCheckpointCommands:
             "compatibility_replay_resume_rebuild_verdict: resume_only_degraded"
             in result.output
         )
+        assert "compatibility_exact_replay_eligible: False" in result.output
         assert "compatibility_mismatched_anchors: []" in result.output
         assert (
             "compatibility_missing_anchors: ['input_snapshot_fingerprint']"
             in result.output
         )
         assert "requested_exact_replay: False" in result.output
+        assert "exact_replay_eligible: False" in result.output
         assert "exact_replay_blockers: ['exact_replay_not_requested']" in result.output
         assert "persistence_profile: replay_ready" in result.output
         assert "forensic_grade_missing_requirements: ['lineage_closure']" in (

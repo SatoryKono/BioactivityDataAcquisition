@@ -2459,6 +2459,16 @@
           "dtype": "str",
           "nullable": true
         },
+        "author_details_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_details_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "author_keys": {
           "description": "",
           "dtype": "str",
@@ -2625,6 +2635,16 @@
           "nullable": true
         },
         "references": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "references_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "references_raw_json": {
           "description": "",
           "dtype": "str",
           "nullable": true
