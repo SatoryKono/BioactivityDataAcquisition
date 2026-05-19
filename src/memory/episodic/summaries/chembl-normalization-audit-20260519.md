@@ -1,27 +1,28 @@
 ---
 id: chembl-normalization-audit-20260519
-title: Audit ChEMBL normalization across all chembl pipelines
+title: Audit ChEMBL normalization state across all chembl pipelines
 task_id: chembl-normalization-audit-20260519
-created_at: '2026-05-19T10:28:15Z'
+created_at: '2026-05-19T11:42:42Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- reports/quality/chembl_normalization_audit_2026-05-19.md
-summary: Prepared architecture-strict ChEMBL normalization audit covering all 14 active
-  chembl pipelines, cross-family policy registries, hash/JSON/DQ parity, composite
-  impact, and prioritized residual gaps (molecule provider-code governance, assay-parameter
-  ontology companions, nested xref vocab enforcement, and fixture coverage expansion).
+- docs/reports/generated/chembl-normalization-audit-2026-05-19-current-main.md
+summary: Produced a current-state ChEMBL normalization audit after the recent remediation
+  wave. Confirmed shared normalization registry, full 14-pipeline registry/contract/fixture
+  coverage, green enum/DQ/hash/matrix audit suites, no new confirmed normalization
+  defects on current main, and only P2 evidence-depth follow-up for shallow raw fixture
+  coverage.
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Audit ChEMBL normalization across all chembl pipelines
+- Title: Audit ChEMBL normalization state across all chembl pipelines
 
 ## Outcome
 
-- Prepared architecture-strict ChEMBL normalization audit covering all 14 active chembl pipelines, cross-family policy registries, hash/JSON/DQ parity, composite impact, and prioritized residual gaps (molecule provider-code governance, assay-parameter ontology companions, nested xref vocab enforcement, and fixture coverage expansion).
+- Produced a current-state ChEMBL normalization audit after the recent remediation wave. Confirmed shared normalization registry, full 14-pipeline registry/contract/fixture coverage, green enum/DQ/hash/matrix audit suites, no new confirmed normalization defects on current main, and only P2 evidence-depth follow-up for shallow raw fixture coverage.
 
 ## Lessons learned
 

@@ -290,6 +290,17 @@ filters:
                 - 9
             relationship_type:
                 - D
+            assay_test_type:
+                operator: not_in
+                values:
+                    - In vivo
+                    - Ex vivo
+            assay_strain:
+                operator: is_empty
+            bao_format:
+                operator: not_in
+                values:
+                    - BAO_0000218
         required_fields:
             - assay_type
             - assay_description

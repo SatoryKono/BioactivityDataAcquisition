@@ -23,27 +23,11 @@ registries:
       linked_rf: "RF-000"
       expires_on: "2026-09-30"
       removal_step: "Split endpoint routing helpers by health/control-plane family and remove this exemption."
-    src/bioetl/interfaces/http/control_plane_identity/specs.py:
-      value: 600
-      owner: "@bioetl-architecture"
-      reason: "Control-plane identity HTTP specs retain generated/request-response schema surfaces in one published interface module pending schema-family split."
-      classification: "technical_debt"
-      linked_rf: "RF-000"
-      expires_on: "2026-09-30"
-      removal_step: "Move identity spec groups into smaller modules and remove this exemption."
-    src/bioetl/interfaces/http/control_plane_identity/extractors.py:
-      value: 483
-      owner: "@bioetl-architecture"
-      reason: "Control-plane identity extraction helpers are mid-refactor and currently retain anchor, artifact, checkpoint, and replay extractors in one interface module."
-      classification: "technical_debt"
-      linked_rf: "RF-000"
-      expires_on: "2026-09-30"
-      removal_step: "Split checkpoint/replay/artifact extraction helpers into focused control-plane identity modules and remove this exemption."
     src/bioetl/application/services/_observability_workflow_support.py:
       value: 520
-      owner: "@bioetl-platform"
+      owner: "@bioetl-architecture"
       reason: "Observability workflow support module provides diagnostic workflow helpers for audit, checkpoint, and run-manifest inspection. The size is justified by the breadth of diagnostic orchestration patterns and error handling across multiple observability surfaces."
-      classification: "intentional_exception"
+      classification: "technical_debt"
       linked_rf: "RF-000"
       expires_on: "2026-09-30"
       removal_step: "Consider extracting specialized workflow helpers (e.g., audit-specific, checkpoint-specific) if the module grows beyond 520 lines."
@@ -55,7 +39,7 @@ registries:
   domain_complexity:
     src/bioetl/domain/config/memory.py::MemoryConfig:
       value: 6
-      owner: "@bioetl-platform"
+      owner: "@bioetl-architecture"
       reason: "MemoryConfig uses Pydantic BaseModel for validation, leading to an apparent cyclomatic complexity of 6 in static analysis, though its core logic is simple and delegated to Pydantic's internal mechanisms."
       classification: "intentional_exception"
       linked_rf: "RF-000"
