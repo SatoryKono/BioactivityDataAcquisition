@@ -29,6 +29,7 @@ def build_trace_artifact_ref(
     """Return the concrete produced-artifact shape used by replay trace output."""
     ordered_keys = (
         "event_type",
+        "publication_status",
         "stage",
         "artifact_id",
         "dataset_ref",
@@ -74,12 +75,56 @@ def build_produced_artifact_trace(
         missing_requirements.append("run_ledger_history")
     if not artifacts:
         missing_requirements.append("artifact_publication_event")
+    artifact_publication_closure = _resolve_artifact_publication_closure(
+        ledger_entries_present=ledger_entries_present,
+        artifact_refs=artifact_refs,
+        missing_requirements=missing_requirements,
+        planned_artifact_count=len(manifest.planned_artifacts),
+    )
     return {
         "lookup": "run_ledger_by_manifest_id",
         "lookup_key": manifest.manifest_id,
         "manifest_id": manifest.manifest_id,
         "complete": not missing_requirements,
+        "artifact_publication_closure": artifact_publication_closure,
         "artifact_count": len(artifacts),
         "artifacts": artifacts,
         "missing_requirements": missing_requirements,
     }
+
+
+def _resolve_artifact_publication_closure(
+    *,
+    ledger_entries_present: bool,
+    artifact_refs: list[dict[str, object]],
+    missing_requirements: list[str],
+    planned_artifact_count: int,
+) -> str:
+    """Classify produced-artifact publication evidence closure."""
+    if any(
+        str(ref.get("publication_status") or "").strip().lower() in {"failed", "error"}
+        for ref in artifact_refs
+    ):
+        return "failed"
+    if not artifact_refs:
+        return "disabled"
+    if missing_requirements:
+        return "partial"
+    if planned_artifact_count and len(artifact_refs) < planned_artifact_count:
+        return "partial"
+    return "closed"
+
+
+def apply_artifact_publication_closure_policy(
+    summary: dict[str, object],
+) -> dict[str, object]:
+    """Attach the canonical artifact-publication closure state."""
+    updated = dict(summary)
+    closure = str(updated.get("artifact_publication_closure") or "").strip()
+    if not closure:
+        trace = updated.get("produced_artifact_trace")
+        if isinstance(trace, dict):
+            closure = str(trace.get("artifact_publication_closure") or "").strip()
+    closure = closure or "disabled"
+    updated["artifact_publication_closure"] = closure
+    return updated

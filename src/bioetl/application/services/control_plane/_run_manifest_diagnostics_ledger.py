@@ -247,6 +247,7 @@ def _build_artifact_ref(entry: RunLedgerEntry) -> dict[str, object] | None:
     artifact_path = details.get("artifact_path")
     artifact_ref: dict[str, object] = {
         "event_type": entry.event_type,
+        "publication_status": entry.status,
         "stage": entry.stage,
         "artifact_id": entry.dataset_ref,
         "dataset_ref": entry.dataset_ref,

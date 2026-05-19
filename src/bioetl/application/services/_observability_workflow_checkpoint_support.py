@@ -67,6 +67,23 @@ def build_checkpoint_compatibility_section(
         checkpoint_anchors=checkpoint_anchors,
         run_manifest=run_manifest,
     )
+    if _exact_replay_request_resolved_to_resume(
+        compatible=compatible,
+        taxonomy=taxonomy,
+        checkpoint_anchors=checkpoint_anchors,
+        run_manifest=run_manifest,
+    ):
+        resolved_taxonomy = taxonomy
+        compatible = False
+        taxonomy = "exact_replay_blocked_resume_semantics"
+        mismatched = [
+            *mismatched,
+            {
+                "anchor": "operator_replay_mode",
+                "checkpoint": resolved_taxonomy,
+                "manifest": replay_context.get("continuation_mode"),
+            },
+        ]
     return {
         "status": "compatible" if compatible else "incompatible",
         "compatible": compatible,
@@ -239,6 +256,24 @@ def _checkpoint_capability_taxonomy(
     if replay_capability == "rebuild_only":
         return "rebuild_only"
     return None
+
+
+def _exact_replay_request_resolved_to_resume(
+    *,
+    compatible: bool,
+    taxonomy: str,
+    checkpoint_anchors: dict[str, object],
+    run_manifest: RunManifestInspectionResult,
+) -> bool:
+    """Reject exact replay requests that only prove checkpoint resume semantics."""
+    if not compatible:
+        return False
+    if taxonomy == "exact_replay":
+        return False
+    return _checkpoint_exact_replay_requested(
+        checkpoint_anchors=checkpoint_anchors,
+        run_manifest=run_manifest,
+    )
 
 
 def _replay_capability(run_manifest: RunManifestInspectionResult | None) -> object:

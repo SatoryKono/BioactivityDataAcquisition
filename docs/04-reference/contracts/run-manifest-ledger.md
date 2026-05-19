@@ -512,6 +512,7 @@ The current diagnostics surface exposes:
 - `persistence_profile.surfaces`;
 - `persistence_profile.replay_ready_missing_requirements`;
 - `persistence_profile.forensic_grade_missing_requirements`.
+- `artifact_publication_closure`;
 - `alert_signals.immutable_input_snapshot_gap`;
 - `alert_signals.composite_resume_reconstructability_gap`;
 - `alert_signals.required_persistence_profile_gap`;
@@ -522,6 +523,10 @@ The current diagnostics surface exposes:
 When ledger-backed diagnostics are available, these profile gaps are promoted
 into alert-oriented booleans and operator next steps so replay/forensic
 deficiencies are visible as actionable signals rather than passive metadata.
+`artifact_publication_closure` is the canonical publication-evidence state:
+`closed`, `partial`, `disabled`, or `failed`. Replay-ready and forensic-grade
+claims require `closed`; `partial`, `disabled`, and `failed` are fail-closed
+evidence gaps even when a manifest and run ledger can otherwise be resolved.
 When immutable input snapshots are the missing replay-ready requirement, the
 diagnostics surface raises `alert_signals.immutable_input_snapshot_gap` and
 points the operator back to cached-Bronze snapshot persistence before exact
@@ -1081,6 +1086,9 @@ minimal identity contract:
 - inspection diagnostics expose `artifact_refs[*].artifact_id` as the
   operator-facing alias of the published `dataset_ref` so sidecar, ledger, and
   inspection surfaces can be correlated without translation.
+- inspection diagnostics expose `artifact_publication_closure`; supported
+  replay-ready and forensic-grade decisions must treat any non-`closed` value
+  as missing produced-artifact publication evidence.
 
 The lineage fragment anchor itself is intentionally split:
 

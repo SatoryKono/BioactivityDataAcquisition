@@ -76,6 +76,7 @@ class _FakeHealthSummary:
 class _FakeWorkflowService:
     def __init__(self) -> None:
         self.run_dossier_calls: list[tuple[str, int]] = []
+        self.manifest_dossier_calls: list[tuple[str, int]] = []
         self.checkpoint_calls: list[tuple[str, str | None, int]] = []
 
     async def inspect_run_dossier(
@@ -166,6 +167,18 @@ class _FakeWorkflowService:
                 "degraded_evidence": [],
                 "next_steps": ["review dossier output"],
             }
+        )
+
+    async def inspect_manifest_dossier(
+        self,
+        identifier: str,
+        *,
+        audit_limit: int = 100,
+    ) -> _FakeInspectionResult:
+        await asyncio.sleep(0)
+        self.manifest_dossier_calls.append((identifier, audit_limit))
+        return await self.inspect_run_dossier(
+            "run-from-manifest", audit_limit=audit_limit
         )
 
     async def inspect_checkpoint_workflow(
@@ -295,7 +308,9 @@ def test_diagnostics_guide_matches_exact_output(cli_runner: CliRunner) -> None:
         "  metrics/admin: bioetl diagnostics metrics [--json]",
         "  health: bioetl diagnostics health [--provider <provider>] [--json]",
         "  run: bioetl diagnostics run --run-id <run-id> [--limit 100] [--format text|json|yaml]",
-        "  dossier: bioetl diagnostics dossier --run-id <run-id> [--limit 100] [--format text|json|yaml]",
+        "  dossier: bioetl diagnostics dossier "
+        "[--run-id <run-id>|--manifest-id <manifest-id>] [--limit 100] "
+        "[--format text|json|yaml]",
         "  contract-checks: bioetl diagnostics contract-checks [--json]",
         "  checkpoint: bioetl diagnostics checkpoint --pipeline <pipeline>"
         " [--run-id <run-id>] [--audit-limit 100] [--format text|json|yaml]",
@@ -589,6 +604,42 @@ def test_diagnostics_dossier_alias_uses_run_dossier_workflow(
     assert workflow_service.run_dossier_calls == [
         ("00000000-0000-0000-0000-000000000001", 7)
     ]
+
+
+@pytest.mark.unit
+def test_diagnostics_dossier_accepts_manifest_id(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    workflow_service = _FakeWorkflowService()
+    bundle = _build_bundle(workflow_service=workflow_service)
+    import bioetl.interfaces.cli.commands.diagnostics as diagnostics_module
+
+    monkeypatch.setattr(
+        diagnostics_module,
+        "get_observability_diagnostics_bundle",
+        lambda: bundle,
+        raising=True,
+    )
+
+    result = cli_runner.invoke(
+        cli,
+        [
+            "diagnostics",
+            "dossier",
+            "--manifest-id",
+            "manifest-1",
+            "--limit",
+            "9",
+            "--format",
+            "json",
+        ],
+    )
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["run_id"] == "run-from-manifest"
+    assert workflow_service.manifest_dossier_calls == [("manifest-1", 9)]
 
 
 @pytest.mark.unit

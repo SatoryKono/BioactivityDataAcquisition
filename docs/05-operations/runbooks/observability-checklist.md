@@ -164,7 +164,8 @@ python -m scripts.engineering.qa report-observability-metric-inventory --json
 ```bash
 bioetl diagnostics guide
 bioetl diagnostics manifest <run-id|manifest-id> --format json
-bioetl diagnostics dossier <run-id> --format json
+bioetl diagnostics dossier --run-id <run-id> --format json
+bioetl diagnostics dossier --manifest-id <manifest-id> --format json
 ```
 
 - Confirm the returned diagnostics payload is sufficient for incident routing:
@@ -180,6 +181,9 @@ bioetl diagnostics dossier <run-id> --format json
 - `diagnostics.next_steps`
 
 - If `diagnostics.alert_signals.artifact_linkage_gap=true`, escalation must include artifact/linkage remediation before retry.
+- If `diagnostics.artifact_publication_closure` is not `closed`, treat the run
+  as not replay-ready; `disabled`, `partial`, and `failed` mean produced
+  artifact publication evidence is not complete.
 - For critical pipelines requiring `forensic_grade` evidence, confirm the
   dossier reports `status.operational_success=true`. A terminal runtime
   `success` is not sufficient when `status.operational_success_criteria`

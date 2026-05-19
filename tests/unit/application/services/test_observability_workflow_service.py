@@ -76,6 +76,7 @@ def _make_checkpoint_manifest_result(
     *,
     execution_fingerprint: str = "fingerprint-1",
     effective_config_hash: str = "effective-hash-1",
+    requested_exact_replay: bool = True,
     replay_capability: str = "exact_replay_supported",
     replay_mode: str = "exact_replay",
     continuation_mode: str = "exact_replay",
@@ -91,7 +92,7 @@ def _make_checkpoint_manifest_result(
             run_id="run-123",
             manifest_id="manifest-1",
             execution_fingerprint=execution_fingerprint,
-            launch_context={"exact_replay": True},
+            launch_context={"exact_replay": requested_exact_replay},
             code_provenance=SimpleNamespace(
                 effective_config_hash=effective_config_hash,
                 effective_config_artifact_id="effective-artifact-1",
@@ -102,7 +103,7 @@ def _make_checkpoint_manifest_result(
         ),
         ledger_entries=(),
         diagnostics={
-            "requested_exact_replay": True,
+            "requested_exact_replay": requested_exact_replay,
             "replay_capability": replay_capability,
             "replay_mode": replay_mode,
             "continuation_mode": continuation_mode,
@@ -143,6 +144,31 @@ async def test_inspect_audit_run_returns_manifest_context() -> None:
     assert result.run_manifest is manifest
     audit_service.inspect_run.assert_awaited_once_with("abc", limit=7)
     run_manifest_service.show.assert_called_once_with("abc")
+
+
+@pytest.mark.asyncio
+async def test_inspect_manifest_dossier_resolves_run_id_from_manifest() -> None:
+    audit_result = AuditInspectionResult(query={"run_id": "run-123"}, entries=())
+    audit_service = mock.AsyncMock()
+    audit_service.inspect_run.return_value = audit_result
+    checkpoint_service = mock.AsyncMock()
+    checkpoint_service.get_checkpoint_for_run.return_value = None
+    run_manifest_service = mock.Mock()
+    run_manifest_service.show.return_value = manifest = _make_manifest_result()
+    manifest.manifest.run_id = "run-123"
+
+    service = ObservabilityWorkflowService(
+        audit_service=audit_service,
+        checkpoint_service=checkpoint_service,
+        run_manifest_service=run_manifest_service,
+    )
+
+    result = await service.inspect_manifest_dossier("manifest-1", audit_limit=11)
+
+    assert result.run_id == "run-123"
+    assert result.run_manifest is manifest
+    run_manifest_service.show.assert_called_once_with("manifest-1")
+    audit_service.inspect_run.assert_awaited_once_with("run-123", limit=11)
 
 
 @pytest.mark.asyncio
@@ -219,12 +245,12 @@ async def test_checkpoint_workflow_to_dict_includes_compatibility_taxonomy() -> 
 
 
 @pytest.mark.asyncio
-async def test_checkpoint_workflow_to_dict_preserves_composite_suffix_resume_taxonomy() -> (
+async def test_checkpoint_workflow_blocks_exact_replay_when_taxonomy_is_resume() -> (
     None
 ):
     checkpoint_service = mock.AsyncMock()
     checkpoint_service.get_checkpoint.return_value = CheckpointInfo(
-        pipeline_name="composite_publication",
+        pipeline_name="chembl_activity",
         run_id="run-123",
         metadata={
             "records_processed": 5,
@@ -246,6 +272,62 @@ async def test_checkpoint_workflow_to_dict_preserves_composite_suffix_resume_tax
     )
     run_manifest_service = mock.Mock()
     run_manifest_service.show.return_value = _make_checkpoint_manifest_result(
+        replay_capability="resume_only",
+        replay_mode="resume",
+        continuation_mode="checkpoint_snapshot_only_resume",
+        operator_replay_mode="Resume",
+        replay_readiness_verdict="resume_compatible",
+    )
+    service = ObservabilityWorkflowService(
+        audit_service=audit_service,
+        checkpoint_service=checkpoint_service,
+        run_manifest_service=run_manifest_service,
+    )
+
+    result = await service.inspect_checkpoint_workflow("chembl_activity")
+    compatibility = result.to_dict()["compatibility"]
+
+    assert compatibility["compatible"] is False
+    assert compatibility["status"] == "incompatible"
+    assert compatibility["taxonomy"] == "exact_replay_blocked_resume_semantics"
+    assert compatibility["mismatched_anchors"] == [
+        {
+            "anchor": "operator_replay_mode",
+            "checkpoint": "checkpoint_snapshot_only_resume",
+            "manifest": "checkpoint_snapshot_only_resume",
+        }
+    ]
+
+
+@pytest.mark.asyncio
+async def test_checkpoint_workflow_to_dict_preserves_composite_suffix_resume_taxonomy() -> (
+    None
+):
+    checkpoint_service = mock.AsyncMock()
+    checkpoint_service.get_checkpoint.return_value = CheckpointInfo(
+        pipeline_name="composite_publication",
+        run_id="run-123",
+        metadata={
+            "records_processed": 5,
+            "manifest_id": "manifest-1",
+            "execution_fingerprint": "fingerprint-1",
+            "effective_config_hash": "effective-hash-1",
+            "effective_config_artifact_id": "effective-artifact-1",
+            "contract_ref": "chembl.activity",
+            "contract_version": "1.0.0",
+            "dq_contract_compatibility_hash": "dq-hash-1",
+            "exact_replay": False,
+            "input_snapshot_fingerprint": "snapshot-fingerprint-1",
+        },
+    )
+    audit_service = mock.AsyncMock()
+    audit_service.inspect_run.return_value = AuditInspectionResult(
+        query={"run_id": "run-123"},
+        entries=(),
+    )
+    run_manifest_service = mock.Mock()
+    run_manifest_service.show.return_value = _make_checkpoint_manifest_result(
+        requested_exact_replay=False,
         replay_capability="resume_only",
         replay_mode="resume",
         continuation_mode="checkpoint_snapshot_plus_ledger_suffix_resume",

@@ -19,7 +19,6 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_persist
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
     _assess_manifest_reproducibility_policy,
     _build_replay_parentage,
-    _build_replay_state_projection,
     _build_resume_contract,
     _resolve_exact_replay_support_boundary,
     _resolve_replay_family_contract,
@@ -29,6 +28,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection import (
     _build_operator_replay_projection,
+)
+from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_state import (
+    _build_replay_state_projection,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
     collect_input_snapshot_content_hashes as _collect_input_snapshot_content_hashes,
@@ -244,11 +246,21 @@ def _build_base_summary_replay_payload(
     replay_family_contract_payload: dict[str, object],
 ) -> dict[str, object]:
     """Build replay-related fields for base summary payload."""
+    replay_state_projection = _build_replay_state_projection(
+        manifest=manifest,
+        input_snapshots=replay_context.input_snapshots,
+        policy_assessment=replay_context.policy_assessment,
+    )
     return {
         "replay_of_run_id": manifest.replay_of_run_id,
         "replay_of_manifest_id": manifest.replay_of_manifest_id,
         "replay_parentage": _build_replay_parentage(manifest),
         "replay_capability": manifest.replay_capability.value,
+        "replay_control_plane_state": _resolve_replay_control_plane_state(
+            manifest=manifest,
+            replay_state_projection=replay_state_projection,
+            replay_family_contract_payload=replay_family_contract_payload,
+        ),
         "required_persistence_profile": (
             replay_context.policy_assessment.required_persistence_profile
         ),
@@ -256,11 +268,7 @@ def _build_base_summary_replay_payload(
         "exact_replay_support_boundary": replay_context.exact_replay_support_boundary,
         "replay_capability_reason": replay_context.replay_capability_reason,
         **replay_family_contract_payload,
-        **_build_replay_state_projection(
-            manifest=manifest,
-            input_snapshots=replay_context.input_snapshots,
-            policy_assessment=replay_context.policy_assessment,
-        ),
+        **replay_state_projection,
         "exact_replay_eligible": exact_replay_eligible,
         "exact_replay_blockers": replay_context.exact_replay_blockers,
         "replay_readiness_verdict": replay_context.replay_readiness_verdict,
@@ -276,6 +284,27 @@ def _build_base_summary_replay_payload(
         "resume_contract": replay_context.resume_contract,
         "resume_diagnostics": None,
     }
+
+
+def _resolve_replay_control_plane_state(
+    *,
+    manifest: RunManifest,
+    replay_state_projection: dict[str, str],
+    replay_family_contract_payload: dict[str, object],
+) -> str:
+    """Return the bounded machine-readable replay state for one manifest."""
+    if manifest.replay_capability.value == "exact_replay_supported":
+        return "exact_replay_supported"
+    if manifest.replay_capability.value == "resume_only":
+        return "resume_only"
+    if (
+        replay_family_contract_payload.get("post_capture_replayable_parent_supported")
+        is True
+        and replay_state_projection.get("historical_live_run_upgrade_state")
+        == "awaiting_input_snapshot_published_evidence"
+    ):
+        return "post_capture_parent_candidate"
+    return "rebuild_only"
 
 
 def _build_base_summary_snapshot_payload(
@@ -375,6 +404,9 @@ def _attach_base_summary_artifact_defaults(
         manifest=manifest,
         ledger_entries_present=False,
         artifact_refs=[],
+    )
+    summary["artifact_publication_closure"] = summary["produced_artifact_trace"].get(
+        "artifact_publication_closure"
     )
     return summary
 

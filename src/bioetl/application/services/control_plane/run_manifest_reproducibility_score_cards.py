@@ -44,6 +44,7 @@ _BLOCKER_PRIORITY_ORDER: tuple[str, ...] = (
     "immutable_input_snapshots",
     "immutable_input_snapshots_missing",
     "missing_immutable_input_snapshots",
+    "artifact_publication_closure",
     "produced_artifact_trace",
 )
 _BLOCKER_PRIORITY_INDEX: dict[str, int] = {
@@ -112,6 +113,10 @@ def score_idempotency(summary: JsonDict) -> ScoreCardRecord:
     if summary.get("published_artifact_count", 0) == 0:
         score -= 1
         evidence.append("no_published_artifacts_observed")
+    if summary.get("artifact_publication_closure") not in {None, "closed"}:
+        score -= 2
+        evidence.append("artifact_publication_closure_not_closed")
+        blockers.append("artifact_publication_closure")
     if summary.get("missing_artifact_links", 0):
         score -= 2
         evidence.append("missing_artifact_links_present")
@@ -256,6 +261,10 @@ def score_replay_readiness(summary: JsonDict) -> ScoreCardRecord:
         score -= 2
         evidence.append("rebuild_only_replay_mode")
         blocker_items.append("rebuild_only_replay_mode")
+    if summary.get("artifact_publication_closure") not in {None, "closed"}:
+        score -= 2
+        evidence.append("artifact_publication_closure_not_closed")
+        blocker_items.append("artifact_publication_closure")
     return ScoreCardRecord(
         "replay_readiness",
         bounded(score),

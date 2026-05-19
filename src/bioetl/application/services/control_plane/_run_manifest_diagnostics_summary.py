@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import cast
 
 from bioetl.application.services.control_plane._run_manifest_diagnostics_artifact_support import (
+    apply_artifact_publication_closure_policy,
     build_produced_artifact_trace,
     sorted_text_items,
 )
@@ -21,7 +22,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_persist
     build_next_steps,
     build_persistence_profile,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
+from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
     _is_composite_execution_context,
 )
 from bioetl.application.services.control_plane._run_manifest_identity_graph_builder import (
@@ -224,6 +225,9 @@ def _build_final_summary_updates(
         "artifact_refs": request.artifact_refs,
         "exact_replay_anchors": exact_replay_anchors,
         "produced_artifact_trace": produced_artifact_trace,
+        "artifact_publication_closure": produced_artifact_trace.get(
+            "artifact_publication_closure"
+        ),
         "planned_artifact_count": len(request.manifest.planned_artifacts),
         "published_artifact_count": len(request.artifact_refs),
         "lineage_fragment_ids": sorted(request.lineage_fragment_ids),
@@ -308,4 +312,4 @@ def _build_final_summary(
             produced_artifact_trace=produced_artifact_trace,
         )
     )
-    return summary
+    return apply_artifact_publication_closure_policy(summary)

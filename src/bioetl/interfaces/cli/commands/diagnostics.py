@@ -166,15 +166,36 @@ def diagnostics_metrics(output_json: bool) -> None:
     render_guide_lines(build_metrics_profile_lines(profile))
 
 
-def _emit_run_dossier(run_id: str, limit: int, output_format: str) -> None:
+def _emit_run_dossier(
+    *,
+    run_id: str | None,
+    manifest_id: str | None,
+    limit: int,
+    output_format: str,
+) -> None:
     """Emit one-run dossier using the canonical workflow service."""
+    if bool(run_id) == bool(manifest_id):
+        raise click.UsageError("Provide exactly one of --run-id or --manifest-id")
     bundle = get_observability_diagnostics_bundle()
 
-    run_async_inspection_command(
-        lambda: bundle.workflow_service.inspect_run_dossier(
+    async def _inspect_by_manifest_id() -> object:
+        assert manifest_id is not None
+        return await bundle.workflow_service.inspect_manifest_dossier(
+            manifest_id,
+            audit_limit=limit,
+        )
+
+    async def _inspect_by_run_id() -> object:
+        assert run_id is not None
+        return await bundle.workflow_service.inspect_run_dossier(
             run_id,
             audit_limit=limit,
-        ),
+        )
+
+    action = _inspect_by_manifest_id if manifest_id else _inspect_by_run_id
+
+    run_async_inspection_command(
+        action,
         error_title="Run diagnostics failed",
         output_format=output_format,
         text_renderer=render_run_dossier_payload,
@@ -185,14 +206,43 @@ def _emit_run_dossier(run_id: str, limit: int, output_format: str) -> None:
 @add_audit_run_options
 def diagnostics_run(run_id: str, limit: int, output_format: str) -> None:
     """Inspect one pipeline run as a bounded forensic dossier."""
-    _emit_run_dossier(run_id=run_id, limit=limit, output_format=output_format)
+    _emit_run_dossier(
+        run_id=run_id,
+        manifest_id=None,
+        limit=limit,
+        output_format=output_format,
+    )
 
 
 @diagnostics.command("dossier")
-@add_audit_run_options
-def diagnostics_dossier(run_id: str, limit: int, output_format: str) -> None:
+@click.option("--run-id", default=None, help="Pipeline RUN_ID to inspect")
+@click.option("--manifest-id", default=None, help="MANIFEST_ID to inspect")
+@click.option(
+    "--limit",
+    default=100,
+    show_default=True,
+    help="Maximum audit entries",
+)
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(["text", "json", "yaml"]),
+    default="text",
+    help="Output format",
+)
+def diagnostics_dossier(
+    run_id: str | None,
+    manifest_id: str | None,
+    limit: int,
+    output_format: str,
+) -> None:
     """Inspect one pipeline run through the public dossier entrypoint."""
-    _emit_run_dossier(run_id=run_id, limit=limit, output_format=output_format)
+    _emit_run_dossier(
+        run_id=run_id,
+        manifest_id=manifest_id,
+        limit=limit,
+        output_format=output_format,
+    )
 
 
 @diagnostics.command("contract-checks")
