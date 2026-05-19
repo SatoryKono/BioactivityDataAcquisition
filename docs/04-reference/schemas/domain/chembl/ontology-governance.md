@@ -19,19 +19,30 @@ and whether they publish a companion bundle beyond the canonical identifier.
 
 ## Unit Boundary
 
-`chembl_activity` is the only current ChEMBL pipeline that publishes UO/QUDT
-ontology companions for unit semantics.
+`chembl_activity` publishes the primary UO/QUDT ontology companion bundle for
+unit semantics.
 
-`chembl_assay_parameters` intentionally does **not** publish ontology companion
-fields today. The reviewed policy is:
+`chembl_assay_parameters` also participates in the same ontology families, but
+only through an additive optional companion bundle declared under
+`unit_companion_policies` in `configs/vocab/chembl_ontology.yaml`.
 
-- `companion_governance`: `standard_unit_only_no_ontology_companion_bundle`
-- fields: `chembl_assay_parameters.standard_units`, `chembl_assay_parameters.units`
-- rationale: keep canonical unit-token normalization without silently expanding
-  Silver/Gold contracts or hash surfaces
+The effective policy is:
 
-The authoritative configuration for this decision lives in
-`configs/vocab/chembl_ontology.yaml` under `unit_companion_policies`.
+- `companion_governance`: `optional_uo_qudt_companion_bundle`
+- primary unit-token surfaces remain authoritative:
+  `chembl_assay_parameters.standard_units`, `chembl_assay_parameters.units`
+- optional ontology surfaces may be populated when runtime/provider context
+  emits them:
+  `chembl_assay_parameters.uo_units`,
+  `chembl_assay_parameters.uo_unit_iri`,
+  `chembl_assay_parameters.uo_unit_mapping_status`,
+  `chembl_assay_parameters.uo_ontology_version`,
+  `chembl_assay_parameters.qudt_units`,
+  `chembl_assay_parameters.qudt_unit_iri`,
+  `chembl_assay_parameters.qudt_unit_mapping_status`,
+  `chembl_assay_parameters.qudt_ontology_version`
+- rationale: preserve canonical analytical unit-token semantics while allowing
+  nullable ontology sidecars without changing the authoritative unit boundary
 
 ## Source Of Truth
 
