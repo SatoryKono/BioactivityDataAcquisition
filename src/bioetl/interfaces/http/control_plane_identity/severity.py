@@ -12,6 +12,46 @@ from bioetl.interfaces.http.control_plane_identity.extractors import (
 from bioetl.interfaces.http.control_plane_identity.types import AnchorSpec
 
 
+def _resolve_checkpoint_anchor_status(checkpoint_status: str) -> str:
+    return {
+        "OK": "OK",
+        "MISMATCH": "FAILING",
+        "MISSING": "DEGRADED",
+        "PARTIAL": "DEGRADED",
+    }.get(checkpoint_status, "DEGRADED")
+
+
+def _resolve_identity_graph_complete(value: object | None) -> str:
+    if value is True:
+        return "OK"
+    rendered_value = str(value).strip().lower()
+    if rendered_value in {"true", "ok"} or rendered_value.startswith("complete"):
+        return "OK"
+    if "run_id" in rendered_value or "manifest_id" in rendered_value:
+        return "FAILING"
+    return "DEGRADED"
+
+
+def _resolve_exact_replay_failures(
+    spec_name: str, manifest: RunManifest | None
+) -> str | None:
+    if manifest is None or not requested_exact_replay(manifest):
+        return None
+
+    failing_specs = {
+        "replay_of_manifest_id",
+        "effective_config_hash",
+        "effective_config_artifact_id",
+        "input_snapshot_identity_fingerprint",
+        "input_snapshot_ids",
+        "input_snapshot_content_hashes",
+    }
+
+    if spec_name in failing_specs:
+        return "FAILING"
+    return None
+
+
 def domain_severity(
     spec: AnchorSpec,
     *,
@@ -24,25 +64,13 @@ def domain_severity(
 ) -> str:
     if not applicable:
         return "N/A"
+
     if spec.name == "checkpoint_anchor_status":
-        return {
-            "OK": "OK",
-            "MISMATCH": "FAILING",
-            "MISSING": "DEGRADED",
-            "PARTIAL": "DEGRADED",
-        }.get(
-            checkpoint_status,
-            "DEGRADED",
-        )
+        return _resolve_checkpoint_anchor_status(checkpoint_status)
+
     if spec.name == "identity_graph_complete" and present:
-        if value is True:
-            return "OK"
-        rendered_value = str(value).strip().lower()
-        if rendered_value in {"true", "ok"} or rendered_value.startswith("complete"):
-            return "OK"
-        if "run_id" in rendered_value or "manifest_id" in rendered_value:
-            return "FAILING"
-        return "DEGRADED"
+        return _resolve_identity_graph_complete(value)
+
     if (
         spec.name == "exact_replay_eligible"
         and manifest is not None
@@ -50,29 +78,17 @@ def domain_severity(
         and value is False
     ):
         return "FAILING"
+
     if present:
         return "OK"
+
     if spec.name == "manifest_id":
         return "FAILING" if is_terminal(ledger_entries) else "DEGRADED"
-    if (
-        spec.name == "replay_of_manifest_id"
-        and manifest is not None
-        and requested_exact_replay(manifest)
-    ):
-        return "FAILING"
-    if (
-        spec.name
-        in {
-            "effective_config_hash",
-            "effective_config_artifact_id",
-            "input_snapshot_identity_fingerprint",
-            "input_snapshot_ids",
-            "input_snapshot_content_hashes",
-        }
-        and manifest is not None
-        and requested_exact_replay(manifest)
-    ):
-        return "FAILING"
+
+    exact_replay_failure = _resolve_exact_replay_failures(spec.name, manifest)
+    if exact_replay_failure:
+        return exact_replay_failure
+
     return spec.missing_severity
 
 

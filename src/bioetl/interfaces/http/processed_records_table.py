@@ -237,7 +237,7 @@ def _query_prometheus_scalar(*, prometheus_base_url: str, query: str) -> float |
         prometheus_base_url.rstrip("/") + "/api/v1/query?" + urlencode({"query": query})
     )
     try:
-        with urlopen(url, timeout=PROMETHEUS_QUERY_TIMEOUT_SECONDS) as response:
+        with urlopen(url, timeout=PROMETHEUS_QUERY_TIMEOUT_SECONDS) as response:  # nosec B310
             payload = json.loads(response.read().decode("utf-8"))
     except (HTTPError, URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
         raise RuntimeError(f"Prometheus query failed: {exc}") from exc
