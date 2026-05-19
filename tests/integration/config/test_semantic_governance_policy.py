@@ -43,20 +43,12 @@ def test_weak_cluster_decisions_cover_current_high_frequency_inventory() -> None
     decisions = payload["weak_cluster_decisions"]
 
     assert policy["weak_decision_min_rows"] == 6
-    assert len(decisions) >= 20
+    assert len(decisions) >= 12
     assert {
         entry["cluster_id"]
         for entry in decisions
     } >= {
-        "shared_abstract",
-        "shared_authors",
-        "shared_issue",
         "shared_pref_name",
-        "shared_publication_class",
-        "shared_publication_date",
-        "shared_publication_subclass",
-        "shared_publication_type_unified",
-        "shared_volume",
         "shared_author_keys",
         "shared_author_orcids",
         "shared_is_oa",
@@ -69,6 +61,23 @@ def test_weak_cluster_decisions_cover_current_high_frequency_inventory() -> None
         "shared_annotation_score",
         "shared_cross_references",
     }
+
+
+def test_promoted_publication_candidates_are_no_longer_reviewed_as_weak_inventory() -> None:
+    payload = yaml.safe_load(DEFAULT_REVIEW_REGISTRY.read_text(encoding="utf-8"))
+
+    decisions = {entry["cluster_id"] for entry in payload["weak_cluster_decisions"]}
+
+    assert {
+        "shared_abstract",
+        "shared_authors",
+        "shared_issue",
+        "shared_publication_class",
+        "shared_publication_date",
+        "shared_publication_subclass",
+        "shared_publication_type_unified",
+        "shared_volume",
+    }.isdisjoint(decisions)
 
 
 def test_promotion_requirements_define_machine_enforced_evidence_contracts() -> None:

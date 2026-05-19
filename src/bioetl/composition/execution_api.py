@@ -109,9 +109,7 @@ def __getattr__(name: str) -> object:
     module_name = _PUBLIC_EXPORTS.get(name)
     if module_name is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    value = getattr(import_module(module_name), name)
-    globals()[name] = value
-    return value
+    return getattr(import_module(module_name), name)
 
 
 def __dir__() -> list[str]:

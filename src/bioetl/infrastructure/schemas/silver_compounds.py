@@ -77,10 +77,10 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("alternative_products_raw_json", pa.string()),
         pa.field("annotation_score", pa.int64()),  # Quality score 1-5
         pa.field("binding_sites", pa.string()),  # JSON: ft_binding features
-        pa.field("biophysicochemical_properties_canonical_json", pa.string()),
         pa.field(
             "biophysicochemical_properties", pa.string()
         ),  # cc_biophysicochemical_properties
+        pa.field("biophysicochemical_properties_canonical_json", pa.string()),
         pa.field("biophysicochemical_properties_raw_json", pa.string()),
         pa.field("catalytic_activity", pa.string()),  # cc_catalytic_activity
         pa.field("caution", pa.string()),  # cc_caution

@@ -339,7 +339,7 @@
       "semantic_surface_count": 286
     },
     "clusters": 282,
-    "fields": 1152,
+    "fields": 1170,
     "normalization": {
       "COMPATIBLE": 886,
       "IDENTICAL": 2347
@@ -358,13 +358,13 @@
         "LOW": 3233
       },
       "semantic_status_counts": {
-        "EXACT": 2726,
+        "EXACT": 2846,
         "PARTIAL": 68,
-        "WEAK": 439
+        "WEAK": 319
       },
       "typing_counts": {
-        "COMPATIBLE": 662,
-        "IDENTICAL": 2571
+        "COMPATIBLE": 654,
+        "IDENTICAL": 2579
       },
       "validation_counts": {
         "COMPATIBLE": 1039,
@@ -375,8 +375,8 @@
       "LOW": 3233
     },
     "typing": {
-      "COMPATIBLE": 662,
-      "IDENTICAL": 2571
+      "COMPATIBLE": 654,
+      "IDENTICAL": 2579
     },
     "validation": {
       "COMPATIBLE": 1039,

@@ -13,13 +13,13 @@
       "LOW": 3233
     },
     "semantic_status_counts": {
-      "EXACT": 2726,
+      "EXACT": 2846,
       "PARTIAL": 68,
-      "WEAK": 439
+      "WEAK": 319
     },
     "typing_counts": {
-      "COMPATIBLE": 662,
-      "IDENTICAL": 2571
+      "COMPATIBLE": 654,
+      "IDENTICAL": 2579
     },
     "validation_counts": {
       "COMPATIBLE": 1039,
@@ -80,43 +80,11 @@
       "gate": "uv run python -m scripts.engineering.qa check-semantic-registry-drift --check --json",
       "id": "weak_same_name_inventory_review",
       "priority": "P2",
-      "row_count": 439,
+      "row_count": 319,
       "status": "reviewed_until_expiry",
       "top_clusters": [
         {
-          "cluster_id": "shared_abstract",
-          "row_count": 15
-        },
-        {
-          "cluster_id": "shared_authors",
-          "row_count": 15
-        },
-        {
-          "cluster_id": "shared_issue",
-          "row_count": 15
-        },
-        {
           "cluster_id": "shared_pref_name",
-          "row_count": 15
-        },
-        {
-          "cluster_id": "shared_publication_class",
-          "row_count": 15
-        },
-        {
-          "cluster_id": "shared_publication_date",
-          "row_count": 15
-        },
-        {
-          "cluster_id": "shared_publication_subclass",
-          "row_count": 15
-        },
-        {
-          "cluster_id": "shared_publication_type_unified",
-          "row_count": 15
-        },
-        {
-          "cluster_id": "shared_volume",
           "row_count": 15
         },
         {
@@ -130,6 +98,38 @@
         {
           "cluster_id": "shared_is_oa",
           "row_count": 10
+        },
+        {
+          "cluster_id": "shared_language",
+          "row_count": 10
+        },
+        {
+          "cluster_id": "shared_assay_type",
+          "row_count": 6
+        },
+        {
+          "cluster_id": "shared_bao_format",
+          "row_count": 6
+        },
+        {
+          "cluster_id": "shared_bao_label",
+          "row_count": 6
+        },
+        {
+          "cluster_id": "shared_issn",
+          "row_count": 6
+        },
+        {
+          "cluster_id": "shared_oa_status",
+          "row_count": 6
+        },
+        {
+          "cluster_id": "shared_annotation_score",
+          "row_count": 3
+        },
+        {
+          "cluster_id": "shared_cross_references",
+          "row_count": 3
         }
       ]
     },
@@ -264,7 +264,7 @@
       "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
       "id": "compatible_typing_ratchet",
       "priority": "P2",
-      "row_count": 662,
+      "row_count": 654,
       "status": "ratcheted",
       "top_clusters": [
         {

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
-from uuid import uuid4
 
 from bioetl.application.runtime_timestamps import (
     capture_runtime_timing_anchor,
@@ -32,6 +31,7 @@ from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import ExecutionMetricsRunnerPort
 
 
@@ -148,6 +148,13 @@ def create_pipeline_runner(
         >>> await runner.run()
     """
     run_context = build_pipeline_context(name, options)
+    return _create_pipeline_runner_from_context(run_context)
+
+
+def _create_pipeline_runner_from_context(
+    run_context: PipelineRunContext,
+) -> ExecutionMetricsRunnerPort:
+    """Build a runnable pipeline runner from a prepared execution context."""
     return _require_execution_metrics_runner(bootstrap_pipeline_runner(run_context))
 
 
@@ -161,19 +168,18 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     Returns:
         RunResult with execution status, record counts, and timing information.
     """
-    # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
     settings = get_settings()
     maybe_start_metrics_server(settings)
 
-    clock = SystemClock()
+    run_context = build_pipeline_context(name, options)
     started_at, started_monotonic = capture_runtime_timing_anchor(
-        started_at=clock.now(),
-        clock=clock,
+        started_at=run_context.started_at,
+        clock=SystemClock(),
     )
 
     # Extract run context for result
     run_type = options.run_type
-    run_id = str(uuid4())
+    run_id = str(run_context.run_id)
 
     status = PipelineRunResult.SUCCESS
     error_message: str | None = None
@@ -181,9 +187,7 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     runner: ExecutionMetricsRunnerPort | None = None
 
     try:
-        runner = _require_execution_metrics_runner(
-            create_pipeline_runner(name, options)
-        )
+        runner = _create_pipeline_runner_from_context(run_context)
         run_id = str(runner.run_id)
     except (
         BioETLError,

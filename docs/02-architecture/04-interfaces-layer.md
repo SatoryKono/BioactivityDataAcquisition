@@ -90,18 +90,13 @@ python -m bioetl health --provider chembl
 `health_server_state_mixin.py`, `types.py`.
 Endpoints: `/health`, `/health/live`, `/health/ready`.
 
-### 2.3. `orchestration/` — Оркестрация (Driving Adapters)
+### 2.3. Оркестрация CLI без placeholder-пакета
 
-**Расположение:** `src/bioetl/interfaces/orchestration/`
-
-`orchestration/` сейчас является минимальным retained package seam без активных
-signal-handler implementations. Signal handlers были удалены 2025-12-31.
-Graceful shutdown обрабатывается непосредственно в canonical domain command modules:
-
-- `interfaces/cli/commands/domains/run/command.py`
-- `interfaces/cli/commands/domains/run_all/command.py`
-- `interfaces/cli/commands/domains/composite/command.py`
-  Shutdown логика вынесена в `application/core/lifecycle/shutdown.py`.
+Отдельный package seam `src/bioetl/interfaces/orchestration/` удалён как stale
+placeholder surface. Runtime orchestration CLI теперь проходит напрямую через
+публичные command-модули `interfaces/cli/commands/run.py`,
+`interfaces/cli/commands/run_all.py` и `interfaces/cli/commands/run_composite.py`,
+а shutdown логика остаётся в `application/core/lifecycle/shutdown.py`.
 
 ______________________________________________________________________
 
