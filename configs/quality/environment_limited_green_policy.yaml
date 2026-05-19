@@ -79,11 +79,12 @@ reason_policy:
     posture: transitional_debt
     allowed_in_current_baseline: true
     rationale: >-
-      The current quality-gate confidence slice can report green without the
-      canonical memory lane, so Neo4j and MCP memory confidence remains
-      environment-limited.
-    next_hardening_target: include memory lane evidence in the blocking
-      quality-gate confidence slice
+      The quality-integral gate confidence slice can report green without
+      executing the dedicated CI memory-tests lane. Neo4j and MCP memory
+      confidence is still blocking at the workflow level, but remains outside
+      this local classification.
+    next_hardening_target: feed memory-tests telemetry into the quality-integral
+      gate classification without adding memory tooling to the coverage path
   - skip_class: pilot_provider_count
     posture: reopened_baseline_gap
     allowed_in_current_baseline: false

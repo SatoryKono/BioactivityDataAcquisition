@@ -63,3 +63,21 @@ def test_chembl_target_component_edge_fixture_covers_accession_taxonomy_and_nest
         for xref in row.get("target_component_xrefs", [])
     }
     assert {"UniProt", "GoFunction", "InterPro", "Pfam"} <= observed_sources
+
+
+def test_chembl_protein_class_edge_fixture_covers_downgraded_flag_semantics() -> None:
+    rows = _load_jsonl(
+        "tests/fixtures/bronze/chembl/protein_class/sample_edge_flags_2026-05-19.jsonl"
+    )
+
+    assert {0, 1} == {row["downgraded"] for row in rows}
+    assert {910010, None} == {row["replaced_by"] for row in rows}
+
+
+def test_chembl_publication_similarity_edge_fixture_covers_pubmed_companions() -> None:
+    rows = _load_jsonl(
+        "tests/fixtures/bronze/chembl/publication_similarity/sample_edge_reference_ids_2026-05-19.jsonl"
+    )
+
+    assert {"14695814", "12345678"} == {row["pubmed_id1"] for row in rows}
+    assert {"14695826", "87654321"} == {row["pubmed_id2"] for row in rows}

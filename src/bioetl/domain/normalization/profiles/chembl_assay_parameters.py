@@ -12,12 +12,21 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_activity_qudt_ontology_version,
+    normalize_profile_activity_qudt_unit_iri,
+    normalize_profile_activity_qudt_unit_mapping_status,
+    normalize_profile_activity_uo_ontology_version,
+    normalize_profile_activity_uo_unit_iri,
+    normalize_profile_activity_uo_unit_mapping_status,
     normalize_profile_assay_parameter_type,
+    normalize_profile_ontology_id,
     normalize_profile_operator,
+    normalize_profile_qudt_unit_reference,
     normalize_profile_standard_unit_enum,
     normalize_profile_text,
 )
 from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
+from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
 from ._chembl_policy_registry import chembl_controlled_family_fields
 from ._chembl_vocab import chembl_enum
@@ -116,6 +125,46 @@ _SPECIAL_RULE_COMPONENTS = {
         "published ChEMBL standard-unit enum after canonical unit "
         "alias collapse; unknown values collapse to None.",
     ),
+    "uo_units": (
+        normalize_profile_ontology_id,
+        "Normalize optional assay-parameter Units Ontology identifiers to canonical "
+        "prefix form before hashing.",
+    ),
+    "uo_unit_iri": (
+        normalize_profile_activity_uo_unit_iri,
+        "Resolve the optional assay-parameter Units Ontology companion bundle from "
+        "sibling normalized identifiers and emit the canonical OBO IRI.",
+    ),
+    "uo_unit_mapping_status": (
+        normalize_profile_activity_uo_unit_mapping_status,
+        "Resolve the optional assay-parameter Units Ontology companion bundle from "
+        "sibling normalized identifiers and emit the canonical mapping-status enum.",
+    ),
+    "uo_ontology_version": (
+        normalize_profile_activity_uo_ontology_version,
+        "Resolve the optional assay-parameter Units Ontology companion bundle from "
+        "sibling normalized identifiers and emit the ontology version.",
+    ),
+    "qudt_units": (
+        normalize_profile_qudt_unit_reference,
+        "Normalize optional assay-parameter QUDT unit reference tokens and URIs "
+        "while preserving unknown reviewable lexemes for companion mapping-status resolution.",
+    ),
+    "qudt_unit_iri": (
+        normalize_profile_activity_qudt_unit_iri,
+        "Resolve the optional assay-parameter QUDT companion bundle from sibling "
+        "normalized unit tokens and emit the canonical QUDT unit IRI.",
+    ),
+    "qudt_unit_mapping_status": (
+        normalize_profile_activity_qudt_unit_mapping_status,
+        "Resolve the optional assay-parameter QUDT companion bundle from sibling "
+        "normalized unit tokens and emit the canonical mapping-status enum.",
+    ),
+    "qudt_ontology_version": (
+        normalize_profile_activity_qudt_ontology_version,
+        "Resolve the optional assay-parameter QUDT companion bundle from sibling "
+        "normalized unit tokens and emit the ontology version.",
+    ),
 }
 
 CHEMBL_ASSAY_PARAMETERS_PROFILE = build_standard_profile(
@@ -132,8 +181,10 @@ CHEMBL_ASSAY_PARAMETERS_PROFILE = build_standard_profile(
     },
     operator_fields=_OPERATOR_FIELDS,
     enum_fields={
+        "qudt_unit_mapping_status": ONTOLOGY_MAPPING_STATUSES,
         "standard_type": ASSAY_PARAMETER_STANDARD_TYPES,
         "standard_units": ASSAY_PARAMETER_STANDARD_UNITS,
+        "uo_unit_mapping_status": ONTOLOGY_MAPPING_STATUSES,
     },
     special_rules=_SPECIAL_RULE_COMPONENTS,
     unit_fields=_RAW_UNIT_FIELDS,

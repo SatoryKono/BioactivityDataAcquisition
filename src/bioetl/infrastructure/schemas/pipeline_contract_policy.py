@@ -10,7 +10,7 @@ from __future__ import annotations
 
 __all__ = ["PipelineContractPolicy", "PipelineContractRollout"]
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 
@@ -35,10 +35,22 @@ class PipelineContractPolicy(BaseModel):
     merge_keys: list[str] = Field(min_length=1)
     hash_include: list[str] = Field(default_factory=list)
     hash_exclude: list[str] = Field(default_factory=list)
+    hash_datetime_policy: str = Field(default="v1_date")
     rename_map: dict[str, str] = Field(default_factory=dict)
     contract_ref: str = Field(default="")
     active_version: str = Field(default="")
     rollout: PipelineContractRollout = Field(default_factory=PipelineContractRollout)
+
+    @field_validator("hash_datetime_policy")
+    @classmethod
+    def validate_hash_datetime_policy(cls, value: str) -> str:
+        """Allow only supported content-hash datetime normalization policies."""
+        normalized = value.strip()
+        if normalized not in {"v1_date", "v2_datetime_utc"}:
+            raise ValueError(
+                "hash_datetime_policy must be one of 'v1_date', 'v2_datetime_utc'"
+            )
+        return normalized
 
     @property
     def rollout_mode(self) -> str:

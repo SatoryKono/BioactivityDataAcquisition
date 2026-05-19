@@ -99,6 +99,14 @@ fixtures:
     owner: "data-platform"
     last_refresh: "2026-04-29"
     validation_status: valid
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/chembl/protein_class/sample_edge_flags_2026-05-19.jsonl
+        records: 2
+        provenance: "Targeted edge-case ChEMBL protein_class Bronze sample covering downgraded/replaced_by semantics that are sparse in the bounded CI sample."
+        owner: "data-platform"
+        last_refresh: "2026-05-19"
+        validation_status: valid
   chembl/publication:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/chembl/publication/sample_ci_2026-04-24.jsonl
@@ -118,6 +126,14 @@ fixtures:
     source_entity: chembl/document_similarity
     resolution_kind: provider_contract_alignment
     extraction_contract: current_document_similarity_provider_shape
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/chembl/publication_similarity/sample_edge_reference_ids_2026-05-19.jsonl
+        records: 2
+        provenance: "Targeted edge-case ChEMBL publication_similarity Bronze sample covering explicit PubMed identifier companions alongside similarity metrics."
+        owner: "data-platform"
+        last_refresh: "2026-05-19"
+        validation_status: valid
   chembl/publication_term:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/chembl/publication_term/sample_ci_2026-04-30.jsonl

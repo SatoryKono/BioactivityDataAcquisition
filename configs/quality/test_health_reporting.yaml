@@ -70,6 +70,7 @@ skip_classes:
   memory_lane_not_run:
     short_label: Memory Lane Not Run
     definition: >
-      The current quality-gate confidence slice does not execute the canonical
-      memory lane, so Neo4j and MCP memory confidence remains incomplete for
-      this run.
+      The current quality-integral gate confidence slice executes architecture
+      checks only and does not include the dedicated CI memory-tests lane; Neo4j
+      and MCP memory confidence is therefore tracked by that separate blocking
+      lane rather than this local classification.

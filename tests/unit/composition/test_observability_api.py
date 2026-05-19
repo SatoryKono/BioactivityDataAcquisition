@@ -51,14 +51,14 @@ def test_start_metrics_server_overrides_logger_when_provided() -> None:
     assert metrics_service.logger is logger
 
 
-def test_get_metrics_service_delegates_to_services_api() -> None:
+def test_get_metrics_service_delegates_to_internal_services_owner() -> None:
     expected = mock.Mock()
-    fake_services_api = ModuleType("bioetl.composition.services_api")
+    fake_services = ModuleType("bioetl.composition._services")
     mock_impl = mock.Mock(return_value=expected)
-    fake_services_api.get_metrics_service = mock_impl
+    fake_services.get_metrics_service = mock_impl
     with mock.patch.dict(
         sys.modules,
-        {"bioetl.composition.services_api": fake_services_api},
+        {"bioetl.composition._services": fake_services},
     ):
         result = observability_api.get_metrics_service()
 
@@ -120,14 +120,14 @@ def test_delete_metrics_from_gateway_uses_metrics_service_delete() -> None:
     )
 
 
-def test_get_audit_service_delegates_to_services_api() -> None:
+def test_get_audit_service_delegates_to_internal_services_owner() -> None:
     expected = mock.Mock()
-    fake_services_api = ModuleType("bioetl.composition.services_api")
+    fake_services = ModuleType("bioetl.composition._services")
     mock_impl = mock.Mock(return_value=expected)
-    fake_services_api.get_audit_service = mock_impl
+    fake_services.get_audit_service = mock_impl
     with mock.patch.dict(
         sys.modules,
-        {"bioetl.composition.services_api": fake_services_api},
+        {"bioetl.composition._services": fake_services},
     ):
         result = observability_api.get_audit_service()
 
@@ -135,14 +135,16 @@ def test_get_audit_service_delegates_to_services_api() -> None:
     mock_impl.assert_called_once_with()
 
 
-def test_get_observability_workflow_service_delegates_to_services_api() -> None:
+def test_get_observability_workflow_service_delegates_to_internal_services_owner() -> (
+    None
+):
     expected = mock.Mock()
-    fake_services_api = ModuleType("bioetl.composition.services_api")
+    fake_services = ModuleType("bioetl.composition._services")
     mock_impl = mock.Mock(return_value=expected)
-    fake_services_api.get_observability_workflow_service = mock_impl
+    fake_services.get_observability_workflow_service = mock_impl
     with mock.patch.dict(
         sys.modules,
-        {"bioetl.composition.services_api": fake_services_api},
+        {"bioetl.composition._services": fake_services},
     ):
         result = observability_api.get_observability_workflow_service()
 

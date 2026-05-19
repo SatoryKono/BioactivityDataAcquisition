@@ -635,6 +635,52 @@ class TestCheckpointCompatibilityService:
             "Minor pipeline version changed (lenient mode)" in msg
             for msg in result.messages
         )
+        assert result.resume_verdict == "resume_only_degraded"
+        assert result.degraded_resume_reasons
+        assert any("resume_only_degraded" in msg for msg in result.messages)
+
+    def test_validate_minimum_compatibility_marks_complete_identity_as_resume_only(
+        self,
+    ) -> None:
+        """Lenient resume is non-degraded only when canonical anchors are present."""
+        current = CheckpointMetadata(
+            records_processed=1000,
+            execution_fingerprint="fp-1",
+            manifest_id="manifest-1",
+            effective_config_hash="a" * 64,
+            effective_config_artifact_id="effective-config-1",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            git_commit="deadbeef",
+            dependency_lock_hash="sha256:lock",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="1.0.0",
+            normalization_profile_hash="b" * 64,
+        )
+        checkpoint = CheckpointMetadata(
+            records_processed=500,
+            execution_fingerprint="fp-1",
+            manifest_id="manifest-1",
+            effective_config_hash="a" * 64,
+            effective_config_artifact_id="effective-config-1",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            git_commit="deadbeef",
+            dependency_lock_hash="sha256:lock",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="1.0.0",
+            normalization_profile_hash="b" * 64,
+        )
+
+        result = self.service.validate_minimum_compatibility(current, checkpoint)
+
+        assert result.compatible is True
+        assert result.resume_verdict == "resume_only"
+        assert result.degraded_resume_reasons == ()
 
     def test_validate_minimum_compatibility_different_contracts(self) -> None:
         """Test lenient mode allows resume with different DQ contracts."""

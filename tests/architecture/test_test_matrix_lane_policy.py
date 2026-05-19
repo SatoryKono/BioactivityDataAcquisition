@@ -265,8 +265,9 @@ class TestCanonicalTestLanes:
                 "lane": "memory",
                 "skip_class": "memory_lane_not_run",
                 "reason": (
-                    "Current quality-gate run does not execute the canonical "
-                    "memory lane."
+                    "Current quality-integral gate slice runs architecture "
+                    "checks only; the dedicated CI memory-tests lane remains "
+                    "separate and is not represented in this local classification."
                 ),
             },
         ]

@@ -15,6 +15,7 @@ INTERNAL_COMPOSITION_ENTRYPOINT_MODULES = (
     "bioetl.composition._services",
 )
 COMPOSITION_BOOTSTRAP_FACADE_MODULE = "bioetl.composition.bootstrap"
+COMPOSITION_SERVICES_API_MODULE = "bioetl.composition.services_api"
 SERVICE_BOOTSTRAPS_COMPAT_MODULE = "bioetl.composition._service_bootstraps"
 CLI_REGISTRY_HELPER_MODULE = "bioetl.interfaces.cli.registry_helpers"
 METADATA_BUILDER_COMPAT_MODULE = (
@@ -129,6 +130,20 @@ COMPOSITION_BOOTSTRAP_INIT_PATH = (
 )
 SERVICE_BOOTSTRAPS_COMPAT_MODULE_PATH = (
     ROOT / "src" / "bioetl" / "composition" / "_service_bootstraps.py"
+)
+CLI_RUN_COMMAND_PATH = (
+    ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run.py"
+)
+CLI_RUN_SERVICE_ACCESS_PATH = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "interfaces"
+    / "cli"
+    / "commands"
+    / "domains"
+    / "run"
+    / "service_access.py"
 )
 
 ALLOWED_DATASOURCE_REGISTRY_SRC_FILES = frozenset(
@@ -1002,6 +1017,17 @@ _MODULE_IMPORT_SCOPE_CASES = (
     pytest.param(
         "src",
         "source_ast_cache",
+        COMPOSITION_SERVICES_API_MODULE,
+        frozenset(),
+        (
+            "First-party src must use narrow composition APIs or internal "
+            "composition owners instead of the compatibility services_api facade:"
+        ),
+        id="composition-services-api-src",
+    ),
+    pytest.param(
+        "src",
+        "source_ast_cache",
         SERVICE_BOOTSTRAPS_COMPAT_MODULE,
         frozenset(),
         "_service_bootstraps compatibility wrapper imports must stay removed from src:",
@@ -1164,6 +1190,34 @@ def test_transformer_dependency_compat_shim_file_has_been_removed() -> None:
     assert not TRANSFORMER_DEPENDENCY_SHIM_PATH.exists(), (
         "Legacy base-transformer dependency shim must stay removed: "
         "src/bioetl/application/core/base_transformer/dependencies.py"
+    )
+
+
+@pytest.mark.architecture
+def test_cli_run_orchestration_singleton_stays_private_compat_owner() -> None:
+    """The CLI run singleton may exist only as a retained compatibility accessor."""
+    allowed_path = CLI_RUN_SERVICE_ACCESS_PATH
+    offenders: list[str] = []
+    for path in sorted((ROOT / "src").rglob("*.py")):
+        source = path.read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        if path != allowed_path and any(
+            isinstance(node, ast.Name) and node.id == "_cli_run_orchestration_service"
+            for node in ast.walk(tree)
+        ):
+            offenders.append(path.relative_to(ROOT).as_posix())
+
+    assert not offenders, (
+        "CLI run orchestration singleton leaked outside private service_access.py:\n"
+        + "\n".join(offenders)
+    )
+
+    run_source = CLI_RUN_COMMAND_PATH.read_text(encoding="utf-8")
+    assert "service = create_cli_run_orchestration_service()" in run_source, (
+        "Runtime CLI run command must build a fresh orchestration service."
+    )
+    assert "service = get_cli_run_orchestration_service()" not in run_source, (
+        "Runtime CLI run command must not use the retained compatibility singleton."
     )
 
 
@@ -1347,7 +1401,11 @@ def test_retired_run_command_wrapper_and_placeholder_package_stay_absent() -> No
     assert not [path for path in retired_paths if path.exists()], (
         "Retired run-command wrapper or placeholder orchestration package returned:\n"
         + "\n".join(
-            sorted(path.relative_to(ROOT).as_posix() for path in retired_paths if path.exists())
+            sorted(
+                path.relative_to(ROOT).as_posix()
+                for path in retired_paths
+                if path.exists()
+            )
         )
     )
 

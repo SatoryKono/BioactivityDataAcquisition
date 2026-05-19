@@ -39,6 +39,43 @@ from bioetl.application.services.execution.pipeline_runner_models import (
 )
 
 
+def _resume_selector_conflict_error(options: CliRunOptionsInput) -> str | None:
+    """Return the first invalid resume-selector combination, if any."""
+    if options.resume and (
+        options.resume_run_id is not None or options.resume_manifest_id is not None
+    ):
+        return (
+            "--resume cannot be used together with --resume-run-id/--resume-manifest-id"
+        )
+    if options.resume_run_id is not None and options.resume_manifest_id is not None:
+        return "--resume-run-id and --resume-manifest-id cannot be used together"
+    return None
+
+
+def _replay_prerequisite_error(options: CliRunOptionsInput) -> str | None:
+    """Return the first replay prerequisite violation, if any."""
+    if (
+        options.replay_of_run_id is not None
+        or options.replay_of_manifest_id is not None
+    ) and not options.exact_replay:
+        return "--replay-of-run-id/--replay-of-manifest-id require --exact-replay"
+    if options.exact_replay and not options.use_cached_bronze:
+        return (
+            "--exact-replay currently requires --use-cached-bronze with "
+            "snapshot-backed Bronze inputs"
+        )
+    return None
+
+
+def _explicit_resume_requested(options: CliRunOptionsInput) -> bool:
+    """Return whether any resume selector was explicitly requested."""
+    return (
+        options.resume
+        or options.resume_run_id is not None
+        or options.resume_manifest_id is not None
+    )
+
+
 class CliRunOrchestrationService:
     """Coordinates run-option preparation and execution mechanics for CLI."""
 
@@ -92,11 +129,7 @@ class CliRunOrchestrationService:
         Returns:
             RunOptions populated from the provided CLI parameters.
         """
-        explicit_resume_requested = (
-            request.resume
-            or request.resume_run_id is not None
-            or request.resume_manifest_id is not None
-        )
+        explicit_resume_requested = _explicit_resume_requested(request)
         return RunOptions(
             run_type=request.run_type,
             resume=explicit_resume_requested,
@@ -128,33 +161,10 @@ class CliRunOrchestrationService:
         request: CliRunPreparationInput,
     ) -> RunPreparationResult:
         """Validate raw CLI inputs and build a prepared execution request."""
-        if (
-            request.options.resume
-            and (
-                request.options.resume_run_id is not None
-                or request.options.resume_manifest_id is not None
-            )
-        ):
-            return RunPreparationResult(
-                error_message=(
-                    "--resume cannot be used together with "
-                    "--resume-run-id/--resume-manifest-id"
-                )
-            )
-        if (
-            request.options.resume_run_id is not None
-            and request.options.resume_manifest_id is not None
-        ):
-            return RunPreparationResult(
-                error_message=(
-                    "--resume-run-id and --resume-manifest-id cannot be used together"
-                )
-            )
-        explicit_resume_requested = (
-            request.options.resume
-            or request.options.resume_run_id is not None
-            or request.options.resume_manifest_id is not None
-        )
+        if error_message := _resume_selector_conflict_error(request.options):
+            return RunPreparationResult(error_message=error_message)
+
+        explicit_resume_requested = _explicit_resume_requested(request.options)
         validation = self.validate_start_offset(
             start_offset=request.options.start_offset,
             run_type=request.options.run_type,
@@ -162,21 +172,8 @@ class CliRunOrchestrationService:
         )
         if not validation.is_valid:
             return RunPreparationResult(error_message=validation.error_message)
-        if (
-            request.options.replay_of_run_id is not None
-            or request.options.replay_of_manifest_id is not None
-        ) and not request.options.exact_replay:
-            return RunPreparationResult(
-                error_message=(
-                    "--replay-of-run-id/--replay-of-manifest-id require --exact-replay"
-                )
-            )
-        if request.options.exact_replay and not request.options.use_cached_bronze:
-            return RunPreparationResult(
-                error_message=(
-                    "--exact-replay currently requires --use-cached-bronze with snapshot-backed Bronze inputs"
-                )
-            )
+        if error_message := _replay_prerequisite_error(request.options):
+            return RunPreparationResult(error_message=error_message)
 
         return RunPreparationResult(
             request=RunExecutionRequest(

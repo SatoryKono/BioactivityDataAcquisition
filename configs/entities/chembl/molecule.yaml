@@ -179,6 +179,25 @@ quality:
                 - 4
             nullable: true
             error_message: max_phase must be one of the declared ChEMBL phase codes when present
+        -   field: availability_type
+            type: enum
+            allowed:
+                - -2
+                - -1
+                - 0
+                - 1
+                - 2
+            nullable: true
+            error_message: availability_type must be one of the reviewed ChEMBL molecule provider codes when present
+        -   field: chirality
+            type: enum
+            allowed:
+                - -1
+                - 0
+                - 1
+                - 2
+            nullable: true
+            error_message: chirality must be one of the reviewed ChEMBL molecule provider codes when present
         -   field: canonical_smiles
             type: custom
             validator: smiles_validator

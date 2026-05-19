@@ -9,7 +9,6 @@ from datetime import datetime
 from bioetl.domain.normalization.json import serialize_json_canonical
 
 __all__ = [
-    "compute_degraded_runtime_anchor_fingerprint",
     "compute_execution_identity_fingerprint",
     "compute_input_snapshot_identity_fingerprint",
     "compute_manifest_execution_fingerprint",
@@ -111,21 +110,6 @@ def compute_manifest_execution_fingerprint(payload: Mapping[str, object]) -> str
     The canonical contract is now the execution-identity payload shared across
     manifest, checkpoint, and runtime compatibility surfaces. Callers are still
     expected to pass an already-normalized payload.
-    """
-
-    return compute_execution_identity_fingerprint(payload)
-
-
-def compute_degraded_runtime_anchor_fingerprint(
-    payload: Mapping[str, object | None],
-) -> str:
-    """Compute the explicitly degraded runtime-anchor compatibility fingerprint.
-
-    This helper is intentionally narrower than the canonical execution identity.
-    It exists only for legacy compatibility paths when a full execution
-    fingerprint or canonical checkpoint-execution payload is unavailable.
-    Callers are expected to pass the already-normalized payload produced by
-    `normalize_runtime_anchor_payload()`.
     """
 
     return compute_execution_identity_fingerprint(payload)

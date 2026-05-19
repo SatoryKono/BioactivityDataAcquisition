@@ -15,6 +15,8 @@ class CheckpointCompatibilityResult:
     messages: list[str]
     execution_identity_compatible: bool = True
     identity_continuity_proven: bool = True
+    resume_verdict: str = "resume_only"
+    degraded_resume_reasons: tuple[str, ...] = ()
 
     @staticmethod
     def compatible_result() -> CheckpointCompatibilityResult:
@@ -25,6 +27,8 @@ class CheckpointCompatibilityResult:
             pipeline_compatible=True,
             execution_identity_compatible=True,
             identity_continuity_proven=True,
+            resume_verdict="resume_only",
+            degraded_resume_reasons=(),
             messages=["Checkpoint is compatible for resume"],
         )
 
@@ -34,6 +38,8 @@ class CheckpointCompatibilityResult:
         pipeline_compatible: bool = False,
         execution_identity_compatible: bool = False,
         identity_continuity_proven: bool = True,
+        resume_verdict: str = "non_replayable",
+        degraded_resume_reasons: tuple[str, ...] = (),
         messages: list[str] | None = None,
     ) -> CheckpointCompatibilityResult:
         """Create an incompatible result with optional reason messages."""
@@ -43,6 +49,8 @@ class CheckpointCompatibilityResult:
             pipeline_compatible=pipeline_compatible,
             execution_identity_compatible=execution_identity_compatible,
             identity_continuity_proven=identity_continuity_proven,
+            resume_verdict=resume_verdict,
+            degraded_resume_reasons=degraded_resume_reasons,
             messages=messages or [],
         )
 

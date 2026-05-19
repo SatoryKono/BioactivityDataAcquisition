@@ -240,6 +240,7 @@ async def test_checkpoint_workflow_to_dict_includes_compatibility_taxonomy() -> 
     assert compatibility["replay_capability"] == "exact_replay_supported"
     assert compatibility["continuation_mode"] == "exact_replay"
     assert compatibility["replay_readiness_verdict"] == "exact_replay_ready"
+    assert compatibility["replay_resume_rebuild_verdict"] == "exact_replay_ready"
     assert compatibility["mismatched_anchors"] == []
     assert "execution_fingerprint" in compatibility["matched_anchors"]
 
@@ -290,6 +291,7 @@ async def test_checkpoint_workflow_blocks_exact_replay_when_taxonomy_is_resume()
     assert compatibility["compatible"] is False
     assert compatibility["status"] == "incompatible"
     assert compatibility["taxonomy"] == "exact_replay_blocked_resume_semantics"
+    assert compatibility["replay_resume_rebuild_verdict"] == "resume_only"
     assert compatibility["mismatched_anchors"] == [
         {
             "anchor": "operator_replay_mode",
@@ -355,6 +357,7 @@ async def test_checkpoint_workflow_to_dict_preserves_composite_suffix_resume_tax
     )
     assert compatibility["operator_replay_mode"] == "Lifecycle Projection"
     assert compatibility["replay_readiness_verdict"] == "lifecycle_projection_only"
+    assert compatibility["replay_resume_rebuild_verdict"] == "resume_only"
 
 
 @pytest.mark.asyncio

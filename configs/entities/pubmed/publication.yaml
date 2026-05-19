@@ -215,6 +215,21 @@ quality:
     type: pattern
     pattern: \S
     nullable: true
+  - field: publication_type_unified
+    type: custom
+    validator: validate_publication_type_unified_taxonomy
+    nullable: true
+    error_message: publication_type_unified must match the shared publication taxonomy
+  - field: publication_subclass
+    type: custom
+    validator: validate_publication_subclass_taxonomy
+    nullable: true
+    error_message: publication_subclass must match the shared publication taxonomy
+  - field: publication_class
+    type: custom
+    validator: validate_publication_class_taxonomy
+    nullable: true
+    error_message: publication_class must match the shared publication taxonomy
   - field: author_orcids
     type: pattern
     pattern: '^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'

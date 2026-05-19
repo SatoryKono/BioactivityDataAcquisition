@@ -36,6 +36,8 @@ ______________________________________________________________________
 | `pref_name`     | `str` | Предпочтительное название                     |
 | `max_phase`     | `int` | Максимальная фаза клинических испытаний (0-4) |
 | `molecule_type` | `str` | Тип молекулы (Small molecule, Protein, etc.)  |
+| `availability_type` | `int` | Reviewed provider-code surface with canonical universe `{-2,-1,0,1,2}` |
+| `chirality`     | `int` | Reviewed provider-code surface with canonical universe `{-1,0,1,2}` |
 
 ### Структурные данные
 

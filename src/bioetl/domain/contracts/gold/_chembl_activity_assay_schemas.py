@@ -200,6 +200,14 @@ class ChEMBLAssayParametersGoldSchema(StrictGoldContractSchema):
     standard_value: Series[float] = pa.Field(nullable=True, coerce=True)
     standard_units: Series[str] = pa.Field(nullable=True)
     standard_text_value: Series[str] = pa.Field(nullable=True)
+    qudt_ontology_version: Series[str] = pa.Field(nullable=True)
+    qudt_unit_iri: Series[str] = pa.Field(nullable=True)
+    qudt_unit_mapping_status: Series[str] = pa.Field(nullable=True)
+    qudt_units: Series[str] = pa.Field(nullable=True)
+    uo_ontology_version: Series[str] = pa.Field(nullable=True)
+    uo_unit_iri: Series[str] = pa.Field(nullable=True)
+    uo_unit_mapping_status: Series[str] = pa.Field(nullable=True)
+    uo_units: Series[str] = pa.Field(nullable=True)
 
 
 __all__ = [

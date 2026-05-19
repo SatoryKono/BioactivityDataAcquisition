@@ -90,6 +90,12 @@ ENUM_POLICIES: tuple[EnumPolicy, ...] = (
     ),
     EnumPolicy(
         "assay_parameters",
+        "qudt_unit_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "assay_parameters",
         "standard_relation",
         ("activity", "standard_relations"),
         surfaces=frozenset({"quality"}),
@@ -98,6 +104,24 @@ ENUM_POLICIES: tuple[EnumPolicy, ...] = (
         "assay_parameters",
         "standard_units",
         ("activity", "standard_units"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "assay_parameters",
+        "uo_unit_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "molecule",
+        "availability_type",
+        ("molecule", "availability_type_values"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "molecule",
+        "chirality",
+        ("molecule", "chirality_values"),
         surfaces=frozenset({"quality"}),
     ),
     EnumPolicy(
@@ -221,6 +245,12 @@ EXACT_DQ_ENUM_POLICIES: tuple[EnumPolicy, ...] = (
     ),
     EnumPolicy(
         "assay_parameters",
+        "qudt_unit_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "assay_parameters",
         "standard_relation",
         ("activity", "standard_relations"),
         surfaces=frozenset({"quality"}),
@@ -229,6 +259,24 @@ EXACT_DQ_ENUM_POLICIES: tuple[EnumPolicy, ...] = (
         "assay_parameters",
         "standard_units",
         ("activity", "standard_units"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "assay_parameters",
+        "uo_unit_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "molecule",
+        "availability_type",
+        ("molecule", "availability_type_values"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "molecule",
+        "chirality",
+        ("molecule", "chirality_values"),
         surfaces=frozenset({"quality"}),
     ),
     EnumPolicy(

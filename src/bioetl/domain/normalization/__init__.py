@@ -29,7 +29,6 @@ from bioetl.domain.normalization.dates import (
     validate_publication_year,
 )
 from bioetl.domain.normalization.fingerprints import (
-    compute_degraded_runtime_anchor_fingerprint,
     compute_execution_identity_fingerprint,
     compute_input_snapshot_identity_fingerprint,
     compute_manifest_execution_fingerprint,
@@ -69,7 +68,6 @@ __all__ = [
     "JoinKeyNormalizationPolicy",
     "build_execution_identity_payload",
     "canonicalize_json_string",
-    "compute_degraded_runtime_anchor_fingerprint",
     "compute_execution_identity_fingerprint",
     "compute_input_snapshot_identity_fingerprint",
     "compute_manifest_execution_fingerprint",

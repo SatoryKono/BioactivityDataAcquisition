@@ -426,15 +426,16 @@ ______________________________________________________________________
 
 ### 6.3. Gold Layer
 
-`chembl_activity` currently does **not** write a Gold dataset.
-In the active config, `sink.gold.enabled: false`, so the pipeline stops after
-Bronze and Silver writes.
+`chembl_activity` writes both Silver and Gold surfaces in the active runtime
+config. The active entity config keeps the Gold sink enabled and the published
+Gold contract/export artifacts below describe an emitted runtime surface rather
+than a reference-only placeholder.
 
 | Параметр     | Значение                                                                                                 |
 | ------------ | -------------------------------------------------------------------------------------------------------- |
-| **Статус**   | Disabled in `configs/entities/chembl/activity.yaml`                                                      |
-| **Причина**  | Активный pipeline config не включает Gold sink                                                           |
-| **Контракт** | Gold contract exports may exist as reference artifacts, but they are not emitted by the current pipeline |
+| **Статус**   | Enabled in `configs/entities/chembl/activity.yaml`                                                       |
+| **Причина**  | Активный pipeline config публикует Gold sink и Gold writer                                               |
+| **Контракт** | Gold contract exports соответствуют active emitted surface                                                |
 
 ______________________________________________________________________
 
@@ -464,16 +465,16 @@ ChEMBL API (/activity.json)
 │  • Формат: Delta Lake                   │
 │  • Append mode; business key = activity_id │
 │  • Schema: 62 поля (PyArrow)            │
-│  • Gold stage disabled in active config │
+│  • Gold stage enabled in active config  │
 └─────────────────────────────────────────┘
          │
          ▼
 ┌─────────────────────────────────────────┐
 │  GOLD                                   │
 │  ─────────────────────────────────────  │
-│  • Disabled for `chembl_activity`       │
-│  • No Gold filter or Gold writer stage  │
-│  • Current terminal output: Silver      │
+│  • Enabled for `chembl_activity`        │
+│  • Gold filters and Gold writer active  │
+│  • Current terminal output: Gold-ready  │
 └─────────────────────────────────────────┘
 ```
 
@@ -505,12 +506,12 @@ ______________________________________________________________________
 | Конфигурация  | `configs/entities/chembl/activity.yaml`                                      |
 | Сущность      | `src/bioetl/domain/entities/bioactivity/_entity.py`                          |
 | Трансформер   | `src/bioetl/application/pipelines/chembl/activity_transformer.py`            |
-| Gold sink     | Disabled in `configs/entities/chembl/activity.yaml`                          |
+| Gold sink     | Enabled in `configs/entities/chembl/activity.yaml`                           |
 | Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`                      |
 | Silver Schema | `src/bioetl/infrastructure/schemas/silver.py`                                |
 | Bronze Writer | `src/bioetl/infrastructure/storage/bronze_writer.py`                         |
 | Silver Writer | `src/bioetl/infrastructure/storage/silver_writer.py`                         |
-| Gold Writer   | Not used by the active `chembl_activity` pipeline                            |
+| Gold Writer   | Used by the active `chembl_activity` pipeline                                |
 | Data Contract | `src/bioetl/domain/contracts/gold/` (canonical source for generated exports) |
 
 ______________________________________________________________________
@@ -551,7 +552,7 @@ ______________________________________________________________________
 | Runtime alignment | Pass           | Активный runtime и config surface описаны в разделах `Конфигурация` и `Связанные файлы`       |
 | Contract linkage  | Pass           | [chembl_activity_v1.0.json](../../contracts/gold/chembl_activity_v1.0.json)                   |
 | API governance    | Pass           | См. [API Compliance](#api-compliance)                                                         |
-| Contract note     | Reference-only | Gold export опубликован как reference surface, несмотря на disabled gold sink в active config |
+| Contract note     | Active runtime surface | Gold export соответствует active config и emitted pipeline surface |
 
 ______________________________________________________________________
 

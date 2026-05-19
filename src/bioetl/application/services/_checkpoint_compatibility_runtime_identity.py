@@ -7,9 +7,11 @@ from typing import Final, cast
 
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
-    compute_degraded_runtime_anchor_fingerprint,
     compute_execution_identity_fingerprint,
     normalize_runtime_anchor_payload,
+)
+from bioetl.domain.normalization.legacy_fingerprints import (
+    compute_degraded_runtime_anchor_fingerprint,
 )
 from bioetl.domain.types import JsonDict
 

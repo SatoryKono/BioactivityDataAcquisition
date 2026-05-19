@@ -11,6 +11,11 @@ class CompositeGoldCommonSchema(pa.DataFrameModel):
     """Common composite Gold output fields across merged entity families."""
 
     entity_id: Series[str] = pa.Field(nullable=False)
+    source: Series[str] = pa.Field(
+        nullable=True,
+        alias="_source",
+        description="Source-family lineage marker retained as composite metadata.",
+    )
     dq_warn: Series[bool] = pa.Field(
         nullable=False,
         default=False,
@@ -36,4 +41,19 @@ class CompositeGoldCommonSchema(pa.DataFrameModel):
         coerce = True
 
 
-__all__ = ["CompositeGoldCommonSchema"]
+class CompositeLookupLineageSchema(CompositeGoldCommonSchema):
+    """Composite schema mixin for provider lookup lineage metadata."""
+
+    lookup_method: Series[str] = pa.Field(
+        nullable=True,
+        alias="_lookup_method",
+        description="Lookup strategy retained as inherited provider/composite lineage metadata.",
+    )
+    original_id: Series[str] = pa.Field(
+        nullable=True,
+        alias="_original_id",
+        description="Original provider lookup identifier retained as lineage metadata.",
+    )
+
+
+__all__ = ["CompositeGoldCommonSchema", "CompositeLookupLineageSchema"]

@@ -58,9 +58,14 @@ from tests.helpers.control_plane_replay import (
     build_tracked_fixture_exact_replay_matrix_payload,
 )
 
+pytestmark = pytest.mark.unit
+
 FIXTURE_DIR = Path("tests/fixtures/golden/reproducibility")
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 _FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+_SOURCE_FINGERPRINT = (
+    "1750d384e3efab89c50eff0b4808a22adc1f4023c3f023e011cc50d41a2431a9"
+)
 
 
 _InMemoryRunManifestStore = InMemoryRunManifestStore
@@ -121,6 +126,7 @@ def _make_manifest() -> RunManifest:
             config_hash="a" * 64,
             resolved_config_hash="b" * 64,
             effective_config_hash="c" * 64,
+            source_fingerprint=_SOURCE_FINGERPRINT,
             contract_ref="chembl.activity",
             contract_version="1.2.0",
             contract_schema_hash="d" * 64,

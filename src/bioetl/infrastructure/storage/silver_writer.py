@@ -187,3 +187,23 @@ class SilverWriter(
             self._contract_rollout_policy.mode in {"dual_write", "dual_read_write"}
             and len(self._contract_rollout_policy.write_versions) > 1
         )
+
+    # Keep legacy validation method names on the root adapter for architecture
+    # guards and direct patch coverage, while runtime services own the work.
+    def _enforce_write_policy(self, mode: SilverWriteMode, table_name: str) -> None:
+        super()._enforce_write_policy(mode, table_name)
+
+    def _validate_silver_pandera(
+        self,
+        records: list[object],
+        table_name: str,
+    ) -> None:
+        super()._validate_silver_pandera(records, table_name)
+
+    async def _check_schema_drift(
+        self,
+        table_name: str,
+        records: list[object],
+        on_schema_mismatch: str,
+    ) -> None:
+        await super()._check_schema_drift(table_name, records, on_schema_mismatch)

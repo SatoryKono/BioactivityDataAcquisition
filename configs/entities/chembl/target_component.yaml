@@ -94,6 +94,11 @@ quality:
     max: 10000000
     nullable: true
     error_message: Taxonomy ID must be between 1 and 10,000,000
+  - field: target_component_xrefs
+    type: custom
+    validator: validate_target_component_xref_src_db_json_vocab
+    nullable: true
+    error_message: target_component_xrefs must be canonical JSON with governed xref_src_db source namespaces when present
   entity_cross_field_validations:
   - name: component_identifiable
     fields:

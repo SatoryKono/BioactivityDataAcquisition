@@ -43,6 +43,10 @@ schema:
     - parameter_type
     - parameter_relation
     - parameter_value
+    - qudt_units
+    - qudt_unit_iri
+    - qudt_unit_mapping_status
+    - qudt_ontology_version
     - units
     - text_value
     - comments
@@ -51,6 +55,10 @@ schema:
     - standard_value
     - standard_units
     - standard_text_value
+    - uo_units
+    - uo_unit_iri
+    - uo_unit_mapping_status
+    - uo_ontology_version
   - name: dq
     pattern: ^_dq_
   silver:
@@ -215,6 +223,42 @@ quality:
     - mg.kg-1
     nullable: true
     error_message: Invalid assay parameter standard_units value
+  - field: qudt_units
+    type: pattern
+    pattern: '^(?:https?://[^\\s]+|[A-Za-zµ%][A-Za-z0-9µ%._/-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$'
+    nullable: true
+    error_message: QUDT assay parameter units must be a raw QUDT URI or canonical unit token when present
+  - field: qudt_unit_iri
+    type: pattern
+    pattern: '^https?://[^\\s]+$'
+    nullable: true
+    error_message: qudt_unit_iri must be an HTTP(S) IRI when present
+  - field: qudt_unit_mapping_status
+    type: enum
+    allowed:
+    - mapped
+    - unmapped
+    - missing
+    nullable: true
+    error_message: Invalid QUDT unit mapping status
+  - field: uo_units
+    type: pattern
+    pattern: '^(?:UO_[0-9]{7}|[A-Za-zµ%][A-Za-z0-9µ%._-]*)$'
+    nullable: true
+    error_message: uo_units must be a canonical ontology/unit token when present
+  - field: uo_unit_iri
+    type: pattern
+    pattern: '^https?://[^\\s]+$'
+    nullable: true
+    error_message: uo_unit_iri must be an HTTP(S) IRI when present
+  - field: uo_unit_mapping_status
+    type: enum
+    allowed:
+    - mapped
+    - unmapped
+    - missing
+    nullable: true
+    error_message: Invalid UO unit mapping status
   - field: units
     type: pattern
     pattern: '^(?:[A-Za-zµ%][A-Za-z0-9µ%._-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$'
@@ -227,7 +271,49 @@ quality:
     - assay_id
     condition: all_present
     error_message: Both param ID and assay ID are required
-  entity_conditional_validations: []
+  - name: uo_unit_requires_mapping_status
+    fields:
+    - uo_units
+    - uo_unit_mapping_status
+    condition: conditional_required
+    trigger_field: uo_units
+    required_field: uo_unit_mapping_status
+    error_message: UO unit mappings must publish a companion mapping status
+  - name: qudt_unit_requires_mapping_status
+    fields:
+    - qudt_units
+    - qudt_unit_mapping_status
+    condition: conditional_required
+    trigger_field: qudt_units
+    required_field: qudt_unit_mapping_status
+    error_message: QUDT unit mappings must publish a companion mapping status
+  entity_conditional_validations:
+  - name: mapped_uo_unit_requires_bundle
+    condition_field: uo_unit_mapping_status
+    condition_value: mapped
+    condition_operator: eq
+    then_validations:
+    - field: uo_unit_iri
+      type: required
+      nullable: false
+      error_message: Mapped UO unit identifiers must publish a canonical IRI
+    - field: uo_ontology_version
+      type: required
+      nullable: false
+      error_message: Mapped UO unit identifiers must publish an ontology version
+  - name: mapped_qudt_unit_requires_bundle
+    condition_field: qudt_unit_mapping_status
+    condition_value: mapped
+    condition_operator: eq
+    then_validations:
+    - field: qudt_unit_iri
+      type: required
+      nullable: false
+      error_message: Mapped QUDT unit identifiers must publish a canonical IRI
+    - field: qudt_ontology_version
+      type: required
+      nullable: false
+      error_message: Mapped QUDT unit identifiers must publish an ontology version
   key_nullability:
   - field: assay_param_id
     key_type: merge

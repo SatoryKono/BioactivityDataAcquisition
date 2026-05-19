@@ -124,6 +124,70 @@
       ],
       "nullable": true,
       "description": ""
+    },
+    "qudt_ontology_version": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "qudt_unit_iri": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "qudt_unit_mapping_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "qudt_units": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "uo_ontology_version": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "uo_unit_iri": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "uo_unit_mapping_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "uo_units": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
     }
   },
   "required": [
@@ -139,6 +203,6 @@
   "normalization_profile": {
     "ref": "chembl.assay_parameters",
     "version": "1.0.0",
-    "hash": "4469175e88e4c0f5e9e7709910c79820515a10e5ffb0c264d07e0b941d3d73df"
+    "hash": "2858207c83f416c842e84cca4f31ae29316bcd579005c275733652f6fa065890"
   }
 }

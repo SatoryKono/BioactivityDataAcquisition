@@ -207,9 +207,13 @@ class CrossRefPublicationEntity(PublicationEntityBase):
 
     # Full author details with ORCID, sequence, affiliations (JSON array)
     author_details: str | None = None
+    author_details_raw_json: str | None = None
+    author_details_canonical_json: str | None = None
 
     # Bibliographic references (JSON array of citation data)
     references: str | None = None
+    references_raw_json: str | None = None
+    references_canonical_json: str | None = None
 
     # Note: publication_type inherited from PublicationEntityBase
     # Stores raw CrossRef type (e.g., "journal-article", "book-chapter")

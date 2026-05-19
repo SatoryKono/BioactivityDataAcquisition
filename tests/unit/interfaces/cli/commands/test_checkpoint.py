@@ -28,7 +28,7 @@ class _FakeInspectionResult:
 class _FakeWorkflowService:
     def __init__(self) -> None:
         self.audit_run_calls: list[tuple[str, int]] = []
-        self.checkpoint_calls: list[tuple[str, str | None, int]] = []
+        self.checkpoint_calls: list[tuple[str, str | None, str | None, int]] = []
 
     async def inspect_audit_run(
         self,
@@ -60,6 +60,11 @@ class _FakeWorkflowService:
                     },
                     "diagnostics": {
                         "operator_replay_mode": "Exact Replay",
+                        "replay_resume_rebuild_verdict": "exact_replay_ready",
+                        "replay_next_action": (
+                            "Use exact replay with manifest, execution fingerprint, "
+                            "and input snapshots."
+                        ),
                         "replay_capability": "exact_replay_supported",
                         "requested_exact_replay": True,
                         "continuation_mode": "exact_replay",
@@ -108,6 +113,11 @@ class _FakeWorkflowService:
                     "continuation_mode": "exact_replay",
                     "operator_replay_mode": "Exact Replay",
                     "replay_readiness_verdict": "exact_replay_ready",
+                    "replay_resume_rebuild_verdict": "exact_replay_ready",
+                    "replay_next_action": (
+                        "Use exact replay with manifest, execution fingerprint, "
+                        "and input snapshots."
+                    ),
                     "matched_anchors": [
                         "manifest_id",
                         "execution_fingerprint",
@@ -124,10 +134,11 @@ class _FakeWorkflowService:
         pipeline_name: str,
         *,
         run_id: str | None = None,
+        manifest_id: str | None = None,
         audit_limit: int = 100,
     ) -> _FakeInspectionResult:
         await asyncio.sleep(0)
-        self.checkpoint_calls.append((pipeline_name, run_id, audit_limit))
+        self.checkpoint_calls.append((pipeline_name, run_id, manifest_id, audit_limit))
         return _FakeInspectionResult(
             {
                 "pipeline_name": pipeline_name,
@@ -164,6 +175,10 @@ class _FakeWorkflowService:
                     },
                     "diagnostics": {
                         "operator_replay_mode": "Resume",
+                        "replay_resume_rebuild_verdict": "resume_only",
+                        "replay_next_action": (
+                            "Use checkpoint resume only; do not treat this as exact replay."
+                        ),
                         "replay_capability": "resume_only",
                         "requested_exact_replay": False,
                         "continuation_mode": "checkpoint_snapshot_only_resume",
@@ -197,6 +212,11 @@ class _FakeWorkflowService:
                     "continuation_mode": "checkpoint_snapshot_only_resume",
                     "operator_replay_mode": "Resume",
                     "replay_readiness_verdict": "resume_only_ready",
+                    "replay_resume_rebuild_verdict": "resume_only_degraded",
+                    "replay_next_action": (
+                        "Resume is best-effort/degraded; collect missing anchors "
+                        "before replay claims."
+                    ),
                     "matched_anchors": [
                         "manifest_id",
                         "execution_fingerprint",
@@ -298,7 +318,12 @@ class TestCheckpointCommands:
         assert payload["pipeline_name"] == "chembl_activity"
         assert payload["checkpoint"]["run_id"] == "00000000-0000-0000-0000-000000000123"
         assert service.checkpoint_calls == [
-            ("chembl_activity", "00000000-0000-0000-0000-000000000123", 25)
+            (
+                "chembl_activity",
+                "00000000-0000-0000-0000-000000000123",
+                None,
+                25,
+            )
         ]
 
     def test_checkpoint_audit_run_text_outputs_human_readable_summary(
@@ -323,6 +348,7 @@ class TestCheckpointCommands:
         assert "Audit Run Diagnostics" in result.output
         assert "manifest_id: manifest-1" in result.output
         assert "mode: Exact Replay" in result.output
+        assert "replay_resume_rebuild_verdict: exact_replay_ready" in result.output
         assert "requested_exact_replay: True" in result.output
         assert "continuation_mode: exact_replay" in result.output
         assert (
@@ -394,6 +420,10 @@ class TestCheckpointCommands:
         assert (
             "compatibility_replay_readiness_verdict: resume_only_ready" in result.output
         )
+        assert (
+            "compatibility_replay_resume_rebuild_verdict: resume_only_degraded"
+            in result.output
+        )
         assert "compatibility_mismatched_anchors: []" in result.output
         assert (
             "compatibility_missing_anchors: ['input_snapshot_fingerprint']"
@@ -406,5 +436,10 @@ class TestCheckpointCommands:
             result.output
         )
         assert service.checkpoint_calls == [
-            ("chembl_activity", "00000000-0000-0000-0000-000000000123", 100)
+            (
+                "chembl_activity",
+                "00000000-0000-0000-0000-000000000123",
+                None,
+                100,
+            )
         ]

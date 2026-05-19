@@ -192,7 +192,11 @@ def test_classify_test_health_marks_contract_e2e_memory_lanes_as_not_run() -> No
                 {
                     "lane": "memory",
                     "skip_class": MEMORY_LANE_NOT_RUN,
-                    "reason": "Current quality-gate run does not execute the canonical memory lane.",
+                    "reason": (
+                        "Current quality-integral gate slice runs architecture "
+                        "checks only; the dedicated CI memory-tests lane remains "
+                        "separate."
+                    ),
                 },
             ]
         },
@@ -220,7 +224,9 @@ def test_classify_test_health_marks_contract_e2e_memory_lanes_as_not_run() -> No
     assert result.status == "environment_limited_green"
     assert "canonical contracts lane" in " | ".join(result.reasons)
     assert "canonical e2e lane" in " | ".join(result.reasons)
-    assert "canonical memory lane" in " | ".join(result.reasons)
+    assert "dedicated CI memory-tests lane remains separate" in " | ".join(
+        result.reasons
+    )
     assert dict(result.skip_classes) == {
         CONTRACT_LANE_NOT_RUN: 1,
         E2E_LANE_NOT_RUN: 1,
@@ -285,7 +291,10 @@ def test_build_test_health_payload_uses_canonical_taxonomy() -> None:
             },
             MEMORY_LANE_NOT_RUN: {
                 "short_label": "Memory Lane Not Run",
-                "definition": "The canonical memory lane was not part of this run.",
+                "definition": (
+                    "The dedicated CI memory-tests lane is tracked outside this "
+                    "quality-integral gate slice."
+                ),
             },
         },
     }

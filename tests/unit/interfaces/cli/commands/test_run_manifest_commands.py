@@ -93,6 +93,11 @@ class _FakeRunManifestService:
                 "operator_replay_mode": "Exact Replay",
                 "requested_exact_replay": True,
                 "replay_readiness_verdict": "exact_replay_ready",
+                "replay_resume_rebuild_verdict": "exact_replay_ready",
+                "replay_next_action": (
+                    "Use exact replay with manifest, execution fingerprint, "
+                    "and input snapshots."
+                ),
                 "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
                 "strict_replay_runtime_verdict": (
                     "allowed_with_snapshot_backed_source_refs"
@@ -134,6 +139,7 @@ class _FakeRunManifestService:
                 "artifact_refs": [
                     {
                         "event_type": "artifact_published",
+                        "publication_status": "success",
                         "stage": "gold",
                         "dataset_ref": "gold:chembl.activity@1",
                         "artifact_id": "gold:chembl.activity@1",
@@ -813,6 +819,7 @@ class TestRunManifestCommands:
         assert "dq_policy_ref: chembl_activity.gold" in result.output
         assert "requested_exact_replay: true" in result.output
         assert "replay_readiness_verdict: exact_replay_ready" in result.output
+        assert "replay_resume_rebuild_verdict: exact_replay_ready" in result.output
         assert "mode: Exact Replay" in result.output
         assert "snapshot_status: full" in result.output
         assert (

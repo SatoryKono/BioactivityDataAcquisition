@@ -132,6 +132,11 @@ quality:
             validator: validate_target_component_relationships_json_vocab
             nullable: true
             error_message: component_relationships must be a canonical JSON array of allowed target component relationships when present
+        -   field: cross_references
+            type: custom
+            validator: validate_target_xref_src_db_json_vocab
+            nullable: true
+            error_message: cross_references must be canonical JSON with governed xref_src_db source namespaces when present
     entity_cross_field_validations:
         -   name: target_identifiable
             fields:

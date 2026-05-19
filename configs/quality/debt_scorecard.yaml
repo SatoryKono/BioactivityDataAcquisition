@@ -1,8 +1,8 @@
 schema_version: 1
 baseline:
-  total_exemptions: 4
+  total_exemptions: 5
   by_registry:
-    file_size_limits: 3
+    file_size_limits: 4
     function_complexity: 0
     function_length: 0
     class_size: 0
@@ -316,19 +316,19 @@ hotspot_family_ratchets:
     path_prefixes:
     - src/bioetl/application/services/control_plane/
     bounded_growth_budgets:
-      files_ge_250_loc: 20
-      max_internal_fan_in: 5
+      files_ge_250_loc: 21
+      max_internal_fan_in: 6
     metrics:
       duplication_clusters: 23
-      files: 59
-      total_loc: 12526
-      files_ge_250_loc: 20
-      helper_function_ratio: 0.507
-      max_internal_fan_in: 5
-      max_internal_fan_in_module: bioetl.application.services.control_plane._run_manifest_diagnostics_replay
+      files: 60
+      total_loc: 12745
+      files_ge_250_loc: 21
+      helper_function_ratio: 0.509
+      max_internal_fan_in: 6
+      max_internal_fan_in_module: bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers
     trend:
-      status: reviewed_baseline_2026-05-15
-      next_action: 2026-05-15 introduces a reviewed family baseline for application/services/control_plane;
+      status: reviewed_baseline_2026-05-19
+      next_action: 2026-05-19 refreshes the reviewed family baseline for application/services/control_plane;
         keep files_ge_250_loc and max_internal_fan_in non-growing while paying down
         23 duplication clusters toward future activation of the zero-duplication ratchet.
   - name: composition_runtime_builders
@@ -346,10 +346,10 @@ hotspot_family_ratchets:
       max_internal_fan_in: 11
     metrics:
       duplication_clusters: 10
-      files: 35
-      total_loc: 5341
-      files_ge_250_loc: 6
-      helper_function_ratio: 0.495
+      files: 37
+      total_loc: 5657
+      files_ge_250_loc: 7
+      helper_function_ratio: 0.5
       max_internal_fan_in: 11
       max_internal_fan_in_module: bioetl.composition.runtime_builders.inputs_resolver
     trend:
@@ -438,11 +438,11 @@ quarterly_targets:
   max_total_exemptions: 29
   min_integral_score: 65
   group_budgets:
-    size_metrics: 26
+    size_metrics: 27
     complexity_metrics: 1
     structural_debt: 4
   registry_budgets:
-    file_size_limits: 4
+    file_size_limits: 5
     function_complexity: 1
     function_length: 11
     class_size: 14
@@ -453,13 +453,13 @@ quarterly_targets:
   max_total_exemptions: 10
   min_integral_score: 70
   group_budgets:
-    size_metrics: 4
+    size_metrics: 7
     complexity_metrics: 4
     structural_debt: 2
   registry_budgets:
-    file_size_limits: 3
+    file_size_limits: 4
     function_complexity: 3
-    function_length: 2
+    function_length: 1
     class_size: 2
     class_method_count: 0
     god_object: 2

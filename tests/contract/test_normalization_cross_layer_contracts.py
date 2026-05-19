@@ -23,12 +23,14 @@ from bioetl.application.services.checkpoint_compatibility_service_v2 import (
 )
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
-    compute_degraded_runtime_anchor_fingerprint,
     compute_execution_identity_fingerprint,
     normalize_doi,
     normalize_pmc_id,
     normalize_pmid,
     normalize_runtime_anchor_payload,
+)
+from bioetl.domain.normalization.legacy_fingerprints import (
+    compute_degraded_runtime_anchor_fingerprint,
 )
 from bioetl.domain.normalization.json import canonicalize_json_string
 from bioetl.domain.normalization.profiles import (

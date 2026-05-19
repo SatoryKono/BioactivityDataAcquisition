@@ -345,7 +345,7 @@ ______________________________________________________________________
 | Диаграмма              | Файл                                                                                                       | Описание                                         |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | Infrastructure Classes | [10-infrastructure-layer-class-diagram.mmd](diagrams/foundation/10-infrastructure-layer-class-diagram.mmd) | Классы слоя Infrastructure                       |
-| Provider Adapters      | [30-port-adapter-mapping.mmd](diagrams/foundation/30-port-adapter-mapping.mmd)                             | Обзор 7 провайдеров и их rate limits             |
+| Provider Adapters      | [30-port-adapter-mapping.mmd](diagrams/foundation/30-port-adapter-mapping.mmd)                             | Обзор 7 external API adapters плюс `uniprot_idmapping` provider seam |
 | HTTP Infrastructure    | [10-infrastructure-layer-class-diagram.mmd](diagrams/foundation/10-infrastructure-layer-class-diagram.mmd) | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
 | Circuit Breaker        | [07-circuit-breaker-states.mmd](diagrams/foundation/07-circuit-breaker-states.mmd)                         | Состояния Circuit Breaker                        |
 | Storage Architecture   | [19-delta-lake-write-sequence.mmd](diagrams/foundation/19-delta-lake-write-sequence.mmd)                   | Bronze, Silver, Gold writers                     |

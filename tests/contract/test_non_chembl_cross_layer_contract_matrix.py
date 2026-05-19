@@ -35,7 +35,6 @@ from bioetl.domain.normalization.publication_structured_fields import (
     publication_structured_field_policies,
 )
 from bioetl.domain.normalization.structured_payload_policies import (
-    StructuredPayloadSemanticPolicy,
     semantic_sensitive_structured_payload_policies,
     structured_payload_policy,
 )
@@ -296,7 +295,7 @@ def test_uniprot_feature_payload_matrix_links_semantic_vocabulary_inventory() ->
     assert row["policy_scope"] == "provider_full_universe"
 
 
-def test_crossref_canonical_only_payloads_are_governed_explicitly() -> None:
+def test_crossref_structured_payloads_publish_raw_and_canonical_sidecars() -> None:
     rows_by_key = {
         (row["pipeline_name"], row["field_name"]): row
         for row in build_field_matrix_rows()
@@ -311,10 +310,91 @@ def test_crossref_canonical_only_payloads_are_governed_explicitly() -> None:
         policy = structured_payload_policy(f"{provider}.{entity}", field_name)
 
         assert policy is not None
-        assert policy.uses_canonical_json_only is True
-        assert row["classification"] == "structured_json_canonical_only"
-        assert row["raw_sidecar"] == ""
-        assert row["canonical_sidecar"] == field_name
+        assert policy.requires_raw_sidecar_before_semantic_transform is True
+        assert row["classification"] == "structured_json_sidecar"
+        assert row["raw_sidecar"] == policy.raw_sidecar_field
+        assert row["canonical_sidecar"] == policy.canonical_sidecar_field
+
+
+def test_publication_taxonomy_dq_validators_are_shared_across_non_chembl_publications() -> (
+    None
+):
+    for provider in ("crossref", "openalex", "pubmed", "semanticscholar"):
+        config_path = Path("configs/entities") / provider / "publication.yaml"
+        assert _field_validation_validator(
+            config_path,
+            "publication_type_unified",
+        ) == "validate_publication_type_unified_taxonomy"
+        assert _field_validation_validator(
+            config_path,
+            "publication_subclass",
+        ) == "validate_publication_subclass_taxonomy"
+        assert _field_validation_validator(
+            config_path,
+            "publication_class",
+        ) == "validate_publication_class_taxonomy"
+
+
+def _field_validation_validator(path: Path, field_name: str) -> str:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    validations = payload["quality"]["entity_field_validations"]
+    for rule in validations:
+        if rule.get("field") == field_name:
+            return str(rule.get("validator", ""))
+    raise AssertionError(f"{path}:{field_name} missing validation")
+
+
+def test_uniprot_reference_array_dq_rules_match_profile_owned_canonicalization() -> None:
+    expected_patterns = {
+        ("configs/entities/uniprot/protein.yaml", "secondary_accessions"): (
+            r'^\[("[A-Z0-9]{6,10}"(,"[A-Z0-9]{6,10}")*)?\]$'
+        ),
+        ("configs/entities/uniprot/protein.yaml", "chembl_ids"): (
+            r'^\[("CHEMBL\d+"(,"CHEMBL\d+")*)?\]$'
+        ),
+        ("configs/entities/uniprot/protein.yaml", "drugbank_ids"): (
+            r'^\[("DB\d{5}"(,"DB\d{5}")*)?\]$'
+        ),
+        ("configs/entities/uniprot/protein.yaml", "go_terms"): (
+            r'^\[(("GO:\d{7}"|\{[^\]]*"id":"GO:\d{7}"[^\]]*\})(,("GO:\d{7}"|\{[^\]]*"id":"GO:\d{7}"[^\]]*\}))*)?\]$'
+        ),
+        ("configs/entities/uniprot/protein.yaml", "interpro_xrefs"): (
+            r'^\[(("IPR\d{6}"|\{[^\]]*"id":"IPR\d{6}"[^\]]*\})(,("IPR\d{6}"|\{[^\]]*"id":"IPR\d{6}"[^\]]*\}))*)?\]$'
+        ),
+        ("configs/entities/uniprot/protein.yaml", "pdb_xrefs"): (
+            r'^\[(("[A-Z0-9]{4}"|\{[^\]]*"id":"[A-Z0-9]{4}"[^\]]*\})(,("[A-Z0-9]{4}"|\{[^\]]*"id":"[A-Z0-9]{4}"[^\]]*\}))*)?\]$'
+        ),
+        ("configs/entities/uniprot/protein.yaml", "pfam_xrefs"): (
+            r'^\[(("PF\d{5}"|\{[^\]]*"id":"PF\d{5}"[^\]]*\})(,("PF\d{5}"|\{[^\]]*"id":"PF\d{5}"[^\]]*\}))*)?\]$'
+        ),
+        ("configs/entities/uniprot/protein.yaml", "reactome_xrefs"): (
+            r'^\[(("R-[A-Z]+-\d+"|\{[^\]]*"id":"R-[A-Z]+-\d+"[^\]]*\})(,("R-[A-Z]+-\d+"|\{[^\]]*"id":"R-[A-Z]+-\d+"[^\]]*\}))*)?\]$'
+        ),
+    }
+
+    for path_str, field_name in expected_patterns:
+        path = Path(path_str)
+        payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+        validations = payload["quality"]["entity_field_validations"]
+        rule = next(rule for rule in validations if rule.get("field") == field_name)
+        assert rule["type"] == "pattern"
+        assert rule["pattern"] == expected_patterns[(path_str, field_name)]
+
+    for path_str in (
+        "configs/entities/uniprot/protein.yaml",
+        "configs/entities/uniprot/idmapping.yaml",
+    ):
+        path = Path(path_str)
+        payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+        validations = payload["quality"]["entity_field_validations"]
+        reviewed_rule = next(
+            rule for rule in validations if rule.get("field") == "reviewed"
+        )
+        assert reviewed_rule["type"] == "enum"
+        assert {
+            str(value).lower()
+            for value in reviewed_rule.get("allowed_values", reviewed_rule.get("allowed", ()))
+        } == {"true", "false"}
 
 
 def test_governed_non_chembl_structured_fields_are_string_typed_cross_layer() -> None:

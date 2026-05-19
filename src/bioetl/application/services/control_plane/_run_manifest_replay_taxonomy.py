@@ -28,6 +28,8 @@ REPLAY_TAXONOMY_FIELDS: tuple[str, ...] = (
     "replay_mode",
     "continuation_mode",
     "operator_replay_mode",
+    "replay_resume_rebuild_verdict",
+    "replay_next_action",
     "exact_replay_eligible",
     "exact_replay_blockers",
     "replay_readiness_verdict",
@@ -68,6 +70,8 @@ def build_replay_taxonomy_projection(
     replay_mode: object,
     continuation_mode: object,
     operator_replay_mode: object,
+    replay_resume_rebuild_verdict: object,
+    replay_next_action: object,
     exact_replay_eligible: object,
     exact_replay_blockers: object,
     replay_readiness_verdict: object,
@@ -90,9 +94,7 @@ def build_replay_taxonomy_projection(
             "post_capture_replayable_parent_boundary": (
                 post_capture_replayable_parent_boundary
             ),
-            "historical_live_run_upgrade_policy": (
-                historical_live_run_upgrade_policy
-            ),
+            "historical_live_run_upgrade_policy": (historical_live_run_upgrade_policy),
             "historical_live_run_upgrade_boundary": (
                 historical_live_run_upgrade_boundary
             ),
@@ -112,13 +114,13 @@ def build_replay_taxonomy_projection(
             "historical_live_run_upgrade_state": historical_live_run_upgrade_state,
             "replay_occurrence_kind": replay_occurrence_kind,
             "source_posture": source_posture,
-            "input_snapshot_missing_source_refs": (
-                input_snapshot_missing_source_refs
-            ),
+            "input_snapshot_missing_source_refs": (input_snapshot_missing_source_refs),
             "replay_capability_reason": replay_capability_reason,
             "replay_mode": replay_mode,
             "continuation_mode": continuation_mode,
             "operator_replay_mode": operator_replay_mode,
+            "replay_resume_rebuild_verdict": replay_resume_rebuild_verdict,
+            "replay_next_action": replay_next_action,
             "exact_replay_eligible": exact_replay_eligible,
             "exact_replay_blockers": exact_replay_blockers,
             "replay_readiness_verdict": replay_readiness_verdict,
@@ -154,6 +156,62 @@ def resolve_replay_taxonomy_projection(
     return projection
 
 
+def resolve_replay_resume_rebuild_verdict(
+    *,
+    replay_capability: object,
+    replay_mode: object,
+    continuation_mode: object,
+    replay_readiness_verdict: object,
+    missing_anchors: object = None,
+) -> str:
+    """Return the mutually exclusive operator verdict for replay triage."""
+    capability = str(replay_capability or "").strip()
+    mode = str(replay_mode or "").strip()
+    continuation = str(continuation_mode or "").strip()
+    readiness = str(replay_readiness_verdict or "").strip()
+    if readiness == "exact_replay_ready" and (
+        mode == "exact_replay" or continuation == "exact_replay"
+    ):
+        return "exact_replay_ready"
+    if _has_missing_anchors(missing_anchors):
+        return "resume_only_degraded"
+    if capability == "resume_only" or mode == "resume" or "resume" in continuation:
+        return "resume_only"
+    if capability == "rebuild_only" or mode in {
+        "rebuild",
+        "same_data_state_recovery",
+        "full_scan_idempotent_rebuild",
+    }:
+        return "rebuild_only"
+    return "non_replayable"
+
+
+def resolve_replay_next_action(verdict: object) -> str:
+    """Return compact next-action guidance for a replay triage verdict."""
+    value = str(verdict or "").strip()
+    if value == "exact_replay_ready":
+        return "Use exact replay with manifest, execution fingerprint, and input snapshots."
+    if value == "resume_only":
+        return "Use checkpoint resume only; do not treat this as exact replay."
+    if value == "resume_only_degraded":
+        return "Resume is best-effort/degraded; collect missing anchors before replay claims."
+    if value == "rebuild_only":
+        return "Rebuild from source state; exact replay evidence is unavailable."
+    return "Do not replay; required control-plane evidence is missing or inconsistent."
+
+
+def _has_missing_anchors(value: object) -> bool:
+    if value is None:
+        return False
+    if isinstance(value, dict):
+        return bool(value)
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, list | tuple | set | frozenset):
+        return bool(value)
+    return bool(value)
+
+
 def _copy_projection_value(field: str, value: object) -> object:
     """Copy mutable replay-taxonomy values to avoid shared references."""
     if field in _LIST_DEFAULTS:
@@ -172,5 +230,7 @@ def _copy_projection_value(field: str, value: object) -> object:
 __all__ = [
     "REPLAY_TAXONOMY_FIELDS",
     "build_replay_taxonomy_projection",
+    "resolve_replay_next_action",
+    "resolve_replay_resume_rebuild_verdict",
     "resolve_replay_taxonomy_projection",
 ]

@@ -34,6 +34,7 @@ from bioetl.domain.normalization._reference_id_support import (
     _normalized_text,
     _strip_prefixes,
 )
+from bioetl.domain.value_objects.identifiers import PubChemCid
 
 
 def _normalize_go_text(value: str) -> str | None:
@@ -182,6 +183,19 @@ def normalize_chembl_reference_id(value: object) -> object:
     return _canonical_or_text(value, normalizer=_normalize_chembl_text)
 
 
+def _normalize_pubchem_cid_text(value: str) -> str | None:
+    candidate = value.strip()
+    if candidate.casefold().startswith("cid:"):
+        candidate = candidate.split(":", maxsplit=1)[1].strip()
+    normalized = PubChemCid.from_raw(candidate)
+    return None if normalized is None else str(normalized)
+
+
+def normalize_pubchem_cid_reference_id(value: object) -> object:
+    """Normalize PubChem CID references to digits-only canonical text."""
+    return _canonical_or_text(value, normalizer=_normalize_pubchem_cid_text)
+
+
 __all__ = [
     "normalize_chembl_reference_id",
     "normalize_drugbank_reference_id",
@@ -193,6 +207,7 @@ __all__ = [
     "normalize_pdb_reference_id",
     "normalize_pfam_reference_id",
     "normalize_pmcid_reference_id",
+    "normalize_pubchem_cid_reference_id",
     "normalize_reactome_reference_id",
     "normalize_ror_reference_id",
     "normalize_semantic_scholar_reference_id",

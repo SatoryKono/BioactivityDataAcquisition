@@ -12,6 +12,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_issn_id,
     normalize_profile_issn_ids,
     normalize_profile_orcid_ids,
+    normalize_profile_passthrough,
 )
 from bioetl.domain.schemas.crossref.publication import PublicationEnrichedSchema
 
@@ -86,20 +87,34 @@ _SET_LIKE_FIELDS = frozenset(
         "subject_keywords",
     }
 )
+_HASH_EXCLUDED_FIELDS = frozenset(
+    {
+        "author_details_raw_json",
+        "references_raw_json",
+    }
+)
 _JSON_STRING_FIELDS = frozenset(
     {
         "affiliation_list",
         "alternative_id",
         "author_details",
+        "author_details_canonical_json",
+        "author_details_raw_json",
         "author_orcids",
         "authors",
         "content_domain_domains",
         "issn_list",
         "references",
+        "references_canonical_json",
+        "references_raw_json",
     }
 )
 _SPECIAL_RULES = {
     **publication_classification_rules(),
+    "author_details_raw_json": (
+        normalize_profile_passthrough,
+        "Preserve the raw provider JSON for CrossRef author-detail payloads.",
+    ),
     "author_orcids": (
         normalize_profile_orcid_ids,
         "Canonicalize ORCID identifiers inside a set-like canonical JSON array.",
@@ -120,6 +135,10 @@ _SPECIAL_RULES = {
         normalize_profile_issn_id,
         "Canonicalize print ISSN identifier to the shared publication identifier policy.",
     ),
+    "references_raw_json": (
+        normalize_profile_passthrough,
+        "Preserve the raw provider JSON for CrossRef bibliographic references.",
+    ),
 }
 
 CROSSREF_PUBLICATION_PROFILE = build_standard_profile(
@@ -136,6 +155,7 @@ CROSSREF_PUBLICATION_PROFILE = build_standard_profile(
     int_fields=_INT_FIELDS,
     boolean_fields=_BOOLEAN_FIELDS,
     set_like_fields=_SET_LIKE_FIELDS,
+    hash_excluded_fields=_HASH_EXCLUDED_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
     special_rules=_SPECIAL_RULES,
 )

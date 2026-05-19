@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.services._observability_trace_support import (
@@ -40,6 +41,7 @@ __all__ = [
     "resolve_checkpoint_for_run",
     "resolve_lineage_for_run",
     "resolve_pipeline_name",
+    "resolve_quarantine_summary_for_run",
     "resolve_run_manifest",
     "trace_links_enabled",
 ]
@@ -63,6 +65,15 @@ class _RunManifestShowService(Protocol):
     def show(self, identifier: str) -> RunManifestInspectionResult: ...
 
 
+class _QuarantineStatsService(Protocol):
+    async def get_filtered_stats(
+        self,
+        *,
+        pipeline: str,
+        run_id: str,
+    ) -> dict[str, object]: ...
+
+
 def trace_links_enabled(tracer: object | None) -> bool:
     return _trace_links_enabled(tracer)
 
@@ -75,6 +86,18 @@ def resolve_pipeline_name(
     return run_manifest.manifest.pipeline_name
 
 
+def _coerce_checkpoint_info(value: object) -> CheckpointInfo | None:
+    if isinstance(value, CheckpointInfo):
+        return value
+    return None
+
+
+def _copy_checkpoint_metadata(metadata: object) -> dict[str, object]:
+    if isinstance(metadata, Mapping):
+        return dict(metadata)
+    return {}
+
+
 async def resolve_checkpoint_for_run(
     *,
     checkpoint_service: _CheckpointLookupService,
@@ -83,9 +106,13 @@ async def resolve_checkpoint_for_run(
 ) -> CheckpointInfo | None:
     if pipeline_name is None:
         return None
-    checkpoint = await checkpoint_service.get_checkpoint_for_run(pipeline_name, run_id)
+    checkpoint = _coerce_checkpoint_info(
+        await checkpoint_service.get_checkpoint_for_run(pipeline_name, run_id)
+    )
     if checkpoint is None:
-        checkpoint = await checkpoint_service.get_checkpoint(pipeline_name)
+        checkpoint = _coerce_checkpoint_info(
+            await checkpoint_service.get_checkpoint(pipeline_name)
+        )
     if checkpoint is None:
         return None
     if checkpoint.run_id in {None, run_id}:
@@ -93,7 +120,10 @@ async def resolve_checkpoint_for_run(
     return CheckpointInfo(
         pipeline_name=checkpoint.pipeline_name,
         run_id=checkpoint.run_id,
-        metadata={**checkpoint.metadata, "status": "mismatched_run_context"},
+        metadata={
+            **_copy_checkpoint_metadata(checkpoint.metadata),
+            "status": "mismatched_run_context",
+        },
     )
 
 
@@ -157,6 +187,30 @@ def enrich_quarantine_summary(
             silver_stats["bronze_ratio"] = silver_total / bronze_records
             silver_stats["bronze_ratio_pct"] = (silver_total / bronze_records) * 100
     return summary
+
+
+async def resolve_quarantine_summary_for_run(
+    *,
+    quarantine_service: _QuarantineStatsService | None,
+    run_id: str,
+    pipeline_name: str | None,
+    run_manifest: RunManifestInspectionResult | None,
+) -> dict[str, object] | None:
+    """Resolve bounded quarantine summary for one run when available."""
+    if quarantine_service is None or pipeline_name is None:
+        return None
+    try:
+        stats = await quarantine_service.get_filtered_stats(
+            pipeline=pipeline_name,
+            run_id=run_id,
+        )
+    except (OSError, RuntimeError, TypeError, ValueError):
+        return None
+    return enrich_quarantine_summary(
+        stats=stats,
+        run_id=run_id,
+        run_manifest=run_manifest,
+    )
 
 
 def build_traceability_section(

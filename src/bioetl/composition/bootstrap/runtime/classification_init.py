@@ -6,15 +6,31 @@ and initializes the domain classification module.
 
 from __future__ import annotations
 
+from functools import lru_cache
 from pathlib import Path
+
+from bioetl.domain.mapping.classification_data import ClassificationData
+
+
+@lru_cache(maxsize=None)
+def _load_publication_type_classification_data(
+    configs_root_key: str,
+) -> ClassificationData:
+    """Load classification data once per configs root key."""
+    from bioetl.infrastructure.config.publication_type_classification_loader import (
+        PublicationTypeClassificationLoader,
+    )
+
+    loader = PublicationTypeClassificationLoader(Path(configs_root_key))
+    return loader.load()
 
 
 def initialize_publication_type_classification(configs_root: Path) -> None:
     """Load classification data from JSON and initialize the domain module.
 
     Must be called once before any pipeline transformer uses
-    ``classify_publication_type()``. Idempotent — repeated calls reload the
-    data but do not cause errors.
+    ``classify_publication_type()``. Idempotent — repeated calls re-apply the
+    same cached data and do not cause errors.
 
     Args:
         configs_root: Root directory of the project configs tree (e.g., Path('configs')).
@@ -23,10 +39,7 @@ def initialize_publication_type_classification(configs_root: Path) -> None:
     from bioetl.domain.mapping.publication_type_classification import (
         initialize_classification,
     )
-    from bioetl.infrastructure.config.publication_type_classification_loader import (
-        PublicationTypeClassificationLoader,
-    )
 
-    loader = PublicationTypeClassificationLoader(configs_root)
-    data = loader.load()
-    initialize_classification(data)
+    initialize_classification(
+        _load_publication_type_classification_data(str(configs_root))
+    )

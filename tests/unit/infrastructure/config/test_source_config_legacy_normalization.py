@@ -64,14 +64,14 @@ _CASE_CHEMBL_NEW: dict[str, Any] = {
     "source": {
         "type": "api",
         "load_strategy": "full",
-        "api": {
+        "provider_config": {
+            "provider": "chembl",
             "base_url": "https://example.chembl/api",
             "auth_type": "public",
             "api_version": "v1",
+            "client": {"timeout": 60.0, "max_retries": 3},
+            "pagination": {"id_batch_size": 25},
         },
-        "client": {"timeout": 60.0, "max_retries": 3},
-        "batch": {"batch_size": 25},
-        "provider_config": {"provider": "chembl"},
         "rate_limit": {
             "requests_per_second": 3.0,
             "burst": 10,
@@ -111,14 +111,17 @@ _CASE_CHEMBL_PAGINATION_NEW: dict[str, Any] = {
     "source": {
         "type": "api",
         "load_strategy": "full",
-        "api": {
+        "provider_config": {
+            "provider": "chembl",
             "base_url": "https://example.chembl/api",
             "auth_type": "public",
             "api_version": "v1",
+            "client": {"timeout": 60.0, "max_retries": 3},
+            "pagination": {
+                "page_size": 250,
+                "max_url_length": 2200,
+            },
         },
-        "client": {"timeout": 60.0, "max_retries": 3},
-        "batch": {"page_size": 250, "max_url_length": 2200},
-        "provider_config": {"provider": "chembl"},
         "rate_limit": {
             "requests_per_second": 3.0,
             "burst": 10,
@@ -145,6 +148,46 @@ def test_canonical_and_shorthand_payloads_are_equivalent(
     canonical_dump = _dump_source_config(canonical_payload)
     shorthand_dump = _dump_source_config(shorthand_payload)
     assert canonical_dump == shorthand_dump
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {
+            "source": {
+                "type": "api",
+                "load_strategy": "full",
+                "api": {
+                    "base_url": "https://example.chembl/api",
+                    "auth_type": "public",
+                    "api_version": "v1",
+                },
+                "client": {"timeout": 60.0, "max_retries": 3},
+                "batch": {"batch_size": 25},
+                "provider_config": {"provider": "chembl"},
+            }
+        },
+        {
+            "source": {
+                "type": "api",
+                "load_strategy": "full",
+                "api": {
+                    "base_url": "https://example.chembl/api",
+                    "auth_type": "public",
+                    "api_version": "v1",
+                },
+                "client": {"timeout": 60.0, "max_retries": 3},
+                "batch": {"page_size": 250, "max_url_length": 2200},
+                "provider_config": {"provider": "chembl"},
+            }
+        },
+    ],
+)
+def test_retired_source_transport_aliases_are_rejected(
+    payload: dict[str, Any],
+) -> None:
+    with pytest.raises(ValueError, match="Retired source transport aliases"):
+        _dump_source_config(payload)
 
 
 def test_source_legacy_normalization_golden_snapshot() -> None:

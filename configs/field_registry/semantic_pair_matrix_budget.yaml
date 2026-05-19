@@ -43,7 +43,7 @@ status_budgets:
     require_reviewed_clusters: true
   - column: Typing
     value: COMPATIBLE
-    max_count: 654
+    max_count: 621
     ratchet_only: true
   - column: Validation
     value: STRICTNESS_MISMATCH
@@ -51,6 +51,6 @@ status_budgets:
     require_reviewed_clusters: true
   - column: Validation
     value: COMPATIBLE
-    max_count: 1039
+    max_count: 1028
     ratchet_only: true
 reviewed_critical_rows: []

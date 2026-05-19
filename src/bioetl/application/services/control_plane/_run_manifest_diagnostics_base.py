@@ -64,6 +64,8 @@ class _BaseSummaryReplayContext:
     continuation_mode: str
     replay_capability_reason: str
     replay_readiness_verdict: str
+    replay_resume_rebuild_verdict: str
+    replay_next_action: str
     exact_replay_support_boundary: str
     exact_replay_blockers: list[str]
     resume_contract: dict[str, object]
@@ -127,6 +129,10 @@ def _resolve_base_summary_replay_context(
         replay_readiness_verdict=str(
             operator_replay_projection["replay_readiness_verdict"]
         ),
+        replay_resume_rebuild_verdict=str(
+            operator_replay_projection["replay_resume_rebuild_verdict"]
+        ),
+        replay_next_action=str(operator_replay_projection["replay_next_action"]),
         exact_replay_support_boundary=_resolve_exact_replay_support_boundary(manifest),
         exact_replay_blockers=list(operator_replay_projection["exact_replay_blockers"]),
         resume_contract=_build_resume_contract(
@@ -272,6 +278,10 @@ def _build_base_summary_replay_payload(
         "exact_replay_eligible": exact_replay_eligible,
         "exact_replay_blockers": replay_context.exact_replay_blockers,
         "replay_readiness_verdict": replay_context.replay_readiness_verdict,
+        "replay_resume_rebuild_verdict": (
+            replay_context.replay_resume_rebuild_verdict
+        ),
+        "replay_next_action": replay_context.replay_next_action,
         "replay_mode": replay_context.replay_mode,
         "operator_replay_mode": _resolve_operator_replay_mode(
             replay_mode=replay_context.replay_mode,

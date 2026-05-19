@@ -34,6 +34,7 @@ def _make_pipeline() -> BasePipeline:
             active_version="2.0.0",
             hash_include=("doi", "publication_date"),
             hash_exclude=("publisher",),
+            hash_datetime_policy="v2_datetime_utc",
             rollout=SimpleNamespace(
                 write_versions=("1.0.0", "2.0.0"),
                 affects_hash=True,
@@ -109,6 +110,10 @@ def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> Non
         "1.0.0",
         "2.0.0",
     )
+    assert {
+        policy.datetime_policy
+        for policy in request.content_hash_policy_by_version.policies
+    } == {"v2_datetime_utc"}
     assert request.gold_schema_policy_by_version is not None
     assert request.gold_schema_policy_by_version.active_schema is active_schema
     assert request.gold_schema_policy_by_version.for_version("1.0.0") is shadow_schema
@@ -152,6 +157,10 @@ def test_build_record_processor_config_and_validator_forwards_paths_and_strict()
     assert config.content_hash_policy_by_version is not None
     assert config.content_hash_policy_by_version.affects_hash is True
     assert config.content_hash_policy_by_version.versions == ("1.0.0", "2.0.0")
+    assert {
+        policy.datetime_policy
+        for policy in config.content_hash_policy_by_version.policies
+    } == {"v2_datetime_utc"}
     assert config.gold_schema_policy_by_version is not None
     assert config.gold_schema_policy_by_version.versions == ("1.0.0", "2.0.0")
     assert config.gold_schema_policy_by_version.active_schema is active_schema
