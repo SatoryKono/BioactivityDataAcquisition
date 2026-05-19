@@ -34,7 +34,13 @@ def test_create_run_manifest_with_effective_config_uses_yaml_provider_entity(
     def _fake_create_and_persist_effective_config_artifact(**kwargs: object):
         captured["provider"] = kwargs["provider"]
         captured["entity"] = kwargs["entity"]
-        return ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
+        return (
+            "artifact-1",
+            "resolved-hash",
+            "effective-hash",
+            "source-hash",
+            "dq-hash",
+        )
 
     def _fake_create_run_manifest(**kwargs: object):
         captured["manifest_provider"] = kwargs["inputs"].yaml_config.provider
@@ -117,7 +123,13 @@ def test_create_run_manifest_with_effective_config_reuses_publication_context(
     def _fake_create_and_persist_effective_config_artifact(**kwargs: object):
         captured["effective_context"] = kwargs["reproducibility_context"]
         captured["effective_identity"] = kwargs["contract_identity"]
-        return ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
+        return (
+            "artifact-1",
+            "resolved-hash",
+            "effective-hash",
+            "source-hash",
+            "dq-hash",
+        )
 
     def _fake_create_run_manifest(**kwargs: object):
         captured["manifest_context"] = kwargs["reproducibility_context"]
@@ -166,7 +178,8 @@ def test_attach_manifest_id_accepts_control_plane_refs_object() -> None:
         config_hash="a" * 64,
         resolved_config_hash="a" * 64,
         effective_config_hash="b" * 64,
-        dq_contract_compatibility_hash="c" * 64,
+        source_fingerprint="c" * 64,
+        dq_contract_compatibility_hash="d" * 64,
         effective_config_artifact_id="artifact-1",
         contract_ref="chembl.activity",
         contract_version="1.2.3",
@@ -189,3 +202,4 @@ def test_attach_manifest_id_accepts_control_plane_refs_object() -> None:
     assert ctx.execution_fingerprint == "fingerprint-1"
     assert ctx.contract_ref == "chembl.activity"
     assert ctx.normalization_profile_ref == "chembl.activity.norm"
+    assert ctx.source_fingerprint == "c" * 64

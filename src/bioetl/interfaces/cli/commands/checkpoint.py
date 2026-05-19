@@ -316,6 +316,7 @@ def checkpoint_audit_run(run_id: str, limit: int, output_format: str) -> None:
 def checkpoint_inspect(
     pipeline: str,
     run_id: str | None,
+    manifest_id: str | None,
     audit_limit: int,
     output_format: str,
 ) -> None:
@@ -326,6 +327,7 @@ def checkpoint_inspect(
         lambda: workflow_service.inspect_checkpoint_workflow(
             pipeline,
             run_id=run_id,
+            manifest_id=manifest_id,
             audit_limit=audit_limit,
         ),
         error_title="Checkpoint diagnostics failed",

@@ -319,13 +319,19 @@ class ObservabilityWorkflowService:
         pipeline_name: str,
         *,
         run_id: str | None = None,
+        manifest_id: str | None = None,
         audit_limit: int = 100,
     ) -> CheckpointAuditWorkflowResult:
         """Return checkpoint state and any related audit/run-manifest context."""
+        if run_id is not None and manifest_id is not None:
+            raise ValueError(
+                "checkpoint diagnostics accept either run_id or manifest_id, not both"
+            )
         if self.tracer is None:
             return await self._inspect_checkpoint_workflow_impl(
                 pipeline_name=pipeline_name,
                 run_id=run_id,
+                manifest_id=manifest_id,
                 audit_limit=audit_limit,
             )
         async with traced_async_operation(
@@ -337,6 +343,7 @@ class ObservabilityWorkflowService:
                 "bioetl.pipeline": pipeline_name,
                 "bioetl.audit_limit": audit_limit,
                 "bioetl.has_explicit_run_id": run_id is not None,
+                "bioetl.has_explicit_manifest_id": manifest_id is not None,
                 _TRACE_ATTR_HAS_RUN_MANIFEST_SERVICE: self.run_manifest_service
                 is not None,
             },
@@ -345,6 +352,7 @@ class ObservabilityWorkflowService:
             result = await self._inspect_checkpoint_workflow_impl(
                 pipeline_name=pipeline_name,
                 run_id=run_id,
+                manifest_id=manifest_id,
                 audit_limit=audit_limit,
             )
             span.set_attribute(_TRACE_ATTR_SUCCESS, True)
@@ -362,10 +370,22 @@ class ObservabilityWorkflowService:
         *,
         pipeline_name: str,
         run_id: str | None,
+        manifest_id: str | None,
         audit_limit: int,
     ) -> CheckpointAuditWorkflowResult:
         """Implement checkpoint diagnostics workflow without tracing concerns."""
-        checkpoint = await self.checkpoint_service.get_checkpoint(pipeline_name)
+        if manifest_id is not None:
+            checkpoint = await self.checkpoint_service.get_checkpoint_for_manifest_id(
+                pipeline_name,
+                manifest_id,
+            )
+        elif run_id is not None:
+            checkpoint = await self.checkpoint_service.get_checkpoint_for_run(
+                pipeline_name,
+                run_id,
+            )
+        else:
+            checkpoint = await self.checkpoint_service.get_checkpoint(pipeline_name)
         resolved_run_id = run_id or (
             checkpoint.run_id if checkpoint is not None else None
         )

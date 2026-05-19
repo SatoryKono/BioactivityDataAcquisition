@@ -92,9 +92,14 @@ class CliRunOrchestrationService:
         Returns:
             RunOptions populated from the provided CLI parameters.
         """
+        explicit_resume_requested = (
+            request.resume
+            or request.resume_run_id is not None
+            or request.resume_manifest_id is not None
+        )
         return RunOptions(
             run_type=request.run_type,
-            resume=request.resume,
+            resume=explicit_resume_requested,
             start_offset=request.start_offset,
             limit=request.limit,
             dry_run=request.dry_run,
@@ -111,6 +116,8 @@ class CliRunOrchestrationService:
             cached_bronze_date=request.cached_bronze_date,
             replay_of_run_id=request.replay_of_run_id,
             replay_of_manifest_id=request.replay_of_manifest_id,
+            resume_run_id=request.resume_run_id,
+            resume_manifest_id=request.resume_manifest_id,
             exact_replay=request.exact_replay,
             required_persistence_profile=request.required_persistence_profile,
             enable_tracing=request.enable_tracing,
@@ -121,10 +128,37 @@ class CliRunOrchestrationService:
         request: CliRunPreparationInput,
     ) -> RunPreparationResult:
         """Validate raw CLI inputs and build a prepared execution request."""
+        if (
+            request.options.resume
+            and (
+                request.options.resume_run_id is not None
+                or request.options.resume_manifest_id is not None
+            )
+        ):
+            return RunPreparationResult(
+                error_message=(
+                    "--resume cannot be used together with "
+                    "--resume-run-id/--resume-manifest-id"
+                )
+            )
+        if (
+            request.options.resume_run_id is not None
+            and request.options.resume_manifest_id is not None
+        ):
+            return RunPreparationResult(
+                error_message=(
+                    "--resume-run-id and --resume-manifest-id cannot be used together"
+                )
+            )
+        explicit_resume_requested = (
+            request.options.resume
+            or request.options.resume_run_id is not None
+            or request.options.resume_manifest_id is not None
+        )
         validation = self.validate_start_offset(
             start_offset=request.options.start_offset,
             run_type=request.options.run_type,
-            resume=request.options.resume,
+            resume=explicit_resume_requested,
         )
         if not validation.is_valid:
             return RunPreparationResult(error_message=validation.error_message)

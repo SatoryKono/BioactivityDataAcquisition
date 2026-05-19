@@ -218,12 +218,21 @@ bioetl run --pipeline chembl_activity --limit 100
 bioetl run --pipeline chembl_activity --resume
 ```
 
+Если оператору нужен не mutable latest pointer, а конкретный historical
+occurrence, используйте explicit selector:
+
+```bash
+bioetl run --pipeline chembl_activity --resume-run-id 7f26d7b2-2c25-4aef-bf4c-030e4f8a4f87
+bioetl run --pipeline chembl_activity --resume-manifest-id manifest-parent-001
+```
+
 `--resume` означает восстановление из checkpoint state, а не strict exact replay.
 Чтобы не смешивать operator semantics:
 
 | Surface                                | Что означает                                                                                                        | Что не означает                                                    |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | `--resume`                             | Продолжить прерванный запуск из checkpoint state с compatibility checks                                             | Не публикует новый run как exact replay родительского run          |
+| `--resume-run-id` / `--resume-manifest-id` | Привязать ordinary-pipeline resume к одному конкретному historical checkpoint occurrence                             | Не обходят compatibility anchors и не превращают run в exact replay |
 | `--run-type rebuild`                   | Пересчитать производные слои заново из доступного source-of-truth/Bronze                                            | Не использует checkpoint continuation и не доказывает exact replay |
 | `--exact-replay`                       | Запросить strict exact replay на snapshot-backed inputs внутри опубликованной support boundary с fail-closed policy | Не является обычным resume или обычным rebuild                     |
 | `replay_mode=same_data_state_recovery` | Inspection-классификация run, у которого есть immutable snapshots и same-data-state recovery anchors                | Не отдельный CLI flag                                              |
@@ -249,8 +258,11 @@ Machine-readable checkpoint load statuses distinguish:
 
 Supported resume modes:
 
-- ordinary `bioetl run --resume` uses checkpoint snapshot state and compatibility
-  checks without ledger suffix replay;
+- ordinary `bioetl run --resume` uses the latest checkpoint pointer and
+  compatibility checks without ledger suffix replay;
+- ordinary `bioetl run --resume-run-id` / `--resume-manifest-id` uses the same
+  compatibility enforcement but pins the checkpoint load to one explicit run
+  occurrence for forensic/debug workflows;
 - composite `bioetl run-composite --resume` uses checkpoint snapshot state as
   the base and then replays ledger events strictly after `last_event_id`.
 

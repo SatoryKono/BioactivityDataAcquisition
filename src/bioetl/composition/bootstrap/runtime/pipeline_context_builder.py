@@ -80,6 +80,8 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         started_at=started_at,
         replay_of_run_id=options.replay_of_run_id,
         replay_of_manifest_id=options.replay_of_manifest_id,
+        resume_run_id=options.resume_run_id,
+        resume_manifest_id=options.resume_manifest_id,
         resume=options.resume,
         limit=options.limit,
         dry_run=options.dry_run,

@@ -48,6 +48,12 @@ __all__ = [
 class _CheckpointLookupService(Protocol):
     async def get_checkpoint(self, pipeline_name: str) -> CheckpointInfo | None: ...
 
+    async def get_checkpoint_for_run(
+        self,
+        pipeline_name: str,
+        run_id: str,
+    ) -> CheckpointInfo | None: ...
+
 
 class _LineageExplainService(Protocol):
     def explain_run(self, run_id: str) -> LineageRunExplanationResult: ...
@@ -77,7 +83,9 @@ async def resolve_checkpoint_for_run(
 ) -> CheckpointInfo | None:
     if pipeline_name is None:
         return None
-    checkpoint = await checkpoint_service.get_checkpoint(pipeline_name)
+    checkpoint = await checkpoint_service.get_checkpoint_for_run(pipeline_name, run_id)
+    if checkpoint is None:
+        checkpoint = await checkpoint_service.get_checkpoint(pipeline_name)
     if checkpoint is None:
         return None
     if checkpoint.run_id in {None, run_id}:

@@ -93,6 +93,7 @@ class RunCodeProvenance:
     config_hash: str | None = None
     resolved_config_hash: str | None = None
     effective_config_hash: str | None = None
+    source_fingerprint: str | None = None
     contract_ref: str | None = None
     contract_version: str | None = None
     contract_schema_hash: str | None = None
@@ -198,6 +199,7 @@ def _load_code_provenance(raw_code: object) -> RunCodeProvenance:
         config_hash=_load_optional_str(payload, "config_hash"),
         resolved_config_hash=_load_optional_str(payload, "resolved_config_hash"),
         effective_config_hash=_load_optional_str(payload, "effective_config_hash"),
+        source_fingerprint=_load_optional_str(payload, "source_fingerprint"),
         contract_ref=_load_optional_str(payload, "contract_ref"),
         contract_version=_load_optional_str(payload, "contract_version"),
         contract_schema_hash=_load_optional_str(payload, "contract_schema_hash"),

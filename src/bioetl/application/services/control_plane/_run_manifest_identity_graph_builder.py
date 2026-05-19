@@ -260,6 +260,7 @@ def _build_identity_graph_core(
         "config_hash": code_provenance.config_hash,
         "resolved_config_hash": code_provenance.resolved_config_hash,
         "effective_config_hash": code_provenance.effective_config_hash,
+        "source_fingerprint": code_provenance.source_fingerprint,
         "git_commit": code_provenance.git_commit,
         "source_revision_state": code_provenance.source_revision_state,
         "dependency_lock_state": (

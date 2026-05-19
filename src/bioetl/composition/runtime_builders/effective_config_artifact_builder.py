@@ -55,7 +55,7 @@ def _create_and_persist_effective_config_artifact_payload(
     settings: Settings,
     logger: object,
     run_id: RunID,
-) -> tuple[str, str, str, str]:
+) -> tuple[str, str, str, str, str]:
     """Persist one effective-config artifact and return its provenance anchors."""
     service = create_effective_config_service()
     artifact = service.create_effective_config_artifact(
@@ -112,6 +112,7 @@ def _create_and_persist_effective_config_artifact_payload(
         artifact.artifact_id,
         artifact.resolved_config_hash,
         artifact.effective_config_hash,
+        artifact.source_fingerprint,
         artifact.dq_contract_compatibility_hash,
     )
 
@@ -124,7 +125,7 @@ def create_and_persist_effective_config_artifact(
     entity: str,
     reproducibility_context: object | None = None,
     contract_identity: _manifest_support.RunManifestContractIdentity | None = None,
-) -> tuple[str, str, str, str]:
+) -> tuple[str, str, str, str, str]:
     """Create effective config artifact, persist it, and return provenance fields."""
     if reproducibility_context is None:
         contract_ref = f"{provider}.{entity}"
@@ -183,7 +184,7 @@ def create_and_persist_composite_effective_config_artifact(
     settings: Settings,
     logger: object,
     run_id: RunID,
-) -> tuple[str, str, str, str]:
+) -> tuple[str, str, str, str, str]:
     """Persist the composite effective-config artifact using the shared path."""
     return _create_and_persist_effective_config_artifact_payload(
         pipeline_name=pipeline_name,

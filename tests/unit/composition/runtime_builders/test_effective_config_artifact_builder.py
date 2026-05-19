@@ -489,7 +489,7 @@ def test_create_and_persist_effective_config_artifact_forwards_required_profile(
         settings: Settings,
         logger: object,
         run_id: RunID,
-    ) -> tuple[str, str, str, str]:
+    ) -> tuple[str, str, str, str, str]:
         captured.update(
             pipeline_name=pipeline_name,
             pipeline_kind=pipeline_kind,
@@ -506,7 +506,13 @@ def test_create_and_persist_effective_config_artifact_forwards_required_profile(
             logger=logger,
             run_id=run_id,
         )
-        return ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
+        return (
+            "artifact-1",
+            "resolved-hash",
+            "effective-hash",
+            "source-hash",
+            "dq-hash",
+        )
 
     monkeypatch.setattr(
         "bioetl.composition.runtime_builders.effective_config_artifact_builder._create_and_persist_effective_config_artifact_payload",
@@ -536,7 +542,13 @@ def test_create_and_persist_effective_config_artifact_forwards_required_profile(
         entity="activity",
     )
 
-    assert result == ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
+    assert result == (
+        "artifact-1",
+        "resolved-hash",
+        "effective-hash",
+        "source-hash",
+        "dq-hash",
+    )
     assert captured["required_persistence_profile"] == "degraded_observable"
     assert captured["resolution_policy"].strict_validation is True
     assert captured["normalization_profile_ref"] == "chembl.activity"
@@ -575,7 +587,7 @@ def test_create_and_persist_effective_config_artifact_uses_effective_replay_prof
         settings: Settings,
         logger: object,
         run_id: RunID,
-    ) -> tuple[str, str, str, str]:
+    ) -> tuple[str, str, str, str, str]:
         captured.update(
             pipeline_name=pipeline_name,
             pipeline_kind=pipeline_kind,
@@ -592,7 +604,13 @@ def test_create_and_persist_effective_config_artifact_uses_effective_replay_prof
             logger=logger,
             run_id=run_id,
         )
-        return ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
+        return (
+            "artifact-1",
+            "resolved-hash",
+            "effective-hash",
+            "source-hash",
+            "dq-hash",
+        )
 
     monkeypatch.setattr(
         "bioetl.composition.runtime_builders.effective_config_artifact_builder._create_and_persist_effective_config_artifact_payload",
@@ -657,11 +675,17 @@ def test_create_and_persist_effective_config_artifact_promotes_prod_family_defau
         settings: Settings,
         logger: object,
         run_id: RunID,
-    ) -> tuple[str, str, str, str]:
+    ) -> tuple[str, str, str, str, str]:
         captured["required_persistence_profile"] = required_persistence_profile
         captured["resolution_policy"] = resolution_policy
         captured["normalization_profile_ref"] = normalization_profile_ref
-        return ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
+        return (
+            "artifact-1",
+            "resolved-hash",
+            "effective-hash",
+            "source-hash",
+            "dq-hash",
+        )
 
     monkeypatch.setattr(
         "bioetl.composition.runtime_builders.effective_config_artifact_builder._create_and_persist_effective_config_artifact_payload",
@@ -711,10 +735,16 @@ def test_create_and_persist_effective_config_artifact_forwards_runtime_strictnes
         settings: Settings,
         logger: object,
         run_id: RunID,
-    ) -> tuple[str, str, str, str]:
+    ) -> tuple[str, str, str, str, str]:
         captured["resolution_policy"] = resolution_policy
         captured["normalization_profile_ref"] = normalization_profile_ref
-        return ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
+        return (
+            "artifact-1",
+            "resolved-hash",
+            "effective-hash",
+            "source-hash",
+            "dq-hash",
+        )
 
     monkeypatch.setattr(
         "bioetl.composition.runtime_builders.effective_config_artifact_builder._create_and_persist_effective_config_artifact_payload",
@@ -776,12 +806,18 @@ def test_create_and_persist_effective_config_artifact_uses_supplied_publication_
         settings: Settings,
         logger: object,
         run_id: RunID,
-    ) -> tuple[str, str, str, str]:
+    ) -> tuple[str, str, str, str, str]:
         captured["required_persistence_profile"] = required_persistence_profile
         captured["normalization_profile_ref"] = normalization_profile_ref
         captured["normalization_profile_version"] = normalization_profile_version
         captured["normalization_profile_hash"] = normalization_profile_hash
-        return ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
+        return (
+            "artifact-1",
+            "resolved-hash",
+            "effective-hash",
+            "source-hash",
+            "dq-hash",
+        )
 
     monkeypatch.setattr(
         "bioetl.composition.runtime_builders.effective_config_artifact_builder._create_and_persist_effective_config_artifact_payload",
@@ -829,7 +865,13 @@ def test_create_and_persist_effective_config_artifact_uses_supplied_publication_
         contract_identity=contract_identity,
     )
 
-    assert result == ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
+    assert result == (
+        "artifact-1",
+        "resolved-hash",
+        "effective-hash",
+        "source-hash",
+        "dq-hash",
+    )
     assert captured["required_persistence_profile"] == "forensic_grade"
     assert captured["normalization_profile_ref"] == "chembl.activity.norm"
     assert captured["normalization_profile_version"] == "1.0.0"
@@ -857,7 +899,7 @@ def test_create_and_persist_composite_effective_config_artifact_forwards_require
         settings: Settings,
         logger: object,
         run_id: RunID,
-    ) -> tuple[str, str, str, str]:
+    ) -> tuple[str, str, str, str, str]:
         captured.update(
             pipeline_name=pipeline_name,
             pipeline_kind=pipeline_kind,
@@ -874,7 +916,13 @@ def test_create_and_persist_composite_effective_config_artifact_forwards_require
             logger=logger,
             run_id=run_id,
         )
-        return ("artifact-2", "resolved-hash", "effective-hash", "dq-hash")
+        return (
+            "artifact-2",
+            "resolved-hash",
+            "effective-hash",
+            "source-hash",
+            "dq-hash",
+        )
 
     monkeypatch.setattr(
         "bioetl.composition.runtime_builders.effective_config_artifact_builder._create_and_persist_effective_config_artifact_payload",
@@ -906,7 +954,13 @@ def test_create_and_persist_composite_effective_config_artifact_forwards_require
         run_id=RunID(uuid4()),
     )
 
-    assert result == ("artifact-2", "resolved-hash", "effective-hash", "dq-hash")
+    assert result == (
+        "artifact-2",
+        "resolved-hash",
+        "effective-hash",
+        "source-hash",
+        "dq-hash",
+    )
     assert captured["required_persistence_profile"] == "forensic_grade"
     assert captured["resolution_policy"].strict_validation is True
     assert captured["normalization_profile_ref"] is None

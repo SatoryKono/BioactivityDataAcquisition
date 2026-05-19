@@ -125,6 +125,7 @@ class PipelineControlPlaneArtifacts:
     config_hash: str | None = None
     resolved_config_hash: str | None = None
     effective_config_hash: str | None = None
+    source_fingerprint: str | None = None
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
     input_snapshot_fingerprint: str | None = None

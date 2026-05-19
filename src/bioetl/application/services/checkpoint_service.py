@@ -31,6 +31,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import CheckpointPort, LoggerPort, MetricsPort, TracingPort
 from bioetl.domain.types import JsonDict
+from bioetl.domain.types import RunID
 
 
 @dataclass(frozen=True, slots=True)
@@ -122,6 +123,19 @@ class CheckpointService:
             _CHECKPOINT_OPERATOR_DURATION_METRIC,
             duration_seconds,
             labels=labels,
+        )
+
+    @staticmethod
+    def _checkpoint_info_from_data(
+        *,
+        pipeline_name: str,
+        checkpoint_data: tuple[RunID, JsonDict],
+    ) -> CheckpointInfo:
+        run_id, metadata = checkpoint_data
+        return CheckpointInfo(
+            pipeline_name=pipeline_name,
+            run_id=str(run_id),
+            metadata=metadata,
         )
 
     async def list_checkpoints(self) -> list[CheckpointInfo]:
@@ -258,14 +272,186 @@ class CheckpointService:
                 status="success",
                 duration_seconds=perf_counter() - start_time,
             )
-            return CheckpointInfo(
+            return self._checkpoint_info_from_data(
                 pipeline_name=pipeline_name,
-                run_id=str(run_id),
-                metadata=metadata,
+                checkpoint_data=(run_id, metadata),
             )
         except _CHECKPOINT_OPERATOR_ERRORS:
             self._record_operator_metrics(
                 operation="get",
+                status="failed",
+                duration_seconds=perf_counter() - start_time,
+            )
+            raise
+
+    async def get_checkpoint_for_run(
+        self,
+        pipeline_name: str,
+        run_id: str,
+    ) -> CheckpointInfo | None:
+        """Get immutable checkpoint evidence for one specific run occurrence."""
+        self.logger.debug(
+            "Getting checkpoint for run",
+            pipeline=pipeline_name,
+            run_id=run_id,
+        )
+        start_time = perf_counter()
+        if self.tracer is None:
+            return await self._get_checkpoint_for_run_impl(
+                pipeline_name=pipeline_name,
+                run_id=run_id,
+                start_time=start_time,
+            )
+        async with traced_async_operation(
+            self.tracer,
+            "checkpoint.get_for_run",
+            self._trace_attributes(
+                operation="get_for_run",
+                pipeline=pipeline_name,
+                **{"bioetl.run_id": run_id},
+            ),
+            tracer_name=self.TRACER_NAME,
+        ) as span:
+            checkpoint = await self._get_checkpoint_for_run_impl(
+                pipeline_name=pipeline_name,
+                run_id=run_id,
+                start_time=start_time,
+            )
+            self._set_trace_result(
+                span,
+                success=True,
+                attributes={"bioetl.checkpoint_found": checkpoint is not None},
+            )
+            return checkpoint
+
+    async def _get_checkpoint_for_run_impl(
+        self,
+        *,
+        pipeline_name: str,
+        run_id: str,
+        start_time: float,
+    ) -> CheckpointInfo | None:
+        """Get immutable checkpoint evidence by run_id."""
+        try:
+            checkpoint_data = await self.checkpoint_port.load_for_run(
+                pipeline_name,
+                RunID(run_id),
+            )
+            if checkpoint_data is None:
+                self.logger.debug(
+                    "Checkpoint not found for run",
+                    pipeline=pipeline_name,
+                    run_id=run_id,
+                )
+                self._record_operator_metrics(
+                    operation="get_for_run",
+                    status="missing",
+                    duration_seconds=perf_counter() - start_time,
+                )
+                return None
+            self.logger.info(
+                "Got checkpoint for run",
+                pipeline=pipeline_name,
+                run_id=run_id,
+            )
+            self._record_operator_metrics(
+                operation="get_for_run",
+                status="success",
+                duration_seconds=perf_counter() - start_time,
+            )
+            return self._checkpoint_info_from_data(
+                pipeline_name=pipeline_name,
+                checkpoint_data=checkpoint_data,
+            )
+        except _CHECKPOINT_OPERATOR_ERRORS:
+            self._record_operator_metrics(
+                operation="get_for_run",
+                status="failed",
+                duration_seconds=perf_counter() - start_time,
+            )
+            raise
+
+    async def get_checkpoint_for_manifest_id(
+        self,
+        pipeline_name: str,
+        manifest_id: str,
+    ) -> CheckpointInfo | None:
+        """Get immutable checkpoint evidence for one specific manifest_id."""
+        self.logger.debug(
+            "Getting checkpoint for manifest",
+            pipeline=pipeline_name,
+            manifest_id=manifest_id,
+        )
+        start_time = perf_counter()
+        if self.tracer is None:
+            return await self._get_checkpoint_for_manifest_id_impl(
+                pipeline_name=pipeline_name,
+                manifest_id=manifest_id,
+                start_time=start_time,
+            )
+        async with traced_async_operation(
+            self.tracer,
+            "checkpoint.get_for_manifest_id",
+            self._trace_attributes(
+                operation="get_for_manifest_id",
+                pipeline=pipeline_name,
+                **{"bioetl.manifest_id": manifest_id},
+            ),
+            tracer_name=self.TRACER_NAME,
+        ) as span:
+            checkpoint = await self._get_checkpoint_for_manifest_id_impl(
+                pipeline_name=pipeline_name,
+                manifest_id=manifest_id,
+                start_time=start_time,
+            )
+            self._set_trace_result(
+                span,
+                success=True,
+                attributes={"bioetl.checkpoint_found": checkpoint is not None},
+            )
+            return checkpoint
+
+    async def _get_checkpoint_for_manifest_id_impl(
+        self,
+        *,
+        pipeline_name: str,
+        manifest_id: str,
+        start_time: float,
+    ) -> CheckpointInfo | None:
+        """Get immutable checkpoint evidence by manifest_id."""
+        try:
+            checkpoint_data = await self.checkpoint_port.load_for_manifest_id(
+                manifest_id
+            )
+            if checkpoint_data is None:
+                self.logger.debug(
+                    "Checkpoint not found for manifest",
+                    pipeline=pipeline_name,
+                    manifest_id=manifest_id,
+                )
+                self._record_operator_metrics(
+                    operation="get_for_manifest_id",
+                    status="missing",
+                    duration_seconds=perf_counter() - start_time,
+                )
+                return None
+            self.logger.info(
+                "Got checkpoint for manifest",
+                pipeline=pipeline_name,
+                manifest_id=manifest_id,
+            )
+            self._record_operator_metrics(
+                operation="get_for_manifest_id",
+                status="success",
+                duration_seconds=perf_counter() - start_time,
+            )
+            return self._checkpoint_info_from_data(
+                pipeline_name=pipeline_name,
+                checkpoint_data=checkpoint_data,
+            )
+        except _CHECKPOINT_OPERATOR_ERRORS:
+            self._record_operator_metrics(
+                operation="get_for_manifest_id",
                 status="failed",
                 duration_seconds=perf_counter() - start_time,
             )

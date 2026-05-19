@@ -132,6 +132,7 @@ class ManifestControlPlaneRefs:
     config_hash: str | None
     resolved_config_hash: str | None
     effective_config_hash: str | None
+    source_fingerprint: str | None
     dq_contract_compatibility_hash: str | None
     effective_config_artifact_id: str | None
     contract_ref: str | None
@@ -163,6 +164,7 @@ def create_control_plane_refs(
     execution_fingerprint: str,
     resolved_config_hash: str,
     effective_config_hash: str,
+    source_fingerprint: str | None,
     dq_contract_compatibility_hash: str,
     effective_config_artifact_id: str,
     contract_ref: str,
@@ -184,6 +186,7 @@ def create_control_plane_refs(
         ),
         resolved_config_hash=resolved_config_hash,
         effective_config_hash=effective_config_hash,
+        source_fingerprint=source_fingerprint,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         effective_config_artifact_id=effective_config_artifact_id,
         contract_ref=contract_ref,

@@ -98,6 +98,7 @@ def render_manifest_section(
                 ("config_hash", provenance.get("config_hash")),
                 ("resolved_config_hash", provenance.get("resolved_config_hash")),
                 ("effective_config_hash", provenance.get("effective_config_hash")),
+                ("source_fingerprint", provenance.get("source_fingerprint")),
             ),
             json_renderer=json_renderer,
         )

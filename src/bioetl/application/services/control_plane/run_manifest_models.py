@@ -35,6 +35,7 @@ class RunManifestCreateSpec:
     config_hash: str | None = None
     resolved_config_hash: str | None = None
     effective_config_hash: str | None = None
+    source_fingerprint: str | None = None
     contract_ref: str | None = None
     contract_version: str | None = None
     contract_schema_hash: str | None = None

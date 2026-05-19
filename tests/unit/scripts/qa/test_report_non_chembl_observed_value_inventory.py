@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-from scripts.engineering.qa.report_non_chembl_observed_value_inventory import (
-    build_inventory_payload,
-)
+from scripts.engineering.qa import report_non_chembl_observed_value_inventory as report
 
 
 def test_build_inventory_payload_covers_expected_non_chembl_sections() -> None:
-    payload = build_inventory_payload()
+    payload = report.build_inventory_payload()
     sections = payload["sections"]
 
     assert payload["source"] == (
@@ -33,3 +31,7 @@ def test_build_inventory_payload_covers_expected_non_chembl_sections() -> None:
     pubchem = sections["pubchem_property_vocab"]
     assert "IUPAC Name" in pubchem["label"]
     assert "Connectivity" in pubchem["name"]
+
+
+def test_committed_artifacts_match_generator_output() -> None:
+    assert report.main(["--check"]) == 0

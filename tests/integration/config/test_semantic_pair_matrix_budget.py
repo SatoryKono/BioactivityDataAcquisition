@@ -20,7 +20,7 @@ from scripts.engineering.qa.check_semantic_registry_drift import (
 def test_semantic_pair_matrix_budget_gate_passes_current_repo() -> None:
     result = validate_semantic_pair_matrix_budget(
         repo_root=Path("."),
-        today=date(2026, 5, 15),
+        today=date(2026, 5, 19),
     )
 
     assert not result.findings, "\n".join(
@@ -31,7 +31,7 @@ def test_semantic_pair_matrix_budget_gate_passes_current_repo() -> None:
 def test_pair_matrix_budget_records_current_risk_counts() -> None:
     result = validate_semantic_pair_matrix_budget(
         repo_root=Path("."),
-        today=date(2026, 5, 15),
+        today=date(2026, 5, 19),
     )
 
     assert result.risk_counts.get("CRITICAL", 0) == 0
@@ -43,11 +43,11 @@ def test_reviewed_critical_rows_are_timeboxed_and_owned() -> None:
     payload = yaml.safe_load(DEFAULT_BUDGET_PATH.read_text(encoding="utf-8"))
     reviewed_rows = payload["reviewed_critical_rows"]
 
-    assert payload["matrix_path"].endswith("semantic_pair_matrix_2026-05-15.csv")
+    assert payload["matrix_path"].endswith("semantic_pair_matrix_2026-05-19.csv")
     assert payload["review_registry_path"].endswith(
         "semantic_audit_review_registry.yaml"
     )
-    assert payload["reviewed_on"] == "2026-05-15"
+    assert payload["reviewed_on"] == "2026-05-19"
     assert {
         (row["column"], row["value"]): row["max_count"]
         for row in payload["status_budgets"]
@@ -58,7 +58,7 @@ def test_reviewed_critical_rows_are_timeboxed_and_owned() -> None:
         ("Normalization", "DIFFERENT"): 0,
         ("Normalization", "COMPATIBLE"): 886,
         ("Typing", "CONFLICTING"): 0,
-        ("Typing", "COMPATIBLE"): 662,
+        ("Typing", "COMPATIBLE"): 654,
         ("Validation", "STRICTNESS_MISMATCH"): 0,
         ("Validation", "COMPATIBLE"): 1039,
     }
@@ -72,7 +72,7 @@ def test_reviewed_critical_rows_are_timeboxed_and_owned() -> None:
 
 def test_semantic_audit_manifest_tracks_base_config_coverage() -> None:
     manifest_path = Path(
-        "reports/semantic_pipeline_audit/semantic_pipeline_audit_manifest_2026-05-15.json"
+        "reports/semantic_pipeline_audit/semantic_pipeline_audit_manifest_2026-05-19.json"
     )
     payload = json.loads(manifest_path.read_text(encoding="utf-8"))
     base_configs = payload["counts"]["base_configs"]
@@ -97,7 +97,7 @@ def test_semantic_audit_manifest_tracks_base_config_coverage() -> None:
 
 def test_semantic_audit_manifest_tracks_residual_backlog() -> None:
     manifest_path = Path(
-        "reports/semantic_pipeline_audit/semantic_pipeline_audit_manifest_2026-05-15.json"
+        "reports/semantic_pipeline_audit/semantic_pipeline_audit_manifest_2026-05-19.json"
     )
     payload = json.loads(manifest_path.read_text(encoding="utf-8"))
     artifact_name = payload["artifacts"]["residual_backlog"]
@@ -125,7 +125,7 @@ def test_semantic_audit_manifest_tracks_residual_backlog() -> None:
 
 def test_non_exact_semantic_clusters_are_owner_reviewed() -> None:
     registry_path = Path(
-        "reports/semantic_pipeline_audit/semantic_cluster_registry_2026-05-15.json"
+        "reports/semantic_pipeline_audit/semantic_cluster_registry_2026-05-19.json"
     )
     payload = json.loads(registry_path.read_text(encoding="utf-8"))
 
@@ -154,7 +154,7 @@ def test_reviewed_semantic_registry_warnings_are_suppressed() -> None:
 
 def test_generated_cluster_registry_does_not_keep_stale_risk_caps() -> None:
     registry_path = Path(
-        "reports/semantic_pipeline_audit/semantic_cluster_registry_2026-05-15.json"
+        "reports/semantic_pipeline_audit/semantic_cluster_registry_2026-05-19.json"
     )
     payload = json.loads(registry_path.read_text(encoding="utf-8"))
 

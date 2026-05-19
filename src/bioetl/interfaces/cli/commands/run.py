@@ -282,6 +282,8 @@ def _build_run_command_input_from_options(
         cached_bronze_path=cast(str | None, options["cached_bronze_path"]),
         replay_of_run_id=cast(str | None, options["replay_of_run_id"]),
         replay_of_manifest_id=cast(str | None, options["replay_of_manifest_id"]),
+        resume_run_id=cast(str | None, options["resume_run_id"]),
+        resume_manifest_id=cast(str | None, options["resume_manifest_id"]),
         exact_replay=cast("bool", options["exact_replay"]),
         required_persistence_profile=cast(
             str | None, options["required_persistence_profile"]

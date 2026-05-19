@@ -178,6 +178,8 @@ bioetl run --pipeline <NAME> [OPTIONS]
 | `--run-type`                             | choice | `incremental` | Тип запуска: `incremental`, `backfill`, `rebuild`                                         |
 | `--limit`                                | int    | None          | Максимальное количество записей                                                           |
 | `--resume`                               | flag   | False         | Продолжить с последнего checkpoint                                                        |
+| `--resume-run-id`                        | str    | None          | Возобновить ordinary pipeline из checkpoint конкретного `run_id` вместо mutable latest pointer |
+| `--resume-manifest-id`                   | str    | None          | Возобновить ordinary pipeline из checkpoint конкретного `manifest_id` вместо mutable latest pointer |
 | `--start-offset`                         | int    | None          | Начать incremental run с указанного offset                                                |
 | `--dry-run`                              | flag   | False         | Предпросмотр без записи данных                                                            |
 | `--yes`, `-y`                            | flag   | False         | Пропустить подтверждение для rebuild/backfill                                             |
@@ -219,6 +221,12 @@ bioetl run --pipeline chembl_activity --run-type rebuild --dry-run
 # Продолжить прерванный запуск
 bioetl run --pipeline chembl_activity --resume
 
+# Продолжить конкретный historical occurrence по run identity
+bioetl run --pipeline chembl_activity --resume-run-id 7f26d7b2-2c25-4aef-bf4c-030e4f8a4f87
+
+# Продолжить конкретный historical occurrence по manifest identity
+bioetl run --pipeline chembl_activity --resume-manifest-id manifest-parent-001
+
 # Начать incremental run с известного offset
 bioetl run --pipeline chembl_activity --start-offset 5000
 
@@ -250,6 +258,7 @@ bioetl run --pipeline chembl_activity \
 | Surface                                              | What operators should read it as                                                                             | What operators must not read it as          |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
 | `--resume`                                           | Checkpoint continuation of the current pipeline execution                                                    | Strict exact replay of a prior run          |
+| `--resume-run-id` / `--resume-manifest-id`           | Occurrence-pinned checkpoint continuation for one explicit historical ordinary-pipeline run                  | A request to ignore compatibility anchors   |
 | `--run-type rebuild`                                 | Fresh recomputation of downstream data from available sources/Bronze                                         | Checkpoint continuation or replay proof     |
 | `--exact-replay`                                     | Fail-closed request for strict exact replay on snapshot-backed inputs внутри опубликованной support boundary | Ordinary rerun, rebuild, or degraded resume |
 | `replay_mode=same_data_state_recovery` in inspection | A manifested run that can recover the same data state from immutable inputs                                  | A separate CLI mode                         |
@@ -275,8 +284,11 @@ bioetl run --pipeline chembl_activity \
 
 Supported resume modes:
 
-- ordinary resume uses checkpoint snapshot state and compatibility checks
-  without ledger suffix replay;
+- ordinary `bioetl run --resume` uses the latest checkpoint pointer plus
+  compatibility checks without ledger suffix replay;
+- ordinary `bioetl run --resume-run-id` / `--resume-manifest-id` pins resume to
+  one explicit historical checkpoint occurrence and still applies the same
+  compatibility gates;
 - composite resume uses checkpoint snapshot state as the base and then replays
   the ledger suffix strictly after `last_event_id`.
 - `execution_fingerprint` остаётся canonical semantic identity, а

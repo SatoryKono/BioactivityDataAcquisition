@@ -79,6 +79,10 @@ class RunManifestHydrationMixin:
                 payload,
                 "effective_config_hash",
             ),
+            source_fingerprint=_optional_payload_string(
+                payload,
+                "source_fingerprint",
+            ),
             contract_ref=_optional_payload_string(payload, "contract_ref"),
             contract_version=_optional_payload_string(payload, "contract_version"),
             contract_schema_hash=_optional_payload_string(
@@ -305,6 +309,7 @@ class RunManifestPayloadMixin:
                 "config_hash": code_provenance.config_hash,
                 "resolved_config_hash": code_provenance.resolved_config_hash,
                 "effective_config_hash": code_provenance.effective_config_hash,
+                "source_fingerprint": code_provenance.source_fingerprint,
                 "contract_ref": code_provenance.contract_ref,
                 "contract_version": code_provenance.contract_version,
                 "contract_schema_hash": code_provenance.contract_schema_hash,

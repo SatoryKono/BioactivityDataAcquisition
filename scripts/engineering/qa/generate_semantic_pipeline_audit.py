@@ -30,7 +30,7 @@ DEFAULT_REVIEW_REGISTRY = (
     REPO_ROOT / "configs" / "field_registry" / "semantic_audit_review_registry.yaml"
 )
 BASE_CONFIG_DIR = REPO_ROOT / "configs" / "base"
-DEFAULT_SOURCE_DATE = "2026-05-15"
+DEFAULT_SOURCE_DATE = "2026-05-19"
 PAIR_MATRIX_PREFIX = "semantic_pair_matrix_"
 CLUSTER_REGISTRY_PREFIX = "semantic_cluster_registry_"
 PAIR_COLUMNS = (
@@ -271,6 +271,17 @@ def _resolve_seed_artifact(
     fallback = _latest_seed_artifact(out_dir, prefix, suffix)
     if fallback is not None:
         return fallback
+    if out_dir != DEFAULT_OUT_DIR:
+        default_dated_candidate = DEFAULT_OUT_DIR / _seed_artifact_filename(
+            prefix,
+            source_date,
+            suffix,
+        )
+        if default_dated_candidate.exists():
+            return default_dated_candidate
+        default_fallback = _latest_seed_artifact(DEFAULT_OUT_DIR, prefix, suffix)
+        if default_fallback is not None:
+            return default_fallback
     raise FileNotFoundError(
         f"Unable to resolve seed artifact for {prefix}*{suffix} in {out_dir}"
     )

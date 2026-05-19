@@ -46,11 +46,11 @@ from bioetl.composition.bootstrap.runtime._composite_control_plane_support impor
 from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
     CompositeControlPlaneBundle,
 )
-from bioetl.composition.runtime_builders.runner_builder_support import (
-    validate_required_persistence_profile,
-)
 from bioetl.composition.runtime_builders.run_manifest_support import (
     legacy_config_hash_from_resolved_config_hash,
+)
+from bioetl.composition.runtime_builders.runner_builder_support import (
+    validate_required_persistence_profile,
 )
 from bioetl.composition.services.versioning import get_code_revision_provenance
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -122,6 +122,7 @@ def _build_composite_control_plane_manifest(
     effective_config_artifact_id: str,
     resolved_config_hash: str,
     effective_config_hash: str,
+    source_fingerprint: str,
     dq_contract_compatibility_hash: str,
     contract_ref: str,
     contract_entity: str,
@@ -150,6 +151,7 @@ def _build_composite_control_plane_manifest(
             infra_context=infra_context,
             resolved_config_hash=resolved_config_hash,
             effective_config_hash=effective_config_hash,
+            source_fingerprint=source_fingerprint,
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             effective_config_artifact_id=effective_config_artifact_id,
             contract_ref=contract_ref,
@@ -181,6 +183,7 @@ def build_composite_control_plane_bundle(
         effective_config_artifact_id,
         resolved_config_hash,
         effective_config_hash,
+        source_fingerprint,
         dq_contract_compatibility_hash,
         contract_ref,
         contract_entity,
@@ -205,6 +208,7 @@ def build_composite_control_plane_bundle(
         effective_config_artifact_id=effective_config_artifact_id,
         resolved_config_hash=resolved_config_hash,
         effective_config_hash=effective_config_hash,
+        source_fingerprint=source_fingerprint,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         contract_ref=contract_ref,
         contract_entity=contract_entity,
@@ -241,6 +245,7 @@ def build_composite_control_plane_bundle(
         ),
         resolved_config_hash=resolved_config_hash or None,
         effective_config_hash=effective_config_hash or None,
+        source_fingerprint=source_fingerprint or None,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash or None,
         effective_config_artifact_id=effective_config_artifact_id or None,
         input_snapshot_fingerprint=_compute_composite_input_snapshot_fingerprint(
@@ -258,6 +263,7 @@ def _build_composite_manifest_create_request(
     infra_context: CompositeInfrastructureContext,
     resolved_config_hash: str,
     effective_config_hash: str,
+    source_fingerprint: str,
     dq_contract_compatibility_hash: str,
     effective_config_artifact_id: str,
     contract_ref: str,
@@ -306,6 +312,7 @@ def _build_composite_manifest_create_request(
         ),
         resolved_config_hash=resolved_config_hash or None,
         effective_config_hash=effective_config_hash or None,
+        source_fingerprint=source_fingerprint or None,
         contract_ref=contract_ref,
         contract_version=contract_version,
         contract_schema_hash=contract_schema_hash,

@@ -323,6 +323,19 @@ class TestBuildPipelineContext:
         assert ctx.cached_bronze.enabled is False
         assert ctx.replay_of_manifest_id == "manifest-parent"
 
+    def test_context_propagates_occurrence_pinned_resume_selectors(self):
+        """Legacy entrypoint must preserve explicit checkpoint occurrence selectors."""
+        options = RunOptions(
+            resume=True,
+            resume_run_id=str(uuid4()),
+            resume_manifest_id="manifest-resume-anchor",
+        )
+        ctx = build_pipeline_context("chembl_activity", options)
+
+        assert ctx.resume is True
+        assert ctx.resume_run_id == options.resume_run_id
+        assert ctx.resume_manifest_id == "manifest-resume-anchor"
+
 
 @pytest.mark.unit
 class TestCompositeBootstrapFacade:
@@ -632,3 +645,54 @@ class TestRunPipelineIntegration:
             pipeline_name="test_pipeline",
             run_type="rebuild",
         )
+
+    @pytest.mark.asyncio
+    async def test_run_pipeline_preserves_context_run_id_even_if_runner_exposes_another(
+        self, mock_runner
+    ):
+        """Entry-point result identity must come from the prepared execution context."""
+        from bioetl.composition.entrypoints import run_pipeline
+
+        runner_run_id = str(uuid4())
+        mock_runner.run_id = runner_run_id
+
+        with (
+            patch(
+                "bioetl.composition._pipeline_execution._create_pipeline_runner_from_context",
+                return_value=mock_runner,
+            ),
+            patch(
+                "bioetl.composition._pipeline_execution.push_metrics_to_gateway",
+                return_value=True,
+            ),
+        ):
+            result = await run_pipeline("test_pipeline", RunOptions())
+
+        assert result.status == PipelineRunResult.SUCCESS
+        assert result.run_id != runner_run_id
+        assert UUID(result.run_id)
+
+    @pytest.mark.asyncio
+    async def test_run_pipeline_does_not_start_metrics_server_directly(
+        self, mock_runner
+    ):
+        """Runtime side effects must stay at the outer CLI/runtime boundary."""
+        from bioetl.composition.entrypoints import run_pipeline
+
+        with (
+            patch(
+                "bioetl.composition._pipeline_execution._create_pipeline_runner_from_context",
+                return_value=mock_runner,
+            ),
+            patch(
+                "bioetl.composition._pipeline_execution.maybe_start_metrics_server",
+            ) as mock_start_metrics,
+            patch(
+                "bioetl.composition._pipeline_execution.push_metrics_to_gateway",
+                return_value=True,
+            ),
+        ):
+            result = await run_pipeline("test_pipeline", RunOptions())
+
+        assert result.status == PipelineRunResult.SUCCESS
+        mock_start_metrics.assert_not_called()
