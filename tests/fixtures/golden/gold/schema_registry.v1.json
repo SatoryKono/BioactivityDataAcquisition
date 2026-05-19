@@ -3786,6 +3786,16 @@
           "dtype": "str",
           "nullable": true
         },
+        "alternative_products_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "alternative_products_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "annotation_score": {
           "description": "",
           "dtype": "float64",
@@ -3797,6 +3807,16 @@
           "nullable": true
         },
         "biophysicochemical_properties": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "biophysicochemical_properties_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "biophysicochemical_properties_raw_json": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -3822,6 +3842,16 @@
           "nullable": true
         },
         "cofactors": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "cofactors_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "cofactors_raw_json": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -4097,6 +4127,16 @@
           "nullable": true
         },
         "reactions": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "reactions_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "reactions_raw_json": {
           "description": "",
           "dtype": "str",
           "nullable": true
