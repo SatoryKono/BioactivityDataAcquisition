@@ -2,13 +2,14 @@
 id: non-chembl-normalization-audit
 title: Audit non-ChEMBL normalization across BioETL main
 task_id: non-chembl-normalization-audit
-created_at: '2026-05-12T04:46:25Z'
+created_at: '2026-05-19T04:17:00Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- <add-source-ref>
+- AGENTS.md
 summary: Active task session context.
-query: non-chembl normalization publication pubchem uniprot composite
+query: non-ChEMBL normalization enums vocabulary identifiers JSON canonicalization
+  composite pipelines
 ---
 
 # Session note
@@ -16,7 +17,7 @@ query: non-chembl normalization publication pubchem uniprot composite
 ## Task
 
 - Title: Audit non-ChEMBL normalization across BioETL main
-- Retrieval query: non-chembl normalization publication pubchem uniprot composite
+- Retrieval query: non-ChEMBL normalization enums vocabulary identifiers JSON canonicalization composite pipelines
 
 ## Retrieved context
 

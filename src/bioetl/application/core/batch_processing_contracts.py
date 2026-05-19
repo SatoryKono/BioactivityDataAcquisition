@@ -18,3 +18,4 @@ class BatchProcessingOutcome:
     gold_records: list[GoldRecord]
     quarantined_count: int
     filtered_out_count: int
+    gold_excluded_by_contract_count: int = 0

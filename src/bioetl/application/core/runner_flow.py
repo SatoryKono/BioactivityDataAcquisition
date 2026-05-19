@@ -271,6 +271,10 @@ def _record_flow_invariants(host: _PipelineRunnerFlowHostProtocol) -> None:
     bronze = max(0, int(metrics.get("records_bronze", 0)))
     silver = max(0, int(metrics.get("records_silver", 0)))
     gold = max(0, int(metrics.get("records_gold", 0)))
+    gold_excluded_by_contract = max(
+        0,
+        int(metrics.get("records_gold_excluded_by_contract", 0)),
+    )
     quarantined = max(0, int(metrics.get("records_quarantined", 0)))
     filtered_out = max(0, int(metrics.get("records_filtered_out", 0)))
 
@@ -282,6 +286,7 @@ def _record_flow_invariants(host: _PipelineRunnerFlowHostProtocol) -> None:
         bronze=bronze,
         silver=silver,
         gold=gold,
+        gold_excluded_by_contract=gold_excluded_by_contract,
         quarantined=quarantined,
         filtered_out=filtered_out,
     )
@@ -314,7 +319,7 @@ def _record_flow_invariants(host: _PipelineRunnerFlowHostProtocol) -> None:
     pipeline_metrics.record_stage_backlog(
         run_type=run_type,
         stage="output",
-        count=max(silver - gold, 0),
+        count=max(silver - gold - gold_excluded_by_contract, 0),
     )
 
 
@@ -327,6 +332,7 @@ def _record_count_flow_invariants(
     bronze: int,
     silver: int,
     gold: int,
+    gold_excluded_by_contract: int,
     quarantined: int,
     filtered_out: int,
 ) -> None:
@@ -361,13 +367,25 @@ def _record_count_flow_invariants(
         status=silver_gold_monotonic,
     )
 
+    gold_terminal = gold + gold_excluded_by_contract
+    silver_gold_terminal_accounted = "unknown"
+    if silver > 0 or gold_terminal > 0:
+        silver_gold_terminal_accounted = (
+            "passed" if silver >= gold_terminal else "violated"
+        )
+    typed_pipeline_metrics.record_flow_invariant(
+        run_type=run_type,
+        invariant="silver_gold_terminal_accounted",
+        status=silver_gold_terminal_accounted,
+    )
+
     _record_stage_lag_gauges(
         host=host,
         pipeline_metrics=pipeline_metrics,
         run_type=run_type,
         ingestion_backlog=max(fetched - bronze, 0),
         validation_backlog=quarantined,
-        output_backlog=max(silver - gold, 0),
+        output_backlog=max(silver - gold_terminal, 0),
     )
 
 

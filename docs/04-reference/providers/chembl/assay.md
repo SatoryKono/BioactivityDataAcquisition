@@ -38,7 +38,7 @@ ______________________________________________________________________
 
 - `schema.column_groups`: `system`, `business`, `dq`
 - `quality.entity_field_validations`: `assay_id`, `assay_type`, `confidence_score`, `relationship_type`
-- `quality.entity_cross_field_validations`: `assay_id` + `description`
+- `quality.entity_cross_field_validations`: `assay_id` + `assay_description`
 - `filters.extraction_params`:
   - `assay_type__in: B,F`
   - `confidence_score__gte: 8`
@@ -48,7 +48,7 @@ ______________________________________________________________________
 - `filters.silver_filters.required_fields`:
   - `assay_id`
   - `assay_type`
-  - `description`
+  - `assay_description`
   - `target_id`
   - `publication_id`
   - `bao_format`
@@ -72,7 +72,7 @@ ______________________________________________________________________
 | ------------------------ | ------------------------------- |
 | `assay_id`               | YAML required + Arrow + Pandera |
 | `assay_type`             | YAML required + Arrow + Pandera |
-| `description`            | YAML required + Arrow + Pandera |
+| `assay_description`      | YAML required + Arrow + Pandera |
 | `target_id`              | YAML required + Arrow + Pandera |
 | `publication_id`         | YAML required + Arrow + Pandera |
 | `bao_format`             | YAML required + Arrow + Pandera |
@@ -151,7 +151,7 @@ Silver Pandera schema находится в
 
 - `assay_id`
 - `assay_type`
-- `description`
+- `assay_description`
 - `target_id`
 - `publication_id`
 - `bao_format`
@@ -168,6 +168,10 @@ Gold-отбор для текущего pipeline задаётся исключи
 - `assay_type in {B, F}`
 - `confidence_score in {8, 9}`
 - `relationship_type = D`
+
+Gold-filter применяется к канонической Silver-записи, поэтому в required-field
+gate используется `assay_description`. Legacy field `description` публикуется
+только после `transform_for_gold()`.
 
 Если эти значения меняются, source of truth находится в
 `configs/entities/chembl/assay.yaml`, а не в этой странице.

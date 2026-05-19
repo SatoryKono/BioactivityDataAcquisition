@@ -116,6 +116,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
         self.records_bronze = 0
         self.records_silver = 0
         self.records_gold = 0
+        self.records_gold_excluded_by_contract = 0
         self.records_quarantined = 0
         self.records_filtered_out = 0
 

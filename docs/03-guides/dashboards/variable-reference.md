@@ -37,6 +37,10 @@ Machine-readable selector SSOT:
 - `$workflow` is context/evidence unless a dashboard explicitly documents a
   truthful current-status intersection. It does not force a
   workflow -> pipeline dependency.
+- `$workflow` remains single-select with Include All across primary dashboards,
+  including `bioetl-workflow-overview`, so cross-dashboard handoffs preserve
+  one coherent workflow shell value while aggregate `All` scope stays
+  available.
 - Pipeline-scoped operator dashboards use single-select `$pipeline`, except
   Overview where intentional landing default = `All`.
 - `$run_type` always uses include-all fallback. Missing context is represented as
@@ -58,7 +62,7 @@ Machine-readable selector SSOT:
 
 | Variable | Dashboards | Datasource / query family | Selection mode | Default / fallback | Notes |
 | --- | --- | --- | --- | --- | --- |
-| `$workflow` | `bioetl-overview-v2`, `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`, `bioetl-workflow-overview` | Prometheus `label_values(bioetl_workflow_runs_total, workflow)` | Multi-select with Include All | `All` / `$__all` | Context/evidence selector in the shared operator shell unless a dashboard documents a truthful current-status intersection. |
+| `$workflow` | `bioetl-overview-v2`, `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`, `bioetl-workflow-overview` | Prometheus `label_values(bioetl_workflow_runs_total, workflow)` | Single-select with Include All | `All` / `$__all` | Context/evidence selector in the shared operator shell unless a dashboard documents a truthful current-status intersection. |
 | `$pipeline` | `bioetl-overview-v2`, `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`, `bioetl-workflow-overview`, `bioetl-silver-reject-explorer` | Prometheus label query from each dashboard's bounded universe: Overview/DQ/Provider/Workflow use `bioetl_records_processed_total`; Runtime uses `bioetl_runtime_pipeline_run_type_universe`; Control Plane uses `bioetl_control_plane_run_type_universe`; Explorer uses concrete pipeline scope for Quarantine API | Single-select | `All` on Overview; otherwise fail-closed `unknown` | Canonical pipeline context. Explorer requires one concrete pipeline. Provider/Workflow expose it as context shell, not as their primary business selector. |
 | `$run_type` | `bioetl-overview-v2`, `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`, `bioetl-workflow-overview`, `bioetl-silver-reject-explorer` | Prometheus label query from the same bounded universe as `$pipeline`, or explorer API context | Multi-select with Include All | `All` / `$__all` | Cross-dashboard links MUST NOT pass `run_type=unknown`. |
 | `$run_id` | `bioetl-overview-v2`, `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`, `bioetl-workflow-overview` | Quarantine Explorer HTTP `/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}` | Single-select, no Include All | `-` | Preserved identity context for shared HTTP `ID`/details panels; not a Prometheus label and not mapped to Silver `$quarantine_run_id`. |

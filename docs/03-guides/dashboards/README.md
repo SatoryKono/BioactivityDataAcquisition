@@ -26,7 +26,8 @@ ______________________________________________________________________
 - `variables-guide.md` — фактические Grafana variables и их PromQL.
 - `variable-reference.md` — человеческий contract для shipped dashboard variables: role, fallback, scope, propagation.
 - `selector-architecture.md` — selector taxonomy, dashboard families, hidden handoff model и future execution-selector design.
-- `dashboard-v2-updates.md` — что именно проверено и исправлено в JSON.
+- `dashboard-v2-updates.md` — active changelog по текущей shipped surface,
+  selector/navigation contract и UX evidence links для последних JSON-изменений.
 
 Текущий shipped Explore handoff:
 
@@ -49,9 +50,13 @@ ______________________________________________________________________
   рядом с Grafana variables.
 - Любые дублирующие dashboard-to-dashboard ссылки из одного dashboard в один
   target dashboard запрещены: переход должен быть ровно один.
-- Во всех shipped navigation panels `id=1000` после bus `0..5` закреплены
-  global adjunct links: `Silver Reject Explorer`, `Explore Logs`,
-  `Explore Traces`.
+- Во всех shipped navigation panels `id=1000`, кроме
+  `bioetl-control-plane-v1`, после bus `0..5` закреплены global adjunct links:
+  `Silver Reject Explorer`, `Explore Logs`, `Explore Traces`.
+- `bioetl-control-plane-v1` является намеренным исключением: top-level
+  navigation удерживает первый экран в dashboard/runbook flow и не уводит
+  оператора напрямую в `Explore Logs` / `Explore Traces`; logs/traces
+  расследование начинается из связанных dashboard handoff или runbook-пути.
 - `Explore Traces` остаётся optional adjunct surface и считается доступным
   только для traced runs; если runtime использовал `NoOpTracing`, пустой Tempo
   result считается корректным поведением.

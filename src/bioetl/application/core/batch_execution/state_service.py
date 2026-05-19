@@ -80,6 +80,9 @@ class BatchExecutionStateService:
             records_bronze=typed_state.records_bronze,
             records_silver=typed_state.records_silver,
             records_gold=typed_state.records_gold,
+            records_gold_excluded_by_contract=(
+                typed_state.records_gold_excluded_by_contract
+            ),
             records_quarantined=typed_state.records_quarantined,
             records_filtered_out=typed_state.records_filtered_out,
             source_batch_ids=typed_state._source_batch_ids,

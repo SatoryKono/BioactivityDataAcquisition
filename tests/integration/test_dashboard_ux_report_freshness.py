@@ -13,7 +13,7 @@ pytestmark = pytest.mark.integration
 _DASHBOARD_GLOB = "grafana/dashboards/*.json"
 _REPORTS_DIR = Path("docs/reports/dashboard-ux-checks")
 _CHANGE_NOTES_PATH = Path("docs/03-guides/dashboards/dashboard-v2-updates.md")
-POLICY_REVIEW_DATE = date(2026, 5, 15)
+POLICY_REVIEW_DATE = date(2026, 5, 19)
 
 
 def _git_changed_files() -> list[str]:

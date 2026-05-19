@@ -379,7 +379,7 @@ Check against `contracts/navigation-links.yaml` → `required_panel_links_by_uid
 - [ ] Panel `9102` (Inspect DQ Current Reasons) → dataLink to: Open Silver Reject Explorer
 
 **bioetl-workflow-overview**:
-- [ ] Panel `9` (Next Diagnostic Surface) → dataLinks to: Open 2. Runtime, Open 4. Data Quality, Open 3. Provider Health, Open 0. Control Plane, Open 1. Overview
+- [ ] Panel `9` (First Action) → dataLinks to: Open 2. Runtime, Open 4. Data Quality, Open 3. Provider Health, Open 0. Control Plane, Open 1. Overview
 
 ---
 

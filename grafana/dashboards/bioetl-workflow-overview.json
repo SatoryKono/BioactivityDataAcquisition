@@ -1240,7 +1240,7 @@
         "hide": 0,
         "includeAll": true,
         "label": "Workflow",
-        "multi": true,
+        "multi": false,
         "name": "workflow",
         "options": [],
         "query": {

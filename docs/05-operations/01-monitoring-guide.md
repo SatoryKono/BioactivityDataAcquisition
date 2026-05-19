@@ -131,6 +131,9 @@ Prometheus labels.
 > role-specific selectors, а не один flat universal query model.
 > Канонический machine-readable selector contract:
 > `docs/03-guides/dashboards/contracts/selector-contracts.yaml`.
+> `$workflow` остаётся single-select with Include All на primary dashboards,
+> включая `5. Workflow`, чтобы handoff сохранял один coherent workflow shell
+> value без потери aggregate `All` scope.
 > `1. Overview` допускает `Workflow=All`, `Pipeline=All`, `Run Type=All` и
 > `Run ID=-` как shipped default entry scope. Pipeline-scoped L1 dashboards сохраняют scoped handoff через
 > `$pipeline`/`$run_type`, а `3. Provider Health` получает hidden
@@ -148,14 +151,14 @@ L0 дашборд для одного operator question: что сейчас bro
 куда drill down первым.
 
 - **Answer surface**: `Provenance`, `Status`, `ID`, `Processed Records`,
-  `Next Action`, `Control Plane`, `Runtime`, `Data Quality`, `Provider`,
+  `First Action`, `Control Plane`, `Runtime`, `Data Quality`, `Provider`,
   `Data Validation`, `Inputs`, `Workflow`. `OK` requires recent signal; no
   recent samples stay `UNKNOWN`, not green. Workflow summary is current-state
   evidence and must follow the latest bounded terminal workflow signal rather
   than cumulative workflow-run counters.
 - **Above-the-fold layout**: first screen without scroll contains the
   provenance header, `Status`, local identity context (`ID`), processed-record
-  context, `Next Action`, compact subsystem current-status cards, `Inputs`,
+  context, `First Action`, compact subsystem current-status cards, `Inputs`,
   and `Workflow`.
 - **L1 historical context**: immediately below the first screen lives the
   `L1 Historical Trends` row with `Runtime Blockers Trend`, `DQ Status Trend`,
@@ -164,7 +167,7 @@ L0 дашборд для одного operator question: что сейчас bro
 - **Subsystem routing**: first-screen current-status panels показывают
   status-first verdict и panel-level drilldowns в canonical dashboards
   (`Runtime`, `Control Plane`, `Data Quality`, `Provider Health`,
-  `Workflow`), а `Status` / `Next Action` дают общий triage order.
+  `Workflow`), а `Status` / `First Action` дают общий triage order.
   Provider handoff fail-close'ится к `provider=unknown` с сохранением
   `pipeline_context`; workflow handoff явно reset-scope.
 - **Failure summary**: только compact selected-range summaries по manifest /
@@ -396,7 +399,7 @@ step outcomes.
   panel now also respects selected `$status` and lives under collapsed row
   `Step Diagnostics (collapsed)`.
 - **First Screen**: keep run/step failure cards, `Workflow Run Outcomes / Range`,
-  and `Next Diagnostic Surface` visible before expanding detailed step
+  and `First Action` visible before expanding detailed step
   diagnostics.
 - **Drilldown**: links `0. Control Plane`, `1. Overview`, `2. Runtime`,
   `3. Provider Health`, `4. Data Quality`.
