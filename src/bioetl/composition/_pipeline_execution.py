@@ -187,7 +187,9 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     runner: ExecutionMetricsRunnerPort | None = None
 
     try:
-        runner = _create_pipeline_runner_from_context(run_context)
+        runner = _require_execution_metrics_runner(
+            _create_pipeline_runner_from_context(run_context)
+        )
         run_id = str(runner.run_id)
     except (
         BioETLError,

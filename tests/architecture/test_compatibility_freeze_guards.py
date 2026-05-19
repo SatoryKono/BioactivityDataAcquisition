@@ -307,25 +307,8 @@ ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES_BY_MODULE = {
         }
     ),
 }
-ALLOWED_RUN_COMMAND_INTERNAL_SRC_FILES = frozenset(
-    {
-        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "interfaces"
-        / "cli"
-        / "commands"
-        / "domains"
-        / "run"
-        / "__init__.py",
-    }
-)
-ALLOWED_RUN_COMMAND_INTERNAL_STRING_SRC_FILES = frozenset(
-    {
-        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run.py",
-    }
-)
+ALLOWED_RUN_COMMAND_INTERNAL_SRC_FILES: frozenset[Path] = frozenset()
+ALLOWED_RUN_COMMAND_INTERNAL_STRING_SRC_FILES: frozenset[Path] = frozenset()
 ALLOWED_RUN_ALL_COMMAND_INTERNAL_SRC_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run_all.py",
@@ -1344,3 +1327,45 @@ def test_package_level_lazy_proxy_surfaces_stay_frozen() -> None:
 def test_service_bootstraps_compat_wrapper_file_stays_removed() -> None:
     """The retired `_service_bootstraps` wrapper module must not be reintroduced."""
     assert not SERVICE_BOOTSTRAPS_COMPAT_MODULE_PATH.exists()
+
+
+@pytest.mark.architecture
+def test_retired_run_command_wrapper_and_placeholder_package_stay_absent() -> None:
+    """Collapsed run-command seams and retired placeholder packages must not return."""
+    retired_paths = (
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "run"
+        / "command.py",
+        ROOT / "src" / "bioetl" / "interfaces" / "orchestration",
+    )
+    assert not [path for path in retired_paths if path.exists()], (
+        "Retired run-command wrapper or placeholder orchestration package returned:\n"
+        + "\n".join(
+            sorted(path.relative_to(ROOT).as_posix() for path in retired_paths if path.exists())
+        )
+    )
+
+
+@pytest.mark.architecture
+def test_selected_public_runtime_facades_do_not_mutate_module_globals() -> None:
+    """Retained public runtime facades must not cache exports via globals mutation."""
+    targets = (
+        ROOT / "src" / "bioetl" / "composition" / "entrypoints.py",
+        ROOT / "src" / "bioetl" / "composition" / "execution_api.py",
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "__init__.py",
+    )
+    offenders = [
+        path.relative_to(ROOT).as_posix()
+        for path in targets
+        if "globals()[name] =" in path.read_text(encoding="utf-8")
+    ]
+    assert not offenders, (
+        "Mutable compatibility export caching must stay retired from public runtime "
+        "facades:\n" + "\n".join(offenders)
+    )
