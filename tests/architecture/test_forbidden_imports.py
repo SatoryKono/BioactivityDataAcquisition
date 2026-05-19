@@ -363,7 +363,7 @@ class TestOrchestrationIsolation:
         assert not violations, (
             "Application layer has direct orchestration imports:\n"
             + "\n".join(f"  - {v}" for v in violations)
-            + "\n\nMove orchestration code to bioetl/interfaces/orchestration/"
+            + "\n\nMove orchestration code to interfaces-layer command/runtime boundaries."
         )
 
 

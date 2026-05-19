@@ -39,7 +39,7 @@ ______________________________________________________________________
 
 | Команда         | Модуль             | Описание                                                                            |
 | --------------- | ------------------ | ----------------------------------------------------------------------------------- |
-| `run`           | `run.py`           | Public CLI seam; canonical implementation lives in `domains/run/command.py`         |
+| `run`           | `run.py`           | Public CLI seam; canonical orchestration lives directly in `run.py` via `domains/run/*` helpers |
 | `run-all`       | `run_all.py`       | Public CLI seam; canonical implementation lives in `domains/run_all/command.py`     |
 | `run-composite` | `run_composite.py` | Public CLI seam; canonical implementation lives in `domains/composite/command.py`   |
 | `run-manifest`  | `run_manifest.py`  | Inspect immutable manifest payloads and append-only ledger history                  |
