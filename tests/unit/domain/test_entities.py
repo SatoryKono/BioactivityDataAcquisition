@@ -116,6 +116,9 @@ class TestBioactivity:
             molecule_id="CHEMBL100",
             target_id="CHEMBL200",
             assay_id="CHEMBL300",
+            activity_type="IC50",
+            activity_value=10.5,
+            activity_relation="=",
             standard_type="IC50",
             standard_value=10.5,
             standard_units="nM",
@@ -124,6 +127,9 @@ class TestBioactivity:
             activity_comment="High quality",
             data_validity_comment="Valid",
         )
+        assert bioactivity.activity_type == "IC50"
+        assert bioactivity.activity_value == pytest.approx(10.5)
+        assert bioactivity.activity_relation == "="
         assert bioactivity.standard_type == "IC50"
         assert bioactivity.standard_value == pytest.approx(10.5)
         assert bioactivity.standard_units == "nM"
@@ -227,8 +233,30 @@ class TestBioactivity:
         assert bioactivity.state == BioactivityState.RAW
         assert bioactivity.activity_id == "12345"
         assert bioactivity.molecule_id == "CHEMBL1"
+        assert bioactivity.activity_type is None
+        assert bioactivity.activity_relation is None
         assert bioactivity.standard_value == pytest.approx(10.5)
         assert bioactivity.pchembl_value == pytest.approx(7.5)
+
+    def test_bioactivity_from_raw_maps_legacy_measurement_fields(self, base_entity_kwargs):
+        """Test from_raw maps legacy provider measurement keys to canonical entity fields."""
+        raw_data = {
+            "activity_id": 12345,
+            "molecule_id": "CHEMBL1",
+            "type": "IC50",
+            "relation": "=",
+            "value": "2.5",
+            "units": "uM",
+        }
+        bioactivity = Bioactivity.from_raw(
+            raw_data=raw_data,
+            run_id=base_entity_kwargs["run_id"],
+            ingestion_ts=base_entity_kwargs["ingestion_ts"],
+        )
+        assert bioactivity.activity_type == "IC50"
+        assert bioactivity.activity_relation == "="
+        assert bioactivity.activity_value == pytest.approx(2.5)
+        assert bioactivity.units == "uM"
 
     def test_bioactivity_from_raw_missing_activity_id(self):
         """Test from_raw raises ValueError if activity_id missing."""

@@ -63,7 +63,7 @@ CHEMBL_PSEUDO_NULL_FIELDS = MappingProxyType(
                 "bao_label",
                 "cell_id",
                 "confidence_description",
-                "description",
+                "assay_description",
                 "publication_id",
                 "relationship_description",
                 "relationship_type",

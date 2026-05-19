@@ -98,10 +98,23 @@ def _extract_bao_fields(raw_data: JsonDict) -> dict[str, object]:
 
 def _extract_activity_measurement_fields(raw_data: JsonDict) -> dict[str, object]:
     return {
-        "type": _safe_str(raw_data.get("type")),
-        "value": _safe_float(raw_data.get("value")),
+        # Accept canonical runtime fields first, then legacy ChEMBL payload keys.
+        "activity_type": _safe_str(
+            raw_data.get("activity_type")
+            if raw_data.get("activity_type") is not None
+            else raw_data.get("type")
+        ),
+        "activity_value": _safe_float(
+            raw_data.get("activity_value")
+            if raw_data.get("activity_value") is not None
+            else raw_data.get("value")
+        ),
         "units": _safe_str(raw_data.get("units")),
-        "relation": _safe_str(raw_data.get("relation")),
+        "activity_relation": _safe_str(
+            raw_data.get("activity_relation")
+            if raw_data.get("activity_relation") is not None
+            else raw_data.get("relation")
+        ),
         "upper_value": _safe_float(raw_data.get("upper_value")),
         "text_value": _safe_str(raw_data.get("text_value")),
         "standard_type": _safe_str(raw_data.get("standard_type")),
