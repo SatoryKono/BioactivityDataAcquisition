@@ -86,7 +86,19 @@ Records pass to Gold layer only if:
 - `assay_type` is one of:
   - **B** (Binding)
   - **F** (Functional)
-- `confidence_score` >= 4
+- `confidence_score` is one of:
+  - **8**
+  - **9**
+- `relationship_type` is:
+  - **D**
+- `src_id` is:
+  - **1**
+- `assay_test_type` is:
+  - **In vitro**
+  - empty / missing after normalization
+- `assay_strain` is empty / missing after normalization
+- `bao_format` is not:
+  - **BAO_0000218**
 
 ## CLI Usage
 

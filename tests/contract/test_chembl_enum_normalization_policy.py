@@ -157,6 +157,8 @@ def _load_chembl_entity_config(entity: str) -> dict[str, object]:
 def _filter_value_set(raw_values: object) -> frozenset[str]:
     if raw_values is None:
         return frozenset()
+    if isinstance(raw_values, dict):
+        return _filter_value_set(raw_values.get("values"))
     if isinstance(raw_values, str):
         return frozenset(
             value for value in (v.strip() for v in raw_values.split(",")) if value

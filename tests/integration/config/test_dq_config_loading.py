@@ -228,6 +228,83 @@ class TestPipelineConfigLoaderWithDQResolution:
         assert "assay_description" in required_fields
         assert "description" not in required_fields
 
+    def test_chembl_assay_gold_filters_enforce_subset_policy(
+        self, config_loader: PipelineConfigLoader
+    ) -> None:
+        """chembl_assay Gold filters should enforce the configured subset policy."""
+        yaml_config = config_loader.load_pipeline_config("chembl_assay")
+        domain_config = resolve_domain_pipeline_config(yaml_config)
+        gold_filters = domain_config.gold_filters
+
+        assert gold_filters is not None
+
+        allowed_record = {
+            "assay_type": "B",
+            "confidence_score": 8,
+            "relationship_type": "D",
+            "assay_description": "Binding assay",
+            "assay_test_type": "In vitro",
+            "assay_strain": None,
+            "bao_format": "BAO_0000357",
+            "src_id": "1",
+        }
+
+        assert gold_filters.should_include(allowed_record) is True
+        assert (
+            gold_filters.should_include(
+                {
+                    **allowed_record,
+                    "assay_test_type": None,
+                }
+            )
+            is True
+        )
+        assert (
+            gold_filters.should_include(
+                {
+                    **allowed_record,
+                    "assay_test_type": "In vivo",
+                }
+            )
+            is False
+        )
+        assert (
+            gold_filters.should_include(
+                {
+                    **allowed_record,
+                    "assay_test_type": "Ex vivo",
+                }
+            )
+            is False
+        )
+        assert (
+            gold_filters.should_include(
+                {
+                    **allowed_record,
+                    "assay_strain": "C57BL/6",
+                }
+            )
+            is False
+        )
+        assert (
+            gold_filters.should_include(
+                {
+                    **allowed_record,
+                    "bao_format": "BAO_0000218",
+                }
+            )
+            is False
+        )
+        assert (
+            gold_filters.should_include(
+                {
+                    **allowed_record,
+                    "src_id": "2",
+                }
+            )
+            is False
+        )
+
     def test_chembl_publication_required_fields_include_runtime_contract_fields(
         self, config_loader: PipelineConfigLoader
     ) -> None:

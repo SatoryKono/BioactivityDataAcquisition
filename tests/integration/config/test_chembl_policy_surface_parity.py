@@ -207,9 +207,11 @@ def _config_enum_surface_expectations(
             for field_name, values in columns.items():
                 if ("chembl", entity, str(field_name)) not in ENUM_REGISTRY_PATHS:
                     continue
-                if field_name not in known_profile_fields or not isinstance(
-                    values, list
-                ):
+                if field_name not in known_profile_fields:
+                    continue
+                if isinstance(values, dict):
+                    values = values.get("values")
+                if not isinstance(values, list):
                     continue
                 if any(isinstance(value, (dict, list)) for value in values):
                     continue

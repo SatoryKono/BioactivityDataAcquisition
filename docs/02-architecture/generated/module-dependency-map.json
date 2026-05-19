@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1872,
-    "total_internal_imports": 7489,
+    "scanned_modules": 1882,
+    "total_internal_imports": 7523,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 323,
@@ -17,7 +17,7 @@
     {
       "source": "application",
       "target": "domain",
-      "imports": 1119,
+      "imports": 1121,
       "allowed": true
     },
     {
@@ -35,7 +35,7 @@
     {
       "source": "composition",
       "target": "domain",
-      "imports": 430,
+      "imports": 432,
       "allowed": true
     },
     {
@@ -47,7 +47,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1278,
+      "imports": 1280,
       "allowed": true
     },
     {
@@ -77,13 +77,13 @@
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 54,
+      "imports": 58,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 216,
+      "imports": 240,
       "allowed": true
     }
   ],
@@ -364,8 +364,18 @@
       "imports": 15
     },
     {
+      "source": "interfaces.http",
+      "target": "domain.control_plane",
+      "imports": 14
+    },
+    {
       "source": "application.services",
       "target": "domain.lineage",
+      "imports": 13
+    },
+    {
+      "source": "application.services",
+      "target": "domain.normalization",
       "imports": 13
     },
     {
@@ -377,16 +387,6 @@
       "source": "interfaces.cli",
       "target": "composition.registry_api",
       "imports": 13
-    },
-    {
-      "source": "application.services",
-      "target": "domain.behavior",
-      "imports": 12
-    },
-    {
-      "source": "composition.control_plane_api",
-      "target": "application.services",
-      "imports": 12
     }
   ],
   "violations": []

@@ -168,10 +168,19 @@ Gold-отбор для текущего pipeline задаётся исключи
 - `assay_type in {B, F}`
 - `confidence_score in {8, 9}`
 - `relationship_type = D`
+- `src_id = 1`
+- `assay_test_type in {In vitro, empty}`
+- `assay_strain is empty`
+- `bao_format != BAO_0000218`
 
 Gold-filter применяется к канонической Silver-записи, поэтому в required-field
 gate используется `assay_description`. Legacy field `description` публикуется
 только после `transform_for_gold()`.
+
+Для `assay_test_type` empty-state в runtime обычно представлен как `None`
+после normalization, а не как буквальная строка `""`.
+Семантические правила из `silver_filters` по текущей compatibility policy
+auto-promote'ятся в effective Gold gate.
 
 Если эти значения меняются, source of truth находится в
 `configs/entities/chembl/assay.yaml`, а не в этой странице.

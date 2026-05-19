@@ -378,7 +378,15 @@ def _filter_column_values(
     columns = config.get("filters", {}).get(stage, {}).get("columns", {})
     if field not in columns:
         return ()
-    return tuple(str(value) for value in columns[field])
+    values = columns[field]
+    if isinstance(values, list):
+        return tuple(str(value) for value in values)
+    if isinstance(values, dict):
+        raw_values = values.get("values")
+        if isinstance(raw_values, list):
+            return tuple(str(value) for value in raw_values)
+        return ()
+    return (str(values),)
 
 
 def _split_extraction_value(value: object) -> tuple[str, ...]:
