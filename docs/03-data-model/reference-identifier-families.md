@@ -20,6 +20,10 @@ DQ alignment:
 - JSON-array/object identifier families use `domain.normalization.reference_ids`
   as the canonical vocabulary seam; DQ generally validates the container shape,
   while profile/domain normalization canonicalizes the embedded identifiers
+- publication-family identifier arrays (`author_orcids`, `issn_list`,
+  `author_openalex_ids`, `institution_ids`, `ror_ids`, `author_s2_ids`) and
+  `uniprot_idmapping.all_mappings` now also publish config-level canonical JSON
+  pattern guards so DQ and profile normalization stay in explicit parity
 
 | Family | Storage | Collection semantics | Canonical form | Example fields |
 | --- | --- | --- | --- | --- |

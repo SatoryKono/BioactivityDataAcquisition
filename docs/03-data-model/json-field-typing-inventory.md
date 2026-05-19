@@ -59,11 +59,11 @@ Migration status:
 | `semanticscholar_publication` | `citation_contexts` | `canonical JSON string` | semantic-sensitive; persisted with `citation_contexts_raw_json` and `citation_contexts_canonical_json` companions |
 | `semanticscholar_publication` | `publication_types` | `canonical JSON string` | semantic-sensitive set-like classification evidence; persisted row order matches hash semantics |
 | `semanticscholar_publication` | `subject_fields` | `canonical JSON string` | semantic-sensitive set-like classification evidence; persisted row order matches hash semantics |
-| `uniprot_protein` | `alternative_products` | `canonical JSON string` | semantic-sensitive canonical-only comment projection governed by `configs/vocab/uniprot_semantic_payloads.yaml` |
-| `uniprot_protein` | `biophysicochemical_properties` | `canonical JSON string` | semantic-sensitive canonical-only comment projection governed by `configs/vocab/uniprot_semantic_payloads.yaml` |
-| `uniprot_protein` | `cofactors` | `canonical JSON string` | semantic-sensitive canonical-only comment projection governed by `configs/vocab/uniprot_semantic_payloads.yaml` |
+| `uniprot_protein` | `alternative_products` | `canonical JSON string` | semantic-sensitive ordered comment payload; persisted with `alternative_products_raw_json` and `alternative_products_canonical_json` companions governed by `configs/vocab/uniprot_semantic_payloads.yaml` |
+| `uniprot_protein` | `biophysicochemical_properties` | `canonical JSON string` | semantic-sensitive ordered comment payload; persisted with `biophysicochemical_properties_raw_json` and `biophysicochemical_properties_canonical_json` companions governed by `configs/vocab/uniprot_semantic_payloads.yaml` |
+| `uniprot_protein` | `cofactors` | `canonical JSON string` | semantic-sensitive unordered comment payload; persisted with `cofactors_raw_json` and `cofactors_canonical_json` companions governed by `configs/vocab/uniprot_semantic_payloads.yaml` |
 | `uniprot_protein` | `features_json` | `canonical JSON string` | semantic-sensitive ordered feature payload with `features_raw_json` and `features_canonical_json` companions; nested `feature.type`, `comment.commentType`, and keyword `category` terms are governed by `configs/vocab/uniprot_semantic_payloads.yaml` |
-| `uniprot_protein` | `reactions` | `canonical JSON string` | semantic-sensitive canonical-only comment projection governed by `configs/vocab/uniprot_semantic_payloads.yaml` |
+| `uniprot_protein` | `reactions` | `canonical JSON string` | semantic-sensitive ordered catalytic-activity projection; persisted with `reactions_raw_json` and `reactions_canonical_json` companions governed by `configs/vocab/uniprot_semantic_payloads.yaml` |
 
 Sidecar companion policy:
 - semantic-sensitive fields keep the current canonical JSON field for compatibility
@@ -79,7 +79,11 @@ Sidecar companion policy:
   `citation_contexts_raw_json`, `citation_contexts_canonical_json`,
   `publication_types_raw_json`, `publication_types_canonical_json`,
   `subject_fields_raw_json`, `subject_fields_canonical_json`,
-  `features_raw_json`, and `features_canonical_json`
+  `alternative_products_raw_json`, `alternative_products_canonical_json`,
+  `biophysicochemical_properties_raw_json`, `biophysicochemical_properties_canonical_json`,
+  `cofactors_raw_json`, `cofactors_canonical_json`,
+  `features_raw_json`, `features_canonical_json`,
+  `reactions_raw_json`, and `reactions_canonical_json`
 
 Null semantics:
 - absence of data MUST remain `NULL`

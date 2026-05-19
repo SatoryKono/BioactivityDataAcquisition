@@ -72,12 +72,18 @@ schema:
     - subcellular_location
     - tissue_specificity
     - alternative_products
+    - alternative_products_raw_json
+    - alternative_products_canonical_json
     - disease_involvement
     - pharmaceutical_use
     - similarity_comment
     - caution
     - cofactors
+    - cofactors_raw_json
+    - cofactors_canonical_json
     - biophysicochemical_properties
+    - biophysicochemical_properties_raw_json
+    - biophysicochemical_properties_canonical_json
     - induction
     - go_terms
     - drugbank_ids
@@ -115,6 +121,8 @@ schema:
     - isoform_ids
     - isoform_synonyms
     - reactions
+    - reactions_raw_json
+    - reactions_canonical_json
     - reaction_ec_numbers
     - cross_reference_count
     - feature_count

@@ -215,6 +215,18 @@ quality:
     type: pattern
     pattern: \S
     nullable: true
+  - field: author_orcids
+    type: pattern
+    pattern: '^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'
+    nullable: true
+    severity: warn
+    error_message: author_orcids must be a canonical JSON string array of ORCID identifiers
+  - field: issn_list
+    type: pattern
+    pattern: '^\[("[0-9Xx-]+"(,"[0-9Xx-]+")*)?\]$'
+    nullable: true
+    severity: warn
+    error_message: issn_list must be a canonical JSON string array of ISSN values
   - field: publication_status
     type: enum
     allowed_values:

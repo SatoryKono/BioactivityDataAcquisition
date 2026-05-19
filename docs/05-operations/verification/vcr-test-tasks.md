@@ -147,6 +147,22 @@ ______________________________________________________________________
 | `test-uniprot_protein-metadata-fields.yaml`                   | E2E `test-uniprot_protein-e2e.py`       | OK     |
 | `test-uniprot_protein-sequence-fields.yaml`                   | E2E `test-uniprot_protein-e2e.py`       | OK     |
 
+> **Observed-value coverage note:** offline non-ChEMBL vocabulary governance
+> now also depends on the curated Bronze fixtures under
+> `tests/fixtures/bronze/openalex/publication/`,
+> `tests/fixtures/bronze/crossref/publication/`,
+> `tests/fixtures/bronze/pubmed/publication/`,
+> `tests/fixtures/bronze/semanticscholar/publication/`,
+> `tests/fixtures/bronze/uniprot/protein/`, and
+> `tests/fixtures/bronze/uniprot/idmapping/`. In particular,
+> `sample_edge_nested_vocab_2026-05-05.jsonl`,
+> `sample_edge_structured_payloads_2026-05-12.jsonl`,
+> `sample_edge_publication_types_mesh_2026-05-05.jsonl`,
+> `sample_edge_publication_types_citations_2026-05-05.jsonl`,
+> `sample_edge_semantic_payloads_2026-05-12.jsonl`, and
+> `sample_edge_statuses_2026-05-05.jsonl` are the authoritative offline inputs
+> for non-ChEMBL observed-value inventory checks.
+
 ### multi-provider/ (1 cassette)
 
 | Cassette                                      | Used By                              | Status |

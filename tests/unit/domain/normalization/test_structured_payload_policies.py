@@ -21,15 +21,15 @@ def test_semantic_sensitive_payload_registry_declares_reviewed_policy_shapes() -
         ("semanticscholar.publication", "citation_contexts"),
         ("semanticscholar.publication", "publication_types"),
         ("semanticscholar.publication", "subject_fields"),
+        ("uniprot.protein", "alternative_products"),
+        ("uniprot.protein", "biophysicochemical_properties"),
+        ("uniprot.protein", "cofactors"),
         ("uniprot.protein", "features_json"),
+        ("uniprot.protein", "reactions"),
     }
     canonical_only_fields = {
         ("crossref.publication", "author_details"),
         ("crossref.publication", "references"),
-        ("uniprot.protein", "alternative_products"),
-        ("uniprot.protein", "biophysicochemical_properties"),
-        ("uniprot.protein", "cofactors"),
-        ("uniprot.protein", "reactions"),
     }
 
     for profile_name, field_name in raw_sidecar_fields | canonical_only_fields:
@@ -162,5 +162,5 @@ def test_semantic_sensitive_payload_registry_exposes_canonical_only_semantic_mod
     assert uniprot_alternative_products is not None
     assert (
         uniprot_alternative_products.semantic_policy
-        is StructuredPayloadSemanticPolicy.CANONICAL_JSON_COMMENT_PROJECTION
+        is StructuredPayloadSemanticPolicy.RAW_JSON_PLUS_CANONICAL_JSON_BEFORE_SEMANTIC_TRANSFORM
     )

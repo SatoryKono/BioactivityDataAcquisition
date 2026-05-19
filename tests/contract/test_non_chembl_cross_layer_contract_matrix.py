@@ -296,7 +296,7 @@ def test_uniprot_feature_payload_matrix_links_semantic_vocabulary_inventory() ->
     assert row["policy_scope"] == "provider_full_universe"
 
 
-def test_crossref_and_uniprot_canonical_only_payloads_are_governed_explicitly() -> None:
+def test_crossref_canonical_only_payloads_are_governed_explicitly() -> None:
     rows_by_key = {
         (row["pipeline_name"], row["field_name"]): row
         for row in build_field_matrix_rows()
@@ -305,10 +305,6 @@ def test_crossref_and_uniprot_canonical_only_payloads_are_governed_explicitly() 
     for pipeline_name, field_name in (
         ("crossref_publication", "author_details"),
         ("crossref_publication", "references"),
-        ("uniprot_protein", "alternative_products"),
-        ("uniprot_protein", "biophysicochemical_properties"),
-        ("uniprot_protein", "cofactors"),
-        ("uniprot_protein", "reactions"),
     ):
         row = rows_by_key[(pipeline_name, field_name)]
         provider, entity = pipeline_name.split("_", maxsplit=1)

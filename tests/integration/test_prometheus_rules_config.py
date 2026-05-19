@@ -725,6 +725,7 @@ def test_runtime_dashboard_recording_rules_exist_and_reference_source_metrics() 
         "bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m": "bioetl_stage_backlog_records",
         "bioetl_runtime_alert_condition_stage_backlog_active_15m": "bioetl_stage_backlog_records",
         "bioetl_runtime_alert_condition_stage_lag_high_15m": "bioetl_stage_lag_seconds",
+        "bioetl_gold_terminal_records_15m": "bioetl_stage_records_total",
         "bioetl_runtime_alert_condition_dq_soft_threshold_15m": "bioetl_dq_soft_threshold_exceeded",
         "bioetl_runtime_alert_condition_dq_hard_fail_15m": "bioetl_dq_validation_failures_total",
         "bioetl_runtime_alert_condition_dq_critical_anomaly_30m": "bioetl_dq_anomaly_detected",

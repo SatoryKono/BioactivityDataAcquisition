@@ -136,6 +136,7 @@ def mock_executor():
     executor.records_bronze = 100
     executor.records_silver = 95
     executor.records_gold = 90
+    executor.records_gold_excluded_by_contract = 3
     executor.records_quarantined = 5
     executor.records_filtered_out = 7
     executor.get_dq_context = MagicMock(return_value=None)
@@ -484,6 +485,9 @@ class TestPipelineRunnerInit:
             "records_bronze": mock_executor.records_bronze,
             "records_silver": mock_executor.records_silver,
             "records_gold": mock_executor.records_gold,
+            "records_gold_excluded_by_contract": (
+                mock_executor.records_gold_excluded_by_contract
+            ),
             "records_quarantined": mock_executor.records_quarantined,
             "records_filtered_out": mock_executor.records_filtered_out,
         }

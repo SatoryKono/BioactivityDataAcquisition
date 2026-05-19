@@ -29,6 +29,35 @@ _TEXT_COMMENT_FIELD_MAP: dict[str, str] = {
     "caution": "CAUTION",
     "induction": "INDUCTION",
 }
+_UNIPROT_SEMANTIC_COMMENT_SIDECARS: tuple[
+    tuple[str, str, str, tuple[str, ...]],
+    ...,
+] = (
+    (
+        "alternative_products",
+        "alternative_products_raw_json",
+        "alternative_products_canonical_json",
+        ("ALTERNATIVE PRODUCTS",),
+    ),
+    (
+        "biophysicochemical_properties",
+        "biophysicochemical_properties_raw_json",
+        "biophysicochemical_properties_canonical_json",
+        ("BIOPHYSICOCHEMICAL PROPERTIES",),
+    ),
+    (
+        "cofactors",
+        "cofactors_raw_json",
+        "cofactors_canonical_json",
+        ("COFACTOR",),
+    ),
+    (
+        "reactions",
+        "reactions_raw_json",
+        "reactions_canonical_json",
+        ("CATALYTIC ACTIVITY",),
+    ),
+)
 _COMMENT_OUTPUT_KEYS: tuple[str, ...] = (
     "function_comment",
     "catalytic_activity",
@@ -84,6 +113,17 @@ def _iter_comments_by_type(
 ) -> list[JsonDict]:
     """Get comments for a type from prebuilt index."""
     return index.get(comment_type, [])
+
+
+def _serialize_comment_type_payload(
+    index: dict[str, list[JsonDict]],
+    comment_types: tuple[str, ...],
+) -> str | None:
+    """Serialize raw provider comment envelopes for the requested types."""
+    payload: list[JsonDict] = []
+    for comment_type in comment_types:
+        payload.extend(_iter_comments_by_type(index, comment_type))
+    return serialize_to_json(payload, ensure_ascii=False) if payload else None
 
 
 def extract_text_values(
@@ -360,4 +400,22 @@ def extract_all_comments(
     serialized["isoform_count"] = (
         isoform_count if isinstance(isoform_count, int) else None
     )
+    index = _build_comment_index(comments)
+    if index is not None:
+        for (
+            field_name,
+            raw_sidecar_field,
+            canonical_sidecar_field,
+            comment_types,
+        ) in _UNIPROT_SEMANTIC_COMMENT_SIDECARS:
+            serialized[raw_sidecar_field] = _serialize_comment_type_payload(
+                index, comment_types
+            )
+            serialized[canonical_sidecar_field] = serialized.get(field_name)
+    else:
+        for _, raw_sidecar_field, canonical_sidecar_field, _ in (
+            _UNIPROT_SEMANTIC_COMMENT_SIDECARS
+        ):
+            serialized[raw_sidecar_field] = None
+            serialized[canonical_sidecar_field] = None
     return serialized

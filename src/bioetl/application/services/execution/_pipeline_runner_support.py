@@ -64,6 +64,10 @@ def build_pipeline_run_result(
         records_bronze=metrics.get("records_bronze", 0),
         records_silver=metrics.get("records_silver", 0),
         records_gold=metrics.get("records_gold", 0),
+        records_gold_excluded_by_contract=metrics.get(
+            "records_gold_excluded_by_contract",
+            0,
+        ),
         records_quarantined=metrics.get("records_quarantined", 0),
         records_filtered_out=metrics.get("records_filtered_out", 0),
         started_at=started_at,

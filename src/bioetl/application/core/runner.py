@@ -127,14 +127,19 @@ class PipelineRunner(PipelineRunnerSupportMixin):
     @property
     def execution_metrics(self) -> dict[str, int]:
         """Return execution counters exposed by the concrete pipeline runner."""
+        gold_excluded = getattr(
+            self._executor,
+            "records_gold_excluded_by_contract",
+            0,
+        )
+        if not isinstance(gold_excluded, int):
+            gold_excluded = 0
         return {
             "records_fetched": int(self._executor.records_fetched),
             "records_bronze": int(self._executor.records_bronze),
             "records_silver": int(self._executor.records_silver),
             "records_gold": int(self._executor.records_gold),
-            "records_gold_excluded_by_contract": int(
-                getattr(self._executor, "records_gold_excluded_by_contract", 0)
-            ),
+            "records_gold_excluded_by_contract": gold_excluded,
             "records_quarantined": int(self._executor.records_quarantined),
             "records_filtered_out": int(self._executor.records_filtered_out),
         }

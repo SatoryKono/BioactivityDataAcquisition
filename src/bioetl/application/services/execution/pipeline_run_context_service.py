@@ -84,6 +84,8 @@ class PipelineRunContextService:
             started_at=started_at,
             replay_of_run_id=options.replay_of_run_id,
             replay_of_manifest_id=options.replay_of_manifest_id,
+            resume_run_id=options.resume_run_id,
+            resume_manifest_id=options.resume_manifest_id,
             resume=options.resume,
             start_offset=options.start_offset,
             limit=options.limit,

@@ -219,6 +219,46 @@ quality:
     pattern: ^\S(?:.*\S)?$
     nullable: true
     error_message: Raw OpenAlex publication_type must be non-empty when present
+  - field: oa_status
+    type: enum
+    allowed_values:
+    - gold
+    - green
+    - hybrid
+    - bronze
+    - closed
+    nullable: true
+    error_message: oa_status must match the shared publication open-access registry
+  - field: author_openalex_ids
+    type: pattern
+    pattern: '^\[("A\d+"(,"A\d+")*)?\]$'
+    nullable: true
+    severity: warn
+    error_message: author_openalex_ids must be a canonical JSON string array of OpenAlex author IDs
+  - field: author_orcids
+    type: pattern
+    pattern: '^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'
+    nullable: true
+    severity: warn
+    error_message: author_orcids must be a canonical JSON string array of ORCID identifiers
+  - field: institution_ids
+    type: pattern
+    pattern: '^\[("I\d+"(,"I\d+")*)?\]$'
+    nullable: true
+    severity: warn
+    error_message: institution_ids must be a canonical JSON string array of OpenAlex institution IDs
+  - field: ror_ids
+    type: pattern
+    pattern: '^\[("https://ror\.org/[a-z0-9]+"(,"https://ror\.org/[a-z0-9]+")*)?\]$'
+    nullable: true
+    severity: warn
+    error_message: ror_ids must be a canonical JSON string array of canonical ROR URLs
+  - field: issn_list
+    type: pattern
+    pattern: '^\[("[0-9Xx-]+"(,"[0-9Xx-]+")*)?\]$'
+    nullable: true
+    severity: warn
+    error_message: issn_list must be a canonical JSON string array of ISSN values
   - field: citations_received
     type: range
     min: 0

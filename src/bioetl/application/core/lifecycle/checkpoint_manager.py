@@ -39,6 +39,8 @@ class CheckpointRuntimeService:
         pipeline_name: str,
         run_id: RunID,
         resume: bool,
+        resume_run_id: RunID | None = None,
+        resume_manifest_id: str | None = None,
         *,
         loading_strategy: LoadingStrategy | None = None,
         metrics: MetricsPort | None = None,
@@ -52,6 +54,8 @@ class CheckpointRuntimeService:
         self._pipeline_name = pipeline_name
         self._run_id = run_id
         self._resume = resume
+        self._resume_run_id = resume_run_id
+        self._resume_manifest_id = resume_manifest_id
         self._loading_strategy = loading_strategy
         self._metrics = metrics
         self._compatibility_service = checkpoint_compatibility_service
@@ -87,6 +91,15 @@ class CheckpointRuntimeService:
     async def _load_checkpoint_data(self) -> tuple[RunID, JsonDict] | None:
         """Load raw checkpoint data and emit failure metrics on transport errors."""
         try:
+            if self._resume_manifest_id is not None:
+                return await self._checkpoint.load_for_manifest_id(
+                    self._resume_manifest_id
+                )
+            if self._resume_run_id is not None:
+                return await self._checkpoint.load_for_run(
+                    self._pipeline_name,
+                    self._resume_run_id,
+                )
             return await self._checkpoint.load(self._pipeline_name)
         except _OPERATION_ERRORS:
             self._emit_checkpoint_load_status("failed")

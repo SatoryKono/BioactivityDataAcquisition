@@ -42,6 +42,14 @@ class UniprotAnnotationSchema(pa.DataFrameModel):  # Pandera typing limitation
     alternative_products: Series[str] | None = pa.Field(
         nullable=True, description="JSON array of alternative splicing/isoforms"
     )
+    alternative_products_raw_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Raw provider JSON for alternative-products comments",
+    )
+    alternative_products_canonical_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Canonical JSON companion for alternative-products comments",
+    )
     disease_involvement: Series[str] | None = pa.Field(
         nullable=True, description="JSON array of disease associations"
     )
@@ -60,9 +68,27 @@ class UniprotAnnotationSchema(pa.DataFrameModel):  # Pandera typing limitation
         nullable=True,
         description="JSON array of cofactors with name and ChEBI ID",
     )
+    cofactors_raw_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Raw provider JSON for cofactor comments",
+    )
+    cofactors_canonical_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Canonical JSON companion for cofactor comments",
+    )
     biophysicochemical_properties: Series[str] | None = pa.Field(
         nullable=True,
         description="JSON object with pH/temp optima, kinetics, redox potential",
+    )
+    biophysicochemical_properties_raw_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Raw provider JSON for biophysicochemical-property comments",
+    )
+    biophysicochemical_properties_canonical_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description=(
+            "Canonical JSON companion for biophysicochemical-property comments"
+        ),
     )
     induction: Series[str] | None = pa.Field(
         nullable=True,

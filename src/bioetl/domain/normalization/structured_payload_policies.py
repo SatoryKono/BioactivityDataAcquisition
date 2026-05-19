@@ -206,12 +206,13 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
         field_name="alternative_products",
         representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
         collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
-        semantic_policy=StructuredPayloadSemanticPolicy.CANONICAL_JSON_COMMENT_PROJECTION,
-        raw_sidecar_field=None,
-        canonical_sidecar_field="alternative_products",
+        semantic_policy=StructuredPayloadSemanticPolicy.RAW_JSON_PLUS_CANONICAL_JSON_BEFORE_SEMANTIC_TRANSFORM,
+        raw_sidecar_field="alternative_products_raw_json",
+        canonical_sidecar_field="alternative_products_canonical_json",
         rationale=(
-            "Alternative-product comment projections are retained as canonical JSON "
-            "evidence today; any raw-sidecar rollout would be an explicit contract change."
+            "Alternative-product comment payloads encode isoform semantics that may "
+            "later split into dedicated entities; retain raw provider comments plus "
+            "deterministic canonical companions before any semantic promotion."
         ),
         controlled_vocabulary_source="configs/vocab/uniprot_semantic_payloads.yaml",
     ),
@@ -220,12 +221,13 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
         field_name="biophysicochemical_properties",
         representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
         collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
-        semantic_policy=StructuredPayloadSemanticPolicy.CANONICAL_JSON_COMMENT_PROJECTION,
-        raw_sidecar_field=None,
-        canonical_sidecar_field="biophysicochemical_properties",
+        semantic_policy=StructuredPayloadSemanticPolicy.RAW_JSON_PLUS_CANONICAL_JSON_BEFORE_SEMANTIC_TRANSFORM,
+        raw_sidecar_field="biophysicochemical_properties_raw_json",
+        canonical_sidecar_field="biophysicochemical_properties_canonical_json",
         rationale=(
-            "Biophysicochemical-property projections remain canonical JSON evidence "
-            "until a reviewed semantic split justifies additive sidecars."
+            "Biophysicochemical-property comments contain nested measurement and "
+            "note semantics; retain raw comment envelopes plus canonical companions "
+            "before future semantic extraction expands the contract."
         ),
         controlled_vocabulary_source="configs/vocab/uniprot_semantic_payloads.yaml",
     ),
@@ -234,12 +236,13 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
         field_name="cofactors",
         representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
         collection_semantics=StructuredPayloadCollectionSemantics.UNORDERED_SET,
-        semantic_policy=StructuredPayloadSemanticPolicy.CANONICAL_JSON_COMMENT_PROJECTION,
-        raw_sidecar_field=None,
-        canonical_sidecar_field="cofactors",
+        semantic_policy=StructuredPayloadSemanticPolicy.RAW_JSON_PLUS_CANONICAL_JSON_BEFORE_SEMANTIC_TRANSFORM,
+        raw_sidecar_field="cofactors_raw_json",
+        canonical_sidecar_field="cofactors_canonical_json",
         rationale=(
-            "Cofactor comment projections are governed canonical JSON evidence; "
-            "they are not yet split into raw and semantic companion payloads."
+            "Cofactor comments mix identifiers and free-text notes; preserve the raw "
+            "provider envelope plus canonical set-like companions before semantic "
+            "splits or vocabulary enrichment."
         ),
         controlled_vocabulary_source="configs/vocab/uniprot_semantic_payloads.yaml",
     ),
@@ -262,12 +265,13 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
         field_name="reactions",
         representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
         collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
-        semantic_policy=StructuredPayloadSemanticPolicy.CANONICAL_JSON_COMMENT_PROJECTION,
-        raw_sidecar_field=None,
-        canonical_sidecar_field="reactions",
+        semantic_policy=StructuredPayloadSemanticPolicy.RAW_JSON_PLUS_CANONICAL_JSON_BEFORE_SEMANTIC_TRANSFORM,
+        raw_sidecar_field="reactions_raw_json",
+        canonical_sidecar_field="reactions_canonical_json",
         rationale=(
-            "Reaction comment projections remain canonical JSON evidence until a "
-            "reviewed semantic-expansion contract introduces additive companions."
+            "Catalytic-activity comments drive derived reaction fields; preserve raw "
+            "provider comments plus canonical companions before expanding reaction "
+            "semantics or downstream derived entities."
         ),
         controlled_vocabulary_source="configs/vocab/uniprot_semantic_payloads.yaml",
     ),

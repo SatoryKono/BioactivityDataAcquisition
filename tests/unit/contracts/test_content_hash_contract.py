@@ -9,6 +9,7 @@ from bioetl.domain.normalization.profiles import (
     OPENALEX_PUBLICATION_PROFILE,
     PUBMED_PUBLICATION_PROFILE,
     SEMANTICSCHOLAR_PUBLICATION_PROFILE,
+    UNIPROT_PROTEIN_PROFILE,
 )
 from bioetl.domain.transformations import generate_content_hash
 
@@ -168,4 +169,41 @@ def test_unordered_publication_raw_json_sidecars_are_excluded_from_semantic_hash
     )
     assert "subject_fields_raw_json" in (
         SEMANTICSCHOLAR_PUBLICATION_PROFILE.hash_excluded_fields
+    )
+
+
+def test_uniprot_raw_json_sidecars_are_excluded_from_semantic_hash() -> None:
+    expected_raw_sidecars = {
+        "alternative_products_raw_json",
+        "biophysicochemical_properties_raw_json",
+        "cofactors_raw_json",
+        "features_raw_json",
+        "reactions_raw_json",
+    }
+
+    assert expected_raw_sidecars <= UNIPROT_PROTEIN_PROFILE.hash_excluded_fields
+
+    record_a = {
+        "accession": "P12345",
+        "alternative_products": '[{"id":"P12345-2","name":"Isoform 2"}]',
+        "alternative_products_canonical_json": '[{"id":"P12345-2","name":"Isoform 2"}]',
+        "alternative_products_raw_json": '[{"commentType":"ALTERNATIVE PRODUCTS","isoforms":[{"isoformIds":[{"value":"P12345-2"}]}]}]',
+    }
+    record_b = {
+        **record_a,
+        "alternative_products_raw_json": '[{"commentType":"ALTERNATIVE PRODUCTS","note":"provider-order-changed","isoforms":[{"isoformIds":[{"value":"P12345-2"}]}]}]',
+    }
+
+    assert generate_content_hash(
+        record_a,
+        "uniprot",
+        include_fields=set(UNIPROT_PROTEIN_PROFILE.hash_included_fields),
+        exclude_fields=set(UNIPROT_PROTEIN_PROFILE.hash_excluded_fields),
+        set_like_fields=set(UNIPROT_PROTEIN_PROFILE.set_like_fields),
+    ) == generate_content_hash(
+        record_b,
+        "uniprot",
+        include_fields=set(UNIPROT_PROTEIN_PROFILE.hash_included_fields),
+        exclude_fields=set(UNIPROT_PROTEIN_PROFILE.hash_excluded_fields),
+        set_like_fields=set(UNIPROT_PROTEIN_PROFILE.set_like_fields),
     )

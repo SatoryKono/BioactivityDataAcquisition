@@ -109,6 +109,6 @@
   "normalization_profile": {
     "ref": "chembl.cell_line",
     "version": "1.0.0",
-    "hash": "9976d62f7fb013352423ee915de51a93335a3a7e778640a3454e1202a3c6c5bf"
+    "hash": "60dc31c123affd69de55f865a2b8f27c84348f70ea594ae60c8f07da5eee68a0"
   }
 }

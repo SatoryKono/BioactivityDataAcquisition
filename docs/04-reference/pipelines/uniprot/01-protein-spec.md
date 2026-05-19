@@ -36,6 +36,14 @@ ______________________________________________________________________
   `entry_name`, `protein_name`, `protein_ec_numbers`, `gene_primary`,
   `taxonomy_id`, `sequence_length`, `sequence_mass`, `chembl_ids`,
   `drugbank_ids`.
+- Semantic-sensitive UniProt comment payloads now use additive sidecars where
+  required for replay/debug and future semantic extraction, including
+  `alternative_products_raw_json` / `alternative_products_canonical_json`,
+  `biophysicochemical_properties_raw_json` /
+  `biophysicochemical_properties_canonical_json`, `cofactors_raw_json` /
+  `cofactors_canonical_json`, `features_raw_json` /
+  `features_canonical_json`, and `reactions_raw_json` /
+  `reactions_canonical_json`.
 - This page no longer republishes older API-shape and hyphenated labels such as
   `protein-name`, `gene-synonyms`, `taxonomy-id`, `sequence-mass`, or
   `chembl-ids` as the active contract.

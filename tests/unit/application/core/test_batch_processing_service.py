@@ -215,6 +215,7 @@ class TestBatchProcessingOutcome:
         assert output.gold_records == [{"b": 2}]
         assert output.quarantined_count == 3
         assert output.filtered_out_count == 1
+        assert output.gold_excluded_by_contract_count == 0
 
 
 # ---------------------------------------------------------------------------

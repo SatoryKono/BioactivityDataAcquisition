@@ -65,6 +65,8 @@ _SET_LIKE_FIELDS = frozenset(
     {
         "cellular_component",
         "chembl_ids",
+        "cofactors",
+        "cofactors_canonical_json",
         "drugbank_ids",
         "gene_orf_names",
         "gene_synonyms",
@@ -86,14 +88,30 @@ _SET_LIKE_FIELDS = frozenset(
         "protein_short_names",
     }
 )
+_HASH_EXCLUDED_FIELDS = frozenset(
+    {
+        "alternative_products_raw_json",
+        "biophysicochemical_properties_raw_json",
+        "cofactors_raw_json",
+        "features_raw_json",
+        "reactions_raw_json",
+    }
+)
 _JSON_STRING_FIELDS = frozenset(
     {
         "alternative_products",
+        "alternative_products_canonical_json",
+        "alternative_products_raw_json",
         "biophysicochemical_properties",
+        "biophysicochemical_properties_canonical_json",
+        "biophysicochemical_properties_raw_json",
         "cellular_component",
         "cofactors",
+        "cofactors_canonical_json",
+        "cofactors_raw_json",
         "features_json",
         "features_canonical_json",
+        "features_raw_json",
         "isoform_ids",
         "isoform_names",
         "isoform_synonyms",
@@ -103,6 +121,8 @@ _JSON_STRING_FIELDS = frozenset(
         "protein_ec_numbers",
         "protein_short_names",
         "reactions",
+        "reactions_canonical_json",
+        "reactions_raw_json",
         "reaction_ec_numbers",
     }
 )
@@ -155,6 +175,18 @@ _SPECIAL_RULES = {
         normalize_profile_passthrough,
         "Preserve the raw provider JSON for UniProt feature payloads.",
     ),
+    "alternative_products_raw_json": (
+        normalize_profile_passthrough,
+        "Preserve the raw provider JSON for alternative-products comments.",
+    ),
+    "biophysicochemical_properties_raw_json": (
+        normalize_profile_passthrough,
+        "Preserve the raw provider JSON for biophysicochemical-property comments.",
+    ),
+    "cofactors_raw_json": (
+        normalize_profile_passthrough,
+        "Preserve the raw provider JSON for cofactor comments.",
+    ),
     "go_terms": (
         normalize_profile_uniprot_go_references,
         _REFERENCE_ID_RULE_NOTES["go"],
@@ -179,6 +211,10 @@ _SPECIAL_RULES = {
         normalize_profile_reactome_references,
         _REFERENCE_ID_RULE_NOTES["reactome"],
     ),
+    "reactions_raw_json": (
+        normalize_profile_passthrough,
+        "Preserve the raw provider JSON for catalytic-activity comments.",
+    ),
     "secondary_accessions": (
         normalize_profile_uniprot_accessions,
         "Canonicalize UniProt secondary accessions inside a set-like canonical JSON array.",
@@ -200,6 +236,7 @@ UNIPROT_PROTEIN_PROFILE = build_standard_profile(
     json_string_fields=_JSON_STRING_FIELDS,
     boolean_fields=_BOOLEAN_FIELDS,
     enum_fields=_ENUM_FIELDS,
+    hash_excluded_fields=_HASH_EXCLUDED_FIELDS,
     special_rules=_SPECIAL_RULES,
 )
 

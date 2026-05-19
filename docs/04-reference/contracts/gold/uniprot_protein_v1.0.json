@@ -243,7 +243,39 @@
       "nullable": true,
       "description": ""
     },
+    "alternative_products_raw_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "alternative_products_canonical_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "biophysicochemical_properties": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "biophysicochemical_properties_raw_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "biophysicochemical_properties_canonical_json": {
       "type": [
         "string",
         "null"
@@ -276,6 +308,22 @@
       "description": ""
     },
     "cofactors": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "cofactors_raw_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "cofactors_canonical_json": {
       "type": [
         "string",
         "null"
@@ -340,6 +388,22 @@
       "description": ""
     },
     "reactions": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "reactions_raw_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "reactions_canonical_json": {
       "type": [
         "string",
         "null"
@@ -711,6 +775,6 @@
   "normalization_profile": {
     "ref": "uniprot.protein",
     "version": "1.0.0",
-    "hash": "1216490ff5db46d29d7977c5ef1c99d6cc0177de82f4f0c5b1fd1816037d817f"
+    "hash": "7627a6358840e61c0216806e15e30e339bc86ffd4c610867922db618afe2569f"
   }
 }
