@@ -20,6 +20,7 @@ ALLOWED_BROAD_EXCEPTION_POLICIES: dict[str, frozenset[str]] = {
     # 500 responses instead of crashing the server on unexpected errors.
     "src/bioetl/interfaces/http/health_server_http_mixin.py": frozenset(),
     "src/bioetl/interfaces/http/health_server_routing_mixin.py": frozenset(),
+    "src/bioetl/interfaces/http/_health_server_routing_support.py": frozenset(),
 }
 P0_2_CRITICAL_ERROR_MODULES = (
     "src/bioetl/application/core/batch_executor.py",

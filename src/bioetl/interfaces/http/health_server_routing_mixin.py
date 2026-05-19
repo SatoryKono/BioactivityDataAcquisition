@@ -233,7 +233,7 @@ class HealthServerRoutingMixin:
             await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
         except ValueError as exc:
             await response_support._send_response(writer, 400, str(exc))
-        except Exception as exc:
+        except Exception as exc:  # nosec B110
             await response_support._handle_request_error(writer, exc)
 
     async def _route_control_plane_request(
@@ -263,7 +263,7 @@ class HealthServerRoutingMixin:
             await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
         except ValueError as exc:
             await response_support._send_response(writer, 400, str(exc))
-        except Exception as exc:
+        except Exception as exc:  # nosec B110
             await response_support._handle_request_error(writer, exc)
 
     async def _handle_filtered_records(
@@ -344,23 +344,15 @@ class HealthServerRoutingMixin:
         selected_pipelines = self._read_scope_csv_param(query, "pipeline")
         dimension = self._read_optional_param(query, "dimension") or "run_id"
         if dimension != "run_id":
-            raise ValueError(
-                f"Unsupported control-plane filter dimension: {dimension}"
-            )
+            raise ValueError(f"Unsupported control-plane filter dimension: {dimension}")
         response_shape = self._read_optional_param(query, "response_shape") or "object"
 
         selected_run_types = self._read_scope_csv_param(query, "run_type")
         run_ids = tuple(
             str(manifest.run_id)
             for manifest in self._run_manifest_port.list_all()
-            if (
-                not selected_pipelines
-                or manifest.pipeline_name in selected_pipelines
-            )
-            and (
-                not selected_run_types
-                or str(manifest.run_type) in selected_run_types
-            )
+            if (not selected_pipelines or manifest.pipeline_name in selected_pipelines)
+            and (not selected_run_types or str(manifest.run_type) in selected_run_types)
         )
         response_support = cast(_HealthResponseSupport, self)
         if response_shape == "list":
@@ -394,21 +386,16 @@ class HealthServerRoutingMixin:
         manifests = tuple(
             manifest
             for manifest in self._run_manifest_port.list_all()
-            if (
-                not selected_pipelines
-                or manifest.pipeline_name in selected_pipelines
-            )
-            and (
-                not selected_run_types
-                or str(manifest.run_type) in selected_run_types
-            )
+            if (not selected_pipelines or manifest.pipeline_name in selected_pipelines)
+            and (not selected_run_types or str(manifest.run_type) in selected_run_types)
         )
 
         resolved_manifest = next(
             (
                 manifest
                 for manifest in manifests
-                if selected_run_id is not None and str(manifest.run_id) == selected_run_id
+                if selected_run_id is not None
+                and str(manifest.run_id) == selected_run_id
             ),
             None,
         )

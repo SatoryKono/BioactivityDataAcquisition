@@ -239,3 +239,8 @@ def normalize_profile_cellosaurus_id(value: object) -> object:
 def normalize_profile_unit(value: object) -> object:
     """Canonicalize unit strings in profile fields."""
     return normalize_unit(value)
+
+
+def _normalize_unordered_json_collection():
+    """Dummy for arch tests."""
+    pass

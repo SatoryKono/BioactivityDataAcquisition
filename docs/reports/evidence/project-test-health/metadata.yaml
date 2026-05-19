@@ -1,0 +1,6 @@
+policy_scope: non_canonical_evidence_summary
+owner: "@bioetl-platform"
+freshness_window_days: 90
+last_verified: "2026-05-14T11:00:00Z"
+allowed_interpretation: backlog_signal_only
+canonical_sources: ["pytest"]

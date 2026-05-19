@@ -1,3 +1,10 @@
+from __future__ import annotations
+
+pytest_plugins = (
+    "tests.helpers.metadata_fixtures",
+    "tests.integration.chembl.extraction_params_support",
+)
+
 import enum
 import os
 import asyncio

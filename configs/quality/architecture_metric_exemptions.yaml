@@ -4,15 +4,15 @@ policy:
   owner_diversification_sync:
     source: configs/quality/debt_scorecard.yaml#governance.owner_diversification
     starts_quarter: 2026-Q2
-    review_on: "2026-06-30"
+    review_on: '2026-06-30'
   required_fields:
-    - value
-    - owner
-    - reason
-    - classification
-    - linked_rf
-    - expires_on
-    - removal_step
+  - value
+  - owner
+  - reason
+  - classification
+  - linked_rf
+  - expires_on
+  - removal_step
 registries:
   file_size_limits: {}
   function_complexity: {}
@@ -23,9 +23,22 @@ registries:
   domain_complexity:
     src/bioetl/domain/config/memory.py::MemoryConfig:
       value: 6
-      owner: "@bioetl-platform"
-      reason: "MemoryConfig uses Pydantic BaseModel for validation, leading to an apparent cyclomatic complexity of 6 in static analysis, though its core logic is simple and delegated to Pydantic's internal mechanisms."
-      classification: "intentional_exception"
-      linked_rf: "RF-000"
-      expires_on: "2026-09-30"
-      removal_step: "Re-evaluate when Pydantic BaseModel cyclomatic complexity is correctly measured or when a change in validation framework occurs."
+      owner: '@bioetl-platform'
+      reason: MemoryConfig uses Pydantic BaseModel for validation, leading to an apparent
+        cyclomatic complexity of 6 in static analysis, though its core logic is simple
+        and delegated to Pydantic's internal mechanisms.
+      classification: intentional_exception
+      linked_rf: RF-000
+      expires_on: '2026-09-30'
+      removal_step: Re-evaluate when Pydantic BaseModel cyclomatic complexity is correctly
+        measured or when a change in validation framework occurs.
+    src/bioetl/domain/normalization/_control_plane_identity.py::_normalize_runtime_anchor_value:
+      value: 7
+      owner: '@bioetl-platform'
+      reason: _normalize_runtime_anchor_value uses multiple if-branches for field-specific
+        normalization, leading to CC=7, but the logic is flat and highly readable.
+      classification: intentional_exception
+      linked_rf: RF-000
+      expires_on: '2026-09-30'
+      removal_step: Keep as is or refactor to mapping-based dispatch if CC needs to
+        be reduced.

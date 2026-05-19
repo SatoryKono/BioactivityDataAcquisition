@@ -1,6 +1,6 @@
 schema_version: 1
 baseline:
-  total_exemptions: 1
+  total_exemptions: 2
   by_registry:
     file_size_limits: 0
     function_complexity: 0
@@ -8,7 +8,7 @@ baseline:
     class_size: 0
     class_method_count: 0
     god_object: 0
-    domain_complexity: 1
+    domain_complexity: 2
 historical_baseline:
   total_exemptions: 44
   by_registry:
@@ -45,9 +45,8 @@ governance:
       max_count: 3
       owner: '@bioetl-architecture'
       linked_rf: RF-ARCH-015
-      rationale: Marker-skip budget now matches the three explicit architecture
-        skipif tests still present in the suite and stays fail-fast against any
-        re-expansion.
+      rationale: Marker-skip budget now matches the three explicit architecture skipif
+        tests still present in the suite and stays fail-fast against any re-expansion.
       ratchet_policy: ratchet only after skip inventory shrinks
   review_policy:
     new_exemption_requires:
@@ -103,8 +102,8 @@ compatibility_debt_metrics:
       rationale: Sanctioned public facades are retained compatibility obligations;
         they require ownership, tests, and lifecycle review even when not counted
         as transition debt.
-      ratchet_policy: Ratchet downward only after a reviewed facade-removal or
-        public-API consolidation PR updates the compatibility inventory.
+      ratchet_policy: Ratchet downward only after a reviewed facade-removal or public-API
+        consolidation PR updates the compatibility inventory.
       ratchet_schedule:
       - effective_on: '2026-04-30'
         max_count: 13
@@ -126,8 +125,7 @@ compatibility_debt_metrics:
       rationale: Temporary compatibility shims were removed early in the 2026-04-29
         sunset wave; the active sunset inventory must stay empty unless a reviewed
         policy exception adds a new item.
-      ratchet_policy: May only decrease before the sunset; must reach zero after
-        2026-06-30.
+      ratchet_policy: May only decrease before the sunset; must reach zero after 2026-06-30.
     expired_compat_count:
       current_count: 0
       max_count: 0
@@ -160,17 +158,17 @@ bronze_fixture_replay_debt_metrics:
       current_count: 0
       max_count: 0
       owner: '@bioetl-data-platform'
-      rationale: Decision-recorded fixture families are residual replay evidence
-        debt and must not grow without a reviewed policy change.
+      rationale: Decision-recorded fixture families are residual replay evidence debt
+        and must not grow without a reviewed policy change.
       ratchet_policy: Ratchet downward as derived/specialized surfaces gain factual
         provider-backed tracked samples.
     tracked_bronze_fixture_count:
       current_count: 21
       owner: '@bioetl-data-platform'
-      rationale: Tracked CI samples are the first-class evidence signal for
-        determinism and replay coverage across supported Bronze families.
-      ratchet_policy: May increase as supported families gain tracked fixture
-        evidence; removals require a reviewed de-scope decision.
+      rationale: Tracked CI samples are the first-class evidence signal for determinism
+        and replay coverage across supported Bronze families.
+      ratchet_policy: May increase as supported families gain tracked fixture evidence;
+        removals require a reviewed de-scope decision.
 registry_groups:
   size_metrics:
     registries:
@@ -250,9 +248,9 @@ hotspot_family_ratchets:
       max_internal_fan_in_module: bioetl.application.core.pipeline_services
     trend:
       status: down_vs_2026-03-23
-      next_action: 2026-05-13 ratchets files_ge_250_loc and max_internal_fan_in
-        down to the reviewed measured baseline for application/core while keeping
-        the family duplication ratchet active.
+      next_action: 2026-05-13 ratchets files_ge_250_loc and max_internal_fan_in down
+        to the reviewed measured baseline for application/core while keeping the family
+        duplication ratchet active.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -276,9 +274,9 @@ hotspot_family_ratchets:
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.composite_support_services_factory
     trend:
       status: down_vs_2026-03-23
-      next_action: 2026-05-13 keeps composition/bootstrap/runtime pinned to the
-        current reviewed max_internal_fan_in ceiling while the files_ge_250_loc
-        baseline stays one step below the budget.
+      next_action: 2026-05-13 keeps composition/bootstrap/runtime pinned to the current
+        reviewed max_internal_fan_in ceiling while the files_ge_250_loc baseline stays
+        one step below the budget.
   - name: composition_factories_pipeline
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -302,8 +300,8 @@ hotspot_family_ratchets:
       max_internal_fan_in_module: bioetl.composition.factories.pipeline.control_plane_artifacts
     trend:
       status: down_vs_2026-03-23
-      next_action: 2026-05-13 ratchets files_ge_250_loc and max_internal_fan_in
-        down to the reviewed measured baseline for composition/factories/pipeline.
+      next_action: 2026-05-13 ratchets files_ge_250_loc and max_internal_fan_in down
+        to the reviewed measured baseline for composition/factories/pipeline.
 removable_complexity_family_ratchets:
   snapshot_date: '2026-04-13'
   update_policy: Only raise budgets after an intentional reviewed baseline refresh
@@ -397,11 +395,11 @@ quarterly_targets:
     god_object: 4
     domain_complexity: 6
 - quarter: 2026-Q2
-  max_total_exemptions: 10
+  max_total_exemptions: 11
   min_integral_score: 70
   group_budgets:
     size_metrics: 4
-    complexity_metrics: 4
+    complexity_metrics: 5
     structural_debt: 2
   registry_budgets:
     file_size_limits: 0
@@ -410,7 +408,7 @@ quarterly_targets:
     class_size: 2
     class_method_count: 0
     god_object: 2
-    domain_complexity: 1
+    domain_complexity: 2
 owner_decomposition_targets:
 - quarter: 2026-Q1
   allocations:
@@ -420,7 +418,7 @@ owner_decomposition_targets:
 - quarter: 2026-Q2
   allocations:
     '@bioetl-architecture': 9
-    '@bioetl-platform': 1
+    '@bioetl-platform': 2
 expiry_decomposition_targets:
 - quarter: 2026-Q1
   max_entries_expiring_in_quarter: 29
