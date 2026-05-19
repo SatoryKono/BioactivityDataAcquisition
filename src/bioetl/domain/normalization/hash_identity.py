@@ -15,8 +15,9 @@ from __future__ import annotations
 
 import math
 from collections.abc import Sequence
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from functools import singledispatch
+from typing import Literal
 
 from bioetl.domain.constants import META_FIELDS
 from bioetl.domain.normalization.json import (
@@ -26,10 +27,13 @@ from bioetl.domain.normalization.json import (
 from bioetl.domain.types import JsonDict
 
 __all__ = [
+    "HashDatetimePolicy",
     "normalize_hash_identity_record",
     "normalize_hash_identity_value",
     "serialize_hash_identity_canonical_json",
 ]
+
+HashDatetimePolicy = Literal["v1_date", "v2_datetime_utc"]
 
 
 @singledispatch
@@ -66,6 +70,24 @@ def _normalize_str(value: str) -> str:
     return value.strip()
 
 
+def _normalize_datetime_utc(value: datetime) -> str:
+    """Normalize datetimes with full UTC precision for v2 hash identity."""
+    aware_value = value if value.tzinfo is not None else value.replace(tzinfo=UTC)
+    utc_value = aware_value.astimezone(UTC)
+    return utc_value.isoformat(timespec="microseconds").replace("+00:00", "Z")
+
+
+def _normalize_scalar_for_policy(
+    value: object,
+    *,
+    datetime_policy: HashDatetimePolicy,
+) -> object:
+    """Normalize one scalar under the selected versioned hash policy."""
+    if isinstance(value, datetime) and datetime_policy == "v2_datetime_utc":
+        return _normalize_datetime_utc(value)
+    return _normalize_scalar(value)
+
+
 def _looks_like_serialized_json_container(value: str) -> bool:
     stripped = value.strip()
     if len(stripped) < 2:
@@ -97,11 +119,13 @@ def _normalize_hash_sequence(
     values: list[object],
     *,
     sort_nested_sequences: bool,
+    datetime_policy: HashDatetimePolicy,
 ) -> list[object]:
     normalized = [
         normalize_hash_identity_value(
             item,
             sort_nested_sequences=sort_nested_sequences,
+            datetime_policy=datetime_policy,
         )
         for item in values
     ]
@@ -112,10 +136,13 @@ def _normalize_hash_sequence(
 
 def _normalize_hash_set_like(
     value: set[object] | frozenset[object],
+    *,
+    datetime_policy: HashDatetimePolicy,
 ) -> list[object]:
     normalized = _normalize_hash_sequence(
         list(value),
         sort_nested_sequences=False,
+        datetime_policy=datetime_policy,
     )
     return _sort_normalized_sequence(normalized)
 
@@ -124,11 +151,13 @@ def _normalize_hash_mapping(
     value: JsonDict,
     *,
     sort_nested_sequences: bool,
+    datetime_policy: HashDatetimePolicy,
 ) -> JsonDict:
     return {
         key: normalize_hash_identity_value(
             item,
             sort_nested_sequences=sort_nested_sequences,
+            datetime_policy=datetime_policy,
         )
         for key, item in value.items()
     }
@@ -141,19 +170,22 @@ def _normalize_hash_collection(
     value: object,
     *,
     sort_nested_sequences: bool,
+    datetime_policy: HashDatetimePolicy,
 ) -> object:
     if isinstance(value, list):
         return _normalize_hash_sequence(
             value,
             sort_nested_sequences=sort_nested_sequences,
+            datetime_policy=datetime_policy,
         )
     if isinstance(value, tuple):
         return _normalize_hash_sequence(
             list(value),
             sort_nested_sequences=sort_nested_sequences,
+            datetime_policy=datetime_policy,
         )
     if isinstance(value, (set, frozenset)):
-        return _normalize_hash_set_like(value)
+        return _normalize_hash_set_like(value, datetime_policy=datetime_policy)
     return _NO_NORMALIZED_COLLECTION
 
 
@@ -161,6 +193,7 @@ def _normalize_hash_string_candidate(
     value: object,
     *,
     sort_nested_sequences: bool,
+    datetime_policy: HashDatetimePolicy,
 ) -> object | None:
     if not sort_nested_sequences or not isinstance(value, str):
         return None
@@ -170,6 +203,7 @@ def _normalize_hash_string_candidate(
     return normalize_hash_identity_value(
         candidate,
         sort_nested_sequences=True,
+        datetime_policy=datetime_policy,
     )
 
 
@@ -177,17 +211,20 @@ def normalize_hash_identity_value(
     value: object,
     *,
     sort_nested_sequences: bool,
+    datetime_policy: HashDatetimePolicy = "v1_date",
 ) -> object:
     """Normalize one value for deterministic hash identity material."""
     if isinstance(value, dict):
         return _normalize_hash_mapping(
             value,
             sort_nested_sequences=sort_nested_sequences,
+            datetime_policy=datetime_policy,
         )
 
     collection = _normalize_hash_collection(
         value,
         sort_nested_sequences=sort_nested_sequences,
+        datetime_policy=datetime_policy,
     )
     if collection is not _NO_NORMALIZED_COLLECTION:
         return collection
@@ -195,11 +232,12 @@ def normalize_hash_identity_value(
     normalized_string_candidate = _normalize_hash_string_candidate(
         value,
         sort_nested_sequences=sort_nested_sequences,
+        datetime_policy=datetime_policy,
     )
     if normalized_string_candidate is not None:
         return normalized_string_candidate
 
-    return _normalize_scalar(value)
+    return _normalize_scalar_for_policy(value, datetime_policy=datetime_policy)
 
 
 def _should_include_hash_identity_field(
@@ -237,6 +275,7 @@ def normalize_hash_identity_record(
     include_fields: set[str] | None = None,
     exclude_fields: set[str] | None = None,
     sort_nested_sequence_fields: set[str] | None = None,
+    datetime_policy: HashDatetimePolicy = "v1_date",
 ) -> JsonDict:
     """Normalize a record using the canonical hash-identity contract."""
     resolved_exclude_fields = exclude_fields or set()
@@ -247,6 +286,7 @@ def normalize_hash_identity_record(
                 key,
                 sort_nested_sequence_fields,
             ),
+            datetime_policy=datetime_policy,
         )
         for key, value in record.items()
         if _should_include_hash_identity_field(

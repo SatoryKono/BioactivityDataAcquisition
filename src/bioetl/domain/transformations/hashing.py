@@ -15,6 +15,7 @@ from __future__ import annotations
 import hashlib
 
 from bioetl.domain.normalization.hash_identity import (
+    HashDatetimePolicy,
     normalize_hash_identity_record,
     serialize_hash_identity_canonical_json,
 )
@@ -66,6 +67,7 @@ def normalize_for_hash(
     include_fields: set[str] | None = None,
     exclude_fields: set[str] | None = None,
     set_like_fields: set[str] | None = None,
+    datetime_policy: HashDatetimePolicy = "v1_date",
 ) -> JsonDict:
     """Normalize record before hashing to ensure consistency.
 
@@ -91,6 +93,7 @@ def normalize_for_hash(
         include_fields=include_fields,
         exclude_fields=exclude_fields,
         sort_nested_sequence_fields=set_like_fields,
+        datetime_policy=datetime_policy,
     )
 
 
@@ -116,6 +119,7 @@ def generate_content_hash(
     include_fields: set[str] | None = None,
     exclude_fields: set[str] | None = None,
     set_like_fields: set[str] | None = None,
+    datetime_policy: HashDatetimePolicy = "v1_date",
 ) -> ContentHash:
     """Generate SHA256 content hash for record versioning.
 
@@ -139,6 +143,7 @@ def generate_content_hash(
         include_fields=include_fields,
         exclude_fields=exclude_fields,
         set_like_fields=set_like_fields,
+        datetime_policy=datetime_policy,
     )
     canonical = canonical_json_dumps(normalized)
     data = f"{provider}{canonical}"

@@ -186,6 +186,10 @@ Equivalence interpretation:
   host/runtime fields. If content hashes and replay anchors match but raw
   sidecar bytes differ only in occurrence metadata, diagnose the run as
   semantically equivalent rather than byte-identical.
+- The manifest diagnostics `artifact_publication_closure` field is the
+  produced-artifact evidence gate. `closed` means all required publication
+  evidence is present. `partial`, `disabled`, and `failed` block replay-ready
+  and forensic-grade conclusions until artifact publication evidence is fixed.
 
 Replay occurrence interpretation:
 
@@ -657,6 +661,9 @@ than silently accepting the bundle as canonical.
   treated as satisfying that operator contract;
 - one-run dossier `status.operational_success=false` means runtime success and
   dossier evidence did not jointly satisfy the active operator contract;
+- one-run dossier lookup can be rooted either by `--run-id` or by
+  `--manifest-id`; the manifest-rooted path resolves the canonical run identity
+  from the manifest before assembling audit, checkpoint, and diagnostics data;
 - for critical runs where `required_profile=forensic_grade`,
   `status.operational_success_criteria.dossier_evidence_satisfied` must be
   `true` before the run is marked operationally successful;

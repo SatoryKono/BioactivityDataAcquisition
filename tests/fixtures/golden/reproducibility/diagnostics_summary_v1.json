@@ -17,6 +17,7 @@
     "strict_replay_boundary_gap": false
   },
   "append_mode_semantic_sinks": [],
+  "artifact_publication_closure": "disabled",
   "artifact_refs": [],
   "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
   "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
@@ -256,6 +257,7 @@
   "post_capture_replayable_parent_supported": true,
   "produced_artifact_trace": {
     "artifact_count": 0,
+    "artifact_publication_closure": "disabled",
     "artifacts": [],
     "complete": false,
     "lookup": "run_ledger_by_manifest_id",
@@ -287,6 +289,7 @@
     "strict_requirement_requested": true
   },
   "replay_capability_reason": "full_immutable_input_snapshot_envelope_present",
+  "replay_control_plane_state": "exact_replay_supported",
   "replay_family_contract": {
     "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
     "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
@@ -355,6 +358,7 @@
       "exact_replay_capability",
       "exact_replay_not_eligible",
       "identity_graph_incomplete",
+      "artifact_publication_closure",
       "produced_artifact_trace"
     ],
     "category_scores": {
@@ -387,16 +391,19 @@
         "score": 8
       },
       "idempotency": {
-        "blockers": [],
+        "blockers": [
+          "artifact_publication_closure"
+        ],
         "confidence": "high",
         "evidence": [
-          "no_published_artifacts_observed"
+          "no_published_artifacts_observed",
+          "artifact_publication_closure_not_closed"
         ],
         "evidence_refs": [
           "diagnostics.exact_replay_eligible",
           "diagnostics.artifact_refs"
         ],
-        "score": 6
+        "score": 4
       },
       "layer_consistency": {
         "blockers": [],
@@ -434,19 +441,21 @@
       "replay_readiness": {
         "blockers": [
           "exact_replay_not_eligible",
-          "dependency_lock_provenance_missing"
+          "dependency_lock_provenance_missing",
+          "artifact_publication_closure"
         ],
         "confidence": "high",
         "evidence": [
           "exact_replay_not_eligible",
-          "exact_replay_blockers_present"
+          "exact_replay_blockers_present",
+          "artifact_publication_closure_not_closed"
         ],
         "evidence_refs": [
           "diagnostics.exact_replay_eligible",
           "diagnostics.exact_replay_blockers",
           "diagnostics.replay_mode"
         ],
-        "score": 6
+        "score": 4
       },
       "run_identity": {
         "blockers": [
@@ -566,7 +575,7 @@
       "scope": "project_wide_exact_replay",
       "verdict": "universal_exact_replay_not_claimed"
     },
-    "overall_score": 7.7,
+    "overall_score": 7.1,
     "required_profile": "replay_ready",
     "scale": "0-10",
     "schema_version": "2.0",
@@ -585,7 +594,7 @@
     },
     "threshold_failures": [
       {
-        "actual": 6,
+        "actual": 4,
         "category": "replay_readiness",
         "reason": "below_required_threshold",
         "required": 7
@@ -658,10 +667,12 @@
         "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
         "legacy_config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "legacy_config_hash_alias_of": "resolved_config_hash",
-        "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "source_fingerprint": "1750d384e3efab89c50eff0b4808a22adc1f4023c3f023e011cc50d41a2431a9"
       }
     },
     "lineage": {
+      "artifact_publication_closure": "disabled",
       "lineage_closure_boundary": {
         "family": "chembl.activity",
         "reason": "family_within_supported_boundary",
@@ -743,6 +754,7 @@
       "post_capture_replayable_parent_boundary": "ledger_materialized_live_capture_parent",
       "post_capture_replayable_parent_supported": true,
       "replay_capability": "exact_replay_supported",
+      "replay_control_plane_state": "exact_replay_supported",
       "replay_family_contract": {
         "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
         "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
@@ -839,6 +851,7 @@
   "rule_bundle_version": "2026.03",
   "run_id": "00000000-0000-0000-0000-000000000901",
   "snapshot_status": "full",
+  "source_fingerprint": "1750d384e3efab89c50eff0b4808a22adc1f4023c3f023e011cc50d41a2431a9",
   "source_posture": "immutable_snapshot_envelope",
   "source_revision_state": "clean"
 }

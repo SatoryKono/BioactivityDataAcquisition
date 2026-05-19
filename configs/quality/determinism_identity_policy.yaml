@@ -38,3 +38,21 @@ allowed_occurrence_identity_generators:
   rationale: Domain event ID is an idempotency/correlation identifier; event payload
     semantics remain separate.
   issue: '#3407'
+content_hash_datetime_policy:
+  active_policy: v1_date
+  migration_target: v2_datetime_utc
+  policies:
+    v1_date:
+      description: Historical content-hash compatibility contract.
+      datetime_normalization: date_only_iso
+      distinguishes_same_day_timestamps: false
+      migration_status: active_compatibility_default
+    v2_datetime_utc:
+      description: Timestamp-sensitive business identity contract.
+      datetime_normalization: utc_iso_microseconds
+      distinguishes_same_day_timestamps: true
+      migration_status: opt_in_until_hash_backfill_plan_exists
+  invariants:
+  - Existing content_hash values must not be silently rewritten.
+  - Versioned hash policy must be recorded before changing defaults.
+  - META_FIELDS and underscore-prefixed runtime fields remain excluded.

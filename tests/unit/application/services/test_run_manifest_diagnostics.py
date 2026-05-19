@@ -68,8 +68,31 @@ def _expected_produced_artifact_trace(manifest: RunManifest) -> dict[str, object
         artifacts=[
             build_published_silver_artifact(
                 artifact_path="data/output/silver/chembl/activity",
+                publication_status="published",
             )
         ],
+    )
+
+
+def test_build_diagnostics_summary_exposes_artifact_publication_closure() -> None:
+    manifest = _make_manifest()
+
+    without_ledger = build_diagnostics_summary(manifest, ())
+    with_ledger = build_diagnostics_summary(
+        manifest,
+        _build_ledger_entries(manifest, terminal_status="success"),
+    )
+
+    assert without_ledger["artifact_publication_closure"] == "disabled"
+    assert with_ledger["artifact_publication_closure"] == "closed"
+    assert with_ledger["produced_artifact_trace"]["artifact_publication_closure"] == (
+        "closed"
+    )
+    assert (
+        with_ledger["reproducibility_diagnostics"]["lineage"][
+            "artifact_publication_closure"
+        ]
+        == "closed"
     )
 
 
@@ -243,7 +266,7 @@ def _assert_provenance_only_score(
     assert score["scale"] == "0-10"
     assert score["required_profile"] == "replay_ready"
     assert score["score_scope"] == "supported_boundary_run"
-    assert score["overall_score"] == pytest.approx(7.3)
+    assert score["overall_score"] == pytest.approx(6.7)
     assert score["thresholds"] == {
         "checkpoint_safety": 7,
         "replay_readiness": 7,
@@ -259,11 +282,11 @@ def _assert_provenance_only_score(
             "required": 7,
         },
         {
-            "actual": 5,
+            "actual": 3,
             "category": "replay_readiness",
             "reason": "below_required_threshold",
             "required": 7,
-        }
+        },
     ]
     assert score["thresholds_satisfied"] is False
     assert score["scored_at"] == manifest.created_at.isoformat()
@@ -289,6 +312,7 @@ def _assert_provenance_only_score(
         "immutable_input_snapshots",
         "immutable_input_snapshots_missing",
         "missing_immutable_input_snapshots",
+        "artifact_publication_closure",
         "produced_artifact_trace",
     ]
     assert "diagnostics.git_commit" in score["evidence_refs"]
@@ -336,6 +360,7 @@ def _expected_provenance_only_summary_without_score(
         "config_hash": _VALID_CONFIG_HASH,
         "resolved_config_hash": _VALID_RESOLVED_CONFIG_HASH,
         "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
+        "source_fingerprint": manifest.code_provenance.source_fingerprint,
         "pipeline_version": "1.0.0",
         "git_commit": "abc1234",
         "source_revision_state": "clean",
@@ -394,6 +419,7 @@ def _expected_provenance_only_summary_without_score(
         "historical_live_run_upgrade_state": (
             "awaiting_input_snapshot_published_evidence"
         ),
+        "replay_control_plane_state": "post_capture_parent_candidate",
         "replay_occurrence_kind": "ordinary_live_capture",
         "exact_replay_eligible": False,
         "exact_replay_blockers": [
@@ -423,6 +449,7 @@ def _expected_provenance_only_summary_without_score(
         "published_artifact_count": 0,
         "exact_replay_anchors": _expected_exact_replay_anchors(manifest),
         "produced_artifact_trace": _expected_missing_produced_artifact_trace(manifest),
+        "artifact_publication_closure": "disabled",
         "persistence_profile": {
             "attained_profile": "degraded_observable",
             "required_profile": "replay_ready",
@@ -922,6 +949,7 @@ def _assert_required_operator_identity_graph(
         "config_hash": _VALID_CONFIG_HASH,
         "resolved_config_hash": _VALID_RESOLVED_CONFIG_HASH,
         "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
+        "source_fingerprint": manifest.code_provenance.source_fingerprint,
         "git_commit": "abc1234",
         "source_revision_state": "clean",
         "dependency_lock_state": "missing",
@@ -1012,6 +1040,7 @@ def _assert_required_operator_identity_graph(
                 artifact_path="data/output/silver/chembl/activity",
                 include_dataset_ref=True,
                 include_artifact_id=False,
+                publication_status="published",
             )
         ],
         "produced_artifact_trace": _expected_produced_artifact_trace(manifest),
@@ -1155,6 +1184,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
     assert summary["artifact_refs"] == [
         {
             "event_type": "artifact_published",
+            "publication_status": "published",
             "stage": "silver",
             "artifact_id": "silver:chembl.activity@1",
             "dataset_ref": "silver:chembl.activity@1",

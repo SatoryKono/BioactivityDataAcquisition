@@ -106,10 +106,12 @@ def build_published_silver_artifact(
     artifact_path: str,
     include_dataset_ref: bool = True,
     include_artifact_id: bool = True,
+    publication_status: str = "published",
 ) -> dict[str, object]:
     """Build the canonical published silver artifact payload used in tests."""
     payload = {
         "event_type": "artifact_published",
+        "publication_status": publication_status,
         "stage": "silver",
         "lineage_fragment_id": "silver:fragment-1",
         "artifact_path": artifact_path,
@@ -362,11 +364,24 @@ def expected_produced_artifact_trace(
         missing_requirements.append("run_ledger_history")
     if not artifact_payload:
         missing_requirements.append("artifact_publication_event")
+    if any(
+        str(artifact.get("publication_status") or "").strip().lower()
+        in {"failed", "error"}
+        for artifact in artifact_payload
+    ):
+        artifact_publication_closure = "failed"
+    elif not artifact_payload:
+        artifact_publication_closure = "disabled"
+    elif missing_requirements:
+        artifact_publication_closure = "partial"
+    else:
+        artifact_publication_closure = "closed"
     return {
         "lookup": "run_ledger_by_manifest_id",
         "lookup_key": manifest.manifest_id,
         "manifest_id": manifest.manifest_id,
         "complete": not missing_requirements,
+        "artifact_publication_closure": artifact_publication_closure,
         "artifact_count": len(artifact_payload),
         "artifacts": artifact_payload,
         "missing_requirements": missing_requirements,
@@ -452,8 +467,7 @@ def expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
     """Build resume-contract expectations for manifest diagnostics."""
     requested_exact_replay = bool(manifest.launch_context.get("exact_replay"))
     required_profile = str(
-        manifest.launch_context.get("required_persistence_profile")
-        or "replay_ready"
+        manifest.launch_context.get("required_persistence_profile") or "replay_ready"
     )
     requested_policy = manifest.launch_context.get("checkpoint_compatibility_policy")
     if not isinstance(requested_policy, str) or requested_policy not in {

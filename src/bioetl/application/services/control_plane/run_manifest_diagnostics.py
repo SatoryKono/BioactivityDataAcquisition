@@ -5,9 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import cast
 
+from bioetl.application.services.control_plane._run_manifest_diagnostics_artifact_support import (
+    apply_artifact_publication_closure_policy,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_base import (
     _build_base_summary_payload,
     _resolve_base_summary_replay_context,
+    _resolve_replay_control_plane_state,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_base_helpers import (
     _resolve_snapshot_status,
@@ -16,14 +20,19 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_finaliz
     attach_base_summary_runtime_views as _attach_base_summary_runtime_views,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_finalization import (
+    attach_summary_reproducibility_views as _attach_summary_reproducibility_views,
+)
+from bioetl.application.services.control_plane._run_manifest_diagnostics_finalization import (
     build_final_diagnostics_summary as _build_final_diagnostics_summary,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
-    _build_replay_state_projection,
     _build_resume_contract,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection import (
     _build_operator_replay_projection,
+)
+from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_state import (
+    _build_replay_state_projection,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
     resolve_post_manifest_input_snapshot_materialization_mode,
@@ -82,6 +91,8 @@ def build_diagnostics_summary(
     base_summary = _build_base_summary(manifest)
 
     if not ledger_entries:
+        base_summary = apply_artifact_publication_closure_policy(base_summary)
+        _attach_summary_reproducibility_views(base_summary)
         return base_summary
     return _build_final_diagnostics_summary(
         manifest=manifest,
@@ -159,6 +170,21 @@ def _build_refresh_replay_projection(
     return _ReplayRefreshProjection(
         replay_payload={
             "replay_capability": policy_assessment.replay_capability.value,
+            "replay_control_plane_state": _resolve_replay_control_plane_state(
+                manifest=effective_manifest,
+                replay_state_projection=_build_replay_state_projection(
+                    manifest=effective_manifest,
+                    input_snapshots=input_snapshots,
+                    policy_assessment=policy_assessment,
+                ),
+                replay_family_contract_payload={
+                    "post_capture_replayable_parent_supported": (
+                        effective_manifest.launch_context.get(
+                            "post_capture_replayable_parent_supported"
+                        )
+                    )
+                },
+            ),
             "replay_capability_assessment": policy_assessment.to_dict(),
             **operator_replay_projection,
             **_build_replay_state_projection(

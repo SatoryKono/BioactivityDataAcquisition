@@ -28,8 +28,9 @@ def build_diagnostics_guide_lines() -> list[str]:
             "[--limit 100] [--format text|json|yaml]"
         ),
         (
-            "  dossier: bioetl diagnostics dossier --run-id <run-id> "
-            "[--limit 100] [--format text|json|yaml]"
+            "  dossier: bioetl diagnostics dossier "
+            "[--run-id <run-id>|--manifest-id <manifest-id>] [--limit 100] "
+            "[--format text|json|yaml]"
         ),
         "  contract-checks: bioetl diagnostics contract-checks [--json]",
         (

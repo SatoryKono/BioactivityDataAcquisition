@@ -778,6 +778,13 @@ bioetl diagnostics --json --output system-diagnostics.json
 bioetl diagnostics --since 24h
 ```
 
+Подкоманда `bioetl diagnostics dossier` собирает one-run dossier. Она принимает
+ровно один идентификатор: `--run-id <RUN_ID>` или `--manifest-id <MANIFEST_ID>`.
+Manifest-rooted lookup сначала разрешает canonical `run_id` из manifest store,
+затем собирает audit, checkpoint и run-manifest diagnostics. В replay/forensic
+решениях учитывайте `artifact_publication_closure`: только `closed` является
+полным produced-artifact evidence gate.
+
 **См. также:**
 
 - `bioetl health` — для health checks

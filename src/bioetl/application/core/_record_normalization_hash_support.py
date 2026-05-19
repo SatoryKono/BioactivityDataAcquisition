@@ -50,7 +50,7 @@ class RecordNormalizationHashSupportMixin:
         *,
         contract_version: str | None = None,
     ) -> str:
-        include_fields, exclude_fields = self._resolve_hash_policy(
+        include_fields, exclude_fields, datetime_policy = self._resolve_hash_policy(
             contract_version=contract_version
         )
         hash_record = self._expand_profile_aliases_for_hash(record)
@@ -64,6 +64,7 @@ class RecordNormalizationHashSupportMixin:
                 set_like_fields=(
                     None if self.profile is None else set(self.profile.set_like_fields)
                 ),
+                datetime_policy=datetime_policy,
             )
         )
 
@@ -193,7 +194,7 @@ class RecordNormalizationHashSupportMixin:
         self,
         *,
         contract_version: str | None,
-    ) -> tuple[set[str] | None, set[str]]:
+    ) -> tuple[set[str] | None, set[str], str]:
         profile_include, profile_exclude = self._profile_hash_fields()
         policy = self._select_hash_policy(contract_version=contract_version)
         return (
@@ -205,4 +206,5 @@ class RecordNormalizationHashSupportMixin:
                 profile_exclude=profile_exclude,
                 policy=policy,
             ),
+            str(getattr(policy, "datetime_policy", "v1_date") or "v1_date"),
         )

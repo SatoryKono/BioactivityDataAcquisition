@@ -28,6 +28,7 @@ def _build_unified_reproducibility_diagnostics_policy_payload(
             [],
         ),
         "replay_capability": summary.get("replay_capability"),
+        "replay_control_plane_state": summary.get("replay_control_plane_state"),
         "replay_readiness_verdict": summary.get("replay_readiness_verdict"),
         "operator_replay_mode": summary.get("operator_replay_mode"),
         "replay_mode": summary.get("replay_mode"),
@@ -132,6 +133,7 @@ def _build_unified_reproducibility_diagnostics_lineage(
         "lineage_fragment_ids": summary.get("lineage_fragment_ids", []),
         "planned_artifact_count": summary.get("planned_artifact_count"),
         "published_artifact_count": summary.get("published_artifact_count"),
+        "artifact_publication_closure": summary.get("artifact_publication_closure"),
         "produced_artifact_trace_complete": produced_artifact_trace.get("complete"),
     }
 

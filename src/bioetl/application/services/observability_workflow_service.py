@@ -12,10 +12,10 @@ from bioetl.application.services._observability_workflow_support import (
     build_status_section,
     build_traceability_section,
     classify_evidence_status,
-    enrich_quarantine_summary,
     resolve_checkpoint_for_run,
     resolve_lineage_for_run,
     resolve_pipeline_name,
+    resolve_quarantine_summary_for_run,
     resolve_run_manifest,
     trace_links_enabled,
 )
@@ -256,10 +256,12 @@ class ObservabilityWorkflowService:
         *,
         run_id: str,
         audit_limit: int,
+        run_manifest: RunManifestInspectionResult | None = None,
     ) -> RunForensicDossierResult:
         """Implement dossier aggregation without tracing concerns."""
         audit = await self.audit_service.inspect_run(run_id, limit=audit_limit)
-        run_manifest = resolve_run_manifest(self.run_manifest_service, run_id)
+        if run_manifest is None:
+            run_manifest = resolve_run_manifest(self.run_manifest_service, run_id)
         pipeline_name = resolve_pipeline_name(run_manifest)
         checkpoint = await resolve_checkpoint_for_run(
             checkpoint_service=self.checkpoint_service,
@@ -267,7 +269,8 @@ class ObservabilityWorkflowService:
             pipeline_name=pipeline_name,
         )
         lineage = resolve_lineage_for_run(self.lineage_service, run_id)
-        quarantine_summary = await self._resolve_quarantine_summary_for_run(
+        quarantine_summary = await resolve_quarantine_summary_for_run(
+            quarantine_service=self.quarantine_service,
             run_id=run_id,
             pipeline_name=pipeline_name,
             run_manifest=run_manifest,
@@ -312,6 +315,22 @@ class ObservabilityWorkflowService:
             missing_evidence=missing_evidence,
             degraded_evidence=degraded_evidence,
             next_steps=next_steps,
+        )
+
+    async def inspect_manifest_dossier(
+        self,
+        identifier: str,
+        *,
+        audit_limit: int = 100,
+    ) -> RunForensicDossierResult:
+        """Return a dossier by manifest_id or run_id through manifest inspection."""
+        if self.run_manifest_service is None:
+            raise ValueError("run manifest service is required for manifest dossier")
+        run_manifest = self.run_manifest_service.show(identifier)
+        return await self._inspect_run_dossier_impl(
+            run_id=str(run_manifest.manifest.run_id),
+            audit_limit=audit_limit,
+            run_manifest=run_manifest,
         )
 
     async def inspect_checkpoint_workflow(
@@ -418,42 +437,5 @@ class ObservabilityWorkflowService:
             pipeline_name=pipeline_name,
             checkpoint=checkpoint,
             audit=audit,
-            run_manifest=run_manifest,
-        )
-
-    async def _resolve_quarantine_summary_for_run(
-        self,
-        *,
-        run_id: str,
-        pipeline_name: str | None,
-        run_manifest: RunManifestInspectionResult | None,
-    ) -> dict[str, object] | None:
-        """Resolve bounded quarantine summary for one run when available."""
-        if self.quarantine_service is None or pipeline_name is None:
-            return None
-        try:
-            stats = await self.quarantine_service.get_filtered_stats(
-                pipeline=pipeline_name,
-                run_id=run_id,
-            )
-        except (OSError, RuntimeError, TypeError, ValueError):
-            return None
-        return self._enrich_quarantine_summary(
-            stats=stats,
-            run_id=run_id,
-            run_manifest=run_manifest,
-        )
-
-    @staticmethod
-    def _enrich_quarantine_summary(
-        *,
-        stats: dict[str, object],
-        run_id: str,
-        run_manifest: RunManifestInspectionResult | None,
-    ) -> dict[str, object]:
-        """Attach run-scoped metadata and Bronze denominator when available."""
-        return enrich_quarantine_summary(
-            stats=stats,
-            run_id=run_id,
             run_manifest=run_manifest,
         )
