@@ -49,7 +49,8 @@ class AssaySchema(ETLRecordSchema):
 
     # === Description & Classification ===
     assay_description: Series[str] = pa.Field(
-        nullable=False, description="Assay description."
+        nullable=False,
+        description="Assay description.",
     )
     assay_type: Series[str] = pa.Field(
         nullable=False,
@@ -144,6 +145,10 @@ class AssaySchema(ETLRecordSchema):
     )
     assay_pref_name: Series[str] | None = pa.Field(
         nullable=True, description="Preferred name."
+    )
+    score: Series[float] | None = pa.Field(
+        nullable=True,
+        description="Assay score distinct from confidence score.",
     )
 
     # === Foreign Keys ===

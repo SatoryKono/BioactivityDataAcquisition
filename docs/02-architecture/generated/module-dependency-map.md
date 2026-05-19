@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `1871`
-- Internal import edges (raw): `7464`
+- Internal import edges (raw): `7467`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `322`
@@ -21,8 +21,8 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1230 OK| application
-    application -->|1112 OK| domain
+    application -->|1231 OK| application
+    application -->|1114 OK| domain
     composition -->|291 OK| application
     composition -->|634 OK| composition
     composition -->|429 OK| domain
@@ -40,8 +40,8 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1230 | allowed |
-| `application`    | `domain`         |    1112 | allowed |
+| `application`    | `application`    |    1231 | allowed |
+| `application`    | `domain`         |    1114 | allowed |
 | `composition`    | `application`    |     291 | allowed |
 | `composition`    | `composition`    |     634 | allowed |
 | `composition`    | `domain`         |     429 | allowed |
@@ -106,13 +106,13 @@ flowchart LR
 | `application.core`              | `domain.normalization`          |      17 |
 | `application.core`              | `domain.value_objects`          |      17 |
 | `composition.factories`         | `domain.config`                 |      16 |
+| `application.pipelines`         | `domain.context`                |      15 |
 | `application.pipelines`         | `domain.ports`                  |      15 |
 | `composition.bootstrap`         | `infrastructure.observability`  |      15 |
 | `infrastructure.control_plane`  | `domain.control_plane`          |      15 |
 | `infrastructure.observability`  | `domain.ports`                  |      15 |
 | `infrastructure.quality`        | `domain.types`                  |      15 |
 | `infrastructure.schemas`        | `domain.config`                 |      15 |
-| `application.pipelines`         | `domain.context`                |      13 |
 | `application.services`          | `domain.lineage`                |      13 |
 | `composition.factories`         | `domain.behavior`               |      13 |
 | `interfaces.cli`                | `composition.registry_api`      |      13 |

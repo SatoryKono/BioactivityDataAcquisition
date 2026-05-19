@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, is_dataclass, replace
-from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.run_ledger_service import (

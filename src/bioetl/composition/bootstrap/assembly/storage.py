@@ -143,6 +143,8 @@ def bootstrap_storage_adapter(
             tracing=tracing,
             save_json=False,
             json_path=None,
+            metadata_coordinator=metadata_coordinator,
+            lineage_store=lineage_store,
         ),
         silver_writer=SilverWriter(
             base_path=output_dir / "silver",  # data/output/silver

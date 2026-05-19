@@ -7,7 +7,6 @@ param(
 )
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$WslDistro = if ($env:BIOETL_WSL_DISTRO) { $env:BIOETL_WSL_DISTRO } else { "Ubuntu" }
 
 function ConvertTo-WslPath {
     param([string]$WindowsPath)
@@ -29,5 +28,10 @@ skips MCP synchronization before launching Codex.
     exit 0
 }
 
-wsl -d $WslDistro -e bash -- $LauncherWSL @Args
+if ($env:BIOETL_WSL_DISTRO) {
+    wsl -d $env:BIOETL_WSL_DISTRO -e bash -- $LauncherWSL @Args
+}
+else {
+    wsl -e bash -- $LauncherWSL @Args
+}
 exit $LASTEXITCODE

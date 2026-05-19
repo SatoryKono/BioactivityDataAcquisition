@@ -117,6 +117,31 @@ scripts\ops\codex.bat "add retry logic"         # interactive with prompt
 scripts\ops\codex-exec.bat "fix the bug"        # full-auto
 ```
 
+### 5. Optional: install `codex` into Windows PATH
+
+If you want to run Codex from any `cmd.exe` or PowerShell session without
+prefixing the repo path:
+
+```cmd
+scripts\ops\install-codex-cmd.bat
+```
+
+This creates user-level shims in `%USERPROFILE%\bin` and adds that directory to
+your user `PATH`. Installed commands:
+
+```cmd
+codex
+codex-exec "your prompt"
+cx
+cxe "your prompt"
+```
+
+Windows launcher behavior:
+
+- by default, `scripts\ops\codex.bat` and `scripts\ops\codex-exec.bat` use the
+  current default WSL distro;
+- set `BIOETL_WSL_DISTRO` if Codex should target a specific distro explicitly.
+
 ______________________________________________________________________
 
 ## Initial Setup (one-time)

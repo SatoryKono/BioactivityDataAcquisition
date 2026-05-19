@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import io
 import tempfile
+from copy import deepcopy
 from datetime import date
+from functools import lru_cache
 from pathlib import Path
 from urllib import error
 
@@ -56,7 +58,7 @@ from scripts.memory.sync import (
     sync_snapshot,
 )
 
-pytestmark = pytest.mark.memory
+pytestmark = [pytest.mark.memory, pytest.mark.timeout(180)]
 LEGACY_REPORT_PATH = str(Path(tempfile.gettempdir()) / "neo4j-memory-audit.json")
 
 
@@ -172,9 +174,14 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+@lru_cache(maxsize=1)
+def _snapshot_base() -> object:
+    return build_snapshot(_repo_root(), verified_at="2026-04-09")
+
+
 def _snapshot() -> tuple[Path, object]:
     root = _repo_root()
-    return root, build_snapshot(root, verified_at="2026-04-09")
+    return root, deepcopy(_snapshot_base())
 
 
 def test_memory_mapping_path_prefers_canonical_graph_mapping(tmp_path: Path) -> None:
@@ -1837,6 +1844,7 @@ def test_snapshot_contains_complexity_candidates_with_simplification_links() -> 
     )
 
 
+@pytest.mark.timeout(180)
 def test_sync_statements_include_management_metadata() -> None:
     _, snapshot = _snapshot()
     project_node = snapshot.nodes[

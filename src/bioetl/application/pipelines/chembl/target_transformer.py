@@ -23,7 +23,8 @@ from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects.taxonomy_id import TaxonomyId
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord, PrimaryId
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
 
 class TargetTransformer(BaseChemblTransformer):
@@ -198,3 +199,32 @@ class TargetTransformer(BaseChemblTransformer):
             # Flattened components
             **serialized_flattened_components,
         }
+
+    def _postprocess_pre_silver_record(
+        self,
+        silver_record: SilverRecord,
+        *,
+        business_data: JsonDict,
+    ) -> SilverRecord:
+        """Align silver output with the published target schema field name."""
+        description = silver_record.get("target_description")
+        if description is None:
+            description = silver_record.pop("description", None)
+        if description is None:
+            description = business_data.get("target_description")
+        if description is None:
+            description = business_data.get("description")
+        silver_record.pop("description", None)
+        silver_record["target_description"] = description
+        return silver_record
+
+    def transform_for_gold(
+        self,
+        context: PipelineContext,
+        silver_record: GoldRecord,
+    ) -> GoldRecord:
+        """Project the Silver field name back to the published Gold contract."""
+        gold_record = super().transform_for_gold(context, silver_record)
+        description = gold_record.pop("target_description", None)
+        gold_record["description"] = description
+        return gold_record

@@ -50,7 +50,8 @@ class TestChemblCompoundRecordPipeline(IntegrationPipelineTestCase):
     ):
         """Test happy path: Bronze -> Silver -> Gold."""
         # Override limit via config override since RuntimeConfig is frozen
-        runtime_config = replace(runtime_config, limit=10)
+        # Disable vacuum optimization to prevent bronze cleanup during test
+        runtime_config = replace(runtime_config, limit=10, optimize_storage=False)
 
         runner = self.create_runner(
             factory=chembl_compound_record_factory,

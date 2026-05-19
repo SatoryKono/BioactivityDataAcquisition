@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.config import ContentHashVersionPolicy
@@ -20,6 +21,7 @@ class _NormalizationProfileLike(Protocol):
     hash_included_fields: frozenset[str]
     hash_excluded_fields: frozenset[str]
     fields: frozenset[str]
+    field_aliases: Mapping[str, str]
 
     def rule_for(self, field_name: str) -> FieldRule | None: ...
 
@@ -51,9 +53,10 @@ class RecordNormalizationHashSupportMixin:
         include_fields, exclude_fields = self._resolve_hash_policy(
             contract_version=contract_version
         )
+        hash_record = self._expand_profile_aliases_for_hash(record)
         return str(
             generate_content_hash(
-                record,
+                hash_record,
                 self.provider,
                 exclude_none=True,
                 include_fields=include_fields,
@@ -80,6 +83,25 @@ class RecordNormalizationHashSupportMixin:
         if self.profile is None:
             return frozenset(), frozenset()
         return self.profile.hash_included_fields, self.profile.hash_excluded_fields
+
+    def _expand_profile_aliases_for_hash(self, record: JsonDict) -> JsonDict:
+        """Project alias-backed canonical fields before authoritative hash scoping.
+
+        Some shipped Silver surfaces still expose reviewed legacy field names,
+        while the profile/hash contract is keyed on canonical schema names.
+        Populate missing canonical targets from alias values so config-scoped
+        include_fields such as legacy assay-description aliases remain hash-effective when
+        the runtime payload still carries ``description``.
+        """
+        if self.profile is None or not self.profile.field_aliases:
+            return record
+
+        expanded = dict(record)
+        for alias, target in self.profile.field_aliases.items():
+            if target in expanded or alias not in expanded:
+                continue
+            expanded[target] = expanded[alias]
+        return expanded
 
     def _uses_authoritative_config_hash_policy(
         self,

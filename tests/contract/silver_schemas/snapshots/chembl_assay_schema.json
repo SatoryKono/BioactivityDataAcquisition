@@ -428,6 +428,15 @@
     "required": true,
     "unique": false
   },
+  "score": {
+    "checks": [],
+    "coerce": false,
+    "description": "Assay score distinct from confidence score.",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "src_assay_id": {
     "checks": [],
     "coerce": false,

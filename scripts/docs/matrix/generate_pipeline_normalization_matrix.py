@@ -1719,12 +1719,10 @@ def _schema_coverage(
     field_name: str,
     arrow_nullable: bool,
 ) -> str:
-    profile_lookup_field = _profile_lookup_field_name(
+    domain_coverage = _resolve_field_value(
         pipeline_name=pipeline_name,
         field_name=field_name,
-    )
-    domain_coverage = _domain_schema_field_coverage_by_pipeline(pipeline_name).get(
-        profile_lookup_field
+        available_values=_domain_schema_field_coverage_by_pipeline(pipeline_name),
     )
     if domain_coverage is None:
         return f"silver_arrow:present(nullable={arrow_nullable});domain_schema:missing"
@@ -1767,11 +1765,11 @@ def _dq_coverage(
 ) -> str:
     if provider != "composite" and _load_dq_config(provider, entity) is None:
         return "dq_config:unavailable"
-    profile_lookup_field = _profile_lookup_field_name(
+    coverage = _resolve_field_value(
         pipeline_name=pipeline_name,
         field_name=field_name,
+        available_values=_dq_rule_coverage_by_field(provider, entity),
     )
-    coverage = _dq_rule_coverage_by_field(provider, entity).get(profile_lookup_field)
     if coverage is None:
         if strictness == "strict_json":
             return "runtime_warning:malformed_json_normalized_to_null"
@@ -1940,12 +1938,10 @@ def _build_entity_rows_for_pipeline(
     for field_name in schema.names:
         field = schema.field(field_name)
         field_type = str(field.type)
-        profile_lookup_field = _profile_lookup_field_name(
+        profile_rule = _resolve_profile_rule(
+            profile=profile,
             pipeline_name=pipeline_name,
             field_name=field_name,
-        )
-        profile_rule = (
-            None if profile is None else profile.rule_for(profile_lookup_field)
         )
         if profile_rule is not None:
             rows.append(
@@ -1977,24 +1973,33 @@ def _build_entity_rows_for_pipeline(
                     normalizer=normalizer,
                     summary=summary,
                 )
+                )
+        for alias_field_name in _alias_field_names(
+            pipeline_name=pipeline_name,
+            field_name=field_name,
+            schema_field_names=schema.names,
+        ):
+            alias_profile_rule = _resolve_profile_rule(
+                profile=profile,
+                pipeline_name=pipeline_name,
+                field_name=alias_field_name,
             )
-        if profile_lookup_field != field_name:
-            if profile_rule is not None:
+            if alias_profile_rule is not None:
                 rows.append(
                     _entity_profile_row(
                         provider=provider,
                         entity=entity,
                         pipeline_name=pipeline_name,
-                        field_name=profile_lookup_field,
+                        field_name=alias_field_name,
                         field_type=field_type,
                         arrow_nullable=field.nullable,
-                        profile_rule=profile_rule,
+                        profile_rule=alias_profile_rule,
                     )
                 )
             else:
                 source, normalizer, summary = _fallback_contract(
                     rule_set,
-                    field_name=profile_lookup_field,
+                    field_name=alias_field_name,
                     field_type=field_type,
                 )
                 rows.append(
@@ -2002,7 +2007,7 @@ def _build_entity_rows_for_pipeline(
                         provider=provider,
                         entity=entity,
                         pipeline_name=pipeline_name,
-                        field_name=profile_lookup_field,
+                        field_name=alias_field_name,
                         field_type=field_type,
                         arrow_nullable=field.nullable,
                         source=source,
@@ -2013,12 +2018,74 @@ def _build_entity_rows_for_pipeline(
     return rows
 
 
+def _alias_field_names(
+    *,
+    pipeline_name: str,
+    field_name: str,
+    schema_field_names: list[str],
+) -> tuple[str, ...]:
+    """Return reviewed alias rows that should also be emitted for one Silver field."""
+    aliases = ENTITY_PROFILE_FIELD_ALIASES.get(pipeline_name, {})
+    reverse_aliases = {alias: source for source, alias in aliases.items()}
+    candidates = [
+        aliases.get(field_name),
+        reverse_aliases.get(field_name),
+    ]
+    return tuple(
+        candidate
+        for candidate in dict.fromkeys(candidates)
+        if candidate is not None and candidate not in schema_field_names
+    )
+
+
+def _field_lookup_candidates(*, pipeline_name: str, field_name: str) -> tuple[str, ...]:
+    """Try the shipped field name first, then any reviewed alias seam in either direction."""
+    aliases = ENTITY_PROFILE_FIELD_ALIASES.get(pipeline_name, {})
+    reverse_aliases = {alias: source for source, alias in aliases.items()}
+    candidates = [field_name]
+    alias_name = aliases.get(field_name)
+    if alias_name is not None:
+        candidates.append(alias_name)
+    source_name = reverse_aliases.get(field_name)
+    if source_name is not None:
+        candidates.append(source_name)
+    return tuple(dict.fromkeys(candidates))
+
+
+def _resolve_profile_rule(
+    *, profile: Any | None, pipeline_name: str, field_name: str
+) -> Any | None:
+    if profile is None:
+        return None
+    for candidate in _field_lookup_candidates(
+        pipeline_name=pipeline_name,
+        field_name=field_name,
+    ):
+        rule = profile.rule_for(candidate)
+        if rule is not None:
+            return rule
+    return None
+
+
+def _resolve_field_value(
+    *, pipeline_name: str, field_name: str, available_values: dict[str, str]
+) -> str | None:
+    for candidate in _field_lookup_candidates(
+        pipeline_name=pipeline_name,
+        field_name=field_name,
+    ):
+        value = available_values.get(candidate)
+        if value is not None:
+            return value
+    return None
+
+
 def _profile_lookup_field_name(*, pipeline_name: str, field_name: str) -> str:
     """Resolve reviewed Silver legacy aliases to canonical profile/schema fields."""
-    return ENTITY_PROFILE_FIELD_ALIASES.get(pipeline_name, {}).get(
-        field_name,
-        field_name,
-    )
+    return _field_lookup_candidates(
+        pipeline_name=pipeline_name,
+        field_name=field_name,
+    )[0]
 
 
 def _entity_profile_row(

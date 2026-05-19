@@ -6,7 +6,7 @@ Uses declarative field_specs DSL for mapping where applicable.
 
 from __future__ import annotations
 
-from bioetl.domain.types import JsonDict
+from bioetl.domain.types import GoldRecord, JsonDict
 
 __all__ = ["AssayTransformer"]
 
@@ -32,6 +32,7 @@ from bioetl.domain.transformations import (
 from bioetl.domain.value_objects.taxonomy_id import validate_taxonomy_id
 
 if TYPE_CHECKING:
+    from bioetl.application.core.pipeline_context import PipelineContext
     from bioetl.domain.types import BronzeRecord, PrimaryId
 
 # Mapping for variant sequence fields extraction (from ChEMBL nested structure)
@@ -122,8 +123,8 @@ _BIOLOGICAL_CONTEXT = FieldGroup(
 _METADATA = FieldGroup(
     name="metadata",
     fields=(
+        FieldSpec("description", target="assay_description"),
         *simple_fields(
-            "description",
             "confidence_description",
             "relationship_type",
             "relationship_description",
@@ -213,3 +214,31 @@ class AssayTransformer(BaseChemblTransformer):
             "tissue_id"
         )
         return business_data
+
+    def _postprocess_pre_silver_record(
+        self,
+        silver_record: JsonDict,
+        *,
+        business_data: JsonDict,
+    ) -> JsonDict:
+        """Project legacy ChEMBL input aliases to the canonical Silver assay shape."""
+        description = silver_record.get("assay_description")
+        if description is None:
+            description = silver_record.pop("description", None)
+        if description is None:
+            description = business_data.get("assay_description")
+        if description is None:
+            description = business_data.get("description")
+        silver_record.pop("description", None)
+        silver_record["assay_description"] = description
+        return silver_record
+
+    def transform_for_gold(
+        self,
+        context: PipelineContext,
+        silver_record: GoldRecord,
+    ) -> GoldRecord:
+        """Re-project canonical Silver assay fields to the legacy Gold contract."""
+        gold_record = super().transform_for_gold(context, silver_record)
+        gold_record["description"] = gold_record.pop("assay_description", None)
+        return gold_record

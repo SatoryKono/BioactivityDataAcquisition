@@ -32,19 +32,19 @@ scripts/ai/codex/
 ### From PowerShell (Windows)
 
 ```powershell
-cd scripts/ai/codex
-
-# Thin transport to the canonical WSL/Bash launcher
-.\run-codex.ps1
-.\run-codex.ps1 "analyze the code"
+# Repo-local launchers
+.\scripts\ops\codex.bat
+.\scripts\ops\codex.bat "analyze the code"
 
 # Or explicit commands
-.\run-codex.ps1 check
-.\run-codex.ps1 setup
+.\scripts\ops\codex.bat help
+.\scripts\ops\codex-exec.bat "fix the failing test"
+.\scripts\ops\install-codex-cmd.bat
 ```
 
-`run-codex.ps1` delegates to `run-codex.sh`, so the WSL/Bash launcher remains
-the single source of truth for environment checks, setup, MCP sync, and Codex execution.
+`scripts\ops\codex.bat` delegates to the canonical WSL/Bash launcher, so the
+WSL transport remains the single source of truth for environment checks, setup,
+MCP sync, and Codex execution.
 
 ### From WSL (Ubuntu)
 

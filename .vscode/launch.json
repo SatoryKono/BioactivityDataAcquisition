@@ -1,64 +1,63 @@
 {
   "version": "0.2.0",
   "configurations": [
-  
-
     {
-      "name": "BioETL: run pipeline via uv (prompt pipeline/limit)",
-      "type": "node-terminal",
+      "name": "BioETL: Debug current test file",
+      "type": "debugpy",
       "request": "launch",
-      "command": "uv run python -m bioetl run --pipeline ${input:bioetlPipeline} --limit ${input:bioetlLimit}",
-      "cwd": "${workspaceFolder}"
+      "module": "pytest",
+      "args": [
+        "${file}",
+        "-s",
+        "-v",
+        "-o",
+        "cache_dir=${env:TEMP}/bioetl-pytest-cache"
+      ],
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv-win/Scripts/python.exe",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "PYTHONPYCACHEPREFIX": "${env:TEMP}/bioetl-pycache"
+      },
+      "justMyCode": true
     },
     {
-      "name": "BioETL: run chembl_molecule --limit 100 via uv",
-      "type": "node-terminal",
+      "name": "BioETL: Debug pytest (narrow)",
+      "type": "debugpy",
       "request": "launch",
-      "command": "uv run python -m bioetl run --pipeline chembl_molecule --limit 100",
-      "cwd": "${workspaceFolder}"
-    },
-    {
-      "name": "BioETL: run pytest current file via uv",
-      "type": "node-terminal",
-      "request": "launch",
-      "command": "uv run python -m pytest \"${file}\" -q",
-      "cwd": "${workspaceFolder}"
-    },
-    {
-      "name": "BioETL: run tests via uv",
-      "type": "node-terminal",
-      "request": "launch",
-      "command": "uv run python -m pytest tests -q",
-      "cwd": "${workspaceFolder}"
+      "module": "pytest",
+      "args": [
+        "${fileDirname}",
+        "-s",
+        "-v",
+        "--maxfail=1",
+        "-o",
+        "cache_dir=${env:TEMP}/bioetl-pytest-cache"
+      ],
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv-win/Scripts/python.exe",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "PYTHONPYCACHEPREFIX": "${env:TEMP}/bioetl-pycache"
+      },
+      "justMyCode": true
     },
     {
       "name": "BioETL: Codex interactive (WSL)",
       "type": "node-terminal",
       "request": "launch",
-      "command": "cmd.exe /c .\\scripts\\ops\\codex.bat",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ai/codex/cursor-launch.ps1 -Mode interactive",
       "cwd": "${workspaceFolder}"
     },
     {
       "name": "BioETL: Codex exec full-auto (WSL)",
       "type": "node-terminal",
       "request": "launch",
-      "command": "cmd.exe /c .\\scripts\\ops\\codex-exec.bat \"${input:codexExecPrompt}\"",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ai/codex/cursor-launch.ps1 -Mode exec \"${input:codexExecPrompt}\"",
       "cwd": "${workspaceFolder}"
     }
   ],
   "inputs": [
-    {
-      "id": "bioetlPipeline",
-      "type": "promptString",
-      "description": "Pipeline name (e.g. chembl_molecule, pubmed_publication)",
-      "default": "chembl_molecule"
-    },
-    {
-      "id": "bioetlLimit",
-      "type": "promptString",
-      "description": "Row limit",
-      "default": "100"
-    },
     {
       "id": "codexExecPrompt",
       "type": "promptString",

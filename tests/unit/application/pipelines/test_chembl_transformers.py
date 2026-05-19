@@ -32,6 +32,21 @@ from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
+def _minimal_valid_assay_record() -> dict[str, object]:
+    return {
+        "assay_id": "CHEMBL1234567",
+        "target_id": "CHEMBL123",
+        "publication_id": "CHEMBL456",
+        "bao_format": "BAO_0000218",
+        "assay_type": "B",
+        "assay_type_description": "Binding",
+        "relationship_type": "D",
+        "description": "Test assay description",
+        "confidence_score": 9,
+        "src_id": 1,
+    }
+
+
 @pytest.fixture(scope="module", autouse=True)
 def initialize_publication_classification() -> None:
     """Bootstrap publication-type classification for publication transformer tests."""
@@ -66,17 +81,7 @@ class TestAssayTransformer:
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):
         """Test transformation of valid assay record."""
-        record = {
-            "assay_id": "CHEMBL1234567",
-            "target_id": "CHEMBL123",
-            "publication_id": "CHEMBL456",
-            "bao_format": "BAO_0000218",
-            "assay_type": "B",
-            "assay_type_description": "Binding",
-            "relationship_type": "D",
-            "description": "Test assay description",
-            "confidence_score": 9,
-        }
+        record = _minimal_valid_assay_record()
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -87,6 +92,8 @@ class TestAssayTransformer:
         assert result["bao_format"] == "BAO_0000218"
         assert result["assay_type"] == "B"
         assert result["assay_type_description"] == "Binding"
+        assert result["assay_description"] == "Test assay description"
+        assert "description" not in result
         assert result["relationship_type"] == "D"
         assert result["confidence_score"] == 9
         assert "entity_id" in result
@@ -99,16 +106,9 @@ class TestAssayTransformer:
     ):
         """Assay normalization should canonicalize BAO fields and organism text."""
         record = {
-            "assay_id": "CHEMBL1234567",
-            "target_id": "CHEMBL123",
-            "publication_id": "CHEMBL456",
+            **_minimal_valid_assay_record(),
             "bao_format": " bao:0000357 ",
             "bao_label": " Single Protein Format ",
-            "assay_type": "B",
-            "assay_type_description": "Binding",
-            "relationship_type": "D",
-            "description": "Test assay description",
-            "confidence_score": 9,
             "assay_organism": "Homo sapiens (Human)",
         }
 
@@ -125,9 +125,7 @@ class TestAssayTransformer:
     ):
         """Transformer should stage raw bao_label and let the profile resolve it."""
         record = {
-            "assay_id": "CHEMBL1234567",
-            "target_id": "CHEMBL123",
-            "publication_id": "CHEMBL456",
+            **_minimal_valid_assay_record(),
             "bao_format": " bao:0000357 ",
             "bao_label": "  noisy label  ",
         }
@@ -158,7 +156,7 @@ class TestAssayTransformer:
     async def test_transform_with_json_fields(self, transformer, mock_context):
         """Test transformation handles complex JSON fields."""
         record = {
-            "assay_id": "CHEMBL1234567",
+            **_minimal_valid_assay_record(),
             "assay_classifications": [{"class": "Pharmacology"}],
             "assay_parameters": [{"param": "IC50"}],
         }
@@ -174,7 +172,7 @@ class TestAssayTransformer:
     async def test_transform_with_variant_sequence(self, transformer, mock_context):
         """Test transformation with variant_sequence data (flattened structure)."""
         record = {
-            "assay_id": "CHEMBL1234567",
+            **_minimal_valid_assay_record(),
             "variant_sequence": {
                 "accession": "P12345",
                 "isoform": "1",
@@ -201,10 +199,7 @@ class TestAssayTransformer:
     @pytest.mark.asyncio
     async def test_transform_with_null_variant(self, transformer, mock_context):
         """Test transformation handles null variant_sequence."""
-        record = {
-            "assay_id": "CHEMBL1234567",
-            "variant_sequence": None,
-        }
+        record = {**_minimal_valid_assay_record(), "variant_sequence": None}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -221,7 +216,7 @@ class TestAssayTransformer:
     async def test_transform_with_partial_variant(self, transformer, mock_context):
         """Test transformation with partial variant_sequence data."""
         record = {
-            "assay_id": "CHEMBL1234567",
+            **_minimal_valid_assay_record(),
             "variant_sequence": {
                 "accession": "P12345",
                 "mutation": "L858R",
@@ -709,6 +704,22 @@ class TestTargetTransformer:
         assert isinstance(xrefs, dict)
         assert xrefs["xref_id"] == "P12345"
         assert xrefs["xref_src_db"] == "UniProt"
+
+    @pytest.mark.asyncio
+    async def test_transform_projects_description_to_target_description(
+        self, transformer, mock_context
+    ):
+        """Silver output must expose target_description, not the domain alias."""
+        record = {
+            "target_id": "CHEMBL1862",
+            "description": "Prostaglandin G/H synthase 2",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["target_description"] == "Prostaglandin G/H synthase 2"
+        assert "description" not in result
 
     @pytest.mark.asyncio
     async def test_transform_aggregates_xrefs_from_multiple_components(

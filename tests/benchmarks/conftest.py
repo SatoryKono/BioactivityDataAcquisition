@@ -19,6 +19,46 @@ except ImportError:
     BenchmarkFixture = Any  # type: ignore[misc, assignment]
 
 
+def _benchmark_plugin_active(config: pytest.Config) -> bool:
+    """Return whether the pytest-benchmark plugin is active for this run."""
+    pluginmanager = config.pluginmanager
+    return any(
+        pluginmanager.hasplugin(name)
+        for name in ("benchmark", "pytest_benchmark", "pytest-benchmark")
+    )
+
+
+class _DisabledBenchmarkFixturePlugin:
+    """Provide a skip-only benchmark fixture when the plugin is disabled."""
+
+    @pytest.fixture
+    def benchmark(self) -> BenchmarkFixture:
+        pytest.skip("pytest-benchmark plugin is not active; run with '-p benchmark'")
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_configure(config: pytest.Config) -> None:
+    """Register a fallback benchmark fixture when the plugin is unavailable."""
+    if _benchmark_plugin_active(config):
+        return
+
+    plugin_name = "bioetl-disabled-benchmark-fixture"
+    if config.pluginmanager.hasplugin(plugin_name):
+        return
+
+    config.pluginmanager.register(_DisabledBenchmarkFixturePlugin(), plugin_name)
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_runtest_setup(item: pytest.Item) -> None:
+    """Skip benchmark-marked tests before fixture resolution when plugin is off."""
+    if "benchmark" not in item.keywords:
+        return
+    if _benchmark_plugin_active(item.config):
+        return
+    pytest.skip("pytest-benchmark plugin is not active; run with '-p benchmark'")
+
+
 @pytest.fixture
 def small_payload() -> list[dict[str, Any]]:
     """Small payload for quick benchmarks (100 records)."""

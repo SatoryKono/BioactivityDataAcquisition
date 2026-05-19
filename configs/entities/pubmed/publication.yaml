@@ -215,15 +215,14 @@ quality:
     type: pattern
     pattern: \S
     nullable: true
-  # Disabled to fix DQ validation - normalization not applied before DQ check
-  # - field: publication_status
-  #   type: enum
-  #   allowed_values:
-  #   - ppublish
-  #   - epublish
-  #   - aheadofprint
-  #   nullable: true
-  #   error_message: publication_status must match the governed PubMed lifecycle vocabulary
+  - field: publication_status
+    type: enum
+    allowed_values:
+    - ppublish
+    - epublish
+    - aheadofprint
+    nullable: true
+    error_message: publication_status must match the governed PubMed lifecycle vocabulary
   - field: citations_received
     type: range
     min: 0

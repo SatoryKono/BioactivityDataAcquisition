@@ -61,7 +61,7 @@ def _canonical_activity_field_name(field_name: str) -> str:
 def _silver_activity_field_name(field_name: str) -> str:
     """Resolve one canonical activity profile field to the reviewed Silver schema name."""
     for silver_name, canonical_name in _LEGACY_ACTIVITY_SCHEMA_ALIASES.items():
-        if canonical_name == field_name:
+        if canonical_name == field_name and silver_name in CHEMBL_ACTIVITY_SCHEMA.names:
             return silver_name
     return field_name
 

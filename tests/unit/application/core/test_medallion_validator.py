@@ -236,6 +236,8 @@ class TestWriteModeValidation:
         config = Mock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "merge"
+        config.table.silver_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "merge_upsert"
 
         validator = MedallionConfigValidator(
             config=config, logger=mock_logger, write_mode_policy=WriteModePolicy()
@@ -248,6 +250,8 @@ class TestWriteModeValidation:
         config = Mock()
         config.table.silver_write_mode = "append"
         config.table.gold_write_mode = "merge"
+        config.table.silver_idempotency_contract = "append_log"
+        config.table.gold_idempotency_contract = "merge_upsert"
 
         validator = MedallionConfigValidator(
             config=config, logger=mock_logger, write_mode_policy=WriteModePolicy()
@@ -273,6 +277,8 @@ class TestWriteModeValidation:
         config = Mock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "merge"
+        config.table.silver_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "merge_upsert"
 
         validator = MedallionConfigValidator(
             config=config, logger=mock_logger, write_mode_policy=WriteModePolicy()
@@ -285,6 +291,8 @@ class TestWriteModeValidation:
         config = Mock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "overwrite"
+        config.table.silver_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "overwrite_rebuild"
 
         validator = MedallionConfigValidator(
             config=config, logger=mock_logger, write_mode_policy=WriteModePolicy()
@@ -297,6 +305,8 @@ class TestWriteModeValidation:
         config = Mock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "scd2"
+        config.table.silver_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "scd2"
 
         validator = MedallionConfigValidator(
             config=config, logger=mock_logger, write_mode_policy=WriteModePolicy()
@@ -309,6 +319,8 @@ class TestWriteModeValidation:
         config = Mock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "append"  # Allowed for gold per ALLOWED_MODES
+        config.table.silver_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "append_log"
 
         validator = MedallionConfigValidator(
             config=config, logger=mock_logger, write_mode_policy=WriteModePolicy()
@@ -321,22 +333,27 @@ class TestWriteModeValidation:
         config = Mock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "invalid_mode"
-
-        validator = MedallionConfigValidator(
-            config=config, logger=mock_logger, write_mode_policy=WriteModePolicy()
-        )
-        errors = validator.validate_write_modes()
-        assert len(errors) == 1
-        assert errors[0].field == "gold_write_mode"
-
-    def test_invalid_both_modes(self, mock_logger: Mock) -> None:
-        """Test validation fails for both invalid modes."""
-        config = Mock()
-        config.table.silver_write_mode = "invalid_mode"
-        config.table.gold_write_mode = "invalid_mode"
+        config.table.silver_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = None
 
         validator = MedallionConfigValidator(
             config=config, logger=mock_logger, write_mode_policy=WriteModePolicy()
         )
         errors = validator.validate_write_modes()
         assert len(errors) == 2
+        assert errors[0].field == "gold_write_mode"
+        assert errors[1].field == "sink.gold.idempotency_contract"
+
+    def test_invalid_both_modes(self, mock_logger: Mock) -> None:
+        """Test validation fails for both invalid modes."""
+        config = Mock()
+        config.table.silver_write_mode = "invalid_mode"
+        config.table.gold_write_mode = "invalid_mode"
+        config.table.silver_idempotency_contract = None
+        config.table.gold_idempotency_contract = None
+
+        validator = MedallionConfigValidator(
+            config=config, logger=mock_logger, write_mode_policy=WriteModePolicy()
+        )
+        errors = validator.validate_write_modes()
+        assert len(errors) == 4
