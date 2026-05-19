@@ -169,8 +169,10 @@ def resolve_replay_resume_rebuild_verdict(
     mode = str(replay_mode or "").strip()
     continuation = str(continuation_mode or "").strip()
     readiness = str(replay_readiness_verdict or "").strip()
-    if readiness == "exact_replay_ready" and (
-        mode == "exact_replay" or continuation == "exact_replay"
+    if (
+        capability == "exact_replay_supported"
+        and readiness == "exact_replay_ready"
+        and (mode == "exact_replay" or continuation == "exact_replay")
     ):
         return "exact_replay_ready"
     if _has_missing_anchors(missing_anchors):

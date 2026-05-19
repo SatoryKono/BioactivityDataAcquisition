@@ -150,6 +150,7 @@ def build_export_sidecar_payloads(
     columns: tuple[str, ...],
     data_fingerprint: ExportFileFingerprint,
     generated_at: str | None = None,
+    allow_nondeterministic_generated_at: bool = False,
     run_ids: tuple[str, ...] = (),
     code_revision: str | None = None,
     strict: bool = False,
@@ -168,7 +169,10 @@ def build_export_sidecar_payloads(
         providers=providers,
         data_sha256=data_fingerprint.sha256,
     )
-    timestamp = generated_at or _utc_now()
+    timestamp = _resolve_generated_at(
+        generated_at,
+        allow_nondeterministic=allow_nondeterministic_generated_at,
+    )
     exported_data_file = _fingerprint_payload(data_fingerprint)
 
     provenance_manifest: dict[str, object] = {
@@ -242,13 +246,18 @@ def build_export_checksum_manifest(
     dataset_bundle_id: str,
     generated_at: str | None,
     fingerprints: tuple[ExportFileFingerprint, ...],
+    allow_nondeterministic_generated_at: bool = False,
 ) -> dict[str, object]:
     """Build a deterministic checksum manifest for data and sidecar files."""
+    timestamp = _resolve_generated_at(
+        generated_at,
+        allow_nondeterministic=allow_nondeterministic_generated_at,
+    )
     return {
         "schema_version": MANIFEST_SCHEMA_VERSION,
         "manifest_type": "bioetl.dataset_snapshot.checksums",
         "dataset_bundle_id": dataset_bundle_id,
-        "generated_at": generated_at or _utc_now(),
+        "generated_at": timestamp,
         "algorithm": "sha256",
         "files": [_fingerprint_payload(fingerprint) for fingerprint in fingerprints],
     }
@@ -264,6 +273,7 @@ def write_export_sidecar_manifests(
     output_path: Path,
     row_count: int,
     generated_at: str | None = None,
+    allow_nondeterministic_generated_at: bool = False,
     run_ids: tuple[str, ...] = (),
     code_revision: str | None = None,
     strict: bool = False,
@@ -278,6 +288,7 @@ def write_export_sidecar_manifests(
         columns=tuple(field.name for field in table.schema),
         data_fingerprint=data_fingerprint,
         generated_at=generated_at,
+        allow_nondeterministic_generated_at=allow_nondeterministic_generated_at,
         run_ids=run_ids,
         code_revision=code_revision,
         strict=strict,
@@ -387,6 +398,24 @@ def _mixed_license_notice(providers: tuple[str, ...]) -> str:
     return (
         "Composite or multi-provider export; downstream redistribution must satisfy "
         "all contributing provider terms and must not be treated as MIT-licensed data."
+    )
+
+
+def _resolve_generated_at(
+    generated_at: str | None,
+    *,
+    allow_nondeterministic: bool,
+) -> str:
+    """Resolve export manifest timestamp without implicit replay-time wall clock drift."""
+    if generated_at is not None:
+        timestamp = generated_at.strip()
+        if timestamp:
+            return timestamp
+    if allow_nondeterministic:
+        return _utc_now()
+    raise ValueError(
+        "generated_at must be provided for deterministic export manifests; "
+        "operator-only exports must opt into non-deterministic generated_at"
     )
 
 

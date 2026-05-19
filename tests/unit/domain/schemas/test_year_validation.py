@@ -100,7 +100,11 @@ class TestCrossRefYearValidation:
             "affiliation_list": None,
             # Author and reference fields
             "author_details": None,
+            "author_details_raw_json": None,
+            "author_details_canonical_json": None,
             "references": None,
+            "references_raw_json": None,
+            "references_canonical_json": None,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:

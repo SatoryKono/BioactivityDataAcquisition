@@ -196,6 +196,9 @@ class ExportService:
                 output_path=output_path,
                 row_count=row_count,
                 generated_at=options.manifest_generated_at,
+                allow_nondeterministic_generated_at=(
+                    options.allow_nondeterministic_manifest_timestamp
+                ),
                 run_ids=options.run_ids,
                 code_revision=options.code_revision,
                 strict=options.manifest_strict,

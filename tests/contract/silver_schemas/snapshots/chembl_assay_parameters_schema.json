@@ -164,6 +164,47 @@
     "required": false,
     "unique": false
   },
+  "qudt_ontology_version": {
+    "checks": [],
+    "coerce": true,
+    "description": "Optional QUDT ontology version companion for qudt_units.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "qudt_unit_iri": {
+    "checks": [],
+    "coerce": true,
+    "description": "Optional canonical QUDT IRI companion for qudt_units.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "qudt_unit_mapping_status": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": true,
+    "description": "Optional QUDT mapping-status companion.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "qudt_units": {
+    "checks": [],
+    "coerce": true,
+    "description": "Optional QUDT unit token/IRI sidecar when published by the provider/runtime.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "standard_relation": {
     "checks": [
       {
@@ -241,6 +282,47 @@
     "checks": [],
     "coerce": true,
     "description": "Original units (e.g., uM, nM, %).",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "uo_ontology_version": {
+    "checks": [],
+    "coerce": true,
+    "description": "Optional Units Ontology version companion for uo_units.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "uo_unit_iri": {
+    "checks": [],
+    "coerce": true,
+    "description": "Optional canonical Units Ontology IRI companion for uo_units.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "uo_unit_mapping_status": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": true,
+    "description": "Optional Units Ontology mapping-status companion.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "uo_units": {
+    "checks": [],
+    "coerce": true,
+    "description": "Optional Units Ontology identifier sidecar when published by the provider/runtime.",
     "dtype": "str",
     "nullable": true,
     "required": false,

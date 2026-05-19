@@ -582,6 +582,35 @@ class TestBatchWriterIOMixinGold:
             "valid_from_col": "valid_from",
         }
 
+    async def test_write_gold_prefers_replay_timestamp_anchor(
+        self, mock_storage, mock_gold_validator
+    ):
+        """Exact replay Gold side effects use the deterministic replay timestamp."""
+        logger = MagicMock()
+        replay_anchor = datetime(2026, 5, 16, 0, 0, tzinfo=UTC)
+        occurrence_started_at = datetime(2026, 5, 19, 12, 30, tzinfo=UTC)
+        context = PipelineContext.create(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
+            started_at=occurrence_started_at,
+            replay_timestamp_anchor=replay_anchor,
+        )
+        writer = _make_writer(
+            mock_storage,
+            context,
+            mock_gold_validator,
+            primary_keys=["entity_id"],
+            gold_write_mode="scd2",
+            scd_config={"business_key": "entity_id", "valid_from_col": "valid_from"},
+        )
+
+        await writer.write_gold([{"entity_id": "x"}])
+
+        kwargs = mock_storage.write_gold.call_args[1]
+        assert kwargs["ingestion_ts"] == replay_anchor
+        assert kwargs["ingestion_ts"] != occurrence_started_at
+
 
 # ---------------------------------------------------------------------------
 # _prepare_gold_records

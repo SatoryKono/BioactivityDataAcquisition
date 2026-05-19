@@ -110,6 +110,14 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         """Access the run context."""
         return self._context
 
+    def _strict_manifest_id_required(self) -> bool:
+        """Return whether sidecar lineage must close over manifest identity."""
+        return bool(
+            self._context.manifest_id
+            or self._context.execution_fingerprint
+            or self._context.effective_config_artifact_id
+        )
+
     @cached_property
     def _run_type_enum(self) -> RunTypeEnum:
         """Map domain RunType to metadata RunTypeEnum."""
@@ -256,6 +264,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         return create_metadata_bundle(
             metadata=self.create_bronze_metadata(input_data),
             lineage_fragment=self.build_bronze_lineage_fragment(input_data),
+            strict_manifest_id_required=self._strict_manifest_id_required(),
         )
 
     def create_bronze_lineage_sidecar(
@@ -320,6 +329,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         return create_metadata_bundle(
             metadata=self.create_silver_metadata(input_data),
             lineage_fragment=self.build_silver_lineage_fragment(input_data),
+            strict_manifest_id_required=self._strict_manifest_id_required(),
         )
 
     def create_gold_metadata(self, input_data: GoldMetadataInput) -> GoldMetadata:
@@ -361,6 +371,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         return create_metadata_bundle(
             metadata=self.create_gold_metadata(input_data),
             lineage_fragment=self.build_gold_lineage_fragment(input_data),
+            strict_manifest_id_required=self._strict_manifest_id_required(),
         )
 
     @classmethod
