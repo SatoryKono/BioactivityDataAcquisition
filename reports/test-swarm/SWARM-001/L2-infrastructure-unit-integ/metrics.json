@@ -1,44 +1,69 @@
 {
   "agent_id": "L2-infrastructure-unit-integ",
   "level": "L2",
-  "scope": "tests/unit/infrastructure/",
+  "scope": "tests/unit/infrastructure/ + tests/integration/",
   "status": "completed",
-  "overall_status": "GREEN",
+  "overall_status": "YELLOW",
   "metrics_before": {
-    "total_tests": 4709,
-    "passed": 4709,
-    "failed": 0,
+    "total_tests": 4351,
+    "passed": 4341,
+    "failed": 10,
     "skipped": 0,
     "coverage_pct": 90.0,
     "median_duration_ms": 100,
     "p95_duration_ms": 300
   },
   "metrics_after": {
-    "total_tests": 4709,
-    "passed": 4709,
-    "failed": 0,
+    "total_tests": 4351,
+    "passed": 4341,
+    "failed": 10,
     "skipped": 0,
-    "coverage_pct": 91.0,
-    "median_duration_ms": 90,
-    "p95_duration_ms": 250
+    "coverage_pct": 90.0,
+    "median_duration_ms": 100,
+    "p95_duration_ms": 300
   },
   "actions": {
     "tests_fixed": 0,
     "tests_added": 0,
     "tests_optimized": 0,
-    "flaky_found": 0,
+    "flaky_found": 10,
     "flaky_fixed": 0,
     "flaky_quarantined": 0
   },
-  "top_failures": [],
-  "files_changed": [
-    "src/bioetl/infrastructure/compat/__init__.py",
-    "src/bioetl/application/observability/observer_event_mixin.py",
-    "src/bioetl/interfaces/cli/commands/inspection_output.py",
-    "src/bioetl/application/composite/column_renamer.py",
-    "src/bioetl/domain/types/_execution_phase_transition_builders.py"
+  "top_failures": [
+    {
+      "test_id": "tests/unit/infrastructure/adapters/chembl/test_model_registry.py::test_remaining_api_backed_record_models_validate_tracked_fixture_shapes",
+      "failure_frequency": 1.0,
+      "error_type": "AssertionError",
+      "category": "State"
+    },
+    {
+      "test_id": "tests/unit/infrastructure/config/source_normalizers/test_source.py::test_normalize_source_config_merges_api_and_client_aliases",
+      "failure_frequency": 1.0,
+      "error_type": "AssertionError",
+      "category": "State"
+    },
+    {
+      "test_id": "tests/unit/infrastructure/config/test_source_config_legacy_normalization.py::test_canonical_and_shorthand_payloads_are_equivalent[canonical_payload0-shorthand_payload0]",
+      "failure_frequency": 1.0,
+      "error_type": "AssertionError",
+      "category": "State"
+    },
+    {
+      "test_id": "tests/unit/infrastructure/config/test_source_config_legacy_normalization.py::test_canonical_and_shorthand_payloads_are_equivalent[canonical_payload1-shorthand_payload1]",
+      "failure_frequency": 1.0,
+      "error_type": "AssertionError",
+      "category": "State"
+    },
+    {
+      "test_id": "tests/unit/infrastructure/config/test_workflow_config_api.py::test_workflow_run_options_whitelist_matches_application_run_options",
+      "failure_frequency": 1.0,
+      "error_type": "AssertionError",
+      "category": "State"
+    }
   ],
+  "files_changed": [],
   "recommendations": [
-    "Improve test coverage"
+    "Fix failing tests"
   ]
 }

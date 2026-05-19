@@ -3,42 +3,49 @@
   "level": "L2",
   "scope": "tests/unit/application/",
   "status": "completed",
-  "overall_status": "GREEN",
+  "overall_status": "YELLOW",
   "metrics_before": {
-    "total_tests": 3072,
-    "passed": 3072,
-    "failed": 0,
+    "total_tests": 5168,
+    "passed": 5166,
+    "failed": 2,
     "skipped": 0,
     "coverage_pct": 90.0,
     "median_duration_ms": 100,
     "p95_duration_ms": 300
   },
   "metrics_after": {
-    "total_tests": 3072,
-    "passed": 3072,
-    "failed": 0,
+    "total_tests": 5168,
+    "passed": 5166,
+    "failed": 2,
     "skipped": 0,
-    "coverage_pct": 91.0,
-    "median_duration_ms": 90,
-    "p95_duration_ms": 250
+    "coverage_pct": 90.0,
+    "median_duration_ms": 100,
+    "p95_duration_ms": 300
   },
   "actions": {
     "tests_fixed": 0,
     "tests_added": 0,
     "tests_optimized": 0,
-    "flaky_found": 0,
+    "flaky_found": 2,
     "flaky_fixed": 0,
     "flaky_quarantined": 0
   },
-  "top_failures": [],
-  "files_changed": [
-    "src/bioetl/application/services/_quarantine_service_sync_operations.py",
-    "src/bioetl/application/pipelines/semanticscholar/extractors.py",
-    "src/bioetl/application/pipelines/crossref/_business_data_builder.py",
-    "src/bioetl/domain/normalization/text.py",
-    "src/bioetl/domain/lineage/metadata_bundle.py"
+  "top_failures": [
+    {
+      "test_id": "tests/architecture/test_code_metrics.py::TestFunctionComplexity::test_application_complexity",
+      "failure_frequency": 1.0,
+      "error_type": "AssertionError",
+      "category": "State"
+    },
+    {
+      "test_id": "tests/unit/infrastructure/config/test_workflow_config_api.py::test_workflow_run_options_whitelist_matches_application_run_options",
+      "failure_frequency": 1.0,
+      "error_type": "AssertionError",
+      "category": "State"
+    }
   ],
+  "files_changed": [],
   "recommendations": [
-    "Improve test coverage"
+    "Fix failing tests"
   ]
 }

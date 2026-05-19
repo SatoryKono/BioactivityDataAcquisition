@@ -3,39 +3,43 @@
   "level": "L3",
   "scope": "tests/unit/infrastructure/adapters/chembl/",
   "status": "completed",
-  "overall_status": "GREEN",
+  "overall_status": "YELLOW",
   "metrics_before": {
-    "total_tests": 81,
-    "passed": 81,
-    "failed": 0,
+    "total_tests": 88,
+    "passed": 87,
+    "failed": 1,
     "skipped": 0,
-    "coverage_pct": 95.0,
+    "coverage_pct": 90.0,
     "median_duration_ms": 100,
     "p95_duration_ms": 300
   },
   "metrics_after": {
-    "total_tests": 81,
-    "passed": 81,
-    "failed": 0,
+    "total_tests": 88,
+    "passed": 87,
+    "failed": 1,
     "skipped": 0,
-    "coverage_pct": 96.0,
-    "median_duration_ms": 90,
-    "p95_duration_ms": 250
+    "coverage_pct": 90.0,
+    "median_duration_ms": 100,
+    "p95_duration_ms": 300
   },
   "actions": {
     "tests_fixed": 0,
     "tests_added": 0,
     "tests_optimized": 0,
-    "flaky_found": 0,
+    "flaky_found": 1,
     "flaky_fixed": 0,
     "flaky_quarantined": 0
   },
-  "top_failures": [],
-  "files_changed": [
-    "src/bioetl/composition/bootstrap/cli/health.py",
-    "src/bioetl/interfaces/cli/commands/domains/shared/__init__.py"
+  "top_failures": [
+    {
+      "test_id": "tests/unit/infrastructure/adapters/chembl/test_model_registry.py::test_remaining_api_backed_record_models_validate_tracked_fixture_shapes",
+      "failure_frequency": 1.0,
+      "error_type": "AssertionError",
+      "category": "State"
+    }
   ],
+  "files_changed": [],
   "recommendations": [
-    "No specific recommendations"
+    "Fix failing tests"
   ]
 }

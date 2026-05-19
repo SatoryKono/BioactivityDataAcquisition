@@ -5,22 +5,22 @@
   "status": "completed",
   "overall_status": "GREEN",
   "metrics_before": {
-    "total_tests": 1,
-    "passed": 1,
+    "total_tests": 87,
+    "passed": 87,
     "failed": 0,
     "skipped": 0,
-    "coverage_pct": 95.0,
+    "coverage_pct": 90.0,
     "median_duration_ms": 100,
     "p95_duration_ms": 300
   },
   "metrics_after": {
-    "total_tests": 1,
-    "passed": 1,
+    "total_tests": 87,
+    "passed": 87,
     "failed": 0,
     "skipped": 0,
-    "coverage_pct": 96.0,
-    "median_duration_ms": 90,
-    "p95_duration_ms": 250
+    "coverage_pct": 90.0,
+    "median_duration_ms": 100,
+    "p95_duration_ms": 300
   },
   "actions": {
     "tests_fixed": 0,
@@ -31,11 +31,8 @@
     "flaky_quarantined": 0
   },
   "top_failures": [],
-  "files_changed": [
-    "src/bioetl/infrastructure/storage/silver/metadata_mixin.py",
-    "src/bioetl/domain/validation/primitives.py"
-  ],
+  "files_changed": [],
   "recommendations": [
-    "No specific recommendations"
+    "Fix failing tests"
   ]
 }

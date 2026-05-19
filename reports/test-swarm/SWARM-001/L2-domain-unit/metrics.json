@@ -3,42 +3,43 @@
   "level": "L2",
   "scope": "tests/unit/domain/",
   "status": "completed",
-  "overall_status": "GREEN",
+  "overall_status": "YELLOW",
   "metrics_before": {
-    "total_tests": 5381,
-    "passed": 5381,
-    "failed": 0,
+    "total_tests": 7019,
+    "passed": 7018,
+    "failed": 1,
     "skipped": 0,
     "coverage_pct": 90.0,
     "median_duration_ms": 100,
     "p95_duration_ms": 300
   },
   "metrics_after": {
-    "total_tests": 5381,
-    "passed": 5381,
-    "failed": 0,
+    "total_tests": 7019,
+    "passed": 7018,
+    "failed": 1,
     "skipped": 0,
-    "coverage_pct": 91.0,
-    "median_duration_ms": 90,
-    "p95_duration_ms": 250
+    "coverage_pct": 90.0,
+    "median_duration_ms": 100,
+    "p95_duration_ms": 300
   },
   "actions": {
     "tests_fixed": 0,
     "tests_added": 0,
     "tests_optimized": 0,
-    "flaky_found": 0,
+    "flaky_found": 1,
     "flaky_fixed": 0,
     "flaky_quarantined": 0
   },
-  "top_failures": [],
-  "files_changed": [
-    "src/bioetl/infrastructure/storage/silver/maintenance_mixin.py",
-    "src/bioetl/application/pipelines/chembl/_pipelines.py",
-    "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py",
-    "src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py",
-    "src/bioetl/application/pipelines/crossref/_business_data_builder.py"
+  "top_failures": [
+    {
+      "test_id": "tests/unit/interfaces/cli/commands/test_runtime_compat_aliases.py::test_cli_internal_wrappers_reexport_public_command_symbols[bioetl.interfaces.cli.commands.domains.run.command-bioetl.interfaces.cli.commands.run-export_names4]",
+      "failure_frequency": 1.0,
+      "error_type": "AssertionError",
+      "category": "State"
+    }
   ],
+  "files_changed": [],
   "recommendations": [
-    "Improve test coverage"
+    "Fix failing tests"
   ]
 }

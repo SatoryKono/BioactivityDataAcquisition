@@ -1,3 +1,3 @@
 # Failure Frequency Summary
 
-All tests passed successfully.
+Found 31 failing tests.
