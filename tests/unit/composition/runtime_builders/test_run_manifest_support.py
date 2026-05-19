@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import os
 from dataclasses import replace
-from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from typing import cast
@@ -225,8 +224,8 @@ def test_cached_bronze_snapshot_refs_keep_stable_identity_when_mtime_changes(
         bronze_root=bronze_root,
         bronze_date="2026-04-12",
     )
-    original_mtime = batch_file.stat().st_mtime
-    os.utime(batch_file, (original_mtime + 10, original_mtime + 10))
+    current_mtime = batch_file.stat().st_mtime
+    os.utime(batch_file, (current_mtime + 10, current_mtime + 10))
     second = build_cached_bronze_input_snapshot_refs(
         bronze_root=bronze_root,
         bronze_date="2026-04-12",
@@ -238,8 +237,8 @@ def test_cached_bronze_snapshot_refs_keep_stable_identity_when_mtime_changes(
     assert first[0].content_hash == second[0].content_hash
     assert first[0].immutable_uri == second[0].immutable_uri
     assert first[0].immutable_uri == "bronze://2026-04-12/batch_demo.jsonl.zst"
-    assert first[0].captured_at != second[0].captured_at
-    assert datetime.fromtimestamp(original_mtime, tz=UTC) == first[0].captured_at
+    assert first[0].captured_at is None
+    assert second[0].captured_at is None
 
 
 @pytest.mark.unit

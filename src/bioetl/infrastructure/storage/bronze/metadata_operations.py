@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, cast
 
@@ -266,7 +265,8 @@ def _build_live_input_snapshot_ref(
         content_hash=content_hash,
         immutable_uri=f"bronze://{portable_relative_path}",
         query_fingerprint=query_fingerprint,
-        captured_at=datetime.fromtimestamp(full_path.stat().st_mtime, tz=UTC),
+        # Local filesystem mtime is not authoritative replay evidence.
+        captured_at=None,
     )
 
 

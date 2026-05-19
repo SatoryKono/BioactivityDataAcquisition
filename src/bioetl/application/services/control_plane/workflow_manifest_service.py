@@ -24,7 +24,13 @@ from bioetl.domain.workflow import (
 __all__ = ["WorkflowManifestCreateSpec", "WorkflowManifestService"]
 
 _EXECUTION_FINGERPRINT_IGNORED_LAUNCH_KEYS = frozenset(
-    {"resume_last", "force_steps", "repair_steps"}
+    {
+        "resume_last",
+        "resume_manifest_id",
+        "resume_run_id",
+        "force_steps",
+        "repair_steps",
+    }
 )
 
 

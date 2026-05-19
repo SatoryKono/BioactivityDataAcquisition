@@ -360,6 +360,172 @@ async def test_workflow_execution_service_resume_last_skips_completed_steps() ->
 
 
 @pytest.mark.asyncio
+async def test_workflow_execution_service_resume_by_manifest_id_skips_completed_steps() -> (
+    None
+):
+    manifest_port = _InMemoryWorkflowManifestPort()
+    ledger_port = _InMemoryWorkflowLedgerPort()
+    state_port = _InMemoryWorkflowStatePort()
+    lock_port = _FakeLockPort()
+    manifest = WorkflowManifestService(
+        manifest_port=manifest_port,
+        created_at_factory=lambda: FIXED_TEST_TIME,
+        _manifest_id_factory=lambda: "workflow-manifest-1",
+    ).create_manifest(
+        request=type(
+            "_Request",
+            (),
+            {
+                "workflow_run_id": RunID(UUID("00000000-0000-0000-0000-000000000111")),
+                "config": _build_config(),
+                "launch_context": {},
+                "resumed_from_manifest_id": None,
+            },
+        )()
+    )
+    state_port.save(
+        WorkflowExecutionState(
+            workflow_run_id=manifest.workflow_run_id,
+            manifest_id=manifest.manifest_id,
+            workflow_name=manifest.workflow_name,
+            execution_fingerprint=manifest.execution_fingerprint,
+            status="failed",
+            started_at=FIXED_TEST_TIME,
+            updated_at=FIXED_TEST_TIME,
+            completed_at=FIXED_TEST_TIME,
+            selected_step_ids=manifest.selected_step_ids,
+            steps=(
+                WorkflowStepState(
+                    step_id="chembl_activity_ingest",
+                    step_kind="pipeline",
+                    status="success",
+                ),
+                WorkflowStepState(
+                    step_id="chembl_assay_ingest",
+                    step_kind="pipeline",
+                    status="failed",
+                    error_type="RuntimeError",
+                    error_message="boom",
+                ),
+            ),
+            completed_transform_fingerprints={},
+            last_error_type="RuntimeError",
+            last_error_message="boom",
+        )
+    )
+    fake_runner = _FakeWorkflowRunner()
+    service = WorkflowExecutionService(
+        workflow_runner=fake_runner,  # type: ignore[arg-type]
+        manifest_service=WorkflowManifestService(
+            manifest_port=manifest_port,
+            created_at_factory=lambda: FIXED_TEST_TIME,
+            _manifest_id_factory=lambda: "workflow-manifest-2",
+        ),
+        workflow_ledger_port=ledger_port,
+        workflow_ledger_factory=_create_workflow_ledger_service,
+        workflow_state_port=state_port,
+        workflow_lock_port=lock_port,
+        now_factory=lambda: FIXED_TEST_TIME,
+        run_id_factory=lambda: RunID(UUID("00000000-0000-0000-0000-000000000222")),
+    )
+
+    result = await service.run_workflow(
+        _build_config(),
+        resume_manifest_id="workflow-manifest-1",
+    )
+
+    assert result.status == "success"
+    assert result.resumed is True
+    assert result.manifest_id == "workflow-manifest-1"
+    assert fake_runner.received_completed_step_ids == frozenset(
+        {"chembl_activity_ingest"}
+    )
+
+
+@pytest.mark.asyncio
+async def test_workflow_execution_service_resume_by_run_id_skips_completed_steps() -> (
+    None
+):
+    manifest_port = _InMemoryWorkflowManifestPort()
+    ledger_port = _InMemoryWorkflowLedgerPort()
+    state_port = _InMemoryWorkflowStatePort()
+    lock_port = _FakeLockPort()
+    manifest = WorkflowManifestService(
+        manifest_port=manifest_port,
+        created_at_factory=lambda: FIXED_TEST_TIME,
+        _manifest_id_factory=lambda: "workflow-manifest-1",
+    ).create_manifest(
+        request=type(
+            "_Request",
+            (),
+            {
+                "workflow_run_id": RunID(UUID("00000000-0000-0000-0000-000000000111")),
+                "config": _build_config(),
+                "launch_context": {},
+                "resumed_from_manifest_id": None,
+            },
+        )()
+    )
+    state_port.save(
+        WorkflowExecutionState(
+            workflow_run_id=manifest.workflow_run_id,
+            manifest_id=manifest.manifest_id,
+            workflow_name=manifest.workflow_name,
+            execution_fingerprint=manifest.execution_fingerprint,
+            status="failed",
+            started_at=FIXED_TEST_TIME,
+            updated_at=FIXED_TEST_TIME,
+            completed_at=FIXED_TEST_TIME,
+            selected_step_ids=manifest.selected_step_ids,
+            steps=(
+                WorkflowStepState(
+                    step_id="chembl_activity_ingest",
+                    step_kind="pipeline",
+                    status="success",
+                ),
+                WorkflowStepState(
+                    step_id="chembl_assay_ingest",
+                    step_kind="pipeline",
+                    status="failed",
+                    error_type="RuntimeError",
+                    error_message="boom",
+                ),
+            ),
+            completed_transform_fingerprints={},
+            last_error_type="RuntimeError",
+            last_error_message="boom",
+        )
+    )
+    fake_runner = _FakeWorkflowRunner()
+    service = WorkflowExecutionService(
+        workflow_runner=fake_runner,  # type: ignore[arg-type]
+        manifest_service=WorkflowManifestService(
+            manifest_port=manifest_port,
+            created_at_factory=lambda: FIXED_TEST_TIME,
+            _manifest_id_factory=lambda: "workflow-manifest-2",
+        ),
+        workflow_ledger_port=ledger_port,
+        workflow_ledger_factory=_create_workflow_ledger_service,
+        workflow_state_port=state_port,
+        workflow_lock_port=lock_port,
+        now_factory=lambda: FIXED_TEST_TIME,
+        run_id_factory=lambda: RunID(UUID("00000000-0000-0000-0000-000000000222")),
+    )
+
+    result = await service.run_workflow(
+        _build_config(),
+        resume_run_id=RunID(UUID("00000000-0000-0000-0000-000000000111")),
+    )
+
+    assert result.status == "success"
+    assert result.resumed is True
+    assert result.workflow_run_id == "00000000-0000-0000-0000-000000000111"
+    assert fake_runner.received_completed_step_ids == frozenset(
+        {"chembl_activity_ingest"}
+    )
+
+
+@pytest.mark.asyncio
 async def test_workflow_execution_service_fails_when_lock_is_held() -> None:
     manifest_port = _InMemoryWorkflowManifestPort()
     state_port = _InMemoryWorkflowStatePort()

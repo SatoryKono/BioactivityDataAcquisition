@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
+from bioetl.application.core.lifecycle.checkpoint_runtime import (
+    enrich_metadata_with_execution_identity,
+)
 from bioetl.application.services.checkpoint_compatibility_service import (
     CheckpointCompatibilityService,
 )
@@ -40,6 +43,9 @@ def _metadata(
     normalization_profile_version: str | None = None,
     normalization_profile_hash: str | None = None,
     effective_config_artifact_id: str | None = None,
+    input_snapshot_refs: tuple[dict[str, object], ...] = (),
+    input_snapshot_ids: tuple[str, ...] = (),
+    input_snapshot_fingerprint: str | None = None,
 ) -> CheckpointMetadata:
     return CheckpointMetadata(
         records_processed=100,
@@ -57,6 +63,9 @@ def _metadata(
         normalization_profile_version=normalization_profile_version,
         normalization_profile_hash=normalization_profile_hash,
         effective_config_artifact_id=effective_config_artifact_id,
+        input_snapshot_refs=input_snapshot_refs,
+        input_snapshot_ids=input_snapshot_ids,
+        input_snapshot_fingerprint=input_snapshot_fingerprint,
     )
 
 
@@ -306,4 +315,42 @@ def test_legacy_and_v2_align_when_fingerprint_matches_despite_composite_drift() 
     assert (
         v2_result.details["execution_identity_compatibility"]["reason"]
         == "identical_execution_fingerprint"
+    )
+
+
+def test_enrich_metadata_with_execution_identity_preserves_profile_and_snapshot_anchors() -> (
+    None
+):
+    identity = _metadata(
+        effective_config_hash="f" * 64,
+        execution_fingerprint="fp-identity",
+        manifest_id="manifest-identity",
+        contract_ref="chembl.activity",
+        contract_version="2.0.0",
+        normalization_profile_ref="chembl.activity",
+        normalization_profile_version="2.1.0",
+        normalization_profile_hash="a" * 64,
+        input_snapshot_refs=(
+            {
+                "snapshot_id": "sha256:snap-a",
+                "content_hash": "snap-a",
+                "immutable_uri": "bronze://2026-05-01/batch_a.jsonl.zst",
+            },
+        ),
+        input_snapshot_ids=("sha256:snap-a",),
+        input_snapshot_fingerprint="snap-fingerprint-a",
+    )
+    sparse = CheckpointMetadata(records_processed=100)
+
+    enriched = enrich_metadata_with_execution_identity(sparse, identity=identity)
+
+    assert enriched.normalization_profile_ref == "chembl.activity"
+    assert enriched.normalization_profile_version == "2.1.0"
+    assert enriched.normalization_profile_hash == "a" * 64
+    assert enriched.input_snapshot_refs == identity.input_snapshot_refs
+    assert enriched.input_snapshot_ids == ("sha256:snap-a",)
+    assert enriched.input_snapshot_fingerprint == "snap-fingerprint-a"
+    assert (
+        enriched.checkpoint_execution_identity_fingerprint()
+        == identity.checkpoint_execution_identity_fingerprint()
     )

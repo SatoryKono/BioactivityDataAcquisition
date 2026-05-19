@@ -242,6 +242,12 @@ def test_run_manifest_config_hash_legacy_alias_contract_is_documented_and_wired(
     policy = _read("src/bioetl/domain/control_plane/reproducibility_policy.py")
     builder = _read("src/bioetl/composition/runtime_builders/run_manifest_builder.py")
     refs = _read("src/bioetl/composition/runtime_builders/_run_manifest_refs.py")
+    composite_builder = _read(
+        "src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py"
+    )
+    run_context_factory = _read(
+        "src/bioetl/composition/factories/pipeline/run_context_factory.py"
+    )
 
     assert (
         "`config_hash` is a legacy compatibility anchor retained for older manifest"
@@ -254,8 +260,10 @@ def test_run_manifest_config_hash_legacy_alias_contract_is_documented_and_wired(
     assert "`config_hash`" in runbook
     assert "legacy compatibility" in runbook
     assert "legacy_config_hash_from_resolved_config_hash" not in policy
-    assert "config_hash=resolved_config_hash" in builder
-    assert "config_hash=resolved_config_hash" in refs
+    assert "legacy_config_hash_from_resolved_config_hash" in builder
+    assert "legacy_config_hash_from_resolved_config_hash" in refs
+    assert "legacy_config_hash_from_resolved_config_hash" in composite_builder
+    assert "legacy_config_hash_from_resolved_config_hash" in run_context_factory
 
 
 @pytest.mark.architecture

@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, TypeVar
 
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
+
+_CheckpointTupleItem = TypeVar("_CheckpointTupleItem")
 
 CheckpointCompatibilityPolicy = Literal["observe", "soft_fail", "hard_fail"]
 CheckpointCompatibilityDisposition = Literal[
@@ -79,9 +81,9 @@ def _prefer_identity_flag(
 
 
 def _prefer_identity_sequence(
-    current_value: tuple[str, ...],
-    identity_value: tuple[str, ...],
-) -> tuple[str, ...]:
+    current_value: tuple[_CheckpointTupleItem, ...],
+    identity_value: tuple[_CheckpointTupleItem, ...],
+) -> tuple[_CheckpointTupleItem, ...]:
     """Prefer persisted non-empty tuple values, otherwise use identity fallback."""
     return current_value if current_value else identity_value
 
@@ -153,9 +155,25 @@ def enrich_metadata_with_execution_identity(
             metadata.contract_version,
             identity.contract_version,
         ),
+        normalization_profile_ref=_prefer_identity_value(
+            metadata.normalization_profile_ref,
+            identity.normalization_profile_ref,
+        ),
+        normalization_profile_version=_prefer_identity_value(
+            metadata.normalization_profile_version,
+            identity.normalization_profile_version,
+        ),
+        normalization_profile_hash=_prefer_identity_value(
+            metadata.normalization_profile_hash,
+            identity.normalization_profile_hash,
+        ),
         exact_replay=_prefer_identity_flag(
             metadata.exact_replay,
             identity.exact_replay,
+        ),
+        input_snapshot_refs=_prefer_identity_sequence(
+            metadata.input_snapshot_refs,
+            identity.input_snapshot_refs,
         ),
         input_snapshot_ids=_prefer_identity_sequence(
             metadata.input_snapshot_ids,

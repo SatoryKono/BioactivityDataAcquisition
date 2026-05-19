@@ -278,7 +278,9 @@ def _build_manifest_create_request(
             reproducibility_context=reproducibility_context,
             run_type_value=run_type_value,
             execution_context_value=execution_context_value,
-            config_hash=resolved_config_hash,
+            config_hash=_manifest_support.legacy_config_hash_from_resolved_config_hash(
+                resolved_config_hash
+            ),
             resolved_config_hash=resolved_config_hash,
             effective_config_hash=effective_config_hash,
             contract_ref=contract_identity.contract_ref,

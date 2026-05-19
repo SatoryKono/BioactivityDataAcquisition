@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import hashlib
-from datetime import UTC, datetime
 from pathlib import Path
 
 from bioetl.domain.control_plane import RunInputSnapshotRef
@@ -49,12 +48,13 @@ def _build_cached_bronze_snapshot_ref(
     content_hash = _compute_cached_bronze_batch_content_hash(batch_file)
     relative_path = batch_file.relative_to(bronze_root).as_posix()
     snapshot_id = _content_addressed_snapshot_id(content_hash)
-    captured_at = datetime.fromtimestamp(batch_file.stat().st_mtime, tz=UTC)
     return RunInputSnapshotRef(
         snapshot_id=snapshot_id,
         content_hash=content_hash,
         immutable_uri=f"bronze://{relative_path}",
-        captured_at=captured_at,
+        # Cached Bronze files are immutable replay inputs; local mtimes are not
+        # authoritative capture timestamps and should not leak into artifacts.
+        captured_at=None,
     )
 
 
