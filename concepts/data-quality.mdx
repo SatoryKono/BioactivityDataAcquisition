@@ -1,0 +1,207 @@
+---
+title: "Data quality validation and quarantine in BioETL"
+description: "BioETL validates every record against configurable rules, routes failures to a quarantine table, and halts batches when error rates exceed your thresholds."
+---
+
+> ## Documentation Index
+>
+> Fetch the complete documentation index at: [https://biomoltech.mintlify.app/llms.txt](https://biomoltech.mintlify.app/llms.txt) Use this file to discover all available pages before exploring further.
+
+BioETL applies data quality (DQ) checks at every stage of the pipeline. Before a record reaches the Silver layer it must pass normalization and schema validation, plus any field-level rules you have configured. Records that fail are written to a quarantine table instead of being silently dropped or passed through. You can inspect, replay, or purge quarantined records at any time, and DQ reports are written alongside each layer's data so you always have an audit trail.
+
+## How normalization works
+
+Before validation can run, raw records are **normalized** — transformed from their provider-specific shape into the canonical schema used across all pipelines. Normalization happens in the Bronze → Silver transition and covers:
+
+<AccordionGroup>
+  <Accordion title="Field renaming">
+    Provider-specific field names are mapped to a uniform, pipeline-agnostic schema. For example, `standard_value` and `standard_units` in ChEMBL become `activity_value` and `activity_unit`; `CanonicalSMILES` in PubChem becomes `smiles`. Mapping tables live in each provider's config under `configs/providers/{provider}.yaml`.
+  </Accordion>
+
+  <Accordion title="Type coercion">
+    API responses are JSON, so all values arrive as strings or loosely typed numerics. BioETL casts each field to its declared dtype: string-encoded numbers become `float64` or `int32`, ISO-8601 date strings become `datetime[UTC]` columns, and boolean-like strings (`"Y"`/`"N"`) become `bool`. Coercion failures are treated as validation errors and route the record to quarantine.
+  </Accordion>
+
+  <Accordion title="Unit standardization">
+    Numeric activity values are converted to canonical units where provider documentation allows. For example, IC50 values reported in µM are stored as nM so cross-provider comparisons use a single baseline. The unit map is declared per entity in `configs/entities/{provider}/{entity}.yaml` under `normalization.unit_map`.
+  </Accordion>
+
+  <Accordion title="Null harmonization">
+    Provider-specific sentinel values — `"None"`, `"-"`, `"N/A"`, empty strings, and provider-defined missing-value codes — are replaced with proper SQL-style `null` values. This ensures that `is_null()` checks and required-field rules behave consistently regardless of the data source.
+  </Accordion>
+
+  <Accordion title="Nested field extraction">
+    Some providers return deeply nested or array-typed JSON fields. BioETL flattens a configurable subset of these into top-level columns during the Silver write. Which fields are extracted is controlled by `normalization.flatten_fields` in the entity YAML. Fields not listed are preserved as serialized JSON strings for downstream access.
+  </Accordion>
+</AccordionGroup>
+
+## How validation works
+
+Validation runs **after normalization**, at two points in the pipeline:
+
+1. **Bronze → Silver**: each normalized record is checked against the entity schema and field-level rules before being written to the Silver Delta Lake table.
+2. **Silver → Gold**: Silver records are filtered against any Gold-specific predicates before being written to the Gold layer.
+
+When a record fails either check, it is written to `data/output/quarantine/common.quarantine/` as a Delta Lake table entry. The entry includes the original payload, the reason the record failed, a structured error code, and a reference to the pipeline run that produced it.
+
+### Validation rule types
+
+| Rule type | YAML key | What it checks | Error code |
+| --- | --- | --- | --- |
+| Schema / dtype | _(implicit)_ | Column matches its declared Pandera dtype | `DQ-TYPE-ERROR` |
+| Required field | `required: true` | Field is not null after normalization | `DQ-MISSING-FIELD` |
+| Numeric range | `min` / `max` | Value falls within declared bounds | `DQ-RANGE` |
+| Allowed values | `allowed_values` | Categorical field matches one of the listed values | `DQ-ENUM` |
+| Regex pattern | `pattern` | String field matches the supplied regular expression | `DQ-PATTERN` |
+| Deduplication | _(implicit)_ | SHA-256 hash of business key \+ payload is unique | _(skipped silently)_ |
+
+Deduplication is handled at the Delta Lake merge step: records whose content hash already exists in Silver are skipped without raising an error, making every pipeline run fully idempotent against the same Bronze data.
+
+## The three-level rule hierarchy
+
+DQ rules are layered so you can set sensible defaults and override them only where needed:
+
+<Steps>
+  <Step title="Global defaults">
+    `configs/base/quality.yaml` defines the baseline rules that apply to every pipeline. These cover common field types — null checks, range bounds, string lengths — and set the default soft and hard thresholds.
+  </Step>
+  <Step title="Provider rules">
+    `configs/providers/{provider}.yaml` can override or extend the global defaults for a specific provider. For example, ChEMBL activity records have different acceptable value ranges than PubChem compound records.
+  </Step>
+  <Step title="Entity rules">
+    `configs/entities/{provider}/{entity}.yaml` contains the most specific rules. Entity-level rules override both global and provider defaults for that single pipeline.
+  </Step>
+</Steps>
+
+When BioETL evaluates a record, it merges the three layers in order — global → provider → entity — so the most specific rule always wins.
+
+## Soft and hard thresholds
+
+Two environment variables control how BioETL responds when records fail validation:
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `BIOETL_DQ_SOFT_THRESHOLD` | `0.05` | Emit a warning when more than 5% of records in a batch fail |
+| `BIOETL_DQ_HARD_THRESHOLD` | `0.20` | Fail the batch when more than 20% of records fail |
+
+When the soft threshold is crossed, BioETL logs a warning and continues processing. The batch still completes and data is written.
+
+When the hard threshold is crossed, BioETL halts the batch and exits with **exit code 83**. No partial data is written for that batch. You can adjust either threshold without redeploying:
+
+```bash
+# Lower the hard threshold to fail faster during development
+export BIOETL_DQ_HARD_THRESHOLD=0.10
+
+bioetl run --pipeline chembl_activity
+```
+
+<Warning>
+  A batch that exceeds the hard threshold exits with code 83. If you are running BioETL in a script or CI job, check the exit code to detect DQ failures: `if [ $? -eq 83 ]; then ...`.
+</Warning>
+
+## DQ reports
+
+After each batch completes, BioETL writes a DQ report as a JSON sidecar file alongside the layer data:
+
+- Bronze: `data/output/bronze/{provider}/{entity}/{date}/batch-{date}-{provider}-{entity}-dq-report.json`
+- Silver: `data/output/silver/{provider}/{entity}/silver-{provider}-{entity}-dq-report.json`
+- Gold: `data/output/gold/{provider}/{entity}/gold-{provider}-{entity}-dq-report.json`
+
+These reports contain a per-field breakdown of pass and fail counts, the thresholds that were applied, and a reference to the run that produced them.
+
+## The quarantine table
+
+Failed records land in a unified Delta Lake quarantine table at `data/output/quarantine/common.quarantine/`. Because quarantine is a Delta Lake table, you can query it with Polars or any Parquet-compatible tool, and its history is preserved across runs.
+
+Each quarantine entry stores:
+
+- The original payload
+- A human-readable failure reason
+- Structured fields: `reason_code`, `rule_type`, `field`, `operator`, `expected`, `actual`
+- The `pipeline` and `run_id` that produced the entry
+- An `ingestion_ts` timestamp
+
+## Inspecting quarantined records
+
+Use `bioetl quarantine inspect` to browse failures for a specific pipeline:
+
+```bash
+# Show the first 100 quarantined records for chembl_activity
+bioetl quarantine inspect --pipeline chembl_activity
+
+# Filter by error code
+bioetl quarantine inspect --pipeline chembl_activity --error-code DQ-MISSING-FIELD
+
+# Show only Silver filter rejects
+bioetl quarantine inspect --pipeline chembl_activity --silver-filter-only
+
+# Limit to a specific run
+bioetl quarantine inspect --pipeline chembl_activity --run-id <run-id> --limit 20
+```
+
+For aggregate counts rather than individual records:
+
+```bash
+# Summary statistics
+bioetl quarantine stats --pipeline chembl_activity
+
+# Breakdown by reason code
+bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by reason-code
+
+# Breakdown by field
+bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by field
+```
+
+## Validating your DQ configuration
+
+Before running a pipeline, you can validate that its DQ rules are syntactically correct and internally consistent:
+
+```bash
+# Validate the merged DQ config for an entity
+bioetl dq validate --entity chembl.activity
+
+# Show all resolved rules
+bioetl dq validate --entity chembl.activity --show-rules
+
+# Fail on warnings as well as errors
+bioetl dq validate --entity chembl.activity --strict
+```
+
+## Replaying and purging quarantined records
+
+If you fix a transformation rule or DQ configuration, you can replay quarantined records back through the pipeline without re-fetching from the API:
+
+```bash
+# Preview which records would be replayed
+bioetl quarantine replay --pipeline chembl_activity --dry-run
+
+# Replay records no older than 7 days
+bioetl quarantine replay --pipeline chembl_activity --max-age-days 7
+```
+
+To remove old quarantine entries:
+
+```bash
+# Preview deletion
+bioetl quarantine purge --pipeline chembl_activity --older-than-days 30 --dry-run
+
+# Delete records older than 30 days
+bioetl quarantine purge --pipeline chembl_activity --older-than-days 30
+```
+
+Quarantine entries are retained for 30 days by default (`BIOETL_QUARANTINE_RETENTION_DAYS`).
+
+## Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| `0` | Pipeline completed successfully |
+| `82` | Pipeline execution error |
+| `83` | DQ hard threshold exceeded — batch halted |
+| `84` | Lock acquisition failed |
+| `86` | Network error |
+| `130` | Interrupted (Ctrl\+C) |
+
+<Tip>
+  Use `bioetl diagnostics --quarantine` for a unified view of quarantine statistics alongside pipeline metrics and health checks.
+</Tip>
