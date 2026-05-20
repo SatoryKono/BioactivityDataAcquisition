@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from bioetl.application.composite.checkpoint.transition_service import (
+    apply_validated_checkpoint_transition,
+)
 from bioetl.application.composite.runner_pkg.runner_constants import (
     CHECKPOINT_NON_FATAL_ERRORS,
 )
@@ -35,14 +38,11 @@ def transition_to_merging_state(
         previous_state,
         CompositePipelineState.MERGING,
     )
-    clock = getattr(host, "_clock", None)
-    if clock is None:
-        merging_state = state.with_state(CompositePipelineState.MERGING)
-    else:
-        merging_state = state.with_state(
-            CompositePipelineState.MERGING,
-            clock=clock,
-        )
+    merging_state = apply_validated_checkpoint_transition(
+        state,
+        CompositePipelineState.MERGING,
+        clock=getattr(host, "_clock", None),
+    )
     host._fsm.log_fsm_transition(
         from_state=previous_state,
         to_state=CompositePipelineState.MERGING,
@@ -92,14 +92,11 @@ async def handle_merge_phase_exception(
         stage="merge_failed",
         error=str(error),
     )
-    clock = getattr(host, "_clock", None)
-    if clock is None:
-        failed_state = state.with_state(CompositePipelineState.FAILED)
-    else:
-        failed_state = state.with_state(
-            CompositePipelineState.FAILED,
-            clock=clock,
-        )
+    failed_state = apply_validated_checkpoint_transition(
+        state,
+        CompositePipelineState.FAILED,
+        clock=getattr(host, "_clock", None),
+    )
     await host._call_save_checkpoint_safe(failed_state, "merge_failed")
 
 
@@ -160,14 +157,11 @@ def transition_to_completed_state(
         previous_state,
         CompositePipelineState.COMPLETED,
     )
-    clock = getattr(host, "_clock", None)
-    if clock is None:
-        completed_state = state.with_state(CompositePipelineState.COMPLETED)
-    else:
-        completed_state = state.with_state(
-            CompositePipelineState.COMPLETED,
-            clock=clock,
-        )
+    completed_state = apply_validated_checkpoint_transition(
+        state,
+        CompositePipelineState.COMPLETED,
+        clock=getattr(host, "_clock", None),
+    )
     host._fsm.log_fsm_transition(
         from_state=previous_state,
         to_state=CompositePipelineState.COMPLETED,

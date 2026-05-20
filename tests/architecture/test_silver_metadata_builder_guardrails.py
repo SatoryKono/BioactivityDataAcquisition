@@ -44,37 +44,9 @@ def test_legacy_silver_metadata_builder_module_has_been_removed() -> None:
 
 
 @pytest.mark.architecture
-def test_silver_metadata_sidecar_adapter_does_not_emit_placeholder_identity() -> None:
-    """Silver sidecars must not publish placeholder content or run-derived IDs."""
-    source = TARGET.read_text(encoding="utf-8")
-
-    assert "SIDECAR_ADAPTER_PRODUCTION_STATUS" in source
-    assert "quarantined_compatibility_only" in source
-    assert "placeholder-hash" not in source
-    assert "{request.table_name}-{request.run_id" not in source
-    assert "build_dataset_content_hash" in source
-    assert "DatasetRef" in source
-
-
-@pytest.mark.architecture
-def test_silver_metadata_sidecar_adapter_carries_control_plane_provenance() -> None:
-    """The quarantined adapter must not silently drop canonical run anchors."""
-    source = TARGET.read_text(encoding="utf-8")
-    required_fragments = (
-        "extract_control_plane_provenance_from_records",
-        "execution_fingerprint=request.execution_fingerprint",
-        "git_commit=request.git_commit",
-        "dependency_lock_hash=request.dependency_lock_hash",
-        "effective_config_hash=request.effective_config_hash",
-        "effective_config_artifact_id=request.effective_config_artifact_id",
-        "contract_ref=request.contract_ref",
-        "normalization_profile_ref=request.normalization_profile_ref",
-        "normalization_profile_hash=request.normalization_profile_hash",
-        "dq_contract_compatibility_hash=request.dq_contract_compatibility_hash",
-    )
-
-    missing = [fragment for fragment in required_fragments if fragment not in source]
-    assert not missing
+def test_quarantined_silver_metadata_sidecar_adapter_has_been_removed() -> None:
+    """The quarantined sidecar adapter must not persist in production src."""
+    assert not TARGET.exists()
 
 
 @pytest.mark.architecture
@@ -97,8 +69,6 @@ def test_runtime_code_does_not_import_quarantined_silver_sidecar_adapter() -> No
     """Active Silver runtime paths must use MetadataCoordinatorPort, not adapter."""
     importers: set[str] = set()
     for path in sorted((ROOT / "src").rglob("*.py")):
-        if path == TARGET:
-            continue
         source = path.read_text(encoding="utf-8")
         if TARGET_MODULE in source:
             importers.add(path.relative_to(ROOT).as_posix())

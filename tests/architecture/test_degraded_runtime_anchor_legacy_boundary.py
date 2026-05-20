@@ -9,14 +9,18 @@ import bioetl.domain.normalization as normalization
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src" / "bioetl"
-HELPER = "compute_degraded_runtime_anchor_fingerprint"
+LEGACY_HELPER_MODULE = (
+    ROOT / "src/bioetl/domain/normalization/legacy_fingerprints.py"
+)
 
 
-def test_degraded_runtime_anchor_fingerprint_is_not_top_level_normalization_api() -> (
-    None
-):
-    assert HELPER not in normalization.__all__
-    assert not hasattr(normalization, HELPER)
+def test_legacy_degraded_runtime_anchor_module_has_been_removed() -> None:
+    assert not LEGACY_HELPER_MODULE.exists()
+
+
+def test_degraded_runtime_anchor_fingerprint_is_not_top_level_normalization_api() -> None:
+    assert "compute_degraded_runtime_anchor_fingerprint" not in normalization.__all__
+    assert not hasattr(normalization, "compute_degraded_runtime_anchor_fingerprint")
 
 
 def test_strict_control_plane_paths_do_not_import_legacy_degraded_fingerprint() -> None:
@@ -34,11 +38,10 @@ def test_strict_control_plane_paths_do_not_import_legacy_degraded_fingerprint() 
                 if node.module not in {
                     "bioetl.domain.normalization",
                     "bioetl.domain.normalization.fingerprints",
-                    "bioetl.domain.normalization.legacy_fingerprints",
                 }:
                     continue
                 imported_names = {alias.name for alias in node.names}
-                if HELPER in imported_names:
+                if "compute_degraded_runtime_anchor_fingerprint" in imported_names:
                     offenders.append(path.relative_to(ROOT).as_posix())
     assert not offenders, (
         "Strict replay/control-plane paths must not import degraded runtime-anchor "

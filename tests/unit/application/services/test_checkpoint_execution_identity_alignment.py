@@ -1,4 +1,4 @@
-"""Regression tests that keep legacy and V2 execution identity semantics aligned."""
+"""Regression tests for canonical checkpoint execution-identity semantics."""
 
 from __future__ import annotations
 
@@ -7,24 +7,24 @@ from unittest.mock import MagicMock
 from bioetl.application.core.lifecycle.checkpoint_runtime import (
     enrich_metadata_with_execution_identity,
 )
+from bioetl.application.services._checkpoint_compatibility_runtime_identity_details import (
+    IdentityDetailsSpec,
+    build_identity_details,
+)
 from bioetl.application.services.checkpoint_compatibility_service import (
     CheckpointCompatibilityService,
 )
-from bioetl.application.services.checkpoint_compatibility_service_v2 import (
-    CheckpointCompatibilityServiceV2,
-    CheckpointIdentity,
-    CompatibilityVerdict,
-    ExecutionPhase,
+from bioetl.domain.normalization import (
+    build_execution_identity_payload,
+    compute_execution_identity_fingerprint,
+    normalize_runtime_anchor_payload,
 )
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
+from bioetl.domain.types.execution_phase import ExecutionPhase
 
 
-def _legacy_service() -> CheckpointCompatibilityService:
+def _service() -> CheckpointCompatibilityService:
     return CheckpointCompatibilityService(logger=MagicMock())
-
-
-def _v2_service() -> CheckpointCompatibilityServiceV2:
-    return CheckpointCompatibilityServiceV2()
 
 
 def _metadata(
@@ -46,9 +46,15 @@ def _metadata(
     input_snapshot_refs: tuple[dict[str, object], ...] = (),
     input_snapshot_ids: tuple[str, ...] = (),
     input_snapshot_fingerprint: str | None = None,
+    pipeline_name: str | None = None,
+    run_type: str | None = None,
+    exact_replay: bool | None = None,
+    silver_filter_compatibility_mode: str | None = None,
 ) -> CheckpointMetadata:
     return CheckpointMetadata(
         records_processed=100,
+        pipeline_name=pipeline_name,
+        run_type=run_type,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         pipeline_version=pipeline_version,
         effective_config_hash=effective_config_hash,
@@ -66,316 +72,182 @@ def _metadata(
         input_snapshot_refs=input_snapshot_refs,
         input_snapshot_ids=input_snapshot_ids,
         input_snapshot_fingerprint=input_snapshot_fingerprint,
+        exact_replay=exact_replay,
+        silver_filter_compatibility_mode=silver_filter_compatibility_mode,
     )
 
 
-def _identity(
-    *,
-    effective_config_hash: str = "a" * 64,
-    composite_run_identity: str | None = None,
-    execution_fingerprint: str | None = None,
-    pipeline_version: str | None = None,
-    manifest_id: str | None = None,
-    contract_ref: str | None = None,
-    contract_version: str | None = None,
-    git_commit: str | None = None,
-    dependency_lock_hash: str | None = None,
-    normalization_profile_ref: str | None = None,
-    normalization_profile_version: str | None = None,
-    normalization_profile_hash: str | None = None,
-    effective_config_artifact_id: str | None = None,
-) -> CheckpointIdentity:
-    return CheckpointIdentity(
-        effective_config_hash=effective_config_hash,
-        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
-        checkpoint_schema_version="1.0.0",
-        composite_run_identity=composite_run_identity,
-        execution_fingerprint=execution_fingerprint,
-        pipeline_version=pipeline_version,
-        manifest_id=manifest_id,
-        git_commit=git_commit,
-        dependency_lock_hash=dependency_lock_hash,
-        contract_ref=contract_ref,
-        contract_version=contract_version,
-        normalization_profile_ref=normalization_profile_ref,
-        normalization_profile_version=normalization_profile_version,
-        normalization_profile_hash=normalization_profile_hash,
-        effective_config_artifact_id=effective_config_artifact_id,
+def test_checkpoint_metadata_emits_canonical_execution_identity_fingerprint() -> None:
+    metadata = _metadata(
+        pipeline_name=" chembl_activity ",
+        run_type=" INCREMENTAL ",
+        pipeline_version=" 1.2.3 ",
+        git_commit=" ABCDEF123 ",
+        effective_config_hash=f" SHA256:{'a' * 64} ",
+        dq_contract_compatibility_hash=" DEADBEEF ",
+        contract_ref=" ChemBL.Activity ",
+        contract_version=" v2 ",
+        effective_config_artifact_id=" artifact-42 ",
+        exact_replay=True,
+        input_snapshot_fingerprint=" FACE ",
+        silver_filter_compatibility_mode=" structural_only_auto_promote ",
+    )
+
+    expected_payload = build_execution_identity_payload(
+        pipeline_name=" chembl_activity ",
+        run_type=" INCREMENTAL ",
+        pipeline_version=" 1.2.3 ",
+        git_commit=" ABCDEF123 ",
+        effective_config_hash=f" SHA256:{'a' * 64} ",
+        dq_contract_compatibility_hash=" DEADBEEF ",
+        contract_ref=" ChemBL.Activity ",
+        contract_version=" v2 ",
+        effective_config_artifact_id=" artifact-42 ",
+        exact_replay=True,
+        input_snapshot_fingerprint=" FACE ",
+        silver_filter_compatibility_mode=" structural_only_auto_promote ",
+    )
+
+    assert metadata.checkpoint_execution_identity_payload() == {
+        key: value for key, value in expected_payload.items() if value is not None
+    }
+    assert metadata.checkpoint_execution_identity_fingerprint() == (
+        compute_execution_identity_fingerprint(expected_payload)
     )
 
 
-def test_legacy_and_v2_align_when_execution_fingerprint_matches() -> None:
-    legacy = _legacy_service()
-    v2 = _v2_service()
-
-    current_metadata = _metadata(execution_fingerprint="fp-same")
-    checkpoint_metadata = _metadata(execution_fingerprint="fp-same")
-    current_identity = _identity(execution_fingerprint="fp-same")
-    checkpoint_identity = _identity(execution_fingerprint="fp-same")
-
-    legacy_result = legacy.validate_checkpoint_compatibility(
-        current_metadata,
-        checkpoint_metadata,
-    )
-    v2_result = v2.check_compatibility(current_identity, checkpoint_identity)
-
-    assert legacy_result.compatible is True
-    assert v2_result.verdict == CompatibilityVerdict.COMPATIBLE
-    assert (
-        v2_result.details["execution_identity_compatibility"]["reason"]
-        == "identical_execution_fingerprint"
-    )
-
-
-def test_legacy_and_v2_align_when_execution_fingerprint_mismatches() -> None:
-    legacy = _legacy_service()
-    v2 = _v2_service()
-
-    current_metadata = _metadata(execution_fingerprint="fp-current")
-    checkpoint_metadata = _metadata(execution_fingerprint="fp-checkpoint")
-    current_identity = _identity(execution_fingerprint="fp-current")
-    checkpoint_identity = _identity(execution_fingerprint="fp-checkpoint")
-
-    legacy_result = legacy.validate_checkpoint_compatibility(
-        current_metadata,
-        checkpoint_metadata,
-    )
-    v2_result = v2.check_compatibility(current_identity, checkpoint_identity)
-
-    assert legacy_result.compatible is False
-    assert legacy_result.execution_identity_compatible is False
-    assert any(
-        "Execution fingerprint mismatch" in msg for msg in legacy_result.messages
-    )
-    assert v2_result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
-    assert (
-        v2_result.details["execution_identity_compatibility"]["reason"]
-        == "execution_fingerprint_mismatch"
-    )
-
-
-def test_legacy_and_v2_align_when_runtime_anchor_fingerprint_mismatches() -> None:
-    legacy = _legacy_service()
-    v2 = _v2_service()
-
-    current_metadata = _metadata(
-        manifest_id="manifest-a",
-        contract_ref="chembl.activity",
-        contract_version="1.0.0",
-        effective_config_artifact_id="artifact-1",
-    )
-    checkpoint_metadata = _metadata(
-        manifest_id="manifest-b",
-        contract_ref="chembl.activity",
-        contract_version="1.0.0",
-        effective_config_artifact_id="artifact-1",
-    )
-    current_identity = _identity(
-        manifest_id="manifest-a",
-        contract_ref="chembl.activity",
-        contract_version="1.0.0",
-        effective_config_artifact_id="artifact-1",
-    )
-    checkpoint_identity = _identity(
-        manifest_id="manifest-b",
-        contract_ref="chembl.activity",
-        contract_version="1.0.0",
-        effective_config_artifact_id="artifact-1",
-    )
-
-    legacy_result = legacy.validate_checkpoint_compatibility(
-        current_metadata,
-        checkpoint_metadata,
-    )
-    v2_result = v2.check_compatibility(current_identity, checkpoint_identity)
-
-    assert legacy_result.compatible is False
-    assert legacy_result.execution_identity_compatible is False
-    assert any(
-        "Degraded runtime-anchor fingerprint mismatch" in msg
-        for msg in legacy_result.messages
-    )
-    assert v2_result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
-    assert (
-        v2_result.details["execution_identity_compatibility"]["reason"]
-        == "degraded_runtime_anchor_fingerprint_mismatch"
-    )
-
-
-def test_legacy_and_v2_align_when_composite_run_identity_mismatches() -> None:
-    legacy = _legacy_service()
-    v2 = _v2_service()
-
-    current_metadata = _metadata(composite_run_identity="run-a")
-    checkpoint_metadata = _metadata(composite_run_identity="run-b")
-    current_identity = _identity(composite_run_identity="run-a")
-    checkpoint_identity = _identity(composite_run_identity="run-b")
-
-    legacy_result = legacy.validate_checkpoint_compatibility(
-        current_metadata,
-        checkpoint_metadata,
-    )
-    v2_result = v2.check_compatibility(current_identity, checkpoint_identity)
-
-    assert legacy_result.compatible is True
-    assert legacy_result.execution_identity_compatible is True
-    assert any(
-        "Checkpoint is compatible for resume" in msg for msg in legacy_result.messages
-    )
-    assert v2_result.verdict == CompatibilityVerdict.COMPATIBLE
-    assert (
-        v2_result.details["execution_identity_compatibility"]["reason"]
-        == "identical_degraded_runtime_anchor_fingerprint"
-    )
-
-
-def test_legacy_blocks_when_composite_identity_is_the_only_resume_anchor() -> None:
-    legacy = _legacy_service()
-
-    current_metadata = CheckpointMetadata(
-        records_processed=100,
-        composite_run_identity="run-a",
-    )
-    checkpoint_metadata = CheckpointMetadata(
-        records_processed=100,
-        composite_run_identity="run-b",
-    )
-
-    legacy_result = legacy.validate_checkpoint_compatibility(
-        current_metadata,
-        checkpoint_metadata,
-    )
-
-    assert legacy_result.compatible is False
-    assert legacy_result.execution_identity_compatible is False
-    assert any(
-        "Execution identity continuity not proven" in msg
-        for msg in legacy_result.messages
-    )
-
-
-def test_legacy_and_v2_align_when_git_commit_and_profile_drift() -> None:
-    legacy = _legacy_service()
-    v2 = _v2_service()
-
-    current_metadata = _metadata(
-        pipeline_version="1.0.0",
-        git_commit="commit-a",
-        dependency_lock_hash="sha256:deps",
-        normalization_profile_ref="chembl.activity",
-        normalization_profile_version="2.0.0",
-        normalization_profile_hash="a" * 64,
-    )
-    checkpoint_metadata = _metadata(
-        pipeline_version="1.0.0",
-        git_commit="commit-b",
-        dependency_lock_hash="sha256:deps",
-        normalization_profile_ref="chembl.activity",
-        normalization_profile_version="2.0.0",
-        normalization_profile_hash="a" * 64,
-    )
-    current_identity = _identity(
-        pipeline_version="1.0.0",
-        git_commit="commit-a",
-        dependency_lock_hash="sha256:deps",
-        normalization_profile_ref="chembl.activity",
-        normalization_profile_version="2.0.0",
-        normalization_profile_hash="a" * 64,
-    )
-    checkpoint_identity = _identity(
-        pipeline_version="1.0.0",
-        git_commit="commit-b",
-        dependency_lock_hash="sha256:deps",
-        normalization_profile_ref="chembl.activity",
-        normalization_profile_version="2.0.0",
-        normalization_profile_hash="a" * 64,
-    )
-
-    legacy_result = legacy.validate_checkpoint_compatibility(
-        current_metadata,
-        checkpoint_metadata,
-    )
-    v2_result = v2.check_compatibility(current_identity, checkpoint_identity)
-
-    assert legacy_result.compatible is False
-    assert legacy_result.execution_identity_compatible is False
-    assert any("Git commit mismatch" in msg for msg in legacy_result.messages)
-    assert v2_result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
-    assert (
-        v2_result.details["execution_identity_compatibility"]["reason"]
-        == "checkpoint_execution_identity_fallback_mismatch"
-    )
-
-
-def test_legacy_and_v2_align_when_fingerprint_matches_despite_composite_drift() -> None:
-    legacy = _legacy_service()
-    v2 = _v2_service()
-
-    current_metadata = _metadata(
-        execution_fingerprint="fp-shared",
-        composite_run_identity="run-a",
-    )
-    checkpoint_metadata = _metadata(
-        execution_fingerprint="fp-shared",
-        composite_run_identity="run-b",
-    )
-    current_identity = _identity(
-        execution_fingerprint="fp-shared",
-        composite_run_identity="run-a",
-    )
-    checkpoint_identity = _identity(
-        execution_fingerprint="fp-shared",
-        composite_run_identity="run-b",
-    )
-
-    legacy_result = legacy.validate_checkpoint_compatibility(
-        current_metadata,
-        checkpoint_metadata,
-    )
-    v2_result = v2.check_compatibility(current_identity, checkpoint_identity)
-
-    assert legacy_result.compatible is True
-    assert legacy_result.execution_identity_compatible is True
-    assert v2_result.verdict == CompatibilityVerdict.COMPATIBLE
-    assert (
-        v2_result.details["execution_identity_compatibility"]["reason"]
-        == "identical_execution_fingerprint"
-    )
-
-
-def test_enrich_metadata_with_execution_identity_preserves_profile_and_snapshot_anchors() -> (
+def test_enrich_metadata_with_execution_identity_backfills_canonical_resume_anchors() -> (
     None
 ):
+    checkpoint = _metadata(pipeline_version=None, git_commit=None)
     identity = _metadata(
-        effective_config_hash="f" * 64,
-        execution_fingerprint="fp-identity",
-        manifest_id="manifest-identity",
+        pipeline_version="1.2.3",
+        git_commit="abcdef123",
+        manifest_id="manifest-123",
         contract_ref="chembl.activity",
-        contract_version="2.0.0",
-        normalization_profile_ref="chembl.activity",
-        normalization_profile_version="2.1.0",
-        normalization_profile_hash="a" * 64,
-        input_snapshot_refs=(
-            {
-                "snapshot_id": "sha256:snap-a",
-                "content_hash": "snap-a",
-                "immutable_uri": "bronze://2026-05-01/batch_a.jsonl.zst",
-            },
-        ),
-        input_snapshot_ids=("sha256:snap-a",),
-        input_snapshot_fingerprint="snap-fingerprint-a",
+        contract_version="1.0.0",
+        effective_config_artifact_id="artifact-42",
+        input_snapshot_fingerprint="face",
     )
-    sparse = CheckpointMetadata(records_processed=100)
 
-    enriched = enrich_metadata_with_execution_identity(sparse, identity=identity)
+    enriched = enrich_metadata_with_execution_identity(checkpoint, identity=identity)
 
-    assert enriched.normalization_profile_ref == "chembl.activity"
-    assert enriched.normalization_profile_version == "2.1.0"
-    assert enriched.normalization_profile_hash == "a" * 64
-    assert enriched.input_snapshot_refs == identity.input_snapshot_refs
-    assert enriched.input_snapshot_ids == ("sha256:snap-a",)
-    assert enriched.input_snapshot_fingerprint == "snap-fingerprint-a"
-    assert (
-        enriched.checkpoint_execution_identity_fingerprint()
-        == identity.checkpoint_execution_identity_fingerprint()
+    assert enriched.pipeline_version == "1.2.3"
+    assert enriched.git_commit == "abcdef123"
+    assert enriched.manifest_id == "manifest-123"
+    assert enriched.contract_ref == "chembl.activity"
+    assert enriched.contract_version == "1.0.0"
+    assert enriched.effective_config_artifact_id == "artifact-42"
+    assert enriched.input_snapshot_fingerprint == "face"
+
+
+def test_resume_service_accepts_matching_execution_fingerprint() -> None:
+    service = _service()
+    current_metadata = _metadata(execution_fingerprint="fp-same")
+    checkpoint_metadata = _metadata(execution_fingerprint="fp-same")
+
+    result = service.validate_checkpoint_compatibility(
+        current_metadata,
+        checkpoint_metadata,
+    )
+
+    assert result.compatible is True
+    assert result.execution_identity_compatible is True
+
+
+def test_resume_service_rejects_execution_fingerprint_mismatch() -> None:
+    service = _service()
+    current_metadata = _metadata(execution_fingerprint="fp-current")
+    checkpoint_metadata = _metadata(execution_fingerprint="fp-checkpoint")
+
+    result = service.validate_checkpoint_compatibility(
+        current_metadata,
+        checkpoint_metadata,
+    )
+
+    assert result.compatible is False
+    assert result.execution_identity_compatible is False
+    assert any("Execution fingerprint mismatch" in msg for msg in result.messages)
+
+
+def test_resume_service_rejects_runtime_anchor_fingerprint_mismatch() -> None:
+    service = _service()
+    current_metadata = _metadata(
+        manifest_id="manifest-a",
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+        effective_config_artifact_id="artifact-1",
+    )
+    checkpoint_metadata = _metadata(
+        manifest_id="manifest-b",
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+        effective_config_artifact_id="artifact-1",
+    )
+
+    result = service.validate_checkpoint_compatibility(
+        current_metadata,
+        checkpoint_metadata,
+    )
+
+    assert result.compatible is False
+    assert result.execution_identity_compatible is False
+    assert any(
+        "Degraded runtime-anchor fingerprint mismatch" in msg
+        for msg in result.messages
+    )
+
+
+def test_runtime_anchor_fingerprint_matches_domain_contract() -> None:
+    raw_payload = {
+        "effective_config_hash": "a" * 64,
+        "effective_config_artifact_id": " artifact-001 ",
+        "contract_ref": " ChemBL.Activity ",
+        "contract_version": " v1 ",
+        "manifest_id": " manifest-a ",
+    }
+    expected_fingerprint = compute_execution_identity_fingerprint(
+        normalize_runtime_anchor_payload(raw_payload)
+    )
+    details = build_identity_details(
+        IdentityDetailsSpec(
+            effective_config_hash="a" * 64,
+            execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+            checkpoint_schema_version="1.0.0",
+            manifest_id=raw_payload["manifest_id"],
+            contract_ref=raw_payload["contract_ref"],
+            contract_version=raw_payload["contract_version"],
+            effective_config_artifact_id=raw_payload["effective_config_artifact_id"],
+        )
+    )
+
+    assert details["degraded_runtime_anchor_fingerprint"] == expected_fingerprint
+
+
+def test_resume_service_ignores_composite_identity_drift_when_canonical_fingerprint_matches() -> (
+    None
+):
+    service = _service()
+    current_metadata = _metadata(
+        dq_contract_compatibility_hash="same-hash",
+        pipeline_version="1.0.0",
+        execution_fingerprint="fp-same",
+        composite_run_identity="run-current",
+    )
+    checkpoint_metadata = _metadata(
+        dq_contract_compatibility_hash="same-hash",
+        pipeline_version="1.0.0",
+        execution_fingerprint="fp-same",
+        composite_run_identity="run-checkpoint",
+    )
+
+    result = service.validate_checkpoint_compatibility(
+        current_metadata,
+        checkpoint_metadata,
+    )
+
+    assert result.compatible is True
+    assert result.execution_identity_compatible is True
+    assert not any(
+        "Composite run identity mismatch" in msg for msg in result.messages
     )

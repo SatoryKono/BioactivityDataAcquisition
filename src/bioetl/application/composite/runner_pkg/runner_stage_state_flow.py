@@ -14,6 +14,10 @@ __all__ = [
 ]
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from bioetl.application.composite.checkpoint.transition_service import (
+    apply_recovery_checkpoint_transition,
+    apply_validated_checkpoint_transition,
+)
 from bioetl.application.composite.runner_pkg.runner_stage_start_flow import (
     start_composite_phase,
 )
@@ -47,13 +51,26 @@ def transition_state_with_fsm_log(
     *,
     stage: str,
     validate: bool = True,
+    recovery_reason: str | None = None,
     **transition_kwargs: object,
 ) -> CompositeCheckpointState:
     """Transition immutable state and emit FSM log entry."""
     previous_state = state.state
+    clock = getattr(host, "_clock", None)
     if validate:
         host._fsm.validate_fsm_transition(previous_state, to_state)
-    next_state = state.with_state(to_state, clock=getattr(host, "_clock", None))
+        next_state = apply_validated_checkpoint_transition(
+            state,
+            to_state,
+            clock=clock,
+        )
+    else:
+        next_state = apply_recovery_checkpoint_transition(
+            state,
+            to_state,
+            reason=recovery_reason or f"{stage}:validation_bypass",
+            clock=clock,
+        )
     host._fsm.log_fsm_transition(
         from_state=previous_state,
         to_state=to_state,
@@ -77,6 +94,7 @@ async def persist_failed_state(
         CompositePipelineState.FAILED,
         stage=stage,
         validate=False,
+        recovery_reason=f"{stage}:persist_failed_checkpoint",
         error=error,
     )
     await host._call_save_checkpoint_safe(failed_state, stage)

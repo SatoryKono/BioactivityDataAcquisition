@@ -57,7 +57,6 @@ async def complete_dependencies_phase(
         state,
         CompositePipelineState.DEPENDENCIES_COMPLETED,
         stage="dependencies_complete",
-        validate=False,
         succeeded=succeeded,
         failed=failed,
     )

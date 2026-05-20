@@ -66,4 +66,3 @@ services:
       - TUNNEL_TOKEN=${TUNNEL_TOKEN}
     ports:
       - "9999:8080"
-    restart: unless-stopped

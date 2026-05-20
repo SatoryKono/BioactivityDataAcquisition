@@ -6,6 +6,9 @@ import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.application.composite.checkpoint.transition_service import (
+    apply_recovery_checkpoint_transition,
+)
 from bioetl.domain.ports import ClockPort
 
 if TYPE_CHECKING:
@@ -170,7 +173,12 @@ class FSMStateHelperService:
             phase_description=phase_description,
         )
 
-        return state.with_state(resume_phase, clock=clock)
+        return apply_recovery_checkpoint_transition(
+            state,
+            resume_phase,
+            reason="resume_from_failed",
+            clock=clock,
+        )
 
     def log_resume_context(self, state: CompositeCheckpointState) -> None:
         """Log the detailed resume context for a checkpoint-backed restart."""
