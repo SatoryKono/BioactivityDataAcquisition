@@ -55,7 +55,7 @@ When a record fails either check, it is written to `data/output/quarantine/commo
 | Regex pattern | `pattern` | String field matches the supplied regular expression | `DQ-PATTERN` |
 | Deduplication | _(implicit)_ | SHA-256 hash of business key \+ payload is unique | _(skipped silently)_ |
 
-Deduplication is handled at the Delta Lake merge step: records whose content hash already exists in Silver are skipped without raising an error, making every pipeline run fully idempotent against the same Bronze data.
+BioETL handles deduplication at the Delta Lake merge step. Records whose content hash already exists in Silver are skipped without raising an error, so every pipeline run is fully idempotent against the same Bronze data.
 
 ## The three-level rule hierarchy
 
