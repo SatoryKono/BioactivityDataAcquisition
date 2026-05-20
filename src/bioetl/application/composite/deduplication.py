@@ -120,29 +120,25 @@ class EnricherDeduplicatorService:
         agg_exprs: list[pl.Expr] = []
         for col in non_key_columns:
             agg_exprs.append(
-                pl.col(col).drop_nulls().n_unique().alias(f"{col}__n_unique")
+                (
+                    (pl.col(col).drop_nulls().n_unique() > 1)
+                    | (pl.col(col).is_null().any() & ~pl.col(col).is_null().all())
+                )
+                .any()
+                .alias(f"{col}__has_conflict")
             )
-            agg_exprs.append(pl.col(col).is_null().any().alias(f"{col}__has_null"))
-            agg_exprs.append(pl.col(col).is_null().all().alias(f"{col}__all_null"))
 
-        aggregated = df.group_by(key_columns).agg(agg_exprs)
+        # Execute aggregation and extract the boolean conflict summary row
+        summary_row = (
+            df.group_by(key_columns)
+            .agg(agg_exprs)
+            .select([pl.col(f"{col}__has_conflict").any() for col in non_key_columns])
+            .row(0)
+        )
 
-        # Classify each column based on the single aggregation result
         columns_with_conflicts: list[str] = []
         columns_without_conflicts: list[str] = []
-        for col in non_key_columns:
-            n_unique_col = f"{col}__n_unique"
-            has_null_col = f"{col}__has_null"
-            all_null_col = f"{col}__all_null"
-
-            has_conflict = (
-                aggregated.filter(
-                    (pl.col(n_unique_col) > 1)
-                    | (pl.col(has_null_col) & ~pl.col(all_null_col))
-                ).height
-                > 0
-            )
-
+        for col, has_conflict in zip(non_key_columns, summary_row, strict=True):
             if has_conflict:
                 columns_with_conflicts.append(col)
             else:
