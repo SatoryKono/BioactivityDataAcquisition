@@ -26,13 +26,12 @@ from bioetl.domain.control_plane._run_ledger_runtime import (
     RUN_FINISHED_EVENT,
     RUN_SHUTDOWN_EVENT,
     RUN_STARTED_EVENT,
-    STAGE_STARTED_EVENT,
     STAGE_COMPLETED_EVENT,
+    STAGE_STARTED_EVENT,
     RunLedgerEntry,
 )
 
 __all__ = ["RunLedgerReplayProjection", "project_run_ledger_replay"]
-
 
 @dataclass(frozen=True, slots=True)
 class RunLedgerReplayProjection:
@@ -60,11 +59,7 @@ class _StageCompletionUpdate(TypedDict, total=False):
     seed_completed: bool
     merge_completed: bool
 
-
-_ProjectionFn = Callable[
-    [RunLedgerReplayProjection, RunLedgerEntry],
-    RunLedgerReplayProjection,
-]
+_ProjectionFn = Callable[[RunLedgerReplayProjection, RunLedgerEntry], RunLedgerReplayProjection]
 
 
 _STAGE_COMPLETION_UPDATES: dict[str, _StageCompletionUpdate] = {
@@ -254,7 +249,6 @@ _TERMINAL_STATES = {
     RUN_FAILED_EVENT: CompositePipelineState.FAILED,
 }
 
-
 def _advance_watermark(
     projection: RunLedgerReplayProjection,
     entry: RunLedgerEntry,
@@ -281,6 +275,29 @@ def _mark_projection_unsupported(
     )
 
 
+def _apply_projector_result(
+    replayed: RunLedgerReplayProjection,
+    entry: RunLedgerEntry,
+    projector: _ProjectionFn,
+) -> RunLedgerReplayProjection:
+    projected = projector(replayed, entry)
+    if projected is replayed and entry.event_type == STAGE_COMPLETED_EVENT:
+        return _mark_projection_unsupported(replayed, entry)
+    return projected
+
+
+def _apply_terminal_or_passthrough(
+    replayed: RunLedgerReplayProjection,
+    entry: RunLedgerEntry,
+) -> RunLedgerReplayProjection:
+    terminal_state = _TERMINAL_STATES.get(entry.event_type)
+    if terminal_state is not None:
+        return replace(replayed, state=terminal_state)
+    if entry.event_type in _PASS_THROUGH_EVENT_TYPES:
+        return replayed
+    return _mark_projection_unsupported(replayed, entry)
+
+
 def _apply_replay_entry(
     projection: RunLedgerReplayProjection,
     entry: RunLedgerEntry,
@@ -288,16 +305,8 @@ def _apply_replay_entry(
     replayed = _advance_watermark(projection, entry)
     projector = _EVENT_PROJECTORS.get(entry.event_type)
     if projector is not None:
-        projected = projector(replayed, entry)
-        if projected is replayed and entry.event_type == STAGE_COMPLETED_EVENT:
-            return _mark_projection_unsupported(replayed, entry)
-        return projected
-    terminal_state = _TERMINAL_STATES.get(entry.event_type)
-    if terminal_state is None:
-        if entry.event_type in _PASS_THROUGH_EVENT_TYPES:
-            return replayed
-        return _mark_projection_unsupported(replayed, entry)
-    return replace(replayed, state=terminal_state)
+        return _apply_projector_result(replayed, entry, projector)
+    return _apply_terminal_or_passthrough(replayed, entry)
 
 
 def project_run_ledger_replay(

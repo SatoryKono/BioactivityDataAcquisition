@@ -34,10 +34,12 @@ for published contracts, CLI surfaces, and specs.
 | Understand pipeline lifecycle      | [pipeline-lifecycle.md](pipeline-lifecycle.md)         |
 | Configure pipelines                | [pipeline-configuration.md](pipeline-configuration.md) |
 | Configure DQ behavior              | [dq-configuration.md](dq-configuration.md)             |
+| Apply repository cleanup safely    | [cleanup.md](cleanup.md)                               |
 | Run tests and local verification   | [testing.md](testing.md)                               |
 | Debug common local problems        | [troubleshooting.md](troubleshooting.md)               |
 | Metrics and local monitoring setup | [metrics-monitoring.md](metrics-monitoring.md)         |
 | Dashboard usage and extension      | [dashboards/README.md](dashboards/README.md)           |
+| Configure development tools        | [development/pycharm-setup.md](development/pycharm-setup.md) |
 
 ## Role Boundaries
 
@@ -52,10 +54,14 @@ for published contracts, CLI surfaces, and specs.
 - [Docs Verification](docs-verification.md): published docs checks, strict
   build flow, mixed-environment notes, and recurring documentation audit
   checklist.
+- [Cleanup](cleanup.md): deterministic local cleanup and retention-sensitive
+  hygiene workflow.
 - [Metrics & Monitoring](metrics-monitoring.md): local observability setup and
   metric catalog.
 - [Testing](testing.md): test strategy, local execution paths, and governance.
 - [Troubleshooting](troubleshooting.md): symptom-oriented problem solving.
+- [Development Setup](development/pycharm-setup.md): IDE-specific local setup
+  and repository integration notes.
 
 ## Related Published Surfaces
 

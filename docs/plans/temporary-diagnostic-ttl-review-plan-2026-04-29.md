@@ -6,7 +6,7 @@
 Freshness note: the bounded TTL execution waves on `2026-04-29` fully closed
 the `temporary_diagnostic` bucket. This document now remains as historical
 policy context; the live closeout state is recorded in
-`docs/plans/temporary-diagnostic-program-closeout-2026-04-29.md`.
+`docs/99-archive/plans/temporary-diagnostic-program-closeout-2026-04-29.md`.
 
 ## Purpose
 

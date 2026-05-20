@@ -24,9 +24,21 @@ echo "✓ Docker доступен"
 echo ""
 
 if [ ! -f .env ]; then
-    echo "⚠ .env файл не найден, создаю из примера..."
-    cp .env.example .env
-    echo "✓ Создан .env файл (отредактируйте если нужно)"
+    if [ "${BIOETL_ALLOW_ENV_FILE_CREATE:-}" = "1" ]; then
+        if [ ! -f .env.example ]; then
+            echo "❌ .env.example не найден; .env не создан"
+            exit 2
+        fi
+        echo "⚠ .env файл не найден; BIOETL_ALLOW_ENV_FILE_CREATE=1 разрешает создание из примера"
+        cp .env.example .env
+        echo "✓ Создан .env файл (отредактируйте перед запуском с секретами)"
+    else
+        echo "❌ .env файл не найден"
+        echo "   Guardrail: Docker helper не создает .env автоматически."
+        echo "   Создайте его вручную после явного решения: cp .env.example .env"
+        echo "   Или запустите с явным opt-in: BIOETL_ALLOW_ENV_FILE_CREATE=1 scripts/ops/docker-setup.sh"
+        exit 2
+    fi
 fi
 
 echo ""

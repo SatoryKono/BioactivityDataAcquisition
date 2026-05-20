@@ -29,6 +29,8 @@ current documentation.
   archive lane for historical operational and deployment material.
 - [Plans Index](../plans/README.md) — retained planning artifacts that may still
   provide useful historical context.
+- [Archived Plans Index](plans/README.md) — completed or superseded plan
+  artifacts moved out of the active plan set.
 - [Reports Index](../reports/index.md) — curated repo-only evidence and bounded
   internal reports.
 - [Root Status Artifacts](root-status-artifacts/README.md) — historical root

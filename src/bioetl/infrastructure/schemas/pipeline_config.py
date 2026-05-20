@@ -7,6 +7,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from bioetl.domain.composite.config_schema import DataSchemaConfig
 from bioetl.domain.constants import DEFAULT_CHECKPOINT_INTERVAL
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.schemas.composite_config import ColumnGroupSchema
@@ -205,6 +206,13 @@ class PipelineYamlConfig(BaseModel):
             "Explicit field-level policy overrides for runtime structural policy. "
             "Use this to set optional semantics directly instead of relying on "
             "derived effective_optional_v1."
+        ),
+    )
+    data_schema: DataSchemaConfig | None = Field(
+        default=None,
+        description=(
+            "Full Medallion layer projection config projected from unified schema. "
+            "Used by writers to enforce include_groups/exclude_fields at runtime."
         ),
     )
     column_groups: list[ColumnGroupSchema] = Field(

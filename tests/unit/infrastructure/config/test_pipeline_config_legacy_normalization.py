@@ -18,9 +18,17 @@ from bioetl.infrastructure.config.pipeline_normalizers import (
 
 def _schema_signature(config: Any) -> dict[str, Any]:
     dumped = config.model_dump(mode="json", exclude_none=True)
+    data_schema = dumped.get("data_schema")
+    normalized_data_schema = None
+    if isinstance(data_schema, dict):
+        normalized_data_schema = {
+            "column_groups": _normalize_column_groups(data_schema.get("column_groups")),
+            "silver": data_schema.get("silver"),
+            "gold": data_schema.get("gold"),
+        }
     return {
         "column_groups": _normalize_column_groups(dumped.get("column_groups")),
-        "data_schema": dumped.get("data_schema"),
+        "data_schema": normalized_data_schema,
         "content_hash": dumped.get("content_hash"),
         "content_hash_policy": dumped.get("content_hash_policy"),
     }
@@ -113,7 +121,17 @@ def test_pipeline_loader_uses_unified_schema_section(
     loaded = load_pipeline_config("demo_canonical_schema")
     assert _schema_signature(loaded) == {
         "column_groups": _normalize_column_groups(schema_payload["column_groups"]),
-        "data_schema": None,
+        "data_schema": {
+            "column_groups": _normalize_column_groups(schema_payload["column_groups"]),
+            "silver": {
+                "include_groups": ["system", "business"],
+                "rename_fields": {},
+            },
+            "gold": {
+                "include_groups": ["business"],
+                "rename_fields": {},
+            },
+        },
         "content_hash": schema_payload["content_hash"],
         "content_hash_policy": None,
     }
@@ -328,7 +346,11 @@ def test_pipeline_schema_normalizer_golden_vector(
     expected = {
         "column_groups": schema_payload["column_groups"],
         "content_hash": schema_payload["content_hash"],
-        "data_schema": None,
+        "data_schema": {
+            "column_groups": schema_payload["column_groups"],
+            "silver": {"include_groups": ["system", "business"]},
+            "gold": {"include_groups": ["business"]},
+        },
     }
 
     unified_cfg: dict[str, Any] = {}

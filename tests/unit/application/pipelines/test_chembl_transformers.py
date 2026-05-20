@@ -341,10 +341,25 @@ class TestPublicationTransformer:
         assert result is not None
         assert result["publication_type_raw"] == "PUBLICATION"
         assert result["publication_type"] == "journal-article"
-        assert result["publication_type_unified"] == "Journal Article"
         assert result["journal"] == "Journal Name"
         assert result["src_id"] == 1
         assert result["_source"] == "chembl"  # System field
+        for field_name in (
+            "pmc_id",
+            "publication_type_unified",
+            "publication_subclass",
+            "publication_class",
+            "oa_status",
+            "citations_received",
+            "citations_made",
+            "affiliation_list",
+            "author_orcids",
+            "is_oa",
+            "issn_list",
+            "language",
+            "publication_date",
+        ):
+            assert field_name not in result
 
     def test_extract_business_data_preserves_raw_publication_type_for_domain_profile(
         self, transformer
@@ -388,9 +403,9 @@ class TestPublicationTransformer:
         assert result is not None
         assert result["publication_type_raw"] == "PUBLICATION"
         assert result["publication_type"] == "journal-article"
-        assert result["publication_type_unified"] is None
-        assert result["publication_subclass"] is None
-        assert result["publication_class"] is None
+        assert "publication_type_unified" not in result
+        assert "publication_subclass" not in result
+        assert "publication_class" not in result
 
     @pytest.mark.asyncio
     async def test_transform_release_metadata_and_invalid_citations(
@@ -412,7 +427,7 @@ class TestPublicationTransformer:
         assert result is not None
         assert result["chembl_release"] == "34"
         assert result["creation_date"] == "2026-01-01"
-        assert result["citations_received"] is None
+        assert "citations_received" not in result
 
     @pytest.mark.asyncio
     async def test_transform_pre_silver_supports_legacy_document_id_fallback(

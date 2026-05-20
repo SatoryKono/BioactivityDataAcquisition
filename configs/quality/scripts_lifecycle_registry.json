@@ -188,18 +188,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a backward-compatible import shim while the canonical Neo4j memory smoke implementation lives under scripts.ai.mcp.neo4j_memory_mcp_smoke; remove it only after tests and historical import paths stop referencing scripts.memory.mcp_smoke."
     },
-    "scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as the bounded non-interactive WSL helper used to avoid Codex launch hangs while the surrounding Windows bootstrap flow is still being consolidated; remove it if launch-codex-wsl.ps1 is retired or rewritten onto a different startup path."
-    },
-    "scripts/ai/codex/launch-codex-wsl.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a Windows-side compatibility launcher while Codex runtime startup guidance still references this PowerShell entrypoint; remove it after docs and operators fully migrate to the governed scripts.ai/canonical launcher surface."
-    },
     "scripts/ai/codex/cursor-launch.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
@@ -217,12 +205,6 @@
       "decision": "internal_helper_orphan",
       "review_by": "2026-07-15",
       "next_step": "Retain only as the bounded non-interactive WSL helper used to avoid Codex launch hangs while the surrounding Windows bootstrap flow is still being consolidated; remove it if launch-codex-wsl.ps1 is retired or rewritten onto a different startup path."
-    },
-    "scripts/ai/codex/launch-codex-wsl.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a Windows-side compatibility launcher while Codex runtime startup guidance still references this PowerShell entrypoint; remove it after docs and operators fully migrate to the governed scripts.ai/canonical launcher surface."
     },
     "scripts/ops/docker-setup.ps1": {
       "owner": "@bioetl-platform",

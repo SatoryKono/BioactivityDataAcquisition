@@ -20,14 +20,45 @@ def test_extract_adr_metadata_reads_inline_status_date_and_owner() -> None:
 
     assert metadata is not None
     assert metadata.status == "superseded"
+    assert metadata.source_status is not None
     assert metadata.decision_date == "2025-12-22"
     assert metadata.owner == "BioETL Team"
 
 
-def test_determine_adr_status_maps_accepted_to_active_bucket() -> None:
-    """Accepted ADRs belong to the active registry bucket."""
+def test_determine_adr_status_maps_accepted_to_accepted_bucket() -> None:
+    """Accepted ADRs keep the normalized accepted registry bucket."""
     generator = ADRRegistryGenerator()
 
     status = generator.determine_adr_status("**Status:** Accepted", {})
 
-    assert status == "active"
+    assert status == "accepted"
+
+
+def test_extract_adr_metadata_uses_superseded_bucket_when_relationship_requires_it() -> (
+    None
+):
+    """Accepted ADRs with full supersession should not stay in accepted bucket."""
+    generator = ADRRegistryGenerator()
+
+    metadata = generator.extract_adr_metadata(
+        Path("docs/02-architecture/decisions/ADR-003-in-memory-locking-strategy.md")
+    )
+
+    assert metadata is not None
+    assert metadata.status == "superseded"
+    assert metadata.source_status == "Accepted (Revised 2025-12-23, see also ADR-010)"
+
+
+def test_extract_adr_metadata_recovers_decision_date_from_table_when_header_is_placeholder() -> (
+    None
+):
+    """Decision-date extraction must survive placeholder inline header dates."""
+    generator = ADRRegistryGenerator()
+
+    metadata = generator.extract_adr_metadata(
+        Path("docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md")
+    )
+
+    assert metadata is not None
+    assert metadata.status == "accepted"
+    assert metadata.decision_date == "2026-02-06"

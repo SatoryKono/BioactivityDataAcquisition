@@ -131,8 +131,8 @@ def build_merge_service(
     deduplicator = EnricherDeduplicatorService(logger)
     aggregator = EnricherAggregator(logger)
     renamer = ColumnRenamer(logger)
-    orderer = ColumnOrderService(logger)
-    coalesce_policy = CoalescePolicyService(logger, order_service=orderer)
+    order_service = ColumnOrderService(logger)
+    coalesce_policy = CoalescePolicyService(logger, order_service=order_service)
     conflict_resolver = ConflictResolverService(
         merge_config=merge_config,
         logger=logger,
@@ -159,11 +159,9 @@ def build_merge_service(
             deduplicator=deduplicator,
             aggregator=aggregator,
             renamer=renamer,
-            order_service=orderer,  # New API: order_service is now required
+            order_service=order_service,
             coalesce_policy=coalesce_policy,
             conflict_resolver=conflict_resolver,
             join_planner=join_planner,
-            orderer=None,  # Old orderer parameter is now optional
-            priority_orderer=None,  # Old priority_orderer parameter is now optional
         ),
     )

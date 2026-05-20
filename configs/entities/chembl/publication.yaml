@@ -100,6 +100,20 @@ schema:
             - citations
             - provider_ids
             - dq
+        exclude_fields:
+            - pmc_id
+            - publication_type_unified
+            - publication_subclass
+            - publication_class
+            - oa_status
+            - citations_received
+            - citations_made
+            - affiliation_list
+            - author_orcids
+            - is_oa
+            - issn_list
+            - language
+            - publication_date
     gold:
         include_groups:
             - system
@@ -118,6 +132,19 @@ schema:
             - _index
             - _lookup_method
             - _original_id
+            - pmc_id
+            - publication_type_unified
+            - publication_subclass
+            - publication_class
+            - oa_status
+            - citations_received
+            - citations_made
+            - affiliation_list
+            - author_orcids
+            - is_oa
+            - issn_list
+            - language
+            - publication_date
 quality:
     version: 1.0.0
     provider: chembl

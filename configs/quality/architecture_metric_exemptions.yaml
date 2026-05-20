@@ -14,7 +14,90 @@ policy:
     - expires_on
     - removal_step
 registries:
-  file_size_limits: {}
+  file_size_limits:
+    # Domain layer exemptions (limit: 305)
+    src/bioetl/domain/behavior/_dq_rule_evaluators.py:
+      value: 400
+      owner: "@bioetl-architecture"
+      reason: "Complex rule evaluation logic with multiple validation strategies"
+      classification: "technical_debt"
+      linked_rf: "RF-016"
+      expires_on: "2026-09-30"
+      removal_step: "Extract rule evaluator factory and strategy classes"
+    src/bioetl/domain/control_plane/run_ledger_replay.py:
+      value: 320
+      owner: "@bioetl-architecture"
+      reason: "Ledger replay with comprehensive state management and error recovery"
+      classification: "technical_debt"
+      linked_rf: "RF-016"
+      expires_on: "2026-09-30"
+      removal_step: "Extract replay state machine and recovery handlers"
+    src/bioetl/domain/normalization/hash_identity.py:
+      value: 320
+      owner: "@bioetl-data-model"
+      reason: "Hash identity policy with multiple normalization strategies"
+      classification: "technical_debt"
+      linked_rf: "RF-016"
+      expires_on: "2026-09-30"
+      removal_step: "Extract strategy factories and policy builders"
+    src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py:
+      value: 350
+      owner: "@bioetl-data-model"
+      reason: "ChEMBL policy registry with extensive normalization mappings"
+      classification: "technical_debt"
+      linked_rf: "RF-016"
+      expires_on: "2026-09-30"
+      removal_step: "Extract mapping tables and policy generators"
+    # Application layer exemptions (limit: 500)
+    src/bioetl/application/composite/checkpoint/load_service.py:
+      value: 550
+      owner: "@bioetl-platform"
+      reason: "Checkpoint load service with comprehensive validation and recovery"
+      classification: "technical_debt"
+      linked_rf: "RF-016"
+      expires_on: "2026-09-30"
+      removal_step: "Extract validation pipeline and recovery strategies"
+    src/bioetl/application/services/_observability_workflow_support.py:
+      value: 520
+      owner: "@bioetl-architecture"
+      reason: "Observability workflow support with multiple emission strategies"
+      classification: "technical_debt"
+      linked_rf: "RF-016"
+      expires_on: "2026-09-30"
+      removal_step: "Extract emission strategy factories and workflow builders"
+    src/bioetl/application/services/control_plane/_effective_config_support.py:
+      value: 530
+      owner: "@bioetl-architecture"
+      reason: "Effective config support with comprehensive resolution logic"
+      classification: "technical_debt"
+      linked_rf: "RF-016"
+      expires_on: "2026-09-30"
+      removal_step: "Extract config resolution pipeline and cache management"
+    src/bioetl/application/services/control_plane/_run_manifest_diagnostics_base.py:
+      value: 520
+      owner: "@bioetl-architecture"
+      reason: "Run manifest diagnostics with extensive validation logic"
+      classification: "technical_debt"
+      linked_rf: "RF-016"
+      expires_on: "2026-09-30"
+      removal_step: "Extract diagnostic validators and report generators"
+    # Interfaces layer exemptions (limit: 420)
+    src/bioetl/interfaces/cli/commands/diagnostics.py:
+      value: 450
+      owner: "@bioetl-architecture"
+      reason: "Diagnostics CLI with comprehensive system health checks"
+      classification: "technical_debt"
+      linked_rf: "RF-016"
+      expires_on: "2026-09-30"
+      removal_step: "Extract health check modules and report formatters"
+    src/bioetl/interfaces/http/_health_server_routing_support.py:
+      value: 460
+      owner: "@bioetl-architecture"
+      reason: "Health server routing with comprehensive endpoint support"
+      classification: "technical_debt"
+      linked_rf: "RF-016"
+      expires_on: "2026-09-30"
+      removal_step: "Extract routing handlers and endpoint factories"
   function_complexity: {}
   function_length: {}
   class_size: {}

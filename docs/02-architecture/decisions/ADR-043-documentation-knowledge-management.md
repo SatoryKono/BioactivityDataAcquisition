@@ -53,7 +53,7 @@ Component Category → Required ADR Coverage:
 
 CI MUST validate internal documentation links:
 
-- Markdown link targets exist (`[text](path)` → path is valid file)
+- Markdown link targets must resolve to valid files or explicit published URLs
 - ADR references in code comments point to existing ADRs
 - RULES.md section references are valid
 

@@ -11,6 +11,23 @@ from bioetl.interfaces.http.control_plane_identity.extractors import (
 )
 from bioetl.interfaces.http.control_plane_identity.types import AnchorSpec
 
+_CHECKPOINT_ANCHOR_SEVERITY_BY_STATUS = {
+    "OK": "OK",
+    "MISMATCH": "FAILING",
+    "MISSING": "DEGRADED",
+    "PARTIAL": "DEGRADED",
+}
+
+_EXACT_REPLAY_REQUIRED_ANCHORS = frozenset(
+    {
+        "effective_config_hash",
+        "effective_config_artifact_id",
+        "input_snapshot_identity_fingerprint",
+        "input_snapshot_ids",
+        "input_snapshot_content_hashes",
+    }
+)
+
 
 def domain_severity(
     spec: AnchorSpec,
@@ -25,33 +42,55 @@ def domain_severity(
     if not applicable:
         return "N/A"
     if spec.name == "checkpoint_anchor_status":
-        return {
-            "OK": "OK",
-            "MISMATCH": "FAILING",
-            "MISSING": "DEGRADED",
-            "PARTIAL": "DEGRADED",
-        }.get(
-            checkpoint_status,
-            "DEGRADED",
-        )
+        return _checkpoint_anchor_severity(checkpoint_status)
     if spec.name == "identity_graph_complete" and present:
-        if value is True:
-            return "OK"
-        rendered_value = str(value).strip().lower()
-        if rendered_value in {"true", "ok"} or rendered_value.startswith("complete"):
-            return "OK"
-        if "run_id" in rendered_value or "manifest_id" in rendered_value:
-            return "FAILING"
-        return "DEGRADED"
-    if (
+        return _identity_graph_severity(value)
+    if _exact_replay_eligibility_failed(spec, manifest=manifest, value=value):
+        return "FAILING"
+    if present:
+        return "OK"
+    return _missing_anchor_severity(
+        spec,
+        manifest=manifest,
+        ledger_entries=ledger_entries,
+    )
+
+
+def _checkpoint_anchor_severity(checkpoint_status: str) -> str:
+    return _CHECKPOINT_ANCHOR_SEVERITY_BY_STATUS.get(checkpoint_status, "DEGRADED")
+
+
+def _identity_graph_severity(value: object | None) -> str:
+    if value is True:
+        return "OK"
+    rendered_value = str(value).strip().lower()
+    if rendered_value in {"true", "ok"} or rendered_value.startswith("complete"):
+        return "OK"
+    if "run_id" in rendered_value or "manifest_id" in rendered_value:
+        return "FAILING"
+    return "DEGRADED"
+
+
+def _exact_replay_eligibility_failed(
+    spec: AnchorSpec,
+    *,
+    manifest: RunManifest | None,
+    value: object | None,
+) -> bool:
+    return (
         spec.name == "exact_replay_eligible"
         and manifest is not None
         and requested_exact_replay(manifest)
         and value is False
-    ):
-        return "FAILING"
-    if present:
-        return "OK"
+    )
+
+
+def _missing_anchor_severity(
+    spec: AnchorSpec,
+    *,
+    manifest: RunManifest | None,
+    ledger_entries: tuple[RunLedgerEntry, ...],
+) -> str:
     if spec.name == "manifest_id":
         return "FAILING" if is_terminal(ledger_entries) else "DEGRADED"
     if (
@@ -61,14 +100,7 @@ def domain_severity(
     ):
         return "FAILING"
     if (
-        spec.name
-        in {
-            "effective_config_hash",
-            "effective_config_artifact_id",
-            "input_snapshot_identity_fingerprint",
-            "input_snapshot_ids",
-            "input_snapshot_content_hashes",
-        }
+        spec.name in _EXACT_REPLAY_REQUIRED_ANCHORS
         and manifest is not None
         and requested_exact_replay(manifest)
     ):

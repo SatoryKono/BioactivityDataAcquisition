@@ -4,8 +4,11 @@ Tests schema inheritance, common field presence, and API contracts.
 Expected: ~25 tests ensuring schema consistency across providers.
 """
 
+from pathlib import Path
+
 import pytest
 import pandera as pa
+import yaml
 
 from bioetl.domain.schemas.common.publication_base import PublicationBaseSchema
 from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
@@ -17,6 +20,12 @@ from bioetl.domain.schemas.semanticscholar.publication import (
 )
 
 pytestmark = [pytest.mark.contracts, pytest.mark.no_api]
+COMPATIBILITY_BASELINE_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "fixtures"
+    / "contracts"
+    / "publication_schema_compatibility.v1.yaml"
+)
 
 PUBLICATION_SCHEMA_CLASSES = (
     ChemblPublicationSchema,
@@ -25,6 +34,14 @@ PUBLICATION_SCHEMA_CLASSES = (
     OpenAlexPublicationSchema,
     SemanticScholarPublicationSchema,
 )
+
+
+def _load_compatibility_baseline() -> dict[str, object]:
+    payload = yaml.safe_load(COMPATIBILITY_BASELINE_PATH.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    compatibility = payload["publication_schema_compatibility"]
+    assert isinstance(compatibility, dict)
+    return compatibility
 
 
 @pytest.mark.architecture
@@ -447,12 +464,62 @@ class TestBackwardCompatibility:
     """Test backward compatibility of schemas."""
 
     def test_deprecated_fields_still_present(self) -> None:
-        """Deprecated field aliases MUST remain for backward compatibility."""
-        pytest.skip("No deprecated publication field aliases are tracked yet.")
+        """Tracked deprecated field aliases MUST remain when baseline declares them."""
+        compatibility = _load_compatibility_baseline()
+        deprecated_aliases = compatibility["deprecated_aliases"]
+        assert isinstance(deprecated_aliases, dict)
+        providers = deprecated_aliases["providers"]
+        assert isinstance(providers, dict)
+
+        schema_map = {
+            "chembl": ChemblPublicationSchema,
+            "pubmed": PubMedPublicationSchema,
+            "crossref": PublicationEnrichedSchema,
+            "openalex": OpenAlexPublicationSchema,
+            "semanticscholar": SemanticScholarPublicationSchema,
+        }
+
+        for provider, aliases in providers.items():
+            assert isinstance(provider, str)
+            assert isinstance(aliases, list)
+            schema_fields = set(schema_map[provider].__annotations__)
+            missing = [field for field in aliases if field not in schema_fields]
+            assert not missing, (
+                f"{provider}: tracked deprecated aliases disappeared: {missing}"
+            )
 
     def test_new_fields_are_nullable(self) -> None:
-        """New fields added to schemas MUST be nullable for compatibility."""
-        pytest.skip("Nullable-field compatibility baseline is not defined yet.")
+        """Tracked compatibility-additive fields MUST remain nullable."""
+        compatibility = _load_compatibility_baseline()
+        nullable_fields = compatibility["nullable_compatibility_fields"]
+        assert isinstance(nullable_fields, dict)
+        providers = nullable_fields["providers"]
+        assert isinstance(providers, dict)
+
+        schema_map = {
+            "chembl": ChemblPublicationSchema,
+            "pubmed": PubMedPublicationSchema,
+            "crossref": PublicationEnrichedSchema,
+            "openalex": OpenAlexPublicationSchema,
+            "semanticscholar": SemanticScholarPublicationSchema,
+        }
+
+        for provider, field_names in providers.items():
+            assert isinstance(provider, str)
+            assert isinstance(field_names, list)
+            fields = schema_map[provider].to_schema().columns
+            missing = [field for field in field_names if field not in fields]
+            assert not missing, (
+                f"{provider}: missing tracked compatibility fields: {missing}"
+            )
+
+            non_nullable = [
+                field for field in field_names if not fields[field].nullable
+            ]
+            assert not non_nullable, (
+                f"{provider}: tracked compatibility fields must stay nullable: "
+                f"{non_nullable}"
+            )
 
 
 @pytest.mark.architecture

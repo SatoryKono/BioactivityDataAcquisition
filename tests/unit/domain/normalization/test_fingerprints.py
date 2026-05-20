@@ -9,9 +9,6 @@ from bioetl.domain.normalization import normalize_runtime_anchor_payload
 from bioetl.domain.normalization import normalize_contract_ref
 from bioetl.domain.normalization import normalize_contract_version
 from bioetl.domain.normalization import normalize_control_plane_sha256
-from bioetl.domain.normalization.legacy_fingerprints import (
-    compute_degraded_runtime_anchor_fingerprint,
-)
 
 
 def _build_payload() -> dict[str, str | None]:
@@ -99,9 +96,9 @@ def test_runtime_anchor_fingerprint_is_deterministic_for_equivalent_payloads() -
         "effective_config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     }
 
-    assert compute_degraded_runtime_anchor_fingerprint(
+    assert compute_execution_identity_fingerprint(
         normalize_runtime_anchor_payload(payload)
-    ) == compute_degraded_runtime_anchor_fingerprint(
+    ) == compute_execution_identity_fingerprint(
         normalize_runtime_anchor_payload(reordered)
     )
 

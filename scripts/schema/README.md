@@ -13,8 +13,8 @@ python -m scripts.schema <command> [args...]
 
 - Shared config-governance constants live in `src/bioetl/infrastructure/config/config_ci_contract.py`.
 - `scripts/schema/check_config_invariants.py` and [test_config_ci_invariants.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_config_ci_invariants.py) import the same active/retired/transitional contract from that module.
-- `scripts/schema/validate_pipeline_configs.py` is an officially supported compatibility wrapper around the canonical validator in `docs/00-project/ai/agents/scripts/py-config-bot-2.py`.
-- Wrapper and canonical validator must not drift in behavior; if the validation contract changes, update the shared module first, then the docs.
+- `scripts/schema/validate_pipeline_configs.py` is the canonical validator for `validate-configs`.
+- `docs/00-project/ai/agents/scripts/py-config-bot-2.py` is a compatibility wrapper only; runtime behavior must be updated in `scripts/schema/validate_pipeline_configs.py` first.
 
 ## Commands
 
@@ -70,7 +70,7 @@ Runtime optionality currently resolves in this order:
 
 Validator distinction:
 
-- `python -m scripts.schema validate-configs` is the maintained JSON Schema / agent-canonical validator.
+- `python -m scripts.schema validate-configs` is the maintained JSON Schema validator.
 - `python -m scripts.schema validate-unified-configs` is the canonical entrypoint for the older standalone structural validator kept for compatibility use cases.
 - `python -m scripts.schema generate-config-matrix` is the canonical entrypoint for the older comparison-matrix generator kept for compatibility use cases.
 - Keep them separate until their contracts are intentionally unified.

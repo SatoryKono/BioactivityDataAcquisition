@@ -19,6 +19,7 @@ exclude_docs: |
     00-project/ai/prompts/README.md
     00-project/ai/prompts/collected/**
     00-project/ai/skills/SKILLS-CATALOG.md
+    02-architecture/adr-registry/README.md
     99-archive/**
     plans/**
     reports/**
@@ -47,6 +48,7 @@ not_in_nav: |
     00-project/ai/skills/local/prometheus-metric-discovery/SKILL.md
     00-project/ai/skills/local/prometheus-query-debugger/SKILL.md
     00-project/ai/skills/local/prometheus-rule-testing/SKILL.md
+    02-architecture/adr-registry/README.md
     04-reference/templates/adr-template.md
     04-reference/templates/contract-spec-template.md
     04-reference/templates/control-plane-contract-spec-template.md
@@ -159,8 +161,7 @@ nav:
             -   Diagrams:
                     -   "Overview": 02-architecture/diagrams/guide/index.md
                     -   "Diagram Policy": 02-architecture/diagrams/governance/policy.md
-                    -   "Historical Diagram Catalog": 02-architecture/diagrams/governance/diagram-catalog.md
-                    -   "Diagram Index": 02-architecture/diagrams/governance/diagrams-index.md
+                    -   "Diagram Catalog (Measured)": 02-architecture/diagrams/governance/diagrams-index.md
                     -   "Views Inventory": 02-architecture/diagrams/governance/diagram-views-inventory.md
                     -   "Workflow Guide": 02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md
             -   Decisions:
@@ -236,10 +237,13 @@ nav:
             -   "Troubleshooting": 03-guides/troubleshooting.md
             -   "Add New Source": 03-guides/add-new-source.md
             -   "Add Pipeline (Existing Source)": 03-guides/add-pipeline-existing-source.md
+            -   "Cleanup Guide": 03-guides/cleanup.md
             -   "Cleanup Policy": 03-guides/cleanup-policy.md
             -   "Registry Pattern": 03-guides/registry-pattern.md
-            -   "Config Schema Guidelines": 03-guides/development/config-schema-guidelines.md
-            -   "Codex WSL2 Setup": 03-guides/development/codex-wsl2-setup.md
+            -   Development:
+                    -   "Config Schema Guidelines": 03-guides/development/config-schema-guidelines.md
+                    -   "Codex WSL2 Setup": 03-guides/development/codex-wsl2-setup.md
+                    -   "PyCharm Setup": 03-guides/development/pycharm-setup.md
             -   Dashboards:
                     -   "Overview": 03-guides/dashboards/README.md
                     -   "V2 Updates": 03-guides/dashboards/dashboard-v2-updates.md
@@ -257,84 +261,84 @@ nav:
                             -   "Selector Resolution": 03-guides/dashboards/v3.0/template/selector-resolution-contract.md
                             -   "Panel Contract": 03-guides/dashboards/v3.0/template/panel-contract.md
             -   "File Path Audit Report": 03-guides/file-path-audit-report.md
-    -   Engineering:
-            -   "Overview": 05-engineering/README.md
-            -   "Normalization Plan P0-P6": 05-engineering/normalization_plan_P0_P6.md
-    -   Providers:
-            -   "Overview": 04-reference/providers/README.md
-            -   ChEMBL:
-                    -   "Activity": 04-reference/providers/chembl/activity.md
-                    -   "Assay": 04-reference/providers/chembl/assay.md
-                    -   "Assay Parameters": 04-reference/providers/chembl/assay-parameters.md
-                    -   "Cell Line": 04-reference/providers/chembl/cell-line.md
-                    -   "Compound Record": 04-reference/providers/chembl/compound-record.md
-                    -   "Molecule": 04-reference/providers/chembl/molecule.md
-                    -   "Protein Class": 04-reference/providers/chembl/protein-class.md
-                    -   "Publication": 04-reference/providers/chembl/publication.md
-                    -   "Publication Similarity": 04-reference/providers/chembl/publication-similarity.md
-                    -   "Publication Term": 04-reference/providers/chembl/publication-term.md
-                    -   "Target": 04-reference/providers/chembl/target.md
-                    -   "Target Component": 04-reference/providers/chembl/target-component.md
-                    -   "Subcellular Fraction": 04-reference/providers/chembl/subcellular-fraction.md
-                    -   "Tissue": 04-reference/providers/chembl/tissue.md
-            -   PubChem:
-                    -   "Compound": 04-reference/providers/pubchem/compound.md
-            -   UniProt:
-                    -   "Protein": 04-reference/providers/uniprot/protein.md
-                    -   "ID Mapping": 04-reference/providers/uniprot/idmapping.md
-            -   PubMed:
-                    -   "Publication": 04-reference/providers/pubmed/publication.md
-            -   CrossRef:
-                    -   "Publication": 04-reference/providers/crossref/publication.md
-            -   OpenAlex:
-                    -   "Publication": 04-reference/providers/openalex/publication.md
-            -   SemanticScholar:
-                    -   "Publication": 04-reference/providers/semanticscholar/publication.md
-    -   Pipelines:
-            -   "Overview": 04-reference/pipelines/README.md
-            -   "Publication Pipelines": 04-reference/pipelines/INDEX.md
-            -   ChEMBL:
-                    -   "Protein Class": 04-reference/pipelines/chembl/01-protein-class-spec.md
-                    -   "Cell Line": 04-reference/pipelines/chembl/02-cell-line-spec.md
-                    -   "Molecule": 04-reference/pipelines/chembl/03-molecule-spec.md
-                    -   "Target": 04-reference/pipelines/chembl/04-target-spec.md
-                    -   "Activity": 04-reference/pipelines/chembl/05-activity-spec.md
-                    -   "Assay": 04-reference/pipelines/chembl/06-assay-spec.md
-                    -   "Publication": 04-reference/pipelines/chembl/07-publication-spec.md
-                    -   "Assay Parameters": 04-reference/pipelines/chembl/08-assay-parameters-spec.md
-                    -   "Compound Record": 04-reference/pipelines/chembl/09-compound-record-spec.md
-                    -   "Target Component": 04-reference/pipelines/chembl/10-target-component-spec.md
-                    -   "Publication Term": 04-reference/pipelines/chembl/11-publication-term-spec.md
-                    -   "Publication Similarity": 04-reference/pipelines/chembl/12-publication-similarity-spec.md
-                    -   "Subcellular Fraction": 04-reference/pipelines/chembl/14-subcellular-fraction-spec.md
-                    -   "Tissue": 04-reference/pipelines/chembl/15-tissue-spec.md
-            -   PubChem:
-                    -   "Compound": 04-reference/pipelines/pubchem/01-compound-spec.md
-            -   UniProt:
-                    -   "Protein": 04-reference/pipelines/uniprot/01-protein-spec.md
-                    -   "ID Mapping": 04-reference/pipelines/uniprot/02-idmapping-spec.md
-            -   PubMed:
-                    -   "Publication": 04-reference/pipelines/pubmed/01-publication-spec.md
-            -   CrossRef:
-                    -   "Publication": 04-reference/pipelines/crossref/01-publication-spec.md
-            -   OpenAlex:
-                    -   "Publication": 04-reference/pipelines/openalex/01-publication-spec.md
-            -   SemanticScholar:
-                    -   "Publication": 04-reference/pipelines/semanticscholar/01-publication-spec.md
-            -   Composite:
-                    -   "Publication": 04-reference/pipelines/composite/01-publication-spec.md
-                    -   "Molecule": 04-reference/pipelines/composite/02-molecule-spec.md
-                    -   "Target": 04-reference/pipelines/composite/03-target-spec.md
-                    -   "Activity": 04-reference/pipelines/composite/04-activity-spec.md
-                    -   "Assay": 04-reference/pipelines/composite/05-assay-spec.md
-    -   "Data Contracts":
-            -   "Gold Schemas": 04-reference/contracts/gold-schemas.md
-            -   "Data Quality Contracts": 04-reference/contracts/dq-contracts.md
-            -   "Observability Metrics": 04-reference/contracts/observability.md
-            -   "Run Manifest & Ledger": 04-reference/contracts/run-manifest-ledger.md
     -   Reference:
             -   "Reference Index": 04-reference/index.md
             -   CLI: 04-reference/cli.md
+            -   Engineering:
+                    -   "Overview": 05-engineering/README.md
+                    -   "Normalization Plan P0-P6": 05-engineering/normalization_plan_P0_P6.md
+            -   Providers:
+                    -   "Overview": 04-reference/providers/README.md
+                    -   ChEMBL:
+                            -   "Activity": 04-reference/providers/chembl/activity.md
+                            -   "Assay": 04-reference/providers/chembl/assay.md
+                            -   "Assay Parameters": 04-reference/providers/chembl/assay-parameters.md
+                            -   "Cell Line": 04-reference/providers/chembl/cell-line.md
+                            -   "Compound Record": 04-reference/providers/chembl/compound-record.md
+                            -   "Molecule": 04-reference/providers/chembl/molecule.md
+                            -   "Protein Class": 04-reference/providers/chembl/protein-class.md
+                            -   "Publication": 04-reference/providers/chembl/publication.md
+                            -   "Publication Similarity": 04-reference/providers/chembl/publication-similarity.md
+                            -   "Publication Term": 04-reference/providers/chembl/publication-term.md
+                            -   "Target": 04-reference/providers/chembl/target.md
+                            -   "Target Component": 04-reference/providers/chembl/target-component.md
+                            -   "Subcellular Fraction": 04-reference/providers/chembl/subcellular-fraction.md
+                            -   "Tissue": 04-reference/providers/chembl/tissue.md
+                    -   PubChem:
+                            -   "Compound": 04-reference/providers/pubchem/compound.md
+                    -   UniProt:
+                            -   "Protein": 04-reference/providers/uniprot/protein.md
+                            -   "ID Mapping": 04-reference/providers/uniprot/idmapping.md
+                    -   PubMed:
+                            -   "Publication": 04-reference/providers/pubmed/publication.md
+                    -   CrossRef:
+                            -   "Publication": 04-reference/providers/crossref/publication.md
+                    -   OpenAlex:
+                            -   "Publication": 04-reference/providers/openalex/publication.md
+                    -   SemanticScholar:
+                            -   "Publication": 04-reference/providers/semanticscholar/publication.md
+            -   Pipelines:
+                    -   "Overview": 04-reference/pipelines/README.md
+                    -   "Publication Pipelines": 04-reference/pipelines/INDEX.md
+                    -   ChEMBL:
+                            -   "Protein Class": 04-reference/pipelines/chembl/01-protein-class-spec.md
+                            -   "Cell Line": 04-reference/pipelines/chembl/02-cell-line-spec.md
+                            -   "Molecule": 04-reference/pipelines/chembl/03-molecule-spec.md
+                            -   "Target": 04-reference/pipelines/chembl/04-target-spec.md
+                            -   "Activity": 04-reference/pipelines/chembl/05-activity-spec.md
+                            -   "Assay": 04-reference/pipelines/chembl/06-assay-spec.md
+                            -   "Publication": 04-reference/pipelines/chembl/07-publication-spec.md
+                            -   "Assay Parameters": 04-reference/pipelines/chembl/08-assay-parameters-spec.md
+                            -   "Compound Record": 04-reference/pipelines/chembl/09-compound-record-spec.md
+                            -   "Target Component": 04-reference/pipelines/chembl/10-target-component-spec.md
+                            -   "Publication Term": 04-reference/pipelines/chembl/11-publication-term-spec.md
+                            -   "Publication Similarity": 04-reference/pipelines/chembl/12-publication-similarity-spec.md
+                            -   "Subcellular Fraction": 04-reference/pipelines/chembl/14-subcellular-fraction-spec.md
+                            -   "Tissue": 04-reference/pipelines/chembl/15-tissue-spec.md
+                    -   PubChem:
+                            -   "Compound": 04-reference/pipelines/pubchem/01-compound-spec.md
+                    -   UniProt:
+                            -   "Protein": 04-reference/pipelines/uniprot/01-protein-spec.md
+                            -   "ID Mapping": 04-reference/pipelines/uniprot/02-idmapping-spec.md
+                    -   PubMed:
+                            -   "Publication": 04-reference/pipelines/pubmed/01-publication-spec.md
+                    -   CrossRef:
+                            -   "Publication": 04-reference/pipelines/crossref/01-publication-spec.md
+                    -   OpenAlex:
+                            -   "Publication": 04-reference/pipelines/openalex/01-publication-spec.md
+                    -   SemanticScholar:
+                            -   "Publication": 04-reference/pipelines/semanticscholar/01-publication-spec.md
+                    -   Composite:
+                            -   "Publication": 04-reference/pipelines/composite/01-publication-spec.md
+                            -   "Molecule": 04-reference/pipelines/composite/02-molecule-spec.md
+                            -   "Target": 04-reference/pipelines/composite/03-target-spec.md
+                            -   "Activity": 04-reference/pipelines/composite/04-activity-spec.md
+                            -   "Assay": 04-reference/pipelines/composite/05-assay-spec.md
+            -   "Data Contracts":
+                    -   "Gold Schemas": 04-reference/contracts/gold-schemas.md
+                    -   "Data Quality Contracts": 04-reference/contracts/dq-contracts.md
+                    -   "Observability Metrics": 04-reference/contracts/observability.md
+                    -   "Run Manifest & Ledger": 04-reference/contracts/run-manifest-ledger.md
             -   Normalization:
                     -   "ChEMBL": 04-reference/normalization/chembl-normalization-overview.md
                     -   Overview: 04-reference/normalization/non-chembl-normalization-overview.md
@@ -348,27 +352,13 @@ nav:
                     -   Overview: 04-reference/api/index.md
                     -   Domain:
                             -   "Domain API": 04-reference/api/domain.md
-                            -   "Entities": 04-reference/api/domain/entities.md
                             -   "Ports": 04-reference/api/domain/ports.md
-                            -   "Types": 04-reference/api/domain/types.md
-                            -   "Exceptions": 04-reference/api/domain/exceptions.md
                     -   Application:
                             -   "Application API": 04-reference/api/application.md
-                            -   "Core": 04-reference/api/application/core.md
-                            -   "Pipelines": 04-reference/api/application/pipelines.md
-                            -   "Services": 04-reference/api/application/services.md
-                            -   "Transformers": 04-reference/api/application/transformers.md
                     -   Infrastructure:
                             -   "Infrastructure API": 04-reference/api/infrastructure.md
-                            -   "Adapters": 04-reference/api/infrastructure/adapters.md
-                            -   "Adapters Common": 04-reference/api/infrastructure/adapters-common.md
-                            -   "Observability": 04-reference/api/infrastructure/observability.md
-                            -   "Storage": 04-reference/api/infrastructure/storage.md
-                            -   "Unified HTTP Client": 04-reference/api/infrastructure/unified-http-client.md
                     -   Composition:
                             -   "Composition API": 04-reference/api/composition.md
-                            -   "Bootstrap": 04-reference/api/composition/bootstrap.md
-                            -   "Factories": 04-reference/api/composition/factories.md
             -   Schemas:
                     -   "Activity Schema": 04-reference/schemas/domain/chembl/activity-schema.md
                     -   "Assay Schema": 04-reference/schemas/domain/chembl/assay-schema.md
@@ -401,6 +391,10 @@ nav:
                     -   "Publication Validation": 05-operations/runbooks/publication-validation-runbook.md
             -   "Performance Baselines": 05-operations/performance-baselines.md
             -   "VACUUM & Retention": 05-operations/vacuum-retention.md
+            -   Tooling:
+                    -   "scripts/ops Index": 05-operations/tooling/scripts-ops/INDEX.md
+                    -   "scripts/ops Quick Start": 05-operations/tooling/scripts-ops/QUICK_START.md
+                    -   "Neo4j / MCP Smoke Tests": 05-operations/tooling/scripts-ops/SMOKE_TEST_README.md
     -   "Internal / Extended":
             -   Agents:
                     -   "Agents Overview": 00-project/ai/agents/README.md
@@ -426,6 +420,7 @@ nav:
                     -   "Diagram Policy (Historical)": 02-architecture/diagrams/governance/00-diagramming-policy.md
                     -   "Architecture Diagrams (Legacy Index)": 02-architecture/diagrams/guide/architecture-reference.md
                     -   "Diagram Root README": 02-architecture/diagrams/README.md
+                    -   "Historical Diagram Catalog": 02-architecture/diagrams/governance/diagram-catalog.md
                     -   "Class Diagram Description Overview": 02-architecture/diagrams/descriptions/class-summary.md
                     -   "Architecture Bundle": 02-architecture/diagrams/bundles/architecture.bundle.md
                     -   "Foundation Bundle": 02-architecture/diagrams/bundles/foundation.bundle.md
@@ -459,8 +454,8 @@ nav:
                     -   "Composite Validation Service": 04-reference/components/composite-validation-service.md
                     -   "Phased Migration Support": 04-reference/components/phased-migration.md
                     -   "Pipeline Review Checklist": 04-reference/templates/pipeline-review-checklist.md
-                    -   "Pipeline Legacy: ChEMBL Activity": 04-reference/pipelines/chembl-activity.md
-                    -   "Pipeline Legacy: ChEMBL Assay": 04-reference/pipelines/chembl-assay.md
+                    -   "Pipeline Compatibility Summary: ChEMBL Activity": 04-reference/pipelines/chembl-activity.md
+                    -   "Pipeline Compatibility Summary: ChEMBL Assay": 04-reference/pipelines/chembl-assay.md
             -   "Operations Extras":
                     -   "Monitoring Guide": 05-operations/01-monitoring-guide.md
                     -   "Deployment & Tooling Extras":

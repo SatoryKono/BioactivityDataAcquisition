@@ -21,8 +21,8 @@ retained_entrypoints:
   external_breaking_change_required: true
   internal_callers_zero: false
   allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.run` as the public
-    seam; `src/bioetl/interfaces/cli/commands/domains/run/__init__.py` may lazily
-    resolve that public module for package compatibility only. `tests`: patch/import
+    seam; `src/bioetl/interfaces/cli/commands/domains/run/__init__.py` may re-export
+    that public module for package compatibility only. `tests`: patch/import
     coverage may target `bioetl.interfaces.cli.commands.run`; retired wrapper module
     `bioetl.interfaces.cli.commands.domains.run.command` must stay absent'
   migration_path: Use `bioetl.interfaces.cli.commands.run` for public CLI wiring and
@@ -240,7 +240,8 @@ retained_entrypoints:
   migration_path: Use `bioetl.application.composite.merger` as the sanctioned public
     seam with `collaborators=MergeCollaboratorGroup(...)`.
   exit_criteria: The merge module remains the sanctioned public seam and all composition
-    paths use collaborator bundles with legacy keyword wiring fully removed.
+    paths use collaborator bundles with only the canonical `order_service` ordering
+    collaborator.
 measured_only_ratchet:
   max_total_modules: 0
   scoped_limits:

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -16,6 +15,7 @@ from bioetl.composition.runtime_builders._run_manifest_refs import (
 )
 from bioetl.composition.runtime_builders._run_manifest_refs import (
     resolve_data_root_mode,
+    resolve_run_context_values,
 )
 from bioetl.composition.runtime_builders._run_manifest_support import (
     to_serializable_mapping as _to_serializable_mapping,
@@ -173,16 +173,7 @@ def build_runtime_overrides_snapshot(
     settings: Settings,
 ) -> dict[str, object]:
     """Convert launch context options into runtime-override snapshot shape."""
-    raw_run_type = getattr(ctx, "run_type", "incremental")
-    run_type_value = (
-        raw_run_type.value if isinstance(raw_run_type, Enum) else str(raw_run_type)
-    )
-    raw_execution_context = getattr(ctx, "execution_context", "isolated")
-    execution_context_value = (
-        raw_execution_context.value
-        if isinstance(raw_execution_context, Enum)
-        else str(raw_execution_context)
-    )
+    run_type_value, execution_context_value = resolve_run_context_values(ctx)
     cli_overrides = {
         "run_type": run_type_value,
         "resume": getattr(ctx, "resume", False),

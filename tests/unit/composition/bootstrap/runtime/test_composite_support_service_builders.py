@@ -410,8 +410,6 @@ def test_build_merge_dependencies_creates_required_services() -> None:
     assert hasattr(result, "deduplicator")
     assert hasattr(result, "aggregator")
     assert hasattr(result, "renamer")
-    assert hasattr(result, "orderer")
-    assert hasattr(result, "priority_orderer")
     assert hasattr(result, "coalesce_policy")
     assert hasattr(result, "conflict_resolver")
     assert hasattr(result, "join_planner")
@@ -421,10 +419,7 @@ def test_build_merge_dependencies_creates_required_services() -> None:
     assert result.deduplicator is not None
     assert result.aggregator is not None
     assert result.renamer is not None
-    assert result.orderer is not None
-    assert result.priority_orderer is None
     assert result.coalesce_policy is not None
     assert result.conflict_resolver is not None
     assert result.join_planner is not None
     assert result.order_service is not None
-    assert result.orderer is result.order_service

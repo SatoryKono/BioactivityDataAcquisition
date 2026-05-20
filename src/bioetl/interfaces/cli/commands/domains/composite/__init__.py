@@ -6,10 +6,12 @@ __all__ = ["run_composite"]
 
 
 def __getattr__(name: str) -> object:
-    if name == "run_composite":
-        from bioetl.interfaces.cli.commands.domains.composite.command import (
-            run_composite,
-        )
+    """Resolve retained command exports lazily to avoid import cycles."""
+    if name != "run_composite":
+        raise AttributeError(name)
 
-        return run_composite
-    raise AttributeError(name)
+    from bioetl.interfaces.cli.commands.domains.composite.command import (
+        run_composite,
+    )
+
+    return run_composite

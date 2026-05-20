@@ -102,8 +102,6 @@ def build_merge_dependencies(
         deduplicator=deduplicator,
         aggregator=aggregator,
         renamer=renamer,
-        orderer=order_service,
-        priority_orderer=None,
         order_service=order_service,
         coalesce_policy=coalesce_policy,
         conflict_resolver=conflict_resolver,

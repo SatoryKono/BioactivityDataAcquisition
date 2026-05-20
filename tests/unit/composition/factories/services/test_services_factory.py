@@ -369,6 +369,7 @@ def test_create_record_processor_builds_dependencies(
             silver_schema=MagicMock(),
             gold_schema=MagicMock(),
             dq_config=MagicMock(),
+            data_schema=None,
             primary_keys=("activity_id",),
             silver_table="activity",
             gold_table="activity_gold",
@@ -412,6 +413,7 @@ def test_create_record_processor_from_pipeline_delegates() -> None:
             provider="chembl",
             entity_type="activity",
             dq=MagicMock(),
+            data_schema=None,
             table=SimpleNamespace(
                 primary_keys=("activity_id",),
                 silver_write_mode="merge",

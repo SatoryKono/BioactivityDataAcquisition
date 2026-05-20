@@ -28,19 +28,19 @@ class TestProjectSchemaFieldsIntoConfig:
         _project_schema_fields_into_config(config, data_schema)
         assert config["content_hash"] == {"fields": ["id"]}
 
-    def test_does_not_project_silver_into_data_schema(self) -> None:
-        """Should not create transient data_schema payload for silver config."""
+    def test_projects_silver_into_data_schema(self) -> None:
+        """Should project the Silver layer into runtime data_schema payload."""
         config: dict = {}
         data_schema = {"silver": {"include_groups": ["system"]}}
         _project_schema_fields_into_config(config, data_schema)
-        assert "data_schema" not in config
+        assert config["data_schema"] == {"silver": {"include_groups": ["system"]}}
 
-    def test_does_not_project_gold_into_data_schema(self) -> None:
-        """Should not create transient data_schema payload for gold config."""
+    def test_projects_gold_into_data_schema(self) -> None:
+        """Should project the Gold layer into runtime data_schema payload."""
         config: dict = {}
         data_schema = {"gold": {"include_groups": ["system"]}}
         _project_schema_fields_into_config(config, data_schema)
-        assert "data_schema" not in config
+        assert config["data_schema"] == {"gold": {"include_groups": ["system"]}}
 
 
 class TestValidateSchemaConfig:
@@ -159,7 +159,11 @@ class TestApplyPipelineSchemaNormalization:
             unified_schema=unified_schema,
         )
         assert config["column_groups"] == unified_schema["column_groups"]
-        assert "data_schema" not in config
+        assert config["data_schema"] == {
+            "column_groups": unified_schema["column_groups"],
+            "silver": unified_schema["silver"],
+            "gold": unified_schema["gold"],
+        }
         assert "content_hash" not in config
 
     def test_no_schema_sources_does_nothing(self) -> None:

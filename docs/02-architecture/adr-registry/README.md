@@ -30,7 +30,8 @@ The `registry.json` file provides machine-readable access to all ADR metadata:
     {
       "adr_number": "001",
       "title": "Decision Title",
-      "status": "active",
+      "status": "accepted",
+      "source_status": "Accepted",
       "category": "architecture",
       "owner": "architecture-team",
       "file_path": "ADR-001-decision-title.md",
@@ -40,7 +41,7 @@ The `registry.json` file provides machine-readable access to all ADR metadata:
     }
   ],
   "stats": {
-    "by_status": {"active": 40, "deprecated": 5, "archived": 5},
+    "by_status": {"accepted": 40, "deprecated": 5, "archived": 5},
     "by_category": {"architecture": 30, "data": 10, "infrastructure": 10}
   }
 }
@@ -50,7 +51,7 @@ The `registry.json` file provides machine-readable access to all ADR metadata:
 
 ```mermaid
 graph LR
-    A[Draft] --> B[Active]
+    A[Draft] --> B[Accepted]
     B --> C[Deprecated]
     B --> D[Superseded]
     C --> E[Archived]
@@ -59,7 +60,7 @@ graph LR
 
 ## Status Definitions
 
-- **🟢 Active**: Currently applicable architectural decision
+- **🟢 Accepted**: Currently applicable architectural decision
 - **🟡 Draft**: Proposed decision under review
 - **🟠 Deprecated**: No longer recommended but may still be in use
 - **🔵 Superseded**: Replaced by a newer decision

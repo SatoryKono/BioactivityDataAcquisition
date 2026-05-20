@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 import pandas as pd
 import pandera as pa
 import pytest
@@ -15,11 +17,8 @@ from bioetl.application.core.field_specs import (
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
-from bioetl.application.services.checkpoint_compatibility_service_v2 import (
-    CheckpointCompatibilityServiceV2,
-    CheckpointIdentity,
-    CompatibilityVerdict,
-    ExecutionPhase,
+from bioetl.application.services.checkpoint_compatibility_service import (
+    CheckpointCompatibilityService,
 )
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
@@ -28,9 +27,6 @@ from bioetl.domain.normalization import (
     normalize_pmc_id,
     normalize_pmid,
     normalize_runtime_anchor_payload,
-)
-from bioetl.domain.normalization.legacy_fingerprints import (
-    compute_degraded_runtime_anchor_fingerprint,
 )
 from bioetl.domain.normalization.json import canonicalize_json_string
 from bioetl.domain.normalization.profiles import (
@@ -199,9 +195,11 @@ def test_checkpoint_execution_identity_payload_matches_domain_contract() -> None
     )
 
 
-def test_runtime_anchor_service_path_matches_domain_degraded_fingerprint() -> None:
-    """Service-level degraded runtime-anchor handling should match the domain seam."""
-    service = CheckpointCompatibilityServiceV2()
+def test_runtime_anchor_service_path_matches_domain_runtime_anchor_fingerprint() -> (
+    None
+):
+    """Resume service runtime-anchor fallback must match the canonical domain seam."""
+    service = CheckpointCompatibilityService(logger=MagicMock())
     raw_current_payload = {
         "effective_config_hash": _HASH_A,
         "effective_config_artifact_id": " artifact-001 ",
@@ -209,14 +207,12 @@ def test_runtime_anchor_service_path_matches_domain_degraded_fingerprint() -> No
         "contract_version": " v1 ",
         "manifest_id": " manifest-a ",
     }
-    expected_fingerprint = compute_degraded_runtime_anchor_fingerprint(
+    expected_fingerprint = compute_execution_identity_fingerprint(
         normalize_runtime_anchor_payload(raw_current_payload)
     )
-
-    current_identity = CheckpointIdentity(
+    current_metadata = CheckpointMetadata(
+        records_processed=1,
         effective_config_hash=_HASH_A,
-        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
-        checkpoint_schema_version="1.0.0",
         manifest_id=raw_current_payload["manifest_id"],
         contract_ref=raw_current_payload["contract_ref"],
         contract_version=raw_current_payload["contract_version"],
@@ -224,31 +220,28 @@ def test_runtime_anchor_service_path_matches_domain_degraded_fingerprint() -> No
             "effective_config_artifact_id"
         ],
     )
-    checkpoint_identity = CheckpointIdentity(
+    checkpoint_metadata = CheckpointMetadata(
+        records_processed=1,
         effective_config_hash=_HASH_A,
-        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
-        checkpoint_schema_version="1.0.0",
         manifest_id="manifest-a",
         contract_ref="chembl.activity",
         contract_version="1.0.0",
         effective_config_artifact_id="artifact-001",
     )
 
-    result = service.check_compatibility(current_identity, checkpoint_identity)
+    result = service.validate_checkpoint_compatibility(
+        current_metadata,
+        checkpoint_metadata,
+    )
 
-    assert result.verdict == CompatibilityVerdict.COMPATIBLE
-    assert (
-        result.details["execution_identity_compatibility"]["reason"]
-        == "identical_degraded_runtime_anchor_fingerprint"
+    assert current_metadata.checkpoint_execution_identity_fingerprint() == (
+        expected_fingerprint
     )
-    assert (
-        result.details["current_identity"]["degraded_runtime_anchor_fingerprint"]
-        == expected_fingerprint
+    assert checkpoint_metadata.checkpoint_execution_identity_fingerprint() == (
+        expected_fingerprint
     )
-    assert (
-        result.details["checkpoint_identity"]["degraded_runtime_anchor_fingerprint"]
-        == expected_fingerprint
-    )
+    assert result.compatible is True
+    assert result.execution_identity_compatible is True
 
 
 def test_record_normalization_processor_keeps_equivalent_payloads_hash_stable() -> None:

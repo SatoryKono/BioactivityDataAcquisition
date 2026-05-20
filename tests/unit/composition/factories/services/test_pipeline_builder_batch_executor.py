@@ -37,6 +37,7 @@ def _make_pipeline(
             provider="chembl",
             entity_type="activity",
             dq=None,
+            data_schema=None,
             table=SimpleNamespace(),
             column_groups=(),
             scd_config=None,

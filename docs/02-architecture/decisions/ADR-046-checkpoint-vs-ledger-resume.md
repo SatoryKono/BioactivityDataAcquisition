@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
 Version: 1.0.0
-Status: accepted
+Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
@@ -14,7 +14,7 @@ ______________________________________________________________________
 # ADR-046: Checkpoint Versus Ledger-Based Resume
 
 **Date:** 2026-05-06
-**Status:** accepted
+**Status:** Accepted
 **Decision makers:** @BioETL-Team
 **Related:** ADR-010 (local-only deployment), ADR-014 (deterministic writes), ADR-015 (pipeline lifecycle), ADR-026 (composite pipeline pattern), ADR-044 (run manifest and run ledger control plane)
 

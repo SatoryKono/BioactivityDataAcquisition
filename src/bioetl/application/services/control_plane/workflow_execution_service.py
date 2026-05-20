@@ -164,11 +164,7 @@ def _workflow_lock_key(config: WorkflowConfig) -> str:
 def _extract_incremental_metadata(
     config: WorkflowConfig,
 ) -> tuple[int | None, int | None]:
-    """Extract start_offset and limit from the first pipeline step.
-
-    These values are saved in state for the next incremental run.
-    If start_offset is None, treat it as 0 for incremental tracking.
-    """
+    """Extract incremental state from the first pipeline step."""
     for step in config.steps:
         if isinstance(step, WorkflowStepConfig):
             offset = step.run_options.start_offset

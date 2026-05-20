@@ -27,6 +27,9 @@ from bioetl.domain.control_plane.run_ledger import (
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from bioetl.domain.types import RunID, RunType
 from bioetl.interfaces.http import _health_server_identity_evidence
+from bioetl.interfaces.http.control_plane_selector_context import (
+    build_selector_filter_options_payload,
+)
 from bioetl.interfaces.http.control_plane_identity import (
     IDENTITY_EVIDENCE_CONTRACT,
     build_control_plane_identity_evidence_payload,
@@ -38,10 +41,12 @@ from bioetl.interfaces.http.control_plane_identity.source_model import (
     DRILLDOWN_TARGET_BY_NAME,
     SOURCE_MODEL_BY_NAME,
 )
+from bioetl.interfaces.http.control_plane_identity.severity import domain_severity
 from bioetl.interfaces.http.control_plane_identity.specs import (
     ALLOWED_LOW_CARDINALITY_LABELS,
     ANCHOR_SPECS,
     OVERVIEW_NAMES,
+    SPEC_BY_NAME,
 )
 from bioetl.interfaces.http.health_server import HealthServer
 from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
@@ -162,6 +167,203 @@ def test_control_plane_identity_checkpoint_compare_classifies_partial() -> None:
     assert rows["manifest_id"]["status"] == "OK"
     assert rows["effective_config_hash"]["status"] == "MISSING"
     assert rows["effective_config_hash"]["ui_status"] == "WARN"
+
+
+def _identity_severity_manifest(*, exact_replay: bool = False) -> RunManifest:
+    return RunManifest(
+        manifest_id="manifest-severity",
+        execution_fingerprint="fingerprint-severity",
+        schema_version="1.0",
+        created_at=datetime(2026, 5, 12, 8, 21, tzinfo=UTC),
+        run_id=RunID(uuid4()),
+        run_type=RunType.REBUILD,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        launch_context={"exact_replay": exact_replay},
+        runtime_config={},
+        resolved_config={},
+        code_provenance=RunCodeProvenance(),
+    )
+
+
+@pytest.mark.parametrize(
+    ("checkpoint_status", "expected"),
+    [
+        ("OK", "OK"),
+        ("MISMATCH", "FAILING"),
+        ("PARTIAL", "DEGRADED"),
+        ("UNKNOWN", "DEGRADED"),
+    ],
+)
+def test_control_plane_identity_domain_severity_maps_checkpoint_status(
+    checkpoint_status: str, expected: str
+) -> None:
+    assert (
+        domain_severity(
+            SPEC_BY_NAME["checkpoint_anchor_status"],
+            value=checkpoint_status,
+            present=True,
+            manifest=None,
+            ledger_entries=(),
+            checkpoint_status=checkpoint_status,
+            applicable=True,
+        )
+        == expected
+    )
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (True, "OK"),
+        ("complete (0 gaps)", "OK"),
+        ("missing run_id", "FAILING"),
+        ("partial graph", "DEGRADED"),
+    ],
+)
+def test_control_plane_identity_domain_severity_maps_identity_graph_value(
+    value: object, expected: str
+) -> None:
+    assert (
+        domain_severity(
+            SPEC_BY_NAME["identity_graph_complete"],
+            value=value,
+            present=True,
+            manifest=None,
+            ledger_entries=(),
+            checkpoint_status="OK",
+            applicable=True,
+        )
+        == expected
+    )
+
+
+def test_control_plane_identity_domain_severity_fails_exact_replay_missing_anchor() -> None:
+    assert (
+        domain_severity(
+            SPEC_BY_NAME["effective_config_hash"],
+            value=None,
+            present=False,
+            manifest=_identity_severity_manifest(exact_replay=True),
+            ledger_entries=(),
+            checkpoint_status="OK",
+            applicable=True,
+        )
+        == "FAILING"
+    )
+
+
+def test_control_plane_identity_domain_severity_fails_terminal_missing_manifest() -> None:
+    run_id = RunID(uuid4())
+    terminal_entry = RunLedgerEntry(
+        entry_id="ledger-terminal",
+        manifest_id="manifest-severity",
+        run_id=run_id,
+        event_type=RUN_FAILED_EVENT,
+        occurred_at=datetime(2026, 5, 12, 8, 22, tzinfo=UTC),
+        status="failed",
+    )
+
+    assert (
+        domain_severity(
+            SPEC_BY_NAME["manifest_id"],
+            value=None,
+            present=False,
+            manifest=_identity_severity_manifest(),
+            ledger_entries=(terminal_entry,),
+            checkpoint_status="OK",
+            applicable=True,
+        )
+        == "FAILING"
+    )
+
+
+class _CountingRunLedgerStore(InMemoryRunLedgerStore):
+    """Ledger fake that records selector lookup fan-out."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.lookup_run_ids: list[str] = []
+
+    def list_entries_by_run_id(self, run_id: RunID) -> list[RunLedgerEntry]:
+        self.lookup_run_ids.append(str(run_id))
+        return super().list_entries_by_run_id(run_id)
+
+
+def test_control_plane_filter_options_narrows_manifest_catalog_before_ledger_reads() -> None:
+    """Scoped run_id queries should not walk unrelated manifests/ledger entries."""
+    manifest_store = InMemoryRunManifestStore()
+    ledger_store = _CountingRunLedgerStore()
+    created_at = datetime(2026, 5, 12, 8, 21, tzinfo=UTC)
+    run_id_1 = RunID(uuid4())
+    run_id_2 = RunID(uuid4())
+    run_id_3 = RunID(uuid4())
+
+    manifest_store.save(
+        RunManifest(
+            manifest_id="manifest-1",
+            execution_fingerprint="fingerprint-1",
+            schema_version="1.0",
+            created_at=created_at,
+            run_id=run_id_1,
+            run_type=RunType.INCREMENTAL,
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity="activity",
+            launch_context={},
+            runtime_config={"run_type": "incremental"},
+            resolved_config={"pipeline_name": "chembl_activity"},
+            code_provenance=RunCodeProvenance(),
+        )
+    )
+    manifest_store.save(
+        RunManifest(
+            manifest_id="manifest-2",
+            execution_fingerprint="fingerprint-2",
+            schema_version="1.0",
+            created_at=created_at + timedelta(minutes=1),
+            run_id=run_id_2,
+            run_type=RunType.BACKFILL,
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity="activity",
+            launch_context={},
+            runtime_config={"run_type": "backfill"},
+            resolved_config={"pipeline_name": "chembl_activity"},
+            code_provenance=RunCodeProvenance(),
+        )
+    )
+    manifest_store.save(
+        RunManifest(
+            manifest_id="manifest-3",
+            execution_fingerprint="fingerprint-3",
+            schema_version="1.0",
+            created_at=created_at + timedelta(minutes=2),
+            run_id=run_id_3,
+            run_type=RunType.INCREMENTAL,
+            pipeline_name="pubchem_compound",
+            provider="pubchem",
+            entity="compound",
+            launch_context={},
+            runtime_config={"run_type": "incremental"},
+            resolved_config={"pipeline_name": "pubchem_compound"},
+            code_provenance=RunCodeProvenance(),
+        )
+    )
+
+    payload = build_selector_filter_options_payload(
+        manifests=manifest_store.list_all(),
+        ledger_port=ledger_store,
+        dimension="run_id",
+        response_shape="list",
+        requested_pipeline="chembl_activity",
+        selected_pipelines=("chembl_activity",),
+        selected_run_types=("incremental",),
+    )
+
+    assert payload == {"items": ["-", str(run_id_1)]}
+    assert ledger_store.lookup_run_ids == [str(run_id_1)]
 
 
 class TestHealthServerControlPlaneSelector:

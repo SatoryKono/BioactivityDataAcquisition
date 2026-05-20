@@ -14,6 +14,9 @@ from bioetl.composition.factories.pipeline._runner_assembly_support import (
     RunnerAssemblyContext as _RunnerAssemblyContext,
 )
 from bioetl.composition.factories.pipeline._runner_assembly_support import (
+    assemble_runner_parts as _assemble_runner_parts_impl,
+)
+from bioetl.composition.factories.pipeline._runner_assembly_support import (
     build_batch_executor as _build_batch_executor_impl,
 )
 from bioetl.composition.factories.pipeline._runner_assembly_support import (
@@ -169,39 +172,14 @@ def _build_runner_constructor_payload(
 def _assemble_runner_parts(
     context: _RunnerAssemblyContext,
 ) -> RunnerAssemblyParts:
-    checkpoint_manager = _build_checkpoint_manager(
-        pipeline=context.pipeline,
-        logger_port=context.logger_port,
-    )
-    lifecycle_service = MedallionLifecycleService(
-        storage=context.pipeline.services.storage,
-        logger=context.logger_port,
-    )
-    lock_runtime_service = _build_lock_runtime_service(
+    return _assemble_runner_parts_impl(
         context,
-        checkpoint_manager=checkpoint_manager,
-        context_holder=LockContextHolder(),
-    )
-    preflight_service = _build_preflight_service(context)
-    observer = _build_observer(context)
-    postrun_service = _build_postrun_service(
-        context,
-        lifecycle_service=lifecycle_service,
-    )
-    batch_executor = _build_batch_executor(
-        context,
-        checkpoint_manager=checkpoint_manager,
-        lock_runtime_service=lock_runtime_service,
-        observer=observer,
-    )
-    return RunnerAssemblyParts(
-        checkpoint_manager=checkpoint_manager,
-        lifecycle_service=lifecycle_service,
-        lock_runtime_service=lock_runtime_service,
-        preflight_service=preflight_service,
-        postrun_service=postrun_service,
-        observer=observer,
-        batch_executor=batch_executor,
+        checkpoint_manager_builder=_build_checkpoint_manager,
+        lock_runtime_service_builder=_build_lock_runtime_service,
+        preflight_service_builder=_build_preflight_service,
+        observer_builder=_build_observer,
+        postrun_service_builder=_build_postrun_service,
+        batch_executor_builder=_build_batch_executor,
     )
 
 

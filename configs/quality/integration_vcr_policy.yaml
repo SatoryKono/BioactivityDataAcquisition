@@ -124,6 +124,10 @@ tracked_suite_inventory:
       pubchem_compound: tests/integration/test_pubchem_pipeline.py
       uniprot_protein: tests/integration/test_uniprot_pipeline.py
     normalization_and_pipeline_support:
+    - tests/integration/grafana/test_silver_reject_explorer_copy.py
+    - tests/integration/grafana/test_workflow_dashboard_json_valid.py
+    - tests/integration/memory/test_timeline_ingest.py
+    - tests/integration/memory/test_workflow_tooling.py
     - tests/integration/normalization/test_chembl_edge_observed_values.py
     - tests/integration/normalization/test_non_chembl_edge_observed_values.py
     - tests/integration/pipelines/test_crossref_date_normalization.py
@@ -146,6 +150,7 @@ tracked_suite_inventory:
     - tests/integration/test_dashboard_variable_dependencies.py
     - tests/integration/test_dashboard_visual_semantics.py
     - tests/integration/test_json_hash_stability.py
+    - tests/integration/test_organism_classification_csv_coverage.py
     - tests/integration/test_runtime_metric_emission_consistency.py
     - tests/integration/test_uniprot_idmapping_pipeline.py
     - tests/integration/workflow/test_workflow_foreign_key_reconciliation.py
@@ -215,6 +220,7 @@ tracked_suite_inventory:
     - tests/integration/config/test_semantic_registry_drift.py
     - tests/integration/config/test_uniprot_semantic_payload_vocabulary_inventory.py
     - tests/integration/config/test_uniprot_structured_reference_dq.py
+    - tests/integration/config/test_validate_pipeline_configs.py
     - tests/integration/fixtures/test_non_chembl_edge_fixture_manifest.py
     - tests/integration/infrastructure/storage/test_atomic.py
     - tests/integration/infrastructure/storage/test_atomic_boost.py

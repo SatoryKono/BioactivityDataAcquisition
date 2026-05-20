@@ -164,6 +164,9 @@
     "Checkpoint pre-check failed with domain error": [
       "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py"
     ],
+    "Checkpoint replay suffix is outside bounded projector coverage": [
+      "src/bioetl/application/composite/checkpoint/load_service.py"
+    ],
     "Checkpoint resume blocked for full_scan_only pipeline. Each run performs a full scan; deduplication via content_hash on Silver. See ADR-031 for details.": [
       "src/bioetl/application/core/lifecycle/checkpoint_manager.py"
     ],
@@ -752,8 +755,14 @@
     "content_hash": [
       "src/bioetl/infrastructure/storage/silver/validation_record_support.py"
     ],
+    "contract_ref": [
+      "src/bioetl/infrastructure/storage/metadata_writer_helpers.py"
+    ],
     "contract_rollout_policy": [
       "src/bioetl/infrastructure/storage/gold/writer_support.py"
+    ],
+    "contract_version": [
+      "src/bioetl/infrastructure/storage/metadata_writer_helpers.py"
     ],
     "control_plane_lifecycle_apply_summary": [
       "src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_store.py"
@@ -836,6 +845,9 @@
     "dq_status": [
       "src/bioetl/infrastructure/quarantine/filtered_read_support.py"
     ],
+    "effective_config_artifact_id": [
+      "src/bioetl/infrastructure/storage/metadata_writer_helpers.py"
+    ],
     "effective_gold_table": [
       "src/bioetl/composition/factories/services/pipeline_batch_executor_builder.py"
     ],
@@ -901,7 +913,8 @@
       "src/bioetl/infrastructure/audit/file_audit.py"
     ],
     "exact_replay": [
-      "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
+      "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py",
+      "src/bioetl/infrastructure/storage/metadata_writer_helpers.py"
     ],
     "execution_fingerprint": [
       "src/bioetl/infrastructure/storage/metadata_writer_helpers.py"
@@ -1015,7 +1028,8 @@
       "src/bioetl/application/core/_filtered_data_source_support.py"
     ],
     "input_snapshot_fingerprint": [
-      "src/bioetl/application/services/checkpoint_compatibility_service.py"
+      "src/bioetl/application/services/checkpoint_compatibility_service.py",
+      "src/bioetl/infrastructure/storage/metadata_writer_helpers.py"
     ],
     "input_snapshots": [
       "src/bioetl/infrastructure/storage/metadata_writer_helpers.py"
@@ -1283,6 +1297,12 @@
     "replay_not_needed": [
       "src/bioetl/application/composite/checkpoint/load_service.py"
     ],
+    "replay_of_manifest_id": [
+      "src/bioetl/infrastructure/storage/metadata_writer_helpers.py"
+    ],
+    "replay_of_run_id": [
+      "src/bioetl/infrastructure/storage/metadata_writer_helpers.py"
+    ],
     "replay_readiness_verdict": [
       "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
     ],
@@ -1548,6 +1568,7 @@
     "Checkpoint minimum compatibility validation failed (lenient mode)",
     "Checkpoint minimum compatibility validation passed (lenient mode)",
     "Checkpoint pre-check failed with domain error",
+    "Checkpoint replay suffix is outside bounded projector coverage",
     "Checkpoint resume blocked for full_scan_only pipeline. Each run performs a full scan; deduplication via content_hash on Silver. See ADR-031 for details.",
     "Checkpoint save failed during exception handling",
     "Checkpoint saved on exception for recovery",
@@ -1736,7 +1757,9 @@
     "configs/quality/observability_metric_inventory_allowlist.yaml",
     "configs/quality/observability_slo_alert_contract.yaml",
     "content_hash",
+    "contract_ref",
     "contract_rollout_policy",
+    "contract_version",
     "control_plane_lifecycle_apply_summary",
     "control_plane_lifecycle_artifact_deleted",
     "correlation_anchor_gaps",
@@ -1764,6 +1787,7 @@
     "dq_reports_generated",
     "dq_reports_skipped",
     "dq_status",
+    "effective_config_artifact_id",
     "effective_gold_table",
     "entity",
     "entity_validation_failed",
@@ -1898,6 +1922,8 @@
     "replay_conflict",
     "replay_family_contract",
     "replay_not_needed",
+    "replay_of_manifest_id",
+    "replay_of_run_id",
     "replay_readiness_verdict",
     "replay_timestamp_anchor",
     "replayed",

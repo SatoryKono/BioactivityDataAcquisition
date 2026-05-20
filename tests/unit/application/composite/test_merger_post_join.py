@@ -35,8 +35,8 @@ def _make_host() -> MagicMock:
     host._logger = MagicMock()
     host._conflict_resolver = MagicMock()
     host._conflict_resolver.resolve_conflicts.side_effect = lambda df, **kw: df
-    host._orderer = MagicMock()
-    host._orderer.order_columns.side_effect = lambda df: df
+    host._order_service = MagicMock()
+    host._order_service.order_columns.side_effect = lambda df: df
     host._run_cross_validation = MagicMock(
         return_value=(pl.DataFrame({"doi": ["10.1/a"]}), None, [])
     )
@@ -90,7 +90,7 @@ class TestFinalizeMergedDataframe:
         host._conflict_resolver.resolve_conflicts.assert_called_once()
         host._add_lineage.assert_called_once()
         host._drop_excluded_fields.assert_called_once()
-        host._orderer.order_columns.assert_called_once()
+        host._order_service.order_columns.assert_called_once()
         assert isinstance(result, pl.DataFrame)
 
 

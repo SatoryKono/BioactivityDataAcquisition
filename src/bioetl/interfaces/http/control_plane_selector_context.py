@@ -57,7 +57,16 @@ def build_selector_context_payload(
     selected_run_id: str | None = None,
 ) -> dict[str, object]:
     """Resolve a coherent dashboard selector tuple from local control-plane data."""
-    records = _build_selector_records(manifests, ledger_port)
+    records = _build_selector_records(
+        _narrow_manifest_catalog(
+            manifests,
+            selected_workflows=selected_workflows,
+            selected_pipelines=selected_pipelines,
+            selected_run_types=selected_run_types,
+            selected_run_id=selected_run_id,
+        ),
+        ledger_port,
+    )
     candidates = _filter_records(
         records,
         selected_workflows=selected_workflows,
@@ -89,7 +98,18 @@ def build_selector_filter_options_payload(
     selected_run_id: str | None = None,
 ) -> dict[str, object]:
     """Build Grafana variable option responses from the selector catalog."""
-    records = _build_selector_records(manifests, ledger_port)
+    records = _build_selector_records(
+        _narrow_manifest_catalog(
+            manifests,
+            selected_workflows=selected_workflows,
+            selected_pipelines=_selected_pipeline_scope(
+                selected_pipelines, requested_pipeline
+            ),
+            selected_run_types=selected_run_types,
+            selected_run_id=selected_run_id,
+        ),
+        ledger_port,
+    )
     candidates = _filter_records(
         records,
         selected_workflows=selected_workflows,
@@ -121,6 +141,64 @@ def _build_selector_records(
     ledger_port: _RunLedgerLookup | None,
 ) -> tuple[_SelectorRecord, ...]:
     return tuple(_build_selector_record(manifest, ledger_port) for manifest in manifests)
+
+
+def _selected_pipeline_scope(
+    selected_pipelines: tuple[str, ...],
+    requested_pipeline: str | None,
+) -> tuple[str, ...]:
+    if selected_pipelines:
+        return selected_pipelines
+    if requested_pipeline in {None, ALL_SCOPE}:
+        return ()
+    return (requested_pipeline,)
+
+
+def _narrow_manifest_catalog(
+    manifests: tuple[RunManifest, ...],
+    *,
+    selected_workflows: tuple[str, ...],
+    selected_pipelines: tuple[str, ...],
+    selected_run_types: tuple[str, ...],
+    selected_run_id: str | None,
+) -> tuple[RunManifest, ...]:
+    """Prune manifest candidates before ledger lookups for selector endpoints.
+
+    The dashboard selector endpoints only need terminal ledger reads for manifests
+    that already match cheap manifest-local scope dimensions such as pipeline,
+    workflow alias, run type, or exact run ID.
+    """
+    narrowed = tuple(
+        manifest
+        for manifest in manifests
+        if _manifest_matches_scope(
+            manifest,
+            selected_workflows=selected_workflows,
+            selected_pipelines=selected_pipelines,
+            selected_run_types=selected_run_types,
+            selected_run_id=selected_run_id,
+        )
+    )
+    return narrowed if narrowed else manifests
+
+
+def _manifest_matches_scope(
+    manifest: RunManifest,
+    *,
+    selected_workflows: tuple[str, ...],
+    selected_pipelines: tuple[str, ...],
+    selected_run_types: tuple[str, ...],
+    selected_run_id: str | None,
+) -> bool:
+    if selected_run_id is not None:
+        return str(manifest.run_id) == selected_run_id
+    if selected_pipelines and manifest.pipeline_name not in selected_pipelines:
+        return False
+    if selected_run_types and manifest.run_type.value not in selected_run_types:
+        return False
+    if not selected_workflows:
+        return True
+    return bool(set(selected_workflows) & set(_workflow_candidates(manifest)))
 
 
 def _build_selector_record(

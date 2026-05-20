@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -21,9 +21,56 @@ _SCHEMA_EXTRACTION_ERRORS = (
 class BatchWriterColumnsMixin:
     """Column resolution helpers extracted from BatchWriter."""
 
+    def _project_via_to_schema(
+        self,
+        schema: object,
+        column_order: Sequence[str],
+    ) -> object | None:
+        """Project a schema object through its conversion surface when available."""
+        if not hasattr(schema, "to_schema"):
+            return None
+        try:
+            converted = schema.to_schema()
+            if hasattr(converted, "select_columns"):
+                return converted.select_columns(list(column_order))
+        except _SCHEMA_EXTRACTION_ERRORS:
+            return schema
+        return None
+
+    def _project_via_select_columns(
+        self,
+        schema: object,
+        column_order: Sequence[str],
+    ) -> object | None:
+        """Project a schema object through a direct select_columns surface."""
+        if not hasattr(schema, "select_columns"):
+            return None
+        try:
+            return schema.select_columns(list(column_order))
+        except _SCHEMA_EXTRACTION_ERRORS:
+            return schema
+
+    def _project_pyarrow_schema(
+        self,
+        schema: object,
+        column_order: Sequence[str],
+    ) -> object | None:
+        """Project a PyArrow schema while preserving metadata when available."""
+        try:
+            import pyarrow as pa
+
+            if not isinstance(schema, pa.Schema):
+                return None
+            projected_fields = [
+                schema.field(name) for name in column_order if name in schema.names
+            ]
+            return pa.schema(projected_fields, metadata=schema.metadata)
+        except (ImportError, AttributeError, TypeError, ValueError):
+            return schema
+
     def _get_schema_columns(
         self,
-        schema: Any,  # Any: schema backend object type depends on runtime writer implementation
+        schema: object,
     ) -> set[str] | None:
         """Extract column names from Pandera schema-like objects."""
         if hasattr(schema, "to_schema"):
@@ -94,6 +141,31 @@ class BatchWriterColumnsMixin:
         )
         ordered_columns = self._apply_system_prefix_order(ordered_columns)
         return ordered_columns, layer_config.rename_fields
+
+    def _project_schema_for_layer(
+        self,
+        layer: Literal["silver", "gold"],
+        schema: object,
+        column_order: Sequence[str] | None,
+    ) -> object:
+        """Project a writer schema to the layer's configured output columns."""
+        if schema is None or not column_order or not self._data_schema:
+            return schema
+
+        layer_config = getattr(self._data_schema, layer, None)
+        if layer_config is None:
+            return schema
+
+        projected = self._project_via_to_schema(schema, column_order)
+        if projected is not None:
+            return projected
+        projected = self._project_via_select_columns(schema, column_order)
+        if projected is not None:
+            return projected
+        projected = self._project_pyarrow_schema(schema, column_order)
+        if projected is not None:
+            return projected
+        return schema
 
     def _apply_system_prefix_order(self, columns: list[str]) -> list[str]:
         """Ensure system fields are first and DQ fields are last."""

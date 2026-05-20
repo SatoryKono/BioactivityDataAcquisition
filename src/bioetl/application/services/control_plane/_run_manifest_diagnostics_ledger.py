@@ -6,6 +6,9 @@ from collections import Counter
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 
+from bioetl.application.services.control_plane._run_manifest_artifact_payloads import (
+    build_artifact_ref_from_ledger_entry,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_helpers import (
     extract_dq_details,
     update_correlation_anchor_gaps,
@@ -241,41 +244,7 @@ def _freeze_ledger_processing_state(
 
 def _build_artifact_ref(entry: RunLedgerEntry) -> dict[str, object] | None:
     """Return one artifact reference emitted from a ledger entry."""
-    if entry.event_family != "artifact" and entry.event_type != "artifact_published":
-        return None
-    details = entry.details or {}
-    artifact_path = details.get("artifact_path")
-    artifact_ref: dict[str, object] = {
-        "event_type": entry.event_type,
-        "publication_status": entry.status,
-        "stage": entry.stage,
-        "artifact_id": entry.dataset_ref,
-        "dataset_ref": entry.dataset_ref,
-        "lineage_fragment_id": entry.lineage_fragment_id,
-        "artifact_path": None if artifact_path is None else str(artifact_path),
-    }
-    for detail_key in (
-        "metadata_path",
-        "artifact_kind",
-        "artifact_semantics",
-        "record_count",
-        "total_bytes",
-        "content_hash",
-        "hash_algorithm",
-        "execution_fingerprint",
-        "input_snapshot_count",
-        "input_snapshot_ids",
-        "input_snapshot_content_hashes",
-        "pipeline_name",
-        "provider",
-        "entity",
-        "run_id",
-        "manifest_id",
-    ):
-        detail_value = details.get(detail_key)
-        if detail_value is not None:
-            artifact_ref[detail_key] = detail_value
-    return artifact_ref
+    return build_artifact_ref_from_ledger_entry(entry)
 
 
 def _resolve_policy_value(values: set[str]) -> str | None:

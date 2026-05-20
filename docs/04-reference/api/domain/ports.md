@@ -1,169 +1,143 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-14'
+  Last verified: '2026-05-20'
 
 ______________________________________________________________________
 
 # Domain Layer Ports Reference
 
-## Overview
+## Scope
 
-This document provides a comprehensive reference for all ports in the BioETL domain layer. Ports define the interfaces that the domain layer exposes to other layers, following the Hexagonal Architecture pattern.
+This page documents the live public port surface exported by
+`src/bioetl/domain/ports/__init__.py`. It is a maintained family reference,
+not a method-by-method mirror of every protocol.
 
-## Port Categories
+For exact signatures, use the source modules under `src/bioetl/domain/ports/`.
+For architectural rationale, use ADR-005, ADR-006, ADR-017, ADR-044, and
+ADR-047.
 
-### Core Domain Ports
+## Canonical Public Export
 
-#### Data Source Ports
+- Canonical import surface: `from bioetl.domain import ports`
+- Public export registry: `src/bioetl/domain/ports/__init__.py`
+- Port source tree: `src/bioetl/domain/ports/`
 
-- **`DataSourcePort`** (`data_source.py`) - Primary interface for data retrieval
-- **`DeltaReaderPort`** (`delta_reader.py`) - Interface for reading Delta Lake tables
-- **`ExportPort`** (`export.py`) - Interface for data export operations
+The domain layer currently exposes focused port families rather than a small
+set of umbrella protocols. Do not document fictional catch-all interfaces such
+as `StoragePort`, `ObservabilityPort`, `RuntimePort`, or `ControlPlanePort`
+unless they exist in the live public export.
 
-#### Processing Ports
+## Live Port Families
 
-- **`FilteringPort`** (`filtering.py`) - Interface for data filtering operations
-- **`DataNormalizationPort`** (`data_normalization.py`) - Interface for data normalization
-- **`IDMappingPort`** (`idmapping.py`) - Interface for ID mapping operations
+### Data Acquisition
 
-#### Storage Ports
+| Family | Representative exports | Canonical modules |
+| --- | --- | --- |
+| Source fetching | `DataSourcePort`, `FilterableDataSourcePort`, `DataSourceFactoryPort` | `data_source.py` |
+| Delta reads | `DeltaReaderPort` | `delta_reader.py` |
+| Export writing | `ExportWriterPort`, `ExportCatalogPort` | `export.py` |
+| Input filtering | `InputFilterPort` | `filtering.py` |
+| ID mapping | `IDMappingPort`, `IDMappingSourceReaderPort` | `idmapping.py` |
+| Normalization strategy | `DataNormalizationPort` | `data_normalization.py` |
 
-- **`StoragePort`** (`storage/`) - Base storage interface
-- **`BronzeStoragePort`** (`storage/bronze_port.py`) - Bronze layer storage
-- **`SilverStoragePort`** (`storage/silver_port.py`) - Silver layer storage
-- **`GoldStoragePort`** (`storage/gold_port.py`) - Gold layer storage
-- **`StorageMaintenancePort`** (`storage_maintenance.py`) - Storage maintenance operations
+### Storage And Output
 
-#### Observability Ports
+| Family | Representative exports | Canonical modules |
+| --- | --- | --- |
+| Medallion storage | `BronzeStoragePort`, `SilverStoragePort`, `GoldStoragePort`, `MergedStoragePort` | `storage/` |
+| Storage lifecycle | `StorageLifecyclePort`, `StorageMaintenancePort` | `storage/`, `storage_maintenance.py` |
+| Silver write payload | `SilverWriteRequest`, `coerce_silver_write_request` | `storage/` |
+| Serialization | `JsonEncoderPort` | `serialization.py` |
 
-- **`LoggerPort`** (`logger_port.py`) - Logging interface
-- **`MetricsPort`** (`metrics_port.py`) - Metrics collection interface
-- **`ObservabilityPort`** (`observability/`) - Comprehensive observability interface
+### Observability And Health
 
-#### Quality Control Ports
+| Family | Representative exports | Canonical modules |
+| --- | --- | --- |
+| Logging and metrics | `LoggerPort`, `MetricsPort`, `MetricsPublisherPort`, `ExecutorMetricsPort` | `observability/` |
+| Tracing | `TracingPort` | `observability/` |
+| Metrics server | `MetricsServerPort`, `MetricsServerRuntimeStatus` | `observability/` |
+| DQ monitoring | `DQMonitorPort` | `observability/` |
+| Health | `HealthCheckPort`, `HealthMonitorPort`, `HealthStatePort` | `health_check.py` |
 
-- **`QualityPort`** (`quality/`) - Data quality interface
-- **`PIIPort`** (`pii.py`) - PII handling interface
-- **`AuditPort`** (`audit.py`) - Auditing interface
+### Runtime Control
 
-#### Runtime Ports
+| Family | Representative exports | Canonical modules |
+| --- | --- | --- |
+| Runner assembly | `RunnablePort`, `RunnerFactoryPort`, `PipelineFactoryPort`, `PipelineRegistryPort` | `runtime/` |
+| Locking and checkpoints | `LockPort`, `CheckpointPort`, `CompositeCheckpointPort` | `runtime/` |
+| Shutdown and clock | `ShutdownPort`, `ClockPort`, `BatchIdGeneratorPort` | `runtime/` |
+| Runtime inspection | `PipelineDebugPort`, `PipelineSnapshot`, `ExecutionObservabilityPort` | `runtime/` |
+| Memory/runtime telemetry | `MemoryMonitorPort`, `MemoryStats`, `MetricsExtractorPort` | `runtime/` |
 
-- **`RuntimePort`** (`runtime/`) - Runtime control interface
-- **`ResiliencePort`** (`resilience.py`) - Resilience and retry interface
-- **`HealthCheckPort`** (`health_check.py`) - Health checking interface
+### Control Plane And Reproducibility
 
-#### Configuration Ports
+| Family | Representative exports | Canonical modules |
+| --- | --- | --- |
+| Run control plane | `RunManifestPort`, `RunLedgerPort`, `EffectiveConfigArtifactStorePort`, `LineageStorePort` | `control_plane/` |
+| Workflow control plane | `WorkflowManifestPort`, `WorkflowLedgerPort`, `WorkflowExecutionStatePort` | `control_plane/` |
+| Replay/audit helpers | `ArtifactByteComparisonPort` | `control_plane/` |
 
-- **`ConfigPort`** (`config/`) - Configuration interface
-- **`MetadataPort`** (`metadata/`) - Metadata management interface
-- **`ControlPlanePort`** (`control_plane/`) - Control plane operations
+### Quality, Audit, And Compliance
 
-#### Specialized Ports
+| Family | Representative exports | Canonical modules |
+| --- | --- | --- |
+| Silver/Gold validation | `SilverValidatorPort`, `GoldValidatorPort` | `quality/` |
+| DQ analysis | `BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort` | `quality/` |
+| DQ configuration | `BronzeDQConfigPort`, `SilverDQConfigPort`, `GoldDQConfigPort` | `quality/` |
+| Error handling | `ErrorClassifierPort`, `ErrorHandlerPort`, `FallbackPolicyPort` | `quality/` |
+| Quarantine | `QuarantinePort`, `QuarantineWriteRequest` | `quality/` |
+| Audit and PII | `AuditPort`, `PiiHasherPort` | `audit.py`, `pii.py` |
 
-- **`SerializationPort`** (`serialization.py`) - Data serialization interface
-- **`PublicationStrategyPort`** (`publication_strategy.py`) - Publication strategy interface
-- **`ADRPort`** (`adr.py`) - Architecture Decision Record interface
+### Configuration, Metadata, And Strategy Surfaces
 
-## Port Details
+| Family | Representative exports | Canonical modules |
+| --- | --- | --- |
+| Settings/config loading | `SettingsPort`, `SettingsLoaderPort`, `PipelineSettingsPort`, `PipelineConfigLoaderPort`, `PipelineYamlConfigPort` | `config/` |
+| Domain config mapping | `DomainConfigMapperPort` | `config/` |
+| Metadata publication | `MetadataWriterPort`, `MetadataCoordinatorPort` | `metadata/` |
+| Publication strategy seams | `PublicationMetadataStrategy`, `IdentifierResolverStrategy`, `DataExtractorStrategy` | `publication_strategy.py` |
+| Workflow foreign-key reconciliation | `ForeignKeyReconciliationPort` | `workflow_foreign_key_reconciliation.py` |
+| ADR service surface | `AdrServicePort` | `adr.py` |
 
-### DataSourcePort
+## Representative Live Signatures
 
-**Location**: `src/bioetl/domain/ports/data_source.py`
-**Purpose**: Primary interface for retrieving data from external sources
-**Key Methods**:
+The source modules remain authoritative. A few representative examples:
 
-- `fetch_data(query: DataQuery) -> DataFrame`
-- `fetch_batch(queries: List[DataQuery]) -> List[DataFrame]`
-- `get_schema(source: str) -> Schema`
+- `DataSourcePort`: provider-scoped fetch protocol with async context manager
+  support in `data_source.py`.
+- `MetricsPort`: low-cardinality metric publication surface with histogram,
+  counter, and gauge operations in `observability/metrics.py`.
+- `RunManifestPort` and `RunLedgerPort`: persisted control-plane artifact
+  storage seams aligned with ADR-044.
+- `WorkflowManifestPort`, `WorkflowLedgerPort`, and
+  `WorkflowExecutionStatePort`: workflow control-plane seams aligned with
+  ADR-047.
 
-### StoragePort
+## Usage Guidance
 
-**Location**: `src/bioetl/domain/ports/storage/`
-**Purpose**: Base interface for all storage operations
-**Implementations**:
-
-- `BronzeStoragePort` - Raw data storage
-- `SilverStoragePort` - Normalized data storage
-- `GoldStoragePort` - Aggregated data storage
-
-**Key Methods**:
-
-- `write(data: DataFrame, partition_spec: Dict) -> WriteResult`
-- `read(filter: Optional[Filter] = None) -> DataFrame`
-- `update(data: DataFrame, condition: Filter) -> UpdateResult`
-- `delete(condition: Filter) -> DeleteResult`
-
-### LoggerPort
-
-**Location**: `src/bioetl/domain/ports/logger_port.py`
-**Purpose**: Structured logging interface
-**Key Methods**:
-
-- `info(message: str, context: Dict = None)`
-- `warning(message: str, context: Dict = None)`
-- `error(message: str, context: Dict = None, exception: Exception = None)`
-- `debug(message: str, context: Dict = None)`
-
-### MetricsPort
-
-**Location**: `src/bioetl/domain/ports/metrics_port.py`
-**Purpose**: Metrics collection and reporting
-**Key Methods**:
-
-- `increment(counter: str, value: int = 1, tags: Dict = None)`
-- `gauge(metric: str, value: float, tags: Dict = None)`
-- `timing(metric: str, duration: float, tags: Dict = None)`
-- `histogram(metric: str, value: float, tags: Dict = None)`
-
-## Usage Patterns
-
-### Dependency Injection
-
-All ports should be injected via constructors:
+- Import ports through the public package surface when you need stable domain
+  contracts:
 
 ```python
-from bioetl.domain.ports import DataSourcePort
-
-
-class MyService:
-    def __init__(self, data_source: DataSourcePort):
-        self.data_source = data_source
+from bioetl.domain.ports import DataSourcePort, RunManifestPort
 ```
 
-### Port Implementation
+- When documenting or testing a single protocol, cite the concrete module that
+  defines it instead of paraphrasing historical signatures from older docs.
+- If a new port is added to `src/bioetl/domain/ports/__init__.py`, update this
+  page in the same change set.
 
-Infrastructure layer provides concrete implementations:
+## Related Surfaces
 
-```python
-from bioetl.domain.ports import StoragePort
-from bioetl.infrastructure.adapters import DeltaLakeAdapter
-
-
-class DeltaStorage(StoragePort):
-    def __init__(self, adapter: DeltaLakeAdapter):
-        self.adapter = adapter
-
-    def write(self, data: DataFrame, partition_spec: Dict) -> WriteResult:
-        # Implementation using Delta Lake
-        pass
-```
-
-## Governance
-
-- **Naming**: All ports must end with `Port` suffix
-- **Location**: Ports must be defined in `src/bioetl/domain/ports/`
-- **Documentation**: Each port must have docstring with purpose and key methods
-- **Testing**: Ports must have interface tests in `tests/unit/domain/ports/`
-
-## Related Documents
-
-- [Hexagonal Architecture](../../../02-architecture/decisions/ADR-005-composition-layer-separation.md)
-- [Domain Layer Design](../../../02-architecture/01-domain-layer.md)
-- [Ports and Adapters Pattern](../../../02-architecture/00-overview.md#ports-adapters)
+- [Domain Layer](../../../02-architecture/01-domain-layer.md)
+- [Application API](../application.md)
+- [Infrastructure API](../infrastructure.md)
+- [Run Manifest & Ledger Contract](../../contracts/run-manifest-ledger.md)
+- [ADR-047 Workflow Control Plane](../../../02-architecture/decisions/ADR-047-workflow-control-plane.md)

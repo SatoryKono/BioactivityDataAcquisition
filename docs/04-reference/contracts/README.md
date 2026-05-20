@@ -17,6 +17,15 @@ ______________________________________________________________________
 контрактов Gold-слоя. JSON-экспорты в `docs/04-reference/contracts/gold/*.json`
 являются сгенерированными артефактами для публикации и обзора.
 
+Текущий published contract pack должен оставаться согласованным с live code и
+config surfaces:
+
+- Gold contract code: `src/bioetl/domain/contracts/gold/`
+- Contract configs: `configs/contracts/**`
+- Control-plane domain models and ports:
+  `src/bioetl/domain/control_plane/`,
+  `src/bioetl/domain/ports/control_plane/`
+
 ## Published Contract Surfaces
 
 Этот registry является published index для contract surfaces в
@@ -28,7 +37,8 @@ ______________________________________________________________________
 - **Gold contracts**:
   generated JSON under `docs/04-reference/contracts/gold/*.json`
 - **Data Quality contracts**:
-  [`dq-contracts.md`](dq-contracts.md) — canonical DQ contract pack
+  [`dq-contracts.md`](dq-contracts.md) — canonical DQ contract pack backed by
+  `configs/contracts/**`
 - **Control-plane contract**:
   [`run-manifest-ledger.md`](run-manifest-ledger.md) — published contract for
   `RunManifest` / `RunLedger`
@@ -74,6 +84,10 @@ snapshot registry:
 
 Этот registry не заменяет published JSON exports; он фиксирует canonical local
 baseline для schema drift и bounded DQ-sensitive output bundles.
+
+Repo-only planning or audit artifacts under `docs/plans/**`, `docs/reports/**`,
+and `docs/99-archive/**` MAY be cited as supporting context, but they are not
+part of the published contract surface.
 
 Обновление выполняется через unified script entry point:
 

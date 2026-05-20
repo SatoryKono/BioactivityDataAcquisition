@@ -9,7 +9,10 @@ Related:
 
 from __future__ import annotations
 
+import pandera as pa
 import pytest
+from bioetl.domain.validation import MAX_PUBLICATION_YEAR, MIN_PUBLICATION_YEAR
+from bioetl.infrastructure.config import load_pipeline_config
 
 from tests.contract.silver_schemas.conftest import (
     SILVER_SCHEMAS,
@@ -217,18 +220,21 @@ class TestNullabilityRules:
 
     @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
     def test_primary_keys_not_nullable(self, schema_name: str) -> None:
-        """Primary key fields SHOULD NOT be nullable.
+        """Configured technical and business primary keys MUST NOT be nullable."""
+        schema_class = SILVER_SCHEMAS[schema_name]
+        fields = extract_field_metadata(schema_class)
+        yaml_config = load_pipeline_config(schema_name)
+        primary_keys = {
+            yaml_config.technical_primary_key,
+            *yaml_config.business_primary_keys,
+        }
 
-        NOTE: Aspirational test - skipped because heuristics can't distinguish
-        primary keys from foreign keys. Many fields ending in _id are FKs
-        (like target_id, publication_id) that are legitimately nullable.
-
-        Use test_schema_stability.py::test_primary_key_field_exists instead,
-        which checks entity_id (the actual base PK from ETLRecordSchema).
-        """
-        pytest.skip(
-            "Cannot reliably distinguish primary keys from foreign keys. "
-            "Fields like target_id, publication_id are FKs, not PKs."
+        nullable_primary_keys = [
+            field for field in sorted(primary_keys) if fields[field]["nullable"]
+        ]
+        assert not nullable_primary_keys, (
+            f"{schema_name}: configured primary keys MUST NOT be nullable: "
+            f"{nullable_primary_keys}"
         )
 
     @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
@@ -288,12 +294,40 @@ class TestValidationConsistency:
                     + "\n\nUse consistent DOI_PATTERN from domain/schemas/constants.py"
                 )
 
-    def test_publication_year_range_consistent(self) -> None:
-        """Publication year range SHOULD be consistent across providers.
+    @pytest.mark.parametrize(
+        "schema_name,fixture_name",
+        [
+            ("chembl_publication", "minimal_chembl_publication_df"),
+            ("pubmed_publication", "minimal_pubmed_publication_df"),
+            ("crossref_publication", "minimal_crossref_publication_df"),
+            ("openalex_publication", "minimal_openalex_publication_df"),
+            (
+                "semanticscholar_publication",
+                "minimal_semanticscholar_publication_df",
+            ),
+        ],
+    )
+    def test_publication_year_range_consistent(
+        self,
+        schema_name: str,
+        fixture_name: str,
+        request: pytest.FixtureRequest,
+    ) -> None:
+        """Publication year bounds MUST match the shared domain contract."""
+        schema_class = SILVER_SCHEMAS[schema_name]
+        df = request.getfixturevalue(fixture_name).copy()
 
-        NOTE: Aspirational test - skipped until metadata extraction enhanced.
-        """
-        pytest.skip(
-            "Range value extraction not implemented in extract_field_metadata(). "
-            "Would require inspecting Pandera Field ge/le parameters directly."
-        )
+        df["publication_year"] = MIN_PUBLICATION_YEAR
+        schema_class.validate(df)
+        df["publication_year"] = MAX_PUBLICATION_YEAR
+        schema_class.validate(df)
+
+        below_min = df.copy()
+        below_min["publication_year"] = MIN_PUBLICATION_YEAR - 1
+        with pytest.raises(pa.errors.SchemaError, match="publication_year"):
+            schema_class.validate(below_min)
+
+        above_max = df.copy()
+        above_max["publication_year"] = MAX_PUBLICATION_YEAR + 1
+        with pytest.raises(pa.errors.SchemaError, match="publication_year"):
+            schema_class.validate(above_max)

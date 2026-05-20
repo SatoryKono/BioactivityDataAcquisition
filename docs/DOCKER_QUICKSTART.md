@@ -2,7 +2,7 @@
 
 ## ✅ Что настроено
 
-- ✓ `.env` файл с переменными окружения
+- ✓ `.env.example` как шаблон переменных окружения; `.env` является local-only/secret-bearing файлом и не создается автоматически
 - ✓ `docker-compose.yml` - основной стек (Neo4j + BioETL)
 - ✓ `docker-compose.monitoring.yml` - мониторинг (Prometheus, Grafana, Loki, Tempo)
 - ✓ `docker-compose.codex.yml` - MCP серверы для Codex
@@ -24,6 +24,14 @@ docker ps
 ```
 
 ### 2. Запустите основной стек
+
+Если локального `.env` еще нет, создайте его вручную только после явного решения:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Docker helpers также поддерживают явный opt-in `-AllowEnvFileCreate`, но не создают `.env` silently.
 
 ```powershell
 # PowerShell
@@ -211,7 +219,7 @@ docker compose up --build -d
 ---
 
 **Автоматизированные скрипты:**
-- `.\scripts\ops\docker-setup.ps1` - Canonical интерактивная настройка Docker для Windows
-- `scripts/ops/docker-setup.sh` - Canonical Bash версия для WSL/Linux
+- `.\scripts\ops\docker-setup.ps1` - Canonical интерактивная настройка Docker для Windows; `.env` создается только с `-AllowEnvFileCreate`
+- `scripts/ops/docker-setup.sh` - Canonical Bash версия для WSL/Linux; `.env` создается только с `BIOETL_ALLOW_ENV_FILE_CREATE=1`
 
 **Все готово к запуску!** 🚀

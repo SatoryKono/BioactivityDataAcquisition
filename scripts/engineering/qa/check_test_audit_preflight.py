@@ -14,11 +14,22 @@ ROOT = Path(__file__).resolve().parents[3]
 LFS_POINTER_PREFIX = b"version https://git-lfs.github.com/spec/v1"
 TELEMETRY_BASELINE = Path("docs/05-engineering/test-telemetry-baseline.md")
 VCR_FIXTURE_ROOT = Path("tests/fixtures/vcr")
+DEFAULT_GIT_TIMEOUT_SECONDS = 5.0
+STRICT_BLOCKER_IDS = (
+    "missing_git_lfs",
+    "git_lfs_unhealthy",
+    "git_status_failed",
+    "lfs_pointer_files_present",
+    "missing_telemetry_baseline",
+    "telemetry_baseline_without_coverage",
+)
 
 GitRunner = Callable[[list[str]], subprocess.CompletedProcess[str]]
 
 
-def _default_git_runner(root: Path) -> GitRunner:
+def _default_git_runner(
+    root: Path, *, timeout_seconds: float = DEFAULT_GIT_TIMEOUT_SECONDS
+) -> GitRunner:
     def _run(args: list[str]) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
             ["git", *args],
@@ -26,18 +37,38 @@ def _default_git_runner(root: Path) -> GitRunner:
             text=True,
             capture_output=True,
             check=False,
+            timeout=timeout_seconds,
         )
 
     return _run
 
 
+def _normalize_process_output(value: str | bytes | None) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace").strip()
+    return value.strip()
+
+
 def _git_value(runner: GitRunner, args: list[str]) -> dict[str, Any]:
-    result = runner(args)
+    try:
+        result = runner(args)
+    except subprocess.TimeoutExpired as exc:
+        return {
+            "ok": False,
+            "stdout": _normalize_process_output(exc.stdout),
+            "stderr": _normalize_process_output(exc.stderr)
+            or f"git {' '.join(args)} timed out after {exc.timeout}s.",
+            "returncode": None,
+            "timed_out": True,
+        }
     return {
         "ok": result.returncode == 0,
-        "stdout": result.stdout.strip(),
-        "stderr": result.stderr.strip(),
+        "stdout": _normalize_process_output(result.stdout),
+        "stderr": _normalize_process_output(result.stderr),
         "returncode": result.returncode,
+        "timed_out": False,
     }
 
 
@@ -83,13 +114,12 @@ def collect_test_audit_preflight(
     current_commit = _git_value(git_runner, ["rev-parse", "--short", "HEAD"])
     default_branch = _detect_default_branch(git_runner)
     default_commit = _git_value(git_runner, ["rev-parse", "--short", default_branch])
+    git_lfs_version = _git_value(git_runner, ["lfs", "version"]) if lfs_path else None
     git_status = _git_value(git_runner, ["status", "--short", "--untracked-files=no"])
 
     baseline_path = root / TELEMETRY_BASELINE
     baseline_exists = baseline_path.exists()
-    baseline_text = (
-        baseline_path.read_text(encoding="utf-8") if baseline_exists else ""
-    )
+    baseline_text = baseline_path.read_text(encoding="utf-8") if baseline_exists else ""
     baseline_has_coverage = "Actual coverage:" in baseline_text
     lfs_pointer_files = _scan_lfs_pointer_files(root)
 
@@ -101,11 +131,24 @@ def collect_test_audit_preflight(
                 "message": "git-lfs is required before comparing main-branch audit evidence.",
             }
         )
+    if lfs_path and git_lfs_version and not git_lfs_version["ok"]:
+        blockers.append(
+            {
+                "id": "git_lfs_unhealthy",
+                "message": (
+                    git_lfs_version["stderr"]
+                    or git_lfs_version["stdout"]
+                    or "git lfs version failed."
+                ),
+            }
+        )
     if not git_status["ok"]:
         blockers.append(
             {
                 "id": "git_status_failed",
-                "message": git_status["stderr"] or "git status failed.",
+                "message": (
+                    git_status["stderr"] or git_status["stdout"] or "git status failed."
+                ),
             }
         )
     if lfs_pointer_files:
@@ -144,6 +187,7 @@ def collect_test_audit_preflight(
         "git_lfs": {
             "available": bool(lfs_path),
             "path": lfs_path,
+            "version": git_lfs_version,
         },
         "telemetry_baseline": {
             "path": TELEMETRY_BASELINE.as_posix(),

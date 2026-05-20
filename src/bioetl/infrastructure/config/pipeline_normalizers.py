@@ -10,6 +10,25 @@ def _project_schema_fields_into_config(
     data_schema: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> None:
     """Project runtime-relevant schema fields into pipeline config."""
+    layer_keys = {
+        "columns",
+        "column_groups",
+        "include_groups",
+        "exclude_fields",
+        "rename_fields",
+    }
+
+    projected_data_schema: JsonDict = {}
+    if "column_groups" in data_schema:
+        projected_data_schema["column_groups"] = data_schema["column_groups"]
+    for layer_name in ("silver", "gold"):
+        layer_value = data_schema.get(layer_name)
+        if isinstance(layer_value, dict):
+            projected_data_schema[layer_name] = {
+                key: layer_value[key] for key in layer_keys if key in layer_value
+            }
+
+    config["data_schema"] = dict(projected_data_schema)
     if "column_groups" in data_schema:
         config["column_groups"] = data_schema["column_groups"]
     if "content_hash" in data_schema:

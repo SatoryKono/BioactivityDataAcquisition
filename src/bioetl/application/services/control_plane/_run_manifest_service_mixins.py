@@ -6,6 +6,9 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.services.control_plane._run_manifest_snapshot_payloads import (
+    source_refs_payload,
+)
 from bioetl.domain.control_plane import (
     RunArtifactRef,
     RunCodeProvenance,
@@ -323,31 +326,7 @@ class RunManifestPayloadMixin:
                 "dq_contract_compatibility_hash": code_provenance.dq_contract_compatibility_hash,
                 "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
             },
-            "source_refs": [
-                {
-                    "provider": item.provider,
-                    "entity": item.entity,
-                    "pipeline_name": item.pipeline_name,
-                    "query": item.query,
-                    "input_snapshots": [
-                        {
-                            "snapshot_id": snapshot.snapshot_id,
-                            "content_hash": snapshot.content_hash,
-                            "immutable_uri": snapshot.immutable_uri,
-                            "query_fingerprint": snapshot.query_fingerprint,
-                            "storage_provider": snapshot.storage_provider,
-                            "object_bucket": snapshot.object_bucket,
-                            "object_key": snapshot.object_key,
-                            "object_version_id": snapshot.object_version_id,
-                            "etag": snapshot.etag,
-                            "last_modified": snapshot.last_modified,
-                            "captured_at": snapshot.captured_at,
-                        }
-                        for snapshot in item.input_snapshots
-                    ],
-                }
-                for item in request.source_refs
-            ],
+            "source_refs": source_refs_payload(request.source_refs),
             "planned_artifacts": [
                 {"layer": item.layer, "path": item.path}
                 for item in request.planned_artifacts

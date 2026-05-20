@@ -2,7 +2,8 @@
 # Запускает основной стек, мониторинг и MCP серверы.
 
 param(
-    [string]$Mode = "full"  # full, basic, monitoring, mcp
+    [string]$Mode = "full",  # full, basic, monitoring, mcp
+    [switch]$AllowEnvFileCreate
 )
 
 $ErrorActionPreference = "Continue"
@@ -35,9 +36,22 @@ Write-Host "✓ Docker доступен" -ForegroundColor Green
 Write-Host ""
 
 if (-not (Test-Path ".env")) {
-    Write-Host "⚠ .env файл не найден, создаю из примера..." -ForegroundColor Yellow
-    Copy-Item ".env.example" ".env"
-    Write-Host "✓ Создан .env файл (отредактируйте если нужно)" -ForegroundColor Green
+    if ($AllowEnvFileCreate -or $env:BIOETL_ALLOW_ENV_FILE_CREATE -eq "1") {
+        if (-not (Test-Path ".env.example")) {
+            Write-Host "❌ .env.example не найден; .env не создан" -ForegroundColor Red
+            exit 2
+        }
+        Write-Host "⚠ .env файл не найден; явный opt-in разрешает создание из примера" -ForegroundColor Yellow
+        Copy-Item ".env.example" ".env"
+        Write-Host "✓ Создан .env файл (отредактируйте перед запуском с секретами)" -ForegroundColor Green
+    }
+    else {
+        Write-Host "❌ .env файл не найден" -ForegroundColor Red
+        Write-Host "   Guardrail: Docker helper не создает .env автоматически." -ForegroundColor Yellow
+        Write-Host "   Создайте его вручную после явного решения: Copy-Item .env.example .env" -ForegroundColor Yellow
+        Write-Host "   Или запустите с явным opt-in: .\scripts\ops\docker-setup.ps1 -AllowEnvFileCreate" -ForegroundColor Yellow
+        exit 2
+    }
 }
 
 function Start-MainStack {

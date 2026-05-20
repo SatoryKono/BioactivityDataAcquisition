@@ -35,6 +35,25 @@ DEFAULT_CONFIG_FACADE_RATCHET = (
 )
 
 
+def _repo_relative_posix(path: Path, repo_root: Path) -> str:
+    """Return repo-relative path serialized with stable POSIX separators."""
+    try:
+        return path.relative_to(repo_root).as_posix()
+    except ValueError:
+        try:
+            return path.relative_to(PROJECT_ROOT).as_posix()
+        except ValueError:
+            return path.as_posix()
+
+
+def _resolve_inventory_path(repo_root: Path, default_path: Path) -> Path:
+    """Prefer repo-local inventory files, but allow project defaults in tests."""
+    repo_candidate = repo_root / "configs" / "quality" / default_path.name
+    if repo_candidate.exists():
+        return repo_candidate
+    return default_path
+
+
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", default=str(PROJECT_ROOT))
@@ -87,9 +106,13 @@ def build_compatibility_importer_census(
         repo_root / "configs" / "quality" / "compatibility_facade_inventory.yaml"
     )
     twin_pairs = find_public_private_twin_modules(repo_root)
-    tracked_twin_families = _load_tracked_twin_families(DEFAULT_TWIN_RATCHET)
+    twin_ratchet_path = _resolve_inventory_path(repo_root, DEFAULT_TWIN_RATCHET)
+    tracked_twin_families = _load_tracked_twin_families(twin_ratchet_path)
+    config_root_facade_path = _resolve_inventory_path(
+        repo_root, DEFAULT_CONFIG_FACADE_RATCHET
+    )
     config_root_facade_inventory = _load_config_root_facade_inventory(
-        DEFAULT_CONFIG_FACADE_RATCHET
+        config_root_facade_path
     )
     config_root_usage = collect_exact_module_import_usage(
         repo_root,
@@ -139,7 +162,9 @@ def build_compatibility_importer_census(
     tracked_twin_rows: list[dict[str, object]] = []
     for family in tracked_twin_families:
         public_module = str(family["public_module"])
-        live_row = twin_rows_by_public_module[public_module]
+        live_row = twin_rows_by_public_module.get(public_module)
+        if live_row is None:
+            continue
         tracked_twin_rows.append(
             {
                 **family,
@@ -179,9 +204,10 @@ def build_compatibility_importer_census(
     return {
         "snapshot_date": snapshot_date or date.today().isoformat(),
         "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
-        "twin_ratchet_source": str(DEFAULT_TWIN_RATCHET.relative_to(repo_root)),
-        "config_root_facade_source": str(
-            DEFAULT_CONFIG_FACADE_RATCHET.relative_to(repo_root)
+        "twin_ratchet_source": _repo_relative_posix(twin_ratchet_path, repo_root),
+        "config_root_facade_source": _repo_relative_posix(
+            config_root_facade_path,
+            repo_root,
         ),
         "summary": {
             "retained_entrypoint_count": len(retained_rows),

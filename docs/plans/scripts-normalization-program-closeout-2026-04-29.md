@@ -105,12 +105,12 @@ This is the key program end state.
 For detailed wave history, use these supporting notes:
 
 - `scripts-cli-wrapper-caller-matrix-2026-04-28.md`
-- `docs-cli-wrapper-closeout-2026-04-28.md`
-- `build-docs-site-parity-audit-2026-04-29.md`
+- `docs/99-archive/plans/docs-cli-wrapper-closeout-2026-04-28.md`
+- `docs/99-archive/plans/build-docs-site-parity-audit-2026-04-29.md`
 - `mcp-wrapper-deep-audit-2026-04-29.md`
 - `repo-governance-wrapper-closeout-2026-04-29.md`
 - `scripts-supporting-retained-set-closeout-2026-04-29.md`
-- `temporary-diagnostic-program-closeout-2026-04-29.md`
+- `docs/99-archive/plans/temporary-diagnostic-program-closeout-2026-04-29.md`
 
 ## Follow-Up
 

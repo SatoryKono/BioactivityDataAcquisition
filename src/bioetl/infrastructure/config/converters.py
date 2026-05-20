@@ -10,7 +10,7 @@ __all__ = ["dq_overrides_to_domain", "yaml_config_to_domain"]
 
 from typing import Literal
 
-from bioetl.domain.composite.config import ColumnGroupConfig
+from bioetl.domain.composite.config import ColumnGroupConfig, DataSchemaConfig
 from bioetl.domain.config import (
     DQConfig,
     FieldPolicyConfig,
@@ -198,6 +198,15 @@ def yaml_config_to_domain(
         checkpoint_interval=yaml_config.checkpoint_interval,
         fields=tuple(source_fields),
         column_groups=column_groups,
+        data_schema=(
+            yaml_config.data_schema
+            if isinstance(yaml_config.data_schema, DataSchemaConfig)
+            else (
+                DataSchemaConfig(**yaml_config.data_schema.model_dump())
+                if yaml_config.data_schema is not None
+                else None
+            )
+        ),
         field_policy=field_policy,
         dq=dq_config,
         transform_version=transform_version,

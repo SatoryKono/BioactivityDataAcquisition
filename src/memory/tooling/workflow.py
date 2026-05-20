@@ -75,15 +75,19 @@ def _compact_prune_report(report: dict[str, Any] | None) -> dict[str, Any] | Non
     if report is None:
         return None
     compact = {
-        "apply": report["apply"],
-        "candidate_count": report["candidate_count"],
-        "total_count": report["total_count"],
-        "active_count": report["active_count"],
-        "max_active": report["max_active"],
-        "density_status": report["density_status"],
-        "density_excess": report["density_excess"],
-        "removed_count": report["removed_count"],
+        "apply": report.get("apply", False),
+        "candidate_count": report.get("candidate_count", 0),
+        "removed_count": report.get("removed_count", 0),
     }
+    for key in (
+        "total_count",
+        "active_count",
+        "max_active",
+        "density_status",
+        "density_excess",
+    ):
+        if key in report:
+            compact[key] = report[key]
     candidates = report.get("candidates", [])
     if candidates:
         compact["candidate_preview"] = candidates[:WORKFLOW_PRUNE_PREVIEW_LIMIT]
