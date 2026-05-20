@@ -28,6 +28,9 @@ from bioetl.domain.mapping.organism_classification_constants import (
     ORGANISM_ALIAS_MAP as _ORGANISM_ALIAS_MAP,
 )
 from bioetl.domain.mapping.organism_classification_constants import (
+    ORGANISM_GENUS_CLASS_MAP as _ORGANISM_GENUS_CLASS_MAP,
+)
+from bioetl.domain.mapping.organism_classification_constants import (
     ORGANISM_NAME_CLASS_MAP as _ORGANISM_NAME_CLASS_MAP,
 )
 from bioetl.domain.mapping.organism_classification_constants import (
@@ -92,6 +95,12 @@ def _match_species_prefix(normalized_organism: str) -> CellularityType | None:
     return None
 
 
+def _match_genus(normalized_organism: str) -> CellularityType | None:
+    """Match organism name by genus when species-level coverage is incomplete."""
+    genus = normalized_organism.split(" ", 1)[0]
+    return _ORGANISM_GENUS_CLASS_MAP.get(genus)
+
+
 def _match_keywords(normalized_organism: str) -> CellularityType | None:
     """Classify by keyword heuristics (fallback)."""
     for cellularity, keywords in _KEYWORD_GROUPS:
@@ -110,6 +119,7 @@ def _classify_by_organism_name(
     return (
         _ORGANISM_NAME_CLASS_MAP.get(normalized_organism)
         or _match_species_prefix(normalized_organism)
+        or _match_genus(normalized_organism)
         or _match_keywords(normalized_organism)
     )
 
@@ -122,6 +132,15 @@ def _build_taxonomy_result(
     """Build result when taxonomy_id is available."""
     taxonomy_class = _classify_by_taxonomy_id(taxonomy_id)
     if taxonomy_class is None:
+        if name_class is not None:
+            return OrganismClassificationResult(
+                organism_class=name_class,
+                normalized_organism=normalized_organism,
+                taxonomy_id=taxonomy_id,
+                source="organism_name",
+                source_conflict=False,
+                reason="taxonomy_id is valid but not mapped; fell back to organism name",
+            )
         return OrganismClassificationResult(
             organism_class=None,
             normalized_organism=normalized_organism,

@@ -6,6 +6,7 @@ from __future__ import annotations
 import ast
 from collections import defaultdict
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
 
@@ -16,6 +17,16 @@ class PackageScan:
     label: str
     root: Path
     module_prefix: str
+
+
+@dataclass(frozen=True)
+class ParsedModule:
+    """Parsed first-party Python module ready for repeated import-graph scans."""
+
+    scan_label: str
+    rel_path: str
+    candidate_targets: tuple[str, ...]
+    exact_import_usage: tuple[tuple[str, tuple[str, ...]], ...]
 
 
 def default_scan_roots(repo_root: Path) -> tuple[PackageScan, ...]:
@@ -48,6 +59,61 @@ def _iter_python_modules(scan: PackageScan) -> list[tuple[str, Path]]:
 
 def _collect_existing_modules(scan: PackageScan) -> frozenset[str]:
     return frozenset(module_name for module_name, _ in _iter_python_modules(scan))
+
+
+@lru_cache(maxsize=None)
+def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
+    """Parse first-party Python modules once per repo path for reuse across checks."""
+    repo_root = Path(repo_root_str)
+    scans = default_scan_roots(repo_root)
+    existing_modules = _collect_existing_modules(scans[0])
+    parsed_modules: list[ParsedModule] = []
+
+    for scan in scans:
+        for importer_module, py_file in _iter_python_modules(scan):
+            try:
+                tree = ast.parse(py_file.read_text(encoding="utf-8"))
+            except (OSError, SyntaxError, UnicodeDecodeError):
+                continue
+            candidate_targets: set[str] = set()
+            exact_import_usage: dict[str, set[str]] = defaultdict(set)
+            for node in ast.walk(tree):
+                for target_module in _iter_candidate_import_targets(
+                    existing_modules=existing_modules,
+                    importer_module=importer_module,
+                    node=node,
+                ):
+                    candidate_targets.add(target_module)
+
+                if isinstance(node, ast.Import):
+                    for alias in node.names:
+                        if alias.name.startswith("bioetl."):
+                            exact_import_usage[alias.name].add("<module>")
+                elif isinstance(node, ast.ImportFrom):
+                    base_module = _resolve_relative_module(
+                        importer_module=importer_module,
+                        module=node.module,
+                        level=node.level,
+                    )
+                    if not base_module or not base_module.startswith("bioetl."):
+                        continue
+                    for alias in node.names:
+                        exact_import_usage[base_module].add(alias.name)
+            parsed_modules.append(
+                ParsedModule(
+                    scan_label=scan.label,
+                    rel_path=py_file.relative_to(repo_root).as_posix(),
+                    candidate_targets=tuple(sorted(candidate_targets)),
+                    exact_import_usage=tuple(
+                        (module_name, tuple(sorted(imported_names)))
+                        for module_name, imported_names in sorted(
+                            exact_import_usage.items()
+                        )
+                    ),
+                )
+            )
+
+    return tuple(parsed_modules)
 
 
 def _resolve_relative_module(
@@ -110,21 +176,12 @@ def collect_bioetl_importers(
         module_name: {"src": set(), "tests": set()} for module_name in existing_modules
     }
 
-    for scan in scans:
-        for importer_module, py_file in _iter_python_modules(scan):
-            try:
-                tree = ast.parse(py_file.read_text(encoding="utf-8"))
-            except (OSError, SyntaxError, UnicodeDecodeError):
-                continue
-            rel_path = py_file.relative_to(repo_root).as_posix()
-            for node in ast.walk(tree):
-                for target_module in _iter_candidate_import_targets(
-                    existing_modules=existing_modules,
-                    importer_module=importer_module,
-                    node=node,
-                ):
-                    if target_module in importers:
-                        importers[target_module][scan.label].add(rel_path)
+    for parsed_module in _collect_parsed_modules(str(repo_root.resolve())):
+        for target_module in parsed_module.candidate_targets:
+            if target_module in importers:
+                importers[target_module][parsed_module.scan_label].add(
+                    parsed_module.rel_path
+                )
 
     return {
         module_name: {
@@ -132,6 +189,38 @@ def collect_bioetl_importers(
             "tests": tuple(sorted(paths["tests"])),
         }
         for module_name, paths in sorted(importers.items())
+    }
+
+
+def collect_exact_module_import_usage(
+    repo_root: Path, target_module: str
+) -> dict[str, dict[str, tuple[str, ...]]]:
+    """Collect exact first-party import usage for one target module.
+
+    The returned mapping is keyed first by scan label (`src` / `tests`) and then
+    by importer path. Each importer path maps to the tuple of imported names used
+    from the target module. Direct ``import <module>`` statements are recorded as
+    ``"<module>"``.
+    """
+
+    scans = default_scan_roots(repo_root)
+    usage: dict[str, dict[str, set[str]]] = {
+        scan.label: defaultdict(set) for scan in scans
+    }
+
+    for parsed_module in _collect_parsed_modules(str(repo_root.resolve())):
+        exact_usage = dict(parsed_module.exact_import_usage)
+        if target_module not in exact_usage:
+            continue
+        for imported_name in exact_usage[target_module]:
+            usage[parsed_module.scan_label][parsed_module.rel_path].add(imported_name)
+
+    return {
+        label: {
+            rel_path: tuple(sorted(imported_names))
+            for rel_path, imported_names in sorted(path_map.items())
+        }
+        for label, path_map in usage.items()
     }
 
 

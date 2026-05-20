@@ -1009,6 +1009,71 @@ class TestLoadResume:
         )
 
     @pytest.mark.asyncio
+    async def test_resume_raises_conflict_when_suffix_contains_unsupported_replay_entry(
+        self,
+    ) -> None:
+        """Resume fails closed when bounded suffix projector lacks coverage."""
+        ledger_port = MagicMock()
+        metrics = MagicMock()
+        ledger_port.list_entries_after.return_value = [
+            _make_run_ledger_entry(
+                entry_id="entry-future",
+                event_type="future_resume_delta",
+                occurred_at=datetime(2024, 6, 1, 10, 0, tzinfo=UTC),
+            ),
+        ]
+        svc, storage, logger = _make_service(
+            resume=True,
+            run_id="run-old",
+            expected_anchors=_anchors(manifest_id="manifest-123"),
+            run_ledger_port=ledger_port,
+            metrics=metrics,
+        )
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-old",
+            state=CompositePipelineState.ENRICHING,
+            seed_completed=True,
+            manifest_id="manifest-123",
+            composite_run_identity="run-old",
+            last_event_id="entry-1",
+            last_event_occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(state_data.to_dict())
+
+        with pytest.raises(
+            CheckpointConflictError, match="unsupported replay-relevant ledger entries"
+        ):
+            await svc.load()
+
+        logger.error.assert_any_call(
+            "Checkpoint replay suffix is outside bounded projector coverage",
+            composite="my_composite",
+            manifest_id="manifest-123",
+            checkpoint_run_id="run-old",
+            projection_contract="checkpoint_snapshot_plus_ledger_suffix_resume",
+            unsupported_replay_entries=[
+                {
+                    "entry_id": "entry-future",
+                    "event_type": "future_resume_delta",
+                    "stage": None,
+                }
+            ],
+            reason_code="checkpoint_replay_projection_incomplete",
+        )
+        metrics.increment_counter.assert_any_call(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {"pipeline": "my_composite", "status": "loaded"},
+        )
+        metrics.increment_counter.assert_any_call(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {"pipeline": "my_composite", "status": "replay_conflict"},
+        )
+
+    @pytest.mark.asyncio
     async def test_resume_blocks_on_manifest_id_mismatch(self) -> None:
         """Resume is blocked when checkpoint manifest_id mismatches expected anchor."""
         svc, storage, _ = _make_service(

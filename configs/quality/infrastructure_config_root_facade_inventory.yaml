@@ -1,0 +1,43 @@
+version: 1
+policy_scope: infrastructure_config_root_facade
+review_date: "2026-05-20"
+target_module: bioetl.infrastructure.config
+new_src_import_policy: allowlisted_only_no_growth
+symbols:
+  - symbol: Settings
+    owner: bioetl.infrastructure.config
+    status: sanctioned_convenience_type
+    canonical_target: bioetl.infrastructure.config._base.Settings
+    max_src_importers: 60
+    allowlisted_path_prefixes:
+      - src/bioetl/composition/
+      - src/bioetl/infrastructure/adapters/openalex/
+      - src/bioetl/infrastructure/adapters/pubmed/
+      - src/bioetl/infrastructure/security/
+    rationale: >-
+      `Settings` remains a retained convenience type import for composition
+      wiring and a bounded set of infrastructure consumers, but new first-party
+      growth through the broad package-root facade is not allowed.
+  - symbol: get_settings
+    owner: bioetl.infrastructure.config
+    status: sanctioned_convenience_runtime
+    canonical_target: bioetl.infrastructure.config._base.get_settings
+    max_src_importers: 19
+    allowlisted_path_prefixes:
+      - src/bioetl/composition/
+      - src/bioetl/infrastructure/storage/support/
+    rationale: >-
+      `get_settings` remains a retained convenience seam for composition
+      runtime/bootstrap paths and one bounded infrastructure support surface.
+      New first-party growth through the package root is not allowed.
+  - symbol: load_pipeline_contract_policy
+    owner: bioetl.infrastructure.config
+    status: sanctioned_convenience_contract_policy
+    canonical_target: bioetl.infrastructure.config.contract_policy_loader.load_pipeline_contract_policy
+    max_src_importers: 3
+    allowlisted_path_prefixes:
+      - src/bioetl/composition/factories/pipeline/
+    rationale: >-
+      Contract-policy loading is still allowed through the package root only for
+      the current pipeline factory slice. New first-party growth must go through
+      reviewed inventory updates first.

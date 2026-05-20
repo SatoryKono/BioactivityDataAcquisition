@@ -273,6 +273,20 @@ class TestCompositeDQExternalization:
                     "soft_fail_threshold": 0.05,
                     "hard_fail_threshold": 0.25,
                     "required_fields": ["publication_id"],
+                    "field_validations": [
+                        {
+                            "field": "publication_id",
+                            "type": "required",
+                            "nullable": False,
+                        }
+                    ],
+                    "cross_field_validations": [
+                        {
+                            "name": "publication_identity_anchor",
+                            "fields": ["doi", "pmid", "title"],
+                            "condition": "any_present",
+                        }
+                    ],
                     "enricher_overrides": {
                         "crossref_publication": {
                             "soft_fail_threshold": 0.15,
@@ -292,9 +306,58 @@ class TestCompositeDQExternalization:
         assert config.dq.soft_fail_threshold == pytest.approx(0.10)
         assert config.dq.hard_fail_threshold == pytest.approx(0.25)
         assert config.dq.required_fields == ("publication_id",)
+        assert config.dq.field_validations[0].field == "publication_id"
+        assert config.dq.field_validations[0].validation_type == "required"
+        assert config.dq.cross_field_validations[0].name == (
+            "publication_identity_anchor"
+        )
         override = config.dq.enricher_overrides["crossref_publication"]
         assert override.soft_fail_threshold == pytest.approx(0.15)
         assert override.hard_fail_threshold == pytest.approx(0.50)
+
+    def test_rejects_legacy_dead_composite_dq_keys(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Legacy entity_* validation keys must fail instead of being ignored."""
+        configs_root = tmp_path / "configs"
+        composites_dir = configs_root / "composites"
+        quality_file = (
+            configs_root / "quality" / "entities" / "composite" / "publication.yaml"
+        )
+
+        payload = _build_composite_payload("composite_legacy_dead_keys")
+        composite_payload = payload["composite"]
+        assert isinstance(composite_payload, dict)
+        composite_payload["dq_overrides"] = {
+            "dq_config_file": "../quality/entities/composite/publication.yaml"
+        }
+
+        _write_yaml(composites_dir / "publication.yaml", payload)
+        _write_yaml(
+            quality_file,
+            {
+                "dq_overrides": {
+                    "soft_fail_threshold": 0.05,
+                    "hard_fail_threshold": 0.25,
+                    "required_fields": ["publication_id"],
+                    "entity_field_validations": {
+                        "publication_id": {
+                            "type": "required",
+                            "nullable": False,
+                        }
+                    },
+                }
+            },
+        )
+
+        monkeypatch.setattr(
+            composite_runtime, "DEFAULT_COMPOSITE_CONFIG_DIR", composites_dir
+        )
+
+        with pytest.raises(ValueError, match="entity_field_validations"):
+            composite_runtime.load_composite_config("publication")
 
     @pytest.mark.parametrize(
         ("entity", "business_key"),

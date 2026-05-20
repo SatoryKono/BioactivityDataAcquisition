@@ -135,15 +135,18 @@ class ManifestControlPlaneRefs:
     source_fingerprint: str | None
     dq_contract_compatibility_hash: str | None
     effective_config_artifact_id: str | None
-    contract_ref: str | None
-    contract_version: str | None
-    contract_schema_hash: str | None
-    dq_policy_ref: str | None
-    rule_bundle_version: str | None
-    normalization_profile_ref: str | None
-    normalization_profile_version: str | None
-    normalization_profile_hash: str | None
-    required_persistence_profile: str | None
+    replay_of_run_id: str | None = None
+    replay_of_manifest_id: str | None = None
+    input_snapshot_fingerprint: str | None = None
+    contract_ref: str | None = None
+    contract_version: str | None = None
+    contract_schema_hash: str | None = None
+    dq_policy_ref: str | None = None
+    rule_bundle_version: str | None = None
+    normalization_profile_ref: str | None = None
+    normalization_profile_version: str | None = None
+    normalization_profile_hash: str | None = None
+    required_persistence_profile: str | None = None
 
 
 def resolve_run_context_values(
@@ -167,6 +170,9 @@ def create_control_plane_refs(
     source_fingerprint: str | None,
     dq_contract_compatibility_hash: str,
     effective_config_artifact_id: str,
+    replay_of_run_id: str | None,
+    replay_of_manifest_id: str | None,
+    input_snapshot_fingerprint: str | None,
     contract_ref: str,
     contract_version: str | None,
     contract_schema_hash: str | None,
@@ -189,6 +195,9 @@ def create_control_plane_refs(
         source_fingerprint=source_fingerprint,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         effective_config_artifact_id=effective_config_artifact_id,
+        replay_of_run_id=replay_of_run_id,
+        replay_of_manifest_id=replay_of_manifest_id,
+        input_snapshot_fingerprint=input_snapshot_fingerprint,
         contract_ref=contract_ref,
         contract_version=contract_version,
         contract_schema_hash=contract_schema_hash,

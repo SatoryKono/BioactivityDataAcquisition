@@ -246,48 +246,42 @@ class TestCheckpointCompatibilityService:
         assert any("Manifest identity mismatch" in msg for msg in result.messages)
 
     def test_validate_composite_run_identity_mismatch(self) -> None:
-        """Legacy composite identity still blocks when no canonical anchor exists."""
+        """Composite identity alone must not prove resume compatibility."""
         current = CheckpointMetadata(
             records_processed=1000,
-            dq_contract_compatibility_hash="same_hash",
-            pipeline_version="1.0.0",
             composite_run_identity="run-current",
         )
         checkpoint = CheckpointMetadata(
             records_processed=500,
-            dq_contract_compatibility_hash="same_hash",
-            pipeline_version="1.0.0",
             composite_run_identity="run-checkpoint",
         )
 
         result = self.service.validate_checkpoint_compatibility(current, checkpoint)
 
-        assert result.compatible is True
-        assert result.execution_identity_compatible is True
+        assert result.compatible is False
+        assert result.execution_identity_compatible is False
         assert any(
-            "Checkpoint is compatible for resume" in msg for msg in result.messages
+            "Execution identity continuity not proven" in msg
+            for msg in result.messages
         )
 
     def test_validate_composite_run_identity_missing(self) -> None:
-        """Missing legacy composite identity alone no longer blocks resume."""
+        """Missing composite identity alone must also fail closed."""
         current = CheckpointMetadata(
             records_processed=1000,
-            dq_contract_compatibility_hash="same_hash",
-            pipeline_version="1.0.0",
             composite_run_identity="run-current",
         )
         checkpoint = CheckpointMetadata(
             records_processed=500,
-            dq_contract_compatibility_hash="same_hash",
-            pipeline_version="1.0.0",
         )
 
         result = self.service.validate_checkpoint_compatibility(current, checkpoint)
 
-        assert result.compatible is True
-        assert result.execution_identity_compatible is True
+        assert result.compatible is False
+        assert result.execution_identity_compatible is False
         assert any(
-            "Checkpoint is compatible for resume" in msg for msg in result.messages
+            "Execution identity continuity not proven" in msg
+            for msg in result.messages
         )
 
     def test_validate_matching_execution_fingerprint_overrides_composite_drift(

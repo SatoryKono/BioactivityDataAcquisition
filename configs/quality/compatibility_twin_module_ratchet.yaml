@@ -1,0 +1,47 @@
+version: 1
+policy_scope: sanctioned_twin_module_ratchet
+review_date: "2026-05-20"
+ratchet_mode: no_growth
+families:
+  - family_id: application.core.span_helpers
+    owner: bioetl.application.core
+    public_module: bioetl.application.core.span_helpers
+    private_module: bioetl.application.core._span_helpers
+    canonical_first_party_module: bioetl.application.core.span_helpers
+    max_public_src_importers: 1
+    max_private_src_importers: 7
+    rationale: >-
+      The public/private helper twin remains live after the earlier compatibility
+      cleanup wave. New split-import growth must be blocked until the family is
+      explicitly narrowed or re-reviewed.
+  - family_id: composition.runtime_builders.run_manifest_support
+    owner: bioetl.composition.runtime_builders
+    public_module: bioetl.composition.runtime_builders.run_manifest_support
+    private_module: bioetl.composition.runtime_builders._run_manifest_support
+    canonical_first_party_module: bioetl.composition.runtime_builders.run_manifest_support
+    max_public_src_importers: 4
+    max_private_src_importers: 9
+    rationale: >-
+      This runtime-builder twin still carries the heaviest split-import skew in
+      the current census and needs a no-growth ratchet while narrowing remains
+      pending.
+  - family_id: domain.normalization.profiles.chembl_policy_registry
+    owner: bioetl.domain.normalization.profiles
+    public_module: bioetl.domain.normalization.profiles.chembl_policy_registry
+    private_module: bioetl.domain.normalization.profiles._chembl_policy_registry
+    canonical_first_party_module: bioetl.domain.normalization.profiles.chembl_policy_registry
+    max_public_src_importers: 1
+    max_private_src_importers: 11
+    rationale: >-
+      The policy-registry twin remains active on the canonical ChEMBL
+      normalization path and should not grow while the family stays split.
+  - family_id: domain.normalization.profiles.chembl_policy_registry_data
+    owner: bioetl.domain.normalization.profiles
+    public_module: bioetl.domain.normalization.profiles.chembl_policy_registry_data
+    private_module: bioetl.domain.normalization.profiles._chembl_policy_registry_data
+    canonical_first_party_module: bioetl.domain.normalization.profiles.chembl_policy_registry_data
+    max_public_src_importers: 2
+    max_private_src_importers: 2
+    rationale: >-
+      The data companion to the policy-registry twin is still split and should
+      stay under a matching no-growth ratchet.

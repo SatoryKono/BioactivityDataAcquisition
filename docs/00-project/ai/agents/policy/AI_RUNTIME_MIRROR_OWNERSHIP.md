@@ -126,3 +126,9 @@ The following divergence is not acceptable:
 - [Post-Change Validation](POST_CHANGE_VALIDATION.md)
 - [MCP Local Runtime Config Strategy](MCP_LOCAL_RUNTIME_CONFIG.md)
 - [Documentation Publication Policy](../../../governance/06-doc-publication-policy.md)
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

@@ -61,9 +61,9 @@ budgets:
   refined_assertless_max: 601
   duplicate_test_names_max: 891
   duplicate_test_name_occurrences_max: 2775
-  compatibility_test_file_max: 53
-  markerless_test_functions_max: 13383
-  uuid4_call_sites_max: 417
+  compatibility_test_file_max: 55
+  markerless_test_functions_max: 13416
+  uuid4_call_sites_max: 419
   date_today_call_sites_max: 0
 preflight:
   script: scripts/engineering/qa/check_test_audit_preflight.py
@@ -103,7 +103,7 @@ assertless_triage:
       rationale: "Performance/benchmark tests use measurement infrastructure as the assertion surface."
       next_review: "2026-09-30"
     helper_asserted:
-      count: 6
+      count: 7
       decision: retained
       rationale: "Verification is delegated to explicit check/validate/verify helper calls."
       next_review: "2026-09-30"
@@ -153,7 +153,7 @@ duplicate_name_triage:
     do_not_consolidate_when: "Inline setup is shorter and clearer than an indirection."
 compatibility_test_inventory:
   review_cadence: quarterly
-  total_files: 53
+  total_files: 55
   default_review_date: "2026-09-30"
   entries:
     - path: tests/architecture/test_application_composite_compat_surface_usage.py
@@ -240,6 +240,13 @@ compatibility_test_inventory:
       policy_ref: "#4209"
       review_date: "2026-09-30"
       rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_compatibility_importer_census_governance.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/compatibility importer census governance"
+      policy_ref: "#4209"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
     - path: tests/architecture/test_compatibility_telemetry_reporting.py
       decision: retained_compatibility_contract
       owner: architecture-governance
@@ -279,6 +286,13 @@ compatibility_test_inventory:
       decision: sunset_review
       owner: architecture-governance
       protected_surface: "architecture/config schema legacy status"
+      policy_ref: "#4209"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_degraded_runtime_anchor_legacy_boundary.py
+      decision: retained_compatibility_contract
+      owner: architecture-governance
+      protected_surface: "architecture/degraded runtime anchor legacy boundary"
       policy_ref: "#4209"
       review_date: "2026-09-30"
       rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
@@ -571,7 +585,7 @@ remediation_closeout:
       decision: closeable
       evidence:
         - tests/architecture/test_observability_metric_governance.py
-        - artifacts/observability/runtime_cardinality_inventory.json
+        - reports/observability/runtime_cardinality_inventory.json
       closeout: "Observability cardinality evidence has an explicit freshness test and regeneration command."
     - issue: "#4206"
       decision: closeable

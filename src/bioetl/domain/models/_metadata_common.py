@@ -109,6 +109,22 @@ class RuntimeMetadata(BaseModel):
     duration_seconds: float | None = Field(
         default=None, description="Duration in seconds"
     )
+    exact_replay: bool | None = Field(
+        default=None,
+        description="Whether this occurrence was launched in strict exact-replay mode",
+    )
+    replay_of_run_id: str | None = Field(
+        default=None,
+        description="Parent run occurrence when this run is an exact replay",
+    )
+    replay_of_manifest_id: str | None = Field(
+        default=None,
+        description="Parent manifest occurrence when this run is an exact replay",
+    )
+    input_snapshot_fingerprint: str | None = Field(
+        default=None,
+        description="Canonical input snapshot identity fingerprint for replayable runs",
+    )
 
 
 class PipelineMetadata(BaseModel):

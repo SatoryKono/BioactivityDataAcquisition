@@ -196,6 +196,10 @@ Examples:
 - `compatibility_replay_readiness_verdict: lifecycle_projection_only` confirms
   that the run is on the bounded composite lifecycle projection path rather than
   a strict exact-replay path.
+- if checkpoint resume fails with unsupported ledger-suffix replay entries,
+  treat that as a projector coverage conflict rather than as a transient cache
+  miss; the bounded composite projector intentionally fails closed when suffix
+  events fall outside its published contract.
 - `compatibility_taxonomy: blocked_resume` means one or more execution identity
   anchors differ; do not resume until the mismatch is explained.
 - `compatibility_taxonomy: missing_run_manifest` or

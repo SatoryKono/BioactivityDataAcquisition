@@ -229,6 +229,31 @@ def test_legacy_and_v2_align_when_composite_run_identity_mismatches() -> None:
     )
 
 
+def test_legacy_blocks_when_composite_identity_is_the_only_resume_anchor() -> None:
+    legacy = _legacy_service()
+
+    current_metadata = CheckpointMetadata(
+        records_processed=100,
+        composite_run_identity="run-a",
+    )
+    checkpoint_metadata = CheckpointMetadata(
+        records_processed=100,
+        composite_run_identity="run-b",
+    )
+
+    legacy_result = legacy.validate_checkpoint_compatibility(
+        current_metadata,
+        checkpoint_metadata,
+    )
+
+    assert legacy_result.compatible is False
+    assert legacy_result.execution_identity_compatible is False
+    assert any(
+        "Execution identity continuity not proven" in msg
+        for msg in legacy_result.messages
+    )
+
+
 def test_legacy_and_v2_align_when_git_commit_and_profile_drift() -> None:
     legacy = _legacy_service()
     v2 = _v2_service()

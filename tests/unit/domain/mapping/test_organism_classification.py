@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import csv
+from pathlib import Path
+
 import pytest
 
 from bioetl.domain.mapping.organism_classification import (
@@ -107,6 +110,14 @@ class TestClassifyByTaxonomyId:
         assert result.reason is not None
         assert "not mapped" in result.reason
 
+    def test_unmapped_valid_taxonomy_id_falls_back_to_resolved_name(self) -> None:
+        result = classify_organism("Influenza A virus", 11320)
+        assert result.organism_class == CellularityType.ACELLULAR
+        assert result.source == "organism_name"
+        assert result.taxonomy_id == 11320
+        assert result.reason is not None
+        assert "fell back to organism name" in result.reason
+
 
 class TestClassifyByOrganismName:
     """Organism name is the fallback classification source."""
@@ -195,6 +206,45 @@ class TestKeywordHeuristics:
         result = classify_organism(organism, None)
         assert result.organism_class == expected
         assert result.source == "organism_name"
+
+
+class TestGenusFallback:
+    """Genus-level fallback covers organisms absent from the species map."""
+
+    @pytest.mark.parametrize(
+        ("organism", "expected"),
+        [
+            ("Cavia porcellus", CellularityType.MULTICELLULAR),
+            ("Oryctolagus cuniculus", CellularityType.MULTICELLULAR),
+            ("Canis lupus familiaris", CellularityType.MULTICELLULAR),
+            ("Klebsiella pneumoniae", CellularityType.UNICELLULAR),
+            ("Schistosoma mansoni", CellularityType.MULTICELLULAR),
+            ("Arabidopsis thaliana", CellularityType.MULTICELLULAR),
+            ("Chlamydomonas reinhardtii", CellularityType.UNICELLULAR),
+        ],
+    )
+    def test_genus_level_fallback(self, organism: str, expected: CellularityType) -> None:
+        result = classify_organism(organism, None)
+        assert result.organism_class == expected
+        assert result.source == "organism_name"
+
+
+class TestChemblTargetCsvCoverage:
+    """Current chembl target filter input should be fully classifiable by name."""
+
+    def test_all_distinct_organisms_in_current_target_csv_resolve(self) -> None:
+        path = Path("data/input/target.csv")
+        rows = csv.DictReader(path.open(newline="", encoding="utf-8"))
+
+        unresolved: list[str] = []
+        for organism_name in sorted(
+            {(row.get("organism") or "").strip() for row in rows if row.get("organism")}
+        ):
+            result = classify_organism(organism_name, None)
+            if result.organism_class is None:
+                unresolved.append(organism_name)
+
+        assert unresolved == []
 
 
 class TestSourceConflict:

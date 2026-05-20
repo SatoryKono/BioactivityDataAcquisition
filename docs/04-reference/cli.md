@@ -525,10 +525,19 @@ bioetl run-manifest show <run-id|manifest-id> [--format text|json|yaml]
 - `current_identity`
 - `checkpoint_identity`
 
-Они содержат resume-critical anchors: `composite_run_identity`,
-`execution_fingerprint`, `manifest_id`, `effective_config_hash`,
-`contract_ref`, `contract_version`, `exact_replay`, `input_snapshot_ids`,
-`input_snapshot_content_hashes`.
+Они содержат resume-critical anchors: `execution_fingerprint`, `manifest_id`,
+`effective_config_hash`, `contract_ref`, `contract_version`, `exact_replay`,
+`input_snapshot_ids`, `input_snapshot_content_hashes`. Для composite-specific
+resume diagnostics дополнительно показывается `composite_run_identity` как
+occurrence-scoped drift guard, а не как generic semantic replay identity.
+
+Output metadata sidecars remain the operator-facing occurrence surface. Their
+`runtime` block publishes `exact_replay`, `replay_of_run_id`,
+`replay_of_manifest_id`, and `input_snapshot_fingerprint`; corresponding
+`artifact_published` ledger details repeat these anchors together with
+`execution_fingerprint`, `effective_config_artifact_id`, `contract_ref`, and
+`contract_version` so replay ancestry can be checked without reconstructing the
+whole manifest by hand.
 
 В `text`/`json`/`yaml` diff output отдельное поле `replay_relationship`
 показывает, является ли один manifest exact replay другого, вместо того чтобы

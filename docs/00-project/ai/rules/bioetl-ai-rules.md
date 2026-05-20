@@ -84,3 +84,9 @@ uv run python -m pytest tests/architecture/test_regression_metrics.py -q
 make test  # local suite with coverage
 make lint  # ruff + mypy
 ```
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

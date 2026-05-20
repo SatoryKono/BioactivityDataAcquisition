@@ -99,3 +99,9 @@ Skills now inlined into commands — invoke directly via `/command-name`:
 1. Этот файл (загружается автоматически)
 1. `docs/00-project/ai/memory/agent-memory.md` — компактный контекст проекта
 1. `docs/00-project/ai/agents/agents/ORCHESTRATION.md` — при оркестрации задач
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

@@ -153,6 +153,8 @@ class TestRunLedgerReplayProjection:
         assert projection.merge_completed is None
         assert projection.last_event_id == "entry-2"
         assert projection.replayed_entry_count == 2
+        assert projection.projector_coverage_complete is True
+        assert projection.unsupported_replay_entries == ()
 
     def test_empty_projection_has_no_state_delta(self) -> None:
         projection = project_run_ledger_replay([])
@@ -304,3 +306,40 @@ class TestRunLedgerReplayProjection:
             "snapshot-a",
             "snapshot-b",
         ]
+
+    def test_marks_projection_incomplete_for_unknown_replay_relevant_event_type(
+        self,
+    ) -> None:
+        projection = project_run_ledger_replay(
+            [
+                _entry(
+                    entry_id="entry-future",
+                    event_type="future_resume_delta",
+                    occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
+                )
+            ]
+        )
+
+        assert projection.projector_coverage_complete is False
+        assert projection.unsupported_replay_entries == (
+            ("entry-future", "future_resume_delta", None),
+        )
+
+    def test_marks_projection_incomplete_for_non_composite_stage_completion(self) -> (
+        None
+    ):
+        projection = project_run_ledger_replay(
+            [
+                _entry(
+                    entry_id="entry-postrun",
+                    event_type="stage_completed",
+                    stage="postrun",
+                    occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
+                )
+            ]
+        )
+
+        assert projection.projector_coverage_complete is False
+        assert projection.unsupported_replay_entries == (
+            ("entry-postrun", "stage_completed", "postrun"),
+        )

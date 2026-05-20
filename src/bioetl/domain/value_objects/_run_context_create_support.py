@@ -36,6 +36,10 @@ _RUN_CONTEXT_OPTIONAL_DEFAULTS: dict[str, object] = {
     "dq_contract_compatibility_hash": None,
     "effective_config_artifact_id": None,
     "execution_fingerprint": None,
+    "exact_replay": False,
+    "replay_of_run_id": None,
+    "replay_of_manifest_id": None,
+    "input_snapshot_fingerprint": None,
 }
 _RUN_CONTEXT_ALL_FIELDS = (
     *_RUN_CONTEXT_REQUIRED_FIELDS,
@@ -169,5 +173,13 @@ def coerce_run_context_create_input(
         ),
         execution_fingerprint=cast(
             _OPTIONAL_STR_ANNOTATION, values["execution_fingerprint"]
+        ),
+        exact_replay=cast(bool, values["exact_replay"]),
+        replay_of_run_id=cast(_OPTIONAL_STR_ANNOTATION, values["replay_of_run_id"]),
+        replay_of_manifest_id=cast(
+            _OPTIONAL_STR_ANNOTATION, values["replay_of_manifest_id"]
+        ),
+        input_snapshot_fingerprint=cast(
+            _OPTIONAL_STR_ANNOTATION, values["input_snapshot_fingerprint"]
         ),
     )

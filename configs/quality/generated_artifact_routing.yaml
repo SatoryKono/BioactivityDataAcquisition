@@ -1,5 +1,5 @@
 schema_version: 1
-updated: "2026-04-21"
+updated: "2026-05-20"
 description: >
   Registry of maintained generators and their approved generated-artifact
   destinations. This is a governance surface for repository layout cleanup:
@@ -266,6 +266,14 @@ routes:
     outputs:
       - reports/observability/grafana/screenshots/
     notes: Grafana render API screenshots are local working outputs under reports/.
+
+  - id: observability-runtime-cardinality-evidence
+    generator: scripts/engineering/qa/report_observability_metric_inventory.py
+    output_kind: working_report
+    commit_policy: tracked_quality_baseline
+    outputs:
+      - reports/observability/runtime_cardinality_inventory.json
+    notes: Runtime cardinality inventory evidence is a tracked observability governance artifact under reports/observability.
 
   - id: runtime-structured-log-file
     generator: src/bioetl/infrastructure/observability/logging_config.py

@@ -101,3 +101,9 @@ bioetl run --pipeline chembl_activity --run-type incremental --limit 100
 - **Loading Strategy**: `full_scan_only` is strictly for publications. All other high-volume entities MUST use `null` (default incremental) to enable checkpointing.
 - **Transformer Mapping**: Use declarative `FieldGroup`/`FieldSpec`. Normalize empty collections to `None`. Compact JSON serialization for list/dict fields.
 - **VCR Governance**: Organize cassettes in `tests/fixtures/vcr/{provider}/`. NEVER store in root. Use `once` mode locally, `none` in CI.
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

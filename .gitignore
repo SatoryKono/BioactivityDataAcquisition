@@ -21,9 +21,9 @@ MagicMock/
 # AI agent temporary files
 .codex_tmp/
 .codex_tmp_issue_*.md
-.env.codex
-.env.gemini
-.env.mistrallvibe
+scripts/ai/codex/.env.codex
+scripts/ai/gemini/.env.gemini
+scripts/ai/vibe/.env.vibe
 git_out.txt
 /memory/
 /check_cfg.py
@@ -118,8 +118,6 @@ log_test.txt
 *.swp
 *~
 ~$*
-script-codex/.env.codex
-script-gemini/.env.gemini
 
 # AI assistant configs (vendor-specific, not project code)
 .ai/
@@ -148,7 +146,6 @@ desktop.ini
 API_KEY.env
 secrets.json
 credentials.json
-!script-mistrallvibe/.env.mistrallvibe
 
 # Docker volumes (RULES.md §8.2)
 docker-data/

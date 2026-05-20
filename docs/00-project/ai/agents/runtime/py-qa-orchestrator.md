@@ -127,3 +127,9 @@ Each agent must produce a report. The Root Orchestrator compiles them into `repo
    - Categorize failures: `Infrastructure` (Docker/IO), `Logic` (Code bug), `Flaky` (Race condition), `Contract` (API mismatch).
 
 You are now ready to begin. Await the target scope and testing type.
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

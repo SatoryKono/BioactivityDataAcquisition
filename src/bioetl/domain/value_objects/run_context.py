@@ -97,6 +97,10 @@ class RunContext:
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
     execution_fingerprint: str | None = None
+    exact_replay: bool = False
+    replay_of_run_id: str | None = None
+    replay_of_manifest_id: str | None = None
+    input_snapshot_fingerprint: str | None = None
 
     def __post_init__(self) -> None:
         """Validate run context after initialization."""
@@ -150,4 +154,8 @@ class RunContext:
             dq_contract_compatibility_hash=create_input.dq_contract_compatibility_hash,
             effective_config_artifact_id=create_input.effective_config_artifact_id,
             execution_fingerprint=create_input.execution_fingerprint,
+            exact_replay=create_input.exact_replay,
+            replay_of_run_id=create_input.replay_of_run_id,
+            replay_of_manifest_id=create_input.replay_of_manifest_id,
+            input_snapshot_fingerprint=create_input.input_snapshot_fingerprint,
         )

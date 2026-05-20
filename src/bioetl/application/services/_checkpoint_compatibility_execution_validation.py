@@ -133,20 +133,6 @@ def _initial_execution_identity_outcome(
     reason = execution_identity_result["reason"]
     continuity_proven = reason != "execution_identity_not_enforced"
     compatible = continuity_proven
-    if reason == "composite_run_identity_missing":
-        compatible = False
-        messages.append(
-            "Composite run identity missing: "
-            f"current={current_metadata.composite_run_identity}, "
-            f"checkpoint={checkpoint_metadata.composite_run_identity}"
-        )
-    elif reason == "composite_run_identity_mismatch":
-        compatible = False
-        messages.append(
-            "Composite run identity mismatch: "
-            f"current={current_metadata.composite_run_identity}, "
-            f"checkpoint={checkpoint_metadata.composite_run_identity}"
-        )
     if reason in {
         "checkpoint_execution_identity_fallback_mismatch",
         "degraded_runtime_anchor_fingerprint_mismatch",
@@ -295,7 +281,6 @@ def _has_explicit_execution_identity(metadata: CheckpointMetadata) -> bool:
     return any(
         (
             metadata.execution_fingerprint,
-            metadata.composite_run_identity,
             metadata.manifest_id,
         )
     )

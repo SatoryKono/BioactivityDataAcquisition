@@ -74,3 +74,9 @@ The closeout MUST include:
 1. skipped checks with reason and the exact command to run later
 1. mirror-sync status when AI runtime files or docs mirrors changed
 1. explicit callout if any stale guidance remains for follow-up
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

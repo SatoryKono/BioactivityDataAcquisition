@@ -53,6 +53,9 @@ def _iter_optional_control_plane_updates(
     source_fingerprint: str | None = None,
     dq_contract_compatibility_hash: str | None = None,
     effective_config_artifact_id: str | None = None,
+    replay_of_run_id: str | None = None,
+    replay_of_manifest_id: str | None = None,
+    input_snapshot_fingerprint: str | None = None,
     contract_ref: str | None = None,
     contract_version: str | None = None,
     contract_schema_hash: str | None = None,
@@ -71,6 +74,9 @@ def _iter_optional_control_plane_updates(
             "source_fingerprint": source_fingerprint,
             "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
             "effective_config_artifact_id": effective_config_artifact_id,
+            "replay_of_run_id": replay_of_run_id,
+            "replay_of_manifest_id": replay_of_manifest_id,
+            "input_snapshot_fingerprint": input_snapshot_fingerprint,
             "contract_ref": contract_ref,
             "contract_version": contract_version,
             "contract_schema_hash": contract_schema_hash,
@@ -137,6 +143,13 @@ def _extract_optional_updates_from_refs(
         effective_config_artifact_id=getattr(
             control_plane_refs, "effective_config_artifact_id", None
         ),
+        replay_of_run_id=getattr(control_plane_refs, "replay_of_run_id", None),
+        replay_of_manifest_id=getattr(
+            control_plane_refs, "replay_of_manifest_id", None
+        ),
+        input_snapshot_fingerprint=getattr(
+            control_plane_refs, "input_snapshot_fingerprint", None
+        ),
         contract_ref=getattr(control_plane_refs, "contract_ref", None),
         contract_version=getattr(control_plane_refs, "contract_version", None),
         contract_schema_hash=getattr(
@@ -170,6 +183,9 @@ def attach_manifest_id(
     source_fingerprint: str | None = None,
     dq_contract_compatibility_hash: str | None = None,
     effective_config_artifact_id: str | None = None,
+    replay_of_run_id: str | None = None,
+    replay_of_manifest_id: str | None = None,
+    input_snapshot_fingerprint: str | None = None,
     contract_ref: str | None = None,
     contract_version: str | None = None,
     contract_schema_hash: str | None = None,
@@ -196,6 +212,9 @@ def attach_manifest_id(
             source_fingerprint=source_fingerprint,
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             effective_config_artifact_id=effective_config_artifact_id,
+            replay_of_run_id=replay_of_run_id,
+            replay_of_manifest_id=replay_of_manifest_id,
+            input_snapshot_fingerprint=input_snapshot_fingerprint,
             contract_ref=contract_ref,
             contract_version=contract_version,
             contract_schema_hash=contract_schema_hash,

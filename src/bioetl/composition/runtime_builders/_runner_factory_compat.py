@@ -56,6 +56,11 @@ def create_runner_from_factory(
             effective_config_artifact_id=getattr(
                 ctx, "effective_config_artifact_id", None
             ),
+            replay_of_run_id=getattr(ctx, "replay_of_run_id", None),
+            replay_of_manifest_id=getattr(ctx, "replay_of_manifest_id", None),
+            input_snapshot_fingerprint=getattr(
+                ctx, "input_snapshot_fingerprint", None
+            ),
         ),
         filter_config=inputs.filter_config,
         config=cast("PipelineYamlConfig", inputs.yaml_config),

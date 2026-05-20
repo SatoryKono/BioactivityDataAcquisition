@@ -274,3 +274,9 @@ ______________________________________________________________________
 | Test failure (infra)   |    P2    | VCR cassette outdated, fixture mismatch     |
 | DQ threshold exceeded  |    P2    | Schema drift, upstream data change          |
 | Config mismatch        |    P2    | Missing key, wrong merge order              |
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

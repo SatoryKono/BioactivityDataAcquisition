@@ -364,3 +364,9 @@ uv run python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 | [ADR-027] | DQ hierarchy lives in base/provider/entity unified configs | `grep -rn "^quality:" configs/providers configs/entities --include="*.yaml"` |
 | [ADR-028] | Filter hierarchy lives in base/provider/entity unified configs | `grep -rn "^filters:" configs/providers configs/entities --include="*.yaml"` |
 ```
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

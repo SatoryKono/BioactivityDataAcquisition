@@ -1103,3 +1103,9 @@ ______________________________________________________________________
 - **1.2** (2025-12-27): Добавлены требования REQ-ARCH-005..007 (Health Check), REQ-CLEAR-001..004 (Medallion Clear Policy), REQ-PYTHON-001..003 (Future Annotations), REQ-CLEANUP-001..004 (Async Resource Cleanup). Синхронизировано с RULES.md v5.6.
 - **1.1** (2025-12-25): Добавлены требования REQ-ARCH-005..007 (Health Check), REQ-CLEAR-001..004 (Medallion Clear Policy), REQ-PYTHON-001..003 (Future Annotations), REQ-CLEANUP-001..004 (Async Resource Cleanup). Синхронизировано с RULES.md v5.4.
 - **1.0** (2025-12-15): Первоначальная версия. Извлечено из RULES.md v5.0.
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

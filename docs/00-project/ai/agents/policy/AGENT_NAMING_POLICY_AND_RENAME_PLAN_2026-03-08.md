@@ -118,3 +118,9 @@ All P1 renames and P2 deduplication are now superseded by full consolidation:
 1. This document defines policy and migration intent only.
 1. Wave 6 applied runtime + docs mirror cleanup simultaneously.
 1. Consolidation updates tracked in `AGENT_CONSOLIDATION_MATRIX_2026-03-08.md`.
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

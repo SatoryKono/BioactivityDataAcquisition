@@ -598,3 +598,9 @@ Task(
 - Нерешённые блокеры
 - Топ-5 рекомендаций
 - Ссылка на `reports/test-swarm/<task_id>/FINAL-REPORT.md`
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

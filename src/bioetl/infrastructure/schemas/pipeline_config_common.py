@@ -132,7 +132,10 @@ class DQYamlConfig(BaseModel):
     hard_fail_threshold: float = Field(default=0.20)
     strict_validation: bool = Field(
         default=False,
-        description="Apply stricter validation rules (feature flag)",
+        description=(
+            "Apply stricter validation rules for inline pipeline quality config; "
+            "the canonical contract-YAML key remains strict_dq_validation"
+        ),
     )
     field_validations: list[FieldValidationConfig] = Field(
         default_factory=list, description="Field-level validation rules"

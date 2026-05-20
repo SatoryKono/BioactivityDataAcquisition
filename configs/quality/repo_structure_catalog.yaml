@@ -104,6 +104,8 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/control-plane-dashboard-issue-pack-2026-05-07.md
       lifecycle: supporting_context
+    - path: docs/plans/control-plane-id-panel-issue-pack-2026-05-15.md
+      lifecycle: supporting_context
     - path: docs/plans/dashboard-datasource-uid-refactoring-plan.md
       lifecycle: supporting_context
     - path: docs/plans/memory-shim-removal-migration-plan.md

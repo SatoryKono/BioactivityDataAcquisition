@@ -85,3 +85,9 @@ If a memory claim looks stale:
 - `docs/00-project/ai/memory/README.md`
 - `src/memory/DAILY_WORKFLOW.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

@@ -52,9 +52,8 @@ class TestCompositeDQExternalization:
     """Enforce consistent DQ externalization for composite entities.
 
     The architecture intentionally keeps one external DQ file per composite
-    entity. Some entities currently share the same tiny threshold-only payload,
-    but they still keep distinct files so the externalization contract remains
-    explicit and entity-scoped.
+    entity. Rich validation content must live in the external per-entity file
+    rather than collapsing back to threshold-only stubs.
     """
 
     def test_externalized_entity_list_is_not_empty(self) -> None:
@@ -95,4 +94,30 @@ class TestCompositeDQExternalization:
         assert not extra_keys, (
             f"Unexpected inline DQ keys in configs/composites/{entity}.yaml: "
             f"{sorted(extra_keys)}"
+        )
+
+    @pytest.mark.parametrize("entity", EXTERNALIZED_COMPOSITE_ENTITIES)
+    def test_external_composite_dq_bundle_is_not_threshold_only(
+        self, entity: str
+    ) -> None:
+        external_path = COMPOSITE_QUALITY_DIR / f"{entity}.yaml"
+        payload = _load_yaml(external_path)
+        dq_overrides = payload.get("dq_overrides", payload)
+        assert isinstance(dq_overrides, dict), f"Missing dq_overrides: {external_path}"
+
+        required_fields = dq_overrides.get("required_fields")
+        field_validations = dq_overrides.get("field_validations")
+        cross_field_validations = dq_overrides.get("cross_field_validations")
+
+        assert isinstance(required_fields, list) and required_fields, (
+            f"Composite DQ config must declare non-empty required_fields: {external_path}"
+        )
+        assert (
+            isinstance(field_validations, list)
+            and field_validations
+            or isinstance(cross_field_validations, list)
+            and cross_field_validations
+        ), (
+            "Composite DQ config must declare field or cross-field validation "
+            f"bundles: {external_path}"
         )

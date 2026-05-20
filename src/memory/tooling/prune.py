@@ -7,6 +7,7 @@ import json
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import IO
 from typing import Any
 
 import yaml
@@ -65,16 +66,45 @@ def _coerce_created_at(value: object) -> datetime | None:
 
 
 def _extract_metadata(path: Path) -> dict[str, Any]:
-    text = path.read_text(encoding="utf-8")
     if path.suffix == ".json":
-        return json.loads(text)
+        return json.loads(path.read_text(encoding="utf-8"))
     if path.suffix in {".yaml", ".yml"}:
-        return yaml.safe_load(text) or {}
-    if path.suffix == ".md" and text.startswith("---\n"):
-        parts = text.split("\n---\n", 1)
-        if len(parts) == 2:
-            return yaml.safe_load(parts[0][4:]) or {}
+        return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    if path.suffix == ".md":
+        return _extract_markdown_metadata(path)
     return {}
+
+
+def _extract_markdown_metadata(path: Path) -> dict[str, Any]:
+    """Read only the front-matter fields prune logic actually needs."""
+    with path.open("r", encoding="utf-8") as handle:
+        if handle.readline() != "---\n":
+            return {}
+        return _read_prune_fields_from_front_matter(handle)
+
+
+def _read_prune_fields_from_front_matter(handle: IO[str]) -> dict[str, Any]:
+    metadata: dict[str, Any] = {}
+    for line in handle:
+        if line == "---\n":
+            return metadata
+        if ":" not in line:
+            continue
+        key, raw_value = line.split(":", 1)
+        key = key.strip()
+        if key not in {"created_at", "ttl_days"}:
+            continue
+        value = raw_value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+            value = value[1:-1]
+        if key == "ttl_days":
+            try:
+                metadata[key] = int(value)
+            except ValueError:
+                continue
+        else:
+            metadata[key] = value
+    return metadata
 
 
 def find_prunable_episodic_notes(

@@ -184,6 +184,64 @@ ORGANISM_NAME_CLASS_MAP: Final[dict[str, CellularityType]] = {
     "herpes simplex virus": CellularityType.ACELLULAR,
 }
 
+ORGANISM_GENUS_CLASS_MAP: Final[dict[str, CellularityType]] = {
+    # Mammals and other vertebrates
+    "callithrix": CellularityType.MULTICELLULAR,
+    "canis": CellularityType.MULTICELLULAR,
+    "cavia": CellularityType.MULTICELLULAR,
+    "danio": CellularityType.MULTICELLULAR,
+    "equus": CellularityType.MULTICELLULAR,
+    "lymnaea": CellularityType.MULTICELLULAR,
+    "luciola": CellularityType.MULTICELLULAR,
+    "meleagris": CellularityType.MULTICELLULAR,
+    "mesocricetus": CellularityType.MULTICELLULAR,
+    "oryctolagus": CellularityType.MULTICELLULAR,
+    "ovis": CellularityType.MULTICELLULAR,
+    "torpedo": CellularityType.MULTICELLULAR,
+    # Invertebrates and helminths
+    "anopheles": CellularityType.MULTICELLULAR,
+    "apis": CellularityType.MULTICELLULAR,
+    "aplysia": CellularityType.MULTICELLULAR,
+    "dermatophagoides": CellularityType.MULTICELLULAR,
+    "onchocerca": CellularityType.MULTICELLULAR,
+    "patiria": CellularityType.MULTICELLULAR,
+    "photinus": CellularityType.MULTICELLULAR,
+    "photuris": CellularityType.MULTICELLULAR,
+    "schistosoma": CellularityType.MULTICELLULAR,
+    # Plants
+    "arabidopsis": CellularityType.MULTICELLULAR,
+    "canavalia": CellularityType.MULTICELLULAR,
+    "carica": CellularityType.MULTICELLULAR,
+    "flaveria": CellularityType.MULTICELLULAR,
+    "ricinus": CellularityType.MULTICELLULAR,
+    "solanum": CellularityType.MULTICELLULAR,
+    "spinacia": CellularityType.MULTICELLULAR,
+    "zea": CellularityType.MULTICELLULAR,
+    # Fungi
+    "agaricus": CellularityType.MULTICELLULAR,
+    "malassezia": CellularityType.UNICELLULAR,
+    "pneumocystis": CellularityType.UNICELLULAR,
+    # Bacteria
+    "aeromonas": CellularityType.UNICELLULAR,
+    "alcaligenes": CellularityType.UNICELLULAR,
+    "aliivibrio": CellularityType.UNICELLULAR,
+    "clostridium": CellularityType.UNICELLULAR,
+    "francisella": CellularityType.UNICELLULAR,
+    "klebsiella": CellularityType.UNICELLULAR,
+    "magnetospirillum": CellularityType.UNICELLULAR,
+    "neisseria": CellularityType.UNICELLULAR,
+    "peptoclostridium": CellularityType.UNICELLULAR,
+    "pseudomonas": CellularityType.UNICELLULAR,
+    "serratia": CellularityType.UNICELLULAR,
+    "stenotrophomonas": CellularityType.UNICELLULAR,
+    "yersinia": CellularityType.UNICELLULAR,
+    # Protists and algae
+    "chlamydomonas": CellularityType.UNICELLULAR,
+    "crithidia": CellularityType.UNICELLULAR,
+    "cryptosporidium": CellularityType.UNICELLULAR,
+    "eimeria": CellularityType.UNICELLULAR,
+}
+
 ACELLULAR_KEYWORDS: Final[tuple[str, ...]] = (
     "virus",
     "viridae",

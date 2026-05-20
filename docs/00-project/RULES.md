@@ -1976,3 +1976,9 @@ fields:
 - **3.0** (2025-05-20): Lineage, Backfill, Concurrency, Graceful Shutdown, Dev Experience.
 - **2.0** (2025-05-20): Классификация ошибок, Medallion, Rate limiting, Перевод на русский.
 - **1.0** (2025-04-01): Черновик.
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

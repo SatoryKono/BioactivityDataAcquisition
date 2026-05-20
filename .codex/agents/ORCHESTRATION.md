@@ -557,3 +557,9 @@ ______________________________________________________________________
 ### v1.0 (2026-02-07)
 
 - Initial release: py-audit-bot, py-plan-bot, py-test-bot, py-debug-bot, py-doc-bot
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.
