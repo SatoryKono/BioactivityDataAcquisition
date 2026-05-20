@@ -1,0 +1,20 @@
+# Consolidated Review — S5: Cross-cutting
+
+**Date**: 2026-05-20
+**Sub-reviews**: 4 agents
+**Status**: PASS
+**Consolidated Score**: 8.5
+
+## Sub-review Summary
+| Sub-sector | Files | Score | Status | CRIT | HIGH |
+|------------|-------|-------|--------|------|------|
+| S5.1 — Cross Domain | 542 | 7.8 | WARN | 0 | 6 |
+| S5.2 — Cross Application | 533 | 10.0 | PASS | 0 | 1 |
+| S5.3 — Cross Infrastructure | 465 | 7.4 | WARN | 3 | 0 |
+| S5.4 — Cross Other | 347 | 8.7 | PASS | 0 | 1 |
+
+## Aggregated Issues
+### Critical (MUST fix)
+1. **AP-001** in `src/bioetl/infrastructure/export/dq_report_writer.py:59` - Hard-coded dependency instantiation: DQReportSerializer()
+2. **AP-001** in `src/bioetl/infrastructure/observability/tracing.py:260` - Hard-coded dependency instantiation: TracerProvider()
+3. **AP-001** in `src/bioetl/infrastructure/observability/anomaly/monitor.py:61` - Hard-coded dependency instantiation: AnomalyDetector()

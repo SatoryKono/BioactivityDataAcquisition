@@ -14,7 +14,7 @@ ______________________________________________________________________
 # Pipeline: ChEMBL Activity
 
 This page is now a compatibility landing page for the legacy flat path
-`docs/04-reference/pipelines/chembl-activity.md`.
+`docs/04-reference/pipelines/chembl_activity.md`.
 
 ## Current Canonical Sources
 

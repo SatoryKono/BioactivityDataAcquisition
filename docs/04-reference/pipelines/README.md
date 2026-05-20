@@ -119,9 +119,9 @@ The top-level pages below are retained as short published summaries for
 historical discoverability, but they are not the preferred deep entrypoints for
 current pipeline behavior:
 
-- `chembl-activity.md` -> current detailed spec:
+- `chembl_activity.md` -> current detailed spec:
   `chembl/05-activity-spec.md`
-- `chembl-assay.md` -> current detailed spec:
+- `chembl_assay.md` -> current detailed spec:
   `chembl/06-assay-spec.md`
 
 ______________________________________________________________________

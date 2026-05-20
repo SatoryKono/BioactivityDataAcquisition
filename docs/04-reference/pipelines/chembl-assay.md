@@ -14,7 +14,7 @@ ______________________________________________________________________
 # Pipeline: ChEMBL Assay
 
 This page is now a compatibility landing page for the legacy flat path
-`docs/04-reference/pipelines/chembl-assay.md`.
+`docs/04-reference/pipelines/chembl_assay.md`.
 
 ## Current Canonical Sources
 

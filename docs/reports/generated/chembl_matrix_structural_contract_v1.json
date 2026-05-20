@@ -345,6 +345,89 @@
       ],
       "physical_type": "str",
       "pipeline": "chembl_activity",
+      "silver_column": "activity_relation",
+      "silver_filter_tokens": [
+        "structural_presence_guard"
+      ],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [
+        "structural:presence_required"
+      ],
+      "source_db": "ChEMBL",
+      "source_table": "activity",
+      "validation_fail_action_prefixes": [
+        "quarantine_filter_rejection"
+      ]
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_activity",
+      "silver_column": "activity_type",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "activity",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "quarantine",
+      "is_framework_field": false,
+      "logical_type": "float",
+      "nullable": false,
+      "optional": false,
+      "optionality_sources": [
+        "silver_required_fields"
+      ],
+      "physical_type": "float64",
+      "pipeline": "chembl_activity",
+      "silver_column": "activity_value",
+      "silver_filter_tokens": [
+        "structural_presence_guard",
+        "structural_type_guard"
+      ],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [
+        "structural:presence_required",
+        "structural:type_strict"
+      ],
+      "source_db": "ChEMBL",
+      "source_table": "activity",
+      "validation_fail_action_prefixes": [
+        "quarantine_filter_rejection"
+      ]
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "quarantine",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": false,
+      "optional": false,
+      "optionality_sources": [
+        "silver_required_fields"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_activity",
       "silver_column": "assay_description",
       "silver_filter_tokens": [
         "structural_presence_guard"
@@ -497,6 +580,52 @@
       "boolean_true_values": [],
       "coercion_policy": "default",
       "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_activity",
+      "silver_column": "bao_endpoint_iri",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "activity",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_activity",
+      "silver_column": "bao_endpoint_mapping_status",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "activity",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
       "filter_fail_sink": "quarantine",
       "is_framework_field": false,
       "logical_type": "string",
@@ -526,6 +655,52 @@
       "boolean_true_values": [],
       "coercion_policy": "default",
       "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_activity",
+      "silver_column": "bao_format_iri",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "activity",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_activity",
+      "silver_column": "bao_format_mapping_status",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "activity",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
       "filter_fail_sink": "quarantine",
       "is_framework_field": false,
       "logical_type": "string",
@@ -549,6 +724,29 @@
       "validation_fail_action_prefixes": [
         "quarantine_filter_rejection"
       ]
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_activity",
+      "silver_column": "bao_ontology_version",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "activity",
+      "validation_fail_action_prefixes": []
     },
     {
       "boolean_false_values": [],
@@ -588,9 +786,9 @@
       "is_framework_field": true,
       "logical_type": "string",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "dq_required_validation"
       ],
       "physical_type": "str",
       "pipeline": "chembl_activity",
@@ -1167,6 +1365,75 @@
       ],
       "physical_type": "str",
       "pipeline": "chembl_activity",
+      "silver_column": "qudt_ontology_version",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "activity",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_activity",
+      "silver_column": "qudt_unit_iri",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "activity",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_activity",
+      "silver_column": "qudt_unit_mapping_status",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "activity",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_activity",
       "silver_column": "qudt_units",
       "silver_filter_tokens": [],
       "silver_normalisation_tokens": [],
@@ -1199,35 +1466,6 @@
       "silver_validation_tokens": [
         "structural:presence_required",
         "structural:type_strict"
-      ],
-      "source_db": "ChEMBL",
-      "source_table": "activity",
-      "validation_fail_action_prefixes": [
-        "quarantine_filter_rejection"
-      ]
-    },
-    {
-      "boolean_false_values": [],
-      "boolean_true_values": [],
-      "coercion_policy": "default",
-      "empty_as_missing": null,
-      "filter_fail_sink": "quarantine",
-      "is_framework_field": false,
-      "logical_type": "string",
-      "nullable": false,
-      "optional": false,
-      "optionality_sources": [
-        "silver_required_fields"
-      ],
-      "physical_type": "str",
-      "pipeline": "chembl_activity",
-      "silver_column": "relation",
-      "silver_filter_tokens": [
-        "structural_presence_guard"
-      ],
-      "silver_normalisation_tokens": [],
-      "silver_validation_tokens": [
-        "structural:presence_required"
       ],
       "source_db": "ChEMBL",
       "source_table": "activity",
@@ -1354,23 +1592,29 @@
       "boolean_true_values": [],
       "coercion_policy": "default",
       "empty_as_missing": null,
-      "filter_fail_sink": "not_applicable",
+      "filter_fail_sink": "quarantine",
       "is_framework_field": false,
       "logical_type": "string",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "silver_required_fields"
       ],
       "physical_type": "str",
       "pipeline": "chembl_activity",
       "silver_column": "standard_type",
-      "silver_filter_tokens": [],
+      "silver_filter_tokens": [
+        "structural_presence_guard"
+      ],
       "silver_normalisation_tokens": [],
-      "silver_validation_tokens": [],
+      "silver_validation_tokens": [
+        "structural:presence_required"
+      ],
       "source_db": "ChEMBL",
       "source_table": "activity",
-      "validation_fail_action_prefixes": []
+      "validation_fail_action_prefixes": [
+        "quarantine_filter_rejection"
+      ]
     },
     {
       "boolean_false_values": [],
@@ -1553,26 +1797,26 @@
       "is_framework_field": false,
       "logical_type": "integer",
       "nullable": false,
-      "optional": false,
+      "optional": true,
       "optionality_sources": [
-        "silver_required_fields"
+        "default_optional"
       ],
       "physical_type": "Int64",
       "pipeline": "chembl_activity",
       "silver_column": "target_taxonomy_id",
       "silver_filter_tokens": [
-        "structural_presence_guard",
         "structural_type_guard"
       ],
-      "silver_normalisation_tokens": [],
+      "silver_normalisation_tokens": [
+        "proposed_null_then_quarantine"
+      ],
       "silver_validation_tokens": [
-        "structural:presence_required",
-        "structural:type_strict"
+        "structural:type_proposed_null_warn_error_then_quarantine"
       ],
       "source_db": "ChEMBL",
       "source_table": "activity",
       "validation_fail_action_prefixes": [
-        "quarantine_filter_rejection"
+        "propose_null_warn_error_then_quarantine"
       ]
     },
     {
@@ -1634,29 +1878,6 @@
       "boolean_true_values": [],
       "coercion_policy": "default",
       "empty_as_missing": null,
-      "filter_fail_sink": "not_applicable",
-      "is_framework_field": false,
-      "logical_type": "string",
-      "nullable": true,
-      "optional": true,
-      "optionality_sources": [
-        "default_optional"
-      ],
-      "physical_type": "str",
-      "pipeline": "chembl_activity",
-      "silver_column": "type",
-      "silver_filter_tokens": [],
-      "silver_normalisation_tokens": [],
-      "silver_validation_tokens": [],
-      "source_db": "ChEMBL",
-      "source_table": "activity",
-      "validation_fail_action_prefixes": []
-    },
-    {
-      "boolean_false_values": [],
-      "boolean_true_values": [],
-      "coercion_policy": "default",
-      "empty_as_missing": null,
       "filter_fail_sink": "quarantine",
       "is_framework_field": false,
       "logical_type": "string",
@@ -1680,6 +1901,75 @@
       "validation_fail_action_prefixes": [
         "quarantine_filter_rejection"
       ]
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_activity",
+      "silver_column": "uo_ontology_version",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "activity",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_activity",
+      "silver_column": "uo_unit_iri",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "activity",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_activity",
+      "silver_column": "uo_unit_mapping_status",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "activity",
+      "validation_fail_action_prefixes": []
     },
     {
       "boolean_false_values": [],
@@ -1739,37 +2029,6 @@
       "source_table": "activity",
       "validation_fail_action_prefixes": [
         "set_null_and_warn"
-      ]
-    },
-    {
-      "boolean_false_values": [],
-      "boolean_true_values": [],
-      "coercion_policy": "default",
-      "empty_as_missing": null,
-      "filter_fail_sink": "quarantine",
-      "is_framework_field": false,
-      "logical_type": "float",
-      "nullable": false,
-      "optional": false,
-      "optionality_sources": [
-        "silver_required_fields"
-      ],
-      "physical_type": "float64",
-      "pipeline": "chembl_activity",
-      "silver_column": "value",
-      "silver_filter_tokens": [
-        "structural_presence_guard",
-        "structural_type_guard"
-      ],
-      "silver_normalisation_tokens": [],
-      "silver_validation_tokens": [
-        "structural:presence_required",
-        "structural:type_strict"
-      ],
-      "source_db": "ChEMBL",
-      "source_table": "activity",
-      "validation_fail_action_prefixes": [
-        "quarantine_filter_rejection"
       ]
     },
     {
@@ -2030,6 +2289,35 @@
       "boolean_true_values": [],
       "coercion_policy": "default",
       "empty_as_missing": null,
+      "filter_fail_sink": "quarantine",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": false,
+      "optional": false,
+      "optionality_sources": [
+        "silver_required_fields"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_assay",
+      "silver_column": "assay_description",
+      "silver_filter_tokens": [
+        "structural_presence_guard"
+      ],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [
+        "structural:presence_required"
+      ],
+      "source_db": "ChEMBL",
+      "source_table": "assay",
+      "validation_fail_action_prefixes": [
+        "quarantine_filter_rejection"
+      ]
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
       "filter_fail_sink": "not_applicable",
       "is_framework_field": false,
       "logical_type": "string",
@@ -2187,6 +2475,29 @@
       "physical_type": "str",
       "pipeline": "chembl_assay",
       "silver_column": "assay_subcellular_fraction",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "assay",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_assay",
+      "silver_column": "assay_subcellular_fraction_raw",
       "silver_filter_tokens": [],
       "silver_normalisation_tokens": [],
       "silver_validation_tokens": [],
@@ -2374,7 +2685,76 @@
       ],
       "physical_type": "str",
       "pipeline": "chembl_assay",
+      "silver_column": "bao_format_iri",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "assay",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_assay",
+      "silver_column": "bao_format_mapping_status",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "assay",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_assay",
       "silver_column": "bao_label",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "assay",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_assay",
+      "silver_column": "bao_ontology_version",
       "silver_filter_tokens": [],
       "silver_normalisation_tokens": [],
       "silver_validation_tokens": [],
@@ -2468,9 +2848,9 @@
       "is_framework_field": true,
       "logical_type": "string",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "dq_required_validation"
       ],
       "physical_type": "str",
       "pipeline": "chembl_assay",
@@ -2481,35 +2861,6 @@
       "source_db": "ChEMBL",
       "source_table": "assay",
       "validation_fail_action_prefixes": []
-    },
-    {
-      "boolean_false_values": [],
-      "boolean_true_values": [],
-      "coercion_policy": "default",
-      "empty_as_missing": null,
-      "filter_fail_sink": "quarantine",
-      "is_framework_field": false,
-      "logical_type": "string",
-      "nullable": false,
-      "optional": false,
-      "optionality_sources": [
-        "silver_required_fields"
-      ],
-      "physical_type": "str",
-      "pipeline": "chembl_assay",
-      "silver_column": "description",
-      "silver_filter_tokens": [
-        "structural_presence_guard"
-      ],
-      "silver_normalisation_tokens": [],
-      "silver_validation_tokens": [
-        "structural:presence_required"
-      ],
-      "source_db": "ChEMBL",
-      "source_table": "assay",
-      "validation_fail_action_prefixes": [
-        "quarantine_filter_rejection"
-      ]
     },
     {
       "boolean_false_values": [],
@@ -3175,9 +3526,9 @@
       "is_framework_field": true,
       "logical_type": "string",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "dq_required_validation"
       ],
       "physical_type": "str",
       "pipeline": "chembl_assay_parameters",
@@ -3227,7 +3578,154 @@
       ],
       "physical_type": "str",
       "pipeline": "chembl_assay_parameters",
-      "silver_column": "relation",
+      "silver_column": "parameter_relation",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "assay_parameters",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": false,
+      "optionality_sources": [
+        "silver_required_fields",
+        "dq_key_nullability"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_assay_parameters",
+      "silver_column": "parameter_type",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "assay_parameters",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "float",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "float64",
+      "pipeline": "chembl_assay_parameters",
+      "silver_column": "parameter_value",
+      "silver_filter_tokens": [
+        "structural_type_guard"
+      ],
+      "silver_normalisation_tokens": [
+        "invalid_type_to_null"
+      ],
+      "silver_validation_tokens": [
+        "structural:type_to_null_warn"
+      ],
+      "source_db": "ChEMBL",
+      "source_table": "assay_parameters",
+      "validation_fail_action_prefixes": [
+        "set_null_and_warn"
+      ]
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_assay_parameters",
+      "silver_column": "qudt_ontology_version",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "assay_parameters",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_assay_parameters",
+      "silver_column": "qudt_unit_iri",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "assay_parameters",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_assay_parameters",
+      "silver_column": "qudt_unit_mapping_status",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "assay_parameters",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_assay_parameters",
+      "silver_column": "qudt_units",
       "silver_filter_tokens": [],
       "silver_normalisation_tokens": [],
       "silver_validation_tokens": [],
@@ -3390,14 +3888,13 @@
       "is_framework_field": false,
       "logical_type": "string",
       "nullable": true,
-      "optional": false,
+      "optional": true,
       "optionality_sources": [
-        "silver_required_fields",
-        "dq_key_nullability"
+        "default_optional"
       ],
       "physical_type": "str",
       "pipeline": "chembl_assay_parameters",
-      "silver_column": "type",
+      "silver_column": "type_raw",
       "silver_filter_tokens": [],
       "silver_normalisation_tokens": [],
       "silver_validation_tokens": [],
@@ -3435,29 +3932,90 @@
       "empty_as_missing": null,
       "filter_fail_sink": "not_applicable",
       "is_framework_field": false,
-      "logical_type": "float",
+      "logical_type": "string",
       "nullable": true,
       "optional": true,
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "float64",
+      "physical_type": "str",
       "pipeline": "chembl_assay_parameters",
-      "silver_column": "value",
-      "silver_filter_tokens": [
-        "structural_type_guard"
-      ],
-      "silver_normalisation_tokens": [
-        "invalid_type_to_null"
-      ],
-      "silver_validation_tokens": [
-        "structural:type_to_null_warn"
-      ],
+      "silver_column": "uo_ontology_version",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
       "source_db": "ChEMBL",
       "source_table": "assay_parameters",
-      "validation_fail_action_prefixes": [
-        "set_null_and_warn"
-      ]
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_assay_parameters",
+      "silver_column": "uo_unit_iri",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "assay_parameters",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_assay_parameters",
+      "silver_column": "uo_unit_mapping_status",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "assay_parameters",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_assay_parameters",
+      "silver_column": "uo_units",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "assay_parameters",
+      "validation_fail_action_prefixes": []
     },
     {
       "boolean_false_values": [],
@@ -3877,12 +4435,81 @@
       "coercion_policy": "default",
       "empty_as_missing": null,
       "filter_fail_sink": "not_applicable",
-      "is_framework_field": true,
+      "is_framework_field": false,
       "logical_type": "string",
-      "nullable": false,
+      "nullable": true,
       "optional": true,
       "optionality_sources": [
         "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_cell_line",
+      "silver_column": "clo_iri",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "cell_line",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_cell_line",
+      "silver_column": "clo_mapping_status",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "cell_line",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_cell_line",
+      "silver_column": "clo_ontology_version",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "cell_line",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": true,
+      "logical_type": "string",
+      "nullable": false,
+      "optional": false,
+      "optionality_sources": [
+        "dq_required_validation"
       ],
       "physical_type": "str",
       "pipeline": "chembl_cell_line",
@@ -3910,6 +4537,75 @@
       "physical_type": "str",
       "pipeline": "chembl_cell_line",
       "silver_column": "efo_id",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "cell_line",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_cell_line",
+      "silver_column": "efo_iri",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "cell_line",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_cell_line",
+      "silver_column": "efo_mapping_status",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "cell_line",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_cell_line",
+      "silver_column": "efo_ontology_version",
       "silver_filter_tokens": [],
       "silver_normalisation_tokens": [],
       "silver_validation_tokens": [],
@@ -4156,9 +4852,9 @@
       "is_framework_field": true,
       "logical_type": "string",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "dq_required_validation"
       ],
       "physical_type": "str",
       "pipeline": "chembl_compound_record",
@@ -4596,7 +5292,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "int64",
+      "physical_type": "Int64",
       "pipeline": "chembl_molecule",
       "silver_column": "black_box_warning",
       "silver_filter_tokens": [
@@ -4650,7 +5346,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "int64",
+      "physical_type": "Int64",
       "pipeline": "chembl_molecule",
       "silver_column": "chirality",
       "silver_filter_tokens": [
@@ -4677,9 +5373,9 @@
       "is_framework_field": true,
       "logical_type": "string",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "dq_required_validation"
       ],
       "physical_type": "str",
       "pipeline": "chembl_molecule",
@@ -4812,7 +5508,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "int64",
+      "physical_type": "Int64",
       "pipeline": "chembl_molecule",
       "silver_column": "first_in_class",
       "silver_filter_tokens": [
@@ -5051,7 +5747,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "int64",
+      "physical_type": "Int64",
       "pipeline": "chembl_molecule",
       "silver_column": "inorganic_flag",
       "silver_filter_tokens": [
@@ -5428,7 +6124,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "int64",
+      "physical_type": "Int64",
       "pipeline": "chembl_molecule",
       "silver_column": "natural_product",
       "silver_filter_tokens": [
@@ -5459,7 +6155,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_molecule",
       "silver_column": "oral",
       "silver_filter_tokens": [
@@ -5490,7 +6186,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_molecule",
       "silver_column": "parenteral",
       "silver_filter_tokens": [
@@ -5552,7 +6248,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "int64",
+      "physical_type": "Int64",
       "pipeline": "chembl_molecule",
       "silver_column": "polymer_flag",
       "silver_filter_tokens": [
@@ -5606,7 +6302,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "int64",
+      "physical_type": "Int64",
       "pipeline": "chembl_molecule",
       "silver_column": "prodrug",
       "silver_filter_tokens": [
@@ -5805,7 +6501,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_molecule",
       "silver_column": "therapeutic_flag",
       "silver_filter_tokens": [
@@ -5837,7 +6533,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_molecule",
       "silver_column": "topical",
       "silver_filter_tokens": [
@@ -5968,7 +6664,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_molecule",
       "silver_column": "withdrawn_flag",
       "silver_filter_tokens": [
@@ -6188,9 +6884,9 @@
       "is_framework_field": true,
       "logical_type": "string",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "dq_required_validation"
       ],
       "physical_type": "str",
       "pipeline": "chembl_protein_class",
@@ -6889,9 +7585,9 @@
       "is_framework_field": true,
       "logical_type": "string",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "dq_required_validation"
       ],
       "physical_type": "str",
       "pipeline": "chembl_publication",
@@ -6985,7 +7681,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_publication",
       "silver_column": "is_oa",
       "silver_filter_tokens": [
@@ -7002,6 +7698,52 @@
       "validation_fail_action_prefixes": [
         "set_null_and_warn"
       ]
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_publication",
+      "silver_column": "issn",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "publication",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_publication",
+      "silver_column": "issn_list",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "publication",
+      "validation_fail_action_prefixes": []
     },
     {
       "boolean_false_values": [],
@@ -7065,6 +7807,29 @@
       "physical_type": "str",
       "pipeline": "chembl_publication",
       "silver_column": "language",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "publication",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_publication",
+      "silver_column": "oa_status",
       "silver_filter_tokens": [],
       "silver_normalisation_tokens": [],
       "silver_validation_tokens": [],
@@ -7215,6 +7980,29 @@
       "boolean_true_values": [],
       "coercion_policy": "default",
       "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_publication",
+      "silver_column": "publication_doi",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "publication",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
       "filter_fail_sink": "quarantine",
       "is_framework_field": false,
       "logical_type": "string",
@@ -7239,6 +8027,52 @@
       "validation_fail_action_prefixes": [
         "quarantine_filter_rejection"
       ]
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_publication",
+      "silver_column": "publication_pmc_id",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "publication",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_publication",
+      "silver_column": "publication_pmid",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "publication",
+      "validation_fail_action_prefixes": []
     },
     {
       "boolean_false_values": [],
@@ -7291,6 +8125,29 @@
       "validation_fail_action_prefixes": [
         "quarantine_filter_rejection"
       ]
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_publication",
+      "silver_column": "publication_type_raw",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "publication",
+      "validation_fail_action_prefixes": []
     },
     {
       "boolean_false_values": [],
@@ -7631,9 +8488,9 @@
       "is_framework_field": true,
       "logical_type": "string",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "dq_required_validation"
       ],
       "physical_type": "str",
       "pipeline": "chembl_publication_similarity",
@@ -8071,9 +8928,9 @@
       "is_framework_field": true,
       "logical_type": "string",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "dq_required_validation"
       ],
       "physical_type": "str",
       "pipeline": "chembl_publication_term",
@@ -8094,9 +8951,9 @@
       "is_framework_field": true,
       "logical_type": "string",
       "nullable": false,
-      "optional": false,
+      "optional": true,
       "optionality_sources": [
-        "dq_key_nullability"
+        "default_optional"
       ],
       "physical_type": "str",
       "pipeline": "chembl_publication_term",
@@ -8142,7 +8999,8 @@
       "nullable": false,
       "optional": false,
       "optionality_sources": [
-        "silver_required_fields"
+        "silver_required_fields",
+        "dq_key_nullability"
       ],
       "physical_type": "str",
       "pipeline": "chembl_publication_term",
@@ -8194,7 +9052,8 @@
       "nullable": false,
       "optional": false,
       "optionality_sources": [
-        "silver_required_fields"
+        "silver_required_fields",
+        "dq_key_nullability"
       ],
       "physical_type": "str",
       "pipeline": "chembl_publication_term",
@@ -8443,9 +9302,9 @@
       "is_framework_field": true,
       "logical_type": "string",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "dq_required_validation"
       ],
       "physical_type": "str",
       "pipeline": "chembl_subcellular_fraction",
@@ -8466,9 +9325,9 @@
       "is_framework_field": true,
       "logical_type": "string",
       "nullable": false,
-      "optional": false,
+      "optional": true,
       "optionality_sources": [
-        "dq_key_nullability"
+        "default_optional"
       ],
       "physical_type": "str",
       "pipeline": "chembl_subcellular_fraction",
@@ -8514,7 +9373,8 @@
       "nullable": false,
       "optional": false,
       "optionality_sources": [
-        "silver_required_fields"
+        "silver_required_fields",
+        "dq_key_nullability"
       ],
       "physical_type": "str",
       "pipeline": "chembl_subcellular_fraction",
@@ -8531,6 +9391,29 @@
       "validation_fail_action_prefixes": [
         "quarantine_filter_rejection"
       ]
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_subcellular_fraction",
+      "silver_column": "subcellular_fraction_raw",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "subcellular_fraction",
+      "validation_fail_action_prefixes": []
     },
     {
       "boolean_false_values": [],
@@ -8817,9 +9700,9 @@
       "is_framework_field": true,
       "logical_type": "string",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "dq_required_validation"
       ],
       "physical_type": "str",
       "pipeline": "chembl_target",
@@ -8861,36 +9744,13 @@
       "empty_as_missing": null,
       "filter_fail_sink": "not_applicable",
       "is_framework_field": false,
-      "logical_type": "string",
-      "nullable": true,
-      "optional": true,
-      "optionality_sources": [
-        "default_optional"
-      ],
-      "physical_type": "str",
-      "pipeline": "chembl_target",
-      "silver_column": "description",
-      "silver_filter_tokens": [],
-      "silver_normalisation_tokens": [],
-      "silver_validation_tokens": [],
-      "source_db": "ChEMBL",
-      "source_table": "target",
-      "validation_fail_action_prefixes": []
-    },
-    {
-      "boolean_false_values": [],
-      "boolean_true_values": [],
-      "coercion_policy": "default",
-      "empty_as_missing": null,
-      "filter_fail_sink": "not_applicable",
-      "is_framework_field": false,
       "logical_type": "boolean",
       "nullable": true,
       "optional": true,
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "bool",
+      "physical_type": "boolean",
       "pipeline": "chembl_target",
       "silver_column": "downgraded",
       "silver_filter_tokens": [
@@ -9136,6 +9996,29 @@
       "physical_type": "str",
       "pipeline": "chembl_target",
       "silver_column": "target_components",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "target",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_target",
+      "silver_column": "target_description",
       "silver_filter_tokens": [],
       "silver_normalisation_tokens": [],
       "silver_validation_tokens": [],
@@ -9424,6 +10307,29 @@
       "boolean_true_values": [],
       "coercion_policy": "default",
       "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_target_component",
+      "silver_column": "component_description",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "target_component",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
       "filter_fail_sink": "quarantine",
       "is_framework_field": false,
       "logical_type": "integer",
@@ -9483,36 +10389,13 @@
       "is_framework_field": true,
       "logical_type": "string",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "dq_required_validation"
       ],
       "physical_type": "str",
       "pipeline": "chembl_target_component",
       "silver_column": "content_hash",
-      "silver_filter_tokens": [],
-      "silver_normalisation_tokens": [],
-      "silver_validation_tokens": [],
-      "source_db": "ChEMBL",
-      "source_table": "target_component",
-      "validation_fail_action_prefixes": []
-    },
-    {
-      "boolean_false_values": [],
-      "boolean_true_values": [],
-      "coercion_policy": "default",
-      "empty_as_missing": null,
-      "filter_fail_sink": "not_applicable",
-      "is_framework_field": false,
-      "logical_type": "string",
-      "nullable": true,
-      "optional": true,
-      "optionality_sources": [
-        "default_optional"
-      ],
-      "physical_type": "str",
-      "pipeline": "chembl_target_component",
-      "silver_column": "description",
       "silver_filter_tokens": [],
       "silver_normalisation_tokens": [],
       "silver_validation_tokens": [],
@@ -9920,6 +10803,75 @@
       ],
       "physical_type": "str",
       "pipeline": "chembl_tissue",
+      "silver_column": "bto_iri",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "tissue",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_tissue",
+      "silver_column": "bto_mapping_status",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "tissue",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_tissue",
+      "silver_column": "bto_ontology_version",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "tissue",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_tissue",
       "silver_column": "caloha_id",
       "silver_filter_tokens": [],
       "silver_normalisation_tokens": [],
@@ -9937,9 +10889,9 @@
       "is_framework_field": true,
       "logical_type": "string",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "dq_required_validation"
       ],
       "physical_type": "str",
       "pipeline": "chembl_tissue",
@@ -9967,6 +10919,75 @@
       "physical_type": "str",
       "pipeline": "chembl_tissue",
       "silver_column": "efo_id",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "tissue",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_tissue",
+      "silver_column": "efo_iri",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "tissue",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_tissue",
+      "silver_column": "efo_mapping_status",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "tissue",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_tissue",
+      "silver_column": "efo_ontology_version",
       "silver_filter_tokens": [],
       "silver_normalisation_tokens": [],
       "silver_validation_tokens": [],
@@ -10072,6 +11093,75 @@
       "physical_type": "str",
       "pipeline": "chembl_tissue",
       "silver_column": "uberon_id",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "tissue",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_tissue",
+      "silver_column": "uberon_iri",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "tissue",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_tissue",
+      "silver_column": "uberon_mapping_status",
+      "silver_filter_tokens": [],
+      "silver_normalisation_tokens": [],
+      "silver_validation_tokens": [],
+      "source_db": "ChEMBL",
+      "source_table": "tissue",
+      "validation_fail_action_prefixes": []
+    },
+    {
+      "boolean_false_values": [],
+      "boolean_true_values": [],
+      "coercion_policy": "default",
+      "empty_as_missing": null,
+      "filter_fail_sink": "not_applicable",
+      "is_framework_field": false,
+      "logical_type": "string",
+      "nullable": true,
+      "optional": true,
+      "optionality_sources": [
+        "default_optional"
+      ],
+      "physical_type": "str",
+      "pipeline": "chembl_tissue",
+      "silver_column": "uberon_ontology_version",
       "silver_filter_tokens": [],
       "silver_normalisation_tokens": [],
       "silver_validation_tokens": [],
