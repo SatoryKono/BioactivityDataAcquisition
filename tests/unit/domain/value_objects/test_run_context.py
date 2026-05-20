@@ -200,6 +200,10 @@ class TestRunContextFactoryMethod:
             pipeline_version="3.0.0",
             git_commit="deadbeef",
             config_hash="sha256:abc",
+            exact_replay=True,
+            replay_of_run_id="run-parent-1",
+            replay_of_manifest_id="manifest-parent-1",
+            input_snapshot_fingerprint="snapshot-fingerprint-1",
         )
         assert ctx.pipeline_name == "pubchem_compound"
         assert ctx.transform_version == "1.0.0"
@@ -207,6 +211,10 @@ class TestRunContextFactoryMethod:
         assert ctx.pipeline_version == "3.0.0"
         assert ctx.git_commit == "deadbeef"
         assert ctx.config_hash == "sha256:abc"
+        assert ctx.exact_replay is True
+        assert ctx.replay_of_run_id == "run-parent-1"
+        assert ctx.replay_of_manifest_id == "manifest-parent-1"
+        assert ctx.input_snapshot_fingerprint == "snapshot-fingerprint-1"
 
     def test_create_none_transform_steps_defaults_to_empty(self) -> None:
         """Test that None transform_steps is normalized to empty tuple."""

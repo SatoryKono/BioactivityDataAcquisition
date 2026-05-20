@@ -84,6 +84,40 @@ def test_validate_blocked_lane_matches_catalog(tmp_path: Path) -> None:
     assert issues == []
 
 
+def test_validate_review_lanes_accepts_absent_transient_root_candidates(
+    tmp_path: Path,
+) -> None:
+    canonical_path = tmp_path / "reports" / "observability" / "runtime_cardinality_inventory.json"
+    canonical_path.parent.mkdir(parents=True, exist_ok=True)
+    canonical_path.write_text("{}", encoding="utf-8")
+
+    payload = {
+        "review_lanes": [
+            {
+                "lane_id": "root_transient_helpers_and_outputs",
+                "classification": "review_required",
+                "verification": ["git ls-files temp_helper.py artifacts"],
+                "candidates": [
+                    {
+                        "path": "artifacts",
+                        "current_live_state": "absent_from_root_baseline",
+                        "canonical_path": "reports/observability/runtime_cardinality_inventory.json",
+                    },
+                    {
+                        "path": "temp_helper.py",
+                        "current_live_state": "absent_from_root_baseline",
+                        "canonical_path": None,
+                    },
+                ],
+            }
+        ]
+    }
+
+    issues = module._validate_review_lanes(payload, repo_root=tmp_path)
+
+    assert issues == []
+
+
 def test_load_yaml_object_requires_mapping(tmp_path: Path) -> None:
     path = tmp_path / "registry.yaml"
     path.write_text(yaml.safe_dump(["not", "a", "mapping"]), encoding="utf-8")

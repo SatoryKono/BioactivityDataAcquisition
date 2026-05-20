@@ -8,130 +8,61 @@ dq_overrides:
   required_fields:
     - publication_id
     - title
-
-  entity_field_validations:
-    # === Quality Indicators (CRITICAL) ===
-    is_retracted:
-      type: boolean
-      nullable: false  # OpenAlex always provides this
-      description: "Retraction status - CRITICAL for data integrity"
-
-    # === Citation Metrics ===
-    influential_citation_count:
-      type: integer
+  field_validations:
+    - field: publication_id
+      type: required
+      nullable: false
+      error_message: composite_publication requires the seed publication identifier
+    - field: title
+      type: required
+      nullable: false
+      error_message: composite_publication requires a canonical publication title
+    - field: doi
+      type: pattern
+      pattern: '^10\.[^/\s]+/.+$'
       nullable: true
-      min_value: 0
-      description: "SemanticScholar influential citations (non-negative)"
-
-    fwci:
-      type: float
+      error_message: doi must remain in canonical DOI format when present
+    - field: pmid
+      type: pattern
+      pattern: '^[1-9]\d*$'
       nullable: true
-      min_value: 0.0
-      description: "OpenAlex Field-Weighted Citation Impact (non-negative)"
-
-    # === JSON Array Fields (schema validation) ===
-    author_orcids:
-      type: json_array
+      error_message: pmid must remain a canonical positive integer string when present
+    - field: pmc_id
+      type: pattern
+      pattern: '^PMC[1-9]\d*$'
       nullable: true
-      description: "JSON array of ORCID identifiers"
-
-    author_details:
-      type: json_array
+      error_message: pmc_id must remain a canonical PMC identifier when present
+    - field: publication_year
+      type: range
+      min: 1500
+      max: 2100
       nullable: true
-      description: "JSON array of author objects (CrossRef)"
-
-    author_s2_ids:
-      type: json_array
+      error_message: publication_year must remain within the governed publication range
+    - field: citations_received
+      type: range
+      min: 0
+      max: 100000000
       nullable: true
-      description: "JSON array of S2 author IDs (40-char hex)"
-
-    author_openalex_ids:
-      type: json_array
+      error_message: citations_received must remain non-negative
+    - field: influential_citation_count
+      type: range
+      min: 0
+      max: 100000000
       nullable: true
-      description: "JSON array of OpenAlex author IDs (e.g., A1234567890)"
-
-    author_h_indices:
-      type: json_array
-      nullable: true
-      description: "JSON array of author h-index values"
-
-    subject_topics:
-      type: json_array
-      nullable: true
-      description: "OpenAlex hierarchical topics"
-
-    primary_topic:
-      type: json_object
-      nullable: true
-      description: "OpenAlex primary topic (single object)"
-
-    grants:
-      type: json_array
-      nullable: true
-      description: "OpenAlex funding/grant information"
-
-    references:
-      type: json_array
-      nullable: true
-      description: "CrossRef cited references"
-
-    citation_contexts:
-      type: json_array
-      nullable: true
-      description: "SemanticScholar citation context sentences"
-
-    chemicals:
-      type: json_array
-      nullable: true
-      description: "PubMed chemical substances"
-
-    databanks:
-      type: json_array
-      nullable: true
-      description: "PubMed databank accessions"
-
-    gene_symbols:
-      type: json_array
-      nullable: true
-      description: "PubMed gene symbols"
-
-    affiliation_list:
-      type: json_array
-      nullable: true
-      description: "Author affiliations (multiple providers)"
-
-    institution_ids:
-      type: json_array
-      nullable: true
-      description: "OpenAlex institution IDs (e.g., I1234567890)"
-
-    institution_country_codes:
-      type: json_array
-      nullable: true
-      description: "OpenAlex institution country codes (ISO 2-letter, e.g., US, GB)"
-
-    # === String Identifiers ===
-    pii:
-      type: string
-      nullable: true
-      description: "PubMed Publisher Item Identifier"
-
-    mid:
-      type: string
-      nullable: true
-      description: "PubMed Manuscript ID"
-
-    publisher_id:
-      type: string
-      nullable: true
-      description: "PubMed publisher-specific identifier"
-
-    dblp_id:
-      type: string
-      nullable: true
-      description: "SemanticScholar DBLP key"
-
-    mag_id:
-      type: string
-      nullable: true
-      description: "OpenAlex MAG legacy ID"
+      error_message: influential_citation_count must remain non-negative
+  cross_field_validations:
+    - name: publication_identity_anchor
+      fields:
+        - doi
+        - pmid
+        - title
+      condition: any_present
+      error_message: composite_publication must retain DOI, PMID, or title as an identity anchor
+    - name: page_range_pairing
+      fields:
+        - page_first
+        - page_last
+      condition: conditional_required
+      trigger_field: page_first
+      required_field: page_last
+      error_message: page_last is required when page_first is populated

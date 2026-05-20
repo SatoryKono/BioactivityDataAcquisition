@@ -16,6 +16,9 @@ def build_control_plane_artifacts(
     effective_config_hash: str | None = None,
     dq_contract_compatibility_hash: str | None = None,
     effective_config_artifact_id: str | None = None,
+    replay_of_run_id: str | None = None,
+    replay_of_manifest_id: str | None = None,
+    input_snapshot_fingerprint: str | None = None,
 ) -> ControlPlaneArtifacts:
     """Build a typed control-plane artifact bundle."""
     return ControlPlaneArtifacts(
@@ -26,4 +29,7 @@ def build_control_plane_artifacts(
         effective_config_hash=effective_config_hash,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         effective_config_artifact_id=effective_config_artifact_id,
+        replay_of_run_id=replay_of_run_id,
+        replay_of_manifest_id=replay_of_manifest_id,
+        input_snapshot_fingerprint=input_snapshot_fingerprint,
     )

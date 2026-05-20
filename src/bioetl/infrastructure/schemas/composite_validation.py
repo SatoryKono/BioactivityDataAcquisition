@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Literal, Self
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from bioetl.domain.composite.config import (
     CompositeDQConfig,
@@ -19,10 +19,20 @@ from bioetl.domain.composite.cross_validation import (
     EnricherFieldPairing,
     FieldComparisonSpec,
 )
+from bioetl.domain.config import (
+    CrossFieldValidation as DomainCrossFieldValidation,
+)
+from bioetl.domain.config import FieldValidation as DomainFieldValidation
+from bioetl.infrastructure.schemas.pipeline_config_common import (
+    CrossFieldValidationConfig,
+    FieldValidationConfig,
+)
 
 
 class DQOverrideSchema(BaseModel):
     """Pydantic schema for per-enricher DQ threshold override."""
+
+    model_config = ConfigDict(extra="forbid")
 
     soft_fail_threshold: float | None = Field(
         default=None, ge=0.0, le=1.0, description="Override soft threshold (0.0-1.0)"
@@ -59,6 +69,12 @@ class DQOverrideSchema(BaseModel):
 class CompositeDQSchema(BaseModel):
     """Pydantic schema for composite data quality configuration."""
 
+    model_config = ConfigDict(extra="forbid")
+
+    dq_config_file: str | None = Field(
+        default=None,
+        description="Optional pointer to the external composite DQ bundle file",
+    )
     soft_fail_threshold: float = Field(
         default=0.10, ge=0.0, le=1.0, description="Default soft threshold (0.0-1.0)"
     )
@@ -70,6 +86,14 @@ class CompositeDQSchema(BaseModel):
     )
     required_fields: list[str] = Field(
         default_factory=list, description="Fields required in final Gold output"
+    )
+    field_validations: list[FieldValidationConfig] = Field(
+        default_factory=list,
+        description="Field-level validation rules for composite Gold output",
+    )
+    cross_field_validations: list[CrossFieldValidationConfig] = Field(
+        default_factory=list,
+        description="Cross-field validation rules for composite Gold output",
     )
 
     @model_validator(mode="after")
@@ -97,6 +121,48 @@ class CompositeDQSchema(BaseModel):
             hard_fail_threshold=self.hard_fail_threshold,
             enricher_overrides=overrides,
             required_fields=tuple(self.required_fields),
+            field_validations=tuple(
+                self._to_domain_field_validation(config)
+                for config in self.field_validations
+            ),
+            cross_field_validations=tuple(
+                self._to_domain_cross_field_validation(config)
+                for config in self.cross_field_validations
+            ),
+        )
+
+    @staticmethod
+    def _to_domain_field_validation(
+        config: FieldValidationConfig,
+    ) -> DomainFieldValidation:
+        return DomainFieldValidation(
+            field=config.field,
+            validation_type=config.type,
+            nullable=config.nullable,
+            severity=config.severity,
+            severity_enricher=config.severity_enricher,
+            min_value=config.min,
+            max_value=config.max,
+            pattern=config.pattern,
+            allowed=tuple(config.allowed),
+            max_length=config.max_length,
+            validator=config.validator,
+            error_message=config.error_message,
+        )
+
+    @staticmethod
+    def _to_domain_cross_field_validation(
+        config: CrossFieldValidationConfig,
+    ) -> DomainCrossFieldValidation:
+        return DomainCrossFieldValidation(
+            name=config.name,
+            fields=tuple(config.fields),
+            condition=config.condition,
+            severity=config.severity,
+            trigger_field=config.trigger_field,
+            required_field=config.required_field,
+            validator=config.validator,
+            error_message=config.error_message,
         )
 
 

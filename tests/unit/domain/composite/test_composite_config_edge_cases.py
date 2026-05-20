@@ -15,6 +15,7 @@ from bioetl.domain.composite.config import (
     MergeConfig,
     SeedConfig,
 )
+from bioetl.domain.config import CrossFieldValidation, FieldValidation
 from bioetl.domain.composite.config_validators import (
     _validate_optional_threshold,
     _validate_positive,
@@ -129,8 +130,20 @@ def test_composite_dq_config_validates_ranges_and_required_fields_list() -> None
         soft_fail_threshold=0.1,
         hard_fail_threshold=0.3,
         required_fields=["title"],  # type: ignore[arg-type]
+        field_validations=[
+            FieldValidation(field="title", validation_type="required", nullable=False)
+        ],  # type: ignore[arg-type]
+        cross_field_validations=[
+            CrossFieldValidation(
+                name="publication_identity_anchor",
+                fields=["doi", "pmid", "title"],  # type: ignore[arg-type]
+                condition="any_present",
+            )
+        ],  # type: ignore[arg-type]
     )
     assert config.required_fields == ("title",)
+    assert config.field_validations[0].field == "title"
+    assert config.cross_field_validations[0].fields == ("doi", "pmid", "title")
 
     with pytest.raises(ValueError, match="soft_fail_threshold must be between"):
         CompositeDQConfig(soft_fail_threshold=1.2, hard_fail_threshold=1.3)

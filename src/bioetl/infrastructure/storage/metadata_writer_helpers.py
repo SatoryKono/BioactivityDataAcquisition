@@ -154,7 +154,7 @@ def _build_artifact_publication_details(
 ) -> dict[str, object]:
     """Build callback payload for one published output artifact."""
     lineage_context = _resolve_lineage_log_context(metadata)
-    execution_fingerprint = getattr(metadata.runtime, "execution_fingerprint", None)
+    execution_fingerprint = getattr(metadata.pipeline, "execution_fingerprint", None)
     details: dict[str, object] = {
         "artifact_kind": "layer_output",
         "artifact_semantics": _resolve_artifact_semantics(
@@ -172,6 +172,19 @@ def _build_artifact_publication_details(
         "pipeline_name": metadata.pipeline.name,
         "provider": metadata.pipeline.provider,
         "entity": metadata.pipeline.entity,
+        "exact_replay": getattr(metadata.runtime, "exact_replay", None),
+        "replay_of_run_id": getattr(metadata.runtime, "replay_of_run_id", None),
+        "replay_of_manifest_id": getattr(
+            metadata.runtime, "replay_of_manifest_id", None
+        ),
+        "input_snapshot_fingerprint": getattr(
+            metadata.runtime, "input_snapshot_fingerprint", None
+        ),
+        "effective_config_artifact_id": getattr(
+            metadata.pipeline, "effective_config_artifact_id", None
+        ),
+        "contract_ref": getattr(metadata.pipeline, "contract_ref", None),
+        "contract_version": getattr(metadata.pipeline, "contract_version", None),
         "dataset_ref": lineage_context["dataset_ref"],
         "lineage_fragment_id": lineage_context["lineage_fragment_id"],
     }

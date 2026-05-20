@@ -1265,5 +1265,5 @@ class TestCheckpointManagerCompatibilityPolicy:
             compatibility_policy="hard_fail",
         )
 
-        with pytest.raises(ValueError, match="Composite run identity mismatch"):
+        with pytest.raises(ValueError, match="Execution identity continuity not proven"):
             await manager.load_checkpoint()

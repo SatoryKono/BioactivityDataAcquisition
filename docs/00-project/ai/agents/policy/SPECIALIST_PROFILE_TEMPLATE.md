@@ -74,3 +74,9 @@ Do not edit this alias directly.
 1. Canonical profiles must include `Boundary note` and `Operating modes`.
 1. Alias profiles must include `Canonical profile` and `Planned removal date`.
 1. New specialist names must follow `sp-*` and must not use `-pro`, `-master`, `-expert`.
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

@@ -407,6 +407,10 @@ The supported resume contract is intentionally dual-mode:
 Composite resume currently follows a checkpoint snapshot + ledger suffix replay
 model.
 
+That suffix replay is bounded and fail-closed: if replay-relevant ledger events
+fall outside the published composite projector contract, runtime reports
+checkpoint conflict instead of silently continuing with partial reconstruction.
+
 ADR-046 clarifies the current architectural boundary: RunLedger is a published
 provenance/inspection surface and a bounded composite suffix-replay aid, but it
 is not the universal operational resume state for ordinary runs.
@@ -569,6 +573,10 @@ For the published supported lineage closure surface, the canonical operator path
 1. Start from the output sidecar (`*_metadata.yaml`) and read:
    - `runtime.run_id`
    - `runtime.manifest_id`
+   - `runtime.exact_replay`
+   - `runtime.replay_of_run_id`
+   - `runtime.replay_of_manifest_id`
+   - `runtime.input_snapshot_fingerprint`
    - `output.artifact_id`
    - `output.lineage_fragment_id`
 1. Resolve the immutable run context:
@@ -587,7 +595,13 @@ For the published supported lineage closure surface, the canonical operator path
      lineage fragment;
    - the sidecar `lineage_fragment_id` matches one of the published fragment
      anchors for the run;
-   - `run_id` and `manifest_id` line up across sidecar, manifest, and ledger.
+   - `run_id` and `manifest_id` line up across sidecar, manifest, and ledger;
+   - `runtime.replay_of_run_id` / `runtime.replay_of_manifest_id`, when
+     present, match manifest ancestry and the corresponding
+     `artifact_published` ledger details;
+   - `runtime.input_snapshot_fingerprint`, when present, matches the manifest's
+     immutable snapshot envelope rather than a weaker `input_snapshot_ids`-only
+     comparison.
 
 For historical lineage reconstruction, distinguish two fragment identities:
 

@@ -57,10 +57,14 @@ This inventory is also the freeze ledger for compatibility debt in the current c
 The following artifacts are operational architecture/config signals and are treated as mandatory:
 
 - `configs/quality/compatibility_facade_inventory.yaml`
+- `configs/quality/compatibility_twin_module_ratchet.yaml`
+- `configs/quality/infrastructure_config_root_facade_inventory.yaml`
 - `docs/02-architecture/generated/module-dependency-map.md`
 - `docs/02-architecture/generated/module-dependency-map.json`
 - `docs/02-architecture/07-compatibility-facade-snapshot.md`
 - `docs/02-architecture/07-compatibility-facade-inventory.md`
+- `reports/quality/compatibility-importer-census.json`
+- `reports/quality/compatibility-importer-census.md`
 - active config docs synchronized by config/schema guardrails
 
 Canonical commands for this cycle:
@@ -69,6 +73,7 @@ Canonical commands for this cycle:
 uv run python -m pytest tests/architecture/test_architecture_dependency_docs_drift.py -q
 uv run python -m scripts.engineering.qa report-dep-map --check
 uv run python -m scripts.engineering.qa report-dep-map --update
+uv run python -m scripts.engineering.qa report-compatibility-importer-census
 ./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --check
 ./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --update
 uv run python scripts/engineering/qa/generate_compatibility_facade_snapshot.py --check
@@ -168,6 +173,9 @@ operational; do not copy generated snapshot counters back into it by hand.
   public entrypoints/support seams rather than compatibility-only shims; they are no longer
   tracked in the measured compatibility registry unless a module is explicitly marked as
   transition-only again.
+- The importer census is the operational ratchet for sanctioned public/private twin families
+  and for the retained `bioetl.infrastructure.config` package-root convenience facade.
+  New first-party growth in those surfaces requires an explicit inventory update first.
 - For provider adapters, first-party code should prefer provider package roots when those roots are
   the documented canonical path. Public entrypoint modules may live in `adapter.py` or `client.py`,
   but retired provider-specific `client.py` shims must not be treated as stable sanctioned seams.

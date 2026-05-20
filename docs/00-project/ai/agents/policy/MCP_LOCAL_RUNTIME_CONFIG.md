@@ -61,3 +61,9 @@ When AI docs mention these configs, they SHOULD state:
 - `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 - `docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

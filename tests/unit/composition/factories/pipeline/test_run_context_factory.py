@@ -44,9 +44,12 @@ def _factory() -> RunContextFactory:
         contract_identity_resolver=lambda _provider, _entity: (
             "chembl.activity",
             "1.0.0",
-            None,
-            None,
-            None,
+            "schema-hash",
+            "dq.policy",
+            "rules-v1",
+            "chembl.activity.norm",
+            "1.0.0",
+            "f" * 64,
         ),
     )
 
@@ -115,6 +118,25 @@ def test_run_context_factory_uses_explicit_started_at_anchor() -> None:
     )
 
     assert context.started_at == started_at
+
+
+def test_run_context_factory_propagates_replay_parentage_and_snapshot_anchor() -> None:
+    """Replay parentage and input snapshot fingerprint must survive into RunContext."""
+    factory = _factory()
+    context = factory.create(
+        run_id=RunID(uuid4()),
+        runtime=RuntimeConfig(run_type=RunType.INCREMENTAL, exact_replay=True),
+        started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
+        yaml_config=_yaml_config(),
+        replay_of_run_id="run-parent-1",
+        replay_of_manifest_id="manifest-parent-1",
+        input_snapshot_fingerprint="snapshot-fingerprint-1",
+    )
+
+    assert context.exact_replay is True
+    assert context.replay_of_run_id == "run-parent-1"
+    assert context.replay_of_manifest_id == "manifest-parent-1"
+    assert context.input_snapshot_fingerprint == "snapshot-fingerprint-1"
 
 
 def test_run_context_factory_fails_closed_for_strict_contract_identity(

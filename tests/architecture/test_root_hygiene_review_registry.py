@@ -111,6 +111,41 @@ def test_root_hygiene_review_registry_tracks_absent_root_conftest_surface() -> N
     assert conftest_candidate["canonical_path"] == "tests/conftest.py"
 
 
+def test_root_hygiene_review_registry_tracks_observed_transient_root_families() -> None:
+    payload = _load_yaml(REGISTRY_PATH)
+    lanes = payload.get("review_lanes")
+    assert isinstance(lanes, list), "Expected review_lanes list"
+
+    transient_lane = next(
+        lane
+        for lane in lanes
+        if isinstance(lane, dict)
+        and lane.get("lane_id") == "root_transient_helpers_and_outputs"
+    )
+    candidates = transient_lane["candidates"]
+    assert isinstance(candidates, list)
+    by_path = {
+        candidate["path"]: candidate
+        for candidate in candidates
+        if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
+    }
+
+    assert by_path["artifacts"]["current_live_state"] == "absent_from_root_baseline"
+    assert (
+        by_path["artifacts"]["canonical_path"]
+        == "reports/observability/runtime_cardinality_inventory.json"
+    )
+    assert (
+        by_path["temp_analyze_conflicting.py"]["current_live_state"]
+        == "absent_from_root_baseline"
+    )
+    assert (
+        by_path["temp_get_hash.py"]["current_live_state"]
+        == "absent_from_root_baseline"
+    )
+    assert by_path["test_output.txt"]["current_live_state"] == "absent_from_root_baseline"
+
+
 def test_blocked_cleanup_lane_matches_structure_catalog() -> None:
     registry = _load_yaml(REGISTRY_PATH)
     structure_catalog = _load_yaml(STRUCTURE_CATALOG_PATH)

@@ -23,11 +23,6 @@ def execution_identity_reason_messages(
 ) -> list[str]:
     """Map compatibility reason codes to user-facing mismatch messages."""
     return [
-        *composite_identity_reason_messages(
-            current_metadata,
-            checkpoint_metadata,
-            execution_identity_result,
-        ),
         *runtime_anchor_reason_messages(
             current_metadata,
             checkpoint_metadata,
@@ -40,28 +35,6 @@ def execution_identity_reason_messages(
         ),
         *unenforced_execution_identity_reason_messages(execution_identity_result),
     ]
-
-
-def composite_identity_reason_messages(
-    current_metadata: CheckpointMetadata,
-    checkpoint_metadata: CheckpointMetadata,
-    execution_identity_result: dict[str, object],
-) -> list[str]:
-    """Return composite-run-identity mismatch messages in stable order."""
-    reason = str(execution_identity_result["reason"])
-    if reason == "composite_run_identity_missing":
-        return [
-            "Composite run identity missing: "
-            f"current={current_metadata.composite_run_identity}, "
-            f"checkpoint={checkpoint_metadata.composite_run_identity}"
-        ]
-    if reason == "composite_run_identity_mismatch":
-        return [
-            "Composite run identity mismatch: "
-            f"current={current_metadata.composite_run_identity}, "
-            f"checkpoint={checkpoint_metadata.composite_run_identity}"
-        ]
-    return []
 
 
 def runtime_anchor_reason_messages(
@@ -109,8 +82,8 @@ def unenforced_execution_identity_reason_messages(
         return []
     return [
         "Execution identity continuity not proven: missing or inconclusive "
-        "execution_fingerprint, composite_run_identity, canonical checkpoint "
-        "execution identity fallback, and degraded runtime-anchor fingerprints"
+        "execution_fingerprint, canonical checkpoint execution identity "
+        "fallback, and degraded runtime-anchor fingerprints"
     ]
 
 

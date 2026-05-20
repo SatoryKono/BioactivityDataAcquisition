@@ -56,12 +56,20 @@ def _make_bronze_metadata() -> BronzeMetadata:
             manifest_id="manifest-1",
             run_type=RunTypeEnum.INCREMENTAL,
             started_at_utc=datetime(2026, 3, 24, 10, 0, tzinfo=UTC),
+            exact_replay=True,
+            replay_of_run_id="run-parent-1",
+            replay_of_manifest_id="manifest-parent-1",
+            input_snapshot_fingerprint="snapshot-fingerprint-1",
         ),
         pipeline=PipelineMetadata(
             name="chembl_activity",
             provider="chembl",
             entity="activity",
             version="1.0.0",
+            execution_fingerprint="fingerprint-1",
+            effective_config_artifact_id="effective-config-1",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
         ),
         source=SourceMetadata(type="api", url="https://example.org"),
         output=BaseOutputMetadata(
@@ -201,6 +209,14 @@ async def test_write_bronze_metadata_records_artifact_publication() -> None:
     assert details["record_count"] == 7
     assert details["run_id"] == str(metadata.runtime.run_id)
     assert details["manifest_id"] == "manifest-1"
+    assert details["execution_fingerprint"] == "fingerprint-1"
+    assert details["exact_replay"] is True
+    assert details["replay_of_run_id"] == "run-parent-1"
+    assert details["replay_of_manifest_id"] == "manifest-parent-1"
+    assert details["input_snapshot_fingerprint"] == "snapshot-fingerprint-1"
+    assert details["effective_config_artifact_id"] == "effective-config-1"
+    assert details["contract_ref"] == "chembl.activity"
+    assert details["contract_version"] == "1.0.0"
     assert details["provider"] == "chembl"
     assert details["dataset_ref"] == "bronze_batch:batch-1"
     assert details["lineage_fragment_id"] == "bronze:fragment-1"

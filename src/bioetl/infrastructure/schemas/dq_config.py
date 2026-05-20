@@ -103,6 +103,9 @@ class DQConfigFile(BaseModel):
     """Complete DQ configuration file schema.
 
     Represents structure of configs/quality/*.yaml files.
+    Contract YAML under configs/contracts/* uses ``strict_dq_validation`` as
+    the canonical file key, while this quality-config schema exposes the
+    normalized domain property name ``strict_validation``.
     Supports three levels of field validations for hierarchical merge:
     - common_*: from _defaults.yaml
     - provider_*: from providers/{provider}.yaml
@@ -115,7 +118,8 @@ class DQConfigFile(BaseModel):
         provider: Provider name (optional, for provider/entity configs).
         entity: Entity name (optional, for entity configs).
         thresholds: DQ threshold configuration (soft/hard fail).
-        strict_validation: Enable stricter validation rules.
+        strict_validation: Normalized domain property corresponding to the
+            canonical contract-YAML key ``strict_dq_validation``.
         invalid_record_policy: How to handle invalid records.
         report: DQ report generation settings.
         common_field_validations: Field validations from defaults.
@@ -162,7 +166,10 @@ class DQConfigFile(BaseModel):
     )
     strict_validation: bool = Field(
         default=False,
-        description="Enable stricter validation rules (feature flag)",
+        description=(
+            "Normalized quality-config property corresponding to the canonical "
+            "contract-YAML key strict_dq_validation under configs/contracts/*"
+        ),
     )
     invalid_record_policy: Literal["quarantine", "skip", "fail"] = Field(
         default="quarantine",

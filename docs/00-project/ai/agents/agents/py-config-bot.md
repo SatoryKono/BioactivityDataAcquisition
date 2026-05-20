@@ -331,3 +331,9 @@ python scripts/agents/py-config-bot-1.py -v
 | [ADR-027] | DQ Rules Externalization: no inline thresholds | `grep -rn "soft_fail_threshold" src/bioetl/ --include="*.py"` |
 | [ADR-028] | Filter Rules Externalization | `grep -rn "gold_filters" configs/base configs/providers configs/entities configs/composites --include="*.yaml"` |
 ```
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

@@ -9,6 +9,8 @@ from bioetl.composition.runtime_builders import run_manifest_builder
 from bioetl.composition.runtime_builders.run_manifest_support import (
     RunManifestContractIdentity,
 )
+from bioetl.domain.models.metadata import InputSnapshotRef
+from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 
 
 def _make_contract_identity() -> RunManifestContractIdentity:
@@ -88,11 +90,19 @@ def test_build_manifest_create_request_uses_named_contract_identity_fields(
 def test_create_control_plane_refs_uses_named_contract_identity_fields() -> None:
     """Manifest refs must stay aligned with named contract identity fields."""
     identity = _make_contract_identity()
+    snapshot = InputSnapshotRef(
+        snapshot_id="snapshot-1",
+        content_hash="sha256:snapshot-1",
+        immutable_uri="file:///immutable/snapshot-1.json",
+    )
 
     refs = run_manifest_builder._create_control_plane_refs(
         manifest=SimpleNamespace(
             manifest_id="manifest-1",
             execution_fingerprint="fingerprint-1",
+            replay_of_run_id="run-parent-1",
+            replay_of_manifest_id="manifest-parent-1",
+            source_refs=[SimpleNamespace(input_snapshots=[snapshot])],
         ),
         resolved_config_hash="resolved-hash",
         effective_config_hash="effective-hash",
@@ -116,6 +126,11 @@ def test_create_control_plane_refs_uses_named_contract_identity_fields() -> None
     assert refs.normalization_profile_hash == identity.normalization_profile_hash
     assert refs.required_persistence_profile == "replay_ready"
     assert refs.source_fingerprint == "source-fingerprint-1"
+    assert refs.replay_of_run_id == "run-parent-1"
+    assert refs.replay_of_manifest_id == "manifest-parent-1"
+    assert refs.input_snapshot_fingerprint == (
+        compute_input_snapshot_identity_fingerprint([snapshot])
+    )
 
 
 def test_build_manifest_create_request_passes_through_reproducibility_context(

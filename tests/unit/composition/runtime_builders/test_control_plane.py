@@ -181,6 +181,9 @@ def test_attach_manifest_id_accepts_control_plane_refs_object() -> None:
         source_fingerprint="c" * 64,
         dq_contract_compatibility_hash="d" * 64,
         effective_config_artifact_id="artifact-1",
+        replay_of_run_id="run-parent-1",
+        replay_of_manifest_id="manifest-parent-1",
+        input_snapshot_fingerprint="snapshot-fingerprint-1",
         contract_ref="chembl.activity",
         contract_version="1.2.3",
         contract_schema_hash="deadbeef",
@@ -203,6 +206,9 @@ def test_attach_manifest_id_accepts_control_plane_refs_object() -> None:
     assert ctx.contract_ref == "chembl.activity"
     assert ctx.normalization_profile_ref == "chembl.activity.norm"
     assert ctx.source_fingerprint == "c" * 64
+    assert ctx.replay_of_run_id == "run-parent-1"
+    assert ctx.replay_of_manifest_id == "manifest-parent-1"
+    assert ctx.input_snapshot_fingerprint == "snapshot-fingerprint-1"
 
 
 def test_attach_manifest_id_accepts_legacy_refs_without_source_fingerprint() -> None:
@@ -236,3 +242,22 @@ def test_attach_manifest_id_accepts_legacy_refs_without_source_fingerprint() -> 
     assert ctx.execution_fingerprint == "fingerprint-legacy"
     assert ctx.contract_ref == "chembl.activity"
     assert getattr(ctx, "source_fingerprint", None) is None
+
+
+def test_attach_manifest_id_accepts_explicit_replay_parentage_kwargs() -> None:
+    """Explicit manifest attachment kwargs should propagate replay ancestry."""
+    ctx = SimpleNamespace(manifest_id=None)
+
+    updated = control_plane.attach_manifest_id(
+        ctx,
+        manifest_id="manifest-2",
+        replay_of_run_id="run-parent-2",
+        replay_of_manifest_id="manifest-parent-2",
+        input_snapshot_fingerprint="snapshot-fingerprint-2",
+    )
+
+    assert updated is ctx
+    assert ctx.manifest_id == "manifest-2"
+    assert ctx.replay_of_run_id == "run-parent-2"
+    assert ctx.replay_of_manifest_id == "manifest-parent-2"
+    assert ctx.input_snapshot_fingerprint == "snapshot-fingerprint-2"

@@ -56,3 +56,9 @@ Ownership and sync rules are fixed in
 - [GEMINI.md](guides/GEMINI.md) — Gemini CLI specific guide
 - [AI Runtime Mirror Ownership](policy/AI_RUNTIME_MIRROR_OWNERSHIP.md) —
   source-of-truth, sync direction, allowed divergence
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

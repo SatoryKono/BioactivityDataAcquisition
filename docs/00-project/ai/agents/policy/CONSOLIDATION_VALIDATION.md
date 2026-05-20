@@ -28,3 +28,9 @@ python3 docs/00-project/ai/agents/policy/check_agent_consolidation.py --strict
 1. `0`: all checks passed.
 1. `1`: one or more policy violations found.
 1. `2`: checker failed to run (e.g., missing target directory).
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

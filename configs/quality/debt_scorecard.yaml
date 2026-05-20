@@ -1,14 +1,14 @@
 schema_version: 1
 baseline:
-  total_exemptions: 3
+  total_exemptions: 0
   by_registry:
-    file_size_limits: 2
+    file_size_limits: 0
     function_complexity: 0
     function_length: 0
     class_size: 0
     class_method_count: 0
     god_object: 0
-    domain_complexity: 1
+    domain_complexity: 0
 historical_baseline:
   total_exemptions: 44
   by_registry:
@@ -451,19 +451,19 @@ quarterly_targets:
     domain_complexity: 6
 - quarter: 2026-Q2
   max_total_exemptions: 10
-  min_integral_score: 70
+  min_integral_score: 100
   group_budgets:
-    size_metrics: 7
-    complexity_metrics: 4
-    structural_debt: 2
+    size_metrics: 0
+    complexity_metrics: 0
+    structural_debt: 0
   registry_budgets:
-    file_size_limits: 4
-    function_complexity: 3
-    function_length: 1
-    class_size: 2
+    file_size_limits: 0
+    function_complexity: 0
+    function_length: 0
+    class_size: 0
     class_method_count: 0
-    god_object: 2
-    domain_complexity: 1
+    god_object: 0
+    domain_complexity: 0
 owner_decomposition_targets:
 - quarter: 2026-Q1
   allocations:

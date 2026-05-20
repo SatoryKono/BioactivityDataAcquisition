@@ -204,6 +204,7 @@ class PipelineRunContext:
     started_at: datetime = field(default=MISSING_RUNTIME_TIMESTAMP)
     replay_of_run_id: str | None = None
     replay_of_manifest_id: str | None = None
+    input_snapshot_fingerprint: str | None = None
     resume_run_id: str | None = None
     resume_manifest_id: str | None = None
     manifest_id: str | None = None

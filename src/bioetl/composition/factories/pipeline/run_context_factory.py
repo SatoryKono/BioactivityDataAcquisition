@@ -203,6 +203,10 @@ class RunContextFactory:
         effective_config_hash: str | None = None,
         dq_contract_compatibility_hash: str | None = None,
         effective_config_artifact_id: str | None = None,
+        exact_replay: bool | None = None,
+        replay_of_run_id: str | None = None,
+        replay_of_manifest_id: str | None = None,
+        input_snapshot_fingerprint: str | None = None,
     ) -> RunContext:
         """Create metadata ``RunContext`` from runtime and resolved YAML."""
         entity = self.entity_type_extractor(self.pipeline_name) or self.pipeline_name
@@ -259,5 +263,21 @@ class RunContextFactory:
                 normalization_profile_hash=normalization_profile_hash,
                 dq_contract_compatibility_hash=dq_contract_compatibility_hash,
                 effective_config_artifact_id=effective_config_artifact_id,
+                exact_replay=(
+                    bool(getattr(runtime, "exact_replay", False))
+                    if exact_replay is None
+                    else exact_replay
+                ),
+                replay_of_run_id=(
+                    replay_of_run_id
+                    if replay_of_run_id is not None
+                    else getattr(runtime, "replay_of_run_id", None)
+                ),
+                replay_of_manifest_id=(
+                    replay_of_manifest_id
+                    if replay_of_manifest_id is not None
+                    else getattr(runtime, "replay_of_manifest_id", None)
+                ),
+                input_snapshot_fingerprint=input_snapshot_fingerprint,
             )
         )

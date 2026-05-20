@@ -31,8 +31,8 @@ runtime_cardinality_review:
   - review_date
   evidence_collection:
     mode: replayable_inventory_evidence_workflow
-    artifact: artifacts/observability/runtime_cardinality_inventory.json
-    command: python -m scripts.engineering.qa.report_observability_metric_inventory --check --json --write-evidence artifacts/observability/runtime_cardinality_inventory.json
+    artifact: reports/observability/runtime_cardinality_inventory.json
+    command: python -m scripts.engineering.qa.report_observability_metric_inventory --check --json --write-evidence reports/observability/runtime_cardinality_inventory.json
     rationale: >
       Cardinality exceptions are reviewed through repo-local inventory plus a
       replayable evidence artifact that is generated during governance checks.

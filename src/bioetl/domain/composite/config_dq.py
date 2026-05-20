@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.config_validators import (
     _validate_optional_threshold,
     _validate_threshold_order,
 )
+
+if TYPE_CHECKING:
+    from bioetl.domain.config.validation import CrossFieldValidation, FieldValidation
 
 __all__ = [
     "CompositeDQConfig",
@@ -48,17 +52,33 @@ class CompositeDQConfig:
         hard_fail_threshold: Default hard threshold for composite.
         enricher_overrides: Per-enricher DQ threshold overrides.
         required_fields: Fields required in final Gold output.
+        field_validations: Field-level validation bundle for composite Gold.
+        cross_field_validations: Cross-field validation bundle for composite Gold.
     """
 
     soft_fail_threshold: float = 0.10
     hard_fail_threshold: float = 0.30
     enricher_overrides: dict[str, DQOverrideConfig] = field(default_factory=dict)
     required_fields: tuple[str, ...] = ()
+    field_validations: tuple[FieldValidation, ...] = ()
+    cross_field_validations: tuple[CrossFieldValidation, ...] = ()
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
         if isinstance(self.required_fields, list):
             object.__setattr__(self, "required_fields", tuple(self.required_fields))
+        if isinstance(self.field_validations, list):
+            object.__setattr__(
+                self,
+                "field_validations",
+                tuple(self.field_validations),
+            )
+        if isinstance(self.cross_field_validations, list):
+            object.__setattr__(
+                self,
+                "cross_field_validations",
+                tuple(self.cross_field_validations),
+            )
         self._validate()
 
     def _validate(self) -> None:

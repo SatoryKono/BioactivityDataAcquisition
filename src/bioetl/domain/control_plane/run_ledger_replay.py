@@ -15,12 +15,18 @@ from bioetl.domain.composite.result import (
 )
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.control_plane._run_ledger_runtime import (
+    ARTIFACT_PUBLISHED_EVENT,
     COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
     COMPOSITE_ENRICHER_COMPLETED_EVENT,
     COMPOSITE_MERGE_COMPLETED_EVENT,
+    DQ_POLICY_APPLIED_EVENT,
     INPUT_SNAPSHOT_PUBLISHED_EVENT,
+    MANIFEST_CREATED_EVENT,
     RUN_FAILED_EVENT,
     RUN_FINISHED_EVENT,
+    RUN_SHUTDOWN_EVENT,
+    RUN_STARTED_EVENT,
+    STAGE_STARTED_EVENT,
     STAGE_COMPLETED_EVENT,
     RunLedgerEntry,
 )
@@ -44,6 +50,9 @@ class RunLedgerReplayProjection:
     last_event_id: str | None = None
     last_event_occurred_at: datetime | None = None
     replayed_entry_count: int = 0
+    projection_contract: str = "checkpoint_snapshot_plus_ledger_suffix_resume"
+    projector_coverage_complete: bool = True
+    unsupported_replay_entries: tuple[tuple[str, str, str | None], ...] = ()
 
 
 class _StageCompletionUpdate(TypedDict, total=False):
@@ -229,6 +238,17 @@ _EVENT_PROJECTORS: dict[str, _ProjectionFn] = {
     INPUT_SNAPSHOT_PUBLISHED_EVENT: _project_input_snapshot_published,
 }
 
+_PASS_THROUGH_EVENT_TYPES = frozenset(
+    {
+        MANIFEST_CREATED_EVENT,
+        RUN_STARTED_EVENT,
+        RUN_SHUTDOWN_EVENT,
+        STAGE_STARTED_EVENT,
+        ARTIFACT_PUBLISHED_EVENT,
+        DQ_POLICY_APPLIED_EVENT,
+    }
+)
+
 _TERMINAL_STATES = {
     RUN_FINISHED_EVENT: CompositePipelineState.COMPLETED,
     RUN_FAILED_EVENT: CompositePipelineState.FAILED,
@@ -246,6 +266,21 @@ def _advance_watermark(
     )
 
 
+def _mark_projection_unsupported(
+    projection: RunLedgerReplayProjection,
+    entry: RunLedgerEntry,
+) -> RunLedgerReplayProjection:
+    unsupported = {
+        *projection.unsupported_replay_entries,
+        (entry.entry_id, entry.event_type, entry.stage),
+    }
+    return replace(
+        projection,
+        projector_coverage_complete=False,
+        unsupported_replay_entries=tuple(sorted(unsupported)),
+    )
+
+
 def _apply_replay_entry(
     projection: RunLedgerReplayProjection,
     entry: RunLedgerEntry,
@@ -253,10 +288,15 @@ def _apply_replay_entry(
     replayed = _advance_watermark(projection, entry)
     projector = _EVENT_PROJECTORS.get(entry.event_type)
     if projector is not None:
-        return projector(replayed, entry)
+        projected = projector(replayed, entry)
+        if projected is replayed and entry.event_type == STAGE_COMPLETED_EVENT:
+            return _mark_projection_unsupported(replayed, entry)
+        return projected
     terminal_state = _TERMINAL_STATES.get(entry.event_type)
     if terminal_state is None:
-        return replayed
+        if entry.event_type in _PASS_THROUGH_EVENT_TYPES:
+            return replayed
+        return _mark_projection_unsupported(replayed, entry)
     return replace(replayed, state=terminal_state)
 
 

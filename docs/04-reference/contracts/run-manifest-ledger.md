@@ -463,6 +463,10 @@ The current replay-enabled resume path is implemented for composite checkpoints.
   milestones such as `state`, `seed_completed`, `merge_completed`, and the
   latest replay watermark, but does not fabricate rich checkpoint payloads such
   as per-provider result maps;
+- projector coverage is fail-closed: if the ledger suffix contains
+  replay-relevant entries outside the bounded composite projector contract,
+  runtime raises checkpoint conflict instead of silently degrading the replay
+  into a partial reconstruction;
 - if the replay watermark is missing from the append order for the current
   `manifest_id`, runtime treats this as checkpoint incompatibility and raises a
   checkpoint conflict instead of silently continuing.
@@ -825,11 +829,11 @@ In non-strict degraded contexts the current published contract still allows
 
 Checkpoint / resume compatibility may additionally rely on a narrower
 runtime-anchor contract derived from a subset of control-plane fields such as
-`manifest_id`, `composite_run_identity`, `effective_config_hash`,
-`contract_ref`, `contract_version`, and `effective_config_artifact_id`. That
-runtime-anchor contract is intentionally not the same thing as the canonical
-`execution_fingerprint`: `composite_run_identity` is occurrence-scoped resume
-identity, not semantic manifest identity.
+`manifest_id`, `effective_config_hash`, `contract_ref`, `contract_version`, and
+`effective_config_artifact_id`. That runtime-anchor contract is intentionally
+not the same thing as the canonical `execution_fingerprint`.
+`composite_run_identity` remains occurrence-scoped composite-resume metadata
+used to guard composite checkpoint drift, not a generic semantic resume proof.
 
 ## Run Ledger Contract
 

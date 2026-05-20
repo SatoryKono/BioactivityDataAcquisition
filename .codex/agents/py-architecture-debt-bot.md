@@ -154,3 +154,9 @@ python -m scripts.qa check-exemptions --mode auto --growth-mode auto --trend-rep
 1. какие exemptions удалены/сузены
 1. какие code hotspots были уменьшены
 1. какие задачи отложены и почему
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

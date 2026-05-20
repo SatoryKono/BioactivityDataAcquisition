@@ -26,6 +26,8 @@ from memory.tooling.refresh_all import refresh_all
 from memory.tooling.review_curated import review_curated_notes
 from memory.validation import validate_memory_scaffold
 
+WORKFLOW_PRUNE_PREVIEW_LIMIT = 10
+
 
 def _default_note_path(task_id: str, *, kind: str) -> Path:
     memory_root = discover_memory_root()
@@ -67,6 +69,28 @@ def _summary_note_body(title: str, summary: str) -> str:
         f"## Lessons learned\n\n"
         f"- Replace with durable follow-up if needed\n"
     )
+
+
+def _compact_prune_report(report: dict[str, Any] | None) -> dict[str, Any] | None:
+    if report is None:
+        return None
+    compact = {
+        "apply": report["apply"],
+        "candidate_count": report["candidate_count"],
+        "total_count": report["total_count"],
+        "active_count": report["active_count"],
+        "max_active": report["max_active"],
+        "density_status": report["density_status"],
+        "density_excess": report["density_excess"],
+        "removed_count": report["removed_count"],
+    }
+    candidates = report.get("candidates", [])
+    if candidates:
+        compact["candidate_preview"] = candidates[:WORKFLOW_PRUNE_PREVIEW_LIMIT]
+    removed_paths = report.get("removed_paths", [])
+    if removed_paths:
+        compact["removed_preview"] = removed_paths[:WORKFLOW_PRUNE_PREVIEW_LIMIT]
+    return compact
 
 
 def _default_pre_task_chunks_path(output_root: Path | None) -> Path:
@@ -386,7 +410,7 @@ def post_task_workflow(
         "summary_note": str(summary_path),
         "refresh_output_root": str(output_root) if output_root else None,
         "refresh_report": refresh_report,
-        "prune_report": prune_report,
+        "prune_report": _compact_prune_report(prune_report),
         "promoted_note": str(curated_path) if curated_path else None,
         "degraded": bool(refresh_report and not refresh_report.get("ok", True)),
         "ok": True,

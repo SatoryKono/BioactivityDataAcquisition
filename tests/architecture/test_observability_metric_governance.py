@@ -19,7 +19,7 @@ ALLOWLIST_PATH = (
     ROOT / "configs" / "quality" / "observability_metric_inventory_allowlist.yaml"
 )
 EVIDENCE_PATH = (
-    ROOT / "artifacts" / "observability" / "runtime_cardinality_inventory.json"
+    ROOT / "reports" / "observability" / "runtime_cardinality_inventory.json"
 )
 
 
@@ -79,7 +79,7 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
     assert evidence_collection["mode"] == "replayable_inventory_evidence_workflow"
     assert (
         evidence_collection["artifact"]
-        == "artifacts/observability/runtime_cardinality_inventory.json"
+        == "reports/observability/runtime_cardinality_inventory.json"
     )
     command = evidence_collection["command"]
     assert "report_observability_metric_inventory" in command
@@ -122,7 +122,7 @@ def test_runtime_cardinality_evidence_artifact_matches_current_inventory() -> No
     """Replayable cardinality evidence artifact must stay materialized and current."""
     assert EVIDENCE_PATH.exists(), (
         "Missing runtime cardinality evidence artifact: "
-        "artifacts/observability/runtime_cardinality_inventory.json"
+        "reports/observability/runtime_cardinality_inventory.json"
     )
 
     actual = json.loads(EVIDENCE_PATH.read_text(encoding="utf-8"))
@@ -133,5 +133,5 @@ def test_runtime_cardinality_evidence_artifact_matches_current_inventory() -> No
         "observability inventory report. Regenerate it with:\n"
         "python -m scripts.engineering.qa.report_observability_metric_inventory "
         "--repo-root . "
-        "--write-evidence artifacts/observability/runtime_cardinality_inventory.json"
+        "--write-evidence reports/observability/runtime_cardinality_inventory.json"
     )

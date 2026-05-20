@@ -237,3 +237,9 @@ ______________________________________________________________________
 | Plan ready                         | → py-test-bot (baseline) → orchestrator (implement) |
 | Debug escalation (py-debug-bot)    | → py-plan-bot корректирует план                     |
 | Scope change                       | → py-plan-bot обновляет `03-plan-updated.md`        |
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

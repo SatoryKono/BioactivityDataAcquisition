@@ -941,7 +941,7 @@ class TestTargetTransformer:
                 "Influenza A virus (strain A/Udorn/1972 H3N2)",
                 11320,
                 "Influenza A virus",
-                None,
+                "acellular",
             ),
             (
                 "Mycobacterium tuberculosis (strain ATCC 25618 / H37Rv)",

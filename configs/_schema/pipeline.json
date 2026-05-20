@@ -45,6 +45,122 @@
       "title": "ApiConfig",
       "type": "object"
     },
+    "AuthoritativeContentHashPolicyConfig": {
+      "additionalProperties": false,
+      "description": "Single runtime-authoritative content-hash policy loaded from entity YAML.",
+      "properties": {
+        "provider": {
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "entity": {
+          "minLength": 1,
+          "title": "Entity",
+          "type": "string"
+        },
+        "contract": {
+          "$ref": "#/$defs/AuthoritativeContentHashPolicyContractConfig"
+        },
+        "algorithm": {
+          "default": "sha256",
+          "minLength": 1,
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "canonicalization": {
+          "minLength": 1,
+          "title": "Canonicalization",
+          "type": "string"
+        },
+        "include_fields": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Include Fields",
+          "type": "array"
+        },
+        "exclude_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclude Fields",
+          "type": "array"
+        },
+        "exclude_patterns": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclude Patterns",
+          "type": "array"
+        },
+        "field_ordering": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Field Ordering",
+          "type": "object"
+        },
+        "normalization": {
+          "$ref": "#/$defs/AuthoritativeContentHashPolicyNormalizationConfig"
+        }
+      },
+      "required": [
+        "provider",
+        "entity",
+        "contract",
+        "canonicalization",
+        "include_fields"
+      ],
+      "title": "AuthoritativeContentHashPolicyConfig",
+      "type": "object"
+    },
+    "AuthoritativeContentHashPolicyContractConfig": {
+      "additionalProperties": false,
+      "description": "Versioned contract metadata for root-level entity hash policy.",
+      "properties": {
+        "version": {
+          "description": "Explicit version of the authoritative content-hash policy.",
+          "title": "Version",
+          "type": "string"
+        },
+        "migration_note": {
+          "description": "Required change note when hash semantics are updated.",
+          "minLength": 1,
+          "title": "Migration Note",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "migration_note"
+      ],
+      "title": "AuthoritativeContentHashPolicyContractConfig",
+      "type": "object"
+    },
+    "AuthoritativeContentHashPolicyNormalizationConfig": {
+      "additionalProperties": false,
+      "description": "Typed normalization metadata co-located with the authoritative hash policy.",
+      "properties": {
+        "trim_strings": {
+          "default": true,
+          "title": "Trim Strings",
+          "type": "boolean"
+        },
+        "round_floats": {
+          "$ref": "#/$defs/_AuthoritativeContentHashPolicyFloatNormalizationConfig"
+        },
+        "dates": {
+          "$ref": "#/$defs/_AuthoritativeContentHashPolicyDateNormalizationConfig"
+        },
+        "null_handling": {
+          "$ref": "#/$defs/_AuthoritativeContentHashPolicyNullHandlingConfig"
+        }
+      },
+      "title": "AuthoritativeContentHashPolicyNormalizationConfig",
+      "type": "object"
+    },
     "BaseFilterColumnSchema": {
       "description": "Base class for filter column configuration.",
       "properties": {
@@ -87,7 +203,7 @@
           "anyOf": [
             {
               "items": {
-                "type": "string"
+                "$ref": "#/$defs/FilterScalar"
               },
               "type": "array"
             },
@@ -512,6 +628,22 @@
       "title": "CsvExportConfig",
       "type": "object"
     },
+    "DQAllowedScalar": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        }
+      ]
+    },
     "DQReportYamlConfig": {
       "description": "Configuration for DQ report generation.",
       "properties": {
@@ -578,7 +710,7 @@
         },
         "strict_validation": {
           "default": false,
-          "description": "Apply DQ-only stricter validation rules for inline pipeline quality config. Contract YAML under configs/contracts/* uses strict_dq_validation as the canonical file key.",
+          "description": "Apply stricter validation rules for inline pipeline quality config; the canonical contract-YAML key remains strict_dq_validation",
           "title": "Strict Validation",
           "type": "boolean"
         },
@@ -790,7 +922,7 @@
         "allowed": {
           "description": "Allowed values",
           "items": {
-            "type": "string"
+            "$ref": "#/$defs/DQAllowedScalar"
           },
           "title": "Allowed",
           "type": "array"
@@ -842,6 +974,19 @@
       "title": "FieldValidationConfig",
       "type": "object"
     },
+    "FilterScalar": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "boolean"
+        }
+      ]
+    },
     "GoldFiltersConfig": {
       "description": "Schema for gold_filters in YAML.",
       "properties": {
@@ -850,7 +995,7 @@
             "anyOf": [
               {
                 "items": {
-                  "type": "string"
+                  "$ref": "#/$defs/FilterScalar"
                 },
                 "type": "array"
               },
@@ -906,6 +1051,20 @@
       },
       "title": "GoldFiltersConfig",
       "type": "object"
+    },
+    "IdempotencyContract": {
+      "description": "Canonical idempotency contract values for table write behavior.",
+      "enum": [
+        "merge_upsert",
+        "scd2",
+        "overwrite_rebuild",
+        "append_log",
+        "partition_append_with_stable_partition_key",
+        "occurrence_only",
+        "disallowed"
+      ],
+      "title": "IdempotencyContract",
+      "type": "string"
     },
     "InputFilterYamlConfig": {
       "description": "Configuration for input ID filtering from CSV.",
@@ -1157,6 +1316,71 @@
       "title": "ScdConfigYamlConfig",
       "type": "object"
     },
+    "SilverFiltersConfig": {
+      "description": "Schema for structural Silver filters in YAML.",
+      "properties": {
+        "columns": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/FilterScalar"
+                },
+                "type": "array"
+              },
+              {
+                "$ref": "#/$defs/BaseGoldColumnFilterConfig"
+              }
+            ]
+          },
+          "description": "Column value filters",
+          "title": "Columns",
+          "type": "object"
+        },
+        "ranges": {
+          "additionalProperties": {
+            "$ref": "#/$defs/BaseGoldRangeFilterConfig"
+          },
+          "description": "Numeric range filters",
+          "title": "Ranges",
+          "type": "object"
+        },
+        "list_lengths": {
+          "additionalProperties": {
+            "$ref": "#/$defs/BaseGoldListLengthFilterConfig"
+          },
+          "description": "List length filters",
+          "title": "List Lengths",
+          "type": "object"
+        },
+        "list_contains": {
+          "additionalProperties": {
+            "$ref": "#/$defs/BaseGoldListContainsFilterConfig"
+          },
+          "description": "List contains filters",
+          "title": "List Contains",
+          "type": "object"
+        },
+        "required_fields": {
+          "description": "Required non-null fields",
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Fields",
+          "type": "array"
+        },
+        "exclude_if_present": {
+          "description": "Exclude if field has value",
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclude If Present",
+          "type": "array"
+        }
+      },
+      "title": "SilverFiltersConfig",
+      "type": "object"
+    },
     "SinkDQReportConfig": {
       "description": "DQ report configuration for sink layers.",
       "properties": {
@@ -1236,6 +1460,18 @@
           ],
           "default": null,
           "title": "Mode"
+        },
+        "idempotency_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IdempotencyContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit idempotency classification for sink write-mode governance."
         },
         "save_json": {
           "default": false,
@@ -1397,6 +1633,63 @@
       },
       "title": "TransformConfig",
       "type": "object"
+    },
+    "_AuthoritativeContentHashPolicyDateNormalizationConfig": {
+      "additionalProperties": false,
+      "description": "Date-normalization settings captured by the authoritative hash policy.",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "format": {
+          "default": "YYYY-MM-DD",
+          "minLength": 1,
+          "title": "Format",
+          "type": "string"
+        }
+      },
+      "title": "_AuthoritativeContentHashPolicyDateNormalizationConfig",
+      "type": "object"
+    },
+    "_AuthoritativeContentHashPolicyFloatNormalizationConfig": {
+      "additionalProperties": false,
+      "description": "Float-normalization settings captured by the authoritative hash policy.",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "precision": {
+          "default": 10,
+          "maximum": 32,
+          "minimum": 0,
+          "title": "Precision",
+          "type": "integer"
+        }
+      },
+      "title": "_AuthoritativeContentHashPolicyFloatNormalizationConfig",
+      "type": "object"
+    },
+    "_AuthoritativeContentHashPolicyNullHandlingConfig": {
+      "additionalProperties": false,
+      "description": "Null/NaN normalization settings captured by the authoritative hash policy.",
+      "properties": {
+        "nan_to_null": {
+          "default": true,
+          "title": "Nan To Null",
+          "type": "boolean"
+        },
+        "inf_to_null": {
+          "default": true,
+          "title": "Inf To Null",
+          "type": "boolean"
+        }
+      },
+      "title": "_AuthoritativeContentHashPolicyNullHandlingConfig",
+      "type": "object"
     }
   },
   "additionalProperties": false,
@@ -1547,7 +1840,7 @@
       "title": "Gold Table"
     },
     "silver_filters": {
-      "$ref": "#/$defs/GoldFiltersConfig"
+      "$ref": "#/$defs/SilverFiltersConfig"
     },
     "gold_filters": {
       "$ref": "#/$defs/GoldFiltersConfig"
@@ -1590,6 +1883,18 @@
     "content_hash": {
       "$ref": "#/$defs/ContentHashConfig",
       "description": "Content-hash include/exclude rules loaded from schema config."
+    },
+    "content_hash_policy": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AuthoritativeContentHashPolicyConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Single runtime-authoritative content-hash policy loaded from the entity root hash_policy section."
     },
     "extraction_params": {
       "additionalProperties": {

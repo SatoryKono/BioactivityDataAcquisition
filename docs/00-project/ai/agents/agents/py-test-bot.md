@@ -274,3 +274,9 @@ ______________________________________________________________________
 | Final FAIL                     | → py-debug-bot                      |
 | Fix applied (py-debug-bot)     | → py-test-bot (phase=retest)        |
 | All tests pass                 | → py-doc-bot + py-audit-bot (final) |
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

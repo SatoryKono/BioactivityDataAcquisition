@@ -33,6 +33,7 @@ from bioetl.domain.ports import (
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.run_context import RunContext
+from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 _FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
@@ -282,7 +283,53 @@ class TestBronzeMetadata:
         assert metadata.runtime.started_at_utc == started_at
         assert metadata.runtime.completed_at_utc == completed_at
         assert metadata.runtime.duration_seconds == pytest.approx(3.0)
+        assert metadata.runtime.exact_replay is False
+        assert metadata.runtime.replay_of_run_id is None
+        assert metadata.runtime.replay_of_manifest_id is None
+        assert metadata.runtime.input_snapshot_fingerprint is None
         assert metadata.output.artifact_id == f"bronze_batch:{input_data.batch_id}"
+
+    def test_bronze_runtime_metadata_carries_replay_parentage_and_snapshot_fingerprint(
+        self,
+    ) -> None:
+        """Bronze sidecars should expose exact replay parentage and snapshot identity."""
+        context = RunContext.create(
+            run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
+            run_type=RunType.INCREMENTAL,
+            started_at=_FIXED_TIME,
+            provider="chembl",
+            entity="activity",
+            exact_replay=True,
+            replay_of_run_id="run-parent-1",
+            replay_of_manifest_id="manifest-parent-1",
+        )
+        coordinator = MetadataCoordinator(context)
+        snapshot = InputSnapshotRef(
+            snapshot_id="snapshot-1",
+            content_hash="sha256:snapshot-1",
+            immutable_uri="file:///immutable/snapshot-1.json",
+        )
+        input_data = BronzeMetadataInput(
+            batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
+            record_count=100,
+            compressed_size=5000,
+            output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME + timedelta(seconds=1),
+            source_metadata=SourceMetadata(
+                type="api",
+                input_snapshots=[snapshot],
+            ),
+        )
+
+        metadata = coordinator.create_bronze_metadata(input_data)
+
+        assert metadata.runtime.exact_replay is True
+        assert metadata.runtime.replay_of_run_id == "run-parent-1"
+        assert metadata.runtime.replay_of_manifest_id == "manifest-parent-1"
+        assert metadata.runtime.input_snapshot_fingerprint == (
+            compute_input_snapshot_identity_fingerprint([snapshot])
+        )
 
     def test_bronze_pipeline_metadata(self, coordinator: MetadataCoordinator) -> None:
         """Test Bronze pipeline metadata uses context values."""

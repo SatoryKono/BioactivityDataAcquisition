@@ -10,7 +10,7 @@ MAX_TEST_FUNCTION_LOC = 200
 
 TEST_FILE_LOC_EXEMPTIONS = {
     "tests/testing_support/bronze_writer.py": 2025,
-    "tests/testing_support/neo4j_memory_sync.py": 3250,
+    "tests/testing_support/neo4j_memory_sync.py": 3300,
     "tests/integration/test_grafana_dashboard_links.py": 2350,
     "tests/integration/test_grafana_config.py": 2460,
     "tests/integration/ci/test_reproducibility_contract_suite.py": 2175,

@@ -53,6 +53,7 @@ from bioetl.domain.models.metadata import (
     RunTypeEnum,
     SilverMetadata,
 )
+from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from bioetl.domain.ports import (
     BronzeMetadataInput,
     GoldMetadataInput,
@@ -143,6 +144,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         started_at: datetime | None = None,
         completed_at: datetime | None = None,
         duration_seconds: float | None = None,
+        input_snapshot_fingerprint: str | None = None,
     ) -> RuntimeMetadata:
         """Build RuntimeMetadata with consistent run_id and run_type.
 
@@ -161,6 +163,14 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             started_at_utc=started_at or self._context.started_at,
             completed_at_utc=completed_at,
             duration_seconds=duration_seconds,
+            exact_replay=self._context.exact_replay,
+            replay_of_run_id=self._context.replay_of_run_id,
+            replay_of_manifest_id=self._context.replay_of_manifest_id,
+            input_snapshot_fingerprint=(
+                self._context.input_snapshot_fingerprint
+                if input_snapshot_fingerprint is None
+                else input_snapshot_fingerprint
+            ),
         )
 
     def _build_pipeline_metadata(self) -> PipelineMetadata:
@@ -222,12 +232,16 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         duration = (input_data.completed_at - input_data.started_at).total_seconds()
         source = build_bronze_source_metadata(input_data)
         file_metadata = build_bronze_file_output_metadata(input_data)
+        source_snapshot_fingerprint = compute_input_snapshot_identity_fingerprint(
+            list(source.input_snapshots)
+        )
 
         return BronzeMetadata(
             runtime=self._build_runtime_metadata(
                 started_at=input_data.started_at,
                 completed_at=input_data.completed_at,
                 duration_seconds=duration,
+                input_snapshot_fingerprint=source_snapshot_fingerprint,
             ),
             pipeline=self._build_pipeline_metadata(),
             source=source,

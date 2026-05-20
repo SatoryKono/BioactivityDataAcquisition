@@ -325,6 +325,41 @@ def _log_rich_checkpoint_projection(
     )
 
 
+def _ensure_projection_coverage(
+    *,
+    composite_name: str,
+    state: CompositeCheckpointState,
+    replay_projection: RunLedgerReplayProjection,
+    logger: LoggerPort,
+) -> None:
+    """Fail closed when the bounded replay projector cannot interpret suffix events."""
+    if replay_projection.projector_coverage_complete:
+        return
+    unsupported_entries = [
+        {
+            "entry_id": entry_id,
+            "event_type": event_type,
+            "stage": stage,
+        }
+        for entry_id, event_type, stage in replay_projection.unsupported_replay_entries
+    ]
+    detail = (
+        "checkpoint replay suffix contains unsupported replay-relevant ledger "
+        f"entries for projector {replay_projection.projection_contract!r}: "
+        f"{unsupported_entries!r}"
+    )
+    logger.error(
+        "Checkpoint replay suffix is outside bounded projector coverage",
+        composite=composite_name,
+        manifest_id=state.manifest_id,
+        checkpoint_run_id=state.run_id,
+        projection_contract=replay_projection.projection_contract,
+        unsupported_replay_entries=unsupported_entries,
+        reason_code="checkpoint_replay_projection_incomplete",
+    )
+    raise CheckpointConflictError(composite_name, detail)
+
+
 class CompositeCheckpointLoadService:
     """Coordinate resume-vs-fresh checkpoint loading decisions."""
 
@@ -469,6 +504,16 @@ class CompositeCheckpointLoadService:
         replay_projection: RunLedgerReplayProjection = project_run_ledger_replay(
             replay_entries
         )
+        try:
+            _ensure_projection_coverage(
+                composite_name=self._composite_name,
+                state=state,
+                replay_projection=replay_projection,
+                logger=self._logger,
+            )
+        except CheckpointConflictError:
+            self._emit_checkpoint_load_status("replay_conflict")
+            raise
         replayed_state: CompositeCheckpointState = _merge_replay_projection_state(
             state=state,
             replay_projection=replay_projection,

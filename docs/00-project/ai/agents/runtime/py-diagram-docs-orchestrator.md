@@ -58,3 +58,9 @@ bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh --skip-checks
   - `docs/02-architecture/diagrams/bundles/foundation.bundle.pdf`
 
 Примечание: пересборка выполняется для Markdown-бандлов, доступных как источники `*-with-descriptions.md`.
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

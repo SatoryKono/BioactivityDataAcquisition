@@ -107,6 +107,9 @@ def build_create_factory_runner_request(
         effective_config_hash=control_plane.effective_config_hash,
         dq_contract_compatibility_hash=control_plane.dq_contract_compatibility_hash,
         effective_config_artifact_id=control_plane.effective_config_artifact_id,
+        replay_of_run_id=control_plane.replay_of_run_id,
+        replay_of_manifest_id=control_plane.replay_of_manifest_id,
+        input_snapshot_fingerprint=control_plane.input_snapshot_fingerprint,
         filter_config=request.filter_config,
         config=cast("PipelineYamlConfig | None", request.config),
         cached_bronze=request.cached_bronze,
@@ -130,6 +133,13 @@ def build_pipeline_create_runner_request_from_kwargs(
             ),
             effective_config_artifact_id=cast(
                 str | None, kwargs.get("effective_config_artifact_id")
+            ),
+            replay_of_run_id=cast(str | None, kwargs.get("replay_of_run_id")),
+            replay_of_manifest_id=cast(
+                str | None, kwargs.get("replay_of_manifest_id")
+            ),
+            input_snapshot_fingerprint=cast(
+                str | None, kwargs.get("input_snapshot_fingerprint")
             ),
         )
     return PipelineCreateRunnerRequest(

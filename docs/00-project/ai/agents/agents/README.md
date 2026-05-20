@@ -77,3 +77,9 @@ registry when exact execution semantics matter.
 Detailed profile mirrors remain repo-only under `docs/00-project/ai/agents/agents/`.
 When exact runtime behavior matters, prefer `.codex/agents/*.md` or the active
 runtime registry over the published catalog.
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

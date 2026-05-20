@@ -29,6 +29,7 @@ from bioetl.composition.runtime_builders._runner_builder_support import (
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
+from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.inputs_resolver import (
@@ -94,6 +95,13 @@ def _create_control_plane_refs(
     required_persistence_profile: str,
 ) -> _manifest_support.ManifestControlPlaneRefs:
     """Build canonical control-plane refs from one persisted manifest record."""
+    input_snapshot_fingerprint = compute_input_snapshot_identity_fingerprint(
+        [
+            snapshot
+            for source_ref in getattr(manifest, "source_refs", ())
+            for snapshot in getattr(source_ref, "input_snapshots", ())
+        ]
+    )
     return _manifest_support.create_control_plane_refs(
         manifest.manifest_id,
         manifest.execution_fingerprint,
@@ -102,6 +110,9 @@ def _create_control_plane_refs(
         source_fingerprint,
         dq_contract_compatibility_hash,
         effective_config_artifact_id,
+        getattr(manifest, "replay_of_run_id", None),
+        getattr(manifest, "replay_of_manifest_id", None),
+        input_snapshot_fingerprint,
         contract_identity.contract_ref,
         contract_identity.contract_version,
         contract_identity.contract_schema_hash,

@@ -1,22 +1,22 @@
 ---
 id: mcp-setup
-title: Configure MCP runtime
+title: Configure MCP
 task_id: mcp-setup
-created_at: '2026-05-14T06:49:26Z'
+created_at: '2026-05-19T19:46:14Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - AGENTS.md
 summary: Active task session context.
-query: mcp setup codex copilot
+query: mcp
 ---
 
 # Session note
 
 ## Task
 
-- Title: Configure MCP runtime
-- Retrieval query: mcp setup codex copilot
+- Title: Configure MCP
+- Retrieval query: mcp
 
 ## Retrieved context
 
