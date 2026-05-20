@@ -38,7 +38,7 @@ class MergePostJoinWorkflowContext(Protocol):
 
     _logger: LoggerPort
     _conflict_resolver: ConflictResolverService
-    _orderer: ColumnOrderService | None  # Deprecated: Use order_service instead
+    _order_service: ColumnOrderService | None
 
     def _run_cross_validation(
         self,
@@ -118,9 +118,9 @@ def finalize_merged_dataframe(
         dependency_results=dependency_results,
     )
     merged_df = host._drop_excluded_fields(merged_df)
-    orderer = host._orderer
-    if orderer is not None:
-        merged_df = orderer.order_columns(merged_df)
+    order_service = host._order_service
+    if order_service is not None:
+        merged_df = order_service.order_columns(merged_df)
         host._logger.info(
             "Ordered columns by semantic groups",
             total_columns=len(merged_df.columns),

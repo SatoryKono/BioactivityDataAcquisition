@@ -93,6 +93,24 @@ _PUBLICATION_GROUPS: tuple[FieldGroup, ...] = (
     _SOURCE_INFO,
 )
 
+_EXCLUDED_OUTPUT_FIELDS: frozenset[str] = frozenset(
+    {
+        "pmc_id",
+        "publication_type_unified",
+        "publication_subclass",
+        "publication_class",
+        "oa_status",
+        "citations_received",
+        "citations_made",
+        "affiliation_list",
+        "author_orcids",
+        "is_oa",
+        "issn_list",
+        "language",
+        "publication_date",
+    }
+)
+
 
 class PublicationTransformer(BaseChemblTransformer):
     """Transforms ChEMBL bronze publication records to silver.
@@ -266,9 +284,7 @@ class PublicationTransformer(BaseChemblTransformer):
         # Remove fields not in unified publication schema (ChEMBL-specific exclusions)
         silver_record.pop("issn", None)
         silver_record.pop("publisher", None)
-        silver_record.pop("oa_status", None)
-
-        # Note: pmc_id, affiliation_list, author_orcids, publication_date, language,
-        # and is_oa are kept (with None values) to satisfy PublicationBaseSchema
+        for field_name in _EXCLUDED_OUTPUT_FIELDS:
+            silver_record.pop(field_name, None)
 
         return silver_record

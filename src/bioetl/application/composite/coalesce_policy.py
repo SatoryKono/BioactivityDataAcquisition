@@ -19,7 +19,7 @@ __all__ = ["CoalescePolicyService"]
 
 
 class _ColumnPriorityProvider(Protocol):
-    """Shared ordering surface implemented by order service and legacy orderer."""
+    """Shared priority-ordering surface exposed by ``ColumnOrderService``."""
 
     def collect_field_columns(
         self,

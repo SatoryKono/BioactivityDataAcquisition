@@ -57,7 +57,7 @@ def test_column_order_golden_snapshot() -> None:
     fixture = load_json_fixture(fixture_path)
 
     merge_service = _build_merge_service()
-    ordered_columns = merge_service._orderer.get_ordered_columns(
+    ordered_columns = merge_service._order_service.get_ordered_columns(
         fixture["input_columns"]
     )
 

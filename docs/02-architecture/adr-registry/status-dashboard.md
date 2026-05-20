@@ -2,33 +2,50 @@
 
 Quick overview of ADR status and distribution.
 
-**Last Updated**: 2026-05-15 07:59:42
+**Last Updated**: 2026-05-20 11:36:52
 
 ## 📈 Status Distribution
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `active` | 46 | 97.9% |
-| `superseded` | 1 | 2.1% |
+| `accepted` | 45 | 95.7% |
+| `superseded` | 2 | 4.3% |
 
 ## 🏷️  Category Distribution
 
 | Category | Count | Percentage |
 |----------|-------|------------|
-| `architecture` | 47 | 100.0% |
+| `Architecture` | 7 | 14.9% |
+| `Configuration` | 4 | 8.5% |
+| `Data Contracts` | 1 | 2.1% |
+| `Data Fetching` | 2 | 4.3% |
+| `Data Loading` | 2 | 4.3% |
+| `Data Modeling` | 3 | 6.4% |
+| `Data Quality` | 5 | 10.6% |
+| `Deployment` | 1 | 2.1% |
+| `Documentation` | 2 | 4.3% |
+| `Domain Model` | 1 | 2.1% |
+| `HTTP/Networking` | 1 | 2.1% |
+| `Lifecycle` | 2 | 4.3% |
+| `Locking` | 1 | 2.1% |
+| `Observability` | 5 | 10.6% |
+| `Reproducibility` | 4 | 8.5% |
+| `Resilience` | 2 | 4.3% |
+| `Storage` | 3 | 6.4% |
+| `Testing` | 1 | 2.1% |
 
 ## 🕒 Recent Activity
 
 Last 5 updated ADRs:
 
-- **ADR-033**: publication validation strategy (<YYYY-MM-DD>)
-- **ADR-047**: workflow control plane (2026-05-08)
-- **ADR-046**: checkpoint vs ledger resume (2026-05-06)
-- **ADR-045**: dq contract system (2026-03-26)
-- **ADR-044**: run manifest ledger control plane (2026-03-24)
+- **ADR-047**: Workflow Control Plane for Declarative Workflows (2026-05-08)
+- **ADR-046**: Checkpoint Versus Ledger-Based Resume (2026-05-06)
+- **ADR-044**: Run Manifest & Ledger Control Plane (2026-04-29)
+- **ADR-026**: Composite Pipeline Pattern (2026-04-24)
+- **ADR-038**: ChEMBL Enum Values Externalization to YAML (2026-04-23)
 
 ## 🎯 Health Metrics
 
-- **Active ADRs**: 46/47 (97.9%)
-- **Maintenance Ratio**: 46:1
+- **Accepted ADRs**: 45/47 (95.7%)
+- **Maintenance Ratio**: 45:2
 - **Average ADRs/Year**: 15.7 (assuming 3-year project)

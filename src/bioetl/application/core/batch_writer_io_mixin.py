@@ -102,13 +102,17 @@ class BatchWriterIOMixin:
         span = self._start_span("write_silver", "silver", len(records), batch_id)
 
         try:
+            silver_schema = self._silver_schema
             available_cols = (
-                list(self._silver_schema.names)
-                if self._silver_schema is not None
+                list(silver_schema.names)
+                if silver_schema is not None
                 else self._collect_record_columns(records)
             )
             column_order, rename_map = self._resolve_layer_columns(
                 "silver", available_cols
+            )
+            silver_schema = self._project_schema_for_layer(
+                "silver", silver_schema, column_order
             )
             if rename_map:
                 records = self._apply_renames_to_records(records, rename_map)
@@ -117,7 +121,7 @@ class BatchWriterIOMixin:
                 table_name=self._silver_table_name,
                 records=records,
                 primary_keys=list(self._table_config.primary_keys),
-                schema=self._silver_schema,
+                schema=silver_schema,
                 mode=self._silver_mode,
                 partition_cols=list(self._table_config.partition_cols),
                 on_schema_mismatch=self._table_config.on_schema_mismatch,
@@ -160,8 +164,23 @@ class BatchWriterIOMixin:
                 available_cols = self._collect_record_columns(records)
                 schema_payload = self._gold_schema_policy_by_version
             else:
-                records, available_cols = self._prepare_gold_records(records)
-                self._validate_gold_records(records)
+                available_cols = (
+                    list(self._get_schema_columns(self._gold_schema) or ())
+                    or self._collect_record_columns(records)
+                )
+                column_order, rename_map = self._resolve_layer_columns(
+                    "gold", available_cols
+                )
+                schema_payload = self._project_schema_for_layer(
+                    "gold",
+                    self._gold_schema,
+                    column_order,
+                )
+                records, available_cols = self._prepare_gold_records(
+                    records,
+                    schema=schema_payload,
+                )
+                self._validate_gold_records(records, schema=schema_payload)
 
             column_order, rename_map = self._resolve_layer_columns(
                 "gold", available_cols
@@ -189,9 +208,12 @@ class BatchWriterIOMixin:
     def _prepare_gold_records(
         self,
         records: list[GoldRecord],
+        *,
+        schema: object | None = None,
     ) -> tuple[list[GoldRecord], list[str]]:
         """Project records to schema and compute available columns."""
-        schema_columns = self._get_schema_columns(self._gold_schema)
+        target_schema = schema if schema is not None else self._gold_schema
+        schema_columns = self._get_schema_columns(target_schema)
         if not schema_columns:
             return records, self._collect_record_columns(records)
 
@@ -206,9 +228,27 @@ class BatchWriterIOMixin:
         ]
         return projected, list(schema_columns)
 
-    def _validate_gold_records(self, records: list[GoldRecord]) -> None:
+    def _validate_gold_records(
+        self,
+        records: list[GoldRecord],
+        *,
+        schema: object | None = None,
+    ) -> None:
         """Validate Gold records against schema contract."""
-        result = self._gold_validator.validate(records)
+        validator = self._gold_validator
+        target_schema = schema if schema is not None else self._gold_schema
+        if schema is not None and hasattr(target_schema, "columns"):
+            validator_cls = validator.__class__
+            validator_kwargs: dict[str, object] = {
+                "schema": target_schema,
+                "strict": getattr(validator, "_strict", True),
+            }
+            dq_config = getattr(validator, "_dq_config", None)
+            if dq_config is not None:
+                validator_kwargs["dq_config"] = dq_config
+            validator = validator_cls(**validator_kwargs)
+
+        result = validator.validate(records)
         if not result.valid:
             raise SchemaViolationError("gold", result.errors)
 

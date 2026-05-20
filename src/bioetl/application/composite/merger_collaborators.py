@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.application.composite.aggregator import EnricherAggregator
@@ -28,7 +28,3 @@ class MergeCollaboratorGroup:
     coalesce_policy: CoalescePolicyService
     conflict_resolver: ConflictResolverService
     join_planner: JoinPlannerService
-    orderer: ColumnOrderService | None = None  # Deprecated: Use order_service
-    priority_orderer: Any | None = (  # Any: deprecated ordering collaborator
-        None  # Any: deprecated ordering collaborator compatibility
-    )

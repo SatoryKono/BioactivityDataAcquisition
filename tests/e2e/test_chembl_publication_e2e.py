@@ -111,7 +111,22 @@ async def test_chembl_publication_metadata_fields(e2e_data_dir: Path):
         assert record.get("title") not in (None, "")
         assert record.get("publication_year") is not None
         assert record.get("publication_type") == "journal-article"
-        assert record.get("publication_type_unified") == "Journal Article"
+        for field_name in (
+            "pmc_id",
+            "publication_type_unified",
+            "publication_subclass",
+            "publication_class",
+            "oa_status",
+            "citations_received",
+            "citations_made",
+            "affiliation_list",
+            "author_orcids",
+            "is_oa",
+            "issn_list",
+            "language",
+            "publication_date",
+        ):
+            assert field_name not in record
 
         prefixed_doi = record.get("publication_doi")
         raw_doi = record.get("doi")

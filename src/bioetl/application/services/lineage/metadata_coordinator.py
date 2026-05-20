@@ -18,13 +18,9 @@ Architecture:
 
 from __future__ import annotations
 
-import platform
-import socket
 from datetime import datetime
 from functools import cached_property
-from typing import ClassVar, Final
 
-from bioetl import __version__ as BIOETL_VERSION
 from bioetl.application.services.lineage._metadata_coordinator_helpers import (
     build_bronze_file_output_metadata,
     build_bronze_output_content_hash,
@@ -35,6 +31,10 @@ from bioetl.application.services.lineage._metadata_coordinator_helpers import (
 from bioetl.application.services.lineage.metadata_assemblers import (
     GoldMetadataService,
     SilverMetadataService,
+)
+from bioetl.application.services.lineage.metadata_context import (
+    EnvironmentMetadataRuntimeService,
+    RunMetadataAssembler,
 )
 from bioetl.application.services.lineage.metadata_lineage_fragments import (
     build_bronze_lineage_fragment,
@@ -50,7 +50,6 @@ from bioetl.domain.models.metadata import (
     GoldMetadata,
     PipelineMetadata,
     RuntimeMetadata,
-    RunTypeEnum,
     SilverMetadata,
 )
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
@@ -60,19 +59,12 @@ from bioetl.domain.ports import (
     MetadataCoordinatorPort,
     SilverMetadataInput,
 )
-from bioetl.domain.types import BatchID, RunType
+from bioetl.domain.types import BatchID
 from bioetl.domain.value_objects.run_context import RunContext
 
 __all__ = [
     "MetadataCoordinator",
 ]
-
-_RUN_TYPE_TO_ENUM: Final[dict[RunType, RunTypeEnum]] = {
-    RunType.INCREMENTAL: RunTypeEnum.INCREMENTAL,
-    RunType.BACKFILL: RunTypeEnum.BACKFILL,
-    RunType.REBUILD: RunTypeEnum.REBUILD,
-}
-
 
 class MetadataCoordinator(MetadataCoordinatorPort):
     """Centralized coordinator for metadata creation across Medallion layers.
@@ -95,9 +87,6 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         >>> metadata = coordinator.create_bronze_metadata(bronze_input)
     """
 
-    # Class-level cache for environment metadata (shared across instances)
-    _cached_environment: ClassVar[EnvironmentMetadata | None] = None
-
     def __init__(self, run_context: RunContext) -> None:
         """Initialize coordinator with run context.
 
@@ -119,11 +108,6 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             or self._context.effective_config_artifact_id
         )
 
-    @cached_property
-    def _run_type_enum(self) -> RunTypeEnum:
-        """Map domain RunType to metadata RunTypeEnum."""
-        return _RUN_TYPE_TO_ENUM[self._context.run_type]
-
     @classmethod
     def _get_environment_metadata(cls) -> EnvironmentMetadata:
         """Get cached environment metadata (computed once per process).
@@ -131,13 +115,12 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         Environment metadata (hostname, python_version, bioetl_version) is
         immutable during process lifetime, so we cache it at class level.
         """
-        if cls._cached_environment is None:
-            cls._cached_environment = EnvironmentMetadata(
-                hostname=socket.gethostname(),
-                python_version=platform.python_version(),
-                bioetl_version=BIOETL_VERSION,
-            )
-        return cls._cached_environment
+        return EnvironmentMetadataRuntimeService.get()
+
+    @cached_property
+    def _metadata_assembler(self) -> RunMetadataAssembler:
+        """Build the metadata assembler lazily to avoid inline DI instantiation."""
+        return RunMetadataAssembler(self._context)
 
     def _build_runtime_metadata(
         self,
@@ -156,49 +139,16 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         Returns:
             RuntimeMetadata with run context data.
         """
-        return RuntimeMetadata(
-            run_id=str(self._context.run_id),
-            manifest_id=self._context.manifest_id,
-            run_type=self._run_type_enum,
-            started_at_utc=started_at or self._context.started_at,
-            completed_at_utc=completed_at,
+        return self._metadata_assembler.build_runtime_metadata(
+            started_at=started_at,
+            completed_at=completed_at,
             duration_seconds=duration_seconds,
-            exact_replay=self._context.exact_replay,
-            replay_of_run_id=self._context.replay_of_run_id,
-            replay_of_manifest_id=self._context.replay_of_manifest_id,
-            input_snapshot_fingerprint=(
-                self._context.input_snapshot_fingerprint
-                if input_snapshot_fingerprint is None
-                else input_snapshot_fingerprint
-            ),
+            input_snapshot_fingerprint=input_snapshot_fingerprint,
         )
 
     def _build_pipeline_metadata(self) -> PipelineMetadata:
         """Build PipelineMetadata with versioning from run context."""
-        return PipelineMetadata(
-            name=self._context.pipeline_name,
-            provider=self._context.provider,
-            entity=self._context.entity,
-            version=self._context.pipeline_version or "1.0.0",
-            git_commit=self._context.git_commit,
-            dependency_lock_hash=self._context.dependency_lock_hash,
-            config_hash=self._context.config_hash,
-            resolved_config_hash=self._context.resolved_config_hash,
-            effective_config_hash=self._context.effective_config_hash,
-            effective_config_artifact_id=self._context.effective_config_artifact_id,
-            execution_fingerprint=self._context.execution_fingerprint,
-            contract_ref=self._context.contract_ref,
-            contract_version=self._context.contract_version,
-            contract_schema_hash=self._context.contract_schema_hash,
-            dq_policy_ref=self._context.dq_policy_ref,
-            rule_bundle_version=self._context.rule_bundle_version,
-            normalization_profile_ref=self._context.normalization_profile_ref,
-            normalization_profile_version=(self._context.normalization_profile_version),
-            normalization_profile_hash=self._context.normalization_profile_hash,
-            dq_contract_compatibility_hash=(
-                self._context.dq_contract_compatibility_hash
-            ),
-        )
+        return self._metadata_assembler.build_pipeline_metadata()
 
     @cached_property
     def _silver_metadata_service(self) -> SilverMetadataService:
@@ -207,7 +157,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             run_context=self._context,
             runtime_metadata_builder=self._build_runtime_metadata,
             pipeline_metadata_builder=self._build_pipeline_metadata,
-            environment_metadata=self._get_environment_metadata(),
+            environment_metadata=self._metadata_assembler.environment_metadata,
         )
 
     @cached_property
@@ -217,7 +167,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             run_context=self._context,
             runtime_metadata_builder=self._build_runtime_metadata,
             pipeline_metadata_builder=self._build_pipeline_metadata,
-            environment_metadata=self._get_environment_metadata(),
+            environment_metadata=self._metadata_assembler.environment_metadata,
         )
 
     def create_bronze_metadata(self, input_data: BronzeMetadataInput) -> BronzeMetadata:
@@ -391,4 +341,4 @@ class MetadataCoordinator(MetadataCoordinatorPort):
     @classmethod
     def reset_environment_cache(cls) -> None:
         """Reset the environment metadata cache (useful for testing)."""
-        cls._cached_environment = None
+        EnvironmentMetadataRuntimeService.reset()

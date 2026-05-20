@@ -11,7 +11,7 @@ allowed_broad_cleanup_examples:
       - "rm -rf docs/reports/"
       - "rm -rf docs/99-archive/"
       - "rm -rf reports/"
-  - path: docs/plans/root-hygiene-audit-issue-pack-2026-04-29.md
+  - path: docs/99-archive/plans/root-hygiene-audit-issue-pack-2026-04-29.md
     reason: Working plan text names the forbidden command family being guarded.
     patterns:
       - "git clean -fdx"

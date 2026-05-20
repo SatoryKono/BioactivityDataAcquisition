@@ -10,6 +10,10 @@ from bioetl.domain.config import DQConfig
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.infrastructure.config.base_config_loader import _load_yaml_file
+from bioetl.infrastructure.config.contract_registry_loader import (
+    load_contract_registry_entry,
+    load_contract_registry_entries,
+)
 
 
 def _resolve_identity_data(
@@ -248,27 +252,35 @@ class DQContractConfigLoader:
 
     def _lookup_registry_entry(self, contract_ref: str) -> JsonDict:
         """Resolve registry entry for contract_ref."""
-        if not self._registry_path.exists():
+        try:
+            load_contract_registry_entries(self._registry_path)
+        except FileNotFoundError as exc:
             raise FileNotFoundError(
                 f"DQ contract registry not found: {self._registry_path}"
+            ) from exc
+        except ValueError as exc:
+            message = str(exc)
+            if "entries must be a mapping" in message:
+                raise ValueError(
+                    "Malformed DQ contract registry: entries must be a mapping"
+                ) from exc
+            raise
+
+        try:
+            entry = load_contract_registry_entry(
+                contract_ref,
+                registry_path=self._registry_path,
             )
-        registry_data = _load_yaml_file(self._registry_path)
-        if not isinstance(registry_data, dict):
-            raise ValueError(f"Malformed DQ contract registry: {self._registry_path}")
-        entries = registry_data.get("entries", {})
-        if not isinstance(entries, dict):
-            raise ValueError(
-                "Malformed DQ contract registry: entries must be a mapping"
-            )
-        entry = entries.get(contract_ref)
-        if entry is None:
+        except KeyError as exc:
             raise KeyError(
                 f"DQ contract registry entry not found for contract_ref: {contract_ref}"
-            )
-        if not isinstance(entry, dict):
+            ) from exc
+
+        identity_data = entry.get("identity", {})
+        if not isinstance(identity_data, dict):
             raise ValueError(
                 "Malformed DQ contract registry entry for "
-                f"{contract_ref}: entry must be a mapping"
+                f"{contract_ref}: identity must be a mapping"
             )
         return entry
 

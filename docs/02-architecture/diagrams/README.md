@@ -17,7 +17,9 @@ ______________________________________________________________________
 
 > **Governance:** [ADR-040 — Diagram Governance and Layout Policy](../decisions/ADR-040-diagram-governance.md)
 > Colour scheme, linkStyle differentiation, view decomposition rules, CI validation — all defined in ADR-040.
-> Supplemental working policy for diagram publication/layout hygiene lives at `docs/02-architecture/diagrams/governance/00-diagramming-policy.md`.
+> Historical compatibility note for older diagramming guidance lives at
+> `docs/02-architecture/diagrams/governance/00-diagramming-policy.md`, but
+> active policy comes from `governance/policy.md` and ADR-040.
 
 All diagrams are in [Mermaid](https://mermaid.js.org/) format.
 Canonical sources use `.mmd`; decomposed views use `.mermaid` in `views/`.
@@ -72,7 +74,7 @@ ______________________________________________________________________
 | 10  | Resilience Patterns                    | `architecture/10-resilience-patterns.mmd`           | Circuit breaker, rate limiter, retry, health checks                                   |
 | 11  | Configuration System                   | `architecture/11-configuration-system.mmd`          | YAML configs → loaders → Pydantic schemas → domain config                             |
 | 12  | Bootstrap / DI Container               | `architecture/12-bootstrap-di-container.mmd`        | Composition root: entrypoints, bootstrap seams, runtime/admin assembly                |
-| 13  | Port/Protocol Contracts                | `architecture/13-port-protocol-contracts.mmd`       | All 29 domain ports mapped to their implementations                                   |
+| 13  | Port/Protocol Contracts                | `architecture/13-port-protocol-contracts.mmd`       | Canonical domain-port contract map plus compatibility slices for the current public families |
 | 14  | CLI / Interface Layer                  | `architecture/14-cli-interface-layer.mmd`           | CLI routing through registry helpers, composition entrypoints, and bootstrap services |
 | 15  | BatchExecutor Internals                | `architecture/15-batch-executor-internals.mmd`      | Executor composition: transformer, writer, memory, metrics                            |
 | 16  | Transformer Hierarchy                  | `architecture/16-transformer-hierarchy.mmd`         | Template Method pattern, all provider transformers, extractors                        |
@@ -149,7 +151,9 @@ classes that was not already covered by the curated set.
 
 - Supplemental generator: `scripts/diagrams/generate_package_family_class_diagrams.py`
 - Generated source naming: `class-diagrams/90-pkg-*.mmd`
-- Current supplemental coverage: **66 package families / 74 density-aware slices**
+- Current supplemental coverage is generated from the live source tree; review
+  the current files in `class-diagrams/90-pkg-*.mmd` rather than relying on a
+  frozen count in prose.
 
 | #   | Family                        | File                                                            | Description                                                                 |
 | --- | ----------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------- |
@@ -217,11 +221,11 @@ Historical/foundational diagrams consolidated from `docs/02-architecture/diagram
 
 | #   | File                                                | Type      | Description                                                                                |
 | --- | --------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------ |
-| 26  | `foundation/26-hexagonal-ports-adapters.mmd`        | flowchart | Hexagonal Architecture — all 24 ports mapped to adapters                                   |
+| 26  | `foundation/26-hexagonal-ports-adapters.mmd`        | flowchart | Hexagonal Architecture — historical foundation view of port-to-adapter seams               |
 | 27  | `foundation/27-import-matrix-enforcement.mmd`       | flowchart | ARCH-001 Import Matrix — 5-layer dependency rules                                          |
 | 28  | `foundation/28-composition-root-di-graph.mmd`       | flowchart | Composition Root DI Graph — full DI assembly                                               |
 | 29  | `foundation/29-composite-pipeline-workflow.mmd`     | sequence  | Composite Pipeline (ADR-026) — seed/deps/fan-out/merge with current checkpoint + lock path |
-| 30  | `foundation/30-port-adapter-mapping.mmd`            | flowchart | Port → Adapter Reference — all 24 ports                                                    |
+| 30  | `foundation/30-port-adapter-mapping.mmd`            | flowchart | Port → Adapter Reference — historical foundation view of the port/adaptor map              |
 | 31  | `foundation/31-pipeline-run-lifecycle.mmd`          | state     | PipelineRun Aggregate FSM                                                                  |
 | 32  | `foundation/32-single-record-journey.mmd`           | flowchart | Single Record Journey — API→Bronze→Transform→Silver→Gold                                   |
 | 33  | `foundation/33-cli-run-interaction.mmd`             | sequence  | CLI → PipelineRunnerService interaction                                                    |
@@ -291,6 +295,7 @@ Tooling note:
 
 - repo scripts now use `scripts/diagrams/mmdc_wrapper.sh` as the default `mmdc` entrypoint;
 - if a native `mmdc` is unavailable, the wrapper can fall back to Docker image `minlag/mermaid-cli`;
+- Docker fallback can reuse a preinstalled Puppeteer cache when `PUPPETEER_CACHE_DIR=/path/to/cache` points to a host directory containing `chrome-headless-shell`;
 - to force Docker mode even when a local `mmdc` exists, set `MMDC_FORCE_DOCKER=1`;
 - to pin an explicit binary, set `MMDC_BIN=/path/to/mmdc`.
 

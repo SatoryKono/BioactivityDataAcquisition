@@ -2,14 +2,6 @@
 
 from __future__ import annotations
 
+from bioetl.interfaces.cli.commands.domains.diagnostics.command import diagnostics
+
 __all__ = ["diagnostics"]
-
-
-def __getattr__(name: str) -> object:
-    if name == "diagnostics":
-        from bioetl.interfaces.cli.commands.domains.diagnostics.command import (
-            diagnostics,
-        )
-
-        return diagnostics
-    raise AttributeError(name)

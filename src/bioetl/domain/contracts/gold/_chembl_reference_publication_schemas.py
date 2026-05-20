@@ -73,30 +73,21 @@ class ChEMBLPublicationGoldSchema(StrictGoldContractSchema):
     publication_pmc_id: Series[str] = pa.Field(nullable=True)
     # Cross-reference IDs (raw identifiers from Silver)
     doi: Series[str] = pa.Field(nullable=True)
-    pmc_id: Series[str] = pa.Field(nullable=True)
     pmid: Series[str] = pa.Field(nullable=True)
     # patent_id excluded from unified publication schema
     title: Series[str] = pa.Field(nullable=False)
     authors: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
-    affiliation_list: Series[str] = pa.Field(nullable=True)  # JSON array
     author_keys: Series[str] = pa.Field(nullable=True)  # Pipe-delimited Surname_F keys
-    author_orcids: Series[str] = pa.Field(nullable=True)
     publication_type: Series[str] = pa.Field(nullable=True)
-    publication_type_unified: Series[str] = pa.Field(nullable=True)
-    publication_subclass: Series[str] = pa.Field(nullable=True)
-    publication_class: Series[str] = pa.Field(nullable=True)
-    publication_date: Series[str] = pa.Field(nullable=True)
     journal: Series[str] = pa.Field(nullable=True)
     publication_year: Series[float] = pa.Field(nullable=True, coerce=True)
+    citations_received: Series[float] = pa.Field(nullable=True, coerce=True)
+    citations_made: Series[float] = pa.Field(nullable=True, coerce=True)
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)
     page_first: Series[str] = pa.Field(nullable=True)
     page_last: Series[str] = pa.Field(nullable=True)
-    language: Series[str] = pa.Field(nullable=True)
-    is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
-    citations_received: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
-    citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)
 
     # ChEMBL release metadata

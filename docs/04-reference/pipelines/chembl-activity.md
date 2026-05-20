@@ -1,111 +1,45 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-05-20'
 
 ______________________________________________________________________
 
 # Pipeline: ChEMBL Activity
 
-> **Full Documentation (RU):** [docs/04-reference/providers/chembl/activity.md](../providers/chembl/activity.md)
+This page is now a compatibility landing page for the legacy flat path
+`docs/04-reference/pipelines/chembl-activity.md`.
 
-## Overview
+## Current Canonical Sources
 
-| Property           | Value                                   |
-| ------------------ | --------------------------------------- |
-| **Pipeline Name**  | `chembl_activity`                       |
-| **Provider**       | ChEMBL                                  |
-| **Entity**         | Activity                                |
-| **Configuration**  | `configs/entities/chembl/activity.yaml` |
-| **Primary Key**    | `activity_id`                           |
-| **Config Version** | 1.2.0                                   |
+- Maintained pipeline spec:
+  [chembl/05-activity-spec.md](chembl/05-activity-spec.md)
+- Provider reference:
+  [providers/chembl/activity.md](../providers/chembl/activity.md)
+- Live config:
+  `configs/entities/chembl/activity.yaml`
 
-## Description
+## Current Runtime Snapshot
 
-This pipeline extracts bioactivity data from the ChEMBL database. Each record represents a measurement of biological activity (IC50, Ki, etc.) for a molecule-target pair.
+| Property | Value |
+| --- | --- |
+| Pipeline ID | `chembl_activity` |
+| Provider | `chembl` |
+| Entity | `activity` |
+| Silver output | Enabled |
+| Gold output | Disabled |
+| Source of truth | `configs/entities/chembl/activity.yaml` |
 
-## Data Schema (Silver Layer)
+## Why This Page Is Compact
 
-The Activity entity contains **55 fields**. Key fields:
+Earlier versions of this document duplicated runtime details that drifted from
+the live config, including stale Gold-layer claims. The numbered spec and the
+provider reference are now the maintained surfaces for current behavior.
 
-| Field                     | Type     | Required | Description                            |
-| ------------------------- | -------- | -------- | -------------------------------------- |
-| `activity_id`             | `string` | **Yes**  | Unique activity record ID              |
-| `molecule_id`             | `string` | **Yes**  | ChEMBL molecule ID (e.g., `CHEMBL25`)  |
-| `target_id`               | `string` | No       | ChEMBL target ID                       |
-| `standard_type`           | `string` | No       | Measurement type: IC50, Ki, EC50, etc. |
-| `standard_value`          | `float`  | No       | Standardized measurement value         |
-| `standard_units`          | `string` | No       | Units: nM, uM, etc.                    |
-| `pchembl_value`           | `float`  | No       | -log10(IC50 in molar)                  |
-| `canonical_smiles`        | `string` | No       | SMILES structure                       |
-| `action_type`             | `string` | No       | Action type: INHIBITOR, AGONIST, etc.  |
-| `action_type_description` | `string` | No       | Description of action type             |
-| `action_type_parent_type` | `string` | No       | Parent grouping (nullable)             |
-| `entity_id`               | `string` | Auto     | `chembl:{activity_id}`                 |
-| `content_hash`            | `string` | Auto     | SHA256 hash for versioning             |
-
-## Data Quality Rules
-
-| Rule              | Condition                            | Action                 |
-| ----------------- | ------------------------------------ | ---------------------- |
-| Positive value    | `standard_value > 0`                 | Quarantine if violated |
-| Known type        | `standard_type` in known enum        | Warning if unknown     |
-| Valid molecule ID | `molecule_id` matches `^CHEMBL\\d+$` | Quarantine if invalid  |
-
-### Error Thresholds
-
-| Threshold | Condition             | Action      |
-| --------- | --------------------- | ----------- |
-| Soft      | > 5% errors in batch  | Log WARNING |
-| Hard      | > 20% errors in batch | Fail batch  |
-
-## Storage Layers
-
-| Layer  | Format                     | Mode                       | Path Pattern                          |
-| ------ | -------------------------- | -------------------------- | ------------------------------------- |
-| Bronze | JSONL + Zstd               | Append-only                | `data/output/bronze/chembl/activity/` |
-| Silver | Delta Lake                 | Append                     | `data/output/silver/chembl/activity/` |
-| Gold   | Disabled in current config | `sink.gold.enabled: false` | —                                     |
-
-### Gold Layer Status
-
-Current entity config keeps Gold disabled for `chembl_activity`.
-Historical gold-filter rules may still exist in older notes, but they are not
-active for the current pipeline contract.
-
-## CLI Usage
-
-```bash
-# Incremental load (default)
-bioetl run --pipeline chembl_activity
-
-# With record limit
-bioetl run --pipeline chembl_activity --limit 1000
-
-# Backfill
-bioetl run --pipeline chembl_activity --run-type backfill
-
-# Full rebuild
-bioetl run --pipeline chembl_activity --run-type rebuild
-```
-
-## Related Files
-
-| Component         | Path                                                              |
-| ----------------- | ----------------------------------------------------------------- |
-| Configuration     | `configs/entities/chembl/activity.yaml`                           |
-| Entity Definition | `src/bioetl/domain/entities/bioactivity/`                         |
-| Transformer       | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
-| Gold Filter       | `configs/entities/chembl/activity.yaml#filters`                   |
-| Data Quality      | `configs/entities/chembl/activity.yaml#quality`                   |
-| Silver Schema     | `src/bioetl/infrastructure/schemas/silver.py`                     |
-
-______________________________________________________________________
-
-*See [full documentation in Russian](../providers/chembl/activity.md) for complete schema details, normalization rules, and data flow diagrams.*
+Use this page only as a stable redirect target for old links.

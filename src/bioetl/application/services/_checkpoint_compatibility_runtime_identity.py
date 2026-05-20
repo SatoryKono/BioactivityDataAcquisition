@@ -10,9 +10,6 @@ from bioetl.domain.normalization import (
     compute_execution_identity_fingerprint,
     normalize_runtime_anchor_payload,
 )
-from bioetl.domain.normalization.legacy_fingerprints import (
-    compute_degraded_runtime_anchor_fingerprint,
-)
 from bioetl.domain.types import JsonDict
 
 _SEVERITY_MAJOR: Final[str] = "major"
@@ -270,7 +267,7 @@ def _compute_degraded_runtime_anchor_fingerprint(
     normalized_payload = normalize_runtime_anchor_payload(raw_payload)
     return cast(
         str | None,
-        compute_degraded_runtime_anchor_fingerprint(normalized_payload),
+        compute_execution_identity_fingerprint(normalized_payload),
     )
 
 

@@ -1,170 +1,31 @@
 # Repository Cleanup Guide
 
-This guide documents the cleanup procedures and best practices for maintaining the BioETL repository hygiene.
+*Compatibility entrypoint; canonical cleanup guidance lives elsewhere.*
 
-## 🗑️ Cleanup Procedures
+This file is retained as a stable path for older links and ad-hoc references.
+It is no longer the authoritative cleanup guide.
 
-Before cleaning retention-sensitive surfaces, use
-[Retention-Sensitive Cleanup](../05-operations/runbooks/retention-sensitive-cleanup.md).
-Blanket deletion is prohibited for `data/**`, control-plane artifacts,
-`tests/fixtures/**`, `tests/fixtures/vcr/**`, `docs/reports/**`, `reports/**`,
-and `docs/99-archive/**`.
-GitHub cleanup requests for those surfaces must use
-`.github/ISSUE_TEMPLATE/retention_sensitive_cleanup.yml`.
+## Canonical Cleanup Surfaces
 
-### 1. Deterministic Local Cleanup
+- Active published guide:
+  [cleanup-policy.md](cleanup-policy.md)
+- Retention-sensitive cleanup runbook:
+  [retention-sensitive-cleanup.md](../05-operations/runbooks/retention-sensitive-cleanup.md)
+- Repo structure and placement policy:
+  [03-file-policy.md](../00-project/governance/03-file-policy.md)
 
-Use the maintained deterministic cleanup entrypoints first:
+## Current Rule
 
-```bash
-# Preview local cache/build cleanup
-make clean-local-artifacts DRY_RUN=1
+Use `cleanup-policy.md` for deterministic local cleanup, repo-hygiene review
+lanes, and machine-readable evidence outputs. Use the retention-sensitive
+runbook before touching `data/**`, control-plane artifacts, `tests/fixtures/**`,
+`docs/reports/**`, `reports/**`, or `docs/99-archive/**`.
 
-# Apply local cache/build cleanup
-make clean-local-artifacts
+## Why This Shim Exists
 
-# Include local worktree/rollback purge
-make clean-local-artifacts PURGE_WORKTREES=1
-```
+- It preserves historical inbound links.
+- It makes the cleanup boundary explicit without duplicating active guidance.
+- It avoids keeping two long-form cleanup guides in sync.
 
-`make clean-local-artifacts` is the maintained post-test/root-hygiene cleanup
-path. It removes stale local caches plus forbidden root output directories such
-as `.coverage-sharded/`, `node_modules/`, `test-output/`, and `logs/`.
-
-### 2. Repo-Hygiene Review Lane
-
-Use the repo cleanup tool only as an exact candidate discovery lane:
-
-```bash
-# Dry run (show exact review/apply candidates)
-python -m scripts.ops.support.repo.cleanup_repository --dry-run \
-  --report-json reports/quality/root-hygiene-cleanup-classification.json \
-  --report-root-review-json reports/quality/root-hygiene-review-evidence.json \
-  --report-reports-workspace-json reports/quality/reports-workspace-review.json
-
-# Apply only policy-approved local artifact candidates
-python -m scripts.ops.support.repo.cleanup_repository --apply
-
-# Apply only exact reviewed local-only reports workspace prune candidates
-python -m scripts.ops.support.repo.cleanup_repository --apply-reports-prune
-```
-
-Tracked policy violations reported by this tool still require explicit git
-review; they are not blanket-deleted by the script.
-
-### 3. Git LFS Setup
-
-For large files (VCR cassettes):
-
-```bash
-# Install Git LFS
-git lfs install
-
-# Track VCR cassettes
-git lfs track "tests/fixtures/vcr/**/*.yaml"
-
-# Add and commit
-git add .gitattributes
-git commit -m "feat: implement Git LFS for VCR cassettes"
-```
-
-## 🛡️ Prevention Measures
-
-### .gitignore Patterns
-
-The repository `.gitignore` includes patterns to prevent common cache and temporary files:
-
-```gitignore
-# Virtual environments
-.python-user/
-
-# AI agent temporary files
-.codex_tmp/
-.codex_tmp_issue_*.md
-
-# Prevent root-level test scripts
-/test_*.js
-/test_*.py
-/test_*.json
-```
-
-### Pre-commit Hooks
-
-The repository includes pre-commit hooks that prevent cache files from being committed:
-
-- `forbid-cache-files`: Blocks `__pycache__`, `.pyc`, `.pytest_cache`, etc.
-- `check-added-large-files`: Blocks files >1MB (configurable)
-
-## 📊 Repository Hygiene Standards
-
-### What Should NOT Be in Git
-
-1. **Cache Directories**: `__pycache__`, `.pytest_cache`, `.mypy_cache`, `.ruff_cache`
-1. **Temporary Files**: `*.pyc`, `*.pyo`, `*.tmp`, `*.log`
-1. **Local Environments**: `.venv/`, `.python-user/`, `venv/`
-1. **AI Agent Files**: `.codex_tmp/`, `.codex_tmp_issue_*.md`
-1. **Root Test Scripts**: `test_*.js`, `test_*.py`, `test_*.json` in repository root
-
-### What SHOULD Be in Git
-
-1. **Source Code**: All files in `src/`
-1. **Configuration**: `configs/`, `pyproject.toml`, CI/CD files
-1. **Tests**: All test files in `tests/`
-1. **Documentation**: All files in `docs/`
-1. **Historical Archives**: `scripts/ops/archive/`, `docs/99-archive/` (for reference)
-
-## 🔧 Maintenance Schedule
-
-### Weekly
-
-- Run repo-hygiene review lane in dry-run mode
-- Review `reports/quality/root-hygiene-review-evidence.json` for live root
-  mismatches and review-lane drift
-- Review `reports/quality/reports-workspace-review.json` for exact-path
-  `reports/` prune candidates before deleting local-only working outputs
-- Check repository size growth
-- Review CI/CD pipeline results
-
-### Monthly
-
-- Run local cleanup wave (if needed)
-- Update `.gitignore` patterns
-- Review pre-commit hook effectiveness
-
-### Quarterly
-
-- Archive old documentation
-- Review historical migration scripts
-- Optimize Git LFS usage
-
-## 📈 Impact Metrics
-
-### Before Cleanup
-
-- Repository size: ~777 MB
-- Cache/temporary files: ~250 MB (32%)
-- Orphan files: ~20 files
-
-### After Cleanup
-
-- Repository size: ~776.7 MB (310KB reduction)
-- Cache/temporary files: ~0 MB
-- Orphan files: ~0 files
-- Prevention: Active via `.gitignore` and pre-commit hooks
-
-## 🎯 Best Practices
-
-1. **Always use dry-run first**: `python -m scripts.ops.support.repo.cleanup_repository --dry-run`
-1. **Attach machine-readable evidence**: add `--report-json reports/quality/root-hygiene-cleanup-classification.json`, `--report-root-review-json reports/quality/root-hygiene-review-evidence.json`, and `--report-reports-workspace-json reports/quality/reports-workspace-review.json`
-1. **Commit cleanup changes separately**: Makes reviews easier
-1. **Document exceptions**: If you need to keep a cache file, document why
-1. **Use Git LFS for large files**: Anything >1MB should use LFS
-1. **Keep historical archives**: They provide valuable context
-
-## 🔗 Related Documents
-
-- [Documentation Publication Policy](../00-project/governance/06-doc-publication-policy.md)
-- [Documentation Navigation Policy](../00-project/governance/07-doc-nav-policy.md)
-- [Retention-Sensitive Cleanup](../05-operations/runbooks/retention-sensitive-cleanup.md)
-- [Git LFS Documentation](https://git-lfs.com/)
-- [Pre-commit Framework](https://pre-commit.com/)
+If you are updating cleanup behavior, edit `cleanup-policy.md` first and keep
+this page as a short compatibility redirect only.

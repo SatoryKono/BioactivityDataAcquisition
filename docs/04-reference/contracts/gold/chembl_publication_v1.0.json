@@ -67,14 +67,6 @@
       "nullable": true,
       "description": ""
     },
-    "pmc_id": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
     "pmid": {
       "type": [
         "string",
@@ -104,14 +96,6 @@
       "nullable": true,
       "description": ""
     },
-    "affiliation_list": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
     "author_keys": {
       "type": [
         "string",
@@ -120,47 +104,7 @@
       "nullable": true,
       "description": ""
     },
-    "author_orcids": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
     "publication_type": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "publication_type_unified": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "publication_subclass": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "publication_class": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "publication_date": {
       "type": [
         "string",
         "null"
@@ -177,6 +121,22 @@
       "description": ""
     },
     "publication_year": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "citations_received": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "citations_made": {
       "type": [
         "number",
         "null"
@@ -211,38 +171,6 @@
     "page_last": {
       "type": [
         "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "language": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "is_oa": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "citations_received": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "citations_made": {
-      "type": [
-        "number",
         "null"
       ],
       "nullable": true,

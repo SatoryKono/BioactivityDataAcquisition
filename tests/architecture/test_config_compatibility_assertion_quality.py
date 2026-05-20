@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 TARGETS = (
     ROOT
-    / "tests/unit/application/services/test_checkpoint_compatibility_service_v2.py",
+    / "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py",
 )
 
 BANNED_PATTERNS = {

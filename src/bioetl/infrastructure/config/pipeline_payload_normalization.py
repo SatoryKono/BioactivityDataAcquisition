@@ -179,7 +179,7 @@ def normalize_pipeline_payload(
     )
     load_source_section(config, payload.config_path)
 
-    for key in ("data_schema", "filter_defaults", "contract_defaults"):
+    for key in ("filter_defaults", "contract_defaults"):
         config.pop(key, None)
     return config
 

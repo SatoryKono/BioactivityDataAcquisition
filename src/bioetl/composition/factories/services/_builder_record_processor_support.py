@@ -23,7 +23,7 @@ if TYPE_CHECKING:
         RecordProcessorConfig,
         TransformCallback,
     )
-    from bioetl.domain.composite.config import ColumnGroupConfig
+    from bioetl.domain.composite.config import ColumnGroupConfig, DataSchemaConfig
     from bioetl.domain.config import DQConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
@@ -49,6 +49,7 @@ class _RecordProcessorBuildRequest:
     silver_schema: pa.Schema | None
     gold_schema: GoldSchemaType
     dq_config: DQConfig | None
+    data_schema: DataSchemaConfig | None
     primary_keys: tuple[str, ...] | list[str]
     silver_table: str
     gold_table: str | None
@@ -92,6 +93,7 @@ def create_record_processor_impl(
         silver_schema=request.silver_schema,
         gold_schema=request.gold_schema,
         dq_config=request.dq_config,
+        data_schema=request.data_schema,
         table_config=request.table_config_cls(
             primary_keys=tuple(request.primary_keys),
             silver_table=request.silver_table,

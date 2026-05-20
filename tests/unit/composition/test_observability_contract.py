@@ -23,6 +23,7 @@ from bioetl.composition.observability import (
     ObservabilityContractError,
 )
 from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
+from tests.helpers.deterministic_ids import deterministic_uuid
 
 
 @pytest.mark.unit
@@ -177,7 +178,7 @@ class TestBootstrapObservability:
 
         bundle = bootstrap_observability_bundle(
             pipeline="test_pipeline",
-            run_id=uuid4(),
+            run_id=deterministic_uuid("observability-contract:metrics-enabled"),
             settings=settings,
         )
 

@@ -1,5 +1,11 @@
 # Docker Setup for BioETL Project
 
+Docker остается optional local-only runtime surface. Скрипты настройки не
+создают и не перезаписывают `.env` автоматически: `.env` считается
+machine-local/secret-bearing файлом. Если файл нужен для локального Docker
+запуска, создайте его вручную из `.env.example` после явного решения или
+используйте opt-in флаг helper-скрипта.
+
 ## ✓ Проверка Docker
 
 ```powershell

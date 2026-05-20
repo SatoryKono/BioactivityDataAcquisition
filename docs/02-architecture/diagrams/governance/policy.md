@@ -134,6 +134,8 @@ bash scripts/diagrams/validate_mermaid_syntax.sh
 ```
 
 Если runtime для `validate_mermaid_syntax.sh` не готов, это фиксируется как открытый риск до устранения.
+Поддерживаемые remediation paths: локальный `chrome-headless-shell`, явный `PUPPETEER_EXECUTABLE_PATH`,
+или Docker fallback с host-mounted `PUPPETEER_CACHE_DIR`.
 
 `uniform_diagram_sizes.py` использовать только точечно и только после ручной проверки,
 так как режим с `&nbsp;` конфликтует с правилом `NBSP-001` в `lint_diagrams.py`.

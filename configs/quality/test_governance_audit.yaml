@@ -70,9 +70,11 @@ preflight:
   telemetry_baseline: docs/05-engineering/test-telemetry-baseline.md
   strict_blockers:
     - missing_git_lfs
+    - git_lfs_unhealthy
     - git_status_failed
     - lfs_pointer_files_present
     - missing_telemetry_baseline
+    - telemetry_baseline_without_coverage
 lane_policy:
   canonical_source: configs/quality/test_matrix.yaml
   docs: docs/03-guides/testing.md
@@ -113,7 +115,7 @@ assertless_triage:
       rationale: "No-op, close/aclose, smoke, or does-not-raise behavior is the contract under test."
       next_review: "2026-09-30"
     weak_no_value:
-      count: 498
+      count: 494
       decision: burn-down
       rationale: "Candidates require assertion strengthening, merge, or removal when the owning module is edited."
       next_review: "2026-09-30"
@@ -626,3 +628,53 @@ file_backed_domain_contract_tests:
     - path: tests/unit/domain/hash_policy/test_hash_policy_stability.py
       target_lane: contracts
       contract_surface: tests/fixtures/hash_policy/**
+repo_backed_unit_test_exceptions:
+  decision: retained_repo_backed_contract_exception
+  rationale: "Checked-in source/config/dashboard/fixture reads may stay in tests/unit only when the repository artifact itself is the contract under test; workflow/dashboard/config tree scenarios were moved out of tests/unit."
+  review_date: "2026-09-30"
+  entries:
+    - path: tests/unit/application/composite/test_non_chembl_join_key_normalization.py
+      target_lane: unit
+      protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml + configs/composites/{molecule,target}.yaml
+    - path: tests/unit/application/pipelines/test_chembl_transformers.py
+      target_lane: unit
+      protected_surface: configs/** publication-type bootstrap inputs used by transformer initialization
+    - path: tests/unit/application/pipelines/test_transformer_snapshots.py
+      target_lane: unit
+      protected_surface: configs/** publication-type bootstrap inputs used by snapshot transformer initialization
+    - path: tests/unit/application/services/test_config_dq_service.py
+      target_lane: unit
+      protected_surface: src/bioetl/application/services/config_dq_service.py
+    - path: tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py
+      target_lane: unit
+      protected_surface: src/bioetl/composition/bootstrap/runtime/pipeline.py
+    - path: tests/unit/composition/factories/test_factory_decoupling_contracts.py
+      target_lane: unit
+      protected_surface: src/bioetl/composition/factories/services/bundle.py
+    - path: tests/unit/composition/test_observability_contract.py
+      target_lane: unit
+      protected_surface: src/bioetl/application/** and src/bioetl/composition/** logging contract scan
+    - path: tests/unit/contracts/test_generate_schema_artifacts.py
+      target_lane: unit
+      protected_surface: scripts/schema/generate_schema_artifacts.py
+    - path: tests/unit/domain/normalization/profiles/test_publication_identifier_profiles.py
+      target_lane: unit
+      protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml
+    - path: tests/unit/memory/test_tooling.py
+      target_lane: unit
+      protected_surface: memory.tooling workflow module CLI entrypoint from repo root
+    - path: tests/unit/scripts/diagrams/test_write_path_security.py
+      target_lane: unit
+      protected_surface: scripts/diagrams/{fix_pagebreaks_in_bundles,uniform_diagram_sizes}.py
+    - path: tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py
+      target_lane: unit
+      protected_surface: scripts/ai/mcp/{neo4j_memory_mcp_adapter.py,mcp_neo4j_memory_wrapper.sh}
+    - path: tests/unit/scripts/test_apply_entity_naming_rename_plan.py
+      target_lane: unit
+      protected_surface: src/tools/apply_entity_naming_rename_plan.py
+    - path: tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py
+      target_lane: unit
+      protected_surface: scripts/docs/generate_pipeline_normalization_field_matrix.py + docs/05-engineering/normalization_plan_P0_P6.md
+    - path: tests/unit/tools/test_differentiate_linkstyle_security.py
+      target_lane: unit
+      protected_surface: src/tools/differentiate_linkstyle.py

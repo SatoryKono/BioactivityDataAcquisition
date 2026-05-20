@@ -6,7 +6,9 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
-import yaml
+from bioetl.infrastructure.config.contract_registry_loader import (
+    load_contract_registry_entries,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,17 +102,8 @@ def _load_contract_registry_entry(
     *,
     strict: bool,
 ) -> dict[str, object] | None:
-    payload = _read_contract_registry_payload(registry_path, strict=strict)
-    if payload is None:
-        return None
-    entries = payload.get("entries")
-    if not isinstance(entries, dict):
-        if strict:
-            raise RuntimeError(
-                "Strict reproducibility contexts require "
-                "configs/base/contract_registry.yaml to expose a top-level "
-                "'entries' mapping"
-            )
+    entries = _read_contract_registry_entries(registry_path, strict=strict)
+    if entries is None:
         return None
     entry = entries.get(contract_ref)
     if not isinstance(entry, dict):
@@ -118,28 +111,20 @@ def _load_contract_registry_entry(
     return entry
 
 
-def _read_contract_registry_payload(
+def _read_contract_registry_entries(
     registry_path: Path,
     *,
     strict: bool,
-) -> dict[str, object] | None:
+) -> dict[str, dict[str, object]] | None:
     try:
-        payload = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
-    except (OSError, yaml.YAMLError) as exc:
+        return load_contract_registry_entries(registry_path)
+    except (FileNotFoundError, OSError, ValueError) as exc:
         if strict:
             raise RuntimeError(
                 "Strict reproducibility contexts require a readable contract "
                 f"registry payload at '{registry_path}'"
             ) from exc
         return None
-    if not isinstance(payload, dict):
-        if strict:
-            raise RuntimeError(
-                "Strict reproducibility contexts require "
-                "configs/base/contract_registry.yaml to parse into a mapping"
-            )
-        return None
-    return payload
 
 
 def _extract_contract_identity_fields(

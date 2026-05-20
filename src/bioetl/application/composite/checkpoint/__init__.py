@@ -26,12 +26,18 @@ from bioetl.application.composite.checkpoint.service import (
     CompositeCheckpointServiceContext,
 )
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
+from bioetl.application.composite.checkpoint.transition_service import (
+    apply_recovery_checkpoint_transition,
+    apply_validated_checkpoint_transition,
+)
 
 __all__ = [
     "CompositeCheckpointService",
     "CompositeCheckpointServiceContext",
     "CompositeCheckpointState",
     "ExpectedCheckpointContext",
+    "apply_recovery_checkpoint_transition",
+    "apply_validated_checkpoint_transition",
     "create_expected_checkpoint_context",
     "fresh_checkpoint_state",
     "merge_expected_anchors",

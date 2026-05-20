@@ -28,3 +28,10 @@ def test_validator_has_canonical_scope_root() -> None:
     assert "CANONICAL_ROOT=" in script
     assert "canonical)" in script
     assert 'DOCS_ROOT="$CANONICAL_ROOT"' in script
+
+
+def test_validator_retries_with_docker_fallback_when_chrome_is_missing() -> None:
+    script = _script_text()
+
+    assert "MMDC_FORCE_DOCKER=1" in script
+    assert "Chrome runtime unavailable" in script

@@ -53,7 +53,7 @@ resolve_chrome_headless_shell() {
     return 0
   fi
 
-  local cache_root="${HOME:-}/.cache/puppeteer/chrome-headless-shell"
+  local cache_root="${PUPPETEER_CACHE_DIR:-${HOME:-}/.cache/puppeteer}/chrome-headless-shell"
   if [[ -d "$cache_root" ]]; then
     local cached_exec
     cached_exec="$(find "$cache_root" -type f -name chrome-headless-shell 2>/dev/null | sort -V | tail -n 1 || true)"
@@ -201,6 +201,35 @@ if [[ -n "$PUPPETEER_CFG" ]]; then
   mmdc_args+=(-p "$PUPPETEER_CFG")
 fi
 
+run_validation() {
+  local file="$1"
+  local out="$2"
+  local err="$3"
+  if "$MMDC_BIN" -i "$file" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"; then
+    return 0
+  fi
+  "$MMDC_BIN" -i "$file" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"
+}
+
+run_validation_with_docker_fallback() {
+  local file="$1"
+  local out="$2"
+  local err="$3"
+
+  if run_validation "$file" "$out" "$err"; then
+    return 0
+  fi
+
+  if grep -q "Could not find Chrome" "$err" && command -v docker >/dev/null 2>&1; then
+    echo "INFO: Chrome runtime unavailable for $file; retrying via Docker mmdc fallback." >&2
+    if MMDC_FORCE_DOCKER=1 "$MMDC_BIN" -i "$file" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"; then
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
 while IFS= read -r -d '' file; do
   base="$(basename "${file%.*}")"
   [[ "$base" = _* ]] && continue
@@ -208,16 +237,14 @@ while IFS= read -r -d '' file; do
   out="$TMP_DIR/${count}_${base}.svg"
   err="$TMP_DIR/${count}_${base}.err"
   echo "Validating $file"
-  if ! "$MMDC_BIN" -i "$file" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"; then
-    # Retry once to reduce flaky Puppeteer/mmdc startup failures.
-    if "$MMDC_BIN" -i "$file" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"; then
-      continue
-    fi
+  if ! run_validation_with_docker_fallback "$file" "$out" "$err"; then
     echo "ERROR: Mermaid validation failed for $file" >&2
     if grep -q "Could not find Chrome" "$err"; then
       echo "HINT: mmdc could not find Chrome/Chromium for Puppeteer." >&2
       echo "      Install browser runtime: npx puppeteer browsers install chrome-headless-shell" >&2
+      echo "      Optional: set PUPPETEER_CACHE_DIR=/path/to/cache so Docker fallback can reuse it." >&2
       echo "      Or provide --puppeteer <config.json> with executablePath/args." >&2
+      echo "      If Docker is available, the validator automatically retries with MMDC_FORCE_DOCKER=1." >&2
     fi
     if [[ -s "$err" ]]; then
       echo "DETAILS:" >&2

@@ -136,9 +136,25 @@ ______________________________________________________________________
 | **ContentHash**                 | SHA-256 hash for record deduplication: `sha256(provider + canonical_json(record))`                                                                 | `checksum`, `fingerprint`                                  |
 | **PipelineRunContext**          | Launch/execution descriptor used during runtime assembly before a runner starts; carries launch options, resume flags, and identity/config anchors | `global run manifest`, `runtime payload object`            |
 | **PipelineContext**             | Immutable in-run processing context carrying `run_id`, `run_type`, `LoggerPort`, and deterministic `started_at` for batch/write flows              | `run state`, `infra context object`                        |
+| **Execution Fingerprint**       | Stable identity hash derived from effective config, selected runtime anchors, and other reproducibility inputs used to fail-close unsafe resume     | `session hash`, `best-effort fingerprint`                  |
+| **EffectiveConfigHash**         | Hash of the final effective execution config after defaults, overrides, and contract-bound normalization are resolved                              | `config file hash`, `settings checksum`                    |
+| **Effective Config Artifact**   | Persisted control-plane artifact capturing the resolved execution config together with source refs and hash anchors                                 | `final yaml dump`, `config snapshot file`                  |
 | **RunManifest (control-plane)** | Immutable provenance/control-plane artifact describing what was launched and with which reproducibility anchors                                    | `universal runtime context`, `one manifest for everything` |
 | **RunLedger (control-plane)**   | Append-only event ledger linked to a run/manifest for provenance, diagnostics, and replay inspection, but not the mutable runtime resume object | `resume state store`, `checkpoint ledger`                  |
+| **WorkflowManifest**            | Workflow-level control-plane artifact describing declarative workflow identity, step graph, and execution anchors                                  | `workflow run context`, `step cache file`                  |
+| **WorkflowLedger**              | Append-only workflow event ledger used for inspection and workflow-level replay analysis                                                          | `workflow checkpoint`, `workflow state object`             |
+| **WorkflowExecutionState**      | Mutable workflow resume/status owner kept separate from workflow ledger history                                                                   | `workflow ledger state`, `workflow manifest`               |
+| **Workflow Control Plane**      | Workflow-specific manifest, ledger, and execution-state artifact family ratified by ADR-047                                                       | `workflow runtime internals`, `job metadata`               |
 | **Control Plane**               | Artifact family around manifests, ledgers, effective config, and related provenance/inspection surfaces                                           | `runtime context`, `execution state`                       |
+
+### Documentation Publication Terms
+
+| Canonical Term         | Definition                                                                                  | Avoid                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------- |
+| **Published docs**     | MkDocs-visible guidance or reference pages intended as current public project documentation | `all docs`, `website-only docs`       |
+| **Internal-published** | Published-but-secondary documentation retained for advanced operators or maintainers        | `private docs`, `repo-only docs`      |
+| **Repo-only docs**     | Repository-path documentation intentionally excluded from MkDocs publication                 | `draft but published`, `hidden canon` |
+| **Archive docs**       | Historical documentation kept for traceability under `docs/99-archive/**`                  | `active guidance`, `current policy`   |
 
 ### Composite Pipeline Services
 

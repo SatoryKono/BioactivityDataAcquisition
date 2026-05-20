@@ -397,10 +397,23 @@ ______________________________________________________________________
 | `publication_id`   | str   | No       | ChEMBL Publication ID |
 | `publication_pmid` | str   | Yes      | PubMed ID             |
 | `publication_doi`  | str   | Yes      | DOI                   |
+| `publication_pmc_id` | str | Yes      | Canonical PMC identifier |
+| `doi`              | str   | Yes      | Raw DOI alias retained for compatibility |
+| `pmid`             | str   | Yes      | Raw PubMed ID alias retained for compatibility |
 | `title`            | str   | Yes      | Заголовок             |
 | `journal`          | str   | Yes      | Журнал                |
 | `publication_year` | float | Yes      | Год публикации        |
 | `authors`          | str   | Yes      | Авторы                |
+| `author_keys`      | str   | Yes      | Pipe-delimited author keys |
+| `publication_type` | str   | Yes      | Canonical publication type subset for ChEMBL |
+| `src_id`           | float | Yes      | ChEMBL source identifier |
+
+Поля `pmc_id`, `publication_type_unified`, `publication_subclass`,
+`publication_class`, `publication_date`, `language`, `is_oa`,
+`citations_received`, `citations_made`, `affiliation_list`, и
+`author_orcids` intentionally do not belong to the current ChEMBL Gold export
+surface. They may still exist in broader publication normalization or Silver
+surfaces, but they are excluded from the live ChEMBL Gold contract.
 
 ______________________________________________________________________
 
@@ -704,7 +717,10 @@ ______________________________________________________________________
 
 ### Composite
 
-Composite-схемы объединяют данные из нескольких провайдеров в единую сущность. Все composite-схемы используют `strict=False` и `coerce=True`, поскольку набор бизнес-полей определяется динамически обогащением из нескольких источников.
+Composite-схемы объединяют данные из нескольких провайдеров в единую сущность.
+Live shared base config uses `strict=True` and `coerce=True`, while business
+fields are provider-derived and intentionally not redeclared one-by-one in the
+shared composite base schema.
 
 **Файлы схем**:
 

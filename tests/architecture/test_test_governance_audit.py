@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 from pathlib import Path
 from typing import Any, cast
@@ -11,6 +12,7 @@ import pytest
 import yaml
 
 from scripts.engineering.qa.check_test_audit_preflight import (
+    STRICT_BLOCKER_IDS,
     collect_test_audit_preflight,
 )
 from scripts.engineering.qa.report_test_governance_audit import (
@@ -19,8 +21,33 @@ from scripts.engineering.qa.report_test_governance_audit import (
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = ROOT / "configs" / "quality" / "test_governance_audit.yaml"
-GOLD_REGISTRY_PATH = ROOT / "tests" / "fixtures" / "golden" / "gold" / (
-    "schema_registry.v1.json"
+GOLD_REGISTRY_PATH = (
+    ROOT / "tests" / "fixtures" / "golden" / "gold" / ("schema_registry.v1.json")
+)
+MOVED_FILE_BACKED_UNIT_TESTS = {
+    "tests/unit/memory/test_workflow_tooling.py": "tests/integration/memory/test_workflow_tooling.py",
+    "tests/unit/memory/test_timeline_ingest.py": "tests/integration/memory/test_timeline_ingest.py",
+    "tests/unit/scripts/test_validate_pipeline_configs.py": "tests/integration/config/test_validate_pipeline_configs.py",
+    "tests/unit/grafana/test_workflow_dashboard_json_valid.py": "tests/integration/grafana/test_workflow_dashboard_json_valid.py",
+    "tests/unit/grafana/test_silver_reject_explorer_copy.py": "tests/integration/grafana/test_silver_reject_explorer_copy.py",
+}
+REPO_BACKED_UNIT_MARKERS = (
+    re.compile(
+        r'Path\("(?:(?:configs|docs|grafana|scripts|src|tests/fixtures)/[^"]+)"\)\.(?:read_text|read_bytes|resolve)\('
+    ),
+    re.compile(r"Path\(__file__\)\.resolve\(\)\.parents\[(3|4)\]"),
+)
+REPO_BACKED_ROOT_USE_TOKENS = (
+    "spec_from_file_location(",
+    "cwd=repo_root",
+    "cwd = repo_root",
+    "source = repo_root /",
+    "module_path =",
+    "script_path =",
+    'repo_root / "configs"',
+    'repo_root / "src"',
+    'repo_root / "scripts"',
+    'repo_root / "docs"',
 )
 
 YamlMap = dict[str, Any]
@@ -64,8 +91,7 @@ def test_test_governance_audit_evidence_paths_exist() -> None:
     for entry in cast(list[YamlMap], payload.get("issues", [])):
         for relative_path in cast(list[str], entry.get("evidence_paths", [])):
             assert (ROOT / relative_path).exists(), (
-                f"Missing governance evidence for issue #{entry['id']}: "
-                f"{relative_path}"
+                f"Missing governance evidence for issue #{entry['id']}: {relative_path}"
             )
 
 
@@ -82,7 +108,9 @@ def test_static_test_governance_report_stays_within_committed_budgets() -> None:
         <= budgets["duplicate_test_name_occurrences_max"]
     )
     assert report["compatibility_test_files"] <= budgets["compatibility_test_file_max"]
-    assert report["markerless_test_functions"] <= budgets["markerless_test_functions_max"]
+    assert (
+        report["markerless_test_functions"] <= budgets["markerless_test_functions_max"]
+    )
     assert report["uuid4_call_sites"] <= budgets["uuid4_call_sites_max"]
     assert report["date_today_call_sites"] <= budgets["date_today_call_sites_max"]
     assert not report["parse_errors"]
@@ -142,7 +170,9 @@ def test_duplicate_name_triage_tracks_top_generic_names() -> None:
 
 
 @pytest.mark.architecture
-def test_compatibility_inventory_covers_every_detected_compatibility_test_file() -> None:
+def test_compatibility_inventory_covers_every_detected_compatibility_test_file() -> (
+    None
+):
     payload = _load_yaml(CONFIG_PATH)
     report = collect_test_governance_report(ROOT)
     inventory = cast(YamlMap, payload["compatibility_test_inventory"])
@@ -214,6 +244,57 @@ def test_file_backed_domain_contract_tests_are_explicitly_classified() -> None:
 
 
 @pytest.mark.architecture
+def test_repo_backed_unit_test_exceptions_are_explicitly_classified() -> None:
+    payload = _load_yaml(CONFIG_PATH)
+    policy = cast(YamlMap, payload["repo_backed_unit_test_exceptions"])
+    entries = cast(list[YamlMap], policy["entries"])
+    configured_paths = {cast(str, entry["path"]) for entry in entries}
+    domain_contract_entries = cast(
+        list[YamlMap],
+        cast(YamlMap, payload["file_backed_domain_contract_tests"])["entries"],
+    )
+    domain_contract_paths = {
+        cast(str, entry["path"]) for entry in domain_contract_entries
+    }
+
+    detected_paths: set[str] = set()
+    for path in sorted((ROOT / "tests" / "unit").rglob("test_*.py")):
+        text = path.read_text(encoding="utf-8")
+        repo_relative_match = REPO_BACKED_UNIT_MARKERS[0].search(text)
+        repo_root_match = REPO_BACKED_UNIT_MARKERS[1].search(text) and any(
+            token in text for token in REPO_BACKED_ROOT_USE_TOKENS
+        )
+        if repo_relative_match or repo_root_match:
+            detected_paths.add(path.relative_to(ROOT).as_posix())
+
+    assert policy["decision"] == "retained_repo_backed_contract_exception"
+    assert cast(str, policy["rationale"]).strip()
+    assert cast(str, policy["review_date"]) >= "2026-05-20"
+    assert configured_paths == detected_paths - domain_contract_paths
+    for entry in entries:
+        assert (ROOT / cast(str, entry["path"])).exists()
+        assert entry["target_lane"] == "unit"
+        assert cast(str, entry["protected_surface"]).strip()
+
+
+@pytest.mark.architecture
+def test_repo_layout_and_dashboard_contract_tests_no_longer_live_in_unit_lane() -> None:
+    for old_path, new_path in MOVED_FILE_BACKED_UNIT_TESTS.items():
+        assert not (ROOT / old_path).exists(), f"Moved file still present: {old_path}"
+        assert (ROOT / new_path).exists(), f"Missing reclassified test: {new_path}"
+
+
+@pytest.mark.architecture
+def test_preflight_strict_blocker_inventory_matches_supported_policy() -> None:
+    payload = _load_yaml(CONFIG_PATH)
+    strict_blockers = tuple(
+        cast(list[str], cast(YamlMap, payload["preflight"])["strict_blockers"])
+    )
+
+    assert strict_blockers == STRICT_BLOCKER_IDS
+
+
+@pytest.mark.architecture
 def test_preflight_reports_missing_git_lfs_as_strict_reproducibility_blocker() -> None:
     def fake_git_runner(args: list[str]) -> subprocess.CompletedProcess[str]:
         values = {
@@ -226,6 +307,7 @@ def test_preflight_reports_missing_git_lfs_as_strict_reproducibility_blocker() -
                 "refs/remotes/origin/HEAD",
             ): "origin/main",
             ("rev-parse", "--short", "main"): "abc1234",
+            ("lfs", "version"): "git-lfs/3.0.0",
             ("status", "--short", "--untracked-files=no"): "",
         }
         key = tuple(args)
@@ -243,6 +325,96 @@ def test_preflight_reports_missing_git_lfs_as_strict_reproducibility_blocker() -
     assert "missing_git_lfs" in blocker_ids
     assert report["default_branch"] == "main"
     assert report["telemetry_baseline"]["exists"] is True
+
+
+@pytest.mark.architecture
+def test_preflight_reports_unhealthy_git_lfs_as_strict_reproducibility_blocker() -> (
+    None
+):
+    def fake_git_runner(args: list[str]) -> subprocess.CompletedProcess[str]:
+        values = {
+            ("branch", "--show-current"): subprocess.CompletedProcess(
+                args, 0, "main", ""
+            ),
+            ("rev-parse", "--short", "HEAD"): subprocess.CompletedProcess(
+                args, 0, "abc1234", ""
+            ),
+            (
+                "symbolic-ref",
+                "--quiet",
+                "--short",
+                "refs/remotes/origin/HEAD",
+            ): subprocess.CompletedProcess(args, 0, "origin/main", ""),
+            ("rev-parse", "--short", "main"): subprocess.CompletedProcess(
+                args, 0, "abc1234", ""
+            ),
+            ("lfs", "version"): subprocess.CompletedProcess(
+                args,
+                1,
+                "",
+                "fatal: 'lfs' appears to be a git command, but we were not able to execute it.",
+            ),
+            ("status", "--short", "--untracked-files=no"): subprocess.CompletedProcess(
+                args,
+                0,
+                "",
+                "",
+            ),
+        }
+        result = values.get(tuple(args))
+        if result is not None:
+            return result
+        return subprocess.CompletedProcess(args, 1, "", f"unexpected git args: {args}")
+
+    report = collect_test_audit_preflight(
+        ROOT,
+        runner=fake_git_runner,
+        git_lfs_path="/usr/bin/git-lfs",
+    )
+
+    blocker_ids = {entry["id"] for entry in report["blockers"]}
+    assert "git_lfs_unhealthy" in blocker_ids
+    assert report["git_lfs"]["version"]["ok"] is False
+
+
+@pytest.mark.architecture
+def test_preflight_reports_timed_out_git_status_as_strict_reproducibility_blocker() -> (
+    None
+):
+    def fake_git_runner(args: list[str]) -> subprocess.CompletedProcess[str]:
+        if tuple(args) == ("status", "--short", "--untracked-files=no"):
+            raise subprocess.TimeoutExpired(
+                cmd=["git", *args],
+                timeout=5.0,
+                stderr="git status probe timed out",
+            )
+
+        values = {
+            ("branch", "--show-current"): "main",
+            ("rev-parse", "--short", "HEAD"): "abc1234",
+            (
+                "symbolic-ref",
+                "--quiet",
+                "--short",
+                "refs/remotes/origin/HEAD",
+            ): "origin/main",
+            ("rev-parse", "--short", "main"): "abc1234",
+            ("lfs", "version"): "git-lfs/3.0.0",
+        }
+        key = tuple(args)
+        if key in values:
+            return subprocess.CompletedProcess(args, 0, values[key], "")
+        return subprocess.CompletedProcess(args, 1, "", f"unexpected git args: {args}")
+
+    report = collect_test_audit_preflight(
+        ROOT,
+        runner=fake_git_runner,
+        git_lfs_path="/usr/bin/git-lfs",
+    )
+
+    blocker_ids = {entry["id"] for entry in report["blockers"]}
+    assert "git_status_failed" in blocker_ids
+    assert report["git_status"]["timed_out"] is True
 
 
 @pytest.mark.architecture
@@ -273,6 +445,7 @@ def test_preflight_reports_lfs_pointer_files_as_strict_reproducibility_blocker(
                 "refs/remotes/origin/HEAD",
             ): "origin/main",
             ("rev-parse", "--short", "main"): "abc1234",
+            ("lfs", "version"): "git-lfs/3.0.0",
             ("status", "--short", "--untracked-files=no"): "",
         }
         key = tuple(args)
@@ -310,7 +483,9 @@ def test_lane_docs_forbid_marker_only_commands_as_canonical_lanes() -> None:
     docs_path = ROOT / cast(YamlMap, payload["lane_policy"])["docs"]
     text = docs_path.read_text(encoding="utf-8")
 
-    assert "Marker-only commands such as `pytest -m unit` are not canonical lanes" in text
+    assert (
+        "Marker-only commands such as `pytest -m unit` are not canonical lanes" in text
+    )
 
 
 @pytest.mark.architecture

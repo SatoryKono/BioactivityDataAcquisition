@@ -75,9 +75,7 @@ class MergeService(
     _parse_pipeline_name = staticmethod(parse_pipeline_name)
     _get_field_aliases = staticmethod(resolve_field_aliases_from_registry)
     _extract_base_column = staticmethod(extract_base_column)
-    _priority_orderer: (
-        ColumnPriorityOrderingPolicy | Any | None  # Any: deprecated orderer
-    )
+    _priority_orderer: ColumnPriorityOrderingPolicy | None
 
     def __init__(
         self,
@@ -132,15 +130,12 @@ class MergeService(
         self._deduplicator = collaborators.deduplicator
         self._aggregator = collaborators.aggregator
         self._renamer = collaborators.renamer
-        self._orderer = collaborators.order_service or collaborators.orderer
-        if collaborators.priority_orderer is not None:
-            self._priority_orderer = collaborators.priority_orderer
-        else:
-            self._priority_orderer = getattr(
-                collaborators.order_service,
-                "_priority_orderer",
-                None,
-            )
+        self._order_service = collaborators.order_service
+        self._priority_orderer = getattr(
+            self._order_service,
+            "_priority_orderer",
+            None,
+        )
         self._coalesce_policy = collaborators.coalesce_policy
         self._conflict_resolver = collaborators.conflict_resolver
         self._join_planner = collaborators.join_planner

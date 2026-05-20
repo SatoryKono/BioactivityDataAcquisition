@@ -112,9 +112,10 @@ python scripts/engineering/qa/check_test_audit_preflight.py --strict
 python scripts/engineering/qa/report_test_governance_audit.py --check
 ```
 
-`check_test_audit_preflight.py --strict` treats missing `git-lfs`, failed
-`git status`, unresolved git-lfs pointer files under `tests/fixtures/vcr/`, or
-missing telemetry baseline as blockers for main-branch audit claims.
+`check_test_audit_preflight.py --strict` treats missing or unhealthy `git-lfs`,
+failed or timed-out `git status`, unresolved git-lfs pointer files under
+`tests/fixtures/vcr/`, missing telemetry baseline, or a telemetry baseline
+without `Actual coverage:` as blockers for main-branch audit claims.
 `report_test_governance_audit.py --check` enforces the current ratcheting
 budgets for assert-less candidates, duplicate test names, compatibility/legacy
 surface, marker/path drift, and deterministic-time/UUID call sites tracked in
@@ -191,6 +192,11 @@ Supported policy slice for issue `#2598`:
   `tests/fixtures/golden/gold/*_dq_bundle_v1.json`; drift/update path идёт через
   `tests/contract/test_gold_schema_snapshot_registry.py` и
   `UPDATE_SNAPSHOTS=1`
+- Publication/Silver compatibility placeholders не должны оставаться как
+  unconditional skips: machine-readable publication baseline хранится в
+  `tests/fixtures/contracts/publication_schema_compatibility.v1.yaml`, а
+  Silver compatibility checks обязаны быть executable against schema/config
+  contracts.
 - canonical VCR placement уже enforced в CI: кассеты вне `tests/fixtures/vcr/{provider}/` блокируются
 - extensionless VCR files пока допустимы только через `.github/vcr-noext-allowlist.txt`; новые такие файлы добавлять нельзя
 
@@ -202,7 +208,13 @@ Supported policy slice for issue `#2598`:
 
 - **Domain**: Тестирование сущностей и чистых функций в `src/bioetl/domain/`.
 - **Application**: Тестирование трансформеров и логики пайплайнов. In-memory fakes предпочтительны, MagicMock допустим.
-- **Правило**: Никакого сетевого взаимодействия или реального ввода-вывода.
+- **Правило**: Никакого сетевого взаимодействия. Repo-layout, dashboard,
+  workflow-tree, and checked-in config-file scenarios не должны жить в
+  `tests/unit/`, если они не перечислены явно в
+  `configs/quality/test_governance_audit.yaml` как repo-backed contract
+  exceptions.
+- Локальный `tmp_path`/tempdir I/O допустим только для изолированных
+  filesystem/serialization seams и не должен зависеть от checked-in repo tree.
 - Memory-marked MCP/Neo4j smoke tests and file-backed workflow smokes не
   относятся к `tests/unit/`; их canonical path теперь `tests/smoke/` или
   integration lanes.

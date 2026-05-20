@@ -6,8 +6,10 @@ __all__ = ["run_all"]
 
 
 def __getattr__(name: str) -> object:
-    if name == "run_all":
-        from bioetl.interfaces.cli.commands.domains.run_all.command import run_all
+    """Resolve retained command exports lazily to avoid import cycles."""
+    if name != "run_all":
+        raise AttributeError(name)
 
-        return run_all
-    raise AttributeError(name)
+    from bioetl.interfaces.cli.commands.domains.run_all.command import run_all
+
+    return run_all

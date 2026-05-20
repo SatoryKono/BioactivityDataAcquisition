@@ -6,8 +6,9 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Protocol, cast
 
-import yaml
-
+from bioetl.infrastructure.config.contract_registry_loader import (
+    try_load_contract_registry_entries,
+)
 from bioetl.infrastructure.schemas.pipeline_contract_policy import (
     PipelineContractPolicy,
 )
@@ -59,18 +60,8 @@ def _schema_columns_from_pandera_fields(schema_class: object) -> set[str] | None
 def load_contract_registry_entries(
     registry_path: Path | None = None,
 ) -> dict[str, dict[str, object]]:
-    """Load contract registry entries from the canonical YAML file."""
-    effective_path = registry_path or Path("configs/base/contract_registry.yaml")
-    if not effective_path.exists():
-        return {}
-    try:
-        payload = yaml.safe_load(effective_path.read_text(encoding="utf-8"))
-    except (OSError, yaml.YAMLError):
-        return {}
-    if not isinstance(payload, dict):
-        return {}
-    entries = payload.get("entries")
-    return entries if isinstance(entries, dict) else {}
+    """Load contract registry entries via the canonical validated loader."""
+    return try_load_contract_registry_entries(cast("Path | None", registry_path))
 
 
 def _supported_versions(entry: dict[str, object]) -> set[str]:

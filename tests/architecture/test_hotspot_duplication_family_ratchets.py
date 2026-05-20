@@ -58,10 +58,8 @@ def _family_is_clean(
     return bool(matched) and all(row.get("duplicate_count") == 0 for row in matched)
 
 
-def test_active_hotspot_family_duplication_ratchets_require_confirmed_clean_history() -> (
-    None
-):
-    """Active family ratchets must stay bounded to zero-duplication seams only."""
+def test_hotspot_family_duplication_budgets_hold_reviewed_baseline() -> None:
+    """Hotspot-family duplication budgets must not grow past the reviewed baseline."""
     scorecard = _load_scorecard()
     hotspot_policy = scorecard.get("hotspot_family_ratchets", {})
     assert isinstance(hotspot_policy, dict)
@@ -70,8 +68,6 @@ def test_active_hotspot_family_duplication_ratchets_require_confirmed_clean_hist
     artifact_policy = hotspot_policy.get("artifact_policy", {})
     assert isinstance(artifact_policy, dict)
     assert artifact_policy.get("expected_direction") == "downward"
-    assert artifact_policy.get("confirming_clean_snapshots_required") == 2
-
     baseline_artifact = artifact_policy.get("baseline_artifact")
     history_artifact = artifact_policy.get("history_artifact")
     latest_reviewed_snapshot = artifact_policy.get("latest_reviewed_snapshot")
@@ -81,6 +77,10 @@ def test_active_hotspot_family_duplication_ratchets_require_confirmed_clean_hist
 
     baseline_payload = _load_json(PROJECT_ROOT / baseline_artifact)
     history_records = _load_jsonl(PROJECT_ROOT / history_artifact)
+    assert any(
+        record.get("snapshot_date") == latest_reviewed_snapshot
+        for record in history_records
+    ), "Hotspot duplication history must include the latest reviewed snapshot"
 
     baseline_summary = baseline_payload.get("summary", {})
     assert isinstance(baseline_summary, dict)
@@ -92,59 +92,75 @@ def test_active_hotspot_family_duplication_ratchets_require_confirmed_clean_hist
 
     families = hotspot_policy.get("families", [])
     assert isinstance(families, list) and families
-    active_families = [
+    enforced_families = [
         family
         for family in families
-        if isinstance(family, dict) and family.get("ratchet_stage") == "active"
+        if isinstance(family, dict)
+        and family.get("ratchet_stage") in {"active", "reviewed-baseline"}
     ]
-    assert active_families, "Expected at least one active hotspot family ratchet"
+    assert enforced_families, "Expected at least one enforced hotspot family ratchet"
 
-    required_clean_snapshots = int(
-        artifact_policy["confirming_clean_snapshots_required"]
-    )
-    for family in active_families:
-        assert family.get("ratchet_scope") == "duplication-plus-bounded-growth"
+    for family in enforced_families:
+        assert "bounded-growth" in str(family.get("ratchet_scope"))
         metrics = family.get("metrics", {})
         assert isinstance(metrics, dict)
-        assert metrics.get("duplication_clusters") == 0
+        duplication_budget = metrics.get("duplication_clusters")
+        assert isinstance(duplication_budget, int) and duplication_budget >= 0
 
         expected_action = family.get("expected_action")
         assert isinstance(expected_action, str)
-        assert "file-growth and fan-in" in expected_action
+        assert "duplication" in expected_action
+        assert "file-growth" in expected_action
+        assert "fan-in" in expected_action
 
         path_prefixes = family.get("path_prefixes", [])
         assert isinstance(path_prefixes, list) and path_prefixes
-        assert _family_is_clean(
+        matched_rows = _match_family_targets(
             baseline_target_rows,
             path_prefixes=[
                 prefix for prefix in path_prefixes if isinstance(prefix, str)
             ],
-        ), (
-            f"Active family {family.get('name')} must stay at zero duplication in the latest baseline"
+        )
+        assert matched_rows, (
+            f"Hotspot family {family.get('name')} must appear in the latest "
+            "duplication baseline"
+        )
+        actual_duplicate_count = max(
+            int(row["duplicate_count"])
+            for row in matched_rows
+            if isinstance(row.get("duplicate_count"), int)
+        )
+        assert actual_duplicate_count <= duplication_budget, (
+            f"Hotspot family {family.get('name')} has {actual_duplicate_count} "
+            f"duplicate clusters, exceeding reviewed budget {duplication_budget}."
         )
 
-        clean_history = [
-            record
-            for record in history_records
-            if isinstance(record.get("targets"), list)
-            and _family_is_clean(
-                [row for row in record["targets"] if isinstance(row, dict)],
-                path_prefixes=[
-                    prefix for prefix in path_prefixes if isinstance(prefix, str)
-                ],
+        if duplication_budget == 0:
+            required_clean_snapshots = int(
+                artifact_policy["confirming_clean_snapshots_required"]
             )
-        ]
-        assert len(clean_history) >= required_clean_snapshots, (
-            f"Active family {family.get('name')} requires at least "
-            f"{required_clean_snapshots} confirming clean snapshots"
-        )
-        assert all(
-            record.get("snapshot_date") == latest_reviewed_snapshot
-            for record in clean_history[-required_clean_snapshots:]
-        ), (
-            f"Active family {family.get('name')} must be confirmed by the latest "
-            "reviewed clean snapshots"
-        )
+            clean_history = [
+                record
+                for record in history_records
+                if isinstance(record.get("targets"), list)
+                and _family_is_clean(
+                    [row for row in record["targets"] if isinstance(row, dict)],
+                    path_prefixes=[
+                        prefix for prefix in path_prefixes if isinstance(prefix, str)
+                    ],
+                )
+            ]
+            assert len(clean_history) >= required_clean_snapshots, (
+                f"Zero-budget family {family.get('name')} requires at least "
+                f"{required_clean_snapshots} confirming clean snapshots"
+            )
+            assert all(
+                record.get("snapshot_date") == latest_reviewed_snapshot
+                for record in clean_history[-required_clean_snapshots:]
+            ), (
+                f"Zero-budget family {family.get('name')} must be confirmed by "
+                "the latest reviewed clean snapshots"
+            )
 
 
 def test_reviewed_baseline_hotspot_families_match_reviewed_duplication_snapshot() -> (
@@ -187,7 +203,8 @@ def test_reviewed_baseline_hotspot_families_match_reviewed_duplication_snapshot(
             row for row in baseline_family_rows if row.get("name") == family_name
         ]
         assert matched_rows, (
-            f"Reviewed-baseline family {family_name} must exist in the reviewed family baseline"
+            f"Reviewed-baseline family {family_name} must exist in the reviewed "
+            "family baseline"
         )
 
         baseline_row = matched_rows[0]

@@ -124,6 +124,18 @@ def test_config_validation_inventory_is_self_classified() -> None:
 def test_validate_configs_reports_validation_depth_summary() -> None:
     script = (
         ROOT
+        / "scripts"
+        / "schema"
+        / "validate_pipeline_configs.py"
+    ).read_text(encoding="utf-8")
+
+    assert "_emit_validation_depth_summary(configs_root)" in script
+    assert "Config validation surface family depths" in script
+
+
+def test_ai_docs_validate_configs_script_is_wrapper_only() -> None:
+    wrapper = (
+        ROOT
         / "docs"
         / "00-project"
         / "ai"
@@ -132,8 +144,8 @@ def test_validate_configs_reports_validation_depth_summary() -> None:
         / "py-config-bot-2.py"
     ).read_text(encoding="utf-8")
 
-    assert "_emit_validation_depth_summary(configs_root)" in script
-    assert "Config validation surface family depths" in script
+    assert 'import_module("scripts.schema.validate_pipeline_configs")' in wrapper
+    assert "def validate_config_tree" not in wrapper
 
 
 def test_high_risk_runtime_config_families_require_cross_file_validation() -> None:

@@ -18,6 +18,7 @@ PY
 DOCKER_IMAGE="${MMDC_DOCKER_IMAGE:-minlag/mermaid-cli}"
 LOCAL_MMDC="/tmp/mermaid-cli-lite/node_modules/.bin/mmdc"
 FORCE_DOCKER="${MMDC_FORCE_DOCKER:-0}"
+HOST_PUPPETEER_CACHE_DIR="${PUPPETEER_CACHE_DIR:-${HOME:-}/.cache/puppeteer}"
 
 run_with_docker() {
   if ! command -v docker >/dev/null 2>&1; then
@@ -31,11 +32,25 @@ run_with_docker() {
     docker pull "$DOCKER_IMAGE" >/dev/null
   fi
 
-  exec docker run --rm \
-    -u "$(id -u):$(id -g)" \
-    -v "$REPO_ROOT:$REPO_ROOT" \
-    -v /tmp:/tmp \
-    -w "$PWD" \
+  local docker_args=(
+    --rm
+    -u "$(id -u):$(id -g)"
+    -v "$REPO_ROOT:$REPO_ROOT"
+    -v /tmp:/tmp
+    -w "$PWD"
+  )
+
+  # Mount a host Puppeteer cache into the container so Docker fallback can
+  # reuse a previously installed chrome-headless-shell runtime.
+  if [[ -d "$HOST_PUPPETEER_CACHE_DIR" ]]; then
+    docker_args+=(
+      -e PUPPETEER_CACHE_DIR=/home/node/.cache/puppeteer
+      -v "$HOST_PUPPETEER_CACHE_DIR:/home/node/.cache/puppeteer"
+    )
+  fi
+
+  exec docker run \
+    "${docker_args[@]}" \
     "$DOCKER_IMAGE" \
     "$@"
 }

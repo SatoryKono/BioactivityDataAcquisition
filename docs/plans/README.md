@@ -1,7 +1,7 @@
 # Plans Directory
 
 *Status: Working planning artifacts (non-normative)*
-*Last updated: 2026-04-29*
+*Last updated: 2026-05-20*
 
 This directory contains implementation plans, corrective roadmaps, migration
 plans, and supporting architecture assessment snapshots.
@@ -73,30 +73,25 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [monitoring-observability-expansion-plan-2026-03-26.md](monitoring-observability-expansion-plan-2026-03-26.md)
 - [project-memory-layer-implementation-plan-2026-04-20.md](project-memory-layer-implementation-plan-2026-04-20.md)
 - [project-memory-layer-issue-pack-2026-04-20.md](project-memory-layer-issue-pack-2026-04-20.md)
-- [repository-file-structure-cleanup-plan-2026-04-20.md](repository-file-structure-cleanup-plan-2026-04-20.md)
 - [repository-file-structure-remediation-plan-2026-04-28.md](repository-file-structure-remediation-plan-2026-04-28.md)
-- [scripts-cli-wrapper-caller-matrix-2026-04-28.md](scripts-cli-wrapper-caller-matrix-2026-04-28.md)
-- [codex-launcher-parity-review-2026-04-28.md](codex-launcher-parity-review-2026-04-28.md)
-- [codex-launcher-parity-refresh-2026-04-29.md](codex-launcher-parity-refresh-2026-04-29.md)
-- [docs-cli-wrapper-closeout-2026-04-28.md](docs-cli-wrapper-closeout-2026-04-28.md)
-- [mcp-wrapper-contract-audit-2026-04-28.md](mcp-wrapper-contract-audit-2026-04-28.md)
-- [build-docs-site-parity-audit-2026-04-29.md](build-docs-site-parity-audit-2026-04-29.md)
-- [mcp-wrapper-deep-audit-2026-04-29.md](mcp-wrapper-deep-audit-2026-04-29.md)
-- [mcp-wrapper-redesign-prerequisites-2026-04-29.md](mcp-wrapper-redesign-prerequisites-2026-04-29.md)
 - [temporary-diagnostic-ttl-review-plan-2026-04-29.md](temporary-diagnostic-ttl-review-plan-2026-04-29.md)
-- [repo-governance-wrapper-closeout-2026-04-29.md](repo-governance-wrapper-closeout-2026-04-29.md)
-- [root-hygiene-cleanup-hardening-2026-04-29.md](root-hygiene-cleanup-hardening-2026-04-29.md)
-- [root-hygiene-audit-issue-pack-2026-04-29.md](root-hygiene-audit-issue-pack-2026-04-29.md)
-- [root-hygiene-review-lane-automation-2026-04-29.md](root-hygiene-review-lane-automation-2026-04-29.md)
-- [scripts-supporting-retained-set-closeout-2026-04-29.md](scripts-supporting-retained-set-closeout-2026-04-29.md)
-- [scripts-supporting-taxonomy-2026-04-29.md](scripts-supporting-taxonomy-2026-04-29.md)
-- [temporary-diagnostic-ttl-wave-1-closeout-2026-04-29.md](temporary-diagnostic-ttl-wave-1-closeout-2026-04-29.md)
-- [temporary-diagnostic-ttl-wave-2-closeout-2026-04-29.md](temporary-diagnostic-ttl-wave-2-closeout-2026-04-29.md)
-- [temporary-diagnostic-ttl-wave-3-closeout-2026-04-29.md](temporary-diagnostic-ttl-wave-3-closeout-2026-04-29.md)
-- [temporary-diagnostic-program-closeout-2026-04-29.md](temporary-diagnostic-program-closeout-2026-04-29.md)
-- [scripts-normalization-program-closeout-2026-04-29.md](scripts-normalization-program-closeout-2026-04-29.md)
-- [claude-to-ai-runtime-migration-plan-2026-04-25.md](claude-to-ai-runtime-migration-plan-2026-04-25.md)
 - [testing-support-migration-plan-2026-04-25.md](testing-support-migration-plan-2026-04-25.md)
+
+## Archived On 2026-05-20
+
+These completed artifacts were moved to `docs/99-archive/plans/` so they no
+longer compete with the current plan reading order:
+
+- `build-docs-site-parity-audit-2026-04-29.md`
+- `codex-launcher-parity-review-2026-04-28.md`
+- `docs-cli-wrapper-closeout-2026-04-28.md`
+- `root-hygiene-audit-issue-pack-2026-04-29.md`
+- `temporary-diagnostic-program-closeout-2026-04-29.md`
+- `temporary-diagnostic-ttl-wave-1-closeout-2026-04-29.md`
+- `temporary-diagnostic-ttl-wave-2-closeout-2026-04-29.md`
+- `temporary-diagnostic-ttl-wave-3-closeout-2026-04-29.md`
+
+See `docs/99-archive/plans/README.md` for the archived plan index.
 
 Earlier operational context files such as
 `onboarding-checklist-day-1-2026-03-20.md` and
@@ -167,7 +162,8 @@ wrappers to existing canonical transport and verification paths.
 The docs CLI wrapper closeout note was added on `2026-04-28` as the bounded
 closeout artifact for the `scripts/docs` wrapper wave. It records the removal
 of `check_doc_links.py` and `run_mkdocs_build.py`, plus the retained parity
-decision for `build_docs_site.sh`.
+decision for `build_docs_site.sh`. The completed closeout note now lives under
+`docs/99-archive/plans/`.
 
 The MCP wrapper contract audit was added on `2026-04-28` to document why the
 named `scripts/ai/mcp/*_wrapper.*` files are contract-bound runtime surfaces
@@ -176,7 +172,8 @@ and therefore out of scope for generic wrapper deletion.
 The build-docs-site parity audit was added on `2026-04-29` to record the
 follow-up redesign decision for `build_docs_site.sh`: retain it only as a shell
 transport adapter while keeping all build semantics in
-`scripts.docs.build.mkdocs_build`.
+`scripts.docs.build.mkdocs_build`. The completed audit note now lives under
+`docs/99-archive/plans/`.
 
 The MCP wrapper deep audit was added on `2026-04-29` to classify the retained
 `scripts/ai/mcp/` wrapper families by launch semantics, generated-config
@@ -222,7 +219,8 @@ issues. It deliberately avoids reopening the already closed remediation issue
 set and instead focuses on the remaining hardening delta: blocked-zone cleanup
 proposal templates, machine-readable cleanup evidence export, regression guards
 against broad cleanup instructions, and owner/admin verification of live
-branch-protection state.
+branch-protection state. The completed issue-pack artifact now lives under
+`docs/99-archive/plans/`.
 
 The root hygiene review lane automation note was added on `2026-04-29` to
 record the follow-up evidence layer in `cleanup_repository.py`: dry-run review
@@ -245,24 +243,28 @@ retained non-active surfaces.
 The temporary diagnostic TTL wave 1 closeout note was added on `2026-04-29` to
 record the first execution wave after the TTL plan: two zero-reference
 one-shot helpers were removed, and `scripts/engineering/qa/hotspot_family_metrics.py`
-was reclassified from `temporary_diagnostic` to `supporting`.
+was reclassified from `temporary_diagnostic` to `supporting`. The completed
+closeout note now lives under `docs/99-archive/plans/`.
 
 The temporary diagnostic TTL wave 2 closeout note was added on `2026-04-29` to
 record the second execution wave: six zero-reference Windows/WSL convenience
 and local repair helpers were removed, and the root-hygiene review registry was
 synchronized to stop treating those deleted helper targets as live canonical
-surfaces.
+surfaces. The completed closeout note now lives under
+`docs/99-archive/plans/`.
 
 The temporary diagnostic TTL wave 3 closeout note was added on `2026-04-29` to
 record the third execution wave: a zero-reference duplicate WSL helper and a
 zero-reference Grafana tracing smoke script were removed, while
 `scripts/memory/mcp_smoke.py` was reclassified as a compatibility shim in the
-`supporting` bucket.
+`supporting` bucket. The completed closeout note now lives under
+`docs/99-archive/plans/`.
 
 The temporary diagnostic program closeout note was added on `2026-04-29` to
 record the final end state of the TTL effort: `temporary_diagnostic=0`, with
 the remaining documented operator commands promoted to `active`, helper/shim
-surfaces moved to `supporting`, and the last dead launcher removed.
+surfaces moved to `supporting`, and the last dead launcher removed. The
+completed program closeout note now lives under `docs/99-archive/plans/`.
 
 The scripts normalization program closeout note was added on `2026-04-29` as
 the top-level completion artifact for the entire scripts cleanup and

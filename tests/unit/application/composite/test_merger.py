@@ -123,8 +123,9 @@ def test_merge_service_accepts_injected_internal_components(
     deduplicator = MagicMock()
     aggregator = MagicMock()
     renamer = MagicMock()
-    orderer = MagicMock()
+    order_service = MagicMock()
     priority_orderer = MagicMock()
+    order_service._priority_orderer = priority_orderer
     coalesce_policy = MagicMock()
     conflict_resolver = MagicMock()
     join_planner = MagicMock()
@@ -138,19 +139,17 @@ def test_merge_service_accepts_injected_internal_components(
             deduplicator=deduplicator,
             aggregator=aggregator,
             renamer=renamer,
-            order_service=orderer,  # New API: order_service is now required
+            order_service=order_service,
             coalesce_policy=coalesce_policy,
             conflict_resolver=conflict_resolver,
             join_planner=join_planner,
-            orderer=None,  # Old orderer parameter is now optional
-            priority_orderer=priority_orderer,  # Old priority_orderer parameter is now optional
         ),
     )
 
     assert service._deduplicator is deduplicator
     assert service._aggregator is aggregator
     assert service._renamer is renamer
-    assert service._orderer is orderer
+    assert service._order_service is order_service
     assert service._priority_orderer is priority_orderer
     assert service._coalesce_policy is coalesce_policy
     assert service._conflict_resolver is conflict_resolver

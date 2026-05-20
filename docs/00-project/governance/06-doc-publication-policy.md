@@ -67,6 +67,9 @@ consistency, а этот документ задаёт правила публи
   - published и `internal-published` страницы MUST NOT оформлять ссылки на такие
     материалы как built-site navigation links; допустимы только repository-path
     references, inline code paths или curated summaries.
+  - `docs/99-archive/README.md` MAY использоваться как стабильный
+    repository-path entrypoint для archive discovery, но это не делает архивное
+    дерево текущей MkDocs navigation surface.
 
 5. `archive`
 
@@ -132,6 +135,11 @@ AI runtime ownership note:
 1. Path-classified bulk families MAY inherit class from governance policy and
    entrypoint without per-file frontmatter, если они не претендуют на
    normative status.
+1. Published specialist families such as `docs/05-engineering/**`,
+   `docs/04-reference/providers/**`, `docs/04-reference/pipelines/**`, and
+   `docs/04-reference/contracts/**` MAY be nested under a broader `Reference`
+   navigation branch when that better matches the current information
+   architecture.
 1. При миграции структуры (пути, команды, конфиги) сначала обновлять `published`, затем `internal-published`, затем `repo-only` и `internal`.
 1. Исторические упоминания legacy-путей в `published` документах должны быть явно помечены как historical context.
 1. Для активных docs использовать автоматические проверки `check_doc_links` и nav/strict-build guardrails в CI.

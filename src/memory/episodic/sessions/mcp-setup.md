@@ -1,22 +1,22 @@
 ---
 id: mcp-setup
-title: Configure MCP
+title: "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430 MCP"
 task_id: mcp-setup
-created_at: '2026-05-19T19:46:14Z'
+created_at: '2026-05-20T05:44:03Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - AGENTS.md
 summary: Active task session context.
-query: mcp
+query: mcp local runtime config codex
 ---
 
 # Session note
 
 ## Task
 
-- Title: Configure MCP
-- Retrieval query: mcp
+- Title: Настройка MCP
+- Retrieval query: mcp local runtime config codex
 
 ## Retrieved context
 

@@ -76,6 +76,7 @@ def batch_writer(
         entity_type="test_entity",
         silver_schema=MagicMock(),
         gold_schema=MagicMock(),
+        gold_schema_policy_by_version=None,
         table_config=TableConfig(),
     )
     return BatchWriter(
@@ -230,6 +231,7 @@ class TestBatchWriterGold:
             entity_type="entity",
             silver_schema=MagicMock(),
             gold_schema=MagicMock(),
+            gold_schema_policy_by_version=None,
         )
 
         writer = BatchWriter(

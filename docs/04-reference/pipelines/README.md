@@ -21,10 +21,17 @@ including composite pipelines.
 > Reference boundary:
 >
 > - canonical current contract: provider reference pages, unified entity configs
->   in `configs/entities/`, composite configs in `configs/composites/`, and
->   in-page status banners on individual pipeline pages;
-> - canonical compact summaries: retained here when a shorter published page is
->   clearer than duplicating the full provider reference and config contract.
+>   in `configs/entities/**`, provider settings in `configs/providers/*.yaml`,
+>   composite configs in `configs/composites/*.yaml`, and in-page status
+>   banners on individual pipeline pages;
+> - compatibility summaries: retained here only when a shorter published page
+>   is clearer than duplicating the full provider reference and config contract.
+
+Current live config baseline on `main`:
+
+- `21` provider entity configs in `configs/entities/**`
+- `5` composite configs in `configs/composites/*.yaml`
+- `7` provider-level source configs in `configs/providers/*.yaml`
 
 ______________________________________________________________________
 
@@ -105,6 +112,17 @@ Current deep specs usually include:
 
 Compact published summaries may intentionally provide only a short active-state
 overview plus links to the current provider reference and config files.
+
+## Compatibility Summary Pages
+
+The top-level pages below are retained as short published summaries for
+historical discoverability, but they are not the preferred deep entrypoints for
+current pipeline behavior:
+
+- `chembl-activity.md` -> current detailed spec:
+  `chembl/05-activity-spec.md`
+- `chembl-assay.md` -> current detailed spec:
+  `chembl/06-assay-spec.md`
 
 ______________________________________________________________________
 

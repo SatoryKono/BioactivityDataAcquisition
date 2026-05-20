@@ -6,8 +6,10 @@ __all__ = ["health"]
 
 
 def __getattr__(name: str) -> object:
-    if name == "health":
-        from bioetl.interfaces.cli.commands.domains.health.command import health
+    """Resolve retained command exports lazily to avoid import cycles."""
+    if name != "health":
+        raise AttributeError(name)
 
-        return health
-    raise AttributeError(name)
+    from bioetl.interfaces.cli.commands.domains.health.command import health
+
+    return health

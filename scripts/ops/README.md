@@ -53,4 +53,4 @@ For MCP operational tooling, see [scripts/ai/mcp/__main__.py](/mnt/wsl/docker-de
 For Codex setup/check tooling, see [scripts/ai/codex/README.md](/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/codex/README.md).
 For Vibe launch tooling, see [scripts/ai/vibe/README.md](/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/vibe/README.md).
 For the current launcher classification used by the scripts consolidation wave,
-see [codex-launcher-parity-review-2026-04-28.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/plans/codex-launcher-parity-review-2026-04-28.md).
+see [codex-launcher-parity-review-2026-04-28.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/99-archive/plans/codex-launcher-parity-review-2026-04-28.md).

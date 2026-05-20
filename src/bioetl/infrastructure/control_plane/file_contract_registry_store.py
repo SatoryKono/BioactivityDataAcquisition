@@ -15,6 +15,9 @@ from bioetl.domain.control_plane.contract_registry_types import (
     RegistryValidationSeverity,
 )
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.config.contract_registry_loader import (
+    load_contract_registry_payload,
+)
 from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 __all__ = [
@@ -98,16 +101,13 @@ class FileContractRegistryStore:
     @staticmethod
     def _read_registry_data(path: Path) -> JsonDict:
         try:
-            content = path.read_text(encoding="utf-8")
+            return load_contract_registry_payload(path)
+        except FileNotFoundError as exc:
+            raise RegistryLoadError(f"Failed to read registry: {exc!s}") from exc
         except OSError as exc:
             raise RegistryLoadError(f"Failed to read registry: {exc!s}") from exc
-        try:
-            loaded = yaml.safe_load(content)
-        except yaml.YAMLError as exc:
-            raise RegistryLoadError(f"Invalid registry YAML: {exc!s}") from exc
-        if not isinstance(loaded, dict):
-            raise RegistryLoadError("Invalid registry format: expected mapping")
-        return loaded
+        except ValueError as exc:
+            raise RegistryLoadError(str(exc)) from exc
 
 
 def create_contract_registry(registry_path: Path) -> ContractRegistry:

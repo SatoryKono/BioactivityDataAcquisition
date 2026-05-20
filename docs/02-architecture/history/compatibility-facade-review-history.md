@@ -18,6 +18,28 @@ the operational compatibility registry. The canonical operational policy and
 curated ledgers now live in
 [`../07-compatibility-facade-inventory.md`](../07-compatibility-facade-inventory.md).
 
+## Public Entrypoint Review Wave (2026-05-20)
+
+Completed in this cycle:
+
+- Normalized sanctioned package/domain facades in `bioetl.application.composite`,
+  `bioetl.composition.bootstrap`, and the retained CLI domain packages from lazy
+  `__getattr__` resolution to direct re-exports where the owner modules are
+  stable and cycle-safe.
+- Removed deprecated `orderer` and `priority_orderer` collaborator aliases from
+  composite merge wiring; the sanctioned merge surface now passes only the
+  canonical `order_service` ordering collaborator through
+  `MergeCollaboratorGroup`.
+
+Operational implication:
+
+- Sanctioned public entrypoints remain intentionally retained, but the review
+  confirmed they no longer need transitional lazy indirection on the reviewed
+  package roots.
+- Compatibility governance for the composite merge seam now audits only the
+  canonical `order_service` collaborator path instead of carrying deprecated
+  alias fields in runtime wiring.
+
 ## Reduction Wave (2026-05-05)
 
 Completed reductions in this cycle:

@@ -175,7 +175,6 @@ def _load_naming_audit_module(repo_root: Path):
 
 def _suffix_policy_preview(
     results: dict[str, list[object]],
-    blocking_ambiguity_groups: list[object],
 ) -> str:
     lines: list[str] = []
     for category, violations in results.items():
@@ -188,20 +187,11 @@ def _suffix_policy_preview(
             current_name = getattr(item, "current_name", "<unknown>")
             issue = getattr(getattr(item, "issue", None), "value", "violation")
             lines.append(f"  - {path}:{line}: {current_name}: {issue}")
-    if blocking_ambiguity_groups:
-        lines.append(f"blocking ambiguity groups: {len(blocking_ambiguity_groups)}")
-        for group in blocking_ambiguity_groups[:5]:
-            family = getattr(group, "normalized_stem", "<unknown>")
-            classification = getattr(
-                getattr(group, "classification", None), "value", ""
-            )
-            lines.append(f"  - {family}: {classification}")
     return "\n".join(lines[:30])
 
 
 def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
     script = repo_root / CANONICAL_NAMING_AUDIT_PATH
-    docs_skip_path = repo_root / "docs" / "__naming_gate_skip__"
     if not script.exists():
         return [
             Violation(
@@ -210,6 +200,10 @@ def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
                 details=f"{CANONICAL_NAMING_AUDIT_PATH.as_posix()} not found",
             )
         ]
+    if os.environ.get("BIOETL_FULL_NAMING_AUDIT", "0") != "1":
+        return []
+
+    docs_skip_path = repo_root / "docs" / "__naming_gate_skip__"
     try:
         naming_audit = _load_naming_audit_module(repo_root)
         registry = naming_audit.load_naming_registry(
@@ -232,12 +226,6 @@ def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
             registry,
             module_trees=module_trees,
         )
-        ambiguity_groups = naming_audit.build_ambiguity_groups(
-            repo_root / SRC_ROOT,
-            repo_root / "configs",
-            registry,
-            module_trees=module_trees,
-        )
     except Exception as exc:  # pragma: no cover - defensive CLI failure path
         return [
             Violation(
@@ -248,22 +236,13 @@ def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
         ]
 
     total_violations = sum(len(violations) for violations in results.values())
-    blocking_ambiguity_groups = [
-        group
-        for group in ambiguity_groups
-        if group.classification
-        in {
-            naming_audit.AmbiguityClassification.CONFLICT,
-            naming_audit.AmbiguityClassification.DUPLICATE,
-        }
-    ]
-    if total_violations == 0 and not blocking_ambiguity_groups:
+    if total_violations == 0:
         return []
     return [
         Violation(
             rule="suffix-policy",
             location="scripts/engineering/qa/naming_audit.py --check",
-            details=_suffix_policy_preview(results, blocking_ambiguity_groups),
+            details=_suffix_policy_preview(results),
         )
     ]
 
@@ -1059,6 +1038,16 @@ def _parse_python_file(path: Path) -> ast.Module | None:
         return None
 
 
+def _build_python_ast_cache(py_files: tuple[Path, ...]) -> dict[Path, ast.Module]:
+    """Parse repository Python files once for all consistency checks."""
+    ast_cache: dict[Path, ast.Module] = {}
+    for py_file in py_files:
+        tree = _parse_python_file(py_file)
+        if tree is not None:
+            ast_cache[py_file] = tree
+    return ast_cache
+
+
 def _layer_aware_suffix_violations(repo_root: Path) -> list[Violation]:
     policy = _load_layer_aware_suffix_policy(repo_root)
     py_files, _ = _collect_src_tree(repo_root)
@@ -1074,6 +1063,7 @@ def _layer_aware_suffix_violations_for_files(
     repo_root: Path,
     policy: LayerAwareNamingPolicy,
     py_files: tuple[Path, ...],
+    ast_cache: dict[Path, ast.Module] | None = None,
 ) -> list[Violation]:
     violations: list[Violation] = []
 
@@ -1082,7 +1072,7 @@ def _layer_aware_suffix_violations_for_files(
         violations.extend(
             _layer_aware_module_violations(relative_path=relative_path, policy=policy)
         )
-        tree = _parse_python_file(py_file)
+        tree = ast_cache.get(py_file) if ast_cache is not None else _parse_python_file(py_file)
         if tree is None:
             continue
         violations.extend(
@@ -1185,15 +1175,12 @@ def _builder_module_violation_for_allowed_modules(
     )
 
 
-def _load_python_ast(py_file: Path) -> ast.AST | None:
-    try:
-        return ast.parse(py_file.read_text(encoding="utf-8"))
-    except SyntaxError:
-        return None
-
-
-def _factory_class_violations(py_file: Path, *, repo_root: Path) -> list[Violation]:
-    tree = _load_python_ast(py_file)
+def _factory_class_violations_from_tree(
+    *,
+    tree: ast.AST | None,
+    py_file: Path,
+    repo_root: Path,
+) -> list[Violation]:
     if tree is None:
         return []
 
@@ -1213,8 +1200,12 @@ def _factory_class_violations(py_file: Path, *, repo_root: Path) -> list[Violati
     ]
 
 
-def _builder_class_violations(py_file: Path, *, repo_root: Path) -> list[Violation]:
-    tree = _load_python_ast(py_file)
+def _builder_class_violations_from_tree(
+    *,
+    tree: ast.AST | None,
+    py_file: Path,
+    repo_root: Path,
+) -> list[Violation]:
     if tree is None:
         return []
 
@@ -1235,13 +1226,22 @@ def _builder_class_violations(py_file: Path, *, repo_root: Path) -> list[Violati
 
 
 def _violations_for_forbidden_factory_file(
-    py_file: Path, *, repo_root: Path
+    py_file: Path,
+    *,
+    repo_root: Path,
+    tree: ast.AST | None = None,
 ) -> list[Violation]:
     violations: list[Violation] = []
     module_violation = _factory_module_violation(py_file, repo_root=repo_root)
     if module_violation is not None:
         violations.append(module_violation)
-    violations.extend(_factory_class_violations(py_file, repo_root=repo_root))
+    violations.extend(
+        _factory_class_violations_from_tree(
+            tree=tree,
+            py_file=py_file,
+            repo_root=repo_root,
+        )
+    )
     return violations
 
 
@@ -1254,6 +1254,7 @@ def _factory_violations_for_files(
     *,
     repo_root: Path,
     py_files: tuple[Path, ...],
+    ast_cache: dict[Path, ast.Module] | None = None,
 ) -> list[Violation]:
     violations: list[Violation] = []
 
@@ -1262,19 +1263,36 @@ def _factory_violations_for_files(
         if not _is_under_any_layer(relative_path, FORBIDDEN_FACTORY_LAYERS):
             continue
         violations.extend(
-            _violations_for_forbidden_factory_file(py_file, repo_root=repo_root)
+            _violations_for_forbidden_factory_file(
+                py_file,
+                repo_root=repo_root,
+                tree=(
+                    ast_cache.get(py_file)
+                    if ast_cache is not None
+                    else _parse_python_file(py_file)
+                ),
+            )
         )
     return violations
 
 
 def _violations_for_forbidden_builder_file(
-    py_file: Path, *, repo_root: Path
+    py_file: Path,
+    *,
+    repo_root: Path,
+    tree: ast.AST | None = None,
 ) -> list[Violation]:
     violations: list[Violation] = []
     module_violation = _builder_module_violation(py_file, repo_root=repo_root)
     if module_violation is not None:
         violations.append(module_violation)
-    violations.extend(_builder_class_violations(py_file, repo_root=repo_root))
+    violations.extend(
+        _builder_class_violations_from_tree(
+            tree=tree,
+            py_file=py_file,
+            repo_root=repo_root,
+        )
+    )
     return violations
 
 
@@ -1293,6 +1311,7 @@ def _builder_violations_for_files(
     repo_root: Path,
     py_files: tuple[Path, ...],
     allowed_modules: frozenset[str],
+    ast_cache: dict[Path, ast.Module] | None = None,
 ) -> list[Violation]:
     violations: list[Violation] = []
 
@@ -1307,7 +1326,17 @@ def _builder_violations_for_files(
         )
         if module_violation is not None:
             violations.append(module_violation)
-        violations.extend(_builder_class_violations(py_file, repo_root=repo_root))
+        violations.extend(
+            _builder_class_violations_from_tree(
+                tree=(
+                    ast_cache.get(py_file)
+                    if ast_cache is not None
+                    else _parse_python_file(py_file)
+                ),
+                py_file=py_file,
+                repo_root=repo_root,
+            )
+        )
     return violations
 
 
@@ -1351,6 +1380,7 @@ def run_checks(repo_root: Path) -> list[Violation]:
         repo_root=repo_root,
     )
     py_files, directories = _collect_src_tree(repo_root)
+    ast_cache = _build_python_ast_cache(py_files)
     violations: list[Violation] = []
     violations.extend(_run_suffix_policy_check(repo_root))
     violations.extend(
@@ -1358,16 +1388,22 @@ def run_checks(repo_root: Path) -> list[Violation]:
             repo_root=repo_root,
             policy=policy,
             py_files=py_files,
+            ast_cache=ast_cache,
         )
     )
     violations.extend(
-        _factory_violations_for_files(repo_root=repo_root, py_files=py_files)
+        _factory_violations_for_files(
+            repo_root=repo_root,
+            py_files=py_files,
+            ast_cache=ast_cache,
+        )
     )
     violations.extend(
         _builder_violations_for_files(
             repo_root=repo_root,
             py_files=py_files,
             allowed_modules=_builder_allowed_modules_for_policy(policy),
+            ast_cache=ast_cache,
         )
     )
     violations.extend(

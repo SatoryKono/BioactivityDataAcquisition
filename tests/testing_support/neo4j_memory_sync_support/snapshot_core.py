@@ -4,161 +4,161 @@ from __future__ import annotations
 
 from .common import *  # noqa: F401,F403
 
-def test_snapshot_contains_core_repo_surfaces() -> None:
-    _, snapshot = _snapshot()
-    node_keys = {(key.label, key.name) for key in snapshot.nodes}
 
-    assert ("project", "BioETL") in node_keys
-    assert ("repo_zone", "src") in node_keys
-    assert ("repo_zone", "docs") in node_keys
-    assert ("repo_zone", REPO_ZONE_GITHUB) in node_keys
-    assert ("directory_surface", APPLICATION_CORE_DIR) in node_keys
-    assert ("directory_surface", CHEMBL_CONFIG_DIR) in node_keys
-    assert ("directory_surface", TESTS_ARCHITECTURE_DIR) in node_keys
-    assert ("directory_surface", ARCHITECTURE_DIAGRAMS_DIR) in node_keys
-    assert ("directory_surface", SCRIPTS_OPS_DIR) in node_keys
-    assert ("directory_surface", GRAFANA_DASHBOARDS_DIR) in node_keys
-    assert ("directory_surface", GITHUB_WORKFLOWS_DIR) in node_keys
-    assert (
-        "file_surface",
-        RECORD_NORMALIZATION_PROCESSOR_PATH,
-    ) in node_keys
-    assert ("file_surface", CHEMBL_ACTIVITY_CONFIG_PATH) in node_keys
-    assert ("file_surface", ARCHITECTURE_DIAGRAMS_README_PATH) in node_keys
-    assert ("file_surface", SCRIPTS_MEMORY_MAIN_PATH) in node_keys
-    assert ("file_surface", DIAGRAM_QUALITY_GATES_TEST_PATH) in node_keys
-    assert ("file_surface", BIOETL_RUNTIME_DASHBOARD_PATH) in node_keys
-    assert ("file_surface", TESTS_WORKFLOW_PATH) in node_keys
-    assert ("layer_family", "domain") in node_keys
-    assert ("package_family", "domain/ports") in node_keys
-    assert (
-        "module_surface",
-        "src/bioetl/domain/config/pipeline.py",
-    ) in node_keys
-    assert (
-        "class_surface",
-        "src.bioetl.infrastructure.adapters.base.BaseHttpAdapter",
-    ) in node_keys
-    assert (
-        "function_surface",
-        "src.bioetl.domain.normalization.profiles.chembl_activity.create_case_normalizer",
-    ) in node_keys
-    assert (
-        "method_surface",
-        "src.bioetl.application.composite.merger.MergeService.merge",
-    ) in node_keys
+def _assert_node_keys_present(
+    node_keys: set[tuple[str, str]],
+    expected: tuple[tuple[str, str], ...],
+) -> None:
+    for node_key in expected:
+        assert node_key in node_keys
+
+
+def _assert_node_keys_absent(
+    node_keys: set[tuple[str, str]],
+    forbidden: tuple[tuple[str, str], ...],
+) -> None:
+    for node_key in forbidden:
+        assert node_key not in node_keys
+
+
+def _assert_core_node_surfaces(
+    node_keys: set[tuple[str, str]],
+    snapshot: GraphSnapshot,
+) -> None:
+    _assert_node_keys_present(
+        node_keys,
+        (
+            ("project", "BioETL"),
+            ("repo_zone", "src"),
+            ("repo_zone", "docs"),
+            ("repo_zone", REPO_ZONE_GITHUB),
+            ("directory_surface", APPLICATION_CORE_DIR),
+            ("directory_surface", CHEMBL_CONFIG_DIR),
+            ("directory_surface", TESTS_ARCHITECTURE_DIR),
+            ("directory_surface", ARCHITECTURE_DIAGRAMS_DIR),
+            ("directory_surface", SCRIPTS_OPS_DIR),
+            ("directory_surface", GRAFANA_DASHBOARDS_DIR),
+            ("directory_surface", GITHUB_WORKFLOWS_DIR),
+            ("file_surface", RECORD_NORMALIZATION_PROCESSOR_PATH),
+            ("file_surface", CHEMBL_ACTIVITY_CONFIG_PATH),
+            ("file_surface", ARCHITECTURE_DIAGRAMS_README_PATH),
+            ("file_surface", SCRIPTS_MEMORY_MAIN_PATH),
+            ("file_surface", DIAGRAM_QUALITY_GATES_TEST_PATH),
+            ("file_surface", BIOETL_RUNTIME_DASHBOARD_PATH),
+            ("file_surface", TESTS_WORKFLOW_PATH),
+            ("layer_family", "domain"),
+            ("package_family", "domain/ports"),
+            ("module_surface", "src/bioetl/domain/config/pipeline.py"),
+            (
+                "class_surface",
+                "src.bioetl.infrastructure.adapters.base.BaseHttpAdapter",
+            ),
+            (
+                "function_surface",
+                "src.bioetl.domain.normalization.profiles.chembl_activity.create_case_normalizer",
+            ),
+            (
+                "method_surface",
+                "src.bioetl.application.composite.merger.MergeService.merge",
+            ),
+            ("provider_surface", "chembl"),
+            ("entity_config", "chembl_activity"),
+            ("composite_config", "composite_activity"),
+            ("dashboard_surface", "bioetl-overview-v2"),
+            ("doc_source_surface", ARCHITECTURE_DIAGRAMS_HUB),
+            ("doc_source_surface", "diagram governance workflow"),
+            ("doc_source_surface", "normalization plan"),
+            ("doc_source_surface", "pipeline normalization matrix"),
+            ("policy_surface", INTEGRATION_VCR_POLICY),
+            ("policy_surface", DIAGRAM_GOVERNANCE_POLICY),
+            ("script_surface", "scripts/engineering/dev/run_pytest.sh"),
+            ("script_surface", "scripts/diagrams/__main__.py"),
+            ("script_surface", "scripts/docs/__main__.py"),
+            ("script_surface", "scripts/schema/__main__.py"),
+            ("script_surface", SCRIPTS_MEMORY_MAIN_PATH),
+            ("script_surface", "scripts/engineering/qa/__main__.py"),
+            ("port_surface", "bioetl.domain.ports"),
+            ("port_surface", "bioetl.domain.ports.runtime.runner.RunnablePort"),
+            ("adapter_surface", CHEMBL_ADAPTER_SURFACE),
+            ("adapter_impl_surface", CHEMBL_ADAPTER_IMPL_SURFACE),
+            ("pipeline_surface", "chembl_activity"),
+            ("contract_surface", CONTRACT_CHEMBL_ACTIVITY),
+            ("alert_surface", "BioETLPipelineRunFailed"),
+            ("runtime_evidence_surface", "run_manifest"),
+            ("runtime_evidence_surface", "run_ledger"),
+            ("runtime_evidence_surface", "effective_config_artifact"),
+            ("runtime_evidence_surface", "lineage"),
+            ("control_plane_artifact_surface", ARTIFACT_RUN_MANIFEST),
+            ("control_plane_artifact_surface", ARTIFACT_EFFECTIVE_CONFIG),
+            ("control_plane_artifact_surface", ARTIFACT_LINEAGE),
+            ("workflow_surface", "tests"),
+            ("workflow_job_surface", JOB_GOVERNANCE_PREFLIGHT),
+            ("workflow_action_surface", ACTION_UPLOAD_ARTIFACT),
+            ("workflow_action_surface", "./.github/actions/setup-python-uv"),
+            ("workflow_artifact_surface", ARTIFACT_COVERAGE_DATA),
+            ("workflow_secret_surface", "GITHUB_TOKEN"),
+            ("cli_command_surface", CMD_BIOETL_RUN),
+            ("cli_command_surface", CMD_MEMORY_SYNC),
+            ("cli_command_surface", "scripts.docs verify"),
+            ("execution_path", EXEC_BIOETL_RUN),
+            ("execution_path", EXEC_DIAGRAMS_LINT),
+            ("execution_path", EXEC_DOCS_VERIFY),
+            ("execution_path", EXEC_SCHEMA_VALIDATE),
+            (
+                "execution_path",
+                "uv run python -m scripts.docs generate-pipeline-normalization-matrix --check",
+            ),
+            (
+                "execution_path",
+                f"python -m scripts.memory sync --report {LEGACY_REPORT_PATH}",
+            ),
+            (
+                "execution_path",
+                "python -m scripts.engineering.qa report-normalization-fallback-inventory --limit 20",
+            ),
+            ("quality_gate", QUALITY_GATE_DIAGRAMS),
+            (
+                "test_artifact",
+                "tests/unit/scripts/ops/neo4j_memory_sync/test_snapshot_topology.py",
+            ),
+        ),
+    )
     assert any(label == "retirement_candidate" for label, _ in node_keys)
     assert any(label == "complexity_candidate" for label, _ in node_keys)
-    assert ("provider_surface", "chembl") in node_keys
-    assert ("entity_config", "chembl_activity") in node_keys
-    assert ("composite_config", "composite_activity") in node_keys
-    assert ("storage_surface", SILVER_CHEMBL_ACTIVITY) in node_keys
-    assert ("storage_surface", SILVER_COMPOSITE_ACTIVITY) in node_keys
-    assert ("storage_surface", RUN_MANIFEST_STORAGE_PATH) in node_keys
-    assert ("storage_surface", EFFECTIVE_CONFIG_STORAGE_PATH) in node_keys
-    assert ("storage_surface", LINEAGE_FRAGMENT_STORAGE_PATH) in node_keys
-    assert ("dashboard_surface", "bioetl-overview-v2") in node_keys
-    assert ("doc_source_surface", ARCHITECTURE_DIAGRAMS_HUB) in node_keys
-    assert ("doc_source_surface", "diagram governance workflow") in node_keys
-    assert ("doc_source_surface", "normalization plan") in node_keys
-    assert ("doc_source_surface", "pipeline normalization matrix") in node_keys
-    assert ("policy_surface", INTEGRATION_VCR_POLICY) in node_keys
-    assert ("policy_surface", DIAGRAM_GOVERNANCE_POLICY) in node_keys
-    assert ("script_surface", "scripts/engineering/dev/run_pytest.sh") in node_keys
-    assert ("script_surface", "scripts/diagrams/__main__.py") in node_keys
-    assert ("script_surface", "scripts/docs/__main__.py") in node_keys
-    assert ("script_surface", "scripts/schema/__main__.py") in node_keys
-    assert ("script_surface", SCRIPTS_MEMORY_MAIN_PATH) in node_keys
-    assert ("script_surface", "scripts/engineering/qa/__main__.py") in node_keys
-    assert ("port_surface", "bioetl.domain.ports") in node_keys
-    assert (
-        "port_surface",
-        "bioetl.domain.ports.runtime.runner.RunnablePort",
-    ) in node_keys
-    assert ("adapter_surface", CHEMBL_ADAPTER_SURFACE) in node_keys
-    assert ("adapter_impl_surface", CHEMBL_ADAPTER_IMPL_SURFACE) in node_keys
-    assert ("pipeline_surface", "chembl_activity") in node_keys
-    assert ("contract_surface", CONTRACT_CHEMBL_ACTIVITY) in node_keys
-    assert ("alert_surface", "BioETLPipelineRunFailed") in node_keys
-    assert ("runtime_evidence_surface", "run_manifest") in node_keys
-    assert ("runtime_evidence_surface", "run_ledger") in node_keys
-    assert ("runtime_evidence_surface", "effective_config_artifact") in node_keys
-    assert ("runtime_evidence_surface", "lineage") in node_keys
-    assert ("control_plane_artifact_surface", ARTIFACT_RUN_MANIFEST) in node_keys
-    assert (
-        "control_plane_artifact_surface",
-        ARTIFACT_EFFECTIVE_CONFIG,
-    ) in node_keys
-    assert ("control_plane_artifact_surface", ARTIFACT_LINEAGE) in node_keys
-    assert ("run_instance_surface", "manifest-left") in node_keys
-    assert ("run_instance_surface", "manifest-chain-smoke") in node_keys
-    assert ("run_instance_surface", "manifest-chain-2") in node_keys
-    assert ("run_instance_surface", "manifest-composite-quarantine") in node_keys
-    assert ("runtime_state_surface", "manifest-left::active-window") in node_keys
-    assert ("runtime_state_surface", STATE_MANIFEST_CHAIN_2) in node_keys
-    assert ("runtime_state_surface", "chembl_activity::composite-lock") in node_keys
-    assert ("schema_field_surface", SILVER_CHEMBL_ACTIVITY_FIELD) in node_keys
-    assert ("schema_field_surface", "gold/chembl/assay::_version") in node_keys
-    assert ("schema_field_surface", SILVER_COMPOSITE_ACTIVITY_FIELD) in node_keys
-    assert ("workflow_surface", "tests") in node_keys
-    assert ("workflow_job_surface", JOB_GOVERNANCE_PREFLIGHT) in node_keys
     assert any(label == "workflow_call_surface" for label, _ in node_keys)
     assert any(label == "workflow_matrix_variant_surface" for label, _ in node_keys)
     assert any(label == "workflow_output_surface" for label, _ in node_keys)
-    assert ("workflow_action_surface", ACTION_UPLOAD_ARTIFACT) in node_keys
-    assert ("workflow_action_surface", "./.github/actions/setup-python-uv") in node_keys
-    assert (
-        "workflow_artifact_surface",
-        ARTIFACT_COVERAGE_DATA,
-    ) in node_keys
-    assert ("workflow_secret_surface", "GITHUB_TOKEN") in node_keys
-    assert ("cli_command_surface", CMD_BIOETL_RUN) in node_keys
-    assert ("cli_command_surface", CMD_MEMORY_SYNC) in node_keys
-    assert ("cli_command_surface", "scripts.docs verify") in node_keys
     assert any(label == "cli_option_surface" for label, _ in node_keys)
     assert any(label == "doc_claim_surface" for label, _ in node_keys)
-    assert ("execution_path", EXEC_BIOETL_RUN) in node_keys
-    assert ("execution_path", EXEC_DIAGRAMS_LINT) in node_keys
-    assert ("execution_path", EXEC_DOCS_VERIFY) in node_keys
-    assert (
-        "execution_path",
-        EXEC_SCHEMA_VALIDATE,
-    ) in node_keys
-    assert (
-        "execution_path",
-        "uv run python -m scripts.docs generate-pipeline-normalization-matrix --check",
-    ) in node_keys
-    assert (
-        "execution_path",
-        f"python -m scripts.memory sync --report {LEGACY_REPORT_PATH}",
-    ) in node_keys
-    assert (
-        "execution_path",
-        "python -m scripts.engineering.qa report-normalization-fallback-inventory --limit 20",
-    ) in node_keys
-    assert ("quality_gate", QUALITY_GATE_DIAGRAMS) in node_keys
     assert any(label == "duplication_cluster" for label, _ in node_keys)
-    assert (
-        "test_artifact",
-        "tests/unit/scripts/ops/neo4j_memory_sync/test_snapshot_topology.py",
-    ) in node_keys
-    assert ("package_family", "composition/__pycache__") not in node_keys
-    assert ("package_family", "infrastructure/__pycache__") not in node_keys
-    assert ("package_family", "interfaces/__pycache__") not in node_keys
-    assert ("directory_surface", "docs/99-archive") not in node_keys
-    assert ("directory_surface", "docs/reports/generated") not in node_keys
-    assert ("directory_surface", "scripts/archive") not in node_keys
-    assert (
-        "directory_surface",
-        "docs/02-architecture/diagrams/views/svg",
-    ) not in node_keys
-    assert ("package_family", "composition/control_plane_api.py") not in node_keys
-    assert ("package_family", "interfaces/test_cli_checkpoint_list.py") not in node_keys
     assert any(
         node.properties.get("current_cycle_status") == "current_cycle"
         for node in snapshot.nodes.values()
         if node.key.label
         in {"module_surface", "class_surface", "function_surface", "method_surface"}
+    )
+
+
+def _assert_storage_runtime_surfaces(node_keys: set[tuple[str, str]], snapshot: GraphSnapshot) -> None:
+    _assert_node_keys_present(
+        node_keys,
+        (
+            ("storage_surface", SILVER_CHEMBL_ACTIVITY),
+            ("storage_surface", SILVER_COMPOSITE_ACTIVITY),
+            ("storage_surface", RUN_MANIFEST_STORAGE_PATH),
+            ("storage_surface", EFFECTIVE_CONFIG_STORAGE_PATH),
+            ("storage_surface", LINEAGE_FRAGMENT_STORAGE_PATH),
+            ("run_instance_surface", "manifest-left"),
+            ("run_instance_surface", "manifest-chain-smoke"),
+            ("run_instance_surface", "manifest-chain-2"),
+            ("run_instance_surface", "manifest-composite-quarantine"),
+            ("runtime_state_surface", "manifest-left::active-window"),
+            ("runtime_state_surface", STATE_MANIFEST_CHAIN_2),
+            ("runtime_state_surface", "chembl_activity::composite-lock"),
+            ("schema_field_surface", SILVER_CHEMBL_ACTIVITY_FIELD),
+            ("schema_field_surface", "gold/chembl/assay::_version"),
+            ("schema_field_surface", SILVER_COMPOSITE_ACTIVITY_FIELD),
+        ),
     )
 
     silver_assay = snapshot.nodes[NodeKey("storage_surface", "silver/chembl/assay")]
@@ -214,6 +214,25 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
         == "excluded_from_exact_replay"
     )
 
+    retry_state = snapshot.nodes[
+        NodeKey("runtime_state_surface", STATE_MANIFEST_CHAIN_2)
+    ]
+    assert retry_state.properties["state_kind"] == "retry_state"
+    assert retry_state.properties["state_status"] == "retrying"
+    assert retry_state.properties["retry_count"] == 1
+
+    lock_state = snapshot.nodes[
+        NodeKey("runtime_state_surface", "chembl_activity::composite-lock")
+    ]
+    assert lock_state.properties["state_kind"] == "lock_state"
+    assert lock_state.properties["lock_scope"] == "cross_validation_quarantine"
+    assert lock_state.properties["lock_key"] == "composite:activity:cross_validation"
+
+
+def _assert_workflow_cli_and_doc_surfaces(
+    node_keys: set[tuple[str, str]],
+    snapshot: GraphSnapshot,
+) -> None:
     tests_workflow = snapshot.nodes[NodeKey("workflow_surface", "tests")]
     assert tests_workflow.properties["workflow_family"] == "test"
     assert "pull_request" in tests_workflow.properties["trigger_names"]
@@ -249,20 +268,23 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
         for relation in snapshot.relations.values()
     )
 
-    retry_state = snapshot.nodes[
-        NodeKey("runtime_state_surface", STATE_MANIFEST_CHAIN_2)
-    ]
-    assert retry_state.properties["state_kind"] == "retry_state"
-    assert retry_state.properties["state_status"] == "retrying"
-    assert retry_state.properties["retry_count"] == 1
+    _assert_node_keys_absent(
+        node_keys,
+        (
+            ("package_family", "composition/__pycache__"),
+            ("package_family", "infrastructure/__pycache__"),
+            ("package_family", "interfaces/__pycache__"),
+            ("directory_surface", "docs/99-archive"),
+            ("directory_surface", "docs/reports/generated"),
+            ("directory_surface", "scripts/archive"),
+            ("directory_surface", "docs/02-architecture/diagrams/views/svg"),
+            ("package_family", "composition/control_plane_api.py"),
+            ("package_family", "interfaces/test_cli_checkpoint_list.py"),
+        ),
+    )
 
-    lock_state = snapshot.nodes[
-        NodeKey("runtime_state_surface", "chembl_activity::composite-lock")
-    ]
-    assert lock_state.properties["state_kind"] == "lock_state"
-    assert lock_state.properties["lock_scope"] == "cross_validation_quarantine"
-    assert lock_state.properties["lock_key"] == "composite:activity:cross_validation"
 
+def _assert_schema_and_relation_surfaces(snapshot: GraphSnapshot) -> None:
     assay_version_field = snapshot.nodes[
         NodeKey("schema_field_surface", "gold/chembl/assay::_version")
     ]
@@ -300,4 +322,12 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert isinstance(docs_drift_relation.properties["section_title"], str)
     assert docs_drift_relation.properties["section_title"]
 
+
+def test_snapshot_contains_core_repo_surfaces() -> None:
+    _, snapshot = _snapshot()
+    node_keys = {(key.label, key.name) for key in snapshot.nodes}
+    _assert_core_node_surfaces(node_keys, snapshot)
+    _assert_storage_runtime_surfaces(node_keys, snapshot)
+    _assert_workflow_cli_and_doc_surfaces(node_keys, snapshot)
+    _assert_schema_and_relation_surfaces(snapshot)
 

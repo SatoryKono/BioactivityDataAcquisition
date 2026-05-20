@@ -440,6 +440,7 @@ class TestBatchWriterIOMixinGold:
             entity_type="ent",
             silver_schema=MagicMock(),
             gold_schema=MagicMock(),
+            gold_schema_policy_by_version=None,
         )
         writer = BatchWriter(
             storage=mock_storage,

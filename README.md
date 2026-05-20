@@ -92,12 +92,13 @@ The domain layer implements Domain-Driven Design patterns:
 | [CLI Reference](docs/04-reference/cli.md)                                   | Command-line interface documentation                                 |
 | [Run Manifest Contract](docs/04-reference/contracts/run-manifest-ledger.md) | Published control-plane manifest and ledger schema                   |
 | [Operations Runbooks](docs/05-operations/runbooks/)                         | Incident response and procedures                                     |
-| [Archive Index](docs/99-archive/README.md)                                  | Historical context only; not normative                               |
+| [Archive Index](docs/99-archive/README.md)                                  | Repository-path historical index; not published in MkDocs nav         |
 
 Start with [Project Map](docs/00-project/00-map.md), [RULES.md](docs/00-project/RULES.md),
 and [Tools Hub](docs/00-project/TOOLS.md) for current guidance. Materials under
-[`docs/99-archive/`](docs/99-archive/README.md) are preserved for traceability,
-but active docs in `docs/00-05` remain the source of truth.
+[`docs/99-archive/`](docs/99-archive/README.md) are preserved for traceability
+as repository-path historical context, but active docs in `docs/00-05` remain
+the source of truth.
 
 ## Repository Structure
 
@@ -266,7 +267,7 @@ uv sync --extra dev --extra tracing
    | `BIOETL_QUARANTINE_RETENTION_DAYS`         | Quarantine record retention (days)                          | `30`                      |
    | `BIOETL_QUARANTINE_PAYLOAD_MAX_SIZE`       | Max payload size (bytes)                                    | `65536`                   |
 
-   See [`.env.example`](configs/.env.example) for the full list with comments.
+   See [`.env.example`](.env.example) for the full list with comments.
 
 1. **Verify Installation**:
    Run tests to ensure everything works.

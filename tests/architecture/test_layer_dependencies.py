@@ -232,6 +232,44 @@ def _is_orphan_directory(
     return str(dir_path.relative_to(src_dir))
 
 
+def _orphan_directories_from_python_cache(
+    *,
+    bioetl_path: Path,
+    src_dir: Path,
+    source_content_cache: dict[Path, str],
+) -> list[str]:
+    """Return orphan package directories using the session Python-file cache."""
+    python_files_by_dir: dict[Path, list[Path]] = {}
+    for py_file in source_content_cache:
+        if bioetl_path not in py_file.parents:
+            continue
+        python_files_by_dir.setdefault(py_file.parent, []).append(py_file)
+
+    dirs_with_python_children = {
+        parent
+        for py_dir in python_files_by_dir
+        for parent in py_dir.parents
+        if parent != py_dir and bioetl_path in parent.parents
+    }
+    contentful_dirs = _mark_contentful_dirs(
+        bioetl_path=bioetl_path,
+        source_content_cache=source_content_cache,
+    )
+
+    orphan_dirs = []
+    for dir_path, py_files in sorted(python_files_by_dir.items()):
+        if dir_path in contentful_dirs or dir_path in dirs_with_python_children:
+            continue
+        init_file = dir_path / "__init__.py"
+        if py_files != [init_file]:
+            continue
+        init_content = source_content_cache.get(init_file, "").strip()
+        if init_content and ("__all__" in init_content or "import" in init_content):
+            continue
+        orphan_dirs.append(dir_path.relative_to(src_dir).as_posix())
+    return orphan_dirs
+
+
 BASE_EXCEPTION_CLASSES = {
     "BioETLError",
     "CriticalError",
@@ -700,32 +738,36 @@ def test_no_orphan_directories(
     bioetl_path = src_dir / "bioetl"
     assert bioetl_path.exists(), "bioetl source not found"
 
-    contentful_dirs = _mark_contentful_dirs(
+    orphan_dirs = _orphan_directories_from_python_cache(
         bioetl_path=bioetl_path,
+        src_dir=src_dir,
         source_content_cache=source_content_cache,
     )
-
-    orphan_dirs = []
-    for dir_path in bioetl_path.rglob("*"):
-        if not dir_path.is_dir():
-            continue
-
-        # Skip if this directory has content anywhere in its subtree
-        if dir_path in contentful_dirs:
-            continue
-
-        orphan_path = _is_orphan_directory(
-            dir_path=dir_path,
-            src_dir=src_dir,
-            source_content_cache=source_content_cache,
-        )
-        if orphan_path is not None:
-            orphan_dirs.append(orphan_path)
 
     assert not orphan_dirs, (
         f"Found {len(orphan_dirs)} orphan directory(s) with no real content:\n"
         + "\n".join(f"  - {d}" for d in orphan_dirs)
     )
+
+
+def test_orphan_directory_detection_uses_cached_python_inventory(tmp_path: Path) -> None:
+    """Synthetic regression guard for the cache-based orphan scan."""
+    src_dir = tmp_path / "src"
+    bioetl_path = src_dir / "bioetl"
+    source_content_cache = {
+        bioetl_path / "empty_pkg" / "__init__.py": "",
+        bioetl_path / "export_pkg" / "__init__.py": "__all__ = ['value']\n",
+        bioetl_path / "real_pkg" / "__init__.py": "",
+        bioetl_path / "real_pkg" / "module.py": "VALUE = 1\n",
+        bioetl_path / "parent_pkg" / "__init__.py": "",
+        bioetl_path / "parent_pkg" / "child" / "module.py": "VALUE = 1\n",
+    }
+
+    assert _orphan_directories_from_python_cache(
+        bioetl_path=bioetl_path,
+        src_dir=src_dir,
+        source_content_cache=source_content_cache,
+    ) == ["bioetl/empty_pkg"]
 
 
 @pytest.mark.slow

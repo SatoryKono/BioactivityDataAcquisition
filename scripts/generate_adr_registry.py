@@ -7,7 +7,6 @@ with metadata for the project navigator. Implements issue #3090.
 """
 
 import json
-import os
 import re
 import sys
 from dataclasses import dataclass, field
@@ -27,7 +26,8 @@ class ADRMetadata:
     file_path: str
 
     # Status information
-    status: str = "active"
+    status: str = "accepted"
+    source_status: str | None = None
     decision_date: str | None = None
     last_reviewed: str | None = None
 
@@ -46,7 +46,7 @@ class ADRMetadata:
     tags: list[str] = field(default_factory=list)
 
     # Ownership
-    owner: str = "architecture-team"
+    owner: str = "BioETL Team"
 
 
 class ADRRegistryGenerator:
@@ -56,7 +56,34 @@ class ADRRegistryGenerator:
         self.adr_dir = Path("docs/02-architecture/decisions")
         self.output_dir = Path("docs/02-architecture/adr-registry")
         self.navigator_registry_file = Path("docs/02-architecture/adr-registry.md")
+        self.adr_index_file = self.adr_dir / "README.md"
+        self.adr_index_metadata = self._load_adr_index_metadata()
         self.adrs = []
+
+    def _load_adr_index_metadata(self) -> dict[str, dict[str, str]]:
+        """Load title/category/date/status metadata from the live ADR index table."""
+
+        if not self.adr_index_file.exists():
+            return {}
+
+        pattern = re.compile(
+            r"\|\s*\[ADR-(\d+)\]\([^)]+\)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|"
+        )
+        metadata_by_number: dict[str, dict[str, str]] = {}
+        for line in self.adr_index_file.read_text(encoding="utf-8").splitlines():
+            match = pattern.match(line.strip())
+            if match is None:
+                continue
+            adr_number, title, status, category, decision_date = (
+                value.strip() for value in match.groups()
+            )
+            metadata_by_number[adr_number] = {
+                "title": title,
+                "status": status,
+                "category": category,
+                "decision_date": decision_date,
+            }
+        return metadata_by_number
 
     def find_adr_files(self) -> list[Path]:
         """Find all ADR files in the decisions directory."""
@@ -119,18 +146,58 @@ class ADRRegistryGenerator:
     def _normalized_registry_status(cls, raw_status: str | None) -> str:
         """Map explicit ADR statuses to registry buckets."""
         if not raw_status:
-            return "active"
+            return "accepted"
         base_status = raw_status.split("(", 1)[0].strip().lower()
         status_map = {
-            "accepted": "active",
-            "active": "active",
+            "accepted": "accepted",
+            "active": "accepted",
             "added": "draft",
             "draft": "draft",
             "deprecated": "deprecated",
             "superseded": "superseded",
             "archived": "archived",
         }
-        return status_map.get(base_status, base_status or "active")
+        return status_map.get(base_status, base_status or "accepted")
+
+    @staticmethod
+    def _normalize_metadata_value(value: str | None) -> str | None:
+        if value is None:
+            return None
+        normalized = str(value).strip().strip("\"'").strip()
+        if not normalized:
+            return None
+        if normalized.startswith("<") and normalized.endswith(">"):
+            return None
+        return normalized
+
+    def _extract_decision_date(self, content: str, front_matter: dict, index_metadata: dict) -> str | None:
+        candidates = (
+            front_matter.get("date"),
+            self._extract_inline_metadata_value(content, labels=("Date",)),
+            index_metadata.get("decision_date"),
+        )
+        for candidate in candidates:
+            normalized = self._normalize_metadata_value(candidate)
+            if normalized is not None:
+                return normalized
+
+        for line in content.splitlines():
+            if "|" not in line:
+                continue
+            lowered = line.lower()
+            if "**дата**" not in lowered and "**date**" not in lowered:
+                continue
+            for cell in (cell.strip().strip("`") for cell in line.split("|")):
+                if re.fullmatch(r"\d{4}-\d{2}-\d{2}", cell):
+                    return cell
+        return None
+
+    @staticmethod
+    def _parse_sortable_date(raw_date: str | None) -> tuple[int, str]:
+        normalized = ADRRegistryGenerator._normalize_metadata_value(raw_date)
+        if normalized is None or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", normalized):
+            return (0, "0000-00-00")
+        return (1, normalized)
 
     def extract_adr_sections(self, content: str) -> dict[str, str]:
         """Extract main sections from ADR content."""
@@ -191,19 +258,41 @@ class ADRRegistryGenerator:
                 relationship_ids.add(adr_id.upper())
         return sorted(relationship_ids)
 
-    def determine_adr_status(self, content: str, metadata: dict) -> str:
+    def determine_adr_status(
+        self,
+        content: str,
+        metadata: dict,
+        *,
+        relationships: dict[str, list[str]] | None = None,
+    ) -> str:
         """Determine the status of an ADR."""
 
         # Check metadata first
         if metadata.get("status"):
-            return self._normalized_registry_status(str(metadata["status"]))
+            normalized = self._normalized_registry_status(str(metadata["status"]))
+            if (
+                normalized == "accepted"
+                and relationships
+                and relationships.get("superseded_by")
+                and "partial" not in str(metadata["status"]).lower()
+            ):
+                return "superseded"
+            return normalized
 
         inline_status = self._extract_inline_metadata_value(
             content,
             labels=("Status",),
         )
         if inline_status:
-            return self._normalized_registry_status(inline_status)
+            normalized = self._normalized_registry_status(inline_status)
+            if (
+                normalized == "accepted"
+                and relationships
+                and relationships.get("superseded_by")
+                and "partial" not in inline_status.lower()
+            ):
+                return "superseded"
+            return normalized
 
         # Check for status indicators in content
         content_lower = content.lower()
@@ -217,7 +306,7 @@ class ADRRegistryGenerator:
         elif "draft" in content_lower:
             return "draft"
         else:
-            return "active"
+            return "accepted"
 
     def extract_adr_metadata(self, file_path: Path) -> ADRMetadata | None:
         """Extract complete metadata from an ADR file."""
@@ -230,22 +319,30 @@ class ADRRegistryGenerator:
             if not adr_number:
                 print(f"⚠️  Could not extract ADR number from {file_path}")
                 return None
+            index_metadata = self.adr_index_metadata.get(adr_number, {})
 
             # Parse front matter
             front_matter = self.parse_adr_front_matter(content)
-            decision_date = front_matter.get("date") or self._extract_inline_metadata_value(
+            decision_date = self._extract_decision_date(
                 content,
-                labels=("Date",),
+                front_matter,
+                index_metadata,
             )
-            last_reviewed = front_matter.get(
-                "last_reviewed"
-            ) or self._extract_inline_metadata_value(
-                content,
-                labels=("Last verified", "Last reviewed"),
+            last_reviewed = self._normalize_metadata_value(
+                front_matter.get("last_reviewed")
+            ) or self._normalize_metadata_value(
+                self._extract_inline_metadata_value(
+                    content,
+                    labels=("Last verified", "Last reviewed"),
+                )
             )
-            owner = front_matter.get("owner") or self._extract_inline_metadata_value(
-                content,
-                labels=("Owner",),
+            owner = self._normalize_metadata_value(
+                front_matter.get("owner")
+            ) or self._normalize_metadata_value(
+                self._extract_inline_metadata_value(
+                    content,
+                    labels=("Owner",),
+                )
             )
 
             # Extract sections
@@ -255,17 +352,29 @@ class ADRRegistryGenerator:
             relationships = self.extract_adr_relationships(content)
 
             # Determine status
-            status = self.determine_adr_status(content, front_matter)
+            source_status = self._normalize_metadata_value(
+                front_matter.get("status")
+            ) or self._normalize_metadata_value(
+                self._extract_inline_metadata_value(content, labels=("Status",))
+            ) or self._normalize_metadata_value(index_metadata.get("status"))
+            status = self.determine_adr_status(
+                content,
+                {
+                    **index_metadata,
+                    **front_matter,
+                },
+                relationships=relationships,
+            )
 
             # Create metadata object
             adr_metadata = ADRMetadata(
                 adr_number=adr_number,
-                title=front_matter.get(
-                    "title",
-                    file_path.stem.replace(f"ADR-{adr_number}-", "").replace("-", " "),
-                ),
+                title=front_matter.get("title")
+                or index_metadata.get("title")
+                or file_path.stem.replace(f"ADR-{adr_number}-", "").replace("-", " "),
                 file_path=str(file_path.relative_to(self.adr_dir)),
                 status=status,
+                source_status=source_status,
                 decision_date=decision_date,
                 last_reviewed=last_reviewed,
                 context=sections.get("context", ""),
@@ -274,9 +383,10 @@ class ADRRegistryGenerator:
                 supersedes=relationships.get("supersedes", []),
                 superseded_by=relationships.get("superseded_by", []),
                 related=relationships.get("related", []),
-                category=front_matter.get("category", "architecture"),
+                category=front_matter.get("category")
+                or index_metadata.get("category", "architecture"),
                 tags=front_matter.get("tags", []),
-                owner=owner or "architecture-team",
+                owner=owner or "BioETL Team",
             )
 
             return adr_metadata
@@ -365,9 +475,9 @@ class ADRRegistryGenerator:
         *,
         decision_link_prefix: str,
     ) -> None:
-        status_order = ["active", "draft", "deprecated", "superseded", "archived"]
+        status_order = ["accepted", "draft", "deprecated", "superseded", "archived"]
         status_icons = {
-            "active": "🟢",
+            "accepted": "🟢",
             "draft": "🟡",
             "deprecated": "🟠",
             "superseded": "🔵",
@@ -404,6 +514,9 @@ class ADRRegistryGenerator:
             f"**Owner**: `{adr.owner}`"
         )
         lines.append("")
+        if adr.source_status and adr.source_status.lower() != adr.status.lower():
+            lines.append(f"**Source status text**: `{adr.source_status}`")
+            lines.append("")
         relationships = self._format_relationships(adr)
         if relationships:
             lines.append(f"**Relationships**: {relationships}")
@@ -412,9 +525,7 @@ class ADRRegistryGenerator:
             lines.append(f"**Context**: {adr.context[:150]}...")
             lines.append("")
         doc_path = f"{decision_link_prefix}/{adr.file_path}"
-        lines.append(
-            f"[📄 View Full ADR]({doc_path}) | [🔗 Permalink](#adr-{adr.adr_number})"
-        )
+        lines.append(f"[📄 View Full ADR]({doc_path})")
         lines.append("")
         lines.append("---")
         lines.append("")
@@ -434,7 +545,7 @@ class ADRRegistryGenerator:
     def _append_registry_footer(lines: list[str]) -> None:
         lines.append("## 🎯 Using the ADR Registry")
         lines.append("")
-        lines.append("- **Active ADRs**: Currently applicable architectural decisions")
+        lines.append("- **Accepted ADRs**: Currently applicable architectural decisions")
         lines.append("- **Draft ADRs**: Proposed decisions under review")
         lines.append(
             "- **Deprecated ADRs**: No longer recommended but may still be in use"
@@ -446,7 +557,7 @@ class ADRRegistryGenerator:
         lines.append("")
         lines.append("```mermaid")
         lines.append("graph LR")
-        lines.append("    A[Draft] --> B[Active]")
+        lines.append("    A[Draft] --> B[Accepted]")
         lines.append("    B --> C[Deprecated]")
         lines.append("    B --> D[Superseded]")
         lines.append("    C --> E[Archived]")
@@ -511,27 +622,30 @@ class ADRRegistryGenerator:
         lines.append("Last 5 updated ADRs:")
         lines.append("")
 
-        # Sort by decision date (newest first)
+        # Sort by last-reviewed date first, then decision date.
         recent_adrs = sorted(
             self.adrs,
-            key=lambda x: x.decision_date if x.decision_date else "1970-01-01",
+            key=lambda x: max(
+                self._parse_sortable_date(x.last_reviewed),
+                self._parse_sortable_date(x.decision_date),
+            ),
             reverse=True,
         )[:5]
 
         for adr in recent_adrs:
-            date = adr.decision_date or "Unknown"
+            date = adr.last_reviewed or adr.decision_date or "Unknown"
             lines.append(f"- **ADR-{adr.adr_number}**: {adr.title} ({date})")
 
         lines.append("")
         lines.append("## 🎯 Health Metrics")
         lines.append("")
 
-        active_count = status_counts.get("active", 0)
+        active_count = status_counts.get("accepted", 0)
         total_count = len(self.adrs)
         active_percentage = (active_count / total_count * 100) if total_count > 0 else 0
 
         lines.append(
-            f"- **Active ADRs**: {active_count}/{total_count} ({active_percentage:.1f}%)"
+            f"- **Accepted ADRs**: {active_count}/{total_count} ({active_percentage:.1f}%)"
         )
         lines.append(
             f"- **Maintenance Ratio**: {active_count}:{total_count - active_count}"
@@ -563,6 +677,7 @@ class ADRRegistryGenerator:
                 "title": adr.title,
                 "file_path": adr.file_path,
                 "status": adr.status,
+                "source_status": adr.source_status,
                 "category": adr.category,
                 "owner": adr.owner,
                 "decision_date": adr.decision_date,
@@ -628,7 +743,7 @@ class ADRRegistryGenerator:
         json_registry = self.generate_json_registry()
         json_file = self.output_dir / "registry.json"
         with open(json_file, "w", encoding="utf-8") as f:
-            json.dump(json_registry, f, indent=2)
+            json.dump(json_registry, f, indent=2, ensure_ascii=False)
         print(f"✅ Written JSON registry: {json_file}")
 
         # Write README for the registry
@@ -673,7 +788,8 @@ The `registry.json` file provides machine-readable access to all ADR metadata:
     {
       "adr_number": "001",
       "title": "Decision Title",
-      "status": "active",
+      "status": "accepted",
+      "source_status": "Accepted",
       "category": "architecture",
       "owner": "architecture-team",
       "file_path": "ADR-001-decision-title.md",
@@ -683,7 +799,7 @@ The `registry.json` file provides machine-readable access to all ADR metadata:
     }
   ],
   "stats": {
-    "by_status": {"active": 40, "deprecated": 5, "archived": 5},
+    "by_status": {"accepted": 40, "deprecated": 5, "archived": 5},
     "by_category": {"architecture": 30, "data": 10, "infrastructure": 10}
   }
 }
@@ -693,7 +809,7 @@ The `registry.json` file provides machine-readable access to all ADR metadata:
 
 ```mermaid
 graph LR
-    A[Draft] --> B[Active]
+    A[Draft] --> B[Accepted]
     B --> C[Deprecated]
     B --> D[Superseded]
     C --> E[Archived]
@@ -702,7 +818,7 @@ graph LR
 
 ## Status Definitions
 
-- **🟢 Active**: Currently applicable architectural decision
+- **🟢 Accepted**: Currently applicable architectural decision
 - **🟡 Draft**: Proposed decision under review
 - **🟠 Deprecated**: No longer recommended but may still be in use
 - **🔵 Superseded**: Replaced by a newer decision

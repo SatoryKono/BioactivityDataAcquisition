@@ -140,6 +140,10 @@ _ALLOWED_RUNTIME_SEAMS: dict[tuple[str, str], str] = {
         "tests/unit/domain/normalization/profiles/test_publication_identifier_profiles.py",
         "yaml",
     ): "publication taxonomy fixture contract parses canonical identifier YAML",
+    (
+        "tests/unit/domain/mapping/test_organism_classification.py",
+        "path.open",
+    ): "organism classification contract reads checked-in target.csv coverage fixture",
 }
 
 

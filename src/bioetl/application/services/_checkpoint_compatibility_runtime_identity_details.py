@@ -9,9 +9,6 @@ from bioetl.domain.normalization import (
     compute_execution_identity_fingerprint,
     normalize_runtime_anchor_payload,
 )
-from bioetl.domain.normalization.legacy_fingerprints import (
-    compute_degraded_runtime_anchor_fingerprint,
-)
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.execution_phase import ExecutionPhase
 
@@ -145,7 +142,7 @@ def _degraded_runtime_anchor_detail(
         return ""
     if manifest_id is not None:
         raw_payload["manifest_id"] = manifest_id
-    return compute_degraded_runtime_anchor_fingerprint(
+    return compute_execution_identity_fingerprint(
         normalize_runtime_anchor_payload(raw_payload)
     )
 
