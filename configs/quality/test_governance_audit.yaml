@@ -438,13 +438,6 @@ compatibility_test_inventory:
       policy_ref: "#4209"
       review_date: "2026-09-30"
       rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/application/services/test_checkpoint_compatibility_service_v2.py
-      decision: retained_compatibility_contract
-      owner: test-governance
-      protected_surface: "unit/application/services/checkpoint compatibility service v2"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
     - path: tests/unit/composition/bootstrap/runtime/test_runtime_facade_compatibility.py
       decision: retained_public_facade_contract
       owner: test-governance

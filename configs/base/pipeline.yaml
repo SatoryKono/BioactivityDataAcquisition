@@ -2,7 +2,6 @@
 # Base Pipeline Configuration — consolidated defaults
 # =============================================================================
 # Preferred base path for pipeline defaults.
-# Legacy fallback remains: configs/pipelines/_base.yaml
 
 version: "1.2.0"
 technical_primary_key: "entity_id"

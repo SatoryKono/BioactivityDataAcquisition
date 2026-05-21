@@ -1,5 +1,10 @@
 # Docker в проекте BioETL - Быстрый старт
 
+Docker в BioETL остается optional local-only tooling surface. По
+`ADR-010` проект не требует Docker для базового development/test runtime; Docker
+compose файлы и helper-скрипты существуют только как добровольная локальная
+обвязка для отдельных стеков (`Neo4j`, monitoring, MCP).
+
 ## ✅ Что настроено
 
 - ✓ `.env.example` как шаблон переменных окружения; `.env` является local-only/secret-bearing файлом и не создается автоматически
@@ -122,7 +127,7 @@ docker system prune -a
 
 | Файл | Описание |
 |------|---------|
-| `.env` | Переменные окружения (создан автоматически) |
+| `.env` | Machine-local переменные окружения (создается только вручную или через явный opt-in helper flag) |
 | `docker-compose.yml` | Основной стек (Neo4j + BioETL) |
 | `docker-compose.monitoring.yml` | Мониторинг (Prometheus, Grafana, Loki, Tempo) |
 | `docker-compose.codex.yml` | MCP серверы для Codex |

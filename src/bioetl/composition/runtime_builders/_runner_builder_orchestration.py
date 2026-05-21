@@ -15,7 +15,7 @@ from bioetl.composition.runtime_builders._runner_builder_support import (
     validate_artifact_recorder_attachment as _validate_artifact_recorder_attachment,
 )
 from bioetl.composition.runtime_builders._runner_factory_compat import (
-    create_runner_from_factory as _create_runner_from_factory,
+    create_runtime_runner_from_factory as _create_runtime_runner_from_factory,
 )
 from bioetl.composition.runtime_builders.ledger_collaborator import (
     PipelineRunnerProtocol,
@@ -60,7 +60,7 @@ def create_runner(
     inputs: _RunnerInputs,
 ) -> PipelineRunnerProtocol:
     """Create the runtime runner from the registered factory seam."""
-    return _create_runner_from_factory(
+    return _create_runtime_runner_from_factory(
         factory=factory,
         ctx=ctx,
         inputs=inputs,

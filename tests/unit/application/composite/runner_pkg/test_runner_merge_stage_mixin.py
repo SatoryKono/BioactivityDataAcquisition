@@ -43,7 +43,11 @@ def _make_state(
 ) -> MagicMock:
     mock = MagicMock()
     mock.state = state
-    mock.with_state = MagicMock(return_value=mock)
+
+    def _with_state(new_state, **kwargs):
+        return _make_state(new_state)
+
+    mock.with_state = MagicMock(side_effect=_with_state)
     return mock
 
 
