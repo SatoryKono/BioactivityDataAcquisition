@@ -1,22 +1,22 @@
 ---
-id: mcp-setup
-title: Sync MCP runtime config
-task_id: mcp-setup
-created_at: '2026-05-21T06:14:59Z'
+id: probe-pre
+title: Probe pre
+task_id: probe-pre
+created_at: '2026-05-21T06:12:26Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - AGENTS.md
 summary: Active task session context.
-query: MCP ensure-mcp.sh codex mcp check
+query: mcp
 ---
 
 # Session note
 
 ## Task
 
-- Title: Sync MCP runtime config
-- Retrieval query: MCP ensure-mcp.sh codex mcp check
+- Title: Probe pre
+- Retrieval query: mcp
 
 ## Retrieved context
 

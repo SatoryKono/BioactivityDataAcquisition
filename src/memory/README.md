@@ -243,8 +243,11 @@ Current default stance:
 
 - `policy/`, `catalog/`, `schemas/`, and `curated/` are versioned
 - `episodic/` is ephemeral and prunable
-- `rag/manifests/`, `graph/exports/`, `graph/projections/`, `graph/indexes/`,
-  and `timeline/events/` are rebuild-only
+- generated RAG and timeline artifacts are rebuild-only; the workflow prefers
+  `derived/rag/manifests/` and `derived/timeline/events/` when present, with
+  compatibility fallback to the legacy `rag/manifests/` and `timeline/events/`
+  paths
+- `graph/exports/`, `graph/projections/`, and `graph/indexes/` are rebuild-only
 
 ## Notes workflow
 

@@ -11,6 +11,8 @@ import memory.query as query_module
 from memory.query import (
     RagQueryOptions,
     _emit,
+    default_rag_chunks_path,
+    default_timeline_dir,
     main,
     query_all,
     query_catalog,
@@ -30,6 +32,43 @@ def test_query_catalog_returns_sources_view() -> None:
     assert payload["kind"] == "catalog"
     assert payload["view"] == "sources"
     assert "sources" in payload["payload"]
+
+
+def test_default_generated_memory_paths_prefer_ready_derived_artifacts(
+    tmp_path: Path,
+) -> None:
+    memory_root = tmp_path / "src" / "memory"
+    derived_chunks = memory_root / "derived" / "rag" / "manifests" / "chunks.jsonl"
+    derived_chunks.parent.mkdir(parents=True, exist_ok=True)
+    derived_chunks.write_text('{"id":"chunk-1"}\n', encoding="utf-8")
+    derived_events = memory_root / "derived" / "timeline" / "events"
+    derived_events.mkdir(parents=True, exist_ok=True)
+    (derived_events / "runs.jsonl").write_text('{"id":"run-1"}\n', encoding="utf-8")
+
+    legacy_chunks = memory_root / "rag" / "manifests" / "chunks.jsonl"
+    legacy_chunks.parent.mkdir(parents=True, exist_ok=True)
+    legacy_chunks.write_text('{"id":"legacy"}\n', encoding="utf-8")
+    legacy_events = memory_root / "timeline" / "events"
+    legacy_events.mkdir(parents=True, exist_ok=True)
+    (legacy_events / "runs.jsonl").write_text('{"id":"legacy-run"}\n', encoding="utf-8")
+
+    assert default_rag_chunks_path(memory_root) == derived_chunks
+    assert default_timeline_dir(memory_root) == derived_events
+
+
+def test_default_generated_memory_paths_fallback_to_legacy_artifacts(
+    tmp_path: Path,
+) -> None:
+    memory_root = tmp_path / "src" / "memory"
+    legacy_chunks = memory_root / "rag" / "manifests" / "chunks.jsonl"
+    legacy_chunks.parent.mkdir(parents=True, exist_ok=True)
+    legacy_chunks.write_text('{"id":"legacy"}\n', encoding="utf-8")
+    legacy_events = memory_root / "timeline" / "events"
+    legacy_events.mkdir(parents=True, exist_ok=True)
+    (legacy_events / "runs.jsonl").write_text('{"id":"legacy-run"}\n', encoding="utf-8")
+
+    assert default_rag_chunks_path(memory_root) == legacy_chunks
+    assert default_timeline_dir(memory_root) == legacy_events
 
 
 def test_emit_returns_nonzero_for_failed_payload(capsys) -> None:

@@ -6,7 +6,7 @@ import argparse
 import json
 import sys
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -39,12 +39,20 @@ from memory.graph.importers.expanded_json import (
 )
 from memory.rag.retrieval import TASK_PROFILES, load_chunk_manifest, rank_chunks
 from memory.rag.filters import WORKFLOW_RAG_MAX_SOURCES
-from memory.resources import CATALOG_DIR, MEMORY_ROOT, POLICY_DIR, load_yaml_resource
+from memory.resources import (
+    CATALOG_DIR,
+    MEMORY_ROOT,
+    POLICY_DIR,
+    discover_memory_root,
+    load_yaml_resource,
+)
 from memory.timeline._common import read_jsonl
 from memory.tooling.refresh_all import refresh_all
 
-DEFAULT_RAG_CHUNKS = MEMORY_ROOT / "rag" / "manifests" / "chunks.jsonl"
-DEFAULT_TIMELINE_DIR = MEMORY_ROOT / "timeline" / "events"
+LEGACY_RAG_CHUNKS = MEMORY_ROOT / "rag" / "manifests" / "chunks.jsonl"
+DERIVED_RAG_CHUNKS = MEMORY_ROOT / "derived" / "rag" / "manifests" / "chunks.jsonl"
+LEGACY_TIMELINE_DIR = MEMORY_ROOT / "timeline" / "events"
+DERIVED_TIMELINE_DIR = MEMORY_ROOT / "derived" / "timeline" / "events"
 DEFAULT_FILE_RELATION_INDEX = MEMORY_ROOT / "graph" / "indexes" / "file_relations.json"
 DEFAULT_MODULE_RELATION_INDEX = (
     MEMORY_ROOT / "graph" / "indexes" / "module_relations.json"
@@ -75,6 +83,44 @@ _TIMELINE_PROFILE_BONUS: dict[str, dict[str, int]] = {
 }
 
 
+def _resolve_memory_root(memory_root: Path | None = None) -> Path:
+    if memory_root is not None:
+        return memory_root
+    return discover_memory_root()
+
+
+def default_rag_chunks_path(memory_root: Path | None = None) -> Path:
+    """Prefer ready derived RAG artifacts, with legacy fallback for compatibility."""
+    resolved_root = _resolve_memory_root(memory_root)
+    derived_path = resolved_root / "derived" / "rag" / "manifests" / "chunks.jsonl"
+    legacy_path = resolved_root / "rag" / "manifests" / "chunks.jsonl"
+    if rag_chunks_ready(derived_path):
+        return derived_path
+    if rag_chunks_ready(legacy_path):
+        return legacy_path
+    if derived_path.parent.exists():
+        return derived_path
+    return legacy_path
+
+
+def default_timeline_dir(memory_root: Path | None = None) -> Path:
+    """Prefer ready derived timeline artifacts, with legacy fallback for compatibility."""
+    resolved_root = _resolve_memory_root(memory_root)
+    derived_dir = resolved_root / "derived" / "timeline" / "events"
+    legacy_dir = resolved_root / "timeline" / "events"
+    if timeline_events_ready(derived_dir):
+        return derived_dir
+    if timeline_events_ready(legacy_dir):
+        return legacy_dir
+    if derived_dir.exists() or derived_dir.parent.exists():
+        return derived_dir
+    return legacy_dir
+
+
+DEFAULT_RAG_CHUNKS = default_rag_chunks_path()
+DEFAULT_TIMELINE_DIR = default_timeline_dir()
+
+
 @dataclass(frozen=True)
 class RagQueryOptions:
     """Inputs for deterministic local RAG chunk retrieval."""
@@ -84,7 +130,7 @@ class RagQueryOptions:
     domain: str | None = None
     repo_zone: str | None = None
     symbol_kind: str | None = None
-    chunks_path: Path = DEFAULT_RAG_CHUNKS
+    chunks_path: Path = field(default_factory=default_rag_chunks_path)
     limit: int = 20
     profile: str = DEFAULT_PROFILE
     auto_refresh: bool = False

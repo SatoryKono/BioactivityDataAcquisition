@@ -229,5 +229,8 @@ Do not promote:
 
 - `src/memory/episodic/` is short-lived and subject to pruning.
 - `src/memory/curated/` is durable and versioned.
-- `rag/manifests/`, `timeline/events/`, and `graph/exports/` are rebuild-only.
+- Generated RAG and timeline artifacts are rebuild-only. The workflow prefers
+  `derived/rag/manifests/` and `derived/timeline/events/` when present, with
+  fallback to the legacy `rag/manifests/` and `timeline/events/` paths.
+- `graph/exports/` is rebuild-only.
 - If memory and runtime source disagree, runtime source wins.
