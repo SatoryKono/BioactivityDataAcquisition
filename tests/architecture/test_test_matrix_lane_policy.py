@@ -88,6 +88,7 @@ class TestCanonicalTestLanes:
     EXPECTED_LANES = {
         "smoke",
         "unit-fast",
+        "repo-backed-unit",
         "unit-parallel-safe",
         "integration-replay",
         "security",
@@ -187,12 +188,17 @@ class TestCanonicalTestLanes:
         assert lanes["smoke"]["marker_expression"] == "not benchmark and not memory"
         assert (
             lanes["unit-fast"]["marker_expression"]
-            == "not slow and not benchmark and not memory"
+            == "not repo_backed and not slow and not benchmark and not memory"
         )
+        assert (
+            lanes["repo-backed-unit"]["marker_expression"]
+            == "repo_backed and not slow and not benchmark and not memory"
+        )
+        assert lanes["repo-backed-unit"]["paths"] == ["tests/unit/"]
         assert lanes["unit-parallel-safe"]["runner_backend"] == "run_pytest_sharded"
         assert (
             lanes["unit-parallel-safe"]["marker_expression"]
-            == "not slow and not serial and not benchmark and not memory"
+            == "not repo_backed and not slow and not serial and not benchmark and not memory"
         )
         assert lanes["unit-parallel-safe"]["paths"] == ["tests/unit/"]
         assert "S1-domain-core" in lanes["unit-parallel-safe"]["runner_options"]

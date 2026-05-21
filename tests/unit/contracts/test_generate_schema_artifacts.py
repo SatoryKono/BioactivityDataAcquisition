@@ -7,6 +7,10 @@ from pathlib import Path
 import sys
 from types import ModuleType
 
+import pytest
+
+pytestmark = pytest.mark.repo_backed
+
 
 def _load_module() -> ModuleType:
     """Load the schema artifact generator script as a testable module."""

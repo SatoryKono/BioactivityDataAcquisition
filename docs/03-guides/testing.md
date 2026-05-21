@@ -35,10 +35,13 @@ Canonical named pytest lanes are defined in
 must use these `suite_name` values for comparable local and CI runs:
 
 - `smoke`: minimal dependency/import smoke lane;
-- `unit-fast`: `tests/unit/`, excluding `slow`, `benchmark`, and `memory`;
+- `unit-fast`: `tests/unit/`, excluding `repo_backed`, `slow`, `benchmark`,
+  and `memory`;
+- `repo-backed-unit`: `tests/unit/` repo-file-backed contract checks that are
+  explicitly isolated from `unit-fast`;
 - `unit-parallel-safe`: deterministic unit/domain/application slice routed
   through the maintained shard inventory and excluding `slow`, `serial`,
-  `benchmark`, and `memory`;
+  `benchmark`, `repo_backed`, and `memory`;
 - `integration-replay`: `tests/integration/` in VCR replay-only mode;
 - `security`: dedicated security and secret-hygiene lane;
 - `contracts`: schema, contract, and snapshot tests;
@@ -116,6 +119,11 @@ python -m scripts.engineering.qa.report_test_governance_audit --check
 failed or timed-out `git status`, unresolved git-lfs pointer files under
 `tests/fixtures/vcr/`, missing telemetry baseline, or a telemetry baseline
 without `Actual coverage:` as blockers for main-branch audit claims.
+When `git-lfs` is missing, the preflight skips repository-status porcelain so
+the primary blocker remains the actionable `missing_git_lfs` diagnosis instead
+of an opaque `git-lfs filter-process` failure or a timeout in a partially
+hydrated checkout. Normal project Git commands still require `git-lfs` to be
+installed in the active shell.
 `report_test_governance_audit --check` enforces the current ratcheting
 budgets for assert-less candidates, duplicate test names, compatibility/legacy
 surface, marker/path drift, and deterministic-time/UUID call sites tracked in
@@ -239,7 +247,7 @@ Supported policy slice for issue `#2598`:
   workflow-tree, and checked-in config-file scenarios не должны жить в
   `tests/unit/`, если они не перечислены явно в
   `configs/quality/test_governance_audit.yaml` как repo-backed contract
-  exceptions.
+  exceptions and marked with `pytest.mark.repo_backed`.
 - Локальный `tmp_path`/tempdir I/O допустим только для изолированных
   filesystem/serialization seams и не должен зависеть от checked-in repo tree.
 - Memory-marked MCP/Neo4j smoke tests and file-backed workflow smokes не

@@ -65,18 +65,24 @@ Trigger for future redesign:
 - only if router dispatch, repo path loading, or root-governance helpers are
   consolidated into a different canonical shared module layout
 
-### 4. Direct compatibility entries (`2`)
+### 4. Direct compatibility entries (`1 active, 1 retired`)
 
-- `scripts/ai/vibe/__main__.py`
 - `scripts/memory/mcp_smoke.py`
 
-These remain retained only as compatibility surfaces while canonical runtime
-behavior lives elsewhere.
+`scripts/memory/mcp_smoke.py` remains retained only as a compatibility surface
+while canonical runtime behavior lives elsewhere.
+
+Retired on 2026-05-21:
+
+- `scripts/ai/vibe/__main__.py`
+
+The Vibe direct module shim was removed after the in-repository caller audit
+found no active `python -m scripts.ai.vibe` callers. The canonical public
+surface is `python -m scripts.ai vibe`; `scripts/ai/__main__.py` now dispatches
+that surface directly to the Vibe launchers/helpers.
 
 Trigger for future deletion:
 
-- caller audit proving no direct `python -m scripts.ai.vibe` usage remains, plus
-  one compatibility window
 - removal of historical import/test references to `scripts.memory.mcp_smoke`
 
 ## Caller-Audit Refresh

@@ -20,6 +20,7 @@ import pytest
 
 # Skip entire module if syrupy is not installed
 pytest.importorskip("syrupy", reason="syrupy package required for snapshot tests")
+pytestmark = pytest.mark.repo_backed
 
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer

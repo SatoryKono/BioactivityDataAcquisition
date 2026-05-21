@@ -46,6 +46,7 @@ def test_tracked_twin_family_ratchet_matches_live_census() -> None:
     }
 
     inventory = _load_yaml(TWIN_RATCHET)
+    assert inventory.get("linked_issue") == "#4452"
     families = inventory.get("families")
     assert isinstance(families, list)
     assert set(live_rows) == {
@@ -70,6 +71,7 @@ def test_infrastructure_config_root_facade_inventory_matches_live_src_importers(
 ):
     """The retained infrastructure.config root-facade inventory must stay allowlisted."""
     inventory = _load_yaml(CONFIG_ROOT_FACADE)
+    assert inventory.get("linked_issue") == "#4453"
     target_module = inventory.get("target_module")
     assert isinstance(target_module, str)
     symbol_rows = inventory.get("symbols")

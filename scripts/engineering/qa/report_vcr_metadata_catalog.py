@@ -21,6 +21,7 @@ class CassetteCatalogRow:
     """Single cassette inventory row for the canonical metadata catalog."""
 
     provider: str
+    scenario_stem: str
     cassette_rel_path: str
     cassette_extension: str
     has_metadata_sidecar: bool
@@ -112,6 +113,7 @@ def iter_catalog_rows(vcr_root: Path) -> list[CassetteCatalogRow]:
         rows.append(
             CassetteCatalogRow(
                 provider=provider,
+                scenario_stem=cassette_path.stem,
                 cassette_rel_path=rel_path,
                 cassette_extension=cassette_path.suffix.lower(),
                 has_metadata_sidecar=metadata_path.exists(),
@@ -129,6 +131,15 @@ def build_catalog(vcr_root: Path) -> dict[str, object]:
     """Build the canonical JSON catalog payload."""
     rows = iter_catalog_rows(vcr_root)
     provider_summary: dict[str, ProviderCatalogSummary] = {}
+    paths_by_stem: dict[str, list[str]] = {}
+    expected_metadata_paths = {
+        row.metadata_rel_path for row in rows if row.metadata_rel_path is not None
+    }
+    actual_metadata_paths = {
+        path.as_posix()
+        for path in vcr_root.rglob("*")
+        if path.is_file() and path.name.endswith(("_meta.yaml", "_meta.yml"))
+    }
 
     for row in rows:
         summary = provider_summary.setdefault(row.provider, ProviderCatalogSummary())
@@ -137,6 +148,7 @@ def build_catalog(vcr_root: Path) -> dict[str, object]:
             summary.metadata_sidecar_count += 1
         else:
             summary.without_metadata_count += 1
+        paths_by_stem.setdefault(row.scenario_stem, []).append(row.cassette_rel_path)
 
     for summary in provider_summary.values():
         cassette_count = summary.cassette_count
@@ -147,6 +159,11 @@ def build_catalog(vcr_root: Path) -> dict[str, object]:
             else 0.0
         )
         summary.metadata_coverage_percent = coverage_percent
+    duplicate_scenario_stems = {
+        stem: sorted(paths)
+        for stem, paths in sorted(paths_by_stem.items())
+        if len(paths) > 1
+    }
 
     return {
         "schema_version": CATALOG_SCHEMA_VERSION,
@@ -158,6 +175,13 @@ def build_catalog(vcr_root: Path) -> dict[str, object]:
                 1 for row in rows if row.has_metadata_sidecar
             ),
             "provider_count": len(provider_summary),
+            "duplicate_scenario_stem_count": len(duplicate_scenario_stems),
+        },
+        "pruning": {
+            "duplicate_scenario_stems": duplicate_scenario_stems,
+            "orphan_metadata_sidecar_count": len(
+                actual_metadata_paths - expected_metadata_paths
+            ),
         },
         "providers": {
             provider: asdict(summary)

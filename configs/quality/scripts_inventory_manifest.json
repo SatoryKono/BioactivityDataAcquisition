@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-21T15:26:28.496552+00:00",
+  "generated_at": "2026-05-21T17:18:03.438872+00:00",
   "summary": {
-    "total_scripts": 396,
+    "total_scripts": 395,
     "status_counts": {
-      "active": 357,
-      "supporting": 39
+      "active": 358,
+      "supporting": 37
     },
     "reference_group_coverage": {
       "agents": 4,
@@ -14,7 +14,7 @@
       "docs": 150,
       "scripts": 315,
       "skills": 8,
-      "tests": 155
+      "tests": 158
     }
   },
   "scripts": [
@@ -23,7 +23,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 15,
       "references": [
         {
           "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
@@ -63,13 +63,13 @@
         },
         {
           "path": "scripts/ai/vibe/README.md",
-          "line": 15,
+          "line": 14,
           "source_group": "scripts",
           "text": "python -m scripts.ai vibe --help"
         },
         {
           "path": "scripts/ai/vibe/README.md",
-          "line": 16,
+          "line": 15,
           "source_group": "scripts",
           "text": "python -m scripts.ai vibe check"
         }
@@ -2633,14 +2633,6 @@
       ]
     },
     {
-      "path": "scripts/ai/vibe/__main__.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
       "path": "scripts/ai/vibe/helper/check-env.ps1",
       "type": "ps1",
       "status": "active",
@@ -2684,10 +2676,10 @@
       "reference_count": 2,
       "references": [
         {
-          "path": "scripts/ai/vibe/__main__.py",
-          "line": 38,
+          "path": "scripts/ai/__main__.py",
+          "line": 64,
           "source_group": "scripts",
-          "text": "target = vibe_helper_dir / \"setup-env.ps1\""
+          "text": "str(helper_dir / \"setup-env.ps1\"),"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
@@ -2747,7 +2739,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
@@ -2804,7 +2796,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
@@ -3638,13 +3630,13 @@
         },
         {
           "path": "tests/unit/scripts/diagrams/test_write_path_security.py",
-          "line": 34,
+          "line": 36,
           "source_group": "tests",
           "text": "_repo_root() / \"scripts\" / \"diagrams\" / \"fix_pagebreaks_in_bundles.py\","
         },
         {
           "path": "tests/unit/scripts/diagrams/test_write_path_security.py",
-          "line": 49,
+          "line": 51,
           "source_group": "tests",
           "text": "_repo_root() / \"scripts\" / \"diagrams\" / \"fix_pagebreaks_in_bundles.py\","
         }
@@ -4595,7 +4587,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 143,
+      "reference_count": 144,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -4650,10 +4642,17 @@
     {
       "path": "scripts/docs/_compat_shim.py",
       "type": "py",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 47,
+          "source_group": "tests",
+          "text": "\"scripts/docs/_compat_shim.py\","
+        }
+      ]
     },
     {
       "path": "scripts/docs/build/mkdocs_build.py",
@@ -4811,7 +4810,7 @@
         },
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 10,
+          "line": 11,
           "source_group": "tests",
           "text": "\"scripts/docs/check_docstring_coverage.py\","
         }
@@ -4993,7 +4992,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 11,
+          "line": 12,
           "source_group": "tests",
           "text": "\"scripts/docs/chembl_matrix_structural_contract.py\","
         }
@@ -5053,7 +5052,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 12,
+          "line": 13,
           "source_group": "tests",
           "text": "\"scripts/docs/enrich_chembl_matrix_normalization_details.py\","
         }
@@ -5068,7 +5067,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 13,
+          "line": 14,
           "source_group": "tests",
           "text": "\"scripts/docs/export_chembl_matrix_structural_contract.py\","
         }
@@ -5083,7 +5082,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 14,
+          "line": 15,
           "source_group": "tests",
           "text": "\"scripts/docs/filter_chembl_matrix_rows.py\","
         }
@@ -5098,7 +5097,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 15,
+          "line": 16,
           "source_group": "tests",
           "text": "\"scripts/docs/fix_doc_links_auto.py\","
         }
@@ -5113,7 +5112,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 16,
+          "line": 17,
           "source_group": "tests",
           "text": "\"scripts/docs/fix_doc_links_explicit.py\","
         }
@@ -5128,7 +5127,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 17,
+          "line": 18,
           "source_group": "tests",
           "text": "\"scripts/docs/fix_link_warnings.py\","
         }
@@ -5248,7 +5247,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 18,
+          "line": 19,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_chembl_activity_field_matrix.py\","
         }
@@ -5263,7 +5262,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 19,
+          "line": 20,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_chembl_matrix_dictionaries.py\","
         }
@@ -5314,13 +5313,13 @@
         },
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 20,
+          "line": 21,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_pipeline_normalization_field_matrix.py\","
         },
         {
           "path": "tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py",
-          "line": 372,
+          "line": 374,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_pipeline_normalization_field_matrix.py\""
         }
@@ -5606,7 +5605,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 21,
+          "line": 22,
           "source_group": "tests",
           "text": "\"scripts/docs/normalize_chembl_matrix_workbook.py\","
         }
@@ -5627,7 +5626,7 @@
         },
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 22,
+          "line": 23,
           "source_group": "tests",
           "text": "\"scripts/docs/report_docs_kpi.py\","
         }
@@ -5642,7 +5641,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 23,
+          "line": 24,
           "source_group": "tests",
           "text": "\"scripts/docs/sentence_doc_audit.py\","
         }
@@ -5657,7 +5656,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 24,
+          "line": 25,
           "source_group": "tests",
           "text": "\"scripts/docs/sync_chembl_matrix_structural_policy.py\","
         }
@@ -5672,7 +5671,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 25,
+          "line": 26,
           "source_group": "tests",
           "text": "\"scripts/docs/sync_repo_identity.py\","
         }
@@ -5687,7 +5686,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 26,
+          "line": 27,
           "source_group": "tests",
           "text": "\"scripts/docs/verify_docs.py\","
         }
@@ -7091,25 +7090,25 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 63,
+          "line": 66,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 76,
+          "line": 79,
           "source_group": "docs",
           "text": "ignore/deselect inventory for `run_pytest_sharded.sh` lives in"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 542,
+          "line": 550,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 633,
+          "line": 641,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
@@ -9105,13 +9104,13 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 27,
+          "line": 28,
           "source_group": "tests",
           "text": "assert committed[\"generated_by\"].endswith(\"report_module_coverage_inventory.py\")"
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 91,
+          "line": 119,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }
@@ -9266,7 +9265,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 201,
+          "line": 209,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -9581,7 +9580,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 575,
+          "line": 583,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         },
@@ -9644,7 +9643,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 576,
+          "line": 584,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -9671,7 +9670,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 199,
+          "line": 207,
           "source_group": "docs",
           "text": "- `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`"
         },
@@ -11363,7 +11362,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 159,
+          "line": 167,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
         },
@@ -11615,7 +11614,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 201,
+          "line": 209,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -12319,7 +12318,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 71,
+      "reference_count": 72,
       "references": [
         {
           "path": ".github/workflows/quality-debt-weekly.yml",
@@ -12728,7 +12727,7 @@
         },
         {
           "path": "tests/unit/contracts/test_generate_schema_artifacts.py",
-          "line": 17,
+          "line": 21,
           "source_group": "tests",
           "text": "/ \"generate_schema_artifacts.py\""
         }
@@ -13043,7 +13042,7 @@
         },
         {
           "path": "tests/unit/scripts/test_apply_entity_naming_rename_plan.py",
-          "line": 16,
+          "line": 18,
           "source_group": "tests",
           "text": "module_path = repo_root / \"src\" / \"tools\" / \"apply_entity_naming_rename_plan.py\""
         }

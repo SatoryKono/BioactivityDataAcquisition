@@ -1371,6 +1371,44 @@ def test_diff_classifies_occurrence_only_replay_runs() -> None:
     assert result.cross_surface_replay_diff["checkpoint_anchors"]["compatible"] is True
 
 
+def test_diff_keeps_legacy_config_hash_outside_semantic_replay_identity() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    created_at = datetime(2025, 1, 1, tzinfo=UTC)
+    shared_fingerprint = "fingerprint-config-hash-compat"
+    left = _make_manifest(
+        manifest_id="manifest-left",
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000221")),
+        execution_fingerprint=shared_fingerprint,
+        created_at=created_at,
+        config_hash="a" * 64,
+    )
+    right = _make_manifest(
+        manifest_id="manifest-right",
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000222")),
+        execution_fingerprint=shared_fingerprint,
+        created_at=created_at,
+        config_hash="f" * 64,
+    )
+    manifest_store.save(left)
+    manifest_store.save(right)
+    service = RunManifestInspectionService(manifest_port=manifest_store)
+
+    result = service.diff("manifest-left", "manifest-right")
+
+    assert result.classification == "semantic_equivalent_with_noncanonical_differences"
+    assert result.semantic_equivalent is True
+    assert result.occurrence_only is False
+    assert result.occurrence_difference_fields == ("manifest_id", "run_id")
+    assert result.semantic_difference_fields == ()
+    assert result.noncanonical_difference_fields == ("code_provenance",)
+    assert result.cross_surface_replay_diff["verdict"] == "semantic_equivalent_replay"
+    assert (
+        result.cross_surface_replay_diff["effective_config"]["semantic_equivalent"]
+        is True
+    )
+    assert result.cross_surface_replay_diff["checkpoint_anchors"]["compatible"] is True
+
+
 def test_diff_classifies_semantic_equivalent_noncanonical_differences() -> None:
     manifest_store = _InMemoryRunManifestStore()
     created_at = datetime(2025, 1, 1, tzinfo=UTC)
@@ -1579,6 +1617,7 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
             pipeline_version="1.0.0",
             git_commit="abc1234",
             source_revision_state="clean",
+            dependency_lock_hash="sha256:deps-chain-1",
             config_hash=artifact.resolved_config_hash,
             resolved_config_hash=artifact.resolved_config_hash,
             effective_config_hash=artifact.effective_config_hash,
@@ -1670,6 +1709,7 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
             pipeline_version="1.0.0",
             git_commit="abc1234",
             source_revision_state="clean",
+            dependency_lock_hash="sha256:deps-chain-smoke",
             config_hash="a" * 64,
             resolved_config_hash="b" * 64,
             effective_config_hash="c" * 64,
@@ -1823,6 +1863,7 @@ def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
             pipeline_version="1.0.0",
             git_commit="abc1234",
             source_revision_state="clean",
+            dependency_lock_hash="sha256:deps-chain-2",
             config_hash=artifact.resolved_config_hash,
             resolved_config_hash=artifact.resolved_config_hash,
             effective_config_hash=artifact.effective_config_hash,

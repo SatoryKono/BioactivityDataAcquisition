@@ -9,6 +9,8 @@ from pathlib import Path
 
 import yaml
 
+from scripts.engineering.qa.report_dead_code_inventory import build_dead_code_inventory
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 TRIAGE_PATH = PROJECT_ROOT / "configs/quality/retirement_candidate_triage.yaml"
 SCORECARD_PATH = PROJECT_ROOT / "configs/quality/debt_scorecard.yaml"
@@ -86,6 +88,15 @@ def test_retirement_triage_entries_are_explicit_and_actionable() -> None:
     policy = triage.get("policy", {})
     assert isinstance(policy, dict)
     assert policy.get("review_cycle_days") == 90
+    zero_import_review = triage.get("repo_wide_zero_import_review", {})
+    assert isinstance(zero_import_review, dict)
+    assert zero_import_review.get("linked_issue") == "#4451"
+    assert zero_import_review.get("mode") == "fail-fast-no-growth"
+    assert isinstance(zero_import_review.get("inventory_command"), str)
+    assert "report_dead_code_inventory" in zero_import_review["inventory_command"]
+    assert isinstance(
+        zero_import_review.get("max_untriaged_zero_import_candidates"), int
+    )
 
     families = triage.get("families", [])
     assert isinstance(families, list) and families
@@ -206,3 +217,24 @@ def test_neo4j_memory_calibration_candidates_match_triage_decisions() -> None:
                 f"{module_path} is calibrated as {expected_disposition} but triage marks it "
                 f"as {triage_entry.get('disposition')}."
             )
+
+
+def test_repo_wide_zero_import_candidate_count_does_not_grow() -> None:
+    """Repo-wide zero-import candidates must stay under the reviewed debt budget."""
+    triage = _load_triage()
+    zero_import_review = triage["repo_wide_zero_import_review"]
+    assert isinstance(zero_import_review, dict)
+    budget = zero_import_review["max_untriaged_zero_import_candidates"]
+    assert isinstance(budget, int)
+
+    inventory = build_dead_code_inventory(PROJECT_ROOT)
+    summary = inventory["summary"]
+    assert isinstance(summary, dict)
+    actual = summary["repo_wide_zero_import_candidate_count"]
+    assert isinstance(actual, int)
+
+    assert actual <= budget, (
+        f"Repo-wide zero-import candidate count grew to {actual}, above the "
+        f"reviewed budget {budget}. Remove candidates or refresh "
+        "retirement_candidate_triage.yaml intentionally."
+    )

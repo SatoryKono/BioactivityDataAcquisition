@@ -9,6 +9,15 @@ import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SCORECARD_PATH = PROJECT_ROOT / "configs/quality/debt_scorecard.yaml"
+ISSUE_BACKED_HOTSPOT_FAMILIES = {
+    "application_services_control_plane": "#4454",
+    "composition_runtime_builders": "#4456",
+}
+ACTIVE_HOTSPOT_CLOSEOUT_FAMILIES = {
+    "application_core",
+    "composition_bootstrap_runtime",
+    "composition_factories_pipeline",
+}
 
 
 def _load_scorecard() -> dict[str, object]:
@@ -219,3 +228,48 @@ def test_reviewed_baseline_hotspot_families_match_reviewed_duplication_snapshot(
             f"Reviewed-baseline family {family_name} must keep scorecard and family "
             "baseline budgets in sync."
         )
+
+
+def test_current_hotspot_closeout_families_are_issue_linked() -> None:
+    """Debt closeout hotspot families must stay traceable to their GitHub issues."""
+    scorecard = _load_scorecard()
+    hotspot_policy = scorecard.get("hotspot_family_ratchets", {})
+    assert isinstance(hotspot_policy, dict)
+    families = hotspot_policy.get("families", [])
+    assert isinstance(families, list)
+    by_name = {
+        str(family["name"]): family for family in families if isinstance(family, dict)
+    }
+
+    for family_name, issue in ISSUE_BACKED_HOTSPOT_FAMILIES.items():
+        family = by_name[family_name]
+        assert family["linked_issue"] == issue
+        assert family["ratchet_stage"] == "reviewed-baseline"
+
+    for family_name in ACTIVE_HOTSPOT_CLOSEOUT_FAMILIES:
+        family = by_name[family_name]
+        assert family["linked_issue"] == "#4477"
+        assert family["ratchet_stage"] == "active"
+
+
+def test_issue_4477_records_active_family_duplication_reduction() -> None:
+    """Issue #4477 must stay backed by an actual active-family reduction."""
+    scorecard = _load_scorecard()
+    hotspot_policy = scorecard.get("hotspot_family_ratchets", {})
+    assert isinstance(hotspot_policy, dict)
+    families = hotspot_policy.get("families", [])
+    assert isinstance(families, list)
+
+    reduced_issue_families: list[dict[str, object]] = []
+    for family in families:
+        if not isinstance(family, dict) or family.get("linked_issue") != "#4477":
+            continue
+        trend = family.get("trend", {})
+        if not isinstance(trend, dict):
+            continue
+        if str(trend.get("status", "")).startswith("reduced_"):
+            reduced_issue_families.append(family)
+    assert reduced_issue_families, (
+        "Issue #4477 closeout must include at least one active hotspot family "
+        "with an explicit reduced_* trend note."
+    )

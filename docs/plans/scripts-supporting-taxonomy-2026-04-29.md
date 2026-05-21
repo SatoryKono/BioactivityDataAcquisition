@@ -13,7 +13,7 @@ surface whose subtypes are encoded directly in
 
 | Decision | Meaning | Typical examples |
 | --- | --- | --- |
-| `compatibility_wrapper` | compatibility-only entrypoint retained for historical direct callers | `scripts/ai/vibe/__main__.py`, `scripts/memory/mcp_smoke.py` |
+| `compatibility_wrapper` | compatibility-only entrypoint retained for historical direct callers | `scripts/memory/mcp_smoke.py`; historical example retired on 2026-05-21: `scripts/ai/vibe/__main__.py` |
 | `internal_compatibility_launcher` | convenience launcher retained for mixed OS or bootstrap workflows, but not a canonical public route | historical example: retained Codex Windows facades before their promotion back to `active` during the 2026-04-29 parity refresh |
 | `windows_compatibility_wrapper` | Windows-side companion retained because platform-specific filenames are part of the runtime/config contract | `scripts/ai/mcp/*_wrapper.ps1` |
 | `shared_helper_module` | shared internal helper with multiple in-repo consumers, but not itself a primary command surface | `scripts/engineering/common/cli_dispatch.py`, `src/tools/neo4j_audit.py` |

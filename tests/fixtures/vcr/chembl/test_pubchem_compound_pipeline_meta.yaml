@@ -1,8 +1,0 @@
-schema_version: 1
-provider: chembl
-cassette_rel_path: tests/fixtures/vcr/chembl/test_pubchem_compound_pipeline.yaml
-metadata_status: managed_inventory
-source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 5646582e37b6ea90d1e8dfd59d8ceb9ce7d488a6f410cacbdd0ad65dda756bdd
-recorded_at: '2026-04-28'
-staleness_ready: true

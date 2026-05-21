@@ -10,6 +10,8 @@ from types import ModuleType
 
 import pytest
 
+pytestmark = pytest.mark.repo_backed
+
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[3]

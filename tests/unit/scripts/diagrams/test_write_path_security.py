@@ -9,6 +9,8 @@ from types import ModuleType
 
 import pytest
 
+pytestmark = pytest.mark.repo_backed
+
 
 def _load_module(module_path: Path, module_name: str) -> ModuleType:
     module_dir = str(module_path.parent)

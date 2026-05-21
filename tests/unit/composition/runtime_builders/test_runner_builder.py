@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import json
+from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
@@ -11,6 +12,7 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.composition.runtime_builders import _run_manifest_builder_policy
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import observability_builder
@@ -18,6 +20,7 @@ from bioetl.composition.runtime_builders import runner_builder
 from bioetl.composition.runtime_builders._runner_builder_orchestration import (
     attach_runner_control_plane_collaborators,
 )
+from bioetl.composition.services import versioning
 from bioetl.domain.ports import PipelineCreateRunnerRequest
 from bioetl.domain.ports.noop import NoOpAudit, NoOpTracing
 
@@ -109,6 +112,22 @@ def _runtime_config_stub() -> dict[str, object]:
 def _build_factory_registry() -> tuple[_FakeFactory, _FakeRegistry]:
     fake_factory = _FakeFactory()
     return fake_factory, _FakeRegistry(factory=fake_factory)
+
+
+def _clean_provenance_context_if_unpatched():
+    if (
+        _run_manifest_builder_policy.get_code_revision_provenance
+        is versioning.get_code_revision_provenance
+    ):
+        return patch(
+            "bioetl.composition.runtime_builders._run_manifest_builder_policy.get_code_revision_provenance",
+            return_value=versioning.CodeRevisionProvenance(
+                git_commit="a" * 40,
+                source_revision_state="clean",
+                dependency_lock_hash="sha256:test-lock",
+            ),
+        )
+    return nullcontext()
 
 
 def _build_context(**overrides: object) -> SimpleNamespace:
@@ -234,10 +253,11 @@ def _call_build_pipeline_runner(
         kwargs["registry"] = registry
     if create_registry_fn is not None:
         kwargs["create_registry_fn"] = create_registry_fn
-    return runner_builder.build_pipeline_runner(
-        context if context is not None else _build_context(),
-        **kwargs,
-    )
+    with _clean_provenance_context_if_unpatched():
+        return runner_builder.build_pipeline_runner(
+            context if context is not None else _build_context(),
+            **kwargs,
+        )
 
 
 def test_handle_control_plane_setup_returns_effective_manifest_profile(
@@ -1680,41 +1700,42 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
         input_filter=SimpleNamespace(enabled=False),
     )
 
-    runner_builder.build_pipeline_runner(
-        context,
-        registry=fake_registry,
-        ensure_providers_loaded_fn=lambda: None,
-        register_all_pipelines_fn=lambda registry=None: None,
-        get_settings_fn=lambda: SimpleNamespace(
-            data_dir=str(tmp_path),
-            pipeline=SimpleNamespace(
-                heartbeat_interval=30,
-                control_plane=SimpleNamespace(
-                    required_persistence_profile="degraded_observable",
-                    checkpoint_compatibility_policy="hard_fail",
-                    run_manifest_enabled=True,
-                    run_ledger_enabled=True,
+    with _clean_provenance_context_if_unpatched():
+        runner_builder.build_pipeline_runner(
+            context,
+            registry=fake_registry,
+            ensure_providers_loaded_fn=lambda: None,
+            register_all_pipelines_fn=lambda registry=None: None,
+            get_settings_fn=lambda: SimpleNamespace(
+                data_dir=str(tmp_path),
+                pipeline=SimpleNamespace(
+                    heartbeat_interval=30,
+                    control_plane=SimpleNamespace(
+                        required_persistence_profile="degraded_observable",
+                        checkpoint_compatibility_policy="hard_fail",
+                        run_manifest_enabled=True,
+                        run_ledger_enabled=True,
+                    ),
                 ),
+                test_mode=False,
             ),
-            test_mode=False,
-        ),
-        load_pipeline_config_fn=lambda _: SimpleNamespace(
-            provider="chembl",
-            entity_type="activity",
-            version="2.0.0",
-            maintenance=None,
-            input_filter=SimpleNamespace(),
-            business_primary_keys=["activity_id"],
-            technical_primary_key="entity_id",
-        ),
-        build_observability_bundle_fn=lambda **_: _namespace_observability(
-            SimpleNamespace(info=lambda *_, **__: None),
-        ),
-        assemble_vacuum_settings_fn=lambda **_: None,
-        assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
-        assemble_filter_config_fn=lambda **_: None,
-        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
-    )
+            load_pipeline_config_fn=lambda _: SimpleNamespace(
+                provider="chembl",
+                entity_type="activity",
+                version="2.0.0",
+                maintenance=None,
+                input_filter=SimpleNamespace(),
+                business_primary_keys=["activity_id"],
+                technical_primary_key="entity_id",
+            ),
+            build_observability_bundle_fn=lambda **_: _namespace_observability(
+                SimpleNamespace(info=lambda *_, **__: None),
+            ),
+            assemble_vacuum_settings_fn=lambda **_: None,
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
+            assemble_filter_config_fn=lambda **_: None,
+            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+        )
 
     for writer in (top_writer, bronze_writer, silver_writer, gold_writer):
         assert writer.recorder is not None
@@ -1743,7 +1764,6 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
 
 
 def test_strict_runner_collaborator_attachment_requires_run_ledger_service() -> None:
-    """Strict profiles must fail if artifact publication cannot be wired."""
     with pytest.raises(RuntimeError, match="requires artifact publication closure"):
         attach_runner_control_plane_collaborators(
             runner=_FakeRunner(),
@@ -1753,7 +1773,6 @@ def test_strict_runner_collaborator_attachment_requires_run_ledger_service() -> 
 
 
 def test_runner_builder_uses_runtime_config_access_seam() -> None:
-    """runner_builder should route runtime config access through the local seam."""
     source = Path(
         "src/bioetl/composition/runtime_builders/runner_builder.py"
     ).read_text(encoding="utf-8")
@@ -1776,7 +1795,6 @@ def test_runner_builder_uses_runtime_config_access_seam() -> None:
 
 
 def test_runner_builder_does_not_expose_legacy_wrapper_patch_points() -> None:
-    """Legacy monkeypatch wrappers should stay removed from runner_builder."""
     for attr_name in (
         "VacuumSettings",
         "_assemble_vacuum_settings",
@@ -1797,13 +1815,11 @@ def test_runner_builder_does_not_expose_legacy_wrapper_patch_points() -> None:
 
 
 def test_inputs_resolver_uses_explicit_resolved_vacuumsettings_name() -> None:
-    """Runtime builder helpers should not expose the old VacuumSettings alias."""
     assert hasattr(inputs_resolver, "ResolvedVacuumSettings")
     assert not hasattr(inputs_resolver, "VacuumSettings")
 
 
 def test_build_pipeline_runner_forces_probe_mode_in_test_mode(tmp_path: Path) -> None:
-    """Builder must pass probe health mode when settings.test_mode is enabled."""
     _, fake_registry = _build_factory_registry()
     captured: dict[str, object] = {}
 
@@ -1836,7 +1852,6 @@ def test_build_pipeline_runner_forces_probe_mode_in_test_mode(tmp_path: Path) ->
 def test_build_pipeline_runner_uses_configured_mode_outside_test_mode(
     tmp_path: Path,
 ) -> None:
-    """Builder must pass configured health mode when test_mode is disabled."""
     _, fake_registry = _build_factory_registry()
     captured: dict[str, object] = {}
 

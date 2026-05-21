@@ -50,9 +50,12 @@ Retained canonical public Python/domain routers include:
 - `python -m scripts.ai`
 - `python -m scripts.ai.mcp`
 
-Compatibility-only Python surface retained intentionally:
+Compatibility-only Python surface retired after the later 2026-05-21 caller
+audit:
 
 - `python -m scripts.ai.vibe`
+
+The canonical Vibe dispatch surface is `python -m scripts.ai vibe`.
 
 ### 3. Retained high-risk surfaces are now explicit
 

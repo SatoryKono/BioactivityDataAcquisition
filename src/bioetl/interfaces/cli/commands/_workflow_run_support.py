@@ -281,9 +281,7 @@ def _validate_workflow_pipeline_replay_prerequisites(config: WorkflowConfig) -> 
                 f"Workflow step '{step.step_id}' requests required_persistence_profile="
                 f"'{required_profile}', which requires immutable snapshot-backed "
                 "Bronze inputs. Use --use-cached-bronze "
-                "(optionally with --cached-bronze-path/--cached-bronze-date), "
-                "or lower the requested persistence floor with "
-                "--required-persistence-profile degraded_observable."
+                "(optionally with --cached-bronze-path/--cached-bronze-date)."
             )
 
 

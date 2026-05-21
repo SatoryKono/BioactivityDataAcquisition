@@ -126,7 +126,7 @@ def test_workflow_run_dry_run_smoke_uses_canonical_example_without_network(
     assert "Workflow run ID: 00000000-0000-0000-0000-000000000111" in result.output
     assert fake_service.received_config is not None
     config = fake_service.received_config
-    step_ids = tuple(getattr(step, "step_id") for step in getattr(config, "steps"))
+    step_ids = tuple(step.step_id for step in config.steps)
     assert step_ids == (
         "chembl_activity_ingest",
         "chembl_assay_ingest",
@@ -134,7 +134,7 @@ def test_workflow_run_dry_run_smoke_uses_canonical_example_without_network(
     )
     pipeline_steps = [
         step
-        for step in getattr(config, "steps")
+        for step in config.steps
         if getattr(step, "pipeline_name", None) is not None
     ]
     assert all(
@@ -205,7 +205,7 @@ def test_workflow_run_accepts_pipeline_style_runtime_overrides(
     config = fake_service.received_config
     pipeline_steps = [
         step
-        for step in getattr(config, "steps")
+        for step in config.steps
         if getattr(step, "pipeline_name", None) is not None
     ]
     assert pipeline_steps
@@ -545,7 +545,7 @@ def test_workflow_run_rejects_strict_profile_without_cached_bronze(
     assert "Workflow configuration error" in result.output
     assert "requires immutable snapshot-backed Bronze inputs" in result.output
     assert "--use-cached-bronze" in result.output
-    assert "degraded_observable" in result.output
+    assert "degraded_observable" not in result.output
 
 
 def test_workflow_status_json_payload_includes_explicit_limits(

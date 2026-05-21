@@ -3,6 +3,7 @@
   "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": null,
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
+  "measurement_mode": "source_tree_only",
   "modules": [
     {
       "coverage_percent": null,
@@ -1182,7 +1183,7 @@
       "missing_lines": null,
       "module": "bioetl.application.core._filtered_data_source_mixins",
       "path": "src/bioetl/application/core/_filtered_data_source_mixins.py",
-      "source_lines": 154
+      "source_lines": 141
     },
     {
       "coverage_percent": null,
@@ -4892,7 +4893,7 @@
       "missing_lines": null,
       "module": "bioetl.application.services.control_plane.run_manifest_service",
       "path": "src/bioetl/application/services/control_plane/run_manifest_service.py",
-      "source_lines": 234
+      "source_lines": 239
     },
     {
       "coverage_percent": null,
@@ -6722,7 +6723,7 @@
       "missing_lines": null,
       "module": "bioetl.composition.factories.pipeline.factory_method_helpers",
       "path": "src/bioetl/composition/factories/pipeline/factory_method_helpers.py",
-      "source_lines": 206
+      "source_lines": 192
     },
     {
       "coverage_percent": null,
@@ -7502,7 +7503,7 @@
       "missing_lines": null,
       "module": "bioetl.composition.runtime_builders._run_manifest_builder_policy",
       "path": "src/bioetl/composition/runtime_builders/_run_manifest_builder_policy.py",
-      "source_lines": 159
+      "source_lines": 165
     },
     {
       "coverage_percent": null,
@@ -9502,7 +9503,7 @@
       "missing_lines": null,
       "module": "bioetl.domain.control_plane.reproducibility_policy",
       "path": "src/bioetl/domain/control_plane/reproducibility_policy.py",
-      "source_lines": 208
+      "source_lines": 211
     },
     {
       "coverage_percent": null,
@@ -19097,7 +19098,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-05-21",
-  "source_tree_sha256": "ff13e0208b3a5529f894db1ba1dcac23989009ef7a859e8a7d871f42420af4b8",
+  "source_tree_sha256": "97a386b7d24fe473d1b8e528622a2edcf566b47bdbf6fb1f39af9e27df80ed67",
   "summary": {
     "coverage_xml_present": false,
     "source_module_count": 1909,

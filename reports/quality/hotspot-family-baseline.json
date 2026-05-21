@@ -17,7 +17,7 @@
       ],
       "duplication_clusters": 8,
       "files": 167,
-      "total_loc": 20903,
+      "total_loc": 20890,
       "files_ge_250_loc": 14,
       "helper_function_ratio": 0.375,
       "max_internal_fan_in": 14,
@@ -65,13 +65,13 @@
       "path_prefixes": [
         "src/bioetl/composition/factories/pipeline/"
       ],
-      "duplication_clusters": 2,
+      "duplication_clusters": 0,
       "files": 31,
-      "total_loc": 4493,
+      "total_loc": 4479,
       "files_ge_250_loc": 4,
       "helper_function_ratio": 0.47,
       "max_internal_fan_in": 4,
-      "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.control_plane_artifacts",
+      "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.construction_types",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 4,
         "max_internal_fan_in": 4
@@ -92,7 +92,7 @@
       ],
       "duplication_clusters": 17,
       "files": 66,
-      "total_loc": 12998,
+      "total_loc": 12986,
       "files_ge_250_loc": 22,
       "helper_function_ratio": 0.496,
       "max_internal_fan_in": 6,
@@ -117,7 +117,7 @@
       ],
       "duplication_clusters": 13,
       "files": 37,
-      "total_loc": 5765,
+      "total_loc": 5771,
       "files_ge_250_loc": 7,
       "helper_function_ratio": 0.495,
       "max_internal_fan_in": 11,

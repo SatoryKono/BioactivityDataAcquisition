@@ -2,8 +2,8 @@
   "summary": {
     "snapshot_date": "2026-05-21",
     "targets": 5,
-    "total_duplicate_clusters": 48,
-    "total_raw_duplicate_clusters": 48,
+    "total_duplicate_clusters": 46,
+    "total_raw_duplicate_clusters": 46,
     "total_excluded_duplicate_clusters": 0
   },
   "normalization": {
@@ -13,7 +13,7 @@
     "status": "compared_to_previous",
     "snapshot_date": "2026-05-21",
     "previous_snapshot_date": "2026-05-20",
-    "total_duplicate_cluster_delta": -3,
+    "total_duplicate_cluster_delta": -5,
     "targets": [
       {
         "target": "src/bioetl/application/core",
@@ -29,9 +29,9 @@
       },
       {
         "target": "src/bioetl/composition/factories/pipeline",
-        "current_duplicate_count": 2,
+        "current_duplicate_count": 0,
         "previous_duplicate_count": 2,
-        "delta_duplicate_count": 0
+        "delta_duplicate_count": -2
       },
       {
         "target": "src/bioetl/application/services/control_plane",
@@ -72,13 +72,6 @@
         {
           "modules": [
             "bioetl.application.core._filtered_data_source_mixins",
-            "bioetl.application.core._filtered_data_source_support"
-          ],
-          "duplicate_clusters": 1
-        },
-        {
-          "modules": [
-            "bioetl.application.core._filtered_data_source_mixins",
             "bioetl.application.core._target_data_source_mixins"
           ],
           "duplicate_clusters": 1
@@ -89,25 +82,16 @@
             "bioetl.application.core._target_data_source_mixins"
           ],
           "duplicate_clusters": 1
+        },
+        {
+          "modules": [
+            "bioetl.application.core._target_data_source_fetch_support",
+            "bioetl.application.core.data_sources.idmapping"
+          ],
+          "duplicate_clusters": 1
         }
       ],
       "clusters": [
-        {
-          "path": "src/bioetl/application/core/wiring/__init__.py",
-          "line": 1,
-          "modules": [
-            {
-              "module": "bioetl.application.core._filtered_data_source_mixins",
-              "start_line": 30,
-              "end_line": 45
-            },
-            {
-              "module": "bioetl.application.core._filtered_data_source_support",
-              "start_line": 25,
-              "end_line": 39
-            }
-          ]
-        },
         {
           "path": "src/bioetl/application/core/wiring/__init__.py",
           "line": 1,
@@ -129,9 +113,25 @@
           "line": 1,
           "modules": [
             {
+              "module": "bioetl.application.core.pipeline_service_protocols",
+              "start_line": 53,
+              "end_line": 61
+            },
+            {
+              "module": "bioetl.application.core.pipeline_services",
+              "start_line": 82,
+              "end_line": 90
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/application/core/wiring/__init__.py",
+          "line": 1,
+          "modules": [
+            {
               "module": "bioetl.application.core._filtered_data_source_mixins",
-              "start_line": 139,
-              "end_line": 149
+              "start_line": 126,
+              "end_line": 136
             },
             {
               "module": "bioetl.application.core._target_data_source_mixins",
@@ -199,8 +199,8 @@
             },
             {
               "module": "bioetl.application.core._filtered_data_source_mixins",
-              "start_line": 139,
-              "end_line": 145
+              "start_line": 126,
+              "end_line": 132
             }
           ]
         },
@@ -398,60 +398,12 @@
     },
     {
       "target": "src/bioetl/composition/factories/pipeline",
-      "returncode": 8,
-      "duplicate_count": 2,
-      "raw_duplicate_count": 2,
+      "returncode": 0,
+      "duplicate_count": 0,
+      "raw_duplicate_count": 0,
       "excluded_duplicate_count": 0,
-      "top_pairs": [
-        {
-          "modules": [
-            "bioetl.composition.factories.pipeline._assembler_factory",
-            "bioetl.composition.factories.pipeline.assembler"
-          ],
-          "duplicate_clusters": 1
-        },
-        {
-          "modules": [
-            "bioetl.composition.factories.pipeline._creation_wiring",
-            "bioetl.composition.factories.pipeline.factory_method_helpers"
-          ],
-          "duplicate_clusters": 1
-        }
-      ],
-      "clusters": [
-        {
-          "path": "src/bioetl/composition/factories/pipeline/_runner_assembly_support.py",
-          "line": 1,
-          "modules": [
-            {
-              "module": "bioetl.composition.factories.pipeline._assembler_factory",
-              "start_line": 146,
-              "end_line": 164
-            },
-            {
-              "module": "bioetl.composition.factories.pipeline.assembler",
-              "start_line": 152,
-              "end_line": 162
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/factories/pipeline/_runner_assembly_support.py",
-          "line": 1,
-          "modules": [
-            {
-              "module": "bioetl.composition.factories.pipeline._creation_wiring",
-              "start_line": 162,
-              "end_line": 169
-            },
-            {
-              "module": "bioetl.composition.factories.pipeline.factory_method_helpers",
-              "start_line": 190,
-              "end_line": 197
-            }
-          ]
-        }
-      ]
+      "top_pairs": [],
+      "clusters": []
     },
     {
       "target": "src/bioetl/application/services/control_plane",
@@ -503,13 +455,13 @@
           "modules": [
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_base",
-              "start_line": 204,
-              "end_line": 229
+              "start_line": 202,
+              "end_line": 227
             },
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection",
-              "start_line": 125,
-              "end_line": 150
+              "start_line": 138,
+              "end_line": 163
             }
           ]
         },
@@ -567,8 +519,8 @@
           "modules": [
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection",
-              "start_line": 75,
-              "end_line": 83
+              "start_line": 88,
+              "end_line": 96
             },
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_replay_state",
@@ -615,8 +567,8 @@
           "modules": [
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_base",
-              "start_line": 183,
-              "end_line": 190
+              "start_line": 181,
+              "end_line": 188
             },
             {
               "module": "bioetl.application.services.control_plane._run_manifest_identity_graph_builder",
@@ -679,8 +631,8 @@
           "modules": [
             {
               "module": "bioetl.application.services.control_plane.run_manifest_service",
-              "start_line": 145,
-              "end_line": 154
+              "start_line": 133,
+              "end_line": 142
             },
             {
               "module": "bioetl.application.services.control_plane.workflow_manifest_service",
@@ -695,13 +647,13 @@
           "modules": [
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_base",
-              "start_line": 98,
-              "end_line": 104
+              "start_line": 97,
+              "end_line": 103
             },
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection",
-              "start_line": 201,
-              "end_line": 207
+              "start_line": 214,
+              "end_line": 220
             }
           ]
         },
@@ -711,8 +663,8 @@
           "modules": [
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection",
-              "start_line": 90,
-              "end_line": 112
+              "start_line": 103,
+              "end_line": 125
             },
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_replay_state",
@@ -743,13 +695,13 @@
           "modules": [
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_base",
-              "start_line": 98,
-              "end_line": 103
+              "start_line": 97,
+              "end_line": 102
             },
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection",
-              "start_line": 209,
-              "end_line": 214
+              "start_line": 222,
+              "end_line": 227
             }
           ]
         },
@@ -906,8 +858,8 @@
             },
             {
               "module": "bioetl.composition.runtime_builders.run_manifest_contract_identity",
-              "start_line": 17,
-              "end_line": 34
+              "start_line": 18,
+              "end_line": 35
             }
           ]
         },

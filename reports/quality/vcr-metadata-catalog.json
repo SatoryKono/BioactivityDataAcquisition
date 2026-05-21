@@ -3,14 +3,19 @@
   "catalog_kind": "vcr_metadata_catalog",
   "vcr_root": "tests/fixtures/vcr",
   "totals": {
-    "cassette_count": 199,
-    "metadata_sidecar_count": 199,
-    "provider_count": 8
+    "cassette_count": 196,
+    "metadata_sidecar_count": 196,
+    "provider_count": 8,
+    "duplicate_scenario_stem_count": 0
+  },
+  "pruning": {
+    "duplicate_scenario_stems": {},
+    "orphan_metadata_sidecar_count": 0
   },
   "providers": {
     "chembl": {
-      "cassette_count": 55,
-      "metadata_sidecar_count": 55,
+      "cassette_count": 52,
+      "metadata_sidecar_count": 52,
       "without_metadata_count": 0,
       "metadata_coverage_percent": 100.0
     },
@@ -60,6 +65,7 @@
   "cassettes": [
     {
       "provider": "chembl",
+      "scenario_stem": "test_all_chembl_pipelines_chain",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_all_chembl_pipelines_chain.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -68,6 +74,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_backfill_clears_silver_only",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_backfill_clears_silver_only.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -76,6 +83,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_chembl_activity_full_cycle",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_activity_full_cycle.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -84,6 +92,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_chembl_activity_full_run",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_activity_full_run.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -92,14 +101,7 @@
     },
     {
       "provider": "chembl",
-      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_and_uniprot_sequential_run.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_and_uniprot_sequential_run_meta.yaml",
-      "metadata_status": "managed_inventory"
-    },
-    {
-      "provider": "chembl",
+      "scenario_stem": "test_chembl_assay_confidence_score",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_assay_confidence_score.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -108,6 +110,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_chembl_assay_full_cycle",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_assay_full_cycle.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -116,6 +119,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_chembl_assay_metadata_fields",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_assay_metadata_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -124,6 +128,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_chembl_molecule_full_cycle",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_molecule_full_cycle.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -132,6 +137,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_chembl_molecule_structural_fields",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_molecule_structural_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -140,6 +146,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_chembl_molecule_then_activity_chain",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_molecule_then_activity_chain.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -148,6 +155,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_chembl_publication_full_cycle",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_publication_full_cycle.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -156,6 +164,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_chembl_publication_metadata_fields",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_publication_metadata_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -164,6 +173,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_chembl_publication_term_full_cycle",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_publication_term_full_cycle.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -172,6 +182,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_chembl_publication_term_mesh_fields",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_publication_term_mesh_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -180,6 +191,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_chembl_publication_term_types",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_publication_term_types.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -188,6 +200,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_chembl_subcellular_fraction_full_cycle",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_subcellular_fraction_full_cycle.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -196,6 +209,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_chembl_target_cross_references",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_target_cross_references.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -204,6 +218,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_chembl_target_full_cycle",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_target_full_cycle.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -212,6 +227,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_chembl_target_then_activity_chain",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_target_then_activity_chain.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -220,6 +236,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_failed_run_preserves_partial_data",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_failed_run_preserves_partial_data.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -228,6 +245,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_multiple_chembl_entities_parallel_safe",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_multiple_chembl_entities_parallel_safe.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -236,14 +254,7 @@
     },
     {
       "provider": "chembl",
-      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_parallel_independent_pipelines.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_parallel_independent_pipelines_meta.yaml",
-      "metadata_status": "managed_inventory"
-    },
-    {
-      "provider": "chembl",
+      "scenario_stem": "test_pipeline_idempotency",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_idempotency.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -252,6 +263,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_pipeline_isolation",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_isolation.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -260,6 +272,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_pipeline_matrix__chembl_assay_parameters",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_assay_parameters.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -268,6 +281,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_pipeline_matrix__chembl_protein_class",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_protein_class.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -276,6 +290,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_pipeline_matrix__chembl_publication_similarity",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_publication_similarity.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -284,6 +299,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_pipeline_matrix__chembl_publication_term",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_publication_term.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -292,6 +308,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_pipeline_matrix__chembl_subcellular_fraction",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_subcellular_fraction.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -300,6 +317,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_pipeline_matrix__chembl_tissue",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_tissue.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -308,6 +326,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_pipeline_resume_after_failure",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_resume_after_failure.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -316,6 +335,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_pipeline_resume_from_checkpoint",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_resume_from_checkpoint.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -324,14 +344,7 @@
     },
     {
       "provider": "chembl",
-      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pubchem_compound_pipeline.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pubchem_compound_pipeline_meta.yaml",
-      "metadata_status": "managed_inventory"
-    },
-    {
-      "provider": "chembl",
+      "scenario_stem": "test_rebuild_clears_existing_data",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_rebuild_clears_existing_data.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -340,6 +353,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_rerun_same_pipeline_twice",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_rerun_same_pipeline_twice.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -348,6 +362,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_vacuum_respects_retention_days",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_vacuum_respects_retention_days.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -356,6 +371,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "test_vacuum_runs_after_successful_pipeline",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_vacuum_runs_after_successful_pipeline.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -364,6 +380,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestActivityExtractionParams.test_filtered_api_request",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestActivityExtractionParams.test_filtered_api_request.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -372,6 +389,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestAssayExtractionParams.test_assay_filtered_api_request",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestAssayExtractionParams.test_assay_filtered_api_request.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -380,6 +398,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestChemblActivityPipeline.test_chembl_activity_error_handling",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblActivityPipeline.test_chembl_activity_error_handling.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -388,6 +407,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestChemblActivityPipeline.test_chembl_activity_happy_path",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblActivityPipeline.test_chembl_activity_happy_path.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -396,6 +416,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestChemblAdapter.test_fetch_activities",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblAdapter.test_fetch_activities.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -404,6 +425,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestChemblAdapter.test_get_entity_count",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblAdapter.test_get_entity_count.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -412,6 +434,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestChemblAdapter.test_health_check",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblAdapter.test_health_check.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -420,6 +443,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestChemblCellLinePipeline.test_chembl_cell_line_happy_path",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblCellLinePipeline.test_chembl_cell_line_happy_path.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -428,6 +452,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestChemblCellLinePipeline.test_chembl_cell_line_source_fields",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblCellLinePipeline.test_chembl_cell_line_source_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -436,6 +461,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestChemblCompoundRecordPipeline.test_chembl_compound_record_error_handling",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblCompoundRecordPipeline.test_chembl_compound_record_error_handling.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -444,6 +470,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestChemblCompoundRecordPipeline.test_chembl_compound_record_happy_path",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblCompoundRecordPipeline.test_chembl_compound_record_happy_path.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -452,6 +479,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestChEMBLIntegration.test_chembl_extract_transform_load",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChEMBLIntegration.test_chembl_extract_transform_load.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -460,6 +488,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestChEMBLPipelineE2E.test_chembl_activity_full_run",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChEMBLPipelineE2E.test_chembl_activity_full_run.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -468,6 +497,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestChemblTargetComponentPipeline.test_chembl_target_component_happy_path",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblTargetComponentPipeline.test_chembl_target_component_happy_path.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -476,6 +506,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestMoleculeExtractionParams.test_molecule_filtered_api_request",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestMoleculeExtractionParams.test_molecule_filtered_api_request.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -484,6 +515,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestPublicationExtractionParams.test_publication_filtered_api_request",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestPublicationExtractionParams.test_publication_filtered_api_request.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -492,6 +524,7 @@
     },
     {
       "provider": "chembl",
+      "scenario_stem": "TestTargetExtractionParams.test_target_filtered_api_request",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/TestTargetExtractionParams.test_target_filtered_api_request.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -500,6 +533,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "provider_contract_agency_lookup_for_doi",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/provider_contract_agency_lookup_for_doi.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -508,6 +542,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "rf013_crossref_health_case_01",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_01.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -516,6 +551,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "rf013_crossref_health_case_02",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_02.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -524,6 +560,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "rf013_crossref_health_case_03",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_03.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -532,6 +569,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "rf013_crossref_health_case_04",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_04.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -540,6 +578,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "rf013_crossref_health_case_05",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_05.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -548,6 +587,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "rf013_crossref_health_case_06",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_06.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -556,6 +596,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "rf013_crossref_health_case_07",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_07.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -564,6 +605,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "rf013_crossref_health_case_08",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_08.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -572,6 +614,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "rf013_crossref_health_case_09",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_09.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -580,6 +623,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "rf013_crossref_health_case_10",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_10.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -588,6 +632,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "rf013_crossref_health_case_11",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_11.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -596,6 +641,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "rf013_crossref_health_case_12",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_12.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -604,6 +650,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "rf013_crossref_health_case_13",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_13.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -612,6 +659,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "rf013_crossref_health_case_14",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_14.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -620,6 +668,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "rf013_crossref_health_case_15",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_15.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -628,6 +677,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "test_crossref_batch_fetch",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_batch_fetch.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -636,6 +686,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "test_crossref_fetch_by_doi",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_fetch_by_doi.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -644,6 +695,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "test_crossref_health_check",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_health_check.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -652,6 +704,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "test_crossref_publication_citation_fields",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_publication_citation_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -660,6 +713,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "test_crossref_publication_full_cycle",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_publication_full_cycle.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -668,6 +722,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "test_crossref_publication_metadata_fields",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_publication_metadata_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -676,6 +731,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "test_crossref_search_by_title",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_search_by_title.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -684,6 +740,7 @@
     },
     {
       "provider": "crossref",
+      "scenario_stem": "works_batch",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/works_batch.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -692,6 +749,7 @@
     },
     {
       "provider": "multi_provider",
+      "scenario_stem": "test_chembl_and_uniprot_sequential_run",
       "cassette_rel_path": "tests/fixtures/vcr/multi_provider/test_chembl_and_uniprot_sequential_run.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -700,6 +758,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "rf013_openalex_health_case_01",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_01.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -708,6 +767,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "rf013_openalex_health_case_02",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_02.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -716,6 +776,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "rf013_openalex_health_case_03",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_03.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -724,6 +785,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "rf013_openalex_health_case_04",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_04.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -732,6 +794,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "rf013_openalex_health_case_05",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_05.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -740,6 +803,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "rf013_openalex_health_case_06",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_06.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -748,6 +812,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "rf013_openalex_health_case_07",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_07.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -756,6 +821,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "rf013_openalex_health_case_08",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_08.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -764,6 +830,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "rf013_openalex_health_case_09",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_09.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -772,6 +839,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "rf013_openalex_health_case_10",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_10.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -780,6 +848,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "rf013_openalex_health_case_11",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_11.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -788,6 +857,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "rf013_openalex_health_case_12",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_12.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -796,6 +866,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "rf013_openalex_health_case_13",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_13.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -804,6 +875,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "rf013_openalex_health_case_14",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_14.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -812,6 +884,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "rf013_openalex_health_case_15",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_15.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -820,6 +893,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "test_openalex_publication_citation_fields",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/test_openalex_publication_citation_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -828,6 +902,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "test_openalex_publication_full_cycle",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/test_openalex_publication_full_cycle.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -836,6 +911,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "test_openalex_publication_metadata_fields",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/test_openalex_publication_metadata_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -844,6 +920,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "TestOpenAlexAdapterIntegration.test_fetch_filtered_batch_dois",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_batch_dois.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -852,6 +929,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "TestOpenAlexAdapterIntegration.test_fetch_filtered_by_doi",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_by_doi.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -860,6 +938,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "TestOpenAlexAdapterIntegration.test_fetch_filtered_with_fallback",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_with_fallback.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -868,6 +947,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "TestOpenAlexAdapterIntegration.test_fetch_with_query",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_with_query.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -876,6 +956,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "TestOpenAlexAdapterIntegration.test_health_check",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_health_check.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -884,6 +965,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "TestOpenAlexAdapterIntegration.test_title_only_lookup",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_title_only_lookup.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -892,6 +974,7 @@
     },
     {
       "provider": "openalex",
+      "scenario_stem": "TestOpenAlexAdapterRateLimiting.test_rate_limiting_not_exceeded",
       "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterRateLimiting.test_rate_limiting_not_exceeded.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -900,6 +983,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "provider_contract_compound_property_endpoint",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/provider_contract_compound_property_endpoint.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -908,6 +992,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "provider_contract_smiles_search",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/provider_contract_smiles_search.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -916,6 +1001,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "test_pubchem_compound_full_cycle",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_full_cycle.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -924,6 +1010,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "test_pubchem_compound_pipeline",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_pipeline.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -932,6 +1019,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "test_pubchem_compound_query_filter",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_query_filter.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -940,6 +1028,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "test_pubchem_compound_structural_fields",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_structural_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -948,6 +1037,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemErrorPaths.test_fetch_by_cid_returns_empty_list",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_returns_empty_list.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -956,6 +1046,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemErrorPaths.test_fetch_by_cid_single_page_response",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_single_page_response.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -964,6 +1055,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemErrorPaths.test_fetch_by_name_http_503_is_handled",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_name_http_503_is_handled.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -972,6 +1064,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemErrorPaths.test_fetch_by_smiles_http_503_is_handled",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_smiles_http_503_is_handled.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -980,6 +1073,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchByQuery.test_fetch_compound_by_name_aspirin",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_aspirin.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -988,6 +1082,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchByQuery.test_fetch_compound_by_name_caffeine",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_caffeine.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -996,6 +1091,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchByQuery.test_fetch_compound_by_name_water",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_water.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1004,6 +1100,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchByQuery.test_fetch_compound_nonexistent_name",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_nonexistent_name.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1012,6 +1109,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchByQuery.test_fetch_compound_with_limit",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_with_limit.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1020,6 +1118,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_cid",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_cid.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1028,6 +1127,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_smiles",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_smiles.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1036,6 +1136,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_batch",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_batch.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1044,6 +1145,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_invalid_skipped",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_invalid_skipped.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1052,6 +1154,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_single",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_single.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1060,6 +1163,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_with_limit",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_with_limit.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1068,6 +1172,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_aspirin",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_aspirin.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1076,6 +1181,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_multiple",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_multiple.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1084,6 +1190,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_empty_skipped",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_empty_skipped.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1092,6 +1199,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_ethanol",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_ethanol.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1100,6 +1208,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_multiple",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_multiple.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1108,6 +1217,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_with_limit",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_with_limit.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1116,6 +1226,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemHealthCheck.test_health_check_returns_healthy",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health_check_returns_healthy.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1124,6 +1235,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemHealthCheck.test_health_check_uses_water_compound",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health_check_uses_water_compound.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1132,6 +1244,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemStructuralFields.test_compound_has_physicochemical_properties",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_physicochemical_properties.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1140,6 +1253,7 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "TestPubChemStructuralFields.test_compound_has_structural_identifiers",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_structural_identifiers.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1148,6 +1262,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "provider_contract_einfo_database_list",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/provider_contract_einfo_database_list.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1156,6 +1271,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "provider_contract_esummary_endpoint",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/provider_contract_esummary_endpoint.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1164,6 +1280,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "rf013_pubmed_health_case_01",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_01.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1172,6 +1289,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "rf013_pubmed_health_case_02",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_02.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1180,6 +1298,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "rf013_pubmed_health_case_03",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_03.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1188,6 +1307,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "rf013_pubmed_health_case_04",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_04.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1196,6 +1316,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "rf013_pubmed_health_case_05",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_05.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1204,6 +1325,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "rf013_pubmed_health_case_06",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_06.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1212,6 +1334,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "rf013_pubmed_health_case_07",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_07.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1220,6 +1343,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "rf013_pubmed_health_case_08",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_08.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1228,6 +1352,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "rf013_pubmed_health_case_09",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_09.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1236,6 +1361,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "rf013_pubmed_health_case_10",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_10.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1244,6 +1370,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "rf013_pubmed_health_case_11",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_11.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1252,6 +1379,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "rf013_pubmed_health_case_12",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_12.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1260,6 +1388,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "rf013_pubmed_health_case_13",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_13.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1268,6 +1397,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "rf013_pubmed_health_case_14",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_14.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1276,6 +1406,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "rf013_pubmed_health_case_15",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_15.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1284,6 +1415,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "test_fetch_publications",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_fetch_publications.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1292,6 +1424,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "test_health_check",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_health_check.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1300,6 +1433,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "test_pubmed_publication_classification_fields",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_pubmed_publication_classification_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1308,6 +1442,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "test_pubmed_publication_date_fields",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_pubmed_publication_date_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1316,6 +1451,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "test_pubmed_publication_full_cycle",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_pubmed_publication_full_cycle.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1324,6 +1460,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "test_pubmed_publication_identifier_fields",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_pubmed_publication_identifier_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1332,6 +1469,7 @@
     },
     {
       "provider": "pubmed",
+      "scenario_stem": "test_pubmed_publication_journal_fields",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_pubmed_publication_journal_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1340,6 +1478,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "rf013_semanticscholar_health_case_01",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_01.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1348,6 +1487,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "rf013_semanticscholar_health_case_02",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_02.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1356,6 +1496,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "rf013_semanticscholar_health_case_03",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_03.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1364,6 +1505,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "rf013_semanticscholar_health_case_04",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_04.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1372,6 +1514,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "rf013_semanticscholar_health_case_05",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_05.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1380,6 +1523,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "rf013_semanticscholar_health_case_06",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_06.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1388,6 +1532,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "rf013_semanticscholar_health_case_07",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_07.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1396,6 +1541,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "rf013_semanticscholar_health_case_08",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_08.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1404,6 +1550,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "rf013_semanticscholar_health_case_09",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_09.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1412,6 +1559,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "rf013_semanticscholar_health_case_10",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_10.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1420,6 +1568,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "rf013_semanticscholar_health_case_11",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_11.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1428,6 +1577,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "rf013_semanticscholar_health_case_12",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_12.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1436,6 +1586,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "rf013_semanticscholar_health_case_13",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_13.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1444,6 +1595,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "rf013_semanticscholar_health_case_14",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_14.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1452,6 +1604,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "rf013_semanticscholar_health_case_15",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_15.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1460,6 +1613,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "test_semanticscholar_publication_citation_fields",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/test_semanticscholar_publication_citation_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1468,6 +1622,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "test_semanticscholar_publication_full_cycle",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/test_semanticscholar_publication_full_cycle.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1476,6 +1631,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "test_semanticscholar_publication_metadata_fields",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/test_semanticscholar_publication_metadata_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1484,6 +1640,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "TestSemanticScholarAdapterIntegration.test_fetch_batch_dois",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_batch_dois.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1492,6 +1649,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "TestSemanticScholarAdapterIntegration.test_fetch_by_doi",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_by_doi.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1500,6 +1658,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "TestSemanticScholarAdapterIntegration.test_fetch_filtered_with_fallback",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_filtered_with_fallback.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1508,6 +1667,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "TestSemanticScholarAdapterIntegration.test_fetch_with_query",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_with_query.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1516,6 +1676,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "TestSemanticScholarAdapterIntegration.test_health_check",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_health_check.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1524,6 +1685,7 @@
     },
     {
       "provider": "semanticscholar",
+      "scenario_stem": "TestSemanticScholarAdapterIntegration.test_title_only_lookup",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_title_only_lookup.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1532,6 +1694,7 @@
     },
     {
       "provider": "uniprot",
+      "scenario_stem": "provider_contract_specific_protein_lookup",
       "cassette_rel_path": "tests/fixtures/vcr/uniprot/provider_contract_specific_protein_lookup.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1540,6 +1703,7 @@
     },
     {
       "provider": "uniprot",
+      "scenario_stem": "provider_contract_taxonomy_endpoint",
       "cassette_rel_path": "tests/fixtures/vcr/uniprot/provider_contract_taxonomy_endpoint.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1548,6 +1712,7 @@
     },
     {
       "provider": "uniprot",
+      "scenario_stem": "test_parallel_independent_pipelines",
       "cassette_rel_path": "tests/fixtures/vcr/uniprot/test_parallel_independent_pipelines.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1556,6 +1721,7 @@
     },
     {
       "provider": "uniprot",
+      "scenario_stem": "test_uniprot_protein_full_cycle",
       "cassette_rel_path": "tests/fixtures/vcr/uniprot/test_uniprot_protein_full_cycle.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1564,6 +1730,7 @@
     },
     {
       "provider": "uniprot",
+      "scenario_stem": "test_uniprot_protein_metadata_fields",
       "cassette_rel_path": "tests/fixtures/vcr/uniprot/test_uniprot_protein_metadata_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1572,6 +1739,7 @@
     },
     {
       "provider": "uniprot",
+      "scenario_stem": "test_uniprot_protein_sequence_fields",
       "cassette_rel_path": "tests/fixtures/vcr/uniprot/test_uniprot_protein_sequence_fields.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1580,6 +1748,7 @@
     },
     {
       "provider": "uniprot",
+      "scenario_stem": "TestUniProtAdapterIntegration.test_fetch_proteins",
       "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_fetch_proteins.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1588,6 +1757,7 @@
     },
     {
       "provider": "uniprot",
+      "scenario_stem": "TestUniProtAdapterIntegration.test_health_check",
       "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_health_check.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1596,6 +1766,7 @@
     },
     {
       "provider": "uniprot",
+      "scenario_stem": "TestUniProtClientIntegration.test_fetch_proteins",
       "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_fetch_proteins.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1604,6 +1775,7 @@
     },
     {
       "provider": "uniprot",
+      "scenario_stem": "TestUniProtClientIntegration.test_health_check",
       "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_health_check.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1612,6 +1784,7 @@
     },
     {
       "provider": "uniprot",
+      "scenario_stem": "TestUniProtIDMappingIntegration.test_health_check",
       "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_health_check.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1620,6 +1793,7 @@
     },
     {
       "provider": "uniprot",
+      "scenario_stem": "TestUniProtIDMappingIntegration.test_map_mixed_results",
       "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_mixed_results.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1628,6 +1802,7 @@
     },
     {
       "provider": "uniprot",
+      "scenario_stem": "TestUniProtIDMappingIntegration.test_map_multiple_ids",
       "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_multiple_ids.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1636,6 +1811,7 @@
     },
     {
       "provider": "uniprot",
+      "scenario_stem": "TestUniProtIDMappingIntegration.test_map_not_found_id",
       "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_not_found_id.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -1644,6 +1820,7 @@
     },
     {
       "provider": "uniprot",
+      "scenario_stem": "TestUniProtIDMappingIntegration.test_map_single_id",
       "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_single_id.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,

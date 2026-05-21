@@ -232,6 +232,7 @@ hotspot_family_ratchets:
   - name: application_core
     owner: '@bioetl-architecture'
     linked_rf: RF-023
+    linked_issue: '#4477'
     ratchet_stage: active
     ratchet_scope: duplication-non-growth-plus-bounded-growth
     expected_action: Hold duplication, file-growth, and fan-in at the reviewed baseline
@@ -258,6 +259,7 @@ hotspot_family_ratchets:
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023
+    linked_issue: '#4477'
     ratchet_stage: active
     ratchet_scope: duplication-non-growth-plus-bounded-growth
     expected_action: Hold duplication, file-growth, and fan-in at the reviewed baseline
@@ -284,6 +286,7 @@ hotspot_family_ratchets:
   - name: composition_factories_pipeline
     owner: '@bioetl-platform'
     linked_rf: RF-023
+    linked_issue: '#4477'
     ratchet_stage: active
     ratchet_scope: duplication-non-growth-plus-bounded-growth
     expected_action: Hold duplication, file-growth, and fan-in at the reviewed baseline
@@ -295,21 +298,23 @@ hotspot_family_ratchets:
       files_ge_250_loc: 4
       max_internal_fan_in: 4
     metrics:
-      duplication_clusters: 2
-      files: 30
-      total_loc: 4218
+      duplication_clusters: 0
+      files: 31
+      total_loc: 4479
       files_ge_250_loc: 4
-      helper_function_ratio: 0.431
+      helper_function_ratio: 0.47
       max_internal_fan_in: 4
-      max_internal_fan_in_module: bioetl.composition.factories.pipeline.control_plane_artifacts
+      max_internal_fan_in_module: bioetl.composition.factories.pipeline.construction_types
     trend:
-      status: refreshed_2026-05-20
-      next_action: 2026-05-20 refreshes the reviewed measured baseline for composition/factories/pipeline
-        to 2 duplicate clusters after runner assembly helper consolidation; keep
-        file-growth and max_internal_fan_in pinned at the reviewed ceiling.
+      status: reduced_2026-05-21_issue_4477
+      next_action: 2026-05-21 closes the remaining composition/factories/pipeline
+        duplicate cluster by removing mirrored public/private transformer
+        keyword forwarding; keep the family on a zero-duplication ratchet while
+        file-growth and max_internal_fan_in stay pinned at the reviewed ceiling.
   - name: application_services_control_plane
     owner: '@bioetl-platform'
     linked_rf: RF-023
+    linked_issue: '#4454'
     ratchet_stage: reviewed-baseline
     ratchet_scope: duplication-report-plus-bounded-growth
     expected_action: Hold file-growth and fan-in at the reviewed baseline during
@@ -338,6 +343,7 @@ hotspot_family_ratchets:
   - name: composition_runtime_builders
     owner: '@bioetl-platform'
     linked_rf: RF-023
+    linked_issue: '#4456'
     ratchet_stage: reviewed-baseline
     ratchet_scope: duplication-report-plus-bounded-growth
     expected_action: Hold file-growth and fan-in at the reviewed baseline during

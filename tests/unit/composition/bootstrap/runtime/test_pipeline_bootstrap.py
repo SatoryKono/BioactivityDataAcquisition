@@ -10,6 +10,8 @@ import pytest
 
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 
+pytestmark = pytest.mark.repo_backed
+
 
 @pytest.mark.unit
 class TestBootstrapPipelineRunner:

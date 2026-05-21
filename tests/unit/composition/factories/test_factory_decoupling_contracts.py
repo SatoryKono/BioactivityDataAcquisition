@@ -17,6 +17,8 @@ from bioetl.composition.factories.services import (
     _create_pipeline_with_services_impl,
 )
 
+pytestmark = pytest.mark.repo_backed
+
 
 @pytest.mark.unit
 def test_service_bundle_factory_has_no_pipeline_factory_proxy_imports() -> None:

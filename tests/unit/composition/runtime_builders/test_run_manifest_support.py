@@ -31,8 +31,10 @@ from bioetl.composition.runtime_builders._run_manifest_support import (
     validate_reproducible_sink_modes,
 )
 from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
+    resolve_code_revision_for_manifest,
     validate_required_runtime_persistence_profile,
 )
+from bioetl.composition.services.versioning import CodeRevisionProvenance
 from bioetl.domain.control_plane import ReplayCapability, RunInputSnapshotRef
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunID
@@ -212,6 +214,52 @@ def test_build_manifest_create_request_uses_supplied_reproducibility_context(
     assert captured["assemble_request_inputs"].source_fingerprint == (
         "source-fingerprint-1"
     )
+
+
+@pytest.mark.unit
+def test_resolve_code_revision_for_manifest_keeps_clean_provenance_in_test_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders._run_manifest_builder_policy.get_code_revision_provenance",
+        lambda: CodeRevisionProvenance(
+            git_commit="a" * 40,
+            source_revision_state="clean",
+            dependency_lock_hash="sha256:test-lock",
+        ),
+    )
+
+    provenance = resolve_code_revision_for_manifest(
+        resolved_config_hash="b" * 64,
+        test_mode=True,
+    )
+
+    assert provenance.git_commit == "a" * 40
+    assert provenance.source_revision_state == "clean"
+    assert provenance.dependency_lock_hash == "sha256:test-lock"
+
+
+@pytest.mark.unit
+def test_resolve_code_revision_for_manifest_uses_deterministic_fallback_for_dirty_test_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders._run_manifest_builder_policy.get_code_revision_provenance",
+        lambda: CodeRevisionProvenance(
+            git_commit="c" * 40,
+            source_revision_state="dirty",
+            dependency_lock_hash="sha256:test-lock",
+        ),
+    )
+
+    provenance = resolve_code_revision_for_manifest(
+        resolved_config_hash="deadbeef" * 8,
+        test_mode=True,
+    )
+
+    assert provenance.git_commit == "test-deadbeefdead"
+    assert provenance.source_revision_state == "clean"
+    assert provenance.dependency_lock_hash == "sha256:test-lock-deadbeefdead"
 
 
 @pytest.mark.unit

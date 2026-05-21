@@ -30,7 +30,7 @@ the canonical source of truth lives under `checks/`, `build/`, `fixers/`, and
 
 Compatibility wrappers are intentionally kept for:
 
-- direct file execution from CI, docs, or local habits such as `python scripts/docs/...`
+- historical direct-file callers during the bounded compatibility window
 - tests that import or monkeypatch historical top-level modules
 - shell-oriented transport needs such as `bash scripts/docs/build_docs_site.sh`, though the preferred public entrypoint is `python -m scripts.docs build-site`
 
