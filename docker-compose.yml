@@ -66,3 +66,13 @@ services:
       - TUNNEL_TOKEN=${TUNNEL_TOKEN}
     ports:
       - "9999:8080"
+
+volumes:
+  warp-data:
+
+networks:
+  warp-network:
+    external: false
+  monitoring:
+    external: true
+    name: bioetl-monitoring

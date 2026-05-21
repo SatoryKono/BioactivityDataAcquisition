@@ -1,0 +1,44 @@
+services:
+  redis:
+    image: redis:7.2-alpine
+    container_name: bioetl-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-bioetl_redis_secure}
+    volumes:
+      - redis-data:/data
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-bioetl_redis_secure}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    environment:
+      - REDIS_REPLICATION_DISKLESS_SYNC=no
+      - REDIS_TCP_KEEPALIVE=300
+      - REDIS_TIMEOUT=0
+
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: bioetl-redis-exporter
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://:${REDIS_PASSWORD:-bioetl_redis_secure}@redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+
+networks:
+  monitoring:
+    external: true
+    name: bioetl-monitoring
