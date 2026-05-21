@@ -103,9 +103,12 @@ def validate_pipeline_name(
         click.BadParameter: If pipeline name is not in registry.
     """
     registry = resolve_context_registry(click_context)
-    if registry is None:
-        registry = build_cli_registry()
-    available = registry.list_pipelines()
+    available = list(registry.list_pipelines()) if registry is not None else []
+    if not available or value not in available:
+        fallback_registry = build_cli_registry()
+        fallback_available = list(fallback_registry.list_pipelines())
+        if fallback_available or not available:
+            available = fallback_available
     if value not in available:
         raise click.BadParameter(f"Unknown pipeline: {value}. Available: {available}")
     return value

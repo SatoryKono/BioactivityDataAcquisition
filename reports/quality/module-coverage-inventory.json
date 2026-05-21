@@ -7812,7 +7812,7 @@
       "missing_lines": null,
       "module": "bioetl.composition.services.versioning",
       "path": "src/bioetl/composition/services/versioning.py",
-      "source_lines": 294
+      "source_lines": 296
     },
     {
       "coverage_percent": null,
@@ -13692,7 +13692,7 @@
       "missing_lines": null,
       "module": "bioetl.infrastructure.adapters.chembl.models_common",
       "path": "src/bioetl/infrastructure/adapters/chembl/models_common.py",
-      "source_lines": 271
+      "source_lines": 281
     },
     {
       "coverage_percent": null,
@@ -18092,7 +18092,7 @@
       "missing_lines": null,
       "module": "bioetl.interfaces.cli.commands._workflow_run_support",
       "path": "src/bioetl/interfaces/cli/commands/_workflow_run_support.py",
-      "source_lines": 298
+      "source_lines": 300
     },
     {
       "coverage_percent": null,
@@ -18442,7 +18442,7 @@
       "missing_lines": null,
       "module": "bioetl.interfaces.cli.commands.domains.health.metrics_publication_integration",
       "path": "src/bioetl/interfaces/cli/commands/domains/health/metrics_publication_integration.py",
-      "source_lines": 39
+      "source_lines": 41
     },
     {
       "coverage_percent": null,
@@ -18662,7 +18662,7 @@
       "missing_lines": null,
       "module": "bioetl.interfaces.cli.commands.domains.run.support",
       "path": "src/bioetl/interfaces/cli/commands/domains/run/support.py",
-      "source_lines": 200
+      "source_lines": 203
     },
     {
       "coverage_percent": null,
@@ -19097,7 +19097,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-05-21",
-  "source_tree_sha256": "60d8eb63ff2c24ff1268cf56ed218cc01c01b0d3aacd8e646c66d40ea6542711",
+  "source_tree_sha256": "255f94eba93fd749f946c8536639b0317fd074d5df2e244846cc233d5a265029",
   "summary": {
     "coverage_xml_present": false,
     "source_module_count": 1909,

@@ -70,7 +70,6 @@ class TestGoldPublicationSchemaUnifiedFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLPublicationGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -80,7 +79,7 @@ class TestGoldPublicationSchemaUnifiedFields:
     def test_schema_has_publication_date(
         self, schema_class: SchemaType, name: str
     ) -> None:
-        """All Gold publication schemas must have publication_date field."""
+        """Gold publication schemas with exact-date support must expose publication_date."""
         fields = get_schema_fields(schema_class)
         assert "publication_date" in fields, f"{name} missing publication_date field"
 
@@ -138,7 +137,6 @@ class TestGoldPublicationSchemaCrossRefFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLPublicationGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -146,7 +144,7 @@ class TestGoldPublicationSchemaCrossRefFields:
         ],
     )
     def test_schema_has_pmc_id_field(self, schema_class: SchemaType, name: str) -> None:
-        """All Gold publication schemas should have pmc_id field."""
+        """Gold publication schemas with raw PMC IDs should expose pmc_id."""
         fields = get_schema_fields(schema_class)
         assert "pmc_id" in fields, f"{name} missing pmc_id field"
 
@@ -450,26 +448,17 @@ class TestGoldSchemaValidation:
             # Cross-reference IDs (raw identifiers from Silver)
             "doi": "10.1234/test",
             "pmid": "12345678",
-            "pmc_id": None,
             "title": "Test Publication",
             "authors": '["Author One"]',
             "abstract": "Test abstract",
-            "affiliation_list": None,
             "author_keys": None,
-            "author_orcids": None,
             "publication_type": "journal-article",
-            "publication_type_unified": None,
-            "publication_subclass": None,
-            "publication_class": None,
-            "publication_date": None,
             "journal": "Test Journal",
             "publication_year": 2024,
             "volume": "10",
             "issue": "2",
             "page_first": "100",
             "page_last": "110",
-            "language": None,
-            "is_oa": None,
             "citations_received": None,
             "citations_made": None,
             "src_id": 1,

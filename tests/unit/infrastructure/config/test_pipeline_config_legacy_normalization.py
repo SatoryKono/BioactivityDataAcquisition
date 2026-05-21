@@ -438,8 +438,13 @@ def test_load_pipeline_config_runs_read_normalize_validate_map_in_order(
     validated_payload = object()
     mapped_payload = object()
 
-    def fake_read(name: str) -> PipelineConfigReadPayload:
+    def fake_read(
+        name: str,
+        *,
+        configs_root: Path | None = None,
+    ) -> PipelineConfigReadPayload:
         assert name == "demo_item"
+        assert configs_root is not None
         events.append("read")
         return raw_payload
 

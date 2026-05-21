@@ -19,13 +19,15 @@ def publish_metrics_safely(
     from bioetl.composition.execution_api import push_metrics_to_gateway
 
     try:
-        push_metrics_to_gateway(
-            run_label=run_label,
-            pipeline_name=pipeline_name,
-            run_type=run_type,
-            grouping_key_extra=grouping_key_extra,
-            metric_names=metric_names,
-        )
+        gateway_kwargs: dict[str, object] = {
+            "run_label": run_label,
+            "pipeline_name": pipeline_name,
+            "run_type": run_type,
+            "grouping_key_extra": grouping_key_extra,
+        }
+        if metric_names is not None:
+            gateway_kwargs["metric_names"] = metric_names
+        push_metrics_to_gateway(**gateway_kwargs)
         return True
     except (
         OSError,

@@ -158,14 +158,14 @@ class TestChemblActivitySchema:
 
     def test_has_activity_values(self):
         """Verify activity value fields exist."""
-        expected = ["value", "units", "standard_value", "standard_units"]
+        expected = ["activity_value", "units", "standard_value", "standard_units"]
         for field_name in expected:
             assert field_name in CHEMBL_ACTIVITY_SCHEMA.names
 
     def test_value_fields_are_float64(self):
         """Verify numeric value fields are float64."""
         float_fields = [
-            "value",
+            "activity_value",
             "upper_value",
             "standard_value",
             "standard_upper_value",
@@ -501,16 +501,16 @@ class TestSilverSchemaValidation:
             "target_organism": "Homo sapiens",
             "target_taxonomy_id": 9606.0,
             "assay_type": "B",
-            "description": "Binding assay",
+            "assay_description": "Binding assay",
             "assay_variant_accession": None,
             "assay_variant_mutation": None,
             "bao_endpoint": "BAO_0000190",
             "bao_format": "BAO_0000357",
             "bao_label": "single protein format",
-            "type": "IC50",
-            "value": 50.0,
+            "activity_type": "IC50",
+            "activity_value": 50.0,
             "units": "nM",
-            "relation": "=",
+            "activity_relation": "=",
             "upper_value": None,
             "text_value": None,
             "standard_type": "IC50",
@@ -611,7 +611,7 @@ class TestSilverSchemaValidation:
             "publication_id": "CHEMBL1122334",
             "record_id": "not_an_integer",  # Should be int64
             "src_id": "not_an_integer",  # Should be int64
-            "value": "not_a_float",  # Should be float64
+            "activity_value": "not_a_float",  # Should be float64
             "standard_value": "not_a_float",  # Should be float64
             "_run_id": "run_001",
             "_run_type": "incremental",
@@ -663,16 +663,16 @@ class TestSilverSchemaValidation:
             "target_organism": None,
             "target_taxonomy_id": None,
             "assay_type": None,
-            "description": None,
+            "assay_description": None,
             "assay_variant_accession": None,
             "assay_variant_mutation": None,
             "bao_endpoint": None,
             "bao_format": None,
             "bao_label": None,
-            "type": None,
-            "value": None,
+            "activity_type": None,
+            "activity_value": None,
             "units": None,
-            "relation": None,
+            "activity_relation": None,
             "upper_value": None,
             "text_value": None,
             "standard_type": None,

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
+import shutil
 import subprocess
 
 import pytest
@@ -39,6 +41,14 @@ ACTIVE_SILVER_METADATA_PATHS = (
 
 
 def _rg_hits(pattern: str) -> list[str]:
+    if shutil.which("rg") is None:
+        compiled = re.compile(pattern)
+        return sorted(
+            path.resolve().relative_to(ROOT).as_posix()
+            for path in (ROOT / "src").rglob("*.py")
+            if compiled.search(path.read_text(encoding="utf-8"))
+        )
+
     result = subprocess.run(
         ["rg", "-l", pattern, str(ROOT / "src"), "-g", "*.py"],
         check=False,

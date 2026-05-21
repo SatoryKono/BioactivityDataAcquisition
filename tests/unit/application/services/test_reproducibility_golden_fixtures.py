@@ -21,6 +21,9 @@ from bioetl.application.services.control_plane.run_manifest_diagnostics import (
     build_diagnostics_summary,
 )
 from bioetl.application.services.lineage import MetadataCoordinator
+from bioetl.application.services.lineage.metadata_context import (
+    EnvironmentMetadataRuntimeService,
+)
 from bioetl.domain.composite.result import (
     DependencyResult,
     DependencyStatus,
@@ -167,7 +170,7 @@ def _make_manifest() -> RunManifest:
 
 def _prime_environment_metadata() -> None:
     MetadataCoordinator.reset_environment_cache()
-    MetadataCoordinator._cached_environment = EnvironmentMetadata(
+    EnvironmentMetadataRuntimeService._cached_environment = EnvironmentMetadata(
         hostname="golden-host",
         python_version="3.12.0",
         bioetl_version="0.0-test",

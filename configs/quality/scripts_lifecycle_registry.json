@@ -212,18 +212,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as the bounded non-interactive WSL helper used to avoid Codex launch hangs while the surrounding Windows bootstrap flow is still being consolidated; remove it if launch-codex-wsl.ps1 is retired or rewritten onto a different startup path."
     },
-    "scripts/ops/docker-setup.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as the canonical Windows Docker setup implementation. User-facing docs now reference scripts/ops/docker-setup.ps1 directly; keep the root wrapper only for external compatibility until the reviewed removal window closes."
-    },
-    "scripts/ops/docker-setup.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as the canonical shell Docker setup implementation. User-facing docs now reference scripts/ops/docker-setup.sh directly; keep the root wrapper only for external compatibility until the reviewed removal window closes."
-    },
     "scripts/engineering/qa/import_graph_inventory.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

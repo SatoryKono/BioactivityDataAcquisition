@@ -72,7 +72,7 @@
       "target_id",
       "publication_id",
       "assay_type",
-      "description"
+      "assay_description"
     ],
     "seed_pipeline": "chembl_assay",
     "version": "1.0.0"

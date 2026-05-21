@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 _FULL_GIT_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+_RUNTIME_PATH_CLS = type(Path("."))
 
 __all__ = [
     "CodeRevisionProvenance",
@@ -145,7 +146,8 @@ def get_git_commit() -> str | None:
 @lru_cache(maxsize=1)
 def get_dependency_lock_hash() -> str | None:
     """Return the content hash for the active dependency lockfile, if present."""
-    for directory in (Path.cwd(), *Path.cwd().parents):
+    cwd = _RUNTIME_PATH_CLS(os.getcwd())
+    for directory in (cwd, *cwd.parents):
         for lockfile_name in ("uv.lock", "poetry.lock"):
             lockfile = directory / lockfile_name
             if lockfile.is_file():

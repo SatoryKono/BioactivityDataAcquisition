@@ -64,7 +64,7 @@ def test_chembl_record_and_response_registries_cover_remaining_api_backed_entiti
 
 def test_remaining_api_backed_record_models_validate_tracked_fixture_shapes() -> None:
     publication_row = _load_first_fixture_row(
-        "tests/fixtures/bronze/chembl/publication/sample_ci_2026-04-29.jsonl"
+        "tests/fixtures/bronze/chembl/publication/sample_ci_2026-04-24.jsonl"
     )
     tissue_row = _load_first_fixture_row(
         "tests/fixtures/bronze/chembl/tissue/sample_ci_2026-04-29.jsonl"

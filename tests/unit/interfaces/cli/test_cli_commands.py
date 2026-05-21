@@ -1830,59 +1830,62 @@ class MockRunResult:
 class TestRunCommandExceptionHandlers:
     """Tests for exception handlers in run command."""
 
-    def test_run_pipeline_not_found(self, cli_runner):
-        """Test run command handles PipelineNotFoundError."""
+    def test_run_pipeline_not_found(self, capsys):
+        """Test run execution step handles PipelineNotFoundError."""
+        from bioetl.application.services.execution.cli_run_orchestration_models import (
+            RunExecutionRequest,
+        )
         from bioetl.application.services.execution.pipeline_runner_models import (
             PipelineNotFoundError,
+            RunOptions,
+        )
+        from bioetl.interfaces.cli.commands.domains.run.command_policy import (
+            execute_run_step,
         )
 
-        mock_service = MagicMock()
-        mock_service.run = AsyncMock(
-            side_effect=PipelineNotFoundError("foo", available=["bar", "baz"])
+        with pytest.raises(SystemExit) as exc_info:
+            execute_run_step(
+                request=RunExecutionRequest(
+                    pipeline="foo",
+                    options=RunOptions(),
+                    health_server=True,
+                    health_port=8080,
+                ),
+                execute_run=MagicMock(
+                    side_effect=PipelineNotFoundError("foo", available=["bar", "baz"])
+                ),
+            )
+
+        captured = capsys.readouterr()
+        assert exc_info.value.code == 80  # CONFIG_ERROR
+        assert "Pipeline not found" in captured.err
+
+    def test_run_unexpected_exception(self, capsys):
+        """Test run execution step handles unexpected exceptions."""
+        from bioetl.application.services.execution.cli_run_orchestration_models import (
+            RunExecutionRequest,
+        )
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            RunOptions,
+        )
+        from bioetl.interfaces.cli.commands.domains.run.command_policy import (
+            execute_run_step,
         )
 
-        with (
-            patch(
-                "bioetl.interfaces.cli.registry_helpers.build_cli_registry"
-            ) as mock_registry,
-            patch(
-                "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
-                return_value=mock_service,
-            ),
-            patch("bioetl.interfaces.cli.commands.run.ensure_metrics_server_started"),
-            patch(
-                "bioetl.interfaces.cli.commands.run.health_server_context", MagicMock()
-            ),
-        ):
-            mock_registry.return_value.list_pipelines.return_value = ["foo"]
-            result = cli_runner.invoke(cli, ["run", "--pipeline", "foo"])
+        with pytest.raises(SystemExit) as exc_info:
+            execute_run_step(
+                request=RunExecutionRequest(
+                    pipeline="foo",
+                    options=RunOptions(),
+                    health_server=True,
+                    health_port=8080,
+                ),
+                execute_run=MagicMock(side_effect=RuntimeError("Unexpected failure")),
+            )
 
-        assert result.exit_code == 80  # CONFIG_ERROR
-        assert "Pipeline not found" in result.output
-
-    def test_run_unexpected_exception(self, cli_runner):
-        """Test run command handles unexpected exceptions."""
-        mock_service = MagicMock()
-        mock_service.run = AsyncMock(side_effect=RuntimeError("Unexpected failure"))
-
-        with (
-            patch(
-                "bioetl.interfaces.cli.registry_helpers.build_cli_registry"
-            ) as mock_registry,
-            patch(
-                "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
-                return_value=mock_service,
-            ),
-            patch("bioetl.interfaces.cli.commands.run.ensure_metrics_server_started"),
-            patch(
-                "bioetl.interfaces.cli.commands.run.health_server_context", MagicMock()
-            ),
-        ):
-            mock_registry.return_value.list_pipelines.return_value = ["foo"]
-            result = cli_runner.invoke(cli, ["run", "--pipeline", "foo"])
-
-        assert result.exit_code == 1  # FAIL
-        assert "Unexpected error" in result.output
+        captured = capsys.readouterr()
+        assert exc_info.value.code == 1  # FAIL
+        assert "Unexpected error" in captured.err
 
 
 # =============================================================================
