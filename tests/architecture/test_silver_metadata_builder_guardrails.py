@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 
 import pytest
 
@@ -37,6 +38,22 @@ ACTIVE_SILVER_METADATA_PATHS = (
 )
 
 
+def _rg_hits(pattern: str) -> list[str]:
+    result = subprocess.run(
+        ["rg", "-l", pattern, str(ROOT / "src"), "-g", "*.py"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode not in {0, 1}:
+        raise RuntimeError(result.stderr.strip() or f"rg failed for {pattern!r}")
+    return [
+        Path(line).resolve().relative_to(ROOT).as_posix()
+        for line in result.stdout.splitlines()
+        if line.strip()
+    ]
+
+
 @pytest.mark.architecture
 def test_legacy_silver_metadata_builder_module_has_been_removed() -> None:
     """The old metadata_builders module name must not return to runtime code."""
@@ -52,14 +69,12 @@ def test_quarantined_silver_metadata_sidecar_adapter_has_been_removed() -> None:
 @pytest.mark.architecture
 def test_source_tree_does_not_reintroduce_silver_placeholder_identity() -> None:
     """Placeholder hashes and run-derived artifact IDs are forbidden in src."""
-    violations: list[str] = []
-    for path in sorted((ROOT / "src").rglob("*.py")):
-        source = path.read_text(encoding="utf-8")
-        if (
-            "placeholder-hash" in source
-            or "{request.table_name}-{request.run_id" in source
-        ):
-            violations.append(path.relative_to(ROOT).as_posix())
+    violations = sorted(
+        {
+            *_rg_hits("placeholder-hash"),
+            *_rg_hits(r"\{request\.table_name\}-\{request\.run_id"),
+        }
+    )
 
     assert not violations
 
@@ -67,11 +82,7 @@ def test_source_tree_does_not_reintroduce_silver_placeholder_identity() -> None:
 @pytest.mark.architecture
 def test_runtime_code_does_not_import_quarantined_silver_sidecar_adapter() -> None:
     """Active Silver runtime paths must use MetadataCoordinatorPort, not adapter."""
-    importers: set[str] = set()
-    for path in sorted((ROOT / "src").rglob("*.py")):
-        source = path.read_text(encoding="utf-8")
-        if TARGET_MODULE in source:
-            importers.add(path.relative_to(ROOT).as_posix())
+    importers = _rg_hits(TARGET_MODULE)
 
     assert not importers
 
@@ -98,10 +109,6 @@ def test_active_silver_metadata_paths_do_not_extract_record_provenance() -> None
 @pytest.mark.architecture
 def test_runtime_code_does_not_import_legacy_silver_metadata_builder() -> None:
     """Runtime code must not import the removed metadata_builders module name."""
-    importers: list[str] = []
-    for path in sorted((ROOT / "src").rglob("*.py")):
-        source = path.read_text(encoding="utf-8")
-        if LEGACY_TARGET_MODULE in source:
-            importers.append(path.relative_to(ROOT).as_posix())
+    importers = _rg_hits(LEGACY_TARGET_MODULE)
 
     assert not importers
