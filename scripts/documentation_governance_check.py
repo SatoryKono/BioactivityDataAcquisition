@@ -14,7 +14,6 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
 
 import yaml
 
@@ -191,7 +190,11 @@ class DocumentationGovernanceChecker:
         broken_links_found = False
 
         for doc_file in doc_files:
-            content = doc_file.read_text()
+            try:
+                content = doc_file.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError) as exc:
+                warnings.append(f"Unable to read {doc_file}: {exc}")
+                continue
 
             # Check for common broken link patterns
             if "<link-or-path>" in content:
@@ -367,8 +370,9 @@ class DocumentationGovernanceChecker:
 
         # Individual check results would go here
         # For now, show summary
+        summary_details = f"{result.checks_passed}/{result.checks_run} checks passed"
         report.append(
-            f"| Overall | {'PASS' if result.passed else 'FAIL'} | {result.checks_passed}/{result.checks_run} checks passed |"
+            f"| Overall | {'PASS' if result.passed else 'FAIL'} | {summary_details} |"
         )
 
         report.append("")
@@ -418,8 +422,10 @@ class DocumentationGovernanceChecker:
             status = (
                 "✅ PASS" if weighted_score >= rule_config["threshold"] else "❌ FAIL"
             )
+            rule_title = rule_name.replace("_", " ").title()
             report.append(
-                f"| {rule_name.replace('_', ' ').title()} | {rule_config['threshold']}% | {weighted_score:.1f}% | {status} |"
+                f"| {rule_title} | {rule_config['threshold']}% | "
+                f"{weighted_score:.1f}% | {status} |"
             )
 
         return "\n".join(report)

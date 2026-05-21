@@ -177,6 +177,7 @@
 05-operations/tooling/scripts-ops/SETUP_CHECKLIST.md
 05-operations/tooling/scripts-ops/WSL_SETUP_SUMMARY.md
 05-operations/verification/ci-failure-triage-2026-05-05.md
+05-operations/verification/docker-helper-credential-history-audit.md
 05-operations/verification/neo4j-memory-qa-examples.md
 05-operations/verification/neo4j-memory-windows-verification.md
 CODEX_HANG_FIX.md
