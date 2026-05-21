@@ -10,21 +10,16 @@ from __future__ import annotations
 import inspect
 import json
 import re
-import sys
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlunsplit
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-SRC_DIR = PROJECT_ROOT / "src"
-if str(SRC_DIR) not in sys.path:
-    sys.path.insert(0, str(SRC_DIR))
-
-from bioetl.domain.contracts import gold as gold_contracts  # noqa: E402
-from bioetl.domain.normalization.profiles import (  # noqa: E402
+from bioetl.domain.contracts import gold as gold_contracts
+from bioetl.domain.normalization.profiles import (
     resolve_normalization_profile_identity,
 )
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_VERSION = "1.0.0"
 JSON_SCHEMA_DRAFT7_URI = urlunsplit(
     ("http", "json-schema.org", "/draft-07/schema", "", "")

@@ -6,14 +6,14 @@ Artifacts:
 - Gold JSON contracts: docs/04-reference/contracts/gold/*.json
 
 Usage:
-    python scripts/schema/generate_schema_artifacts.py
-    python scripts/schema/generate_schema_artifacts.py --check
+    python -m scripts.schema generate-artifacts
+    python -m scripts.schema generate-artifacts --check
 """
 
 from __future__ import annotations
 
 import argparse
-import importlib.util
+import importlib
 import inspect
 import json
 import subprocess
@@ -76,7 +76,7 @@ def _build_registry(entries: list[CanonicalSchemaEntry]) -> str:
     lines.append('"""Auto-generated registry from configs/entities schema sections.')
     lines.append("")
     lines.append(
-        "DO NOT EDIT MANUALLY. Run: python scripts/schema/generate_schema_artifacts.py"
+        "DO NOT EDIT MANUALLY. Run: python -m scripts.schema generate-artifacts"
     )
     lines.append('"""')
     lines.append("")
@@ -181,7 +181,7 @@ def _run_gold_contract_generation(check: bool) -> bool:
 
     before = _snapshot_generated_contracts()
     subprocess.run(
-        [sys.executable, "scripts/schema/generate_contracts.py"],
+        [sys.executable, "-m", "scripts.schema.generate_contracts"],
         cwd=PROJECT_ROOT,
         check=True,
     )
@@ -202,17 +202,8 @@ def _snapshot_generated_contracts() -> dict[str, str]:
 
 
 def _load_generate_contracts_module() -> ModuleType:
-    """Load the contract generator script as a module for side-effect-free checks."""
-    script_path = PROJECT_ROOT / "scripts" / "schema" / "generate_contracts.py"
-    spec = importlib.util.spec_from_file_location(
-        "bioetl_generate_contracts_script",
-        script_path,
-    )
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"Unable to load contract generator: {script_path}")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    """Load the contract generator through its package module path."""
+    return importlib.import_module("scripts.schema.generate_contracts")
 
 
 def _expected_generated_contracts_snapshot() -> dict[str, str]:
@@ -255,7 +246,7 @@ def main() -> int:
 
     if args.check and (stale_registry or stale_contracts):
         _emit(
-            "\nGenerated artifacts are stale. Run: python scripts/schema/generate_schema_artifacts.py",
+            "\nGenerated artifacts are stale. Run: python -m scripts.schema generate-artifacts",
             err=True,
         )
         return 1

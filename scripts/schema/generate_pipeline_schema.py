@@ -6,7 +6,7 @@ configs/_schema/composite.json with auto-generated schemas derived
 from PipelineYamlConfig and CompositeConfigFileSchema Pydantic models.
 
 Usage:
-    python -m scripts.schema.generate_pipeline_schema [--check]
+    python -m scripts.schema generate-pipeline [--check]
 
 Exit codes:
     0 - Schemas generated (or up-to-date with --check)
@@ -18,13 +18,12 @@ import json
 import sys
 from pathlib import Path
 
-project_root = Path(__file__).resolve().parents[2]
-
 from bioetl.infrastructure.schemas.composite_config import CompositeConfigFileSchema
 from bioetl.infrastructure.schemas.dq_config import DQConfigFile
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
+project_root = Path(__file__).resolve().parents[2]
 SCHEMA_DIR = project_root / "configs" / "_schema"
 
 SCHEMAS = {
@@ -86,7 +85,7 @@ def main() -> int:
 
     if args.check and stale:
         sys.stderr.write(
-            "\nSchemas are out of date. Run: python scripts/generate_pipeline_schema.py\n"
+            "\nSchemas are out of date. Run: python -m scripts.schema generate-pipeline\n"
         )
         return 1
 

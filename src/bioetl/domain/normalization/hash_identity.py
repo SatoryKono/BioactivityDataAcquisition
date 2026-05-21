@@ -13,13 +13,13 @@ hash migration is approved.
 
 from __future__ import annotations
 
-import math
 from collections.abc import Sequence
-from datetime import UTC, date, datetime
-from functools import singledispatch
-from typing import Literal
 
 from bioetl.domain.constants import META_FIELDS
+from bioetl.domain.normalization._hash_identity_scalars import (
+    HashDatetimePolicy,
+    normalize_hash_scalar_for_policy,
+)
 from bioetl.domain.normalization.json import (
     deserialize_json_value,
     serialize_json_canonical,
@@ -27,63 +27,11 @@ from bioetl.domain.normalization.json import (
 from bioetl.domain.types import JsonDict
 
 __all__ = [
-    "HashDatetimePolicy", "normalize_hash_identity_record",
-    "normalize_hash_identity_value", "serialize_hash_identity_canonical_json",
+    "HashDatetimePolicy",
+    "normalize_hash_identity_record",
+    "normalize_hash_identity_value",
+    "serialize_hash_identity_canonical_json",
 ]
-
-HashDatetimePolicy = Literal["v1_date", "v2_datetime_utc"]
-
-
-@singledispatch
-def _normalize_scalar(
-    value: object,
-) -> object:
-    """Normalize one scalar value for the hash-identity contract."""
-    return value
-
-
-@_normalize_scalar.register(float)
-def _normalize_float(value: float) -> float | None:
-    """Normalize floats for deterministic hashing and dedup identity."""
-    if math.isnan(value) or math.isinf(value):
-        return None
-    return round(value, 10)
-
-
-@_normalize_scalar.register(datetime)
-def _normalize_datetime(value: datetime) -> str:
-    """Collapse datetimes to date ISO strings for the historical hash contract."""
-    return value.date().isoformat()
-
-
-@_normalize_scalar.register(date)
-def _normalize_date(value: date) -> str:
-    """Normalize dates to ISO strings."""
-    return value.isoformat()
-
-
-@_normalize_scalar.register(str)
-def _normalize_str(value: str) -> str:
-    """Strip strings before hashing."""
-    return value.strip()
-
-
-def _normalize_datetime_utc(value: datetime) -> str:
-    """Normalize datetimes with full UTC precision for v2 hash identity."""
-    aware_value = value if value.tzinfo is not None else value.replace(tzinfo=UTC)
-    utc_value = aware_value.astimezone(UTC)
-    return utc_value.isoformat(timespec="microseconds").replace("+00:00", "Z")
-
-
-def _normalize_scalar_for_policy(
-    value: object,
-    *,
-    datetime_policy: HashDatetimePolicy,
-) -> object:
-    """Normalize one scalar under the selected versioned hash policy."""
-    if isinstance(value, datetime) and datetime_policy == "v2_datetime_utc":
-        return _normalize_datetime_utc(value)
-    return _normalize_scalar(value)
 
 
 def _looks_like_serialized_json_container(value: str) -> bool:
@@ -235,7 +183,7 @@ def normalize_hash_identity_value(
     if normalized_string_candidate is not None:
         return normalized_string_candidate
 
-    return _normalize_scalar_for_policy(value, datetime_policy=datetime_policy)
+    return normalize_hash_scalar_for_policy(value, datetime_policy=datetime_policy)
 
 
 def _should_include_hash_identity_field(

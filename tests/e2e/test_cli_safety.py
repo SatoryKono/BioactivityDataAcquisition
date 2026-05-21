@@ -23,9 +23,15 @@ def mock_registry():
     mock = MagicMock()
     mock.list_pipelines.return_value = ["test_pipe"]
     mock.contains.return_value = True
-    with patch(
-        "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
-        return_value=mock,
+    with (
+        patch(
+            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
+            return_value=mock,
+        ),
+        patch(
+            "bioetl.interfaces.cli.main._build_main_registry",
+            return_value=mock,
+        ),
     ):
         yield mock
 

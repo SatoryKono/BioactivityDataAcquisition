@@ -253,7 +253,7 @@ API reference (`docs/04-reference/api/application.md`) uses legacy entity names 
 ```markdown
 ## Problem
 
-ADR-042 (`docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md`) contains a placeholder `<link-or-path>` in the References section, breaking the navigability and verification chain for this important testing strategy document.
+ADR-042 (`docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md`) contained a placeholder reference token in the References section, breaking the navigability and verification chain for this important testing strategy document.
 
 ## Impact
 
@@ -261,12 +261,12 @@ ADR-042 (`docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md`) co
 
 ## Evidence
 
-- **ADR-042**: Contains `<link-or-path>` placeholder in References section
+- **ADR-042**: Contains placeholder reference token in References section
 - **User Impact**: Cannot trace ADR to implementation/test/workflow
 
 ## Solution
 
-1. Replace `<link-or-path>` with actual links to:
+1. Replace the placeholder reference token with actual links to:
    - Implementation code
    - Test files
    - CI/CD workflows
@@ -531,7 +531,7 @@ Fix terminology drift and improve navigation to resolve P1 usability issues.
    - Add clear visual indicators for each category
 
 3. **ADR-042 reference fix**:
-   - Replace `<link-or-path>` placeholder with actual links
+   - Replace placeholder reference token with actual links
    - Add links to implementation, tests, and workflows
    - Validate all references
 

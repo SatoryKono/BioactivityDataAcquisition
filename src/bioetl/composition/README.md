@@ -122,7 +122,8 @@ StorageFactory
 - **No business logic** in composition — only wiring
 - **No imports from interfaces** — composition wires for interfaces, not the reverse
 - **Factories only here** — `Factory.create()` calls must not appear in domain/application
-- **Module-level singletons OK** — `_default_registry` is the only approved module-level instance
+- **Bounded module-level state only** — sanctioned process-local state is limited to the default pipeline/provider registry caches and narrow synchronization locks such as `_WORKFLOW_MEMORY_LOCK`; new globals require an explicit governance update.
+- **Workflow time is explicit** — control-plane workflow services are wired with `ClockPort`/`SystemClock`, not ad hoc wall-clock calls inside composition.
 
 ## Retained Entrypoint Policy
 

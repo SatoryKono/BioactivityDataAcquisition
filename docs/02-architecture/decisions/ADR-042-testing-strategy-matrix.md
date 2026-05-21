@@ -172,4 +172,7 @@ ______________________________________________________________________
 
 ## References
 
-- `<link-or-path>`
+- [Testing guide](../../03-guides/testing.md)
+- [Test matrix registry](../../../configs/quality/test_matrix.yaml)
+- [Module coverage inventory generator](../../../scripts/engineering/qa/report_module_coverage_inventory.py)
+- [Module coverage inventory gate](../../../tests/architecture/test_module_coverage_inventory.py)

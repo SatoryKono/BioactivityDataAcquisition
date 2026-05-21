@@ -30,6 +30,7 @@ from bioetl.domain.control_plane._run_ledger_runtime import (
 
 __all__ = ["RunLedgerReplayProjection", "project_run_ledger_replay"]
 
+
 @dataclass(frozen=True, slots=True)
 class RunLedgerReplayProjection:
     """Deterministic replay delta for durable composite resume milestones."""
@@ -51,7 +52,9 @@ class RunLedgerReplayProjection:
     unsupported_replay_entries: tuple[tuple[str, str, str | None], ...] = ()
 
 
-_ProjectionFn = Callable[[RunLedgerReplayProjection, RunLedgerEntry], RunLedgerReplayProjection]
+_ProjectionFn = Callable[
+    [RunLedgerReplayProjection, RunLedgerEntry], RunLedgerReplayProjection
+]
 
 
 def _project_stage_completed(
@@ -206,6 +209,7 @@ _EVENT_PROJECTORS: dict[str, _ProjectionFn] = {
     COMPOSITE_MERGE_COMPLETED_EVENT: _project_composite_merge_completed,
     INPUT_SNAPSHOT_PUBLISHED_EVENT: _project_input_snapshot_published,
 }
+
 
 def _advance_watermark(
     projection: RunLedgerReplayProjection,

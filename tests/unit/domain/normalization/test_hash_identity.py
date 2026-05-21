@@ -4,11 +4,15 @@ from __future__ import annotations
 
 from datetime import UTC, date, datetime, timezone, timedelta
 
+import pytest
+
 from bioetl.domain.normalization import (
     normalize_hash_identity_record,
     serialize_hash_identity_canonical_json,
 )
 from bioetl.domain.transformations import generate_content_hash
+
+pytestmark = pytest.mark.unit
 
 
 def test_hash_identity_normalizes_datetime_to_date_iso() -> None:

@@ -10,7 +10,7 @@ Checks:
   INV-CFG-006  pipeline_name == {provider}_{entity_type}
 
 Usage:
-    python scripts/schema/check_config_invariants.py [--verbose]
+    python -m scripts.schema check-invariants [--verbose]
 
 Exit codes:
     0 - All invariants pass
@@ -29,11 +29,7 @@ from typing import Any
 
 import yaml
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-if __package__ in {None, ""}:
-    sys.path.insert(0, str(PROJECT_ROOT / "src"))
-
-from bioetl.infrastructure.config.config_ci_contract import (  # noqa: E402
+from bioetl.infrastructure.config.config_ci_contract import (
     COMPOSITE_ALLOWED_KEYS,
     CONTRACT_ALLOWED_KEYS,
     ENTITY_ALLOWED_KEYS,
@@ -48,6 +44,7 @@ from bioetl.infrastructure.config.config_ci_contract import (  # noqa: E402
     VALID_LOADING_STRATEGIES,
 )
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CONFIGS_DIR = PROJECT_ROOT / "configs"
 ENTITIES_DIR = CONFIGS_DIR / "entities"
 COMPOSITES_DIR = CONFIGS_DIR / "composites"
