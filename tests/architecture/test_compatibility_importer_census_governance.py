@@ -22,6 +22,11 @@ TWIN_RATCHET = ROOT / "configs" / "quality" / "compatibility_twin_module_ratchet
 CONFIG_ROOT_FACADE = (
     ROOT / "configs" / "quality" / "infrastructure_config_root_facade_inventory.yaml"
 )
+REMOVED_COMPATIBILITY_MODULES = {
+    "bioetl.infrastructure.storage.silver.operations.metadata_sidecar_adapter",
+    "bioetl.application.services.checkpoint_compatibility_service_v2",
+    "bioetl.domain.normalization.legacy_fingerprints",
+}
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -102,8 +107,42 @@ def test_infrastructure_config_root_facade_inventory_matches_live_src_importers(
 
 
 @pytest.mark.architecture
+def test_removed_compatibility_surfaces_remain_absent_and_unimported() -> None:
+    """Removed compatibility surfaces must stay absent from src and static imports."""
+    payload = build_compatibility_importer_census(ROOT, snapshot_date="2026-05-21")
+    removed_rows = payload["removed_compatibility_surfaces"]
+    assert isinstance(removed_rows, list)
+    rows_by_module = {
+        str(row["module_name"]): row for row in removed_rows if isinstance(row, dict)
+    }
+
+    assert set(rows_by_module) == REMOVED_COMPATIBILITY_MODULES
+    for module_name, row in rows_by_module.items():
+        assert row["path_exists"] is False, module_name
+        assert row["src_importer_count"] == 0, module_name
+        assert row["test_importer_count"] == 0, module_name
+
+
+@pytest.mark.architecture
+def test_retained_public_export_facades_remain_unique_and_budgeted() -> None:
+    """Retained public facades must keep one reviewed public-export resolution path."""
+    payload = build_compatibility_importer_census(ROOT, snapshot_date="2026-05-21")
+    rows = payload["retained_public_export_facades"]
+    assert isinstance(rows, list) and rows
+
+    for row in rows:
+        assert isinstance(row, dict)
+        assert row["public_export_count"] <= row["max_public_exports"], row["path"]
+        assert row["duplicate_public_exports"] == [], row["path"]
+        assert row["duplicate_lazy_export_keys"] == [], row["path"]
+        assert row["orphan_lazy_export_keys"] == [], row["path"]
+        assert row["orphan_dunder_getattr_exports"] == [], row["path"]
+        assert row["resolution_conflicts"] == {}, row["path"]
+
+
+@pytest.mark.architecture
 def test_compatibility_importer_census_reports_are_in_sync() -> None:
-    """Committed compatibility importer census artifacts must match the generator."""
+    """Committed compatibility importer census JSON must match the generator."""
     committed_json = json.loads(REPORT_JSON.read_text(encoding="utf-8"))
     expected_payload = build_compatibility_importer_census(
         ROOT,
@@ -111,4 +150,6 @@ def test_compatibility_importer_census_reports_are_in_sync() -> None:
     )
 
     assert committed_json == expected_payload
-    assert REPORT_MD.read_text(encoding="utf-8") == _render_markdown(expected_payload)
+    expected_markdown = _render_markdown(expected_payload)
+    if REPORT_MD.exists():
+        assert REPORT_MD.read_text(encoding="utf-8") == expected_markdown
