@@ -11,7 +11,6 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.domain.ports.noop import NoOpAudit, NoOpTracing
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import observability_builder
@@ -20,6 +19,7 @@ from bioetl.composition.runtime_builders._runner_builder_orchestration import (
     attach_runner_control_plane_collaborators,
 )
 from bioetl.domain.ports import PipelineCreateRunnerRequest
+from bioetl.domain.ports.noop import NoOpAudit, NoOpTracing
 
 SILVER_OUTPUT_PATH = "test-output/silver/chembl/activity"
 SILVER_METADATA_PATH = "test-output/silver/chembl/activity/_metadata.yaml"
@@ -1930,26 +1930,18 @@ def test_assemble_filter_config_passes_cli_overrides_when_enabled() -> None:
 
 @pytest.mark.unit
 def test_canonical_observability_builder_uses_noop_when_disabled() -> None:
-    logger = MagicMock()
-    tracer = MagicMock()
-    metrics = MagicMock()
+    logger, tracer, metrics = MagicMock(), MagicMock(), MagicMock()
     logger_factory = MagicMock(return_value=logger)
     noop_tracing_factory = MagicMock(return_value=tracer)
     noop_metrics_factory = MagicMock(return_value=metrics)
 
+    obs = SimpleNamespace(
+        tracing_enabled=False, metrics_enabled=False, dq_monitor_enabled=False,
+        allow_noop_observability_in_prod=False, audit_enabled=False
+    )
     result = observability_builder.build_observability_bundle(
-        pipeline="chembl_activity",
-        run_id=uuid4(),
-        settings=SimpleNamespace(
-            env="dev",
-            observability=SimpleNamespace(
-                tracing_enabled=False,
-                metrics_enabled=False,
-                dq_monitor_enabled=False,
-                allow_noop_observability_in_prod=False,
-                audit_enabled=False,
-            ),
-        ),
+        pipeline="chembl_activity", run_id=uuid4(),
+        settings=SimpleNamespace(env="dev", observability=obs),
         logger_factory=logger_factory,
         noop_tracing_factory=noop_tracing_factory,
         noop_metrics_factory=noop_metrics_factory,
@@ -1964,39 +1956,24 @@ def test_canonical_observability_builder_uses_noop_when_disabled() -> None:
 
 @pytest.mark.unit
 def test_canonical_observability_builder_configures_dq_monitor_thresholds() -> None:
-    logger = MagicMock()
-    tracer = MagicMock()
-    metrics = MagicMock()
-    dq_monitor = MagicMock()
+    logger, tracer, metrics, dq_monitor = MagicMock(), MagicMock(), MagicMock(), MagicMock()
     logger_factory = MagicMock(return_value=logger)
     tracer_factory = MagicMock(return_value=tracer)
     metrics_factory = MagicMock(return_value=metrics)
     dq_monitor_factory = MagicMock(return_value=dq_monitor)
 
-    settings = SimpleNamespace(
-        env="dev",
-        observability=SimpleNamespace(
-            tracing_enabled=True,
-            metrics_enabled=True,
-            dq_monitor_enabled=True,
-            dq_baseline_window=20,
-            dq_z_score_threshold=2.5,
-            dq_min_baseline_samples=12,
-            dq_error_rate_max=0.3,
-            dq_quality_score_min=0.7,
-            allow_noop_observability_in_prod=False,
-            audit_enabled=False,
-        ),
+    obs_settings = SimpleNamespace(
+        tracing_enabled=True, metrics_enabled=True, dq_monitor_enabled=True,
+        dq_baseline_window=20, dq_z_score_threshold=2.5, dq_min_baseline_samples=12,
+        dq_error_rate_max=0.3, dq_quality_score_min=0.7,
+        allow_noop_observability_in_prod=False, audit_enabled=False,
     )
+    settings = SimpleNamespace(env="dev", observability=obs_settings)
 
     result = observability_builder.build_observability_bundle(
-        pipeline="chembl_activity",
-        run_id=uuid4(),
-        settings=settings,
-        logger_factory=logger_factory,
-        tracer_factory=tracer_factory,
-        metrics_factory=metrics_factory,
-        dq_monitor_factory=dq_monitor_factory,
+        pipeline="chembl_activity", run_id=uuid4(), settings=settings,
+        logger_factory=logger_factory, tracer_factory=tracer_factory,
+        metrics_factory=metrics_factory, dq_monitor_factory=dq_monitor_factory,
     )
 
     assert result.logger is logger

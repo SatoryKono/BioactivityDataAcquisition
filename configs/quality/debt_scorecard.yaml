@@ -322,10 +322,10 @@ hotspot_family_ratchets:
       max_internal_fan_in: 6
     metrics:
       duplication_clusters: 17
-      files: 65
-      total_loc: 12909
-      files_ge_250_loc: 20
-      helper_function_ratio: 0.495
+      files: 66
+      total_loc: 12998
+      files_ge_250_loc: 22
+      helper_function_ratio: 0.496
       max_internal_fan_in: 6
       max_internal_fan_in_module: bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers
     trend:

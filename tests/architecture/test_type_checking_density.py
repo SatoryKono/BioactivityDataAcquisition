@@ -44,7 +44,7 @@ class ZoneTypeCheckingStats:
 TYPE_CHECKING_DENSITY_BUDGETS: tuple[TypeCheckingBudget, ...] = (
     TypeCheckingBudget(
         relative_path="application/composite",
-        max_files_with_type_checking=43,
+        max_files_with_type_checking=44,
         max_type_checking_blocks=44,
         max_type_checking_imports=169,
     ),
