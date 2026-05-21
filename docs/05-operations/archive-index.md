@@ -31,6 +31,7 @@ ______________________________________________________________________
 ### Historical verification and release evidence
 
 - [Historical Release Checklist (v5.9)](release-checklist.md)
+- [Docker Helper Credential History Audit](verification/docker-helper-credential-history-audit.md)
 - [Endpoint Validation Checklist](verification/endpoint-validation-checklist.md)
 - [VCR Provider Rebalancing](verification/vcr-provider-rebalancing.md)
 - [VCR Test Tasks](verification/vcr-test-tasks.md)

@@ -1284,7 +1284,6 @@
       "src/bioetl/infrastructure/adapters/http/_health_monitor_observability.py"
     ],
     "pushgateway_url": [
-      "src/bioetl/composition/_metrics_publication.py",
       "src/bioetl/composition/observability_api.py"
     ],
     "quality_score": [

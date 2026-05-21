@@ -191,11 +191,13 @@ Examples:
   as exact replay.
 - `compatibility_taxonomy: checkpoint_snapshot_plus_ledger_suffix_resume` means
   the compatible path is the bounded composite checkpoint snapshot +
-  ledger-suffix reconstruction model; this is lifecycle-oriented reconstruction,
-  not rich checkpoint-state replay.
-- `compatibility_replay_readiness_verdict: lifecycle_projection_only` confirms
-  that the run is on the bounded composite lifecycle projection path rather than
-  a strict exact-replay path.
+  ledger-suffix reconstruction model; diagnostics then determine whether the
+  persisted evidence supports only lifecycle reconstruction or the richer
+  composite payload projection.
+- `compatibility_replay_readiness_verdict: lifecycle_projection_only` applies
+  only when the ledger lacks the published rich composite replay payload
+  evidence; runs with that evidence surface a regular resume-compatible verdict
+  instead of the lifecycle-only warning.
 - if checkpoint resume fails with unsupported ledger-suffix replay entries,
   treat that as a projector coverage conflict rather than as a transient cache
   miss; the bounded composite projector intentionally fails closed when suffix

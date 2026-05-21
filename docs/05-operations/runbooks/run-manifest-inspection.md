@@ -699,8 +699,10 @@ than silently accepting the bundle as canonical.
 - `correlation_anchor_gaps.contract_version > 0` on failure-critical runs means contract traceability is incomplete.
 - `persistence_profile.composite_resume_reconstructability` states the current
   composite replay boundary explicitly with
-  `scope=coarse_grained_composite_resume`: lifecycle milestones and watermarks
-  are reconstructed from persisted state, but rich checkpoint payloads are not.
+  `scope=coarse_grained_composite_resume` when only lifecycle milestones and
+  watermarks are reconstructable, or `scope=rich_composite_resume` when
+  persisted seed/dependency/enrichment/merge payload maps are also
+  reconstructable from the ledger evidence.
 
 ## Compliance
 

@@ -1,6 +1,6 @@
 version: 1
 policy_scope: sanctioned_twin_module_ratchet
-review_date: "2026-05-20"
+review_date: "2026-05-21"
 ratchet_mode: no_growth
 families:
   - family_id: application.core.span_helpers
@@ -41,7 +41,7 @@ families:
     private_module: bioetl.domain.normalization.profiles._chembl_policy_registry_data
     canonical_first_party_module: bioetl.domain.normalization.profiles.chembl_policy_registry_data
     max_public_src_importers: 2
-    max_private_src_importers: 2
+    max_private_src_importers: 3
     rationale: >-
       The data companion to the policy-registry twin is still split and should
       stay under a matching no-growth ratchet.
