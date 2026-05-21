@@ -164,9 +164,6 @@
     "Checkpoint exists but cannot be parsed, will be overwritten": [
       "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py"
     ],
-    "Checkpoint incompatible with current runtime anchors": [
-      "src/bioetl/application/composite/checkpoint/load_service.py"
-    ],
     "Checkpoint minimum compatibility validation failed (lenient mode)": [
       "src/bioetl/application/services/checkpoint_compatibility_service.py"
     ],
@@ -1650,7 +1647,6 @@
     "Checkpoint compatibility validation passed",
     "Checkpoint compatibility validation passed.",
     "Checkpoint exists but cannot be parsed, will be overwritten",
-    "Checkpoint incompatible with current runtime anchors",
     "Checkpoint minimum compatibility validation failed (lenient mode)",
     "Checkpoint minimum compatibility validation passed (lenient mode)",
     "Checkpoint pre-check failed with domain error",

@@ -8,14 +8,27 @@ from uuid import UUID
 import pytest
 
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.control_plane._run_ledger_replay_policy import (
+    PASS_THROUGH_EVENT_TYPES,
+    STAGE_COMPLETION_UPDATES,
+    TERMINAL_STATES,
+)
 from bioetl.domain.control_plane.run_ledger import (
+    ARTIFACT_PUBLISHED_EVENT,
     COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
     COMPOSITE_ENRICHER_COMPLETED_EVENT,
     COMPOSITE_MERGE_COMPLETED_EVENT,
     COMPOSITE_RUN_LEDGER_STAGE_NAMES,
+    DQ_POLICY_APPLIED_EVENT,
     INPUT_SNAPSHOT_PUBLISHED_EVENT,
+    MANIFEST_CREATED_EVENT,
     ORDINARY_RUN_LEDGER_STAGE_NAMES,
+    RUN_FAILED_EVENT,
+    RUN_FINISHED_EVENT,
+    RUN_SHUTDOWN_EVENT,
+    RUN_STARTED_EVENT,
     RunLedgerEntry,
+    STAGE_STARTED_EVENT,
     project_run_ledger_replay,
 )
 from bioetl.domain.types import RunID
@@ -194,6 +207,64 @@ class TestRunLedgerReplayProjection:
             "postrun",
             "checkpoint_finalize",
         )
+
+    def test_replay_policy_stage_completion_updates_are_contract_frozen(self) -> None:
+        assert STAGE_COMPLETION_UPDATES == {
+            "seed": {
+                "state": CompositePipelineState.SEED_COMPLETED,
+                "seed_completed": True,
+            },
+            "dependencies": {
+                "state": CompositePipelineState.DEPENDENCIES_COMPLETED,
+            },
+            "enrichment": {
+                "state": CompositePipelineState.ENRICHMENT_COMPLETED,
+            },
+            "merge": {
+                "state": CompositePipelineState.MERGING,
+                "merge_completed": True,
+            },
+        }
+
+    def test_replay_policy_event_type_sets_are_contract_frozen(self) -> None:
+        assert PASS_THROUGH_EVENT_TYPES == frozenset(
+            {
+                ARTIFACT_PUBLISHED_EVENT,
+                DQ_POLICY_APPLIED_EVENT,
+                MANIFEST_CREATED_EVENT,
+                RUN_SHUTDOWN_EVENT,
+                RUN_STARTED_EVENT,
+                STAGE_STARTED_EVENT,
+            }
+        )
+        assert TERMINAL_STATES == {
+            RUN_FAILED_EVENT: CompositePipelineState.FAILED,
+            RUN_FINISHED_EVENT: CompositePipelineState.COMPLETED,
+        }
+
+    @pytest.mark.parametrize("event_type", sorted(PASS_THROUGH_EVENT_TYPES))
+    def test_policy_pass_through_events_advance_watermark_only(
+        self,
+        event_type: str,
+    ) -> None:
+        projection = project_run_ledger_replay(
+            [
+                _entry(
+                    entry_id=f"entry-{event_type}",
+                    event_type=event_type,
+                    occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
+                )
+            ]
+        )
+
+        assert projection.state is None
+        assert projection.seed_completed is None
+        assert projection.merge_completed is None
+        assert projection.completed_dependencies == frozenset()
+        assert projection.completed_enrichers == frozenset()
+        assert projection.merge_result is None
+        assert projection.last_event_id == f"entry-{event_type}"
+        assert projection.projector_coverage_complete is True
 
     def test_legacy_entry_payload_without_idempotency_key_deserializes(self) -> None:
         entry = RunLedgerEntry.from_dict(

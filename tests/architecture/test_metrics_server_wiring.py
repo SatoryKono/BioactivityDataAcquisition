@@ -216,6 +216,10 @@ def test_pipeline_execution_uses_composition_pushgateway_seam() -> None:
         "_pipeline_execution.py must use composition-owned push_metrics_to_gateway "
         "instead of importing infrastructure Pushgateway helpers directly."
     )
+    assert "composition._metrics_publication" not in source, (
+        "_pipeline_execution.py must use composition.observability_api as the "
+        "single Pushgateway publication implementation seam."
+    )
 
 
 def test_runtime_observability_builder_delegates_noop_resolution_to_canonical_helper() -> (

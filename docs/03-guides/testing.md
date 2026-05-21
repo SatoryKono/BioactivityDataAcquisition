@@ -125,6 +125,20 @@ Failure classifications are informational and come from
 `configs/quality/test_health_classifiers.yaml`; pytest exit codes and quality
 gates remain the blocking signals.
 
+Git LFS recovery notes:
+
+- LFS-tracked test fixtures are declared in `.gitattributes` under
+  `tests/fixtures/vcr/**/*.yaml`.
+- If GitHub rejects a push with `GH008` for an unknown LFS object, first verify
+  local LFS health with `git lfs fsck`, then upload the missing object with
+  `git lfs push origin --object-id <sha>` or, for a full repair,
+  `git lfs push --all origin`.
+- If a generated local pre-push hook fails with
+  `fatal: could not open '/dev/stdin' for reading`, do not replay that hook via
+  a scripted `/dev/stdin` path. Run the explicit `git lfs push ...` repair
+  command from a shell where `git-lfs` is on `PATH`, then rerun the normal
+  project pre-push checks.
+
 Canonical local execution paths:
 
 - **CI / single-OS checkout**: `uv run python -m ...` или поддерживаемые

@@ -122,7 +122,7 @@ def test_build_current_member_facts_exposes_composite_inherited_field_types() ->
 def test_build_current_member_facts_exposes_composite_authority_shim_types() -> None:
     seed_registry = json.loads(
         Path(
-            "reports/semantic_pipeline_audit/semantic_cluster_registry_2026-05-19.json"
+            "reports/semantic_pipeline_audit/semantic_cluster_registry_2026-05-21.json"
         ).read_text(encoding="utf-8")
     )
 
@@ -139,3 +139,48 @@ def test_build_current_member_facts_exposes_composite_authority_shim_types() -> 
     assert facts[("composite_target", "_source")]["field_type"] == "string"
     assert facts[("composite_target", "_lookup_method")]["field_type"] == "string"
     assert facts[("composite_target", "_original_id")]["field_type"] == "string"
+
+
+def test_refresh_clusters_rebuilds_canonical_registry_membership_from_current_registry() -> (
+    None
+):
+    seed_registry = json.loads(
+        Path(
+            "reports/semantic_pipeline_audit/semantic_cluster_registry_2026-05-21.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    facts = audit._build_current_member_facts(seed_registry)
+    refreshed = audit._refresh_clusters(
+        seed_registry,
+        facts,
+        review_registry={},
+        source_date="2026-05-21",
+    )
+    cluster_lookup = {
+        cluster["cluster_id"]: cluster
+        for cluster in refreshed["clusters"]
+        if isinstance(cluster, dict)
+    }
+
+    chembl_cluster = cluster_lookup["chembl_molecule_identifier"]
+    chembl_members = {
+        str(member["pipeline"])
+        for member in chembl_cluster["members"]
+        if isinstance(member, dict)
+    }
+    assert chembl_members == {
+        "chembl_activity",
+        "chembl_compound_record",
+        "chembl_molecule",
+        "composite_activity",
+        "composite_molecule",
+    }
+
+    pubchem_cluster = cluster_lookup["pubchem_cid_identifier"]
+    pubchem_members = {
+        str(member["pipeline"])
+        for member in pubchem_cluster["members"]
+        if isinstance(member, dict)
+    }
+    assert pubchem_members == {"pubchem_compound"}

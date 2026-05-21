@@ -76,10 +76,7 @@
       "file": "docs/04-reference/contracts/gold/chembl_publication_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "citations_made",
-          "citations_received"
-        ],
+        "added_properties": [],
         "removed_properties": [],
         "changed_properties": [],
         "required_changed": false

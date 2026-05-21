@@ -55,7 +55,26 @@
         "configs/composites/activity.yaml"
       ],
       "migration_status": "canonical_internal_with_legacy_input_filter",
-      "notes": "Internal schema, merge and DQ surfaces use molecule_id. Provider-native ChEMBL filters still accept molecule_chembl_id at the ingestion boundary."
+      "notes": "Internal schema, merge and DQ surfaces use molecule_id for ChEMBL-seeded molecule identity. PubChem CID is a provider-local identifier family and must not be treated as the same business identifier. Provider-native ChEMBL filters still accept molecule_chembl_id at the ingestion boundary."
+    },
+    {
+      "cluster_id": "pubchem_cid_identifier",
+      "semantic_name": "PubChem CID business identifier",
+      "canonical_name": "pubchem_cid",
+      "legacy_names": [
+        "cid"
+      ],
+      "raw_provider_names": [
+        "molecule_id"
+      ],
+      "pipelines": [
+        "pubchem_compound"
+      ],
+      "affected_paths": [
+        "configs/entities/pubchem/compound.yaml"
+      ],
+      "migration_status": "canonical_internal_with_provider_local_identity",
+      "notes": "PubChem compound surfaces currently persist CID under the internal field name molecule_id. This identifier is provider-local and is intentionally not semantically identical to the ChEMBL molecule_id family."
     },
     {
       "cluster_id": "pubmed_identifier",

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import builtins
+import hashlib
 import json
 import os
 import tempfile
@@ -459,11 +460,14 @@ class TestCsvExporterInternals:
             return original_replace(path_obj, target_obj)
 
         monkeypatch.setattr(Path, "replace", _patched_replace)
-        monkeypatch.setattr("time.time", lambda: 1234567890)
 
         exporter._atomic_csv_write(table, target, write_options)
 
-        backup_path = tmp_path / "table.1234567890.csv"
+        backup_candidates = list(tmp_path.glob("table.write-locked.*.csv"))
+        assert len(backup_candidates) == 1
+        backup_path = backup_candidates[0]
+        expected_digest = hashlib.sha256(backup_path.read_bytes()).hexdigest()[:12]
+        assert backup_path.name == f"table.write-locked.{expected_digest}.csv"
         assert backup_path.exists()
         mock_logger.warning.assert_called()
 
@@ -566,13 +570,16 @@ class TestCsvExporterTrueAppend:
             return original_open(path, mode, **kwargs)
 
         monkeypatch.setattr("builtins.open", _patched_open)
-        monkeypatch.setattr("time.time", lambda: 9999999999)
 
         table2 = pa.Table.from_pydict({"id": [2]})
         await exporter.export("locked_test", table2)
 
         mock_logger.warning.assert_called()
-        backup = tmp_path / "locked_test.9999999999.csv"
+        backups = list(tmp_path.glob("locked_test.append-locked.*.csv"))
+        assert len(backups) == 1
+        backup = backups[0]
+        expected_digest = hashlib.sha256(backup.read_bytes()).hexdigest()[:12]
+        assert backup.name == f"locked_test.append-locked.{expected_digest}.csv"
         assert backup.exists()
 
 

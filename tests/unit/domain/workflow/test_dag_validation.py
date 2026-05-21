@@ -134,9 +134,9 @@ def test_workflow_run_options_merge_required_persistence_profile() -> None:
     merged = base.merged_with(override)
 
     assert merged.limit == 100
-    assert merged.required_persistence_profile == "degraded_observable"
+    assert merged.required_persistence_profile == "replay_ready"
     assert merged.to_mapping()["required_persistence_profile"] == (
-        "degraded_observable"
+        "replay_ready"
     )
 
 

@@ -21,13 +21,13 @@ DEFAULT_PAIR_MATRIX = (
     REPO_ROOT
     / "reports"
     / "semantic_pipeline_audit"
-    / "semantic_pair_matrix_2026-05-19.csv"
+    / "semantic_pair_matrix_2026-05-21.csv"
 )
 DEFAULT_CLUSTER_REGISTRY = (
     REPO_ROOT
     / "reports"
     / "semantic_pipeline_audit"
-    / "semantic_cluster_registry_2026-05-19.json"
+    / "semantic_cluster_registry_2026-05-21.json"
 )
 DEFAULT_GENERIC_OWNERSHIP = (
     REPO_ROOT / "configs" / "field_registry" / "generic_field_ownership.yaml"
@@ -83,7 +83,9 @@ def _cluster_lookup(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 
 def _cluster_counts(rows: tuple[dict[str, str], ...], status: str) -> Counter[str]:
-    return Counter(row["Cluster ID"] for row in rows if row.get("Semantic Status") == status)
+    return Counter(
+        row["Cluster ID"] for row in rows if row.get("Semantic Status") == status
+    )
 
 
 def _non_empty_str(mapping: dict[str, Any], key: str) -> bool:
@@ -288,7 +290,9 @@ def _weak_decision_findings(
         )
         threshold = 1
     counts = _cluster_counts(rows, "WEAK")
-    expected = {cluster_id for cluster_id, count in counts.items() if count >= threshold}
+    expected = {
+        cluster_id for cluster_id, count in counts.items() if count >= threshold
+    }
     entries = payload.get("weak_cluster_decisions", [])
     if not isinstance(entries, list):
         return findings + [
@@ -369,7 +373,9 @@ def _generic_collision_findings(
             )
         ]
     denied_terms = {
-        str(term) for term in generic_ownership.get("denied_terms", []) if isinstance(term, str)
+        str(term)
+        for term in generic_ownership.get("denied_terms", [])
+        if isinstance(term, str)
     }
     actual: set[str] = set()
     for entry in entries:

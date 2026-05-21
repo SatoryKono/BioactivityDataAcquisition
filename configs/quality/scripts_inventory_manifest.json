@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-21T13:15:23.947557+00:00",
+  "generated_at": "2026-05-21T13:24:29.417294+00:00",
   "summary": {
     "total_scripts": 396,
     "status_counts": {
@@ -10622,7 +10622,7 @@
         },
         {
           "path": "tests/architecture/test_docs_root_surface_governance_alignment.py",
-          "line": 204,
+          "line": 271,
           "source_group": "tests",
           "text": "powershell_helper = _read(\"scripts/ops/docker-setup.ps1\")"
         }
@@ -10655,7 +10655,7 @@
         },
         {
           "path": "tests/architecture/test_docs_root_surface_governance_alignment.py",
-          "line": 203,
+          "line": 270,
           "source_group": "tests",
           "text": "bash_helper = _read(\"scripts/ops/docker-setup.sh\")"
         }

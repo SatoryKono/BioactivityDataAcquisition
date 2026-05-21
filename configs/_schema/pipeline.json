@@ -365,6 +365,54 @@
       "title": "ClientSourceConfig",
       "type": "object"
     },
+    "ColumnGroupConfig": {
+      "description": "Configuration for a column group in output ordering.\n\nDefines how columns are grouped and ordered in the merged output.\nColumns can be matched by explicit field names or regex patterns.\n\nAttributes:\n    name: Group name for logging/debugging.\n    fields: Explicit list of field names to include in this group.\n        Matches both exact field names and prefixed versions\n        (e.g., \"title\" matches \"title\" and \"crossref.title\").\n    pattern: Regex pattern to match field names.\n        Applied after explicit field matching.\n    provider_order: Order of providers within this group.\n        Seed columns (no prefix) always come first.\n\nExample:\n    >>> group = ColumnGroupConfig(\n    ...     name=\"title\",\n    ...     fields=(\"title\", \"vernacular_title\"),\n    ...     provider_order=(\"chembl\", \"crossref\", \"openalex\"),\n    ... )",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "fields": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        },
+        "provider_order": {
+          "default": [
+            "chembl",
+            "crossref",
+            "openalex",
+            "pubmed",
+            "semanticscholar"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Provider Order",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "ColumnGroupConfig",
+      "type": "object"
+    },
     "ColumnGroupSchema": {
       "description": "Pydantic schema for column group configuration.",
       "properties": {
@@ -755,6 +803,43 @@
         }
       },
       "title": "DQYamlConfig",
+      "type": "object"
+    },
+    "DataSchemaConfig": {
+      "description": "Top-level schema configuration for composite pipeline column management.\n\nDefines shared column groups and per-layer (Silver/Gold) column selection\nrules used during the merge phase of composite pipelines.",
+      "properties": {
+        "column_groups": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ColumnGroupConfig"
+          },
+          "title": "Column Groups",
+          "type": "array"
+        },
+        "silver": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LayerColumnConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "gold": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LayerColumnConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "DataSchemaConfig",
       "type": "object"
     },
     "FieldPolicyConfigSchema": {
@@ -1157,6 +1242,96 @@
     },
     "JsonDict": {
       "additionalProperties": true,
+      "type": "object"
+    },
+    "LayerColumnConfig": {
+      "description": "Column selection configuration for a single Medallion layer.\n\nSupports three mutually exclusive selection modes: explicit column list,\ngroup inclusion, or full column group definitions. Exactly one mode\nmay be active; specifying more than one raises ``ValueError``.",
+      "properties": {
+        "columns": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Columns"
+        },
+        "column_groups": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ColumnGroupConfig"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Column Groups"
+        },
+        "include_groups": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Include Groups"
+        },
+        "exclude_fields": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exclude Fields"
+        },
+        "rename_fields": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Rename Fields",
+          "type": "object"
+        },
+        "alias_policy": {
+          "anyOf": [
+            {
+              "enum": [
+                "preserve",
+                "canonical"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alias Policy"
+        }
+      },
+      "title": "LayerColumnConfig",
       "type": "object"
     },
     "MaintenanceConfig": {
@@ -1871,6 +2046,18 @@
       "description": "Explicit field-level policy overrides for runtime structural policy. Use this to set optional semantics directly instead of relying on derived effective_optional_v1.",
       "title": "Field Policy",
       "type": "object"
+    },
+    "data_schema": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DataSchemaConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Full Medallion layer projection config projected from unified schema. Used by writers to enforce include_groups/exclude_fields at runtime."
     },
     "column_groups": {
       "description": "Optional column ordering groups for Silver/Gold output",

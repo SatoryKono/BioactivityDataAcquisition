@@ -37,6 +37,7 @@ _RUN_CONTEXT_OPTIONAL_DEFAULTS: dict[str, object] = {
     "effective_config_artifact_id": None,
     "execution_fingerprint": None,
     "exact_replay": False,
+    "required_persistence_profile": None,
     "replay_of_run_id": None,
     "replay_of_manifest_id": None,
     "input_snapshot_fingerprint": None,
@@ -175,6 +176,9 @@ def coerce_run_context_create_input(
             _OPTIONAL_STR_ANNOTATION, values["execution_fingerprint"]
         ),
         exact_replay=cast(bool, values["exact_replay"]),
+        required_persistence_profile=cast(
+            _OPTIONAL_STR_ANNOTATION, values["required_persistence_profile"]
+        ),
         replay_of_run_id=cast(_OPTIONAL_STR_ANNOTATION, values["replay_of_run_id"]),
         replay_of_manifest_id=cast(
             _OPTIONAL_STR_ANNOTATION, values["replay_of_manifest_id"]

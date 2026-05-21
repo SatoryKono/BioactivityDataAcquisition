@@ -201,6 +201,7 @@ class TestRunContextFactoryMethod:
             git_commit="deadbeef",
             config_hash="sha256:abc",
             exact_replay=True,
+            required_persistence_profile="replay_ready",
             replay_of_run_id="run-parent-1",
             replay_of_manifest_id="manifest-parent-1",
             input_snapshot_fingerprint="snapshot-fingerprint-1",
@@ -212,6 +213,7 @@ class TestRunContextFactoryMethod:
         assert ctx.git_commit == "deadbeef"
         assert ctx.config_hash == "sha256:abc"
         assert ctx.exact_replay is True
+        assert ctx.required_persistence_profile == "replay_ready"
         assert ctx.replay_of_run_id == "run-parent-1"
         assert ctx.replay_of_manifest_id == "manifest-parent-1"
         assert ctx.input_snapshot_fingerprint == "snapshot-fingerprint-1"

@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
 import os
 import tempfile
-import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -15,10 +15,15 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-def _locked_csv_backup_path(path: Path) -> Path:
-    """Return an occurrence-only backup path for a locked CSV target."""
-    timestamp = int(time.time())
-    return path.with_suffix(f".{timestamp}.csv")
+def _csv_payload_digest(path: Path) -> str:
+    """Return a stable digest for one temporary CSV payload."""
+    return hashlib.sha256(path.read_bytes()).hexdigest()[:12]
+
+
+def _locked_csv_backup_path(path: Path, *, payload_path: Path, mode: str) -> Path:
+    """Return a deterministic backup path for a locked CSV target."""
+    suffix = _csv_payload_digest(payload_path)
+    return path.with_suffix(f".{mode}-locked.{suffix}.csv")
 
 
 def atomic_csv_write(
@@ -41,7 +46,11 @@ def atomic_csv_write(
         try:
             temp_path.replace(target_path)
         except PermissionError:
-            backup_path = _locked_csv_backup_path(target_path)
+            backup_path = _locked_csv_backup_path(
+                target_path,
+                payload_path=temp_path,
+                mode="write",
+            )
             temp_path.replace(backup_path)
             logger.warning(
                 "Target CSV locked, wrote to backup", backup_path=str(backup_path)
@@ -74,7 +83,11 @@ def append_to_csv(
             with open(csv_path, "ab") as target, open(temp_path, "rb") as source:
                 target.write(source.read())
         except PermissionError:
-            backup_path = _locked_csv_backup_path(csv_path)
+            backup_path = _locked_csv_backup_path(
+                csv_path,
+                payload_path=temp_path,
+                mode="append",
+            )
             logger.warning(
                 "Target CSV locked during append, wrote batch to backup",
                 backup_path=str(backup_path),

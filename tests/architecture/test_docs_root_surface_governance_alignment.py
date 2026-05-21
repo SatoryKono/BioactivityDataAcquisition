@@ -101,6 +101,73 @@ def _environment_mapping(service: dict[str, Any]) -> dict[str, str]:
     return {}
 
 
+def test_docker_helper_contract_schema_is_explicit_and_fail_closed() -> None:
+    contract = _docker_helper_contract()
+    assert set(contract) == {"schema_version", "policy", "helpers"}
+    assert contract["schema_version"] == 1
+
+    policy = contract["policy"]
+    assert set(policy) == {
+        "adr",
+        "canonical_runtime",
+        "runtime_guardrail",
+        "stable_anchor",
+        "status",
+    }
+    assert policy["stable_anchor"] == "BIOETL-DOCKER-HELPER-ADR010-ADJUNCT"
+    assert policy["adr"] == "ADR-010"
+    assert policy["status"] == "optional_local_only_adjunct"
+    assert policy["canonical_runtime"] is False
+    assert "MUST NOT" in policy["runtime_guardrail"]
+
+    allowed_helper_keys = {
+        "credential_env",
+        "forbidden_default_tokens",
+        "forbidden_env_keys",
+        "monitoring",
+        "required_env_keys",
+        "required_port_binds",
+        "service",
+        "status",
+    }
+    allowed_monitoring_keys = {
+        "metrics_path",
+        "posture",
+        "prometheus_jobs",
+        "reason",
+    }
+    for filename, helper in contract["helpers"].items():
+        assert (ROOT / filename).is_file(), f"Missing helper compose file: {filename}"
+        assert set(helper) <= allowed_helper_keys, (
+            f"{filename} declares unsupported helper contract keys: "
+            f"{sorted(set(helper) - allowed_helper_keys)}"
+        )
+        assert helper["status"] == "optional_local_only_adjunct"
+        assert isinstance(helper["service"], str) and helper["service"]
+        for key in (
+            "credential_env",
+            "forbidden_default_tokens",
+            "forbidden_env_keys",
+            "required_env_keys",
+            "required_port_binds",
+        ):
+            if key in helper:
+                assert isinstance(helper[key], list), f"{filename}.{key} must be a list"
+
+        monitoring = helper["monitoring"]
+        assert set(monitoring) <= allowed_monitoring_keys, (
+            f"{filename} declares unsupported monitoring keys: "
+            f"{sorted(set(monitoring) - allowed_monitoring_keys)}"
+        )
+        posture = monitoring["posture"]
+        assert posture in {"healthcheck_only", "prometheus_scrape"}
+        if posture == "prometheus_scrape":
+            assert monitoring.get("prometheus_jobs")
+            assert monitoring.get("metrics_path")
+        else:
+            assert monitoring.get("reason")
+
+
 def test_root_governance_ratifies_reviewed_docker_helpers() -> None:
     contract = _docker_helper_contract()
     anchor = contract["policy"]["stable_anchor"]
