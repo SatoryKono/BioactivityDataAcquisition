@@ -5,7 +5,7 @@ description: "BioETL writes data through three layers — Bronze, Silver, and Go
 
 > ## Documentation Index
 >
-> Fetch the complete documentation index at: [https://biomoltech.mintlify.app/llms.txt](https://biomoltech.mintlify.app/llms.txt) Use this file to discover all available pages before exploring further.
+> Fetch the complete documentation index at: [https://biomoltech.mintlify.app/llms.txt](https://biomoltech.mintlify.app/llms.txt). Use this file to discover all available pages before exploring further.
 
 Every pipeline run in BioETL writes data through three discrete layers. This design — called the medallion architecture — separates raw API responses from normalized records and analysis-ready aggregates, giving you a clear data lineage from source to query. Because each layer persists independently, you can reprocess any stage without re-fetching from the API, inspect what arrived from an upstream source, and travel back to earlier versions of a table.
 

@@ -5,7 +5,7 @@ description: "BioETL validates every record against configurable rules, routes f
 
 > ## Documentation Index
 >
-> Fetch the complete documentation index at: [https://biomoltech.mintlify.app/llms.txt](https://biomoltech.mintlify.app/llms.txt) Use this file to discover all available pages before exploring further.
+> Fetch the complete documentation index at: [https://biomoltech.mintlify.app/llms.txt](https://biomoltech.mintlify.app/llms.txt). Use this file to discover all available pages before exploring further.
 
 BioETL applies data quality (DQ) checks at every stage of the pipeline. Before a record reaches the Silver layer it must pass normalization and schema validation, plus any field-level rules you have configured. Records that fail are written to a quarantine table instead of being silently dropped or passed through. You can inspect, replay, or purge quarantined records at any time, and DQ reports are written alongside each layer's data so you always have an audit trail.
 
