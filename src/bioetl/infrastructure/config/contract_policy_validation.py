@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Protocol
+from typing import Protocol, cast
 
 from bioetl.infrastructure.config.contract_registry_loader import (
     try_load_contract_registry_entries,

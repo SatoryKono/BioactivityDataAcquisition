@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1900,
-    "total_internal_imports": 7614,
+    "scanned_modules": 1901,
+    "total_internal_imports": 7617,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 331,
@@ -59,7 +59,7 @@
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 963,
+      "imports": 964,
       "allowed": true
     },
     {
@@ -83,7 +83,7 @@
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 248,
+      "imports": 250,
       "allowed": true
     }
   ],
