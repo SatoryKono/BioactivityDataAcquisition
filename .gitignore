@@ -100,6 +100,7 @@ log_test.txt
 /reports/quality/*
 !/reports/quality/hotspot-family-baseline.json
 !/reports/quality/hotspot-family-baseline.md
+!/reports/quality/compatibility-importer-census.json
 /reports/Codex/review_documentation-cascade-audit_*.md
 /reports/Codex/review_py-test-swarm_*.md
 
@@ -296,6 +297,13 @@ docs/reports/evidence/documentation-internal-surface-governance/02-evidence/inte
 !/docs/99-archive/legacy-05-architecture/
 !/docs/99-archive/legacy-05-architecture/**
 /docs/reports
+!/docs/reports/
+!/docs/reports/evidence/
+!/docs/reports/evidence/project-legacy-compatibility-remediation/
+/docs/reports/evidence/project-legacy-compatibility-remediation/*
+!/docs/reports/evidence/project-legacy-compatibility-remediation/03-synthesis/
+/docs/reports/evidence/project-legacy-compatibility-remediation/03-synthesis/*
+!/docs/reports/evidence/project-legacy-compatibility-remediation/03-synthesis/CROSS-SYNTHESIS-project-legacy-compatibility-remediation.md
 /.npm-cache/_cacache
 /.npm-cache/
 /caddy/
