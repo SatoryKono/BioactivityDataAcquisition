@@ -38,6 +38,7 @@ class RunContextCreateInput:
     effective_config_artifact_id: str | None = None
     execution_fingerprint: str | None = None
     exact_replay: bool = False
+    required_persistence_profile: str | None = None
     replay_of_run_id: str | None = None
     replay_of_manifest_id: str | None = None
     input_snapshot_fingerprint: str | None = None

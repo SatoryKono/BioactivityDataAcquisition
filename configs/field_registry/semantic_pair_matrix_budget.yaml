@@ -1,7 +1,7 @@
 version: "1.2.0"
-matrix_path: reports/semantic_pipeline_audit/semantic_pair_matrix_2026-05-19.csv
+matrix_path: reports/semantic_pipeline_audit/semantic_pair_matrix_2026-05-21.csv
 review_registry_path: configs/field_registry/semantic_audit_review_registry.yaml
-reviewed_on: "2026-05-19"
+reviewed_on: "2026-05-21"
 owner: BioETL Team
 budgets:
   CRITICAL:
@@ -35,7 +35,7 @@ status_budgets:
     require_reviewed_clusters: true
   - column: Normalization
     value: COMPATIBLE
-    max_count: 886
+    max_count: 891
     ratchet_only: true
   - column: Typing
     value: CONFLICTING
@@ -43,7 +43,7 @@ status_budgets:
     require_reviewed_clusters: true
   - column: Typing
     value: COMPATIBLE
-    max_count: 621
+    max_count: 668
     ratchet_only: true
   - column: Validation
     value: STRICTNESS_MISMATCH
@@ -51,6 +51,6 @@ status_budgets:
     require_reviewed_clusters: true
   - column: Validation
     value: COMPATIBLE
-    max_count: 1028
+    max_count: 1050
     ratchet_only: true
 reviewed_critical_rows: []

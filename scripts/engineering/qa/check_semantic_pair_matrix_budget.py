@@ -7,6 +7,7 @@ import argparse
 import csv
 import hashlib
 import json
+import re
 import sys
 from collections import Counter
 from dataclasses import dataclass
@@ -23,6 +24,8 @@ DEFAULT_BUDGET_PATH = (
 DEFAULT_REVIEW_REGISTRY_PATH = (
     REPO_ROOT / "configs" / "field_registry" / "semantic_audit_review_registry.yaml"
 )
+PAIR_MATRIX_PREFIX = "semantic_pair_matrix_"
+PAIR_MATRIX_PATTERN = re.compile(r"^semantic_pair_matrix_(\d{4}-\d{2}-\d{2})\.csv$")
 ROW_KEY_FIELDS = (
     "Cluster ID",
     "Pipeline A",
@@ -80,6 +83,19 @@ def _matrix_path(repo_root: Path, budget: dict[str, Any]) -> Path:
         raise ValueError("semantic pair-matrix budget must define matrix_path")
     path = Path(value)
     return path if path.is_absolute() else repo_root / path
+
+
+def _snapshot_date_from_matrix_path(path: Path) -> date | None:
+    match = PAIR_MATRIX_PATTERN.match(path.name)
+    if match is None:
+        return None
+    return date.fromisoformat(match.group(1))
+
+
+def _latest_generated_matrix_path(repo_root: Path) -> Path | None:
+    report_dir = repo_root / "reports" / "semantic_pipeline_audit"
+    candidates = sorted(report_dir.glob(f"{PAIR_MATRIX_PREFIX}*.csv"))
+    return candidates[-1] if candidates else None
 
 
 def _row_key(row: dict[str, str]) -> str:
@@ -388,6 +404,77 @@ def _critical_row_findings(
     return findings
 
 
+def _snapshot_binding_findings(
+    *,
+    repo_root: Path,
+    budget: dict[str, Any],
+) -> list[PairMatrixFinding]:
+    findings: list[PairMatrixFinding] = []
+    matrix_path = _matrix_path(repo_root, budget)
+    reviewed_on = budget.get("reviewed_on")
+    if not isinstance(reviewed_on, str):
+        return [
+            PairMatrixFinding(
+                kind="missing_reviewed_on",
+                row_key="<budget>",
+                cluster_id="<budget>",
+                message="semantic pair-matrix budget must define reviewed_on",
+            )
+        ]
+
+    try:
+        reviewed_on_date = date.fromisoformat(reviewed_on)
+    except ValueError:
+        return [
+            PairMatrixFinding(
+                kind="invalid_reviewed_on",
+                row_key="<budget>",
+                cluster_id="<budget>",
+                message=f"semantic pair-matrix budget has invalid reviewed_on {reviewed_on!r}",
+            )
+        ]
+
+    matrix_date = _snapshot_date_from_matrix_path(matrix_path)
+    if matrix_date is not None and matrix_date != reviewed_on_date:
+        findings.append(
+            PairMatrixFinding(
+                kind="reviewed_snapshot_mismatch",
+                row_key="<budget>",
+                cluster_id="<budget>",
+                message=(
+                    f"semantic pair-matrix budget reviewed_on={reviewed_on} does not match "
+                    f"matrix snapshot {matrix_path.name}"
+                ),
+            )
+        )
+
+    latest_matrix_path = _latest_generated_matrix_path(repo_root)
+    latest_matrix_date = (
+        _snapshot_date_from_matrix_path(latest_matrix_path)
+        if latest_matrix_path is not None
+        else None
+    )
+    if (
+        latest_matrix_path is not None
+        and latest_matrix_path != matrix_path
+        and latest_matrix_date is not None
+        and latest_matrix_date > reviewed_on_date
+    ):
+        findings.append(
+            PairMatrixFinding(
+                kind="stale_reviewed_snapshot",
+                row_key="<budget>",
+                cluster_id="<budget>",
+                message=(
+                    f"semantic pair-matrix budget still targets {matrix_path.name}, "
+                    f"but newer generated snapshot {latest_matrix_path.name} exists and "
+                    "must be explicitly reviewed or promoted"
+                ),
+            )
+        )
+    return findings
+
+
 def _reviewed_identity_findings(
     rows: tuple[dict[str, str], ...],
     reviewed: dict[str, dict[str, Any]],
@@ -451,6 +538,7 @@ def validate_semantic_pair_matrix_budget(
     )
     findings.extend(_critical_row_findings(rows, reviewed))
     findings.extend(_reviewed_identity_findings(rows, reviewed))
+    findings.extend(_snapshot_binding_findings(repo_root=repo_root, budget=budget))
     return PairMatrixBudgetResult(risk_counts=risk_counts, findings=tuple(findings))
 
 

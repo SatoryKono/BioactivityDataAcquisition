@@ -78,8 +78,9 @@ _NEXT_STEP_BY_SIGNAL: tuple[tuple[str, str], ...] = (
         "composite_resume_reconstructability_gap",
         (
             "Treat composite resume as checkpoint snapshot plus ledger suffix "
-            "replay only; do not expect per-provider result maps or other rich "
-            "checkpoint payloads to be reconstructed."
+            "replay only when rich checkpoint payload evidence is missing; "
+            "otherwise validate the recorded seed/dependency/enrichment/merge "
+            "payloads before forensic replay claims."
         ),
     ),
     (
@@ -228,6 +229,11 @@ def build_persistence_profile(
         replay_ready_missing_requirements=replay_ready_missing_requirements,
         forensic_grade_missing_requirements=forensic_grade_missing_requirements,
     )
+    composite_resume_reconstructability = _build_composite_resume_reconstructability(
+        composite_resume_rich_replay_supported=(
+            inputs.composite_resume_rich_replay_supported
+        ),
+    )
     return {
         "attained_profile": attained_profile,
         "required_profile": required_profile,
@@ -243,22 +249,7 @@ def build_persistence_profile(
         "required_profile_missing_requirements": required_profile_missing_requirements,
         "replay_ready_missing_requirements": replay_ready_missing_requirements,
         "forensic_grade_missing_requirements": forensic_grade_missing_requirements,
-        "composite_resume_reconstructability": {
-            "scope": "coarse_grained_composite_resume",
-            "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
-            "reconstructs": [
-                "state",
-                "seed_completed",
-                "merge_completed",
-                "last_event_id",
-                "last_event_occurred_at",
-            ],
-            "does_not_reconstruct": [
-                "per_provider_result_maps",
-                "rich_checkpoint_payloads",
-            ],
-            "forensic_grade_supported": inputs.composite_resume_rich_replay_supported,
-        },
+        "composite_resume_reconstructability": composite_resume_reconstructability,
         "lineage_closure_boundary": inputs.lineage_closure_boundary,
     }
 
@@ -364,6 +355,46 @@ def _build_persistence_surfaces(
         "run_ledger_history": ledger_entries_present,
         "artifact_lineage_links": inputs.artifact_lineage_links_complete,
         "lineage_closure_boundary_support": inputs.lineage_closure_boundary_supported,
+    }
+
+
+def _build_composite_resume_reconstructability(
+    *,
+    composite_resume_rich_replay_supported: bool,
+) -> dict[str, object]:
+    """Return the published checkpoint reconstruction scope for composite runs."""
+    if composite_resume_rich_replay_supported:
+        return {
+            "scope": "rich_composite_resume",
+            "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
+            "reconstructs": [
+                "state",
+                "seed_completed",
+                "seed_result",
+                "dependency_results",
+                "enrichment_results",
+                "merge_result",
+                "last_event_id",
+                "last_event_occurred_at",
+            ],
+            "does_not_reconstruct": [],
+            "forensic_grade_supported": True,
+        }
+    return {
+        "scope": "coarse_grained_composite_resume",
+        "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
+        "reconstructs": [
+            "state",
+            "seed_completed",
+            "merge_completed",
+            "last_event_id",
+            "last_event_occurred_at",
+        ],
+        "does_not_reconstruct": [
+            "per_provider_result_maps",
+            "rich_checkpoint_payloads",
+        ],
+        "forensic_grade_supported": False,
     }
 
 

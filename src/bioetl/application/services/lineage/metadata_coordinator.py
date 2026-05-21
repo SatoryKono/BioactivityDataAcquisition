@@ -41,6 +41,9 @@ from bioetl.application.services.lineage.metadata_lineage_fragments import (
     build_gold_lineage_fragment,
     build_silver_lineage_fragment,
 )
+from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
+)
 from bioetl.domain.lineage import LineageGraphFragment, MetadataLineageBundleResult
 from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
@@ -102,11 +105,8 @@ class MetadataCoordinator(MetadataCoordinatorPort):
 
     def _strict_manifest_id_required(self) -> bool:
         """Return whether sidecar lineage must close over manifest identity."""
-        return bool(
-            self._context.manifest_id
-            or self._context.execution_fingerprint
-            or self._context.effective_config_artifact_id
-        )
+        profile = str(self._context.required_persistence_profile or "").strip().lower()
+        return bool(self._context.exact_replay) or profile in STRICT_PERSISTENCE_PROFILES
 
     @classmethod
     def _get_environment_metadata(cls) -> EnvironmentMetadata:

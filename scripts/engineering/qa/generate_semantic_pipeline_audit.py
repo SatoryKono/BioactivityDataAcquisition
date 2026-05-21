@@ -29,8 +29,11 @@ DEFAULT_OUT_DIR = REPO_ROOT / "reports" / "semantic_pipeline_audit"
 DEFAULT_REVIEW_REGISTRY = (
     REPO_ROOT / "configs" / "field_registry" / "semantic_audit_review_registry.yaml"
 )
+DEFAULT_CANONICAL_REGISTRY = (
+    REPO_ROOT / "configs" / "field_registry" / "canonical_registry.json"
+)
 BASE_CONFIG_DIR = REPO_ROOT / "configs" / "base"
-DEFAULT_SOURCE_DATE = "2026-05-19"
+DEFAULT_SOURCE_DATE = "2026-05-21"
 PAIR_MATRIX_PREFIX = "semantic_pair_matrix_"
 CLUSTER_REGISTRY_PREFIX = "semantic_cluster_registry_"
 PAIR_COLUMNS = (
@@ -226,6 +229,16 @@ def _load_json(path: Path) -> dict[str, Any]:
     if isinstance(payload, dict):
         return payload
     raise ValueError(f"Expected JSON mapping in {path}")
+
+
+def _canonical_registry_clusters(
+    path: Path = DEFAULT_CANONICAL_REGISTRY,
+) -> tuple[dict[str, Any], ...]:
+    payload = _load_json(path)
+    clusters = payload.get("clusters", [])
+    if not isinstance(clusters, list):
+        raise ValueError("canonical_registry clusters must be a list")
+    return tuple(cluster for cluster in clusters if isinstance(cluster, dict))
 
 
 def _load_csv(path: Path) -> list[dict[str, str]]:
@@ -466,8 +479,66 @@ def _refresh_clusters(
     source_date: str,
 ) -> dict[str, Any]:
     clusters = []
+    seen_cluster_ids: set[str] = set()
+
+    for cluster in _canonical_registry_clusters():
+        cluster_id = str(cluster.get("cluster_id") or "")
+        canonical_name = str(cluster.get("canonical_name") or "")
+        if not cluster_id or not canonical_name:
+            continue
+        member_names = {
+            str(name)
+            for name in [
+                cluster.get("canonical_name"),
+                *cast(list[Any], cluster.get("legacy_names", [])),
+                *cast(list[Any], cluster.get("raw_provider_names", [])),
+            ]
+            if isinstance(name, str)
+        }
+        allowed_pipelines = {
+            str(pipeline)
+            for pipeline in cast(list[Any], cluster.get("pipelines", []))
+            if isinstance(pipeline, str)
+        }
+        members = [
+            fact
+            for fact in facts.values()
+            if fact.get("field") in member_names
+            and fact.get("pipeline") in allowed_pipelines
+        ]
+        if not members:
+            continue
+        refreshed_cluster = {
+            "aliases": sorted(name for name in member_names if name != canonical_name),
+            "canonical_field": canonical_name,
+            "cluster_id": cluster_id,
+            "rationale": str(cluster.get("notes") or ""),
+            "semantic_status": "EXACT",
+            "source": "canonical_registry",
+        }
+        refreshed_cluster.update(CLUSTER_METADATA_OVERRIDES.get(cluster_id, {}))
+        refreshed_cluster["member_count"] = len(members)
+        refreshed_cluster["pipeline_count"] = len(
+            {str(member["pipeline"]) for member in members}
+        )
+        refreshed_cluster["members"] = sorted(
+            members,
+            key=lambda member: (
+                str(member.get("pipeline") or ""),
+                str(member.get("field") or ""),
+            ),
+        )
+        clusters.append(refreshed_cluster)
+        seen_cluster_ids.add(cluster_id)
+
     for cluster in seed_registry.get("clusters", []):
         if not isinstance(cluster, dict):
+            continue
+        cluster_id = str(cluster.get("cluster_id") or "")
+        if (
+            cluster_id in seen_cluster_ids
+            or cluster.get("source") == "canonical_registry"
+        ):
             continue
         members = []
         for member in cluster.get("members", []):
@@ -483,10 +554,7 @@ def _refresh_clusters(
             for key, value in cluster.items()
             if key not in {"members", "review"}
         }
-        refreshed_cluster.update(
-            CLUSTER_METADATA_OVERRIDES.get(str(refreshed_cluster.get("cluster_id")), {})
-        )
-        cluster_id = str(refreshed_cluster.get("cluster_id") or "")
+        refreshed_cluster.update(CLUSTER_METADATA_OVERRIDES.get(cluster_id, {}))
         semantic_status = str(refreshed_cluster.get("semantic_status") or "")
         review = _review_payload_for_cluster(
             review_registry,
@@ -495,7 +563,9 @@ def _refresh_clusters(
         )
         lexical_field = GENERIC_COLLISION_LEXICAL_FIELDS.get(cluster_id)
         if lexical_field is not None and members:
-            if not any(str(member.get("field") or "") == lexical_field for member in members):
+            if not any(
+                str(member.get("field") or "") == lexical_field for member in members
+            ):
                 continue
         if not members:
             continue
@@ -511,7 +581,10 @@ def _refresh_clusters(
         "generated_at": f"{source_date}T00:00:00Z",
         "source_date": source_date,
         "scope": seed_registry.get("scope", "all_etl_pipelines"),
-        "clusters": clusters,
+        "clusters": sorted(
+            clusters,
+            key=lambda cluster: str(cluster.get("cluster_id") or ""),
+        ),
     }
 
 

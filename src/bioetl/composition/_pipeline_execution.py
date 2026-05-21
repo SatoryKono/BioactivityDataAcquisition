@@ -81,7 +81,7 @@ def push_metrics_to_gateway(
     Returns:
         True if push succeeded, False otherwise.
     """
-    from bioetl.composition._metrics_publication import (
+    from bioetl.composition.observability_api import (
         push_metrics_to_gateway as push_metrics_to_gateway_impl,
     )
 

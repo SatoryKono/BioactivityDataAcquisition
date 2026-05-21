@@ -268,6 +268,11 @@ class RunContextFactory:
                     if exact_replay is None
                     else exact_replay
                 ),
+                required_persistence_profile=getattr(
+                    runtime,
+                    "required_persistence_profile",
+                    None,
+                ),
                 replay_of_run_id=(
                     replay_of_run_id
                     if replay_of_run_id is not None

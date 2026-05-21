@@ -206,6 +206,37 @@ Examples:
   `corrupted_checkpoint_payload` means evidence is incomplete or corrupt and
   must not be collapsed into a normal cache miss.
 
+### Reference: resume anchor validation
+
+Composite checkpoint resume validation is implemented in
+`src/bioetl/application/composite/checkpoint/_load_validation.py` and is the
+reference fail-closed pattern for replay-critical checkpoint gates.
+
+The validator compares the persisted checkpoint state with the current expected
+runtime anchors:
+
+- `contract_ref`
+- `contract_version`
+- `effective_config_hash`
+- `effective_config_artifact_id`
+- `execution_fingerprint`
+- `dq_contract_compatibility_hash`
+- `input_snapshot_fingerprint`
+- `manifest_id`
+- `composite_run_identity`
+
+If an expected anchor is present but the checkpoint omits it, resume is blocked.
+If both sides carry an anchor and values differ, resume is blocked. The emitted
+diagnostic uses `reason_code=checkpoint_resume_incompatible` and the runner
+raises `CheckpointConflictError`.
+
+For composite resume, checkpoint state remains the trusted operational baseline.
+Only after anchors pass does the runtime apply bounded run-ledger suffix replay
+strictly after the checkpoint watermark. That suffix replay restores lifecycle
+milestones and replay watermark metadata only; it does not reconstruct rich
+checkpoint payloads such as dependency result maps, enrichment result maps, or
+merge payload details.
+
 ### Backup checkpoint
 
 ```bash

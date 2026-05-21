@@ -223,6 +223,12 @@ def _build_refresh_summary_update(
     updated = dict(summary)
     replay_projection = _build_refresh_replay_projection(refresh_context)
     updated.update(replay_projection.replay_payload)
+    if bool(summary.get("composite_resume_rich_replay_supported")) and (
+        updated.get("replay_readiness_verdict") == "lifecycle_projection_only"
+    ):
+        updated["replay_readiness_verdict"] = "resume_compatible"
+        if updated.get("operator_replay_mode") == "Lifecycle Projection":
+            updated["operator_replay_mode"] = "Resume"
     updated = _refresh_replay_summary_update_snapshot_fields(
         updated=updated,
         refresh_context=refresh_context,

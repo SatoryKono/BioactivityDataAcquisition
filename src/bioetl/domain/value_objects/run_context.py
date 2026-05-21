@@ -51,6 +51,7 @@ class RunContext:
         dq_contract_compatibility_hash: SHA256 hash of DQ contract compatibility for reproducibility.
         effective_config_artifact_id: Reference to the effective config artifact for this run.
         execution_fingerprint: Canonical execution identity fingerprint from the run manifest.
+        required_persistence_profile: Declared persistence floor for replay safety.
 
     Example:
         >>> from datetime import UTC, datetime
@@ -98,6 +99,7 @@ class RunContext:
     effective_config_artifact_id: str | None = None
     execution_fingerprint: str | None = None
     exact_replay: bool = False
+    required_persistence_profile: str | None = None
     replay_of_run_id: str | None = None
     replay_of_manifest_id: str | None = None
     input_snapshot_fingerprint: str | None = None
@@ -155,6 +157,7 @@ class RunContext:
             effective_config_artifact_id=create_input.effective_config_artifact_id,
             execution_fingerprint=create_input.execution_fingerprint,
             exact_replay=create_input.exact_replay,
+            required_persistence_profile=create_input.required_persistence_profile,
             replay_of_run_id=create_input.replay_of_run_id,
             replay_of_manifest_id=create_input.replay_of_manifest_id,
             input_snapshot_fingerprint=create_input.input_snapshot_fingerprint,

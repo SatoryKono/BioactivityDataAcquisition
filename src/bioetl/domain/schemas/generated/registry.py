@@ -1,6 +1,6 @@
 """Auto-generated registry from configs/entities schema sections.
 
-DO NOT EDIT MANUALLY. Run: python scripts/schema/generate_schema_artifacts.py
+DO NOT EDIT MANUALLY. Run: python -m scripts.schema generate-artifacts
 """
 
 from __future__ import annotations

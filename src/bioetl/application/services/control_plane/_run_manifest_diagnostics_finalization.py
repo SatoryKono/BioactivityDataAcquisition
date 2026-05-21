@@ -109,13 +109,13 @@ def _build_ledger_enriched_summary(
         summary,
         ledger_entries,
     )
-    enriched = refresh_replay_summary_fn(
-        manifest=manifest,
-        summary=enriched,
-    )
     enriched = _attach_rich_composite_replay_support(
         enriched,
         ledger_entries,
+    )
+    enriched = refresh_replay_summary_fn(
+        manifest=manifest,
+        summary=enriched,
     )
     return _LedgerEnrichedSummary(payload=enriched)
 

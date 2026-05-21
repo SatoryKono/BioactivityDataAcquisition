@@ -1,4 +1,3 @@
-# ruff: noqa: UP049
 """Immutable workflow configuration models."""
 
 from __future__ import annotations
@@ -7,6 +6,11 @@ from dataclasses import dataclass, fields
 from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import JsonDict
+from bioetl.domain.workflow._run_options_support import (
+    prefer_override,
+    prefer_stricter_persistence_profile,
+    serialize_workflow_run_option_value,
+)
 from bioetl.domain.workflow.dag import topologically_sorted_step_ids
 
 __all__ = [
@@ -21,18 +25,6 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from bioetl.domain.workflow.dag import _WorkflowStepLike
-
-
-_RUN_OPTIONS_MULTI_FILTER_IDS = "multi_filter_ids"
-_RUN_OPTIONS_FILTER_IDS = "filter_ids"
-
-
-def _prefer_override[_RunOptionValue](
-    current: _RunOptionValue | None,
-    override: _RunOptionValue | None,
-) -> _RunOptionValue | None:
-    """Return the override when it is set, otherwise keep the current value."""
-    return override if override is not None else current
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,74 +63,74 @@ class WorkflowRunOptionsConfig:
     ) -> WorkflowRunOptionsConfig:
         """Return a merged config where non-null override values win."""
         return WorkflowRunOptionsConfig(
-            run_type=_prefer_override(self.run_type, override.run_type),
-            resume=_prefer_override(self.resume, override.resume),
-            start_offset=_prefer_override(self.start_offset, override.start_offset),
-            limit=_prefer_override(self.limit, override.limit),
-            dry_run=_prefer_override(self.dry_run, override.dry_run),
-            input_csv=_prefer_override(self.input_csv, override.input_csv),
-            filter_column=_prefer_override(
+            run_type=prefer_override(self.run_type, override.run_type),
+            resume=prefer_override(self.resume, override.resume),
+            start_offset=prefer_override(self.start_offset, override.start_offset),
+            limit=prefer_override(self.limit, override.limit),
+            dry_run=prefer_override(self.dry_run, override.dry_run),
+            input_csv=prefer_override(self.input_csv, override.input_csv),
+            filter_column=prefer_override(
                 self.filter_column,
                 override.filter_column,
             ),
-            filter_field=_prefer_override(self.filter_field, override.filter_field),
-            filter_ids=_prefer_override(self.filter_ids, override.filter_ids),
-            multi_filter_ids=_prefer_override(
+            filter_field=prefer_override(self.filter_field, override.filter_field),
+            filter_ids=prefer_override(self.filter_ids, override.filter_ids),
+            multi_filter_ids=prefer_override(
                 self.multi_filter_ids,
                 override.multi_filter_ids,
             ),
-            fallback_column=_prefer_override(
+            fallback_column=prefer_override(
                 self.fallback_column,
                 override.fallback_column,
             ),
-            fallback_mapping=_prefer_override(
+            fallback_mapping=prefer_override(
                 self.fallback_mapping,
                 override.fallback_mapping,
             ),
-            vacuum_after_run=_prefer_override(
+            vacuum_after_run=prefer_override(
                 self.vacuum_after_run,
                 override.vacuum_after_run,
             ),
-            vacuum_retention_days=_prefer_override(
+            vacuum_retention_days=prefer_override(
                 self.vacuum_retention_days,
                 override.vacuum_retention_days,
             ),
-            log_level=_prefer_override(self.log_level, override.log_level),
-            ignore_yaml_filter=_prefer_override(
+            log_level=prefer_override(self.log_level, override.log_level),
+            ignore_yaml_filter=prefer_override(
                 self.ignore_yaml_filter,
                 override.ignore_yaml_filter,
             ),
-            skip_gold=_prefer_override(self.skip_gold, override.skip_gold),
-            execution_context=_prefer_override(
+            skip_gold=prefer_override(self.skip_gold, override.skip_gold),
+            execution_context=prefer_override(
                 self.execution_context,
                 override.execution_context,
             ),
-            use_cached_bronze=_prefer_override(
+            use_cached_bronze=prefer_override(
                 self.use_cached_bronze,
                 override.use_cached_bronze,
             ),
-            cached_bronze_path=_prefer_override(
+            cached_bronze_path=prefer_override(
                 self.cached_bronze_path,
                 override.cached_bronze_path,
             ),
-            cached_bronze_date=_prefer_override(
+            cached_bronze_date=prefer_override(
                 self.cached_bronze_date,
                 override.cached_bronze_date,
             ),
-            replay_of_run_id=_prefer_override(
+            replay_of_run_id=prefer_override(
                 self.replay_of_run_id,
                 override.replay_of_run_id,
             ),
-            replay_of_manifest_id=_prefer_override(
+            replay_of_manifest_id=prefer_override(
                 self.replay_of_manifest_id,
                 override.replay_of_manifest_id,
             ),
-            exact_replay=_prefer_override(self.exact_replay, override.exact_replay),
-            required_persistence_profile=_prefer_override(
+            exact_replay=prefer_override(self.exact_replay, override.exact_replay),
+            required_persistence_profile=prefer_stricter_persistence_profile(
                 self.required_persistence_profile,
                 override.required_persistence_profile,
             ),
-            enable_tracing=_prefer_override(
+            enable_tracing=prefer_override(
                 self.enable_tracing,
                 override.enable_tracing,
             ),
@@ -151,7 +143,7 @@ class WorkflowRunOptionsConfig:
             value = getattr(self, field.name)
             if value is None:
                 continue
-            result[field.name] = _serialize_workflow_run_option_value(field.name, value)
+            result[field.name] = serialize_workflow_run_option_value(field.name, value)
         return result
 
 
@@ -270,26 +262,3 @@ class WorkflowConfig:
             if step.step_id == step_id:
                 return step
         return None
-
-
-def _serialize_workflow_run_option_value(field_name: str, value: object) -> object:
-    """Serialize one workflow run-option value for JSON-compatible mappings."""
-    if field_name == _RUN_OPTIONS_MULTI_FILTER_IDS:
-        return _serialize_multi_filter_ids(value)
-    if field_name == _RUN_OPTIONS_FILTER_IDS:
-        return _serialize_filter_ids(value)
-    return value
-
-
-def _serialize_multi_filter_ids(value: object) -> object:
-    """Serialize ``multi_filter_ids`` into a JSON-compatible mapping."""
-    if not isinstance(value, dict):
-        return value
-    return {key: list(items) for key, items in value.items()}
-
-
-def _serialize_filter_ids(value: object) -> object:
-    """Serialize ``filter_ids`` into a JSON-compatible list."""
-    if not isinstance(value, tuple):
-        return value
-    return list(value)

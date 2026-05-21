@@ -181,6 +181,56 @@ class TestMetadataCoordinator:
         assert env.python_version
         assert env.bioetl_version
 
+    def test_strict_profiles_require_manifest_closure_for_bronze_bundle(self) -> None:
+        """Replay-grade persistence profiles must fail closed without manifest_id."""
+        context = RunContext.create(
+            run_id=RunID(deterministic_uuid_from_callsite("strict-lineage")),
+            run_type=RunType.INCREMENTAL,
+            started_at=_FIXED_TIME,
+            provider="chembl",
+            entity="activity",
+            required_persistence_profile="replay_ready",
+        )
+        coordinator = MetadataCoordinator(context)
+        input_data = BronzeMetadataInput(
+            batch_id=BatchID(deterministic_uuid_from_callsite("strict-bronze-batch")),
+            record_count=10,
+            compressed_size=512,
+            output_path="v1/chembl/activity/2026-03-24/batch-1.jsonl.zst",
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=r"Strict sidecar lineage closure requires runtime\.manifest_id",
+        ):
+            coordinator.create_bronze_metadata_bundle(input_data)
+
+    def test_degraded_profile_allows_bronze_bundle_without_manifest_id(self) -> None:
+        """Degraded observable runs may emit sidecars without strict manifest closure."""
+        context = RunContext.create(
+            run_id=RunID(deterministic_uuid_from_callsite("degraded-lineage")),
+            run_type=RunType.INCREMENTAL,
+            started_at=_FIXED_TIME,
+            provider="chembl",
+            entity="activity",
+            required_persistence_profile="degraded_observable",
+        )
+        coordinator = MetadataCoordinator(context)
+        input_data = BronzeMetadataInput(
+            batch_id=BatchID(deterministic_uuid_from_callsite("degraded-bronze-batch")),
+            record_count=10,
+            compressed_size=512,
+            output_path="v1/chembl/activity/2026-03-24/batch-1.jsonl.zst",
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
+        )
+
+        bundle = coordinator.create_bronze_metadata_bundle(input_data)
+
+        assert isinstance(bundle, MetadataLineageBundleResult)
+
 
 class TestBronzeMetadata:
     """Tests for Bronze metadata creation."""
