@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import uuid4
 
 import pytest
 
@@ -11,12 +10,13 @@ from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.ports.noop import NoOpAudit
 from bioetl.domain.types import RunID
 from tests.helpers.clock import FIXED_TEST_TIME
+from tests.helpers.deterministic_ids import deterministic_uuid_value
 
 
 @pytest.fixture
 def run_id() -> RunID:
-    """Generate a unique run ID."""
-    return RunID(uuid4())
+    """Return a stable run ID for replay-safe NoOpAudit tests."""
+    return RunID(deterministic_uuid_value("domain.ports.noop_audit.run"))
 
 
 @pytest.fixture
@@ -40,8 +40,8 @@ class TestNoOpAudit:
     async def test_log_write_does_nothing(self, sample_entry: AuditEntry) -> None:
         """Test log_write is a no-op."""
         audit = NoOpAudit()
-        # Should not raise
         await audit.log_write(sample_entry)
+        assert await audit.get_entries(run_id=sample_entry.run_id) == []
 
     @pytest.mark.asyncio
     async def test_get_entries_returns_empty_list(self, run_id: RunID) -> None:

@@ -120,6 +120,7 @@ def resolve_effective_required_persistence_profile(
     *,
     configured_required_profile: object,
     family_default_profile: object,
+    strict_persistence_profiles: frozenset[str] | None = None,
     exact_replay_requested: bool = False,
     critical_runtime: bool = False,
 ) -> str:
@@ -127,7 +128,9 @@ def resolve_effective_required_persistence_profile(
     return _resolve_effective_required_persistence_profile(
         configured_required_profile=configured_required_profile,
         family_default_profile=family_default_profile,
-        strict_persistence_profiles=STRICT_PERSISTENCE_PROFILES,
+        strict_persistence_profiles=(
+            strict_persistence_profiles or STRICT_PERSISTENCE_PROFILES
+        ),
         exact_replay_requested=exact_replay_requested,
         critical_runtime=critical_runtime,
     )

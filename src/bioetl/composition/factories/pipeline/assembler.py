@@ -150,13 +150,13 @@ def create_transformer[TPipeline: BasePipeline](
     """Public compatibility seam for direct transformer creation from a factory."""
     # Architecture marker: transformer_class=self.transformer_class
     return factory.create_transformer(
-        tracer=tracer,
-        metrics=metrics,
-        silver_filters=silver_filters,
-        gold_filters=gold_filters,
-        identity_service=identity_service,
-        pii_hasher=pii_hasher,
-        data_normalizer=data_normalizer,
-        contract_policy=contract_policy,
-        dependencies=dependencies,
+        tracer,
+        metrics,
+        silver_filters,
+        gold_filters,
+        identity_service,
+        pii_hasher,
+        data_normalizer,
+        contract_policy,
+        dependencies,
     )

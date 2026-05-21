@@ -51,6 +51,8 @@ from tests.helpers import (
     assert_written_core_artifacts_are_deterministic,
 )
 
+pytestmark = pytest.mark.repo_backed
+
 
 def _row(
     rows: list[dict[str, str]], pipeline_name: str, field_name: str
@@ -246,7 +248,9 @@ def _assert_assay_parameter_rows(rows: list[dict[str, str]]) -> None:
     assert "domain_schema:present" in assay_parameter_relation["schema_coverage"]
 
     assay_parameter_uo_units = _row(rows, "chembl_assay_parameters", "uo_units")
-    assert assay_parameter_uo_units["semantic_category"] == "ontology_reference_identifier"
+    assert (
+        assay_parameter_uo_units["semantic_category"] == "ontology_reference_identifier"
+    )
     assert assay_parameter_uo_units["strictness"] == "controlled_unit"
     assert assay_parameter_uo_units["controlled_vocabulary_source"] == (
         "configs/vocab/chembl_ontology.yaml"
@@ -321,9 +325,7 @@ def _assert_publication_and_target_rows(rows: list[dict[str, str]]) -> None:
     assert target_description["normalizer"] == "normalize_profile_null"
     assert "domain_schema:present" in target_description["schema_coverage"]
 
-    target_component_description = _row(
-        rows, "chembl_target_component", "description"
-    )
+    target_component_description = _row(rows, "chembl_target_component", "description")
     assert target_component_description["normalization_source"] == "profile"
     assert target_component_description["normalizer"] == "normalize_profile_null"
     assert "domain_schema:present" in target_component_description["schema_coverage"]
@@ -620,7 +622,9 @@ def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields(
         rows, "composite_activity", "_lookup_method"
     )
     assert composite_activity_lookup_method["field_type"] == "string"
-    assert composite_activity_lookup_method["schema_coverage"] == "gold_contract:explicit"
+    assert (
+        composite_activity_lookup_method["schema_coverage"] == "gold_contract:explicit"
+    )
 
 
 def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> None:
@@ -979,7 +983,9 @@ def test_build_field_matrix_rows_surfaces_reviewed_molecule_provider_codes() -> 
     rows = build_field_matrix_rows()
 
     availability_type = _row(rows, "chembl_molecule", "availability_type")
-    assert availability_type["controlled_vocabulary_source"] == "configs/enums/chembl.yaml"
+    assert (
+        availability_type["controlled_vocabulary_source"] == "configs/enums/chembl.yaml"
+    )
     assert availability_type["strictness"] == "strict_enum"
     assert availability_type["dq_coverage"] == "enum:error"
 

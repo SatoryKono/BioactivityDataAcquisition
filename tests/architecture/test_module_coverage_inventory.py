@@ -9,6 +9,7 @@ import pytest
 
 from scripts.engineering.qa.report_module_coverage_inventory import (
     build_module_coverage_inventory,
+    main as module_coverage_inventory_main,
 )
 from scripts.engineering.qa.file_discovery import discover_files
 from tests.architecture._test_matrix_policy_support import load_matrix
@@ -26,6 +27,7 @@ def test_module_coverage_inventory_is_committed_and_shape_is_stable() -> None:
     assert committed["schema_version"] == 1
     assert committed["generated_by"].endswith("report_module_coverage_inventory.py")
     assert committed["coverage_xml_path"] == "reports/coverage/coverage.xml"
+    assert committed["measurement_mode"] in {"coverage_xml", "source_tree_only"}
     assert committed["canonical_coverage_lane"] == "coverage-verify"
     assert isinstance(committed["modules"], list) and committed["modules"]
 
@@ -44,6 +46,9 @@ def test_module_coverage_inventory_is_committed_and_shape_is_stable() -> None:
         coverage_percent = row["coverage_percent"]
         if coverage_percent is not None:
             assert 0.0 <= coverage_percent <= 100.0
+        if committed["measurement_mode"] == "source_tree_only":
+            assert row["coverage_status"] == "coverage_xml_missing"
+            assert coverage_percent is None
 
 
 @pytest.mark.architecture
@@ -68,6 +73,29 @@ def test_module_coverage_inventory_source_tree_hash_is_current() -> None:
     )
 
     assert committed["source_tree_sha256"] == rebuilt["source_tree_sha256"]
+
+
+@pytest.mark.architecture
+def test_module_coverage_inventory_check_requires_coverage_xml_by_default(
+    tmp_path: Path,
+) -> None:
+    missing_coverage_xml = tmp_path / "coverage.xml"
+    artifact = tmp_path / "module-coverage-inventory.json"
+    artifact.write_text("{}", encoding="utf-8")
+
+    rc = module_coverage_inventory_main(
+        [
+            "--repo-root",
+            str(ROOT),
+            "--coverage-xml",
+            str(missing_coverage_xml),
+            "--json-out",
+            str(artifact),
+            "--check",
+        ]
+    )
+
+    assert rc == 1
 
 
 @pytest.mark.architecture

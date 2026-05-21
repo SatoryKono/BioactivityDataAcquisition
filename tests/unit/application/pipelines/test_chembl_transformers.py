@@ -31,6 +31,8 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
+pytestmark = pytest.mark.repo_backed
+
 
 def _minimal_valid_assay_record() -> dict[str, object]:
     return {

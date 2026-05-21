@@ -196,6 +196,19 @@ def test_exact_replay_launch_inherits_supported_family_default_profile() -> None
     )
 
 
+def test_public_profile_resolver_accepts_explicit_strict_profile_set() -> None:
+    """Public wrapper must accept the low-level strict-profile keyword."""
+    assert (
+        resolve_effective_required_persistence_profile(
+            configured_required_profile="degraded_observable",
+            family_default_profile="custom_strict",
+            strict_persistence_profiles=frozenset({"custom_strict"}),
+            exact_replay_requested=True,
+        )
+        == "custom_strict"
+    )
+
+
 def test_critical_runtime_inherits_supported_family_default_profile() -> None:
     assert (
         resolve_effective_required_persistence_profile(

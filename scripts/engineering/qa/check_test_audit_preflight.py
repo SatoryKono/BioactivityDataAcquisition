@@ -82,6 +82,20 @@ def _detect_default_branch(runner: GitRunner) -> str:
     return "main"
 
 
+def _skipped_git_status_due_to_missing_lfs() -> dict[str, Any]:
+    return {
+        "ok": True,
+        "stdout": "",
+        "stderr": (
+            "Skipped git status because git-lfs is unavailable; missing_git_lfs "
+            "is the strict reproducibility blocker."
+        ),
+        "returncode": None,
+        "timed_out": False,
+        "skipped": True,
+    }
+
+
 def _scan_lfs_pointer_files(root: Path) -> list[str]:
     vcr_root = root / VCR_FIXTURE_ROOT
     if not vcr_root.exists():
@@ -114,8 +128,13 @@ def collect_test_audit_preflight(
     current_commit = _git_value(git_runner, ["rev-parse", "--short", "HEAD"])
     default_branch = _detect_default_branch(git_runner)
     default_commit = _git_value(git_runner, ["rev-parse", "--short", default_branch])
+    lfs_available = bool(lfs_path)
     git_lfs_version = _git_value(git_runner, ["lfs", "version"]) if lfs_path else None
-    git_status = _git_value(git_runner, ["status", "--short", "--untracked-files=no"])
+    git_status = (
+        _git_value(git_runner, ["status", "--short", "--untracked-files=no"])
+        if lfs_available
+        else _skipped_git_status_due_to_missing_lfs()
+    )
 
     baseline_path = root / TELEMETRY_BASELINE
     baseline_exists = baseline_path.exists()

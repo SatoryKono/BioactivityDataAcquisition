@@ -2,6 +2,7 @@ version: 1
 policy_scope: sanctioned_twin_module_ratchet
 review_date: "2026-05-21"
 ratchet_mode: no_growth
+linked_issue: "#4452"
 families:
   - family_id: application.core.span_helpers
     owner: bioetl.application.core

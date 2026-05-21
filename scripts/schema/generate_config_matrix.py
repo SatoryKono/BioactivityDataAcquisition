@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
+import io
 import json
 from pathlib import Path
 from typing import Any
@@ -58,56 +60,139 @@ def _sort_key(path: str) -> tuple[int, list[str]]:
     return (len(parts), parts)
 
 
-def main() -> None:
-    """Generate CSV and Markdown comparison outputs."""
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail if committed config matrix/report artifacts are stale.",
+    )
+    mode.add_argument(
+        "--update",
+        action="store_true",
+        help="Write generated config matrix/report artifacts (default).",
+    )
+    parser.add_argument(
+        "--matrix-output",
+        type=Path,
+        default=Path("docs/04-reference/config_comparison_matrix.csv"),
+        help="CSV matrix output path.",
+    )
+    parser.add_argument(
+        "--report-output",
+        type=Path,
+        default=Path("docs/config-discrepancies-report.md"),
+        help="Markdown discrepancy report output path.",
+    )
+    return parser.parse_args(argv)
+
+
+def _build_artifact_contents() -> tuple[str, str, int, int, int]:
+    """Build matrix/report contents without writing files."""
     configs = _collect_configs()
     all_keys = sorted(
         {key for values in configs.values() for key in values}, key=_sort_key
     )
     config_names = sorted(configs.keys())
 
-    output_path = Path("docs/04-reference/config_comparison_matrix.csv")
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.writer(handle)
-        writer.writerow(["Parameter Path", *config_names])
-        for key in all_keys:
-            row = [key]
-            for cfg_name in config_names:
-                row.append(configs[cfg_name].get(key, "—"))
-            writer.writerow(row)
+    if configs:
+        common = set.intersection(*(set(values.keys()) for values in configs.values()))
+    else:
+        common = set()
 
-    print(f"Matrix saved to {output_path}")
-    print(f"Total parameters: {len(all_keys)}")
-    print(f"Total configs: {len(configs)}")
+    partial = [key for key in all_keys if key not in common]
+    matrix_handle = io.StringIO(newline="")
+    writer = csv.writer(matrix_handle)
+    writer.writerow(["Parameter Path", *config_names])
+    for key in all_keys:
+        row = [key]
+        for cfg_name in config_names:
+            row.append(configs[cfg_name].get(key, "—"))
+        writer.writerow(row)
 
+    report_lines = [
+        "# Config Discrepancies Report",
+        "",
+        f"Total configs: {len(configs)}",
+        f"Total unique parameters: {len(all_keys)}",
+        "",
+        "## Inconsistent Parameters",
+        "",
+    ]
+    for key in partial:
+        present_in = [cfg for cfg, data in configs.items() if key in data]
+        report_lines.append(
+            f"- `{key}` ({len(present_in)}/{len(configs)}): {', '.join(present_in)}"
+        )
+    report_lines.append("")
+    return (
+        matrix_handle.getvalue(),
+        "\n".join(report_lines),
+        len(all_keys),
+        len(configs),
+        len(partial),
+    )
+
+
+def _write_artifacts(
+    *,
+    matrix_path: Path,
+    report_path: Path,
+    matrix_content: str,
+    report_content: str,
+) -> None:
+    matrix_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    matrix_path.write_text(matrix_content, encoding="utf-8", newline="")
+    report_path.write_text(report_content, encoding="utf-8")
+
+
+def _artifact_matches(path: Path, expected: str) -> bool:
+    if not path.exists():
+        print(f"[drift] missing: {path}")
+        return False
+    with path.open(encoding="utf-8", newline="") as handle:
+        actual = handle.read()
+    if actual == expected:
+        return True
+    print(f"[drift] mismatch: {path}")
+    return False
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Generate or check CSV and Markdown comparison outputs."""
+    args = _parse_args(argv)
+    matrix_content, report_content, parameter_count, config_count, partial_count = (
+        _build_artifact_contents()
+    )
+    if args.check:
+        ok = _artifact_matches(
+            args.matrix_output,
+            matrix_content,
+        ) and _artifact_matches(args.report_output, report_content)
+        if ok:
+            print("[ok] config matrix artifacts are up to date")
+            return 0
+        print("[hint] run: python -m scripts.schema generate-config-matrix --update")
+        return 1
+
+    _write_artifacts(
+        matrix_path=args.matrix_output,
+        report_path=args.report_output,
+        matrix_content=matrix_content,
+        report_content=report_content,
+    )
+    print(f"Matrix saved to {args.matrix_output}")
+    print(f"Total parameters: {parameter_count}")
+    print(f"Total configs: {config_count}")
     print("\n" + "=" * 80)
     print("PARAMETER PRESENCE SUMMARY")
     print("=" * 80)
-    if configs:
-        common = set.intersection(*(set(values.keys()) for values in configs.values()))
-        print(f"Common parameters in all configs: {len(common)}")
-    else:
-        common = set()
-        print("No configs discovered.")
-
-    partial = [key for key in all_keys if key not in common]
-    print(f"Inconsistent parameters: {len(partial)}")
-
-    report_path = Path("docs/config-discrepancies-report.md")
-    with report_path.open("w", encoding="utf-8") as handle:
-        handle.write("# Config Discrepancies Report\n\n")
-        handle.write(f"Total configs: {len(configs)}\n")
-        handle.write(f"Total unique parameters: {len(all_keys)}\n\n")
-        handle.write("## Inconsistent Parameters\n\n")
-        for key in partial:
-            present_in = [cfg for cfg, data in configs.items() if key in data]
-            handle.write(
-                f"- `{key}` ({len(present_in)}/{len(configs)}): {', '.join(present_in)}\n"
-            )
-
-    print(f"Discrepancy report saved to {report_path}")
+    print(f"Inconsistent parameters: {partial_count}")
+    print(f"Discrepancy report saved to {args.report_output}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

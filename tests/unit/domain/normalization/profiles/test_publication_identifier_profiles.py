@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 import yaml
 
 from bioetl.domain.mapping.publication_type_classification import (
@@ -27,6 +28,8 @@ from bioetl.domain.normalization.profiles.semanticscholar_publication import (
 from tests.helpers.publication_type_classification import (
     initialize_test_publication_type_classification,
 )
+
+pytestmark = pytest.mark.repo_backed
 
 
 def test_crossref_profile_canonicalizes_issn_collection_fields() -> None:
@@ -111,7 +114,7 @@ def test_publication_taxonomy_fixture_cases_match_profile_rules() -> None:
         assert entry.subclass == case["subclass_expected"]
         assert entry.class_code == case["class_expected"]
         assert unified_rule.apply(case["unified_expected"]) == case["unified_expected"]
-        assert subclass_rule.apply(case["subclass_expected"]) == case[
-            "subclass_expected"
-        ]
+        assert (
+            subclass_rule.apply(case["subclass_expected"]) == case["subclass_expected"]
+        )
         assert class_rule.apply(case["class_expected"]) == case["class_expected"]

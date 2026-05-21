@@ -9,6 +9,13 @@ policy:
     Config compatibility shapes must be explicit, bounded, and covered by tests.
     New legacy-shape normalizers are not allowed unless they are registered here
     with a removal date or a permanent canonical-alias rationale.
+  burn_down:
+    linked_issue: "#4473"
+    mode: fail-fast-no-growth
+    accepted_shape_max: 2
+    migration_supported_shape_max: 0
+    retired_rejected_shape_min: 6
+    expired_shape_policy: "fail-ci"
   constraints:
     - "Domain must not import infrastructure or perform I/O."
     - "Config normalization remains an infrastructure boundary before schema validation."

@@ -43,9 +43,6 @@ from bioetl.composition.factories.pipeline._factory_method_types import (
 from bioetl.composition.factories.pipeline._factory_method_types import (
     resolve_data_source_creator as _resolve_data_source_creator,
 )
-from bioetl.composition.factories.pipeline.control_plane_artifacts import (
-    build_control_plane_artifacts,
-)
 from bioetl.composition.factories.pipeline.transformer_dependencies import (
     build_transformer_dependencies,
 )
@@ -187,18 +184,7 @@ def create_factory_runner[TPipeline: "BasePipeline"](
         settings=request.settings,
         observability=request.observability,
         yaml_config=yaml_config,
-        control_plane_artifacts=build_control_plane_artifacts(
-            manifest_id=request.manifest_id,
-            execution_fingerprint=request.execution_fingerprint,
-            config_hash=request.config_hash,
-            resolved_config_hash=request.resolved_config_hash,
-            effective_config_hash=request.effective_config_hash,
-            dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
-            effective_config_artifact_id=request.effective_config_artifact_id,
-            replay_of_run_id=request.replay_of_run_id,
-            replay_of_manifest_id=request.replay_of_manifest_id,
-            input_snapshot_fingerprint=request.input_snapshot_fingerprint,
-        ),
+        control_plane_artifacts=request,
         create_with_services_fn=create_with_services_fn,
         assemble_runner_fn=assemble_runner_fn,
         filter_config=request.filter_config,

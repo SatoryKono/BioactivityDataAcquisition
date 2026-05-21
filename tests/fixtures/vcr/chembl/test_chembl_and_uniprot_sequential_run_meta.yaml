@@ -1,8 +1,0 @@
-schema_version: 1
-provider: chembl
-cassette_rel_path: tests/fixtures/vcr/chembl/test_chembl_and_uniprot_sequential_run.yaml
-metadata_status: managed_inventory
-source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 7a88c9b18dbf5a6ea02a1770afc2500b14c4ca1336c85336331cbfbc2c53e777
-recorded_at: '2026-04-28'
-staleness_ready: true

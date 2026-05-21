@@ -124,10 +124,12 @@ bioetl workflow status <NAME> [OPTIONS]
   overrides as `bioetl run`, such as `--limit`, CSV/filter options,
   cache/replay options, vacuum overrides, tracing overrides, and
   `--required-persistence-profile`.
-- `--required-persistence-profile degraded_observable` is a local/live-run
-  opt-down from the default `replay_ready` evidence floor. `--exact-replay`
-  still promotes the effective profile back to the strict published family
-  default and cannot be used to bypass exact-replay guardrails.
+- `--required-persistence-profile degraded_observable` is still available for
+  local diagnostic launches, but strict workflow steps do not recommend it as a
+  remediation path for missing snapshot-backed Bronze evidence. `--exact-replay`
+  and production/debug-critical launches still promote the effective profile
+  back to the strict published family default and cannot be used to bypass
+  exact-replay guardrails.
 - pipeline-level `--resume` is intentionally not exposed on `workflow run`;
   workflow control-plane resume stays on `--resume-last`.
 - `--resume-last` использует semantic `execution_fingerprint`, а не только имя workflow.
@@ -141,7 +143,6 @@ bioetl workflow run chembl_activity --dry-run
 bioetl workflow run chembl_activity --limit 1000
 bioetl workflow run chembl_activity --input-csv data/filter-ids.csv --filter-column molecule_id --filter-field molecule_chembl_id
 bioetl workflow run chembl_activity --use-cached-bronze --exact-replay --replay-of-run-id parent-run-1 --replay-of-manifest-id manifest-parent-1
-bioetl workflow run chembl_publication --limit 1000 --required-persistence-profile degraded_observable
 bioetl workflow status chembl_activity
 bioetl workflow run publication_provider_pack --dry-run
 bioetl workflow run chembl_core --dry-run
@@ -248,7 +249,7 @@ bioetl run --pipeline chembl_activity --debug
 # Запуск из локального Bronze cache
 bioetl run --pipeline chembl_activity --use-cached-bronze
 
-# Локальный observable live/backfill запуск без replay_ready evidence claim
+# Локальный diagnostic live/backfill запуск без replay_ready evidence claim
 bioetl run --pipeline chembl_publication --limit 1000 --required-persistence-profile degraded_observable
 
 # Strict exact replay с явным ancestry

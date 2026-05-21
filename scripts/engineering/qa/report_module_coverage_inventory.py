@@ -27,6 +27,14 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--json-out", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--snapshot-date", default=None)
     parser.add_argument("--check", action="store_true")
+    parser.add_argument(
+        "--allow-missing-coverage-xml",
+        action="store_true",
+        help=(
+            "Permit source-tree-only inventory checks when reports/coverage/coverage.xml "
+            "has not been produced by the coverage-verify lane."
+        ),
+    )
     return parser.parse_args(argv)
 
 
@@ -183,6 +191,9 @@ def build_module_coverage_inventory(
         "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
         "coverage_xml_path": _repo_relative(coverage_xml, repo_root),
         "coverage_xml_sha256": _sha256(coverage_xml),
+        "measurement_mode": (
+            "coverage_xml" if coverage_xml_exists else "source_tree_only"
+        ),
         "source_tree_sha256": _source_tree_sha256(source_paths, repo_root),
         "canonical_coverage_lane": "coverage-verify",
         "summary": {
@@ -208,6 +219,19 @@ def _payload_for_check(args: argparse.Namespace) -> dict[str, Any]:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
+
+    if (
+        args.check
+        and not args.coverage_xml.exists()
+        and not args.allow_missing_coverage_xml
+    ):
+        print(f"[module-coverage-inventory] missing coverage XML: {args.coverage_xml}")
+        print(
+            "[module-coverage-inventory] run the coverage-verify lane first, "
+            "or pass --allow-missing-coverage-xml for source-tree-only drift checks"
+        )
+        return 1
+
     payload = _payload_for_check(args)
     rendered = json.dumps(payload, indent=2, sort_keys=True) + "\n"
 

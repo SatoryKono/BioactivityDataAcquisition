@@ -42,27 +42,28 @@ __all__ = [
 ]
 
 
-def _validate_strict_code_provenance(
+def _validate_executable_code_provenance(
     request: RunManifestCreateSpec,
     code_provenance: RunCodeProvenance,
 ) -> None:
-    """Fail closed when strict replay contexts cannot pin code revision."""
+    """Fail closed when executable runs cannot pin code and dependency state."""
     required_profile = str(
         request.launch_context.get("required_persistence_profile")
         or "degraded_observable"
     )
-    strict_context = (
-        bool(request.launch_context.get("exact_replay"))
-        or required_profile in STRICT_PERSISTENCE_PROFILES
-    )
-    if not strict_context:
-        return
+    strict_code_provenance_required = bool(
+        request.launch_context.get("exact_replay")
+    ) or required_profile in STRICT_PERSISTENCE_PROFILES
     if not code_provenance.git_commit:
         raise RuntimeError(
-            "Run manifest requires git_commit code provenance for exact "
-            "replay, replay_ready, and forensic_grade contexts"
+            "Run manifest requires git_commit code provenance for every "
+            "executable run manifest"
         )
-    if str(code_provenance.source_revision_state or "").strip().lower() != "clean":
+    if (
+        strict_code_provenance_required
+        and str(code_provenance.source_revision_state or "").strip().lower()
+        != "clean"
+    ):
         raise RuntimeError(
             "Run manifest requires clean source_revision_state for exact "
             "replay, replay_ready, and forensic_grade contexts"
@@ -70,7 +71,7 @@ def _validate_strict_code_provenance(
     if not code_provenance.dependency_lock_hash:
         raise RuntimeError(
             "Run manifest requires dependency_lock_hash code provenance for "
-            "exact replay, replay_ready, and forensic_grade contexts"
+            "every executable run manifest"
         )
 
 
@@ -83,14 +84,6 @@ def _validate_documented_code_provenance(
         raise RuntimeError(
             "Run manifest requires a documented source_revision_state "
             f"(allowed: {sorted(DOCUMENTED_SOURCE_REVISION_STATES)})"
-        )
-    if not code_provenance.git_commit and state not in {
-        "git_unavailable",
-        "dirty_state_unknown",
-    }:
-        raise RuntimeError(
-            "Run manifest cannot persist missing git_commit unless "
-            "source_revision_state is git_unavailable or dirty_state_unknown"
         )
     if code_provenance.git_commit and state == "git_unavailable":
         raise RuntimeError(
@@ -192,10 +185,10 @@ class RunManifestService(
         created_at = self._resolve_created_at()
         normalized_run_type = self._normalize_run_type(request.run_type)
         code_provenance = self._build_code_provenance(request)
-        _validate_strict_code_provenance(request, code_provenance)
         _validate_documented_code_provenance(code_provenance)
         _validate_exact_replay_snapshot_claim(request)
         _validate_strict_input_snapshots(request)
+        _validate_executable_code_provenance(request, code_provenance)
         normalized_payload = normalize_run_manifest_spec(
             self._build_manifest_payload(
                 request=request,

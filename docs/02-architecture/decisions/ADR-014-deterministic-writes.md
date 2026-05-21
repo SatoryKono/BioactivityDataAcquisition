@@ -199,6 +199,6 @@ Application и interfaces слои **MUST NOT** импортировать `stru
 
 ## References
 
-- [ADR-010: Control Plane Reproducibility](ADR-010-control-plane-reproducibility.md)
-- [Runtime Clock Port](../../../src/bioetl/domain/ports/time.py)
+- [ADR-044: RunManifest/RunLedger Control Plane](ADR-044-run-manifest-ledger-control-plane.md)
+- [Runtime Clock Port](../../../src/bioetl/domain/ports/runtime/clock.py)
 - [SystemClock adapter](../../../src/bioetl/infrastructure/time/system_clock.py)

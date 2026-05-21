@@ -87,6 +87,15 @@ def _has_pytest_mark(decorators: list[ast.expr]) -> bool:
     return False
 
 
+def _has_pytest_fixture(decorators: list[ast.expr]) -> bool:
+    for decorator in decorators:
+        target = decorator.func if isinstance(decorator, ast.Call) else decorator
+        qualified = _qualified_name(target)
+        if qualified in {"pytest.fixture", "fixture"}:
+            return True
+    return False
+
+
 def _has_module_pytestmark(tree: ast.Module) -> bool:
     for node in tree.body:
         if isinstance(node, ast.Assign):
@@ -130,14 +139,40 @@ class _TestBodyVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def _test_functions(tree: ast.Module) -> list[ast.FunctionDef | ast.AsyncFunctionDef]:
-    functions: list[ast.FunctionDef | ast.AsyncFunctionDef] = []
-    for node in ast.walk(tree):
-        if isinstance(
-            node, ast.FunctionDef | ast.AsyncFunctionDef
-        ) and node.name.startswith(TEST_FUNCTION_PREFIX):
-            functions.append(node)
-    return functions
+class _TestFunctionCollector(ast.NodeVisitor):
+    def __init__(self) -> None:
+        self.functions: list[tuple[ast.FunctionDef | ast.AsyncFunctionDef, bool]] = []
+        self._class_mark_stack: list[bool] = [False]
+
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        inherited_mark = self._class_mark_stack[-1]
+        class_has_mark = _has_pytest_mark(node.decorator_list)
+        self._class_mark_stack.append(inherited_mark or class_has_mark)
+        self.generic_visit(node)
+        self._class_mark_stack.pop()
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._collect_function(node)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._collect_function(node)
+
+    def _collect_function(
+        self,
+        node: ast.FunctionDef | ast.AsyncFunctionDef,
+    ) -> None:
+        if node.name.startswith(TEST_FUNCTION_PREFIX) and not _has_pytest_fixture(
+            node.decorator_list
+        ):
+            self.functions.append((node, self._class_mark_stack[-1]))
+
+
+def _test_functions(
+    tree: ast.Module,
+) -> list[tuple[ast.FunctionDef | ast.AsyncFunctionDef, bool]]:
+    collector = _TestFunctionCollector()
+    collector.visit(tree)
+    return collector.functions
 
 
 def _classify_assertless_candidate(
@@ -204,7 +239,7 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
             continue
 
         module_has_mark = _has_module_pytestmark(tree)
-        for function in _test_functions(tree):
+        for function, class_has_mark in _test_functions(tree):
             total_functions += 1
             location = f"{relative}:{function.lineno}"
             test_name_locations[function.name].append(location)
@@ -234,7 +269,11 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
                 if len(assertless_examples) < 25:
                     assertless_examples.append(location)
 
-            if not module_has_mark and not _has_pytest_mark(function.decorator_list):
+            if (
+                not module_has_mark
+                and not class_has_mark
+                and not _has_pytest_mark(function.decorator_list)
+            ):
                 markerless_test_functions += 1
 
     duplicate_names = {

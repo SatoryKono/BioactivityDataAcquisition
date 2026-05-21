@@ -377,7 +377,72 @@ class TestMetricsService:
 
         assert result.success is False
         assert result.error == "Metrics publisher is not configured"
-        mock_logger.warning.assert_called()
+        mock_logger.warning.assert_called_once_with(
+            "Metrics gateway publication unavailable",
+            gateway="localhost:9091",
+            run_label="bioetl",
+            grouping_key={"pipeline": "chembl_activity"},
+            error="Metrics publisher is not configured",
+        )
+
+    def test_push_to_gateway_logs_exception_with_structured_fields(
+        self, mock_logger: MagicMock, mock_server: MagicMock
+    ) -> None:
+        """Gateway publication exceptions should preserve structured diagnostics."""
+        mock_publisher = MagicMock(spec=MetricsPublisherPort)
+        mock_publisher.push_to_gateway.side_effect = OSError("gateway refused")
+        service = MetricsService(
+            logger=mock_logger,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+            _server=mock_server,
+            _publisher=mock_publisher,
+        )
+
+        result = service.push_to_gateway(
+            gateway="localhost:9091",
+            run_label="bioetl",
+            grouping_key={"pipeline": "chembl_activity"},
+        )
+
+        assert result.success is False
+        assert result.error == "gateway refused"
+        mock_logger.warning.assert_called_once_with(
+            "Metrics gateway publication failed",
+            gateway="localhost:9091",
+            run_label="bioetl",
+            grouping_key={"pipeline": "chembl_activity"},
+            error="gateway refused",
+            error_type="OSError",
+        )
+
+    def test_push_to_gateway_logs_unsuccessful_result_with_structured_fields(
+        self, mock_logger: MagicMock, mock_server: MagicMock
+    ) -> None:
+        """False publisher results should include bounded failure context."""
+        mock_publisher = MagicMock(spec=MetricsPublisherPort)
+        mock_publisher.push_to_gateway.return_value = False
+        service = MetricsService(
+            logger=mock_logger,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+            _server=mock_server,
+            _publisher=mock_publisher,
+        )
+
+        result = service.push_to_gateway(
+            gateway="localhost:9091",
+            run_label="bioetl",
+            grouping_key={"pipeline": "chembl_activity"},
+        )
+
+        assert result.success is False
+        assert result.error == "Publisher returned unsuccessful result"
+        mock_logger.warning.assert_called_once_with(
+            "Metrics gateway publication failed",
+            gateway="localhost:9091",
+            run_label="bioetl",
+            grouping_key={"pipeline": "chembl_activity"},
+            error="Publisher returned unsuccessful result",
+        )
 
     def test_delete_from_gateway_success(
         self, mock_logger: MagicMock, mock_server: MagicMock

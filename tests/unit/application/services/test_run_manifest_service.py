@@ -29,6 +29,9 @@ from bioetl.infrastructure.control_plane import FileRunManifestStore
 from tests.helpers.clock import FixedClock
 
 
+pytestmark = pytest.mark.unit
+
+
 _InMemoryRunManifestStore = InMemoryRunManifestStore
 
 
@@ -224,28 +227,52 @@ def test_create_manifest_preserves_resume_only_replay_capability() -> None:
     assert manifest.to_dict()["replay_capability"] == "resume_only"
 
 
-def test_create_manifest_allows_exact_replay_capability_without_strict_request() -> (
-    None
-):
+def test_create_manifest_requires_git_commit_even_for_degraded_profile() -> None:
     store = _InMemoryRunManifestStore()
     service = RunManifestService(
         manifest_port=store,
         _manifest_id_factory=lambda: "manifest-capability-only",
     )
 
-    manifest = service.create_manifest(
-        replace(
-            _make_request(),
-            git_commit=None,
-            source_revision_state="dirty_state_unknown",
-            replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
-            launch_context={"limit": 100, "resume": False},
+    with pytest.raises(RuntimeError, match="requires git_commit code provenance"):
+        service.create_manifest(
+            replace(
+                _make_request(),
+                git_commit=None,
+                source_revision_state="dirty_state_unknown",
+                replay_capability=ReplayCapability.REBUILD_ONLY,
+                launch_context={
+                    "limit": 100,
+                    "resume": False,
+                    "required_persistence_profile": "degraded_observable",
+                },
+            )
         )
+    assert store.get("manifest-capability-only") is None
+
+
+def test_create_manifest_requires_dependency_lock_even_for_degraded_profile() -> None:
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-missing-lock-degraded",
     )
 
-    assert manifest.code_provenance.git_commit is None
-    assert manifest.code_provenance.source_revision_state == "dirty_state_unknown"
-    assert store.get("manifest-capability-only") == manifest
+    with pytest.raises(RuntimeError, match="requires dependency_lock_hash"):
+        service.create_manifest(
+            replace(
+                _make_request(),
+                dependency_lock_hash=None,
+                replay_capability=ReplayCapability.REBUILD_ONLY,
+                launch_context={
+                    "limit": 100,
+                    "resume": False,
+                    "required_persistence_profile": "degraded_observable",
+                },
+            )
+        )
+
+    assert store.get("manifest-missing-lock-degraded") is None
 
 
 def test_create_manifest_rejects_exact_capability_claim_without_snapshot_envelope() -> (
@@ -333,7 +360,7 @@ def test_create_manifest_rejects_missing_git_commit_with_clean_state() -> None:
         _manifest_id_factory=lambda: "manifest-missing-git-clean",
     )
 
-    with pytest.raises(RuntimeError, match="missing git_commit"):
+    with pytest.raises(RuntimeError, match="requires git_commit code provenance"):
         service.create_manifest(
             replace(
                 _make_request(),
@@ -691,7 +718,13 @@ def test_create_manifest_requires_clean_source_revision_state_for_strict_replay(
         _manifest_id_factory=lambda: "manifest-dirty-source",
     )
 
-    with pytest.raises(RuntimeError, match="requires clean source_revision_state"):
+    with pytest.raises(
+        RuntimeError,
+        match=(
+            "requires clean source_revision_state for exact replay, "
+            "replay_ready, and forensic_grade contexts"
+        ),
+    ):
         service.create_manifest(
             replace(
                 _make_request(),
@@ -717,7 +750,40 @@ def test_create_manifest_allows_dirty_source_revision_state_for_degraded_context
             _make_request(),
             source_revision_state="dirty",
             replay_capability=ReplayCapability.REBUILD_ONLY,
+            launch_context={
+                "limit": 100,
+                "resume": False,
+                "required_persistence_profile": "degraded_observable",
+            },
         )
     )
 
     assert manifest.code_provenance.source_revision_state == "dirty"
+    assert store.get("manifest-dirty-degraded") == manifest
+
+
+def test_create_manifest_reports_snapshot_gap_before_dirty_source_state_in_strict_context() -> (
+    None
+):
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-strict-snapshot-gap",
+    )
+
+    with pytest.raises(RuntimeError, match="requires immutable input snapshots"):
+        service.create_manifest(
+            replace(
+                _make_request(),
+                source_revision_state="dirty",
+                source_refs=(),
+                replay_capability=ReplayCapability.REBUILD_ONLY,
+                launch_context={
+                    "limit": 100,
+                    "resume": False,
+                    "required_persistence_profile": "replay_ready",
+                },
+            )
+        )
+
+    assert store.get("manifest-strict-snapshot-gap") is None

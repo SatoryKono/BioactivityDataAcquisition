@@ -38,6 +38,148 @@ allowed_occurrence_identity_generators:
   rationale: Domain event ID is an idempotency/correlation identifier; event payload
     semantics remain separate.
   issue: '#3407'
+- path: src/bioetl/application/services/execution/pipeline_runner_service.py
+  symbol: PipelineRunnerService.run
+  generator: uuid4
+  identity_field: RunID
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: Pipeline runner service run_id is an execution occurrence identifier;
+    replay and content semantics remain anchored by manifest fingerprints and
+    input snapshot fingerprints.
+  issue: '#4472'
+- path: src/bioetl/application/services/control_plane/run_manifest_service.py
+  symbol: RunManifestService._manifest_id_factory
+  generator: uuid4
+  identity_field: manifest_id
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: Run manifest IDs identify persisted control-plane occurrences;
+    execution_fingerprint and effective-config hashes carry semantic replay identity.
+  issue: '#4472'
+- path: src/bioetl/application/services/control_plane/run_ledger_service.py
+  symbol: RunLedgerService._entry_id_factory
+  generator: uuid4
+  identity_field: ledger_entry_id
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: Run ledger entry IDs are append-only event occurrence identifiers;
+    ledger idempotency and semantic event payloads remain separate.
+  issue: '#4472'
+- path: src/bioetl/application/services/control_plane/workflow_manifest_service.py
+  symbol: WorkflowManifestService._manifest_id_factory
+  generator: uuid4
+  identity_field: workflow_manifest_id
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: Workflow manifest IDs identify persisted workflow occurrences while
+    compute_execution_fingerprint carries the semantic workflow identity.
+  issue: '#4472'
+- path: src/bioetl/application/services/control_plane/workflow_ledger_service.py
+  symbol: WorkflowLedgerService._entry_id_factory
+  generator: uuid4
+  identity_field: workflow_ledger_entry_id
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: Workflow ledger entry IDs are append-only event occurrence identifiers
+    and must not participate in semantic workflow replay identity.
+  issue: '#4472'
+- path: src/bioetl/application/services/control_plane/workflow_execution_service.py
+  symbol: WorkflowExecutionService.run_id_factory
+  generator: uuid4
+  identity_field: workflow_run_id
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: Workflow run IDs identify execution occurrences; workflow manifest
+    fingerprints define replay semantics.
+  issue: '#4472'
+- path: src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py
+  symbol: initialize_runner_runtime_state
+  generator: uuid4
+  identity_field: composite_run_id
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: Composite runner IDs identify mutable runtime occurrences and are
+    excluded from semantic composite dependency and replay identity.
+  issue: '#4472'
+- path: src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py
+  symbol: resolve_effective_run_id
+  generator: uuid4
+  identity_field: composite_run_id
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: Runtime assembly fallback IDs are occurrence-only defaults used when
+    callers do not inject an explicit run identifier.
+  issue: '#4472'
+- path: src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py
+  symbol: build_pipeline_context
+  generator: uuid4
+  identity_field: RunID
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: CLI/runtime PipelineRunContext run_id is an occurrence identifier;
+    exact replay uses explicit replay selectors and input snapshot fingerprints.
+  issue: '#4472'
+- path: src/bioetl/composition/bootstrap/runtime/runner.py
+  symbol: bootstrap_pipeline_runner_service
+  generator: uuid4
+  identity_field: service_run_id
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: Bootstrap service_run_id is used for observability correlation while
+    execution identity remains in run manifests and fingerprints.
+  issue: '#4472'
+- path: src/bioetl/composition/bootstrap/runtime/logger_bootstrap.py
+  symbol: bootstrap_logger
+  generator: uuid4
+  identity_field: log_correlation_run_id
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: Logger fallback run IDs are correlation-only observability IDs and
+    must not enter replay fingerprints.
+  issue: '#4472'
+- path: src/bioetl/composition/bootstrap/cli/storage.py
+  symbol: _create_cli_preview_run_context
+  generator: uuid4
+  identity_field: cli_preview_run_id
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: CLI preview storage contexts use occurrence-only IDs for local
+    operator actions and not for semantic replay identity.
+  issue: '#4472'
+- path: src/bioetl/composition/observability_api.py
+  symbol: push_metrics_to_gateway
+  generator: uuid4
+  identity_field: metrics_correlation_run_id
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: Metrics gateway helper fallback IDs are observability correlation
+    identifiers for push/delete operations, not semantic execution identity.
+  issue: '#4472'
+- path: src/bioetl/composition/observability_api.py
+  symbol: delete_metrics_from_gateway
+  generator: uuid4
+  identity_field: metrics_cleanup_correlation_run_id
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: Metrics gateway cleanup fallback IDs are observability correlation
+    identifiers for delete operations, not semantic execution identity.
+  issue: '#4467'
+legacy_config_hash_policy:
+  field: config_hash
+  alias_of: resolved_config_hash
+  semantic_classification: compatibility-only
+  replay_identity_anchor: false
+  primary_semantic_anchor: effective_config_hash
+  canonical_replay_anchors:
+  - execution_fingerprint
+  - resolved_config_hash
+  - effective_config_hash
+  rationale: Legacy config_hash is retained for older manifest and sidecar
+    consumers; new replay comparisons must use execution_fingerprint plus the
+    explicit resolved/effective config hashes and must not promote config_hash to
+    a primary semantic anchor.
+  issue: '#4467'
 content_hash_datetime_policy:
   active_policy: v1_date
   migration_target: v2_datetime_utc

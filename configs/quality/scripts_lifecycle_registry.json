@@ -14,12 +14,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the shared CLI dispatch helper for canonical scripts.engineering and adjacent routers; promote it to active inventory once helper modules receive explicit catalog classification."
     },
-    "scripts/ai/vibe/__main__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a direct module-level compatibility entrypoint while the canonical public Python surface remains `python -m scripts.ai vibe`; remove it after caller audit and one compatibility window if no direct module callers remain."
-    },
     "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",

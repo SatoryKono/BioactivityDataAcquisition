@@ -58,13 +58,51 @@ issues:
       - scripts/engineering/qa/report_test_governance_audit.py
       - tests/architecture/test_test_governance_audit.py
 budgets:
-  refined_assertless_max: 582
-  duplicate_test_names_max: 879
-  duplicate_test_name_occurrences_max: 2742
+  refined_assertless_max: 563
+  duplicate_test_names_max: 877
+  duplicate_test_name_occurrences_max: 2730
   compatibility_test_file_max: 56
-  markerless_test_functions_max: 13431
-  uuid4_call_sites_max: 413
+  markerless_test_functions_max: 7800
+  uuid4_call_sites_max: 404
   date_today_call_sites_max: 0
+budget_ratchet:
+  linked_issue: "#4458"
+  mode: fail-fast-no-growth
+  expected_direction: downward
+  refreshed_on: "2026-05-21"
+  touch_policy: >-
+    Refactors touching test families must reduce the applicable budget or keep
+    it flat with an explicit owner rationale; increasing a debt budget requires
+    a separate governance review.
+  ratcheted_fields:
+    - refined_assertless_max
+    - duplicate_test_names_max
+    - duplicate_test_name_occurrences_max
+    - compatibility_test_file_max
+    - markerless_test_functions_max
+    - uuid4_call_sites_max
+    - date_today_call_sites_max
+current_issue_closeout:
+  issue_set:
+    - "#4455"
+    - "#4457"
+    - "#4459"
+    - "#4461"
+    - "#4462"
+    - "#4463"
+    - "#4465"
+    - "#4466"
+    - "#4468"
+    - "#4469"
+    - "#4470"
+  decision: closeable
+  evidence:
+    - reports/quality/module-coverage-inventory.json
+    - scripts/engineering/qa/report_test_governance_audit.py
+    - configs/quality/test_governance_audit.yaml
+    - reports/quality/vcr-metadata-catalog.json
+    - tests/integration/test_observability_emission_integration.py
+    - tests/architecture/test_test_governance_audit.py
 preflight:
   script: scripts/engineering/qa/check_test_audit_preflight.py
   telemetry_baseline: docs/05-engineering/test-telemetry-baseline.md
@@ -95,7 +133,7 @@ tracing:
 assertless_triage:
   categories:
     architecture_helper_guard:
-      count: 30
+      count: 29
       decision: retained
       rationale: "Architecture policy tests delegate assertions to shared guard helpers or pytest.fail paths."
       next_review: "2026-09-30"
@@ -115,7 +153,7 @@ assertless_triage:
       rationale: "No-op, close/aclose, smoke, or does-not-raise behavior is the contract under test."
       next_review: "2026-09-30"
     weak_no_value:
-      count: 479
+      count: 461
       decision: burn-down
       rationale: "Candidates require assertion strengthening, merge, or removal when the owning module is edited."
       next_review: "2026-09-30"
@@ -127,11 +165,11 @@ assertless_triage:
       - tests/unit/application/core/
       - tests/unit/infrastructure/control_plane/
 duplicate_name_triage:
-  total_duplicate_names: 879
-  duplicate_occurrences: 2742
+  total_duplicate_names: 877
+  duplicate_occurrences: 2730
   top_generic_names:
     - name: test_default_values
-      count: 42
+      count: 38
       decision: rename-on-touch
       preferred_pattern: "test_<subject>_default_values"
     - name: test_immutability
@@ -139,7 +177,7 @@ duplicate_name_triage:
       decision: rename-on-touch
       preferred_pattern: "test_<value_object>_is_immutable"
     - name: test_custom_values
-      count: 22
+      count: 20
       decision: rename-on-touch
       preferred_pattern: "test_<subject>_accepts_custom_values"
     - name: test_hash_consistency
@@ -153,6 +191,39 @@ duplicate_name_triage:
   fixture_builder_policy:
     consolidate_when: "RunID, BatchID, PipelineRunContext, Bronze/Silver/Gold metadata, or checkpoint setup repeats across three or more tests in one module family."
     do_not_consolidate_when: "Inline setup is shorter and clearer than an indirection."
+slow_governance_scanner_cache:
+  decision: retained_cached_scanner
+  issue_ref: "#4462"
+  cached_entrypoints:
+    - scripts.engineering.qa.report_test_governance_audit.collect_test_governance_report
+  isolated_lanes:
+    - architecture-fast-boundary
+    - architecture-slow-governance
+oversized_test_module_inventory:
+  issue_ref: "#4470"
+  max_tracked_lines: 2200
+  split_on_touch: true
+  top_modules:
+    - path: tests/integration/ci/test_reproducibility_contract_suite.py
+      lines: 2164
+      owner: reproducibility-contracts
+      target_split: integration/ci reproducibility phases
+    - path: tests/integration/test_grafana_config.py
+      lines: 2070
+      owner: observability-dashboards
+      target_split: dashboard config contracts
+    - path: tests/unit/application/services/test_metadata_coordinator.py
+      lines: 1994
+      owner: application-services
+      target_split: metadata coordinator command/query families
+    - path: tests/unit/composition/runtime_builders/test_runner_builder.py
+      lines: 1999
+      owner: composition-runtime
+      target_split: runner-builder factory seams
+    - path: tests/unit/application/core/test_record_normalization_processor.py
+      lines: 1981
+      owner: application-core
+      target_split: normalization processor scenarios
 compatibility_test_inventory:
   review_cadence: quarterly
   total_files: 56
@@ -637,51 +708,51 @@ file_backed_domain_contract_tests:
       contract_surface: tests/fixtures/hash_policy/**
 repo_backed_unit_test_exceptions:
   decision: retained_repo_backed_contract_exception
-  rationale: "Checked-in source/config/dashboard/fixture reads may stay in tests/unit only when the repository artifact itself is the contract under test; workflow/dashboard/config tree scenarios were moved out of tests/unit."
+  rationale: "Checked-in source/config/dashboard/fixture reads may stay under tests/unit only when the repository artifact itself is the contract under test; they run in the repo-backed-unit lane, not unit-fast."
   review_date: "2026-09-30"
   entries:
     - path: tests/unit/application/composite/test_non_chembl_join_key_normalization.py
-      target_lane: unit
+      target_lane: repo-backed-unit
       protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml + configs/composites/{molecule,target}.yaml
     - path: tests/unit/application/pipelines/test_chembl_transformers.py
-      target_lane: unit
+      target_lane: repo-backed-unit
       protected_surface: configs/** publication-type bootstrap inputs used by transformer initialization
     - path: tests/unit/application/pipelines/test_transformer_snapshots.py
-      target_lane: unit
+      target_lane: repo-backed-unit
       protected_surface: configs/** publication-type bootstrap inputs used by snapshot transformer initialization
     - path: tests/unit/application/services/test_config_dq_service.py
-      target_lane: unit
+      target_lane: repo-backed-unit
       protected_surface: src/bioetl/application/services/config_dq_service.py
     - path: tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py
-      target_lane: unit
+      target_lane: repo-backed-unit
       protected_surface: src/bioetl/composition/bootstrap/runtime/pipeline.py
     - path: tests/unit/composition/factories/test_factory_decoupling_contracts.py
-      target_lane: unit
+      target_lane: repo-backed-unit
       protected_surface: src/bioetl/composition/factories/services/bundle.py
     - path: tests/unit/composition/test_observability_contract.py
-      target_lane: unit
+      target_lane: repo-backed-unit
       protected_surface: src/bioetl/application/** and src/bioetl/composition/** logging contract scan
     - path: tests/unit/contracts/test_generate_schema_artifacts.py
-      target_lane: unit
+      target_lane: repo-backed-unit
       protected_surface: scripts/schema/generate_schema_artifacts.py
     - path: tests/unit/domain/normalization/profiles/test_publication_identifier_profiles.py
-      target_lane: unit
+      target_lane: repo-backed-unit
       protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml
     - path: tests/unit/memory/test_tooling.py
-      target_lane: unit
+      target_lane: repo-backed-unit
       protected_surface: memory.tooling workflow module CLI entrypoint from repo root
     - path: tests/unit/scripts/diagrams/test_write_path_security.py
-      target_lane: unit
+      target_lane: repo-backed-unit
       protected_surface: scripts/diagrams/{fix_pagebreaks_in_bundles,uniform_diagram_sizes}.py
     - path: tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py
-      target_lane: unit
+      target_lane: repo-backed-unit
       protected_surface: scripts/ai/mcp/{neo4j_memory_mcp_adapter.py,mcp_neo4j_memory_wrapper.sh}
     - path: tests/unit/scripts/test_apply_entity_naming_rename_plan.py
-      target_lane: unit
+      target_lane: repo-backed-unit
       protected_surface: src/tools/apply_entity_naming_rename_plan.py
     - path: tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py
-      target_lane: unit
+      target_lane: repo-backed-unit
       protected_surface: scripts/docs/generate_pipeline_normalization_field_matrix.py + docs/05-engineering/normalization_plan_P0_P6.md
     - path: tests/unit/tools/test_differentiate_linkstyle_security.py
-      target_lane: unit
+      target_lane: repo-backed-unit
       protected_surface: src/tools/differentiate_linkstyle.py

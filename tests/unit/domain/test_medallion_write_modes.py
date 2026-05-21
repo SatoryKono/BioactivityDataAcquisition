@@ -115,8 +115,8 @@ class TestWriteModePolicy:
     def test_bronze_allows_only_append(self) -> None:
         """Test that Bronze layer only allows APPEND mode."""
         policy = WriteModePolicy()
-        # Should not raise
         policy.validate(Layer.BRONZE, WriteMode.APPEND)
+        assert policy.ALLOWED_MODES[Layer.BRONZE] == {WriteMode.APPEND}
 
     def test_bronze_rejects_merge(self) -> None:
         """Test that Bronze layer rejects MERGE mode."""
@@ -134,11 +134,13 @@ class TestWriteModePolicy:
         """Test that Silver layer allows MERGE mode."""
         policy = WriteModePolicy()
         policy.validate(Layer.SILVER, WriteMode.MERGE)
+        assert WriteMode.MERGE in policy.ALLOWED_MODES[Layer.SILVER]
 
     def test_silver_allows_append(self) -> None:
         """Test that Silver layer allows APPEND mode."""
         policy = WriteModePolicy()
         policy.validate(Layer.SILVER, WriteMode.APPEND)
+        assert WriteMode.APPEND in policy.ALLOWED_MODES[Layer.SILVER]
 
     def test_silver_rejects_overwrite(self) -> None:
         """Test that Silver layer rejects OVERWRITE mode."""
@@ -150,16 +152,19 @@ class TestWriteModePolicy:
         """Test that Gold layer allows MERGE mode."""
         policy = WriteModePolicy()
         policy.validate(Layer.GOLD, WriteMode.MERGE)
+        assert WriteMode.MERGE in policy.ALLOWED_MODES[Layer.GOLD]
 
     def test_gold_allows_overwrite(self) -> None:
         """Test that Gold layer allows OVERWRITE mode."""
         policy = WriteModePolicy()
         policy.validate(Layer.GOLD, WriteMode.OVERWRITE)
+        assert WriteMode.OVERWRITE in policy.ALLOWED_MODES[Layer.GOLD]
 
     def test_gold_allows_append(self) -> None:
         """Test that Gold layer allows APPEND mode."""
         policy = WriteModePolicy()
         policy.validate(Layer.GOLD, WriteMode.APPEND)
+        assert WriteMode.APPEND in policy.ALLOWED_MODES[Layer.GOLD]
 
     def test_error_message_includes_allowed_modes(self) -> None:
         """Test that error message includes the allowed modes."""

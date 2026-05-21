@@ -9,7 +9,6 @@ import asyncio
 from datetime import UTC, datetime
 from collections.abc import Callable
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
 
 import polars as pl
 import pytest
@@ -32,6 +31,7 @@ from bioetl.domain.composite.result import (
 )
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import RecoverableError
+from tests.helpers.deterministic_ids import deterministic_run_id
 from tests.unit.application.composite import runner_test_support as support
 
 InMemoryCheckpointManager = support.InMemoryCheckpointManager
@@ -40,8 +40,8 @@ create_checkpoint_manager = support.create_in_memory_checkpoint_manager
 
 @pytest.fixture
 def test_run_id() -> str:
-    """Generate a valid UUID for test run ID."""
-    return str(uuid4())
+    """Return a stable UUID-shaped run ID for replay-safe FSM tests."""
+    return deterministic_run_id("composite.runner.fsm")
 
 
 @pytest.fixture
@@ -1384,7 +1384,7 @@ class TestFSMFailedStateIsResumable:
         """Checkpoint with FAILED state should be resumable."""
         state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=deterministic_run_id("composite.runner.fsm.failed-resumable"),
             state=CompositePipelineState.FAILED,
             seed_completed=True,
         )

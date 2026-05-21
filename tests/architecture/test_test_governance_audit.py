@@ -27,9 +27,15 @@ GOLD_REGISTRY_PATH = (
 MOVED_FILE_BACKED_UNIT_TESTS = {
     "tests/unit/memory/test_workflow_tooling.py": "tests/integration/memory/test_workflow_tooling.py",
     "tests/unit/memory/test_timeline_ingest.py": "tests/integration/memory/test_timeline_ingest.py",
-    "tests/unit/scripts/test_validate_pipeline_configs.py": "tests/integration/config/test_validate_pipeline_configs.py",
-    "tests/unit/grafana/test_workflow_dashboard_json_valid.py": "tests/integration/grafana/test_workflow_dashboard_json_valid.py",
-    "tests/unit/grafana/test_silver_reject_explorer_copy.py": "tests/integration/grafana/test_silver_reject_explorer_copy.py",
+    "tests/unit/scripts/test_validate_pipeline_configs.py": (
+        "tests/integration/config/test_validate_pipeline_configs.py"
+    ),
+    "tests/unit/grafana/test_workflow_dashboard_json_valid.py": (
+        "tests/integration/grafana/test_workflow_dashboard_json_valid.py"
+    ),
+    "tests/unit/grafana/test_silver_reject_explorer_copy.py": (
+        "tests/integration/grafana/test_silver_reject_explorer_copy.py"
+    ),
 }
 REPO_BACKED_UNIT_MARKERS = (
     re.compile(
@@ -96,6 +102,31 @@ def test_test_governance_audit_evidence_paths_exist() -> None:
 
 
 @pytest.mark.architecture
+def test_current_test_audit_issue_closeout_tracks_live_evidence() -> None:
+    payload = _load_yaml(CONFIG_PATH)
+    closeout = cast(YamlMap, payload["current_issue_closeout"])
+
+    assert closeout["decision"] == "closeable"
+    assert set(closeout["issue_set"]) == {
+        "#4455",
+        "#4457",
+        "#4459",
+        "#4461",
+        "#4462",
+        "#4463",
+        "#4465",
+        "#4466",
+        "#4468",
+        "#4469",
+        "#4470",
+    }
+    for relative_path in cast(list[str], closeout["evidence"]):
+        assert (ROOT / relative_path).exists(), (
+            f"Current issue closeout references missing evidence: {relative_path}"
+        )
+
+
+@pytest.mark.architecture
 def test_static_test_governance_report_stays_within_committed_budgets() -> None:
     payload = _load_yaml(CONFIG_PATH)
     report = collect_test_governance_report(ROOT)
@@ -114,6 +145,35 @@ def test_static_test_governance_report_stays_within_committed_budgets() -> None:
     assert report["uuid4_call_sites"] <= budgets["uuid4_call_sites_max"]
     assert report["date_today_call_sites"] <= budgets["date_today_call_sites_max"]
     assert not report["parse_errors"]
+
+
+@pytest.mark.architecture
+def test_test_governance_budgets_are_explicit_no_growth_ratchets() -> None:
+    payload = _load_yaml(CONFIG_PATH)
+    budgets = cast(YamlMap, payload["budgets"])
+    ratchet = cast(YamlMap, payload["budget_ratchet"])
+
+    assert ratchet["linked_issue"] == "#4458"
+    assert ratchet["mode"] == "fail-fast-no-growth"
+    assert ratchet["expected_direction"] == "downward"
+    assert cast(str, ratchet["touch_policy"]).strip()
+    assert set(cast(list[str], ratchet["ratcheted_fields"])) == set(budgets)
+
+
+@pytest.mark.architecture
+def test_static_test_governance_report_reuses_cached_inventory_scan() -> None:
+    payload = _load_yaml(CONFIG_PATH)
+    cache_policy = cast(YamlMap, payload["slow_governance_scanner_cache"])
+
+    first = collect_test_governance_report(ROOT)
+    second = collect_test_governance_report(ROOT)
+
+    assert cache_policy["decision"] == "retained_cached_scanner"
+    assert first is second
+    assert cache_policy["isolated_lanes"] == [
+        "architecture-fast-boundary",
+        "architecture-slow-governance",
+    ]
 
 
 @pytest.mark.architecture
@@ -167,6 +227,24 @@ def test_duplicate_name_triage_tracks_top_generic_names() -> None:
     }
     assert configured_top == report_top
     assert cast(YamlMap, triage["fixture_builder_policy"])["consolidate_when"]
+
+
+@pytest.mark.architecture
+def test_oversized_test_module_inventory_tracks_current_top_modules() -> None:
+    payload = _load_yaml(CONFIG_PATH)
+    inventory = cast(YamlMap, payload["oversized_test_module_inventory"])
+    entries = cast(list[YamlMap], inventory["top_modules"])
+    max_lines = int(inventory["max_tracked_lines"])
+
+    assert inventory["split_on_touch"] is True
+    for entry in entries:
+        path = ROOT / cast(str, entry["path"])
+        assert path.exists()
+        actual_lines = len(path.read_text(encoding="utf-8").splitlines())
+        assert actual_lines == int(entry["lines"])
+        assert actual_lines <= max_lines
+        assert cast(str, entry["owner"]).strip()
+        assert cast(str, entry["target_split"]).strip()
 
 
 @pytest.mark.architecture
@@ -273,7 +351,9 @@ def test_repo_backed_unit_test_exceptions_are_explicitly_classified() -> None:
     assert configured_paths == detected_paths - domain_contract_paths
     for entry in entries:
         assert (ROOT / cast(str, entry["path"])).exists()
-        assert entry["target_lane"] == "unit"
+        assert entry["target_lane"] == "repo-backed-unit"
+        text = (ROOT / cast(str, entry["path"])).read_text(encoding="utf-8")
+        assert "pytest.mark.repo_backed" in text
         assert cast(str, entry["protected_surface"]).strip()
 
 
@@ -308,7 +388,6 @@ def test_preflight_reports_missing_git_lfs_as_strict_reproducibility_blocker() -
             ): "origin/main",
             ("rev-parse", "--short", "main"): "abc1234",
             ("lfs", "version"): "git-lfs/3.0.0",
-            ("status", "--short", "--untracked-files=no"): "",
         }
         key = tuple(args)
         if key in values:
@@ -323,6 +402,9 @@ def test_preflight_reports_missing_git_lfs_as_strict_reproducibility_blocker() -
 
     blocker_ids = {entry["id"] for entry in report["blockers"]}
     assert "missing_git_lfs" in blocker_ids
+    assert "git_status_failed" not in blocker_ids
+    assert report["git_status"]["ok"] is True
+    assert report["git_status"]["skipped"] is True
     assert report["default_branch"] == "main"
     assert report["telemetry_baseline"]["exists"] is True
 

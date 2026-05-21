@@ -101,6 +101,12 @@ def test_config_compatibility_registry_has_explicit_policy() -> None:
     assert any("Gold strict validation" in item for item in constraints)
     assert any("No new compatibility shape" in item for item in constraints)
 
+    burn_down = policy.get("burn_down")
+    assert isinstance(burn_down, dict), "registry must declare burn-down policy"
+    assert burn_down.get("linked_issue") == "#4473"
+    assert burn_down.get("mode") == "fail-fast-no-growth"
+    assert burn_down.get("expired_shape_policy") == "fail-ci"
+
 
 def test_config_compatibility_entries_are_bounded_or_justified() -> None:
     """Every compatibility entry needs a sunset date or permanent rationale."""
@@ -143,6 +149,49 @@ def test_config_compatibility_entries_are_bounded_or_justified() -> None:
             assert date.fromisoformat(decision_recorded_on), (
                 f"{entry_id} decision_recorded_on must be ISO date"
             )
+
+
+def test_config_compatibility_burn_down_budget_is_not_exceeded() -> None:
+    """Compatibility-shape count must not grow without explicit budget review."""
+    payload = _load_registry()
+    policy = payload["policy"]
+    assert isinstance(policy, dict)
+    burn_down = policy["burn_down"]
+    assert isinstance(burn_down, dict)
+
+    accepted_entries = payload["accepted_shapes"]
+    rejected_entries = payload["retired_rejected_shapes"]
+    assert isinstance(accepted_entries, list)
+    assert isinstance(rejected_entries, list)
+
+    migration_supported_count = sum(
+        1
+        for entry in accepted_entries
+        if isinstance(entry, dict) and entry.get("status") in MIGRATION_STATUSES
+    )
+    assert len(accepted_entries) <= int(burn_down["accepted_shape_max"])
+    assert migration_supported_count <= int(
+        burn_down["migration_supported_shape_max"]
+    )
+    assert len(rejected_entries) >= int(burn_down["retired_rejected_shape_min"])
+
+
+def test_temporary_config_compatibility_shapes_are_not_expired() -> None:
+    """Temporary compatibility shapes must fail CI after their removal date."""
+    today = date(2026, 5, 21)
+    payload = _load_registry()
+
+    expired = [
+        str(entry["id"])
+        for entry in _entries(payload)
+        if entry.get("status") in MIGRATION_STATUSES
+        and date.fromisoformat(str(entry["remove_after"])) < today
+    ]
+
+    assert not expired, (
+        "Temporary config compatibility shapes expired and must be removed or "
+        "re-reviewed:\n" + "\n".join(expired)
+    )
 
 
 def test_config_compatibility_entries_reference_existing_files() -> None:

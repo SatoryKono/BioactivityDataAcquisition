@@ -52,16 +52,34 @@ test_lanes:
 
     unit-fast:
       suite_name: unit-fast
-      description: "Fast unit lane; excludes slow, benchmark, and Neo4j/MCP memory tests."
+      description: "Fast unit lane; excludes slow, benchmark, repo-backed, and Neo4j/MCP memory tests."
       runner_backend: run_pytest
       runner: scripts/engineering/dev/run_pytest.sh
       paths:
         - tests/unit/
-      marker_expression: "not slow and not benchmark and not memory"
+      marker_expression: "not repo_backed and not slow and not benchmark and not memory"
       pytest_args:
         - tests/unit/
         - -m
-        - not slow and not benchmark and not memory
+        - not repo_backed and not slow and not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    repo-backed-unit:
+      suite_name: repo-backed-unit
+      description: "Repository-file-backed unit-path contract checks isolated from unit-fast."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/unit/
+      marker_expression: "repo_backed and not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/unit/
+        - -m
+        - repo_backed and not slow and not benchmark and not memory
       replay_mode: not_applicable
       coverage_gate: none
       expected_artifacts:
@@ -70,7 +88,7 @@ test_lanes:
 
     unit-parallel-safe:
       suite_name: unit-parallel-safe
-      description: "Deterministic unit lane routed through the maintained shard inventory; excludes slow, serial, benchmark, and memory tests."
+      description: "Deterministic unit lane routed through the maintained shard inventory; excludes repo-backed, slow, serial, benchmark, and memory tests."
       runner_backend: run_pytest_sharded
       runner: scripts/engineering/dev/run_pytest_sharded.sh
       runner_options:
@@ -88,11 +106,11 @@ test_lanes:
         - S6-crosscutting-unit
       paths:
         - tests/unit/
-      marker_expression: "not slow and not serial and not benchmark and not memory"
+      marker_expression: "not repo_backed and not slow and not serial and not benchmark and not memory"
       pytest_args:
         - tests/unit/
         - -m
-        - not slow and not serial and not benchmark and not memory
+        - not repo_backed and not slow and not serial and not benchmark and not memory
       replay_mode: not_applicable
       coverage_gate: none
       expected_artifacts:
@@ -569,7 +587,7 @@ fixture_governance:
     metadata_catalog_location: reports/quality/vcr-metadata-catalog.json
     stale_age_checker: scripts/engineering/qa/vcr/check_vcr_metadata_age.py
     provider_expected_sidecar_counts:
-      chembl: 55
+      chembl: 52
       crossref: 24
       multi_provider: 1
       openalex: 25

@@ -22,7 +22,7 @@ from bioetl.domain.config.validation import (
 class TestValidationConfig:
     """Tests for ValidationConfig frozen dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_validation_config_default_values(self) -> None:
         config = ValidationConfig()
         assert config.min_publication_year == 1500
         assert config.max_publication_year == 2100
@@ -34,7 +34,7 @@ class TestValidationConfig:
         assert math.isclose(config.max_pchembl_value, 15.0)
         assert config.molecular_weight_precision == 10
 
-    def test_custom_values(self) -> None:
+    def test_validation_config_custom_publication_year_values(self) -> None:
         config = ValidationConfig(
             min_publication_year=2000,
             max_publication_year=2025,

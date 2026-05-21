@@ -12,34 +12,21 @@ from bioetl.application.core._fetch_forwarding import forward_fetch_records
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator, Mapping
+    from collections.abc import AsyncIterator
     from types import TracebackType
 
-    from bioetl.domain.filtering import FilterLoadResult, InputFilterConfig
-    from bioetl.domain.ports import (
-        DataSourcePort,
-        InputFilterPort,
-        LoggerPort,
-        MetricsPort,
+    from bioetl.application.core._filtered_data_source_support import (
+        _FilteredDataSourceState as _FilteredDataSourceStateBase,
     )
     from bioetl.domain.types import HealthStatus
+else:
+
+    class _FilteredDataSourceStateBase:
+        """Runtime placeholder for the type-checking-only state protocol."""
 
 
-class _FilteredDataSourceStateMixin:
+class _FilteredDataSourceStateMixin(_FilteredDataSourceStateBase):
     """Attribute contract shared by FilteredDataSource mixins."""
-
-    _data_source: DataSourcePort
-    _filter_reader: InputFilterPort | None
-    _filter_config: InputFilterConfig
-    _metrics: MetricsPort | None
-    _pipeline_name: str
-    _logger: LoggerPort | None
-    _filter_ids: list[str] | None
-    _filter_result: FilterLoadResult | None
-    _multi_filter_ids: Mapping[str, list[str]] | None
-    _valid_combinations: frozenset[tuple[str, ...]] | None
-    _filter_fields: tuple[str, ...] | None
-    _fallback_mapping: dict[str, str] | None
 
     def _ensure_filterable_adapter(self, mode: str) -> None:
         """Check adapter supports filtering mode."""

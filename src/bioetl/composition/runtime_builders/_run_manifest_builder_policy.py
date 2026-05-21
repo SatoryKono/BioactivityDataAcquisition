@@ -49,7 +49,13 @@ def resolve_code_revision_for_manifest(
 ) -> CodeRevisionProvenance:
     """Return code provenance, with a deterministic test-only fallback."""
     code_revision = get_code_revision_provenance()
-    if code_revision.git_commit is not None or not test_mode:
+    if not test_mode:
+        return code_revision
+    if (
+        code_revision.git_commit is not None
+        and str(code_revision.source_revision_state or "").strip().lower() == "clean"
+        and code_revision.dependency_lock_hash is not None
+    ):
         return code_revision
     return CodeRevisionProvenance(
         git_commit=f"test-{resolved_config_hash[:12]}",

@@ -25,6 +25,8 @@ from bioetl.composition.observability import (
 from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 from tests.helpers.deterministic_ids import deterministic_uuid
 
+pytestmark = pytest.mark.repo_backed
+
 
 @pytest.mark.unit
 class TestObservabilityBundle:

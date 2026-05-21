@@ -305,9 +305,9 @@ Current rollout semantics:
 1. `run_manifest_enabled=true`, `run_ledger_enabled=false` keeps manifest creation but suppresses ledger writes where that degraded mode is still allowed.
 1. `run_ledger_enabled=true` is only valid when `run_manifest_enabled=true`.
 1. Executable launches default to `replay_ready`. When an exact-replay request
-   or critical runtime still carries a legacy `degraded_observable`
-   configuration, the effective profile is promoted to the published strict
-   family default instead of silently preserving the weaker floor.
+   or critical runtime still carries a `degraded_observable` configuration, the
+   effective profile is promoted to the published strict family default instead
+   of silently preserving the weaker floor.
 1. The effective default is fail-closed: a production/debug-critical supported
    family launch that cannot prove immutable input snapshots, or a composite
    launch without a full snapshot envelope, is blocked before it can be claimed
@@ -490,7 +490,9 @@ persistence-profile taxonomy:
 runtime/deployment for that run. The current published contract is:
 
 - `degraded_observable` remains a valid explicit opt-down and may still be
-  inspected even when richer replay/forensic surfaces are absent;
+  inspected even when richer replay/forensic surfaces are absent, but
+  production/debug-critical launches and exact-replay requests do not preserve
+  this weaker floor for replay-capable families;
 - `replay_ready` is the default floor for executable runs;
 - `replay_ready` is only valid inside the strict exact-replay support boundary;
   execution contexts outside that boundary must fail closed during bootstrap
@@ -815,22 +817,23 @@ consumers MAY still read legacy `config_hash`, but manifest hydration and new
 control-plane write paths MUST NOT synthesize missing `resolved_config_hash` or
 `effective_config_hash` values from it.
 
-Strict exact-replay, `replay_ready`, and `forensic_grade` manifests require
-`git_commit` to be present. Inspection diagnostics must expose both
+All new executable manifests require `git_commit`, `clean`
+`source_revision_state`, and `dependency_lock_hash` to be present, regardless
+of whether the requested persistence floor is `degraded_observable`,
+`replay_ready`, or `forensic_grade`. Inspection diagnostics must expose both
 `git_commit` and `source_revision_state` through `diagnostics`,
 `code_provenance_state`, and `identity_graph` so missing or dirty code
-provenance is visible to operators and automation. New manifests should record
-`dependency_lock_hash` as a forensic anchor when a repository lockfile is
-available; the field is not a domain I/O concern and must be resolved by
-composition/runtime wiring. Diagnostics expose `dependency_lock_state` as
-`present` or `missing` so absent lockfile evidence remains operator-visible.
-Metadata sidecars and checkpoint metadata carry the same lock hash when it is
-available through the run context.
+provenance is visible to operators and automation. New manifests must record
+`dependency_lock_hash` as a provenance anchor; the field is not a domain I/O
+concern and must be resolved by composition/runtime wiring. Diagnostics expose
+`dependency_lock_state` as `present` or `missing` so historical absent lockfile
+evidence remains operator-visible. Metadata sidecars and checkpoint metadata
+carry the same lock hash when it is available through the run context.
 
-In non-strict degraded contexts the current published contract still allows
-`git_commit` to be absent, but only when `source_revision_state` is
-`git_unavailable` or `dirty_state_unknown`. A missing `git_commit` paired with
-`clean` or `dirty` is considered invalid control-plane provenance.
+Older persisted manifests may still surface documented legacy
+`source_revision_state` values such as `git_unavailable` or
+`dirty_state_unknown`, but new executable write paths must fail closed before
+persisting those states.
 
 Checkpoint / resume compatibility may additionally rely on a narrower
 runtime-anchor contract derived from a subset of control-plane fields such as

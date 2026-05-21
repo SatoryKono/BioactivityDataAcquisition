@@ -14,6 +14,10 @@ from memory.graph import sync as graph_sync
 from memory.tooling.prune import find_prunable_episodic_notes, prune_episodic_notes
 from memory.tooling.refresh_all import refresh_all
 
+import pytest
+
+pytestmark = pytest.mark.repo_backed
+
 
 def test_refresh_all_generates_rag_and_timeline_outputs(tmp_path: Path) -> None:
     (tmp_path / "docs/00-project").mkdir(parents=True)

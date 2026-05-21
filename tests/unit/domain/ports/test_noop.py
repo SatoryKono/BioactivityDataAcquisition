@@ -68,7 +68,7 @@ class TestNoOpOtelTracer:
         tracer = _NoOpOtelTracer()
         with tracer.start_as_current_span("op") as span:
             span.set_attribute("key", "value")
-        # Should not raise
+        assert isinstance(span, _NoOpSpan)
 
 
 @pytest.mark.unit

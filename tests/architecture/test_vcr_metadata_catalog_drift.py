@@ -57,11 +57,16 @@ def test_vcr_metadata_catalog_tracks_cassettes_not_sidecars() -> None:
     )
 
     totals = cast(dict[str, Any], payload["totals"])
+    pruning = cast(dict[str, Any], payload["pruning"])
     cassettes = cast(list[dict[str, Any]], payload["cassettes"])
 
     assert totals["cassette_count"] == len(cassette_files)
     assert totals["metadata_sidecar_count"] == len(metadata_files)
+    assert totals["duplicate_scenario_stem_count"] == 0
+    assert pruning["duplicate_scenario_stems"] == {}
+    assert pruning["orphan_metadata_sidecar_count"] == 0
     assert not any(
         cassette["cassette_rel_path"].endswith(("_meta.yaml", "_meta.yml"))
         for cassette in cassettes
     )
+    assert all(cassette["scenario_stem"] for cassette in cassettes)

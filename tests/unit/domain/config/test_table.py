@@ -15,7 +15,7 @@ from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 class TestTableConfig:
     """Tests for TableConfig frozen dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_table_config_default_values(self) -> None:
         config = TableConfig()
         assert config.primary_keys == ("entity_id",)
         assert config.silver_table is None

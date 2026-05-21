@@ -203,6 +203,7 @@ markers = [
     "benchmark: Benchmark tests (excluded from standard runs, run with -m benchmark)",
     "smoke: Smoke tests (quick sanity checks for local development)",
     "serial: Tests that must run serially (not parallel-safe, e.g., shared state)",
+    "repo_backed: Unit-path tests that read repository files and run outside the unit-fast lane",
     "no_api: Tests that do not require external API access",
     "chembl: ChEMBL provider-specific tests",
     "pubchem: PubChem provider-specific tests",

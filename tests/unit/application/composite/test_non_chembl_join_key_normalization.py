@@ -10,6 +10,8 @@ import yaml
 
 from bioetl.application.composite.join_key_normalization import stringify_join_key_value
 
+pytestmark = pytest.mark.repo_backed
+
 FIXTURE_PATH = Path("tests/fixtures/normalization/non_chembl_identifier_cases.yaml")
 
 

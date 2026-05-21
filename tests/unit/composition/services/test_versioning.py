@@ -168,6 +168,34 @@ def test_get_dependency_lock_hash_reads_uv_lock_from_current_tree(
 
 
 @pytest.mark.unit
+def test_get_dependency_lock_hash_uses_runtime_path_class(
+    tmp_path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runtime_root = tmp_path / "runtime-tree"
+    runtime_nested = runtime_root / "nested"
+    runtime_nested.mkdir(parents=True)
+    lockfile = runtime_root / "uv.lock"
+    lockfile.write_text("version = 1\n", encoding="utf-8")
+
+    process_cwd = tmp_path / "process-cwd"
+    process_cwd.mkdir()
+    monkeypatch.chdir(process_cwd)
+
+    class RuntimePath:
+        @staticmethod
+        def cwd():
+            return runtime_nested
+
+    monkeypatch.setattr(versioning, "_RUNTIME_PATH_CLS", RuntimePath)
+    versioning.get_dependency_lock_hash.cache_clear()
+
+    digest = versioning.get_dependency_lock_hash()
+
+    assert isinstance(digest, str)
+    assert digest.startswith("sha256:")
+
+
+@pytest.mark.unit
 def test_get_dependency_lock_hash_returns_none_without_supported_lockfile(
     tmp_path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

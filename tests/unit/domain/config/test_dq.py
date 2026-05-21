@@ -15,7 +15,7 @@ from bioetl.domain.config.validation import FieldValidation
 class TestDQReportConfig:
     """Tests for DQReportConfig frozen dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_dq_report_config_default_values(self) -> None:
         config = DQReportConfig()
         assert config.enabled is True
         assert config.format == "json"
@@ -23,7 +23,7 @@ class TestDQReportConfig:
         assert config.sample_size == 10
         assert config.output_path is None
 
-    def test_custom_values(self) -> None:
+    def test_dq_report_config_custom_values(self) -> None:
         config = DQReportConfig(
             enabled=False,
             format="csv",
@@ -56,7 +56,7 @@ class TestKeyNullabilityRule:
 class TestDQConfig:
     """Tests for DQConfig frozen dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_dq_config_default_values(self) -> None:
         config = DQConfig()
         assert config.soft_fail_threshold == pytest.approx(0.05)
         assert config.hard_fail_threshold == pytest.approx(0.20)

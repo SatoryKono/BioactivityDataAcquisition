@@ -27,6 +27,8 @@ from bioetl.domain.control_plane.effective_config_artifact import (
 )
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 
+pytestmark = pytest.mark.repo_backed
+
 
 def _load_config_dq_service_module() -> object:
     module_path = (
