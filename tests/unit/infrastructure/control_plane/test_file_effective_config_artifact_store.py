@@ -13,6 +13,9 @@ from bioetl.infrastructure.control_plane import (
     EffectiveConfigArtifactConflictError,
     FileEffectiveConfigArtifactStore,
 )
+from bioetl.infrastructure.control_plane.file_effective_config_artifact_store import (
+    _normalize_semantic_payload_for_conflict_check,
+)
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 
@@ -214,6 +217,97 @@ def test_file_store_rejects_conflicting_semantic_payload_for_existing_artifact_i
         )
 
     assert artifact_path.read_bytes() == original_bytes
+
+
+def test_file_store_allows_raw_source_hash_drift_for_same_semantic_artifact_id(
+    tmp_path: Path,
+) -> None:
+    store = FileEffectiveConfigArtifactStore(base_path=tmp_path / "effective_config")
+    first_run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
+    second_run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
+    payload: dict[str, object] = {
+        "artifact_id": "effective-config-raw-hash-drift",
+        "schema_version": "1.0",
+        "semantic_artifact": {
+            "artifact_id": "effective-config-raw-hash-drift",
+            "pipeline_name": "chembl_assay",
+            "effective_config_hash": "sha256:stable",
+            "source_refs": [
+                {
+                    "source_type": "file",
+                    "source_path": "configs/base/pipeline.yaml",
+                    "source_hash": "sha256:semantic",
+                    "raw_source_hash": "sha256:raw-lf",
+                    "source_hash_strategy": "canonical_yaml",
+                    "priority": 1,
+                }
+            ],
+        },
+        "occurrence_envelope": {
+            "created_at": "2026-04-21T10:00:00+00:00",
+        },
+    }
+    byte_drift_payload = {
+        **payload,
+        "semantic_artifact": {
+            **payload["semantic_artifact"],
+            "source_refs": [
+                {
+                    "source_type": "file",
+                    "source_path": "configs/base/pipeline.yaml",
+                    "source_hash": "sha256:semantic",
+                    "raw_source_hash": "sha256:raw-crlf",
+                    "source_hash_strategy": "canonical_yaml",
+                    "priority": 1,
+                }
+            ],
+        },
+        "occurrence_envelope": {
+            "created_at": "2026-04-21T10:05:00+00:00",
+        },
+    }
+
+    store.save(
+        artifact_id="effective-config-raw-hash-drift",
+        run_id=first_run_id,
+        payload=payload,
+    )
+    artifact_path = store.base_path / "effective-config-raw-hash-drift.json"
+    original_bytes = artifact_path.read_bytes()
+
+    store.save(
+        artifact_id="effective-config-raw-hash-drift",
+        run_id=second_run_id,
+        payload=byte_drift_payload,
+    )
+
+    assert artifact_path.read_bytes() == original_bytes
+    assert store.get_occurrence_by_run_id(first_run_id) is not None
+    assert store.get_occurrence_by_run_id(second_run_id) is not None
+
+
+def test_normalize_semantic_payload_for_conflict_check_does_not_mutate_input() -> None:
+    payload: dict[str, object] = {
+        "artifact_id": "effective-config-raw-hash-drift",
+        "semantic_artifact": {
+            "artifact_id": "effective-config-raw-hash-drift",
+            "source_refs": [
+                {
+                    "source_type": "file",
+                    "source_path": "configs/base/pipeline.yaml",
+                    "source_hash": "sha256:semantic",
+                    "raw_source_hash": "sha256:raw-lf",
+                }
+            ],
+        },
+    }
+
+    normalized = _normalize_semantic_payload_for_conflict_check(payload)
+
+    source_ref = payload["semantic_artifact"]["source_refs"][0]
+    normalized_source_ref = normalized["semantic_artifact"]["source_refs"][0]
+    assert source_ref["raw_source_hash"] == "sha256:raw-lf"
+    assert "raw_source_hash" not in normalized_source_ref
 
 
 def test_file_store_returns_none_when_item_is_missing(tmp_path: Path) -> None:

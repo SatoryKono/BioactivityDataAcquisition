@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
-from uuid import uuid4
 
 import pytest
 from hypothesis import HealthCheck, given, settings
@@ -15,6 +14,7 @@ from bioetl.domain.aggregates.quarantine_entry import (
 )
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import BatchID, RunID
+from tests.helpers.deterministic_ids import deterministic_uuid_value
 
 pytestmark = [pytest.mark.hypothesis]
 
@@ -41,11 +41,11 @@ def _ts(offset_seconds: int = 0) -> datetime:
 
 
 def _run_id() -> RunID:
-    return RunID(uuid4())
+    return RunID(deterministic_uuid_value("hypothesis.quarantine_entry.run_id"))
 
 
 def _batch_id() -> BatchID:
-    return BatchID(uuid4())
+    return BatchID(deterministic_uuid_value("hypothesis.quarantine_entry.batch_id"))
 
 
 def _create_entry(

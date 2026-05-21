@@ -12,9 +12,6 @@ SRC_ROOT = ROOT / "src"
 REGISTRY_PATH_LITERAL = "configs/base/contract_registry.yaml"
 ALLOWED_LITERAL_OWNERS = {
     "src/bioetl/infrastructure/config/contract_registry_loader.py",
-    "src/bioetl/composition/runtime_builders/run_manifest_contract_identity.py",
-    "src/bioetl/composition/runtime_builders/_effective_config_graph_support.py",
-    "src/memory/graph/sync.py",
 }
 
 

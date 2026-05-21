@@ -39,7 +39,9 @@ if TYPE_CHECKING:
     from bioetl.application.core.batch_tracing import BatchTracingManagerService
     from bioetl.application.core.batch_transformer import BatchTransformer
     from bioetl.application.core.batch_writer import BatchWriter
-    from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.application.core.pipeline_service_protocols import (
+        PipelineServicesProtocol,
+    )
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterProtocol,
     )
@@ -58,7 +60,7 @@ class BatchProcessingSupportService:
     def __init__(
         self,
         *,
-        services: PipelineService,
+        services: PipelineServicesProtocol,
         logger: LoggerPort,
         batch_metrics: BatchMetricsRecorderService,
         transformer: BatchTransformer,

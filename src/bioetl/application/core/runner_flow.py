@@ -33,7 +33,9 @@ if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointRuntimeService,
     )
-    from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.application.core.pipeline_service_protocols import (
+        PipelineServicesProtocol,
+    )
     from bioetl.application.services.control_plane.run_ledger_service import (
         RunLedgerService,
     )
@@ -49,7 +51,7 @@ class _PipelineRunnerFlowHostProtocol(Protocol):
     _runtime: RuntimeConfig
     _executor: BatchExecutor
     _checkpoint_manager: CheckpointRuntimeService
-    _services: PipelineService
+    _services: PipelineServicesProtocol
     _logger: LoggerPort
     _run_ledger_service: RunLedgerService | None
 

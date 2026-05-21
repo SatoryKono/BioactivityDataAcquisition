@@ -7,7 +7,10 @@ from collections.abc import Callable
 
 import polars as pl
 
-from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from bioetl.application.composite.checkpoint import (
+    CompositeCheckpointState,
+    apply_recovery_checkpoint_transition,
+)
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
 )
@@ -76,8 +79,10 @@ class CompositeRunnerStageMixin(
         )
         if state.state != CompositePipelineState.SEED_COMPLETED:
             previous_state = state.state
-            state = state.with_state(
+            state = apply_recovery_checkpoint_transition(
+                state,
                 CompositePipelineState.SEED_COMPLETED,
+                reason="seed_resume_completed_checkpoint",
                 clock=getattr(self, "_clock", None),
             )
             self._fsm.log_fsm_transition(

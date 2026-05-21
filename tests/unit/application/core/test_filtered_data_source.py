@@ -186,7 +186,9 @@ class TestFilteredDataSourceInit:
         assert filtered.provider_name == "chembl"
         assert filtered._filter_ids is None
 
-    def test_provider_name_from_wrapped(self, mock_data_source, disabled_filter_config):
+    def test_provider_name_property_delegates_to_wrapped_source(
+        self, mock_data_source, disabled_filter_config
+    ):
         """Test provider_name is delegated to wrapped data source."""
         mock_data_source.provider_name = "pubchem"
         filtered = FilteredDataSource(
@@ -875,6 +877,13 @@ class TestFilteredDataSourceMetrics:
 
         await filtered.__aenter__()
 
+        assert filtered.filter_result is not None
+        assert filtered.filter_result.filter_fields == ("molecule_id", "assay_id")
+        assert filtered._filter_fields == ("molecule_id", "assay_id")
+        assert filtered._valid_combinations == frozenset(
+            {("CHEMBL1", "CHEMBL_ASSAY_1")}
+        )
+
         calls = mock_metrics.increment_counter.call_args_list
         counter_names = [call.args[0] for call in calls]
         assert "bioetl_filter_combinations_loaded_total" in counter_names
@@ -928,6 +937,13 @@ class TestFilteredDataSourceMetrics:
         )
 
         await filtered.__aenter__()
+
+        assert filtered.filter_result is not None
+        assert filtered.filter_result.filter_fields == ("molecule_id", "assay_id")
+        assert filtered._filter_fields == ("molecule_id", "assay_id")
+        assert filtered._valid_combinations == frozenset(
+            {("CHEMBL1", "CHEMBL_ASSAY_1")}
+        )
 
 
 @pytest.mark.unit

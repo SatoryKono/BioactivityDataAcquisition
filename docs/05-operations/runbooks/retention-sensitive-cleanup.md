@@ -95,11 +95,12 @@ diagnostics under `reports/quality/`:
 
 | Path family | Owner | TTL | Notes |
 | --- | --- | --- | --- |
-| `reports/quality/_tmp_*` | `Engineering / Quality` | 7 days | Transitional local diagnostics inside a retained reports surface |
-| `reports/quality/pretest_guardrails_*.json` | `Engineering / Quality` | 30 days | Timestamped pretest guardrail snapshots kept for short-lived review/history |
+| `reports/quality/_tmp_*` | `Engineering / Quality` | 7 days | Transitional local diagnostics inside a retained reports surface; prune only after TTL expiry |
+| `reports/quality/pretest_guardrails_*.json` | `Engineering / Quality` | 30 days | Timestamped pretest guardrail snapshots kept for short-lived review/history; prune only after TTL expiry |
 
 These TTL classes do not override the fail-closed review model. They narrow the
-approved candidate families for bounded prune waves.
+approved candidate families for bounded prune waves, and they only become
+prune candidates after the artifact age exceeds the configured TTL.
 
 ## Procedure
 

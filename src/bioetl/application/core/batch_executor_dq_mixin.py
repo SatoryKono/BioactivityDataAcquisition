@@ -20,7 +20,9 @@ from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
     from bioetl.application.core.config import RecordProcessorConfig
-    from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.application.core.pipeline_service_protocols import (
+        PipelineServicesProtocol,
+    )
     from bioetl.application.services.dq_report_service import DQReportContext
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort
@@ -43,7 +45,7 @@ class _BatchExecutorDQMixin:
     same input corpus.
     """
 
-    _services: PipelineService
+    _services: PipelineServicesProtocol
     _context: PipelineContext
     _config: RecordProcessorConfig
     _logger: LoggerPort

@@ -1,8 +1,8 @@
 schema_version: 1
 baseline:
-  total_exemptions: 10
+  total_exemptions: 5
   by_registry:
-    file_size_limits: 10
+    file_size_limits: 5
     function_complexity: 0
     function_length: 0
     class_size: 0
@@ -127,7 +127,7 @@ sanctioned_public_entrypoint_governance:
   inventory_source: configs/quality/compatibility_facade_inventory.yaml
   metrics:
     public_entrypoint_count:
-      current_count: 11
+      current_count: 14
       owner: '@bioetl-architecture'
       linked_issue: '4029'
       rationale: Permanent public entrypoints remain governed as sanctioned public
@@ -188,7 +188,7 @@ registry_groups:
     - class_method_count
 registries:
   file_size_limits:
-    target_count: 10
+    target_count: 5
     total_loc_budget: 20000
   class_size:
     target_count: 0
@@ -215,13 +215,13 @@ hotspot_budgets:
     class_size: 1
     god_object: 1
 hotspot_family_ratchets:
-  snapshot_date: '2026-05-20'
+  snapshot_date: '2026-05-21'
   mode: fail-fast
   artifact_policy:
     duplication_command: uv run python -m scripts.engineering.qa report-duplication-baseline --targets src/bioetl/application/core src/bioetl/composition/bootstrap/runtime src/bioetl/composition/factories/pipeline src/bioetl/application/services/control_plane src/bioetl/composition/runtime_builders --json-out reports/quality/hotspot-duplication-baseline.json --md-out reports/quality/hotspot-duplication-baseline.md --history-jsonl reports/quality/hotspot-duplication-history.jsonl
     baseline_artifact: reports/quality/hotspot-duplication-baseline.json
     history_artifact: reports/quality/hotspot-duplication-history.jsonl
-    latest_reviewed_snapshot: '2026-05-20'
+    latest_reviewed_snapshot: '2026-05-21'
     confirming_clean_snapshots_required: 2
     expected_direction: downward
     ratchet_policy: Keep the hotspot layer report-only at the repo level; enforce
@@ -321,18 +321,20 @@ hotspot_family_ratchets:
       files_ge_250_loc: 22
       max_internal_fan_in: 6
     metrics:
-      duplication_clusters: 20
-      files: 62
-      total_loc: 12901
-      files_ge_250_loc: 21
-      helper_function_ratio: 0.504
+      duplication_clusters: 17
+      files: 65
+      total_loc: 12909
+      files_ge_250_loc: 20
+      helper_function_ratio: 0.495
       max_internal_fan_in: 6
       max_internal_fan_in_module: bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers
     trend:
-      status: reviewed_baseline_2026-05-20
-      next_action: 2026-05-20 refreshes the reviewed family baseline for application/services/control_plane
-        after diagnostics helper extraction; keep duplicate clusters, files_ge_250_loc,
-        and max_internal_fan_in non-growing while paying down 20 duplicate clusters.
+      status: reduced_2026-05-21
+      next_action: 2026-05-21 reduces the reviewed family baseline for application/services/control_plane
+        from 20 to 17 duplicate clusters after shared ledger identity, manifest-time,
+        and checkpoint-anchor projection extraction; keep duplicate clusters,
+        files_ge_250_loc, and max_internal_fan_in non-growing while paying down
+        the remaining 17 duplicate clusters.
   - name: composition_runtime_builders
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -349,7 +351,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 13
       files: 37
-      total_loc: 5708
+      total_loc: 5736
       files_ge_250_loc: 7
       helper_function_ratio: 0.502
       max_internal_fan_in: 11

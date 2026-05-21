@@ -16,21 +16,21 @@ from bioetl.domain.config import (
 class TestDQConfig:
     """Tests for DQConfig dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_dq_config_default_threshold_values(self) -> None:
         """Test default threshold values."""
         config = DQConfig()
 
         assert config.soft_fail_threshold == pytest.approx(0.05)
         assert config.hard_fail_threshold == pytest.approx(0.20)
 
-    def test_custom_values(self) -> None:
+    def test_dq_config_accepts_custom_threshold_values(self) -> None:
         """Test custom threshold values."""
         config = DQConfig(soft_fail_threshold=0.10, hard_fail_threshold=0.30)
 
         assert config.soft_fail_threshold == pytest.approx(0.10)
         assert config.hard_fail_threshold == pytest.approx(0.30)
 
-    def test_immutability(self) -> None:
+    def test_dq_config_is_immutable(self) -> None:
         """Test that DQConfig is frozen (immutable)."""
         config = DQConfig()
 
@@ -77,7 +77,7 @@ class TestDQConfig:
 class TestTableConfig:
     """Tests for TableConfig dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_table_config_default_values(self) -> None:
         """Test default configuration values."""
         config = TableConfig()
 
@@ -102,7 +102,7 @@ class TestTableConfig:
         assert config.silver_table == "my_silver_table"
         assert config.gold_table == "my_gold_table"
 
-    def test_immutability(self) -> None:
+    def test_table_config_is_immutable(self) -> None:
         """Test that TableConfig is frozen (immutable)."""
         config = TableConfig()
 
@@ -189,7 +189,7 @@ class TestTableConfig:
 class TestValidationConfig:
     """Tests for ValidationConfig dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_validation_config_default_range_values(self) -> None:
         """Test default validation range values."""
         config = ValidationConfig()
 
@@ -219,7 +219,7 @@ class TestValidationConfig:
         assert config.min_molecular_weight == pytest.approx(1.0)
         assert config.max_molecular_weight == pytest.approx(50_000.0)
 
-    def test_immutability(self) -> None:
+    def test_validation_config_is_immutable(self) -> None:
         """Test that ValidationConfig is frozen (immutable)."""
         config = ValidationConfig()
 

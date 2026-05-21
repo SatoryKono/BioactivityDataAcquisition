@@ -4,10 +4,18 @@
 from __future__ import annotations
 
 import ast
+import os
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
+
+from scripts.engineering.qa.file_discovery import discover_files
+
+_MIN_PARALLEL_READ_FILES = 64
+_DEFAULT_READ_WORKERS = 8
+_MAX_READ_WORKERS = 16
 
 
 @dataclass(frozen=True)
@@ -29,6 +37,44 @@ class ParsedModule:
     exact_import_usage: tuple[tuple[str, tuple[str, ...]], ...]
 
 
+def _read_worker_count(total_files: int) -> int:
+    """Return a conservative worker count for mounted-worktree file reads."""
+    if total_files < _MIN_PARALLEL_READ_FILES:
+        return 1
+    cpu_count = os.cpu_count() or _DEFAULT_READ_WORKERS
+    return min(total_files, _MAX_READ_WORKERS, max(_DEFAULT_READ_WORKERS, cpu_count))
+
+
+def _read_module_source(item: tuple[str, Path]) -> tuple[str, Path, str | None]:
+    """Read one Python module source payload for import-graph parsing."""
+    module_name, py_file = item
+    try:
+        return module_name, py_file, py_file.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return module_name, py_file, None
+
+
+def _read_module_sources(
+    modules: list[tuple[str, Path]],
+) -> list[tuple[str, Path, str]]:
+    """Read module sources with bounded parallelism before single-thread parsing."""
+    max_workers = _read_worker_count(len(modules))
+    rows: list[tuple[str, Path, str]] = []
+
+    if max_workers == 1:
+        for module in modules:
+            module_name, py_file, text = _read_module_source(module)
+            if text is not None:
+                rows.append((module_name, py_file, text))
+        return rows
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for module_name, py_file, text in executor.map(_read_module_source, modules):
+            if text is not None:
+                rows.append((module_name, py_file, text))
+    return rows
+
+
 def default_scan_roots(repo_root: Path) -> tuple[PackageScan, ...]:
     """Return the canonical first-party scan roots."""
     return (
@@ -38,30 +84,43 @@ def default_scan_roots(repo_root: Path) -> tuple[PackageScan, ...]:
 
 
 def _iter_python_modules(scan: PackageScan) -> list[tuple[str, Path]]:
-    if not scan.root.exists():
-        return []
+    return list(
+        _iter_python_modules_cached(
+            str(scan.root.resolve()),
+            scan.module_prefix,
+        )
+    )
+
+
+@cache
+def _iter_python_modules_cached(
+    root_str: str,
+    module_prefix: str,
+) -> tuple[tuple[str, Path], ...]:
+    root = Path(root_str)
+    if not root.exists():
+        return ()
 
     modules: list[tuple[str, Path]] = []
-    for py_file in sorted(scan.root.rglob("*.py")):
-        if "__pycache__" in py_file.parts:
-            continue
-        rel_path = py_file.relative_to(scan.root)
+    for relative_path in discover_files(root_str, ".py"):
+        py_file = root / relative_path
+        rel_path = py_file.relative_to(root)
         if py_file.name == "__init__.py":
             rel_parts = rel_path.parent.parts
         else:
             rel_parts = rel_path.with_suffix("").parts
         module_name = ".".join(
-            [scan.module_prefix, *rel_parts] if rel_parts else [scan.module_prefix]
+            [module_prefix, *rel_parts] if rel_parts else [module_prefix]
         )
         modules.append((module_name, py_file))
-    return modules
+    return tuple(modules)
 
 
 def _collect_existing_modules(scan: PackageScan) -> frozenset[str]:
     return frozenset(module_name for module_name, _ in _iter_python_modules(scan))
 
 
-@lru_cache(maxsize=None)
+@cache
 def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
     """Parse first-party Python modules once per repo path for reuse across checks."""
     repo_root = Path(repo_root_str)
@@ -70,10 +129,12 @@ def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
     parsed_modules: list[ParsedModule] = []
 
     for scan in scans:
-        for importer_module, py_file in _iter_python_modules(scan):
+        for importer_module, py_file, source_text in _read_module_sources(
+            _iter_python_modules(scan)
+        ):
             try:
-                tree = ast.parse(py_file.read_text(encoding="utf-8"))
-            except (OSError, SyntaxError, UnicodeDecodeError):
+                tree = ast.parse(source_text)
+            except SyntaxError:
                 continue
             candidate_targets: set[str] = set()
             exact_import_usage: dict[str, set[str]] = defaultdict(set)
@@ -233,7 +294,8 @@ def find_public_private_twin_modules(repo_root: Path) -> list[dict[str, str]]:
     }
     pairs: list[dict[str, str]] = []
 
-    for py_file in sorted(src_root.rglob("_*.py")):
+    for relative_path in discover_files(str(src_root.resolve()), ".py", "_"):
+        py_file = src_root / relative_path
         if py_file.name == "__init__.py":
             continue
         public_file = py_file.with_name(py_file.name[1:])

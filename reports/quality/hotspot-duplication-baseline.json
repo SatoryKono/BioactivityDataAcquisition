@@ -1,9 +1,9 @@
 {
   "summary": {
-    "snapshot_date": "2026-05-20",
+    "snapshot_date": "2026-05-21",
     "targets": 5,
-    "total_duplicate_clusters": 51,
-    "total_raw_duplicate_clusters": 51,
+    "total_duplicate_clusters": 48,
+    "total_raw_duplicate_clusters": 48,
     "total_excluded_duplicate_clusters": 0
   },
   "normalization": {
@@ -11,39 +11,39 @@
   },
   "trend": {
     "status": "compared_to_previous",
-    "snapshot_date": "2026-05-20",
-    "previous_snapshot_date": "2026-03-24",
-    "total_duplicate_cluster_delta": null,
+    "snapshot_date": "2026-05-21",
+    "previous_snapshot_date": "2026-05-20",
+    "total_duplicate_cluster_delta": -3,
     "targets": [
       {
         "target": "src/bioetl/application/core",
         "current_duplicate_count": 8,
-        "previous_duplicate_count": null,
-        "delta_duplicate_count": null
+        "previous_duplicate_count": 8,
+        "delta_duplicate_count": 0
       },
       {
         "target": "src/bioetl/composition/bootstrap/runtime",
         "current_duplicate_count": 8,
-        "previous_duplicate_count": null,
-        "delta_duplicate_count": null
+        "previous_duplicate_count": 8,
+        "delta_duplicate_count": 0
       },
       {
         "target": "src/bioetl/composition/factories/pipeline",
         "current_duplicate_count": 2,
-        "previous_duplicate_count": null,
-        "delta_duplicate_count": null
+        "previous_duplicate_count": 2,
+        "delta_duplicate_count": 0
       },
       {
         "target": "src/bioetl/application/services/control_plane",
-        "current_duplicate_count": 20,
-        "previous_duplicate_count": null,
-        "delta_duplicate_count": null
+        "current_duplicate_count": 17,
+        "previous_duplicate_count": 20,
+        "delta_duplicate_count": -3
       },
       {
         "target": "src/bioetl/composition/runtime_builders",
         "current_duplicate_count": 13,
-        "previous_duplicate_count": null,
-        "delta_duplicate_count": null
+        "previous_duplicate_count": 13,
+        "delta_duplicate_count": 0
       }
     ]
   },
@@ -456,8 +456,8 @@
     {
       "target": "src/bioetl/application/services/control_plane",
       "returncode": 8,
-      "duplicate_count": 20,
-      "raw_duplicate_count": 20,
+      "duplicate_count": 17,
+      "raw_duplicate_count": 17,
       "excluded_duplicate_count": 0,
       "top_pairs": [
         {
@@ -490,10 +490,10 @@
         },
         {
           "modules": [
-            "bioetl.application.services.control_plane.run_manifest_service",
-            "bioetl.application.services.control_plane.workflow_manifest_service"
+            "bioetl.application.services.control_plane._run_manifest_diagnostics_base",
+            "bioetl.application.services.control_plane._run_manifest_identity_graph_builder"
           ],
-          "duplicate_clusters": 2
+          "duplicate_clusters": 1
         }
       ],
       "clusters": [
@@ -503,24 +503,8 @@
           "modules": [
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_base",
-              "start_line": 449,
-              "end_line": 496
-            },
-            {
-              "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_main_helpers",
-              "start_line": 170,
-              "end_line": 222
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/application/services/control_plane/_run_manifest_snapshot_payloads.py",
-          "line": 1,
-          "modules": [
-            {
-              "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_base",
-              "start_line": 219,
-              "end_line": 244
+              "start_line": 204,
+              "end_line": 229
             },
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection",
@@ -556,8 +540,8 @@
             },
             {
               "module": "bioetl.application.services.control_plane._run_ledger_entry_support",
-              "start_line": 56,
-              "end_line": 69
+              "start_line": 57,
+              "end_line": 70
             }
           ]
         },
@@ -572,24 +556,8 @@
             },
             {
               "module": "bioetl.application.services.control_plane._run_ledger_entry_support",
-              "start_line": 56,
-              "end_line": 68
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/application/services/control_plane/_run_manifest_snapshot_payloads.py",
-          "line": 1,
-          "modules": [
-            {
-              "module": "bioetl.application.services.control_plane._run_ledger_entry_support",
-              "start_line": 75,
-              "end_line": 89
-            },
-            {
-              "module": "bioetl.application.services.control_plane.workflow_ledger_service",
-              "start_line": 45,
-              "end_line": 57
+              "start_line": 57,
+              "end_line": 69
             }
           ]
         },
@@ -647,8 +615,8 @@
           "modules": [
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_base",
-              "start_line": 198,
-              "end_line": 205
+              "start_line": 183,
+              "end_line": 190
             },
             {
               "module": "bioetl.application.services.control_plane._run_manifest_identity_graph_builder",
@@ -711,29 +679,13 @@
           "modules": [
             {
               "module": "bioetl.application.services.control_plane.run_manifest_service",
-              "start_line": 151,
-              "end_line": 160
+              "start_line": 145,
+              "end_line": 154
             },
             {
               "module": "bioetl.application.services.control_plane.workflow_manifest_service",
-              "start_line": 45,
-              "end_line": 54
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/application/services/control_plane/_run_manifest_snapshot_payloads.py",
-          "line": 1,
-          "modules": [
-            {
-              "module": "bioetl.application.services.control_plane.run_manifest_service",
-              "start_line": 186,
-              "end_line": 198
-            },
-            {
-              "module": "bioetl.application.services.control_plane.workflow_manifest_service",
-              "start_line": 122,
-              "end_line": 130
+              "start_line": 43,
+              "end_line": 52
             }
           ]
         },
@@ -743,8 +695,8 @@
           "modules": [
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_base",
-              "start_line": 113,
-              "end_line": 119
+              "start_line": 98,
+              "end_line": 104
             },
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection",
@@ -791,8 +743,8 @@
           "modules": [
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_base",
-              "start_line": 113,
-              "end_line": 118
+              "start_line": 98,
+              "end_line": 103
             },
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection",
@@ -901,8 +853,8 @@
           "modules": [
             {
               "module": "bioetl.composition.runtime_builders._effective_config_artifact_builder_support",
-              "start_line": 179,
-              "end_line": 189
+              "start_line": 177,
+              "end_line": 187
             },
             {
               "module": "bioetl.composition.runtime_builders._run_manifest_snapshot_support",
@@ -917,8 +869,8 @@
           "modules": [
             {
               "module": "bioetl.composition.runtime_builders._effective_config_artifact_builder_support",
-              "start_line": 207,
-              "end_line": 216
+              "start_line": 205,
+              "end_line": 214
             },
             {
               "module": "bioetl.composition.runtime_builders._run_manifest_snapshot_support",
@@ -954,8 +906,8 @@
             },
             {
               "module": "bioetl.composition.runtime_builders.run_manifest_contract_identity",
-              "start_line": 15,
-              "end_line": 32
+              "start_line": 17,
+              "end_line": 34
             }
           ]
         },

@@ -127,3 +127,42 @@ def with_health_server_options[**_CommandParams, _CommandReturn](
         )
 
     return decorator
+
+
+def with_observability_backend_options[**_CommandParams, _CommandReturn](
+    default_backend_port: int,
+) -> Callable[
+    [Callable[_CommandParams, _CommandReturn]],
+    Callable[_CommandParams, _CommandReturn],
+]:
+    """Attach detached observability-backend options to a Click command."""
+
+    def decorator(
+        func: Callable[_CommandParams, _CommandReturn],
+    ) -> Callable[_CommandParams, _CommandReturn]:
+        func = _cast_command(
+            click.option(
+                "--observability-backend-port",
+                type=int,
+                default=default_backend_port,
+                help=(
+                    "Port for the detached Quarantine Explorer backend used by "
+                    "Grafana ID/detail panels."
+                ),
+                show_default=True,
+            )(func)
+        )
+        return _cast_command(
+            click.option(
+                "--ensure-observability-backend/--no-ensure-observability-backend",
+                "ensure_observability_backend",
+                default=True,
+                help=(
+                    "Auto-start a detached Quarantine Explorer backend for "
+                    "Grafana ID/detail panels."
+                ),
+                show_default=True,
+            )(func)
+        )
+
+    return decorator

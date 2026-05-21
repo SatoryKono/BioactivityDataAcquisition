@@ -5,9 +5,12 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Protocol
 from uuid import uuid4
 
+from bioetl.application.services.control_plane._manifest_time_support import (
+    ManifestClock,
+    resolve_manifest_created_at,
+)
 from bioetl.application.services.control_plane._run_manifest_service_mixins import (
     RunManifestHydrationMixin,
     RunManifestPayloadMixin,
@@ -15,7 +18,6 @@ from bioetl.application.services.control_plane._run_manifest_service_mixins impo
 from bioetl.application.services.control_plane.run_manifest_models import (
     RunManifestCreateSpec,
 )
-from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
 from bioetl.domain.control_plane import (
     ReplayCapability,
     RunCodeProvenance,
@@ -38,14 +40,6 @@ __all__ = [
     "RunManifestCreateSpec",
     "RunManifestService",
 ]
-
-
-class _ClockLike(Protocol):
-    """Local clock seam to keep strict mypy stable under skipped imports."""
-
-    def now(self) -> datetime:
-        """Return the current timestamp."""
-        ...
 
 
 def _validate_strict_code_provenance(
@@ -149,7 +143,7 @@ class RunManifestService(
     """Create and persist immutable run manifests."""
 
     manifest_port: RunManifestPort
-    clock: _ClockLike | None = None
+    clock: ManifestClock | None = None
     created_at_factory: Callable[[], datetime] | None = None
     schema_version: str = "1.0"
     _manifest_id_factory: Callable[[], str] = field(
@@ -188,11 +182,10 @@ class RunManifestService(
 
     def _resolve_created_at(self) -> datetime:
         """Resolve manifest creation time through the configured seam."""
-        if self.clock is not None:
-            return self.clock.now()
-        if self.created_at_factory is not None:
-            return self.created_at_factory()
-        return MISSING_RUNTIME_TIMESTAMP
+        return resolve_manifest_created_at(
+            clock=self.clock,
+            created_at_factory=self.created_at_factory,
+        )
 
     def create_manifest(self, request: RunManifestCreateSpec) -> RunManifest:
         """Build fingerprinted manifest and persist it through the port."""

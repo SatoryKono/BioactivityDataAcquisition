@@ -24,6 +24,7 @@ def test_required_typed_field_gets_presence_and_type_quarantine_tokens() -> None
     semantics = build_structural_workbook_semantics(
         logical_type="integer",
         nullable=False,
+
         optional=False,
         empty_as_missing=None,
         coercion_policy="default",

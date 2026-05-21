@@ -139,13 +139,21 @@ class FileEffectiveConfigArtifactStore:
             payload=payload,
         )
         semantic_text = _to_stable_json(semantic_payload)
+        semantic_compare_text = _to_stable_json(
+            _normalize_semantic_payload_for_conflict_check(semantic_payload)
+        )
         if artifact_path.exists():
             existing_payload = _read_json_object(artifact_path)
             existing_semantic_payload = _build_semantic_payload(
                 artifact_id=artifact_id,
                 payload=existing_payload,
             )
-            if _to_stable_json(existing_semantic_payload) == semantic_text:
+            existing_semantic_compare_text = _to_stable_json(
+                _normalize_semantic_payload_for_conflict_check(
+                    existing_semantic_payload
+                )
+            )
+            if existing_semantic_compare_text == semantic_compare_text:
                 return False
             raise EffectiveConfigArtifactConflictError(
                 "Effective-config semantic artifact already exists with "
@@ -198,6 +206,40 @@ def _build_semantic_payload(
     if schema_version is not None:
         semantic_payload["schema_version"] = schema_version
     return semantic_payload
+
+
+def _normalize_semantic_payload_for_conflict_check(
+    payload: dict[str, object],
+) -> dict[str, object]:
+    """Normalize forensic-only fields away for semantic idempotency checks.
+
+    ``raw_source_hash`` is byte-level provenance. It can drift across equivalent
+    LF/CRLF checkouts while ``source_hash`` and the semantic artifact id remain
+    stable. Conflict checks must therefore ignore it.
+    """
+    semantic_artifact = payload.get(_SEMANTIC_ARTIFACT_KEY)
+    normalized = dict(payload)
+    if not isinstance(semantic_artifact, dict):
+        return normalized
+
+    normalized_semantic_artifact = dict(semantic_artifact)
+    normalized[_SEMANTIC_ARTIFACT_KEY] = normalized_semantic_artifact
+
+    source_refs = semantic_artifact.get("source_refs")
+    if not isinstance(source_refs, list):
+        return normalized
+
+    normalized_source_refs: list[object] = []
+    for item in source_refs:
+        if isinstance(item, dict):
+            normalized_item = dict(item)
+            normalized_item.pop("raw_source_hash", None)
+            normalized_source_refs.append(normalized_item)
+            continue
+        normalized_source_refs.append(item)
+
+    normalized_semantic_artifact["source_refs"] = normalized_source_refs
+    return normalized
 
 
 def _build_occurrence_payload(

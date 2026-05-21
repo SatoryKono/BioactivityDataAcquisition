@@ -26,6 +26,11 @@ COMPATIBILITY_BASELINE_PATH = (
     / "contracts"
     / "publication_schema_compatibility.v1.yaml"
 )
+ARCHITECTURE_MEDALLION_CONTRACT_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "architecture"
+    / "test_medallion_invariants.py"
+)
 
 PUBLICATION_SCHEMA_CLASSES = (
     ChemblPublicationSchema,
@@ -437,26 +442,69 @@ class TestFieldTypeConsistency:
 
 @pytest.mark.architecture
 class TestSchemaVersioning:
-    """Test schema version stability."""
+    """Test executable publication compatibility baseline coverage."""
+
+    SCHEMA_MAP = {
+        "chembl": ChemblPublicationSchema,
+        "pubmed": PubMedPublicationSchema,
+        "crossref": PublicationEnrichedSchema,
+        "openalex": OpenAlexPublicationSchema,
+        "semanticscholar": SemanticScholarPublicationSchema,
+    }
 
     @pytest.mark.parametrize(
-        "schema_class",
+        "section_name",
         [
-            ChemblPublicationSchema,
-            PubMedPublicationSchema,
-            PublicationEnrichedSchema,
-            OpenAlexPublicationSchema,
-            SemanticScholarPublicationSchema,
+            "deprecated_aliases",
+            "nullable_compatibility_fields",
         ],
     )
-    def test_schema_has_version_or_stable(
-        self, schema_class: type[pa.DataFrameModel]
+    def test_compatibility_baseline_covers_current_provider_set(
+        self, section_name: str
     ) -> None:
-        """Schema class should document version or be marked stable."""
-        # Check if __doc__ mentions version or stability
-        doc = schema_class.__doc__ or ""
-        # This is a soft requirement - schemas should document stability
-        assert len(doc) > 0, f"{schema_class.__name__} should have docstring"
+        """Machine-readable baseline must explicitly enumerate every provider."""
+        compatibility = _load_compatibility_baseline()
+        section = compatibility[section_name]
+        assert isinstance(section, dict)
+        assert str(section["review_date"]) >= "2026-05-20"
+        providers = section["providers"]
+        assert isinstance(providers, dict)
+        assert set(providers) == set(self.SCHEMA_MAP)
+
+    @pytest.mark.parametrize("provider,schema_class", SCHEMA_MAP.items())
+    def test_compatibility_baseline_references_live_schema_fields(
+        self,
+        provider: str,
+        schema_class: type[pa.DataFrameModel],
+    ) -> None:
+        """Tracked compatibility baseline entries must point at real schema fields."""
+        compatibility = _load_compatibility_baseline()
+        alias_fields = compatibility["deprecated_aliases"]["providers"][provider]
+        nullable_fields = compatibility["nullable_compatibility_fields"]["providers"][
+            provider
+        ]
+
+        assert isinstance(alias_fields, list)
+        assert isinstance(nullable_fields, list)
+
+        schema_annotations = set(schema_class.__annotations__)
+        schema_columns = set(schema_class.to_schema().columns)
+
+        missing_aliases = [
+            field for field in alias_fields if field not in schema_annotations
+        ]
+        missing_nullable = [
+            field for field in nullable_fields if field not in schema_columns
+        ]
+
+        assert not missing_aliases, (
+            f"{provider}: compatibility alias baseline references missing fields: "
+            f"{missing_aliases}"
+        )
+        assert not missing_nullable, (
+            f"{provider}: compatibility nullable baseline references missing columns: "
+            f"{missing_nullable}"
+        )
 
 
 @pytest.mark.architecture
@@ -607,11 +655,15 @@ class TestOutputFormatStability:
 
     def test_silver_output_is_delta(self) -> None:
         """Silver layer MUST use Delta Lake format."""
-        pytest.skip("Silver storage format is enforced by architecture tests.")
+        contract = ARCHITECTURE_MEDALLION_CONTRACT_PATH.read_text(encoding="utf-8")
+        assert "def test_silver_writer_uses_delta_lake" in contract
+        assert "write_deltalake" in contract
 
     def test_bronze_output_is_jsonl(self) -> None:
         """Bronze layer MUST use JSONL + zstd format."""
-        pytest.skip("Bronze storage format is enforced by architecture tests.")
+        contract = ARCHITECTURE_MEDALLION_CONTRACT_PATH.read_text(encoding="utf-8")
+        assert "jsonl.zst" in contract
+        assert "test_bronze_path_includes_date_partition" in contract
 
 
 @pytest.mark.architecture

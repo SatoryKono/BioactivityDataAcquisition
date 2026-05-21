@@ -311,3 +311,10 @@ docs/reports/evidence/documentation-internal-surface-governance/02-evidence/inte
 /.npm-cache/
 /caddy/
 -
+/docs/reports/evidence/compatibility-registry-curated-ssot-drift
+/docs/reports/evidence/compatibility-registry-policy-history-mixing
+/docs/reports/evidence/compatibility-registry-refactor
+/docs/reports/evidence/compatibility-registry-snapshot-automation-drift
+/docs/reports/evidence/documentation-cascade-decisions
+/docs/reports/evidence/documentation-publication-remediation
+/docs/reports/evidence

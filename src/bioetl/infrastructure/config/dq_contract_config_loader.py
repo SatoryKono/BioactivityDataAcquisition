@@ -11,8 +11,9 @@ from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.infrastructure.config.base_config_loader import _load_yaml_file
 from bioetl.infrastructure.config.contract_registry_loader import (
-    load_contract_registry_entry,
     load_contract_registry_entries,
+    load_contract_registry_entry,
+    resolve_contract_registry_path,
 )
 
 
@@ -146,7 +147,9 @@ class DQContractConfigLoader:
     def __init__(self, configs_root: Path) -> None:
         self._configs_root = configs_root
         self._contracts_dir = configs_root / "contracts"
-        self._registry_path = configs_root / "base" / "contract_registry.yaml"
+        self._registry_path = resolve_contract_registry_path(
+            configs_root=configs_root,
+        )
 
     def load_dq_config_for_pipeline(self, pipeline_name: str) -> DQConfig:
         """Load DQ configuration for a pipeline from contract files."""

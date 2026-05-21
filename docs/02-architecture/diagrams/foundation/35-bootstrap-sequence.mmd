@@ -29,7 +29,7 @@ flowchart TB
 
     subgraph Step2["Step 2: Configuration"]
         S2A["ConfigLoader.load(pipeline_name)"]
-        S2B["PipelineYamlConfig<br/>(_base.yaml merged with entity.yaml)"]
+        S2B["PipelineYamlConfig<br/>(base defaults merged with entity.yaml)"]
         S2C["DQ + Filter config loaders"]
     end
 

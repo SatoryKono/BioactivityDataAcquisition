@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-21T06:55:55.530284+00:00",
+  "generated_at": "2026-05-21T10:57:02.642040+00:00",
   "summary": {
-    "total_scripts": 394,
+    "total_scripts": 396,
     "status_counts": {
-      "active": 354,
-      "supporting": 40
+      "active": 357,
+      "supporting": 39
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 3,
       "ci": 58,
-      "docs": 148,
-      "scripts": 314,
+      "docs": 149,
+      "scripts": 315,
       "skills": 8,
-      "tests": 152
+      "tests": 155
     }
   },
   "scripts": [
@@ -894,19 +894,19 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 221,
+          "line": 239,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1"
         },
         {
           "path": "docs/DOCKER_SETUP.md",
-          "line": 203,
+          "line": 221,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1 mcp-setup"
         },
         {
           "path": "docs/DOCKER_SETUP.md",
-          "line": 204,
+          "line": 222,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1"
         },
@@ -6989,13 +6989,13 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 511,
+          "line": 528,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 602,
+          "line": 619,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
@@ -7358,7 +7358,7 @@
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 75,
+          "line": 81,
           "source_group": "docs",
           "text": "python3 scripts/engineering/diagnostics/audit_structure.py --path ."
         },
@@ -7540,7 +7540,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 181,
+      "reference_count": 185,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -7607,7 +7607,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 103,
+          "line": 105,
           "source_group": "scripts",
           "text": "\"analyze-duplicate-functions\": \"analyze_duplicate_functions.py\","
         }
@@ -7636,7 +7636,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 104,
+          "line": 106,
           "source_group": "scripts",
           "text": "\"calibrate-hotspots\": \"calibrate_hotspot_budgets.py\","
         }
@@ -7657,7 +7657,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 68,
+          "line": 69,
           "source_group": "scripts",
           "text": "\"check-app-deps\": \"check_application_deps.py\","
         }
@@ -7678,7 +7678,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 67,
+          "line": 68,
           "source_group": "scripts",
           "text": "\"check-architecture\": \"check_architecture.py\","
         }
@@ -7756,7 +7756,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 69,
+          "line": 70,
           "source_group": "scripts",
           "text": "\"check-constructor-args\": \"check_constructor_args.py\","
         }
@@ -7771,7 +7771,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 108,
+          "line": 110,
           "source_group": "scripts",
           "text": "\"check-dashboard-visual-semantics\": \"check_dashboard_visual_semantics.py\","
         }
@@ -7786,7 +7786,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 73,
+          "line": 74,
           "source_group": "scripts",
           "text": "\"check-docs-drift\": \"check_docs_drift.py\","
         }
@@ -7837,7 +7837,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 83,
+          "line": 84,
           "source_group": "scripts",
           "text": "\"check-generic-field-ownership\": \"check_generic_field_ownership.py\","
         }
@@ -7864,7 +7864,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 82,
+          "line": 83,
           "source_group": "scripts",
           "text": "\"check-gold-nullable-numeric\": \"check_gold_nullable_numeric_compatibility.py\","
         }
@@ -7903,7 +7903,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 71,
+          "line": 72,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": \"check_naming_package_consistency.py\","
         },
@@ -7972,7 +7972,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 84,
+          "line": 85,
           "source_group": "scripts",
           "text": "\"check-ontology-unit-semantics\": \"check_ontology_unit_semantics.py\","
         }
@@ -8017,7 +8017,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 72,
+          "line": 73,
           "source_group": "scripts",
           "text": "\"check-exemptions\": \"check_quality_exemptions.py\","
         }
@@ -8068,7 +8068,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 81,
+          "line": 82,
           "source_group": "scripts",
           "text": "\"check-semantic-anchor-parity\": \"check_semantic_anchor_parity.py\","
         }
@@ -8095,7 +8095,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 76,
+          "line": 77,
           "source_group": "scripts",
           "text": "\"check-semantic-field-registry\": \"check_semantic_field_registry.py\","
         }
@@ -8122,7 +8122,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 80,
+          "line": 81,
           "source_group": "scripts",
           "text": "\"check-semantic-governance-policy\": \"check_semantic_governance_policy.py\","
         }
@@ -8173,7 +8173,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 78,
+          "line": 79,
           "source_group": "scripts",
           "text": "\"check-semantic-pair-budget\": \"check_semantic_pair_matrix_budget.py\","
         }
@@ -8224,7 +8224,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 77,
+          "line": 78,
           "source_group": "scripts",
           "text": "\"check-semantic-registry-drift\": \"check_semantic_registry_drift.py\","
         }
@@ -8290,7 +8290,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 74,
+          "line": 75,
           "source_group": "scripts",
           "text": "\"check-xwalk-missing-backlog\": \"check_xwalk_missing_backlog.py\","
         }
@@ -8317,7 +8317,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 93,
+          "line": 95,
           "source_group": "scripts",
           "text": "\"report-pubchem-property-vocab\": \"extract_pubchem_property_vocab.py\","
         }
@@ -8344,7 +8344,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 94,
+          "line": 96,
           "source_group": "scripts",
           "text": "\"report-publication-nested-vocab\": \"extract_publication_nested_vocab.py\","
         }
@@ -8352,6 +8352,14 @@
     },
     {
       "path": "scripts/engineering/qa/extract_uniprot_semantic_payload_vocab.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/engineering/qa/file_discovery.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -8379,7 +8387,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 85,
+          "line": 86,
           "source_group": "scripts",
           "text": "\"generate-debt-tasks\": \"generate_architecture_debt_tasks.py\","
         },
@@ -8448,7 +8456,7 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 77,
+          "line": 76,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         }
@@ -8469,31 +8477,31 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 79,
+          "line": 78,
           "source_group": "docs",
           "text": "uv run python scripts/engineering/qa/generate_compatibility_facade_snapshot.py --check"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 80,
+          "line": 79,
           "source_group": "docs",
           "text": "uv run python scripts/engineering/qa/generate_compatibility_facade_snapshot.py --update"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 81,
+          "line": 80,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_compatibility_facade_snapshot.py --check"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 82,
+          "line": 81,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_compatibility_facade_snapshot.py --update"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 95,
+          "line": 94,
           "source_group": "docs",
           "text": "- compatibility snapshot markdown: generated only by `scripts/engineering/qa/generate_compatibility_facade_snapshot.py`"
         },
@@ -8544,7 +8552,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 97,
+          "line": 99,
           "source_group": "scripts",
           "text": "\"report-hotspots\": \"generate_hotspot_degradation_report.py\","
         }
@@ -8592,7 +8600,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 79,
+          "line": 80,
           "source_group": "scripts",
           "text": "\"report-semantic-pipeline-audit\": \"generate_semantic_pipeline_audit.py\","
         }
@@ -8753,7 +8761,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 66,
+          "line": 67,
           "source_group": "scripts",
           "text": "\"check-naming\": \"naming_audit.py\","
         }
@@ -8788,7 +8796,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 86,
+          "line": 87,
           "source_group": "scripts",
           "text": "\"reduce-architecture-debt\": \"reduce_architecture_debt.py\","
         },
@@ -8815,7 +8823,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 101,
+          "line": 103,
           "source_group": "scripts",
           "text": "\"report-chembl-observed-value-inventory\": \"report_chembl_observed_value_inventory.py\","
         }
@@ -8830,7 +8838,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 91,
+          "line": 92,
           "source_group": "scripts",
           "text": "\"report-compatibility-importer-census\": \"report_compatibility_importer_census.py\","
         }
@@ -8851,7 +8859,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 109,
+          "line": 111,
           "source_group": "scripts",
           "text": "\"report-dashboard-inventory\": \"report_dashboard_inventory.py\","
         }
@@ -8866,7 +8874,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 110,
+          "line": 112,
           "source_group": "scripts",
           "text": "\"report-dashboard-query-duplicates\": \"report_dashboard_query_duplicates.py\","
         }
@@ -8881,7 +8889,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 92,
+          "line": 94,
           "source_group": "scripts",
           "text": "\"report-dead-code-inventory\": \"report_dead_code_inventory.py\","
         }
@@ -8914,7 +8922,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 98,
+          "line": 100,
           "source_group": "scripts",
           "text": "\"report-duplication-baseline\": \"report_duplication_baseline.py\","
         }
@@ -8929,7 +8937,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 99,
+          "line": 101,
           "source_group": "scripts",
           "text": "\"report-function-length-inventory\": \"report_function_length_inventory.py\","
         }
@@ -8950,9 +8958,42 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 96,
+          "line": 98,
           "source_group": "scripts",
           "text": "\"report-family-baseline\": \"report_hotspot_family_baseline.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/qa/report_module_coverage_inventory.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
+          "line": 93,
+          "source_group": "docs",
+          "text": "- `scripts/engineering/qa/report_module_coverage_inventory.py` converts the"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 93,
+          "source_group": "scripts",
+          "text": "\"report-module-coverage\": \"report_module_coverage_inventory.py\","
+        },
+        {
+          "path": "tests/architecture/test_module_coverage_inventory.py",
+          "line": 24,
+          "source_group": "tests",
+          "text": "assert committed[\"generated_by\"].endswith(\"report_module_coverage_inventory.py\")"
+        },
+        {
+          "path": "tests/architecture/test_module_coverage_inventory.py",
+          "line": 77,
+          "source_group": "tests",
+          "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }
       ]
     },
@@ -8997,7 +9038,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 100,
+          "line": 102,
           "source_group": "scripts",
           "text": "\"report-normalization-fallback-inventory\": \"report_normalization_fallback_inventory.py\","
         },
@@ -9018,7 +9059,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 102,
+          "line": 104,
           "source_group": "scripts",
           "text": "\"report-observability-metric-inventory\": \"report_observability_metric_inventory.py\","
         },
@@ -9063,7 +9104,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 90,
+          "line": 91,
           "source_group": "scripts",
           "text": "\"report-provider-contract-drift\": \"report_provider_contract_drift.py\","
         }
@@ -9111,13 +9152,13 @@
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
-          "line": 68,
+          "line": 69,
           "source_group": "docs",
           "text": "`scripts/engineering/qa/report_vcr_metadata_catalog.py` and"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 180,
+          "line": 187,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -9153,7 +9194,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 89,
+          "line": 90,
           "source_group": "scripts",
           "text": "\"report-vcr-metadata\": \"report_vcr_metadata_catalog.py\","
         }
@@ -9282,7 +9323,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 95,
+          "line": 97,
           "source_group": "scripts",
           "text": "\"sync-integration-vcr-policy\": \"sync_integration_vcr_policy.py\","
         }
@@ -9315,7 +9356,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 63,
+          "line": 64,
           "source_group": "scripts",
           "text": "_TEST_HEALTH_SCRIPT = \"test_health.py\""
         }
@@ -9330,7 +9371,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 75,
+          "line": 76,
           "source_group": "scripts",
           "text": "\"validate-dq-consistency\": \"validate_dq_consistency.py\","
         }
@@ -9432,7 +9473,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 544,
+          "line": 561,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         },
@@ -9495,7 +9536,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 545,
+          "line": 562,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -9522,7 +9563,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 178,
+          "line": 185,
           "source_group": "docs",
           "text": "- `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`"
         },
@@ -9653,13 +9694,13 @@
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 74,
+          "line": 80,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py"
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 105,
+          "line": 111,
           "source_group": "docs",
           "text": "`scripts/engineering/repo/audit_root_cleanliness.py` MUST использовать этот"
         },
@@ -9689,7 +9730,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/retention-sensitive-cleanup.md",
-          "line": 210,
+          "line": 211,
           "source_group": "docs",
           "text": "- root placement: `python scripts/engineering/repo/audit_root_cleanliness.py`"
         },
@@ -9815,7 +9856,7 @@
         },
         {
           "path": "scripts/engineering/dev/pretest_guardrails.sh",
-          "line": 432,
+          "line": 431,
           "source_group": "scripts",
           "text": "\"$PYTHON_BIN\" -m scripts.engineering.repo check-catalog \\"
         },
@@ -10106,13 +10147,13 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 44,
+          "line": 47,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 50,
+          "line": 53,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`"
         },
@@ -10798,60 +10839,84 @@
     {
       "path": "scripts/ops/docker-setup.ps1",
       "type": "ps1",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 43,
+          "line": 50,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\docker-setup.ps1 -Mode basic"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 58,
+          "line": 66,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\docker-setup.ps1 -Mode monitoring"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 74,
+          "line": 83,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\docker-setup.ps1 -Mode mcp"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 227,
+          "line": 245,
           "source_group": "docs",
           "text": "- `.\\scripts\\ops\\docker-setup.ps1` - Canonical интерактивная настройка Docker для Windows; `.env` создается только с `-AllowEnvFileCreate`"
+        },
+        {
+          "path": "docs/DOCKER_SETUP.md",
+          "line": 73,
+          "source_group": "docs",
+          "text": "Canonical helper scripts `scripts/ops/docker-setup.ps1` and"
         },
         {
           "path": "docs/site/DOCKER_QUICKSTART/index.html",
           "line": 23618,
           "source_group": "docs",
           "text": "- <code>.\\scripts\\ops\\docker-setup.ps1</code> - Canonical интерактивная настройка Docker для Windows; <code>.env</code> создается только с <code>-AllowEnvFileCreate</code>"
+        },
+        {
+          "path": "tests/architecture/test_docs_root_surface_governance_alignment.py",
+          "line": 68,
+          "source_group": "tests",
+          "text": "powershell_helper = _read(\"scripts/ops/docker-setup.ps1\")"
         }
       ]
     },
     {
       "path": "scripts/ops/docker-setup.sh",
       "type": "sh",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 228,
+          "line": 246,
           "source_group": "docs",
           "text": "- `scripts/ops/docker-setup.sh` - Canonical Bash версия для WSL/Linux; `.env` создается только с `BIOETL_ALLOW_ENV_FILE_CREATE=1`"
+        },
+        {
+          "path": "docs/DOCKER_SETUP.md",
+          "line": 74,
+          "source_group": "docs",
+          "text": "`scripts/ops/docker-setup.sh` automatically ensure these shared external"
         },
         {
           "path": "docs/site/DOCKER_QUICKSTART/index.html",
           "line": 23619,
           "source_group": "docs",
           "text": "- <code>scripts/ops/docker-setup.sh</code> - Canonical Bash версия для WSL/Linux; <code>.env</code> создается только с <code>BIOETL_ALLOW_ENV_FILE_CREATE=1</code></p>"
+        },
+        {
+          "path": "tests/architecture/test_docs_root_surface_governance_alignment.py",
+          "line": 67,
+          "source_group": "tests",
+          "text": "bash_helper = _read(\"scripts/ops/docker-setup.sh\")"
         }
       ]
     },
@@ -11442,13 +11507,13 @@
         },
         {
           "path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
-          "line": 69,
+          "line": 70,
           "source_group": "docs",
-          "text": "`scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py`; workflow-level"
+          "text": "`scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py`"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 180,
+          "line": 187,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },

@@ -5,6 +5,8 @@ Tests bootstrap functions for HealthService and health server dependencies.
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock, patch
+
 import pytest
 
 from bioetl.application.services.health_service import HealthService
@@ -99,6 +101,19 @@ class TestBootstrapHealthService:
 
         assert isinstance(result.clock, SystemClock)
 
+    def test_bootstrap_health_service_delegates_to_canonical_assembly(self):
+        """CLI health bootstrap should delegate service construction to assembly."""
+        expected_service = MagicMock(spec=HealthService)
+
+        with patch(
+            "bioetl.composition.bootstrap.cli.health.create_health_service",
+            return_value=expected_service,
+        ) as mock_create:
+            result = bootstrap_health_service()
+
+        assert result is expected_service
+        mock_create.assert_called_once()
+
 
 @pytest.mark.unit
 class TestBootstrapHealthServerDependencies:
@@ -152,3 +167,16 @@ class TestBootstrapHealthServerDependencies:
         assert result1.health_monitor is not result2.health_monitor
         assert result1.run_manifest_port is not result2.run_manifest_port
         assert result1.run_ledger_port is not result2.run_ledger_port
+
+    def test_bootstrap_dependencies_delegate_to_canonical_assembly(self):
+        """Health listener dependency wiring should delegate to assembly."""
+        expected_dependencies = MagicMock(spec=HealthServerDependencies)
+
+        with patch(
+            "bioetl.composition.bootstrap.cli.health.create_health_server_dependencies",
+            return_value=expected_dependencies,
+        ) as mock_create:
+            result = bootstrap_health_server_dependencies()
+
+        assert result is expected_dependencies
+        mock_create.assert_called_once()

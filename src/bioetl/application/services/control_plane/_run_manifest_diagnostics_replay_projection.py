@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from bioetl.application.services.control_plane._run_manifest_diagnostics_base_helpers import (
     _resolve_operator_replay_mode,
     _resolve_source_posture,
@@ -18,6 +20,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
     _resolve_replay_family_contract,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_state import (
+    _build_replay_state_projection,
     _resolve_broader_historical_exact_replay_state,
     _resolve_continuation_mode,
     _resolve_exact_replay_blockers,
@@ -35,6 +38,16 @@ from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
 )
+
+
+@dataclass(frozen=True, slots=True)
+class _ReplayProjectionBundle:
+    """Shared replay projection bundle reused across diagnostics surfaces."""
+
+    operator_projection: dict[str, object]
+    replay_state_projection: dict[str, str]
+    replay_control_plane_state: str
+    exact_replay_eligible: bool
 
 
 def _build_operator_replay_projection_inputs(
@@ -217,5 +230,65 @@ def _build_operator_replay_projection(
         )
     )
 
+def _resolve_replay_control_plane_state(
+    *,
+    manifest: RunManifest,
+    replay_state_projection: dict[str, str],
+    replay_family_contract_payload: dict[str, object],
+) -> str:
+    """Return the bounded machine-readable replay state for one manifest."""
+    if manifest.replay_capability.value == "exact_replay_supported":
+        return "exact_replay_supported"
+    if manifest.replay_capability.value == "resume_only":
+        return "resume_only"
+    if (
+        replay_family_contract_payload.get("post_capture_replayable_parent_supported")
+        is True
+        and replay_state_projection.get("historical_live_run_upgrade_state")
+        == "awaiting_input_snapshot_published_evidence"
+    ):
+        return "post_capture_parent_candidate"
+    return "rebuild_only"
 
-__all__ = ["_build_operator_replay_projection"]
+
+def _build_replay_projection_bundle(
+    *,
+    manifest: RunManifest,
+    input_snapshots: list[dict[str, object]],
+    requested_exact_replay: bool,
+    resume_requested: bool,
+    policy_assessment: ReproducibilityPolicyAssessment,
+    replay_family_contract_payload: dict[str, object],
+) -> _ReplayProjectionBundle:
+    """Assemble the canonical replay projection bundle for diagnostics callers."""
+    operator_projection = _build_operator_replay_projection(
+        manifest=manifest,
+        input_snapshots=input_snapshots,
+        requested_exact_replay=requested_exact_replay,
+        resume_requested=resume_requested,
+        policy_assessment=policy_assessment,
+    )
+    replay_state_projection = _build_replay_state_projection(
+        manifest=manifest,
+        input_snapshots=input_snapshots,
+        policy_assessment=policy_assessment,
+    )
+    return _ReplayProjectionBundle(
+        operator_projection=operator_projection,
+        replay_state_projection=replay_state_projection,
+        replay_control_plane_state=_resolve_replay_control_plane_state(
+            manifest=manifest,
+            replay_state_projection=replay_state_projection,
+            replay_family_contract_payload=replay_family_contract_payload,
+        ),
+        exact_replay_eligible=bool(
+            operator_projection.get("exact_replay_eligible", False)
+        ),
+    )
+
+
+__all__ = [
+    "_build_operator_replay_projection",
+    "_build_replay_projection_bundle",
+    "_resolve_replay_control_plane_state",
+]

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
-from uuid import uuid4
 
 import pytest
 from hypothesis import HealthCheck, assume, given, settings
@@ -12,6 +11,7 @@ from hypothesis import strategies as st
 from bioetl.domain.aggregates.pipeline_run import PipelineRun, PipelineRunState
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import RunID, RunType
+from tests.helpers.deterministic_ids import deterministic_uuid_value
 
 pytestmark = [pytest.mark.hypothesis]
 
@@ -36,7 +36,7 @@ def _ts(offset_seconds: int = 0) -> datetime:
 
 
 def _run_id() -> RunID:
-    return RunID(uuid4())
+    return RunID(deterministic_uuid_value("hypothesis.pipeline_run.run_id"))
 
 
 def _make_run() -> PipelineRun:

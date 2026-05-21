@@ -120,6 +120,13 @@ bioetl workflow run chembl_publication --limit 1000 --required-persistence-profi
 published family default, поэтому этот флаг не является обходом exact-replay
 guardrails.
 
+По умолчанию `bioetl workflow run`, `bioetl run`, `bioetl run-all` и
+`bioetl run-composite` также пытаются автоматически поднять detached
+Quarantine Explorer backend на `127.0.0.1:8081`, чтобы Grafana `ID`/detail
+панели могли читать `/ops/control-plane/*` без отдельного ручного запуска
+`bioetl quarantine serve`. Для opt-out используйте
+`--no-ensure-observability-backend`.
+
 Для inspection используются команды:
 
 ```bash

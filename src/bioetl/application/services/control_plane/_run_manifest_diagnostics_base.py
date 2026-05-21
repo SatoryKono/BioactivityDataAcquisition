@@ -13,8 +13,17 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_base_he
     _resolve_operator_replay_mode,
     _resolve_snapshot_status,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_persistence import (
-    build_lineage_closure_boundary,
+from bioetl.application.services.control_plane._run_manifest_diagnostics_checkpoint_projection import (
+    build_checkpoint_anchor_projection as _build_checkpoint_anchor_projection,
+)
+from bioetl.application.services.control_plane._run_manifest_diagnostics_checkpoint_projection import (
+    build_current_checkpoint_anchor_payload as _build_current_checkpoint_anchor_payload,
+)
+from bioetl.application.services.control_plane._run_manifest_diagnostics_checkpoint_projection import (
+    build_resume_anchor_comparison as _build_resume_anchor_comparison,
+)
+from bioetl.application.services.control_plane._run_manifest_diagnostics_checkpoint_projection import (
+    resolve_resume_identity_maps as _resolve_resume_identity_maps,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
     _assess_manifest_reproducibility_policy,
@@ -28,9 +37,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection import (
     _build_operator_replay_projection,
-)
-from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_state import (
-    _build_replay_state_projection,
+    _build_replay_projection_bundle,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
     collect_input_snapshot_content_hashes as _collect_input_snapshot_content_hashes,
@@ -71,30 +78,7 @@ class _BaseSummaryReplayContext:
     resume_contract: dict[str, object]
     replay_family_contract: dict[str, object]
     policy_assessment: ReproducibilityPolicyAssessment
-
-
-_EMPTY_RESUME_ANCHOR_COMPARISON = {
-    "checkpoint_identity_present": False,
-    "matching_fields": [],
-    "mismatched_fields": [],
-    "missing_current_fields": [],
-    "missing_checkpoint_fields": [],
-}
-
-
-def _resolve_resume_identity_maps(
-    summary: dict[str, object],
-) -> tuple[dict[str, object], dict[str, object]] | None:
-    resume_diagnostics = summary.get("resume_diagnostics")
-    if not isinstance(resume_diagnostics, dict):
-        return None
-    current_identity = resume_diagnostics.get("current_identity")
-    checkpoint_identity = resume_diagnostics.get("checkpoint_identity")
-    if not isinstance(current_identity, dict) or not isinstance(
-        checkpoint_identity, dict
-    ):
-        return None
-    return current_identity, checkpoint_identity
+    operator_replay_projection: dict[str, object]
 
 
 def _resolve_base_summary_replay_context(
@@ -143,6 +127,7 @@ def _resolve_base_summary_replay_context(
         ),
         replay_family_contract=replay_family_contract,
         policy_assessment=policy_assessment,
+        operator_replay_projection=operator_replay_projection,
     )
 
 
@@ -151,10 +136,8 @@ def _is_exact_replay_eligible(
     replay_context: _BaseSummaryReplayContext,
 ) -> bool:
     """Return whether manifest identity has enough anchors for exact replay."""
-    return (
-        manifest.replay_capability.value == "exact_replay_supported"
-        and not replay_context.exact_replay_blockers
-    )
+    del manifest
+    return bool(replay_context.operator_replay_projection["exact_replay_eligible"])
 
 
 def _build_base_summary_payload(
@@ -252,21 +235,21 @@ def _build_base_summary_replay_payload(
     replay_family_contract_payload: dict[str, object],
 ) -> dict[str, object]:
     """Build replay-related fields for base summary payload."""
-    replay_state_projection = _build_replay_state_projection(
+    replay_projection_bundle = _build_replay_projection_bundle(
         manifest=manifest,
         input_snapshots=replay_context.input_snapshots,
+        requested_exact_replay=replay_context.requested_exact_replay,
+        resume_requested=replay_context.resume_requested,
         policy_assessment=replay_context.policy_assessment,
+        replay_family_contract_payload=replay_family_contract_payload,
     )
+    operator_replay_projection = replay_projection_bundle.operator_projection
     return {
         "replay_of_run_id": manifest.replay_of_run_id,
         "replay_of_manifest_id": manifest.replay_of_manifest_id,
         "replay_parentage": _build_replay_parentage(manifest),
         "replay_capability": manifest.replay_capability.value,
-        "replay_control_plane_state": _resolve_replay_control_plane_state(
-            manifest=manifest,
-            replay_state_projection=replay_state_projection,
-            replay_family_contract_payload=replay_family_contract_payload,
-        ),
+        "replay_control_plane_state": replay_projection_bundle.replay_control_plane_state,
         "required_persistence_profile": (
             replay_context.policy_assessment.required_persistence_profile
         ),
@@ -274,13 +257,11 @@ def _build_base_summary_replay_payload(
         "exact_replay_support_boundary": replay_context.exact_replay_support_boundary,
         "replay_capability_reason": replay_context.replay_capability_reason,
         **replay_family_contract_payload,
-        **replay_state_projection,
-        "exact_replay_eligible": exact_replay_eligible,
+        **replay_projection_bundle.replay_state_projection,
+        "exact_replay_eligible": replay_projection_bundle.exact_replay_eligible,
         "exact_replay_blockers": replay_context.exact_replay_blockers,
         "replay_readiness_verdict": replay_context.replay_readiness_verdict,
-        "replay_resume_rebuild_verdict": (
-            replay_context.replay_resume_rebuild_verdict
-        ),
+        "replay_resume_rebuild_verdict": (replay_context.replay_resume_rebuild_verdict),
         "replay_next_action": replay_context.replay_next_action,
         "replay_mode": replay_context.replay_mode,
         "operator_replay_mode": _resolve_operator_replay_mode(
@@ -293,28 +274,8 @@ def _build_base_summary_replay_payload(
         "replay_capability_assessment": (replay_context.policy_assessment.to_dict()),
         "resume_contract": replay_context.resume_contract,
         "resume_diagnostics": None,
+        "lineage_closure_boundary": operator_replay_projection["lineage_closure_boundary"],
     }
-
-
-def _resolve_replay_control_plane_state(
-    *,
-    manifest: RunManifest,
-    replay_state_projection: dict[str, str],
-    replay_family_contract_payload: dict[str, object],
-) -> str:
-    """Return the bounded machine-readable replay state for one manifest."""
-    if manifest.replay_capability.value == "exact_replay_supported":
-        return "exact_replay_supported"
-    if manifest.replay_capability.value == "resume_only":
-        return "resume_only"
-    if (
-        replay_family_contract_payload.get("post_capture_replayable_parent_supported")
-        is True
-        and replay_state_projection.get("historical_live_run_upgrade_state")
-        == "awaiting_input_snapshot_published_evidence"
-    ):
-        return "post_capture_parent_candidate"
-    return "rebuild_only"
 
 
 def _build_base_summary_snapshot_payload(
@@ -386,11 +347,6 @@ def _build_base_summary_core_payload(
             replay_context.policy_assessment.snapshot_envelope.missing_snapshot_source_refs
         ),
         **snapshot_payload,
-        "lineage_closure_boundary": build_lineage_closure_boundary(
-            provider=manifest.provider,
-            entity=manifest.entity,
-            contract_ref=code_provenance.contract_ref,
-        ),
         "planned_artifacts": _build_planned_artifact_refs(manifest),
         "occurrence_only_diagnostics": [],
     }
@@ -450,52 +406,10 @@ def _build_effective_config_diagnostics(
     }
 
 
-def _build_current_checkpoint_anchor_payload(
-    summary: dict[str, object],
-) -> dict[str, object]:
-    return {
-        "execution_fingerprint": summary.get("execution_fingerprint"),
-        "manifest_id": summary.get("manifest_id"),
-        "effective_config_hash": summary.get("effective_config_hash"),
-        "contract_ref": summary.get("contract_ref"),
-        "contract_version": summary.get("contract_version"),
-        "effective_config_artifact_id": summary.get("effective_config_artifact_id"),
-        "input_snapshot_ids": summary.get("input_snapshot_ids", []),
-    }
-
-
-def _build_resume_anchor_comparison(
-    summary: dict[str, object],
-) -> dict[str, object]:
-    identity_maps = _resolve_resume_identity_maps(summary)
-    if identity_maps is None:
-        return dict(_EMPTY_RESUME_ANCHOR_COMPARISON)
-    current_identity, checkpoint_identity = identity_maps
-    matching_fields: list[object] = []
-    mismatched_fields: list[object] = []
-    missing_current_fields: list[object] = []
-    missing_checkpoint_fields: list[object] = []
-    for field in sorted(set(current_identity) | set(checkpoint_identity)):
-        if field not in current_identity:
-            missing_current_fields.append(field)
-        elif field not in checkpoint_identity:
-            missing_checkpoint_fields.append(field)
-        elif current_identity[field] == checkpoint_identity[field]:
-            matching_fields.append(field)
-        else:
-            mismatched_fields.append(field)
-    return {
-        "checkpoint_identity_present": True,
-        "matching_fields": matching_fields,
-        "mismatched_fields": mismatched_fields,
-        "missing_current_fields": missing_current_fields,
-        "missing_checkpoint_fields": missing_checkpoint_fields,
-    }
-
-
 __all__ = [
     "_BaseSummaryReplayContext",
     "_build_base_summary_payload",
+    "_build_checkpoint_anchor_projection",
     "_build_current_checkpoint_anchor_payload",
     "_build_effective_config_diagnostics",
     "_build_resume_anchor_comparison",

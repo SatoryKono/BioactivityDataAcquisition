@@ -1024,10 +1024,14 @@ ______________________________________________________________________
 
 **Backend contract:** this datasource expects a dedicated long-lived BioETL HTTP
 backend, not a transient per-run companion server. Recommended launcher:
-`bioetl quarantine serve --port 8081`. `bioetl health server --port 8081`
+`bioetl quarantine serve --host 0.0.0.0 --port 8081`. `bioetl health server --port 8081`
 remains a compatibility entrypoint, but operators should treat the Quarantine
 Explorer backend as a stable observability surface for Grafana rather than a
 temporary workflow-run helper.
+Primary pipeline execution commands (`bioetl run`, `bioetl workflow run`,
+`bioetl run-all`, `bioetl run-composite`) now attempt to auto-start this
+detached backend unless `--no-ensure-observability-backend` is passed, so one
+operator run command is normally enough for `ID` and detail panels to populate.
 The default Docker-backed Grafana datasource URL is
 `http://host.docker.internal:8081`, which matches the host-gateway mapping that
 the Grafana container already provisions.

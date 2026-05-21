@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from bioetl.infrastructure.config.contract_registry_loader import (
+    DEFAULT_CONTRACT_REGISTRY_PATH,
     load_contract_registry_entries,
 )
 
@@ -33,12 +34,12 @@ def resolve_contract_identity(
 ) -> RunManifestContractIdentity:
     """Resolve contract identity fields from canonical registry when available."""
     contract_ref = f"{provider}.{entity}"
-    registry_path = Path("configs/base/contract_registry.yaml")
+    registry_path = DEFAULT_CONTRACT_REGISTRY_PATH
     if not registry_path.exists():
         if strict:
             raise RuntimeError(
-                "Strict reproducibility contexts require configs/base/"
-                f"contract_registry.yaml to resolve contract identity for '{contract_ref}'"
+                "Strict reproducibility contexts require "
+                f"{registry_path.as_posix()} to resolve contract identity for '{contract_ref}'"
             )
         return RunManifestContractIdentity(contract_ref, None, None, None, None, None, None, None)
     entry = _load_contract_registry_entry(
@@ -50,7 +51,7 @@ def resolve_contract_identity(
         if strict:
             raise RuntimeError(
                 "Strict reproducibility contexts require a contract registry entry "
-                f"for '{contract_ref}' in configs/base/contract_registry.yaml"
+                f"for '{contract_ref}' in {registry_path.as_posix()}"
             )
         return RunManifestContractIdentity(contract_ref, None, None, None, None, None, None, None)
     fields = _extract_contract_identity_fields(entry)

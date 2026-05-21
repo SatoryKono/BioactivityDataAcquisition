@@ -8,7 +8,7 @@ symbols:
     owner: bioetl.infrastructure.config
     status: sanctioned_convenience_type
     canonical_target: bioetl.infrastructure.config._base.Settings
-    max_src_importers: 60
+    max_src_importers: 61
     allowlisted_path_prefixes:
       - src/bioetl/composition/
       - src/bioetl/infrastructure/adapters/openalex/

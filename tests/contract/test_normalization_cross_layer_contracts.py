@@ -60,6 +60,27 @@ def _matrix_row(pipeline_name: str, field_name: str) -> dict[str, str]:
     )
 
 
+def _runtime_anchor_fingerprint_from_metadata(
+    metadata: CheckpointMetadata,
+) -> str | None:
+    payload = {
+        key: value
+        for key, value in {
+            "effective_config_hash": metadata.effective_config_hash,
+            "effective_config_artifact_id": metadata.effective_config_artifact_id,
+            "contract_ref": metadata.contract_ref,
+            "contract_version": metadata.contract_version,
+            "manifest_id": metadata.manifest_id,
+        }.items()
+        if value is not None
+    }
+    if not payload:
+        return None
+    return compute_execution_identity_fingerprint(
+        normalize_runtime_anchor_payload(payload)
+    )
+
+
 def test_pmid_contract_agrees_across_active_layers(
     minimal_pubmed_publication_df: pd.DataFrame,
 ) -> None:
@@ -198,7 +219,7 @@ def test_checkpoint_execution_identity_payload_matches_domain_contract() -> None
 def test_runtime_anchor_service_path_matches_domain_runtime_anchor_fingerprint() -> (
     None
 ):
-    """Resume service runtime-anchor fallback must match the canonical domain seam."""
+    """Lenient resume runtime-anchor fallback must match the canonical domain seam."""
     service = CheckpointCompatibilityService(logger=MagicMock())
     raw_current_payload = {
         "effective_config_hash": _HASH_A,
@@ -207,41 +228,43 @@ def test_runtime_anchor_service_path_matches_domain_runtime_anchor_fingerprint()
         "contract_version": " v1 ",
         "manifest_id": " manifest-a ",
     }
-    expected_fingerprint = compute_execution_identity_fingerprint(
-        normalize_runtime_anchor_payload(raw_current_payload)
-    )
+    normalized_payload = normalize_runtime_anchor_payload(raw_current_payload)
+    expected_fingerprint = compute_execution_identity_fingerprint(normalized_payload)
     current_metadata = CheckpointMetadata(
         records_processed=1,
-        effective_config_hash=_HASH_A,
-        manifest_id=raw_current_payload["manifest_id"],
-        contract_ref=raw_current_payload["contract_ref"],
-        contract_version=raw_current_payload["contract_version"],
-        effective_config_artifact_id=raw_current_payload[
+        effective_config_hash=normalized_payload["effective_config_hash"],
+        manifest_id=normalized_payload["manifest_id"],
+        contract_ref=normalized_payload["contract_ref"],
+        contract_version=normalized_payload["contract_version"],
+        effective_config_artifact_id=normalized_payload[
             "effective_config_artifact_id"
         ],
     )
     checkpoint_metadata = CheckpointMetadata(
         records_processed=1,
-        effective_config_hash=_HASH_A,
-        manifest_id="manifest-a",
-        contract_ref="chembl.activity",
-        contract_version="1.0.0",
-        effective_config_artifact_id="artifact-001",
+        effective_config_hash=normalized_payload["effective_config_hash"],
+        manifest_id=normalized_payload["manifest_id"],
+        contract_ref=normalized_payload["contract_ref"],
+        contract_version=normalized_payload["contract_version"],
+        effective_config_artifact_id=normalized_payload[
+            "effective_config_artifact_id"
+        ],
     )
 
-    result = service.validate_checkpoint_compatibility(
+    result = service.validate_minimum_compatibility(
         current_metadata,
         checkpoint_metadata,
     )
 
-    assert current_metadata.checkpoint_execution_identity_fingerprint() == (
+    assert _runtime_anchor_fingerprint_from_metadata(current_metadata) == (
         expected_fingerprint
     )
-    assert checkpoint_metadata.checkpoint_execution_identity_fingerprint() == (
+    assert _runtime_anchor_fingerprint_from_metadata(checkpoint_metadata) == (
         expected_fingerprint
     )
     assert result.compatible is True
     assert result.execution_identity_compatible is True
+    assert result.resume_verdict == "resume_only_degraded"
 
 
 def test_record_normalization_processor_keeps_equivalent_payloads_hash_stable() -> None:

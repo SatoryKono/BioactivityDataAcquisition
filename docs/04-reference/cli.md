@@ -153,6 +153,12 @@ bioetl workflow status chembl_core --run-id 00000000-0000-0000-0000-000000000111
 bioetl workflow status chembl_core --format json
 ```
 
+`workflow run`, `run`, `run-all` и `run-composite` по умолчанию также
+используют `--ensure-observability-backend`, то есть пытаются автоматически
+запустить detached `bioetl quarantine serve --host 0.0.0.0 --port 8081` для
+Grafana `ID`/detail panels. Для отключения используйте
+`--no-ensure-observability-backend`.
+
 ______________________________________________________________________
 
 ### `run` — Запуск одного пайплайна

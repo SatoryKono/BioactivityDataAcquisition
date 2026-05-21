@@ -96,8 +96,8 @@ def _get_retry_config() -> RetryConfig:
     return RetryConfig(
         max_attempts=3,
         multiplier=2.0,
-        base_delay=0.25,
-        max_delay=1.0,
+        base_delay=0.0,
+        max_delay=0.0,
         jitter_range=(0.0, 0.0),
         retryable_statuses=_TRANSIENT_HTTP_STATUS_CODES,
         jitter_seed=20260304,
@@ -130,14 +130,23 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
                 item.add_marker(pytest.mark.timeout(E2E_DEFAULT_TIMEOUT))
 
 
-@pytest.fixture(scope="module")
-def vcr_cassette_dir(request: pytest.FixtureRequest) -> Path:
-    """Return provider-specific cassette directory for E2E tests."""
-    test_name = request.node.name
-    provider_dir = infer_provider_cassette_dir(
-        node_name=test_name,
-        module_path=str(request.node.fspath),
+def _resolve_e2e_provider_cassette_dir(
+    *, node_name: str, module_path: str | None
+) -> str:
+    """Resolve one per-test E2E cassette provider directory."""
+    return infer_provider_cassette_dir(
+        node_name=node_name,
+        module_path=module_path,
         overrides=_E2E_VCR_CASSETTE_DIR_BY_TEST,
+    )
+
+
+@pytest.fixture
+def vcr_cassette_dir(request: pytest.FixtureRequest) -> Path:
+    """Return provider-specific cassette directory for one E2E test."""
+    provider_dir = _resolve_e2e_provider_cassette_dir(
+        node_name=request.node.name,
+        module_path=str(request.node.fspath),
     )
     return build_cassette_dir(
         fixtures_root=Path(__file__).resolve().parents[1] / "fixtures" / "vcr",
@@ -280,9 +289,9 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
     E2E suites can share one data directory when they intentionally reuse the
     same pipeline run output across multiple assertions.
     """
-    from bioetl.infrastructure.config import Settings, get_pipeline_config, get_settings
-    from bioetl.composition.factories.storage import _context_resolution
     from unittest.mock import PropertyMock, patch
+
+    from bioetl.infrastructure.config import Settings, get_pipeline_config, get_settings
 
     data_dir.mkdir(parents=True, exist_ok=True)
 
@@ -305,21 +314,25 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
     get_pipeline_config.cache_clear()
 
     # Patch Settings properties to use output/ subdirectory
-    with patch.object(
-        Settings,
-        "bronze_path",
-        new_callable=PropertyMock,
-        return_value=data_dir / "output" / "bronze",
-    ), patch.object(
-        Settings,
-        "silver_path",
-        new_callable=PropertyMock,
-        return_value=data_dir / "output" / "silver",
-    ), patch.object(
-        Settings,
-        "gold_path",
-        new_callable=PropertyMock,
-        return_value=data_dir / "output" / "gold",
+    with (
+        patch.object(
+            Settings,
+            "bronze_path",
+            new_callable=PropertyMock,
+            return_value=data_dir / "output" / "bronze",
+        ),
+        patch.object(
+            Settings,
+            "silver_path",
+            new_callable=PropertyMock,
+            return_value=data_dir / "output" / "silver",
+        ),
+        patch.object(
+            Settings,
+            "gold_path",
+            new_callable=PropertyMock,
+            return_value=data_dir / "output" / "gold",
+        ),
     ):
         try:
             yield data_dir
@@ -701,7 +714,8 @@ async def run_pipeline_or_skip_transient(context: PipelineRunContext) -> Any:
             _skip_transient_pipeline_run(context, transient_exc)
 
         delay = retry_config.calculate_delay(attempt, url=context.pipeline_name)
-        await asyncio.sleep(delay)
+        assert delay == 0.0, "E2E retry helper must not add wall-clock sleeps"
+        await asyncio.sleep(0)
 
     msg = "run_pipeline_or_skip_transient exhausted without terminal decision"
     raise RuntimeError(msg)

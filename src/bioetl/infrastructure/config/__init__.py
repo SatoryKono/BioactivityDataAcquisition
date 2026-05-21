@@ -35,6 +35,9 @@ from bioetl.infrastructure.config.contract_policy_loader import (
 )
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
+from bioetl.infrastructure.config.publication_controlled_vocabulary_loader import (
+    PublicationControlledVocabularyLoader,
+)
 from bioetl.infrastructure.config.publication_type_classification_loader import (
     PublicationTypeClassificationLoader,
 )
@@ -82,6 +85,7 @@ __all__ = [
     "ObservabilitySettings",
     "PipelineConfigLoader",
     "PipelineSettings",
+    "PublicationControlledVocabularyLoader",
     "PublicationTypeClassificationLoader",
     "Settings",
     "SourceYamlConfig",

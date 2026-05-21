@@ -44,7 +44,7 @@ PUBMED_DATE_FIELDS = [
 ]
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def vcr_config(vcr_cassette_dir: Path) -> dict[str, object]:
     """Configure VCR for PubMed Publications E2E tests."""
     return build_base_vcr_config(

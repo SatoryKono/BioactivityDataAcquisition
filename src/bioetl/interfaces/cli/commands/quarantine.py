@@ -54,7 +54,7 @@ def quarantine() -> None:
 @quarantine.command("serve")
 @click.option(
     "--host",
-    default="127.0.0.1",
+    default="0.0.0.0",
     help="Host to bind the Quarantine Explorer backend to.",
     show_default=True,
 )

@@ -6,13 +6,20 @@ import argparse
 import ast
 import json
 import re
+import sys
 from collections import Counter, defaultdict
+from functools import cache
 from pathlib import Path
 from typing import Any, cast
 
 import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.engineering.qa.file_discovery import discover_files  # noqa: E402
+
 DEFAULT_CONFIG = Path("configs/quality/test_governance_audit.yaml")
 TEST_FUNCTION_PREFIX = "test_"
 COMPATIBILITY_FILE_RE = re.compile(
@@ -56,7 +63,14 @@ BUDGET_TO_METRIC = {
 
 def _iter_test_files(root: Path) -> list[Path]:
     tests_root = root / "tests"
-    return sorted(tests_root.rglob("test_*.py"))
+    return [
+        tests_root / relative_path
+        for relative_path in discover_files(
+            str(tests_root.resolve()),
+            ".py",
+            TEST_FUNCTION_PREFIX,
+        )
+    ]
 
 
 def _qualified_name(node: ast.AST) -> str:
@@ -123,9 +137,9 @@ class _TestBodyVisitor(ast.NodeVisitor):
 def _test_functions(tree: ast.Module) -> list[ast.FunctionDef | ast.AsyncFunctionDef]:
     functions: list[ast.FunctionDef | ast.AsyncFunctionDef] = []
     for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and node.name.startswith(
-            TEST_FUNCTION_PREFIX
-        ):
+        if isinstance(
+            node, ast.FunctionDef | ast.AsyncFunctionDef
+        ) and node.name.startswith(TEST_FUNCTION_PREFIX):
             functions.append(node)
     return functions
 
@@ -164,9 +178,10 @@ def _classify_assertless_candidate(
     return "weak_no_value"
 
 
-def collect_test_governance_report(root: Path = ROOT) -> dict[str, Any]:
+@cache
+def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
     """Collect deterministic static counts used as remediation budgets."""
-    root = root.resolve()
+    root = Path(root_str).resolve()
     test_files = _iter_test_files(root)
     test_name_locations: dict[str, list[str]] = defaultdict(list)
     assertless_examples: list[str] = []
@@ -264,6 +279,11 @@ def collect_test_governance_report(root: Path = ROOT) -> dict[str, Any]:
         "date_today_call_sites": date_today_call_sites,
         "parse_errors": parse_errors,
     }
+
+
+def collect_test_governance_report(root: Path = ROOT) -> dict[str, Any]:
+    """Collect deterministic static counts used as remediation budgets."""
+    return _collect_test_governance_report_cached(str(root.resolve()))
 
 
 def load_config(path: Path) -> dict[str, Any]:

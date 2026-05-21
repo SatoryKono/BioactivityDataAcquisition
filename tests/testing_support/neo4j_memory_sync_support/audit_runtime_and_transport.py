@@ -65,6 +65,8 @@ def test_git_last_commit_age_days_bulk_batches_history_lookup(monkeypatch) -> No
         _text: bool,
     ) -> Result:
         calls.append(cmd)
+        if "ls-files" in cmd:
+            return Result("src/a.py\nsrc/b.py\nsrc/c.py\n")
         return Result(
             "__TS__1712448000\nsrc/a.py\nsrc/b.py\n\n__TS__1712361600\nsrc/c.py\n",
         )
@@ -81,10 +83,55 @@ def test_git_last_commit_age_days_bulk_batches_history_lookup(monkeypatch) -> No
         chunk_size=10,
     )
 
-    assert len(calls) == 1
-    assert calls[0][-3:] == [PATH_SRC_A, PATH_SRC_B, PATH_SRC_C]
+    assert len(calls) == 2
+    assert "ls-files" in calls[0]
+    assert "log" in calls[1]
+    assert calls[1][-3:] == [PATH_SRC_A, PATH_SRC_B, PATH_SRC_C]
     assert result[PATH_SRC_A] is not None
     assert result[PATH_SRC_B] == result[PATH_SRC_A]
+    assert result[PATH_SRC_C] is not None
+    assert cache == result
+
+
+def test_git_last_commit_age_days_bulk_skips_untracked_paths(monkeypatch) -> None:
+    class Result:
+        def __init__(self, stdout: str, returncode: int = 0) -> None:
+            self.stdout = stdout
+            self.returncode = returncode
+
+    calls: list[list[str]] = []
+
+    def _run(
+        cmd: list[str],
+        _check: bool,
+        _capture_output: bool,
+        _text: bool,
+    ) -> Result:
+        calls.append(cmd)
+        if "ls-files" in cmd:
+            return Result("src/a.py\nsrc/c.py\n")
+        return Result(
+            "__TS__1712448000\nsrc/a.py\n\n__TS__1712361600\nsrc/c.py\n",
+        )
+
+    monkeypatch.setattr("scripts.memory.sync.subprocess.run", _run)
+    monkeypatch.setattr("scripts.memory.sync._resolve_git_executable", lambda: "git")
+
+    cache: dict[str, int | None] = {}
+    result = _git_last_commit_age_days_bulk(
+        Path("/repo"),
+        [PATH_SRC_A, PATH_SRC_B, PATH_SRC_C],
+        date(2026, 4, 10),
+        cache,
+        chunk_size=10,
+    )
+
+    assert len(calls) == 2
+    assert "ls-files" in calls[0]
+    assert "log" in calls[1]
+    assert calls[1][-2:] == [PATH_SRC_A, PATH_SRC_C]
+    assert result[PATH_SRC_A] is not None
+    assert result[PATH_SRC_B] is None
     assert result[PATH_SRC_C] is not None
     assert cache == result
 
@@ -539,5 +586,4 @@ def test_neo4j_http_client_reports_all_transport_attempts(monkeypatch) -> None:
     assert "attempts:" in message
     assert f"{HOST_DOCKER_INTERNAL_HTTP_URI}/db/neo4j/tx/commit" in message
     assert f"{LOCALHOST_HTTP_URI}/db/neo4j/tx/commit" in message
-
 

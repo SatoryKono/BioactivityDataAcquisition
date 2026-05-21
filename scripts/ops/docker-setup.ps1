@@ -35,6 +35,24 @@ catch {
 Write-Host "✓ Docker доступен" -ForegroundColor Green
 Write-Host ""
 
+function Ensure-ExternalNetwork {
+    param([string]$NetworkName)
+
+    docker network inspect $NetworkName *> $null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "✓ Docker network ready: $NetworkName" -ForegroundColor Green
+        return
+    }
+
+    Write-Host "Создаю shared Docker network: $NetworkName" -ForegroundColor Blue
+    docker network create $NetworkName *> $null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "❌ Не удалось создать Docker network: $NetworkName" -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "✓ Docker network ready: $NetworkName" -ForegroundColor Green
+}
+
 if (-not (Test-Path ".env")) {
     if ($AllowEnvFileCreate -or $env:BIOETL_ALLOW_ENV_FILE_CREATE -eq "1") {
         if (-not (Test-Path ".env.example")) {
@@ -53,6 +71,9 @@ if (-not (Test-Path ".env")) {
         exit 2
     }
 }
+
+Ensure-ExternalNetwork -NetworkName "bioetl-monitoring"
+Ensure-ExternalNetwork -NetworkName "warp-network"
 
 function Start-MainStack {
     Write-Host ""

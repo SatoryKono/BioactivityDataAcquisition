@@ -8,10 +8,10 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.application.services._checkpoint_service_support import (
     _CHECKPOINT_OPERATOR_ERRORS,
 )
+from bioetl.application.services.checkpoint_models import CheckpointInfo
 from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
-    from bioetl.application.services.checkpoint_service import CheckpointInfo
     from bioetl.domain.types import JsonDict
 
 
@@ -66,8 +66,6 @@ async def list_checkpoints_impl(
     start_time: float,
 ) -> list[CheckpointInfo]:
     """List checkpoints and emit bounded observability signals."""
-    from bioetl.application.services.checkpoint_service import CheckpointInfo
-
     try:
         pipeline_names = await host.checkpoint_port.list_all()
         checkpoints: list[CheckpointInfo] = []

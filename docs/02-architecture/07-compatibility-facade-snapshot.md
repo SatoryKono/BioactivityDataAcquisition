@@ -5,18 +5,18 @@
 ## Summary
 
 - Registry YAML: `configs/quality/compatibility_facade_inventory.yaml`
-- Curated inventory rows: `11`
+- Curated inventory rows: `14`
 - Transition debt rows: `0`
-- Sanctioned public entrypoint rows: `11`
+- Sanctioned public entrypoint rows: `14`
 - Retained review entrypoints: `0`
-- Permanent public entrypoints: `11`
-- Measured tracked modules: `11`
+- Permanent public entrypoints: `14`
+- Measured tracked modules: `14`
 - Measured-only modules outside curated inventory: `0`
 - Discovered docstring-tracked modules: `0`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
-- Curated rows requiring external breaking change process: `11`
+- Curated rows requiring external breaking change process: `14`
 - Curated rows marked internal-callers-zero: `0`
 - First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`
@@ -35,8 +35,11 @@
 
 - `src/bioetl/application/composite/merger.py`
 - `src/bioetl/composition/entrypoints.py`
+- `src/bioetl/composition/health_api.py`
+- `src/bioetl/composition/maintenance_api.py`
 - `src/bioetl/domain/composite/config.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
+- `src/bioetl/infrastructure/config/__init__.py`
 - `src/bioetl/interfaces/cli/commands/diagnostics.py`
 - `src/bioetl/interfaces/cli/commands/health.py`
 - `src/bioetl/interfaces/cli/commands/maintenance.py`
@@ -55,6 +58,9 @@
 - `src/bioetl/interfaces/cli/commands/quarantine.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/maintenance.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/composition/entrypoints.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/composition/health_api.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/composition/maintenance_api.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/infrastructure/config/__init__.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/domain/composite/config.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/domain/value_objects/activity_values.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/application/composite/merger.py` — external breaking change required: `true`, internal callers zero: `false`

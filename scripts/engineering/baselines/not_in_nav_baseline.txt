@@ -100,27 +100,39 @@
 00-project/ai/skills/local/prometheus-query-debugger/SKILL.md
 00-project/ai/skills/local/prometheus-rule-testing/SKILL.md
 00-project/ai/skills/local/synthesizing-pillars/references/synthesis-template.md
+02-architecture/adr-registry/README.md
 02-architecture/adr-registry/index.md
 02-architecture/adr-registry/status-dashboard.md
-02-architecture/adr-registry/README.md
 02-architecture/decisions/notes/2026-04-07-ledger-based-resume-spike.md
 02-architecture/diagrams/governance/diagram-expansion-2026-05-12.md
 03-data-model/json-field-typing-inventory.md
 03-data-model/reference-identifier-families.md
-03-guides/cleanup.md
-03-guides/dashboards/design-system.md
 03-guides/dashboards/dashboard-audit-checklist.md
 03-guides/dashboards/dashboard-checklist-per-dashboard.md
 03-guides/dashboards/dashboard-requirements-comprehensive.md
 03-guides/dashboards/dashboard-test-proposals.md
+03-guides/dashboards/design-system.md
 03-guides/dashboards/navigation-contract.md
 03-guides/dashboards/panel-title-inventory.md
 03-guides/dashboards/selector-architecture.md
 03-guides/dashboards/variable-reference.md
 03-guides/development/mistral-vibe-wsl2-setup.md
-03-guides/development/pycharm-setup.md
 03-guides/script-management/README.md
 03-guides/script-management/script-analysis-prompt.md
+04-reference/api/application/core.md
+04-reference/api/application/pipelines.md
+04-reference/api/application/services.md
+04-reference/api/application/transformers.md
+04-reference/api/composition/bootstrap.md
+04-reference/api/composition/factories.md
+04-reference/api/domain/entities.md
+04-reference/api/domain/exceptions.md
+04-reference/api/domain/types.md
+04-reference/api/infrastructure/adapters-common.md
+04-reference/api/infrastructure/adapters.md
+04-reference/api/infrastructure/observability.md
+04-reference/api/infrastructure/storage.md
+04-reference/api/infrastructure/unified-http-client.md
 04-reference/contracts/canonical-field-registry.md
 04-reference/contracts/reproducibility-scoring-rubric.md
 04-reference/internalextended/composition-internal.md
@@ -161,18 +173,13 @@
 05-operations/tooling/scripts-ops/CODEX_WSL_QUICK_REF.md
 05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md
 05-operations/tooling/scripts-ops/HOW_TO_RUN.md
-05-operations/tooling/scripts-ops/INDEX.md
 05-operations/tooling/scripts-ops/INSTALLATION_COMPLETE.md
-05-operations/tooling/scripts-ops/QUICK_START.md
 05-operations/tooling/scripts-ops/SETUP_CHECKLIST.md
-05-operations/tooling/scripts-ops/SMOKE_TEST_README.md
 05-operations/tooling/scripts-ops/WSL_SETUP_SUMMARY.md
 05-operations/verification/ci-failure-triage-2026-05-05.md
 05-operations/verification/neo4j-memory-qa-examples.md
 05-operations/verification/neo4j-memory-windows-verification.md
 CODEX_HANG_FIX.md
-DOCKER_QUICKSTART.md
-DOCKER_SETUP.md
 CODEX_QUICK_START.md
 CODEX_WSL_SETUP.md
 D-01 Governance & Style Guide.md
@@ -184,6 +191,8 @@ D-06 Data Quality и Quarantine Handbook.md
 D-07 Observability Specification.md
 D-08 Security & Compliance dossier.md
 D-09 Requirements Traceability.md
+DOCKER_QUICKSTART.md
+DOCKER_SETUP.md
 config-discrepancies-report.md
 filters/ADR-048-silver-filters-structural-scope.md
 filters/README.md
@@ -195,3 +204,6 @@ migration.md
 plugins/link_checker/INTEGRATION_GUIDE.md
 plugins/link_checker/README.md
 refactoring_plans/runtime_metadata_factory_refactoring_plan.md
+ru/00-project/index.md
+ru/INDEX.md
+ru/README.md

@@ -3,14 +3,14 @@
   "catalog_kind": "vcr_metadata_catalog",
   "vcr_root": "tests/fixtures/vcr",
   "totals": {
-    "cassette_count": 203,
-    "metadata_sidecar_count": 203,
+    "cassette_count": 199,
+    "metadata_sidecar_count": 199,
     "provider_count": 8
   },
   "providers": {
     "chembl": {
-      "cassette_count": 58,
-      "metadata_sidecar_count": 58,
+      "cassette_count": 55,
+      "metadata_sidecar_count": 55,
       "without_metadata_count": 0,
       "metadata_coverage_percent": 100.0
     },
@@ -33,8 +33,8 @@
       "metadata_coverage_percent": 100.0
     },
     "pubchem": {
-      "cassette_count": 32,
-      "metadata_sidecar_count": 32,
+      "cassette_count": 31,
+      "metadata_sidecar_count": 31,
       "without_metadata_count": 0,
       "metadata_coverage_percent": 100.0
     },
@@ -80,14 +80,6 @@
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_activity_full_cycle_meta.yaml",
-      "metadata_status": "managed_inventory"
-    },
-    {
-      "provider": "chembl",
-      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_activity_full_run.root.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_activity_full_run.root_meta.yaml",
       "metadata_status": "managed_inventory"
     },
     {
@@ -252,14 +244,6 @@
     },
     {
       "provider": "chembl",
-      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_idempotency.root.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_idempotency.root_meta.yaml",
-      "metadata_status": "managed_inventory"
-    },
-    {
-      "provider": "chembl",
       "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_idempotency.yaml",
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
@@ -320,14 +304,6 @@
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_tissue_meta.yaml",
-      "metadata_status": "managed_inventory"
-    },
-    {
-      "provider": "chembl",
-      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_resume_after_failure.root.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_resume_after_failure.root_meta.yaml",
       "metadata_status": "managed_inventory"
     },
     {
@@ -944,14 +920,6 @@
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_full_cycle_meta.yaml",
-      "metadata_status": "managed_inventory"
-    },
-    {
-      "provider": "pubchem",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_pipeline.root.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_pipeline.root_meta.yaml",
       "metadata_status": "managed_inventory"
     },
     {

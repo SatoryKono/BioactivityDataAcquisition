@@ -102,7 +102,7 @@ common cache/build artifacts, refreshes the scripts inventory manifest, checks
 inventory/lifecycle/catalog governance, verifies docs, and runs a targeted
 fail-fast architecture slice for the recurring doc/governance regressions.
 The same preflight also checks the committed RF-06 hotspot-family baseline
-artifact via `python -m scripts.engineering.qa report-family-baseline --active-only --check`.
+artifact via `python -m scripts.engineering.qa report-family-baseline --check`.
 It now also validates the `src/memory/` subsystem, runs a refresh smoke on a
 temporary output root, and performs a dry-run episodic prune check.
 

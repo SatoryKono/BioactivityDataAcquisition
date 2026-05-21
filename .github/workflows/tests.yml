@@ -744,13 +744,18 @@ jobs:
                     uv run python -m coverage combine reports/coverage --keep
                     uv run python -m coverage report --show-missing --fail-under=85
                     uv run python -m coverage xml -o reports/coverage/coverage.xml
+                    uv run python -m scripts.engineering.qa report-module-coverage \
+                      --coverage-xml reports/coverage/coverage.xml \
+                      --json-out reports/quality/module-coverage-inventory.json
 
             -   name: Upload Coverage Report
                 uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
                 if: always()
                 with:
                     name: coverage-report
-                    path: reports/coverage/coverage.xml
+                    path: |
+                        reports/coverage/coverage.xml
+                        reports/quality/module-coverage-inventory.json
                     retention-days: 30
 
     duration-telemetry:

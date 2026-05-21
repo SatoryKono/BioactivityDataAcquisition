@@ -463,8 +463,13 @@ class TestPostrunServiceCleanup:
     @pytest.mark.asyncio
     async def test_cleanup_without_tracer(self, postrun_service):
         """Test cleanup handles None tracer."""
-        # Should not raise
-        await postrun_service.cleanup(None)
+        postrun_service._cleanup_orchestrator.cleanup_tracer = AsyncMock()
+        result = await postrun_service.cleanup(None)
+
+        assert result is None
+        postrun_service._cleanup_orchestrator.cleanup_tracer.assert_awaited_once_with(
+            None
+        )
 
     @pytest.mark.asyncio
     async def test_cleanup_handles_tracer_error(self, postrun_service, mock_logger):

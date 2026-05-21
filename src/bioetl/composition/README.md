@@ -42,14 +42,16 @@ composition/
 │   ├── registration_bio.py     # ChEMBL, PubChem, UniProt
 │   └── _registration_contracts.py  # Leaf contracts for provider assembly support
 │
+├── monitoring/                 # Composition-local monitoring support
+│   └── deprecation_tracker.py  # Tracks deprecated surface usage during runtime assembly
+│
 ├── runtime_builders/           # Late-stage runtime assembly
 │   ├── runner_builder.py       # RunnerBuilder — assembles PipelineRunner
 │   ├── inputs_resolver.py      # Resolves RunnerInputs from config
 │   └── observability_builder.py # Wires logger + tracer + metrics
 │
 └── services/                   # Composition-level service wiring
-    ├── metadata_assemblers.py  # MetadataBuilder assembly
-    ├── metadata_coordinator.py # MetadataCoordinator wiring
+    ├── effective_config_serializer.py  # Effective-config serialization helpers
     └── versioning.py           # Version info assembly
 ```
 

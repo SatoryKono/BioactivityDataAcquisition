@@ -11,7 +11,6 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_artifac
 from bioetl.application.services.control_plane._run_manifest_diagnostics_base import (
     _build_base_summary_payload,
     _resolve_base_summary_replay_context,
-    _resolve_replay_control_plane_state,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_base_helpers import (
     _resolve_snapshot_status,
@@ -29,10 +28,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
     _build_resume_contract,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection import (
-    _build_operator_replay_projection,
-)
-from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_state import (
-    _build_replay_state_projection,
+    _build_replay_projection_bundle,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
     resolve_post_manifest_input_snapshot_materialization_mode,
@@ -160,41 +156,30 @@ def _build_refresh_replay_projection(
     effective_manifest = refresh_context.effective_manifest
     policy_assessment = refresh_context.policy_assessment
     input_snapshots = refresh_context.input_snapshots
-    operator_replay_projection = _build_operator_replay_projection(
+    replay_projection_bundle = _build_replay_projection_bundle(
         manifest=effective_manifest,
         input_snapshots=input_snapshots,
         requested_exact_replay=refresh_context.requested_exact_replay,
         resume_requested=refresh_context.resume_requested,
         policy_assessment=policy_assessment,
+        replay_family_contract_payload={
+            "post_capture_replayable_parent_supported": (
+                effective_manifest.launch_context.get(
+                    "post_capture_replayable_parent_supported"
+                )
+            )
+        },
     )
     return _ReplayRefreshProjection(
         replay_payload={
             "replay_capability": policy_assessment.replay_capability.value,
-            "replay_control_plane_state": _resolve_replay_control_plane_state(
-                manifest=effective_manifest,
-                replay_state_projection=_build_replay_state_projection(
-                    manifest=effective_manifest,
-                    input_snapshots=input_snapshots,
-                    policy_assessment=policy_assessment,
-                ),
-                replay_family_contract_payload={
-                    "post_capture_replayable_parent_supported": (
-                        effective_manifest.launch_context.get(
-                            "post_capture_replayable_parent_supported"
-                        )
-                    )
-                },
-            ),
+            "replay_control_plane_state": replay_projection_bundle.replay_control_plane_state,
             "replay_capability_assessment": policy_assessment.to_dict(),
-            **operator_replay_projection,
-            **_build_replay_state_projection(
-                manifest=effective_manifest,
-                input_snapshots=input_snapshots,
-                policy_assessment=policy_assessment,
-            ),
+            **replay_projection_bundle.operator_projection,
+            **replay_projection_bundle.replay_state_projection,
         },
-        exact_replay_eligible=bool(operator_replay_projection["exact_replay_eligible"]),
-        replay_mode=str(operator_replay_projection["replay_mode"]),
+        exact_replay_eligible=replay_projection_bundle.exact_replay_eligible,
+        replay_mode=str(replay_projection_bundle.operator_projection["replay_mode"]),
     )
 
 

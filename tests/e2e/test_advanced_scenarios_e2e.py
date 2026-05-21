@@ -18,8 +18,6 @@ from uuid import uuid4
 
 import pytest
 from deltalake import DeltaTable
-from tests.helpers.vcr_config import build_cassette_dir
-
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import BatchID, RunID, RunType
 from .conftest import (
@@ -31,15 +29,6 @@ from .conftest import (
 )
 
 pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
-
-
-@pytest.fixture(scope="module")
-def vcr_cassette_dir() -> Path:
-    """Route advanced scenario cassettes through the shared ChEMBL cassette root."""
-    return build_cassette_dir(
-        fixtures_root=Path(__file__).resolve().parents[1] / "fixtures" / "vcr",
-        provider_dir="chembl",
-    )
 
 
 async def _seed_chembl_activity_silver(data_dir: Path, *, limit: int = 3) -> int:
@@ -148,7 +137,6 @@ async def test_vacuum_respects_retention_days(
     # Execute one more run to create a new version.
     ctx = create_test_context("chembl_activity", limit=5)
     await run_pipeline_or_skip_transient(ctx)
-    await asyncio.sleep(0.1)  # Small delay between runs
 
     # Verify table has records
     count = _assert_chembl_activity_silver_or_skip(

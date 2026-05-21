@@ -30,7 +30,7 @@ from .conftest import (
 pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def vcr_config(vcr_cassette_dir) -> dict[str, Any]:
     """Configure VCR for PubChem Compound E2E tests."""
     return build_base_vcr_config(

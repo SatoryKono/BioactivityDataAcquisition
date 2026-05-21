@@ -159,7 +159,7 @@ def test_set_execution_stats(service: BatchTracingManagerService) -> None:
 
 def test_set_execution_stats_none_span(service: BatchTracingManagerService) -> None:
     """Set execution stats with None span is a no-op."""
-    service.set_execution_stats(
+    result = service.set_execution_stats(
         None,
         total_fetched=0,
         total_bronze=0,
@@ -170,6 +170,8 @@ def test_set_execution_stats_none_span(service: BatchTracingManagerService) -> N
         min_batch_size_used=0,
         memory_decision_trace=(),
     )
+
+    assert result is None
 
 
 def test_noop_tracing(mock_context: MagicMock, mock_config: MagicMock) -> None:
@@ -185,7 +187,7 @@ def test_noop_tracing(mock_context: MagicMock, mock_config: MagicMock) -> None:
     assert isinstance(svc._tracer, NoOpTracing)
 
 
-def test_none_tracer_is_rejected(
+def test_batch_tracing_manager_requires_explicit_tracer(
     mock_context: MagicMock, mock_config: MagicMock
 ) -> None:
     """The application layer must not silently build tracing defaults."""

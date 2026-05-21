@@ -587,7 +587,7 @@ class TestBatchExecutorExecute:
 class TestBatchExecutorProcessBatch:
     """Tests for batch processing functionality."""
 
-    async def test_process_batch_writes_to_all_layers(
+    async def test_execute_process_batch_writes_to_all_layers(
         self, batch_executor, mock_services, mock_storage
     ):
         """Test that processing writes to Bronze, Silver, and Gold."""
@@ -608,7 +608,7 @@ class TestBatchExecutorProcessBatch:
         mock_storage.write_silver.assert_called_once()
         # mock_storage.write_gold.assert_called_once()
 
-    async def test_process_batch_no_gold_records(
+    async def test_execute_process_batch_skips_gold_when_filter_rejects_all(
         self, batch_executor, mock_services, mock_storage
     ):
         """Test process when no records pass gold filter."""
@@ -624,7 +624,7 @@ class TestBatchExecutorProcessBatch:
         assert batch_executor.records_gold == 0
         mock_storage.write_gold.assert_not_called()
 
-    async def test_process_batch_handles_transform_error(
+    async def test_execute_process_batch_quarantines_transform_errors(
         self,
         mock_services,
         mock_context,
@@ -890,7 +890,9 @@ class TestBatchExecutorTracing:
         span.record_exception.assert_called_once()
         span.set_attribute.assert_any_call("error", True)
 
-    async def test_no_span_without_tracer(self, batch_executor, mock_services):
+    async def test_execute_without_tracer_records_counts_without_span(
+        self, batch_executor, mock_services
+    ):
         """Test that no span is created when tracer is None."""
 
         async def mock_fetch(**kwargs):
@@ -899,8 +901,11 @@ class TestBatchExecutorTracing:
 
         mock_services.data_source.fetch = mock_fetch
 
-        # batch_executor fixture doesn't have tracer, should work without errors
         await batch_executor.execute(limit=None)
+
+        assert batch_executor.records_fetched == 3
+        assert batch_executor.records_bronze == 3
+        assert batch_executor.records_silver == 3
 
 
 @pytest.mark.unit

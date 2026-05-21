@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
-from uuid import uuid4
 
 import pytest
 
@@ -19,11 +18,12 @@ from bioetl.domain.lineage import (
 )
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane import FileLineageStore
+from tests.helpers.deterministic_ids import deterministic_uuid_value
 
 
 def test_file_store_round_trips_fragments_by_id_run_manifest_and_node(tmp_path) -> None:
     store = FileLineageStore(base_path=tmp_path / "lineage")
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_value("lineage_store.round_trip"))
     run_node = LineageNodeRef(
         node_type=LineageNodeType.RUN,
         node_id=f"run:{run_id}",
@@ -77,7 +77,7 @@ def test_file_store_emits_lineage_read_metric_on_manifest_lookup(tmp_path) -> No
         base_path=tmp_path / "lineage",
         metrics=metrics,
     )
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_value("lineage_store.metrics"))
     run_node = LineageNodeRef(
         node_type=LineageNodeType.RUN,
         node_id=f"run:{run_id}",
@@ -132,8 +132,8 @@ def test_file_store_preserves_occurrence_specific_history_for_semantically_equiv
     tmp_path,
 ) -> None:
     store = FileLineageStore(base_path=tmp_path / "lineage")
-    first_run_id = RunID(uuid4())
-    second_run_id = RunID(uuid4())
+    first_run_id = RunID(deterministic_uuid_value("lineage_store.first_history"))
+    second_run_id = RunID(deterministic_uuid_value("lineage_store.second_history"))
 
     def _build_fragment(*, run_id: RunID, manifest_id: str) -> LineageGraphFragment:
         run_node = LineageNodeRef(
@@ -202,7 +202,7 @@ def test_file_store_rolls_back_fragment_and_indexes_when_index_append_fails(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     store = FileLineageStore(base_path=tmp_path / "lineage")
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_value("lineage_store.rollback"))
     run_node = LineageNodeRef(
         node_type=LineageNodeType.RUN,
         node_id=f"run:{run_id}",
@@ -277,7 +277,7 @@ def test_file_store_get_fails_closed_on_truncated_semantic_index_tail(tmp_path) 
 
 def test_file_store_fails_closed_on_truncated_index_tail(tmp_path) -> None:
     store = FileLineageStore(base_path=tmp_path / "lineage")
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid_value("lineage_store.truncated_tail"))
     index_path = store._run_index_path(str(run_id))
     index_path.parent.mkdir(parents=True, exist_ok=True)
     index_path.write_text(

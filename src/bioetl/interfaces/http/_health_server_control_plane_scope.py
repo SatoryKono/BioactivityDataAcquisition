@@ -1,0 +1,88 @@
+"""Control-plane selector scope helpers for health-server routing."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Protocol
+
+from bioetl.domain.control_plane import RunManifest
+from bioetl.interfaces.http.control_plane_selector_context import RUN_ID_NO_SELECTION
+
+
+@dataclass(frozen=True, slots=True)
+class _IdentityScope:
+    requested_pipeline: str
+    selected_pipelines: tuple[str, ...]
+    selected_run_types: tuple[str, ...]
+    selected_run_id: str | None
+    resolved_manifest: RunManifest | None
+    resolved_via: str
+
+
+class _ControlPlaneScopeHost(Protocol):
+    _run_manifest_port: object | None
+
+    def _read_required_param(self, query: dict[str, str], name: str) -> str: ...
+
+    @staticmethod
+    def _read_optional_param(query: dict[str, str], name: str) -> str | None: ...
+
+    @classmethod
+    def _read_scope_csv_param(
+        cls,
+        query: dict[str, str],
+        name: str,
+    ) -> tuple[str, ...]: ...
+
+
+def read_selected_run_id(
+    host: _ControlPlaneScopeHost,
+    query: dict[str, str],
+) -> str | None:
+    selected_run_id = host._read_optional_param(query, "run_id")
+    return None if selected_run_id in {None, RUN_ID_NO_SELECTION} else selected_run_id
+
+
+def resolve_control_plane_identity_scope(
+    host: _ControlPlaneScopeHost,
+    query: dict[str, str],
+) -> _IdentityScope:
+    assert host._run_manifest_port is not None
+    requested_pipeline = host._read_required_param(query, "pipeline")
+    selected_pipelines = host._read_scope_csv_param(query, "pipeline")
+    selected_run_types = host._read_scope_csv_param(query, "run_type")
+    selected_run_id = read_selected_run_id(host, query)
+
+    manifests = tuple(
+        manifest
+        for manifest in host._run_manifest_port.list_all()
+        if (not selected_pipelines or manifest.pipeline_name in selected_pipelines)
+        and (not selected_run_types or str(manifest.run_type) in selected_run_types)
+    )
+    resolved_manifest = next(
+        (
+            manifest
+            for manifest in manifests
+            if selected_run_id is not None and str(manifest.run_id) == selected_run_id
+        ),
+        None,
+    )
+    resolved_via = "selected_run_id"
+    if resolved_manifest is None:
+        if len(selected_pipelines) != 1:
+            resolved_via = "aggregate_scope_requires_exact_run_id"
+        else:
+            resolved_manifest = manifests[-1] if manifests else None
+            resolved_via = (
+                "latest_manifest_for_scope"
+                if resolved_manifest is not None
+                else "no_manifest_for_scope"
+            )
+    return _IdentityScope(
+        requested_pipeline=requested_pipeline,
+        selected_pipelines=selected_pipelines,
+        selected_run_types=selected_run_types,
+        selected_run_id=selected_run_id,
+        resolved_manifest=resolved_manifest,
+        resolved_via=resolved_via,
+    )

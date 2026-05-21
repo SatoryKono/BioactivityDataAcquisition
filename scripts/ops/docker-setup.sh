@@ -24,6 +24,17 @@ fi
 echo "✓ Docker доступен"
 echo ""
 
+ensure_external_network() {
+    local network_name="$1"
+    if docker network inspect "$network_name" >/dev/null 2>&1; then
+        echo "✓ Docker network ready: $network_name"
+        return 0
+    fi
+    echo "Создаю shared Docker network: $network_name"
+    docker network create "$network_name" >/dev/null
+    echo "✓ Docker network ready: $network_name"
+}
+
 if [ ! -f .env ]; then
     if [ "${BIOETL_ALLOW_ENV_FILE_CREATE:-}" = "1" ]; then
         if [ ! -f .env.example ]; then
@@ -41,6 +52,9 @@ if [ ! -f .env ]; then
         exit 2
     fi
 fi
+
+ensure_external_network "bioetl-monitoring"
+ensure_external_network "warp-network"
 
 echo ""
 echo "=========================================="

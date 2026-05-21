@@ -404,19 +404,6 @@ def diagnostics_quarantine(
     )
 
 
-_COMMAND_OBJECTS = (
-    diagnostics_guide,
-    diagnostics_health,
-    diagnostics_metrics,
-    diagnostics_run,
-    diagnostics_dossier,
-    diagnostics_contract_checks,
-    diagnostics_checkpoint,
-    diagnostics_manifest,
-    diagnostics_forensic_diff,
-    diagnostics_quarantine,
-)
-
 COMMANDS = (
     "guide",
     "metrics",

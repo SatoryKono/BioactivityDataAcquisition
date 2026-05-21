@@ -24,7 +24,9 @@ from bioetl.application.core.runner_flow import (
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
-    from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.application.core.pipeline_service_protocols import (
+        PipelineServicesProtocol,
+    )
     from bioetl.application.core.postrun.service import PostrunService
     from bioetl.application.core.runner_execution_flow import (
         _PipelineRunnerExecutionHostProtocol,
@@ -48,7 +50,7 @@ class _PipelineRunnerCleanupHostProtocol(Protocol):
 
     _postrun_service: PostrunService
     _tracer: TracingPort
-    _services: PipelineService
+    _services: PipelineServicesProtocol
     _logger: LoggerPort
     _executor: BatchExecutor
 
@@ -60,7 +62,7 @@ class PipelineRunnerSupportMixin:
 
     _postrun_service: PostrunService
     _tracer: TracingPort
-    _services: PipelineService
+    _services: PipelineServicesProtocol
     _logger: LoggerPort
     _executor: BatchExecutor
 

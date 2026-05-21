@@ -58,7 +58,8 @@ def test_tests_workflow_routes_coverage_xml_under_reports() -> None:
     """Coverage XML must be generated and uploaded from reports/coverage."""
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
     assert "coverage xml -o reports/coverage/coverage.xml" in workflow
-    assert "path: reports/coverage/coverage.xml" in workflow
+    assert "name: coverage-report" in workflow
+    assert "reports/coverage/coverage.xml" in workflow
     assert "coverage xml -o coverage.xml" not in workflow
     assert "path: coverage.xml" not in workflow
 

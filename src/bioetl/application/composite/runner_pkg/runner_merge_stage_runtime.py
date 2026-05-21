@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.checkpoint.transition_service import (
+    apply_recovery_checkpoint_transition,
     apply_validated_checkpoint_transition,
 )
 from bioetl.application.composite.runner_pkg.runner_constants import (
@@ -104,9 +105,12 @@ def handle_dry_run_merge_skip(
     host: _CompositeRunnerMergeStageHostProtocol,
     state: CompositeCheckpointState,
 ) -> CompositeCheckpointState:
-    """Log dry-run merge skip and leave checkpoint state unchanged."""
+    """Apply the explicit dry-run completion shortcut outside the domain FSM."""
+    if not host._runtime.dry_run:
+        raise RuntimeError("Dry-run merge shortcut requires runtime.dry_run=True")
+    previous_state = state.state
     host._fsm.log_fsm_transition(
-        from_state=state.state,
+        from_state=previous_state,
         to_state=CompositePipelineState.COMPLETED,
         stage="dry_run_skip_merge",
         reason="dry_run_mode",
@@ -116,7 +120,12 @@ def handle_dry_run_merge_skip(
         composite=host._config.name,
         run_id=host._run_id_str,
     )
-    return state
+    return apply_recovery_checkpoint_transition(
+        state,
+        CompositePipelineState.COMPLETED,
+        reason="dry_run_skip_merge",
+        clock=getattr(host, "_clock", None),
+    )
 
 
 async def delete_checkpoint_safe(

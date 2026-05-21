@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+import bioetl.infrastructure.config.domain_config_resolver as resolver_module
 from bioetl.infrastructure.config.domain_config_resolver import (
     DomainConfigResolver,
     load_domain_pipeline_config,
@@ -82,6 +83,49 @@ def test_load_domain_pipeline_config_uses_canonical_function_flow() -> None:
 
     assert result == "domain-config"
     assert captured["pipeline_name"] == "chembl_activity"
+    assert captured["mapped_config"] is yaml_config
+    assert captured["resolved_dq_config"] == "resolved-dq"
+
+
+@pytest.mark.unit
+def test_load_domain_pipeline_config_honors_explicit_configs_root_for_default_yaml_loader(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    yaml_config = _make_yaml_config()
+    captured: dict[str, object] = {}
+
+    def _load_from_root(
+        pipeline_name: str,
+        *,
+        configs_root: Path,
+    ) -> PipelineYamlConfig:
+        captured["pipeline_name"] = pipeline_name
+        captured["configs_root"] = configs_root
+        return yaml_config
+
+    def _mapper(config: object, resolved_dq_config: object = None) -> str:
+        captured["mapped_config"] = config
+        captured["resolved_dq_config"] = resolved_dq_config
+        return "domain-config"
+
+    monkeypatch.setattr(
+        resolver_module,
+        "load_pipeline_config_from_root",
+        _load_from_root,
+    )
+
+    result = load_domain_pipeline_config(
+        "chembl_activity",
+        configs_root=Path("custom-configs"),
+        relaxed_dq=False,
+        yaml_loader=resolver_module.load_pipeline_config,
+        loader_class=_DummyLoader,
+        domain_mapper=_mapper,
+    )
+
+    assert result == "domain-config"
+    assert captured["pipeline_name"] == "chembl_activity"
+    assert captured["configs_root"] == Path("custom-configs")
     assert captured["mapped_config"] is yaml_config
     assert captured["resolved_dq_config"] == "resolved-dq"
 

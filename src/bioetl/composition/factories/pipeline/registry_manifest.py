@@ -1,4 +1,4 @@
-"""Canonical pipeline registry manifest for composition-layer assembly."""
+"""Canonical composition-layer assembly manifest for pipeline registration."""
 
 from __future__ import annotations
 
@@ -15,7 +15,4 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     *NON_CHEMBL_PIPELINE_CONFIGS,
 )
 
-__all__ = [
-    "PIPELINE_CONFIGS",
-    "PipelineFactoryConfig",
-]
+__all__ = ["PIPELINE_CONFIGS", "PipelineFactoryConfig"]

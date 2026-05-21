@@ -22,7 +22,9 @@ from bioetl.domain.context import PipelineContext
 
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
-    from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.application.core.pipeline_service_protocols import (
+        PipelineServicesProtocol,
+    )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import BronzeRecord, RunID, RunType, SilverRecord
@@ -57,7 +59,7 @@ class BasePipeline(ABC):  # noqa: B024
         cls,
         run_id: RunID,
         runtime: RuntimeConfig,
-        services: PipelineService,
+        services: PipelineServicesProtocol,
         config: PipelineConfig,
         shutdown_signal: ShutdownSignal,
         started_at: datetime | None = None,
@@ -95,7 +97,7 @@ class BasePipeline(ABC):  # noqa: B024
         self,
         config: PipelineConfig,
         runtime: RuntimeConfig,
-        services: PipelineService,
+        services: PipelineServicesProtocol,
         run_id: RunID,
         shutdown_signal: ShutdownSignal,
         started_at: datetime | None = None,
@@ -150,7 +152,7 @@ class BasePipeline(ABC):  # noqa: B024
         return self._runtime
 
     @property
-    def services(self) -> PipelineService:
+    def services(self) -> PipelineServicesProtocol:
         """Access injected services."""
         return self._services
 

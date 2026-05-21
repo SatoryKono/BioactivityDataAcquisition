@@ -7,6 +7,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+from scripts.ops.support.repo.cleanup_repository import collect_reports_workspace_evidence
+
 ROOT = Path(__file__).resolve().parents[2]
 INVENTORY = ROOT / "configs" / "quality" / "replay_safe_cleanup_inventory.yaml"
 REQUIRED_REPLAY_ANCHORS = {
@@ -102,6 +104,24 @@ def test_reports_quality_working_diagnostics_publish_owner_and_ttl() -> None:
         assert entry.get("protection") == "owner-reviewed-working-report-ttl"
         assert entry.get("owner") == "Engineering / Quality"
         assert entry.get("ttl_days") == expected_ttl
+
+
+@pytest.mark.architecture
+def test_reports_quality_ttl_artifacts_are_not_past_retention_window() -> None:
+    """Live repo state must not retain expired reports/quality TTL artifacts."""
+    evidence = collect_reports_workspace_evidence(ROOT)
+    expired = [
+        row.rel_path
+        for row in evidence
+        if row.retention_entry_id
+        in {
+            "reports_quality_tmp_diagnostics",
+            "reports_quality_pretest_guardrails_history",
+        }
+        and row.ttl_expired is True
+    ]
+
+    assert expired == []
 
 
 @pytest.mark.architecture

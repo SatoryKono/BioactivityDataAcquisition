@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import sys
 from collections.abc import Callable, Mapping
+from dataclasses import replace
 from functools import partial
 from typing import TYPE_CHECKING, NoReturn, cast
 
@@ -15,6 +16,12 @@ from bioetl.interfaces.cli.commands.domains.health.metrics_publication_integrati
 )
 from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
     ensure_metrics_server_started as _ensure_metrics_server_started_impl,
+)
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    ensure_observability_backend_started as _ensure_observability_backend_started_impl,
+)
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    should_disable_transient_health_server,
 )
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
@@ -209,6 +216,18 @@ def _run_command_with_cli_policy(
     cli_input: RunCommandInput,
 ) -> None:
     """Execute the prepared run command through the canonical CLI policy path."""
+    backend_result = ensure_observability_backend_started(
+        enabled=cli_input.ensure_observability_backend,
+        port=cli_input.observability_backend_port,
+    )
+    if should_disable_transient_health_server(
+        health_server_enabled=cli_input.health_server,
+        health_port=cli_input.health_port,
+        observability_backend_port=cli_input.observability_backend_port,
+        backend_result=backend_result,
+    ):
+        cli_input = replace(cli_input, health_server=False)
+
     registry = resolve_context_registry(ctx)
     service = create_cli_run_orchestration_service()
     run_command_flow(
@@ -276,6 +295,12 @@ def _build_run_command_input_from_options(
         debug=cast("bool", options["debug"]),
         health_server=cast("bool", options["health_server"]),
         health_port=cast("int", options["health_port"]),
+        ensure_observability_backend=cast(
+            "bool", options.get("ensure_observability_backend", True)
+        ),
+        observability_backend_port=cast(
+            "int", options.get("observability_backend_port", DEFAULT_HEALTH_SERVER_PORT)
+        ),
         enable_tracing=cast("bool | None", options["enable_tracing"]),
         use_cached_bronze=cast("bool", options["use_cached_bronze"]),
         cached_bronze_date=cast(str | None, options["cached_bronze_date"]),
@@ -320,3 +345,4 @@ run = build_run_click_command(
 echo_health_server_info = _echo_health_server_info_impl
 ensure_metrics_server_started = _ensure_metrics_server_started_impl
 health_server_context = _health_server_context_impl
+ensure_observability_backend_started = _ensure_observability_backend_started_impl

@@ -9,6 +9,7 @@ from pathlib import Path
 import yaml
 
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.config.pipeline_payload_normalization import (
     PipelineConfigReadPayload,
@@ -20,6 +21,7 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 __all__ = [
     "PipelineConfigReadPayload",
     "load_pipeline_config",
+    "load_pipeline_config_from_root",
     "load_pipeline_config_uncached",
     "map_pipeline_config",
     "normalize_pipeline_config_payload",
@@ -55,6 +57,17 @@ def _load_base_config(config_path: Path) -> JsonDict:
     return {}
 
 
+def _assert_legacy_pipeline_config_surface_absent(configs_root: Path) -> None:
+    """Fail closed if the retired configs/pipelines tree reappears."""
+    legacy_dir = configs_root / "pipelines"
+    if legacy_dir.exists():
+        raise ValueError(
+            "Legacy pipeline config directory must remain absent: "
+            f"{legacy_dir}. Use configs/base/pipeline.yaml and "
+            "configs/entities/{provider}/{entity}.yaml only."
+        )
+
+
 def _load_unified_entity_raw(path: Path) -> JsonDict:
     """Load unified entity YAML file, returning empty dict when absent."""
     if not path.exists():
@@ -76,6 +89,8 @@ def _get_unified_section(
 
 def read_pipeline_config_payload(
     pipeline_name: str,
+    *,
+    configs_root: Path | None = None,
 ) -> PipelineConfigReadPayload:
     """Read pipeline config from unified entity YAML and merge base defaults."""
     if "_" not in pipeline_name:
@@ -84,7 +99,9 @@ def read_pipeline_config_payload(
         )
 
     provider, entity = pipeline_name.split("_", 1)
-    config_path = Path(f"configs/entities/{provider}/{entity}.yaml")
+    resolved_configs_root = resolve_configs_root(configs_root)
+    _assert_legacy_pipeline_config_surface_absent(resolved_configs_root)
+    config_path = resolved_configs_root / "entities" / provider / f"{entity}.yaml"
 
     unified_raw = _load_unified_entity_raw(config_path)
     unified_pipeline = _get_unified_section(unified_raw, "pipeline")
@@ -138,14 +155,18 @@ def run_pipeline_config_flow(
     pipeline_name: str,
     *,
     filter_loader: FilterConfigLoader | None,
-    read_payload_fn: Callable[[str], PipelineConfigReadPayload],
+    configs_root: Path | None = None,
     normalize_payload_fn: Callable[..., JsonDict],
     validate_payload_fn: Callable[[JsonDict], PipelineYamlConfig],
     map_config_fn: Callable[[PipelineYamlConfig], PipelineYamlConfig],
 ) -> PipelineYamlConfig:
     """Run the canonical staged pipeline-config flow with injectable seams."""
-    effective_filter_loader = filter_loader or FilterConfigLoader(Path("configs"))
-    raw_payload = read_payload_fn(pipeline_name)
+    resolved_configs_root = resolve_configs_root(configs_root)
+    effective_filter_loader = filter_loader or FilterConfigLoader(resolved_configs_root)
+    raw_payload = read_pipeline_config_payload(
+        pipeline_name,
+        configs_root=resolved_configs_root,
+    )
     normalized_payload = normalize_payload_fn(
         raw_payload,
         filter_loader=effective_filter_loader,
@@ -154,9 +175,9 @@ def run_pipeline_config_flow(
     return map_config_fn(validated_payload)
 
 
-def _configs_root_cache_key() -> str:
+def _configs_root_cache_key(configs_root: Path | None = None) -> str:
     """Build a stable cache key for configuration root resolution."""
-    return str(Path("configs").resolve())
+    return str(resolve_configs_root(configs_root))
 
 
 @lru_cache(maxsize=10)
@@ -165,12 +186,27 @@ def _load_pipeline_config_cached(
     _configs_root_key: str,
 ) -> PipelineYamlConfig:
     """Load pipeline configuration with cwd-aware caching."""
-    return load_pipeline_config_uncached(pipeline_name)
+    return load_pipeline_config_uncached(
+        pipeline_name,
+        configs_root=Path(_configs_root_key),
+    )
 
 
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     """Load pipeline configuration using the canonical cached function flow."""
     return _load_pipeline_config_cached(pipeline_name, _configs_root_cache_key())
+
+
+def load_pipeline_config_from_root(
+    pipeline_name: str,
+    *,
+    configs_root: Path,
+) -> PipelineYamlConfig:
+    """Load pipeline configuration against one explicit config root."""
+    return _load_pipeline_config_cached(
+        pipeline_name,
+        _configs_root_cache_key(configs_root),
+    )
 
 
 load_pipeline_config.cache_clear = _load_pipeline_config_cached.cache_clear  # type: ignore[attr-defined]
@@ -182,12 +218,13 @@ def load_pipeline_config_uncached(
     pipeline_name: str,
     *,
     filter_loader: FilterConfigLoader | None = None,
+    configs_root: Path | None = None,
 ) -> PipelineYamlConfig:
     """Load pipeline configuration using the explicit uncached pipeline path."""
     return run_pipeline_config_flow(
         pipeline_name,
         filter_loader=filter_loader,
-        read_payload_fn=read_pipeline_config_payload,
+        configs_root=configs_root,
         normalize_payload_fn=normalize_pipeline_config_payload,
         validate_payload_fn=validate_pipeline_config_payload,
         map_config_fn=map_pipeline_config,

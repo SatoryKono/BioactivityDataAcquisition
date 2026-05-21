@@ -203,7 +203,9 @@ class TestBootstrapPipeline:
 
     @patch("bioetl.composition.bootstrap.runtime.pipeline.create_registry")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.create_pipeline_config_loader"
+    )
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
     )
@@ -216,7 +218,7 @@ class TestBootstrapPipeline:
         mock_get_settings: MagicMock,
         mock_create_run_manifest: MagicMock,
         mock_bootstrap_observability_bundle: MagicMock,
-        mock_load_config: MagicMock,
+        mock_create_pipeline_loader: MagicMock,
         mock_assemble_filter: MagicMock,
         mock_create_registry: MagicMock,
         mock_logger: MagicMock,
@@ -263,7 +265,9 @@ class TestBootstrapPipeline:
 
         mock_assemble_filter.return_value = None
 
-        mock_load_config.return_value = _create_pipeline_yaml_config()
+        mock_pipeline_loader = MagicMock()
+        mock_pipeline_loader.return_value = _create_pipeline_yaml_config()
+        mock_create_pipeline_loader.return_value = mock_pipeline_loader
         _, _, mock_runner = _configure_registry_with_runner(mock_create_registry)
 
         ctx = _create_pipeline_context()
@@ -282,14 +286,16 @@ class TestBootstrapPipeline:
     )
     @patch("bioetl.composition.bootstrap.runtime.pipeline.ensure_providers_loaded")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.create_pipeline_config_loader"
+    )
     @patch(
         "bioetl.composition.runtime_builders.runner_builder.create_run_manifest_with_effective_config"
     )
     def test_bootstrap_pipeline_chembl_activity(
         self,
         mock_create_run_manifest,
-        mock_load_config,
+        mock_create_pipeline_loader,
         mock_register_pipelines,
         mock_ensure_loaded,
         mock_observability_bundle,
@@ -305,7 +311,9 @@ class TestBootstrapPipeline:
 
         mock_get_settings.return_value = mock_settings
 
-        mock_load_config.return_value = _create_pipeline_yaml_config()
+        mock_pipeline_loader = MagicMock()
+        mock_pipeline_loader.return_value = _create_pipeline_yaml_config()
+        mock_create_pipeline_loader.return_value = mock_pipeline_loader
         mock_observability_bundle.return_value = _create_observability_bundle(
             mock_logger
         )
@@ -351,7 +359,9 @@ class TestBootstrapVacuumConfig:
 
     @patch("bioetl.composition.bootstrap.runtime.pipeline.create_registry")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.create_pipeline_config_loader"
+    )
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
     )
@@ -360,7 +370,7 @@ class TestBootstrapVacuumConfig:
         self,
         mock_get_settings: MagicMock,
         mock_bootstrap_observability_bundle: MagicMock,
-        mock_load_config: MagicMock,
+        mock_create_pipeline_loader: MagicMock,
         mock_assemble_filter: MagicMock,
         mock_create_registry: MagicMock,
     ) -> None:
@@ -380,10 +390,12 @@ class TestBootstrapVacuumConfig:
         )
         mock_assemble_filter.return_value = None
 
-        mock_load_config.return_value = _create_pipeline_yaml_config(
+        mock_pipeline_loader = MagicMock()
+        mock_pipeline_loader.return_value = _create_pipeline_yaml_config(
             auto_vacuum=True,
             retention_days=14,
         )
+        mock_create_pipeline_loader.return_value = mock_pipeline_loader
 
         _, mock_factory, _ = _configure_registry_with_runner(mock_create_registry)
 
@@ -427,7 +439,9 @@ class TestBootstrapVacuumConfig:
 
     @patch("bioetl.composition.bootstrap.runtime.pipeline.create_registry")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.create_pipeline_config_loader"
+    )
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
     )
@@ -436,7 +450,7 @@ class TestBootstrapVacuumConfig:
         self,
         mock_get_settings: MagicMock,
         mock_bootstrap_observability_bundle: MagicMock,
-        mock_load_config: MagicMock,
+        mock_create_pipeline_loader: MagicMock,
         mock_assemble_filter: MagicMock,
         mock_create_registry: MagicMock,
     ) -> None:
@@ -456,10 +470,12 @@ class TestBootstrapVacuumConfig:
         )
         mock_assemble_filter.return_value = None
 
-        mock_load_config.return_value = _create_pipeline_yaml_config(
+        mock_pipeline_loader = MagicMock()
+        mock_pipeline_loader.return_value = _create_pipeline_yaml_config(
             auto_vacuum=True,
             retention_days=14,
         )
+        mock_create_pipeline_loader.return_value = mock_pipeline_loader
 
         _, mock_factory, _ = _configure_registry_with_runner(mock_create_registry)
 

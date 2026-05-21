@@ -201,6 +201,9 @@ class TestRunCommandHealthServerOptions:
         assert "--health-server" in result.output
         assert "--no-health-server" in result.output
         assert "--health-port" in result.output
+        assert "--ensure-observability-backend" in result.output
+        assert "--no-ensure-observability-backend" in result.output
+        assert "--observability-backend-port" in result.output
         assert "8081" in result.output  # default port
 
 
@@ -217,6 +220,8 @@ class TestRunAllCommandHealthServerOptions:
         assert "--health-server" in result.output
         assert "--no-health-server" in result.output
         assert "--health-port" in result.output
+        assert "--ensure-observability-backend" in result.output
+        assert "--observability-backend-port" in result.output
 
 
 class TestRunCompositeCommandHealthServerOptions:
@@ -232,6 +237,22 @@ class TestRunCompositeCommandHealthServerOptions:
         assert "--health-server" in result.output
         assert "--no-health-server" in result.output
         assert "--health-port" in result.output
+        assert "--ensure-observability-backend" in result.output
+        assert "--observability-backend-port" in result.output
+
+
+class TestWorkflowCommandObservabilityOptions:
+    """Test observability backend options in workflow run command."""
+
+    def test_workflow_run_help_shows_observability_backend_options(
+        self, cli_runner: CliRunner
+    ) -> None:
+        result = cli_runner.invoke(cli, ["workflow", "run", "--help"])
+
+        assert result.exit_code == 0
+        assert "--ensure-observability-backend" in result.output
+        assert "--no-ensure-observability-backend" in result.output
+        assert "--observability-backend-port" in result.output
 
 
 class TestDefaultHealthServerPort:

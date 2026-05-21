@@ -431,14 +431,18 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
     assert "effective_config_artifact_persisted" in events
 
 
-def test_build_pipeline_runner_creates_registry_when_not_provided() -> None:
+def test_build_pipeline_runner_creates_registry_when_not_provided(tmp_path: Path) -> None:
     """Builder should create a fresh registry when no explicit registry is provided."""
     fake_factory, created_registry = _build_factory_registry()
 
     result = _call_build_pipeline_runner(
         _build_context(),
         create_registry_fn=lambda: created_registry,
-        settings=_build_settings(heartbeat_interval=15, test_mode=True),
+        settings=_build_settings(
+            data_dir=str(tmp_path),
+            heartbeat_interval=15,
+            test_mode=True,
+        ),
         pipeline_config=_build_pipeline_config(
             maintenance=None,
             input_filter=None,
@@ -450,7 +454,9 @@ def test_build_pipeline_runner_creates_registry_when_not_provided() -> None:
     assert fake_factory.kwargs["runtime"] == _runtime_config_stub()
 
 
-def test_build_pipeline_runner_registers_pipelines_into_created_registry() -> None:
+def test_build_pipeline_runner_registers_pipelines_into_created_registry(
+    tmp_path: Path,
+) -> None:
     """Builder should register pipelines against the created runtime registry."""
     created_registry = _build_factory_registry()[1]
     calls: dict[str, object] = {}
@@ -462,7 +468,11 @@ def test_build_pipeline_runner_registers_pipelines_into_created_registry() -> No
         register_all_pipelines_fn=lambda registry=None: calls.setdefault(
             "pipelines_registry", registry
         ),
-        settings=_build_settings(heartbeat_interval=15, test_mode=True),
+        settings=_build_settings(
+            data_dir=str(tmp_path),
+            heartbeat_interval=15,
+            test_mode=True,
+        ),
         pipeline_config=_build_pipeline_config(
             maintenance=None,
             input_filter=None,
@@ -1792,7 +1802,7 @@ def test_inputs_resolver_uses_explicit_resolved_vacuumsettings_name() -> None:
     assert not hasattr(inputs_resolver, "VacuumSettings")
 
 
-def test_build_pipeline_runner_forces_probe_mode_in_test_mode() -> None:
+def test_build_pipeline_runner_forces_probe_mode_in_test_mode(tmp_path: Path) -> None:
     """Builder must pass probe health mode when settings.test_mode is enabled."""
     _, fake_registry = _build_factory_registry()
     captured: dict[str, object] = {}
@@ -1804,7 +1814,11 @@ def test_build_pipeline_runner_forces_probe_mode_in_test_mode() -> None:
     _call_build_pipeline_runner(
         _build_context(vacuum=SimpleNamespace(enabled=None, retention_days=7)),
         registry=fake_registry,
-        settings=_build_settings(health_check_mode="strict", test_mode=True),
+        settings=_build_settings(
+            data_dir=str(tmp_path),
+            health_check_mode="strict",
+            test_mode=True,
+        ),
         pipeline_config=_build_pipeline_config(
             maintenance=SimpleNamespace(auto_vacuum=False, vacuum_retention_days=7),
             batch_size=100,
@@ -1819,7 +1833,9 @@ def test_build_pipeline_runner_forces_probe_mode_in_test_mode() -> None:
     assert captured["health_check_mode"] == "probe"
 
 
-def test_build_pipeline_runner_uses_configured_mode_outside_test_mode() -> None:
+def test_build_pipeline_runner_uses_configured_mode_outside_test_mode(
+    tmp_path: Path,
+) -> None:
     """Builder must pass configured health mode when test_mode is disabled."""
     _, fake_registry = _build_factory_registry()
     captured: dict[str, object] = {}
@@ -1831,7 +1847,11 @@ def test_build_pipeline_runner_uses_configured_mode_outside_test_mode() -> None:
     _call_build_pipeline_runner(
         _build_context(vacuum=SimpleNamespace(enabled=None, retention_days=7)),
         registry=fake_registry,
-        settings=_build_settings(health_check_mode="probe", test_mode=False),
+        settings=_build_settings(
+            data_dir=str(tmp_path),
+            health_check_mode="probe",
+            test_mode=False,
+        ),
         pipeline_config=_build_pipeline_config(
             maintenance=SimpleNamespace(auto_vacuum=False, vacuum_retention_days=7),
             batch_size=100,
@@ -1846,14 +1866,19 @@ def test_build_pipeline_runner_uses_configured_mode_outside_test_mode() -> None:
     assert captured["health_check_mode"] == "probe"
 
 
-def test_build_pipeline_runner_forces_skip_gold_when_sink_disabled() -> None:
+def test_build_pipeline_runner_forces_skip_gold_when_sink_disabled(
+    tmp_path: Path,
+) -> None:
     """Builder should disable Gold writes when pipeline YAML disables Gold sink."""
     fake_factory, fake_registry = _build_factory_registry()
 
     _call_build_pipeline_runner(
         _build_context(vacuum=SimpleNamespace(enabled=None, retention_days=7)),
         registry=fake_registry,
-        settings=_build_settings(health_check_mode="strict"),
+        settings=_build_settings(
+            data_dir=str(tmp_path),
+            health_check_mode="strict",
+        ),
         pipeline_config=_build_pipeline_config(
             pipeline_name="chembl_activity",
             maintenance=SimpleNamespace(auto_vacuum=False, vacuum_retention_days=7),

@@ -360,6 +360,11 @@ class TestAllowedTransitions:
             {CompositePipelineState.ENRICHMENT_COMPLETED, CompositePipelineState.FAILED}
         )
 
+    def test_enrichment_completed_allowed_transitions(self):
+        """ENRICHMENT_COMPLETED should allow MERGING only."""
+        allowed = CompositePipelineState.ENRICHMENT_COMPLETED.allowed_transitions
+        assert allowed == frozenset({CompositePipelineState.MERGING})
+
     def test_merging_allowed_transitions(self):
         """MERGING should allow CROSS_VALIDATION_RUNNING or COMPLETED."""
         allowed = CompositePipelineState.MERGING.allowed_transitions

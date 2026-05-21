@@ -154,6 +154,109 @@ class TestBootstrapPipelineRunner:
 
         mock_ensure_providers_loaded.assert_called_once_with()
 
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.create_source_config_loader")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.create_pipeline_config_loader"
+    )
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.resolve_configs_root")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.initialize_publication_controlled_vocabulary"
+    )
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.initialize_publication_type_classification"
+    )
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.initialize_chembl_policy_registry"
+    )
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.ensure_providers_loaded")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner")
+    def test_uses_resolved_configs_root_for_runtime_initialization_and_loaders(
+        self,
+        mock_build_runner: MagicMock,
+        mock_register: MagicMock,
+        mock_ensure_providers_loaded: MagicMock,
+        mock_init_chembl_policy: MagicMock,
+        mock_classify: MagicMock,
+        mock_init_publication_vocab: MagicMock,
+        mock_resolve_configs_root: MagicMock,
+        mock_create_pipeline_loader: MagicMock,
+        mock_create_source_loader: MagicMock,
+    ) -> None:
+        """Runtime bootstrap should bind loaders and init data to one config root."""
+        configs_root = Path("/tmp/bioetl-configs")
+        registry = MagicMock()
+        registry.list_pipelines.return_value = ["chembl_activity"]
+        mock_build_runner.return_value = MagicMock()
+        mock_resolve_configs_root.return_value = configs_root
+        pipeline_loader = MagicMock(name="pipeline_loader")
+        source_loader = MagicMock(name="source_loader")
+        mock_create_pipeline_loader.return_value = pipeline_loader
+        mock_create_source_loader.return_value = source_loader
+
+        bootstrap_pipeline_runner(MagicMock(), registry=registry)
+
+        mock_resolve_configs_root.assert_called_once_with()
+        mock_init_chembl_policy.assert_called_once_with(configs_root)
+        mock_classify.assert_called_once_with(configs_root)
+        mock_init_publication_vocab.assert_called_once_with(configs_root)
+        mock_create_pipeline_loader.assert_called_once_with(configs_root)
+        mock_create_source_loader.assert_called_once_with(configs_root)
+        build_kwargs = mock_build_runner.call_args.kwargs
+        assert build_kwargs["load_pipeline_config_fn"] is pipeline_loader
+        assert build_kwargs["load_source_config_fn"] is source_loader
+
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.create_source_config_loader")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.create_pipeline_config_loader"
+    )
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.resolve_configs_root")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.initialize_publication_controlled_vocabulary"
+    )
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.initialize_publication_type_classification"
+    )
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.initialize_chembl_policy_registry"
+    )
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.ensure_providers_loaded")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner")
+    def test_prefers_explicit_pipeline_loader_injection_over_bound_loader_factory(
+        self,
+        mock_build_runner: MagicMock,
+        mock_register: MagicMock,
+        mock_ensure_providers_loaded: MagicMock,
+        mock_init_chembl_policy: MagicMock,
+        mock_classify: MagicMock,
+        mock_init_publication_vocab: MagicMock,
+        mock_resolve_configs_root: MagicMock,
+        mock_create_pipeline_loader: MagicMock,
+        mock_create_source_loader: MagicMock,
+    ) -> None:
+        """Bootstrap should use explicit injected loader instead of identity checks."""
+        configs_root = Path("/tmp/bioetl-configs")
+        registry = MagicMock()
+        registry.list_pipelines.return_value = ["chembl_activity"]
+        mock_build_runner.return_value = MagicMock()
+        mock_resolve_configs_root.return_value = configs_root
+        injected_loader = MagicMock(name="injected_pipeline_loader")
+        source_loader = MagicMock(name="source_loader")
+        mock_create_pipeline_loader.return_value = MagicMock(name="default_loader")
+        mock_create_source_loader.return_value = source_loader
+
+        bootstrap_pipeline_runner(
+            MagicMock(),
+            registry=registry,
+            load_pipeline_config_fn=injected_loader,
+        )
+
+        build_kwargs = mock_build_runner.call_args.kwargs
+        assert build_kwargs["load_pipeline_config_fn"] is injected_loader
+        mock_create_pipeline_loader.assert_not_called()
+        mock_init_publication_vocab.assert_called_once_with(configs_root)
+
 
 def test_pipeline_bootstrap_uses_runtime_config_access_seam() -> None:
     """Runtime bootstrap should route config loading through the local seam."""

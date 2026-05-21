@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-04-28T07:38:19+03:00",
+  "metrics": {
+    "total_checked": 31,
+    "matches": 31,
+    "mismatches": 0,
+    "parity_percentage": 100.0,
+    "missing_docs_count": 0,
+    "missing_code_count": 0
+  },
+  "status": "pass",
+  "missing_docs": [],
+  "missing_code": [],
+  "thresholds": {
+    "block": 85.0,
+    "error": 90.0,
+    "warning": 95.0,
+    "pass": 95.0
+  }
+}

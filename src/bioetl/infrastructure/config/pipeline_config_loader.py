@@ -1,29 +1,11 @@
-"""Retained convenience loader for pipeline YAML plus DQ integration.
-
-Wave 3 ownership classification: retain.
-Loads and validates pipeline configurations from YAML files.
-Integrates with DQConfigLoader for hierarchical DQ config resolution.
-
-This module intentionally remains as a thin convenience class for callers that
-still benefit from object-shaped loading, DQ resolution, and cache clearing.
-Canonical staged YAML loading lives in ``pipeline_config_api.py`` and the
-canonical YAML + DQ -> domain bridge lives in
-``domain_config_resolver.py``.
-
-Example:
-    >>> from pathlib import Path
-    >>> from bioetl.infrastructure.config import PipelineConfigLoader
-    >>> loader = PipelineConfigLoader(Path("configs"))
-    >>> config = loader.load_pipeline_config("chembl_activity")
-    >>> config.dq.soft_fail_threshold
-    0.05
-"""
+"""Retained convenience loader for pipeline YAML, filters, and DQ resolution."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
+from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.config.pipeline_config_api import (
@@ -38,7 +20,6 @@ from bioetl.infrastructure.config.pipeline_dq_resolution import (
     resolve_pipeline_dq_config,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-
 
 class PipelineConfigLoader:
     """Retained convenience facade for YAML loading plus DQ/filter integration.
@@ -76,10 +57,11 @@ class PipelineConfigLoader:
             filter_loader: Optional filter config loader. Created automatically if None.
             relaxed_dq: Whether to relax DQ thresholds (default: False).
         """
+        self._configs_root = resolve_configs_root(configs_root)
         self._dq_loader = dq_loader or DQConfigLoader(
-            configs_root, relaxed_dq=relaxed_dq
+            self._configs_root, relaxed_dq=relaxed_dq
         )
-        self._filter_loader = filter_loader or FilterConfigLoader(configs_root)
+        self._filter_loader = filter_loader or FilterConfigLoader(self._configs_root)
 
     def load_pipeline_config(self, pipeline_name: str) -> PipelineYamlConfig:
         """Load pipeline configuration from YAML file.
@@ -100,6 +82,7 @@ class PipelineConfigLoader:
         return load_yaml_config_uncached(
             pipeline_name,
             filter_loader=self._filter_loader,
+            configs_root=self._configs_root,
         )
 
     def resolve_dq_config(

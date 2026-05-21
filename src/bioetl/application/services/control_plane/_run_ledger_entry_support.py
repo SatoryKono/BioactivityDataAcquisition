@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import datetime
-from hashlib import sha256
 from typing import Protocol
 
+from bioetl.application.services.control_plane._ledger_identity_support import (
+    build_ledger_idempotency_key,
+)
 from bioetl.application.services.control_plane._run_ledger_diagnostic_support import (
     _RunLedgerDiagnosticRequest,
     build_run_ledger_diagnostic_details,
@@ -73,16 +74,7 @@ class _RunLedgerServiceEntryProtocol(Protocol):
 
 def build_run_ledger_idempotency_key(payload: Mapping[str, object]) -> str:
     """Build a stable key for one logical lifecycle event."""
-    semantic_payload = {
-        field_name: payload.get(field_name) for field_name in _IDEMPOTENCY_KEY_FIELDS
-    }
-    serialized = json.dumps(
-        semantic_payload,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=True,
-    )
-    return f"sha256:{sha256(serialized.encode('utf-8')).hexdigest()}"
+    return build_ledger_idempotency_key(payload, fields=_IDEMPOTENCY_KEY_FIELDS)
 
 
 def validate_manifest_linkage(service: _RunLedgerServiceEntryProtocol) -> None:

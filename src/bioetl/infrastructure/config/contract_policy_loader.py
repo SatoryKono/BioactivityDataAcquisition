@@ -10,8 +10,10 @@ from pathlib import Path
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.base_config_loader import _load_yaml_file
 from bioetl.infrastructure.config.contract_policy_validation import (
-    load_contract_registry_entries,
     validate_contract_policy_registry_alignment,
+)
+from bioetl.infrastructure.config.contract_registry_loader import (
+    try_load_contract_registry_entries,
 )
 from bioetl.infrastructure.schemas.pipeline_contract_policy import (
     PipelineContractPolicy,
@@ -148,7 +150,7 @@ def _apply_rollout_defaults(
 def load_pipeline_contract_policy(provider: str, entity: str) -> PipelineContractPolicy:
     """Load typed policy from unified entity config contracts section."""
     base_defaults = _load_base_contract_defaults()
-    registry_entries = load_contract_registry_entries()
+    registry_entries = try_load_contract_registry_entries()
 
     unified_entity_path = _CONFIGS_ROOT / "entities" / provider / f"{entity}.yaml"
     if not unified_entity_path.exists():

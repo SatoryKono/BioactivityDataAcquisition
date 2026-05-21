@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from pathlib import Path
-from typing import Protocol, cast
+from typing import Protocol
 
 from bioetl.infrastructure.config.contract_registry_loader import (
     try_load_contract_registry_entries,
@@ -14,7 +13,6 @@ from bioetl.infrastructure.schemas.pipeline_contract_policy import (
 )
 
 __all__ = [
-    "load_contract_registry_entries",
     "resolve_silver_columns",
     "schema_columns",
     "validate_contract_policy_registry_alignment",
@@ -55,13 +53,6 @@ def _schema_columns_from_pandera_fields(schema_class: object) -> set[str] | None
     if isinstance(fields, dict) and fields:
         return {str(name) for name in fields}
     return None
-
-
-def load_contract_registry_entries(
-    registry_path: Path | None = None,
-) -> dict[str, dict[str, object]]:
-    """Load contract registry entries via the canonical validated loader."""
-    return try_load_contract_registry_entries(cast("Path | None", registry_path))
 
 
 def _supported_versions(entry: dict[str, object]) -> set[str]:
@@ -123,7 +114,7 @@ def validate_contract_policy_registry_alignment(
     """Validate rollout versions against registry governance metadata when present."""
     if not hasattr(policy, "contract_ref") or not hasattr(policy, "active_version"):
         return
-    entries = registry_entries or load_contract_registry_entries()
+    entries = registry_entries or try_load_contract_registry_entries()
     entry = entries.get(policy.contract_ref)
     if not isinstance(entry, dict):
         return

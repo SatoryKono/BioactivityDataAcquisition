@@ -1569,11 +1569,22 @@ def test_run_command_with_cli_policy_wires_registry_and_cli_seams() -> None:
             "resolve_context_registry",
             return_value=registry,
         ) as mock_resolve_registry,
+        patch.object(
+            run_module,
+            "ensure_observability_backend_started",
+        ) as mock_ensure_backend,
+        patch.object(
+            run_module,
+            "should_disable_transient_health_server",
+            return_value=False,
+        ) as mock_disable_transient,
         patch.object(run_module, "run_command_flow") as mock_run_command_flow,
     ):
         run_module._run_command_with_cli_policy(ctx, cli_input)
 
     mock_resolve_registry.assert_called_once_with(ctx)
+    mock_ensure_backend.assert_called_once_with(enabled=True, port=8081)
+    mock_disable_transient.assert_called_once()
     assert mock_run_command_flow.call_count == 1
     kwargs = mock_run_command_flow.call_args.kwargs
     assert kwargs["cli_input"] is cli_input
@@ -1586,6 +1597,79 @@ def test_run_command_with_cli_policy_wires_registry_and_cli_seams() -> None:
     execute_run_callable = kwargs["execute_run"]
     assert execute_run_callable.func is run_module.execute_run
     assert execute_run_callable.keywords == {"registry": registry}
+
+
+@pytest.mark.unit
+def test_run_command_with_cli_policy_disables_transient_health_server_on_live_backend(
+) -> None:
+    """CLI helper should pass a downgraded input when detached backend replaces the HTTP server."""
+    from bioetl.interfaces.cli.commands import run as run_module
+    from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+        ObservabilityBackendEnsureResult,
+    )
+    from bioetl.interfaces.cli.commands.domains.run.command_policy import (
+        RunCommandInput,
+    )
+
+    ctx = MagicMock(name="click_context")
+    registry = MagicMock(name="registry")
+    cli_input = RunCommandInput(
+        pipeline="chembl_activity",
+        run_type="incremental",
+        resume=False,
+        start_offset=None,
+        limit=None,
+        input_csv=None,
+        filter_column=None,
+        filter_field=None,
+        dry_run=False,
+        yes=True,
+        vacuum_after_run=None,
+        vacuum_retention_days=None,
+        debug=False,
+        health_server=True,
+        health_port=8081,
+        enable_tracing=True,
+        use_cached_bronze=False,
+        cached_bronze_date=None,
+        cached_bronze_path=None,
+    )
+    backend_result = ObservabilityBackendEnsureResult(
+        status="reused",
+        health_url="http://127.0.0.1:8081/health",
+    )
+
+    with (
+        patch.object(
+            run_module,
+            "resolve_context_registry",
+            return_value=registry,
+        ),
+        patch.object(
+            run_module,
+            "ensure_observability_backend_started",
+            return_value=backend_result,
+        ) as mock_ensure_backend,
+        patch.object(
+            run_module,
+            "should_disable_transient_health_server",
+            return_value=True,
+        ) as mock_disable_transient,
+        patch.object(run_module, "run_command_flow") as mock_run_command_flow,
+    ):
+        run_module._run_command_with_cli_policy(ctx, cli_input)
+
+    mock_ensure_backend.assert_called_once_with(enabled=True, port=8081)
+    mock_disable_transient.assert_called_once_with(
+        health_server_enabled=True,
+        health_port=8081,
+        observability_backend_port=8081,
+        backend_result=backend_result,
+    )
+    kwargs = mock_run_command_flow.call_args.kwargs
+    assert kwargs["cli_input"] is not cli_input
+    assert kwargs["cli_input"].health_server is False
+    assert kwargs["cli_input"].health_port == cli_input.health_port
 
 
 @pytest.mark.unit

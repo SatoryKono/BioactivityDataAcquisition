@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from functools import cache
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock
 from uuid import uuid4
@@ -19,6 +20,9 @@ from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
+)
+from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+    initialize_publication_controlled_vocabulary,
 )
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.domain.context import PipelineContext
@@ -132,6 +136,12 @@ def _create_stub_transformer(
         entity_type=entity_type,
         dependencies=dependencies,
     )
+
+
+@pytest.fixture(autouse=True)
+def _init_publication_controlled_vocabulary_registry() -> None:
+    """Initialize publication vocabulary registry for observability tests."""
+    initialize_publication_controlled_vocabulary(Path("configs"))
 
 
 # =============================================================================

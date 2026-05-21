@@ -1370,17 +1370,7 @@
           "dtype": "str",
           "nullable": true
         },
-        "affiliation_list": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
         "author_keys": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "author_orcids": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -1425,22 +1415,12 @@
           "dtype": "str",
           "nullable": false
         },
-        "is_oa": {
-          "description": "",
-          "dtype": "bool",
-          "nullable": true
-        },
         "issue": {
           "description": "",
           "dtype": "str",
           "nullable": true
         },
         "journal": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "language": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -1455,22 +1435,7 @@
           "dtype": "str",
           "nullable": true
         },
-        "pmc_id": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
         "pmid": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "publication_class": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "publication_date": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -1495,17 +1460,7 @@
           "dtype": "str",
           "nullable": true
         },
-        "publication_subclass": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
         "publication_type": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "publication_type_unified": {
           "description": "",
           "dtype": "str",
           "nullable": true

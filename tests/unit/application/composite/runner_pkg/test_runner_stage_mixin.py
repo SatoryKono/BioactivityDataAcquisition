@@ -12,6 +12,7 @@ import pytest
 from bioetl.application.composite.runner_pkg.runner_stage_mixin import (
     CompositeRunnerStageMixin,
 )
+from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.domain.composite.result import (
     SeedResult,
 )
@@ -194,6 +195,24 @@ def test_resume_seed_phase_when_state_differs_then_fsm_transition_logged() -> No
 
     harness._resume_seed_phase(state)
 
+    harness._fsm.log_fsm_transition.assert_called_once()
+
+
+@pytest.mark.unit
+def test_resume_seed_phase_uses_recovery_transition_for_checkpoint_reconstruction() -> (
+    None
+):
+    harness = _StageMixinHarness()
+    state = CompositeCheckpointState(
+        composite_name="test_composite",
+        run_id="run-stage-test",
+        state=CompositePipelineState.FAILED,
+        seed_completed=True,
+    )
+
+    result = harness._resume_seed_phase(state)
+
+    assert result.state == CompositePipelineState.SEED_COMPLETED
     harness._fsm.log_fsm_transition.assert_called_once()
 
 

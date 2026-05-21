@@ -12,6 +12,7 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
     with_dry_run_option,
     with_health_server_options,
     with_limit_option,
+    with_observability_backend_options,
     with_run_type_option,
     with_yes_option,
 )
@@ -49,6 +50,7 @@ def build_run_all_click_command(
     )
     @with_debug_option("Enable DEBUG level logging")
     @with_health_server_options(default_health_server_port)
+    @with_observability_backend_options(default_health_server_port)
     @click.pass_context
     def run_all_command(click_context: click.Context, /, **kwargs: object) -> None:
         """Run all registered pipelines for one provider sequentially."""

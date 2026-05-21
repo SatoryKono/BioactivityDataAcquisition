@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: sonarqube
       POSTGRES_USER: sonarqube
-      POSTGRES_PASSWORD: sonarqube_secure
+      POSTGRES_PASSWORD: ${SONARQUBE_DB_PASSWORD:?Set SONARQUBE_DB_PASSWORD before starting docker-compose.sonarqube.yml}
     volumes:
       - postgres-sonarqube-data:/var/lib/postgresql/data
     networks:
@@ -22,10 +22,10 @@ services:
     environment:
       SONAR_JDBC_URL: jdbc:postgresql://postgres-sonarqube:5432/sonarqube
       SONAR_JDBC_USERNAME: sonarqube
-      SONAR_JDBC_PASSWORD: sonarqube_secure
-      SONAR_WEB_JAVASKOPTS: "-Xmx2048m -Xms1024m"
+      SONAR_JDBC_PASSWORD: ${SONARQUBE_DB_PASSWORD:?Set SONARQUBE_DB_PASSWORD before starting docker-compose.sonarqube.yml}
+      SONAR_WEB_JAVAOPTS: "-Xmx2048m -Xms1024m"
       SONAR_CE_JAVASKOPTS: "-Xmx2048m -Xms512m"
-      SONAR_WEB_SYSTEMPASSCODE: sonarqube_system
+      SONAR_WEB_SYSTEMPASSCODE: ${SONARQUBE_SYSTEM_PASSCODE:?Set SONARQUBE_SYSTEM_PASSCODE before starting docker-compose.sonarqube.yml}
       SONAR_FORCEAUTHENTICATION: "true"
     volumes:
       - sonarqube-data:/opt/sonarqube/data

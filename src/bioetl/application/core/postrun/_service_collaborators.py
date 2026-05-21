@@ -6,7 +6,9 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
-    from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.application.core.pipeline_service_protocols import (
+        PipelineServicesProtocol,
+    )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
         LoggerPort,
@@ -32,7 +34,7 @@ def _resolve_legacy_or_service(
     legacy_kwargs: dict[str, object],
     *,
     key: str,
-    services: PipelineService | None,
+    services: PipelineServicesProtocol | None,
     service_attr: str | None = None,
 ) -> object | None:
     """Resolve collaborator from legacy kwargs first, then service container."""
@@ -46,7 +48,7 @@ def _resolve_legacy_or_service(
 
 def resolve_postrun_collaborators(
     *,
-    services: PipelineService | None,
+    services: PipelineServicesProtocol | None,
     context: PipelineContext,
     legacy_kwargs: dict[str, object],
 ) -> ResolvedPostrunCollaborators:

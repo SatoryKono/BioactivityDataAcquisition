@@ -251,7 +251,7 @@ class TestCoordinatorTimeoutLogging:
         enricher_config.filter_condition = None
 
         async def slow_run() -> None:
-            await asyncio.sleep(1.0)  # Will timeout
+            await asyncio.get_running_loop().create_future()
 
         def slow_factory(name: str, keys: pl.DataFrame) -> MagicMock:
             runner = MagicMock()

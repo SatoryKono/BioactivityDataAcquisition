@@ -11,7 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +25,7 @@ except ImportError:
 
 from bioetl.domain.workflow import WorkflowStepConfig
 from bioetl.infrastructure.config.composite_config_api import load_composite_config
+from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.source_config_loader import (
     normalize_source_config_payload,
     validate_source_config_payload,
@@ -117,6 +118,18 @@ def _load_base_pipeline_defaults(configs_root: Path) -> dict[str, Any]:
         return {}
     payload = yaml.safe_load(base_path.read_text(encoding="utf-8")) or {}
     return payload if isinstance(payload, dict) else {}
+
+
+def _validate_legacy_pipeline_dir_absent(configs_root: Path) -> list[str]:
+    """Return a validator error if the retired configs/pipelines tree exists."""
+    legacy_dir = configs_root / "pipelines"
+    if not legacy_dir.exists():
+        return []
+    return [
+        "Legacy pipeline config directory must remain absent: "
+        f"{legacy_dir}. Runtime defaults belong in configs/base/pipeline.yaml "
+        "and per-pipeline payloads belong in configs/entities/{provider}/{entity}.yaml."
+    ]
 
 
 def _build_normalized_pipeline_payload(
@@ -686,11 +699,21 @@ def _emit_validation_depth_summary(configs_root: Path) -> None:
     sys.stdout.write(f"Config validation surface family depths: {rendered}\n")
 
 
+def _validate_registry_manifest_surface(configs_root: Path) -> list[str]:
+    """Validate the canonical runtime registry manifest against tracked configs."""
+    from bioetl.composition.factories.pipeline.registry_validation import (
+        validate_registry_manifest,
+    )
+
+    return validate_registry_manifest(configs_root=configs_root)
+
+
 def validate_config_tree(
     configs_root: Path,
     *,
     verbose: bool = False,
     skip_runtime_normalized_check: bool = False,
+    registry_validator: Callable[[Path], list[str]] | None = None,
 ) -> tuple[list[str], list[str], int]:
     """Validate the canonical config tree and return errors, warnings, and count."""
     schema_dir = configs_root / "_schema"
@@ -720,6 +743,7 @@ def validate_config_tree(
 
     errors: list[str] = []
     warnings: list[str] = []
+    errors.extend(_validate_legacy_pipeline_dir_absent(configs_root))
 
     for config_path in entity_files:
         _process_entity_config(
@@ -771,6 +795,13 @@ def validate_config_tree(
             errors=errors,
         )
 
+    effective_registry_validator = (
+        _validate_registry_manifest_surface
+        if registry_validator is None
+        else registry_validator
+    )
+    errors.extend(effective_registry_validator(configs_root))
+
     total = (
         len(entity_files)
         + len(provider_files)
@@ -781,7 +812,13 @@ def validate_config_tree(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate unified pipeline configs")
+    parser = argparse.ArgumentParser(
+        description=(
+            "Validate unified pipeline configs. The tracked YAML config tree is "
+            "validated together with the composition-owned pipeline registry "
+            "manifest so runtime bindings and config surfaces cannot drift."
+        )
+    )
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument(
         "--strict",
@@ -793,9 +830,18 @@ def main() -> int:
         action="store_true",
         help="Skip runtime-normalized invariants check (not recommended).",
     )
+    parser.add_argument(
+        "--configs-root",
+        type=Path,
+        default=None,
+        help=(
+            "Explicit configs root. Defaults to the canonical repo-root "
+            "configs/ directory used by registry/config validation."
+        ),
+    )
     args = parser.parse_args()
 
-    configs_root = Path("configs")
+    configs_root = resolve_configs_root(args.configs_root)
     errors, warnings, total = validate_config_tree(
         configs_root,
         verbose=args.verbose,

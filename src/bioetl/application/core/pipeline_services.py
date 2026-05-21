@@ -12,22 +12,19 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 from types import TracebackType
-from typing import TYPE_CHECKING, Protocol, Self, runtime_checkable
+from typing import TYPE_CHECKING, Self
 
+from bioetl.application.core.pipeline_service_protocols import (
+    PipelineStorageProtocol,
+)
 from bioetl.domain.ports import (
-    BronzeStoragePort,
     CheckpointPort,
     DataSourcePort,
     DQMonitorPort,
-    GoldStoragePort,
     LockPort,
     LoggerPort,
-    MergedStoragePort,
     MetricsPort,
     QuarantinePort,
-    SilverStoragePort,
-    StorageLifecyclePort,
-    StorageMaintenancePort,
     TracingPort,
 )
 
@@ -41,25 +38,6 @@ if TYPE_CHECKING:
         MetadataWriterPort,
         SilverDQAnalyzerPort,
     )
-
-
-@runtime_checkable
-class PipelineStorageProtocol(
-    BronzeStoragePort,
-    SilverStoragePort,
-    GoldStoragePort,
-    MergedStoragePort,
-    StorageMaintenancePort,
-    StorageLifecyclePort,
-    Protocol,
-):
-    """Application DI bundle for a full pipeline storage adapter.
-
-    Domain exposes only narrow storage ports. ``PipelineService`` carries the
-    concrete storage adapter across runner phases, so its field needs the union
-    of those narrow capabilities without reintroducing a public Domain aggregate.
-    """
-
 
 @dataclass(frozen=True)
 class PipelineService:

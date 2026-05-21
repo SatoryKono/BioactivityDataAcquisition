@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import UTC, datetime
-from uuid import uuid4
 
 from bioetl.application.services.control_plane.historical_replay_closure_service import (
     HistoricalReplayClosureService,
@@ -21,6 +20,7 @@ from bioetl.application.services.control_plane.historical_replay_certification_s
 from bioetl.domain.control_plane import RunManifest, RunSourceRef
 from bioetl.domain.types import RunID
 from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
+from tests.helpers.deterministic_ids import deterministic_uuid_value
 from tests.unit.application.services.run_manifest_test_support import (
     make_run_manifest as _build_manifest,
 )
@@ -30,7 +30,7 @@ def _make_source_manifest() -> RunManifest:
     return _build_manifest(
         manifest_id="closure-source-manifest",
         execution_fingerprint="closure-source-fingerprint",
-        run_id=RunID(uuid4()),
+        run_id=RunID(deterministic_uuid_value("historical.closure.source")),
         created_at=datetime(2026, 1, 3, 9, 0, tzinfo=UTC),
     )
 
@@ -39,7 +39,7 @@ def _make_composite_manifest() -> RunManifest:
     manifest = _build_manifest(
         manifest_id="closure-composite-manifest",
         execution_fingerprint="closure-composite-fingerprint",
-        run_id=RunID(uuid4()),
+        run_id=RunID(deterministic_uuid_value("historical.closure.composite")),
         created_at=datetime(2026, 1, 3, 9, 30, tzinfo=UTC),
     )
     return replace(

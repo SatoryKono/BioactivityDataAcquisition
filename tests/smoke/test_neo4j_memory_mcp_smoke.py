@@ -127,7 +127,6 @@ from __future__ import annotations
 
 import json
 import sys
-import time
 
 
 def read_frame():
@@ -179,7 +178,7 @@ while True:
                 },
             }
         )
-        time.sleep(30.0)
+        sys.stdin.read()
         break
 """.strip()
         + "\n",

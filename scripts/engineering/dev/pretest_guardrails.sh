@@ -389,7 +389,6 @@ run_auto_fix() {
     # baseline report consumes inventory-derived metadata.
     run_step hotspot-family-baseline-sync \
         "$PYTHON_BIN" -m scripts.engineering.qa report-family-baseline \
-        --active-only \
         --update
 }
 
@@ -435,7 +434,6 @@ run_repo_checks() {
     if [[ "$MODE" != "auto" ]]; then
         run_step hotspot-family-baseline-check \
             "$PYTHON_BIN" -m scripts.engineering.qa report-family-baseline \
-            --active-only \
             --check
     fi
 }

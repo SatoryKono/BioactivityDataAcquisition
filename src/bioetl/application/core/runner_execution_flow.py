@@ -30,7 +30,9 @@ if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointRuntimeService,
     )
-    from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.application.core.pipeline_service_protocols import (
+        PipelineServicesProtocol,
+    )
     from bioetl.application.core.postrun.service import PostrunService
     from bioetl.application.core.preflight.service import PreflightService
     from bioetl.application.observability.observer import PipelineObserver
@@ -58,7 +60,7 @@ _PHASE_BY_STAGE_NAME = {
 class _PipelineRunnerExecutionHostProtocol(Protocol):
     _config: PipelineConfig
     _runtime: RuntimeConfig
-    _services: PipelineService
+    _services: PipelineServicesProtocol
     _executor: BatchExecutor
     _checkpoint_manager: CheckpointRuntimeService
     _preflight_service: PreflightService

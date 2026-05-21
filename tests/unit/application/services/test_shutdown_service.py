@@ -115,16 +115,14 @@ class TestShutdownService:
     @pytest.mark.asyncio
     async def test_wait_blocks_until_shutdown(self, shutdown_service: ShutdownService):
         """Test wait() blocks until shutdown is initiated."""
+        wait_task = asyncio.create_task(shutdown_service.wait())
+        await asyncio.sleep(0)
+        assert wait_task.done() is False
 
-        async def initiate_after_delay():
-            await asyncio.sleep(0.05)
-            await shutdown_service.initiate_shutdown("delayed shutdown")
-
-        task = asyncio.create_task(initiate_after_delay())
-        await asyncio.wait_for(shutdown_service.wait(), timeout=1.0)
+        await shutdown_service.initiate_shutdown("delayed shutdown")
+        await asyncio.wait_for(wait_task, timeout=1.0)
 
         assert shutdown_service.is_shutting_down() is True
-        await task
 
     @pytest.mark.asyncio
     async def test_wait_for_completion_timeout(self, shutdown_service: ShutdownService):
@@ -135,16 +133,16 @@ class TestShutdownService:
     @pytest.mark.asyncio
     async def test_wait_for_completion_success(self, shutdown_service: ShutdownService):
         """Test wait_for_completion returns True when marked complete."""
+        wait_task = asyncio.create_task(
+            shutdown_service.wait_for_completion(timeout_seconds=1.0)
+        )
+        await asyncio.sleep(0)
+        assert wait_task.done() is False
 
-        async def mark_complete_after_delay():
-            await asyncio.sleep(0.05)
-            shutdown_service.mark_completed()
-
-        task = asyncio.create_task(mark_complete_after_delay())
-        result = await shutdown_service.wait_for_completion(timeout_seconds=1.0)
+        shutdown_service.mark_completed()
+        result = await asyncio.wait_for(wait_task, timeout=1.0)
 
         assert result is True
-        await task
 
     def test_mark_completed_emits_metric(
         self, shutdown_service: ShutdownService, metrics: MockMetrics

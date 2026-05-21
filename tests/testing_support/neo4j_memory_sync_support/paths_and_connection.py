@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import scripts.memory.sync as memory_sync_module
+
 from .common import *  # noqa: F401,F403
 
 def test_memory_mapping_path_prefers_canonical_graph_mapping(tmp_path: Path) -> None:
@@ -15,6 +17,18 @@ def test_memory_mapping_path_prefers_canonical_graph_mapping(tmp_path: Path) -> 
     )
 
     assert _memory_mapping_path(tmp_path) == canonical / "mappings.yaml"
+
+
+def test_memory_mapping_excludes_generated_memory_artifacts() -> None:
+    config = memory_sync_module._file_structure_config(
+        _load_memory_mapping(_repo_root())
+    )
+    excluded_prefixes = set(config.get("excluded_prefixes", ()))
+
+    assert "src/memory/derived" in excluded_prefixes
+    assert "src/memory/episodic/sessions" in excluded_prefixes
+    assert "src/memory/episodic/summaries" in excluded_prefixes
+    assert "docs/site" in excluded_prefixes
 
 
 def test_derive_http_uri_from_bolt() -> None:
@@ -87,4 +101,3 @@ def test_resolve_neo4j_connection_does_not_leak_default_mcp_credentials_into_aud
     assert username == "neo4j"
     assert password == "audit_secure_password"
     assert database == "neo4j"
-
