@@ -12,9 +12,9 @@ from memory.artifact_readiness import rag_chunks_ready, timeline_events_ready
 from memory.notes import slugify, utc_now_iso, write_markdown_note
 from memory.query import (
     DEFAULT_PROFILE,
-    DEFAULT_RAG_CHUNKS,
-    DEFAULT_TIMELINE_DIR,
     TASK_PROFILES,
+    default_rag_chunks_path,
+    default_timeline_dir,
     query_catalog,
     query_all,
 )
@@ -99,13 +99,13 @@ def _compact_prune_report(report: dict[str, Any] | None) -> dict[str, Any] | Non
 
 def _default_pre_task_chunks_path(output_root: Path | None) -> Path:
     if output_root is None:
-        return DEFAULT_RAG_CHUNKS
+        return default_rag_chunks_path()
     return output_root / "rag" / "manifests" / "chunks.jsonl"
 
 
 def _default_pre_task_events_dir(output_root: Path | None) -> Path:
     if output_root is None:
-        return DEFAULT_TIMELINE_DIR
+        return default_timeline_dir()
     return output_root / "timeline" / "events"
 
 
