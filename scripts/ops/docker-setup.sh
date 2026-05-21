@@ -1,6 +1,7 @@
 #!/bin/bash
-# Canonical Docker setup entrypoint for BioETL.
-# Запускает основной стек, мониторинг и MCP серверы.
+# Canonical optional Docker helper entrypoint for BioETL.
+# Запускает только reviewed local helper stacks для основного стека,
+# monitoring и MCP; это не mandatory runtime bootstrap path under ADR-010.
 
 set -euo pipefail
 

@@ -34,7 +34,7 @@ ______________________________________________________________________
 
 `src/bioetl/domain/ports/` содержит `Protocol`-контракты для Ports & Adapters:
 
-Сейчас пакет включает **16 top-level Python modules** в `domain/ports` (включая
+Сейчас пакет включает **17 top-level Python modules** в `domain/ports` (включая
 фасадный `__init__.py`), и это число синхронизируется архитектурным тестом
 `test_ports_count_matches_docs`.
 

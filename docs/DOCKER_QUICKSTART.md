@@ -5,6 +5,13 @@ Docker в BioETL остается optional local-only tooling surface. По
 compose файлы и helper-скрипты существуют только как добровольная локальная
 обвязка для отдельных стеков (`Neo4j`, monitoring, MCP).
 
+Reviewed extra compose files в корне (`docker-compose.alertmanager.yml`,
+`docker-compose.minio.yml`, `docker-compose.redis.yml`,
+`docker-compose.sonarqube.yml`) сохраняются только как optional adjunct helper
+stacks для локальной диагностики или точечных интеграционных экспериментов.
+Они не входят в canonical helper flow и не являются обязательной частью
+Local-Only runtime.
+
 ## ✅ Что настроено
 
 - ✓ `.env.example` как шаблон переменных окружения; `.env` является local-only/secret-bearing файлом и не создается автоматически
@@ -131,6 +138,10 @@ docker system prune -a
 | `docker-compose.yml` | Основной стек (Neo4j + BioETL) |
 | `docker-compose.monitoring.yml` | Мониторинг (Prometheus, Grafana, Loki, Tempo) |
 | `docker-compose.codex.yml` | MCP серверы для Codex |
+| `docker-compose.alertmanager.yml` | Optional adjunct Alertmanager helper stack; not part of baseline runtime |
+| `docker-compose.minio.yml` | Optional local MinIO helper stack; not part of ADR-010 runtime |
+| `docker-compose.redis.yml` | Optional local Redis helper stack; not part of ADR-010 runtime |
+| `docker-compose.sonarqube.yml` | Optional local SonarQube helper stack; not part of baseline runtime |
 | `Dockerfile.bioetl` | Образ BioETL (multi-stage Python) |
 | `Dockerfile.warp` | Warp VPN клиент |
 | `Dockerfile.mcp-*` | MCP серверы (Node.js) |
@@ -226,5 +237,8 @@ docker compose up --build -d
 **Автоматизированные скрипты:**
 - `.\scripts\ops\docker-setup.ps1` - Canonical интерактивная настройка Docker для Windows; `.env` создается только с `-AllowEnvFileCreate`
 - `scripts/ops/docker-setup.sh` - Canonical Bash версия для WSL/Linux; `.env` создается только с `BIOETL_ALLOW_ENV_FILE_CREATE=1`
+- Extra reviewed compose files for Alertmanager / MinIO / Redis / SonarQube
+  остаются manual-only helper surfaces и не запускаются canonical helper script
+  по умолчанию
 
 **Все готово к запуску!** 🚀
