@@ -2,7 +2,8 @@
 
 These files are publish-ready GitHub issue drafts created from the
 2026-05-19 file-structure cleanup audit plus local repository verification in
-this workspace.
+this workspace. Additional drafts were added on 2026-05-21 after a fresh
+repo-native audit surfaced new live root-governance gaps.
 
 Direct publication to GitHub was blocked in this session because local `gh`
 CLI is not installed.
@@ -18,14 +19,26 @@ CLI is not installed.
 
 3. `RH-016-Expand-Root-Hygiene-Review-Lanes-For-Observed-Transient-Root-Families.md`
 
+### P2.5
+
+4. `RH-017-Resolve-Noncanonical-Concepts-Root-Documentation-Surface.md`
+5. `RH-018-Resolve-Tracked-Extra-Docker-Compose-Root-Allowlist-Drift.md`
+
 ## Verification Snapshot
 
 - `./.venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked`
-  currently fails on tracked root drift:
+  previously failed on tracked root drift:
   - `temp_analyze_conflicting.py`
   - `temp_get_hash.py`
   - `test_output.txt`
   - `artifacts/`
+- `python3 scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked`
+  in the 2026-05-21 audit currently fails on:
+  - `docker-compose.alertmanager.yml`
+  - `docker-compose.minio.yml`
+  - `docker-compose.redis.yml`
+  - `docker-compose.sonarqube.yml`
+  - `concepts/`
 - `reports/quality/root-hygiene-cleanup-classification.json` currently reports
   `337` cleanup candidates, all `SAFE`, with `0` `REVIEW_REQUIRED` and `0`
   `BLOCKED`.
@@ -52,3 +65,5 @@ CLI is not installed.
 - It does not open a generic "clean the repo" umbrella issue.
 - The highest-signal defect is the contradiction between root-hygiene policy
   and the current observability evidence path under `artifacts/`.
+- The 2026-05-21 additions isolate two new confirmed tracked-tree gaps rather
+  than reopening generic local cleanup noise.

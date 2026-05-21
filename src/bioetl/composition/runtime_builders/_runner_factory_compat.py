@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     )
 
 
-def create_runner_from_factory(
+def create_runtime_runner_from_factory(
     *,
     factory: PipelineFactoryPort,
     ctx: PipelineRunContext,
