@@ -6,7 +6,7 @@ configs/_schema/composite.json with auto-generated schemas derived
 from PipelineYamlConfig and CompositeConfigFileSchema Pydantic models.
 
 Usage:
-    python scripts/generate_pipeline_schema.py [--check]
+    python -m scripts.schema.generate_pipeline_schema [--check]
 
 Exit codes:
     0 - Schemas generated (or up-to-date with --check)
@@ -18,9 +18,7 @@ import json
 import sys
 from pathlib import Path
 
-# Ensure project root is in python path
 project_root = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(project_root / "src"))
 
 from bioetl.infrastructure.schemas.composite_config import CompositeConfigFileSchema
 from bioetl.infrastructure.schemas.dq_config import DQConfigFile

@@ -4,9 +4,13 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+import pytest
+
 from bioetl.interfaces.cli.commands.domains.health.metrics_publication_integration import (
     publish_metrics_safely,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_publish_metrics_safely_delegates_to_execution_api() -> None:

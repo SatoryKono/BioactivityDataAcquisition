@@ -25,30 +25,26 @@ Commands:
 
 from __future__ import annotations
 
-from pathlib import Path
-
-from scripts.engineering.common.cli_dispatch import dispatch_cli, python_command
+from scripts.engineering.common.cli_dispatch import dispatch_cli, module_command
 
 COMMANDS: dict[str, str] = {
-    "check-invariants": "check_config_invariants.py",
-    "check-required-fields": "check_required_filter_fields.py",
-    "audit-optionality": "audit_effective_optionality.py",
-    "check-config-paths": "lint_config_paths.py",
-    "generate-pipeline": "generate_pipeline_schema.py",
-    "generate-artifacts": "generate_schema_artifacts.py",
-    "generate-pubtype": "generate_publication_type_classification_artifacts.py",
-    "generate-contracts": "generate_contracts.py",
-    "generate-config-matrix": "generate_config_matrix.py",
-    "generate-unified-map": "generate_unified_schema_map.py",
-    "generate-field-diagnostics": "generate_field_level_diagnostics.py",
-    "generate-field-spec": "generate_field_transformation_spec.py",
-    "validate-configs": "validate_pipeline_configs.py",
-    "validate-unified-configs": "validate_unified_configs.py",
-    "analyze-gaps": "config_gap_analysis.py",
+    "check-invariants": "scripts.schema.check_config_invariants",
+    "check-required-fields": "scripts.schema.check_required_filter_fields",
+    "audit-optionality": "scripts.schema.audit_effective_optionality",
+    "check-config-paths": "scripts.schema.lint_config_paths",
+    "generate-pipeline": "scripts.schema.generate_pipeline_schema",
+    "generate-artifacts": "scripts.schema.generate_schema_artifacts",
+    "generate-pubtype": "scripts.schema.generate_publication_type_classification_artifacts",
+    "generate-contracts": "scripts.schema.generate_contracts",
+    "generate-config-matrix": "scripts.schema.generate_config_matrix",
+    "generate-unified-map": "scripts.schema.generate_unified_schema_map",
+    "generate-field-diagnostics": "scripts.schema.generate_field_level_diagnostics",
+    "generate-field-spec": "scripts.schema.generate_field_transformation_spec",
+    "validate-configs": "scripts.schema.validate_pipeline_configs",
+    "validate-unified-configs": "scripts.schema.validate_unified_configs",
+    "analyze-gaps": "scripts.schema.config_gap_analysis",
 }
-COMMAND_SPECS = {name: python_command(script) for name, script in COMMANDS.items()}
-
-_DIR = Path(__file__).parent
+COMMAND_SPECS = {name: module_command(module) for name, module in COMMANDS.items()}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -56,7 +52,6 @@ def main(argv: list[str] | None = None) -> int:
         argv,
         help_text=__doc__ or "",
         commands=COMMAND_SPECS,
-        base_dir=_DIR,
     )
 
 

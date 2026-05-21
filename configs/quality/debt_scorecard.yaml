@@ -1,8 +1,8 @@
 schema_version: 1
 baseline:
-  total_exemptions: 5
+  total_exemptions: 0
   by_registry:
-    file_size_limits: 5
+    file_size_limits: 0
     function_complexity: 0
     function_length: 0
     class_size: 0
@@ -188,7 +188,7 @@ registry_groups:
     - class_method_count
 registries:
   file_size_limits:
-    target_count: 5
+    target_count: 0
     total_loc_budget: 20000
   class_size:
     target_count: 0
