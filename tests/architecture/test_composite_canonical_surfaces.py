@@ -24,6 +24,11 @@ DEPRECATED_COMPOSITE_SYMBOLS = (
     "CompositePipelineRunnerService",
     "CompositePreflightValidator",
 )
+_DEPRECATED_COMPOSITE_SYMBOL_BYTES = tuple(
+    symbol.encode("utf-8") for symbol in DEPRECATED_COMPOSITE_SYMBOLS
+)
+_SCAN_CHUNK_SIZE = 64 * 1024
+_SCAN_OVERLAP = max(len(symbol) for symbol in _DEPRECATED_COMPOSITE_SYMBOL_BYTES) - 1
 
 
 def _python_files(root: Path) -> list[Path]:
@@ -38,14 +43,28 @@ def _text_files(root: Path) -> list[Path]:
     return sorted(files)
 
 
+def _file_contains_symbol(path: Path, symbol: bytes) -> bool:
+    with path.open("rb") as stream:
+        tail = b""
+        while chunk := stream.read(_SCAN_CHUNK_SIZE):
+            haystack = tail + chunk
+            if symbol in haystack:
+                return True
+            tail = haystack[-_SCAN_OVERLAP:] if _SCAN_OVERLAP > 0 else b""
+    return False
+
+
 def _symbol_hits(root: Path, allowlist: frozenset[Path]) -> list[str]:
     hits: list[str] = []
     for py_file in _python_files(root):
         if py_file in allowlist:
             continue
-        source = py_file.read_text(encoding="utf-8")
-        for symbol in DEPRECATED_COMPOSITE_SYMBOLS:
-            if symbol in source:
+        for symbol, symbol_bytes in zip(
+            DEPRECATED_COMPOSITE_SYMBOLS,
+            _DEPRECATED_COMPOSITE_SYMBOL_BYTES,
+            strict=True,
+        ):
+            if _file_contains_symbol(py_file, symbol_bytes):
                 hits.append(f"{py_file.relative_to(ROOT)} -> {symbol}")
     return hits
 
@@ -56,9 +75,12 @@ def _doc_symbol_hits() -> list[str]:
         for doc_file in _text_files(root):
             if "legacy" in doc_file.parts:
                 continue
-            source = doc_file.read_text(encoding="utf-8")
-            for symbol in DEPRECATED_COMPOSITE_SYMBOLS:
-                if symbol in source:
+            for symbol, symbol_bytes in zip(
+                DEPRECATED_COMPOSITE_SYMBOLS,
+                _DEPRECATED_COMPOSITE_SYMBOL_BYTES,
+                strict=True,
+            ):
+                if _file_contains_symbol(doc_file, symbol_bytes):
                     hits.append(f"{doc_file.relative_to(ROOT)} -> {symbol}")
     return hits
 
