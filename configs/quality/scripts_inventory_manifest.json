@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-21T10:57:02.642040+00:00",
+  "generated_at": "2026-05-21T11:06:12.758660+00:00",
   "summary": {
     "total_scripts": 396,
     "status_counts": {
@@ -14,7 +14,7 @@
       "docs": 149,
       "scripts": 315,
       "skills": 8,
-      "tests": 155
+      "tests": 154
     }
   },
   "scripts": [
@@ -10436,7 +10436,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
@@ -10455,12 +10455,6 @@
           "line": 23,
           "source_group": "scripts",
           "text": "- `sync.py` is now a compatibility module alias to `memory.graph.sync`."
-        },
-        {
-          "path": "tests/architecture/test_contract_registry_loader_boundary.py",
-          "line": 17,
-          "source_group": "tests",
-          "text": "\"src/memory/graph/sync.py\","
         }
       ]
     },
@@ -10881,7 +10875,7 @@
         },
         {
           "path": "tests/architecture/test_docs_root_surface_governance_alignment.py",
-          "line": 68,
+          "line": 97,
           "source_group": "tests",
           "text": "powershell_helper = _read(\"scripts/ops/docker-setup.ps1\")"
         }
@@ -10914,7 +10908,7 @@
         },
         {
           "path": "tests/architecture/test_docs_root_surface_governance_alignment.py",
-          "line": 67,
+          "line": 96,
           "source_group": "tests",
           "text": "bash_helper = _read(\"scripts/ops/docker-setup.sh\")"
         }
