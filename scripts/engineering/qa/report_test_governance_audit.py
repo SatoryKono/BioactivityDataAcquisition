@@ -6,7 +6,6 @@ import argparse
 import ast
 import json
 import re
-import sys
 from collections import Counter, defaultdict
 from functools import cache
 from pathlib import Path
@@ -14,12 +13,9 @@ from typing import Any, cast
 
 import yaml
 
+from scripts.engineering.qa.file_discovery import discover_files
+
 ROOT = Path(__file__).resolve().parents[3]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
-from scripts.engineering.qa.file_discovery import discover_files  # noqa: E402
-
 DEFAULT_CONFIG = Path("configs/quality/test_governance_audit.yaml")
 TEST_FUNCTION_PREFIX = "test_"
 COMPATIBILITY_FILE_RE = re.compile(

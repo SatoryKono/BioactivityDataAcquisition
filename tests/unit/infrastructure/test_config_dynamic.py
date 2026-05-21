@@ -192,9 +192,7 @@ def test_load_pipeline_from_unified_entity_when_legacy_missing(tmp_path, monkeyp
     assert config.entity_type == "item"
 
 
-def test_load_pipeline_rejects_reintroduced_legacy_pipeline_dir(
-    tmp_path, monkeypatch
-):
+def test_load_pipeline_rejects_reintroduced_legacy_pipeline_dir(tmp_path, monkeypatch):
     load_pipeline_config_cached.cache_clear()
     load_source_config.cache_clear()
 
@@ -214,7 +212,9 @@ def test_load_pipeline_rejects_reintroduced_legacy_pipeline_dir(
     (tmp_path / "configs" / "pipelines").mkdir(parents=True)
 
     monkeypatch.chdir(tmp_path)
-    with pytest.raises(ValueError, match="Legacy pipeline config directory must remain absent"):
+    with pytest.raises(
+        ValueError, match="Legacy pipeline config directory must remain absent"
+    ):
         load_pipeline_config("demo_item")
 
 

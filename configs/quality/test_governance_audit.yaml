@@ -58,11 +58,11 @@ issues:
       - scripts/engineering/qa/report_test_governance_audit.py
       - tests/architecture/test_test_governance_audit.py
 budgets:
-  refined_assertless_max: 583
+  refined_assertless_max: 582
   duplicate_test_names_max: 879
   duplicate_test_name_occurrences_max: 2742
   compatibility_test_file_max: 56
-  markerless_test_functions_max: 13424
+  markerless_test_functions_max: 13422
   uuid4_call_sites_max: 413
   date_today_call_sites_max: 0
 preflight:
@@ -95,7 +95,7 @@ tracing:
 assertless_triage:
   categories:
     architecture_helper_guard:
-      count: 31
+      count: 30
       decision: retained
       rationale: "Architecture policy tests delegate assertions to shared guard helpers or pytest.fail paths."
       next_review: "2026-09-30"

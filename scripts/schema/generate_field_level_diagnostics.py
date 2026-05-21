@@ -8,19 +8,15 @@ import ast
 import csv
 import json
 import re
-import sys
 from pathlib import Path
 from typing import Any
 
-CURRENT_FILE = Path(__file__).resolve()
-PROJECT_ROOT = CURRENT_FILE.parents[2]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-from scripts.schema.generate_unified_schema_map import (  # noqa: E402
+from scripts.schema.generate_unified_schema_map import (
     build_unified_schema_rows,
 )
 
+CURRENT_FILE = Path(__file__).resolve()
+PROJECT_ROOT = CURRENT_FILE.parents[2]
 PUBLICATION_ALIAS_FILE = (
     PROJECT_ROOT / "src" / "bioetl" / "application" / "core" / "publication_aliases.py"
 )

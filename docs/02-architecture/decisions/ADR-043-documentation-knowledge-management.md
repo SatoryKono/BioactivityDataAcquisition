@@ -151,4 +151,6 @@ ______________________________________________________________________
 
 ## References
 
-- `<link-or-path>`
+- [Documentation rules](../../00-project/RULES.md)
+- [Documentation link checker](../../../scripts/docs/checks/check_links.py)
+- [AI runtime mirror ownership policy](../../00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md)

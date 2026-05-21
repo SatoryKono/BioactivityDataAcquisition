@@ -199,4 +199,6 @@ Application и interfaces слои **MUST NOT** импортировать `stru
 
 ## References
 
-- `<link-or-path>`
+- [ADR-010: Control Plane Reproducibility](ADR-010-control-plane-reproducibility.md)
+- [Runtime Clock Port](../../../src/bioetl/domain/ports/time.py)
+- [SystemClock adapter](../../../src/bioetl/infrastructure/time/system_clock.py)

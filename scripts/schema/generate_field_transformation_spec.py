@@ -7,20 +7,16 @@ import argparse
 import csv
 import json
 import re
-import sys
 from pathlib import Path
 from typing import Any
 
 import yaml
 
-CURRENT_FILE = Path(__file__).resolve()
-PROJECT_ROOT = CURRENT_FILE.parents[2]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
 from scripts.schema.generate_field_level_diagnostics import build_field_level_rows
 from scripts.schema.generate_unified_schema_map import build_unified_schema_rows
 
+CURRENT_FILE = Path(__file__).resolve()
+PROJECT_ROOT = CURRENT_FILE.parents[2]
 DEFAULT_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "field_transformation_spec.csv"
 
 CSV_COLUMNS: tuple[str, ...] = (

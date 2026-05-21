@@ -246,4 +246,6 @@ This ADR establishes rules **NAME-007** through **NAME-009** for the active AI r
 
 ## References
 
-- `<link-or-path>`
+- [Runtime rules](../../00-project/RULES.md)
+- [Codex runtime profiles](../../../.codex/agents/)
+- [Codex runtime skills](../../../.codex/skills/)

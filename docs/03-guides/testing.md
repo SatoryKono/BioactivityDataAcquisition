@@ -108,15 +108,15 @@ Before using a local checkout as source evidence for broad test audits, run the
 reproducibility preflight and static governance budget report:
 
 ```bash
-python scripts/engineering/qa/check_test_audit_preflight.py --strict
-python scripts/engineering/qa/report_test_governance_audit.py --check
+python -m scripts.engineering.qa.check_test_audit_preflight --strict
+python -m scripts.engineering.qa.report_test_governance_audit --check
 ```
 
-`check_test_audit_preflight.py --strict` treats missing or unhealthy `git-lfs`,
+`check_test_audit_preflight --strict` treats missing or unhealthy `git-lfs`,
 failed or timed-out `git status`, unresolved git-lfs pointer files under
 `tests/fixtures/vcr/`, missing telemetry baseline, or a telemetry baseline
 without `Actual coverage:` as blockers for main-branch audit claims.
-`report_test_governance_audit.py --check` enforces the current ratcheting
+`report_test_governance_audit --check` enforces the current ratcheting
 budgets for assert-less candidates, duplicate test names, compatibility/legacy
 surface, marker/path drift, and deterministic-time/UUID call sites tracked in
 `configs/quality/test_governance_audit.yaml`.

@@ -57,66 +57,67 @@ Commands:
 
 from __future__ import annotations
 
-from pathlib import Path
+from scripts.engineering.common.cli_dispatch import dispatch_cli, module_command
 
-from scripts.engineering.common.cli_dispatch import dispatch_cli, python_command
-
-_TEST_HEALTH_SCRIPT = "test_health.py"
-
-COMMAND_SPECS = {
-    "check-naming": "naming_audit.py",
-    "check-architecture": "check_architecture.py",
-    "check-app-deps": "check_application_deps.py",
-    "check-constructor-args": "check_constructor_args.py",
-    "check-c901": "check_c901_baseline.py",
-    "check-naming-pkg": "check_naming_package_consistency.py",
-    "check-exemptions": "check_quality_exemptions.py",
-    "check-docs-drift": "check_docs_drift.py",
-    "check-xwalk-missing-backlog": "check_xwalk_missing_backlog.py",
-    "validate-dq-consistency": "validate_dq_consistency.py",
-    "check-semantic-field-registry": "check_semantic_field_registry.py",
-    "check-semantic-registry-drift": "check_semantic_registry_drift.py",
-    "check-semantic-pair-budget": "check_semantic_pair_matrix_budget.py",
-    "report-semantic-pipeline-audit": "generate_semantic_pipeline_audit.py",
-    "check-semantic-governance-policy": "check_semantic_governance_policy.py",
-    "check-semantic-anchor-parity": "check_semantic_anchor_parity.py",
-    "check-gold-nullable-numeric": "check_gold_nullable_numeric_compatibility.py",
-    "check-generic-field-ownership": "check_generic_field_ownership.py",
-    "check-ontology-unit-semantics": "check_ontology_unit_semantics.py",
-    "generate-debt-tasks": "generate_architecture_debt_tasks.py",
-    "reduce-architecture-debt": "reduce_architecture_debt.py",
-    "check-terminology": "lint_terminology.py",
-    "report-dep-map": "generate_architecture_dependency_map.py",
-    "report-vcr-metadata": "report_vcr_metadata_catalog.py",
-    "report-provider-contract-drift": "report_provider_contract_drift.py",
-    "report-compatibility-importer-census": "report_compatibility_importer_census.py",
-    "report-module-coverage": "report_module_coverage_inventory.py",
-    "report-dead-code-inventory": "report_dead_code_inventory.py",
-    "report-pubchem-property-vocab": "extract_pubchem_property_vocab.py",
-    "report-publication-nested-vocab": "extract_publication_nested_vocab.py",
-    "sync-integration-vcr-policy": "sync_integration_vcr_policy.py",
-    "report-family-baseline": "report_hotspot_family_baseline.py",
-    "report-hotspots": "generate_hotspot_degradation_report.py",
-    "report-duplication-baseline": "report_duplication_baseline.py",
-    "report-function-length-inventory": "report_function_length_inventory.py",
-    "report-normalization-fallback-inventory": "report_normalization_fallback_inventory.py",
-    "report-chembl-observed-value-inventory": "report_chembl_observed_value_inventory.py",
-    "report-observability-metric-inventory": "report_observability_metric_inventory.py",
-    "analyze-duplicate-functions": "analyze_duplicate_functions.py",
-    "calibrate-hotspots": "calibrate_hotspot_budgets.py",
-    "run-tests": python_command(_TEST_HEALTH_SCRIPT, "run-tests"),
-    "summarize-junit": python_command(_TEST_HEALTH_SCRIPT, "summarize-junit"),
-    "test-health": python_command(_TEST_HEALTH_SCRIPT, "test-health"),
-    "check-dashboard-visual-semantics": "check_dashboard_visual_semantics.py",
-    "report-dashboard-inventory": "report_dashboard_inventory.py",
-    "report-dashboard-query-duplicates": "report_dashboard_query_duplicates.py",
+COMMAND_MODULES: dict[str, str] = {
+    "check-naming": "scripts.engineering.qa.naming_audit",
+    "check-architecture": "scripts.engineering.qa.check_architecture",
+    "check-app-deps": "scripts.engineering.qa.check_application_deps",
+    "check-constructor-args": "scripts.engineering.qa.check_constructor_args",
+    "check-c901": "scripts.engineering.qa.check_c901_baseline",
+    "check-naming-pkg": "scripts.engineering.qa.check_naming_package_consistency",
+    "check-exemptions": "scripts.engineering.qa.check_quality_exemptions",
+    "check-docs-drift": "scripts.engineering.qa.check_docs_drift",
+    "check-xwalk-missing-backlog": "scripts.engineering.qa.check_xwalk_missing_backlog",
+    "validate-dq-consistency": "scripts.engineering.qa.validate_dq_consistency",
+    "check-semantic-field-registry": "scripts.engineering.qa.check_semantic_field_registry",
+    "check-semantic-registry-drift": "scripts.engineering.qa.check_semantic_registry_drift",
+    "check-semantic-pair-budget": "scripts.engineering.qa.check_semantic_pair_matrix_budget",
+    "report-semantic-pipeline-audit": "scripts.engineering.qa.generate_semantic_pipeline_audit",
+    "check-semantic-governance-policy": "scripts.engineering.qa.check_semantic_governance_policy",
+    "check-semantic-anchor-parity": "scripts.engineering.qa.check_semantic_anchor_parity",
+    "check-gold-nullable-numeric": "scripts.engineering.qa.check_gold_nullable_numeric_compatibility",
+    "check-generic-field-ownership": "scripts.engineering.qa.check_generic_field_ownership",
+    "check-ontology-unit-semantics": "scripts.engineering.qa.check_ontology_unit_semantics",
+    "generate-debt-tasks": "scripts.engineering.qa.generate_architecture_debt_tasks",
+    "reduce-architecture-debt": "scripts.engineering.qa.reduce_architecture_debt",
+    "check-terminology": "scripts.engineering.qa.lint_terminology",
+    "report-dep-map": "scripts.engineering.qa.generate_architecture_dependency_map",
+    "report-vcr-metadata": "scripts.engineering.qa.report_vcr_metadata_catalog",
+    "report-provider-contract-drift": "scripts.engineering.qa.report_provider_contract_drift",
+    "report-compatibility-importer-census": "scripts.engineering.qa.report_compatibility_importer_census",
+    "report-module-coverage": "scripts.engineering.qa.report_module_coverage_inventory",
+    "report-dead-code-inventory": "scripts.engineering.qa.report_dead_code_inventory",
+    "report-pubchem-property-vocab": "scripts.engineering.qa.extract_pubchem_property_vocab",
+    "report-publication-nested-vocab": "scripts.engineering.qa.extract_publication_nested_vocab",
+    "sync-integration-vcr-policy": "scripts.engineering.qa.sync_integration_vcr_policy",
+    "report-family-baseline": "scripts.engineering.qa.report_hotspot_family_baseline",
+    "report-hotspots": "scripts.engineering.qa.generate_hotspot_degradation_report",
+    "report-duplication-baseline": "scripts.engineering.qa.report_duplication_baseline",
+    "report-function-length-inventory": "scripts.engineering.qa.report_function_length_inventory",
+    "report-normalization-fallback-inventory": "scripts.engineering.qa.report_normalization_fallback_inventory",
+    "report-chembl-observed-value-inventory": "scripts.engineering.qa.report_chembl_observed_value_inventory",
+    "report-observability-metric-inventory": "scripts.engineering.qa.report_observability_metric_inventory",
+    "analyze-duplicate-functions": "scripts.engineering.qa.analyze_duplicate_functions",
+    "calibrate-hotspots": "scripts.engineering.qa.calibrate_hotspot_budgets",
+    "check-dashboard-visual-semantics": "scripts.engineering.qa.check_dashboard_visual_semantics",
+    "report-dashboard-inventory": "scripts.engineering.qa.report_dashboard_inventory",
+    "report-dashboard-query-duplicates": "scripts.engineering.qa.report_dashboard_query_duplicates",
 }
 COMMAND_SPECS = {
-    name: spec if hasattr(spec, "runner") else python_command(spec)
-    for name, spec in COMMAND_SPECS.items()
+    name: module_command(module) for name, module in COMMAND_MODULES.items()
 }
-
-_DIR = Path(__file__).parent
+COMMAND_SPECS.update(
+    {
+        "run-tests": module_command("scripts.engineering.qa.test_health", "run-tests"),
+        "summarize-junit": module_command(
+            "scripts.engineering.qa.test_health", "summarize-junit"
+        ),
+        "test-health": module_command(
+            "scripts.engineering.qa.test_health", "test-health"
+        ),
+    }
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -124,7 +125,6 @@ def main(argv: list[str] | None = None) -> int:
         argv,
         help_text=__doc__ or "",
         commands=COMMAND_SPECS,
-        base_dir=_DIR,
     )
 
 
