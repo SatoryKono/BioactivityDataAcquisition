@@ -2,45 +2,9 @@
 
 from __future__ import annotations
 
-import difflib
 from pathlib import Path
+import subprocess
 import sys
-from types import ModuleType
-
-
-def _load_dep_map_module() -> ModuleType:
-    script = Path(
-        "scripts/engineering/qa/generate_architecture_dependency_map.py"
-    ).resolve()
-    module = ModuleType("dep_map_drift_gen")
-    module.__file__ = str(script)
-    module.__package__ = ""
-    sys.modules["dep_map_drift_gen"] = module
-    source = script.read_text(encoding="utf-8")
-    exec(compile(source, str(script), "exec"), module.__dict__)
-    return module
-
-
-def _format_diff(label: str, actual: str, expected: str) -> str:
-    diff_lines = list(
-        difflib.unified_diff(
-            actual.splitlines(),
-            expected.splitlines(),
-            fromfile=f"committed:{label}",
-            tofile=f"generated:{label}",
-            lineterm="",
-        )
-    )
-    return "\n".join(diff_lines[:40])
-
-
-def _strip_frontmatter(text: str) -> str:
-    if not text.startswith("---\n"):
-        return text
-    parts = text.split("\n---\n", 1)
-    if len(parts) != 2:
-        return text
-    return parts[1]
 
 
 def test_dependency_map_script_exists() -> None:
@@ -108,24 +72,20 @@ def test_nightly_workflow_regenerates_dependency_map() -> None:
 
 
 def test_dependency_map_drift_check_passes_current_repo() -> None:
-    mod = _load_dep_map_module()
-    snapshot = mod.collect_dependency_snapshot(Path("src/bioetl"))
-    expected_md = mod.build_markdown(snapshot)
-    expected_json = mod.build_json(snapshot)
-
-    md_path = Path("docs/02-architecture/generated/module-dependency-map.md")
-    json_path = Path("docs/02-architecture/generated/module-dependency-map.json")
-    actual_md = _strip_frontmatter(md_path.read_text(encoding="utf-8"))
-    actual_json = json_path.read_text(encoding="utf-8")
-
-    assert actual_md == expected_md, (
-        "Dependency-map markdown artifact drifted from generator output.\n"
-        f"{_format_diff(str(md_path), actual_md, expected_md)}"
+    result = subprocess.run(
+        [
+            sys.executable,
+            "scripts/engineering/qa/generate_architecture_dependency_map.py",
+            "--check",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
     )
-
-    assert actual_json == expected_json, (
-        "Dependency-map JSON artifact drifted from generator output.\n"
-        f"{_format_diff(str(json_path), actual_json, expected_json)}"
+    assert result.returncode == 0, (
+        "Dependency-map artifact drift check failed.\n"
+        f"stdout:\n{result.stdout}\n"
+        f"stderr:\n{result.stderr}\n"
     )
 
 
