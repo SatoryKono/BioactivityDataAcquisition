@@ -16,10 +16,11 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 > priority order после последующих bounded closeout waves. В частности,
 > `crossref/batch.py` больше не является крупным mixed-responsibility hotspot:
 > текущий файл — `24` LOC compatibility facade поверх split collaborators.
-> Дополнительно live architecture-metric exemption baseline теперь достиг `0`:
-> remaining `ProviderRegistry` `god_object` waiver retired, поэтому текущий
-> active debt posture лучше читать как topology/ownership watchlist без живых
-> size/class/god-object exemptions.
+> Дополнительно live architecture-metric exemption baseline сейчас содержит
+> `9` active file-size-limit exemptions и не содержит active class/god-object
+> exemptions. Поэтому текущий active debt posture лучше читать как
+> topology/ownership watchlist с ограниченным file-size waiver inventory, а не
+> как zero-exemption baseline.
 > Для live prioritization используйте текущий roadmap и refreshed governance
 > summaries, а не только этот dated pack.
 

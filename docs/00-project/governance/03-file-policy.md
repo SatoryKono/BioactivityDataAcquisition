@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # Политика файлов и директорий
 
-*Синхронизировано с RULES.md v6.1.3 | Последнее обновление: 2026-05-13*
+*Синхронизировано с RULES.md v6.1.3 | Последнее обновление: 2026-05-21*
 
 ______________________________________________________________________
 
@@ -28,6 +28,9 @@ ______________________________________________________________________
 ## 0. Политика корня репозитория
 
 - Root-level tracked файлы MUST соответствовать `.github/root-allowlist.txt`.
+- Reviewed root-level `docker-compose*.yml` files MAY оставаться tracked только
+  как optional local-only helper stacks; они MUST NOT переопределять ADR-010 и
+  MUST NOT трактоваться как обязательный runtime bootstrap path.
 - Root-level tracked markdown и txt артефакты MUST быть ограничены canonical
   root entrypoints. Операционные quick-reference материалы SHOULD жить в
   `docs/05-operations/`, а одноразовые status/recovery/final-summary артефакты
@@ -53,6 +56,9 @@ ______________________________________________________________________
 - Generated/runtime root trees such as `node_modules/`, `output/`, `test-output/`,
   `logs/`, `MagicMock/`, `caddy/`, and local package trees like
   `.python-user/` MUST NOT попадать в git-index.
+- Noncanonical documentation roots such as `concepts/` MUST NOT оставаться
+  tracked в корне; documentation content MUST жить под `docs/**`, а historical
+  or foreign-format doc carryovers SHOULD переезжать в `docs/99-archive/**`.
 
 Root allowlist интерпретируется как policy surface, а не как временный склад.
 Если новый root-level файл существует только для инцидента, ручной проверки или

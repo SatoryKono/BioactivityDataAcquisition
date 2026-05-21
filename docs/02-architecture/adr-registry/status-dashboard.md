@@ -2,7 +2,7 @@
 
 Quick overview of ADR status and distribution.
 
-**Last Updated**: 2026-05-20 11:36:52
+**Last Updated**: 2026-05-21 12:51:45
 
 ## 📈 Status Distribution
 
@@ -38,11 +38,11 @@ Quick overview of ADR status and distribution.
 
 Last 5 updated ADRs:
 
+- **ADR-042**: Testing Strategy Matrix & Fixture Gov. (2026-05-21)
 - **ADR-047**: Workflow Control Plane for Declarative Workflows (2026-05-08)
 - **ADR-046**: Checkpoint Versus Ledger-Based Resume (2026-05-06)
 - **ADR-044**: Run Manifest & Ledger Control Plane (2026-04-29)
 - **ADR-026**: Composite Pipeline Pattern (2026-04-24)
-- **ADR-038**: ChEMBL Enum Values Externalization to YAML (2026-04-23)
 
 ## 🎯 Health Metrics
 

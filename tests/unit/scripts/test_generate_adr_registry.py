@@ -46,7 +46,7 @@ def test_extract_adr_metadata_uses_superseded_bucket_when_relationship_requires_
 
     assert metadata is not None
     assert metadata.status == "superseded"
-    assert metadata.source_status == "Accepted (Revised 2025-12-23, see also ADR-010)"
+    assert metadata.source_status == "Superseded (revised 2025-12-23; see ADR-010)"
 
 
 def test_extract_adr_metadata_recovers_decision_date_from_table_when_header_is_placeholder() -> (

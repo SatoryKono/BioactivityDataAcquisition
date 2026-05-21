@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
 Version: 1.0.0
-Status: Accepted (Revised 2025-12-23, see also ADR-010)
+Status: Superseded (revised 2025-12-23; see ADR-010)
 Class: published
 Owner: BioETL Team
 Reviewers:
@@ -14,7 +14,7 @@ ______________________________________________________________________
 # ADR-003: In-Memory Locking Strategy (MemoryLock)
 
 **Date:** 2025-05-20
-**Status:** Accepted (Revised 2025-12-23, see also ADR-010)
+**Status:** Superseded (revised 2025-12-23; see ADR-010)
 **Last updated:** 2026-01-02
 **Decision makers:** @BioETL-Team
 **Superseded by:** [ADR-010](ADR-010-local-only-deployment.md) (local-only locking scope and deployment posture)
@@ -187,7 +187,7 @@ await lock.aclose()
 | Control      | Requirement                                                                | Status     | Evidence                                          |
 | ------------ | -------------------------------------------------------------------------- | ---------- | ------------------------------------------------- |
 | Format       | ADR MUST use standard metadata and normalized section headings             | `pass`     | `ADR-003-in-memory-locking-strategy.md`           |
-| Status       | ADR status MUST be explicit and consistent                                 | `pass`     | `Accepted (Revised 2025-12-23, see also ADR-010)` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass`     | `Superseded (revised 2025-12-23; see ADR-010)` |
 | Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `declared` | `metadata block`                                  |
 | Verification | Implementation and validation expectations MUST be documented              | `pass`     | `Verification / Acceptance Criteria`              |
 | References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass`     | `References`                                      |

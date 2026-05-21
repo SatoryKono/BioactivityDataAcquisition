@@ -21,7 +21,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | -------------------------------------------------------- | ------------------------------------------ | --------------------------------------- | --------------- | ---------- |
 | [ADR-001](ADR-001-delta-lake-vs-parquet.md)              | Delta Lake vs Parquet                      | Accepted                                | Storage         | 2025-05-20 |
 | [ADR-002](ADR-002-medallion-architecture.md)             | Medallion Architecture                     | Accepted                                | Architecture    | 2025-05-20 |
-| [ADR-003](ADR-003-in-memory-locking-strategy.md)         | In-Memory Locking (MemoryLock)             | Accepted (Revised)                      | Locking         | 2025-12-23 |
+| [ADR-003](ADR-003-in-memory-locking-strategy.md)         | In-Memory Locking (MemoryLock)             | Superseded                              | Locking         | 2025-12-23 |
 | [ADR-004](ADR-004-pydantic-vs-dataclasses.md)            | Pydantic vs Dataclasses                    | Accepted                                | Data Modeling   | 2025-05-20 |
 | [ADR-005](ADR-005-composition-layer-separation.md)       | Composition Layer Separation               | Accepted                                | Architecture    | 2025-12-15 |
 | [ADR-006](ADR-006-logger-metrics-ports.md)               | Logger and Metrics Ports                   | Accepted                                | Observability   | 2025-12-18 |
@@ -135,7 +135,7 @@ This directory contains Architecture Decision Records documenting significant ar
 
 ### Locking
 
-- [ADR-003](ADR-003-in-memory-locking-strategy.md): In-Memory Locking (MemoryLock) — Local-Only locking strategy
+- [ADR-003](ADR-003-in-memory-locking-strategy.md): In-Memory Locking (MemoryLock) — historical locking decision now superseded by ADR-010
 
 ### Testing
 
@@ -213,7 +213,7 @@ This directory contains Architecture Decision Records documenting significant ar
                                        │
                                 ┌───────────┐
                                 │  ADR-010  │
-                                │Local-Only │──────► ADR-003 (Revised: Redis→MemoryLock)
+                                │Local-Only │──────► ADR-003 (historical Redis→MemoryLock transition)
                                 └───────────┘
                                        │
                                        ▼

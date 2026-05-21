@@ -1617,17 +1617,17 @@ make run-local    # запуск сэмплового пайплайна (chembl
 - **Checkpoints**: Локальные файлы (`data/output/checkpoints`)
 - **Зависимости**: Python 3.11+; `uv` является preferred package/environment manager, `pip` допустим как manual fallback
 
-**Для распределённого развёртывания (будущее):**
+**Optional local helper tooling (не canonical runtime):**
 
-- Docker Compose (legacy, unsupported): Postgres, Redis, MinIO
-
-- Volumes: `./docker-data/`
-
-- Reset: `make docker-reset`
-
-- **Seed Data**: `make seed-local` — загрузка сэмпловых фикстур.
-
-- **.env.example**: Шаблон переменных окружения (без секретов).
+- reviewed `docker-compose*.yml` surfaces MAY оставаться в репозитории только
+  как добровольные локальные helper stacks для Neo4j, monitoring, MCP и
+  точечных adjunct tools;
+- такие compose файлы MUST NOT трактоваться как supported runtime orchestration
+  path для базового development/test execution;
+- helper surfaces for Redis, MinIO, Alertmanager и SonarQube считаются
+  local-only adjunct tooling/diagnostics, а не обязательной частью ADR-010
+  runtime;
+- `.env.example` остаётся только шаблоном без секретов для ручного local setup.
 
 ______________________________________________________________________
 
@@ -1891,7 +1891,7 @@ fields:
 | ------------------------------------------------------------------------------------- | ------------------------------------------ | --------------------------------------- | ---------- |
 | [ADR-001](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)              | Delta Lake vs Parquet                      | Accepted                                | 2025-05    |
 | [ADR-002](../02-architecture/decisions/ADR-002-medallion-architecture.md)             | Medallion Architecture                     | Accepted                                | 2025-05    |
-| [ADR-003](../02-architecture/decisions/ADR-003-in-memory-locking-strategy.md)         | In-Memory Locking (MemoryLock)             | Accepted (Revised)                      | 2025-12    |
+| [ADR-003](../02-architecture/decisions/ADR-003-in-memory-locking-strategy.md)         | In-Memory Locking (MemoryLock)             | Superseded                              | 2025-12    |
 | [ADR-004](../02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md)            | Pydantic vs Dataclasses                    | Accepted                                | 2025-05    |
 | [ADR-005](../02-architecture/decisions/ADR-005-composition-layer-separation.md)       | Composition Layer Separation               | Accepted                                | 2025-12    |
 | [ADR-006](../02-architecture/decisions/ADR-006-logger-metrics-ports.md)               | Logger and Metrics Ports                   | Accepted                                | 2025-12-18 |

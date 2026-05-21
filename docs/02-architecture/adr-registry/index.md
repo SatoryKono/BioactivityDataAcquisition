@@ -4,7 +4,7 @@ This registry provides a comprehensive index of all Architecture Decision Record
 with metadata, status, and relationships.
 
 **Total ADRs**: 47
-**Last Updated**: 2026-05-20
+**Last Updated**: 2026-05-21
 
 ## 📊 Status Summary
 
@@ -564,7 +564,7 @@ execution, but safe operator recovery still needed explicit workflow-level...
 
 **Status**: `superseded` | **Category**: `Locking` | **Owner**: `BioETL Team`
 
-**Source status text**: `Accepted (Revised 2025-12-23, see also ADR-010)`
+**Source status text**: `Superseded (revised 2025-12-23; see ADR-010)`
 
 **Relationships**: Superseded by: ADR-010, Related: ADR-010
 

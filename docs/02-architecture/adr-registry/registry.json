@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-20T11:36:52.757356",
+  "generated": "2026-05-21T12:51:45.525689",
   "total_adrs": 47,
   "adrs": [
     {
@@ -43,7 +43,7 @@
       "title": "In-Memory Locking (MemoryLock)",
       "file_path": "ADR-003-in-memory-locking-strategy.md",
       "status": "superseded",
-      "source_status": "Accepted (Revised 2025-12-23, see also ADR-010)",
+      "source_status": "Superseded (revised 2025-12-23; see ADR-010)",
       "category": "Locking",
       "owner": "BioETL Team",
       "decision_date": "2025-05-20",
@@ -781,7 +781,7 @@
       "category": "Testing",
       "owner": "BioETL Team",
       "decision_date": "2026-03-09",
-      "last_reviewed": "2026-03-30",
+      "last_reviewed": "2026-05-21",
       "context": "BioETL has grown to 854+ test files across 9 test categories. While coverage meets\nthe 85% threshold, several gaps exist:\n1. **No formalized test matrix** — no systematic mapping of provider x enti...",
       "decision": "### Test Matrix (Provider x Layer x Type)\n| Layer                                  | Unit   | Integration | Contract | Property              | E2E    |\n| -------------------------------------- | --...",
       "consequences": "### Positive\n- Systematic coverage tracking via matrix\n- Clear boundary between property-based and VCR testing\n- Mutation testing catches undertested logic\n- Contract versioning prevents silent sch...",

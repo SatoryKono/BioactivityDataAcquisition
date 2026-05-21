@@ -6,6 +6,12 @@ machine-local/secret-bearing файлом. Если файл нужен для �
 запуска, создайте его вручную из `.env.example` после явного решения или
 используйте opt-in флаг helper-скрипта.
 
+Reviewed extra compose files в корне (`docker-compose.alertmanager.yml`,
+`docker-compose.minio.yml`, `docker-compose.redis.yml`,
+`docker-compose.sonarqube.yml`) сохраняются только как optional adjunct helper
+stacks. Они не требуются для базового development/test runtime и не считаются
+canonical orchestration path under ADR-010.
+
 ## ✓ Проверка Docker
 
 ```powershell
@@ -218,5 +224,9 @@ docker ps | Select-String bioetl
 - `docker-compose.yml` — основной стек
 - `docker-compose.monitoring.yml` — мониторинг
 - `docker-compose.codex.yml` — MCP серверы
+- `docker-compose.alertmanager.yml` — optional local Alertmanager helper stack
+- `docker-compose.minio.yml` — optional local MinIO helper stack
+- `docker-compose.redis.yml` — optional local Redis helper stack
+- `docker-compose.sonarqube.yml` — optional local SonarQube helper stack
 - `.env` — переменные окружения
 - `Dockerfile.*` — определения образов
