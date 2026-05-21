@@ -5,6 +5,8 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[2]
 PACK_ROOT = (
@@ -34,6 +36,7 @@ def test_canonical_cross_synthesis_is_readable() -> None:
 def test_curated_evidence_surface_has_no_unreadable_visible_entries() -> None:
     """Visible curated evidence entries must keep working with standard stat calls."""
     pending = [PACK_ROOT]
+    failures: list[str] = []
 
     while pending:
         current = pending.pop()
@@ -41,6 +44,19 @@ def test_curated_evidence_surface_has_no_unreadable_visible_entries() -> None:
             for entry in entries:
                 if entry.name.startswith("."):
                     continue
-                entry.stat(follow_symlinks=False)
-                if entry.is_dir(follow_symlinks=False):
-                    pending.append(Path(entry.path))
+                try:
+                    entry.stat(follow_symlinks=False)
+                    if entry.is_dir(follow_symlinks=False):
+                        pending.append(Path(entry.path))
+                except OSError as exc:
+                    failures.append(
+                        f"{Path(entry.path).relative_to(ROOT)}: "
+                        f"{type(exc).__name__} errno={getattr(exc, 'errno', None)} "
+                        f"{exc}"
+                    )
+
+    if failures:
+        pytest.fail(
+            "Curated evidence surface has unreadable visible entries:\n"
+            + "\n".join(f"  - {failure}" for failure in failures)
+        )

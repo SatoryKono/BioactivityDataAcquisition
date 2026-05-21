@@ -41,8 +41,20 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
 from bioetl.infrastructure.config._yaml_settings_source import YamlSettingsSource
+from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
+
+
+def _get_pipeline_config_root(config_root: str | None) -> Path:
+    """Resolve helper config root with cwd-local override for test worktrees."""
+    if config_root is not None:
+        return Path(config_root)
+
+    cwd_configs = (Path.cwd() / "configs").resolve()
+    if cwd_configs.is_dir():
+        return cwd_configs
+    return resolve_configs_root()
 
 
 @lru_cache(maxsize=10)
@@ -75,7 +87,7 @@ def get_pipeline_config(
         load_domain_pipeline_config,
     )
 
-    root = Path(config_root) if config_root is not None else Path("configs")
+    root = _get_pipeline_config_root(config_root)
     return load_domain_pipeline_config(
         pipeline_name,
         configs_root=root,

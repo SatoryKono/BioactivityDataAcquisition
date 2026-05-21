@@ -170,6 +170,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the hotspot-family metrics helper consumed by QA report generation and architecture ratchet tests; only move or inline it if the hotspot baseline/report flow is consolidated into a different canonical helper surface."
     },
+    "scripts/engineering/qa/file_discovery.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the shared filesystem discovery helper consumed by QA inventory and report generators; fold it into a broader canonical discovery helper only if those generators consolidate on a different traversal surface."
+    },
     "scripts/engineering/qa/extract_uniprot_semantic_payload_vocab.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

@@ -12,6 +12,7 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
     with_dry_run_option,
     with_health_server_options,
     with_limit_option,
+    with_observability_backend_options,
     with_run_type_option,
     with_yes_option,
 )
@@ -133,7 +134,7 @@ def _add_debug_options(default_health_server_port: int) -> CommandDecorator:
     def decorator(cmd: CommandCallback) -> CommandCallback:
         cmd = with_debug_option()(cmd)
         cmd = with_health_server_options(default_health_server_port)(cmd)
-        return cmd
+        return with_observability_backend_options(default_health_server_port)(cmd)
 
     return decorator
 

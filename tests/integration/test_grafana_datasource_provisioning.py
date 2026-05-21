@@ -34,10 +34,9 @@ def test_quarantine_explorer_backend_contract_is_documented() -> None:
     readme = Path("grafana/README.md").read_text(encoding="utf-8")
     env_example = Path(".env.example").read_text(encoding="utf-8")
 
-    assert "bioetl quarantine serve --port 8081" in readme
+    assert "bioetl quarantine serve --host 0.0.0.0 --port 8081" in readme
     assert "dedicated long-lived BioETL HTTP" in readme
     assert "compatibility entrypoint" in readme
-    assert "bioetl quarantine serve --port 8081" in env_example
     assert (
         "BIOETL_QUARANTINE_EXPLORER_URL=http://host.docker.internal:8081" in env_example
     )

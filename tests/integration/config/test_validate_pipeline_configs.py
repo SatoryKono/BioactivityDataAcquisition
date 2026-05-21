@@ -155,3 +155,37 @@ def test_validate_config_tree_reports_unknown_composite_pipeline_reference(
         "composite references unknown pipelines: missing_publication" in error
         for error in errors
     )
+
+
+def test_validate_config_tree_includes_registry_manifest_validation(
+    tmp_path: Path,
+) -> None:
+    module = _load_module()
+    configs_root = _build_minimal_crossref_tree(tmp_path)
+
+    errors, warnings, total = module.validate_config_tree(
+        configs_root,
+        registry_validator=lambda _root: ["registry drift detected"],
+    )
+
+    assert total == 3
+    assert not warnings
+    assert "registry drift detected" in errors
+
+
+def test_validate_config_tree_reports_legacy_pipeline_dir_reintroduction(
+    tmp_path: Path,
+) -> None:
+    module = _load_module()
+    configs_root = _build_minimal_crossref_tree(tmp_path)
+    legacy_dir = configs_root / "pipelines"
+    legacy_dir.mkdir(parents=True)
+
+    errors, warnings, total = module.validate_config_tree(configs_root)
+
+    assert total == 3
+    assert not warnings
+    assert any(
+        "Legacy pipeline config directory must remain absent" in error
+        for error in errors
+    )

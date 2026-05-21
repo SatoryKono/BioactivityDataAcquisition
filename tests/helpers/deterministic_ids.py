@@ -42,6 +42,11 @@ def deterministic_batch_id(label: str) -> str:
     return str(deterministic_uuid(f"batch:{label}"))
 
 
+def deterministic_uuid_value(label: str) -> UUID:
+    """Return a stable UUID value for tests that need UUID-typed identifiers."""
+    return deterministic_uuid(label)
+
+
 def deterministic_table_name(prefix: str, label: str) -> str:
     """Return a stable table name suffix derived from a deterministic UUID."""
     return f"{prefix}_{deterministic_uuid(f'table:{label}').hex[:12]}"

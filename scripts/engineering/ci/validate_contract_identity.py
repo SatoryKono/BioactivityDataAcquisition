@@ -12,6 +12,9 @@ from bioetl.domain.control_plane.contract_registry import (
     RegistryValidationIssue,
     RegistryValidationSeverity,
 )
+from bioetl.infrastructure.config.contract_registry_loader import (
+    resolve_contract_registry_path,
+)
 from bioetl.infrastructure.control_plane import FileContractRegistryStore
 
 
@@ -198,7 +201,7 @@ def _build_supported_versions_issues(
 def main() -> int:
     """Validate contract identity and write CI diagnostics."""
     repo_root = Path(__file__).resolve().parents[3]
-    registry_path = repo_root / "configs" / "base" / "contract_registry.yaml"
+    registry_path = resolve_contract_registry_path(repo_root=repo_root)
     diagnostics_path = repo_root / "reports/quality/contract-identity-diagnostics.json"
 
     if not registry_path.exists():

@@ -17,7 +17,7 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 > `crossref/batch.py` больше не является крупным mixed-responsibility hotspot:
 > текущий файл — `24` LOC compatibility facade поверх split collaborators.
 > Дополнительно live architecture-metric exemption baseline сейчас содержит
-> `9` active file-size-limit exemptions и не содержит active class/god-object
+> `7` active file-size-limit exemptions и не содержит active class/god-object
 > exemptions. Поэтому текущий active debt posture лучше читать как
 > topology/ownership watchlist с ограниченным file-size waiver inventory, а не
 > как zero-exemption baseline.

@@ -19,9 +19,6 @@ from bioetl.application.core.wiring.transformer import (
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )
-from bioetl.composition.factories.pipeline._factory_method_types import (
-    build_pipeline_create_runner_request_from_kwargs as _build_pipeline_create_runner_request_from_kwargs,
-)
 from bioetl.composition.factories.pipeline.assembler_helpers import (
     _FactoryLike,
     build_factory_context,
@@ -41,6 +38,9 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
 )
 from bioetl.composition.providers.provider_registry import (
     ProviderDataSourceAccessProtocol,
+)
+from bioetl.composition.pipeline_runner_request import (
+    build_pipeline_create_runner_request_from_kwargs as _build_pipeline_create_runner_request_from_kwargs,
 )
 from bioetl.domain.behavior import EntityIdentityGenerator
 from bioetl.domain.filtering import (

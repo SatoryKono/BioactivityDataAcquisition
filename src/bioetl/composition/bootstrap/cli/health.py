@@ -6,80 +6,27 @@ Used primarily by CLI health operations.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from bioetl.application.services.health_service import HealthService
+from bioetl.composition.bootstrap.assembly.health_service import (
+    HealthServerDependencies,
+    create_health_server_dependencies,
+    create_health_service,
+)
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.bootstrap.cli.run_manifest import (
     bootstrap_run_manifest_service,
 )
-from bioetl.composition.factories.datasource.data_source_factory import (
-    DataSourceFactory,
-)
-from bioetl.composition.providers.registration import (
-    resolve_provider_assembly_support,
-)
-from bioetl.domain.ports import MetricsPort, RunLedgerPort, RunManifestPort
-from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
 from bioetl.infrastructure.config import get_settings
-from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
-from bioetl.infrastructure.time import SystemClock
+
+if TYPE_CHECKING:
+    from bioetl.application.services.health_service import HealthService
 
 __all__ = [
     "HealthServerDependencies",
     "bootstrap_health_server_dependencies",
     "bootstrap_health_service",
 ]
-
-
-@dataclass(frozen=True, slots=True)
-class HealthServerDependencies:
-    """Dependencies for HealthServer, provided by composition layer.
-
-    This dataclass allows composition to provide dependencies without
-    importing from interfaces layer (which would violate layer rules).
-
-    Attributes:
-        health_monitor: ProviderHealthMonitor for health state tracking.
-        metrics: MetricsPort for observability.
-        run_manifest_port: Read-only control-plane run catalog surface used by
-            Grafana selector helper endpoints.
-        run_ledger_port: Read-only control-plane run ledger used by selector
-            helper endpoints to resolve latest terminal run completion.
-    """
-
-    health_monitor: ProviderHealthMonitor
-    metrics: MetricsPort
-    run_manifest_port: RunManifestPort
-    run_ledger_port: RunLedgerPort
-
-
-@dataclass(frozen=True, slots=True)
-class _HealthCheckDataSourceFactory:
-    """Composition-aware factory wrapper for CLI/server health probes."""
-
-    logger: object
-    metrics: MetricsPort
-    settings: object
-
-    @staticmethod
-    def list_providers() -> list[str]:
-        return DataSourceFactory.list_providers()
-
-    def create(self, provider: str) -> object:
-        support = resolve_provider_assembly_support(None)
-        http_client = support.create_http_client(
-            provider,
-            self.settings,
-            metrics=self.metrics,
-        )
-        return DataSourceFactory.create(
-            provider,
-            http_client=http_client,
-            logger=self.logger,
-            settings=self.settings,
-            metrics=self.metrics,
-        )
 
 
 def bootstrap_health_service() -> HealthService:
@@ -98,17 +45,10 @@ def bootstrap_health_service() -> HealthService:
         ...     logger.info("All providers healthy")
     """
     noop_logger = create_noop_logger()
-    metrics = PrometheusMetrics()
     settings = get_settings()
-
-    return HealthService(
+    return create_health_service(
         logger=noop_logger,
-        _factory=_HealthCheckDataSourceFactory(
-            logger=noop_logger,
-            metrics=metrics,
-            settings=settings,
-        ),
-        clock=SystemClock(),
+        settings=settings,
     )
 
 
@@ -131,16 +71,6 @@ def bootstrap_health_server_dependencies() -> HealthServerDependencies:
         >>> server = HealthServer(host="127.0.0.1", port=9090,
         ...                       health_monitor=deps.health_monitor)
     """
-    # Create metrics port for health monitor
-    metrics = PrometheusMetrics()
-
-    # Create health monitor with injected metrics
-    health_monitor = ProviderHealthMonitor(metrics=metrics)
-    run_manifest_service = bootstrap_run_manifest_service()
-
-    return HealthServerDependencies(
-        health_monitor=health_monitor,
-        metrics=metrics,
-        run_manifest_port=run_manifest_service.manifest_port,
-        run_ledger_port=run_manifest_service.ledger_port,
+    return create_health_server_dependencies(
+        run_manifest_service_factory=bootstrap_run_manifest_service,
     )

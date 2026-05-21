@@ -7,6 +7,10 @@ from pathlib import Path
 
 import yaml
 
+from bioetl.infrastructure.config.contract_registry_loader import (
+    DEFAULT_CONTRACT_REGISTRY_PATH,
+)
+
 _CONFIG_GRAPH_FILE_SUFFIXES = (".yaml", ".yml", ".toml", ".lock")
 _DEPENDENCY_PROVENANCE_FILES = ("pyproject.toml", "uv.lock", "poetry.lock")
 
@@ -32,7 +36,7 @@ def _core_config_graph_paths(*, provider: str, entity: str) -> list[str]:
                 f"configs/quality/entities/{provider}/{entity}.yaml",
             ]
         )
-    core_paths.append("configs/base/contract_registry.yaml")
+    core_paths.append(DEFAULT_CONTRACT_REGISTRY_PATH.as_posix())
     return core_paths
 
 

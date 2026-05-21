@@ -79,11 +79,10 @@ def test_run_smoke_command_reports_ready_without_responses(tmp_path: Path) -> No
 from __future__ import annotations
 
 import sys
-import time
 
 sys.stderr.write("INFO SonarQube MCP Server - Status: Server ready\\n")
 sys.stderr.flush()
-time.sleep(10)
+sys.stdin.read()
 """.strip()
         + "\n",
         encoding="utf-8",
@@ -109,14 +108,12 @@ def test_run_smoke_command_rejects_unframed_stdout_preamble_after_ready(
 from __future__ import annotations
 
 import sys
-import time
 
 sys.stderr.write("INFO SonarQube MCP Server - Status: Server ready\\n")
 sys.stderr.flush()
-time.sleep(0.1)
 sys.stdout.write("oops\\n")
 sys.stdout.flush()
-time.sleep(0.5)
+sys.stdin.read()
 """.strip()
         + "\n",
         encoding="utf-8",

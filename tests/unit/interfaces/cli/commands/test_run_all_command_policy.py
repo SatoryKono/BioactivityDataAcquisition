@@ -138,6 +138,8 @@ class TestBuildRunAllCommandInput:
                 debug=False,
                 health_server=True,
                 health_port=8081,
+                ensure_observability_backend=True,
+                observability_backend_port=8081,
             )
 
         mock_build_input.assert_called_once_with(
@@ -150,6 +152,8 @@ class TestBuildRunAllCommandInput:
             debug=False,
             health_server=True,
             health_port=8081,
+            ensure_observability_backend=True,
+            observability_backend_port=8081,
         )
         mock_run_with_policy.assert_called_once_with(ctx, cli_input)
 

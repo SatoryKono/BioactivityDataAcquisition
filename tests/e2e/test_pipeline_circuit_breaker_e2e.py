@@ -134,9 +134,6 @@ class TestCircuitBreakerStateTransitions:
 
         assert cb.get_state() == CircuitBreakerState.OPEN
 
-        # Wait for recovery (instant in this test)
-        await asyncio.sleep(0.01)
-
         # Next successful call should transition to CLOSED
         async def success():
             await asyncio.sleep(0)
@@ -165,9 +162,6 @@ class TestCircuitBreakerStateTransitions:
 
         initial_trips = cb.get_trips_total()
         assert cb.get_state() == CircuitBreakerState.OPEN
-
-        # Wait for recovery
-        await asyncio.sleep(0.01)
 
         # Probe fails - should reopen
         with pytest.raises(RuntimeError):
@@ -330,8 +324,6 @@ class TestCircuitBreakerMetrics:
 
         assert cb.get_trips_total() == 1
 
-        # Recover
-        await asyncio.sleep(0.01)
         await cb.call(success)
 
         # Second trip

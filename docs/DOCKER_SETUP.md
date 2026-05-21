@@ -23,6 +23,7 @@ docker compose --version
 
 ```powershell
 # Запустить основные контейнеры
+docker network create bioetl-monitoring
 docker compose up -d
 
 # Проверить статус
@@ -45,6 +46,7 @@ docker compose logs -f bioetl-app
 
 ```powershell
 # Запустить мониторинг
+docker network create bioetl-monitoring
 docker compose -f docker-compose.monitoring.yml up -d
 
 # Проверить статус
@@ -61,11 +63,17 @@ docker compose -f docker-compose.monitoring.yml ps
 
 ```powershell
 # Запустить MCP серверы
+docker network create warp-network
 docker compose -f docker-compose.codex.yml up -d
 
 # Проверить статус
 docker compose -f docker-compose.codex.yml ps
 ```
+
+Canonical helper scripts `scripts/ops/docker-setup.ps1` and
+`scripts/ops/docker-setup.sh` automatically ensure these shared external
+networks before starting compose stacks. Manual `docker compose ... up` on a
+fresh machine must create them first.
 
 **MCP Серверы:**
 - bioetl-mcp-memory
@@ -165,6 +173,10 @@ Get-Process -Id (Get-NetTCPConnection -LocalPort 8081).OwningProcess
 docker network ls
 docker network inspect warp-network
 docker network inspect bioetl-monitoring
+
+# Если shared external network ещё не создан
+docker network create warp-network
+docker network create bioetl-monitoring
 ```
 
 ### Пересборка контейнеров
@@ -227,6 +239,8 @@ docker ps | Select-String bioetl
 - `docker-compose.alertmanager.yml` — optional local Alertmanager helper stack
 - `docker-compose.minio.yml` — optional local MinIO helper stack
 - `docker-compose.redis.yml` — optional local Redis helper stack
-- `docker-compose.sonarqube.yml` — optional local SonarQube helper stack
+- `docker-compose.sonarqube.yml` — optional local SonarQube helper stack; requires local-only `SONARQUBE_DB_PASSWORD` and `SONARQUBE_SYSTEM_PASSCODE`
+- Reviewed adjunct helper compose files that attach to `bioetl-monitoring`
+  require `docker network create bioetl-monitoring` before first manual start
 - `.env` — переменные окружения
 - `Dockerfile.*` — определения образов

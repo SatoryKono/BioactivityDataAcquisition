@@ -1,15 +1,17 @@
 # Сводка evidence: project-package-topology
 
-Дата: 2026-05-19
+Дата: 2026-05-21
 Статус: refreshed
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-Refresh note (2026-05-19): top-level package counts were remeasured from the
+Refresh note (2026-05-21): top-level package counts were remeasured from the
 working tree with `find src/bioetl ... -name '*.py'` and first-order package
-directory scans excluding `__pycache__`. This summary is now a current topology
-calibration aid again; older `2026-03-20` raw evidence files remain historical
-inputs and should not be treated as the latest package-count baseline.
+directory scans excluding `__pycache__`. Targeted raw evidence snapshots for the
+`interfaces` and `composition` pillar packs were refreshed in place to remove
+known topology drift; other older `2026-03-20` raw evidence files remain
+historical inputs and should not be treated as the latest package-count
+baseline.
 
 > Это summary — repo-only evidence layer для package-topology
 > интерпретации. Он помогает калибровать structural observations, но не
@@ -37,8 +39,8 @@ Collected: `6`
 
 - The repository is not flat at the top level; it is split into clear zones for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct first-order package groups.
-- Current Python file count under `src/bioetl` is `1872`.
-- Current layer file counts are: `domain=541`, `application=527`, `infrastructure=464`, `composition=235`, `interfaces=103`.
+- Current Python file count under `src/bioetl` is `1901`.
+- Current layer file counts are: `domain=543`, `application=538`, `infrastructure=466`, `composition=239`, `interfaces=113`.
 - Current first-order package counts are: `domain=22`, `application=6`, `infrastructure=20`, `composition=6`, `interfaces=2`.
 - `domain` and `application` are now the broadest package surfaces by Python file count; `infrastructure` remains the broadest adapter and external-system implementation boundary.
 

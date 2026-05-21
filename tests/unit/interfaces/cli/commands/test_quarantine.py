@@ -68,6 +68,7 @@ class TestQuarantineGroup:
         assert result.exit_code == 0
         assert "--host" in result.output
         assert "--port" in result.output
+        assert "0.0.0.0" in result.output
         assert "8081" in result.output
 
     @patch("bioetl.interfaces.cli.commands.quarantine.run_health_server_command")

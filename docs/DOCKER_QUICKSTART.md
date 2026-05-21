@@ -50,6 +50,7 @@ Docker helpers также поддерживают явный opt-in `-AllowEnvF
 .\scripts\ops\docker-setup.ps1 -Mode basic
 
 # Или вручную
+docker network create bioetl-monitoring
 docker compose up -d
 ```
 
@@ -65,6 +66,7 @@ docker compose up -d
 .\scripts\ops\docker-setup.ps1 -Mode monitoring
 
 # Или вручную
+docker network create bioetl-monitoring
 docker compose -f docker-compose.monitoring.yml up -d
 ```
 
@@ -81,8 +83,13 @@ docker compose -f docker-compose.monitoring.yml up -d
 .\scripts\ops\docker-setup.ps1 -Mode mcp
 
 # Или вручную
+docker network create warp-network
 docker compose -f docker-compose.codex.yml up -d
 ```
+
+Canonical helper scripts now bootstrap the shared external Docker networks
+(`bioetl-monitoring` and `warp-network`) automatically. If you start compose
+files manually on a fresh machine, create the required network first.
 
 ## 📋 Основные команды
 
@@ -141,7 +148,7 @@ docker system prune -a
 | `docker-compose.alertmanager.yml` | Optional adjunct Alertmanager helper stack; not part of baseline runtime |
 | `docker-compose.minio.yml` | Optional local MinIO helper stack; not part of ADR-010 runtime |
 | `docker-compose.redis.yml` | Optional local Redis helper stack; not part of ADR-010 runtime |
-| `docker-compose.sonarqube.yml` | Optional local SonarQube helper stack; not part of baseline runtime |
+| `docker-compose.sonarqube.yml` | Optional local SonarQube helper stack; not part of baseline runtime. Requires local-only `SONARQUBE_DB_PASSWORD` and `SONARQUBE_SYSTEM_PASSCODE` via shell env or `.env` |
 | `Dockerfile.bioetl` | Образ BioETL (multi-stage Python) |
 | `Dockerfile.warp` | Warp VPN клиент |
 | `Dockerfile.mcp-*` | MCP серверы (Node.js) |
@@ -240,5 +247,7 @@ docker compose up --build -d
 - Extra reviewed compose files for Alertmanager / MinIO / Redis / SonarQube
   остаются manual-only helper surfaces и не запускаются canonical helper script
   по умолчанию
+- Manual-only helper compose files that join the monitoring network require
+  `docker network create bioetl-monitoring` first on a fresh machine
 
 **Все готово к запуску!** 🚀

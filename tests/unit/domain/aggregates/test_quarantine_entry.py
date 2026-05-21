@@ -11,7 +11,6 @@ Tests verify that:
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
-from uuid import uuid4
 
 import pytest
 
@@ -22,6 +21,7 @@ from bioetl.domain.aggregates.quarantine_entry import (
 )
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import BatchID, ContentHash, RunID
+from tests.helpers.deterministic_ids import deterministic_uuid_value
 
 
 def _ts(offset_seconds: int = 0) -> datetime:
@@ -32,13 +32,13 @@ def _ts(offset_seconds: int = 0) -> datetime:
 @pytest.fixture
 def run_id() -> RunID:
     """Create a test run ID."""
-    return RunID(uuid4())
+    return RunID(deterministic_uuid_value("unit.quarantine_entry.run_id"))
 
 
 @pytest.fixture
 def batch_id() -> BatchID:
     """Create a test batch ID."""
-    return BatchID(uuid4())
+    return BatchID(deterministic_uuid_value("unit.quarantine_entry.batch_id"))
 
 
 @pytest.fixture

@@ -10,6 +10,9 @@ from typing import cast
 from bioetl.application.services.control_plane._run_manifest_diagnostics_base import (
     _build_effective_config_diagnostics,
 )
+from bioetl.application.services.control_plane._run_manifest_diagnostics_checkpoint_projection import (
+    build_checkpoint_anchor_projection as _build_checkpoint_anchor_projection,
+)
 
 
 def _build_unified_reproducibility_diagnostics_policy_payload(
@@ -118,8 +121,7 @@ def _build_unified_reproducibility_diagnostics_checkpoint_anchors(
     return {
         "resume_contract": summary.get("resume_contract"),
         "resume_diagnostics": summary.get("resume_diagnostics"),
-        "current_manifest_anchors": _build_current_checkpoint_anchor_payload(summary),
-        "resume_anchor_comparison": _build_resume_anchor_comparison(summary),
+        **_build_checkpoint_anchor_projection(summary),
     }
 
 
@@ -171,56 +173,6 @@ def _build_unified_reproducibility_diagnostics(
     }
 
 
-def _build_current_checkpoint_anchor_payload(
-    summary: dict[str, object],
-) -> dict[str, object]:
-    return {
-        "execution_fingerprint": summary.get("execution_fingerprint"),
-        "manifest_id": summary.get("manifest_id"),
-        "effective_config_hash": summary.get("effective_config_hash"),
-        "contract_ref": summary.get("contract_ref"),
-        "contract_version": summary.get("contract_version"),
-        "effective_config_artifact_id": summary.get("effective_config_artifact_id"),
-        "input_snapshot_ids": summary.get("input_snapshot_ids", []),
-    }
-
-
-def _build_resume_anchor_comparison(
-    summary: dict[str, object],
-) -> dict[str, object]:
-    from bioetl.application.services.control_plane._run_manifest_diagnostics_base import (
-        _EMPTY_RESUME_ANCHOR_COMPARISON,
-        _resolve_resume_identity_maps,
-    )
-
-    identity_maps = _resolve_resume_identity_maps(summary)
-    if identity_maps is None:
-        return dict(_EMPTY_RESUME_ANCHOR_COMPARISON)
-    current_identity, checkpoint_identity = identity_maps
-    matching_fields: list[object] = []
-    mismatched_fields: list[object] = []
-    missing_current_fields: list[object] = []
-    missing_checkpoint_fields: list[object] = []
-    for field in sorted(set(current_identity) | set(checkpoint_identity)):
-        if field not in current_identity:
-            missing_current_fields.append(field)
-        elif field not in checkpoint_identity:
-            missing_checkpoint_fields.append(field)
-        elif current_identity[field] == checkpoint_identity[field]:
-            matching_fields.append(field)
-        else:
-            mismatched_fields.append(field)
-    return {
-        "checkpoint_identity_present": True,
-        "matching_fields": matching_fields,
-        "mismatched_fields": mismatched_fields,
-        "missing_current_fields": missing_current_fields,
-        "missing_checkpoint_fields": missing_checkpoint_fields,
-    }
-
-
 __all__ = [
-    "_build_current_checkpoint_anchor_payload",
-    "_build_resume_anchor_comparison",
     "_build_unified_reproducibility_diagnostics",
 ]

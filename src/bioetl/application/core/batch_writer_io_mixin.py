@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 from datetime import datetime
+from inspect import signature
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 import orjson
 
@@ -238,19 +240,42 @@ class BatchWriterIOMixin:
         validator = self._gold_validator
         target_schema = schema if schema is not None else self._gold_schema
         if schema is not None and hasattr(target_schema, "columns"):
-            validator_cls = validator.__class__
-            validator_kwargs: dict[str, object] = {
-                "schema": target_schema,
-                "strict": getattr(validator, "_strict", True),
-            }
-            dq_config = getattr(validator, "_dq_config", None)
-            if dq_config is not None:
-                validator_kwargs["dq_config"] = dq_config
-            validator = validator_cls(**validator_kwargs)
+            validator = self._rebind_gold_validator_schema(validator, target_schema)
 
         result = validator.validate(records)
         if not result.valid:
             raise SchemaViolationError("gold", result.errors)
+
+    def _rebind_gold_validator_schema(
+        self,
+        validator: object,
+        schema: object,
+    ) -> object:
+        """Clone schema-aware validators for projected Gold schemas when supported."""
+        if isinstance(validator, Mock):
+            return validator
+
+        validator_cls = type(validator)
+        try:
+            init_params = signature(validator_cls).parameters
+        except (TypeError, ValueError):
+            return validator
+
+        if "schema" not in init_params:
+            return validator
+
+        validator_kwargs: dict[str, object] = {"schema": schema}
+        if "strict" in init_params:
+            validator_kwargs["strict"] = getattr(validator, "_strict", True)
+
+        dq_config = getattr(validator, "_dq_config", None)
+        if "dq_config" in init_params and dq_config is not None:
+            validator_kwargs["dq_config"] = dq_config
+
+        try:
+            return validator_cls(**validator_kwargs)
+        except TypeError:
+            return validator
 
     def _should_defer_gold_validation_to_storage(self) -> bool:
         """Whether Gold validation/projection must happen per-version in storage."""

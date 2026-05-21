@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.checkpoint_service import CheckpointInfo
+from bioetl.application.services.checkpoint_models import CheckpointInfo
 from bioetl.application.services.control_plane.run_manifest_inspection_service import (
     RunManifestInspectionResult,
 )

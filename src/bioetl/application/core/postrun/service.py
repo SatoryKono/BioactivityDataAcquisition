@@ -31,7 +31,9 @@ from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
-    from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.application.core.pipeline_service_protocols import (
+        PipelineServicesProtocol,
+    )
     from bioetl.application.core.postrun.cleanup_orchestrator import (
         PostrunCleanupService,
     )
@@ -93,7 +95,7 @@ class PostrunService(PostrunServiceSupportMixin):
         dq_service: DataQualityService,
         lifecycle_service: MedallionLifecycleService,
         dependencies: PostrunDependencyContext | None = None,
-        services: PipelineService | None = None,
+        services: PipelineServicesProtocol | None = None,
         tracer: TracingPort | None = None,
         **legacy_kwargs: object,
     ) -> None:

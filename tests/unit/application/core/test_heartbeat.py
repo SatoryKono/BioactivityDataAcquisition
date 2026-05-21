@@ -144,21 +144,38 @@ class TestHeartbeatTask:
 
     async def test_heartbeat_loop_runs_periodically(
         self,
-        heartbeat_task: HeartbeatTask,
         mock_lock_port: AsyncMock,
+        mock_shutdown_signal: Mock,
+        mock_logger: Mock,
     ) -> None:
         """Test that heartbeat loop calls lock_port periodically."""
-        mock_lock_port.heartbeat.return_value = True
+        second_heartbeat = asyncio.Event()
+        call_count = 0
+
+        async def heartbeat(*args: object, **kwargs: object) -> bool:
+            nonlocal call_count
+            call_count += 1
+            if call_count >= 2:
+                second_heartbeat.set()
+            return True
+
+        mock_lock_port.heartbeat.side_effect = heartbeat
+        heartbeat_task = HeartbeatTask(
+            lock_port=mock_lock_port,
+            lock_key="lock:test_pipeline",
+            owner_id=TEST_RUN_ID,
+            exclusive=False,
+            interval=0,
+            shutdown_signal=mock_shutdown_signal,
+            logger=mock_logger,
+        )
 
         await heartbeat_task.start()
-
-        # Wait for a couple heartbeat cycles
-        await asyncio.sleep(0.1)
+        await asyncio.wait_for(second_heartbeat.wait(), timeout=1.0)
 
         await heartbeat_task.stop()
 
-        # At least the initial heartbeat should have been called
-        assert mock_lock_port.heartbeat.call_count >= 1
+        assert mock_lock_port.heartbeat.call_count >= 2
 
     async def test_exclusive_flag_passed_to_heartbeat(
         self,

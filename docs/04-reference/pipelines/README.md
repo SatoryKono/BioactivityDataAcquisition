@@ -115,13 +115,13 @@ overview plus links to the current provider reference and config files.
 
 ## Compatibility Summary Pages
 
-The top-level pages below are retained as short published summaries for
-historical discoverability, but they are not the preferred deep entrypoints for
-current pipeline behavior:
+The top-level activity and assay landing pages are retained as short published
+summaries for historical discoverability, but they are not the preferred deep
+entrypoints for current pipeline behavior:
 
-- `chembl-activity.md` -> current detailed spec:
+- ChEMBL activity landing page -> current detailed spec:
   `chembl/05-activity-spec.md`
-- `chembl-assay.md` -> current detailed spec:
+- ChEMBL assay landing page -> current detailed spec:
   `chembl/06-assay-spec.md`
 
 ______________________________________________________________________

@@ -14,6 +14,9 @@ from bioetl.domain.control_plane.contract_registry import (
     RegistryValidationIssue,
     RegistryValidationSeverity,
 )
+from bioetl.infrastructure.config.contract_registry_loader import (
+    resolve_contract_registry_path,
+)
 from bioetl.infrastructure.control_plane import FileContractRegistryStore
 
 _ENTITY_CONFIGS_ROOT = Path("configs/entities")
@@ -278,7 +281,7 @@ def _finalize_validation(
 def main() -> int:
     """Main validation entry point."""
     repo_root = Path(__file__).resolve().parents[3]
-    registry_path = repo_root / "configs/base/contract_registry.yaml"
+    registry_path = resolve_contract_registry_path(repo_root=repo_root)
     diagnostics_path = repo_root / "reports/quality/contract-registry-diagnostics.json"
 
     if not registry_path.exists():

@@ -192,6 +192,32 @@ def test_load_pipeline_from_unified_entity_when_legacy_missing(tmp_path, monkeyp
     assert config.entity_type == "item"
 
 
+def test_load_pipeline_rejects_reintroduced_legacy_pipeline_dir(
+    tmp_path, monkeypatch
+):
+    load_pipeline_config_cached.cache_clear()
+    load_source_config.cache_clear()
+
+    entity_dir = tmp_path / "configs" / "entities" / "demo"
+    entity_dir.mkdir(parents=True)
+    _write_unified_entity_config(
+        tmp_path / "configs" / "entities",
+        "demo",
+        "item",
+        {
+            "pipeline_name": "demo_item",
+            "provider": "demo",
+            "entity_type": "item",
+            "business_primary_keys": ["id"],
+        },
+    )
+    (tmp_path / "configs" / "pipelines").mkdir(parents=True)
+
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(ValueError, match="Legacy pipeline config directory must remain absent"):
+        load_pipeline_config("demo_item")
+
+
 def test_load_invalid_name_format(setup_configs):
     """Verify names without provider_entity format are rejected."""
     with pytest.raises(ValueError, match="must be in '<provider>_<entity>' format"):

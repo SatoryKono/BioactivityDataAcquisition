@@ -9,13 +9,30 @@ Sunset date: 2026-06-30 (see PLAN-001).
 
 from __future__ import annotations
 
+import ast
 from datetime import date
+from importlib import import_module
 from pathlib import Path
 
 import pytest
 
+from scripts.engineering.qa.file_discovery import discover_files
+
+ROOT = Path(__file__).resolve().parents[2]
 SUNSET_DATE = date(2026, 6, 30)
 POLICY_REVIEW_DATE = date(2026, 5, 15)
+REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE = (
+    "bioetl.application.services.checkpoint_compatibility_service_v2"
+)
+REMOVED_CHECKPOINT_COMPATIBILITY_V2_PATH = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "services"
+    / "checkpoint_compatibility_service_v2.py"
+)
+BASE_PIPELINE_CONFIG = ROOT / "configs" / "base" / "pipeline.yaml"
 
 # Active sunset items. The 2026-04-29 removal wave retired all previously
 # tracked entries early with explicit maintainer approval.
@@ -164,3 +181,40 @@ def test_removed_compat_module_stays_removed(name: str, path: Path) -> None:
         f"Removed compatibility module {name} exists again at {path}. "
         "Use the canonical narrow-port or normalization surface instead."
     )
+
+
+def _find_importers(root: Path, module_name: str) -> list[str]:
+    violations: list[str] = []
+    for relative_path in discover_files(str(root.resolve()), ".py"):
+        path = root / relative_path
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                names = {alias.name for alias in node.names}
+                if module_name in names:
+                    violations.append(path.relative_to(ROOT).as_posix())
+                    break
+            if isinstance(node, ast.ImportFrom) and node.module == module_name:
+                violations.append(path.relative_to(ROOT).as_posix())
+                break
+    return violations
+
+
+@pytest.mark.architecture
+def test_checkpoint_compatibility_v2_surface_stays_removed_and_unimportable() -> None:
+    """Removed checkpoint compatibility V2 surface must stay absent everywhere."""
+    assert not REMOVED_CHECKPOINT_COMPATIBILITY_V2_PATH.exists()
+    with pytest.raises(ModuleNotFoundError):
+        import_module(REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE)
+    assert not _find_importers(ROOT / "src", REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE)
+    assert not _find_importers(
+        ROOT / "tests", REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE
+    )
+
+
+@pytest.mark.architecture
+def test_removed_pipeline_base_yaml_fallback_surface_stays_absent() -> None:
+    """Historical pipeline base fallback path must not silently return."""
+    text = BASE_PIPELINE_CONFIG.read_text(encoding="utf-8")
+    assert "configs/pipelines/_base.yaml" not in text
+    assert not (ROOT / "configs" / "pipelines").exists()

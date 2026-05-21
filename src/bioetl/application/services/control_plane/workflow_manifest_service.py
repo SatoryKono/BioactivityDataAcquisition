@@ -5,13 +5,15 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Protocol
 from uuid import uuid4
 
+from bioetl.application.services.control_plane._manifest_time_support import (
+    ManifestClock,
+    resolve_manifest_created_at,
+)
 from bioetl.application.services.control_plane.workflow_manifest_models import (
     WorkflowManifestCreateSpec,
 )
-from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
 from bioetl.domain.control_plane import WorkflowManifest, WorkflowManifestStep
 from bioetl.domain.normalization import compute_execution_identity_fingerprint
 from bioetl.domain.ports import WorkflowManifestPort
@@ -34,16 +36,12 @@ _EXECUTION_FINGERPRINT_IGNORED_LAUNCH_KEYS = frozenset(
 )
 
 
-class _ClockLike(Protocol):
-    def now(self) -> datetime: ...
-
-
 @dataclass(slots=True)
 class WorkflowManifestService:
     """Create and persist immutable workflow manifests."""
 
     manifest_port: WorkflowManifestPort
-    clock: _ClockLike | None = None
+    clock: ManifestClock | None = None
     created_at_factory: Callable[[], datetime] | None = None
     schema_version: str = "1.0"
     _manifest_id_factory: Callable[[], str] = field(
@@ -123,8 +121,7 @@ class WorkflowManifestService:
         )
 
     def _resolve_created_at(self) -> datetime:
-        if self.clock is not None:
-            return self.clock.now()
-        if self.created_at_factory is not None:
-            return self.created_at_factory()
-        return MISSING_RUNTIME_TIMESTAMP
+        return resolve_manifest_created_at(
+            clock=self.clock,
+            created_at_factory=self.created_at_factory,
+        )

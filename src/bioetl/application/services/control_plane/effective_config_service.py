@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import json
 
+from bioetl.application.services.control_plane._effective_config_provenance_support import (
+    build_source_class_provenance,
+)
 from bioetl.application.services.control_plane._effective_config_support import (
     SemanticIdentityPayloadContext,
     build_dq_components,
@@ -13,7 +16,6 @@ from bioetl.application.services.control_plane._effective_config_support import 
     build_resolved_config_snapshot,
     build_runtime_override_snapshot,
     build_semantic_identity_payload,
-    build_source_class_provenance,
     compute_source_fingerprint,
     extract_contract_refs,
     resolve_resolution_policy,

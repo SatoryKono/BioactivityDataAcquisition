@@ -26,6 +26,10 @@ from typing import TypeVar, cast
 from urllib import error, parse, request
 
 import yaml
+from bioetl.infrastructure.config.contract_registry_loader import (
+    DEFAULT_CONTRACT_REGISTRY_PATH,
+    load_contract_registry_payload,
+)
 
 type JsonScalar = str | int | float | bool | None
 type JsonValue = JsonScalar | list["JsonValue"] | dict[str, "JsonValue"]
@@ -64,7 +68,7 @@ RUN_MANIFEST_INSPECTION_DOC_PATH = (
 TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH = (
     "docs/05-operations/runbooks/traceability-signal-ownership.md"
 )
-CONTRACT_REGISTRY_RELATIVE_PATH = "configs/base/contract_registry.yaml"
+CONTRACT_REGISTRY_RELATIVE_PATH = DEFAULT_CONTRACT_REGISTRY_PATH.as_posix()
 CHEMBL_ACTIVITY_CONTRACT_REF = "chembl.activity"
 RUN_MANIFEST_ARTIFACT_REF = "run_manifest::json"
 EFFECTIVE_CONFIG_ARTIFACT_REF = "effective_config_artifact::json"
@@ -181,6 +185,7 @@ DEFAULT_FILE_STRUCTURE_REPO_ZONES: dict[str, tuple[str, ...]] = {
     GITHUB_DIR: (GITHUB_DIR,),
 }
 DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES: tuple[str, ...] = (
+    "docs/site",
     "docs/99-archive",
     "docs/exports",
     "docs/reports",
@@ -2707,7 +2712,7 @@ def _git_last_commit_age_days_bulk(
     today: date,
     cache: dict[str, int | None],
     *,
-    chunk_size: int = 16,
+    chunk_size: int = 1024,
 ) -> dict[str, int | None]:
     unique_paths = [path for path in dict.fromkeys(relative_paths) if path]
     if not unique_paths:
@@ -2720,10 +2725,21 @@ def _git_last_commit_age_days_bulk(
         chunk = pending_paths[start_index : start_index + chunk_size]
         if not chunk:
             continue
-        chunk_results = _git_chunk_commit_ages(
+        tracked_chunk = _git_chunk_tracked_paths(
             git_executable=git_executable,
             root=root,
             chunk=chunk,
+        )
+        untracked_paths = sorted(set(chunk) - set(tracked_chunk))
+        for path in untracked_paths:
+            cache[path] = None
+            resolved[path] = None
+        if not tracked_chunk:
+            continue
+        chunk_results = _git_chunk_commit_ages(
+            git_executable=git_executable,
+            root=root,
+            chunk=tracked_chunk,
             today=today,
         )
         cache.update(chunk_results)
@@ -2781,6 +2797,47 @@ def _git_chunk_commit_ages(
     if result.returncode != 0:
         return chunk_results
     return _parse_git_chunk_age_output(result.stdout, chunk, today)
+
+
+def _git_chunk_tracked_paths(
+    *,
+    git_executable: str,
+    root: Path,
+    chunk: list[str],
+) -> list[str]:
+    try:
+        result = subprocess.run(
+            [
+                git_executable,
+                "-C",
+                str(root),
+                "ls-files",
+                "--cached",
+                "--",
+                *chunk,
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except TypeError:
+        result = subprocess.run(
+            [
+                git_executable,
+                "-C",
+                str(root),
+                "ls-files",
+                "--cached",
+                "--",
+                *chunk,
+            ],
+            False,
+            True,
+            True,
+        )
+    if result.returncode != 0:
+        return []
+    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
 
 
 def _parse_git_chunk_age_output(
@@ -10942,7 +10999,7 @@ def _contract_registry_entries(root: Path) -> dict[str, dict[str, object]]:
 
 
 def _contract_registry_payload(root: Path) -> dict[object, object]:
-    payload = _read_yaml(root / CONTRACT_REGISTRY_RELATIVE_PATH)
+    payload = load_contract_registry_payload(root / DEFAULT_CONTRACT_REGISTRY_PATH)
     entries = payload.get("entries")
     return entries if isinstance(entries, dict) else {}
 
@@ -17355,7 +17412,9 @@ def _excluded_file_structure_paths(snapshot: GraphSnapshot) -> list[str]:
         for node in snapshot.nodes.values()
         if node.key.label in {"directory_surface", "file_surface"}
         and (
-            node.key.name.startswith("docs/99-archive")
+            node.key.name.startswith("docs/site")
+            or node.key.name.startswith("docs/site/")
+            or node.key.name.startswith("docs/99-archive")
             or node.key.name.startswith("docs/exports")
             or node.key.name.startswith("docs/reports/generated")
             or node.key.name.startswith("docs/02-architecture/generated")

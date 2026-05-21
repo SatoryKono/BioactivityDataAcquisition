@@ -3,11 +3,19 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import yaml
 
 from scripts.ops.support.repo import cleanup_repository as module
+
+
+def _set_age_days(path: Path, *, days: int) -> None:
+    age_seconds = days * 24 * 60 * 60
+    now = path.stat().st_mtime
+    target = now - age_seconds
+    os.utime(path, (target, target))
 
 
 def _write_governance_files(tmp_path: Path) -> None:
@@ -503,7 +511,8 @@ def test_collect_reports_workspace_evidence_marks_local_only_candidates_for_prun
         "field,value\n",
         encoding="utf-8",
     )
-    (quality_dir / "pretest_guardrails_20260420_174602.json").write_text(
+    _set_age_days(quality_dir / "_tmp_field_level_diagnostics.csv", days=8)
+    (quality_dir / "pretest_guardrails_20260419_174602.json").write_text(
         "{}\n",
         encoding="utf-8",
     )
@@ -535,6 +544,10 @@ def test_collect_reports_workspace_evidence_marks_local_only_candidates_for_prun
         == "PRUNE_CANDIDATE"
     )
     assert (
+        by_path["reports/quality/_tmp_field_level_diagnostics.csv"].ttl_expired
+        is True
+    )
+    assert (
         by_path["reports/quality/_tmp_field_level_diagnostics.csv"].retention_entry_id
         == "reports_quality_tmp_diagnostics"
     )
@@ -544,21 +557,63 @@ def test_collect_reports_workspace_evidence_marks_local_only_candidates_for_prun
     )
     assert (
         by_path[
-            "reports/quality/pretest_guardrails_20260420_174602.json"
+            "reports/quality/pretest_guardrails_20260419_174602.json"
         ].classification
         == "PRUNE_CANDIDATE"
     )
     assert (
         by_path[
-            "reports/quality/pretest_guardrails_20260420_174602.json"
+            "reports/quality/pretest_guardrails_20260419_174602.json"
+        ].ttl_expired
+        is True
+    )
+    assert (
+        by_path[
+            "reports/quality/pretest_guardrails_20260419_174602.json"
         ].retention_entry_id
         == "reports_quality_pretest_guardrails_history"
     )
     assert (
         by_path[
-            "reports/quality/pretest_guardrails_20260420_174602.json"
+            "reports/quality/pretest_guardrails_20260419_174602.json"
         ].retention_ttl_days
         == 30
+    )
+
+
+def test_collect_reports_workspace_evidence_retains_fresh_ttl_artifacts(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _write_governance_files(tmp_path)
+    quality_dir = tmp_path / "reports" / "quality"
+    quality_dir.mkdir(parents=True)
+    fresh_tmp = quality_dir / "_tmp_recent_diagnostics.csv"
+    fresh_tmp.write_text("field,value\n", encoding="utf-8")
+    fresh_guardrails = quality_dir / "pretest_guardrails_20990101_000000.json"
+    fresh_guardrails.write_text("{}\n", encoding="utf-8")
+
+    monkeypatch.setattr(module, "_tracked_paths", lambda repo_root: [])
+    monkeypatch.setattr(module, "_git_path_has_history", lambda repo_root, path: False)
+    monkeypatch.setattr(module, "_count_reference_hits", lambda repo_root, path: 0)
+
+    evidence = module.collect_reports_workspace_evidence(tmp_path)
+    by_path = {row.rel_path: row for row in evidence}
+
+    assert (
+        by_path["reports/quality/_tmp_recent_diagnostics.csv"].classification
+        == "RETAIN"
+    )
+    assert by_path["reports/quality/_tmp_recent_diagnostics.csv"].ttl_expired is False
+    assert (
+        by_path[
+            "reports/quality/pretest_guardrails_20990101_000000.json"
+        ].classification
+        == "RETAIN"
+    )
+    assert (
+        by_path["reports/quality/pretest_guardrails_20990101_000000.json"].ttl_expired
+        is False
     )
 
 

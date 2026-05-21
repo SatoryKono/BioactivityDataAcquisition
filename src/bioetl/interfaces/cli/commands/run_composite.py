@@ -1,13 +1,9 @@
-"""Run composite pipeline command for BioETL CLI.
-
-Implements the composite pipeline execution command that orchestrates
-multiple data sources (seed + enrichers) into a unified dataset.
-"""
+"""Run the composite pipeline CLI command."""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, cast
 
 import click
@@ -44,6 +40,10 @@ from bioetl.interfaces.cli.commands.domains.composite.support import (
 from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
     ensure_metrics_server_started,
 )
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    ensure_observability_backend_started,
+    should_disable_transient_health_server,
+)
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     echo_health_server_info,
@@ -55,9 +55,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.runner_pkg import CompositePipelineRunner
     from bioetl.domain.composite.config import CompositeConfig
 
-__all__ = [
-    "run_composite",
-]
+__all__ = ["run_composite"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -79,6 +77,8 @@ class CompositeRunCommandInput:
     debug: bool = False
     health_server: bool = True
     health_port: int = DEFAULT_HEALTH_SERVER_PORT
+    ensure_observability_backend: bool = True
+    observability_backend_port: int = DEFAULT_HEALTH_SERVER_PORT
 
 
 def _validate_composite_name(
@@ -288,6 +288,20 @@ def _exit_with_composite_result(success: bool, error_message: str | None) -> Non
     help="Port for the HTTP health server.",
     show_default=True,
 )
+@click.option(
+    "--ensure-observability-backend/--no-ensure-observability-backend",
+    "ensure_observability_backend",
+    default=True,
+    help="Auto-start a detached Quarantine Explorer backend for Grafana ID/detail panels.",
+    show_default=True,
+)
+@click.option(
+    "--observability-backend-port",
+    type=int,
+    default=DEFAULT_HEALTH_SERVER_PORT,
+    help="Port for the detached Quarantine Explorer backend used by Grafana ID/detail panels.",
+    show_default=True,
+)
 def run_composite(**options: object) -> None:
     """Run a composite pipeline that combines multiple data sources.
 
@@ -322,6 +336,17 @@ def run_composite(**options: object) -> None:
         health_port: TCP port for the HTTP health server.
     """
     cli_input = _build_composite_run_command_input(options)
+    backend_result = ensure_observability_backend_started(
+        enabled=cli_input.ensure_observability_backend,
+        port=cli_input.observability_backend_port,
+    )
+    if should_disable_transient_health_server(
+        health_server_enabled=cli_input.health_server,
+        health_port=cli_input.health_port,
+        observability_backend_port=cli_input.observability_backend_port,
+        backend_result=backend_result,
+    ):
+        cli_input = replace(cli_input, health_server=False)
     runtime = build_runtime_config(
         CompositeRuntimeCliInput(
             resume=cli_input.resume,
@@ -384,4 +409,11 @@ def _build_composite_run_command_input(
         debug=cast(bool, options.get("debug", False)),
         health_server=cast(bool, options.get("health_server", True)),
         health_port=cast(int, options.get("health_port", DEFAULT_HEALTH_SERVER_PORT)),
+        ensure_observability_backend=cast(
+            bool, options.get("ensure_observability_backend", True)
+        ),
+        observability_backend_port=cast(
+            int,
+            options.get("observability_backend_port", DEFAULT_HEALTH_SERVER_PORT),
+        ),
     )

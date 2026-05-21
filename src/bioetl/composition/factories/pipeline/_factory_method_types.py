@@ -14,7 +14,6 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 )
 from bioetl.composition.factories.pipeline.control_plane_artifacts import (
     ControlPlaneArtifacts,
-    build_control_plane_artifacts,
 )
 from bioetl.composition.factories.pipeline.creation_support import (
     _PipelineCreationRequest,
@@ -119,43 +118,12 @@ def build_create_factory_runner_request(
 def build_pipeline_create_runner_request_from_kwargs(
     **kwargs: object,
 ) -> PipelineCreateRunnerRequest:
-    """Build the canonical public runner request from keyword wiring."""
-    control_plane = kwargs.get("control_plane")
-    if control_plane is None:
-        control_plane = build_control_plane_artifacts(
-            manifest_id=cast(str | None, kwargs.get("manifest_id")),
-            execution_fingerprint=cast(str | None, kwargs.get("execution_fingerprint")),
-            config_hash=cast(str | None, kwargs.get("config_hash")),
-            resolved_config_hash=cast(str | None, kwargs.get("resolved_config_hash")),
-            effective_config_hash=cast(str | None, kwargs.get("effective_config_hash")),
-            dq_contract_compatibility_hash=cast(
-                str | None, kwargs.get("dq_contract_compatibility_hash")
-            ),
-            effective_config_artifact_id=cast(
-                str | None, kwargs.get("effective_config_artifact_id")
-            ),
-            replay_of_run_id=cast(str | None, kwargs.get("replay_of_run_id")),
-            replay_of_manifest_id=cast(
-                str | None, kwargs.get("replay_of_manifest_id")
-            ),
-            input_snapshot_fingerprint=cast(
-                str | None, kwargs.get("input_snapshot_fingerprint")
-            ),
-        )
-    return PipelineCreateRunnerRequest(
-        run_id=cast("RunID", kwargs["run_id"]),
-        runtime=cast("RuntimeConfig", kwargs["runtime"]),
-        started_at=cast("datetime", kwargs["started_at"]),
-        settings=cast("Settings", kwargs["settings"]),
-        observability=cast("ObservabilityBundle", kwargs["observability"]),
-        control_plane=cast("ControlPlaneArtifacts", control_plane),
-        filter_config=cast("InputFilterConfig | None", kwargs.get("filter_config")),
-        config=cast("PipelineYamlConfig | None", kwargs.get("config")),
-        cached_bronze=cast(
-            "CachedBronzeContext | None",
-            kwargs.get("cached_bronze"),
-        ),
+    """Compat shim for legacy factory imports expecting the kwargs builder here."""
+    from bioetl.composition.pipeline_runner_request import (
+        build_pipeline_create_runner_request_from_kwargs as _build_request,
     )
+
+    return _build_request(**kwargs)
 
 
 def extract_entity_type(pipeline_name: str) -> str | None:

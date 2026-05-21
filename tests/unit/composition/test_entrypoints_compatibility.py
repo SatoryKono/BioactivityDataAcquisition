@@ -154,3 +154,22 @@ def test_canonical_composition_owner_modules_remain_directly_importable() -> Non
     assert control_plane_api_module is not None
     assert health_api_module is not None
     assert maintenance_api_module is not None
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "module_name",
+    (
+        "bioetl.composition.entrypoints",
+        "bioetl.composition.health_api",
+        "bioetl.composition.maintenance_api",
+    ),
+)
+def test_public_composition_facades_do_not_duplicate_explicit_exports(
+    module_name: str,
+) -> None:
+    """Explicit composition facade exports must stay unique and introspection-safe."""
+    module = importlib.import_module(module_name)
+
+    assert len(module.__all__) == len(set(module.__all__))
+    assert set(module.__all__) <= set(dir(module))

@@ -16,6 +16,9 @@ DEPENDENCIES_COMPLETED).
 Note: Cross-validation is optional. If no cross-validation configured, MERGING
 transitions directly to COMPLETED (or CROSS_VALIDATION_RUNNING which immediately
 transitions to CROSS_VALIDATION_COMPLETED).
+
+Note: Dry-run composite execution skips MERGING entirely, but that shortcut is
+owned by the application layer rather than the domain FSM.
 """
 
 from __future__ import annotations
@@ -177,6 +180,7 @@ class CompositePipelineState(StrEnum):
 # Valid transitions for each state
 # Maps current state value -> set of allowed next state values
 # Note: seed_completed can go to dependencies_running OR enriching (if no dependencies)
+# Note: dry-run completion shortcut is guarded in the application layer
 # Note: merging can go to cross_validation_running OR completed (if no cross-validation)
 # Note: any active state can transition to FAILED, including MERGING
 _STATE_TRANSITIONS: Mapping[str, frozenset[str]] = {

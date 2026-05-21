@@ -19,6 +19,10 @@ file_structure:
   excluded_dir_names:
     - "__pycache__"
   excluded_prefixes:
+    - "src/memory/derived"
+    - "src/memory/episodic/sessions"
+    - "src/memory/episodic/summaries"
+    - "docs/site"
     - "docs/99-archive"
     - "docs/exports"
     - "docs/reports/generated"

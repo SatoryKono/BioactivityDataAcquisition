@@ -78,7 +78,8 @@ design rationale and layer structure.
   boundaries, diagrams, and ADR routing.
 - Use this reference section for concrete published surfaces that operators,
   integrators, or maintainers must consult directly.
-- Use repository-path indexes for repo-only context:
-  [`../plans/README.md`](../plans/README.md),
-  [`../reports/index.md`](../reports/index.md),
-  [`../99-archive/README.md`](../99-archive/README.md).
+- Use the repo-only plans index for working context:
+  [`../plans/README.md`](../plans/README.md).
+- Historical archive material lives in the archived [`../99-archive/README.md`](../99-archive/README.md) index.
+- Reports remain non-canonical and should be navigated directly through the
+  `docs/reports/` tree when needed.

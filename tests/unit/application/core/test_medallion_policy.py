@@ -92,11 +92,10 @@ class TestWriteModePolicyAllowedModes:
 class TestWriteModePolicyValidateBronze:
     """Tests for Bronze layer validation."""
 
-    def test_bronze_append_allowed(self):
+    def test_validate_bronze_accepts_append_mode(self):
         """Test Bronze APPEND is allowed."""
         policy = WriteModePolicy()
-        # Should not raise
-        policy.validate(Layer.BRONZE, WriteMode.APPEND)
+        assert policy.validate(Layer.BRONZE, WriteMode.APPEND) is None
 
     def test_bronze_merge_rejected(self):
         """Test Bronze MERGE is rejected."""
@@ -119,17 +118,15 @@ class TestWriteModePolicyValidateBronze:
 class TestWriteModePolicyValidateSilver:
     """Tests for Silver layer validation."""
 
-    def test_silver_append_allowed(self):
+    def test_validate_silver_accepts_append_mode(self):
         """Test Silver APPEND is allowed."""
         policy = WriteModePolicy()
-        # Should not raise
-        policy.validate(Layer.SILVER, WriteMode.APPEND)
+        assert policy.validate(Layer.SILVER, WriteMode.APPEND) is None
 
-    def test_silver_merge_allowed(self):
+    def test_validate_silver_accepts_merge_mode(self):
         """Test Silver MERGE is allowed."""
         policy = WriteModePolicy()
-        # Should not raise
-        policy.validate(Layer.SILVER, WriteMode.MERGE)
+        assert policy.validate(Layer.SILVER, WriteMode.MERGE) is None
 
     def test_silver_overwrite_rejected(self):
         """Test Silver OVERWRITE is rejected."""
@@ -143,23 +140,20 @@ class TestWriteModePolicyValidateSilver:
 class TestWriteModePolicyValidateGold:
     """Tests for Gold layer validation."""
 
-    def test_gold_merge_allowed(self):
+    def test_validate_gold_accepts_merge_mode(self):
         """Test Gold MERGE is allowed."""
         policy = WriteModePolicy()
-        # Should not raise
-        policy.validate(Layer.GOLD, WriteMode.MERGE)
+        assert policy.validate(Layer.GOLD, WriteMode.MERGE) is None
 
-    def test_gold_overwrite_allowed(self):
+    def test_validate_gold_accepts_overwrite_mode(self):
         """Test Gold OVERWRITE is allowed."""
         policy = WriteModePolicy()
-        # Should not raise
-        policy.validate(Layer.GOLD, WriteMode.OVERWRITE)
+        assert policy.validate(Layer.GOLD, WriteMode.OVERWRITE) is None
 
-    def test_gold_append_allowed(self):
+    def test_validate_gold_accepts_append_mode(self):
         """Test Gold APPEND is allowed."""
         policy = WriteModePolicy()
-        # Should not raise
-        policy.validate(Layer.GOLD, WriteMode.APPEND)
+        assert policy.validate(Layer.GOLD, WriteMode.APPEND) is None
 
 
 @pytest.mark.unit
@@ -177,11 +171,12 @@ class TestWriteModePolicyValidateAllCombinations:
             (Layer.GOLD, WriteMode.APPEND),
         ],
     )
-    def test_allowed_combinations(self, layer: Layer, mode: WriteMode):
+    def test_validate_accepts_each_allowed_layer_mode_pair(
+        self, layer: Layer, mode: WriteMode
+    ):
         """Test all allowed layer/mode combinations."""
         policy = WriteModePolicy()
-        # Should not raise
-        policy.validate(layer, mode)
+        assert policy.validate(layer, mode) is None
 
     @pytest.mark.parametrize(
         ("layer", "mode"),

@@ -476,15 +476,15 @@ class TestConcurrentHalfOpenProbes:
                 await cb.call(fail)
 
         # Multiple concurrent probes
-        async def probe(delay: float) -> str:
-            await asyncio.sleep(delay)
+        async def probe() -> str:
+            await _yield_once()
             return "ok"
 
         # Start multiple probes concurrently
         results = await asyncio.gather(
-            cb.call(lambda: probe(0.01)),
-            cb.call(lambda: probe(0.02)),
-            cb.call(lambda: probe(0.03)),
+            cb.call(probe),
+            cb.call(probe),
+            cb.call(probe),
             return_exceptions=True,
         )
 

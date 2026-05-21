@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass
 from typing import Protocol, cast
 from urllib.parse import unquote
 
-from bioetl.domain.control_plane import RunManifest
+from bioetl.interfaces.http._health_server_control_plane_scope import (
+    read_selected_run_id,
+    resolve_control_plane_identity_scope,
+)
 from bioetl.interfaces.http._health_server_identity_evidence import (
     build_control_plane_identity_evidence_payload,
 )
@@ -24,16 +26,6 @@ from bioetl.interfaces.http.processed_records_table import (
 )
 
 _NOT_FOUND_MESSAGE = "Not Found"
-
-
-@dataclass(frozen=True, slots=True)
-class _IdentityScope:
-    requested_pipeline: str
-    selected_pipelines: tuple[str, ...]
-    selected_run_types: tuple[str, ...]
-    selected_run_id: str | None
-    resolved_manifest: RunManifest | None
-    resolved_via: str
 
 
 class _HealthResponseSupport(Protocol):
@@ -278,7 +270,7 @@ async def handle_control_plane_filter_options(
     selected_workflows = host._read_scope_csv_param(query, "workflow")
     selected_run_types = host._read_scope_csv_param(query, "run_type")
     selected_run_statuses = host._read_scope_csv_param(query, "run_status")
-    selected_run_id = _read_selected_run_id(host, query)
+    selected_run_id = read_selected_run_id(host, query)
     response_shape = host._read_optional_param(query, "response_shape") or "object"
 
     payload = build_selector_filter_options_payload(
@@ -314,7 +306,7 @@ async def handle_control_plane_selector_context(
         selected_pipelines=host._read_scope_csv_param(query, "pipeline"),
         selected_run_types=host._read_scope_csv_param(query, "run_type"),
         selected_run_statuses=host._read_scope_csv_param(query, "run_status"),
-        selected_run_id=_read_selected_run_id(host, query),
+        selected_run_id=read_selected_run_id(host, query),
     )
     await host._send_payload_response(writer, 200, payload)
 
@@ -326,7 +318,7 @@ async def handle_control_plane_identity_table(
 ) -> None:
     """Handle control-plane-backed identity rows for Overview v3."""
     assert host._run_manifest_port is not None
-    scope = _resolve_control_plane_identity_scope(host, query)
+    scope = resolve_control_plane_identity_scope(host, query)
 
     await host._send_payload_response(
         writer,
@@ -349,7 +341,7 @@ async def handle_control_plane_identity_evidence(
 ) -> None:
     """Handle dedicated Control Plane identity evidence rows."""
     assert host._run_manifest_port is not None
-    scope = _resolve_control_plane_identity_scope(host, query)
+    scope = resolve_control_plane_identity_scope(host, query)
     view = host._read_optional_param(query, "view") or "anchors"
     priority = host._read_optional_param(query, "priority")
 
@@ -368,60 +360,6 @@ async def handle_control_plane_identity_evidence(
             priority=priority,
         ),
     )
-
-
-def _read_selected_run_id(
-    host: _HealthRoutingHost,
-    query: dict[str, str],
-) -> str | None:
-    selected_run_id = host._read_optional_param(query, "run_id")
-    return None if selected_run_id in {None, RUN_ID_NO_SELECTION} else selected_run_id
-
-
-def _resolve_control_plane_identity_scope(
-    host: _HealthRoutingHost,
-    query: dict[str, str],
-) -> _IdentityScope:
-    requested_pipeline = host._read_required_param(query, "pipeline")
-    selected_pipelines = host._read_scope_csv_param(query, "pipeline")
-    selected_run_types = host._read_scope_csv_param(query, "run_type")
-    selected_run_id = _read_selected_run_id(host, query)
-
-    manifests = tuple(
-        manifest
-        for manifest in host._run_manifest_port.list_all()
-        if (not selected_pipelines or manifest.pipeline_name in selected_pipelines)
-        and (not selected_run_types or str(manifest.run_type) in selected_run_types)
-    )
-    resolved_manifest = next(
-        (
-            manifest
-            for manifest in manifests
-            if selected_run_id is not None and str(manifest.run_id) == selected_run_id
-        ),
-        None,
-    )
-    resolved_via = "selected_run_id"
-    if resolved_manifest is None:
-        if len(selected_pipelines) != 1:
-            resolved_via = "aggregate_scope_requires_exact_run_id"
-        else:
-            resolved_manifest = manifests[-1] if manifests else None
-            resolved_via = (
-                "latest_manifest_for_scope"
-                if resolved_manifest is not None
-                else "no_manifest_for_scope"
-            )
-    return _IdentityScope(
-        requested_pipeline=requested_pipeline,
-        selected_pipelines=selected_pipelines,
-        selected_run_types=selected_run_types,
-        selected_run_id=selected_run_id,
-        resolved_manifest=resolved_manifest,
-        resolved_via=resolved_via,
-    )
-
-
 async def handle_filtered_record_detail(
     host: _HealthRoutingHost,
     writer: asyncio.StreamWriter,

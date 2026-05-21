@@ -30,28 +30,13 @@ from bioetl.application.services._checkpoint_service_support import (
     _CHECKPOINT_OPERATOR_DURATION_METRIC,
     _CHECKPOINT_OPERATOR_OPERATIONS_METRIC,
 )
+from bioetl.application.services.checkpoint_models import CheckpointInfo
 from bioetl.domain.types import JsonDict, RunID
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
     from bioetl.domain.ports import CheckpointPort, LoggerPort, MetricsPort, TracingPort
-
-
-@dataclass(frozen=True, slots=True)
-class CheckpointInfo:
-    """Information about a checkpoint.
-
-    Attributes:
-        pipeline_name: Name of the pipeline.
-        run_id: Run ID that created this checkpoint.
-        metadata: Checkpoint metadata (records_processed, etc.).
-    """
-
-    pipeline_name: str
-    run_id: str | None
-    metadata: JsonDict  # Any: checkpoint metadata values are heterogeneous
-
 
 @dataclass
 class CheckpointService:

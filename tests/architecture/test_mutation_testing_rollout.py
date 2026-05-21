@@ -28,11 +28,25 @@ class TestMutationTestingRollout:
         assert mutation.get("ci_gate_mode") in {"partial", "full"}
         assert mutation["targets"]["domain"]["min_score"] == 70
         assert mutation["targets"]["domain"]["enforced"] is True
+        assert mutation["targets"]["application_control_plane"]["min_score"] == 60
+        assert mutation["targets"]["application_control_plane"]["enforced"] is True
         assert mutation["targets"]["application"]["min_score"] == 60
         assert mutation["targets"]["application"]["enforced"] is False
 
-        assert "mutmut run --paths-to-mutate=src/bioetl/domain/" in workflow
-        assert "THRESHOLD = 70.0" in workflow
+        assert "paths_to_mutate: src/bioetl/domain/" in workflow
+        assert "src/bioetl/application/services/control_plane/" in workflow
+        assert "tests/unit/application/services/control_plane/" in workflow
+        assert "MUTATION_SCORE_THRESHOLD" in workflow
+        assert (
+            "mutmut run --paths-to-mutate=src/bioetl/domain/ --tests-dir=tests/ || true"
+            not in workflow
+        )
+        assert (
+            "Mutation workflow produced zero mutants; treating this as a broken gate."
+            in workflow
+        )
+        assert "Could not parse mutmut results" in workflow
+        assert "mutmut results failed" in workflow
         assert "--paths-to-mutate=src/bioetl/application/" not in workflow
         assert mutation.get("ci_gate_mode") == "partial"
 
@@ -58,6 +72,9 @@ class TestMutationTestingRollout:
             assert entry["status"] == expected_status
             assert entry["min_score"] == target_policy["min_score"]
             assert entry["owner"]
+            if target_policy["enforced"]:
+                assert entry["paths_to_mutate"] == target_policy["paths_to_mutate"]
+                assert entry["tests_dir"] == target_policy["tests_dir"]
             assert entry["current_evidence_paths"]
             assert entry["artifact_paths"]
             for relative_path in (

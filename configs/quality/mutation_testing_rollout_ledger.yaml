@@ -9,6 +9,8 @@ entries:
   status: enforced
   owner: "@bioetl-domain"
   min_score: 70
+  paths_to_mutate: src/bioetl/domain/
+  tests_dir: tests/
   current_evidence_paths:
   - configs/quality/test_matrix.yaml
   - .github/workflows/mutation-testing.yml
@@ -16,13 +18,31 @@ entries:
   artifact_paths:
   - src/bioetl/domain
   - .github/workflows/mutation-testing.yml
+- target: application_control_plane
+  status: enforced
+  owner: "@bioetl-application"
+  min_score: 60
+  paths_to_mutate: src/bioetl/application/services/control_plane/
+  tests_dir: tests/unit/application/services/control_plane/
+  promotion_basis: curated_high_risk_application_scope
+  issue: '#4386'
+  last_reviewed: '2026-05-21'
+  current_evidence_paths:
+  - configs/quality/test_matrix.yaml
+  - .github/workflows/mutation-testing.yml
+  - tests/architecture/test_mutation_testing_rollout.py
+  artifact_paths:
+  - src/bioetl/application/services/control_plane
+  - tests/unit/application/services/control_plane
+  - .github/workflows/mutation-testing.yml
 - target: application
   status: staged
   owner: "@bioetl-application"
   min_score: 60
+  paths_to_mutate: src/bioetl/application/
   blocking_classification: missing_stable_application_mutation_baseline
   issue: '#3410'
-  last_reviewed: '2026-04-29'
+  last_reviewed: '2026-05-21'
   target_resolution_date: '2026-06-30'
   current_evidence_paths:
   - configs/quality/test_matrix.yaml
@@ -33,8 +53,8 @@ entries:
   - .github/workflows/mutation-testing.yml
   next_step: >-
     Capture a stable application-layer mutation baseline, split long-running
-    targets if needed, and add an explicit CI job before switching the target
-    to enforced.
+    targets if needed, and promote the target only after the hardened domain
+    gate keeps failing on zero-mutant or broken-run scenarios.
   promotion_criteria: >-
     Application mutation testing has a repeatable baseline at or above the
     configured min_score, CI runtime is bounded, and the workflow enforces the

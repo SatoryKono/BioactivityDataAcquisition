@@ -98,13 +98,11 @@
     ".": [
       "src/bioetl/application/core/batch_executor_dq_helpers.py",
       "src/bioetl/application/observability/observer_event_mixin.py",
-      "src/bioetl/application/pipelines/common/publication_vocab_observability.py",
       "src/bioetl/application/services/checkpoint_compatibility_service.py",
       "src/bioetl/application/services/export_manifests.py",
       "src/bioetl/infrastructure/storage/gold/io_mixin.py",
       "src/bioetl/infrastructure/storage/gold/writer_support.py",
       "src/bioetl/infrastructure/storage/metadata/builder_base.py",
-      "src/bioetl/infrastructure/storage/silver/operations/metadata_sidecar_adapter.py",
       "src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py",
       "src/bioetl/infrastructure/storage/silver/validation_record_support.py",
       "src/bioetl/interfaces/http/processed_records_table.py"
@@ -114,7 +112,6 @@
       "src/bioetl/infrastructure/storage/gold/io_mixin.py",
       "src/bioetl/infrastructure/storage/gold/writer_support.py",
       "src/bioetl/infrastructure/storage/metadata/builder_base.py",
-      "src/bioetl/infrastructure/storage/silver/operations/metadata_sidecar_adapter.py",
       "src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py",
       "src/bioetl/infrastructure/storage/silver/validation_record_support.py",
       "src/bioetl/interfaces/http/processed_records_table.py"
@@ -234,6 +231,9 @@
       "src/bioetl/infrastructure/storage/metadata/builder_base.py"
     ],
     "Dry run: merge skipped, pipeline completing": [
+      "src/bioetl/application/composite/runner_pkg/runner_merge_stage_runtime.py"
+    ],
+    "Dry-run merge shortcut requires runtime.dry_run=True": [
       "src/bioetl/application/composite/runner_pkg/runner_merge_stage_runtime.py"
     ],
     "Emergency checkpoint save failed during shutdown": [
@@ -1021,9 +1021,6 @@
       "src/bioetl/infrastructure/quarantine/filtered_reads.py",
       "src/bioetl/infrastructure/storage/bronze_writer.py"
     ],
-    "inherits": [
-      "src/bioetl/application/pipelines/common/publication_vocab_observability.py"
-    ],
     "input_filter_file_not_found": [
       "src/bioetl/application/core/_filtered_data_source_support.py"
     ],
@@ -1089,7 +1086,6 @@
     ],
     "merge": [
       "src/bioetl/infrastructure/storage/gold/writer_support.py",
-      "src/bioetl/infrastructure/storage/silver/operations/metadata_sidecar_adapter.py",
       "src/bioetl/infrastructure/storage/silver/validation_operations.py"
     ],
     "merge_failed": [
@@ -1215,9 +1211,6 @@
     "postrun_phase_completed": [
       "src/bioetl/application/core/postrun/_phase_runtime.py"
     ],
-    "preserve_unknown": [
-      "src/bioetl/application/pipelines/common/publication_vocab_observability.py"
-    ],
     "produced_datasets": [
       "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py"
     ],
@@ -1228,9 +1221,6 @@
     ],
     "provider_unhealthy_alert": [
       "src/bioetl/infrastructure/adapters/http/_health_monitor_observability.py"
-    ],
-    "providers": [
-      "src/bioetl/application/pipelines/common/publication_vocab_observability.py"
     ],
     "quality_score": [
       "src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py"
@@ -1507,7 +1497,6 @@
     "utf-8": [
       "src/bioetl/infrastructure/control_plane/file_run_ledger_store.py",
       "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
-      "src/bioetl/infrastructure/storage/silver/operations/metadata_sidecar_adapter.py",
       "src/bioetl/interfaces/http/processed_records_table.py"
     ],
     "validation_error": [
@@ -1516,9 +1505,6 @@
     "value": [
       "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py",
       "src/bioetl/interfaces/http/processed_records_table.py"
-    ],
-    "values": [
-      "src/bioetl/application/pipelines/common/publication_vocab_observability.py"
     ],
     "violations": [
       "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py"
@@ -1592,6 +1578,7 @@
     "Dependencies phase failed",
     "Deterministic metadata timestamp requires explicit time or record-level _lineage_created_at/_ingestion_ts anchors",
     "Dry run: merge skipped, pipeline completing",
+    "Dry-run merge shortcut requires runtime.dry_run=True",
     "Emergency checkpoint save failed during shutdown",
     "Error occurred",
     "Exception transformation failed",
@@ -1838,7 +1825,6 @@
     "increment",
     "increment_counter",
     "ingestion_ts",
-    "inherits",
     "input_filter_file_not_found",
     "input_snapshot_fingerprint",
     "input_snapshots",
@@ -1897,11 +1883,9 @@
     "policy_stage",
     "postrun.run",
     "postrun_phase_completed",
-    "preserve_unknown",
     "produced_datasets",
     "provider",
     "provider_unhealthy_alert",
-    "providers",
     "quality_score",
     "quarantine_status",
     "quarantine_summary",
@@ -1988,7 +1972,6 @@
     "utf-8",
     "validation_error",
     "value",
-    "values",
     "violations",
     "write_bronze",
     "write_duration_ms",

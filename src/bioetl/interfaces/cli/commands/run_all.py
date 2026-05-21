@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Mapping
+from dataclasses import replace
 from typing import TYPE_CHECKING, cast
 
 import click
@@ -12,6 +13,10 @@ import bioetl.interfaces.cli.commands.domains.run_all.support as run_all_support
 from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
     ensure_metrics_server_started,
+)
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    ensure_observability_backend_started,
+    should_disable_transient_health_server,
 )
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
@@ -207,6 +212,18 @@ def _run_all_callback(
 ) -> None:
     """Canonical callback implementation for the run-all Click command."""
     cli_input = _build_run_all_command_input_from_options(options)
+    if not cli_input.list_only:
+        backend_result = ensure_observability_backend_started(
+            enabled=cli_input.ensure_observability_backend,
+            port=cli_input.observability_backend_port,
+        )
+        if should_disable_transient_health_server(
+            health_server_enabled=cli_input.health_server,
+            health_port=cli_input.health_port,
+            observability_backend_port=cli_input.observability_backend_port,
+            backend_result=backend_result,
+        ):
+            cli_input = replace(cli_input, health_server=False)
     dispatch_cli_callback(
         click_context,
         build_cli_input=lambda: cli_input,
@@ -228,6 +245,12 @@ def _build_run_all_command_input_from_options(
         debug=cast("bool", options["debug"]),
         health_server=cast("bool", options["health_server"]),
         health_port=cast("int", options["health_port"]),
+        ensure_observability_backend=cast(
+            "bool", options.get("ensure_observability_backend", True)
+        ),
+        observability_backend_port=cast(
+            "int", options.get("observability_backend_port", DEFAULT_HEALTH_SERVER_PORT)
+        ),
     )
 
 

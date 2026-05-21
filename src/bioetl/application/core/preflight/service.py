@@ -15,7 +15,9 @@ from bioetl.domain.types import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.application.core.pipeline_service_protocols import (
+        PipelineServicesProtocol,
+    )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort, MetricsPort
@@ -48,7 +50,7 @@ class PreflightService:
 
     async def validate_infrastructure(
         self,
-        services: PipelineService,
+        services: PipelineServicesProtocol,
         *,
         raise_on_unhealthy: bool = True,
     ) -> HealthReport:
@@ -112,7 +114,7 @@ class PreflightService:
 
     async def validate_preflight(
         self,
-        services: PipelineService,
+        services: PipelineServicesProtocol,
         runtime: RuntimeConfig,
         bronze_path: str,
         silver_path: str,

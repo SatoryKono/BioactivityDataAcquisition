@@ -47,26 +47,24 @@ class TestShutdownSignal:
         signal = ShutdownSignal()
         signal.request()
 
-        # Should return immediately
-        await asyncio.wait_for(signal.wait(), timeout=1.0)
+        result = await asyncio.wait_for(signal.wait(), timeout=1.0)
+
+        assert result is None
+        assert signal.is_requested is True
 
     @pytest.mark.asyncio
     async def test_wait_blocks_until_requested(self):
         """Test that wait() blocks until request() is called."""
         signal = ShutdownSignal()
 
-        async def request_after_delay():
-            await asyncio.sleep(0.1)
-            signal.request()
+        wait_task = asyncio.create_task(signal.wait())
+        await asyncio.sleep(0)
+        assert wait_task.done() is False
 
-        # Start request task
-        task = asyncio.create_task(request_after_delay())
-
-        # Wait for signal
-        await asyncio.wait_for(signal.wait(), timeout=1.0)
+        signal.request()
+        await asyncio.wait_for(wait_task, timeout=1.0)
 
         assert signal.is_requested is True
-        await task
 
     def test_is_shutting_down_alias(self):
         """Test is_shutting_down() is alias for is_requested."""
@@ -76,7 +74,7 @@ class TestShutdownSignal:
         assert signal.is_shutting_down() is True
 
     @pytest.mark.asyncio
-    async def test_initiate_shutdown_sets_flag(self):
+    async def test_shutdown_signal_initiate_shutdown_sets_flag(self):
         """Test initiate_shutdown() sets flag (ShutdownPort compat)."""
         signal = ShutdownSignal()
         await signal.initiate_shutdown("test reason")
@@ -84,26 +82,27 @@ class TestShutdownSignal:
         assert signal.is_shutting_down() is True
 
     @pytest.mark.asyncio
-    async def test_wait_for_completion_timeout(self):
+    async def test_shutdown_signal_wait_for_completion_returns_false_on_timeout(self):
         """Test wait_for_completion returns False on timeout."""
         signal = ShutdownSignal()
         result = await signal.wait_for_completion(timeout_seconds=0.01)
         assert result is False
 
     @pytest.mark.asyncio
-    async def test_wait_for_completion_success(self):
+    async def test_shutdown_signal_wait_for_completion_returns_true_after_mark_completed(
+        self,
+    ):
         """Test wait_for_completion returns True when marked complete."""
         signal = ShutdownSignal()
 
-        async def mark_complete_after_delay():
-            await asyncio.sleep(0.05)
-            signal.mark_completed()
+        wait_task = asyncio.create_task(signal.wait_for_completion(timeout_seconds=1.0))
+        await asyncio.sleep(0)
+        assert wait_task.done() is False
 
-        task = asyncio.create_task(mark_complete_after_delay())
-        result = await signal.wait_for_completion(timeout_seconds=1.0)
+        signal.mark_completed()
+        result = await asyncio.wait_for(wait_task, timeout=1.0)
 
         assert result is True
-        await task
 
     def test_mark_completed(self):
         """Test mark_completed sets completion event."""
@@ -117,7 +116,7 @@ class TestShutdownSignal:
 class TestPipelineShutdownError:
     """Tests for PipelineShutdownError exception."""
 
-    def test_can_be_raised(self):
+    def test_pipeline_shutdown_error_can_be_raised(self):
         """Test that exception can be raised and caught."""
         with pytest.raises(PipelineShutdownError):
             raise PipelineShutdownError()

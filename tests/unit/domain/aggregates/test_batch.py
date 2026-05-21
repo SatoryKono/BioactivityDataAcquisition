@@ -11,7 +11,6 @@ Tests verify that:
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
-from uuid import uuid4
 
 import pytest
 
@@ -22,6 +21,7 @@ from bioetl.domain.aggregates.batch import (
 )
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID
+from tests.helpers.deterministic_ids import deterministic_uuid_value
 
 
 def _ts(offset_seconds: int = 0) -> datetime:
@@ -32,7 +32,7 @@ def _ts(offset_seconds: int = 0) -> datetime:
 @pytest.fixture
 def run_id() -> RunID:
     """Create a test run ID."""
-    return RunID(uuid4())
+    return RunID(deterministic_uuid_value("unit.batch.run_id"))
 
 
 @pytest.fixture
@@ -292,7 +292,9 @@ class TestBatchEncapsulation:
         original_id = batch.batch_id
 
         with pytest.raises(AttributeError):
-            batch.batch_id = BatchID(uuid4())  # type: ignore
+            batch.batch_id = BatchID(
+                deterministic_uuid_value("unit.batch.mutability")
+            )  # type: ignore
 
         assert batch.batch_id == original_id
 
@@ -407,7 +409,9 @@ class TestBatchConstructorValidation:
         """Invariant: start_index >= 0."""
         with pytest.raises(ValueError, match="cannot be negative"):
             Batch(
-                batch_id=BatchID(uuid4()),
+                batch_id=BatchID(
+                    deterministic_uuid_value("unit.batch.constructor_validation")
+                ),
                 run_id=run_id,
                 start_index=-1,
                 created_at=_ts(0),

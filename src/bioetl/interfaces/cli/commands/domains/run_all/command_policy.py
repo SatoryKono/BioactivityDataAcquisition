@@ -110,6 +110,8 @@ class RunAllCommandInput:
     debug: bool
     health_server: bool
     health_port: int
+    ensure_observability_backend: bool = True
+    observability_backend_port: int = 8081
 
 
 def exit_with_code(code: int | str | None = None) -> NoReturn:
@@ -128,6 +130,8 @@ def build_run_all_command_input(
     debug: bool,
     health_server: bool,
     health_port: int,
+    ensure_observability_backend: bool = True,
+    observability_backend_port: int = 8081,
 ) -> RunAllCommandInput:
     """Build normalized CLI input payload for run_all_command_flow."""
     return RunAllCommandInput(
@@ -140,6 +144,8 @@ def build_run_all_command_input(
         debug=debug,
         health_server=health_server,
         health_port=health_port,
+        ensure_observability_backend=ensure_observability_backend,
+        observability_backend_port=observability_backend_port,
     )
 
 

@@ -257,7 +257,7 @@ class TestTrackBatchLifecycle:
 class TestTrackProcessedRecords:
     """Tests for track_processed_records method."""
 
-    def test_calls_increment_counter(
+    def test_track_processed_records_calls_stage_and_flow_counters(
         self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
     ) -> None:
         """Test that increment_counter is called with correct metric name."""
@@ -577,7 +577,7 @@ class TestTrackDQValidationFailure:
 class TestTrackQuarantinedRecords:
     """Tests for track_quarantined_records method."""
 
-    def test_calls_increment_counter(
+    def test_track_quarantined_records_calls_legacy_quarantine_counter(
         self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
     ) -> None:
         """Test that dq_records_quarantined_total counter is incremented."""
@@ -681,9 +681,17 @@ class TestNoOpWithNoneMetrics:
             pipeline_label="safe_test",
             run_type_label="incremental",
         )
-        # None of these should raise
-        recorder.track_batch_size(stage="bronze", size=10)
-        recorder.track_processed_records(stage="silver", count=5)
-        recorder.track_error(stage="transform", error_type=ErrorType.TIMEOUT)
-        recorder.track_dq_validation_failure(stage="gold", severity="soft_fail")
-        recorder.track_quarantined_records(error_type=ErrorType.INVALID_DATA, count=1)
+
+        results = (
+            recorder.track_batch_size(stage="bronze", size=10),
+            recorder.track_processed_records(stage="silver", count=5),
+            recorder.track_error(stage="transform", error_type=ErrorType.TIMEOUT),
+            recorder.track_dq_validation_failure(stage="gold", severity="soft_fail"),
+            recorder.track_quarantined_records(
+                error_type=ErrorType.INVALID_DATA,
+                count=1,
+            ),
+        )
+
+        assert recorder._metrics is None
+        assert results == (None, None, None, None, None)

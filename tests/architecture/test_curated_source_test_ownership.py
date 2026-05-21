@@ -15,6 +15,7 @@ ALLOWED_OWNERSHIP = frozenset({"direct_test", "cluster_owner"})
 ALLOWED_PREFIXES = (
     "src/bioetl/application/core/",
     "src/bioetl/application/composite/",
+    "src/bioetl/application/services/control_plane/",
     "src/bioetl/infrastructure/adapters/",
     "src/bioetl/infrastructure/storage/",
 )

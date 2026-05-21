@@ -172,8 +172,15 @@ Supported policy slice for issue `#2598`:
 
 Текущее состояние rollout по ADR-042:
 
-- mutation testing в CI блокирует только `domain/` с порогом `70%`
-- `application/` mutation target (`60%`) задокументирован, но пока staged и не является blocking gate
+- mutation testing в CI блокирует `domain/` с порогом `70%` и curated
+  `application_control_plane` target
+  (`src/bioetl/application/services/control_plane/`,
+  `tests/unit/application/services/control_plane/`) с порогом `60%`
+- broad `application/` mutation target (`60%`) задокументирован, но пока staged
+  и не является blocking gate
+- empty/broken `mutmut` run (`0` сгенерированных мутантов) больше не считается
+  допустимым green-path и должен падать как неисправный gate; `mutmut results`
+  nonzero exit или unparseable output тоже считаются broken gate
 - VCR cassette metadata (`*_meta.yaml`) перешли в `enforced` rollout: `configs/quality/test_matrix.yaml` теперь объявляет managed inventory contract для всего canonical VCR estate, а repo-wide metadata coverage больше не держится на seeded subset
 - `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`
 - canonical VCR metadata catalog теперь существует как tracked artifact в `reports/quality/vcr-metadata-catalog.json`
@@ -197,6 +204,12 @@ Supported policy slice for issue `#2598`:
   `tests/fixtures/contracts/publication_schema_compatibility.v1.yaml`, а
   Silver compatibility checks обязаны быть executable against schema/config
   contracts.
+- Module-level coverage inventory теперь является committed artifact:
+  `reports/quality/module-coverage-inventory.json` генерируется из
+  `reports/coverage/coverage.xml` через
+  `python -m scripts.engineering.qa report-module-coverage` в lane
+  `coverage-verify`. Artifact должен перечислять каждый `src/bioetl/**/*.py`
+  module и явно фиксировать coverage status.
 - canonical VCR placement уже enforced в CI: кассеты вне `tests/fixtures/vcr/{provider}/` блокируются
 - extensionless VCR files пока допустимы только через `.github/vcr-noext-allowlist.txt`; новые такие файлы добавлять нельзя
 
@@ -473,6 +486,10 @@ cached-Bronze snapshot envelope.
 - **Blocking CI Threshold**: merge-gate в CI использует `coverage report --fail-under=85`, то есть blocking threshold для репозитория составляет **>=85%** общего line coverage.
 - **Domain Coverage Goal**: для доменного слоя по-прежнему желателен более высокий локальный стандарт, но он не является отдельным blocking CI gate, пока workflow не вводит отдельный `fail-under` для domain-only coverage.
 - **Branch Coverage**: Проверяется автоматически через `pytest-cov`.
+- **Module Coverage Inventory**: `coverage-verify` генерирует
+  `reports/quality/module-coverage-inventory.json` после
+  `reports/coverage/coverage.xml`; локальная проверка drift:
+  `uv run python -m scripts.engineering.qa report-module-coverage --check`.
 - **Regression**: Все исправления багов обязаны сопровождаться регрессионным тестом.
 - **Coverage Configuration**: Подробная информация о настройке покрытия, исключаемых паттернах и troubleshooting — см. [Coverage Configuration Guide](./coverage-configuration.md)
 

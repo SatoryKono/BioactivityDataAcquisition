@@ -22,6 +22,7 @@ import shutil
 import subprocess  # nosec B404
 import sys
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 
 import yaml
@@ -187,6 +188,8 @@ class ReportsWorkspaceEvidence:
     retention_entry_id: str | None = None
     retention_owner: str | None = None
     retention_ttl_days: int | None = None
+    age_days: int | None = None
+    ttl_expired: bool | None = None
 
     @property
     def rel_path(self) -> str:
@@ -784,6 +787,70 @@ def _iter_reports_retained_dir_transient_candidates(repo_root: Path) -> set[Path
     return candidates
 
 
+def _is_reports_retained_dir_transient_path(path: Path) -> bool:
+    path_text = path.as_posix()
+    inside_retained_dir = any(
+        path_text.startswith(f"{retained_dir.as_posix()}/")
+        for retained_dir in REPORTS_RETAINED_DIRS
+    )
+    return inside_retained_dir and any(
+        fnmatch.fnmatch(path.name, pattern)
+        for pattern in REPORTS_RETAINED_DIR_TRANSIENT_PATTERNS
+    )
+
+
+_PRETEST_GUARDRAILS_TIMESTAMP_RE = re.compile(
+    r"^pretest_guardrails_(\d{8})_(\d{6})\.json$"
+)
+
+
+def _reports_quality_embedded_timestamp(path: Path) -> datetime | None:
+    match = _PRETEST_GUARDRAILS_TIMESTAMP_RE.match(path.name)
+    if match is None:
+        return None
+    date_part, time_part = match.groups()
+    try:
+        return datetime.strptime(f"{date_part}{time_part}", "%Y%m%d%H%M%S").replace(
+            tzinfo=UTC
+        )
+    except ValueError:
+        return None
+
+
+def _artifact_timestamp(path: Path) -> datetime | None:
+    embedded = _reports_quality_embedded_timestamp(path)
+    if embedded is not None:
+        return embedded
+    if not path.exists():
+        return None
+    return datetime.fromtimestamp(path.stat().st_mtime, tz=UTC)
+
+
+def _artifact_age_days(path: Path, *, now: datetime) -> int | None:
+    timestamp = _artifact_timestamp(path)
+    if timestamp is None or timestamp > now:
+        return None
+    # Retention TTLs are calendar-day policies; avoid hour-of-day drift across
+    # platforms and CI runners by comparing date boundaries rather than
+    # full 24-hour intervals.
+    return (now.date() - timestamp.date()).days
+
+
+def _ttl_report_row_classification(
+    *,
+    tracked: bool,
+    exists: bool,
+    age_days: int | None,
+    retention_ttl_days: int | None,
+) -> tuple[str, bool | None]:
+    if retention_ttl_days is None or not exists:
+        return ("REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE", None)
+    expired = age_days is not None and age_days > retention_ttl_days
+    if tracked:
+        return ("REVIEW_REQUIRED", expired)
+    return ("PRUNE_CANDIDATE" if expired else "RETAIN", expired)
+
+
 def _iter_reports_top_level_uncurated_surfaces(repo_root: Path) -> set[Path]:
     reports_root = repo_root / REPORTS_WORKSPACE
     if not reports_root.exists():
@@ -819,18 +886,42 @@ def _reports_workspace_row(
             break
     exists = (repo_root / path).exists()
     tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
+    skip_transient_local_scan = (
+        exists and not tracked and _is_reports_retained_dir_transient_path(path)
+    )
+    age_days = (
+        _artifact_age_days(repo_root / path, now=datetime.now(tz=UTC))
+        if exists
+        else None
+    )
     return ReportsWorkspaceEvidence(
         path=path,
         classification=classification,
         tracked=tracked,
         exists=exists,
-        has_history=_git_path_has_history(repo_root, path),
-        reference_hits=_count_reference_hits(repo_root, path) if exists else 0,
+        has_history=(
+            False
+            if skip_transient_local_scan
+            else _git_path_has_history(repo_root, path)
+        ),
+        reference_hits=(
+            0
+            if skip_transient_local_scan
+            else _count_reference_hits(repo_root, path)
+            if exists
+            else 0
+        ),
         generator=generator,
         commit_policy=commit_policy,
         retention_entry_id=retention_entry_id,
         retention_owner=retention_owner,
         retention_ttl_days=retention_ttl_days,
+        age_days=age_days,
+        ttl_expired=(
+            None
+            if retention_ttl_days is None
+            else age_days is not None and age_days > retention_ttl_days
+        ),
         reason=reason,
     )
 
@@ -935,19 +1026,38 @@ def collect_reports_workspace_evidence(
         if path.as_posix() in rows:
             continue
         tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
+        candidate_row = _reports_workspace_row(
+            repo_root,
+            tracked_paths,
+            path=path,
+            classification="PRUNE_CANDIDATE",
+            route_metadata=route_metadata,
+            retention_metadata=retention_metadata,
+            reason="transient retained-surface artifact candidate",
+        )
+        classification, ttl_expired = _ttl_report_row_classification(
+            tracked=tracked,
+            exists=candidate_row.exists,
+            age_days=candidate_row.age_days,
+            retention_ttl_days=candidate_row.retention_ttl_days,
+        )
         rows[path.as_posix()] = _reports_workspace_row(
             repo_root,
             tracked_paths,
             path=path,
-            classification="REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE",
+            classification=classification,
             route_metadata=route_metadata,
             retention_metadata=retention_metadata,
             reason=(
                 "tracked transient artifact inside retained reports surface "
+                f"{'exceeds' if ttl_expired else 'is still within'} its TTL and "
                 "requires manual review before prune"
                 if tracked
-                else "transient _tmp_ artifact inside retained reports surface "
-                "is a local prune candidate"
+                else "transient retained-surface artifact exceeds its TTL and "
+                "is a bounded local prune candidate"
+                if ttl_expired
+                else "transient retained-surface artifact is still within its "
+                "TTL window and should be retained"
             ),
         )
 
@@ -1158,6 +1268,8 @@ def build_reports_workspace_review_report(
                 "retention_entry_id": row.retention_entry_id,
                 "retention_owner": row.retention_owner,
                 "retention_ttl_days": row.retention_ttl_days,
+                "age_days": row.age_days,
+                "ttl_expired": row.ttl_expired,
                 "reason": row.reason,
             }
             for row in reports_evidence
@@ -1387,7 +1499,10 @@ def _log_reports_workspace_evidence(
         logger.info("### %s (%d)", classification, len(evidence_rows))
         for row in visible_rows:
             logger.info(
-                "  %s | exists=%s tracked=%s history=%s refs=%d route=%s policy=%s ttl=%s owner=%s",
+                (
+                    "  %s | exists=%s tracked=%s history=%s refs=%d route=%s "
+                    "policy=%s ttl=%s age_days=%s ttl_expired=%s owner=%s"
+                ),
                 row.rel_path,
                 str(row.exists).lower(),
                 str(row.tracked).lower(),
@@ -1398,6 +1513,8 @@ def _log_reports_workspace_evidence(
                 str(row.retention_ttl_days)
                 if row.retention_ttl_days is not None
                 else "n/a",
+                str(row.age_days) if row.age_days is not None else "n/a",
+                str(row.ttl_expired).lower() if row.ttl_expired is not None else "n/a",
                 row.retention_owner or "n/a",
             )
             logger.info("      %s", row.reason)

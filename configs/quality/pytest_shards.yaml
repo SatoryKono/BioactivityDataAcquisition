@@ -66,11 +66,13 @@ shards:
     extra_pytest_args:
       - --timeout=300
       - --ignore-glob=tests/architecture/test_[g-z]*.py
+      - --ignore=tests/architecture/test_antipatterns.py
       - --ignore=tests/architecture/test_any_budget.py
       - --ignore=tests/architecture/test_scripts_catalog_governance.py
       - --ignore=tests/architecture/test_architecture_dependency_docs_drift.py
       - --ignore=tests/architecture/test_check_doc_links_guardrails.py
       - --ignore=tests/architecture/test_compatibility_facade_inventory.py
+      - --ignore=tests/architecture/test_compatibility_importer_census_governance.py
       - --ignore=tests/architecture/test_docs_version_sync.py
       - --ignore=tests/architecture/test_documentation_sync.py
       - --ignore=tests/architecture/test_code_metrics.py
@@ -103,11 +105,14 @@ shards:
       - --ignore=tests/architecture/test_architecture_dependency_docs_drift.py
       - --ignore=tests/architecture/test_check_doc_links_guardrails.py
       - --ignore=tests/architecture/test_compatibility_facade_inventory.py
+      - --ignore=tests/architecture/test_compatibility_importer_census_governance.py
       - --ignore=tests/architecture/test_docs_version_sync.py
       - --ignore=tests/architecture/test_documentation_sync.py
       - --ignore=tests/architecture/test_code_metrics.py
+      - --ignore=tests/architecture/test_layer_dependencies.py
       - --ignore=tests/architecture/test_diagram_regression_workflow.py
       - --ignore=tests/architecture/test_docs_governance_workflow.py
+      - --ignore=tests/architecture/test_lint_terminology_script.py
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
       - --ignore=tests/architecture/test_quality_burndown_priorities.py
   - name: S5-infra-adapters
@@ -145,21 +150,31 @@ shards:
       - --ignore=tests/architecture/test_docs_governance_workflow.py
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
       - --ignore=tests/architecture/test_quality_burndown_priorities.py
+      - --ignore=tests/architecture/test_regression_metrics.py
   - name: S7-crosscutting-architecture-guardrails
     wave: 2
     paths:
+      - tests/architecture/test_antipatterns.py
       - tests/architecture/test_any_budget.py
       - tests/architecture/test_scripts_catalog_governance.py
       - tests/architecture/test_architecture_dependency_docs_drift.py
       - tests/architecture/test_check_doc_links_guardrails.py
       - tests/architecture/test_compatibility_facade_inventory.py
+      - tests/architecture/test_compatibility_importer_census_governance.py
       - tests/architecture/test_docs_version_sync.py
       - tests/architecture/test_documentation_sync.py
       - tests/architecture/test_code_metrics.py
+      - tests/architecture/test_layer_dependencies.py
       - tests/architecture/test_diagram_regression_workflow.py
       - tests/architecture/test_docs_governance_workflow.py
+      - tests/architecture/test_lint_terminology_script.py
       - tests/architecture/test_quality_debt_scorecard.py
       - tests/architecture/test_quality_burndown_priorities.py
+      - tests/architecture/test_regression_metrics.py
+      - tests/architecture/test_scripts_deprecation_backlog.py
+      - tests/architecture/test_scripts_inventory_manifest.py
+      - tests/architecture/test_scripts_lifecycle_registry.py
+      - tests/architecture/test_test_structural_debt.py
     workers_override: 2
     extra_pytest_args:
       - --timeout=300
@@ -193,3 +208,7 @@ shards:
       - --ignore=tests/architecture/test_docs_governance_workflow.py
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
       - --ignore=tests/architecture/test_quality_burndown_priorities.py
+      - --ignore=tests/architecture/test_scripts_deprecation_backlog.py
+      - --ignore=tests/architecture/test_scripts_inventory_manifest.py
+      - --ignore=tests/architecture/test_scripts_lifecycle_registry.py
+      - --ignore=tests/architecture/test_test_structural_debt.py

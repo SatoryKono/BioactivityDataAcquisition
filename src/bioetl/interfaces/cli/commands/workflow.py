@@ -26,6 +26,12 @@ from bioetl.interfaces.cli.commands.domains.health.metrics_publication_integrati
 from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
     ensure_metrics_server_started,
 )
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    ensure_observability_backend_started,
+)
+from bioetl.interfaces.cli.commands.domains.health.server_integration import (
+    DEFAULT_HEALTH_SERVER_PORT,
+)
 from bioetl.interfaces.cli.commands.domains.shared.inspection_output import (
     emit_inspection_payload,
 )
@@ -224,6 +230,20 @@ def workflow() -> None:
     help="Auto-increment start_offset from last successful execution. "
     "Cannot be used with resume selectors or --start-offset.",
 )
+@click.option(
+    "--ensure-observability-backend/--no-ensure-observability-backend",
+    "ensure_observability_backend",
+    default=True,
+    help="Auto-start a detached Quarantine Explorer backend for Grafana ID/detail panels.",
+    show_default=True,
+)
+@click.option(
+    "--observability-backend-port",
+    type=int,
+    default=DEFAULT_HEALTH_SERVER_PORT,
+    help="Port for the detached Quarantine Explorer backend used by Grafana ID/detail panels.",
+    show_default=True,
+)
 @click.pass_obj
 def run_workflow_command(
     registry: PipelineRegistry | None,
@@ -256,6 +276,8 @@ def run_workflow_command(
     force_steps: str | None,
     repair_steps: str | None,
     incremental: bool,
+    ensure_observability_backend: bool,
+    observability_backend_port: int,
 ) -> None:
     """Execute one declarative workflow config sequentially."""
     _validate_run_workflow_options(
@@ -290,6 +312,10 @@ def run_workflow_command(
         replay_of_run_id=replay_of_run_id,
         replay_of_manifest_id=replay_of_manifest_id,
         enable_tracing=enable_tracing,
+    )
+    ensure_observability_backend_started(
+        enabled=ensure_observability_backend,
+        port=observability_backend_port,
     )
     result = _execute_workflow_and_publish_metrics(
         get_workflow_execution_service_fn=get_workflow_execution_service,

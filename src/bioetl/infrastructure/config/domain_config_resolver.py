@@ -8,7 +8,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
-from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config,
+    load_pipeline_config_from_root,
+)
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 
 if TYPE_CHECKING:
@@ -95,7 +98,13 @@ def load_domain_pipeline_config(
     domain_mapper: DomainConfigMapper = yaml_config_to_domain,
 ) -> PipelineConfig:
     """Load domain config through the canonical function-based config flow."""
-    yaml_config = yaml_loader(pipeline_name)
+    if yaml_loader is load_pipeline_config:
+        yaml_config = load_pipeline_config_from_root(
+            pipeline_name,
+            configs_root=configs_root,
+        )
+    else:
+        yaml_config = yaml_loader(pipeline_name)
     return resolve_domain_pipeline_config(
         yaml_config,
         configs_root=configs_root,
@@ -104,9 +113,4 @@ def load_domain_pipeline_config(
         domain_mapper=domain_mapper,
     )
 
-
-__all__ = [
-    "DomainConfigResolver",
-    "load_domain_pipeline_config",
-    "resolve_domain_pipeline_config",
-]
+__all__ = ["DomainConfigResolver", "load_domain_pipeline_config", "resolve_domain_pipeline_config"]

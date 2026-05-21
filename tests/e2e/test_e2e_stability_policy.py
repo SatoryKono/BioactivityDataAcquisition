@@ -13,6 +13,7 @@ from bioetl.domain.exceptions.network import ExternalServiceError
 from .conftest import (
     E2E_FIXED_RUN_ID,
     E2E_FIXED_STARTED_AT,
+    _resolve_e2e_provider_cassette_dir,
     build_e2e_run_context,
     build_e2e_skip_reason,
     build_e2e_replay_context,
@@ -115,6 +116,15 @@ def test_resolve_cassette_name_uses_matrix_fallback(
         entity="protein_class",
     )
     assert _resolve_cassette_name(case) == "test_pipeline_matrix__chembl_protein_class"
+
+
+def test_e2e_provider_cassette_dir_override_is_resolved_per_test_name() -> None:
+    """Per-test multi-provider cassette overrides must not collapse to module default."""
+    provider_dir = _resolve_e2e_provider_cassette_dir(
+        node_name="test_chembl_and_uniprot_sequential_run",
+        module_path="tests/e2e/test_advanced_scenarios_e2e.py",
+    )
+    assert provider_dir == "multi_provider"
 
 
 def test_non_empty_contract_covers_all_matrix_pipelines() -> None:

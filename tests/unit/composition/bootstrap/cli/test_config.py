@@ -163,3 +163,25 @@ class TestBootstrapConfigService:
             "chembl_activity",
             configs_root=configs_root,
         )
+
+    @patch("bioetl.composition.bootstrap.cli.config.create_pipeline_config_loader")
+    @patch("bioetl.composition.bootstrap.cli.config.resolve_configs_root")
+    @patch("bioetl.composition.bootstrap.cli.config.register_all_pipelines")
+    def test_resolves_configs_root_before_binding_pipeline_loader(
+        self,
+        mock_register: MagicMock,
+        mock_resolve_configs_root: MagicMock,
+        mock_create_pipeline_loader: MagicMock,
+    ) -> None:
+        """CLI config bootstrap should bind one explicit configs root."""
+        requested_root = Path("relative-configs")
+        resolved_root = Path("/tmp/bioetl-configs")
+        mock_resolve_configs_root.return_value = resolved_root
+        bound_loader = MagicMock(name="pipeline_config_loader")
+        mock_create_pipeline_loader.return_value = bound_loader
+
+        result = bootstrap_config_service(configs_root=requested_root)
+
+        mock_resolve_configs_root.assert_called_once_with(requested_root)
+        mock_create_pipeline_loader.assert_called_once_with(resolved_root)
+        assert result._pipeline_config_loader is bound_loader

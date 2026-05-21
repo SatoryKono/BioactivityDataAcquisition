@@ -28,7 +28,9 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
-    from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.application.core.pipeline_service_protocols import (
+        PipelineServicesProtocol,
+    )
     from bioetl.application.services.control_plane.run_ledger_service import (
         RunLedgerService,
     )
@@ -57,7 +59,7 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         self,
         config: PipelineConfig,
         runtime: RuntimeConfig,
-        services: PipelineService,
+        services: PipelineServicesProtocol,
         context: PipelineContext,
         dependencies: PipelineRunnerDependencies | None = None,
         *,
@@ -116,7 +118,7 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         return None if manifest_id is None else str(manifest_id)
 
     @property
-    def services(self) -> PipelineService:
+    def services(self) -> PipelineServicesProtocol:
         """Access injected services."""
         return self._services
 

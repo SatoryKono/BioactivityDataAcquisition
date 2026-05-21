@@ -34,6 +34,7 @@ from bioetl.domain.ports.config import (
     PipelineConfigLoaderPort,
     PipelineSettingsPort,
     PipelineYamlConfigPort,
+    PublicationVocabularyPort,
     SettingsLoaderPort,
     SettingsPort,
 )
@@ -248,6 +249,7 @@ __all__ = [
     "PipelineSettingsPort",
     "PipelineSnapshot",
     "PipelineYamlConfigPort",
+    "PublicationVocabularyPort",
     "PublicationMetadataStrategy",
     "QuarantinePort",
     "QuarantineWriteRequest",

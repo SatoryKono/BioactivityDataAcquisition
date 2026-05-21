@@ -32,6 +32,7 @@ Commands:
     report-vcr-metadata  Generate/check canonical VCR metadata catalog
     report-provider-contract-drift  Generate provider contract drift diagnostics from replay cassettes
     report-compatibility-importer-census Generate deterministic importer census for sanctioned seams and twin modules
+    report-module-coverage Generate/check module-level coverage inventory
     report-dead-code-inventory Generate repo-local static dead-code review inventory
     report-pubchem-property-vocab Extract observed PubChem property-URN vocabulary
     report-publication-nested-vocab Extract nested publication-sidecar vocabularies
@@ -89,6 +90,7 @@ COMMAND_SPECS = {
     "report-vcr-metadata": "report_vcr_metadata_catalog.py",
     "report-provider-contract-drift": "report_provider_contract_drift.py",
     "report-compatibility-importer-census": "report_compatibility_importer_census.py",
+    "report-module-coverage": "report_module_coverage_inventory.py",
     "report-dead-code-inventory": "report_dead_code_inventory.py",
     "report-pubchem-property-vocab": "extract_pubchem_property_vocab.py",
     "report-publication-nested-vocab": "extract_publication_nested_vocab.py",

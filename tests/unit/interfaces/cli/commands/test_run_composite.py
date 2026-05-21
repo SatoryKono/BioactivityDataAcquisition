@@ -26,12 +26,28 @@ from bioetl.interfaces.cli.commands.run_composite import (
     _validate_composite_name,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    ObservabilityBackendEnsureResult,
+)
 
 
 @pytest.fixture
 def cli_runner() -> CliRunner:
     """Create a Click CLI runner for testing."""
     return CliRunner()
+
+
+@pytest.fixture(autouse=True)
+def patch_observability_backend_ensure() -> None:
+    """Prevent CLI tests from starting a real detached observability backend."""
+    with patch(
+        "bioetl.interfaces.cli.commands.run_composite.ensure_observability_backend_started",
+        return_value=ObservabilityBackendEnsureResult(
+            status="failed",
+            health_url="http://127.0.0.1:8081/health",
+        ),
+    ):
+        yield
 
 
 @pytest.fixture

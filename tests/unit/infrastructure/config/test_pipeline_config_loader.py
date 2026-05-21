@@ -6,8 +6,10 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import bioetl.infrastructure.config.pipeline_config_loader as pipeline_config_loader_module
 
 from bioetl.domain.config import DQConfig
+from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -59,3 +61,36 @@ def test_resolve_dq_config_accepts_dq_overrides_key() -> None:
     assert dummy.calls
     assert dummy.calls[-1] is not None
     assert dummy.calls[-1]["thresholds"] == {"soft_fail": 0.06, "hard_fail": 0.19}
+
+
+@pytest.mark.unit
+def test_load_pipeline_config_uses_loader_configs_root() -> None:
+    """Configured configs_root must be forwarded into the canonical YAML flow."""
+    captured: dict[str, object] = {}
+    loader = PipelineConfigLoader(Path("configs"), dq_loader=_DummyDQLoader())
+
+    def _fake_load_yaml_config_uncached(
+        pipeline_name: str,
+        *,
+        filter_loader: object | None = None,
+        configs_root: Path | None = None,
+    ) -> PipelineYamlConfig:
+        captured["pipeline_name"] = pipeline_name
+        captured["filter_loader"] = filter_loader
+        captured["configs_root"] = configs_root
+        return PipelineYamlConfig.model_validate(_base_pipeline_dict())
+
+    monkeypatch = pytest.MonkeyPatch()
+    monkeypatch.setattr(
+        pipeline_config_loader_module,
+        "load_yaml_config_uncached",
+        _fake_load_yaml_config_uncached,
+    )
+    try:
+        _ = loader.load_pipeline_config("chembl_activity")
+    finally:
+        monkeypatch.undo()
+
+    assert captured["pipeline_name"] == "chembl_activity"
+    assert captured["filter_loader"] is loader._filter_loader
+    assert captured["configs_root"] == resolve_configs_root(Path("configs"))

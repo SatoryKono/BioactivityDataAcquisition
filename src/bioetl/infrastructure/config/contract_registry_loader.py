@@ -9,24 +9,42 @@ import yaml
 from bioetl.domain.types import JsonDict
 
 DEFAULT_CONTRACT_REGISTRY_PATH = Path("configs/base/contract_registry.yaml")
+_CONTRACT_REGISTRY_PATH_FROM_CONFIGS_ROOT = DEFAULT_CONTRACT_REGISTRY_PATH.relative_to(
+    "configs"
+)
 
 __all__ = [
     "DEFAULT_CONTRACT_REGISTRY_PATH",
     "load_contract_registry_entries",
     "load_contract_registry_entry",
     "load_contract_registry_payload",
+    "resolve_contract_registry_path",
     "try_load_contract_registry_entries",
     "try_load_contract_registry_payload",
 ]
 
 
-def _resolve_registry_path(registry_path: Path | None) -> Path:
-    return registry_path or DEFAULT_CONTRACT_REGISTRY_PATH
+def resolve_contract_registry_path(
+    registry_path: Path | None = None,
+    *,
+    repo_root: Path | None = None,
+    configs_root: Path | None = None,
+) -> Path:
+    """Resolve the canonical contract-registry path from one explicit root."""
+    if registry_path is not None:
+        return registry_path
+    if repo_root is not None and configs_root is not None:
+        raise ValueError("Pass either repo_root or configs_root, not both")
+    if repo_root is not None:
+        return repo_root / DEFAULT_CONTRACT_REGISTRY_PATH
+    if configs_root is not None:
+        return configs_root / _CONTRACT_REGISTRY_PATH_FROM_CONFIGS_ROOT
+    return DEFAULT_CONTRACT_REGISTRY_PATH
 
 
 def load_contract_registry_payload(registry_path: Path | None = None) -> JsonDict:
     """Load the raw contract-registry payload as a mapping."""
-    path = _resolve_registry_path(registry_path)
+    path = resolve_contract_registry_path(registry_path)
     if not path.exists():
         raise FileNotFoundError(f"Contract registry not found: {path}")
     try:
@@ -54,7 +72,7 @@ def load_contract_registry_entries(
     registry_path: Path | None = None,
 ) -> dict[str, dict[str, object]]:
     """Load validated top-level contract-registry entries mapping."""
-    path = _resolve_registry_path(registry_path)
+    path = resolve_contract_registry_path(registry_path)
     payload = load_contract_registry_payload(path)
     entries = payload.get("entries")
     if not isinstance(entries, dict):

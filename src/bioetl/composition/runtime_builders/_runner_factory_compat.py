@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
+from bioetl.composition.pipeline_runner_request import (
+    build_pipeline_create_runner_request,
+)
 from bioetl.composition.runtime_builders.inputs_resolver import (
     RunnerInputs as _RunnerInputs,
 )
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
-from bioetl.domain.ports import (
-    PipelineControlPlaneArtifacts,
-    PipelineCreateRunnerRequest,
-)
+from bioetl.domain.ports import PipelineControlPlaneArtifacts
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.ledger_collaborator import (
@@ -35,7 +35,7 @@ def create_runtime_runner_from_factory(
     inputs: _RunnerInputs,
 ) -> PipelineRunnerProtocol:
     """Create a runtime runner via the canonical request contract."""
-    request = PipelineCreateRunnerRequest(
+    request = build_pipeline_create_runner_request(
         run_id=ctx.run_id,
         runtime=inputs.runtime_config,
         started_at=getattr(ctx, "started_at", MISSING_RUNTIME_TIMESTAMP),
@@ -58,9 +58,7 @@ def create_runtime_runner_from_factory(
             ),
             replay_of_run_id=getattr(ctx, "replay_of_run_id", None),
             replay_of_manifest_id=getattr(ctx, "replay_of_manifest_id", None),
-            input_snapshot_fingerprint=getattr(
-                ctx, "input_snapshot_fingerprint", None
-            ),
+            input_snapshot_fingerprint=getattr(ctx, "input_snapshot_fingerprint", None),
         ),
         filter_config=inputs.filter_config,
         config=cast("PipelineYamlConfig", inputs.yaml_config),

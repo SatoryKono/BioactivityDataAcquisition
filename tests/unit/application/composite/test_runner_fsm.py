@@ -300,7 +300,8 @@ class TestFSMDryRunMode:
 
         next_state = runner._handle_dry_run_merge_skip(state)
 
-        assert next_state is state
+        assert next_state is not state
+        assert next_state.state == CompositePipelineState.COMPLETED
         fsm_calls = _fsm_transition_calls(mock_logger)
         assert any(c.kwargs.get("stage") == "dry_run_skip_merge" for c in fsm_calls)
 

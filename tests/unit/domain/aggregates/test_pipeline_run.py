@@ -11,7 +11,6 @@ Tests verify that:
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
-from uuid import uuid4
 
 import pytest
 
@@ -23,6 +22,7 @@ from bioetl.domain.aggregates.pipeline_run import (
 )
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import RunID, RunType
+from tests.helpers.deterministic_ids import deterministic_uuid_value
 
 
 def _ts(minutes: int = 0, seconds: int = 0) -> datetime:
@@ -33,7 +33,7 @@ def _ts(minutes: int = 0, seconds: int = 0) -> datetime:
 @pytest.fixture
 def run_id() -> RunID:
     """Create a test run ID."""
-    return RunID(uuid4())
+    return RunID(deterministic_uuid_value("unit.pipeline_run.run_id"))
 
 
 @pytest.fixture
@@ -338,7 +338,9 @@ class TestPipelineRunEncapsulation:
         assert pipeline_run.run_id == run_id
 
         with pytest.raises(AttributeError):
-            pipeline_run.run_id = RunID(uuid4())  # type: ignore
+            pipeline_run.run_id = RunID(
+                deterministic_uuid_value("unit.pipeline_run.mutability")
+            )  # type: ignore
 
     def test_metadata_returns_copy(self, run_id: RunID) -> None:
         """Invariant: metadata returns a copy, not the original."""

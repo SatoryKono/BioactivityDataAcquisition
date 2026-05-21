@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import datetime, UTC
 from pathlib import Path
 from unittest.mock import MagicMock
-from uuid import uuid4
 
 from bioetl.domain.control_plane.run_ledger import RunLedgerEntry
 from bioetl.domain.control_plane.run_manifest import RunCodeProvenance, RunManifest
@@ -15,6 +14,7 @@ from bioetl.infrastructure.control_plane.file_run_ledger_store import FileRunLed
 from bioetl.infrastructure.control_plane.file_run_manifest_store import (
     FileRunManifestStore,
 )
+from tests.helpers.deterministic_ids import deterministic_uuid_value
 
 
 def _make_manifest(pipeline: str = "chembl_activity") -> RunManifest:
@@ -24,7 +24,7 @@ def _make_manifest(pipeline: str = "chembl_activity") -> RunManifest:
         execution_fingerprint="fingerprint",
         schema_version="1",
         created_at=now,
-        run_id=RunID(uuid4()),
+        run_id=RunID(deterministic_uuid_value(f"control_plane.manifest.{pipeline}")),
         run_type=RunType.INCREMENTAL,
         pipeline_name=pipeline,
         provider="chembl",
