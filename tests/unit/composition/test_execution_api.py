@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from unittest import mock
 
+import pytest
+
 from bioetl.composition import execution_api
+
+pytestmark = pytest.mark.unit
 
 
 def test_push_metrics_to_gateway_forwards_restricted_metric_names() -> None:

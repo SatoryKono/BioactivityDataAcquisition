@@ -20,15 +20,15 @@ from bioetl.domain.behavior._dq_rule_evaluators_cross import (
 from bioetl.domain.behavior._dq_rule_evaluators_cross import (
     _custom_cross_rule_violated as _custom_cross_rule_violated_impl,
 )
+from bioetl.domain.behavior._dq_rule_evaluators_vocab import (
+    _resolve_custom_validation_strategy,
+)
 from bioetl.domain.behavior._dq_value_coercion import (
     _coerce_list_like,
     _coerce_numeric_value,
     _is_present,
     _violates_maximum,
     _violates_minimum,
-)
-from bioetl.domain.behavior._dq_rule_evaluators_vocab import (
-    _resolve_custom_validation_strategy,
 )
 
 if TYPE_CHECKING:

@@ -6,17 +6,14 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import sys
 import xml.etree.ElementTree as ET
 from datetime import date
 from pathlib import Path
 from typing import Any
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+from scripts.engineering.qa.file_discovery import discover_files
 
-from scripts.engineering.qa.file_discovery import discover_files  # noqa: E402
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 DEFAULT_COVERAGE_XML = PROJECT_ROOT / "reports" / "coverage" / "coverage.xml"
 DEFAULT_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "module-coverage-inventory.json"
@@ -37,6 +34,17 @@ def _sha256(path: Path) -> str | None:
     if not path.exists():
         return None
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _source_tree_sha256(source_paths: list[Path], repo_root: Path) -> str:
+    digest = hashlib.sha256()
+    for path in source_paths:
+        relative = _repo_relative(path, repo_root)
+        digest.update(relative.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
 
 
 def _repo_relative(path: Path, repo_root: Path) -> str:
@@ -134,9 +142,10 @@ def build_module_coverage_inventory(
     coverage_xml = coverage_xml.resolve()
     coverage_xml_exists = coverage_xml.exists()
     coverage_by_path = _parse_coverage_xml(coverage_xml)
+    source_paths = _iter_source_modules(repo_root)
     rows: list[dict[str, Any]] = []
 
-    for source_path in _iter_source_modules(repo_root):
+    for source_path in source_paths:
         repo_path = _repo_relative(source_path, repo_root)
         coverage_entry = coverage_by_path.get(repo_path)
         status = _coverage_status(
@@ -174,6 +183,7 @@ def build_module_coverage_inventory(
         "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
         "coverage_xml_path": _repo_relative(coverage_xml, repo_root),
         "coverage_xml_sha256": _sha256(coverage_xml),
+        "source_tree_sha256": _source_tree_sha256(source_paths, repo_root),
         "canonical_coverage_lane": "coverage-verify",
         "summary": {
             "source_module_count": len(rows),

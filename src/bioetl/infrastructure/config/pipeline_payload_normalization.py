@@ -16,7 +16,9 @@ from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.config.pipeline_normalizers import (
     apply_pipeline_schema_normalization,
 )
-from bioetl.infrastructure.config.source_config_loader import load_source_config_from_root
+from bioetl.infrastructure.config.source_config_loader import (
+    load_source_config_from_root,
+)
 from bioetl.infrastructure.config_loader_filtering import (
     apply_hierarchical_filter_config,
 )

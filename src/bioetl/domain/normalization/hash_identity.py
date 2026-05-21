@@ -27,10 +27,8 @@ from bioetl.domain.normalization.json import (
 from bioetl.domain.types import JsonDict
 
 __all__ = [
-    "HashDatetimePolicy",
-    "normalize_hash_identity_record",
-    "normalize_hash_identity_value",
-    "serialize_hash_identity_canonical_json",
+    "HashDatetimePolicy", "normalize_hash_identity_record",
+    "normalize_hash_identity_value", "serialize_hash_identity_canonical_json",
 ]
 
 HashDatetimePolicy = Literal["v1_date", "v2_datetime_utc"]
