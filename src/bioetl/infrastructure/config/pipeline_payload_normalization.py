@@ -16,7 +16,7 @@ from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.config.pipeline_normalizers import (
     apply_pipeline_schema_normalization,
 )
-from bioetl.infrastructure.config.source_config_loader import load_source_config
+from bioetl.infrastructure.config.source_config_loader import load_source_config_from_root
 from bioetl.infrastructure.config_loader_filtering import (
     apply_hierarchical_filter_config,
 )
@@ -135,9 +135,12 @@ def load_source_section(
     if not isinstance(provider, str) or not provider:
         return
 
-    del config_path
+    configs_root = config_path.parents[2]
     try:
-        source_config = load_source_config(provider)
+        source_config = load_source_config_from_root(
+            provider,
+            configs_root=configs_root,
+        )
     except ValueError:
         return
 

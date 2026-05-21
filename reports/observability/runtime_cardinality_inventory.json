@@ -95,6 +95,21 @@
     "-": [
       "src/bioetl/application/observability/observer_event_mixin.py"
     ],
+    "--incremental cannot be used together with resume selectors": [
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py"
+    ],
+    "--incremental cannot be used when --start-offset is explicitly set. Either use --incremental for auto-increment or --start-offset for manual control.": [
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py"
+    ],
+    "--resume-last cannot be used together with --resume-manifest-id": [
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py"
+    ],
+    "--resume-last cannot be used together with --resume-run-id": [
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py"
+    ],
+    "--resume-manifest-id cannot be used together with --resume-run-id": [
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py"
+    ],
     ".": [
       "src/bioetl/application/core/batch_executor_dq_helpers.py",
       "src/bioetl/application/observability/observer_event_mixin.py",
@@ -293,6 +308,9 @@
     "GoldRecord": [
       "src/bioetl/application/core/_base_transformer_structural_support.py"
     ],
+    "Invalid options": [
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py"
+    ],
     "Ledger append produced an empty write": [
       "src/bioetl/infrastructure/control_plane/file_run_ledger_store.py"
     ],
@@ -331,6 +349,27 @@
     ],
     "MetadataWriterPort | None": [
       "src/bioetl/infrastructure/storage/gold/writer_support.py"
+    ],
+    "Metrics gateway cleanup completed": [
+      "src/bioetl/application/services/_metrics_service_gateway_support.py"
+    ],
+    "Metrics gateway cleanup failed": [
+      "src/bioetl/application/services/_metrics_service_gateway_support.py"
+    ],
+    "Metrics gateway cleanup unavailable": [
+      "src/bioetl/application/services/_metrics_service_gateway_support.py"
+    ],
+    "Metrics gateway publication completed": [
+      "src/bioetl/application/services/_metrics_service_gateway_support.py"
+    ],
+    "Metrics gateway publication failed": [
+      "src/bioetl/application/services/_metrics_service_gateway_support.py"
+    ],
+    "Metrics gateway publication unavailable": [
+      "src/bioetl/application/services/_metrics_service_gateway_support.py"
+    ],
+    "Metrics publisher is not configured": [
+      "src/bioetl/application/services/_metrics_service_gateway_support.py"
     ],
     "MetricsPort": [
       "src/bioetl/composition/factories/services/port_factories.py"
@@ -391,7 +430,8 @@
       "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py"
     ],
     "Runner does not implement ExecutionMetricsRunnerPort": [
-      "src/bioetl/application/services/execution/pipeline_runner_service.py"
+      "src/bioetl/application/services/execution/pipeline_runner_service.py",
+      "src/bioetl/composition/_pipeline_execution.py"
     ],
     "Running enrichers": [
       "src/bioetl/application/composite/coordinator.py"
@@ -460,6 +500,12 @@
     "TracingPort | None": [
       "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py",
       "src/bioetl/infrastructure/storage/gold/writer_support.py"
+    ],
+    "Workflow configuration error": [
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py"
+    ],
+    "Workflow failed": [
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py"
     ],
     "Write mode policy violation": [
       "src/bioetl/infrastructure/storage/silver/validation_operations.py"
@@ -657,6 +703,9 @@
       "src/bioetl/application/core/_base_transformer_execution_support.py",
       "src/bioetl/application/observability/observer_context_mixin.py"
     ],
+    "bioetl.error": [
+      "src/bioetl/application/services/_metrics_service_gateway_support.py"
+    ],
     "bioetl.pipeline": [
       "src/bioetl/application/composite/_lifecycle_observer_tracing_helpers.py",
       "src/bioetl/application/observability/observer_context_mixin.py"
@@ -666,6 +715,7 @@
       "src/bioetl/application/observability/observer_context_mixin.py"
     ],
     "bioetl.success": [
+      "src/bioetl/application/services/_metrics_service_gateway_support.py",
       "src/bioetl/application/services/checkpoint_service.py",
       "src/bioetl/application/services/quarantine_service.py"
     ],
@@ -794,6 +844,9 @@
     "debug": [
       "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
     ],
+    "defaults": [
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py"
+    ],
     "degraded_evidence": [
       "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py"
     ],
@@ -873,6 +926,7 @@
       "src/bioetl/application/core/_base_transformer_execution_support.py",
       "src/bioetl/application/core/batch_checkpoint_recovery_service.py",
       "src/bioetl/application/observability/observer_context_mixin.py",
+      "src/bioetl/application/services/_metrics_service_gateway_support.py",
       "src/bioetl/infrastructure/audit/file_audit.py",
       "src/bioetl/interfaces/http/processed_records_table.py"
     ],
@@ -890,6 +944,9 @@
     "error_details": [
       "src/bioetl/infrastructure/quarantine/filtered_read_support.py",
       "src/bioetl/infrastructure/quarantine/statistics_support.py"
+    ],
+    "error_message": [
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py"
     ],
     "error_rate": [
       "src/bioetl/application/services/data_quality_service.py",
@@ -914,7 +971,8 @@
     ],
     "exact_replay": [
       "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py",
-      "src/bioetl/infrastructure/storage/metadata_writer_helpers.py"
+      "src/bioetl/infrastructure/storage/metadata_writer_helpers.py",
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py"
     ],
     "execution_fingerprint": [
       "src/bioetl/infrastructure/storage/metadata_writer_helpers.py"
@@ -1118,6 +1176,12 @@
       "src/bioetl/infrastructure/storage/gold/writer_support.py",
       "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py"
     ],
+    "metrics.delete_from_gateway": [
+      "src/bioetl/application/services/_metrics_service_gateway_support.py"
+    ],
+    "metrics.push_to_gateway": [
+      "src/bioetl/application/services/_metrics_service_gateway_support.py"
+    ],
     "mismatches": [
       "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py"
     ],
@@ -1222,6 +1286,10 @@
     "provider_unhealthy_alert": [
       "src/bioetl/infrastructure/adapters/http/_health_monitor_observability.py"
     ],
+    "pushgateway_url": [
+      "src/bioetl/composition/_metrics_publication.py",
+      "src/bioetl/composition/observability_api.py"
+    ],
     "quality_score": [
       "src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py"
     ],
@@ -1258,19 +1326,32 @@
       "src/bioetl/application/services/data_quality_service.py"
     ],
     "records_bronze": [
-      "src/bioetl/application/observability/observer.py"
+      "src/bioetl/application/observability/observer.py",
+      "src/bioetl/composition/_pipeline_execution.py"
     ],
     "records_count": [
       "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py"
     ],
     "records_fetched": [
-      "src/bioetl/application/observability/observer.py"
+      "src/bioetl/application/observability/observer.py",
+      "src/bioetl/composition/_pipeline_execution.py"
+    ],
+    "records_filtered_out": [
+      "src/bioetl/composition/_pipeline_execution.py"
     ],
     "records_gold": [
-      "src/bioetl/application/observability/observer.py"
+      "src/bioetl/application/observability/observer.py",
+      "src/bioetl/composition/_pipeline_execution.py"
+    ],
+    "records_gold_excluded_by_contract": [
+      "src/bioetl/composition/_pipeline_execution.py"
+    ],
+    "records_quarantined": [
+      "src/bioetl/composition/_pipeline_execution.py"
     ],
     "records_silver": [
-      "src/bioetl/application/observability/observer.py"
+      "src/bioetl/application/observability/observer.py",
+      "src/bioetl/composition/_pipeline_execution.py"
     ],
     "rename_dataframe": [
       "src/bioetl/application/composite/merger_input_mixin.py"
@@ -1304,7 +1385,8 @@
     ],
     "required_persistence_profile": [
       "src/bioetl/composition/bootstrap/runtime/observability_bundle.py",
-      "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
+      "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py",
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py"
     ],
     "required_terms": [
       "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py"
@@ -1356,7 +1438,11 @@
     "run_type": [
       "src/bioetl/infrastructure/quarantine/filtered_read_support.py",
       "src/bioetl/infrastructure/quarantine/filtered_reads.py",
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py",
       "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py"
+    ],
+    "run_type_context": [
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py"
     ],
     "runbook": [
       "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py"
@@ -1395,6 +1481,9 @@
     "silver_structural_quarantined": [
       "src/bioetl/application/core/_base_transformer_structural_support.py"
     ],
+    "single_pipeline_name": [
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py"
+    ],
     "skip_gold": [
       "src/bioetl/application/core/_runner_observability.py"
     ],
@@ -1411,6 +1500,9 @@
       "src/bioetl/infrastructure/audit/file_audit.py",
       "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py",
       "src/bioetl/interfaces/http/processed_records_table.py"
+    ],
+    "steps": [
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py"
     ],
     "storage_optimization_failed": [
       "src/bioetl/application/services/medallion_lifecycle.py"
@@ -1494,6 +1586,9 @@
       "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
       "src/bioetl/infrastructure/storage/bronze_writer.py"
     ],
+    "use_cached_bronze": [
+      "src/bioetl/interfaces/cli/commands/_workflow_run_support.py"
+    ],
     "utf-8": [
       "src/bioetl/infrastructure/control_plane/file_run_ledger_store.py",
       "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
@@ -1537,6 +1632,11 @@
     "+00:00",
     ",",
     "-",
+    "--incremental cannot be used together with resume selectors",
+    "--incremental cannot be used when --start-offset is explicitly set. Either use --incremental for auto-increment or --start-offset for manual control.",
+    "--resume-last cannot be used together with --resume-manifest-id",
+    "--resume-last cannot be used together with --resume-run-id",
+    "--resume-manifest-id cannot be used together with --resume-run-id",
     ".",
     "/",
     "0",
@@ -1598,6 +1698,7 @@
     "Getting checkpoint for manifest",
     "Getting checkpoint for run",
     "GoldRecord",
+    "Invalid options",
     "Ledger append produced an empty write",
     "LineageGraphFragment | None",
     "LineageStorePort | None",
@@ -1611,6 +1712,13 @@
     "MetadataCoordinatorPort | None",
     "MetadataT",
     "MetadataWriterPort | None",
+    "Metrics gateway cleanup completed",
+    "Metrics gateway cleanup failed",
+    "Metrics gateway cleanup unavailable",
+    "Metrics gateway publication completed",
+    "Metrics gateway publication failed",
+    "Metrics gateway publication unavailable",
+    "Metrics publisher is not configured",
     "MetricsPort",
     "MetricsPort | None",
     "No records to write",
@@ -1653,6 +1761,8 @@
     "Starting storage optimization",
     "T",
     "TracingPort | None",
+    "Workflow configuration error",
+    "Workflow failed",
     "Write mode policy violation",
     "Writing merged Gold records",
     "Z",
@@ -1713,6 +1823,7 @@
     "bioetl.checkpoint",
     "bioetl.checkpoint.status",
     "bioetl.duration_ms",
+    "bioetl.error",
     "bioetl.pipeline",
     "bioetl.status",
     "bioetl.success",
@@ -1757,6 +1868,7 @@
     "data_source_retry",
     "date",
     "debug",
+    "defaults",
     "degraded_evidence",
     "degraded_evidence_count",
     "delta_version_after",
@@ -1786,6 +1898,7 @@
     "errorType",
     "error_code",
     "error_details",
+    "error_message",
     "error_rate",
     "errors.domain",
     "errors.integration",
@@ -1855,6 +1968,8 @@
     "metadata_writer",
     "metadata_written",
     "metrics",
+    "metrics.delete_from_gateway",
+    "metrics.push_to_gateway",
     "mismatches",
     "missing",
     "missing_compatibility_context",
@@ -1886,6 +2001,7 @@
     "produced_datasets",
     "provider",
     "provider_unhealthy_alert",
+    "pushgateway_url",
     "quality_score",
     "quarantine_status",
     "quarantine_summary",
@@ -1899,7 +2015,10 @@
     "records_bronze",
     "records_count",
     "records_fetched",
+    "records_filtered_out",
     "records_gold",
+    "records_gold_excluded_by_contract",
+    "records_quarantined",
     "records_silver",
     "rename_dataframe",
     "replay_capability",
@@ -1926,6 +2045,7 @@
     "run_manifest_enabled",
     "run_scope",
     "run_type",
+    "run_type_context",
     "runbook",
     "seed_completed",
     "set_gauge",
@@ -1938,11 +2058,13 @@
     "silver_merge_recovered_after_retry",
     "silver_merge_retry",
     "silver_structural_quarantined",
+    "single_pipeline_name",
     "skip_gold",
     "slo_contracts",
     "started_at",
     "state",
     "status",
+    "steps",
     "storage_optimization_failed",
     "storage_provider",
     "strict",
@@ -1969,6 +2091,7 @@
     "transform_record",
     "transformation_skipped",
     "unknown",
+    "use_cached_bronze",
     "utf-8",
     "validation_error",
     "value",

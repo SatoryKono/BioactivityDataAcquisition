@@ -96,6 +96,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
         gateway: str,
         run_label: str = "bioetl",
         grouping_key: dict[str, str] | None = None,
+        metric_names: tuple[str, ...] | None = None,
     ) -> PushResult:
         """Publish current metrics snapshot through the explicit publisher port."""
         labels = dict(grouping_key or {})
@@ -104,6 +105,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
                 gateway=gateway,
                 run_label=run_label,
                 labels=labels,
+                metric_names=metric_names,
             )
         with traced_operation(
             self.tracer,
@@ -121,6 +123,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
                 gateway=gateway,
                 run_label=run_label,
                 labels=labels,
+                metric_names=metric_names,
             )
             self._set_result_attributes(
                 span, success=result.success, error=result.error
@@ -133,6 +136,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
         gateway: str,
         run_label: str,
         labels: dict[str, str],
+        metric_names: tuple[str, ...] | None,
     ) -> PushResult:
         """Implement gateway publication without tracing concerns."""
         if self._publisher is None:
@@ -157,6 +161,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
                 gateway=gateway,
                 run_label=run_label,
                 grouping_key=labels,
+                metric_names=metric_names,
             )
         except _METRICS_GATEWAY_ERRORS as exc:
             error = str(exc)

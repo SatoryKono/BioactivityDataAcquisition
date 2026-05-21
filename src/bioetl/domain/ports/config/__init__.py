@@ -7,13 +7,13 @@ from bioetl.domain.ports.config.config_loader_port import (
     PipelineConfigLoaderPort,
     SettingsLoaderPort,
 )
-from bioetl.domain.ports.config.publication_vocabulary_port import (
-    PublicationVocabularyPort,
-)
 from bioetl.domain.ports.config.config_port import (
     PipelineSettingsPort,
     PipelineYamlConfigPort,
     SettingsPort,
+)
+from bioetl.domain.ports.config.publication_vocabulary_port import (
+    PublicationVocabularyPort,
 )
 
 __all__ = [

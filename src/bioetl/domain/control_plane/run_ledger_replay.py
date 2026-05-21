@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, field, replace
 from datetime import datetime
-from typing import TypedDict, cast
+from typing import cast
 
 from bioetl.domain.composite.result import (
     DependencyResult,
@@ -15,20 +15,17 @@ from bioetl.domain.composite.result import (
 )
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.control_plane._run_ledger_runtime import (
-    ARTIFACT_PUBLISHED_EVENT,
     COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
     COMPOSITE_ENRICHER_COMPLETED_EVENT,
     COMPOSITE_MERGE_COMPLETED_EVENT,
-    DQ_POLICY_APPLIED_EVENT,
     INPUT_SNAPSHOT_PUBLISHED_EVENT,
-    MANIFEST_CREATED_EVENT,
-    RUN_FAILED_EVENT,
-    RUN_FINISHED_EVENT,
-    RUN_SHUTDOWN_EVENT,
-    RUN_STARTED_EVENT,
     STAGE_COMPLETED_EVENT,
-    STAGE_STARTED_EVENT,
     RunLedgerEntry,
+)
+from bioetl.domain.control_plane._run_ledger_replay_policy import (
+    PASS_THROUGH_EVENT_TYPES,
+    STAGE_COMPLETION_UPDATES,
+    TERMINAL_STATES,
 )
 
 __all__ = ["RunLedgerReplayProjection", "project_run_ledger_replay"]
@@ -54,37 +51,14 @@ class RunLedgerReplayProjection:
     unsupported_replay_entries: tuple[tuple[str, str, str | None], ...] = ()
 
 
-class _StageCompletionUpdate(TypedDict, total=False):
-    state: CompositePipelineState
-    seed_completed: bool
-    merge_completed: bool
-
 _ProjectionFn = Callable[[RunLedgerReplayProjection, RunLedgerEntry], RunLedgerReplayProjection]
-
-
-_STAGE_COMPLETION_UPDATES: dict[str, _StageCompletionUpdate] = {
-    "seed": {
-        "state": CompositePipelineState.SEED_COMPLETED,
-        "seed_completed": True,
-    },
-    "dependencies": {
-        "state": CompositePipelineState.DEPENDENCIES_COMPLETED,
-    },
-    "enrichment": {
-        "state": CompositePipelineState.ENRICHMENT_COMPLETED,
-    },
-    "merge": {
-        "state": CompositePipelineState.MERGING,
-        "merge_completed": True,
-    },
-}
 
 
 def _project_stage_completed(
     projection: RunLedgerReplayProjection,
     entry: RunLedgerEntry,
 ) -> RunLedgerReplayProjection:
-    update = _STAGE_COMPLETION_UPDATES.get((entry.stage or "").strip().lower())
+    update = STAGE_COMPLETION_UPDATES.get((entry.stage or "").strip().lower())
     if update is None:
         return projection
     return cast(
@@ -233,22 +207,6 @@ _EVENT_PROJECTORS: dict[str, _ProjectionFn] = {
     INPUT_SNAPSHOT_PUBLISHED_EVENT: _project_input_snapshot_published,
 }
 
-_PASS_THROUGH_EVENT_TYPES = frozenset(
-    {
-        MANIFEST_CREATED_EVENT,
-        RUN_STARTED_EVENT,
-        RUN_SHUTDOWN_EVENT,
-        STAGE_STARTED_EVENT,
-        ARTIFACT_PUBLISHED_EVENT,
-        DQ_POLICY_APPLIED_EVENT,
-    }
-)
-
-_TERMINAL_STATES = {
-    RUN_FINISHED_EVENT: CompositePipelineState.COMPLETED,
-    RUN_FAILED_EVENT: CompositePipelineState.FAILED,
-}
-
 def _advance_watermark(
     projection: RunLedgerReplayProjection,
     entry: RunLedgerEntry,
@@ -290,10 +248,10 @@ def _apply_terminal_or_passthrough(
     replayed: RunLedgerReplayProjection,
     entry: RunLedgerEntry,
 ) -> RunLedgerReplayProjection:
-    terminal_state = _TERMINAL_STATES.get(entry.event_type)
+    terminal_state = TERMINAL_STATES.get(entry.event_type)
     if terminal_state is not None:
         return replace(replayed, state=terminal_state)
-    if entry.event_type in _PASS_THROUGH_EVENT_TYPES:
+    if entry.event_type in PASS_THROUGH_EVENT_TYPES:
         return replayed
     return _mark_projection_unsupported(replayed, entry)
 

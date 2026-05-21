@@ -8,10 +8,10 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 Refresh note (2026-05-21): top-level package counts were remeasured from the
 working tree with `find src/bioetl ... -name '*.py'` and first-order package
 directory scans excluding `__pycache__`. Targeted raw evidence snapshots for the
-`interfaces` and `composition` pillar packs were refreshed in place to remove
-known topology drift; other older `2026-03-20` raw evidence files remain
-historical inputs and should not be treated as the latest package-count
-baseline.
+`interfaces`, `composition`, and `application` pillar packs were refreshed in
+place to remove known topology drift; older `2026-03-20` raw evidence files in
+other layer packs remain historical inputs and should not be treated as the
+latest package-count baseline.
 
 > Это summary — repo-only evidence layer для package-topology
 > интерпретации. Он помогает калибровать structural observations, но не
@@ -39,8 +39,8 @@ Collected: `6`
 
 - The repository is not flat at the top level; it is split into clear zones for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct first-order package groups.
-- Current Python file count under `src/bioetl` is `1901`.
-- Current layer file counts are: `domain=543`, `application=538`, `infrastructure=466`, `composition=239`, `interfaces=113`.
+- Current Python file count under `src/bioetl` is `1903`.
+- Current layer file counts are: `domain=543`, `application=539`, `infrastructure=466`, `composition=239`, `interfaces=114`.
 - Current first-order package counts are: `domain=22`, `application=6`, `infrastructure=20`, `composition=6`, `interfaces=2`.
 - `domain` and `application` are now the broadest package surfaces by Python file count; `infrastructure` remains the broadest adapter and external-system implementation boundary.
 

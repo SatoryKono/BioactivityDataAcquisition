@@ -238,6 +238,7 @@ def push_metrics_to_gateway(
     run_label: str = "bioetl",
     logger: LoggerPort | None = None,
     grouping_key: dict[str, str] | None = None,
+    metric_names: tuple[str, ...] | None = None,
     job: str | None = None,
 ) -> bool:
     """Publish a bounded aggregate metrics snapshot to Prometheus Pushgateway.
@@ -269,6 +270,11 @@ def push_metrics_to_gateway(
     gateway = gateway or "localhost:9091"
     effective_run_label = job if job is not None else run_label
     safe_grouping_key = _sanitize_pushgateway_grouping_key(grouping_key)
+    registry = (
+        REGISTRY.restricted_registry(metric_names)
+        if metric_names is not None
+        else REGISTRY
+    )
 
     try:
         # Keep Pushgateway publication best-effort so CLI teardown does not stall
@@ -276,7 +282,7 @@ def push_metrics_to_gateway(
         push_to_gateway(
             gateway,
             job=effective_run_label,
-            registry=REGISTRY,
+            registry=registry,
             grouping_key=safe_grouping_key,
             timeout=1.0,
         )

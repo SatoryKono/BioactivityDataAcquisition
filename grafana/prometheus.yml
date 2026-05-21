@@ -44,7 +44,17 @@ scrape_configs:
       - targets: ['redis-exporter:9121']
     metrics_path: /metrics
 
-  - job_name: 'sonarqube'
+  - job_name: 'minio-cluster'
     static_configs:
-      - targets: ['sonarqube:9000']
-    metrics_path: /api/v2/metrics/health
+      - targets: ['minio:9000']
+    metrics_path: /minio/v2/metrics/cluster
+
+  - job_name: 'minio-node'
+    static_configs:
+      - targets: ['minio:9000']
+    metrics_path: /minio/v2/metrics/node
+
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+    metrics_path: /metrics

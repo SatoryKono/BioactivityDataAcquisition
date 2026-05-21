@@ -62,7 +62,7 @@ BioETL изначально проектировался с поддержкой
 | S3 + boto3                    | Локальная ФС (pathlib) |
 | Redis + aioredis              | MemoryLock             |
 | Prefect + tasks               | CLI + PipelineRunner   |
-| Docker Compose (minio, redis) | Python venv только     |
+| Application runtime Docker Compose (minio, redis) | Python venv только; reviewed optional helper compose files are adjunct tooling only |
 
 ### 2. Уменьшение зависимостей
 
@@ -219,8 +219,13 @@ class Settings:
 
 При обновлении с предыдущих версий:
 
-1. Удалить Docker Compose конфигурацию (minio, redis)
-1. Обновить переменные окружения (удалить AWS-*, REDIS-*)
+1. Удалить или деклассифицировать Docker Compose конфигурацию (minio, redis),
+   если она используется как application runtime, storage, locking или
+   orchestration path.
+1. Reviewed root-level helper compose files MAY remain only under
+   `BIOETL-DOCKER-HELPER-ADR010-ADJUNCT` governance and MUST NOT be used by
+   application logic.
+1. Обновить переменные окружения application runtime (удалить AWS-*, REDIS-*).
 1. Переустановить зависимости: `pip install -e .[dev]`
 1. Перенести данные из S3 в локальную директорию `data/`
 

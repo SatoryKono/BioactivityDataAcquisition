@@ -88,6 +88,7 @@ def push_metrics_to_gateway(
     pipeline_name: str | None = None,
     run_type: str | None = None,
     grouping_key_extra: Mapping[str, str] | None = None,
+    metric_names: tuple[str, ...] | None = None,
 ) -> bool:
     """Push metrics through the composition-owned observability seam."""
     from bioetl.composition.observability_api import (
@@ -101,6 +102,8 @@ def push_metrics_to_gateway(
     }
     if grouping_key_extra is not None:
         gateway_kwargs["grouping_key_extra"] = grouping_key_extra
+    if metric_names is not None:
+        gateway_kwargs["metric_names"] = metric_names
     return bool(_impl(**gateway_kwargs))
 
 

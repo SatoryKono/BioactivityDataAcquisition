@@ -13,6 +13,7 @@ def publish_metrics_safely(
     pipeline_name: str | None = None,
     run_type: str | None = None,
     grouping_key_extra: Mapping[str, str] | None = None,
+    metric_names: tuple[str, ...] | None = None,
 ) -> bool:
     """Push process-local metrics without failing the completed CLI command."""
     from bioetl.composition.execution_api import push_metrics_to_gateway
@@ -23,6 +24,7 @@ def publish_metrics_safely(
             pipeline_name=pipeline_name,
             run_type=run_type,
             grouping_key_extra=grouping_key_extra,
+            metric_names=metric_names,
         )
         return True
     except (

@@ -141,6 +141,7 @@ def push_metrics_to_gateway(
     pipeline_name: str | None = None,
     run_type: str | None = None,
     grouping_key_extra: Mapping[str, str] | None = None,
+    metric_names: tuple[str, ...] | None = None,
     logger: LoggerPort | None = None,
 ) -> bool:
     """Push metrics through the canonical composition-owned observability seam."""
@@ -166,6 +167,7 @@ def push_metrics_to_gateway(
         gateway=gateway,
         run_label=run_label,
         grouping_key=grouping_key,
+        metric_names=metric_names,
     )
     return bool(result.success)
 

@@ -711,9 +711,14 @@ def test_load_source_section_reuses_canonical_source_loader(
         }
     )
 
+    def _load_source_config_from_root(provider: str, *, configs_root: Path) -> object:
+        assert provider == "chembl"
+        assert configs_root == tmp_path / "configs"
+        return base_source
+
     monkeypatch.setattr(
-        "bioetl.infrastructure.config.source_config_loader.load_source_config",
-        lambda provider: base_source,
+        "bioetl.infrastructure.config.pipeline_payload_normalization.load_source_config_from_root",
+        _load_source_config_from_root,
     )
 
     _load_source_section(config, config_path)
@@ -772,8 +777,8 @@ def test_load_source_section_rejects_pipeline_source_pagination_overrides(
     )
 
     monkeypatch.setattr(
-        "bioetl.infrastructure.config.source_config_loader.load_source_config",
-        lambda provider: base_source,
+        "bioetl.infrastructure.config.pipeline_payload_normalization.load_source_config_from_root",
+        lambda provider, *, configs_root: base_source,
     )
 
     with pytest.raises(ValueError, match="page_size_override") as exc_info:

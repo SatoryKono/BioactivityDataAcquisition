@@ -8,7 +8,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from bioetl.application.services.control_plane._manifest_time_support import (
-    ManifestClock,
+    ManifestClockProtocol,
     resolve_manifest_created_at,
 )
 from bioetl.application.services.control_plane._run_manifest_service_mixins import (
@@ -143,7 +143,7 @@ class RunManifestService(
     """Create and persist immutable run manifests."""
 
     manifest_port: RunManifestPort
-    clock: ManifestClock | None = None
+    clock: ManifestClockProtocol | None = None
     created_at_factory: Callable[[], datetime] | None = None
     schema_version: str = "1.0"
     _manifest_id_factory: Callable[[], str] = field(

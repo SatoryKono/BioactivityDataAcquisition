@@ -356,6 +356,7 @@ class TestMetricsService:
             gateway="localhost:9091",
             run_label="bioetl",
             grouping_key={"pipeline": "chembl_activity"},
+            metric_names=None,
         )
 
     def test_push_to_gateway_logs_failure_without_publisher(

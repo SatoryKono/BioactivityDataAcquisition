@@ -138,7 +138,7 @@ StorageFactory
 - Interfaces must not import `composition.registry` or
   `composition.registry_default` directly; `composition.registry_api` is the
   only sanctioned registry seam outside composition internals.
-- Pipeline registration from interfaces/orchestration must also go through
+- Pipeline registration from interface entrypoints must also go through
   `composition.registry_api.register_all_pipelines`, not
   `composition.factories.pipeline.registry`.
 - Internal modules such as `_pipeline_execution`, `_resource_management`, and `_services`

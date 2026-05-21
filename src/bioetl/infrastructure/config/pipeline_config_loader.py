@@ -21,6 +21,7 @@ from bioetl.infrastructure.config.pipeline_dq_resolution import (
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
+
 class PipelineConfigLoader:
     """Retained convenience facade for YAML loading plus DQ/filter integration.
 

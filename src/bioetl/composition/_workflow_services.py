@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
@@ -37,11 +36,6 @@ __all__ = [
 ]
 
 _WORKFLOW_MEMORY_LOCK: object | None = None
-
-
-def _current_utc_time() -> datetime:
-    """Return a UTC timestamp without adding a composition -> domain edge."""
-    return datetime.now(UTC)
 
 
 def load_workflow_config(name: str) -> WorkflowConfig:
@@ -163,6 +157,7 @@ def get_workflow_execution_service(
         FileWorkflowLedgerStore,
         FileWorkflowManifestStore,
     )
+    from bioetl.infrastructure.time import SystemClock
 
     settings = get_settings()
     metrics = create_metrics(settings)
@@ -183,7 +178,7 @@ def get_workflow_execution_service(
         workflow_runner=get_workflow_runner_service(registry=registry),
         manifest_service=WorkflowManifestService(
             manifest_port=manifest_store,
-            created_at_factory=_current_utc_time,
+            clock=SystemClock(),
         ),
         workflow_ledger_port=ledger_store,
         workflow_ledger_factory=_create_workflow_ledger_service,

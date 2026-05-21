@@ -36,11 +36,11 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     extract_entity_type as _extract_entity_type,
 )
-from bioetl.composition.providers.provider_registry import (
-    ProviderDataSourceAccessProtocol,
-)
 from bioetl.composition.pipeline_runner_request import (
     build_pipeline_create_runner_request_from_kwargs as _build_pipeline_create_runner_request_from_kwargs,
+)
+from bioetl.composition.providers.provider_registry import (
+    ProviderDataSourceAccessProtocol,
 )
 from bioetl.domain.behavior import EntityIdentityGenerator
 from bioetl.domain.filtering import (

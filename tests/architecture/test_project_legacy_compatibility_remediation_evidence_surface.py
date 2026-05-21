@@ -2,24 +2,25 @@
 
 from __future__ import annotations
 
+import hashlib
 import os
 from pathlib import Path
 
 import pytest
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[2]
 PACK_ROOT = (
-    ROOT
-    / "docs"
-    / "reports"
-    / "evidence"
-    / "project-legacy-compatibility-remediation"
+    ROOT / "docs" / "reports" / "evidence" / "project-legacy-compatibility-remediation"
 )
 CANONICAL_CROSS_SYNTHESIS = (
     PACK_ROOT
     / "03-synthesis"
     / "CROSS-SYNTHESIS-project-legacy-compatibility-remediation.md"
+)
+RECOVERY_PROVENANCE = (
+    PACK_ROOT / "06-status" / "recovered-cross-synthesis-provenance-2026-05-21.yaml"
 )
 
 
@@ -31,6 +32,39 @@ def test_canonical_cross_synthesis_is_readable() -> None:
     assert "DEC-legacy-use-four-bucket-classification-instead-of-broad-purge" in text
     assert "retain-as-contract" in text
     assert "Wave 1" in text
+
+
+def test_recovered_cross_synthesis_checksum_matches_provenance() -> None:
+    """The recovered synthesis must carry verifiable checksum provenance."""
+    manifest = yaml.safe_load(RECOVERY_PROVENANCE.read_text(encoding="utf-8"))
+    assert isinstance(manifest, dict)
+    artifact = manifest["artifact"]
+    assert isinstance(artifact, dict)
+    artifact_path = ROOT / artifact["path"]
+
+    digest = hashlib.sha256(artifact_path.read_bytes()).hexdigest()
+    assert digest == artifact["sha256"]
+    assert artifact_path.stat().st_size == artifact["byte_size"]
+    assert artifact["status"] == "recovered-canonical-copy"
+
+    source_inputs = manifest["source_inputs"]
+    assert isinstance(source_inputs, list)
+    for source in source_inputs:
+        source_path = str(source)
+        if "*" in source_path:
+            assert list(ROOT.glob(source_path)), (
+                f"No provenance inputs match {source_path}"
+            )
+        else:
+            assert (ROOT / source_path).exists(), (
+                f"Missing provenance input {source_path}"
+            )
+
+    recovery_note = manifest["recovery_note"]
+    assert isinstance(recovery_note, dict)
+    assert (
+        "does not prove byte-for-byte identity" in recovery_note["verification_scope"]
+    )
 
 
 def test_curated_evidence_surface_has_no_unreadable_visible_entries() -> None:
