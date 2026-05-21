@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
+import re
 
 import pytest
 import yaml
 
-from scripts.ops.support.repo.cleanup_repository import collect_reports_workspace_evidence
-
 ROOT = Path(__file__).resolve().parents[2]
 INVENTORY = ROOT / "configs" / "quality" / "replay_safe_cleanup_inventory.yaml"
+QUALITY_REPORTS_ROOT = ROOT / "reports" / "quality"
+_PRETEST_GUARDRAILS_TIMESTAMP_RE = re.compile(
+    r"^pretest_guardrails_(\d{8})_(\d{6})\.json$"
+)
 REQUIRED_REPLAY_ANCHORS = {
     "run_manifest",
     "run_ledger",
@@ -109,17 +113,25 @@ def test_reports_quality_working_diagnostics_publish_owner_and_ttl() -> None:
 @pytest.mark.architecture
 def test_reports_quality_ttl_artifacts_are_not_past_retention_window() -> None:
     """Live repo state must not retain expired reports/quality TTL artifacts."""
-    evidence = collect_reports_workspace_evidence(ROOT)
-    expired = [
-        row.rel_path
-        for row in evidence
-        if row.retention_entry_id
-        in {
-            "reports_quality_tmp_diagnostics",
-            "reports_quality_pretest_guardrails_history",
-        }
-        and row.ttl_expired is True
-    ]
+    now = datetime.now(tz=UTC)
+    expired: list[str] = []
+    ttl_by_pattern = {"_tmp_*": 7, "pretest_guardrails_*.json": 30}
+
+    for pattern, ttl_days in ttl_by_pattern.items():
+        for path in QUALITY_REPORTS_ROOT.glob(pattern):
+            if not path.is_file():
+                continue
+            timestamp = datetime.fromtimestamp(path.stat().st_mtime, tz=UTC)
+            match = _PRETEST_GUARDRAILS_TIMESTAMP_RE.match(path.name)
+            if match is not None:
+                date_part, time_part = match.groups()
+                timestamp = datetime.strptime(
+                    f"{date_part}{time_part}",
+                    "%Y%m%d%H%M%S",
+                ).replace(tzinfo=UTC)
+            age_days = (now.date() - timestamp.date()).days
+            if age_days > ttl_days:
+                expired.append(path.relative_to(ROOT).as_posix())
 
     assert expired == []
 
