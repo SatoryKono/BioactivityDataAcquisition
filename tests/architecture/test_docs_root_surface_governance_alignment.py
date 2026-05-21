@@ -75,6 +75,8 @@ def test_technical_debt_summary_tracks_live_exemption_baseline() -> None:
     assert f"`{file_size_limits}` active file-size-limit exemptions" in summary_text
     assert "не содержит active class/god-object" in summary_text
     assert "## Live File Size Exemption Inventory" in summary_text
+    if not file_size_entries:
+        assert "_No active file-size-limit exemptions_" in summary_text
     for path, metadata in file_size_entries.items():
         assert f"`{path}`" in summary_text
         assert metadata["owner"] in summary_text
