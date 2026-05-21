@@ -31,6 +31,9 @@ ______________________________________________________________________
 - Reviewed root-level `docker-compose*.yml` files MAY оставаться tracked только
   как optional local-only helper stacks; они MUST NOT переопределять ADR-010 и
   MUST NOT трактоваться как обязательный runtime bootstrap path.
+- Stable helper governance anchor:
+  `BIOETL-DOCKER-HELPER-ADR010-ADJUNCT`; machine-readable helper contracts live
+  in `configs/quality/docker_helper_contracts.yaml`.
 - Root-level tracked markdown и txt артефакты MUST быть ограничены canonical
   root entrypoints. Операционные quick-reference материалы SHOULD жить в
   `docs/05-operations/`, а одноразовые status/recovery/final-summary артефакты

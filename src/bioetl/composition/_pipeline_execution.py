@@ -69,6 +69,7 @@ def push_metrics_to_gateway(
     pipeline_name: str | None = None,
     run_type: str | None = None,
     grouping_key_extra: dict[str, str] | None = None,
+    metric_names: tuple[str, ...] | None = None,
 ) -> bool:
     """Push current metrics to Prometheus Pushgateway via composition.
 
@@ -91,6 +92,8 @@ def push_metrics_to_gateway(
     }
     if grouping_key_extra is not None:
         gateway_kwargs["grouping_key_extra"] = grouping_key_extra
+    if metric_names is not None:
+        gateway_kwargs["metric_names"] = metric_names
     return push_metrics_to_gateway_impl(**gateway_kwargs)
 
 

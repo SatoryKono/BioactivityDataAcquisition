@@ -45,7 +45,7 @@ from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
 )
-from bioetl.infrastructure.config.contract_policy_validation import (
+from bioetl.infrastructure.config.contract_registry_loader import (
     load_contract_registry_entries,
 )
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config

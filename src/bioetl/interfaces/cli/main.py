@@ -182,7 +182,8 @@ def _build_main_registry() -> object:
 @click.pass_context
 def cli(ctx: Context) -> None:
     """BioETL - Bioactivity Data ETL Pipeline."""
-    del ctx
+    if ctx.obj is None:
+        ctx.obj = _build_main_registry()
 
 
 def main() -> None:

@@ -12,6 +12,14 @@ stacks для локальной диагностики или точечных 
 Они не входят в canonical helper flow и не являются обязательной частью
 Local-Only runtime.
 
+<!-- BIOETL-DOCKER-HELPER-ADR010-ADJUNCT -->
+
+Governance anchor: `BIOETL-DOCKER-HELPER-ADR010-ADJUNCT`. Machine-readable
+контракт reviewed helper stacks находится в
+`configs/quality/docker_helper_contracts.yaml`. Этот контракт закрепляет, что
+helper compose files остаются optional local-only adjunct tooling и MUST NOT
+использоваться для storage, locking или orchestration semantics приложения.
+
 ## ✅ Что настроено
 
 - ✓ `.env.example` как шаблон переменных окружения; `.env` является local-only/secret-bearing файлом и не создается автоматически
@@ -146,9 +154,9 @@ docker system prune -a
 | `docker-compose.monitoring.yml` | Мониторинг (Prometheus, Grafana, Loki, Tempo) |
 | `docker-compose.codex.yml` | MCP серверы для Codex |
 | `docker-compose.alertmanager.yml` | Optional adjunct Alertmanager helper stack; not part of baseline runtime |
-| `docker-compose.minio.yml` | Optional local MinIO helper stack; not part of ADR-010 runtime |
-| `docker-compose.redis.yml` | Optional local Redis helper stack; not part of ADR-010 runtime |
-| `docker-compose.sonarqube.yml` | Optional local SonarQube helper stack; not part of baseline runtime. Requires local-only `SONARQUBE_DB_PASSWORD` and `SONARQUBE_SYSTEM_PASSCODE` via shell env or `.env` |
+| `docker-compose.minio.yml` | Optional local MinIO helper stack; not part of ADR-010 runtime. Requires explicit `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD`; binds to localhost only |
+| `docker-compose.redis.yml` | Optional local Redis helper stack; not part of ADR-010 runtime. Requires explicit `REDIS_PASSWORD`; binds to localhost only |
+| `docker-compose.sonarqube.yml` | Optional local SonarQube helper stack; not part of baseline runtime. Requires local-only `SONARQUBE_DB_PASSWORD` and `SONARQUBE_SYSTEM_PASSCODE`; binds to localhost only |
 | `Dockerfile.bioetl` | Образ BioETL (multi-stage Python) |
 | `Dockerfile.warp` | Warp VPN клиент |
 | `Dockerfile.mcp-*` | MCP серверы (Node.js) |
@@ -249,5 +257,14 @@ docker compose up --build -d
   по умолчанию
 - Manual-only helper compose files that join the monitoring network require
   `docker network create bioetl-monitoring` first on a fresh machine
+- Redis, MinIO and SonarQube helper compose files require explicit local
+  credential environment variables. `.env.example` keeps these values empty so
+  copied local `.env` files fail closed until the operator fills machine-local
+  secrets.
+- Helper stack metrics posture is governed by
+  `configs/quality/docker_helper_contracts.yaml`: Redis, MinIO and
+  Alertmanager have Prometheus scrape contracts; SonarQube is healthcheck-only
+  in repo-default Prometheus because its native metrics endpoint requires a
+  runtime passcode.
 
 **Все готово к запуску!** 🚀

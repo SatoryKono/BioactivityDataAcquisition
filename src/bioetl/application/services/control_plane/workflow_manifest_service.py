@@ -8,7 +8,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from bioetl.application.services.control_plane._manifest_time_support import (
-    ManifestClock,
+    ManifestClockProtocol,
     resolve_manifest_created_at,
 )
 from bioetl.application.services.control_plane.workflow_manifest_models import (
@@ -41,7 +41,7 @@ class WorkflowManifestService:
     """Create and persist immutable workflow manifests."""
 
     manifest_port: WorkflowManifestPort
-    clock: ManifestClock | None = None
+    clock: ManifestClockProtocol | None = None
     created_at_factory: Callable[[], datetime] | None = None
     schema_version: str = "1.0"
     _manifest_id_factory: Callable[[], str] = field(

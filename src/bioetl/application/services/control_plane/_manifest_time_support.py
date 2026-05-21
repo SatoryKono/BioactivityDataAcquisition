@@ -8,7 +8,7 @@ from typing import Protocol
 
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
 
-__all__ = ["ManifestClock", "resolve_manifest_created_at"]
+__all__ = ["ManifestClockProtocol", "resolve_manifest_created_at"]
 
 
 class ManifestClockProtocol(Protocol):
@@ -19,14 +19,9 @@ class ManifestClockProtocol(Protocol):
         ...
 
 
-# Public application-layer seam uses role vocabulary rather than domain `*Port`
-# naming, which is reserved for domain boundary protocols.
-ManifestClock = ManifestClockProtocol
-
-
 def resolve_manifest_created_at(
     *,
-    clock: ManifestClock | None,
+    clock: ManifestClockProtocol | None,
     created_at_factory: Callable[[], datetime] | None,
 ) -> datetime:
     """Resolve manifest creation time through the configured seam."""

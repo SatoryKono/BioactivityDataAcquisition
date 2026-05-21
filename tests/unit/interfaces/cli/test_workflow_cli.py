@@ -390,6 +390,73 @@ def test_workflow_run_starts_metrics_server_and_publishes_metrics(
     ]
 
 
+def test_workflow_run_omits_pipeline_grouping_for_multi_pipeline_workflow(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    import bioetl.interfaces.cli.commands.workflow as workflow_cmd
+
+    fake_service = _FakeWorkflowRunnerService()
+    published_calls: list[dict[str, object]] = []
+    monkeypatch.setattr(
+        workflow_cmd,
+        "get_workflow_execution_service",
+        lambda registry=None: fake_service,
+        raising=True,
+    )
+    monkeypatch.setattr(
+        workflow_cmd,
+        "ensure_metrics_server_started",
+        lambda: True,
+        raising=True,
+    )
+    monkeypatch.setattr(
+        workflow_cmd,
+        "publish_metrics_safely",
+        lambda **kwargs: published_calls.append(kwargs) or True,
+        raising=True,
+    )
+
+    result = cli_runner.invoke(
+        cli,
+        [
+            "workflow",
+            "run",
+            "chembl_core",
+            "--limit",
+            "5",
+            "--required-persistence-profile",
+            "degraded_observable",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert published_calls == [
+        {
+            "run_label": "bioetl",
+            "pipeline_name": None,
+            "run_type": None,
+            "grouping_key_extra": {
+                "workflow_run_id": "00000000-0000-0000-0000-000000000111"
+            },
+            "metric_names": (
+                "bioetl_workflow_runs",
+                "bioetl_workflow_runs_total",
+                "bioetl_workflow_runs_created",
+                "bioetl_workflow_current_status",
+                "bioetl_workflow_step_events",
+                "bioetl_workflow_step_events_total",
+                "bioetl_workflow_step_events_created",
+                "bioetl_workflow_step_duration_seconds",
+                "bioetl_workflow_step_duration_seconds_bucket",
+                "bioetl_workflow_step_duration_seconds_count",
+                "bioetl_workflow_step_duration_seconds_sum",
+                "bioetl_workflow_step_duration_seconds_created",
+            ),
+        }
+    ]
+
+
 def test_workflow_run_publishes_metrics_even_when_workflow_fails(
     cli_runner: CliRunner,
     monkeypatch: Any,

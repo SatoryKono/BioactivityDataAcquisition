@@ -90,6 +90,7 @@ def test_push_metrics_to_gateway_uses_metrics_service_push() -> None:
             "pipeline": "chembl_activity",
             "run_type": "incremental",
         },
+        metric_names=None,
     )
 
 

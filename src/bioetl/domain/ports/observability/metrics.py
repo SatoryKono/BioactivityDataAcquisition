@@ -151,6 +151,7 @@ class MetricsPublisherPort(Protocol):
         gateway: str,
         run_label: str,
         grouping_key: MetricLabels | None = None,
+        metric_names: tuple[str, ...] | None = None,
     ) -> bool:
         """Publish the current metrics snapshot to a gateway backend."""
         ...

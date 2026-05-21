@@ -19,6 +19,7 @@ def test_publish_metrics_safely_delegates_to_execution_api() -> None:
             pipeline_name="workflow_chembl_activity",
             run_type="backfill",
             grouping_key_extra={"workflow_run_id": "run-123"},
+            metric_names=("bioetl_workflow_runs",),
         )
 
     assert result is True
@@ -27,6 +28,7 @@ def test_publish_metrics_safely_delegates_to_execution_api() -> None:
         pipeline_name="workflow_chembl_activity",
         run_type="backfill",
         grouping_key_extra={"workflow_run_id": "run-123"},
+        metric_names=("bioetl_workflow_runs",),
     )
 
 

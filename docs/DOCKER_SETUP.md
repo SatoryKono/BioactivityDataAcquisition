@@ -12,6 +12,14 @@ Reviewed extra compose files в корне (`docker-compose.alertmanager.yml`,
 stacks. Они не требуются для базового development/test runtime и не считаются
 canonical orchestration path under ADR-010.
 
+<!-- BIOETL-DOCKER-HELPER-ADR010-ADJUNCT -->
+
+Governance anchor: `BIOETL-DOCKER-HELPER-ADR010-ADJUNCT`. Reviewed helper stack
+contract source: `configs/quality/docker_helper_contracts.yaml`. Redis, MinIO,
+SonarQube and Alertmanager helper compose files MUST remain optional
+local-only adjunct tooling and MUST NOT become application storage, locking, or
+orchestration dependencies.
+
 ## ✓ Проверка Docker
 
 ```powershell
@@ -150,6 +158,26 @@ LOG_LEVEL=INFO
 GRAFANA_ADMIN_PASSWORD=changeme
 ```
 
+Optional adjunct helper compose files require explicit local credentials rather
+than runnable defaults:
+
+```powershell
+# Redis helper
+$env:REDIS_PASSWORD = "<local-redis-password>"
+
+# MinIO helper
+$env:MINIO_ROOT_USER = "<local-minio-user>"
+$env:MINIO_ROOT_PASSWORD = "<local-minio-password>"
+
+# SonarQube helper
+$env:SONARQUBE_DB_PASSWORD = "<local-sonarqube-db-password>"
+$env:SONARQUBE_SYSTEM_PASSCODE = "<local-sonarqube-system-passcode>"
+```
+
+These variables may be stored in a machine-local `.env` after explicit operator
+approval. The tracked `.env.example` intentionally keeps secret-bearing helper
+values empty.
+
 ## 🐛 Диагностика
 
 ### Контейнер не запускается
@@ -237,10 +265,15 @@ docker ps | Select-String bioetl
 - `docker-compose.monitoring.yml` — мониторинг
 - `docker-compose.codex.yml` — MCP серверы
 - `docker-compose.alertmanager.yml` — optional local Alertmanager helper stack
-- `docker-compose.minio.yml` — optional local MinIO helper stack
-- `docker-compose.redis.yml` — optional local Redis helper stack
-- `docker-compose.sonarqube.yml` — optional local SonarQube helper stack; requires local-only `SONARQUBE_DB_PASSWORD` and `SONARQUBE_SYSTEM_PASSCODE`
+- `docker-compose.minio.yml` — optional local MinIO helper stack; requires explicit `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD`; binds to localhost only
+- `docker-compose.redis.yml` — optional local Redis helper stack; requires explicit `REDIS_PASSWORD`; binds to localhost only
+- `docker-compose.sonarqube.yml` — optional local SonarQube helper stack; requires local-only `SONARQUBE_DB_PASSWORD` and `SONARQUBE_SYSTEM_PASSCODE`; binds to localhost only
 - Reviewed adjunct helper compose files that attach to `bioetl-monitoring`
   require `docker network create bioetl-monitoring` before first manual start
+- Helper stack observability posture is governed by
+  `configs/quality/docker_helper_contracts.yaml`: Redis, MinIO and
+  Alertmanager have Prometheus scrape contracts; SonarQube remains
+  healthcheck-only in repo-default Prometheus because its native metrics
+  endpoint requires runtime passcode authentication.
 - `.env` — переменные окружения
 - `Dockerfile.*` — определения образов

@@ -27,12 +27,14 @@ class MetricsPublisherAdapter:
         gateway: str,
         run_label: str,
         grouping_key: MetricLabels | None = None,
+        metric_names: tuple[str, ...] | None = None,
     ) -> bool:
         """Publish current metrics to the configured gateway."""
         return push_metrics_to_gateway(
             gateway=gateway,
             run_label=run_label,
             grouping_key=grouping_key,
+            metric_names=metric_names,
             logger=self._logger,
         )
 

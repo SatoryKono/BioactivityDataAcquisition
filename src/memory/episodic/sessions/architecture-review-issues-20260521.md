@@ -1,23 +1,22 @@
 ---
 id: architecture-review-issues-20260521
-title: Create GitHub issues for architecture review findings
+title: Create GitHub issues from architecture review findings
 task_id: architecture-review-issues-20260521
-created_at: '2026-05-21T06:48:12Z'
+created_at: '2026-05-21T12:24:45Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- src/memory/episodic/summaries/architecture-review-20260521.md
+- <add-source-ref>
 summary: Active task session context.
-query: architecture review refactoring issues hotspot dependency map drift github
-  issues
+query: architecture review findings create GitHub issues refactoring plan BioETL
 ---
 
 # Session note
 
 ## Task
 
-- Title: Create GitHub issues for architecture review findings
-- Retrieval query: architecture review refactoring issues hotspot dependency map drift github issues
+- Title: Create GitHub issues from architecture review findings
+- Retrieval query: architecture review findings create GitHub issues refactoring plan BioETL
 
 ## Retrieved context
 

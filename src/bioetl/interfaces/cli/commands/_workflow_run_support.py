@@ -22,6 +22,21 @@ from bioetl.interfaces.cli.commands._workflow_support import (
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
+_WORKFLOW_PUBLICATION_METRIC_NAMES = (
+    "bioetl_workflow_runs",
+    "bioetl_workflow_runs_total",
+    "bioetl_workflow_runs_created",
+    "bioetl_workflow_current_status",
+    "bioetl_workflow_step_events",
+    "bioetl_workflow_step_events_total",
+    "bioetl_workflow_step_events_created",
+    "bioetl_workflow_step_duration_seconds",
+    "bioetl_workflow_step_duration_seconds_bucket",
+    "bioetl_workflow_step_duration_seconds_count",
+    "bioetl_workflow_step_duration_seconds_sum",
+    "bioetl_workflow_step_duration_seconds_created",
+)
+
 if TYPE_CHECKING:
     from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.domain.workflow import WorkflowConfig
@@ -177,16 +192,19 @@ def _execute_workflow_and_publish_metrics(
         return result
 
     ensure_metrics_server_started_fn()
-    publish_metrics_safely_fn(
-        run_label="bioetl",
-        pipeline_name=_workflow_metrics_pipeline_name(config),
-        run_type=_workflow_metrics_run_type(config),
-        grouping_key_extra=(
+    publication_kwargs: dict[str, object] = {
+        "run_label": "bioetl",
+        "pipeline_name": _workflow_metrics_pipeline_name(config),
+        "run_type": _workflow_metrics_run_type(config),
+        "grouping_key_extra": (
             {"workflow_run_id": result.workflow_run_id}
             if result.workflow_run_id is not None
             else None
         ),
-    )
+    }
+    if publication_kwargs["pipeline_name"] is None:
+        publication_kwargs["metric_names"] = _WORKFLOW_PUBLICATION_METRIC_NAMES
+    publish_metrics_safely_fn(**publication_kwargs)
     return result
 
 
@@ -199,22 +217,19 @@ def _handle_workflow_result(result: object) -> None:
     raise click.exceptions.Exit(ExitCode.PIPELINE_ERROR)
 
 
-def _workflow_metrics_pipeline_name(config: object) -> str:
-    """Resolve a bounded pipeline/workflow label for metrics publication."""
+def _workflow_metrics_pipeline_name(config: object) -> str | None:
+    """Resolve a Pushgateway-safe pipeline grouping label for workflows."""
     single_pipeline_name = getattr(config, "single_pipeline_name", None)
     if isinstance(single_pipeline_name, str) and single_pipeline_name:
         return single_pipeline_name
-    workflow_name = getattr(config, "name", None)
-    if isinstance(workflow_name, str) and workflow_name:
-        return workflow_name
-    pipeline_context = getattr(config, "pipeline_context", None)
-    if isinstance(pipeline_context, str) and pipeline_context:
-        return pipeline_context
-    return "unknown"
+    return None
 
 
-def _workflow_metrics_run_type(config: object) -> str:
+def _workflow_metrics_run_type(config: object) -> str | None:
     """Resolve the effective workflow run_type for metrics publication."""
+    single_pipeline_name = getattr(config, "single_pipeline_name", None)
+    if not isinstance(single_pipeline_name, str) or not single_pipeline_name:
+        return None
     defaults = getattr(config, "defaults", None)
     default_run_type = getattr(defaults, "run_type", None)
     if isinstance(default_run_type, str) and default_run_type:
