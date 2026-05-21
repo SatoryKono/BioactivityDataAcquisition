@@ -1,22 +1,20 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-21T13:24:29.417294+00:00",
+  "generated_at": "2026-05-21T13:42:55.697973+00:00",
   "summary": {
     "total_scripts": 396,
     "status_counts": {
-      "active": 344,
-      "orphan": 9,
-      "supporting": 39,
-      "unknown": 4
+      "active": 357,
+      "supporting": 39
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 3,
       "ci": 58,
       "docs": 150,
-      "scripts": 292,
+      "scripts": 315,
       "skills": 8,
-      "tests": 154
+      "tests": 155
     }
   },
   "scripts": [
@@ -408,7 +406,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 208,
+          "line": 211,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.ps1\","
         }
@@ -423,7 +421,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 209,
+          "line": 212,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.sh\","
         }
@@ -632,7 +630,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 210,
+          "line": 213,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/setup-env.sh\","
         }
@@ -767,7 +765,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 207,
+          "line": 210,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/test-basic.sh\","
         }
@@ -1084,7 +1082,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/ai/codex/helper/ensure-mcp.sh",
@@ -1103,6 +1101,12 @@
           "line": 9,
           "source_group": "scripts",
           "text": "SETUP_MCP=\"${REPO_ROOT}/scripts/ai/codex/setup_mcp.py\""
+        },
+        {
+          "path": "scripts/engineering/dev/__main__.py",
+          "line": 48,
+          "source_group": "scripts",
+          "text": "COMMAND_SPECS[\"setup-mcp\"] = module_command(\"scripts.ai.codex.setup_mcp\")"
         }
       ]
     },
@@ -1340,7 +1344,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 211,
+          "line": 214,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/check-env.ps1\","
         }
@@ -1505,7 +1509,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 212,
+          "line": 215,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/setup-env.sh\","
         }
@@ -2645,7 +2649,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 213,
+          "line": 216,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.ps1\","
         }
@@ -2666,7 +2670,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 214,
+          "line": 217,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.sh\","
         }
@@ -2687,7 +2691,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 215,
+          "line": 218,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.ps1\","
         }
@@ -2732,7 +2736,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 216,
+          "line": 219,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.sh\","
         }
@@ -2861,7 +2865,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 203,
+          "line": 206,
           "source_group": "scripts",
           "text": "\"scripts/check_dq_dsl_parity.py\","
         }
@@ -2945,7 +2949,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 201,
+          "line": 204,
           "source_group": "scripts",
           "text": "\"scripts/ci_check_docs_parity.sh\","
         }
@@ -4656,13 +4660,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 42,
           "source_group": "scripts",
           "text": "| `build-site`                             | `scripts/docs/build/mkdocs_build.py`                            | Build the MkDocs site through the packaged Python entrypoint                             "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 38,
+          "source_group": "scripts",
+          "text": "\"build-site\": \"scripts.docs.build.mkdocs_build\","
         }
       ]
     },
@@ -4820,13 +4830,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 45,
           "source_group": "scripts",
           "text": "| `check-docstrings`                       | `scripts/docs/checks/check_docstrings.py`                       | Check docstring coverage                                                                 "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 41,
+          "source_group": "scripts",
+          "text": "\"check-docstrings\": \"scripts.docs.checks.check_docstrings\","
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
@@ -4841,13 +4857,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 44,
           "source_group": "scripts",
           "text": "| `check-drift`                            | `scripts/docs/checks/check_drift.py`                            | Check documentation drift (ports, classes, runtime mirrors, freshness, AI runtime surface"
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 40,
+          "source_group": "scripts",
+          "text": "\"check-drift\": \"scripts.docs.checks.check_drift\","
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
@@ -4862,7 +4884,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 45,
+      "reference_count": 46,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -4919,13 +4941,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 46,
           "source_group": "scripts",
           "text": "| `check-kpi`                              | `scripts/docs/checks/report_docs_kpi.py`                        | Report documentation KPI metrics                                                         "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 42,
+          "source_group": "scripts",
+          "text": "\"check-kpi\": \"scripts.docs.checks.report_docs_kpi\","
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
@@ -4940,13 +4968,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 41,
           "source_group": "scripts",
           "text": "| `verify`                                 | `scripts/docs/checks/verify.py`                                 | Run the canonical docs verification chain (links, drift, docstrings, strict build)       "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 37,
+          "source_group": "scripts",
+          "text": "\"verify\": \"scripts.docs.checks.verify\","
         }
       ]
     },
@@ -5105,13 +5139,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 55,
           "source_group": "scripts",
           "text": "| `fix-links-auto`                         | `scripts/docs/fixers/fix_links_auto.py`                         | Auto-fix broken documentation links                                                      "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 51,
+          "source_group": "scripts",
+          "text": "\"fix-links-auto\": \"scripts.docs.fixers.fix_links_auto\","
         }
       ]
     },
@@ -5120,13 +5160,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 56,
           "source_group": "scripts",
           "text": "| `fix-links-explicit`                     | `scripts/docs/fixers/fix_links_explicit.py`                     | Fix documentation links with explicit rules                                              "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 52,
+          "source_group": "scripts",
+          "text": "\"fix-links-explicit\": \"scripts.docs.fixers.fix_links_explicit\","
         }
       ]
     },
@@ -5135,13 +5181,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 57,
           "source_group": "scripts",
           "text": "| `fix-link-warnings`                      | `scripts/docs/fixers/link_warnings.py`                          | Fix link warnings in specified files                                                     "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 53,
+          "source_group": "scripts",
+          "text": "\"fix-link-warnings\": \"scripts.docs.fixers.link_warnings\","
         }
       ]
     },
@@ -5150,13 +5202,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 59,
           "source_group": "scripts",
           "text": "| `sync-repo-identity`                     | `scripts/docs/fixers/repo_identity.py`                          | Normalize active docs and workflow references to the canonical repo identity             "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 55,
+          "source_group": "scripts",
+          "text": "\"sync-repo-identity\": \"scripts.docs.fixers.repo_identity\","
         }
       ]
     },
@@ -5165,13 +5223,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 58,
           "source_group": "scripts",
           "text": "| `audit-sentence`                         | `scripts/docs/fixers/sentence_audit.py`                         | Sentence-level documentation audit                                                       "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 54,
+          "source_group": "scripts",
+          "text": "\"audit-sentence\": \"scripts.docs.fixers.sentence_audit\","
         }
       ]
     },
@@ -5283,13 +5347,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 50,
           "source_group": "scripts",
           "text": "| `build-matrix-dicts`                     | `scripts/docs/matrix/build_matrix_dicts.py`                     | Build inventory and dictionary artifacts for the canonical ChEMBL matrix workbook        "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 46,
+          "source_group": "scripts",
+          "text": "\"build-matrix-dicts\": \"scripts.docs.matrix.build_matrix_dicts\","
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
@@ -5304,13 +5374,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 51,
           "source_group": "scripts",
           "text": "| `enrich-matrix-normalization-details`    | `scripts/docs/matrix/enrich_normalization_details.py`           | Populate exact per-row normalization details in the canonical ChEMBL matrix workbook     "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 47,
+          "source_group": "scripts",
+          "text": "\"enrich-matrix-normalization-details\": \"scripts.docs.matrix.enrich_normalization_details\","
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
@@ -5325,13 +5401,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 47,
           "source_group": "scripts",
           "text": "| `export-matrix-structural-contract`      | `scripts/docs/matrix/export_structural_contract.py`             | Export the canonical runtime structural contract for ChEMBL workbook sync                "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 43,
+          "source_group": "scripts",
+          "text": "\"export-matrix-structural-contract\": \"scripts.docs.matrix.export_structural_contract\","
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
@@ -5346,13 +5428,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 52,
           "source_group": "scripts",
           "text": "| `filter-matrix-rows`                     | `scripts/docs/matrix/filter_rows.py`                            | Remove rows from the canonical ChEMBL matrix workbook by column value                    "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 48,
+          "source_group": "scripts",
+          "text": "\"filter-matrix-rows\": \"scripts.docs.matrix.filter_rows\","
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
@@ -5367,13 +5455,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 48,
           "source_group": "scripts",
           "text": "| `generate-field-matrix`                  | `scripts/docs/matrix/generate_field_matrix.py`                  | Generate deterministic ChemBL Activity field-matrix artifacts directly from code         "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 44,
+          "source_group": "scripts",
+          "text": "\"generate-field-matrix\": \"scripts.docs.matrix.generate_field_matrix\","
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
@@ -5388,7 +5482,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/provider-contract-drift.yml",
@@ -5421,6 +5515,12 @@
           "text": "| `generate-pipeline-normalization-matrix` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | Generate deterministic normalization field-matrix artifacts for all entity and composite "
         },
         {
+          "path": "scripts/docs/__main__.py",
+          "line": 45,
+          "source_group": "scripts",
+          "text": "\"generate-pipeline-normalization-matrix\": \"scripts.docs.matrix.generate_pipeline_normalization_matrix\","
+        },
+        {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
           "line": 18,
           "source_group": "tests",
@@ -5433,13 +5533,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 53,
           "source_group": "scripts",
           "text": "| `normalize-matrix-values`                | `scripts/docs/matrix/normalize_values.py`                       | Normalize controlled vocabulary values in the canonical ChEMBL matrix workbook           "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 49,
+          "source_group": "scripts",
+          "text": "\"normalize-matrix-values\": \"scripts.docs.matrix.normalize_values\","
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
@@ -5469,13 +5575,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 54,
           "source_group": "scripts",
           "text": "| `sync-matrix-structural-policy`          | `scripts/docs/matrix/sync_structural_policy.py`                 | Reconcile workbook policy columns with the current structural Silver policy semantics    "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 50,
+          "source_group": "scripts",
+          "text": "\"sync-matrix-structural-policy\": \"scripts.docs.matrix.sync_structural_policy\","
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
@@ -6151,7 +6263,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 205,
+          "line": 208,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/update_test_telemetry_baseline.py\","
         }
@@ -6208,7 +6320,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 204,
+          "line": 207,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_control_plane_artifacts.py\","
         }
@@ -6991,13 +7103,13 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 528,
+          "line": 542,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 619,
+          "line": 633,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
@@ -7542,7 +7654,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 185,
+      "reference_count": 186,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -7599,13 +7711,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 34,
           "source_group": "scripts",
           "text": "| `analyze-duplicate-functions`    | `analyze_duplicate_functions.py`                      | Compatibility wrapper for the legacy AST duplicate-function analyzer                              |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 101,
+          "source_group": "scripts",
+          "text": "\"analyze-duplicate-functions\": \"scripts.engineering.qa.analyze_duplicate_functions\","
         }
       ]
     },
@@ -7622,13 +7740,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 35,
           "source_group": "scripts",
           "text": "| `calibrate-hotspots`             | `scripts/engineering/qa/calibrate_hotspot_budgets.py` | Calibrate hotspot budgets                                                                         |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 102,
+          "source_group": "scripts",
+          "text": "\"calibrate-hotspots\": \"scripts.engineering.qa.calibrate_hotspot_budgets\","
         }
       ]
     },
@@ -7637,13 +7761,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 18,
           "source_group": "scripts",
           "text": "| `check-app-deps`                 | `check_application_deps.py`                           | Canonical compatibility wrapper for the legacy application dependency check                       |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 65,
+          "source_group": "scripts",
+          "text": "\"check-app-deps\": \"scripts.engineering.qa.check_application_deps\","
         }
       ]
     },
@@ -7652,13 +7782,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 17,
           "source_group": "scripts",
           "text": "| `check-architecture`             | `check_architecture.py`                               | Canonical compatibility wrapper for the legacy infrastructure architecture check                  |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 64,
+          "source_group": "scripts",
+          "text": "\"check-architecture\": \"scripts.engineering.qa.check_architecture\","
         }
       ]
     },
@@ -7667,7 +7803,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 13,
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
@@ -7724,38 +7860,70 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 19,
           "source_group": "scripts",
           "text": "| `check-constructor-args`         | `check_constructor_args.py`                           | Canonical compatibility wrapper for the legacy constructor argument audit                         |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 66,
+          "source_group": "scripts",
+          "text": "\"check-constructor-args\": \"scripts.engineering.qa.check_constructor_args\","
         }
       ]
     },
     {
       "path": "scripts/engineering/qa/check_dashboard_visual_semantics.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 103,
+          "source_group": "scripts",
+          "text": "\"check-dashboard-visual-semantics\": \"scripts.engineering.qa.check_dashboard_visual_semantics\","
+        }
+      ]
     },
     {
       "path": "scripts/engineering/qa/check_docs_drift.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 70,
+          "source_group": "scripts",
+          "text": "\"check-docs-drift\": \"scripts.engineering.qa.check_docs_drift\","
+        },
+        {
+          "path": "tests/architecture/test_scripts_inventory_discovery.py",
+          "line": 127,
+          "source_group": "tests",
+          "text": "target = root / \"scripts\" / \"engineering\" / \"qa\" / \"check_docs_drift.py\""
+        },
+        {
+          "path": "tests/architecture/test_scripts_inventory_discovery.py",
+          "line": 134,
+          "source_group": "tests",
+          "text": "for item in refs[\"scripts/engineering/qa/check_docs_drift.py\"]"
+        }
+      ]
     },
     {
       "path": "scripts/engineering/qa/check_generic_field_ownership.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/semantic-governance.yml",
@@ -7792,15 +7960,21 @@
           "line": 23645,
           "source_group": "docs",
           "text": "<code>python3 scripts/engineering/qa/check_generic_field_ownership.py --check</code></li>"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 80,
+          "source_group": "scripts",
+          "text": "\"check-generic-field-ownership\": \"scripts.engineering.qa.check_generic_field_ownership\","
         }
       ]
     },
     {
       "path": "scripts/engineering/qa/check_gold_nullable_numeric_compatibility.py",
       "type": "py",
-      "status": "unknown",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/04-reference/contracts/gold-schemas.md",
@@ -7813,6 +7987,12 @@
           "line": 25615,
           "source_group": "docs",
           "text": "<code>python3 scripts/engineering/qa/check_gold_nullable_numeric_compatibility.py --check</code>."
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 79,
+          "source_group": "scripts",
+          "text": "\"check-gold-nullable-numeric\": \"scripts.engineering.qa.check_gold_nullable_numeric_compatibility\","
         }
       ]
     },
@@ -7821,7 +8001,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 13,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -7848,14 +8028,20 @@
           "text": "check-naming-pkg     Package naming consistency check"
         },
         {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 68,
+          "source_group": "scripts",
+          "text": "\"check-naming-pkg\": \"scripts.engineering.qa.check_naming_package_consistency\","
+        },
+        {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 137,
+          "line": 140,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": ("
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 138,
+          "line": 141,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/check_naming_package_consistency.py\""
         },
@@ -7864,12 +8050,6 @@
           "line": 14,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"check_naming_package_consistency.py\""
-        },
-        {
-          "path": "tests/architecture/test_naming_package_consistency_gate.py",
-          "line": 20,
-          "source_group": "tests",
-          "text": "/ \"check_naming_package_consistency.py\""
         }
       ]
     },
@@ -7878,7 +8058,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/semantic-governance.yml",
@@ -7915,6 +8095,12 @@
           "line": 23647,
           "source_group": "docs",
           "text": "<code>python3 scripts/engineering/qa/check_ontology_unit_semantics.py --check</code></li>"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 81,
+          "source_group": "scripts",
+          "text": "\"check-ontology-unit-semantics\": \"scripts.engineering.qa.check_ontology_unit_semantics\","
         }
       ]
     },
@@ -7923,7 +8109,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/00-project/ai/prompts/architecture_metric_exemptions_tasks_json_prompt.md",
@@ -7954,6 +8140,12 @@
           "line": 22,
           "source_group": "scripts",
           "text": "| `check-exemptions`               | `check_quality_exemptions.py`                         | Quality exemptions audit                                                                          |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 69,
+          "source_group": "scripts",
+          "text": "\"check-exemptions\": \"scripts.engineering.qa.check_quality_exemptions\","
         }
       ]
     },
@@ -7962,7 +8154,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/semantic-governance.yml",
@@ -7999,15 +8191,21 @@
           "line": 23643,
           "source_group": "docs",
           "text": "<code>python3 scripts/engineering/qa/check_semantic_anchor_parity.py --check</code></li>"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 78,
+          "source_group": "scripts",
+          "text": "\"check-semantic-anchor-parity\": \"scripts.engineering.qa.check_semantic_anchor_parity\","
         }
       ]
     },
     {
       "path": "scripts/engineering/qa/check_semantic_field_registry.py",
       "type": "py",
-      "status": "unknown",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/04-reference/contracts/canonical-field-registry.md",
@@ -8020,6 +8218,12 @@
           "line": 23637,
           "source_group": "docs",
           "text": "<li>QA check: <code>python3 scripts/engineering/qa/check_semantic_field_registry.py --check</code></li>"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 73,
+          "source_group": "scripts",
+          "text": "\"check-semantic-field-registry\": \"scripts.engineering.qa.check_semantic_field_registry\","
         }
       ]
     },
@@ -8028,7 +8232,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": ".github/workflows/semantic-governance.yml",
@@ -8041,6 +8245,12 @@
           "line": 43,
           "source_group": "ci",
           "text": "- \"scripts/engineering/qa/check_semantic_governance_policy.py\""
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 77,
+          "source_group": "scripts",
+          "text": "\"check-semantic-governance-policy\": \"scripts.engineering.qa.check_semantic_governance_policy\","
         }
       ]
     },
@@ -8049,7 +8259,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/semantic-governance.yml",
@@ -8086,6 +8296,12 @@
           "line": 23641,
           "source_group": "docs",
           "text": "<code>python3 scripts/engineering/qa/check_semantic_pair_matrix_budget.py --check</code></li>"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 75,
+          "source_group": "scripts",
+          "text": "\"check-semantic-pair-budget\": \"scripts.engineering.qa.check_semantic_pair_matrix_budget\","
         }
       ]
     },
@@ -8094,7 +8310,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/semantic-governance.yml",
@@ -8131,6 +8347,12 @@
           "line": 23639,
           "source_group": "docs",
           "text": "<code>python3 scripts/engineering/qa/check_semantic_registry_drift.py --check</code></li>"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 74,
+          "source_group": "scripts",
+          "text": "\"check-semantic-registry-drift\": \"scripts.engineering.qa.check_semantic_registry_drift\","
         }
       ]
     },
@@ -8160,7 +8382,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -8179,15 +8401,21 @@
           "line": 23,
           "source_group": "scripts",
           "text": "| `check-xwalk-missing-backlog`    | `check_xwalk_missing_backlog.py`                      | Validate that xwalk `MISSING_*` markers are tracked in the backlog                                |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 71,
+          "source_group": "scripts",
+          "text": "\"check-xwalk-missing-backlog\": \"scripts.engineering.qa.check_xwalk_missing_backlog\","
         }
       ]
     },
     {
       "path": "scripts/engineering/qa/extract_pubchem_property_vocab.py",
       "type": "py",
-      "status": "unknown",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/04-reference/normalization/pubchem-normalization.md",
@@ -8200,15 +8428,21 @@
           "line": 23482,
           "source_group": "docs",
           "text": "fixtures by <code>scripts/engineering/qa/extract_pubchem_property_vocab.py</code>.</p>"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 91,
+          "source_group": "scripts",
+          "text": "\"report-pubchem-property-vocab\": \"scripts.engineering.qa.extract_pubchem_property_vocab\","
         }
       ]
     },
     {
       "path": "scripts/engineering/qa/extract_publication_nested_vocab.py",
       "type": "py",
-      "status": "unknown",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/04-reference/normalization/publication-normalization.md",
@@ -8221,6 +8455,12 @@
           "line": 23648,
           "source_group": "docs",
           "text": "and the extractor <code>scripts/engineering/qa/extract_publication_nested_vocab.py</code>.</p>"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 92,
+          "source_group": "scripts",
+          "text": "\"report-publication-nested-vocab\": \"scripts.engineering.qa.extract_publication_nested_vocab\","
         }
       ]
     },
@@ -8245,7 +8485,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -8258,6 +8498,12 @@
           "line": 78,
           "source_group": "scripts",
           "text": "- `scripts/engineering/qa/generate_architecture_debt_tasks.py` (`python -m scripts.engineering.qa generate-debt-tasks`) generates the canonical architecture debt task backlog."
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 82,
+          "source_group": "scripts",
+          "text": "\"generate-debt-tasks\": \"scripts.engineering.qa.generate_architecture_debt_tasks\","
         },
         {
           "path": "tests/architecture/test_architecture_debt_agent_surface.py",
@@ -8278,7 +8524,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 30,
+      "reference_count": 31,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -8392,7 +8638,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -8417,6 +8663,12 @@
           "line": 32,
           "source_group": "scripts",
           "text": "| `report-hotspots`                | `generate_hotspot_degradation_report.py`              | Generate performance hotspot degradation report                                                   |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 95,
+          "source_group": "scripts",
+          "text": "\"report-hotspots\": \"scripts.engineering.qa.generate_hotspot_degradation_report\","
         }
       ]
     },
@@ -8446,7 +8698,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": ".github/workflows/semantic-governance.yml",
@@ -8459,6 +8711,12 @@
           "line": 46,
           "source_group": "ci",
           "text": "- \"scripts/engineering/qa/generate_semantic_pipeline_audit.py\""
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 76,
+          "source_group": "scripts",
+          "text": "\"report-semantic-pipeline-audit\": \"scripts.engineering.qa.generate_semantic_pipeline_audit\","
         }
       ]
     },
@@ -8514,7 +8772,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -8571,7 +8829,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -8616,10 +8874,10 @@
           "text": "| `check-naming`                   | `naming_audit.py`                                     | Naming convention audit (RULES.md §2) with `configs/naming_exceptions.yaml` as exception registry |"
         },
         {
-          "path": "scripts/engineering/qa/check_naming_package_consistency.py",
-          "line": 5,
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 63,
           "source_group": "scripts",
-          "text": "1) strict suffix-policy: delegated to ``scripts/engineering/qa/naming_audit.py --check``."
+          "text": "\"check-naming\": \"scripts.engineering.qa.naming_audit\","
         }
       ]
     },
@@ -8636,7 +8894,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -8649,6 +8907,12 @@
           "line": 79,
           "source_group": "scripts",
           "text": "- `scripts/engineering/qa/reduce_architecture_debt.py` (`python -m scripts.engineering.qa reduce-architecture-debt`) builds the orchestration plan consumed by the architecture-debt agent."
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 83,
+          "source_group": "scripts",
+          "text": "\"reduce-architecture-debt\": \"scripts.engineering.qa.reduce_architecture_debt\","
         },
         {
           "path": "tests/architecture/test_architecture_debt_agent_surface.py",
@@ -8667,56 +8931,90 @@
     {
       "path": "scripts/engineering/qa/report_chembl_observed_value_inventory.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 99,
+          "source_group": "scripts",
+          "text": "\"report-chembl-observed-value-inventory\": \"scripts.engineering.qa.report_chembl_observed_value_inventory\","
+        }
+      ]
     },
     {
       "path": "scripts/engineering/qa/report_compatibility_importer_census.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/qa/report_dashboard_inventory.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
         {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 88,
+          "source_group": "scripts",
+          "text": "\"report-compatibility-importer-census\": \"scripts.engineering.qa.report_compatibility_importer_census\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/qa/report_dashboard_inventory.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
           "path": "scripts/engineering/qa/README.md",
           "line": 30,
           "source_group": "scripts",
           "text": "| `report-dashboard-inventory`     | `report_dashboard_inventory.py`                       | Generate/check dashboard inventory parity, provisioning drift, deployed drift, and local health   |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 104,
+          "source_group": "scripts",
+          "text": "\"report-dashboard-inventory\": \"scripts.engineering.qa.report_dashboard_inventory\","
         }
       ]
     },
     {
       "path": "scripts/engineering/qa/report_dashboard_query_duplicates.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 105,
+          "source_group": "scripts",
+          "text": "\"report-dashboard-query-duplicates\": \"scripts.engineering.qa.report_dashboard_query_duplicates\","
+        }
+      ]
     },
     {
       "path": "scripts/engineering/qa/report_dead_code_inventory.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 90,
+          "source_group": "scripts",
+          "text": "\"report-dead-code-inventory\": \"scripts.engineering.qa.report_dead_code_inventory\","
+        }
+      ]
     },
     {
       "path": "scripts/engineering/qa/report_duplication_baseline.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -8735,29 +9033,48 @@
           "line": 98,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_duplication_baseline.py"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 96,
+          "source_group": "scripts",
+          "text": "\"report-duplication-baseline\": \"scripts.engineering.qa.report_duplication_baseline\","
         }
       ]
     },
     {
       "path": "scripts/engineering/qa/report_function_length_inventory.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 97,
+          "source_group": "scripts",
+          "text": "\"report-function-length-inventory\": \"scripts.engineering.qa.report_function_length_inventory\","
+        }
+      ]
     },
     {
       "path": "scripts/engineering/qa/report_hotspot_family_baseline.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 31,
           "source_group": "scripts",
           "text": "| `report-family-baseline`         | `report_hotspot_family_baseline.py`                   | Generate/check RF-06 hotspot-family baseline artifacts                                            |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 94,
+          "source_group": "scripts",
+          "text": "\"report-family-baseline\": \"scripts.engineering.qa.report_hotspot_family_baseline\","
         }
       ]
     },
@@ -8766,7 +9083,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
@@ -8779,6 +9096,12 @@
           "line": 177,
           "source_group": "docs",
           "text": "- [Module coverage inventory generator](../../../scripts/engineering/qa/report_module_coverage_inventory.py)"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 89,
+          "source_group": "scripts",
+          "text": "\"report-module-coverage\": \"scripts.engineering.qa.report_module_coverage_inventory\","
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
@@ -8807,7 +9130,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
@@ -8834,6 +9157,12 @@
           "text": "<li>fallback inventory report: <a href=\"../../scripts/engineering/qa/report_normalization_fallback_inventory.py\">report_normalization_fallback_inventory.py</a></li>"
         },
         {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 98,
+          "source_group": "scripts",
+          "text": "\"report-normalization-fallback-inventory\": \"scripts.engineering.qa.report_normalization_fallback_inventory\","
+        },
+        {
           "path": "tests/architecture/test_normalization_evidence_governance.py",
           "line": 32,
           "source_group": "tests",
@@ -8846,8 +9175,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 100,
+          "source_group": "scripts",
+          "text": "\"report-observability-metric-inventory\": \"scripts.engineering.qa.report_observability_metric_inventory\","
+        },
         {
           "path": "tests/architecture/test_observability_metric_governance.py",
           "line": 36,
@@ -8861,7 +9196,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/provider-contract-drift.yml",
@@ -8886,6 +9221,12 @@
           "line": 88,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_provider_contract_drift.py --output reports/quality/provider-contract-drift-report.json --fail-on breaking"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 87,
+          "source_group": "scripts",
+          "text": "\"report-provider-contract-drift\": \"scripts.engineering.qa.report_provider_contract_drift\","
         }
       ]
     },
@@ -8915,7 +9256,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
@@ -8925,7 +9266,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 187,
+          "line": 201,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -8960,10 +9301,10 @@
           "text": "python scripts/engineering/qa/report_vcr_metadata_catalog.py --update"
         },
         {
-          "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 365,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/qa/report_vcr_metadata_catalog.py\","
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 86,
+          "source_group": "scripts",
+          "text": "\"report-vcr-metadata\": \"scripts.engineering.qa.report_vcr_metadata_catalog\","
         }
       ]
     },
@@ -9084,17 +9425,24 @@
     {
       "path": "scripts/engineering/qa/sync_integration_vcr_policy.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 93,
+          "source_group": "scripts",
+          "text": "\"sync-integration-vcr-policy\": \"scripts.engineering.qa.sync_integration_vcr_policy\","
+        }
+      ]
     },
     {
       "path": "scripts/engineering/qa/test_health.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -9113,16 +9461,29 @@
           "line": 38,
           "source_group": "scripts",
           "text": "| `test-health`                    | `test_health.py`                                      | Summarize historical lane history from recent `reports/quality/test-runs/*.json` evidence         |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 112,
+          "source_group": "scripts",
+          "text": "\"run-tests\": module_command(\"scripts.engineering.qa.test_health\", \"run-tests\"),"
         }
       ]
     },
     {
       "path": "scripts/engineering/qa/validate_dq_consistency.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 72,
+          "source_group": "scripts",
+          "text": "\"validate-dq-consistency\": \"scripts.engineering.qa.validate_dq_consistency\","
+        }
+      ]
     },
     {
       "path": "scripts/engineering/qa/vcr/__main__.py",
@@ -9220,7 +9581,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 561,
+          "line": 575,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         },
@@ -9283,7 +9644,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 562,
+          "line": 576,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -9310,7 +9671,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 185,
+          "line": 199,
           "source_group": "docs",
           "text": "- `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`"
         },
@@ -9334,7 +9695,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 144,
+          "line": 147,
           "source_group": "scripts",
           "text": "\"check-metadata-age\": \"scripts/engineering/qa/vcr/check_vcr_metadata_age.py\","
         },
@@ -9372,7 +9733,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 53,
+      "reference_count": 54,
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -10741,13 +11102,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 124,
+          "line": 127,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/codex-exec.bat\": (\"scripts/codex-exec.bat\",),"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 127,
+          "line": 130,
           "source_group": "scripts",
           "text": "\"scripts/codex-exec.bat\": (\"scripts/ops/launchers/codex/codex-exec.bat\",),"
         }
@@ -10912,13 +11273,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 125,
+          "line": 128,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/codex.bat\": (\"scripts/codex.bat\",),"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 128,
+          "line": 131,
           "source_group": "scripts",
           "text": "\"scripts/codex.bat\": (\"scripts/ops/launchers/codex/codex.bat\",),"
         }
@@ -11002,7 +11363,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 145,
+          "line": 159,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
         },
@@ -11254,7 +11615,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 187,
+          "line": 201,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -11452,7 +11813,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 217,
+          "line": 220,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/docker/restart-docker.ps1\","
         }
@@ -11854,7 +12215,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 202,
+          "line": 205,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/repo/cleanup_repository.py\","
         },
@@ -12015,13 +12376,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/schema/README.md",
           "line": 25,
           "source_group": "scripts",
           "text": "| `audit-optionality`          | `scripts/schema/audit_effective_optionality.py`                        | Audit or validate `effective_optional_v1` derived from current config surface          |"
+        },
+        {
+          "path": "scripts/schema/__main__.py",
+          "line": 33,
+          "source_group": "scripts",
+          "text": "\"audit-optionality\": \"scripts.schema.audit_effective_optionality\","
         }
       ]
     },
@@ -12030,7 +12397,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-034-schema-domain-pairs.md",
@@ -12049,6 +12416,12 @@
           "line": 23,
           "source_group": "scripts",
           "text": "| `check-invariants`           | `scripts/schema/check_config_invariants.py`                            | Validate config CI invariants (naming, schemas, auth, keys)                            |"
+        },
+        {
+          "path": "scripts/schema/__main__.py",
+          "line": 31,
+          "source_group": "scripts",
+          "text": "\"check-invariants\": \"scripts.schema.check_config_invariants\","
         }
       ]
     },
@@ -12057,13 +12430,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/schema/README.md",
           "line": 24,
           "source_group": "scripts",
           "text": "| `check-required-fields`      | `scripts/schema/check_required_filter_fields.py`                       | Validate `silver_filters.required_fields` cover explicit YAML required/not-null fields |"
+        },
+        {
+          "path": "scripts/schema/__main__.py",
+          "line": 32,
+          "source_group": "scripts",
+          "text": "\"check-required-fields\": \"scripts.schema.check_required_filter_fields\","
         }
       ]
     },
@@ -12072,7 +12451,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -12115,6 +12494,12 @@
           "line": 37,
           "source_group": "scripts",
           "text": "| `analyze-gaps`               | `scripts/schema/config_gap_analysis.py`                                | Config gap analysis between configs and code                                           |"
+        },
+        {
+          "path": "scripts/schema/__main__.py",
+          "line": 45,
+          "source_group": "scripts",
+          "text": "\"analyze-gaps\": \"scripts.schema.config_gap_analysis\","
         }
       ]
     },
@@ -12123,13 +12508,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/schema/README.md",
           "line": 31,
           "source_group": "scripts",
           "text": "| `generate-config-matrix`     | `scripts/schema/generate_config_matrix.py`                             | Canonical entity/composite config comparison matrix generator                          |"
+        },
+        {
+          "path": "scripts/schema/__main__.py",
+          "line": 39,
+          "source_group": "scripts",
+          "text": "\"generate-config-matrix\": \"scripts.schema.generate_config_matrix\","
         }
       ]
     },
@@ -12138,7 +12529,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -12178,7 +12569,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 191,
+          "line": 194,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/generate_contracts.py\","
         },
@@ -12195,13 +12586,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/schema/README.md",
           "line": 33,
           "source_group": "scripts",
           "text": "| `generate-field-diagnostics` | `scripts/schema/generate_field_level_diagnostics.py`                   | Generate field-level schema drift diagnostics CSV                                      |"
+        },
+        {
+          "path": "scripts/schema/__main__.py",
+          "line": 41,
+          "source_group": "scripts",
+          "text": "\"generate-field-diagnostics\": \"scripts.schema.generate_field_level_diagnostics\","
         }
       ]
     },
@@ -12210,13 +12607,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/schema/README.md",
           "line": 34,
           "source_group": "scripts",
           "text": "| `generate-field-spec`        | `scripts/schema/generate_field_transformation_spec.py`                 | Generate deterministic per-field transformation specification CSV                      |"
+        },
+        {
+          "path": "scripts/schema/__main__.py",
+          "line": 42,
+          "source_group": "scripts",
+          "text": "\"generate-field-spec\": \"scripts.schema.generate_field_transformation_spec\","
         }
       ]
     },
@@ -12225,13 +12628,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/schema/README.md",
           "line": 27,
           "source_group": "scripts",
           "text": "| `generate-pipeline`          | `scripts/schema/generate_pipeline_schema.py`                           | Generate pipeline JSON schema                                                          |"
+        },
+        {
+          "path": "scripts/schema/__main__.py",
+          "line": 35,
+          "source_group": "scripts",
+          "text": "\"generate-pipeline\": \"scripts.schema.generate_pipeline_schema\","
         }
       ]
     },
@@ -12240,13 +12649,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/schema/README.md",
           "line": 29,
           "source_group": "scripts",
           "text": "| `generate-pubtype`           | `scripts/schema/generate_publication_type_classification_artifacts.py` | Generate publication type classification artifacts                                     |"
+        },
+        {
+          "path": "scripts/schema/__main__.py",
+          "line": 37,
+          "source_group": "scripts",
+          "text": "\"generate-pubtype\": \"scripts.schema.generate_publication_type_classification_artifacts\","
         },
         {
           "path": "tests/architecture/test_publication_type_codegen_contract.py",
@@ -12267,7 +12682,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -12300,6 +12715,12 @@
           "text": "| `generate-artifacts`         | `scripts/schema/generate_schema_artifacts.py`                          | Generate schema artifacts                                                              |"
         },
         {
+          "path": "scripts/schema/__main__.py",
+          "line": 36,
+          "source_group": "scripts",
+          "text": "\"generate-artifacts\": \"scripts.schema.generate_schema_artifacts\","
+        },
+        {
           "path": "tests/architecture/test_generated_artifact_routing.py",
           "line": 89,
           "source_group": "tests",
@@ -12318,13 +12739,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/schema/README.md",
           "line": 32,
           "source_group": "scripts",
           "text": "| `generate-unified-map`       | `scripts/schema/generate_unified_schema_map.py`                        | Generate unified Bronze→Silver→Gold schema map CSV                                     |"
+        },
+        {
+          "path": "scripts/schema/__main__.py",
+          "line": 40,
+          "source_group": "scripts",
+          "text": "\"generate-unified-map\": \"scripts.schema.generate_unified_schema_map\","
         }
       ]
     },
@@ -12333,13 +12760,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/schema/README.md",
           "line": 26,
           "source_group": "scripts",
           "text": "| `check-config-paths`         | `scripts/schema/lint_config_paths.py`                                  | Check for legacy dq/filter config path references                                      |"
+        },
+        {
+          "path": "scripts/schema/__main__.py",
+          "line": 34,
+          "source_group": "scripts",
+          "text": "\"check-config-paths\": \"scripts.schema.lint_config_paths\","
         }
       ]
     },
@@ -12348,7 +12781,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -12405,13 +12838,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/schema/README.md",
           "line": 36,
           "source_group": "scripts",
           "text": "| `validate-unified-configs`   | `scripts/schema/validate_unified_configs.py`                           | Canonical structural unified-config validator retained for compatibility use cases     |"
+        },
+        {
+          "path": "scripts/schema/__main__.py",
+          "line": 44,
+          "source_group": "scripts",
+          "text": "\"validate-unified-configs\": \"scripts.schema.validate_unified_configs\","
         }
       ]
     },

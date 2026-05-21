@@ -396,9 +396,9 @@ class TestRunLedgerReplayProjection:
             ("entry-future", "future_resume_delta", None),
         )
 
-    def test_marks_projection_incomplete_for_non_composite_stage_completion(self) -> (
-        None
-    ):
+    def test_marks_projection_incomplete_for_non_composite_stage_completion(
+        self,
+    ) -> None:
         projection = project_run_ledger_replay(
             [
                 _entry(

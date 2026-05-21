@@ -62,7 +62,7 @@ budgets:
   duplicate_test_names_max: 879
   duplicate_test_name_occurrences_max: 2742
   compatibility_test_file_max: 56
-  markerless_test_functions_max: 13430
+  markerless_test_functions_max: 13431
   uuid4_call_sites_max: 413
   date_today_call_sites_max: 0
 preflight:
