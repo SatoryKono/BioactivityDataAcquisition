@@ -24,6 +24,7 @@ class _PersistenceInputs:
     strict_replay_execution_context_supported: bool
     produced_artifact_trace_present: bool
     artifact_lineage_links_complete: bool
+    composite_execution_context: bool
     composite_resume_rich_replay_supported: bool
 
 
@@ -230,6 +231,7 @@ def build_persistence_profile(
         forensic_grade_missing_requirements=forensic_grade_missing_requirements,
     )
     composite_resume_reconstructability = _build_composite_resume_reconstructability(
+        composite_execution_context=inputs.composite_execution_context,
         composite_resume_rich_replay_supported=(
             inputs.composite_resume_rich_replay_supported
         ),
@@ -305,6 +307,7 @@ def _resolve_persistence_inputs(
         produced_artifact_trace_present=bool(artifact_refs),
         artifact_lineage_links_complete=not artifact_refs
         or (missing_link_count == 0 and bool(lineage_fragment_ids)),
+        composite_execution_context=composite_execution_context,
         composite_resume_rich_replay_supported=bool(
             base_summary.get(
                 "composite_resume_rich_replay_supported",
@@ -360,10 +363,11 @@ def _build_persistence_surfaces(
 
 def _build_composite_resume_reconstructability(
     *,
+    composite_execution_context: bool,
     composite_resume_rich_replay_supported: bool,
 ) -> dict[str, object]:
     """Return the published checkpoint reconstruction scope for composite runs."""
-    if composite_resume_rich_replay_supported:
+    if composite_execution_context and composite_resume_rich_replay_supported:
         return {
             "scope": "rich_composite_resume",
             "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
@@ -394,7 +398,7 @@ def _build_composite_resume_reconstructability(
             "per_provider_result_maps",
             "rich_checkpoint_payloads",
         ],
-        "forensic_grade_supported": False,
+        "forensic_grade_supported": composite_resume_rich_replay_supported,
     }
 
 

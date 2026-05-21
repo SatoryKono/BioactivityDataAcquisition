@@ -60,10 +60,12 @@ class WorkflowRunOptionsSchema(BaseModel):
     cached_bronze_date: str | None = None
     replay_of_run_id: str | None = None
     replay_of_manifest_id: str | None = None
+    resume_run_id: str | None = None
+    resume_manifest_id: str | None = None
     exact_replay: bool | None = None
-    required_persistence_profile: Literal[
-        "degraded_observable", "replay_ready", "forensic_grade"
-    ] | None = None
+    required_persistence_profile: (
+        Literal["degraded_observable", "replay_ready", "forensic_grade"] | None
+    ) = None
     enable_tracing: bool | None = None
 
     def to_domain(self) -> WorkflowRunOptionsConfig:
@@ -101,6 +103,8 @@ class WorkflowRunOptionsSchema(BaseModel):
             cached_bronze_date=self.cached_bronze_date,
             replay_of_run_id=self.replay_of_run_id,
             replay_of_manifest_id=self.replay_of_manifest_id,
+            resume_run_id=self.resume_run_id,
+            resume_manifest_id=self.resume_manifest_id,
             exact_replay=self.exact_replay,
             required_persistence_profile=self.required_persistence_profile,
             enable_tracing=self.enable_tracing,

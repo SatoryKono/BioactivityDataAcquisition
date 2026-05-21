@@ -14,7 +14,7 @@
     "twin_pairs_without_public_src_importers": 1,
     "tracked_twin_family_count": 4,
     "config_root_symbol_count": 3,
-    "config_root_src_importer_count": 81,
+    "config_root_src_importer_count": 80,
     "retained_public_export_facade_count": 4,
     "retained_public_export_facades_with_duplicate_exports": 0,
     "retained_public_export_facades_with_resolution_conflicts": 0
@@ -189,7 +189,6 @@
       "canonical_target": "bioetl.infrastructure.config",
       "owner": "bioetl.infrastructure.config",
       "src_importers": [
-        "src/bioetl/composition/_metrics_publication.py",
         "src/bioetl/composition/_pipeline_execution.py",
         "src/bioetl/composition/_workflow_services.py",
         "src/bioetl/composition/bootstrap/assembly/checkpoint.py",
@@ -305,7 +304,7 @@
         "tests/unit/infrastructure/test_config_dynamic.py",
         "tests/unit/infrastructure/test_config_settings.py"
       ],
-      "src_importer_count": 81,
+      "src_importer_count": 80,
       "test_importer_count": 32
     },
     {
@@ -988,7 +987,7 @@
       "public_module": "bioetl.domain.normalization.profiles.chembl_policy_registry_data",
       "public_src_importer_count": 2,
       "public_test_importer_count": 0,
-      "private_src_importer_count": 2,
+      "private_src_importer_count": 3,
       "private_test_importer_count": 0,
       "public_src_importers": [
         "src/bioetl/composition/bootstrap/runtime/normalization_policy_init.py",
@@ -996,6 +995,7 @@
       ],
       "private_src_importers": [
         "src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py",
+        "src/bioetl/domain/normalization/profiles/_chembl_policy_registry_defaults.py",
         "src/bioetl/domain/normalization/profiles/chembl_policy_registry_data.py"
       ]
     },
@@ -1139,16 +1139,17 @@
       "private_module": "bioetl.domain.normalization.profiles._chembl_policy_registry_data",
       "canonical_first_party_module": "bioetl.domain.normalization.profiles.chembl_policy_registry_data",
       "max_public_src_importers": 2,
-      "max_private_src_importers": 2,
+      "max_private_src_importers": 3,
       "rationale": "The data companion to the policy-registry twin is still split and should stay under a matching no-growth ratchet.",
       "current_public_src_importer_count": 2,
-      "current_private_src_importer_count": 2,
+      "current_private_src_importer_count": 3,
       "current_public_src_importers": [
         "src/bioetl/composition/bootstrap/runtime/normalization_policy_init.py",
         "src/bioetl/infrastructure/config/chembl_policy_registry_loader.py"
       ],
       "current_private_src_importers": [
         "src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py",
+        "src/bioetl/domain/normalization/profiles/_chembl_policy_registry_defaults.py",
         "src/bioetl/domain/normalization/profiles/chembl_policy_registry_data.py"
       ]
     }
@@ -1246,9 +1247,8 @@
           "src/bioetl/infrastructure/storage/support/"
         ],
         "rationale": "`get_settings` remains a retained convenience seam for composition runtime/bootstrap paths and one bounded infrastructure support surface. New first-party growth through the package root is not allowed.",
-        "current_src_importer_count": 19,
+        "current_src_importer_count": 18,
         "current_src_importers": [
-          "src/bioetl/composition/_metrics_publication.py",
           "src/bioetl/composition/_pipeline_execution.py",
           "src/bioetl/composition/_workflow_services.py",
           "src/bioetl/composition/bootstrap/assembly/checkpoint.py",

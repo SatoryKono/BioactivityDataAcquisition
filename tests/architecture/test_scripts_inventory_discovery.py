@@ -120,6 +120,21 @@ def test_discover_refs_counts_pre_commit_local_hook_entrypoints() -> None:
     assert {item.source_group for item in wrapper_refs} >= {"ci"}
 
 
+def test_discover_refs_counts_unified_dispatcher_command_modules() -> None:
+    """Dispatcher command maps should mark their command modules active."""
+    module = _load_inventory_module()
+    root = repo_root()
+    target = root / "scripts" / "engineering" / "qa" / "check_docs_drift.py"
+
+    refs = module._discover_refs(root, [target])
+
+    assert any(
+        item.path == "scripts/engineering/qa/__main__.py"
+        and item.source_group == "scripts"
+        for item in refs["scripts/engineering/qa/check_docs_drift.py"]
+    )
+
+
 def test_agent_usage_includes_codex_agents_and_skills() -> None:
     """Agent usage should detect both skill wrappers and logical agent specs."""
     module = _load_inventory_module()

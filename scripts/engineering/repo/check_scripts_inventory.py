@@ -120,6 +120,9 @@ MODULE_REF_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"(?:uv\s+run\s+)?(?:python(?:3(?:\.\d+)?)?|py)\s+-m\s+"
     r"((?:scripts|src\.tools)(?:\.[A-Za-z0-9_]+)+)"
 )
+MODULE_STRING_REF_PATTERN: Final[re.Pattern[str]] = re.compile(
+    r"[\"']((?:scripts|src\.tools)(?:\.[A-Za-z0-9_]+)+)[\"']"
+)
 SCRIPT_PATH_ALIASES: Final[dict[str, tuple[str, ...]]] = {
     "scripts/ops/launchers/codex/codex-exec.bat": ("scripts/codex-exec.bat",),
     "scripts/ops/launchers/codex/codex.bat": ("scripts/codex.bat",),
@@ -501,10 +504,16 @@ def _discover_refs_in_file(
     normalized_text = text.replace("\\", "/")
     has_script_path_refs = any(token in normalized_text for token in SCRIPT_PATH_TOKENS)
     has_module_refs = any(token in normalized_text for token in MODULE_REF_TOKENS)
+    has_dispatcher_module_refs = _has_dispatcher_module_refs(rel, normalized_text)
     has_basename_refs = _line_has_basename_script_candidate(
         normalized_text, basename_map
     )
-    if not has_script_path_refs and not has_module_refs and not has_basename_refs:
+    if not (
+        has_script_path_refs
+        or has_module_refs
+        or has_dispatcher_module_refs
+        or has_basename_refs
+    ):
         return []
 
     source_group = _source_group(rel)
@@ -514,6 +523,15 @@ def _discover_refs_in_file(
         normalized_text=normalized_text,
         source_group=source_group,
         script_set=script_set,
+    )
+    discovered.extend(
+        _discover_dispatcher_module_refs_in_file(
+            rel=rel,
+            text=text,
+            normalized_text=normalized_text,
+            source_group=source_group,
+            script_set=script_set,
+        )
     )
     original_lines = text.splitlines()
     normalized_lines = normalized_text.splitlines()
@@ -535,6 +553,55 @@ def _discover_refs_in_file(
             )
         )
     return discovered
+
+
+def _has_dispatcher_module_refs(rel: str, normalized_text: str) -> bool:
+    """Detect canonical command dispatcher module mappings."""
+    if not rel.startswith("scripts/") or not rel.endswith("/__main__.py"):
+        return False
+    return "scripts." in normalized_text or "src.tools." in normalized_text
+
+
+def _discover_dispatcher_module_refs_in_file(
+    *,
+    rel: str,
+    text: str,
+    normalized_text: str,
+    source_group: str,
+    script_set: set[str],
+) -> list[tuple[str, RefEvidence]]:
+    """Resolve ``COMMAND_MODULES``-style dispatcher strings to script paths."""
+    if not _has_dispatcher_module_refs(rel, normalized_text):
+        return []
+
+    discovered: list[tuple[str, RefEvidence]] = []
+    for module_name in set(MODULE_STRING_REF_PATTERN.findall(normalized_text)):
+        candidate_path = f"{module_name.replace('.', '/')}.py"
+        if candidate_path not in script_set or rel == candidate_path:
+            continue
+        line_no, raw_line = _get_first_module_string_line(
+            text=text,
+            module_name=module_name,
+        )
+        discovered.append(
+            (
+                candidate_path,
+                _make_ref_evidence(
+                    rel=rel,
+                    line_no=line_no,
+                    raw_line=raw_line,
+                    source_group=source_group,
+                ),
+            )
+        )
+    return discovered
+
+
+def _get_first_module_string_line(*, text: str, module_name: str) -> tuple[int, str]:
+    for line_no, raw_line in enumerate(text.splitlines(), start=1):
+        if module_name in raw_line:
+            return line_no, raw_line
+    return 1, ""
 
 
 def _discover_module_command_refs_in_file(
@@ -897,9 +964,7 @@ def _deprecation_next_step(status: str) -> str:
     if status == "temporary_diagnostic":
         return "Retain only while the bounded troubleshooting flow remains live."
     if status == "supporting":
-        return (
-            "Retain as a supporting surface/helper until a canonical replacement exists."
-        )
+        return "Retain as a supporting surface/helper until a canonical replacement exists."
     return "Archive/remove after freeze window if no active consumers."
 
 
@@ -1002,9 +1067,7 @@ def _check_lifecycle_registry(
         )
         return 1
 
-    print(
-        f"[OK] Lifecycle registry covers non-active scripts: {registry_path}"
-    )
+    print(f"[OK] Lifecycle registry covers non-active scripts: {registry_path}")
     return 0
 
 

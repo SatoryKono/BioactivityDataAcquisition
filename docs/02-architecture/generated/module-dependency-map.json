@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1901,
-    "total_internal_imports": 7617,
+    "scanned_modules": 1907,
+    "total_internal_imports": 7630,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 331,
@@ -11,13 +11,13 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 1272,
+      "imports": 1275,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1128,
+      "imports": 1131,
       "allowed": true
     },
     {
@@ -29,7 +29,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 646,
+      "imports": 645,
       "allowed": true
     },
     {
@@ -47,7 +47,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1283,
+      "imports": 1291,
       "allowed": true
     },
     {
@@ -114,14 +114,14 @@
       "imports": 79
     },
     {
-      "source": "application.core",
+      "source": "application.composite",
       "target": "domain.ports",
       "imports": 74
     },
     {
-      "source": "application.composite",
+      "source": "application.core",
       "target": "domain.ports",
-      "imports": 73
+      "imports": 74
     },
     {
       "source": "application.services",
@@ -141,7 +141,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 67
+      "imports": 68
     },
     {
       "source": "infrastructure.storage",
@@ -234,14 +234,14 @@
       "imports": 28
     },
     {
-      "source": "infrastructure.storage",
-      "target": "domain.medallion",
+      "source": "application.composite",
+      "target": "domain.exceptions",
       "imports": 27
     },
     {
-      "source": "application.composite",
-      "target": "domain.exceptions",
-      "imports": 26
+      "source": "infrastructure.storage",
+      "target": "domain.medallion",
+      "imports": 27
     },
     {
       "source": "application.pipelines",

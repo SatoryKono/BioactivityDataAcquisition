@@ -998,7 +998,7 @@ def test_show_composite_manifest_surfaces_bounded_reconstructability_contract() 
         == "coarse_grained_composite_resume"
     )
     assert any(
-        "Treat composite resume as checkpoint snapshot plus ledger suffix replay only;"
+        "Treat composite resume as checkpoint snapshot plus ledger suffix replay only"
         in step
         for step in result.diagnostics["next_steps"]
     )

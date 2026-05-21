@@ -1,6 +1,6 @@
 version: 1
 policy_scope: infrastructure_config_root_facade
-review_date: "2026-05-20"
+review_date: "2026-05-21"
 target_module: bioetl.infrastructure.config
 new_src_import_policy: allowlisted_only_no_growth
 symbols:

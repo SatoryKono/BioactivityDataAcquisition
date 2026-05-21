@@ -1571,8 +1571,9 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
         "Current persisted surfaces do not satisfy the declared required persistence profile for this run.",
         (
             "Treat composite resume as checkpoint snapshot plus ledger suffix "
-            "replay only; do not expect per-provider result maps or other rich "
-            "checkpoint payloads to be reconstructed."
+            "replay only when rich checkpoint payload evidence is missing; "
+            "otherwise validate the recorded seed/dependency/enrichment/merge "
+            "payloads before forensic replay claims."
         ),
         "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
         "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",

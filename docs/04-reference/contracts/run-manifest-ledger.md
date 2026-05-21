@@ -459,10 +459,11 @@ The current replay-enabled resume path is implemented for composite checkpoints.
 - after the checkpoint snapshot is loaded and compatibility anchors are
   validated, runtime replays only the ledger suffix strictly after
   `last_event_id` via `RunLedgerPort.list_entries_after(manifest_id, last_event_id)`;
-- the replay projector is intentionally coarse-grained: it restores lifecycle
-  milestones such as `state`, `seed_completed`, `merge_completed`, and the
-  latest replay watermark, but does not fabricate rich checkpoint payloads such
-  as per-provider result maps;
+- the replay projector is bounded by persisted evidence: it always restores
+  lifecycle milestones such as `state`, `seed_completed`, `merge_completed`,
+  and the latest replay watermark, and it additionally restores recorded
+  `seed_result` / dependency / enrichment / merge payload maps when the ledger
+  contains the corresponding composite completion events;
 - projector coverage is fail-closed: if the ledger suffix contains
   replay-relevant entries outside the bounded composite projector contract,
   runtime raises checkpoint conflict instead of silently degrading the replay
@@ -575,12 +576,16 @@ semantics reviewers must cite when recalculating audit scores.
 Composite replay is additionally documented as a bounded reconstructability
 surface:
 
-- scope: `coarse_grained_composite_resume`;
+- scope: `coarse_grained_composite_resume` when only lifecycle/watermark
+  evidence is available, or `rich_composite_resume` when the ledger contains
+  persisted seed/dependency/enrichment/merge replay payloads;
 - resume model: `checkpoint_snapshot_plus_ledger_suffix`;
-- reconstructed from persisted state: `state`, `seed_completed`,
+- coarse reconstruction from persisted state: `state`, `seed_completed`,
   `merge_completed`, `last_event_id`, `last_event_occurred_at`;
-- not reconstructed: per-provider result maps and other rich checkpoint
-  payloads.
+- rich reconstruction from persisted state additionally includes:
+  `seed_result`, `dependency_results`, `enrichment_results`, `merge_result`;
+- rich reconstruction is published only when corresponding ledger evidence is
+  present; otherwise diagnostics keep the bounded coarse contract.
 
 When the inspected execution context is composite, diagnostics also raise
 `alert_signals.composite_resume_reconstructability_gap` and point operators to

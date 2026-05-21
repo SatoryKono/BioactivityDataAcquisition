@@ -4522,7 +4522,7 @@
       "missing_lines": null,
       "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_persistence",
       "path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence.py",
-      "source_lines": 478
+      "source_lines": 482
     },
     {
       "coverage_percent": null,
@@ -5450,16 +5450,6 @@
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
-      "module": "bioetl.composition._metrics_publication",
-      "path": "src/bioetl/composition/_metrics_publication.py",
-      "source_lines": 29
-    },
-    {
-      "coverage_percent": null,
-      "coverage_status": "coverage_xml_missing",
-      "covered_lines": null,
-      "executable_lines": null,
-      "missing_lines": null,
       "module": "bioetl.composition._pipeline_execution",
       "path": "src/bioetl/composition/_pipeline_execution.py",
       "source_lines": 249
@@ -5802,7 +5792,17 @@
       "missing_lines": null,
       "module": "bioetl.composition.bootstrap.cli.config",
       "path": "src/bioetl/composition/bootstrap/cli/config.py",
-      "source_lines": 83
+      "source_lines": 64
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "coverage_xml_missing",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.composition.bootstrap.cli.config_helpers",
+      "path": "src/bioetl/composition/bootstrap/cli/config_helpers.py",
+      "source_lines": 23
     },
     {
       "coverage_percent": null,
@@ -13272,7 +13272,7 @@
       "missing_lines": null,
       "module": "bioetl.domain.workflow.config",
       "path": "src/bioetl/domain/workflow/config.py",
-      "source_lines": 264
+      "source_lines": 274
     },
     {
       "coverage_percent": null,
@@ -16882,7 +16882,7 @@
       "missing_lines": null,
       "module": "bioetl.infrastructure.schemas.workflow_config",
       "path": "src/bioetl/infrastructure/schemas/workflow_config.py",
-      "source_lines": 226
+      "source_lines": 230
     },
     {
       "coverage_percent": null,
@@ -19097,7 +19097,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-05-21",
-  "source_tree_sha256": "2bc5a0f55644d6f08cf48d63b201423b144f31586ceb4e639ade9159e283ba78",
+  "source_tree_sha256": "60d8eb63ff2c24ff1268cf56ed218cc01c01b0d3aacd8e646c66d40ea6542711",
   "summary": {
     "coverage_xml_present": false,
     "source_module_count": 1909,
