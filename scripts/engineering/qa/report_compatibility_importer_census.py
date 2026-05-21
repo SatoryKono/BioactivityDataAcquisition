@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import sys
+from collections import Counter
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -32,6 +34,32 @@ DEFAULT_CONFIG_FACADE_RATCHET = (
     / "configs"
     / "quality"
     / "infrastructure_config_root_facade_inventory.yaml"
+)
+REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
+    {
+        "issue_id": "4390",
+        "surface_id": "metadata_sidecar_adapter",
+        "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_sidecar_adapter.py",
+        "module_name": "bioetl.infrastructure.storage.silver.operations.metadata_sidecar_adapter",
+        "canonical_target": "bioetl.domain.ports.storage.metadata.MetadataCoordinatorPort",
+        "owner": "bioetl.infrastructure.storage.silver.operations",
+    },
+    {
+        "issue_id": "4388",
+        "surface_id": "checkpoint_compatibility_service_v2",
+        "path": "src/bioetl/application/services/checkpoint_compatibility_service_v2.py",
+        "module_name": "bioetl.application.services.checkpoint_compatibility_service_v2",
+        "canonical_target": "bioetl.application.services.checkpoint_compatibility_service",
+        "owner": "bioetl.application.services",
+    },
+    {
+        "issue_id": "4388",
+        "surface_id": "legacy_fingerprints",
+        "path": "src/bioetl/domain/normalization/legacy_fingerprints.py",
+        "module_name": "bioetl.domain.normalization.legacy_fingerprints",
+        "canonical_target": "bioetl.domain.normalization.fingerprints",
+        "owner": "bioetl.domain.normalization",
+    },
 )
 
 
@@ -92,6 +120,173 @@ def _module_name_from_repo_path(repo_path: str) -> str:
     return normalized.replace("/", ".")
 
 
+def _parse_module(path: Path) -> ast.Module:
+    return ast.parse(path.read_text(encoding="utf-8"), filename=path.as_posix())
+
+
+def _string_literals_from_sequence(node: ast.AST) -> list[str]:
+    if not isinstance(node, ast.List | ast.Tuple):
+        return []
+    values: list[str] = []
+    for element in node.elts:
+        if isinstance(element, ast.Constant) and isinstance(element.value, str):
+            values.append(element.value)
+    return values
+
+
+def _top_level_string_sequence_assignment(tree: ast.Module, target_name: str) -> list[str]:
+    for node in tree.body:
+        if not isinstance(node, ast.Assign):
+            continue
+        if not any(
+            isinstance(target, ast.Name) and target.id == target_name
+            for target in node.targets
+        ):
+            continue
+        values = _string_literals_from_sequence(node.value)
+        if values:
+            return values
+    return []
+
+
+def _top_level_dict_string_keys(tree: ast.Module, target_name: str) -> list[str]:
+    for node in tree.body:
+        if not isinstance(node, ast.Assign):
+            if not (
+                isinstance(node, ast.AnnAssign)
+                and isinstance(node.target, ast.Name)
+                and node.target.id == target_name
+                and isinstance(node.value, ast.Dict)
+            ):
+                continue
+            dict_node = node.value
+        else:
+            if not any(
+                isinstance(target, ast.Name) and target.id == target_name
+                for target in node.targets
+            ):
+                continue
+            if not isinstance(node.value, ast.Dict):
+                continue
+            dict_node = node.value
+        keys: list[str] = []
+        for key in dict_node.keys:
+            if isinstance(key, ast.Constant) and isinstance(key.value, str):
+                keys.append(key.value)
+        return keys
+    return []
+
+
+def _collect_runtime_binding_names(tree: ast.Module) -> set[str]:
+    bindings: set[str] = set()
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+            bindings.add(node.name)
+            continue
+        if isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                bindings.add(alias.asname or alias.name)
+            continue
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    bindings.add(target.id)
+            continue
+        if (
+            isinstance(node, ast.AnnAssign)
+            and node.value is not None
+            and isinstance(node.target, ast.Name)
+        ):
+            bindings.add(node.target.id)
+    return bindings
+
+
+def _collect_getattr_branch_names(tree: ast.Module) -> set[str]:
+    def _visit_if(node: ast.If, names: set[str]) -> None:
+        test = node.test
+        if (
+            isinstance(test, ast.Compare)
+            and isinstance(test.left, ast.Name)
+            and test.left.id == "name"
+            and len(test.ops) == 1
+            and isinstance(test.ops[0], ast.Eq)
+            and len(test.comparators) == 1
+            and isinstance(test.comparators[0], ast.Constant)
+            and isinstance(test.comparators[0].value, str)
+        ):
+            names.add(test.comparators[0].value)
+        for child in node.orelse:
+            if isinstance(child, ast.If):
+                _visit_if(child, names)
+
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef) and node.name == "__getattr__":
+            names: set[str] = set()
+            for child in node.body:
+                if isinstance(child, ast.If):
+                    _visit_if(child, names)
+            return names
+    return set()
+
+
+def _duplicates(values: list[str]) -> list[str]:
+    counts = Counter(values)
+    return sorted(name for name, count in counts.items() if count > 1)
+
+
+def _build_public_export_contract_row(
+    module_path: Path,
+    inventory_row: dict[str, Any],
+) -> dict[str, object]:
+    tree = _parse_module(module_path)
+    export_contract = inventory_row["public_export_contract"]
+    assert isinstance(export_contract, dict)
+    public_exports = _top_level_string_sequence_assignment(tree, "__all__")
+    lazy_export_table_name = export_contract.get("lazy_export_table")
+    lazy_export_keys = (
+        _top_level_dict_string_keys(tree, str(lazy_export_table_name))
+        if isinstance(lazy_export_table_name, str)
+        else []
+    )
+    getattr_branch_names = (
+        sorted(_collect_getattr_branch_names(tree))
+        if bool(export_contract.get("parse_dunder_getattr_string_branches"))
+        else []
+    )
+    runtime_bindings = _collect_runtime_binding_names(tree)
+    resolution_conflicts: dict[str, list[str]] = {}
+    for export_name in public_exports:
+        providers: list[str] = []
+        if export_name in runtime_bindings:
+            providers.append("runtime_binding")
+        if export_name in lazy_export_keys:
+            providers.append("lazy_export_table")
+        if export_name in getattr_branch_names:
+            providers.append("dunder_getattr_branch")
+        if len(providers) != 1:
+            resolution_conflicts[export_name] = providers
+
+    public_export_set = set(public_exports)
+    return {
+        "path": inventory_row["path"],
+        "module_name": _module_name_from_repo_path(str(inventory_row["path"])),
+        "canonical_target": inventory_row["canonical_target"],
+        "max_public_exports": int(export_contract["max_public_exports"]),
+        "public_exports": public_exports,
+        "public_export_count": len(public_exports),
+        "duplicate_public_exports": _duplicates(public_exports),
+        "lazy_export_table": lazy_export_table_name,
+        "lazy_export_keys": lazy_export_keys,
+        "duplicate_lazy_export_keys": _duplicates(lazy_export_keys),
+        "orphan_lazy_export_keys": sorted(set(lazy_export_keys) - public_export_set),
+        "dunder_getattr_exports": getattr_branch_names,
+        "orphan_dunder_getattr_exports": sorted(
+            set(getattr_branch_names) - public_export_set
+        ),
+        "resolution_conflicts": resolution_conflicts,
+    }
+
+
 def build_compatibility_importer_census(
     repo_root: Path, *, snapshot_date: str | None = None
 ) -> dict[str, object]:
@@ -118,8 +313,24 @@ def build_compatibility_importer_census(
         repo_root,
         str(config_root_facade_inventory["target_module"]),
     )
+    removed_surface_rows: list[dict[str, object]] = []
+    for row in REMOVED_COMPATIBILITY_SURFACES:
+        usage = collect_exact_module_import_usage(repo_root, row["module_name"])
+        src_importers = sorted(usage["src"])
+        test_importers = sorted(usage["tests"])
+        removed_surface_rows.append(
+            {
+                **row,
+                "path_exists": (repo_root / row["path"]).exists(),
+                "src_importers": src_importers,
+                "test_importers": test_importers,
+                "src_importer_count": len(src_importers),
+                "test_importer_count": len(test_importers),
+            }
+        )
 
     retained_rows: list[dict[str, object]] = []
+    retained_public_export_rows: list[dict[str, object]] = []
     for row in retained_entrypoints:
         repo_path = str(row["path"])
         module_name = _module_name_from_repo_path(repo_path)
@@ -137,6 +348,11 @@ def build_compatibility_importer_census(
                 "test_importer_count": len(importers.get("tests", ())),
             }
         )
+        export_contract = row.get("public_export_contract")
+        if isinstance(export_contract, dict):
+            retained_public_export_rows.append(
+                _build_public_export_contract_row(repo_root / repo_path, row)
+            )
 
     twin_rows: list[dict[str, object]] = []
     for pair in twin_pairs:
@@ -211,6 +427,16 @@ def build_compatibility_importer_census(
         ),
         "summary": {
             "retained_entrypoint_count": len(retained_rows),
+            "removed_compatibility_surface_count": len(removed_surface_rows),
+            "removed_compatibility_surfaces_with_src_importers": sum(
+                1 for row in removed_surface_rows if row["src_importer_count"] > 0
+            ),
+            "removed_compatibility_surfaces_with_test_importers": sum(
+                1 for row in removed_surface_rows if row["test_importer_count"] > 0
+            ),
+            "removed_compatibility_surfaces_still_present": sum(
+                1 for row in removed_surface_rows if row["path_exists"]
+            ),
             "twin_pair_count": len(twin_rows),
             "twin_pairs_with_private_src_importers": sum(
                 1 for row in twin_rows if row["private_src_importer_count"] > 0
@@ -221,8 +447,19 @@ def build_compatibility_importer_census(
             "tracked_twin_family_count": len(tracked_twin_rows),
             "config_root_symbol_count": len(config_symbol_rows),
             "config_root_src_importer_count": len(config_src_usage),
+            "retained_public_export_facade_count": len(retained_public_export_rows),
+            "retained_public_export_facades_with_duplicate_exports": sum(
+                1
+                for row in retained_public_export_rows
+                if row["duplicate_public_exports"] or row["duplicate_lazy_export_keys"]
+            ),
+            "retained_public_export_facades_with_resolution_conflicts": sum(
+                1 for row in retained_public_export_rows if row["resolution_conflicts"]
+            ),
         },
         "retained_entrypoints": retained_rows,
+        "retained_public_export_facades": retained_public_export_rows,
+        "removed_compatibility_surfaces": removed_surface_rows,
         "twin_pairs": twin_rows,
         "tracked_twin_families": tracked_twin_rows,
         "config_root_facade": {
@@ -238,9 +475,13 @@ def build_compatibility_importer_census(
 def _render_markdown(payload: dict[str, object]) -> str:
     summary = payload["summary"]
     retained_rows = payload["retained_entrypoints"]
+    public_export_rows = payload["retained_public_export_facades"]
+    removed_rows = payload["removed_compatibility_surfaces"]
     twin_rows = payload["twin_pairs"]
     assert isinstance(summary, dict)
     assert isinstance(retained_rows, list)
+    assert isinstance(public_export_rows, list)
+    assert isinstance(removed_rows, list)
     assert isinstance(twin_rows, list)
 
     lines = [
@@ -248,10 +489,17 @@ def _render_markdown(payload: dict[str, object]) -> str:
         "",
         f"- snapshot_date: {payload['snapshot_date']}",
         f"- retained_entrypoint_count: {summary['retained_entrypoint_count']}",
+        f"- removed_compatibility_surface_count: {summary['removed_compatibility_surface_count']}",
+        f"- removed_compatibility_surfaces_with_src_importers: {summary['removed_compatibility_surfaces_with_src_importers']}",
+        f"- removed_compatibility_surfaces_with_test_importers: {summary['removed_compatibility_surfaces_with_test_importers']}",
+        f"- removed_compatibility_surfaces_still_present: {summary['removed_compatibility_surfaces_still_present']}",
         f"- twin_pair_count: {summary['twin_pair_count']}",
         f"- tracked_twin_family_count: {summary['tracked_twin_family_count']}",
         f"- config_root_symbol_count: {summary['config_root_symbol_count']}",
         f"- config_root_src_importer_count: {summary['config_root_src_importer_count']}",
+        f"- retained_public_export_facade_count: {summary['retained_public_export_facade_count']}",
+        f"- retained_public_export_facades_with_duplicate_exports: {summary['retained_public_export_facades_with_duplicate_exports']}",
+        f"- retained_public_export_facades_with_resolution_conflicts: {summary['retained_public_export_facades_with_resolution_conflicts']}",
         "- purpose: measure sanctioned public seams and underscore/public twin usage",
         "",
         "## Retained Entrypoints",
@@ -263,6 +511,47 @@ def _render_markdown(payload: dict[str, object]) -> str:
         assert isinstance(row, dict)
         lines.append(
             f"| `{row['path']}` | {row['src_importer_count']} | {row['test_importer_count']} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## Retained Public Export Facades",
+            "",
+            "| Path | Public exports | Lazy exports | Duplicate exports | Resolution conflicts |",
+            "| --- | ---: | ---: | --- | --- |",
+        ]
+    )
+    for row in public_export_rows:
+        assert isinstance(row, dict)
+        duplicate_exports = sorted(
+            set(row["duplicate_public_exports"]) | set(row["duplicate_lazy_export_keys"])
+        )
+        conflicts = sorted(row["resolution_conflicts"])
+        lines.append(
+            f"| `{row['path']}` | {row['public_export_count']} | "
+            f"{len(row['lazy_export_keys']) + len(row['dunder_getattr_exports'])} | "
+            f"{', '.join(duplicate_exports) if duplicate_exports else 'none'} | "
+            f"{', '.join(conflicts) if conflicts else 'none'} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## Removed Compatibility Surfaces",
+            "",
+            "| Module | Path exists | src importers | test importers | Canonical target |",
+            "| --- | --- | ---: | ---: | --- |",
+        ]
+    )
+    for row in removed_rows:
+        assert isinstance(row, dict)
+        lines.append(
+            f"| `{row['module_name']}` | "
+            f"{'yes' if row['path_exists'] else 'no'} | "
+            f"{row['src_importer_count']} | "
+            f"{row['test_importer_count']} | "
+            f"`{row['canonical_target']}` |"
         )
 
     lines.extend(

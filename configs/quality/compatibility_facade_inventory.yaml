@@ -183,6 +183,84 @@ retained_entrypoints:
     symbol imports in first-party source stay at zero, internal implementation-module
     imports outside `composition/` stay at zero, and internal-module patch coverage
     remains confined to the dedicated entrypoint-boundary tests.
+  public_export_contract:
+    max_public_exports: 15
+    lazy_export_table: _PUBLIC_SYMBOL_TARGETS
+- path: src/bioetl/composition/health_api.py
+  compatibility_role: Permanent public health composition facade that intentionally
+    shields split services/bootstrap/resource seams while keeping a reviewed export
+    budget.
+  canonical_target: bioetl.composition.health_api
+  status: public-entrypoint
+  owner: bioetl.composition
+  introduced_in: 2026-05 public export review
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: '`src`: import only the explicit health/quarantine symbols
+    exposed by `bioetl.composition.health_api`; do not bypass this facade to patch
+    `_services`, bootstrap health wiring, or `_resource_management` outside the
+    reviewed owner paths. `tests`: public facade imports may appear in CLI/composition
+    coverage, while direct internal patch targets stay confined to dedicated boundary
+    tests.'
+  migration_path: Use `bioetl.composition.health_api` as the sanctioned health-facing
+    composition seam; do not add new first-party imports from `bioetl.composition._services`,
+    `bioetl.composition._resource_management`, or `bioetl.composition.bootstrap.cli.health`
+    when the public facade export already exists.
+  exit_criteria: The public health facade remains the sanctioned import seam, its
+    reviewed export budget stays bounded, and internal owner modules remain hidden
+    behind the facade for ordinary first-party callers.
+  public_export_contract:
+    max_public_exports: 8
+    lazy_export_table: _PUBLIC_EXPORTS
+- path: src/bioetl/composition/maintenance_api.py
+  compatibility_role: Permanent public maintenance composition facade that intentionally
+    shields maintenance/resource wiring behind a reviewed export budget.
+  canonical_target: bioetl.composition.maintenance_api
+  status: public-entrypoint
+  owner: bioetl.composition
+  introduced_in: 2026-05 public export review
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: '`src`: import maintenance lifecycle/archive/cleanup/vacuum
+    helpers only through `bioetl.composition.maintenance_api`; direct imports from
+    `_resource_management` and `_services` stay confined to owner implementation
+    paths. `tests`: public facade imports may appear in CLI/composition coverage,
+    while direct internal patch targets stay confined to dedicated boundary tests.'
+  migration_path: Use `bioetl.composition.maintenance_api` as the sanctioned maintenance-facing
+    composition seam; do not add new first-party imports from `bioetl.composition._resource_management`
+    or `bioetl.composition._services` when the public facade export already exists.
+  exit_criteria: The public maintenance facade remains the sanctioned import seam,
+    its reviewed export budget stays bounded, and internal owner modules remain hidden
+    behind the facade for ordinary first-party callers.
+  public_export_contract:
+    max_public_exports: 8
+    lazy_export_table: _PUBLIC_EXPORTS
+- path: src/bioetl/infrastructure/config/__init__.py
+  compatibility_role: Permanent public infrastructure config package-root convenience
+    facade that intentionally shields split config loader APIs behind a reviewed
+    export budget.
+  canonical_target: bioetl.infrastructure.config
+  status: public-entrypoint
+  owner: bioetl.infrastructure.config
+  introduced_in: legacy-pre-2026-05
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: '`src`: use the package-root config facade only for reviewed
+    convenience symbols and keep new imports bounded by the dedicated root-facade
+    inventory. `tests`: public package-root imports may appear in runtime/config
+    contract coverage, while deeper loader modules remain the owner path for focused
+    implementation tests.'
+  migration_path: Use `bioetl.infrastructure.config` only for the sanctioned convenience
+    exports and prefer owner loader modules when no reviewed facade symbol is needed.
+  exit_criteria: The package-root convenience facade remains the sanctioned public
+    import seam, its reviewed export budget stays bounded, and symbol-level import
+    growth remains governed by the dedicated root-facade inventory.
+  public_export_contract:
+    max_public_exports: 18
+    parse_dunder_getattr_string_branches: true
 - path: src/bioetl/domain/composite/config.py
   compatibility_role: Permanent public entrypoint for composite config models that
     shields split config internals.
