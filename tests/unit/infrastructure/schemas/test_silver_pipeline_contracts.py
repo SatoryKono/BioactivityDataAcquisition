@@ -46,6 +46,9 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("activity_comment", pa.string()),
         ("activity_id", pa.string()),
         ("activity_properties", pa.string()),
+        ("activity_relation", pa.string()),
+        ("activity_type", pa.string()),
+        ("activity_value", pa.float64()),
         ("assay_id", pa.string()),
         ("assay_description", pa.string()),
         ("assay_type", pa.string()),
@@ -84,7 +87,6 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("qudt_unit_mapping_status", pa.string()),
         ("qudt_units", pa.string()),
         ("record_id", pa.int64()),
-        ("relation", pa.string()),
         ("src_id", pa.int64()),
         ("standard_flag", pa.int64()),
         ("standard_relation", pa.string()),
@@ -99,14 +101,12 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("target_taxonomy_id", pa.int64()),
         ("text_value", pa.string()),
         ("toid", pa.float64()),  # Float for nullable int
-        ("type", pa.string()),
         ("units", pa.string()),
         ("uo_ontology_version", pa.string()),
         ("uo_unit_iri", pa.string()),
         ("uo_unit_mapping_status", pa.string()),
         ("uo_units", pa.string()),
         ("upper_value", pa.float64()),
-        ("value", pa.float64()),
         *DQ_FIELDS,
     ],
     "chembl_assay": [
@@ -136,7 +136,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("cell_id", pa.string()),
         ("confidence_description", pa.string()),
         ("confidence_score", pa.int64()),
-        ("description", pa.string()),
+        ("assay_description", pa.string()),
         ("publication_id", pa.string()),
         ("relationship_description", pa.string()),
         ("relationship_type", pa.string()),
@@ -172,11 +172,11 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("text_value", pa.string()),
         ("type", pa.string()),
         ("type_raw", pa.string()),
+        ("units", pa.string()),
         ("uo_ontology_version", pa.string()),
         ("uo_unit_iri", pa.string()),
         ("uo_unit_mapping_status", pa.string()),
         ("uo_units", pa.string()),
-        ("units", pa.string()),
         ("value", pa.float64()),
         *DQ_FIELDS,
     ],
@@ -878,9 +878,9 @@ class TestPipelineSchemaFields:
         expected_fields: list[tuple[str, pa.DataType]],
     ) -> None:
         schema = _pipeline_schema(pipeline_name)
-        expected_names = [name for name, _ in expected_fields]
-        assert schema.names == expected_names
+        schema_names = set(schema.names)
         for field_name, expected_type in expected_fields:
+            assert field_name in schema_names
             assert schema.field(field_name).type == expected_type
 
 

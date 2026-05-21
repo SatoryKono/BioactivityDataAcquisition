@@ -107,8 +107,16 @@ def test_discover_refs_counts_pre_commit_local_hook_entrypoints() -> None:
         / "vcr"
         / "check_vcr_filename_policy.py",
     ]
+    original_iter_search_files = module._iter_search_files
 
-    refs = module._discover_refs(root, targets)
+    def _iter_only_pre_commit(_: Path) -> list[Path]:
+        return [root / ".pre-commit-config.yaml"]
+
+    module._iter_search_files = _iter_only_pre_commit
+    try:
+        refs = module._discover_refs(root, targets)
+    finally:
+        module._iter_search_files = original_iter_search_files
 
     wrapper_refs = refs["scripts/engineering/dev/run_project_python.py"]
     placement_refs = refs["scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"]
@@ -125,8 +133,17 @@ def test_discover_refs_counts_unified_dispatcher_command_modules() -> None:
     module = _load_inventory_module()
     root = repo_root()
     target = root / "scripts" / "engineering" / "qa" / "check_docs_drift.py"
+    dispatcher = root / "scripts" / "engineering" / "qa" / "__main__.py"
+    original_iter_search_files = module._iter_search_files
 
-    refs = module._discover_refs(root, [target])
+    def _iter_only_qa_dispatcher(_: Path) -> list[Path]:
+        return [dispatcher]
+
+    module._iter_search_files = _iter_only_qa_dispatcher
+    try:
+        refs = module._discover_refs(root, [target])
+    finally:
+        module._iter_search_files = original_iter_search_files
 
     assert any(
         item.path == "scripts/engineering/qa/__main__.py"

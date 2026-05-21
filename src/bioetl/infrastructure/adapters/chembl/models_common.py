@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from bioetl.domain.types import JsonDict
 
@@ -172,6 +172,16 @@ class ChemblPublicationApiRecord(BaseModel):
     chembl_release: ChemblReleaseInfo | None = Field(
         default=None, description="ChEMBL release metadata"
     )
+
+    @field_validator("pubmed_id", mode="before")
+    @classmethod
+    def _normalize_pubmed_id(cls, value: object) -> object:
+        """Normalize live API PMID payloads that may arrive as integers."""
+        if value is None:
+            return None
+        if isinstance(value, int):
+            return str(value)
+        return value
 
 
 class ChemblPublicationResponse(BaseModel):

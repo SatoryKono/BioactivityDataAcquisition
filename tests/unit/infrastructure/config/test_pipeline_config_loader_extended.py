@@ -554,9 +554,11 @@ def test_load_pipeline_config_forwards_injected_filter_loader(
         pipeline_name: str,
         *,
         filter_loader: object | None = None,
+        configs_root: Path | None = None,
     ) -> PipelineYamlConfig:
         captured["pipeline_name"] = pipeline_name
         captured["filter_loader"] = filter_loader
+        captured["configs_root"] = configs_root
         return expected
 
     monkeypatch.setattr(
@@ -576,3 +578,4 @@ def test_load_pipeline_config_forwards_injected_filter_loader(
     assert result is expected
     assert captured["pipeline_name"] == "test_provider_test_entity"
     assert captured["filter_loader"] is filter_loader
+    assert captured["configs_root"] == loader._configs_root

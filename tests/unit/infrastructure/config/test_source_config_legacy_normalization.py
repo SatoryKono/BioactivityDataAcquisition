@@ -263,8 +263,13 @@ def test_load_source_config_uncached_calls_pipeline_in_order(
 ) -> None:
     events: list[str] = []
 
-    def fake_read(provider: str) -> dict[str, Any]:
+    def fake_read(
+        provider: str,
+        *,
+        configs_root: Path | None = None,
+    ) -> dict[str, Any]:
         assert provider == "chembl"
+        assert configs_root is None or configs_root.name == "configs"
         events.append("read")
         return {"raw": True}
 
