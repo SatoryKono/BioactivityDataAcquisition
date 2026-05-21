@@ -17,10 +17,10 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 > `crossref/batch.py` больше не является крупным mixed-responsibility hotspot:
 > текущий файл — `24` LOC compatibility facade поверх split collaborators.
 > Дополнительно live architecture-metric exemption baseline сейчас содержит
-> `5` active file-size-limit exemptions и не содержит active class/god-object
+> `0` active file-size-limit exemptions и не содержит active class/god-object
 > exemptions. Поэтому текущий active debt posture лучше читать как
-> topology/ownership watchlist с ограниченным file-size waiver inventory, а не
-> как zero-exemption baseline.
+> topology/ownership watchlist без active waiver inventory, а не как
+> open-ended exemption baseline.
 > Для live prioritization используйте текущий roadmap и refreshed governance
 > summaries, а не только этот dated pack.
 
@@ -31,11 +31,7 @@ Source of truth: `configs/quality/architecture_metric_exemptions.yaml` and
 
 | Path | Owner | Expires | Removal Step |
 | ---- | ----- | ------- | ------------ |
-| `src/bioetl/domain/behavior/_dq_rule_evaluators.py` | `@bioetl-architecture` | `2026-09-30` | Extract rule evaluator factory and strategy classes |
-| `src/bioetl/domain/control_plane/run_ledger_replay.py` | `@bioetl-architecture` | `2026-09-30` | Extract replay state machine and recovery handlers |
-| `src/bioetl/domain/normalization/hash_identity.py` | `@bioetl-data-model` | `2026-09-30` | Extract strategy factories and policy builders |
-| `src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py` | `@bioetl-data-model` | `2026-09-30` | Extract mapping tables and policy generators |
-| `src/bioetl/application/composite/checkpoint/load_service.py` | `@bioetl-platform` | `2026-09-30` | Extract validation pipeline and recovery strategies |
+| _No active file-size-limit exemptions_ | _n/a_ | _n/a_ | _n/a_ |
 
 ## Gate Status
 
@@ -74,7 +70,7 @@ Source of truth: `configs/quality/architecture_metric_exemptions.yaml` and
 - `registration.py` is green under direct decoupling tests, and the live repo now treats that area as a guarded compatibility seam; older evidence language remains useful mostly as historical context for why the watchlist exists.
 - Dependency-map policy is clean, but hotspot evidence still shows strong concentration in a small number of large allowed seams, now led by CLI commands and storage rather than adapters.
 - Some thin wrappers look like duplication or dead code at first glance, but repo guardrails and evidence packs classify them as intentional compatibility infrastructure.
-- The repo now carries a limited file-size exemption baseline, while active class/god-object waiver debt remains retired; older “live hotspot” narratives in this pack still need explicit rebaseline notes rather than direct execution.
+- The repo now carries a zero active architecture-metric exemption baseline; older “live hotspot” narratives in this pack still need explicit rebaseline notes rather than direct execution.
 
 ## Remaining Gaps
 
