@@ -55,10 +55,38 @@ def pytest_cmdline_main(config):
 def pytest_configure(config):
     # Keep it here as well just in case
     _normalize_enum_option(config.option, "diff_mode")
+    _reset_last_failed_collection_state(config)
     _auto_enable_benchmark_selection_for_explicit_benchmark_runs(config)
     _configure_windows_asyncio(config)
     if _selected_paths_need_hypothesis(config):
         _configure_hypothesis_profiles()
+
+
+def pytest_itemcollected(item: pytest.Item) -> None:
+    """Track pre-deselection collection volume for `--last-failed` runs."""
+    config = item.config
+    setattr(
+        config,
+        "_bioetl_last_failed_collected_count",
+        _last_failed_collected_count(config) + 1,
+    )
+
+
+def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
+    """Treat `--last-failed` empty selections as a successful no-op run.
+
+    Pytest returns `NO_TESTS_COLLECTED` when the last-failed cache does not
+    intersect the currently selected path set, even if the path itself contains
+    collected tests. IDE runners surface that as a hard failure/empty suite.
+    Keep genuine "no tests here" failures intact by only normalizing runs that
+    collected tests before the `--last-failed` deselection step.
+    """
+    if _should_treat_last_failed_empty_suite_as_success(
+        config=session.config,
+        collected_count=_last_failed_collected_count(session.config),
+        exitstatus=exitstatus,
+    ):
+        session.exitstatus = 0
 
 
 def _configure_windows_asyncio(config: pytest.Config) -> None:
@@ -70,6 +98,41 @@ def _configure_windows_asyncio(config: pytest.Config) -> None:
     # async tests can exhaust socket buffers during socketpair() setup.
     config.inicfg["asyncio_default_test_loop_scope"] = "module"
     config.inicfg["asyncio_default_fixture_loop_scope"] = "module"
+
+
+def _should_treat_last_failed_empty_suite_as_success(
+    *,
+    config: pytest.Config,
+    collected_count: int,
+    exitstatus: int,
+) -> bool:
+    """Return True when `--last-failed` produced an empty selected suite."""
+    return (
+        exitstatus == pytest.ExitCode.NO_TESTS_COLLECTED
+        and collected_count > 0
+        and _is_last_failed_run(config)
+    )
+
+
+def _is_last_failed_run(config: pytest.Config) -> bool:
+    """Detect either `--last-failed` spellings used by pytest/config wrappers."""
+    option_namespace = getattr(config, "option", None)
+    if option_namespace is not None and getattr(option_namespace, "lf", False):
+        return True
+    try:
+        return bool(config.getoption("lf"))
+    except (AttributeError, TypeError, ValueError):
+        return False
+
+
+def _reset_last_failed_collection_state(config: pytest.Config) -> None:
+    """Initialize per-session collection state used by last-failed policy."""
+    setattr(config, "_bioetl_last_failed_collected_count", 0)
+
+
+def _last_failed_collected_count(config: pytest.Config) -> int:
+    """Return the tracked pre-deselection item count for the current run."""
+    return int(getattr(config, "_bioetl_last_failed_collected_count", 0))
 
 
 @pytest.fixture(scope="session")
