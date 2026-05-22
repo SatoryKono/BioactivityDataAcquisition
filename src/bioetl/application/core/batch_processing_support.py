@@ -31,15 +31,12 @@ from bioetl.application.core.batch_runtime_failure_policy import (
 )
 from bioetl.application.core.batch_transformer import TransformResult
 from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
-from bioetl.domain.aggregates.events import DomainEvent
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BatchID, BronzeRecord, RunID
 
 __all__ = ["BatchProcessingSupportService"]
 
 if TYPE_CHECKING:
-    from opentelemetry.trace import Span
-
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.batch_tracing import BatchTracingManagerService
     from bioetl.application.core.batch_transformer import BatchTransformer
@@ -51,7 +48,6 @@ if TYPE_CHECKING:
         DomainEventEmitterProtocol,
     )
     from bioetl.domain.ports import LoggerPort
-    from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 _ResultT = TypeVar("_ResultT")
@@ -195,34 +191,6 @@ class BatchProcessingSupportService:
             transform_result=transform_result,
         )
 
-    def finalize_batch_span(
-        self,
-        *,
-        span: Span | None,
-        records: list[BronzeRecord],
-        transform_result: TransformResult,
-    ) -> None:
-        self._tracing.set_batch_result(
-            span,
-            bronze_count=len(records),
-            silver_count=len(transform_result.silver_records),
-            gold_count=len(transform_result.gold_records),
-            quarantined_count=transform_result.quarantined_count,
-        )
-        self._tracing.end_span(span)
-
-    async def execute_with_pipeline_failure_policy(
-        self,
-        *,
-        span: Span | None,
-        work_coro: Awaitable[_ResultT],
-    ) -> _ResultT:
-        return await execute_with_pipeline_failure_policy(
-            tracing=self._tracing,
-            span=span,
-            work_coro=work_coro,
-        )
-
     async def _execute_with_span(
         self,
         name: str,
@@ -254,10 +222,3 @@ class BatchProcessingSupportService:
             batch_id=batch_id,
             start_index=start_index,
         )
-
-    @staticmethod
-    def build_bronze_refs(bronze_result: object) -> list[BronzeWriteResult] | None:
-        return build_bronze_refs(bronze_result)
-
-    def emit_domain_event(self, event: DomainEvent) -> None:
-        emit_domain_event(self._domain_event_emitter, event)
