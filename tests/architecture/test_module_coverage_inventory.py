@@ -28,12 +28,22 @@ def test_module_coverage_inventory_is_committed_and_shape_is_stable() -> None:
     assert committed["generated_by"].endswith("report_module_coverage_inventory.py")
     assert committed["coverage_xml_path"] == "reports/coverage/coverage.xml"
     assert committed["measurement_mode"] == "coverage_xml"
-    assert isinstance(committed["coverage_xml_sha256"], str) and committed[
-        "coverage_xml_sha256"
-    ]
+    assert (
+        isinstance(committed["coverage_xml_sha256"], str)
+        and committed["coverage_xml_sha256"]
+    )
     assert committed["canonical_coverage_lane"] == "coverage-verify"
     assert isinstance(committed["modules"], list) and committed["modules"]
     assert committed["summary"]["coverage_xml_present"] is True
+    assert isinstance(committed["summary"]["unmeasured_module_count"], int)
+    assert isinstance(committed["summary"]["unmeasured_modules"], list)
+    assert committed["summary"]["unmeasured_module_count"] == len(
+        committed["summary"]["unmeasured_modules"]
+    )
+    for unmeasured in committed["summary"]["unmeasured_modules"]:
+        assert str(unmeasured["module"]).startswith("bioetl")
+        assert str(unmeasured["path"]).startswith("src/bioetl/")
+        assert unmeasured["reason"] == "coverage_xml_has_no_class_entry"
     hotspot_family_coverage = committed["summary"]["hotspot_family_coverage"]
     assert isinstance(hotspot_family_coverage, dict) and hotspot_family_coverage
 
@@ -57,6 +67,15 @@ def test_module_coverage_inventory_is_committed_and_shape_is_stable() -> None:
         assert isinstance(family_row["module_count"], int)
         assert isinstance(family_row["measured_module_count"], int)
         assert isinstance(family_row["unmeasured_module_count"], int)
+        assert isinstance(family_row["measured_percent"], float)
+        assert 0.0 <= family_row["measured_percent"] <= 100.0
+        assert isinstance(family_row["status_counts"], dict)
+        coverage_percent_min = family_row["coverage_percent_min"]
+        coverage_percent_avg = family_row["coverage_percent_avg"]
+        if coverage_percent_min is not None:
+            assert 0.0 <= coverage_percent_min <= 100.0
+        if coverage_percent_avg is not None:
+            assert 0.0 <= coverage_percent_avg <= 100.0
         assert family_row["module_count"] >= family_row["measured_module_count"]
         assert family_row["module_count"] >= family_row["unmeasured_module_count"]
 
@@ -105,6 +124,8 @@ def test_module_coverage_inventory_reports_measured_hotspot_family_evidence() ->
             family_name
         )
         assert family_row["unmeasured_module_count"] == 0, family_name
+        assert family_row["measured_percent"] == 100.0, family_name
+        assert family_row["status_counts"].get("unmeasured", 0) == 0, family_name
 
 
 @pytest.mark.architecture
