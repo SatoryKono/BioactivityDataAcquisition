@@ -183,9 +183,9 @@ def _run_rg_reference_scan(
             check=False,
         )
     except OSError:
-        return {}
+        return _run_python_reference_scan(repo_root=repo_root, tokens=tokens)
     if result.returncode not in {0, 1}:
-        return {}
+        return _run_python_reference_scan(repo_root=repo_root, tokens=tokens)
     owners_by_token: dict[str, set[str]] = {}
     for line in result.stdout.splitlines():
         event = json.loads(line)
@@ -196,6 +196,41 @@ def _run_rg_reference_scan(
         for submatch in data.get("submatches", []):
             token = submatch["match"]["text"]
             owners_by_token.setdefault(token, set()).add(owner)
+    return owners_by_token
+
+
+def _run_python_reference_scan(
+    *,
+    repo_root: Path,
+    tokens: list[str],
+) -> dict[str, set[str]]:
+    """Fallback fixed-string reachability scan when ripgrep is unavailable."""
+
+    owners_by_token: dict[str, set[str]] = {}
+    if not tokens:
+        return owners_by_token
+
+    candidate_files: list[Path] = []
+    for root in REACHABILITY_SCAN_ROOTS:
+        scan_root = repo_root / root
+        if not scan_root.exists():
+            continue
+        candidate_files.extend(
+            path
+            for path in scan_root.rglob("*.py")
+            if "tests/fixtures" not in path.as_posix()
+        )
+
+    for path in candidate_files:
+        try:
+            content = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        owner = path.relative_to(repo_root).as_posix()
+        for token in tokens:
+            if token in content:
+                owners_by_token.setdefault(token, set()).add(owner)
+
     return owners_by_token
 
 

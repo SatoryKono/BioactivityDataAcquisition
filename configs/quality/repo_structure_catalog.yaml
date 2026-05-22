@@ -149,6 +149,8 @@ local_tolerated_root_dirs:
       role: local_agent_workspace_surface_untracked
     - path: .cache
       role: local_cache_surface_untracked
+    - path: .codex_tmp
+      role: local_codex_scratch_untracked
     - path: caddy
       role: local_compose_runtime_state_untracked
     - path: .coverage-sharded
@@ -171,6 +173,15 @@ local_tolerated_root_dirs:
       role: local_windows_virtualenv_recovery_untracked
     - path: .windsurf
       role: local_vendor_editor_state_untracked
+
+docs_generated_helper_surfaces:
+  approved_roots:
+    - path: docs/site
+      role: generated_local_publication_helper_surface
+      lifecycle: non_normative_local_build_output
+    - path: docs/exports
+      role: generated_docs_export_surface
+      lifecycle: non_normative_helper_export_surface
 
 blocked_cleanup_zones:
   - path: docs/99-archive

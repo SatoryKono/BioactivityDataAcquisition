@@ -145,6 +145,32 @@ def test_root_hygiene_review_registry_tracks_observed_transient_root_families() 
     assert (
         by_path["test_output.txt"]["current_live_state"] == "absent_from_root_baseline"
     )
+    assert by_path["tests.txt"]["current_live_state"] == "absent_from_root_baseline"
+
+
+def test_root_hygiene_review_registry_classifies_codex_tmp_as_local_only_surface() -> (
+    None
+):
+    payload = _load_yaml(REGISTRY_PATH)
+    lanes = payload.get("review_lanes")
+    assert isinstance(lanes, list), "Expected review_lanes list"
+
+    local_runtime_lane = next(
+        lane
+        for lane in lanes
+        if isinstance(lane, dict) and lane.get("lane_id") == "local_runtime_root_dirs"
+    )
+    candidates = local_runtime_lane["candidates"]
+    assert isinstance(candidates, list)
+    by_path = {
+        candidate["path"]: candidate
+        for candidate in candidates
+        if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
+    }
+
+    assert (
+        by_path[".codex_tmp"]["current_live_state"] == "present_local_only_root_surface"
+    )
 
 
 def test_blocked_cleanup_lane_matches_structure_catalog() -> None:
