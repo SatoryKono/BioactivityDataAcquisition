@@ -12,7 +12,12 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.core._batch_write_support import emit_domain_event
 from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
+from bioetl.application.core.batch_processing_runtime import (
+    build_bronze_refs,
+    execute_with_pipeline_failure_policy,
+)
 from bioetl.application.core.batch_processing_support import (
     BatchProcessingSupportService,
 )
@@ -118,7 +123,8 @@ class BatchProcessingService:
         span = self._tracing.start_batch_span(batch_id, len(records), start_index)
         self._batch_metrics.track_records_fetched(len(records))
         self._batch_metrics.track_batch_created(stage="bronze", count=len(records))
-        self._support.emit_domain_event(
+        emit_domain_event(
+            self._context.observer,
             BatchCreated(
                 occurred_at=ingestion_ts,
                 run_id=self._context.run_id,
@@ -129,7 +135,8 @@ class BatchProcessingService:
 
         return cast(
             "BatchProcessingOutcome",
-            await self._support.execute_with_pipeline_failure_policy(
+            await execute_with_pipeline_failure_policy(
+                tracing=self._tracing,
                 span=span,
                 work_coro=self._process_batch_work(
                     records=records,
@@ -171,7 +178,8 @@ class BatchProcessingService:
             batch_id=batch_id,
             start_index=start_index,
         )
-        self._support.emit_domain_event(
+        emit_domain_event(
+            self._context.observer,
             BatchSealed(
                 occurred_at=ingestion_ts,
                 run_id=self._context.run_id,
@@ -190,13 +198,16 @@ class BatchProcessingService:
             transform_result=transform_result,
             batch_id=batch_id,
             ingestion_ts=ingestion_ts,
-            bronze_refs=self._support.build_bronze_refs(bronze_result),
+            bronze_refs=build_bronze_refs(bronze_result),
         )
-        self._support.finalize_batch_span(
-            span=span,
-            records=records,
-            transform_result=transform_result,
+        self._tracing.set_batch_result(
+            span,
+            bronze_count=len(records),
+            silver_count=len(transform_result.silver_records),
+            gold_count=len(transform_result.gold_records),
+            quarantined_count=transform_result.quarantined_count,
         )
+        self._tracing.end_span(span)
         return BatchProcessingOutcome(
             batch_id=batch_id,
             bronze_result=cast("BronzeWriteResult | None", bronze_result),
