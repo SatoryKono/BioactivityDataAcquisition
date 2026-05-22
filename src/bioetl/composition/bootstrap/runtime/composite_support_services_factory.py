@@ -50,7 +50,7 @@ if TYPE_CHECKING:
         MetricsPort,
         QuarantinePort,
     )
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config._base import Settings
 
 
 @dataclass(slots=True)

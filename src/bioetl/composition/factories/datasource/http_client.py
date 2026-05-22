@@ -20,7 +20,7 @@ from bioetl.infrastructure.config.source_config_loader import load_source_config
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config._base import Settings
 
 __all__ = [
     "HttpClientFactory",

@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
     from bioetl.domain.context import VacuumSettings as CliVacuumSettings
     from bioetl.domain.filtering import InputFilterConfig
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config._base import Settings
     from bioetl.infrastructure.schemas.pipeline_config import (
         InputFilterYamlConfig as YamlInputFilter,
     )

@@ -16,19 +16,19 @@
         "src/bioetl/application/core/"
       ],
       "duplication_clusters": 8,
-      "files": 167,
-      "total_loc": 21025,
-      "files_ge_250_loc": 14,
+      "files": 169,
+      "total_loc": 21082,
+      "files_ge_250_loc": 12,
       "helper_function_ratio": 0.375,
-      "max_internal_fan_in": 14,
+      "max_internal_fan_in": 15,
       "max_internal_fan_in_module": "bioetl.application.core.pipeline_service_protocols",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 14,
         "max_internal_fan_in": 15
       },
       "budget_warnings": [
-        "at_budget:files_ge_250_loc=14/14",
-        "near_budget:max_internal_fan_in=14/15"
+        "near_budget:files_ge_250_loc=12/14",
+        "at_budget:max_internal_fan_in=15/15"
       ]
     },
     {

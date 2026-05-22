@@ -29,7 +29,7 @@ if TYPE_CHECKING:
         CompositeInfrastructureContext,
     )
     from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config._base import Settings
 
 
 def build_run_ledger_service(

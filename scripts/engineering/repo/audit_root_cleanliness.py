@@ -535,6 +535,68 @@ def _unexpected_untracked_root_dirs(
     )
 
 
+def _unexpected_local_root_python_files(
+    repo_root: Path,
+    tracked_root_files: set[str],
+) -> list[str]:
+    """Return unexpected local root Python files present on disk."""
+    violations: list[str] = []
+    for entry in repo_root.iterdir():
+        if not entry.is_file():
+            continue
+        if entry.name in tracked_root_files:
+            continue
+        if entry.suffix == ".py":
+            violations.append(entry.name)
+    return sorted(violations)
+
+
+def _unexpected_local_root_dirs_on_disk(
+    repo_root: Path,
+    *,
+    tracked_root_dirs: set[str],
+    allowed_root_dirs: frozenset[str],
+    tolerated_local_root_dirs: frozenset[str],
+) -> list[str]:
+    """Return unexpected root directories present on disk, including ignored dirs."""
+    violations: list[str] = []
+    for entry in repo_root.iterdir():
+        if entry.name == ".git" or not entry.is_dir():
+            continue
+        if entry.name in tracked_root_dirs:
+            continue
+        if entry.name in allowed_root_dirs:
+            continue
+        if entry.name in tolerated_local_root_dirs:
+            continue
+        violations.append(entry.name)
+    return sorted(violations)
+
+
+def _report_strict_local_root_clutter(
+    *,
+    unexpected_local_root_python_files: list[str],
+    unexpected_local_root_dirs: list[str],
+) -> bool:
+    """Report local root clutter that strict mode must reject even if ignored."""
+    has_violations = False
+    if unexpected_local_root_python_files:
+        has_violations = True
+        sys.stderr.write(
+            "ERROR: unexpected local root Python files detected in strict mode:\n"
+        )
+        for entry in unexpected_local_root_python_files:
+            sys.stderr.write(f"  - {entry}\n")
+    if unexpected_local_root_dirs:
+        has_violations = True
+        sys.stderr.write(
+            "ERROR: unexpected local root directories detected in strict mode:\n"
+        )
+        for entry in unexpected_local_root_dirs:
+            sys.stderr.write(f"  - {entry}\n")
+    return has_violations
+
+
 def _report_untracked_root_entries(
     *,
     unexpected_untracked_root_files: list[str],
@@ -640,6 +702,9 @@ def main() -> int:
     unexpected_root_files = layout_state["unexpected_root_files"]
     unexpected_root_dirs = layout_state["unexpected_root_dirs"]
     missing_allowed_files = layout_state["missing_allowed_files"]
+    tolerated_local_root_dirs = root_governance.local_tolerated_root_directories(
+        structure_catalog
+    )
 
     root_layout_exit = _report_root_layout_violations(
         unexpected_root_files=unexpected_root_files,
@@ -663,6 +728,20 @@ def main() -> int:
         return structure_policy_exit
 
     _report_missing_allowed_files(missing_allowed_files)
+
+    strict_local_root_violation = _report_strict_local_root_clutter(
+        unexpected_local_root_python_files=_unexpected_local_root_python_files(
+            repo_root, tracked_root_files
+        ),
+        unexpected_local_root_dirs=_unexpected_local_root_dirs_on_disk(
+            repo_root,
+            tracked_root_dirs=tracked_root_dirs,
+            allowed_root_dirs=allowed_root_dirs,
+            tolerated_local_root_dirs=tolerated_local_root_dirs,
+        ),
+    )
+    if args.strict_untracked and strict_local_root_violation:
+        return 1
 
     unexpected_untracked_root_files = layout_state["unexpected_untracked_root_files"]
     unexpected_untracked_root_dirs = layout_state["unexpected_untracked_root_dirs"]

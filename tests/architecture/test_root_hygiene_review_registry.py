@@ -171,6 +171,92 @@ def test_root_hygiene_review_registry_classifies_codex_tmp_as_local_only_surface
     assert (
         by_path[".codex_tmp"]["current_live_state"] == "present_local_only_root_surface"
     )
+    assert (
+        by_path[".benchmarks"]["current_live_state"]
+        == "present_local_only_root_surface"
+    )
+    assert (
+        by_path[".hypothesis"]["current_live_state"]
+        == "present_local_only_root_surface"
+    )
+    assert (
+        by_path[".import_linter_cache"]["current_live_state"]
+        == "present_local_only_root_surface"
+    )
+    assert (
+        by_path["node_modules"]["current_live_state"]
+        == "present_local_only_root_surface"
+    )
+    assert (
+        by_path[".pytest_cache"]["current_live_state"]
+        == "present_local_only_root_surface"
+    )
+    assert (
+        by_path[".ruff_cache"]["current_live_state"]
+        == "present_local_only_root_surface"
+    )
+    assert (
+        by_path["test-output"]["current_live_state"]
+        == "present_local_only_root_surface"
+    )
+    assert by_path[".venv"]["current_live_state"] == "present_local_only_root_surface"
+
+
+def test_root_hygiene_review_registry_classifies_qodo_as_local_vendor_surface() -> None:
+    payload = _load_yaml(REGISTRY_PATH)
+    lanes = payload.get("review_lanes")
+    assert isinstance(lanes, list), "Expected review_lanes list"
+
+    vendor_lane = next(
+        lane
+        for lane in lanes
+        if isinstance(lane, dict) and lane.get("lane_id") == "local_vendor_tooling_roots"
+    )
+    candidates = vendor_lane["candidates"]
+    assert isinstance(candidates, list)
+    by_path = {
+        candidate["path"]: candidate
+        for candidate in candidates
+        if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
+    }
+
+    assert by_path[".qodo"]["current_live_state"] == "present_local_only_root_surface"
+
+
+def test_root_hygiene_review_registry_tracks_absent_root_logs_and_test_print() -> None:
+    payload = _load_yaml(REGISTRY_PATH)
+    lanes = payload.get("review_lanes")
+    assert isinstance(lanes, list), "Expected review_lanes list"
+
+    transient_lane = next(
+        lane
+        for lane in lanes
+        if isinstance(lane, dict)
+        and lane.get("lane_id") == "root_transient_helpers_and_outputs"
+    )
+    transient_by_path = {
+        candidate["path"]: candidate
+        for candidate in transient_lane["candidates"]
+        if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
+    }
+    assert transient_by_path["logs"]["current_live_state"] == "absent_from_root_baseline"
+    assert transient_by_path["logs"]["canonical_path"] == "reports/logs"
+
+    ad_hoc_lane = next(
+        lane
+        for lane in lanes
+        if isinstance(lane, dict)
+        and lane.get("lane_id") == "root_ad_hoc_docs_and_diagnostics"
+    )
+    ad_hoc_by_path = {
+        candidate["path"]: candidate
+        for candidate in ad_hoc_lane["candidates"]
+        if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
+    }
+    assert (
+        ad_hoc_by_path["test_print.py"]["current_live_state"]
+        == "absent_from_root_baseline"
+    )
 
 
 def test_blocked_cleanup_lane_matches_structure_catalog() -> None:

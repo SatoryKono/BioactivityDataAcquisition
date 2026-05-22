@@ -9,6 +9,7 @@ nested_reference_vocabularies:
       - chembl_target_component.target_component_xrefs[].xref_src_db
     values:
       - AlphaFoldDB
+      - CGD
       - ChEBI
       - DrugBank
       - ExpressionAtlas

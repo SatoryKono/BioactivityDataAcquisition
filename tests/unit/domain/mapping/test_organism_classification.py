@@ -218,6 +218,7 @@ class TestGenusFallback:
             ("Schistosoma mansoni", CellularityType.MULTICELLULAR),
             ("Arabidopsis thaliana", CellularityType.MULTICELLULAR),
             ("Chlamydomonas reinhardtii", CellularityType.UNICELLULAR),
+            ("Trichophyton", CellularityType.MULTICELLULAR),
         ],
     )
     def test_genus_level_fallback(

@@ -31,6 +31,7 @@ from bioetl.application.core.batch_runtime_failure_policy import (
 )
 from bioetl.application.core.batch_transformer import TransformResult
 from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
+from bioetl.domain.aggregates.events import DomainEvent
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BatchID, BronzeRecord, RunID
 
@@ -222,3 +223,6 @@ class BatchProcessingSupportService:
             batch_id=batch_id,
             start_index=start_index,
         )
+
+    def emit_domain_event(self, event: DomainEvent) -> None:
+        emit_domain_event(self._domain_event_emitter, event)

@@ -147,6 +147,31 @@ def test_validate_review_lanes_accepts_present_local_only_codex_tmp(
     assert issues == []
 
 
+def test_validate_review_lanes_accepts_missing_present_local_only_surface(
+    tmp_path: Path,
+) -> None:
+    payload = {
+        "review_lanes": [
+            {
+                "lane_id": "local_runtime_root_dirs",
+                "classification": "review_required",
+                "verification": ["git check-ignore -v .qodo"],
+                "candidates": [
+                    {
+                        "path": ".qodo",
+                        "current_live_state": "present_local_only_root_surface",
+                        "canonical_path": None,
+                    }
+                ],
+            }
+        ]
+    }
+
+    issues = module._validate_review_lanes(payload, repo_root=tmp_path)
+
+    assert issues == []
+
+
 def test_load_yaml_object_requires_mapping(tmp_path: Path) -> None:
     path = tmp_path / "registry.yaml"
     path.write_text(yaml.safe_dump(["not", "a", "mapping"]), encoding="utf-8")

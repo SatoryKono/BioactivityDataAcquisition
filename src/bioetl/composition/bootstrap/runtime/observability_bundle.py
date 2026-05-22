@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from uuid import UUID
 
     from bioetl.domain.ports import DQMonitorPort
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config._base import Settings
 
 __all__ = [
     "bootstrap_observability_bundle_impl",

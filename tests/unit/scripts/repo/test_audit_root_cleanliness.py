@@ -93,6 +93,38 @@ def test_collect_forbidden_local_output_roots_allows_routed_reports_logs() -> No
     assert violations == []
 
 
+def test_unexpected_local_root_dirs_on_disk_reject_uncataloged_root_dirs(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "configs").mkdir()
+    (tmp_path / ".benchmarks").mkdir()
+    (tmp_path / ".qodo").mkdir()
+    (tmp_path / "logs").mkdir()
+
+    violations = module._unexpected_local_root_dirs_on_disk(
+        tmp_path,
+        tracked_root_dirs={"configs"},
+        allowed_root_dirs=frozenset({"configs"}),
+        tolerated_local_root_dirs=frozenset({".benchmarks", ".qodo"}),
+    )
+
+    assert violations == ["logs"]
+
+
+def test_unexpected_local_root_python_files_reject_untracked_root_python(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "test_print.py").write_text("print('x')\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text("ok\n", encoding="utf-8")
+
+    violations = module._unexpected_local_root_python_files(
+        tmp_path,
+        tracked_root_files={"README.md"},
+    )
+
+    assert violations == ["test_print.py"]
+
+
 def test_collect_tracked_policy_violations_allows_current_canonical_root_files() -> (
     None
 ):

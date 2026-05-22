@@ -5,22 +5,21 @@ from __future__ import annotations
 from bioetl.application.services.control_plane._run_manifest_diagnostics_base_helpers import (
     _resolve_source_posture,
 )
+from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_blockers import (
+    _resolve_exact_replay_blockers,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
-    _append_mode_exact_replay_blockers,
     _build_replay_parentage,
     _collect_append_mode_semantic_sinks,
-    _dependency_lock_exact_replay_blockers,
     _has_historical_composite_certified_snapshots,
     _has_historical_source_certified_snapshots,
     _has_live_capture_materialized_snapshots,
     _has_partial_input_snapshot_envelope,
     _is_composite_execution_context,
     _is_full_scan_idempotent_rebuild,
-    _profile_exact_replay_blockers,
     _requires_resume_without_snapshot_reason,
     _resolve_exact_replay_supported_reason,
     _resolve_reproducibility_profile,
-    _snapshot_exact_replay_blockers,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -220,29 +219,6 @@ def _build_replay_state_projection(
         ),
         "source_posture": _resolve_source_posture(policy_assessment),
     }
-
-
-def _resolve_exact_replay_blockers(
-    *,
-    manifest: RunManifest,
-    policy_assessment: ReproducibilityPolicyAssessment,
-) -> list[str]:
-    """Return explicit blockers preventing exact replay eligibility."""
-    profile = _resolve_reproducibility_profile(manifest)
-    append_mode_sinks = _collect_append_mode_semantic_sinks(manifest)
-    return [
-        *_profile_exact_replay_blockers(profile),
-        *_append_mode_exact_replay_blockers(append_mode_sinks),
-        *_snapshot_exact_replay_blockers(
-            manifest=manifest,
-            policy_assessment=policy_assessment,
-        ),
-        *_dependency_lock_exact_replay_blockers(
-            manifest=manifest,
-            profile=profile,
-            policy_assessment=policy_assessment,
-        ),
-    ]
 
 
 __all__ = [

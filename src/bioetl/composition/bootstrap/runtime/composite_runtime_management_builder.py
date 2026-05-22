@@ -41,7 +41,7 @@ if TYPE_CHECKING:
         LoggerPort,
         MetricsPort,
     )
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config._base import Settings
 
 
 def build_runtime_management_services(

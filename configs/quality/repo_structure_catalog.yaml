@@ -147,6 +147,8 @@ local_tolerated_root_dirs:
       role: local_agent_bridge_state_untracked
     - path: .agents
       role: local_agent_workspace_surface_untracked
+    - path: .benchmarks
+      role: local_benchmark_workspace_untracked
     - path: .cache
       role: local_cache_surface_untracked
     - path: .codex_tmp
@@ -155,16 +157,32 @@ local_tolerated_root_dirs:
       role: local_compose_runtime_state_untracked
     - path: .coverage-sharded
       role: local_coverage_shards_untracked
+    - path: .hypothesis
+      role: local_property_test_cache_untracked
+    - path: .import_linter_cache
+      role: local_import_linter_cache_untracked
     - path: .jules
       role: local_vendor_workspace_state_untracked
     - path: .junie
       role: local_vendor_editor_state_untracked
+    - path: node_modules
+      role: local_node_dependency_tree_untracked
     - path: .npm-cache
       role: local_npm_cache_surface_untracked
+    - path: .pytest_cache
+      role: local_pytest_cache_untracked
+    - path: .qodo
+      role: local_vendor_tooling_workspace_untracked
+    - path: .ruff_cache
+      role: local_ruff_cache_untracked
     - path: .scannerwork
       role: local_sonar_workspace_untracked
     - path: .sonarlint
       role: local_sonarlint_state_untracked
+    - path: test-output
+      role: local_test_output_surface_untracked
+    - path: .venv
+      role: local_primary_virtualenv_untracked
     - path: .venv-docs
       role: local_docs_virtualenv_untracked
     - path: .venv-win

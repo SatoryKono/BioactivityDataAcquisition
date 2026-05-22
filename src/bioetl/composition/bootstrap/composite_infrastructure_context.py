@@ -12,7 +12,7 @@ from bioetl.domain.ports import (
     MetricsPort,
     TracingPort,
 )
-from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.config._base import Settings
 
 
 @dataclass(frozen=True, slots=True)

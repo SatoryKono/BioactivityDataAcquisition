@@ -11,7 +11,7 @@ from bioetl.infrastructure.audit.file_audit import FileAuditAdapter
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config._base import Settings
 
 __all__ = ["create_audit_port"]
 

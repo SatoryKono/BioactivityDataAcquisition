@@ -44,7 +44,7 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort, TracingPort
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config._base import Settings
 
 __all__ = [
     "bootstrap_runtime_basics",

@@ -19,7 +19,7 @@ if TYPE_CHECKING:
         SilverDQConfigPort,
     )
     from bioetl.domain.types import JsonDict
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config._base import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 

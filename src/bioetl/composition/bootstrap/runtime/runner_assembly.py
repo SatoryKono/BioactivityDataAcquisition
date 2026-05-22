@@ -51,7 +51,7 @@ if TYPE_CHECKING:
         QuarantinePort,
         TracingPort,
     )
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config._base import Settings
 
 
 __all__ = [

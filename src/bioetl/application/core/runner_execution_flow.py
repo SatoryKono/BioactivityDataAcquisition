@@ -10,18 +10,17 @@ __all__ = [
     "run_postrun_phase",
     "validate_infrastructure",
 ]
-import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core._runner_observability import (
     emit_postrun_observability,
-    emit_preflight_health_results,
 )
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
 )
+from bioetl.application.core.runner_preflight_flow import validate_infrastructure
 from bioetl.application.observability.observer import LifecyclePhase
 from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAMES
 
@@ -223,36 +222,6 @@ async def run_postrun_phase(host: _PipelineRunnerExecutionHostProtocol) -> None:
         dq_context=dq_context,
     )
     emit_postrun_observability(host, result, runner_stage=_POSTRUN_STAGE_NAME)
-
-
-async def validate_infrastructure(host: _PipelineRunnerExecutionHostProtocol) -> None:
-    """Validate infrastructure health before pipeline execution."""
-    start_time = time.perf_counter()
-    try:
-        report = await host._preflight_service.validate_infrastructure(
-            host._services,
-            raise_on_unhealthy=False,
-        )
-    except TypeError as exc:
-        if "raise_on_unhealthy" not in str(exc):
-            raise
-        report = await host._preflight_service.validate_infrastructure(host._services)
-    if report is None:
-        return
-    duration = time.perf_counter() - start_time
-    emit_preflight_health_results(
-        host,
-        report,
-        runner_stage=_PREFLIGHT_STAGE_NAME,
-    )
-    host._observer.emit_health_check_summary(
-        validated=report.is_healthy,
-        duration_seconds=duration,
-        overall_status=report.overall_status.value,
-        components_checked=len(report.results),
-        runner_stage=_PREFLIGHT_STAGE_NAME,
-    )
-    host._preflight_service.assert_infrastructure_healthy(report)
 
 
 async def prepare_medallion_layers(host: _PipelineRunnerExecutionHostProtocol) -> None:
