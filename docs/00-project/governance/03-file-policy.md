@@ -38,6 +38,10 @@ ______________________________________________________________________
   root entrypoints. Операционные quick-reference материалы SHOULD жить в
   `docs/05-operations/`, а одноразовые status/recovery/final-summary артефакты
   MUST архивироваться под `docs/99-archive/`.
+- Raw generated test inventories and dumps (for example `tests.txt`) MUST NOT
+  оставаться tracked в корне. Retained diagnostics and auditable test outputs
+  MUST route into approved `reports/**` or archive/report surfaces instead of a
+  root-level txt dump.
 - Root-level tracked директории MUST ограничиваться approved runtime/tooling and
   project surfaces: `.codex`, `.cursor`, `.gemini`, `.github`, `.idea`,
   `.vibe`, `.vscode`, `assets`, `configs`, `data`, `docs`, `grafana`,
@@ -135,6 +139,22 @@ Machine-readable каталог для structure hygiene хранится в
 - Закрытые или purely historical plan artifacts SHOULD переезжать в
   `docs/99-archive/**` или закрепляться в evidence/report surfaces, а не
   накапливаться как competing active docs.
+
+### 0.3.1. Generated docs helper surfaces
+
+- `docs/site/**` is a generated local publication-helper surface produced by
+  documentation build tooling (see `mkdocs.yml`). It is non-normative,
+  MUST NOT использоваться как source of truth, and SHOULD remain a local or
+  ignored generated output unless a specific artifact family is explicitly
+  ratified elsewhere.
+- `docs/exports/**` is a generated documentation-export surface. Exported merged
+  snapshots such as `docs/exports/*.merged.md` are non-normative helper outputs
+  and MUST follow their generated-artifact routing policy rather than being
+  treated as active documentation.
+- New generated documentation helper outputs MUST be classified in
+  `configs/quality/generated_artifact_routing.yaml` and SHOULD be reflected in
+  `configs/quality/repo_structure_catalog.yaml` when they represent a stable
+  repo-level surface family.
 
 ### 0.4. Sidecar code under `src/`
 

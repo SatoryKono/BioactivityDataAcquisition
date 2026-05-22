@@ -4,7 +4,8 @@ description: >
   Registry of maintained generators and their approved generated-artifact
   destinations. This is a governance surface for repository layout cleanup:
   generated working outputs route to reports/, curated generated docs route to
-  docs/reports/, and generated source stays in explicit generated packages.
+  docs/reports/, generated docs helper outputs stay under docs-local helper
+  surfaces, and generated source stays in explicit generated packages.
 
 allowed_output_roots:
   working_reports:
@@ -15,6 +16,8 @@ allowed_output_roots:
     - docs/02-architecture/generated/
   ignored_docs_exports:
     - docs/exports/
+  local_generated_docs_helpers:
+    - docs/site/
   generated_source:
     - src/bioetl/domain/schemas/generated/
     - src/bioetl/domain/mapping/generated/

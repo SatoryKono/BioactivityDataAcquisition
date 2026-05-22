@@ -46,8 +46,8 @@ review_lanes:
     classification: review_required
     scope: observed transient root helpers, raw test dumps, and forbidden root artifact routing
     verification:
-      - git ls-files temp_analyze_conflicting.py temp_get_hash.py test_output.txt artifacts
-      - rg -n "temp_analyze_conflicting\\.py|temp_get_hash\\.py|test_output\\.txt|reports/observability/runtime_cardinality_inventory\\.json|artifacts/observability/runtime_cardinality_inventory\\.json" .github docs scripts tests configs README.md Makefile pyproject.toml
+      - git ls-files temp_analyze_conflicting.py temp_get_hash.py test_output.txt tests.txt artifacts
+      - rg -n "temp_analyze_conflicting\\.py|temp_get_hash\\.py|test_output\\.txt|tests\\.txt|reports/observability/runtime_cardinality_inventory\\.json|artifacts/observability/runtime_cardinality_inventory\\.json" .github docs scripts tests configs README.md Makefile pyproject.toml
       - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
     candidates:
       - path: artifacts
@@ -66,13 +66,17 @@ review_lanes:
         current_live_state: absent_from_root_baseline
         canonical_path: null
         action_if_reintroduced: remove raw root test output or route retained diagnostics into reports/pytest or another approved reports surface
+      - path: tests.txt
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: remove raw root test inventory dump or move curated evidence into approved reports or archive surfaces instead of reintroducing a tracked root txt file
 
   - lane_id: root_tooling_transitions
     classification: owner_decision_required
     scope: AI/editor/tooling root surfaces with transitional or owned status
     verification:
-      - git ls-files .claude .codex_tmp .vibe .ai .gemini .jules
-      - rg -n "\\.claude/|\\.codex_tmp|\\.vibe|\\.ai/|\\.gemini/|\\.jules/" .github docs scripts tests configs README.md pyproject.toml
+      - git ls-files .claude .vibe .ai .gemini .jules
+      - rg -n "\\.claude/|\\.vibe|\\.ai/|\\.gemini/|\\.jules/" .github docs scripts tests configs README.md pyproject.toml
       - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
     candidates:
       - path: .ai
@@ -83,10 +87,6 @@ review_lanes:
         current_live_state: absent_from_root_baseline
         canonical_path: .codex
         action_if_reintroduced: migrate_to_codex_or_remove_root_surface
-      - path: .codex_tmp
-        current_live_state: absent_from_root_baseline
-        canonical_path: null
-        action_if_reintroduced: decide_owner_or_remove_from_tracked_root
       - path: .gemini
         current_live_state: present_curated_root_surface
         canonical_path: GEMINI.md
@@ -104,9 +104,9 @@ review_lanes:
     classification: review_required
     scope: local runtime/cache roots that may exist in the working tree but must remain untracked
     verification:
-      - git ls-files .agent-work .agentbridge .agents .cache .npm-cache caddy
-      - git check-ignore -v .agent-work .agentbridge .agents .cache .npm-cache caddy
-      - rg -n "\\.agent-work/|\\.agentbridge/|\\.agents/|\\.cache/|\\.npm-cache/|caddy/" .gitignore docs scripts .github tests configs
+      - git ls-files .agent-work .agentbridge .agents .cache .codex_tmp .npm-cache caddy
+      - git check-ignore -v .agent-work .agentbridge .agents .cache .codex_tmp .npm-cache caddy
+      - rg -n "\\.agent-work/|\\.agentbridge/|\\.agents/|\\.cache/|\\.codex_tmp/|\\.npm-cache/|caddy/" .gitignore docs scripts .github tests configs README.md
     candidates:
       - path: .agent-work
         current_live_state: present_local_only_root_surface
@@ -124,6 +124,10 @@ review_lanes:
         current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_scope_to_a_documented_cache_surface
+      - path: .codex_tmp
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_as_local_codex_scratch_or_reclassify_through_explicit_structure_governance
       - path: .npm-cache
         current_live_state: present_local_only_root_surface
         canonical_path: null

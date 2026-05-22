@@ -99,6 +99,25 @@ def test_generated_artifact_routing_covers_core_generators() -> None:
     )
 
 
+def test_generated_artifact_routing_classifies_docs_helper_surfaces() -> None:
+    """Generated docs helper surfaces must stay explicitly classified."""
+    payload = _load_routing()
+    allowed_roots = set(_allowed_output_roots(payload))
+
+    assert "docs/site/" in allowed_roots
+    assert "docs/exports/" in allowed_roots
+
+    docs_export_route = next(
+        route
+        for route in payload["routes"]
+        if route.get("id") == "docs-export-merged-markdown"
+    )
+    assert docs_export_route["commit_policy"] == "ignored_local_export"
+    assert "docs/exports/full-documentation-no-plans-reports-skills.merged.md" in (
+        docs_export_route["outputs"]
+    )
+
+
 def test_contract_governance_workflow_uploads_diagnostics_from_reports_quality() -> (
     None
 ):
