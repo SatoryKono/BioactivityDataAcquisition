@@ -19,7 +19,7 @@ from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import InvalidStateError
-from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
+from bioetl.domain.ports import ClockPort, ExecutionMetricsRunnerPort, LoggerPort
 
 
 class _CompositeRunnerStageEnrichmentHostProtocol(Protocol):
@@ -31,6 +31,7 @@ class _CompositeRunnerStageEnrichmentHostProtocol(Protocol):
     _observer: CompositeLifecycleObserverService
     _runtime: CompositeRuntimeConfig
     _run_id_str: str
+    _clock: ClockPort | None
 
     def _call_get_enrichers_to_run(
         self,

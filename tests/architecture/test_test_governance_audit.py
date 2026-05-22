@@ -134,6 +134,7 @@ def test_current_test_audit_issue_closeout_tracks_live_evidence() -> None:
         "#4507",
         "#4508",
         "#4509",
+        "#4536",
     }
     for relative_path in cast(list[str], closeout["evidence"]):
         assert (ROOT / relative_path).exists(), (
@@ -322,6 +323,7 @@ def test_remediation_closeout_tracks_issues_4200_to_4209_with_live_evidence() ->
         "#4207",
         "#4208",
         "#4209",
+        "#4536",
     }
     for entry in entries:
         assert entry["decision"] == "closeable"

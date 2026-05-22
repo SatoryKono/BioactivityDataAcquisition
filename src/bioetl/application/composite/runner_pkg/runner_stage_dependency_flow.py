@@ -15,6 +15,7 @@ from bioetl.application.composite.runner_pkg.runner_stage_types import (
     _DependencyPhaseOutcome,
     _PreparedDependenciesRunContext,
 )
+from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.domain.composite.result import DependencyResult
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.ports import ExecutionMetricsRunnerPort
@@ -80,15 +81,12 @@ def collect_successful_dependencies(
     dependency_results: dict[str, DependencyResult],
 ) -> CompositeCheckpointState:
     """Mark each successful dependency as completed on checkpoint state."""
-    clock = getattr(host, "_clock", None)
+    clock = resolve_runtime_clock(getattr(host, "_clock", None))
     for dep_name, dep_result in dependency_results.items():
         if dep_result.is_success:
-            if clock is None:
-                state = state.with_dependency_completed(dep_name, dep_result)
-            else:
-                state = state.with_dependency_completed(
-                    dep_name,
-                    dep_result,
-                    clock=clock,
-                )
+            state = state.with_dependency_completed(
+                dep_name,
+                dep_result,
+                clock=clock,
+            )
     return state

@@ -29,4 +29,5 @@ class TestAdapterImportHealth:
     @pytest.mark.parametrize("module_path", _ADAPTER_MODULES)
     def test_module_importable(self, module_path: str) -> None:
         """Each adapter module must import without errors."""
-        importlib.import_module(module_path)
+        module = importlib.import_module(module_path)
+        assert module is not None

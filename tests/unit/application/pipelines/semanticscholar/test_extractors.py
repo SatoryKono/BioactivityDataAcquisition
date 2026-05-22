@@ -3,6 +3,10 @@
 
 from __future__ import annotations
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_affiliations,
     extract_author_h_indices,

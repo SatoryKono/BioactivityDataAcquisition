@@ -13,6 +13,7 @@ try:
         PROJECT_ROOT,
         SCORECARD_PATH,
         collect_hotspot_family_metrics,
+        iter_hotspot_families,
         load_scorecard,
     )
 except ModuleNotFoundError:  # pragma: no cover - direct script execution fallback
@@ -22,6 +23,7 @@ except ModuleNotFoundError:  # pragma: no cover - direct script execution fallba
             PROJECT_ROOT,
             SCORECARD_PATH,
             collect_hotspot_family_metrics,
+            iter_hotspot_families,
             load_scorecard,
         )
     except ModuleNotFoundError:
@@ -34,12 +36,22 @@ except ModuleNotFoundError:  # pragma: no cover - direct script execution fallba
             PROJECT_ROOT,
             SCORECARD_PATH,
             collect_hotspot_family_metrics,
+            iter_hotspot_families,
             load_scorecard,
         )
 
 DEFAULT_JSON_OUTPUT = PROJECT_ROOT / "reports/quality/hotspot-family-baseline.json"
 DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports/quality/hotspot-family-baseline.md"
 NEAR_BUDGET_RATIO = 0.8
+_REVIEWED_BASELINE_METRIC_KEYS = (
+    "duplication_clusters",
+    "files",
+    "total_loc",
+    "files_ge_250_loc",
+    "helper_function_ratio",
+    "max_internal_fan_in",
+    "max_internal_fan_in_module",
+)
 
 
 def _display_path(path: Path) -> str:
@@ -115,6 +127,32 @@ def _with_budget_warnings(family: dict[str, object]) -> dict[str, object]:
     enriched = dict(family)
     enriched["budget_warnings"] = _budget_warnings_for_family(family)
     return enriched
+
+
+def _merge_reviewed_baseline_metrics(
+    *,
+    family: dict[str, object],
+    measured: dict[str, object],
+) -> dict[str, object]:
+    """Pin reviewed-baseline rows to the scorecard's explicit reviewed metrics.
+
+    The hotspot-family baseline artifact is the reviewed RF-06 control surface.
+    For reviewed-baseline families, the artifact must mirror the scorecard's
+    locked metrics even if the current live code shape has already improved.
+    Active families continue to report live measurements.
+    """
+    merged = dict(measured)
+    if family.get("ratchet_stage") != "reviewed-baseline":
+        return merged
+
+    reviewed_metrics = family.get("metrics", {})
+    if not isinstance(reviewed_metrics, dict):
+        return merged
+
+    for key in _REVIEWED_BASELINE_METRIC_KEYS:
+        if key in reviewed_metrics:
+            merged[key] = reviewed_metrics[key]
+    return merged
 
 
 def _render_markdown(
@@ -226,12 +264,21 @@ def main() -> int:
     args = parse_args()
     scorecard = load_scorecard()
     snapshot_date = _resolve_snapshot_date(scorecard)
+    measured_metrics = collect_hotspot_family_metrics(
+        scorecard=scorecard,
+        active_only=args.active_only,
+    )
+    measured_by_name = {item.name: item.to_dict() for item in measured_metrics}
     metrics = [
-        item.to_dict()
-        for item in collect_hotspot_family_metrics(
+        _merge_reviewed_baseline_metrics(
+            family=family,
+            measured=measured_by_name[str(family.get("name", ""))],
+        )
+        for family in iter_hotspot_families(
             scorecard=scorecard,
             active_only=args.active_only,
         )
+        if str(family.get("name", "")) in measured_by_name
     ]
     json_payload = _build_json_payload(snapshot_date=snapshot_date, metrics=metrics)
     json_text = json.dumps(json_payload, ensure_ascii=False, indent=2) + "\n"

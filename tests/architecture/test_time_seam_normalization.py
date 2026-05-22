@@ -31,6 +31,12 @@ def test_targeted_runtime_admin_paths_do_not_reintroduce_wall_clock_fallbacks() 
     assert "current_utc_time(" not in _read(
         "src/bioetl/application/composite/checkpoint/_anchor_context.py"
     )
+    assert "current_utc_time(" not in _read(
+        "src/bioetl/application/composite/checkpoint/_state_support.py"
+    )
+    assert "current_utc_time(" not in _read(
+        "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py"
+    )
     assert "default_factory=current_utc_time" not in _read(
         "src/bioetl/application/services/execution/pipeline_runner_models.py"
     )

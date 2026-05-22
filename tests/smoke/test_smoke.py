@@ -38,11 +38,12 @@ class TestRuntimeDependencies:
             "pubchempy",
         ],
     )
-    def test_dependency_importable(self, module_name: str) -> None:
+    def test_runtime_dependency_importable(self, module_name: str) -> None:
         """Each critical dependency must be importable."""
         import importlib
 
-        importlib.import_module(module_name)
+        module = importlib.import_module(module_name)
+        assert module is not None
 
 
 @pytest.mark.smoke
@@ -59,11 +60,12 @@ class TestDevDependencies:
             "psutil",
         ],
     )
-    def test_dependency_importable(self, module_name: str) -> None:
+    def test_dev_dependency_importable(self, module_name: str) -> None:
         """Each critical dev dependency must be importable."""
         import importlib
 
-        importlib.import_module(module_name)
+        module = importlib.import_module(module_name)
+        assert module is not None
 
     @pytest.mark.parametrize(
         "module_name",
@@ -76,7 +78,11 @@ class TestDevDependencies:
     )
     def test_dev_only_dependency_importable(self, module_name: str) -> None:
         """Dev-only dependencies (from [dev] extra) must be importable when installed."""
-        pytest.importorskip(module_name, reason=f"{module_name} requires [dev] extra")
+        module = pytest.importorskip(
+            module_name,
+            reason=f"{module_name} requires [dev] extra",
+        )
+        assert module is not None
 
 
 @pytest.mark.smoke
@@ -87,24 +93,39 @@ class TestCoreImports:
         """Domain layer imports successfully."""
         from bioetl.domain import config, ports, types  # noqa: F401
 
+        assert config is not None
+        assert ports is not None
+        assert types is not None
+
     def test_application_imports(self) -> None:
         """Application layer imports successfully."""
         from bioetl.application.core import base_transformer  # noqa: F401
         from bioetl.application.core import runner  # noqa: F401
+
+        assert base_transformer is not None
+        assert runner is not None
 
     def test_infrastructure_imports(self) -> None:
         """Infrastructure layer imports successfully."""
         from bioetl.infrastructure.storage import bronze_writer  # noqa: F401
         from bioetl.infrastructure.storage import silver_writer  # noqa: F401
 
+        assert bronze_writer is not None
+        assert silver_writer is not None
+
     def test_composition_imports(self) -> None:
         """Composition layer imports successfully."""
         from bioetl.composition import bootstrap  # noqa: F401
         from bioetl.composition import entrypoints  # noqa: F401
 
+        assert bootstrap is not None
+        assert entrypoints is not None
+
     def test_cli_imports(self) -> None:
         """CLI module imports successfully."""
         import bioetl.interfaces.cli  # noqa: F401
+
+        assert bioetl.interfaces.cli is not None
 
 
 @pytest.mark.smoke

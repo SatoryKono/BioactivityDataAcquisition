@@ -314,7 +314,11 @@ def test_collect_successful_dependencies_when_success_then_marks_completed() -> 
 
     harness._collect_successful_dependencies(state, results)
 
-    state.with_dependency_completed.assert_called_once_with("dep_a", results["dep_a"])
+    state.with_dependency_completed.assert_called_once_with(
+        "dep_a",
+        results["dep_a"],
+        clock=harness._clock,
+    )
 
 
 @pytest.mark.unit
@@ -326,6 +330,17 @@ def test_collect_successful_dependencies_when_failed_then_not_marked() -> None:
     harness._collect_successful_dependencies(state, results)
 
     state.with_dependency_completed.assert_not_called()
+
+
+@pytest.mark.unit
+def test_collect_successful_dependencies_when_clock_missing_then_raises() -> None:
+    harness = _StageMixinHarness()
+    harness._clock = None
+    state = make_runner_state()
+    results = {"dep_a": success_dep("dep_a")}
+
+    with pytest.raises(RuntimeError, match="ClockPort is required"):
+        harness._collect_successful_dependencies(state, results)
 
 
 @pytest.mark.unit
@@ -359,7 +374,11 @@ async def test_postprocess_dependency_results_when_mixed_then_finalizes_with_cou
 
     assert dep_results is results
     assert new_state is completed_state
-    state.with_dependency_completed.assert_called_once_with("dep_a", results["dep_a"])
+    state.with_dependency_completed.assert_called_once_with(
+        "dep_a",
+        results["dep_a"],
+        clock=harness._clock,
+    )
     harness._complete_dependencies_phase.assert_awaited_once_with(
         state,
         succeeded=1,

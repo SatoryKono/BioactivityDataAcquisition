@@ -1,22 +1,22 @@
 ---
 id: full-test-loop-20260522
-title: Run full project tests and fix failures until green
+title: Run and fix full test suite until clean
 task_id: full-test-loop-20260522
-created_at: '2026-05-22T09:19:01Z'
+created_at: '2026-05-22T13:00:39Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- <add-source-ref>
+- AGENTS.md
 summary: Active task session context.
-query: full pytest suite failing tests coverage architecture integration
+query: pytest full suite failing tests BioETL
 ---
 
 # Session note
 
 ## Task
 
-- Title: Run full project tests and fix failures until green
-- Retrieval query: full pytest suite failing tests coverage architecture integration
+- Title: Run and fix full test suite until clean
+- Retrieval query: pytest full suite failing tests BioETL
 
 ## Retrieved context
 

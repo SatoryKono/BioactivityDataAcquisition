@@ -21,6 +21,7 @@ from bioetl.application.composite.runner_pkg.runner_stage_payloads import (
 from bioetl.application.composite.runner_pkg.runner_stage_start_flow import (
     start_composite_phase,
 )
+from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import InvalidStateError
@@ -197,17 +198,14 @@ class _CompositeRunnerStageEnrichmentMixin:
         enrichment_results: dict[str, EnrichmentResult],
     ) -> CompositeCheckpointState:
         """Record successful or skipped enrichers in checkpoint state."""
-        clock = getattr(self, "_clock", None)
+        clock = resolve_runtime_clock(getattr(self, "_clock", None))
         for name, result in enrichment_results.items():
             if result.is_success or result.status == EnrichmentStatus.SKIPPED:
-                if clock is None:
-                    state = state.with_enricher_completed(name, result)
-                else:
-                    state = state.with_enricher_completed(
-                        name,
-                        result,
-                        clock=clock,
-                    )
+                state = state.with_enricher_completed(
+                    name,
+                    result,
+                    clock=clock,
+                )
         return state
 
     async def _validate_required_enrichment_results(

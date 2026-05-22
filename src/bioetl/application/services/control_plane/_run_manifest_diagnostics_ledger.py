@@ -155,7 +155,7 @@ def _register_artifact_ref(
     entry: RunLedgerEntry,
 ) -> None:
     """Record artifact references and missing-link counters for one entry."""
-    artifact_ref = _build_artifact_ref(entry)
+    artifact_ref = build_artifact_ref_from_ledger_entry(entry)
     if artifact_ref is None:
         return
     state.artifact_refs.append(artifact_ref)
@@ -242,15 +242,7 @@ def _freeze_ledger_processing_state(
     )
 
 
-def _build_artifact_ref(entry: RunLedgerEntry) -> dict[str, object] | None:
-    """Return one artifact reference emitted from a ledger entry."""
-    return build_artifact_ref_from_ledger_entry(entry)
-
-
 def _resolve_policy_value(values: set[str]) -> str | None:
-    """Return one canonical policy value or an explicit mixed-policy marker."""
     if not values:
         return None
-    if len(values) == 1:
-        return next(iter(values))
-    return "mixed"
+    return next(iter(values)) if len(values) == 1 else "mixed"

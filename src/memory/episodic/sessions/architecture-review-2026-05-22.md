@@ -1,23 +1,23 @@
 ---
 id: architecture-review-2026-05-22
-title: Architecture review scoring and refactoring plan
+title: Architecture review and prioritized refactoring plan
 task_id: architecture-review-2026-05-22
-created_at: '2026-05-22T05:48:40Z'
+created_at: '2026-05-22T14:01:55Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- <add-source-ref>
+- AGENTS.md
 summary: Active task session context.
-query: architecture review layer dependencies hexagonal DDD composition config governance
-  hotspots test strategy technical debt
+query: architecture review layers hexagonal DDD ports adapters DI composition tests
+  governance hotspots dependency map debt scorecard
 ---
 
 # Session note
 
 ## Task
 
-- Title: Architecture review scoring and refactoring plan
-- Retrieval query: architecture review layer dependencies hexagonal DDD composition config governance hotspots test strategy technical debt
+- Title: Architecture review and prioritized refactoring plan
+- Retrieval query: architecture review layers hexagonal DDD ports adapters DI composition tests governance hotspots dependency map debt scorecard
 
 ## Retrieved context
 

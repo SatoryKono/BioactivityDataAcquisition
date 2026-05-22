@@ -185,18 +185,28 @@ def test_removed_compat_module_stays_removed(name: str, path: Path) -> None:
 
 def _find_importers(root: Path, module_name: str) -> list[str]:
     violations: list[str] = []
+    parent_module, _, leaf_name = module_name.rpartition(".")
     for relative_path in discover_files(str(root.resolve()), ".py"):
         path = root / relative_path
-        tree = ast.parse(path.read_text(encoding="utf-8"))
+        text = path.read_text(encoding="utf-8")
+        # Fast-path: skip AST parsing for files that cannot reference the
+        # removed surface by either its full import path or leaf module name.
+        if module_name not in text and leaf_name not in text:
+            continue
+        tree = ast.parse(text)
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 names = {alias.name for alias in node.names}
                 if module_name in names:
                     violations.append(path.relative_to(ROOT).as_posix())
                     break
-            if isinstance(node, ast.ImportFrom) and node.module == module_name:
-                violations.append(path.relative_to(ROOT).as_posix())
-                break
+            if isinstance(node, ast.ImportFrom):
+                imported_names = {alias.name for alias in node.names}
+                if node.module == module_name or (
+                    node.module == parent_module and leaf_name in imported_names
+                ):
+                    violations.append(path.relative_to(ROOT).as_posix())
+                    break
     return violations
 
 

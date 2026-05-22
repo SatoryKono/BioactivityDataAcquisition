@@ -9,6 +9,7 @@ from unittest.mock import AsyncMock, MagicMock
 from bioetl.application.composite.lifecycle_observer_service import (
     CompositeLifecycleObserverService,
 )
+from tests.helpers.clock import fixed_test_clock
 from bioetl.domain.composite.result import (
     DependencyResult,
     DependencyStatus,
@@ -135,6 +136,7 @@ def initialize_runner_pkg_harness(
     harness._observer_logger = observer_logger
     harness._observer = CompositeLifecycleObserverService(logger=observer_logger)
     harness._run_id_str = run_id_str
+    harness._clock = fixed_test_clock()
     harness._checkpoint_manager = AsyncMock()
     harness._fsm = MagicMock()
 

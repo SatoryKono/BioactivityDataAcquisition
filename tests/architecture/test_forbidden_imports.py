@@ -204,6 +204,8 @@ def _port_import_violations(layer_path: Path, src_dir: Path) -> list[str]:
     for py_file in _python_files(layer_path):
         tree = _parse_file(py_file)
         relative_path = _relative(src_dir, py_file)
+        if relative_path.parts[:3] == ("bioetl", "domain", "ports"):
+            continue
         violations.extend(_port_import_violations_for_tree(relative_path, tree))
     return violations
 
@@ -396,7 +398,13 @@ class TestPortImportFacade:
         Deeper internal modules remain forbidden to preserve clear public entry points.
         """
         violations = []
-        for layer in ["application", "composition", "infrastructure", "interfaces"]:
+        for layer in [
+            "application",
+            "composition",
+            "domain",
+            "infrastructure",
+            "interfaces",
+        ]:
             layer_path = src_dir / "bioetl" / layer
             if not layer_path.exists():
                 continue

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.domain.composite.state import CompositePipelineState, validate_transition
 
 if TYPE_CHECKING:
@@ -22,10 +23,11 @@ def _replace_checkpoint_state(
     *,
     clock: ClockPort | None = None,
 ) -> CompositeCheckpointState:
-    """Delegate raw immutable state replacement while preserving clock semantics."""
-    if clock is None:
-        return checkpoint_state.with_state(new_state)
-    return checkpoint_state.with_state(new_state, clock=clock)
+    """Delegate raw immutable state replacement through the required clock seam."""
+    return checkpoint_state.with_state(
+        new_state,
+        clock=resolve_runtime_clock(clock),
+    )
 
 
 def apply_validated_checkpoint_transition(

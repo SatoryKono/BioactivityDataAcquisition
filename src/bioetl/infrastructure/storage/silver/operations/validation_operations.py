@@ -9,10 +9,10 @@ from typing import Literal, Protocol, cast
 
 import pyarrow as pa
 
+from bioetl.domain.config import KeyNullabilityRule
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
-from bioetl.domain.config import KeyNullabilityRule
 from bioetl.domain.medallion import SilverWriteMode, WriteMode, WriteModePolicy
 from bioetl.domain.ports import LoggerPort, MetricsPort, SilverValidatorPort
 from bioetl.domain.types import BronzeRecord

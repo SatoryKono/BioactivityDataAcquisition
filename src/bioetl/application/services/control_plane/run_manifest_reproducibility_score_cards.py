@@ -441,7 +441,6 @@ __all__ = [
     "PROFILE_SCORE_THRESHOLDS",
     "ScoreCardRecord",
     "build_executable_run_contract_claim",
-    "build_global_reproducibility_claim",
     "build_historical_replay_universe_exact_replay_claim",
     "build_supported_boundary_verdict",
     "evaluate_threshold_failures",

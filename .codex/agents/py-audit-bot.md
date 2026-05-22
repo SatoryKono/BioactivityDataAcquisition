@@ -43,7 +43,7 @@ ______________________________________________________________________
 - Назначение: ETL-фреймворк для данных биоактивности из научных баз данных
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD
 - Deployment: Local-Only (ADR-010) — без Docker/Redis
-- Текущее состояние: 43 ADR-файла (`ADR-001..ADR-043`), latest: `ADR-043-documentation-knowledge-management.md`
+- Текущее состояние: 47 ADR-файлов (`ADR-001..ADR-047`), latest: `ADR-047-workflow-control-plane.md`
 
 **Ключевые файлы:**
 

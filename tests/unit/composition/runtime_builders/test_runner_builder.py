@@ -190,8 +190,20 @@ def _build_pipeline_config(**overrides: object) -> SimpleNamespace:
         "input_filter": SimpleNamespace(),
         "business_primary_keys": ["activity_id"],
         "technical_primary_key": "entity_id",
+        "sink": {
+            "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+            "silver": SimpleNamespace(enabled=True, save_metadata=True),
+            "gold": SimpleNamespace(enabled=True, save_metadata=True),
+        },
     }
+    sink_override = overrides.pop("sink", None)
     values.update(overrides)
+    if sink_override is not None:
+        base_sink = values["sink"]
+        if isinstance(base_sink, dict) and isinstance(sink_override, dict):
+            values["sink"] = {**base_sink, **sink_override}
+        else:
+            values["sink"] = sink_override
     return SimpleNamespace(**values)
 
 
@@ -199,8 +211,34 @@ def _default_build_observability_bundle_fn(**_: object) -> SimpleNamespace:
     return _namespace_observability(SimpleNamespace(info=lambda *_, **__: None))
 
 
-def _default_cached_bronze_context(_: object) -> SimpleNamespace:
-    return SimpleNamespace(enabled=False)
+def _ensure_default_cached_bronze_fixture(
+    *,
+    settings: object,
+    pipeline_config: object,
+) -> SimpleNamespace:
+    bronze_base = Path(
+        str(
+            getattr(
+                settings,
+                "bronze_path",
+                getattr(settings, "data_dir", "/tmp/bioetl-test-data"),
+            )
+        )
+    )
+    provider = str(getattr(pipeline_config, "provider", "chembl"))
+    entity = str(getattr(pipeline_config, "entity_type", "activity"))
+    bronze_root = bronze_base / provider / entity
+    bronze_date = "2026-01-01"
+    bronze_day = bronze_root / bronze_date
+    bronze_day.mkdir(parents=True, exist_ok=True)
+    batch_file = bronze_day / "batch_2026-01-01_default.jsonl.zst"
+    if not batch_file.exists():
+        batch_file.write_bytes(b"default-snapshot-bytes")
+    return SimpleNamespace(
+        enabled=True,
+        bronze_path=str(bronze_root),
+        bronze_date=bronze_date,
+    )
 
 
 def _call_build_pipeline_runner(
@@ -218,6 +256,10 @@ def _call_build_pipeline_runner(
     assemble_filter_config_fn: object | None = None,
     assemble_cached_bronze_context_fn: object | None = None,
 ) -> object:
+    resolved_settings = settings if settings is not None else _build_settings()
+    resolved_pipeline_config = (
+        pipeline_config if pipeline_config is not None else _build_pipeline_config()
+    )
     kwargs: dict[str, object] = {
         "ensure_providers_loaded_fn": ensure_providers_loaded_fn
         if ensure_providers_loaded_fn is not None
@@ -225,12 +267,8 @@ def _call_build_pipeline_runner(
         "register_all_pipelines_fn": register_all_pipelines_fn
         if register_all_pipelines_fn is not None
         else (lambda registry=None: None),
-        "get_settings_fn": lambda: (
-            settings if settings is not None else _build_settings()
-        ),
-        "load_pipeline_config_fn": lambda _: (
-            pipeline_config if pipeline_config is not None else _build_pipeline_config()
-        ),
+        "get_settings_fn": lambda: resolved_settings,
+        "load_pipeline_config_fn": lambda _: resolved_pipeline_config,
         "build_observability_bundle_fn": build_observability_bundle_fn
         if build_observability_bundle_fn is not None
         else _default_build_observability_bundle_fn,
@@ -245,7 +283,12 @@ def _call_build_pipeline_runner(
         else (lambda **_: None),
         "assemble_cached_bronze_context_fn": assemble_cached_bronze_context_fn
         if assemble_cached_bronze_context_fn is not None
-        else _default_cached_bronze_context,
+        else (
+            lambda _: _ensure_default_cached_bronze_fixture(
+                settings=resolved_settings,
+                pipeline_config=resolved_pipeline_config,
+            )
+        ),
     }
     if registry is not None:
         kwargs["registry"] = registry
@@ -898,7 +941,7 @@ def test_build_pipeline_runner_persists_resume_launch_context_when_resume_enable
     launch_context = payload["launch_context"]
     assert isinstance(launch_context, dict)
     assert launch_context["resume"] is True
-    assert payload["replay_capability"] == "resume_only"
+    assert payload["replay_capability"] == "exact_replay_supported"
     assert launch_context["query"] == "status=active"
     assert launch_context["pipeline_name"] == "chembl_activity"
 
@@ -1038,37 +1081,34 @@ def test_build_pipeline_runner_requires_manifest_control_plane_when_manifest_dis
     assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
 
-def test_build_pipeline_runner_can_disable_ledger_while_keeping_manifest(
+def test_build_pipeline_runner_promotes_family_floor_and_rejects_ledger_disable(
     tmp_path: Path,
 ) -> None:
-    """Manifest should still persist when ledger rollout is explicitly disabled."""
+    """Registered strict families must fail closed when ledger is disabled."""
     fake_factory, fake_registry = _build_factory_registry()
 
-    _call_build_pipeline_runner(
-        _build_context(limit=25),
-        registry=fake_registry,
-        settings=_build_settings(
-            data_dir=str(tmp_path),
-            control_plane=SimpleNamespace(
-                run_manifest_enabled=True,
-                run_ledger_enabled=False,
-                required_persistence_profile="degraded_observable",
+    with pytest.raises(
+        RuntimeError,
+        match="required persistence profile 'replay_ready'",
+    ):
+        _call_build_pipeline_runner(
+            _build_context(limit=25),
+            registry=fake_registry,
+            settings=_build_settings(
+                data_dir=str(tmp_path),
+                control_plane=SimpleNamespace(
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=False,
+                    required_persistence_profile="degraded_observable",
+                ),
             ),
-        ),
-        pipeline_config=_build_pipeline_config(),
-        assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
-    )
+            pipeline_config=_build_pipeline_config(),
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental"
+            ),
+        )
 
-    assert isinstance(fake_factory.kwargs, dict)
-    manifest_id = fake_factory.kwargs["manifest_id"]
-    assert isinstance(manifest_id, str)
-    assert fake_factory.runner.attached_run_ledger_service is None
-    assert (
-        tmp_path / "output" / "control" / "run_manifest" / f"{manifest_id}.json"
-    ).exists()
-    assert not (
-        tmp_path / "output" / "control" / "run_ledger" / f"{manifest_id}.jsonl"
-    ).exists()
+    assert fake_factory.kwargs is None
 
 
 def test_build_pipeline_runner_requires_ledger_for_forensic_grade_profile(
@@ -1739,6 +1779,11 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
                 input_filter=SimpleNamespace(),
                 business_primary_keys=["activity_id"],
                 technical_primary_key="entity_id",
+                sink={
+                    "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                    "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                    "gold": SimpleNamespace(enabled=True, save_metadata=True),
+                },
             ),
             build_observability_bundle_fn=lambda **_: _namespace_observability(
                 SimpleNamespace(info=lambda *_, **__: None),
@@ -1748,7 +1793,25 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
                 run_type="incremental"
             ),
             assemble_filter_config_fn=lambda **_: None,
-            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+            assemble_cached_bronze_context_fn=lambda _: _ensure_default_cached_bronze_fixture(
+                settings=SimpleNamespace(
+                    data_dir=str(tmp_path),
+                    pipeline=SimpleNamespace(
+                        heartbeat_interval=30,
+                        control_plane=SimpleNamespace(
+                            required_persistence_profile="degraded_observable",
+                            checkpoint_compatibility_policy="hard_fail",
+                            run_manifest_enabled=True,
+                            run_ledger_enabled=True,
+                        ),
+                    ),
+                    test_mode=False,
+                ),
+                pipeline_config=SimpleNamespace(
+                    provider="chembl",
+                    entity_type="activity",
+                ),
+            ),
         )
 
     for writer in (top_writer, bronze_writer, silver_writer, gold_writer):
