@@ -222,6 +222,12 @@ Certified historical replay is therefore bounded but operationalized:
   one full-universe closure artifact by merging the retained local corpus with
   authoritative archived/offline historical packs through the supported CLI
   surface;
+- the full-universe artifact now carries one explicit
+  `governed_full_corpus_gate` verdict. Universal historical exact-replay
+  wording is allowed only when that gate reports `satisfied=true`;
+- `bioetl run-manifest universe-report --require-universal-claim` and
+  `--require-durable-evidence-coverage` are the operator-facing non-zero
+  fail-closed gates for that wording;
 - `scripts/engineering/qa/run_historical_replay_universe_campaign.py` persists
   a full-universe closure artifact by merging the local retained corpus with
   one or more authoritative external universe packs for archived/offline runs;

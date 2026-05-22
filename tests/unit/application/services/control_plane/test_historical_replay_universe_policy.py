@@ -5,6 +5,7 @@ from __future__ import annotations
 from bioetl.application.services.control_plane.historical_replay_universe_policy import (
     build_authoritative_truth_surface,
     build_durable_coverage_claim,
+    build_governed_full_corpus_gate,
     build_universal_claim,
 )
 from bioetl.application.services.control_plane.historical_replay_universe_service import (
@@ -95,4 +96,33 @@ def test_build_durable_coverage_claim_blocks_on_non_durable_records() -> None:
         "reason": "known_historical_universe_still_contains_non_durable_evidence_paths",
         "scope": "all_known_historical_runs",
         "blocked_manifest_ids": ["manifest-open"],
+    }
+
+
+def test_build_governed_full_corpus_gate_requires_both_claims() -> None:
+    gate = build_governed_full_corpus_gate(
+        authoritative_truth_surface=build_authoritative_truth_surface(),
+        universal_claim={
+            "claimed": False,
+            "scope": "all_known_historical_runs",
+        },
+        durable_claim={
+            "claimed": True,
+            "scope": "all_known_historical_runs",
+        },
+    )
+
+    assert gate == {
+        "gate_kind": "universal_historical_exact_replay",
+        "scope": "all_known_historical_runs",
+        "authoritative_truth_surface": "historical_replay_universe_closure_report",
+        "required_claims": {
+            "universal_claim": False,
+            "durable_evidence_coverage_claim": True,
+        },
+        "satisfied": False,
+        "verdict": "gate_blocked",
+        "reason": (
+            "authoritative_full_corpus_gate_requires_universal_claim_and_durable_coverage"
+        ),
     }

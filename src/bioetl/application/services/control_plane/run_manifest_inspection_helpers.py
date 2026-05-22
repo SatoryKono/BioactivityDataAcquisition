@@ -176,3 +176,111 @@ def build_run_artifact_diff_payload(
             )
         )
     return payload
+
+
+def build_authoritative_replay_dossier(
+    *,
+    manifest: RunManifest,
+    diagnostics: dict[str, object],
+    identity_graph: dict[str, object],
+) -> dict[str, object]:
+    """Build one compact operator-facing summary of the authoritative replay dossier."""
+    code_provenance = manifest.code_provenance
+    artifact_refs = diagnostics.get("artifact_refs")
+    lineage_fragment_ids = diagnostics.get("lineage_fragment_ids")
+    input_snapshot_ids = diagnostics.get("input_snapshot_ids")
+    input_snapshot_hashes = diagnostics.get("input_snapshot_content_hashes")
+    if not isinstance(artifact_refs, list):
+        artifact_refs = []
+    if not isinstance(lineage_fragment_ids, list):
+        lineage_fragment_ids = []
+    if not isinstance(input_snapshot_ids, list):
+        input_snapshot_ids = []
+    if not isinstance(input_snapshot_hashes, list):
+        input_snapshot_hashes = []
+    published_artifact_refs = [
+        {
+            key: value
+            for key, value in artifact_ref.items()
+            if key
+            in {
+                "stage",
+                "dataset_ref",
+                "artifact_id",
+                "lineage_fragment_id",
+                "artifact_path",
+                "metadata_path",
+                "run_id",
+                "manifest_id",
+            }
+        }
+        for artifact_ref in artifact_refs
+        if isinstance(artifact_ref, Mapping)
+    ]
+    checkpoint_identity = {
+        key: value
+        for key, value in {
+            "required_persistence_profile": diagnostics.get(
+                "required_persistence_profile"
+            ),
+            "execution_fingerprint": manifest.execution_fingerprint,
+            "effective_config_hash": code_provenance.effective_config_hash,
+            "effective_config_artifact_id": (
+                code_provenance.effective_config_artifact_id
+            ),
+            "contract_ref": code_provenance.contract_ref,
+            "contract_version": code_provenance.contract_version,
+            "normalization_profile_ref": code_provenance.normalization_profile_ref,
+            "normalization_profile_version": (
+                code_provenance.normalization_profile_version
+            ),
+            "normalization_profile_hash": code_provenance.normalization_profile_hash,
+            "input_snapshot_identity_fingerprint": diagnostics.get(
+                "input_snapshot_identity_fingerprint"
+            ),
+            "input_snapshot_ids": input_snapshot_ids,
+        }.items()
+        if value not in (None, [], "")
+    }
+    return {
+        "truth_boundary": "authoritative_replay_artifacts_only",
+        "authoritative_replay_artifacts": [
+            "run_manifest",
+            "effective_config_artifact",
+            "lineage_fragment",
+            "layer_metadata",
+            "checkpoint_metadata",
+            "input_snapshot_envelope",
+        ],
+        "manifest_id": manifest.manifest_id,
+        "run_id": str(manifest.run_id),
+        "execution_fingerprint": manifest.execution_fingerprint,
+        "git_commit": code_provenance.git_commit,
+        "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
+        "effective_config_hash": code_provenance.effective_config_hash,
+        "contract_ref": code_provenance.contract_ref,
+        "contract_version": code_provenance.contract_version,
+        "required_persistence_profile": diagnostics.get(
+            "required_persistence_profile"
+        ),
+        "exact_replay_support_boundary": diagnostics.get(
+            "exact_replay_support_boundary"
+        ),
+        "snapshot_status": diagnostics.get("snapshot_status"),
+        "input_snapshot_ids": input_snapshot_ids,
+        "input_snapshot_content_hashes": input_snapshot_hashes,
+        "input_snapshot_identity_fingerprint": diagnostics.get(
+            "input_snapshot_identity_fingerprint"
+        ),
+        "lineage_fragment_ids": [
+            value for value in lineage_fragment_ids if isinstance(value, str)
+        ],
+        "published_artifact_refs": published_artifact_refs,
+        "planned_artifact_count": diagnostics.get("planned_artifact_count"),
+        "published_artifact_count": diagnostics.get("published_artifact_count"),
+        "identity_graph_complete": diagnostics.get("identity_graph_complete"),
+        "checkpoint_identity": checkpoint_identity,
+        "canonical_execution_identity": identity_graph.get(
+            "canonical_execution_identity", {}
+        ),
+    }

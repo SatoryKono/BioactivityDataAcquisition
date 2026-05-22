@@ -621,10 +621,15 @@ bioetl run-manifest universe-report [--external-pack path/to/archive-pack.json .
 
 - `--write` сохраняет artifact в
   `data/output/control/historical_replay_universe/{report_id}.json`;
-- `--require-universal-claim` завершает команду ошибкой, если
+- `--require-universal-claim` завершает команду с non-zero exit, если
   `universal_claim.claimed != true`;
-- `--require-durable-evidence-coverage` завершает команду ошибкой, если
+- `--require-durable-evidence-coverage` завершает команду с non-zero exit, если
   `durable_evidence_coverage_claim.claimed != true`.
+
+Artifact также публикует `governed_full_corpus_gate`. Это machine-readable
+gate для wording уровня `all_known_historical_runs`: universal historical
+exact-replay claim допустим только когда этот gate имеет
+`satisfied=true`.
 
 Используй оба `--require-*` флага для fail-closed release/operator gates,
 когда нужна строгая проверка wording уровня "любой historical run".

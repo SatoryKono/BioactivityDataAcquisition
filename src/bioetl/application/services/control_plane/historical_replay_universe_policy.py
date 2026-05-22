@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 __all__ = [
     "build_authoritative_truth_surface",
     "build_durable_coverage_claim",
+    "build_governed_full_corpus_gate",
     "build_universal_claim",
     "build_universe_report_id",
 ]
@@ -81,18 +82,48 @@ def build_durable_coverage_claim(
     }
 
 
+def build_governed_full_corpus_gate(
+    *,
+    authoritative_truth_surface: dict[str, object],
+    universal_claim: dict[str, object],
+    durable_claim: dict[str, object],
+) -> dict[str, object]:
+    """Return the governed gate payload for universal historical replay wording."""
+    universal_claimed = bool(universal_claim.get("claimed", False))
+    durable_claimed = bool(durable_claim.get("claimed", False))
+    satisfied = universal_claimed and durable_claimed
+    return {
+        "gate_kind": "universal_historical_exact_replay",
+        "scope": "all_known_historical_runs",
+        "authoritative_truth_surface": authoritative_truth_surface.get("surface"),
+        "required_claims": {
+            "universal_claim": universal_claimed,
+            "durable_evidence_coverage_claim": durable_claimed,
+        },
+        "satisfied": satisfied,
+        "verdict": "gate_satisfied" if satisfied else "gate_blocked",
+        "reason": (
+            "authoritative_full_corpus_gate_satisfied"
+            if satisfied
+            else "authoritative_full_corpus_gate_requires_universal_claim_and_durable_coverage"
+        ),
+    }
+
+
 def build_universe_report_id(
     *,
     inventory: HistoricalReplayUniverseInventorySnapshot,
     authoritative_truth_surface: dict[str, object],
     universal_claim: dict[str, object],
     durable_claim: dict[str, object],
+    governed_full_corpus_gate: dict[str, object],
 ) -> str:
     payload = {
         "inventory": inventory.to_dict(),
         "authoritative_truth_surface": authoritative_truth_surface,
         "universal_claim": universal_claim,
         "durable_evidence_coverage_claim": durable_claim,
+        "governed_full_corpus_gate": governed_full_corpus_gate,
     }
     digest = hashlib.sha256(
         json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")

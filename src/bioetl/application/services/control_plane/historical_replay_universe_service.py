@@ -14,6 +14,7 @@ from bioetl.application.services.control_plane.historical_replay_corpus_service 
 from bioetl.application.services.control_plane.historical_replay_universe_policy import (
     build_authoritative_truth_surface,
     build_durable_coverage_claim,
+    build_governed_full_corpus_gate,
     build_universal_claim,
     build_universe_report_id,
 )
@@ -154,6 +155,7 @@ class HistoricalReplayUniverseClosureReportRecord:
     authoritative_truth_surface: dict[str, object]
     universal_claim: dict[str, object]
     durable_evidence_coverage_claim: dict[str, object]
+    governed_full_corpus_gate: dict[str, object]
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -163,6 +165,7 @@ class HistoricalReplayUniverseClosureReportRecord:
             "authoritative_truth_surface": self.authoritative_truth_surface,
             "universal_claim": self.universal_claim,
             "durable_evidence_coverage_claim": self.durable_evidence_coverage_claim,
+            "governed_full_corpus_gate": self.governed_full_corpus_gate,
         }
 
 
@@ -203,11 +206,17 @@ class HistoricalReplayUniverseService:
         authoritative_truth_surface = build_authoritative_truth_surface()
         universal_claim = build_universal_claim(inventory)
         durable_claim = build_durable_coverage_claim(inventory)
+        governed_full_corpus_gate = build_governed_full_corpus_gate(
+            authoritative_truth_surface=authoritative_truth_surface,
+            universal_claim=universal_claim,
+            durable_claim=durable_claim,
+        )
         report_id = build_universe_report_id(
             inventory=inventory,
             authoritative_truth_surface=authoritative_truth_surface,
             universal_claim=universal_claim,
             durable_claim=durable_claim,
+            governed_full_corpus_gate=governed_full_corpus_gate,
         )
         return HistoricalReplayUniverseClosureReportRecord(
             generated_at=self.now_factory(),
@@ -216,6 +225,7 @@ class HistoricalReplayUniverseService:
             authoritative_truth_surface=authoritative_truth_surface,
             universal_claim=universal_claim,
             durable_evidence_coverage_claim=durable_claim,
+            governed_full_corpus_gate=governed_full_corpus_gate,
         )
 
     def _build_local_records(

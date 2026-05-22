@@ -44,7 +44,8 @@ class BronzeWriterMetadataMixin:
             "batch_id": str(batch_id),
             "sidecar_truth_boundary": "legacy_lineage_projection_non_authoritative",
             "authoritative_replay_artifacts": (
-                "run_manifest,lineage_fragment,layer_metadata"
+                "run_manifest,lineage_fragment,layer_metadata,"
+                "effective_config_artifact"
             ),
         }
 

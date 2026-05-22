@@ -99,6 +99,8 @@ class RunManifestVerifyResult:
     manifest_diff: dict[str, object]
     effective_config: dict[str, object]
     missing_evidence: tuple[str, ...] = ()
+    left_authoritative_replay_dossier: dict[str, object] = field(default_factory=dict)
+    right_authoritative_replay_dossier: dict[str, object] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         """Return JSON/YAML-safe payload for CLI presentation."""
@@ -114,6 +116,12 @@ class RunManifestVerifyResult:
             "missing_evidence": list(self.missing_evidence),
             "manifest_diff": self.manifest_diff,
             "effective_config": self.effective_config,
+            "left_authoritative_replay_dossier": (
+                self.left_authoritative_replay_dossier
+            ),
+            "right_authoritative_replay_dossier": (
+                self.right_authoritative_replay_dossier
+            ),
         }
 
 

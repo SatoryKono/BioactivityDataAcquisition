@@ -129,6 +129,22 @@ def _diagnostics_section_items(
             "reproducibility_audit_score",
             diagnostics.get("reproducibility_audit_score"),
         ),
+        (
+            "historical_replay_universe_governed_full_corpus_gate",
+            diagnostics.get("historical_replay_universe_governed_full_corpus_gate"),
+        ),
+        (
+            "historical_replay_universe_exact_replay_claim",
+            diagnostics.get("historical_replay_universe_exact_replay_claim"),
+        ),
+        (
+            "executable_run_contract_claim",
+            diagnostics.get("executable_run_contract_claim"),
+        ),
+        (
+            "authoritative_replay_dossier",
+            diagnostics.get("authoritative_replay_dossier"),
+        ),
         ("alert_signals", diagnostics.get("alert_signals")),
         ("next_steps", diagnostics.get("next_steps")),
     )
@@ -207,6 +223,7 @@ def render_identity_graph_section(
             "published_artifacts",
             "produced_artifact_trace",
             "occurrence_only_diagnostics",
+            "authoritative_replay_dossier",
         ),
         json_renderer=json_renderer,
     )

@@ -8,6 +8,8 @@ import pytest
 
 from tests import conftest as root_conftest
 
+pytestmark = pytest.mark.unit
+
 
 @dataclass
 class _FakeOptionNamespace:
