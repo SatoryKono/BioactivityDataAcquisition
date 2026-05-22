@@ -4903,7 +4903,7 @@
       "missing_lines": 28,
       "module": "bioetl.application.services.control_plane.run_manifest_inspection_helpers",
       "path": "src/bioetl/application/services/control_plane/run_manifest_inspection_helpers.py",
-      "source_lines": 286
+      "source_lines": 305
     },
     {
       "coverage_percent": 0.0,
@@ -19248,7 +19248,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-05-22",
-  "source_tree_sha256": "35fa0562c846002cbdbc921179f4799cf008949a6d8a5bf665fcc0477aea49b5",
+  "source_tree_sha256": "48518498c524f3bb3a7aa4b24600370e0dc6fcb663cbe51b35c383a510750d60",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
