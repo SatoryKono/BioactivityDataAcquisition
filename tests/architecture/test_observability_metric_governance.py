@@ -7,9 +7,8 @@ import json
 from pathlib import Path
 
 import pytest
-import yaml
-
 from scripts.engineering.qa import report_observability_metric_inventory as inventory
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -20,6 +19,11 @@ ALLOWLIST_PATH = (
 )
 EVIDENCE_PATH = (
     ROOT / "reports" / "observability" / "runtime_cardinality_inventory.json"
+)
+REGENERATION_COMMAND = (
+    "python -m scripts.engineering.qa.report_observability_metric_inventory "
+    "--repo-root . "
+    "--write-evidence reports/observability/runtime_cardinality_inventory.json"
 )
 
 
@@ -118,20 +122,61 @@ def test_runtime_cardinality_allowlist_entries_require_metadata() -> None:
 
 
 @pytest.mark.architecture
-def test_runtime_cardinality_evidence_artifact_matches_current_inventory() -> None:
-    """Replayable cardinality evidence artifact must stay materialized and current."""
+def test_runtime_cardinality_evidence_artifact_is_committed_and_governed() -> None:
+    """Replayable cardinality evidence artifact must stay materialized."""
     assert EVIDENCE_PATH.exists(), (
         "Missing runtime cardinality evidence artifact: "
         "reports/observability/runtime_cardinality_inventory.json"
     )
 
     actual = json.loads(EVIDENCE_PATH.read_text(encoding="utf-8"))
-    expected = inventory.collect_metric_inventory(ROOT)
+    assert set(actual) >= {
+        "declared_metrics",
+        "emitted_metrics",
+        "runtime_emitters",
+        "helper_backed_emitters",
+        "runtime_cardinality_review_required",
+        "declared_risky_label_review_required",
+        "runtime_label_contract_violations",
+        "runtime_label_contract_unresolved",
+    }
+    for key in (
+        "declared_metrics",
+        "emitted_metrics",
+        "runtime_cardinality_review_required",
+        "declared_risky_label_review_required",
+        "runtime_label_contract_violations",
+        "runtime_label_contract_unresolved",
+    ):
+        assert isinstance(actual[key], list), f"{key} must be a list"
+        assert actual[key] == sorted(actual[key]), f"{key} must be deterministic"
 
+    runtime_emitters = actual["runtime_emitters"]
+    helper_backed_emitters = actual["helper_backed_emitters"]
+    assert isinstance(runtime_emitters, dict)
+    assert isinstance(helper_backed_emitters, dict)
+
+    allowlist_payload = yaml.safe_load(ALLOWLIST_PATH.read_text(encoding="utf-8"))
+    allowlisted_runtime_cardinality = sorted(
+        entry["metric"]
+        for entry in allowlist_payload["allowed"]["runtime_cardinality_review_required"]
+    )
+    assert actual["runtime_cardinality_review_required"] == (
+        allowlisted_runtime_cardinality
+    ), (
+        "Runtime cardinality evidence must stay aligned with the governed "
+        "allowlist metadata. Regenerate it with:\n"
+        f"{REGENERATION_COMMAND}"
+    )
+
+    expected = inventory.collect_metric_inventory(ROOT)
+    mismatched_keys = sorted(
+        key for key in sorted(set(actual) | set(expected)) if actual.get(key) != expected.get(key)
+    )
     assert actual == expected, (
-        "Runtime cardinality evidence artifact drifted from the current "
-        "observability inventory report. Regenerate it with:\n"
-        "python -m scripts.engineering.qa.report_observability_metric_inventory "
-        "--repo-root . "
-        "--write-evidence reports/observability/runtime_cardinality_inventory.json"
+        "Runtime cardinality evidence artifact is stale or inconsistent with the "
+        "current static inventory report. Mismatched keys: "
+        f"{', '.join(mismatched_keys) if mismatched_keys else '<unknown>'}. "
+        "Regenerate it with:\n"
+        f"{REGENERATION_COMMAND}"
     )
