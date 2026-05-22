@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import ast
 import os
+import shutil
+import subprocess
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 from pathlib import Path
@@ -26,7 +28,7 @@ EXPECTED_TEST_IMPORTS: dict[str, frozenset[str]] = {}
 @lru_cache(maxsize=2)
 def _collect_imports(root: Path) -> dict[str, frozenset[str]]:
     """Collect exact imports from ``bioetl.application.services`` under ``root``."""
-    paths = tuple(sorted(root.rglob("*.py")))
+    paths = _candidate_python_paths(root)
     max_workers = min(32, max(1, os.cpu_count() or 1))
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -50,6 +52,99 @@ def _collect_imports_for_path(path: Path) -> tuple[str, set[str]] | None:
         return None
 
     return path.relative_to(ROOT).as_posix(), imported_names
+
+
+def _candidate_python_paths(root: Path) -> tuple[Path, ...]:
+    rg_paths = _candidate_python_paths_via_rg(root)
+    if rg_paths is not None:
+        return rg_paths
+
+    git_paths = _candidate_python_paths_via_git_grep(root)
+    if git_paths is not None:
+        return git_paths
+
+    return tuple(
+        path for path in sorted(root.rglob("*.py")) if _read_candidate_source(path) is not None
+    )
+
+
+def _candidate_python_paths_via_rg(root: Path) -> tuple[Path, ...] | None:
+    rg_binary = shutil.which("rg")
+    if rg_binary is None:
+        return None
+
+    command = [
+        rg_binary,
+        "-l",
+        "-F",
+        "-e",
+        _PACKAGE_ROOT_IMPORT_MARKERS[0],
+        "-e",
+        _PACKAGE_ROOT_IMPORT_MARKERS[1],
+        str(root),
+        "-g",
+        "*.py",
+    ]
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+    except OSError:
+        return None
+
+    if completed.returncode not in {0, 1}:
+        return None
+    return _paths_from_search_output(completed.stdout)
+
+
+def _candidate_python_paths_via_git_grep(root: Path) -> tuple[Path, ...] | None:
+    git_binary = shutil.which("git")
+    if git_binary is None:
+        return None
+
+    command = [
+        git_binary,
+        "grep",
+        "-l",
+        "-e",
+        _PACKAGE_ROOT_IMPORT_MARKERS[0],
+        "-e",
+        _PACKAGE_ROOT_IMPORT_MARKERS[1],
+        "--",
+        root.as_posix(),
+    ]
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+    except OSError:
+        return None
+
+    if completed.returncode not in {0, 1}:
+        return None
+    return _paths_from_search_output(completed.stdout)
+
+
+def _paths_from_search_output(output: str) -> tuple[Path, ...]:
+    if not output.strip():
+        return ()
+    return tuple(
+        sorted(
+            ROOT / relative_path
+            for relative_path in output.splitlines()
+            if relative_path.strip()
+        )
+    )
 
 
 def _read_candidate_source(path: Path) -> str | None:
