@@ -64,5 +64,5 @@ action_type_description,S2.15,YES,EMPTY,activity_transformer.py:221,chembl.py:16
 action_type_parent_type,S2.15,YES,EMPTY,activity_transformer.py:221,chembl.py:171,activity.py:169,chembl.py:114,string,true,false,NESTED
 activity_properties,S2.16,YES,EMPTY,activity_transformer.py:225,chembl.py:176,activity.py:173,chembl.py:117,string,true,false,OK
 toid,S2.17,YES,EMPTY,activity_transformer.py:128,chembl.py:130,activity.py:134,chembl.py:118,integer,true,false,OK
-manual_curation_flag,MISSING,MISSING,EMPTY,activity_transformer.py:129,MISSING,activity.py:137,MISSING,integer,true,false,MISSING_DOC;MISSING_GOLD
-original_activity_id,MISSING,MISSING,EMPTY,activity_transformer.py:130,MISSING,activity.py:143,MISSING,integer,true,false,MISSING_DOC;MISSING_GOLD
+manual_curation_flag,S2.14,YES,EMPTY,activity_transformer.py:129,chembl.py:131,activity.py:137,chembl.py:117,integer,true,false,OK
+original_activity_id,S2.14,YES,EMPTY,activity_transformer.py:130,chembl.py:132,activity.py:143,chembl.py:120,integer,true,false,OK

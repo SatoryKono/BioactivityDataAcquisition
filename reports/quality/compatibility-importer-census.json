@@ -150,7 +150,6 @@
       "canonical_target": "bioetl.composition.health_api",
       "owner": "bioetl.composition",
       "src_importers": [
-        "src/bioetl/composition/services_api.py",
         "src/bioetl/interfaces/cli/commands/diagnostics.py",
         "src/bioetl/interfaces/cli/commands/domains/health/server_integration.py",
         "src/bioetl/interfaces/cli/commands/health.py",
@@ -160,7 +159,7 @@
         "tests/unit/composition/test_canonical_module_paths.py",
         "tests/unit/composition/test_health_api.py"
       ],
-      "src_importer_count": 5,
+      "src_importer_count": 4,
       "test_importer_count": 2
     },
     {

@@ -25,11 +25,6 @@ from bioetl.composition._services import (
     get_workflow_runner_service,
     load_workflow_config,
 )
-from bioetl.composition.health_api import (
-    get_health_server_dependencies,
-    get_quarantine_port,
-    get_quarantine_service,
-)
 
 __all__ = [
     "cleanup_bronze",
@@ -57,3 +52,30 @@ __all__ = [
     "get_workflow_runner_service",
     "load_workflow_config",
 ]
+
+
+def get_health_server_dependencies():
+    """Return the public health listener dependency bundle."""
+    from bioetl.composition._services import (
+        get_health_server_dependencies as _get_health_server_dependencies,
+    )
+
+    return _get_health_server_dependencies()
+
+
+def get_quarantine_service():
+    """Return the public quarantine admin service."""
+    from bioetl.composition._services import (
+        get_quarantine_service as _get_quarantine_service,
+    )
+
+    return _get_quarantine_service()
+
+
+def get_quarantine_port():
+    """Return the shared public quarantine storage port."""
+    from bioetl.composition._services import (
+        get_quarantine_port as _get_quarantine_port,
+    )
+
+    return _get_quarantine_port()

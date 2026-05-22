@@ -145,7 +145,6 @@ def push_metrics_to_gateway(
     logger: LoggerPort | None = None,
 ) -> bool:
     """Push metrics through the canonical composition-owned observability seam."""
-    from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
     from bioetl.composition.runtime_builders.config_access import get_settings
 
     settings = get_settings()
@@ -158,10 +157,8 @@ def push_metrics_to_gateway(
     if grouping_key_extra:
         grouping_key.update(grouping_key_extra)
     metrics_service = get_metrics_service()
-    metrics_service.logger = logger or bootstrap_logger(
-        pipeline=pipeline_name or "metrics_publication",
-        run_id=uuid4(),
-        log_level="INFO",
+    metrics_service.logger = logger or _build_metrics_gateway_logger(
+        pipeline=pipeline_name or "metrics_publication"
     )
     result = metrics_service.push_to_gateway(
         gateway=gateway,
@@ -180,7 +177,6 @@ def delete_metrics_from_gateway(
     logger: LoggerPort | None = None,
 ) -> bool:
     """Delete metrics through the canonical composition-owned observability seam."""
-    from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
     from bioetl.composition.runtime_builders.config_access import get_settings
 
     settings = get_settings()
@@ -191,10 +187,8 @@ def delete_metrics_from_gateway(
     if run_type:
         grouping_key["run_type"] = run_type
     metrics_service = get_metrics_service()
-    metrics_service.logger = logger or bootstrap_logger(
-        pipeline=pipeline_name or "metrics_cleanup",
-        run_id=uuid4(),
-        log_level="INFO",
+    metrics_service.logger = logger or _build_metrics_gateway_logger(
+        pipeline=pipeline_name or "metrics_cleanup"
     )
     result = metrics_service.delete_from_gateway(
         gateway=gateway,
@@ -202,6 +196,17 @@ def delete_metrics_from_gateway(
         grouping_key=grouping_key,
     )
     return bool(result.success)
+
+
+def _build_metrics_gateway_logger(*, pipeline: str) -> LoggerPort:
+    """Create the shared fallback logger for gateway helper operations."""
+    from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
+
+    return bootstrap_logger(
+        pipeline=pipeline,
+        run_id=uuid4(),
+        log_level="INFO",
+    )
 
 
 def get_audit_service() -> AuditInspectionService:

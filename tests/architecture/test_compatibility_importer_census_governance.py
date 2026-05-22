@@ -78,7 +78,7 @@ def test_infrastructure_config_root_facade_inventory_matches_live_src_importers(
 ):
     """The retained infrastructure.config root-facade inventory must stay allowlisted."""
     inventory = _load_yaml(CONFIG_ROOT_FACADE)
-    assert inventory.get("linked_issue") == "#4453"
+    assert inventory.get("linked_issue") == "#4564"
     target_module = inventory.get("target_module")
     assert isinstance(target_module, str)
     symbol_rows = inventory.get("symbols")

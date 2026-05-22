@@ -129,7 +129,7 @@ sanctioned_public_entrypoint_governance:
     public_entrypoint_count:
       current_count: 14
       owner: '@bioetl-architecture'
-      linked_issue: '4542'
+      linked_issue: '4565'
       rationale: Permanent public entrypoints remain governed as sanctioned public
         API seams with explicit burn-down metadata, but they are not compatibility
         debt because they are not transition shims.
@@ -140,7 +140,7 @@ sanctioned_public_entrypoint_governance:
     stable_public_api_count:
       current_count: 13
       owner: '@bioetl-architecture'
-      linked_issue: '4542'
+      linked_issue: '4565'
       rationale: Stable public entrypoints intentionally remain external patch/import
         seams and should stay explicitly bounded rather than being treated as
         hidden transition debt.
@@ -150,7 +150,7 @@ sanctioned_public_entrypoint_governance:
     narrow_first_party_callers_count:
       current_count: 1
       owner: '@bioetl-architecture'
-      linked_issue: '4542'
+      linked_issue: '4565'
       rationale: A small subset of sanctioned public entrypoints still needs first-party
         caller narrowing even though the public API itself remains stable.
       review_cadence: quarterly
@@ -333,7 +333,7 @@ hotspot_family_ratchets:
   - name: application_services_control_plane
     owner: '@bioetl-platform'
     linked_rf: RF-023
-    linked_issue: '#4547'
+    linked_issue: '#4563'
     ratchet_stage: reviewed-baseline
     ratchet_scope: duplication-report-plus-bounded-growth
     expected_action: Hold file-growth and fan-in at the reviewed baseline during
@@ -362,7 +362,7 @@ hotspot_family_ratchets:
   - name: composition_runtime_builders
     owner: '@bioetl-platform'
     linked_rf: RF-023
-    linked_issue: '#4552'
+    linked_issue: '#4563'
     ratchet_stage: reviewed-baseline
     ratchet_scope: duplication-report-plus-bounded-growth
     expected_action: Hold file-growth and fan-in at the reviewed baseline during
@@ -387,6 +387,36 @@ hotspot_family_ratchets:
         keep duplicate clusters, files_ge_250_loc, and max_internal_fan_in non-growing
         while paying down 13 duplicate clusters toward future activation of the
         zero-duplication ratchet.
+hotspot_family_coverage_thresholds:
+  snapshot_date: '2026-05-22'
+  linked_issue: '#4567'
+  mode: fail-fast
+  families:
+    application_core:
+      min_measured_module_count: 167
+      max_unmeasured_module_count: 0
+      min_covered_module_count: 0
+      min_covered_line_percent: 0.0
+    composition_bootstrap_runtime:
+      min_measured_module_count: 42
+      max_unmeasured_module_count: 0
+      min_covered_module_count: 0
+      min_covered_line_percent: 0.0
+    composition_factories_pipeline:
+      min_measured_module_count: 31
+      max_unmeasured_module_count: 0
+      min_covered_module_count: 0
+      min_covered_line_percent: 0.0
+    application_services_control_plane:
+      min_measured_module_count: 71
+      max_unmeasured_module_count: 0
+      min_covered_module_count: 0
+      min_covered_line_percent: 0.0
+    composition_runtime_builders:
+      min_measured_module_count: 38
+      max_unmeasured_module_count: 0
+      min_covered_module_count: 2
+      min_covered_line_percent: 2.72
 removable_complexity_family_ratchets:
   snapshot_date: '2026-04-13'
   update_policy: Only raise budgets after an intentional reviewed baseline refresh

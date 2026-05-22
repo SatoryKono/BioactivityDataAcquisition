@@ -51,6 +51,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_snapsho
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
     compute_input_snapshot_identity_fingerprint as _compute_input_snapshot_identity_fingerprint,
 )
+from bioetl.application.services.control_plane._run_manifest_replay_family_contract_payload import (
+    build_replay_family_contract_payload as _build_replay_family_contract_payload,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_summary import (
     _build_exact_replay_anchors,
 )
@@ -195,39 +198,6 @@ def _build_base_summary_code_provenance_payload(
     }
 
 
-def _build_base_summary_replay_family_contract_payload(
-    replay_family_contract: dict[str, object],
-) -> dict[str, object]:
-    """Build replay family contract section of base summary payload."""
-    return {
-        "replay_support_state": replay_family_contract.get("support_state"),
-        "post_capture_replayable_parent_supported": replay_family_contract.get(
-            "post_capture_replayable_parent_supported"
-        ),
-        "post_capture_replayable_parent_boundary": replay_family_contract.get(
-            "post_capture_replayable_parent_boundary"
-        ),
-        "historical_live_run_upgrade_policy": replay_family_contract.get(
-            "historical_live_run_upgrade_policy"
-        ),
-        "historical_live_run_upgrade_boundary": replay_family_contract.get(
-            "historical_live_run_upgrade_boundary"
-        ),
-        "historical_live_run_upgrade_reason": replay_family_contract.get(
-            "historical_live_run_upgrade_reason"
-        ),
-        "broader_historical_exact_replay_policy": replay_family_contract.get(
-            "broader_historical_exact_replay_policy"
-        ),
-        "broader_historical_exact_replay_boundary": replay_family_contract.get(
-            "broader_historical_exact_replay_boundary"
-        ),
-        "broader_historical_exact_replay_reason": replay_family_contract.get(
-            "broader_historical_exact_replay_reason"
-        ),
-    }
-
-
 def _build_base_summary_replay_payload(
     manifest: RunManifest,
     replay_context: _BaseSummaryReplayContext,
@@ -321,8 +291,8 @@ def _build_base_summary_core_payload(
         dependency_lock_state=dependency_lock_state,
         code_provenance_state=code_provenance_state,
     )
-    replay_family_contract_payload = _build_base_summary_replay_family_contract_payload(
-        replay_family_contract=replay_context.replay_family_contract,
+    replay_family_contract_payload = _build_replay_family_contract_payload(
+        replay_context.replay_family_contract
     )
     replay_payload = _build_base_summary_replay_payload(
         manifest=manifest,

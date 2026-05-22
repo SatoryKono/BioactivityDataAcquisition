@@ -341,7 +341,7 @@ measured_only_review_workflow:
   promotion_requires_curated_row: true
 retained_entrypoint_burn_down_plan:
   review_date: '2026-09-30'
-  linked_issue: '#4542'
+  linked_issue: '#4565'
   allowed_phases:
   - visibility
   - narrow-first-party-callers
