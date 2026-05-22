@@ -23,6 +23,8 @@ from bioetl.application.core.protocols import (
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import BronzeRecord, SilverRecord
 
+pytestmark = pytest.mark.unit
+
 
 class TestTransformCallbackProtocol:
     """Tests for TransformCallback protocol."""

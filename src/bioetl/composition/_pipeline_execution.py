@@ -14,6 +14,7 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     RunOptions,
     RunResult,
 )
+from bioetl.composition._registration import ensure_runtime_registrations
 from bioetl.composition.bootstrap.runtime.observability import (
     maybe_start_metrics_server,
 )
@@ -25,9 +26,9 @@ from bioetl.composition.factories.pipeline.registry import register_all_pipeline
 from bioetl.composition.factories.pipeline.runner import create_metrics_extractor
 from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.composition.registry_api import PipelineRegistry
+from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
-from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
@@ -48,9 +49,7 @@ __all__ = [
 
 def _ensure_registrations(registry: PipelineRegistry | None = None) -> None:
     """Ensure providers and pipelines are registered for shared entrypoints."""
-    ensure_providers_loaded()
-    if registry is None or not registry.list_pipelines():
-        register_all_pipelines(registry=registry)
+    ensure_runtime_registrations(registry=registry)
 
 
 def _require_execution_metrics_runner(

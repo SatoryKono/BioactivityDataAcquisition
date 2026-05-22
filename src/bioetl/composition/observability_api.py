@@ -146,7 +146,7 @@ def push_metrics_to_gateway(
 ) -> bool:
     """Push metrics through the canonical composition-owned observability seam."""
     from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
-    from bioetl.infrastructure.config import get_settings
+    from bioetl.composition.runtime_builders.config_access import get_settings
 
     settings = get_settings()
     gateway = getattr(settings, "pushgateway_url", None) or _PUSHGATEWAY_FALLBACK
@@ -181,7 +181,7 @@ def delete_metrics_from_gateway(
 ) -> bool:
     """Delete metrics through the canonical composition-owned observability seam."""
     from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
-    from bioetl.infrastructure.config import get_settings
+    from bioetl.composition.runtime_builders.config_access import get_settings
 
     settings = get_settings()
     gateway = getattr(settings, "pushgateway_url", None) or _PUSHGATEWAY_FALLBACK
@@ -227,7 +227,7 @@ def get_metrics_service() -> MetricsService:
 
 def get_metrics_operator_profile() -> MetricsOperatorProfile:
     """Return the canonical operator-facing metrics/admin profile."""
-    from bioetl.infrastructure.config import get_settings
+    from bioetl.composition.runtime_builders.config_access import get_settings
 
     settings = get_settings()
     metrics_service = get_metrics_service()

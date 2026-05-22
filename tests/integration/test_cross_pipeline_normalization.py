@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, cast
 
+import pytest
 
 from bioetl.domain.normalization.profiles.chembl_activity import CHEMBL_ACTIVITY_PROFILE
 from bioetl.domain.normalization.profiles.chembl_assay import CHEMBL_ASSAY_PROFILE
@@ -17,6 +18,8 @@ from bioetl.domain.normalization.profiles.chembl_target_component import (
 from bioetl.domain.normalization.profiles.chembl_tissue import CHEMBL_TISSUE_PROFILE
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.normalization.identifiers import normalize_ontology_id
+
+pytestmark = pytest.mark.integration
 
 
 class TestCrossPipelineCaseNormalization:

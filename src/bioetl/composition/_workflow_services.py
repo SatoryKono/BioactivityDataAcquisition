@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.registry_api import PipelineRegistry
-from bioetl.infrastructure.config import get_settings
+from bioetl.composition.runtime_builders.config_access import get_settings
 
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.workflow_execution_service import (

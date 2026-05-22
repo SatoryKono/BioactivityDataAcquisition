@@ -20,6 +20,8 @@ from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane import FileRunLedgerStore
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
+pytestmark = pytest.mark.unit
+
 _FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
 
 

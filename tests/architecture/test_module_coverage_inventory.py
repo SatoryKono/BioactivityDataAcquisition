@@ -101,7 +101,10 @@ def test_module_coverage_inventory_reports_measured_hotspot_family_evidence() ->
         family_row = hotspot_family_coverage.get(family_name)
         assert isinstance(family_row, dict), family_name
         assert family_row["module_count"] > 0, family_name
-        assert family_row["measured_module_count"] > 0, family_name
+        assert family_row["measured_module_count"] == family_row["module_count"], (
+            family_name
+        )
+        assert family_row["unmeasured_module_count"] == 0, family_name
 
 
 @pytest.mark.architecture

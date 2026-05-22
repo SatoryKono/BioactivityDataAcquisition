@@ -169,7 +169,7 @@ def test_test_governance_budgets_are_explicit_no_growth_ratchets() -> None:
     budgets = cast(YamlMap, payload["budgets"])
     ratchet = cast(YamlMap, payload["budget_ratchet"])
 
-    assert ratchet["linked_issue"] in {"#4458", "#4488", "#4499"}
+    assert ratchet["linked_issue"] in {"#4458", "#4488", "#4499", "#4549"}
     assert ratchet["mode"] == "fail-fast-no-growth"
     assert ratchet["expected_direction"] == "downward"
     assert cast(str, ratchet["touch_policy"]).strip()

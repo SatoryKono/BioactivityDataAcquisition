@@ -62,11 +62,11 @@ budgets:
   duplicate_test_names_max: 876
   duplicate_test_name_occurrences_max: 2728
   compatibility_test_file_max: 56
-  markerless_test_functions_max: 7137
+  markerless_test_functions_max: 7134
   uuid4_call_sites_max: 404
   date_today_call_sites_max: 0
 budget_ratchet:
-  linked_issue: "#4488"
+  linked_issue: "#4549"
   mode: fail-fast-no-growth
   expected_direction: downward
   refreshed_on: "2026-05-22"

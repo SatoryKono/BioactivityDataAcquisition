@@ -91,7 +91,7 @@ def __getattr__(name: str) -> object:
 
 def get_runtime_settings() -> object:
     """Load runtime settings through the composition boundary."""
-    from bioetl.infrastructure.config import get_settings
+    from bioetl.composition.runtime_builders.config_access import get_settings
 
     return get_settings()
 

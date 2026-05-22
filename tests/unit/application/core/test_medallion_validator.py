@@ -16,6 +16,8 @@ from bioetl.application.core.preflight.service import (
 from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.types import RunType
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def mock_logger() -> Mock:

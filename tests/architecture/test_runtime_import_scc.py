@@ -32,22 +32,6 @@ ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
             "removes the split data/default ownership seam."
         ),
     },
-    frozenset(
-        {
-            "bioetl.composition._pipeline_execution",
-            "bioetl.composition._services",
-            "bioetl.composition.observability_api",
-        }
-    ): {
-        "owner": "bioetl.composition",
-        "review_date": "2026-09-30",
-        "linked_issue": "#4500",
-        "rationale": (
-            "Composition public facades and pipeline execution services retain "
-            "a reviewed cycle while runtime-builder/bootstrap wiring is split "
-            "into a strictly one-way assembly flow."
-        ),
-    },
 }
 FORBIDDEN_RUNTIME_SCCS: tuple[frozenset[str], ...] = (
     frozenset(
