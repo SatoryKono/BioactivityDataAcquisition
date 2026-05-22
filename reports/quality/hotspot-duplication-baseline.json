@@ -2,8 +2,8 @@
   "summary": {
     "snapshot_date": "2026-05-22",
     "targets": 5,
-    "total_duplicate_clusters": 43,
-    "total_raw_duplicate_clusters": 43,
+    "total_duplicate_clusters": 40,
+    "total_raw_duplicate_clusters": 40,
     "total_excluded_duplicate_clusters": 0
   },
   "normalization": {
@@ -13,7 +13,7 @@
     "status": "compared_to_previous",
     "snapshot_date": "2026-05-22",
     "previous_snapshot_date": "2026-05-21",
-    "total_duplicate_cluster_delta": -3,
+    "total_duplicate_cluster_delta": -6,
     "targets": [
       {
         "target": "src/bioetl/application/core",
@@ -35,15 +35,15 @@
       },
       {
         "target": "src/bioetl/application/services/control_plane",
-        "current_duplicate_count": 17,
+        "current_duplicate_count": 16,
         "previous_duplicate_count": 17,
-        "delta_duplicate_count": 0
+        "delta_duplicate_count": -1
       },
       {
         "target": "src/bioetl/composition/runtime_builders",
-        "current_duplicate_count": 13,
+        "current_duplicate_count": 11,
         "previous_duplicate_count": 13,
-        "delta_duplicate_count": 0
+        "delta_duplicate_count": -2
       }
     ]
   },
@@ -346,8 +346,8 @@
     {
       "target": "src/bioetl/application/services/control_plane",
       "returncode": 8,
-      "duplicate_count": 17,
-      "raw_duplicate_count": 17,
+      "duplicate_count": 16,
+      "raw_duplicate_count": 16,
       "excluded_duplicate_count": 0,
       "top_pairs": [
         {
@@ -381,7 +381,7 @@
         {
           "modules": [
             "bioetl.application.services.control_plane._run_manifest_diagnostics_base",
-            "bioetl.application.services.control_plane._run_manifest_identity_graph_builder"
+            "bioetl.application.services.control_plane.run_manifest_inspection_helpers"
           ],
           "duplicate_clusters": 1
         }
@@ -462,8 +462,8 @@
             },
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_replay_state",
-              "start_line": 205,
-              "end_line": 213
+              "start_line": 204,
+              "end_line": 212
             }
           ]
         },
@@ -478,24 +478,8 @@
             },
             {
               "module": "bioetl.application.services.control_plane.historical_replay_universe_service",
-              "start_line": 49,
-              "end_line": 56
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/application/services/control_plane/_run_manifest_snapshot_payloads.py",
-          "line": 1,
-          "modules": [
-            {
-              "module": "bioetl.application.services.control_plane._run_manifest_replay_taxonomy",
-              "start_line": 214,
-              "end_line": 221
-            },
-            {
-              "module": "bioetl.application.services.control_plane.run_manifest_replay_taxonomy",
-              "start_line": 12,
-              "end_line": 19
+              "start_line": 50,
+              "end_line": 57
             }
           ]
         },
@@ -509,9 +493,9 @@
               "end_line": 188
             },
             {
-              "module": "bioetl.application.services.control_plane._run_manifest_identity_graph_builder",
-              "start_line": 235,
-              "end_line": 242
+              "module": "bioetl.application.services.control_plane.run_manifest_inspection_helpers",
+              "start_line": 230,
+              "end_line": 237
             }
           ]
         },
@@ -542,8 +526,8 @@
             },
             {
               "module": "bioetl.application.services.control_plane.historical_replay_universe_service",
-              "start_line": 35,
-              "end_line": 41
+              "start_line": 36,
+              "end_line": 42
             }
           ]
         },
@@ -606,8 +590,8 @@
             },
             {
               "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_replay_state",
-              "start_line": 213,
-              "end_line": 230
+              "start_line": 212,
+              "end_line": 223
             }
           ]
         },
@@ -617,13 +601,13 @@
           "modules": [
             {
               "module": "bioetl.application.services.control_plane.run_manifest_inspection_models",
-              "start_line": 119,
-              "end_line": 124
+              "start_line": 127,
+              "end_line": 132
             },
             {
               "module": "bioetl.application.services.control_plane.run_manifest_inspection_service",
-              "start_line": 38,
-              "end_line": 43
+              "start_line": 41,
+              "end_line": 46
             }
           ]
         },
@@ -664,8 +648,8 @@
     {
       "target": "src/bioetl/composition/runtime_builders",
       "returncode": 8,
-      "duplicate_count": 13,
-      "raw_duplicate_count": 13,
+      "duplicate_count": 11,
+      "raw_duplicate_count": 11,
       "excluded_duplicate_count": 0,
       "top_pairs": [
         {
@@ -691,36 +675,20 @@
         },
         {
           "modules": [
-            "bioetl.composition.runtime_builders._input_snapshot_resolution",
-            "bioetl.composition.runtime_builders.input_snapshot_resolution"
+            "bioetl.composition.runtime_builders._run_manifest_creation_support",
+            "bioetl.composition.runtime_builders.run_manifest_contract_identity"
           ],
           "duplicate_clusters": 1
         },
         {
           "modules": [
-            "bioetl.composition.runtime_builders._run_manifest_creation_support",
-            "bioetl.composition.runtime_builders.run_manifest_contract_identity"
+            "bioetl.composition.runtime_builders._run_manifest_refs",
+            "bioetl.composition.runtime_builders.control_plane"
           ],
           "duplicate_clusters": 1
         }
       ],
       "clusters": [
-        {
-          "path": "src/bioetl/composition/runtime_builders/_silver_filter_compatibility_support.py",
-          "line": 1,
-          "modules": [
-            {
-              "module": "bioetl.composition.runtime_builders._run_manifest_support",
-              "start_line": 42,
-              "end_line": 71
-            },
-            {
-              "module": "bioetl.composition.runtime_builders.run_manifest_support",
-              "start_line": 23,
-              "end_line": 41
-            }
-          ]
-        },
         {
           "path": "src/bioetl/composition/runtime_builders/_silver_filter_compatibility_support.py",
           "line": 1,
@@ -830,22 +798,6 @@
               "module": "bioetl.composition.runtime_builders.run_manifest_builder",
               "start_line": 62,
               "end_line": 69
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/runtime_builders/_silver_filter_compatibility_support.py",
-          "line": 1,
-          "modules": [
-            {
-              "module": "bioetl.composition.runtime_builders._input_snapshot_resolution",
-              "start_line": 15,
-              "end_line": 31
-            },
-            {
-              "module": "bioetl.composition.runtime_builders.input_snapshot_resolution",
-              "start_line": 11,
-              "end_line": 17
             }
           ]
         },

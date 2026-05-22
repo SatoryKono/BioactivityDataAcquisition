@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import xml.etree.ElementTree as ET
+from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -46,15 +47,37 @@ def _sha256(path: Path) -> str | None:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _source_tree_sha256(source_paths: list[Path], repo_root: Path) -> str:
+@dataclass(frozen=True, slots=True)
+class _SourceModuleSnapshot:
+    """Source-tree facts read once for row generation and drift hashing."""
+
+    path: Path
+    repo_path: str
+    source_lines: int
+
+
+def _read_source_module_snapshots(
+    source_paths: list[Path],
+    repo_root: Path,
+) -> tuple[list[_SourceModuleSnapshot], str]:
+    """Read source modules once and return row facts plus tree digest."""
     digest = hashlib.sha256()
+    snapshots: list[_SourceModuleSnapshot] = []
     for path in source_paths:
         relative = _repo_relative(path, repo_root)
+        raw_source = path.read_bytes()
         digest.update(relative.encode("utf-8"))
         digest.update(b"\0")
-        digest.update(path.read_bytes())
+        digest.update(raw_source)
         digest.update(b"\0")
-    return digest.hexdigest()
+        snapshots.append(
+            _SourceModuleSnapshot(
+                path=path,
+                repo_path=relative,
+                source_lines=len(raw_source.decode("utf-8").splitlines()),
+            )
+        )
+    return snapshots, digest.hexdigest()
 
 
 def _repo_relative(path: Path, repo_root: Path) -> str:
@@ -229,23 +252,48 @@ def _build_hotspot_family_coverage(
     rows: list[dict[str, Any]],
     *,
     repo_root: Path,
-) -> dict[str, dict[str, int]]:
+) -> dict[str, dict[str, Any]]:
     families = _load_hotspot_family_prefixes(repo_root)
-    family_coverage: dict[str, dict[str, int]] = {}
+    family_coverage: dict[str, dict[str, Any]] = {}
     for family_name, prefixes in families.items():
         family_rows = [
             row
             for row in rows
             if any(str(row["path"]).startswith(prefix) for prefix in prefixes)
         ]
+        measured_module_count = sum(
+            1 for row in family_rows if _status_is_measured(str(row["coverage_status"]))
+        )
+        unmeasured_module_count = sum(
+            1 for row in family_rows if str(row["coverage_status"]) == "unmeasured"
+        )
+        coverage_percents = [
+            float(row["coverage_percent"])
+            for row in family_rows
+            if row["coverage_percent"] is not None
+        ]
+        status_counts: dict[str, int] = {}
+        for row in family_rows:
+            status = str(row["coverage_status"])
+            status_counts[status] = status_counts.get(status, 0) + 1
         family_coverage[family_name] = {
             "module_count": len(family_rows),
-            "measured_module_count": sum(
-                1 for row in family_rows if _status_is_measured(str(row["coverage_status"]))
+            "measured_module_count": measured_module_count,
+            "unmeasured_module_count": unmeasured_module_count,
+            "measured_percent": (
+                round(100.0 * measured_module_count / len(family_rows), 2)
+                if family_rows
+                else 100.0
             ),
-            "unmeasured_module_count": sum(
-                1 for row in family_rows if str(row["coverage_status"]) == "unmeasured"
+            "coverage_percent_min": (
+                round(min(coverage_percents), 2) if coverage_percents else None
             ),
+            "coverage_percent_avg": (
+                round(sum(coverage_percents) / len(coverage_percents), 2)
+                if coverage_percents
+                else None
+            ),
+            "status_counts": dict(sorted(status_counts.items())),
         }
     return family_coverage
 
@@ -262,21 +310,23 @@ def build_module_coverage_inventory(
     coverage_xml_exists = coverage_xml.exists()
     coverage_by_path = _parse_coverage_xml(coverage_xml, repo_root=repo_root)
     source_paths = _iter_source_modules(repo_root)
+    source_snapshots, source_tree_sha256 = _read_source_module_snapshots(
+        source_paths,
+        repo_root,
+    )
     rows: list[dict[str, Any]] = []
 
-    for source_path in source_paths:
-        repo_path = _repo_relative(source_path, repo_root)
-        coverage_entry = coverage_by_path.get(repo_path)
+    for source_snapshot in source_snapshots:
+        coverage_entry = coverage_by_path.get(source_snapshot.repo_path)
         status = _coverage_status(
             coverage_xml_exists=coverage_xml_exists,
             coverage_entry=coverage_entry,
         )
-        source_text = source_path.read_text(encoding="utf-8")
         rows.append(
             {
-                "module": _module_name(source_path, repo_root),
-                "path": repo_path,
-                "source_lines": len(source_text.splitlines()),
+                "module": _module_name(source_snapshot.path, repo_root),
+                "path": source_snapshot.repo_path,
+                "source_lines": source_snapshot.source_lines,
                 "coverage_status": status,
                 "coverage_percent": _coverage_percent(coverage_entry),
                 "executable_lines": (
@@ -297,6 +347,15 @@ def build_module_coverage_inventory(
         status_counts[status] = status_counts.get(status, 0) + 1
 
     hotspot_family_coverage = _build_hotspot_family_coverage(rows, repo_root=repo_root)
+    unmeasured_modules = [
+        {
+            "module": str(row["module"]),
+            "path": str(row["path"]),
+            "reason": "coverage_xml_has_no_class_entry",
+        }
+        for row in rows
+        if str(row["coverage_status"]) == "unmeasured"
+    ]
 
     return {
         "schema_version": 1,
@@ -307,12 +366,14 @@ def build_module_coverage_inventory(
         "measurement_mode": (
             "coverage_xml" if coverage_xml_exists else "source_tree_only"
         ),
-        "source_tree_sha256": _source_tree_sha256(source_paths, repo_root),
+        "source_tree_sha256": source_tree_sha256,
         "canonical_coverage_lane": "coverage-verify",
         "summary": {
             "source_module_count": len(rows),
             "coverage_xml_present": coverage_xml_exists,
             "status_counts": dict(sorted(status_counts.items())),
+            "unmeasured_module_count": len(unmeasured_modules),
+            "unmeasured_modules": unmeasured_modules,
             "hotspot_family_coverage": hotspot_family_coverage,
         },
         "modules": rows,
