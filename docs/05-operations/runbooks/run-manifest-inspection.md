@@ -278,7 +278,16 @@ Interpretation:
   or more authoritative archived/offline packs.
 - `universe-report --require-universal-claim --require-durable-evidence-coverage`
   is the fail-closed operator path whenever release evidence or top-level
-  wording wants to claim that any historical run remains exact replayable.
+  wording wants to claim that any historical run remains exact replayable; the
+  command now exits non-zero when either gate is unsatisfied.
+- `governed_full_corpus_gate.satisfied=true` is the machine-readable summary
+  that the authoritative full-corpus gate is actually closed.
+- `run-manifest show`, `run-manifest score`, and `run-manifest verify` surface
+  a compact `authoritative_replay_dossier` summary. Treat it as a navigation
+  index over the authoritative replay artifacts, not as a replacement for
+  `run_manifest`, `effective_config_artifact`, `lineage_fragment`,
+  `layer_metadata`, `checkpoint_metadata`, and the immutable input snapshot
+  envelope themselves.
 - `run_historical_replay_closure_campaign.py` is the deterministic batch path
   for retained-corpus campaigns: it builds the inventory, optionally emits a
   residual-disposition artifact, may auto-certify retained source/composite

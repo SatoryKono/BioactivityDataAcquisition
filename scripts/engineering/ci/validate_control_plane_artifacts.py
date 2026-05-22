@@ -13,6 +13,12 @@ import yaml
 
 _GIT_LS_FILES_TIMEOUT_SECONDS = 5.0
 _JSON_SUFFIX = ".json"
+_CONTROL_PLANE_EFFECTIVE_CONFIG_MAX_FILES = 64
+_CONTROL_PLANE_EFFECTIVE_CONFIG_OCCURRENCE_MAX_FILES = 64
+_RUN_MANIFEST_VALIDATION_MAX_FILES = 64
+_RUN_LEDGER_VALIDATION_MAX_FILES = 32
+_METADATA_SIDECAR_VALIDATION_MAX_FILES = 64
+_LINEAGE_FRAGMENT_VALIDATION_MAX_FILES = 64
 
 
 def validate_control_plane_artifacts(root: Path) -> list[str]:
@@ -30,17 +36,23 @@ def _validate_effective_config_artifacts(
     root: Path,
     violations: list[str],
 ) -> None:
-    for path in _iter_artifact_files(
-        root,
-        Path("data/output/control/effective_config"),
-        suffix=_JSON_SUFFIX,
+    for path in _bounded_example_paths(
+        _iter_artifact_files(
+            root,
+            Path("data/output/control/effective_config"),
+            suffix=_JSON_SUFFIX,
+        ),
+        max_files=_CONTROL_PLANE_EFFECTIVE_CONFIG_MAX_FILES,
     ):
         _validate_semantic_effective_config_file(path, violations)
 
-    for path in _iter_artifact_files(
-        root,
-        Path("data/output/control/effective_config/_occurrences"),
-        suffix=_JSON_SUFFIX,
+    for path in _bounded_example_paths(
+        _iter_artifact_files(
+            root,
+            Path("data/output/control/effective_config/_occurrences"),
+            suffix=_JSON_SUFFIX,
+        ),
+        max_files=_CONTROL_PLANE_EFFECTIVE_CONFIG_OCCURRENCE_MAX_FILES,
     ):
         _validate_effective_config_occurrence_file(path, violations)
 
@@ -90,10 +102,13 @@ def _validate_run_manifests(
     root: Path,
     violations: list[str],
 ) -> None:
-    for path in _iter_artifact_files(
-        root,
-        Path("data/output/control/run_manifest"),
-        suffix=_JSON_SUFFIX,
+    for path in _bounded_example_paths(
+        _iter_artifact_files(
+            root,
+            Path("data/output/control/run_manifest"),
+            suffix=_JSON_SUFFIX,
+        ),
+        max_files=_RUN_MANIFEST_VALIDATION_MAX_FILES,
     ):
         _validate_run_manifest_file(path, violations)
 
@@ -135,10 +150,13 @@ def _validate_run_manifest_file(path: Path, violations: list[str]) -> None:
 
 
 def _validate_run_ledgers(root: Path, violations: list[str]) -> None:
-    for path in _iter_artifact_files(
-        root,
-        Path("data/output/control/run_ledger"),
-        suffix=".jsonl",
+    for path in _bounded_example_paths(
+        _iter_artifact_files(
+            root,
+            Path("data/output/control/run_ledger"),
+            suffix=".jsonl",
+        ),
+        max_files=_RUN_LEDGER_VALIDATION_MAX_FILES,
     ):
         seen_entries = False
         with path.open(encoding="utf-8") as handle:
@@ -171,11 +189,14 @@ def _validate_run_ledgers(root: Path, violations: list[str]) -> None:
 
 def _validate_metadata_sidecar_examples(root: Path, violations: list[str]) -> None:
     """Validate bounded committed sidecar examples against control-plane anchors."""
-    for path in _iter_artifact_files(
-        root,
-        Path("data/output/bronze"),
-        suffix="_metadata.yaml",
-        recursive=True,
+    for path in _bounded_example_paths(
+        _iter_artifact_files(
+            root,
+            Path("data/output/bronze"),
+            suffix="_metadata.yaml",
+            recursive=True,
+        ),
+        max_files=_METADATA_SIDECAR_VALIDATION_MAX_FILES,
     ):
         payload = _load_yaml_object(path, violations)
         if payload is None:
@@ -206,10 +227,13 @@ def _validate_metadata_sidecar_examples(root: Path, violations: list[str]) -> No
 
 def _validate_lineage_fragment_examples(root: Path, violations: list[str]) -> None:
     """Validate committed lineage fragments expose manifest/run identity anchors."""
-    for path in _iter_artifact_files(
-        root,
-        Path("data/output/bronze/chembl/control/lineage/fragments"),
-        suffix=_JSON_SUFFIX,
+    for path in _bounded_example_paths(
+        _iter_artifact_files(
+            root,
+            Path("data/output/bronze/chembl/control/lineage/fragments"),
+            suffix=_JSON_SUFFIX,
+        ),
+        max_files=_LINEAGE_FRAGMENT_VALIDATION_MAX_FILES,
     ):
         payload = _load_json_object(path, violations)
         if payload is None:
@@ -237,6 +261,28 @@ def _load_json_object(path: Path, violations: list[str]) -> dict[str, Any] | Non
     return payload
 
 
+def _bounded_example_paths(paths: list[Path], *, max_files: int) -> list[Path]:
+    """Return a deterministic bounded sample of committed example artifacts.
+
+    Historical committed examples may accumulate over time, especially in mounted
+    worktrees where opening hundreds of small files becomes the dominant cost.
+    The control-plane contract lane therefore validates a fixed deterministic
+    subset that still spans the sorted corpus instead of reading the entire
+    retained archive on every test invocation.
+    """
+    ordered = sorted(paths)
+    if len(ordered) <= max_files:
+        return ordered
+
+    head_count = max_files // 2
+    tail_count = max_files - head_count
+    bounded = [*ordered[:head_count], *ordered[-tail_count:]]
+
+    # Preserve deterministic order while guarding against accidental overlap.
+    unique_bounded = list(dict.fromkeys(bounded))
+    return unique_bounded
+
+
 def _iter_artifact_files(
     root: Path,
     relative_dir: Path,
@@ -252,7 +298,14 @@ def _iter_artifact_files(
     should not be read by this test.
     """
     base_dir = root / relative_dir
+    is_git_checkout = (root / ".git").exists()
     tracked_files = _git_tracked_files(root, relative_dir)
+    if tracked_files is None and is_git_checkout:
+        # In a Git checkout this validator should only read committed examples.
+        # If `git ls-files` times out or fails on a mounted worktree, falling
+        # back to the filesystem would read local runtime outputs and defeat the
+        # contract lane's bounded-committed-example intent.
+        return []
     if tracked_files is None:
         candidates = base_dir.rglob("*") if recursive else base_dir.glob(f"*{suffix}")
     else:

@@ -381,6 +381,22 @@ class _FakeRunManifestService:
                         "reason": (
                             "authoritative_historical_replay_universe_artifact_unavailable"
                         ),
+                        "governed_full_corpus_gate": {
+                            "gate_kind": "universal_historical_exact_replay",
+                            "scope": "all_known_historical_runs",
+                            "authoritative_truth_surface": (
+                                "historical_replay_universe_closure_report"
+                            ),
+                            "required_claims": {
+                                "universal_claim": False,
+                                "durable_evidence_coverage_claim": False,
+                            },
+                            "satisfied": False,
+                            "verdict": "gate_blocked",
+                            "reason": (
+                                "authoritative_historical_replay_universe_artifact_unavailable"
+                            ),
+                        },
                     },
                     "executable_run_contract_claim": {
                         "scope": (
@@ -410,6 +426,40 @@ class _FakeRunManifestService:
                         }
                     },
                 },
+                "historical_replay_universe_governed_full_corpus_gate": {
+                    "gate_kind": "universal_historical_exact_replay",
+                    "scope": "all_known_historical_runs",
+                    "authoritative_truth_surface": (
+                        "historical_replay_universe_closure_report"
+                    ),
+                    "required_claims": {
+                        "universal_claim": False,
+                        "durable_evidence_coverage_claim": False,
+                    },
+                    "satisfied": False,
+                    "verdict": "gate_blocked",
+                    "reason": (
+                        "authoritative_historical_replay_universe_artifact_unavailable"
+                    ),
+                },
+                "authoritative_replay_dossier": {
+                    "truth_boundary": "authoritative_replay_artifacts_only",
+                    "authoritative_replay_artifacts": [
+                        "run_manifest",
+                        "effective_config_artifact",
+                        "lineage_fragment",
+                        "layer_metadata",
+                        "checkpoint_metadata",
+                        "input_snapshot_envelope",
+                    ],
+                    "manifest_id": "manifest-1",
+                    "run_id": str(self._run_id),
+                    "execution_fingerprint": "fingerprint-1",
+                    "effective_config_artifact_id": "eca-123",
+                    "input_snapshot_identity_fingerprint": (
+                        _SNAPSHOT_IDENTITY_FINGERPRINT
+                    ),
+                },
             },
             identity_graph={
                 "run_id": str(self._run_id),
@@ -429,6 +479,11 @@ class _FakeRunManifestService:
                 "input_snapshot_content_hashes": ["sha256:snapshot-1"],
                 "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
                 "replay_mode": "exact_replay",
+                "authoritative_replay_dossier": {
+                    "truth_boundary": "authoritative_replay_artifacts_only",
+                    "manifest_id": "manifest-1",
+                    "execution_fingerprint": "fingerprint-1",
+                },
                 "input_snapshot_count": 1,
                 "input_snapshots": [
                     {
@@ -631,6 +686,26 @@ class _FakeHistoricalReplayUniverseReport:
             "claimed": durable_claimed,
             "scope": "all_known_historical_runs",
         }
+        self.governed_full_corpus_gate = {
+            "gate_kind": "universal_historical_exact_replay",
+            "scope": "all_known_historical_runs",
+            "authoritative_truth_surface": "historical_replay_universe_closure_report",
+            "required_claims": {
+                "universal_claim": universal_claimed,
+                "durable_evidence_coverage_claim": durable_claimed,
+            },
+            "satisfied": universal_claimed and durable_claimed,
+            "verdict": (
+                "gate_satisfied"
+                if universal_claimed and durable_claimed
+                else "gate_blocked"
+            ),
+            "reason": (
+                "authoritative_full_corpus_gate_satisfied"
+                if universal_claimed and durable_claimed
+                else "authoritative_full_corpus_gate_requires_universal_claim_and_durable_coverage"
+            ),
+        }
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -639,6 +714,7 @@ class _FakeHistoricalReplayUniverseReport:
             "durable_evidence_coverage_claim": (
                 self.durable_evidence_coverage_claim
             ),
+            "governed_full_corpus_gate": self.governed_full_corpus_gate,
         }
 
 
@@ -777,6 +853,10 @@ class TestRunManifestCommands:
             "composite.cross_validation.quarantine"
         ]
         assert "alert_signals" in payload["diagnostics"]
+        assert (
+            payload["diagnostics"]["authoritative_replay_dossier"]["manifest_id"]
+            == "manifest-1"
+        )
 
     def test_score_json_outputs_machine_readable_audit_score(
         self,
@@ -803,9 +883,16 @@ class TestRunManifestCommands:
         assert score["historical_replay_universe_exact_replay_claim"]["claimed"] is (
             False
         )
+        assert (
+            score["historical_replay_universe_exact_replay_claim"][
+                "governed_full_corpus_gate"
+            ]["satisfied"]
+            is False
+        )
         assert score["executable_run_contract_claim"]["claimed"] is True
         assert score["blockers"] == []
         assert "diagnostics.git_commit" in score["evidence_refs"]
+        assert payload["authoritative_replay_dossier"]["manifest_id"] == "manifest-1"
 
     def test_replay_bundle_json_outputs_control_plane_descriptor(
         self,
@@ -851,8 +938,10 @@ class TestRunManifestCommands:
         assert "verdict: supported_boundary_satisfied" in result.output
         assert "historical_replay_universe_exact_replay_claim:" in result.output
         assert "verdict: historical_universe_exact_replay_not_claimed" in result.output
+        assert "governed_full_corpus_gate:" in result.output
         assert "executable_run_contract_claim:" in result.output
         assert "verdict: prospective_executable_run_contract_claimed" in result.output
+        assert "authoritative_replay_dossier:" in result.output
 
     def test_show_yaml_outputs_manifest_and_diagnostics(
         self,
@@ -917,6 +1006,7 @@ class TestRunManifestCommands:
         assert "planned_artifact_count: 1" in result.output
         assert "published_artifact_count: 1" in result.output
         assert "artifact_refs" in result.output
+        assert "authoritative_replay_dossier" in result.output
         assert "identity_graph_complete: true" in result.output
         assert "Identity Graph" in result.output
         assert "lineage_fragment_ids" in result.output
@@ -1204,6 +1294,7 @@ class TestRunManifestCommands:
         payload = json.loads(result.output)
         assert payload["universal_claim"]["claimed"] is True
         assert payload["durable_evidence_coverage_claim"]["claimed"] is True
+        assert payload["governed_full_corpus_gate"]["satisfied"] is True
 
     def test_universe_report_fails_closed_when_required_claim_is_missing(
         self,
@@ -1227,6 +1318,5 @@ class TestRunManifestCommands:
             ],
         )
 
-        assert result.exit_code == 0
-        assert "Historical replay universe report failed" in result.stderr
-        assert "Authoritative historical replay universe claim" in result.stderr
+        assert result.exit_code != 0
+        assert "Authoritative historical replay universe claim" in result.output

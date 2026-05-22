@@ -234,11 +234,11 @@ oversized_test_module_inventory:
       owner: reproducibility-contracts
       target_split: integration/ci reproducibility phases
     - path: tests/unit/application/services/test_metadata_coordinator.py
-      lines: 2002
+      lines: 1998
       owner: application-services
       target_split: metadata coordinator command/query families
     - path: tests/unit/composition/runtime_builders/test_runner_builder.py
-      lines: 1910
+      lines: 1973
       owner: composition-runtime
       target_split: runner-builder factory seams
     - path: tests/unit/application/core/test_record_normalization_processor.py
@@ -254,7 +254,7 @@ oversized_test_module_inventory:
       owner: observability-dashboards
     - issue_ref: "#4506"
       source: tests/unit/composition/runtime_builders/test_runner_builder.py
-      source_lines_after_split: 1910
+      source_lines_after_split: 1973
       extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
       extracted_surface_lines: 93
       owner: composition-runtime

@@ -176,7 +176,12 @@ def render_verify_payload(payload: dict[str, object]) -> str:
         f"  semantic_equivalent: {format_scalar(payload.get('semantic_equivalent'))}",
         f"  occurrence_only: {format_scalar(payload.get('occurrence_only'))}",
     ]
-    for label in ("missing_evidence", "effective_config"):
+    for label in (
+        "missing_evidence",
+        "effective_config",
+        "left_authoritative_replay_dossier",
+        "right_authoritative_replay_dossier",
+    ):
         rendered = format_block(payload.get(label), json_renderer=_render_jsonish_block)
         if len(rendered) == 1:
             lines.append(f"  {label}: {rendered[0]}")
@@ -255,6 +260,16 @@ def render_score_payload(payload: dict[str, object]) -> str:
                 f"    reason: {format_scalar(historical_claim.get('reason'))}",
             ]
         )
+        governed_gate = historical_claim.get("governed_full_corpus_gate")
+        if isinstance(governed_gate, dict):
+            lines.extend(
+                [
+                    "    governed_full_corpus_gate:",
+                    f"      satisfied: {format_scalar(governed_gate.get('satisfied'))}",
+                    f"      verdict: {format_scalar(governed_gate.get('verdict'))}",
+                    f"      reason: {format_scalar(governed_gate.get('reason'))}",
+                ]
+            )
     if isinstance(executable_claim, dict):
         lines.extend(
             [
@@ -262,6 +277,20 @@ def render_score_payload(payload: dict[str, object]) -> str:
                 f"    claimed: {format_scalar(executable_claim.get('claimed'))}",
                 f"    verdict: {format_scalar(executable_claim.get('verdict'))}",
                 f"    reason: {format_scalar(executable_claim.get('reason'))}",
+            ]
+        )
+    dossier = payload.get("authoritative_replay_dossier")
+    if isinstance(dossier, dict):
+        lines.extend(
+            [
+                "  authoritative_replay_dossier:",
+                f"    manifest_id: {format_scalar(dossier.get('manifest_id'))}",
+                "    execution_fingerprint: "
+                f"{format_scalar(dossier.get('execution_fingerprint'))}",
+                "    effective_config_artifact_id: "
+                f"{format_scalar(dossier.get('effective_config_artifact_id'))}",
+                "    input_snapshot_identity_fingerprint: "
+                f"{format_scalar(dossier.get('input_snapshot_identity_fingerprint'))}",
             ]
         )
     return "\n".join(lines)

@@ -76,6 +76,8 @@ def test_universe_report_blocks_claim_when_external_archived_record_is_unresolve
     assert report.universal_claim["scope"] == "all_known_historical_runs"
     assert "archived-manifest-1" in report.universal_claim["blocked_manifest_ids"]
     assert report.durable_evidence_coverage_claim["claimed"] is False
+    assert report.governed_full_corpus_gate["satisfied"] is False
+    assert report.governed_full_corpus_gate["verdict"] == "gate_blocked"
 
 
 def test_universe_report_supports_claim_when_local_and_external_records_are_closed() -> (
@@ -121,3 +123,4 @@ def test_universe_report_supports_claim_when_local_and_external_records_are_clos
     assert report.universal_claim["claimed"] is True
     assert report.universal_claim["scope"] == "all_known_historical_runs"
     assert report.durable_evidence_coverage_claim["claimed"] is True
+    assert report.governed_full_corpus_gate["satisfied"] is True

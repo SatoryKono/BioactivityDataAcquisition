@@ -28,6 +28,20 @@ def build_historical_replay_universe_exact_replay_claim(
 ) -> JsonDict:
     historical_universe_claim = summary.get("historical_replay_universe_claim")
     historical_universe_source = summary.get("historical_replay_universe_claim_source")
+    governed_gate = summary.get("historical_replay_universe_governed_full_corpus_gate")
+    if not isinstance(governed_gate, dict):
+        governed_gate = {
+            "gate_kind": "universal_historical_exact_replay",
+            "scope": "all_known_historical_runs",
+            "authoritative_truth_surface": "historical_replay_universe_closure_report",
+            "required_claims": {
+                "universal_claim": False,
+                "durable_evidence_coverage_claim": False,
+            },
+            "satisfied": False,
+            "verdict": "gate_blocked",
+            "reason": "authoritative_historical_replay_universe_artifact_unavailable",
+        }
     if isinstance(historical_universe_claim, dict):
         claim_refs = _claim_evidence_refs(
             evidence_refs=evidence_refs,
@@ -68,6 +82,7 @@ def build_historical_replay_universe_exact_replay_claim(
             "lineage_closure_boundary": summary.get("lineage_closure_boundary"),
             "authoritative_truth_surface": "historical_replay_universe_closure_report",
             "claim_source_artifact_path": artifact_path,
+            "governed_full_corpus_gate": governed_gate,
             "evidence_refs": claim_refs,
         }
     claim_refs = _claim_evidence_refs(
@@ -83,6 +98,7 @@ def build_historical_replay_universe_exact_replay_claim(
         "lineage_closure_boundary": summary.get("lineage_closure_boundary"),
         "authoritative_truth_surface": "historical_replay_universe_closure_report",
         "claim_source_artifact_path": None,
+        "governed_full_corpus_gate": governed_gate,
         "evidence_refs": claim_refs,
     }
 

@@ -423,6 +423,18 @@ def test_show_attaches_latest_historical_replay_universe_claim_to_score() -> Non
                 "scope": "all_known_historical_runs",
                 "blocked_manifest_ids": [],
             },
+            "governed_full_corpus_gate": {
+                "gate_kind": "universal_historical_exact_replay",
+                "scope": "all_known_historical_runs",
+                "authoritative_truth_surface": "historical_replay_universe_closure_report",
+                "required_claims": {
+                    "universal_claim": True,
+                    "durable_evidence_coverage_claim": True,
+                },
+                "satisfied": True,
+                "verdict": "gate_satisfied",
+                "reason": "authoritative_full_corpus_gate_satisfied",
+            },
         }
     )
     service = RunManifestInspectionService(
@@ -452,6 +464,13 @@ def test_show_attaches_latest_historical_replay_universe_claim_to_score() -> Non
     assert executable_claim["claimed"] is True
     assert executable_claim["verdict"] == "prospective_executable_run_contract_claimed"
     assert historical_claim["verdict"] == "historical_universe_exact_replay_claimed"
+    assert historical_claim["governed_full_corpus_gate"]["satisfied"] is True
+    assert (
+        result.diagnostics["historical_replay_universe_governed_full_corpus_gate"][
+            "verdict"
+        ]
+        == "gate_satisfied"
+    )
     assert (
         historical_claim["reason"]
         == "latest_historical_replay_universe_artifact_supports_universal_claim"
@@ -460,6 +479,10 @@ def test_show_attaches_latest_historical_replay_universe_claim_to_score() -> Non
         historical_claim["claim_source_artifact_path"]
         == "data/output/control/historical_replay_universe/latest.json"
     )
+    dossier = result.diagnostics["authoritative_replay_dossier"]
+    assert dossier["manifest_id"] == "manifest-global-claim"
+    assert dossier["execution_fingerprint"] == manifest.execution_fingerprint
+    assert "run_manifest" in dossier["authoritative_replay_artifacts"]
 
 
 def _expected_input_snapshots() -> list[dict[str, object]]:
@@ -1597,7 +1620,14 @@ def test_verify_confirms_cross_store_effective_config_replay_evidence() -> None:
         "left_effective_config_hash": True,
         "right_effective_config_hash": True,
     }
-    assert result.to_dict()["manifest_diff"]["classification"] == "occurrence_only"
+    payload = result.to_dict()
+    assert payload["manifest_diff"]["classification"] == "occurrence_only"
+    assert payload["left_authoritative_replay_dossier"]["manifest_id"] == (
+        "manifest-left"
+    )
+    assert payload["right_authoritative_replay_dossier"]["manifest_id"] == (
+        "manifest-right"
+    )
 
 
 def test_verify_reports_missing_effective_config_evidence() -> None:

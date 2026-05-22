@@ -116,6 +116,10 @@ def score_command(identifier: str, output_format: str) -> None:
             "reproducibility_audit_score",
             {},
         ),
+        "authoritative_replay_dossier": result.diagnostics.get(
+            "authoritative_replay_dossier",
+            {},
+        ),
     }
     _emit_payload(payload, output_format)
 
@@ -369,19 +373,17 @@ def universe_report_command(
 
             artifact_path = persist_historical_replay_universe_report(report)
             payload = {**payload, "artifact_path": str(artifact_path)}
-        if require_universal_claim and not bool(
-            report.universal_claim.get("claimed", False)
-        ):
-            raise ValueError(
-                "Authoritative historical replay universe claim is not satisfied."
-            )
-        if require_durable_evidence_coverage and not bool(
-            report.durable_evidence_coverage_claim.get("claimed", False)
-        ):
-            raise ValueError("Durable evidence coverage claim is not satisfied.")
     except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
         echo_error("Historical replay universe report failed", str(exc))
         return
+    if require_universal_claim and not bool(report.universal_claim.get("claimed", False)):
+        raise click.ClickException(
+            "Authoritative historical replay universe claim is not satisfied."
+        )
+    if require_durable_evidence_coverage and not bool(
+        report.durable_evidence_coverage_claim.get("claimed", False)
+    ):
+        raise click.ClickException("Durable evidence coverage claim is not satisfied.")
     _emit_payload(payload, output_format)
 
 

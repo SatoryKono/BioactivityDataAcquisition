@@ -12,6 +12,9 @@ from bioetl.application.services.control_plane._run_manifest_inspection_mixins i
 from bioetl.application.services.control_plane.run_manifest_diagnostics import (
     build_diagnostics_summary,
 )
+from bioetl.application.services.control_plane.run_manifest_inspection_helpers import (
+    build_authoritative_replay_dossier,
+)
 from bioetl.application.services.control_plane.run_manifest_inspection_models import (
     RunManifestDiffEntry,
     RunManifestDiffResult,
@@ -74,6 +77,13 @@ class RunManifestInspectionService(
         self._attach_historical_replay_universe_claim(diagnostics)
         self._attach_reproducibility_claim_views(diagnostics)
         identity_graph = self._build_identity_graph(manifest, diagnostics)
+        dossier = build_authoritative_replay_dossier(
+            manifest=manifest,
+            diagnostics=diagnostics,
+            identity_graph=identity_graph,
+        )
+        diagnostics["authoritative_replay_dossier"] = dossier
+        identity_graph["authoritative_replay_dossier"] = dossier
         diagnostics["identity_graph"] = identity_graph
         return RunManifestInspectionResult(
             manifest=manifest,
@@ -101,6 +111,11 @@ class RunManifestInspectionService(
         diagnostics["historical_replay_universe_claim_source"] = str(
             report.get("_artifact_path") or report.get("report_id") or ""
         )
+        governed_gate = report.get("governed_full_corpus_gate")
+        if isinstance(governed_gate, dict):
+            diagnostics["historical_replay_universe_governed_full_corpus_gate"] = dict(
+                governed_gate
+            )
         diagnostics["historical_replay_universe_durable_evidence_claimed"] = bool(
             durable_claim.get("claimed")
         )
@@ -200,9 +215,11 @@ class RunManifestInspectionService(
         self, left_identifier: str, right_identifier: str
     ) -> RunManifestVerifyResult:
         """Verify replay evidence across manifest and effective-config stores."""
+        left_result = self.show(left_identifier)
+        right_result = self.show(right_identifier)
         diff_result = self.diff(left_identifier, right_identifier)
-        left_manifest = self._resolve_manifest(left_identifier)
-        right_manifest = self._resolve_manifest(right_identifier)
+        left_manifest = left_result.manifest
+        right_manifest = right_result.manifest
         effective_config = build_effective_config_store_verification(
             self.effective_config_artifact_port,
             left_manifest=left_manifest,
@@ -247,6 +264,14 @@ class RunManifestInspectionService(
             missing_evidence=missing_evidence,
             manifest_diff=diff_result.to_dict(),
             effective_config=effective_config,
+            left_authoritative_replay_dossier=cast(
+                "dict[str, object]",
+                left_result.diagnostics.get("authoritative_replay_dossier", {}),
+            ),
+            right_authoritative_replay_dossier=cast(
+                "dict[str, object]",
+                right_result.diagnostics.get("authoritative_replay_dossier", {}),
+            ),
         )
 
     def _resolve_manifest(self, identifier: str) -> RunManifest:
