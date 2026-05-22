@@ -6,9 +6,9 @@ Usage:
     python -m scripts.engineering.dev --help
 
 Commands:
-    setup              Legacy compatibility setup facade (shell)
-    setup --quick      Legacy quick-mode guidance facade (shell)
-    setup --ci         Legacy CI-mode guidance facade (shell)
+    setup              Legacy compatibility command; exits with guidance
+    setup --quick      Legacy quick-mode command; exits with guidance
+    setup --ci         Legacy CI-mode command; exits with guidance
     pretest-guardrails Run repository/docs/architecture preflight (shell)
     pytest-sharded     Run the recommended path-based pytest shards (shell)
     install-deps       Install project dependencies
@@ -30,6 +30,7 @@ from scripts.engineering.common.cli_dispatch import (
     dispatch_cli,
     module_command,
     print_help,
+    print_unknown_command,
     python_command,
     shell_command,
 )
@@ -48,7 +49,6 @@ COMMAND_SPECS = {
 COMMAND_SPECS["setup-mcp"] = module_command("scripts.ai.codex.setup_mcp")
 
 SHELL_COMMANDS = {
-    "setup": "dev_setup.sh",
     "pretest-guardrails": "pretest_guardrails.sh",
     "pytest-sharded": "run_pytest_sharded.sh",
 }
@@ -59,6 +59,24 @@ SHELL_COMMAND_SPECS = {
 _DIR = Path(__file__).parent
 
 
+def _handle_legacy_setup_command(rest: list[str]) -> int:
+    """Hard-fail the retired legacy setup command with actionable guidance."""
+    if rest and rest[0] not in {"--quick", "--ci"}:
+        return print_unknown_command(
+            "setup",
+            {**COMMAND_SPECS, **SHELL_COMMAND_SPECS},
+            extra_available=("test-changed",),
+            sort_available=True,
+        )
+    print(
+        "The legacy `python -m scripts.engineering.dev setup` command is retired. "
+        "Use `make install` for project bootstrap or "
+        "`python -m scripts.engineering.dev setup-mcp` for MCP setup.",
+        file=sys.stderr,
+    )
+    return 2
+
+
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
 
@@ -67,6 +85,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     cmd, rest = args[0], args[1:]
+
+    if cmd == "setup":
+        return _handle_legacy_setup_command(rest)
 
     if cmd in COMMAND_SPECS:
         return dispatch_cli(

@@ -10,14 +10,13 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SCORECARD_PATH = PROJECT_ROOT / "configs/quality/debt_scorecard.yaml"
 ISSUE_BACKED_HOTSPOT_FAMILIES = {
-    "application_services_control_plane": "#4454",
-    "composition_runtime_builders": "#4456",
+    "application_services_control_plane": "#4547",
+    "composition_runtime_builders": "#4552",
 }
 ACTIVE_ISSUE_BACKED_HOTSPOT_FAMILIES = {
-    "composition_bootstrap_runtime": "#4534",
+    "composition_bootstrap_runtime": "#4548",
 }
 ACTIVE_HOTSPOT_CLOSEOUT_FAMILIES = {
-    "application_core",
     "composition_factories_pipeline",
 }
 
@@ -258,6 +257,10 @@ def test_current_hotspot_closeout_families_are_issue_linked() -> None:
         family = by_name[family_name]
         assert family["linked_issue"] == "#4477"
         assert family["ratchet_stage"] == "active"
+
+    application_core = by_name["application_core"]
+    assert application_core["linked_issue"] == "#4554"
+    assert application_core["ratchet_stage"] == "active"
 
 
 def test_issue_4477_records_active_family_duplication_reduction() -> None:

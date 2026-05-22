@@ -13,7 +13,7 @@ make setup-plugins
 python -m scripts.engineering.dev setup-mcp  # optional MCP tooling via canonical backend
 ```
 
-`dev_setup.sh` is still wired into `python -m scripts.engineering.dev setup`, but it is currently a legacy placeholder rather than the supported bootstrap path. Repository-local references to that path should be treated as compatibility evidence, not as proof that it is a canonical onboarding command.
+`python -m scripts.engineering.dev setup` is a retained legacy command that now fails fast with guidance to use `make install` or `setup-mcp`. Repository-local references to `dev_setup.sh` should be treated as historical compatibility evidence, not as proof that it is a canonical onboarding command.
 
 ## Stable Dual-OS Environments
 
@@ -178,9 +178,9 @@ python -m scripts.engineering.dev <command> [args...]
 
 | Command              | Script                                                       | Description                                                      |
 | -------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
-| `setup`              | `scripts/engineering/dev/dev_setup.sh`                       | Legacy shell facade; currently not the supported onboarding path |
-| `setup --quick`      | `scripts/engineering/dev/dev_setup.sh`                       | Legacy placeholder mode; not recommended for current setup       |
-| `setup --ci`         | `scripts/engineering/dev/dev_setup.sh`                       | Legacy placeholder mode; not recommended for current setup       |
+| `setup`              | hard-fail guidance in `python -m scripts.engineering.dev`    | Legacy compatibility command; points users to maintained setup paths |
+| `setup --quick`      | hard-fail guidance in `python -m scripts.engineering.dev`    | Legacy compatibility command; no shell bootstrap remains         |
+| `setup --ci`         | hard-fail guidance in `python -m scripts.engineering.dev`    | Legacy compatibility command; CI should use maintained repo commands |
 | `install-deps`       | `scripts/engineering/dev/install_deps.py`                    | Auxiliary helper script, not a full project bootstrap            |
 | `probe-quality`      | `scripts/engineering/dev/quality_gate_probe.py`              | Measure narrow pytest/mypy startup latency and timeout behavior  |
 | `pretest-guardrails` | `scripts/engineering/dev/pretest_guardrails.sh`              | Run cleanup + repo/docs/memory/architecture preflight            |
@@ -195,9 +195,9 @@ python -m scripts.engineering.dev <command> [args...]
 
 | Command              | When                                                                                                                         | Trigger                                                |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `setup`              | Legacy compatibility entrypoint only; use `make install` instead                                                             | Manual, only if intentionally testing the shell facade |
-| `setup --quick`      | Legacy compatibility entrypoint only; use `make install` + targeted verify commands instead                                  | Manual, exceptional use only                           |
-| `setup --ci`         | Legacy compatibility entrypoint only; CI should use the maintained repo commands                                             | CI migration/legacy compatibility only                 |
+| `setup`              | Legacy compatibility entrypoint only; expect a hard-fail message that points to `make install` or `setup-mcp`               | Manual, only if intentionally verifying the retired command |
+| `setup --quick`      | Legacy compatibility entrypoint only; expect the same hard-fail guidance as `setup`                                          | Manual, exceptional use only                           |
+| `setup --ci`         | Legacy compatibility entrypoint only; expect the same hard-fail guidance as `setup`; CI should use maintained repo commands | CI migration/legacy compatibility only                 |
 | `install-deps`       | Specialized helper for one auxiliary package; not for normal repo setup                                                      | Manual, rare maintenance task                          |
 | `pretest-guardrails` | Before broad bash pytest runs when you want drift/governance/memory issues caught up front                                   | Manual, or auto-triggered by bash pytest runners       |
 | `run-tests`          | Local test execution; supports modes: `all`, `unit`, `arch`, `integration`, `contract`, `smoke`, `security`, `memory`, `cov` | Manual, during development                             |

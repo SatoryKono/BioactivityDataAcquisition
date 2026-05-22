@@ -143,6 +143,18 @@ def test_setup_router_is_the_supported_public_entrypoint() -> None:
     assert not (root / "scripts/engineering/dev/setup_copilot_codex_mcp.ps1").exists()
 
 
+def test_legacy_setup_command_fails_with_guidance() -> None:
+    """Legacy setup command should fail fast with maintained-path guidance."""
+    result = run_repo_python("-m", "scripts.engineering.dev", "setup")
+
+    assert result.returncode == 2
+    assert "legacy `python -m scripts.engineering.dev setup` command is retired" in (
+        result.stderr
+    )
+    assert "make install" in result.stderr
+    assert "setup-mcp" in result.stderr
+
+
 def test_github_mcp_wrappers_load_repo_env() -> None:
     """GitHub MCP wrappers should load repo .env before fallback auth."""
     root = repo_root()

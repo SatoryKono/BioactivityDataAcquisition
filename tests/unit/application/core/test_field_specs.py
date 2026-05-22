@@ -22,6 +22,8 @@ from bioetl.application.core.field_specs import (
     simple_fields,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestFieldSpec:
     """Tests for FieldSpec dataclass."""

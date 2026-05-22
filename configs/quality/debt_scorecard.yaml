@@ -251,7 +251,7 @@ hotspot_family_ratchets:
   - name: application_core
     owner: '@bioetl-architecture'
     linked_rf: RF-023
-    linked_issue: '#4477'
+    linked_issue: '#4554'
     ratchet_stage: active
     ratchet_scope: duplication-non-growth-plus-bounded-growth
     expected_action: Hold duplication, file-growth, and fan-in at the reviewed baseline
@@ -278,7 +278,7 @@ hotspot_family_ratchets:
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023
-    linked_issue: '#4534'
+    linked_issue: '#4548'
     ratchet_stage: active
     ratchet_scope: duplication-non-growth-plus-bounded-growth
     expected_action: Hold duplication, file-growth, and fan-in at the reviewed baseline
@@ -333,7 +333,7 @@ hotspot_family_ratchets:
   - name: application_services_control_plane
     owner: '@bioetl-platform'
     linked_rf: RF-023
-    linked_issue: '#4454'
+    linked_issue: '#4547'
     ratchet_stage: reviewed-baseline
     ratchet_scope: duplication-report-plus-bounded-growth
     expected_action: Hold file-growth and fan-in at the reviewed baseline during
@@ -362,7 +362,7 @@ hotspot_family_ratchets:
   - name: composition_runtime_builders
     owner: '@bioetl-platform'
     linked_rf: RF-023
-    linked_issue: '#4456'
+    linked_issue: '#4552'
     ratchet_stage: reviewed-baseline
     ratchet_scope: duplication-report-plus-bounded-growth
     expected_action: Hold file-growth and fan-in at the reviewed baseline during

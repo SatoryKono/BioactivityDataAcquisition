@@ -11,6 +11,11 @@ from bioetl.application.core._batch_write_support import (
     emit_domain_event,
     safe_write_layer,
 )
+from bioetl.application.core._batch_processing_metrics_support import (
+    track_bronze_write_metrics,
+    track_storage_write_metrics,
+    track_transform_result_metrics,
+)
 from bioetl.application.core.batch_processing_runtime import (
     build_bronze_refs,
     execute_transform_with_span,
@@ -109,18 +114,9 @@ class BatchProcessingSupportService:
                 "bronze", error, batch_id, record_count=len(records)
             ),
         )
-        self._batch_metrics.track_batch_size("bronze", len(records))
-        self._batch_metrics.track_processed_records("bronze", len(records))
-        self._batch_metrics.track_batch_written(stage="bronze", count=len(records))
-        self._batch_metrics.track_stage_records(
-            stage="ingestion",
-            outcome="bronze_written",
-            count=len(records),
-        )
-        self._batch_metrics.track_stage_records(
-            stage="bronze",
-            outcome="records",
-            count=len(records),
+        track_bronze_write_metrics(
+            self._batch_metrics,
+            record_count=len(records),
         )
         emit_batch_written(
             emitter=self._domain_event_emitter,
@@ -144,31 +140,9 @@ class BatchProcessingSupportService:
             batch_id=batch_id,
             start_index=start_index,
         )
-        self._batch_metrics.track_processed_records(
-            "silver", len(transform_result.silver_records)
-        )
-        self._batch_metrics.track_processed_records(
-            "gold", len(transform_result.gold_records)
-        )
-        self._batch_metrics.track_stage_records(
-            stage="transform",
-            outcome="silver_ready",
-            count=len(transform_result.silver_records),
-        )
-        self._batch_metrics.track_stage_records(
-            stage="silver",
-            outcome="valid",
-            count=len(transform_result.silver_records),
-        )
-        self._batch_metrics.track_stage_records(
-            stage="transform",
-            outcome="gold_ready",
-            count=len(transform_result.gold_records),
-        )
-        self._batch_metrics.track_stage_records(
-            stage="gold",
-            outcome="excluded_by_contract",
-            count=transform_result.gold_excluded_by_contract_count,
+        track_transform_result_metrics(
+            self._batch_metrics,
+            transform_result=transform_result,
         )
         return transform_result
 
@@ -216,20 +190,9 @@ class BatchProcessingSupportService:
                 silver_refs=[silver_result] if silver_result is not None else None,
                 operation_errors=_OPERATION_ERRORS,
             )
-        self._batch_metrics.track_stage_records(
-            stage="storage",
-            outcome="silver_written",
-            count=len(transform_result.silver_records),
-        )
-        self._batch_metrics.track_stage_records(
-            stage="storage",
-            outcome="gold_written",
-            count=len(transform_result.gold_records),
-        )
-        self._batch_metrics.track_stage_records(
-            stage="gold",
-            outcome="written",
-            count=len(transform_result.gold_records),
+        track_storage_write_metrics(
+            self._batch_metrics,
+            transform_result=transform_result,
         )
 
     def finalize_batch_span(

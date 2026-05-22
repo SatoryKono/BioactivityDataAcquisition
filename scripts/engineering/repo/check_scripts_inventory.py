@@ -185,7 +185,6 @@ LEGACY_INTERNAL_AI_LAUNCHERS: Final[frozenset[str]] = frozenset(
 )
 LEGACY_NAMED_SCRIPTS: Final[frozenset[str]] = frozenset(
     {
-        "scripts/engineering/dev/dev_setup.sh",
         "scripts/engineering/diagnostics/_tmp_inspect_vcr.py",
     }
 )
