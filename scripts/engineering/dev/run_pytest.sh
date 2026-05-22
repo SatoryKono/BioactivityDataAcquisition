@@ -28,6 +28,7 @@ PYTEST_ARGS=("$@")
 PYTEST_PLUGIN_ARGS=()
 PYTEST_NARROW="${BIOETL_PYTEST_NARROW:-0}"
 PYTEST_WITH_COVERAGE="${BIOETL_PYTEST_WITH_COVERAGE:-0}"
+PYTEST_NO_COV="${BIOETL_PYTEST_NO_COV:-0}"
 FILTERED_PYTEST_ARGS=()
 SKIP_PREFLIGHT="${BIOETL_SKIP_PREFLIGHT:-0}"
 PREFLIGHT_SCOPE="${BIOETL_PREFLIGHT_SCOPE:-}"
@@ -41,6 +42,10 @@ for arg in "${PYTEST_ARGS[@]}"; do
         PYTEST_WITH_COVERAGE=1
         continue
     fi
+    if [[ "$arg" == "--no-cov" ]]; then
+        PYTEST_NO_COV=1
+        continue
+    fi
     if [[ "$arg" == "--skip-preflight" ]]; then
         SKIP_PREFLIGHT=1
         continue
@@ -48,7 +53,7 @@ for arg in "${PYTEST_ARGS[@]}"; do
     FILTERED_PYTEST_ARGS+=("$arg")
 done
 
-if [[ "$PYTEST_WITH_COVERAGE" == "1" && "${#DEFAULT_FLAGS[@]}" -gt 0 ]]; then
+if [[ "$PYTEST_WITH_COVERAGE" == "1" && "$PYTEST_NO_COV" != "1" && "${#DEFAULT_FLAGS[@]}" -gt 0 ]]; then
     DEFAULT_FLAGS=(--cov=src/bioetl --cov-report=term "${DEFAULT_FLAGS[@]}")
 fi
 
@@ -63,6 +68,29 @@ for arg in "${PYTEST_ARGS[@]}"; do
 done
 
 PYTEST_ARGS=("${FILTERED_PYTEST_ARGS[@]}")
+if [[ "$PYTEST_NO_COV" == "1" ]]; then
+    _filtered_no_cov_args=()
+    _skip_cov_value=0
+    for arg in "${PYTEST_ARGS[@]}"; do
+        if [[ "$_skip_cov_value" == "1" ]]; then
+            _skip_cov_value=0
+            continue
+        fi
+        case "$arg" in
+            --cov|--cov-report|--cov-config)
+                _skip_cov_value=1
+                continue
+                ;;
+            --cov=*|--cov-report=*|--cov-config=*|--no-cov)
+                continue
+                ;;
+            *)
+                _filtered_no_cov_args+=("$arg")
+                ;;
+        esac
+    done
+    PYTEST_ARGS=("${_filtered_no_cov_args[@]}")
+fi
 
 QUIET_REQUESTED=0
 for arg in "${PYTEST_ARGS[@]}"; do
@@ -123,7 +151,7 @@ _needs_cov_plugin() {
     local arg
     for arg in "$@"; do
         case "$arg" in
-            --cov|--cov=*|--cov-report|--cov-report=*|--cov-config|--cov-config=*|--no-cov)
+            --cov|--cov=*|--cov-report|--cov-report=*|--cov-config|--cov-config=*)
                 return 0
                 ;;
             *)

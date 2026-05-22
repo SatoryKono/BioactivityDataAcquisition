@@ -64,8 +64,7 @@ def test_test_surface_hardening_evidence_paths_exist() -> None:
     for entry in cast(list[YamlMap], payload.get("issues", [])):
         for relative_path in cast(list[str], entry.get("evidence_paths", [])):
             assert (ROOT / relative_path).exists(), (
-                f"Missing hardening evidence for issue #{entry['id']}: "
-                f"{relative_path}"
+                f"Missing hardening evidence for issue #{entry['id']}: {relative_path}"
             )
 
 

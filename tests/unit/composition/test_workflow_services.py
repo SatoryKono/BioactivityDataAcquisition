@@ -26,7 +26,8 @@ def test_get_workflow_execution_service_injects_real_manifest_clock(
         lambda settings: sentinel.metrics,
     )
     monkeypatch.setattr(
-        "bioetl.infrastructure.config.get_settings",
+        _workflow_services,
+        "get_settings",
         lambda: SimpleNamespace(data_dir=tmp_path),
     )
 

@@ -664,5 +664,9 @@ async def test_write_silver_merged_empty_records(temp_delta_path: str):
         records=[],
     )
 
-    assert ("warning", "No records to write for merged Silver", {"table_name": "test_empty"}) in logger.events
+    assert (
+        "warning",
+        "No records to write for merged Silver",
+        {"table_name": "test_empty"},
+    ) in logger.events
     assert not (Path(temp_delta_path) / "test_empty").exists()

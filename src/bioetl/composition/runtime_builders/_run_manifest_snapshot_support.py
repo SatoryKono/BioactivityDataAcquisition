@@ -56,6 +56,7 @@ def build_launch_context_snapshot(
     *,
     run_type_value: str,
     execution_context_value: str,
+    configured_required_persistence_profile: str | None = None,
     required_persistence_profile: str,
     strict_exact_replay_supported: bool | None = None,
     reproducibility_family: str | None = None,
@@ -71,6 +72,9 @@ def build_launch_context_snapshot(
     )
     snapshot.update(
         {
+            "configured_required_persistence_profile": (
+                configured_required_persistence_profile or required_persistence_profile
+            ),
             "required_persistence_profile": required_persistence_profile,
             "exact_replay_support_boundary": exact_replay_support_boundary,
         }

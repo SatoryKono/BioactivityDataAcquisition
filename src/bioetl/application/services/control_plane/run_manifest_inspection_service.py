@@ -72,15 +72,7 @@ class RunManifestInspectionService(
             ledger_entries = tuple(self.ledger_port.list_entries(manifest.manifest_id))
         diagnostics = build_diagnostics_summary(manifest, ledger_entries)
         self._attach_historical_replay_universe_claim(diagnostics)
-        diagnostics.setdefault(
-            "global_reproducibility_claim",
-            diagnostics.get("reproducibility_audit_score", {}).get(
-                "global_reproducibility_claim",
-                {},
-            )
-            if isinstance(diagnostics.get("reproducibility_audit_score"), dict)
-            else {},
-        )
+        self._attach_reproducibility_claim_views(diagnostics)
         identity_graph = self._build_identity_graph(manifest, diagnostics)
         diagnostics["identity_graph"] = identity_graph
         return RunManifestInspectionResult(
@@ -114,8 +106,22 @@ class RunManifestInspectionService(
         )
         score = build_reproducibility_audit_scoring(diagnostics)
         diagnostics["reproducibility_audit_score"] = score
-        diagnostics["global_reproducibility_claim"] = score.get(
-            "global_reproducibility_claim",
+        self._attach_reproducibility_claim_views(diagnostics)
+
+    def _attach_reproducibility_claim_views(
+        self,
+        diagnostics: dict[str, object],
+    ) -> None:
+        """Project the explicit claim surfaces from score payload to top-level diagnostics."""
+        score = diagnostics.get("reproducibility_audit_score")
+        if not isinstance(score, dict):
+            return
+        diagnostics["historical_replay_universe_exact_replay_claim"] = score.get(
+            "historical_replay_universe_exact_replay_claim",
+            {},
+        )
+        diagnostics["executable_run_contract_claim"] = score.get(
+            "executable_run_contract_claim",
             {},
         )
 
@@ -137,8 +143,10 @@ class RunManifestInspectionService(
         self, left_identifier: str, right_identifier: str
     ) -> RunManifestDiffResult:
         """Compute a stable top-level diff between two manifests."""
-        left_manifest = self._resolve_manifest(left_identifier)
-        right_manifest = self._resolve_manifest(right_identifier)
+        left_result = self.show(left_identifier)
+        right_result = self.show(right_identifier)
+        left_manifest = left_result.manifest
+        right_manifest = right_result.manifest
         left_payload = left_manifest.to_dict()
         right_payload = right_manifest.to_dict()
         diff_fields = tuple(
@@ -179,6 +187,12 @@ class RunManifestInspectionService(
                 left_manifest=left_manifest,
                 right_manifest=right_manifest,
                 classification=classification,
+                left_artifact_refs=self._artifact_refs_from_diagnostics(
+                    left_result.diagnostics
+                ),
+                right_artifact_refs=self._artifact_refs_from_diagnostics(
+                    right_result.diagnostics
+                ),
             ),
         )
 
@@ -254,3 +268,12 @@ class RunManifestInspectionService(
             if manifest is not None:
                 return manifest
         raise ValueError(f"Run manifest not found for identifier: {identifier}")
+
+    @staticmethod
+    def _artifact_refs_from_diagnostics(
+        diagnostics: dict[str, object],
+    ) -> tuple[dict[str, object], ...]:
+        refs = diagnostics.get("artifact_refs")
+        if not isinstance(refs, list):
+            return ()
+        return tuple(dict(ref) for ref in refs if isinstance(ref, dict))

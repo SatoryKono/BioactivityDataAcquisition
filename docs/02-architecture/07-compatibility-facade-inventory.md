@@ -122,6 +122,9 @@ Scorecard alignment:
 - `public-entrypoint` rows remain visible through this inventory and a separate
   sanctioned-public-entrypoint governance metric, but they are not technical debt
   unless they regress back into transition-only compatibility shims.
+- `configs/quality/compatibility_facade_inventory.yaml` carries the canonical
+  retained-entrypoint burn-down plan for `#4512`; sanctioned public seams now
+  declare whether they are stable public API or still narrowing first-party callers.
 
 ### Transition Debt Ledger
 
@@ -186,6 +189,10 @@ operational; do not copy generated snapshot counters back into it by hand.
   implementation-module paths and have not yet been promoted to permanent public status.
 - `public-entrypoint` rows are permanent sanctioned import and patch targets, even though their
   implementations remain partitioned behind internal owner modules.
+- Public-entrypoint governance is no longer count-only. Each sanctioned seam must
+  carry an explicit `phase`, `target_state`, and `completion_gate` in the YAML
+  burn-down plan so quarterly review can distinguish stable API from caller-narrowing
+  work.
 - Measured-only modules are not sanctioned public import targets for first-party `src/`; they
   remain tracked only to prevent silent compatibility-surface drift while owners decide whether to
   retain, promote, or remove them.

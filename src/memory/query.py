@@ -37,8 +37,8 @@ from memory.graph.importers.expanded_json import (
 from memory.graph.importers.expanded_json import (
     query_module_relations as _query_module_relations,
 )
-from memory.rag.retrieval import TASK_PROFILES, load_chunk_manifest, rank_chunks
 from memory.rag.filters import WORKFLOW_RAG_MAX_SOURCES
+from memory.rag.retrieval import TASK_PROFILES, load_chunk_manifest, rank_chunks
 from memory.resources import (
     CATALOG_DIR,
     MEMORY_ROOT,
@@ -915,9 +915,7 @@ def query_timeline(
         require_chunks=False,
     )
     if not timeline_events_ready(resolved_events_dir):
-        raise _missing_manifest_error(
-            resolved_events_dir, "timeline event projections"
-        )
+        raise _missing_manifest_error(resolved_events_dir, "timeline event projections")
     matches: list[dict[str, Any]] = []
     lowered_query = query.lower() if query is not None else None
     for path in _iter_timeline_paths(resolved_events_dir):

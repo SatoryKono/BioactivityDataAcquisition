@@ -128,7 +128,7 @@ effective_config:
     git_commit: "abc1234"
     config_files:
       - "configs/providers/chembl.yaml"
-      - "configs/entities/molecule.yaml"
+      - "configs/entities/chembl/molecule.yaml"
 ```
 
 ### 3. Phased Migration Support

@@ -29,9 +29,9 @@ def test_active_docs_sync_workflow_selector_and_cta_titles() -> None:
     panel_inventory = Path(
         "docs/03-guides/dashboards/panel-title-inventory.md"
     ).read_text(encoding="utf-8")
-    changelog = Path(
-        "docs/03-guides/dashboards/dashboard-v2-updates.md"
-    ).read_text(encoding="utf-8")
+    changelog = Path("docs/03-guides/dashboards/dashboard-v2-updates.md").read_text(
+        encoding="utf-8"
+    )
 
     assert "Single-select with Include All" in variable_reference
     assert "single-select with Include All across primary dashboards" in (
@@ -48,9 +48,9 @@ def test_active_docs_sync_workflow_selector_and_cta_titles() -> None:
 
 
 def test_active_dashboard_changelog_stays_current_to_shipped_surface() -> None:
-    changelog = Path(
-        "docs/03-guides/dashboards/dashboard-v2-updates.md"
-    ).read_text(encoding="utf-8")
+    changelog = Path("docs/03-guides/dashboards/dashboard-v2-updates.md").read_text(
+        encoding="utf-8"
+    )
 
     required_tokens = (
         "Shipped Surface 2026-05-19",

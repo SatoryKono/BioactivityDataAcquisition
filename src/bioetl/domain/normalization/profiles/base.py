@@ -85,9 +85,7 @@ def _validate_field_aliases(
 ) -> None:
     for alias, target in field_aliases.items():
         if alias in field_rules:
-            raise ValueError(
-                f"field_aliases cannot shadow canonical field {alias!r}"
-            )
+            raise ValueError(f"field_aliases cannot shadow canonical field {alias!r}")
         if target not in field_rules:
             raise ValueError(
                 f"field_alias target {target!r} is missing from field_rules"
@@ -301,4 +299,6 @@ class NormalizationProfile:
             parts.append(f"missing={sorted(missing)}")
         if extra:
             parts.append(f"extra={sorted(extra)}")
-        raise ValueError(f"{self.profile_name} does not cover schema fields exactly: {'; '.join(parts)}")
+        raise ValueError(
+            f"{self.profile_name} does not cover schema fields exactly: {'; '.join(parts)}"
+        )

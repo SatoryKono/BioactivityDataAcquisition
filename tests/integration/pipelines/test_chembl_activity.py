@@ -71,13 +71,17 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
         # If not found in temp directory, check production path
         if not bronze_files:
             prod_bronze_path = "data/output/bronze"
-            bronze_files = glob.glob(f"{prod_bronze_path}/**/*.jsonl.zst", recursive=True)
+            bronze_files = glob.glob(
+                f"{prod_bronze_path}/**/*.jsonl.zst", recursive=True
+            )
             if not bronze_files:
                 bronze_files = glob.glob(
                     f"{prod_bronze_path}/**/*.jsonl.zstd", recursive=True
                 )
 
-        assert len(bronze_files) > 0, f"No bronze files found in {self.bronze_path} or data/output/bronze"
+        assert len(bronze_files) > 0, (
+            f"No bronze files found in {self.bronze_path} or data/output/bronze"
+        )
 
         # Verify Silver Delta Table
         from deltalake import DeltaTable

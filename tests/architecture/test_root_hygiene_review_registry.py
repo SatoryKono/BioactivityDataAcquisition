@@ -140,10 +140,11 @@ def test_root_hygiene_review_registry_tracks_observed_transient_root_families() 
         == "absent_from_root_baseline"
     )
     assert (
-        by_path["temp_get_hash.py"]["current_live_state"]
-        == "absent_from_root_baseline"
+        by_path["temp_get_hash.py"]["current_live_state"] == "absent_from_root_baseline"
     )
-    assert by_path["test_output.txt"]["current_live_state"] == "absent_from_root_baseline"
+    assert (
+        by_path["test_output.txt"]["current_live_state"] == "absent_from_root_baseline"
+    )
 
 
 def test_blocked_cleanup_lane_matches_structure_catalog() -> None:

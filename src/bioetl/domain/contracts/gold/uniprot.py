@@ -72,9 +72,7 @@ class UniProtProteinGoldSchema(StrictGoldContractSchema):
     alternative_products_canonical_json: Series[str] = pa.Field(nullable=True)
     biophysicochemical_properties: Series[str] = pa.Field(nullable=True)
     biophysicochemical_properties_raw_json: Series[str] = pa.Field(nullable=True)
-    biophysicochemical_properties_canonical_json: Series[str] = pa.Field(
-        nullable=True
-    )
+    biophysicochemical_properties_canonical_json: Series[str] = pa.Field(nullable=True)
     caution: Series[str] = pa.Field(nullable=True)
     catalytic_activity: Series[str] = pa.Field(nullable=True)
     cellular_component: Series[str] = pa.Field(nullable=True)  # GO aspect C

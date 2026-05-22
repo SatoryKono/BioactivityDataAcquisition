@@ -1,4 +1,4 @@
-"""Port contract for byte-level artifact comparison in forensic diff flows."""
+"""Port contract for semantic-first artifact comparison in forensic diff flows."""
 
 from __future__ import annotations
 
@@ -10,12 +10,12 @@ __all__ = ["ArtifactByteComparisonPort"]
 
 @runtime_checkable
 class ArtifactByteComparisonPort(Protocol):
-    """Compare artifact references for byte-level forensic equivalence."""
+    """Compare artifact references semantically while preserving raw-byte evidence."""
 
     def compare_artifacts(
         self,
         left_refs: Sequence[Mapping[str, object]],
         right_refs: Sequence[Mapping[str, object]],
     ) -> dict[str, object]:
-        """Return deterministic byte-comparison verdict for two artifact sets."""
+        """Return deterministic semantic and raw-byte comparison verdicts."""
         ...

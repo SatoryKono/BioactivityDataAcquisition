@@ -53,9 +53,7 @@ def _load_policy() -> dict[str, object]:
 
 def _build_parent_map(tree: ast.AST) -> dict[ast.AST, ast.AST]:
     return {
-        child: node
-        for node in ast.walk(tree)
-        for child in ast.iter_child_nodes(node)
+        child: node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)
     }
 
 
@@ -145,9 +143,22 @@ def test_determinism_identity_policy_has_expected_shape() -> None:
     assert payload["version"] == 1
     assert payload["policy_scope"] == "deterministic_identity_generation"
     assert date.fromisoformat(str(payload["review_date"])) >= POLICY_REVIEW_DATE
+    reduction_plan = payload.get("compatibility_reduction_plan")
+    assert isinstance(reduction_plan, dict)
+    assert reduction_plan.get("linked_issue") == "#4517"
+    assert reduction_plan.get("review_date") == "2026-09-30"
+    assert set(reduction_plan.get("allowed_outcomes", [])) == {
+        "retain_occurrence_only_generator",
+        "keep_compatibility_alias_but_block_new_semantics",
+        "keep_hash_policy_split_until_backfill",
+    }
 
     entries = payload.get("allowed_occurrence_identity_generators")
     assert isinstance(entries, list) and entries
+    occurrence_budget = reduction_plan.get("occurrence_identity_budget")
+    assert isinstance(occurrence_budget, dict)
+    assert occurrence_budget.get("max_allowed_call_sites") == len(entries)
+    assert isinstance(occurrence_budget.get("ratchet_policy"), str)
 
     seen_call_sites: set[tuple[str, str]] = set()
     for entry in entries:
@@ -183,6 +194,19 @@ def test_determinism_identity_policy_has_expected_shape() -> None:
         "effective_config_hash",
     }
     assert str(legacy_config_hash_policy["issue"]) == "#4467"
+    assert (
+        legacy_config_hash_policy["reviewed_outcome"]
+        == "keep_compatibility_alias_but_block_new_semantics"
+    )
+
+    hash_policy_budget = reduction_plan.get("replay_hash_policy_budget")
+    assert isinstance(hash_policy_budget, dict)
+    assert hash_policy_budget.get("allowed_legacy_alias_fields") == ["config_hash"]
+    assert set(hash_policy_budget.get("allowed_hash_datetime_defaults", [])) == {
+        "v1_date",
+        "v2_datetime_utc",
+    }
+    assert isinstance(hash_policy_budget.get("ratchet_policy"), str)
 
 
 @pytest.mark.architecture

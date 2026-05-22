@@ -16,7 +16,9 @@ import pytest
 # Base path for source files
 SRC_PATH = Path(__file__).parent.parent.parent / "src" / "bioetl"
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-INTERFACES_LAYER_DOC = PROJECT_ROOT / "docs" / "02-architecture" / "04-interfaces-layer.md"
+INTERFACES_LAYER_DOC = (
+    PROJECT_ROOT / "docs" / "02-architecture" / "04-interfaces-layer.md"
+)
 INTERFACES_INFRASTRUCTURE_IMPORT_ALLOWLIST: dict[str, dict[str, object]] = {}
 _ALLOWLIST_REQUIRED_FIELDS = frozenset({"imports", "owner", "reason", "review_by"})
 
@@ -133,15 +135,15 @@ class TestInterfacesNoDIrectInfrastructure:
         """Interfaces layer doc must reference ADR-005, not the legacy matrix claim."""
         content = INTERFACES_LAYER_DOC.read_text(encoding="utf-8")
 
-        assert (
-            "матрица импортов (interfaces может импортировать всё)" not in content
-        ), "Interfaces layer doc still references the legacy import-matrix claim."
-        assert (
-            "(decisions/ADR-005-composition-layer-separation.md)" in content
-        ), "Interfaces layer doc must link to ADR-005 as the active import matrix."
-        assert (
-            "не импортирует `infrastructure` напрямую" in content
-        ), "Interfaces layer doc must state that direct interfaces->infrastructure imports are forbidden."
+        assert "матрица импортов (interfaces может импортировать всё)" not in content, (
+            "Interfaces layer doc still references the legacy import-matrix claim."
+        )
+        assert "(decisions/ADR-005-composition-layer-separation.md)" in content, (
+            "Interfaces layer doc must link to ADR-005 as the active import matrix."
+        )
+        assert "не импортирует `infrastructure` напрямую" in content, (
+            "Interfaces layer doc must state that direct interfaces->infrastructure imports are forbidden."
+        )
 
     def test_all_interfaces_files_no_direct_infrastructure_imports(self):
         """All interfaces modules must route infrastructure access through composition."""

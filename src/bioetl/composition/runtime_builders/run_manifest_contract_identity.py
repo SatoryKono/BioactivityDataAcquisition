@@ -41,7 +41,9 @@ def resolve_contract_identity(
                 "Strict reproducibility contexts require "
                 f"{registry_path.as_posix()} to resolve contract identity for '{contract_ref}'"
             )
-        return RunManifestContractIdentity(contract_ref, None, None, None, None, None, None, None)
+        return RunManifestContractIdentity(
+            contract_ref, None, None, None, None, None, None, None
+        )
     entry = _load_contract_registry_entry(
         registry_path,
         contract_ref,
@@ -53,7 +55,9 @@ def resolve_contract_identity(
                 "Strict reproducibility contexts require a contract registry entry "
                 f"for '{contract_ref}' in {registry_path.as_posix()}"
             )
-        return RunManifestContractIdentity(contract_ref, None, None, None, None, None, None, None)
+        return RunManifestContractIdentity(
+            contract_ref, None, None, None, None, None, None, None
+        )
     fields = _extract_contract_identity_fields(entry)
     if strict:
         _validate_complete_contract_identity(contract_ref, fields)

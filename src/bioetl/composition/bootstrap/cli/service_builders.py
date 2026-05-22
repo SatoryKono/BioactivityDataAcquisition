@@ -22,6 +22,9 @@ from bioetl.application.services.observability_workflow_service import (
     ObservabilityWorkflowService,
 )
 from bioetl.application.services.quarantine_service import QuarantineService
+from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
+    build_effective_config_source_refs,
+)
 from bioetl.domain.ports import DomainConfigMapperPort, SettingsLoaderPort
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
@@ -91,6 +94,7 @@ def build_cli_config_service(
         _pipeline_yaml_getter=pipeline_yaml_getter,
         _dq_config_loader=dq_config_loader,
         _effective_config_service=effective_config_service_factory(),
+        _config_source_ref_provider=build_effective_config_source_refs,
     )
     return ConfigService(
         logger=logger,

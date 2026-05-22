@@ -140,7 +140,9 @@ def _build_selector_records(
     manifests: tuple[RunManifest, ...],
     ledger_port: _RunLedgerLookup | None,
 ) -> tuple[_SelectorRecord, ...]:
-    return tuple(_build_selector_record(manifest, ledger_port) for manifest in manifests)
+    return tuple(
+        _build_selector_record(manifest, ledger_port) for manifest in manifests
+    )
 
 
 def _selected_pipeline_scope(
@@ -224,7 +226,9 @@ def _build_selector_record(
             if terminal_entry
             else "manifest_created_at_fallback"
         ),
-        run_status=terminal_entry.status if terminal_entry and terminal_entry.status else "unknown",
+        run_status=terminal_entry.status
+        if terminal_entry and terminal_entry.status
+        else "unknown",
         terminal_event_type=terminal_entry.event_type if terminal_entry else None,
     )
 

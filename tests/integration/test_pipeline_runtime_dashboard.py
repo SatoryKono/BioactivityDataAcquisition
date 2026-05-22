@@ -29,9 +29,7 @@ _QUERY_WINDOW_FUNC_RE = re.compile(
 )
 _ALLOWED_DASHBOARD_LINK_VARS = {
     "bioetl-overview-v2": frozenset({"workflow", "pipeline", "run_type", "run_id"}),
-    "bioetl-dq-v2": frozenset(
-        {"workflow", "pipeline", "run_type", "run_id", "stage"}
-    ),
+    "bioetl-dq-v2": frozenset({"workflow", "pipeline", "run_type", "run_id", "stage"}),
     "bioetl-runtime": frozenset(
         {"workflow", "pipeline", "run_type", "run_id", "stage"}
     ),

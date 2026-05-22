@@ -292,9 +292,7 @@ class TestBatchEncapsulation:
         original_id = batch.batch_id
 
         with pytest.raises(AttributeError):
-            batch.batch_id = BatchID(
-                deterministic_uuid_value("unit.batch.mutability")
-            )  # type: ignore
+            batch.batch_id = BatchID(deterministic_uuid_value("unit.batch.mutability"))  # type: ignore
 
         assert batch.batch_id == original_id
 

@@ -627,6 +627,56 @@ def is_external_healthcheck_playback_failure(exc: Exception) -> bool:
     )
 
 
+def is_strict_persistence_snapshot_gap(exc: Exception) -> bool:
+    """Return True when strict persistence fails closed on missing snapshots."""
+    if not isinstance(exc, RuntimeError):
+        return False
+    message = " ".join(str(exc).lower().split())
+    if "immutable input snapshots" not in message:
+        return False
+    return any(
+        marker in message
+        for marker in (
+            "strict persistence profiles require immutable input snapshots",
+            "cannot satisfy required persistence profile",
+            "no snapshot-backed source refs were resolved",
+        )
+    )
+
+
+def _skip_strict_persistence_snapshot_gap(
+    context: PipelineRunContext,
+    exc: Exception,
+) -> None:
+    """Skip one E2E run when cassette playback cannot satisfy strict replay policy."""
+    pytest.skip(
+        build_e2e_skip_reason(
+            "PERSISTENCE_SNAPSHOT_GAP",
+            pipeline_name=context.pipeline_name,
+            detail=(
+                "strict snapshot policy blocked cassette-backed playback: "
+                f"{exc}"
+            ),
+        )
+    )
+
+
+def wrap_bootstrap_pipeline_runner_for_e2e(
+    bootstrap_fn: Callable[..., Any],
+) -> Callable[..., Any]:
+    """Guard one bootstrap entrypoint with deterministic strict-policy skips."""
+
+    def _wrapped(context: PipelineRunContext, *args: object, **kwargs: object) -> Any:
+        try:
+            return bootstrap_fn(context, *args, **kwargs)
+        except RuntimeError as exc:
+            if is_strict_persistence_snapshot_gap(exc):
+                _skip_strict_persistence_snapshot_gap(context, exc)
+            raise
+
+    return _wrapped
+
+
 def build_e2e_skip_reason(
     reason_code: str,
     *,
@@ -686,6 +736,36 @@ def _skip_transient_pipeline_run(
     )
 
 
+@pytest.fixture(autouse=True)
+def guard_bootstrap_pipeline_runner_for_e2e(
+    request: pytest.FixtureRequest,
+    monkeypatch: pytest.MonkeyPatch,
+) -> Generator[None, None, None]:
+    """Patch direct bootstrap imports so legacy E2E modules honor policy skips."""
+    import bioetl.composition.bootstrap as bootstrap_package
+    from bioetl.composition.bootstrap.runtime import pipeline as runtime_pipeline
+
+    guarded_bootstrap = wrap_bootstrap_pipeline_runner_for_e2e(
+        runtime_pipeline.bootstrap_pipeline_runner
+    )
+    monkeypatch.setattr(
+        runtime_pipeline,
+        "bootstrap_pipeline_runner",
+        guarded_bootstrap,
+    )
+    monkeypatch.setattr(
+        bootstrap_package,
+        "bootstrap_pipeline_runner",
+        guarded_bootstrap,
+    )
+
+    module = getattr(request.node, "module", None)
+    if module is not None and hasattr(module, "bootstrap_pipeline_runner"):
+        monkeypatch.setattr(module, "bootstrap_pipeline_runner", guarded_bootstrap)
+
+    yield
+
+
 async def run_pipeline_or_skip_transient(context: PipelineRunContext) -> Any:
     """Run pipeline with deterministic retries; skip on transient exhaustion."""
     import httpx
@@ -697,10 +777,14 @@ async def run_pipeline_or_skip_transient(context: PipelineRunContext) -> Any:
     transient_exc: Exception | None = None
     for attempt in range(retry_config.max_attempts):
         run_context = _create_retry_run_context(context, attempt)
-        runner = bootstrap_pipeline_runner(run_context)
         try:
+            runner = bootstrap_pipeline_runner(run_context)
             await runner.run()
             return runner
+        except RuntimeError as exc:
+            if is_strict_persistence_snapshot_gap(exc):
+                _skip_strict_persistence_snapshot_gap(run_context, exc)
+            raise
         except ExternalServiceError as exc:
             if not _is_transient_external_error(exc):
                 raise

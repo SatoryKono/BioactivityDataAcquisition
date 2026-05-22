@@ -15,12 +15,6 @@ services:
       NEO4J_server_memory_pagecache_size: 1g
       # JVM GC tuning
       NEO4J_server_jvm_additional: "-XX:+UseG1GC -XX:G1HeapRegionSize=16m"
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:7474"]
-      interval: 10s
-      timeout: 5s
-      retries: 30
-      start_period: 40s
     restart: unless-stopped
     volumes:
       - neo4j_data:/var/lib/neo4j/data

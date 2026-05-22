@@ -229,7 +229,9 @@ def build_run_replay_bundle_descriptor(
         identity_graph,
         persistence_profile,
         replay_capability_default=manifest.replay_capability.value,
-        requested_exact_replay_default=bool(manifest.launch_context.get("exact_replay")),
+        requested_exact_replay_default=bool(
+            manifest.launch_context.get("exact_replay")
+        ),
     )
     bundle = _build_replay_bundle(
         result,

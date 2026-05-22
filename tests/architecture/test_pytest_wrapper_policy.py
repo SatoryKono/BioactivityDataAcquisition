@@ -34,6 +34,22 @@ def test_powershell_wrapper_keeps_local_coverage_opt_in() -> None:
     )
 
 
+def test_wrappers_allow_no_cov_override_without_loading_coverage_flags() -> None:
+    shell = RUN_PYTEST_SH.read_text(encoding="utf-8")
+    powershell = RUN_PYTEST_PS1.read_text(encoding="utf-8")
+
+    assert 'if [[ "$arg" == "--no-cov" ]]; then' in shell
+    assert 'if [[ "$PYTEST_WITH_COVERAGE" == "1" && "$PYTEST_NO_COV" != "1"' in shell
+    assert (
+        "--cov|--cov=*|--cov-report|--cov-report=*|--cov-config|--cov-config=*)"
+        in shell
+    )
+
+    assert 'if ($Arg -eq "--no-cov") {' in powershell
+    assert "if ($PytestWithCoverage -and -not $PytestNoCov) {" in powershell
+    assert "$PytestArgs = Remove-CoverageArgs -Args $PytestArgs" in powershell
+
+
 def test_wrapper_autopreflight_scope_is_limited_to_full_repo_and_config_heavy_runs() -> (
     None
 ):

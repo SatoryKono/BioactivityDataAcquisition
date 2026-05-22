@@ -55,7 +55,11 @@ def resolve_postrun_collaborators(
     metadata_coordinator: object | None = None,
     metadata_writer: object | None = None,
 ) -> ResolvedPostrunCollaborators:
-    """Resolve storage/metrics/logger/metadata collaborators for PostrunService."""
+    """Resolve storage/metrics/logger/metadata collaborators for PostrunService.
+
+    Compatibility shim for legacy direct constructor kwargs. Review for removal
+    after 2026-09-30 once callers rely on ``services=...`` exclusively.
+    """
     resolved_storage = _resolve_explicit_or_service(
         storage,
         services=services,

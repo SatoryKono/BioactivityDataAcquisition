@@ -220,11 +220,22 @@ def test_critical_runtime_inherits_supported_family_default_profile() -> None:
     )
 
 
-def test_non_exact_launch_preserves_configured_default_profile() -> None:
+def test_supported_family_launch_promotes_degraded_override_to_strict_floor() -> None:
     assert (
         resolve_effective_required_persistence_profile(
             configured_required_profile="degraded_observable",
             family_default_profile="replay_ready",
+            exact_replay_requested=False,
+        )
+        == "replay_ready"
+    )
+
+
+def test_unsupported_family_launch_preserves_degraded_override() -> None:
+    assert (
+        resolve_effective_required_persistence_profile(
+            configured_required_profile="degraded_observable",
+            family_default_profile="degraded_observable",
             exact_replay_requested=False,
         )
         == "degraded_observable"

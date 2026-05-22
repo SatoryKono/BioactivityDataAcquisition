@@ -12,6 +12,10 @@ import click
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,
+    resolve_effective_required_persistence_profile,
+)
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    resolve_reproducibility_family_profile,
 )
 from bioetl.domain.types import RunID
 from bioetl.interfaces.cli.commands._workflow_support import (
@@ -258,13 +262,18 @@ def _validate_workflow_pipeline_replay_prerequisites(config: WorkflowConfig) -> 
     for step in config.pipeline_steps:
         exact_replay = _resolve_step_option(config, step, "exact_replay")
         use_cached_bronze = _resolve_step_option(config, step, "use_cached_bronze")
-        required_profile = (
+        configured_profile = (
             _resolve_step_option(
                 config,
                 step,
                 "required_persistence_profile",
             )
             or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+        )
+        required_profile = _resolve_workflow_step_required_profile(
+            step=step,
+            configured_profile=str(configured_profile),
+            exact_replay=bool(exact_replay),
         )
 
         if bool(exact_replay) and not bool(use_cached_bronze):
@@ -283,6 +292,31 @@ def _validate_workflow_pipeline_replay_prerequisites(config: WorkflowConfig) -> 
                 "Bronze inputs. Use --use-cached-bronze "
                 "(optionally with --cached-bronze-path/--cached-bronze-date)."
             )
+
+
+def _resolve_workflow_step_required_profile(
+    *,
+    step: object,
+    configured_profile: str,
+    exact_replay: bool,
+) -> str:
+    """Resolve one workflow step profile against the published family floor."""
+    pipeline_name = getattr(step, "pipeline_name", None)
+    if not isinstance(pipeline_name, str) or "_" not in pipeline_name:
+        return configured_profile
+    provider, entity = pipeline_name.split("_", 1)
+    execution_context = "composite" if provider == "composite" else "source"
+    profile = resolve_reproducibility_family_profile(
+        provider=provider,
+        entity=entity,
+        contract_ref=f"{provider}.{entity}",
+        execution_context=execution_context,
+    )
+    return resolve_effective_required_persistence_profile(
+        configured_required_profile=configured_profile,
+        family_default_profile=profile.default_required_persistence_profile,
+        exact_replay_requested=exact_replay,
+    )
 
 
 def _resolve_step_option(

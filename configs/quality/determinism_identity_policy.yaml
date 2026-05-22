@@ -1,6 +1,25 @@
 version: 1
 policy_scope: deterministic_identity_generation
 review_date: '2026-09-30'
+compatibility_reduction_plan:
+  linked_issue: '#4517'
+  review_date: '2026-09-30'
+  allowed_outcomes:
+  - retain_occurrence_only_generator
+  - keep_compatibility_alias_but_block_new_semantics
+  - keep_hash_policy_split_until_backfill
+  occurrence_identity_budget:
+    max_allowed_call_sites: 18
+    ratchet_policy: No new uuid4-based occurrence identity generators may be added
+      without explicit policy review and test evidence.
+  replay_hash_policy_budget:
+    allowed_legacy_alias_fields:
+    - config_hash
+    allowed_hash_datetime_defaults:
+    - v1_date
+    - v2_datetime_utc
+    ratchet_policy: Compatibility-only replay/hash aliases may stay only while they
+      remain explicitly documented and outside semantic execution identity.
 allowed_occurrence_identity_generators:
 - path: src/bioetl/domain/aggregates/_batch_aggregate.py
   symbol: Batch.create
@@ -180,9 +199,11 @@ legacy_config_hash_policy:
     explicit resolved/effective config hashes and must not promote config_hash to
     a primary semantic anchor.
   issue: '#4467'
+  reviewed_outcome: keep_compatibility_alias_but_block_new_semantics
 content_hash_datetime_policy:
   active_policy: v1_date
   migration_target: v2_datetime_utc
+  reviewed_outcome: keep_hash_policy_split_until_backfill
   policies:
     v1_date:
       description: Historical content-hash compatibility contract.

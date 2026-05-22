@@ -321,18 +321,27 @@ def test_publication_taxonomy_dq_validators_are_shared_across_non_chembl_publica
 ):
     for provider in ("crossref", "openalex", "pubmed", "semanticscholar"):
         config_path = Path("configs/entities") / provider / "publication.yaml"
-        assert _field_validation_validator(
-            config_path,
-            "publication_type_unified",
-        ) == "validate_publication_type_unified_taxonomy"
-        assert _field_validation_validator(
-            config_path,
-            "publication_subclass",
-        ) == "validate_publication_subclass_taxonomy"
-        assert _field_validation_validator(
-            config_path,
-            "publication_class",
-        ) == "validate_publication_class_taxonomy"
+        assert (
+            _field_validation_validator(
+                config_path,
+                "publication_type_unified",
+            )
+            == "validate_publication_type_unified_taxonomy"
+        )
+        assert (
+            _field_validation_validator(
+                config_path,
+                "publication_subclass",
+            )
+            == "validate_publication_subclass_taxonomy"
+        )
+        assert (
+            _field_validation_validator(
+                config_path,
+                "publication_class",
+            )
+            == "validate_publication_class_taxonomy"
+        )
 
 
 def _field_validation_validator(path: Path, field_name: str) -> str:
@@ -344,7 +353,9 @@ def _field_validation_validator(path: Path, field_name: str) -> str:
     raise AssertionError(f"{path}:{field_name} missing validation")
 
 
-def test_uniprot_reference_array_dq_rules_match_profile_owned_canonicalization() -> None:
+def test_uniprot_reference_array_dq_rules_match_profile_owned_canonicalization() -> (
+    None
+):
     expected_patterns = {
         ("configs/entities/uniprot/protein.yaml", "secondary_accessions"): (
             r'^\[("[A-Z0-9]{6,10}"(,"[A-Z0-9]{6,10}")*)?\]$'
@@ -393,7 +404,9 @@ def test_uniprot_reference_array_dq_rules_match_profile_owned_canonicalization()
         assert reviewed_rule["type"] == "enum"
         assert {
             str(value).lower()
-            for value in reviewed_rule.get("allowed_values", reviewed_rule.get("allowed", ()))
+            for value in reviewed_rule.get(
+                "allowed_values", reviewed_rule.get("allowed", ())
+            )
         } == {"true", "false"}
 
 

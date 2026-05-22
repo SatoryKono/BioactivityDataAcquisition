@@ -17,13 +17,13 @@ from bioetl.composition.runtime_builders._run_manifest_refs import (
     resolve_data_root_mode,
     resolve_run_context_values,
 )
-from bioetl.composition.runtime_builders._run_manifest_support import (
-    to_serializable_mapping as _to_serializable_mapping,
-)
 from bioetl.composition.runtime_builders._silver_filter_compatibility_support import (
     add_silver_filter_compatibility_defaults,
     current_silver_filter_compatibility_mode,
     current_silver_filter_compatibility_snapshot,
+)
+from bioetl.composition.runtime_builders.run_manifest_support import (
+    to_serializable_mapping as _to_serializable_mapping,
 )
 from bioetl.composition.services.versioning import get_dependency_lock_hash
 from bioetl.domain.control_plane.config_source_hashing import (

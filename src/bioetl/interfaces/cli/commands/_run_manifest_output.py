@@ -222,7 +222,8 @@ def render_score_payload(payload: dict[str, object]) -> str:
         return json.dumps(payload, indent=2, default=str)
 
     boundary_verdict = score.get("supported_boundary_verdict")
-    global_claim = score.get("global_reproducibility_claim")
+    historical_claim = score.get("historical_replay_universe_exact_replay_claim")
+    executable_claim = score.get("executable_run_contract_claim")
     lines = [
         "Run Manifest Score",
         f"  identifier: {format_scalar(payload.get('identifier'))}",
@@ -245,13 +246,22 @@ def render_score_payload(payload: dict[str, object]) -> str:
                 f"{format_scalar(boundary_verdict.get('exact_replay_support_boundary'))}",
             ]
         )
-    if isinstance(global_claim, dict):
+    if isinstance(historical_claim, dict):
         lines.extend(
             [
-                "  global_reproducibility_claim:",
-                f"    claimed: {format_scalar(global_claim.get('claimed'))}",
-                f"    verdict: {format_scalar(global_claim.get('verdict'))}",
-                f"    reason: {format_scalar(global_claim.get('reason'))}",
+                "  historical_replay_universe_exact_replay_claim:",
+                f"    claimed: {format_scalar(historical_claim.get('claimed'))}",
+                f"    verdict: {format_scalar(historical_claim.get('verdict'))}",
+                f"    reason: {format_scalar(historical_claim.get('reason'))}",
+            ]
+        )
+    if isinstance(executable_claim, dict):
+        lines.extend(
+            [
+                "  executable_run_contract_claim:",
+                f"    claimed: {format_scalar(executable_claim.get('claimed'))}",
+                f"    verdict: {format_scalar(executable_claim.get('verdict'))}",
+                f"    reason: {format_scalar(executable_claim.get('reason'))}",
             ]
         )
     return "\n".join(lines)

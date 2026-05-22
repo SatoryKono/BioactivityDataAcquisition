@@ -21,12 +21,13 @@ families:
     public_module: bioetl.composition.runtime_builders.run_manifest_support
     private_module: bioetl.composition.runtime_builders._run_manifest_support
     canonical_first_party_module: bioetl.composition.runtime_builders.run_manifest_support
-    max_public_src_importers: 4
-    max_private_src_importers: 9
+    max_public_src_importers: 12
+    max_private_src_importers: 1
     rationale: >-
-      This runtime-builder twin still carries the heaviest split-import skew in
-      the current census and needs a no-growth ratchet while narrowing remains
-      pending.
+      Issue #4485 collapsed first-party runtime-builder imports onto the public
+      `run_manifest_support` seam. The public budget now reflects the
+      canonicalized importer count, while private imports are limited to the
+      public re-export module only.
   - family_id: domain.normalization.profiles.chembl_policy_registry
     owner: bioetl.domain.normalization.profiles
     public_module: bioetl.domain.normalization.profiles.chembl_policy_registry

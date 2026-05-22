@@ -130,6 +130,10 @@ def test_current_test_audit_issue_closeout_tracks_live_evidence() -> None:
         "#4468",
         "#4469",
         "#4470",
+        "#4506",
+        "#4507",
+        "#4508",
+        "#4509",
     }
     for relative_path in cast(list[str], closeout["evidence"]):
         assert (ROOT / relative_path).exists(), (

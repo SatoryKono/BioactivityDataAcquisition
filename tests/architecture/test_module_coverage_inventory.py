@@ -27,9 +27,13 @@ def test_module_coverage_inventory_is_committed_and_shape_is_stable() -> None:
     assert committed["schema_version"] == 1
     assert committed["generated_by"].endswith("report_module_coverage_inventory.py")
     assert committed["coverage_xml_path"] == "reports/coverage/coverage.xml"
-    assert committed["measurement_mode"] in {"coverage_xml", "source_tree_only"}
+    assert committed["measurement_mode"] == "coverage_xml"
+    assert isinstance(committed["coverage_xml_sha256"], str) and committed[
+        "coverage_xml_sha256"
+    ]
     assert committed["canonical_coverage_lane"] == "coverage-verify"
     assert isinstance(committed["modules"], list) and committed["modules"]
+    assert committed["summary"]["coverage_xml_present"] is True
 
     for row in committed["modules"]:
         assert row["module"].startswith("bioetl")
@@ -46,9 +50,6 @@ def test_module_coverage_inventory_is_committed_and_shape_is_stable() -> None:
         coverage_percent = row["coverage_percent"]
         if coverage_percent is not None:
             assert 0.0 <= coverage_percent <= 100.0
-        if committed["measurement_mode"] == "source_tree_only":
-            assert row["coverage_status"] == "coverage_xml_missing"
-            assert coverage_percent is None
 
 
 @pytest.mark.architecture

@@ -60,6 +60,7 @@ BRONZE_BATCH_URI = (TEST_ROOT / "bronze" / "batch_1.jsonl.zst").as_uri()
 SILVER_ARTIFACT_PATH = str(TEST_ROOT / "output" / "silver" / "chembl" / "activity")
 GOLD_DQ_REPORT_PATH = str(TEST_ROOT / "reports" / "gold_dq.json")
 COMPOSITE_CV_REPORT_PATH = str(TEST_ROOT / "reports" / "composite_cv.json")
+pytestmark = pytest.mark.unit
 
 
 def _expected_code_provenance_state(manifest: RunManifest) -> dict[str, object]:
@@ -432,7 +433,8 @@ def test_show_attaches_latest_historical_replay_universe_claim_to_score() -> Non
     result = service.show("manifest-global-claim")
 
     score = result.diagnostics["reproducibility_audit_score"]
-    global_claim = score["global_reproducibility_claim"]
+    historical_claim = score["historical_replay_universe_exact_replay_claim"]
+    executable_claim = score["executable_run_contract_claim"]
     assert result.diagnostics["historical_replay_universe_claim"]["claimed"] is True
     assert (
         result.diagnostics["historical_replay_universe_claim_source"]
@@ -442,14 +444,20 @@ def test_show_attaches_latest_historical_replay_universe_claim_to_score() -> Non
         result.diagnostics["historical_replay_universe_durable_evidence_claimed"]
         is True
     )
-    assert global_claim["claimed"] is True
-    assert global_claim["verdict"] == "universal_exact_replay_claimed"
+    assert historical_claim["claimed"] is True
     assert (
-        global_claim["reason"]
+        result.diagnostics["historical_replay_universe_exact_replay_claim"]["claimed"]
+        is True
+    )
+    assert executable_claim["claimed"] is True
+    assert executable_claim["verdict"] == "prospective_executable_run_contract_claimed"
+    assert historical_claim["verdict"] == "historical_universe_exact_replay_claimed"
+    assert (
+        historical_claim["reason"]
         == "latest_historical_replay_universe_artifact_supports_universal_claim"
     )
     assert (
-        global_claim["claim_source_artifact_path"]
+        historical_claim["claim_source_artifact_path"]
         == "data/output/control/historical_replay_universe/latest.json"
     )
 
@@ -764,8 +772,15 @@ def _expected_diagnostics_without_ledger(
             "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         ],
         "reproducibility_audit_score": reproducibility_audit_score,
-        "global_reproducibility_claim": (
-            reproducibility_audit_score.get("global_reproducibility_claim", {})
+        "historical_replay_universe_exact_replay_claim": (
+            reproducibility_audit_score.get(
+                "historical_replay_universe_exact_replay_claim", {}
+            )
+            if isinstance(reproducibility_audit_score, dict)
+            else {}
+        ),
+        "executable_run_contract_claim": (
+            reproducibility_audit_score.get("executable_run_contract_claim", {})
             if isinstance(reproducibility_audit_score, dict)
             else {}
         ),

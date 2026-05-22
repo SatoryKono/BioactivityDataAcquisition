@@ -1366,7 +1366,8 @@ def test_reproducibility_contract_forensic_grade_profile_is_attained(
         "supported_boundary_satisfied"
     )
     assert score["supported_boundary_verdict"]["supported_boundary_satisfied"] is True
-    assert score["global_reproducibility_claim"]["claimed"] is False
+    assert score["historical_replay_universe_exact_replay_claim"]["claimed"] is False
+    assert score["executable_run_contract_claim"]["claimed"] is True
     assert score["required_profile"] == "forensic_grade"
     assert score["thresholds"] == {
         "determinism": 8,
@@ -1522,7 +1523,8 @@ def test_reproducibility_contract_replay_ready_profile_requires_snapshot_backed_
         "supported_boundary_gaps_present"
     )
     assert score["supported_boundary_verdict"]["supported_boundary_satisfied"] is False
-    assert score["global_reproducibility_claim"]["claimed"] is False
+    assert score["historical_replay_universe_exact_replay_claim"]["claimed"] is False
+    assert score["executable_run_contract_claim"]["claimed"] is True
     assert score["required_profile"] == "replay_ready"
     assert score["thresholds"] == {
         "determinism": 7,
@@ -1594,7 +1596,8 @@ def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed(
         "supported_boundary_gaps_present"
     )
     assert score["supported_boundary_verdict"]["supported_boundary_satisfied"] is False
-    assert score["global_reproducibility_claim"]["claimed"] is False
+    assert score["historical_replay_universe_exact_replay_claim"]["claimed"] is False
+    assert score["executable_run_contract_claim"]["claimed"] is True
     threshold_failures = {
         item["category"]: item for item in score["threshold_failures"]
     }
@@ -1889,8 +1892,11 @@ def test_reproducibility_contract_forensic_diff_exposes_byte_mismatch_inside_sem
     assert payload["semantic_equivalent"] is True
     assert payload["occurrence_only"] is True
     assert payload["artifact_byte_equivalence"]["available"] is True
-    assert payload["artifact_byte_equivalence"]["equivalent"] is False
-    assert payload["artifact_byte_equivalence"]["mismatched_artifacts"]
+    assert payload["artifact_byte_equivalence"]["equivalent"] is True
+    assert payload["artifact_byte_equivalence"]["semantic_equivalent"] is True
+    assert payload["artifact_byte_equivalence"]["raw_byte_equivalent"] is False
+    assert payload["artifact_byte_equivalence"]["occurrence_only"] is True
+    assert payload["artifact_byte_equivalence"]["occurrence_only_artifacts"]
 
 
 def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_lineage_family() -> (
@@ -2005,7 +2011,8 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
         "blocked_outside_supported_boundary"
     )
     assert score["supported_boundary_verdict"]["supported_boundary_satisfied"] is False
-    assert score["global_reproducibility_claim"]["claimed"] is False
+    assert score["historical_replay_universe_exact_replay_claim"]["claimed"] is False
+    assert score["executable_run_contract_claim"]["claimed"] is True
     threshold_failures = {
         item["category"]: item for item in score["threshold_failures"]
     }

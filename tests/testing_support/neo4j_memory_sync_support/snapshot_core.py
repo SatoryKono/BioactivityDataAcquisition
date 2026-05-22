@@ -139,7 +139,9 @@ def _assert_core_node_surfaces(
     )
 
 
-def _assert_storage_runtime_surfaces(node_keys: set[tuple[str, str]], snapshot: GraphSnapshot) -> None:
+def _assert_storage_runtime_surfaces(
+    node_keys: set[tuple[str, str]], snapshot: GraphSnapshot
+) -> None:
     _assert_node_keys_present(
         node_keys,
         (
@@ -330,4 +332,3 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     _assert_storage_runtime_surfaces(node_keys, snapshot)
     _assert_workflow_cli_and_doc_surfaces(node_keys, snapshot)
     _assert_schema_and_relation_surfaces(snapshot)
-

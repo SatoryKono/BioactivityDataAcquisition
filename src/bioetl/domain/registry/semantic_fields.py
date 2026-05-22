@@ -9,6 +9,7 @@ __all__ = [
     "SemanticFieldRegistry",
 ]
 
+
 def _build_registry_indexes(
     clusters: tuple[SemanticFieldCluster, ...],
 ) -> tuple[
@@ -34,6 +35,8 @@ def _build_registry_indexes(
         by_legacy_name,
         by_raw_provider_name,
     )
+
+
 @dataclass(frozen=True, slots=True)
 class SemanticFieldCluster:
     """One semantic field cluster with canonical and legacy naming metadata."""

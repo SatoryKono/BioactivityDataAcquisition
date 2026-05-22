@@ -171,6 +171,40 @@ def test_collect_metric_inventory_detects_keyword_metric_name_emitters(
     ]
 
 
+def test_metric_inventory_filters_non_metric_alias_noise(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset({"bioetl_live_counter_total"}),
+    )
+
+    runtime_dir = tmp_path / "src" / "bioetl" / "application"
+    runtime_dir.mkdir(parents=True)
+    (runtime_dir / "emitters.py").write_text(
+        "\n".join(
+            [
+                'metrics.increment_counter("bioetl_live_counter_total", labels={})',
+                'emit_metric(metrics, "legacy_alias_total")',
+                'emit_metric(metrics, "Legacy alias with spaces")',
+                'emit_metric(metrics, "")',
+                'emit_metric(metrics, "status/detail")',
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert report["compatibility_alias_candidates"] == ["legacy_alias_total"]
+    assert report["alias_emitters"] == {
+        "legacy_alias_total": ["src/bioetl/application/emitters.py"]
+    }
+
+
 def test_collect_metric_inventory_detects_direct_keyword_name_emitters(
     tmp_path: Path,
     monkeypatch: object,
@@ -689,9 +723,7 @@ def test_collect_metric_inventory_flags_declared_risky_label_review_candidates(
 
     report = inventory.collect_metric_inventory(tmp_path)
 
-    assert report["declared_risky_label_review_required"] == [
-        "bioetl_reviewed_total"
-    ]
+    assert report["declared_risky_label_review_required"] == ["bioetl_reviewed_total"]
 
 
 def test_validate_metric_inventory_reports_unallowed_drift() -> None:

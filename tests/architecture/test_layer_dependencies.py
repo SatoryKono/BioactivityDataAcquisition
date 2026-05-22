@@ -750,7 +750,9 @@ def test_no_orphan_directories(
     )
 
 
-def test_orphan_directory_detection_uses_cached_python_inventory(tmp_path: Path) -> None:
+def test_orphan_directory_detection_uses_cached_python_inventory(
+    tmp_path: Path,
+) -> None:
     """Synthetic regression guard for the cache-based orphan scan."""
     src_dir = tmp_path / "src"
     bioetl_path = src_dir / "bioetl"

@@ -19,6 +19,4 @@ def test_create_runner_from_factory_name_is_owned_by_pipeline_factory_helpers() 
         if needle in path.read_text(encoding="utf-8"):
             owners.append(path.relative_to(ROOT).as_posix())
 
-    assert owners == [
-        "src/bioetl/composition/factories/pipeline/assembler_helpers.py"
-    ]
+    assert owners == ["src/bioetl/composition/factories/pipeline/assembler_helpers.py"]

@@ -403,7 +403,9 @@ def test_build_rag_manifests_workflow_scope_limits_to_focus_matches(
     assert "src/bioetl/application/pipelines/chembl_activity.py" in {
         item["source_path"] for item in catalog["sources"]
     }
-    assert all("tests/unit/test_memory_flow.py" != chunk["source_path"] for chunk in chunks)
+    assert all(
+        "tests/unit/test_memory_flow.py" != chunk["source_path"] for chunk in chunks
+    )
 
 
 def test_write_rag_manifests_persists_build_scope_metadata(tmp_path: Path) -> None:

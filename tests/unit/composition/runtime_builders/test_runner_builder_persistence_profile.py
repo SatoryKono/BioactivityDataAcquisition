@@ -72,6 +72,10 @@ def test_build_pipeline_runner_rejects_missing_provenance_even_with_degraded_ove
 ) -> None:
     """Executable manifests must keep full provenance even under degraded profiles."""
     fake_factory, fake_registry = _build_factory_registry()
+    bronze_root = tmp_path / "bronze-cache"
+    bronze_day = bronze_root / "2026-01-01"
+    bronze_day.mkdir(parents=True)
+    (bronze_day / "batch_2026-01-01_demo.jsonl.zst").write_bytes(b"snapshot-bytes")
 
     with (
         patch(
@@ -99,9 +103,20 @@ def test_build_pipeline_runner_rejects_missing_provenance_even_with_degraded_ove
                     required_persistence_profile="replay_ready",
                 ),
             ),
-            pipeline_config=_build_pipeline_config(),
+            pipeline_config=_build_pipeline_config(
+                sink={
+                    "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                    "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                    "gold": SimpleNamespace(enabled=True, save_metadata=True),
+                },
+            ),
             assemble_runtime_config_fn=lambda **_: SimpleNamespace(
                 run_type="incremental"
+            ),
+            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
+                enabled=True,
+                bronze_path=str(bronze_root),
+                bronze_date="2026-01-01",
             ),
         )
     assert fake_factory.kwargs is None

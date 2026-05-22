@@ -127,7 +127,9 @@ def test_resolve_replay_verdict_prioritizes_semantic_drift() -> None:
     )
 
 
-def test_build_effective_config_store_verification_tracks_occurrence_only_diff() -> None:
+def test_build_effective_config_store_verification_tracks_occurrence_only_diff() -> (
+    None
+):
     left_run_id = RunID(uuid4())
     right_run_id = RunID(uuid4())
     left_manifest = _make_manifest(run_id=left_run_id, artifact_id="artifact-1")

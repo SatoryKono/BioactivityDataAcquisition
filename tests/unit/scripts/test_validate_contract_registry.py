@@ -36,7 +36,7 @@ def _write_entity_config(
                     "entity_type": entity,
                     "sink": {
                         "gold": gold_payload,
-                    }
+                    },
                 },
             },
             sort_keys=False,

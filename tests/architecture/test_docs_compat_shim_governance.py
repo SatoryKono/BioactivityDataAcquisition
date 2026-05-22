@@ -117,9 +117,7 @@ def test_retired_script_compatibility_wrappers_stay_absent() -> None:
     assert isinstance(entries, dict)
 
     lingering_files = [
-        path
-        for path in RETIRED_COMPATIBILITY_WRAPPERS
-        if (ROOT / path).exists()
+        path for path in RETIRED_COMPATIBILITY_WRAPPERS if (ROOT / path).exists()
     ]
     lingering_registry_rows = sorted(RETIRED_COMPATIBILITY_WRAPPERS & set(entries))
 

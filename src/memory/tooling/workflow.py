@@ -15,8 +15,8 @@ from memory.query import (
     TASK_PROFILES,
     default_rag_chunks_path,
     default_timeline_dir,
-    query_catalog,
     query_all,
+    query_catalog,
 )
 from memory.rag.filters import WORKFLOW_RAG_MAX_SOURCES
 from memory.resources import discover_memory_root, discover_repo_root

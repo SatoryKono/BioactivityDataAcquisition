@@ -64,10 +64,7 @@ def test_weak_cluster_decisions_cover_current_high_frequency_inventory() -> None
 
     assert policy["weak_decision_min_rows"] == 6
     assert len(decisions) >= 25
-    assert {
-        entry["cluster_id"]
-        for entry in decisions
-    } >= {
+    assert {entry["cluster_id"] for entry in decisions} >= {
         "shared_pref_name",
         "shared_author_keys",
         "shared_author_orcids",
@@ -159,9 +156,11 @@ def test_role_governed_and_assay_weak_clusters_have_explicit_semantic_scopes() -
 
     for cluster_id in payload["weak_cluster_policy"]["role_governed_cluster_ids"]:
         assert decisions[cluster_id]["semantic_scope"].startswith("role_governed_")
-        assert "ontology_unit_semantic_roles.yaml" in decisions[cluster_id][
-            "authority_scope"
-        ] or decisions[cluster_id]["field_name"] == "text_value"
+        assert (
+            "ontology_unit_semantic_roles.yaml"
+            in decisions[cluster_id]["authority_scope"]
+            or decisions[cluster_id]["field_name"] == "text_value"
+        )
 
     for cluster_id in payload["weak_cluster_policy"]["explicit_contract_cluster_ids"]:
         assert (
@@ -214,7 +213,9 @@ def test_composite_unknown_typing_reviews_retire_after_contract_shim() -> None:
     assert payload["composite_unknown_typing_reviews"] == []
 
 
-def test_composite_schema_authority_registry_matches_shared_system_field_blocks() -> None:
+def test_composite_schema_authority_registry_matches_shared_system_field_blocks() -> (
+    None
+):
     payload = yaml.safe_load(COMPOSITE_AUTHORITY_REGISTRY.read_text(encoding="utf-8"))
     authorities = {entry["id"]: entry for entry in payload["authorities"]}
     system_authority = authorities["medallion_system_metadata_contract"]
@@ -236,16 +237,17 @@ def test_composite_schema_authority_registry_matches_shared_system_field_blocks(
     }
 
 
-def test_composite_schema_authority_registry_matches_activity_taxonomy_contract() -> None:
+def test_composite_schema_authority_registry_matches_activity_taxonomy_contract() -> (
+    None
+):
     payload = yaml.safe_load(COMPOSITE_AUTHORITY_REGISTRY.read_text(encoding="utf-8"))
     authorities = {entry["id"]: entry for entry in payload["authorities"]}
     activity_authority = authorities["seed_and_provider_gold_contracts"]
 
     schema = CompositeActivityGoldSchema.to_schema()
-    assert (
-        activity_authority["field_types"]["taxonomy_id"]
-        == _matrix_type_from_pyarrow(schema.columns["taxonomy_id"].dtype)
-    )
+    assert activity_authority["field_types"][
+        "taxonomy_id"
+    ] == _matrix_type_from_pyarrow(schema.columns["taxonomy_id"].dtype)
 
     contract = json.loads(
         Path("docs/04-reference/contracts/gold/composite_activity_v1.0.json").read_text(

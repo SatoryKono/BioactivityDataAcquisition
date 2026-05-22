@@ -110,7 +110,11 @@ def test_build_manifest_create_request_uses_supplied_reproducibility_context(
         *, reproducibility_context: object, **_: object
     ):
         captured["launch_context_context"] = reproducibility_context
-        return {"required_persistence_profile": "forensic_grade", "exact_replay": False}
+        return {
+            "configured_required_persistence_profile": "degraded_observable",
+            "required_persistence_profile": "forensic_grade",
+            "exact_replay": False,
+        }
 
     def _fake_build_replay_assessment(**_: object):
         return SimpleNamespace(
@@ -169,6 +173,7 @@ def test_build_manifest_create_request_uses_supplied_reproducibility_context(
     )
 
     reproducibility_context = SimpleNamespace(
+        configured_required_persistence_profile="degraded_observable",
         required_persistence_profile="forensic_grade",
         strict_exact_replay_supported=False,
         family="strict",
@@ -208,6 +213,10 @@ def test_build_manifest_create_request_uses_supplied_reproducibility_context(
     )
 
     assert request.launch_context["required_persistence_profile"] == "forensic_grade"
+    assert (
+        request.launch_context["configured_required_persistence_profile"]
+        == "degraded_observable"
+    )
     assert captured["required_persistence_profile"] == "forensic_grade"
     assert captured["validated_required_profile"] == "forensic_grade"
     assert captured["launch_context_context"] is reproducibility_context
@@ -661,6 +670,7 @@ def test_build_launch_context_snapshot_marks_ordinary_source_boundary() -> None:
 
     assert launch_context["execution_context"] == "pipeline"
     assert launch_context["required_persistence_profile"] == "replay_ready"
+    assert launch_context["configured_required_persistence_profile"] == "replay_ready"
     assert (
         launch_context["exact_replay_support_boundary"]
         == "snapshot_backed_source_runs_only"
@@ -682,6 +692,10 @@ def test_build_launch_context_snapshot_marks_composite_snapshot_envelope_boundar
 
     assert launch_context["execution_context"] == "composite"
     assert launch_context["required_persistence_profile"] == "degraded_observable"
+    assert (
+        launch_context["configured_required_persistence_profile"]
+        == "degraded_observable"
+    )
     assert (
         launch_context["exact_replay_support_boundary"]
         == "composite_snapshot_backed_input_envelope"

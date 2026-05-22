@@ -111,6 +111,13 @@ The canonical shard membership and ignore/deselect rules for
 `configs/quality/pytest_shards.yaml`. Update that inventory rather than editing
 the shard plan inline in the shell runner.
 
+Canonical test-health lane names live in
+`configs/quality/test_matrix.yaml` under `test_lanes.lanes`. Developer wrapper
+commands such as `run-tests unit`, `run-tests arch`, and `test-changed` are
+local convenience aliases; do not treat those command names as comparable
+CI/local telemetry suites unless the command explicitly records a canonical
+`suite_name`.
+
 For architecture-focused local runs, prefer the explicit aliases:
 
 - `S7-architecture-fast-boundary`

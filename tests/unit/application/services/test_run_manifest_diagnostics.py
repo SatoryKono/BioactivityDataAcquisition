@@ -298,9 +298,13 @@ def _assert_provenance_only_score(
     assert score["supported_boundary_verdict"]["supported_boundary_satisfied"] is (
         False
     )
-    assert score["global_reproducibility_claim"]["claimed"] is False
-    assert score["global_reproducibility_claim"]["verdict"] == (
-        "universal_exact_replay_not_claimed"
+    assert score["historical_replay_universe_exact_replay_claim"]["claimed"] is False
+    assert score["historical_replay_universe_exact_replay_claim"]["verdict"] == (
+        "historical_universe_exact_replay_not_claimed"
+    )
+    assert score["executable_run_contract_claim"]["claimed"] is True
+    assert score["executable_run_contract_claim"]["verdict"] == (
+        "prospective_executable_run_contract_claimed"
     )
     assert score["blockers"] == [
         "dependency_lock_hash_missing",

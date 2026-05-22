@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-import bioetl.composition.runtime_builders._run_manifest_support as _manifest_support
+import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
 from bioetl.composition.services.versioning import (
     CodeRevisionProvenance,
     get_code_revision_provenance,
@@ -32,6 +32,7 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True, slots=True)
 class ManifestReproducibilityContext:
+    configured_required_persistence_profile: str
     required_persistence_profile: str
     strict_exact_replay_supported: bool
     family: str
@@ -109,6 +110,7 @@ def resolve_manifest_reproducibility_context(
         or required_persistence_profile in STRICT_PERSISTENCE_PROFILES,
     )
     return ManifestReproducibilityContext(
+        configured_required_persistence_profile=configured_required_profile,
         required_persistence_profile=required_persistence_profile,
         strict_exact_replay_supported=(
             reproducibility_profile.strict_exact_replay_supported

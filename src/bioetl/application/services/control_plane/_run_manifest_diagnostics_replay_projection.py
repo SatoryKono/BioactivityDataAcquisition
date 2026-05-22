@@ -230,6 +230,7 @@ def _build_operator_replay_projection(
         )
     )
 
+
 def _resolve_replay_control_plane_state(
     *,
     manifest: RunManifest,

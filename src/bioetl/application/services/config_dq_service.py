@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from datetime import datetime
-from pathlib import Path
 from typing import Literal, Protocol, cast
 
 from bioetl.application.services.control_plane.effective_config_service import (
@@ -15,7 +14,6 @@ from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane.config_source_hashing import (
     ConfigSourceHashStrategy,
-    compute_config_source_hashes,
 )
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
@@ -41,6 +39,12 @@ class PipelineYamlConfigGetterProtocol(Protocol):
     """Callable port returning mapped pipeline YAML config."""
 
     def __call__(self, pipeline_name: str) -> JsonDict: ...
+
+
+class ConfigSourceRefProviderProtocol(Protocol):
+    """Callable port returning effective-config source references."""
+
+    def __call__(self, *, provider: str, entity: str) -> list[ConfigSourceRef]: ...
 
 
 DQStrictnessMode = Literal["lenient", "moderate", "strict"]
@@ -110,41 +114,39 @@ def _dq_config_to_dict(dq_config: DQConfig) -> JsonDict:
     }
 
 
-def _compute_file_hashes(
-    *,
-    relative_path: str,
-    path: Path,
-) -> tuple[str | None, str | None, ConfigSourceHashStrategy | None]:
-    """Return semantic and raw hashes for one config source file when available."""
-    if not path.exists() or not path.is_file():
-        return None, None, None
-    hashes = compute_config_source_hashes(
-        source_path=relative_path,
-        raw_bytes=path.read_bytes(),
-    )
-    return hashes.semantic_hash, hashes.raw_hash, hashes.hash_strategy
-
-
-def _build_config_source_ref(
+def _logical_config_source_ref(
     *,
     relative_path: str,
     priority: int,
-    repo_root: Path,
 ) -> ConfigSourceRef:
-    """Build one file-backed source ref for admin effective-config tooling."""
-    source_path = repo_root / relative_path
-    source_hash, raw_source_hash, source_hash_strategy = _compute_file_hashes(
-        relative_path=relative_path,
-        path=source_path,
-    )
+    """Build an in-memory fallback ref without filesystem provenance."""
     return ConfigSourceRef(
         source_type="file",
         source_path=relative_path,
-        source_hash=source_hash,
-        raw_source_hash=raw_source_hash,
-        source_hash_strategy=source_hash_strategy,
         priority=priority,
     )
+
+
+def _default_config_source_refs(*, provider: str, entity: str) -> list[ConfigSourceRef]:
+    """Return logical config refs for tests or non-composed service graphs."""
+    refs = [
+        _logical_config_source_ref(
+            relative_path="configs/base/pipeline.yaml",
+            priority=1,
+        ),
+        _logical_config_source_ref(
+            relative_path=f"configs/providers/{provider}.yaml",
+            priority=2,
+        ),
+    ]
+    if entity and entity != "unknown":
+        refs.append(
+            _logical_config_source_ref(
+                relative_path=f"configs/entities/{provider}/{entity}.yaml",
+                priority=3,
+            )
+        )
+    return refs
 
 
 def _build_source_refs(artifact_dict: JsonDict) -> list[ConfigSourceRef]:
@@ -287,7 +289,9 @@ class ConfigDQService:
     _pipeline_yaml_getter: PipelineYamlConfigGetterProtocol
     _dq_config_loader: DQConfigLoaderProtocol
     _effective_config_service: EffectiveConfigService
-    _repo_root: Path | None = None
+    _config_source_ref_provider: ConfigSourceRefProviderProtocol = (
+        _default_config_source_refs
+    )
 
     def get_dq_config(self, pipeline_name: str) -> JsonDict:
         """Load and normalize the pipeline-level DQ configuration."""
@@ -335,19 +339,15 @@ class ConfigDQService:
         self.logger.debug("Getting effective config artifact", pipeline=pipeline_name)
         pipeline_config = self._pipeline_yaml_getter(pipeline_name)
         provider = str(pipeline_config.get("provider", "unknown"))
-        repo_root = self._repo_root or Path(__file__).resolve().parents[4]
-        source_refs = [
-            _build_config_source_ref(
-                relative_path="configs/base/pipeline.yaml",
-                priority=1,
-                repo_root=repo_root,
-            ),
-            _build_config_source_ref(
-                relative_path=f"configs/providers/{provider}.yaml",
-                priority=2,
-                repo_root=repo_root,
-            ),
-        ]
+        entity = str(
+            pipeline_config.get("entity")
+            or pipeline_config.get("entity_type")
+            or "unknown"
+        )
+        source_refs = self._config_source_ref_provider(
+            provider=provider,
+            entity=entity,
+        )
         dq_config: DQConfig | None = None
         try:
             dq_config = self._dq_config_loader(pipeline_name)

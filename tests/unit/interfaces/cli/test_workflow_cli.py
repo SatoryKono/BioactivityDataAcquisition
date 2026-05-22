@@ -96,10 +96,13 @@ def test_workflow_status_is_bounded_and_step_oriented(
 def test_workflow_run_dry_run_smoke_uses_canonical_example_without_network(
     cli_runner: CliRunner,
     monkeypatch: Any,
+    tmp_path: Path,
 ) -> None:
     import bioetl.interfaces.cli.commands.workflow as workflow_cmd
 
     fake_service = _FakeWorkflowRunnerService()
+    cached_bronze_path = tmp_path / "bronze"
+    cached_bronze_path.mkdir()
     monkeypatch.setattr(
         workflow_cmd,
         "get_workflow_execution_service",
@@ -118,6 +121,9 @@ def test_workflow_run_dry_run_smoke_uses_canonical_example_without_network(
             "summarize_core_extracts",
             "--required-persistence-profile",
             "degraded_observable",
+            "--use-cached-bronze",
+            "--cached-bronze-path",
+            str(cached_bronze_path),
         ],
     )
 
@@ -283,10 +289,13 @@ def test_workflow_run_accepts_pipeline_style_runtime_overrides(
 def test_workflow_run_forwards_occurrence_pinned_resume_selectors(
     cli_runner: CliRunner,
     monkeypatch: Any,
+    tmp_path: Path,
 ) -> None:
     import bioetl.interfaces.cli.commands.workflow as workflow_cmd
 
     fake_service = _FakeWorkflowRunnerService()
+    cached_bronze_path = tmp_path / "bronze"
+    cached_bronze_path.mkdir()
     monkeypatch.setattr(
         workflow_cmd,
         "get_workflow_execution_service",
@@ -304,6 +313,9 @@ def test_workflow_run_forwards_occurrence_pinned_resume_selectors(
             "manifest-123",
             "--required-persistence-profile",
             "degraded_observable",
+            "--use-cached-bronze",
+            "--cached-bronze-path",
+            str(cached_bronze_path),
         ],
     )
 
@@ -338,12 +350,15 @@ def test_workflow_run_rejects_conflicting_resume_selectors(
 def test_workflow_run_starts_metrics_server_and_publishes_metrics(
     cli_runner: CliRunner,
     monkeypatch: Any,
+    tmp_path: Path,
 ) -> None:
     import bioetl.interfaces.cli.commands.workflow as workflow_cmd
 
     fake_service = _FakeWorkflowRunnerService()
     started_calls: list[bool] = []
     published_calls: list[dict[str, object]] = []
+    cached_bronze_path = tmp_path / "bronze"
+    cached_bronze_path.mkdir()
     monkeypatch.setattr(
         workflow_cmd,
         "get_workflow_execution_service",
@@ -373,6 +388,9 @@ def test_workflow_run_starts_metrics_server_and_publishes_metrics(
             "5",
             "--required-persistence-profile",
             "degraded_observable",
+            "--use-cached-bronze",
+            "--cached-bronze-path",
+            str(cached_bronze_path),
         ],
     )
 
@@ -393,11 +411,14 @@ def test_workflow_run_starts_metrics_server_and_publishes_metrics(
 def test_workflow_run_omits_pipeline_grouping_for_multi_pipeline_workflow(
     cli_runner: CliRunner,
     monkeypatch: Any,
+    tmp_path: Path,
 ) -> None:
     import bioetl.interfaces.cli.commands.workflow as workflow_cmd
 
     fake_service = _FakeWorkflowRunnerService()
     published_calls: list[dict[str, object]] = []
+    cached_bronze_path = tmp_path / "bronze"
+    cached_bronze_path.mkdir()
     monkeypatch.setattr(
         workflow_cmd,
         "get_workflow_execution_service",
@@ -427,6 +448,9 @@ def test_workflow_run_omits_pipeline_grouping_for_multi_pipeline_workflow(
             "5",
             "--required-persistence-profile",
             "degraded_observable",
+            "--use-cached-bronze",
+            "--cached-bronze-path",
+            str(cached_bronze_path),
         ],
     )
 
@@ -460,6 +484,7 @@ def test_workflow_run_omits_pipeline_grouping_for_multi_pipeline_workflow(
 def test_workflow_run_publishes_metrics_even_when_workflow_fails(
     cli_runner: CliRunner,
     monkeypatch: Any,
+    tmp_path: Path,
 ) -> None:
     import bioetl.interfaces.cli.commands.workflow as workflow_cmd
     from bioetl.interfaces.cli.exit_codes import ExitCode
@@ -488,6 +513,8 @@ def test_workflow_run_publishes_metrics_even_when_workflow_fails(
             )
 
     published_calls: list[dict[str, object]] = []
+    cached_bronze_path = tmp_path / "bronze"
+    cached_bronze_path.mkdir()
     monkeypatch.setattr(
         workflow_cmd,
         "get_workflow_execution_service",
@@ -515,6 +542,9 @@ def test_workflow_run_publishes_metrics_even_when_workflow_fails(
             "chembl_activity",
             "--required-persistence-profile",
             "degraded_observable",
+            "--use-cached-bronze",
+            "--cached-bronze-path",
+            str(cached_bronze_path),
         ],
     )
 

@@ -274,7 +274,9 @@ def _build_base_summary_replay_payload(
         "replay_capability_assessment": (replay_context.policy_assessment.to_dict()),
         "resume_contract": replay_context.resume_contract,
         "resume_diagnostics": None,
-        "lineage_closure_boundary": operator_replay_projection["lineage_closure_boundary"],
+        "lineage_closure_boundary": operator_replay_projection[
+            "lineage_closure_boundary"
+        ],
     }
 
 

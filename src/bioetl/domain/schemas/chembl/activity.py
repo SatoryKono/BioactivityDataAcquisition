@@ -178,9 +178,15 @@ class ActivitySchema(ETLRecordSchema):
     record_id: Series[int] = pa.Field(
         nullable=False, description="FK to compound_record."
     )
-    activity_type: Series[str] | None = pa.Field(nullable=True, description="Original type.")
-    activity_relation: Series[str] = pa.Field(nullable=False, description="Original operator.")
-    activity_value: Series[float] = pa.Field(nullable=False, description="Original value.")
+    activity_type: Series[str] | None = pa.Field(
+        nullable=True, description="Original type."
+    )
+    activity_relation: Series[str] = pa.Field(
+        nullable=False, description="Original operator."
+    )
+    activity_value: Series[float] = pa.Field(
+        nullable=False, description="Original value."
+    )
     units: Series[str] = pa.Field(nullable=False, description="Original units.")
     text_value: Series[str] | None = pa.Field(nullable=True, description="Text value.")
     standard_text_value: Series[str] | None = pa.Field(
@@ -219,7 +225,6 @@ class ActivitySchema(ETLRecordSchema):
     ligand_efficiency_sei: Series[float] | None = pa.Field(
         nullable=True, description="Surface Efficiency Index (SEI)."
     )
-
     action_type: Series[str] | None = pa.Field(
         nullable=True, description="Action type classification."
     )
@@ -229,7 +234,6 @@ class ActivitySchema(ETLRecordSchema):
     action_type_parent_type: Series[str] | None = pa.Field(
         nullable=True, description="Parent action type category."
     )
-
     activity_properties: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of activity properties."
     )
@@ -275,9 +279,7 @@ class ActivitySchema(ETLRecordSchema):
     bao_label: Series[str] = pa.Field(
         nullable=False, description="BioAssay Ontology label."
     )
-    journal: Series[str] = pa.Field(
-        nullable=False, description="Publication journal name."
-    )
+    journal: Series[str] = pa.Field(nullable=False, description="Journal name.")
     publication_doi: Series[str] | None = pa.Field(
         nullable=True, description="Publication DOI."
     )

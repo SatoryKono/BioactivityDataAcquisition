@@ -9,16 +9,16 @@ import bioetl.domain.normalization as normalization
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src" / "bioetl"
-LEGACY_HELPER_MODULE = (
-    ROOT / "src/bioetl/domain/normalization/legacy_fingerprints.py"
-)
+LEGACY_HELPER_MODULE = ROOT / "src/bioetl/domain/normalization/legacy_fingerprints.py"
 
 
 def test_legacy_degraded_runtime_anchor_module_has_been_removed() -> None:
     assert not LEGACY_HELPER_MODULE.exists()
 
 
-def test_degraded_runtime_anchor_fingerprint_is_not_top_level_normalization_api() -> None:
+def test_degraded_runtime_anchor_fingerprint_is_not_top_level_normalization_api() -> (
+    None
+):
     assert "compute_degraded_runtime_anchor_fingerprint" not in normalization.__all__
     assert not hasattr(normalization, "compute_degraded_runtime_anchor_fingerprint")
 

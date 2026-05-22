@@ -149,9 +149,7 @@ def test_build_effective_config_source_refs_discovers_transitive_config_graph_ed
         "contracts:\n  composite.publication: 1.0.0\n",
         encoding="utf-8",
     )
-    (
-        tmp_path / "configs" / "composites" / "publication.yaml"
-    ).write_text(
+    (tmp_path / "configs" / "composites" / "publication.yaml").write_text(
         "composite:\n"
         "  dq_overrides:\n"
         "    dq_config_file: ../quality/entities/composite/publication.yaml\n",
@@ -549,7 +547,7 @@ def test_create_and_persist_effective_config_artifact_forwards_required_profile(
         "source-hash",
         "dq-hash",
     )
-    assert captured["required_persistence_profile"] == "degraded_observable"
+    assert captured["required_persistence_profile"] == "replay_ready"
     assert captured["resolution_policy"].strict_validation is True
     assert captured["normalization_profile_ref"] == "chembl.activity"
     assert captured["normalization_profile_version"] == "1.0.0"
@@ -829,7 +827,9 @@ def test_create_and_persist_effective_config_artifact_uses_supplied_publication_
     )
     monkeypatch.setattr(
         "bioetl.composition.runtime_builders.effective_config_artifact_builder._manifest_support.resolve_contract_identity",
-        lambda **_: (_ for _ in ()).throw(AssertionError("identity resolver should not run")),
+        lambda **_: (_ for _ in ()).throw(
+            AssertionError("identity resolver should not run")
+        ),
     )
 
     settings = Settings(data_dir=Path("data"))

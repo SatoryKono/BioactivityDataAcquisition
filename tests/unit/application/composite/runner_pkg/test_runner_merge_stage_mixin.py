@@ -137,7 +137,9 @@ def test_transition_to_merging_state_when_called_then_validates_and_logs_fsm() -
 
 
 @pytest.mark.unit
-def test_handle_dry_run_merge_skip_when_called_then_logs_and_returns_completed_state() -> None:
+def test_handle_dry_run_merge_skip_when_called_then_logs_and_returns_completed_state() -> (
+    None
+):
     harness = _MergeHarness()
     state = _make_state(CompositePipelineState.ENRICHMENT_COMPLETED)
     harness._runtime.dry_run = True

@@ -238,7 +238,9 @@ class TestBioactivity:
         assert bioactivity.standard_value == pytest.approx(10.5)
         assert bioactivity.pchembl_value == pytest.approx(7.5)
 
-    def test_bioactivity_from_raw_maps_legacy_measurement_fields(self, base_entity_kwargs):
+    def test_bioactivity_from_raw_maps_legacy_measurement_fields(
+        self, base_entity_kwargs
+    ):
         """Test from_raw maps legacy provider measurement keys to canonical entity fields."""
         raw_data = {
             "activity_id": 12345,

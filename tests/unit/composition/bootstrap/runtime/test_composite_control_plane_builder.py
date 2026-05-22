@@ -252,7 +252,7 @@ def test_build_composite_control_plane_bundle_fails_closed_when_manifest_disable
     assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
 
-def test_build_composite_control_plane_bundle_can_disable_ledger_while_keeping_manifest(
+def test_build_composite_control_plane_bundle_rejects_disabled_ledger_under_promoted_replay_profile(
     tmp_path: Path,
 ) -> None:
     config = cast(Any, _RichMockCompositeConfig())
@@ -286,54 +286,18 @@ def test_build_composite_control_plane_bundle_can_disable_ledger_while_keeping_m
             dependency_lock_hash=_VALID_SHA256_D,
         ),
     ):
-        bundle = build_composite_control_plane_bundle(
-            config=config,
-            runtime=runtime,
-            infra_context=infra_context,
-        )
+        with pytest.raises(
+            RuntimeError,
+            match="requires run ledgers for required persistence profile 'replay_ready'",
+        ):
+            build_composite_control_plane_bundle(
+                config=config,
+                runtime=runtime,
+                infra_context=infra_context,
+            )
 
-    assert isinstance(bundle.manifest_id, str)
-    assert isinstance(bundle.execution_fingerprint, str)
-    assert bundle.run_ledger_service is None
-    assert isinstance(bundle.effective_config_artifact_id, str)
-    manifest_path = (
-        tmp_path / "output" / "control" / "run_manifest" / f"{bundle.manifest_id}.json"
-    )
-    effective_config_path = (
-        tmp_path
-        / "output"
-        / "control"
-        / "effective_config"
-        / f"{bundle.effective_config_artifact_id}.json"
-    )
-    assert manifest_path.exists()
-    assert effective_config_path.exists()
-    assert not (
-        tmp_path / "output" / "control" / "run_ledger" / f"{bundle.manifest_id}.jsonl"
-    ).exists()
-    manifest = RunManifest.from_dict(json.loads(manifest_path.read_text("utf-8")))
-    assert manifest.replay_capability == ReplayCapability.REBUILD_ONLY
-    assert bundle.execution_fingerprint == manifest.execution_fingerprint
-    assert (
-        manifest.code_provenance.effective_config_artifact_id
-        == bundle.effective_config_artifact_id
-    )
-    assert manifest.code_provenance.resolved_config_hash == bundle.resolved_config_hash
-    assert (
-        manifest.code_provenance.effective_config_hash == bundle.effective_config_hash
-    )
-    snapshot_ids = sorted(
-        snapshot.snapshot_id
-        for source_ref in manifest.source_refs
-        for snapshot in source_ref.input_snapshots
-    )
-    assert bundle.input_snapshot_fingerprint == (
-        compute_input_snapshot_identity_fingerprint(snapshot_ids)
-    )
-    assert (
-        manifest.launch_context["exact_replay_support_boundary"]
-        == "composite_snapshot_backed_input_envelope"
-    )
+    assert not (tmp_path / "output" / "control" / "run_manifest").exists()
+    assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
 
 def test_build_composite_control_plane_bundle_requires_ledger_for_forensic_grade_profile(
@@ -569,7 +533,23 @@ def test_build_composite_control_plane_bundle_persists_manifest_created_when_led
     tmp_path: Path,
 ) -> None:
     config = cast(Any, _RichMockCompositeConfig())
-    runtime = CompositeRuntimeConfig(resume=True)
+    bronze_root = tmp_path / "cached-bronze"
+    for provider, entity in (
+        ("pubmed", "publication"),
+        ("crossref", "publication"),
+        ("openalex", "publication"),
+    ):
+        bronze_day = bronze_root / provider / entity / "2026-01-01"
+        bronze_day.mkdir(parents=True)
+        (bronze_day / f"batch_{provider}.jsonl.zst").write_bytes(
+            f"{provider}-snapshot".encode()
+        )
+    runtime = CompositeRuntimeConfig(
+        resume=True,
+        use_cached_bronze=True,
+        cached_bronze_path=str(bronze_root),
+        cached_bronze_date="2026-01-01",
+    )
     infra_context = cast(
         Any,
         SimpleNamespace(
@@ -622,7 +602,23 @@ def test_build_composite_control_plane_bundle_persists_effective_config_artifact
     tmp_path: Path,
 ) -> None:
     config = cast(Any, _RichMockCompositeConfig())
-    runtime = CompositeRuntimeConfig(resume=False)
+    bronze_root = tmp_path / "cached-bronze"
+    for provider, entity in (
+        ("pubmed", "publication"),
+        ("crossref", "publication"),
+        ("openalex", "publication"),
+    ):
+        bronze_day = bronze_root / provider / entity / "2026-01-01"
+        bronze_day.mkdir(parents=True)
+        (bronze_day / f"batch_{provider}.jsonl.zst").write_bytes(
+            f"{provider}-snapshot".encode()
+        )
+    runtime = CompositeRuntimeConfig(
+        resume=False,
+        use_cached_bronze=True,
+        cached_bronze_path=str(bronze_root),
+        cached_bronze_date="2026-01-01",
+    )
     infra_context = cast(
         Any,
         SimpleNamespace(
@@ -632,7 +628,7 @@ def test_build_composite_control_plane_bundle_persists_effective_config_artifact
                 pipeline=SimpleNamespace(
                     control_plane=SimpleNamespace(
                         run_manifest_enabled=True,
-                        run_ledger_enabled=False,
+                        run_ledger_enabled=True,
                         required_persistence_profile="degraded_observable",
                     )
                 ),

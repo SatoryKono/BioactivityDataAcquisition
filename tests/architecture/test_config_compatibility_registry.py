@@ -103,9 +103,16 @@ def test_config_compatibility_registry_has_explicit_policy() -> None:
 
     burn_down = policy.get("burn_down")
     assert isinstance(burn_down, dict), "registry must declare burn-down policy"
-    assert burn_down.get("linked_issue") == "#4473"
+    assert burn_down.get("linked_issue") == "#4516"
     assert burn_down.get("mode") == "fail-fast-no-growth"
     assert burn_down.get("expired_shape_policy") == "fail-ci"
+    exit_strategy = policy.get("accepted_shape_exit_strategy")
+    assert isinstance(exit_strategy, dict)
+    assert exit_strategy.get("linked_issue") == "#4516"
+    assert exit_strategy.get("review_date") == "2026-09-30"
+    assert set(exit_strategy.get("allowed_strategies", [])) == {
+        "retain-permanent-canonical-alias"
+    }
 
 
 def test_config_compatibility_entries_are_bounded_or_justified() -> None:
@@ -149,6 +156,9 @@ def test_config_compatibility_entries_are_bounded_or_justified() -> None:
             assert date.fromisoformat(decision_recorded_on), (
                 f"{entry_id} decision_recorded_on must be ISO date"
             )
+            assert entry.get("exit_strategy") == "retain-permanent-canonical-alias", (
+                f"{entry_id} permanent aliases must declare the reviewed exit strategy"
+            )
 
 
 def test_config_compatibility_burn_down_budget_is_not_exceeded() -> None:
@@ -170,9 +180,7 @@ def test_config_compatibility_burn_down_budget_is_not_exceeded() -> None:
         if isinstance(entry, dict) and entry.get("status") in MIGRATION_STATUSES
     )
     assert len(accepted_entries) <= int(burn_down["accepted_shape_max"])
-    assert migration_supported_count <= int(
-        burn_down["migration_supported_shape_max"]
-    )
+    assert migration_supported_count <= int(burn_down["migration_supported_shape_max"])
     assert len(rejected_entries) >= int(burn_down["retired_rejected_shape_min"])
 
 

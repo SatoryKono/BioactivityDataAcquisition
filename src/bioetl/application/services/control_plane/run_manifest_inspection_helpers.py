@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import cast
 
+from bioetl.application.services.control_plane._run_manifest_inspection_artifact_refs import (
+    build_artifact_ref_semantic_diff,
+)
 from bioetl.domain.control_plane import RunManifest
 
 
@@ -149,12 +153,14 @@ def build_run_artifact_diff_payload(
     *,
     left_manifest: RunManifest,
     right_manifest: RunManifest,
+    left_artifact_refs: tuple[Mapping[str, object], ...] = (),
+    right_artifact_refs: tuple[Mapping[str, object], ...] = (),
 ) -> dict[str, object]:
     left_snapshots = manifest_snapshot_ids(left_manifest)
     right_snapshots = manifest_snapshot_ids(right_manifest)
     left_artifacts = planned_artifact_identity(left_manifest)
     right_artifacts = planned_artifact_identity(right_manifest)
-    return {
+    payload = {
         "input_snapshots_match": left_snapshots == right_snapshots,
         "left_input_snapshot_count": len(left_snapshots),
         "right_input_snapshot_count": len(right_snapshots),
@@ -162,3 +168,11 @@ def build_run_artifact_diff_payload(
         "left_planned_artifact_count": len(left_artifacts),
         "right_planned_artifact_count": len(right_artifacts),
     }
+    if left_artifact_refs or right_artifact_refs:
+        payload.update(
+            build_artifact_ref_semantic_diff(
+                left_artifact_refs=left_artifact_refs,
+                right_artifact_refs=right_artifact_refs,
+            )
+        )
+    return payload

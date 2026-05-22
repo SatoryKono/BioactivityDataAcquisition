@@ -45,9 +45,7 @@ def test_load_latest_report_returns_newest_artifact_payload(tmp_path) -> None:
     assert payload is not None
     assert payload["report_id"] == "historical-replay-universe-b"
     assert payload["universal_claim"] == {"claimed": True}
-    assert str(payload["_artifact_path"]).endswith(
-        "historical-replay-universe-b.json"
-    )
+    assert str(payload["_artifact_path"]).endswith("historical-replay-universe-b.json")
 
 
 def test_load_latest_report_returns_none_for_empty_store(tmp_path) -> None:

@@ -46,8 +46,8 @@ effective_config:
     build_timestamp: "2024-03-25T13:45:00Z"
     config_files:
       - "configs/providers/chembl.yaml"
-      - "configs/entities/molecule.yaml"
-      - "configs/composites/molecule_pipeline.yaml"
+      - "configs/entities/chembl/molecule.yaml"
+      - "configs/composites/molecule.yaml"
 
   # Environment
   environment:

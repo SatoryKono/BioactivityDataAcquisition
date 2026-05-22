@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-import bioetl.composition.runtime_builders._run_manifest_support as _manifest_support
+import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
 from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
 )
@@ -97,6 +97,9 @@ def _build_manifest_launch_context(
         request_inputs.ctx,
         run_type_value=request_inputs.run_type_value,
         execution_context_value=request_inputs.execution_context_value,
+        configured_required_persistence_profile=_read_attr(
+            reproducibility_context, "configured_required_persistence_profile"
+        ),
         required_persistence_profile=_read_attr(
             reproducibility_context, "required_persistence_profile"
         ),

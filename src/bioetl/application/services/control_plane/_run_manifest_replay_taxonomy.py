@@ -5,45 +5,10 @@ from __future__ import annotations
 from collections.abc import Mapping
 from copy import deepcopy
 
-REPLAY_TAXONOMY_FIELDS: tuple[str, ...] = (
-    "replay_capability",
-    "requested_exact_replay",
-    "exact_replay_support_boundary",
-    "replay_family_contract",
-    "replay_support_state",
-    "post_capture_replayable_parent_supported",
-    "post_capture_replayable_parent_boundary",
-    "historical_live_run_upgrade_policy",
-    "historical_live_run_upgrade_boundary",
-    "historical_live_run_upgrade_reason",
-    "broader_historical_exact_replay_policy",
-    "broader_historical_exact_replay_boundary",
-    "broader_historical_exact_replay_reason",
-    "broader_historical_exact_replay_state",
-    "historical_live_run_upgrade_state",
-    "replay_occurrence_kind",
-    "source_posture",
-    "input_snapshot_missing_source_refs",
-    "replay_capability_reason",
-    "replay_mode",
-    "continuation_mode",
-    "operator_replay_mode",
-    "replay_resume_rebuild_verdict",
-    "replay_next_action",
-    "exact_replay_eligible",
-    "exact_replay_blockers",
-    "replay_readiness_verdict",
-    "append_mode_semantic_sinks",
-    "resume_contract",
-    "resume_diagnostics",
-    "lineage_closure_boundary",
+from bioetl.application.services.control_plane._run_manifest_replay_taxonomy_fields import (
+    LIST_DEFAULTS,
+    REPLAY_TAXONOMY_FIELDS,
 )
-
-_LIST_DEFAULTS: dict[str, object] = {
-    "input_snapshot_missing_source_refs": [],
-    "exact_replay_blockers": [],
-    "append_mode_semantic_sinks": [],
-}
 
 
 def build_replay_taxonomy_projection(
@@ -151,7 +116,7 @@ def resolve_replay_taxonomy_projection(
         elif field in defaults_payload:
             value = defaults_payload[field]
         else:
-            value = _LIST_DEFAULTS.get(field)
+            value = LIST_DEFAULTS.get(field)
         projection[field] = _copy_projection_value(field, value)
     return projection
 
@@ -234,12 +199,12 @@ def _has_missing_anchors(value: object) -> bool:
 
 def _copy_projection_value(field: str, value: object) -> object:
     """Copy mutable replay-taxonomy values to avoid shared references."""
-    if field in _LIST_DEFAULTS:
+    if field in LIST_DEFAULTS:
         if isinstance(value, tuple):
             return list(value)
         if isinstance(value, list):
             return list(value)
-        return list(_LIST_DEFAULTS[field])
+        return list(LIST_DEFAULTS[field])
     if isinstance(value, dict):
         return dict(value)
     if isinstance(value, list):

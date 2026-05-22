@@ -141,7 +141,9 @@ def test_record_stage_records_allows_zero_for_series_initialization() -> None:
 
 
 @pytest.mark.unit
-def test_initialize_record_accounting_outcomes_creates_all_expected_zero_series() -> None:
+def test_initialize_record_accounting_outcomes_creates_all_expected_zero_series() -> (
+    None
+):
     metrics = MagicMock()
     recorder = PipelineMetricsRecorder(metrics, "chembl_activity")
 

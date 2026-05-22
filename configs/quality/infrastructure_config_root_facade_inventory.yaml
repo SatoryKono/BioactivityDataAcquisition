@@ -14,8 +14,8 @@ symbols:
       - src/bioetl/composition/
     rationale: >-
       `Settings` remains a retained convenience type import for composition
-      wiring and a bounded set of infrastructure consumers, but new first-party
-      growth through the broad package-root facade is not allowed.
+      wiring, but new first-party growth through the broad package-root facade
+      is not allowed.
   - symbol: get_settings
     owner: bioetl.infrastructure.config
     status: sanctioned_convenience_runtime
@@ -25,8 +25,8 @@ symbols:
       - src/bioetl/composition/
     rationale: >-
       `get_settings` remains a retained convenience seam for composition
-      runtime/bootstrap paths and one bounded infrastructure support surface.
-      New first-party growth through the package root is not allowed.
+      runtime/bootstrap paths. New first-party growth through the package root
+      is not allowed.
   - symbol: load_pipeline_contract_policy
     owner: bioetl.infrastructure.config
     status: sanctioned_convenience_contract_policy

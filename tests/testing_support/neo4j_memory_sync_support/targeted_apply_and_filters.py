@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from .common import *  # noqa: F401,F403
 
+
 def test_normalization_evidence_statements_cover_registry_and_fallback_metrics() -> (
     None
 ):
@@ -286,5 +287,3 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_specific_an
 
     assert "Run a base sync first" in message
     assert "`class_surface:pkg.Example`" in message
-
-

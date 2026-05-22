@@ -199,7 +199,8 @@ def test_reviewed_baseline_hotspot_families_match_reviewed_duplication_snapshot(
     reviewed_families = [
         family
         for family in families
-        if isinstance(family, dict) and family.get("ratchet_stage") == "reviewed-baseline"
+        if isinstance(family, dict)
+        and family.get("ratchet_stage") == "reviewed-baseline"
     ]
     assert reviewed_families, "Expected at least one reviewed-baseline hotspot family"
 

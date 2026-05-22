@@ -208,28 +208,35 @@ def test_registry_yaml_has_expected_shape() -> None:
 
 
 @pytest.mark.architecture
-def test_retained_entrypoint_sunset_review_covers_all_public_rows() -> None:
-    """Retained public entrypoints must have explicit 2026-09-30 review disposition."""
+def test_retained_entrypoint_burn_down_plan_covers_all_public_rows() -> None:
+    """Retained public entrypoints must declare an explicit burn-down plan."""
     mod = _load_registry_module()
     registry = mod.load_compatibility_registry(REGISTRY_YAML)
     payload = yaml.safe_load(REGISTRY_YAML.read_text(encoding="utf-8"))
-    sunset_review = payload["retained_entrypoint_sunset_review"]
+    burn_down_plan = payload["retained_entrypoint_burn_down_plan"]
 
-    assert sunset_review["linked_issue"] == "#4498"
-    assert sunset_review["review_date"] == "2026-09-30"
-    allowed = set(sunset_review["allowed_dispositions"])
-    assert allowed == {
-        "keep_public_api",
-        "narrow_internal_callers",
-        "remove_after_migration",
+    assert burn_down_plan["linked_issue"] == "#4512"
+    assert burn_down_plan["review_date"] == "2026-09-30"
+    allowed_phases = set(burn_down_plan["allowed_phases"])
+    assert allowed_phases == {
+        "visibility",
+        "narrow-first-party-callers",
+        "enforce",
+    }
+    allowed_target_states = set(burn_down_plan["allowed_target_states"])
+    assert allowed_target_states == {
+        "retain_as_stable_public_api",
+        "narrow_first_party_callers",
     }
 
-    rows = sunset_review["rows"]
+    rows = burn_down_plan["rows"]
     paths_by_review = {row["path"]: row for row in rows}
     assert set(paths_by_review) == {row.path for row in registry.retained_entrypoints}
     for path, row in paths_by_review.items():
-        assert row["disposition"] in allowed, path
+        assert row["phase"] in allowed_phases, path
+        assert row["target_state"] in allowed_target_states, path
         assert str(row["rationale"]).strip(), path
+        assert str(row["completion_gate"]).strip(), path
 
 
 @pytest.mark.architecture

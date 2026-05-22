@@ -214,7 +214,9 @@ def _workflow_focus_score(
 ) -> tuple[int, int, str]:
     lowered_path = rel_path.lower()
     token_hits = sum(token in lowered_path for token in focus_tokens)
-    direct_bonus = 1 if any(f"/{token}" in lowered_path for token in focus_tokens) else 0
+    direct_bonus = (
+        1 if any(f"/{token}" in lowered_path for token in focus_tokens) else 0
+    )
     source_priority = priority_index.get(source_id, len(priority_index))
     return (-(token_hits + direct_bonus), source_priority, rel_path)
 

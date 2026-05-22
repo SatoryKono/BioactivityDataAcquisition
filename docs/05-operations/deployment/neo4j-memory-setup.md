@@ -36,6 +36,9 @@ out of the repository root and archived under
    cp .env.example .env
    ```
 
+   AI/runtime agents must not create or edit `.env` files without explicit
+   per-task approval; this is a human operator setup step.
+
 1. Update Neo4j credentials in `.env`:
 
    ```bash

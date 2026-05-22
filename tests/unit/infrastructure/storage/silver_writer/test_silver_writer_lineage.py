@@ -91,7 +91,9 @@ class TestSilverWriterAudit:
             mode=SilverWriteMode.MERGE,
             run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
             run_type=RunType.INCREMENTAL,
-            source_batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
+            source_batch_id=BatchID(
+                deterministic_uuid_from_callsite("replay-sensitive")
+            ),
             ingestion_ts=datetime(2025, 1, 1, tzinfo=UTC),
         )
 
@@ -116,7 +118,9 @@ class TestSilverWriterAudit:
                 mode=SilverWriteMode.MERGE,
                 run_id=None,
                 run_type=RunType.INCREMENTAL,
-                source_batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
+                source_batch_id=BatchID(
+                    deterministic_uuid_from_callsite("replay-sensitive")
+                ),
                 ingestion_ts=datetime(2025, 1, 1, tzinfo=UTC),
             )
 
@@ -142,7 +146,9 @@ class TestSilverWriterAudit:
             mode=SilverWriteMode.MERGE,
             run_id=RunID(valid_uuid),
             run_type=RunType.INCREMENTAL,
-            source_batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
+            source_batch_id=BatchID(
+                deterministic_uuid_from_callsite("replay-sensitive")
+            ),
             ingestion_ts=datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC),
         )
 
@@ -170,7 +176,9 @@ class TestSilverWriterAudit:
             mode=SilverWriteMode.APPEND,
             run_id=RunID(valid_uuid),
             run_type=RunType.BACKFILL,
-            source_batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
+            source_batch_id=BatchID(
+                deterministic_uuid_from_callsite("replay-sensitive")
+            ),
             ingestion_ts=ingestion_dt,
         )
 
@@ -196,7 +204,9 @@ class TestSilverWriterAudit:
                 mode=SilverWriteMode.DELETE,
                 run_id=RunID(valid_uuid),
                 run_type=RunType.REBUILD,
-                source_batch_id=BatchID(deterministic_uuid_from_callsite("replay-sensitive")),
+                source_batch_id=BatchID(
+                    deterministic_uuid_from_callsite("replay-sensitive")
+                ),
                 ingestion_ts=None,
             )
 

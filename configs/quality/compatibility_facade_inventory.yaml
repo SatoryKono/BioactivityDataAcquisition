@@ -339,54 +339,85 @@ measured_only_review_workflow:
   - promote
   - remove
   promotion_requires_curated_row: true
-retained_entrypoint_sunset_review:
+retained_entrypoint_burn_down_plan:
   review_date: '2026-09-30'
-  linked_issue: '#4498'
-  allowed_dispositions:
-  - keep_public_api
-  - narrow_internal_callers
-  - remove_after_migration
+  linked_issue: '#4512'
+  allowed_phases:
+  - visibility
+  - narrow-first-party-callers
+  - enforce
+  allowed_target_states:
+  - retain_as_stable_public_api
+  - narrow_first_party_callers
   rows:
   - path: src/bioetl/interfaces/cli/commands/run.py
-    disposition: keep_public_api
+    phase: enforce
+    target_state: retain_as_stable_public_api
     rationale: Public CLI command seam; removal would be an external breaking change.
+    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam and block new direct owner-module imports outside approved boundary coverage.
   - path: src/bioetl/interfaces/cli/commands/run_all.py
-    disposition: keep_public_api
+    phase: enforce
+    target_state: retain_as_stable_public_api
     rationale: Public CLI command seam; removal would be an external breaking change.
+    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam and block new direct owner-module imports outside approved boundary coverage.
   - path: src/bioetl/interfaces/cli/commands/run_composite.py
-    disposition: keep_public_api
+    phase: enforce
+    target_state: retain_as_stable_public_api
     rationale: Public CLI command seam; removal would be an external breaking change.
+    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam and block new direct owner-module imports outside approved boundary coverage.
   - path: src/bioetl/interfaces/cli/commands/health.py
-    disposition: keep_public_api
+    phase: enforce
+    target_state: retain_as_stable_public_api
     rationale: Public CLI command seam; removal would be an external breaking change.
+    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam and block new direct owner-module imports outside approved boundary coverage.
   - path: src/bioetl/interfaces/cli/commands/diagnostics.py
-    disposition: keep_public_api
+    phase: enforce
+    target_state: retain_as_stable_public_api
     rationale: Public CLI command seam; removal would be an external breaking change.
+    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam and block new direct owner-module imports outside approved boundary coverage.
   - path: src/bioetl/interfaces/cli/commands/quarantine.py
-    disposition: keep_public_api
+    phase: enforce
+    target_state: retain_as_stable_public_api
     rationale: Public CLI command seam; removal would be an external breaking change.
+    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam and block new direct owner-module imports outside approved boundary coverage.
   - path: src/bioetl/interfaces/cli/commands/maintenance.py
-    disposition: keep_public_api
+    phase: enforce
+    target_state: retain_as_stable_public_api
     rationale: Public CLI command seam; removal would be an external breaking change.
+    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam and block new direct owner-module imports outside approved boundary coverage.
   - path: src/bioetl/composition/entrypoints.py
-    disposition: keep_public_api
+    phase: narrow-first-party-callers
+    target_state: narrow_first_party_callers
     rationale: Public composition entrypoint; retained as stable integration API.
+    completion_gate: Reduce first-party imports to the explicit execution-facing exports only and keep `_pipeline_execution`, `_resource_management`, and `_services` hidden behind the public seam.
   - path: src/bioetl/composition/health_api.py
-    disposition: keep_public_api
+    phase: narrow-first-party-callers
+    target_state: narrow_first_party_callers
     rationale: Public composition health facade; retained as stable integration API.
+    completion_gate: Route first-party health and quarantine call sites through the reviewed facade exports only and keep deeper composition owner modules as implementation details.
   - path: src/bioetl/composition/maintenance_api.py
-    disposition: keep_public_api
+    phase: narrow-first-party-callers
+    target_state: narrow_first_party_callers
     rationale: Public composition maintenance facade; retained as stable integration API.
+    completion_gate: Route first-party maintenance/archive/cleanup/vacuum call sites through the reviewed facade exports only and keep deeper composition owner modules as implementation details.
   - path: src/bioetl/infrastructure/config/__init__.py
-    disposition: narrow_internal_callers
+    phase: narrow-first-party-callers
+    target_state: narrow_first_party_callers
     rationale: Public package-root facade remains, but first-party imports must continue migrating to canonical modules.
+    completion_gate: Hold the package-root facade as external convenience API while first-party `src/` imports continue ratcheting downward through the dedicated root-facade inventory.
   - path: src/bioetl/domain/composite/config.py
-    disposition: keep_public_api
+    phase: enforce
+    target_state: retain_as_stable_public_api
     rationale: Public domain config model entrypoint; retained as stable integration API.
+    completion_gate: Keep the root domain config entrypoint stable and block new imports of split config internals outside the owner package and dedicated boundary tests.
   - path: src/bioetl/domain/value_objects/activity_values.py
-    disposition: keep_public_api
+    phase: enforce
+    target_state: retain_as_stable_public_api
     rationale: Public value-object entrypoint; retained as stable integration API.
+    completion_gate: Keep the value-object facade stable and block new imports of split activity-value internals outside the owner package and dedicated boundary tests.
   - path: src/bioetl/application/composite/merger.py
-    disposition: keep_public_api
+    phase: enforce
+    target_state: retain_as_stable_public_api
     rationale: Public composite merge module; retained while collaborator bundle API is canonical.
+    completion_gate: Keep the sanctioned merge entrypoint stable and prevent first-party callers from bypassing the collaborator bundle/canonical merge surface.
 measured_only_modules: []

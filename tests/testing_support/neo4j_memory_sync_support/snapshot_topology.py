@@ -1035,6 +1035,7 @@ def _assert_relation_membership(
     for relation_key in expected:
         assert relation_key in relation_keys
 
+
 def test_duplication_analysis_config_excludes_normalization_registry_path() -> None:
     root = _repo_root()
     config = _duplication_analysis_config(_load_memory_mapping(root))
@@ -1691,5 +1692,3 @@ def test_docs_drift_sources_skips_unreadable_doc_artifacts(
 
     assert list(_docs_drift_sources(snapshot, tmp_path, {})) == []
     assert doc_key in snapshot.nodes
-
-

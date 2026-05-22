@@ -59,7 +59,8 @@ def resolve_closure_verdict(
     claim_scope_mode: HistoricalReplayClaimScopeMode,
 ) -> tuple[str, str]:
     if (
-        inventory.certified_count + inventory.replayable_count == inventory.manifest_count
+        inventory.certified_count + inventory.replayable_count
+        == inventory.manifest_count
         and inventory.unsupported_count == 0
     ):
         return (
