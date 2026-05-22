@@ -8,6 +8,7 @@ from __future__ import annotations
 import asyncio
 import sys
 import warnings
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -17,8 +18,11 @@ import pytest
 PYTHON_314 = sys.version_info >= (3, 14)
 
 from bioetl.domain.exceptions import SchemaViolationError
+from bioetl.application.services.lineage import MetadataCoordinator
+from bioetl.domain.types import RunID, RunType
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.medallion import SilverWriteMode, WriteMode
+from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.validation.pandera_validator import (
     NoOpValidator,
@@ -30,6 +34,7 @@ from tests.unit.infrastructure.storage.silver_writer._test_support import (
     silver_table_path,
     write_standard_silver,
 )
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 
 def _build_pandera_validator(
@@ -618,3 +623,51 @@ class TestSilverWriterPreparePayloadExecutor:
         assert captured_request.schema == schema
         assert captured_request.mode == "append"
         assert captured_request.partition_cols == ["entity_id"]
+
+    @pytest.mark.asyncio
+    async def test_prepare_payload_fails_closed_for_strict_merge_without_content_hash(
+        self, noop_logger
+    ) -> None:
+        from bioetl.infrastructure.storage.silver.validation_mixin import (
+            _ValidatedSilverWriteContext,
+        )
+
+        records, schema, expected_table = _sample_prepare_payload_fixture()
+        context = RunContext.create(
+            run_id=RunID(deterministic_uuid_from_callsite("strict-silver-merge")),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC),
+            provider="chembl",
+            entity="activity",
+            required_persistence_profile="replay_ready",
+        )
+        writer = make_silver_writer(
+            logger=noop_logger,
+            metadata_coordinator=MetadataCoordinator(context),
+        )
+        writer._check_schema_drift = AsyncMock(return_value=None)  # type: ignore[method-assign]
+
+        with patch.object(
+            writer,
+            "_sync_validate_and_build_arrow",
+            return_value=_ValidatedSilverWriteContext(
+                records=records,
+                validated_mode=SilverWriteMode.MERGE,
+                arrow_data=expected_table,
+            ),
+        ):
+            with pytest.raises(
+                ValueError,
+                match="Replay-capable Silver merge requires content_hash",
+            ):
+                await writer._prepare_silver_write_payload(
+                    table_name="test.table",
+                    records=records,
+                    primary_keys=["entity_id"],
+                    schema=schema,
+                    mode="merge",
+                    on_schema_mismatch="ignore",
+                    column_order=None,
+                    partition_cols=None,
+                    key_nullability_rules=None,
+                )

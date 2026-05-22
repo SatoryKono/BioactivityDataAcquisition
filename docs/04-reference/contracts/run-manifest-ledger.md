@@ -308,10 +308,11 @@ Current rollout semantics:
    without manifest creation.
 1. `run_manifest_enabled=true`, `run_ledger_enabled=false` keeps manifest creation but suppresses ledger writes where that degraded mode is still allowed.
 1. `run_ledger_enabled=true` is only valid when `run_manifest_enabled=true`.
-1. Executable launches default to `replay_ready`. When an exact-replay request
-   or critical runtime still carries a `degraded_observable` configuration, the
-   effective profile is promoted to the published strict family default instead
-   of silently preserving the weaker floor.
+1. Executable launches for replay-capable published families default to
+   `replay_ready`. When a supported executable family still carries a
+   configured `degraded_observable` override, the effective profile is promoted
+   to the published strict family default instead of silently preserving the
+   weaker floor.
 1. Runtime surfaces must distinguish configured vs effective persistence
    profile. Bootstrap observability may publish the configured request as
    `configured_required_persistence_profile`, while the canonical
@@ -498,10 +499,10 @@ persistence-profile taxonomy:
 `required_persistence_profile` is the declared minimum profile requested by the
 runtime/deployment for that run. The current published contract is:
 
-- `degraded_observable` remains a valid explicit opt-down and may still be
-  inspected even when richer replay/forensic surfaces are absent, but
-  production/debug-critical launches and exact-replay requests do not preserve
-  this weaker floor for replay-capable families;
+- `degraded_observable` remains valid only for families outside the published
+  replay-capable executable boundary. Replay-capable executable families do not
+  preserve this weaker floor: they promote to the published strict floor or
+  fail closed before the run is claimed as executable;
 - `replay_ready` is the default floor for executable runs;
 - `replay_ready` is only valid inside the strict exact-replay support boundary;
   execution contexts outside that boundary must fail closed during bootstrap
@@ -765,8 +766,11 @@ artifact equality:
   produced-artifact trace. Occurrence-only fields such as `run_id`,
   `manifest_id`, ledger append order, wall-clock timestamps, host/runtime
   diagnostics, and occurrence envelopes may differ.
-- `artifact_byte_equivalence` means the compared artifacts are byte-for-byte
-  identical. This is stricter than semantic replay and is not implied when
+- `artifact_byte_equivalence` is resolved semantic-first for structured
+  sidecars. Normalized JSON/YAML sidecars are compared after removing
+  occurrence-only fields such as `run_id`, `manifest_id`, and occurrence-only
+  dataset provenance anchors. Raw-byte equality remains an explicit forensic
+  sub-surface. This is stricter than semantic replay and is not implied when
   sidecars or metadata envelopes contain occurrence-scoped timestamps, run IDs,
   manifest IDs, lineage timestamps, or host/runtime fields.
 
@@ -1043,8 +1047,9 @@ The score payload includes `schema_version`, `contract_version`, `scale`,
 `required_profile`, run-scoped `score_scope`, backward-compatible
 run-scoped `overall_score`, category scores, score `thresholds`,
 `threshold_failures`, `thresholds_satisfied`, `blockers`, `evidence_refs`,
-explicit `supported_boundary_verdict`, explicit `global_reproducibility_claim`,
-`scored_at`, and `source`.
+explicit `supported_boundary_verdict`,
+`historical_replay_universe_exact_replay_claim`,
+`executable_run_contract_claim`, `scored_at`, and `source`.
 
 `overall_score` remains a legacy-compatible summary for the inspected
 run/family within its published replay boundary. It is not a project-wide claim
@@ -1056,26 +1061,25 @@ whether the inspected run satisfies its published boundary requirements or is
 blocked/gapped by replay capability, lineage closure, thresholds, or other
 boundary evidence.
 
-`global_reproducibility_claim` is the machine-readable project-wide claim
-surface. It remains explicit even when the inspected run scores well inside its
-supported boundary. When the latest authoritative historical replay universe
-artifact is available, this field must mirror that artifact's truth surface;
-otherwise it remains an explicit unclaimed fallback rather than silently
-inferring a universal guarantee from one run's local score.
+`historical_replay_universe_exact_replay_claim` is the machine-readable claim
+surface for historical corpus coverage. It remains explicit even when the
+inspected run scores well inside its supported boundary. When the latest
+authoritative historical replay universe artifact is available, this field must
+mirror that artifact's truth surface; otherwise it remains an explicit
+unclaimed fallback rather than silently inferring a universal guarantee from
+one run's local score.
+
+`executable_run_contract_claim` is the machine-readable claim surface for
+prospective executable runs inside the published supported boundary. It states
+that replay-capable executable launches promote to the strict family floor or
+fail closed instead of running under a degraded replay claim.
 
 Current published lineage closure boundary for Bronze -> Silver -> Gold
-operator-grade trace/debug support covers these families:
-
-- `chembl.activity`
-- `chembl.molecule`
-- `composite.activity`
-- `composite.assay`
-- `composite.molecule`
-- `composite.publication`
-- `composite.target`
-- `crossref.publication`
-- `pubchem.compound`
-- `pubmed.publication`
+operator-grade trace/debug support is authoritative only in the generated
+[Reproducibility Support Matrix](../../02-architecture/policies/reproducibility-support-matrix.md).
+That matrix is the sole source of truth for family membership inside the
+published closure boundary; this contract intentionally avoids freezing a
+second hard-coded family list here.
 
 For each supported family the canonical semantic artifact anchors remain:
 
@@ -1085,7 +1089,8 @@ For each supported family the canonical semantic artifact anchors remain:
 - Gold dataset outputs with canonical artifact ids of the form
   `gold:{family}`.
 
-Families outside that published list may still emit lineage signals, but they
+Families outside that generated published boundary may still emit lineage
+signals, but they
 are fail-closed outside the supported end-to-end closure surface for
 operator-grade trace/debug guarantees.
 The diagnostics payload therefore publishes an explicit

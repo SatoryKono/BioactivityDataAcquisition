@@ -39,7 +39,7 @@ ______________________________________________________________________
 | `run_id`       | UUID            | Идентификатор запуска пайплайна (в sidecar metadata). |
 | `batch_id`     | UUID            | Идентификатор пакета данных (в sidecar metadata).     |
 
-**Примечание**: Metadata хранится в sidecar-файлах уровня файла (`.zst.meta.json` и `*_metadata.yaml`), а не как per-record поля. Воспроизводимость Silver/Gold опирается на sidecar/control-plane anchors (`run_id`, `manifest_id`, `execution_fingerprint`, `content_hash`), а не на persisted occurrence-scoped поля в физических строках Delta.
+**Примечание**: Metadata хранится в sidecar-файлах уровня файла (`.zst.meta.json` и `*_metadata.yaml`), а не как per-record поля. Legacy Bronze `.zst.meta.json` sidecar является только occurrence-scoped lineage projection, а не authoritative replay dossier. Authoritative replay reconstruction должна опираться на immutable control-plane and lineage surfaces together: `run_manifest`, canonical layer metadata, lineage fragment, effective-config artifact и published ledger evidence. Воспроизводимость Silver/Gold опирается на эти sidecar/control-plane anchors (`run_id`, `manifest_id`, `execution_fingerprint`, `content_hash`), а не на persisted occurrence-scoped поля в физических строках Delta.
 
 **Примечание**: Если источник возвращает массив JSON, он разбивается на отдельные строки (records).
 

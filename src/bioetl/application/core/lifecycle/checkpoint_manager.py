@@ -16,6 +16,7 @@ from bioetl.application.core.lifecycle.checkpoint_runtime import (
     resolve_current_metadata,
     resolve_incompatible_checkpoint_disposition,
     resolve_missing_compatibility_context_disposition,
+    strict_checkpoint_resume_required,
     validate_compatibility_policy,
 )
 from bioetl.domain.medallion import LoadingStrategy
@@ -174,6 +175,10 @@ class CheckpointRuntimeService:
             ),
             identity_continuity_proven=(
                 compatibility_result.identity_continuity_proven
+            ),
+            strict_persistence_required=strict_checkpoint_resume_required(
+                current_metadata=current_metadata,
+                checkpoint_metadata=checkpoint_metadata,
             ),
         )
         try:

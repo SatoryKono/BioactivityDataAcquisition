@@ -100,8 +100,14 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
     assert "### Input snapshot identity vs locator" in text
     assert "`snapshot_id` is content-addressed as `sha256:{content_hash}`" in text
     assert "`bronze://{relative_path_from_bronze_root}`" in text
-    assert "Executable launches default to `replay_ready`" in text
-    assert "effective profile is promoted to the published strict" in text
+    assert (
+        "Executable launches for replay-capable published families default to" in text
+    )
+    assert (
+        "configured `degraded_observable` override, the effective profile is promoted"
+        in text
+    )
+    assert "to the published strict family default instead" in text
     assert "The effective default is fail-closed" in text
     assert "post-capture replayable parent evidence" in text
     assert "live_capture_snapshot_materialized" in text
@@ -129,6 +135,14 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
     assert "source_pack_ref" in text
     assert "evidence_residency" in text
     assert "durable evidence path" in text
+    assert "historical_replay_universe_exact_replay_claim" in text
+    assert "executable_run_contract_claim" in text
+    assert "Reproducibility Support Matrix" in text
+    assert (
+        "Current published lineage closure boundary for Bronze -> Silver -> Gold "
+        "operator-grade trace/debug support covers these families:"
+        not in text
+    )
     assert "## Reproducibility Scoring Rubric" in text
     assert "|   100 | `forensic_grade`" in text
     assert "| Evidence surface" in text
@@ -201,7 +215,8 @@ def test_run_manifest_docs_define_replay_equivalence_levels() -> None:
         "universe-report --external-pack path/to/archive-pack.json --write" in runbook
     )
     assert "run_historical_replay_closure_campaign.py" in runbook
-    assert "global_universal_historical_replay_claim" in runbook
+    assert "historical_replay_universe_exact_replay_claim" in runbook
+    assert "executable_run_contract_claim" in runbook
     assert "retained_corpus_claim" in runbook
     assert "irrecoverable_missing_immutable_evidence" in runbook
     assert "claim_scope_mode" in runbook
