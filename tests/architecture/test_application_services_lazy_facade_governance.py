@@ -6,38 +6,66 @@ Issue: #3474
 from __future__ import annotations
 
 import ast
+import os
+from concurrent.futures import ThreadPoolExecutor
+from functools import lru_cache
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE_ROOT_MODULE = "bioetl.application.services"
 _DIRECT_MODULE_IMPORT_SENTINEL = "<module>"
+_PACKAGE_ROOT_IMPORT_MARKERS = (
+    f"from {PACKAGE_ROOT_MODULE} import",
+    f"import {PACKAGE_ROOT_MODULE}",
+)
 
 EXPECTED_TEST_IMPORTS: dict[str, frozenset[str]] = {}
 
 
+@lru_cache(maxsize=2)
 def _collect_imports(root: Path) -> dict[str, frozenset[str]]:
     """Collect exact imports from ``bioetl.application.services`` under ``root``."""
-    collected: dict[str, set[str]] = {}
+    paths = tuple(sorted(root.rglob("*.py")))
+    max_workers = min(32, max(1, os.cpu_count() or 1))
 
-    for path in sorted(root.rglob("*.py")):
-        _collect_imports_for_path(path, collected=collected)
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        results = executor.map(_collect_imports_for_path, paths)
 
     return {
         relative_path: frozenset(sorted(imported_names))
-        for relative_path, imported_names in collected.items()
+        for item in results
+        if item is not None
+        for relative_path, imported_names in (item,)
     }
 
 
-def _collect_imports_for_path(path: Path, *, collected: dict[str, set[str]]) -> None:
-    imported_names = _collect_imports_from_tree(_parse_import_tree(path))
-    if imported_names:
-        collected[path.relative_to(ROOT).as_posix()] = imported_names
+def _collect_imports_for_path(path: Path) -> tuple[str, set[str]] | None:
+    source = _read_candidate_source(path)
+    if source is None:
+        return None
+
+    imported_names = _collect_imports_from_tree(_parse_import_tree(path, source))
+    if not imported_names:
+        return None
+
+    return path.relative_to(ROOT).as_posix(), imported_names
 
 
-def _parse_import_tree(path: Path) -> ast.Module:
+def _read_candidate_source(path: Path) -> str | None:
     try:
-        return ast.parse(path.read_text(encoding="utf-8"))
+        source = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError as exc:  # pragma: no cover - architecture scan safety
+        raise AssertionError(f"Unable to decode {path}: {exc}") from exc
+
+    if not any(marker in source for marker in _PACKAGE_ROOT_IMPORT_MARKERS):
+        return None
+    return source
+
+
+def _parse_import_tree(path: Path, source: str) -> ast.Module:
+    try:
+        return ast.parse(source)
     except SyntaxError as exc:  # pragma: no cover - architecture scan safety
         raise AssertionError(f"Unable to parse {path}: {exc}") from exc
 
