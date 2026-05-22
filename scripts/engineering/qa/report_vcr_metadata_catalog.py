@@ -96,12 +96,6 @@ def _metadata_status(metadata_payload: object) -> str:
     return "present"
 
 
-def _load_metadata_payload(path: Path) -> object | None:
-    if not path.exists():
-        return None
-    return cast(object | None, yaml.safe_load(path.read_text(encoding="utf-8")))
-
-
 def _load_existing_metadata_payload(path: Path) -> object | None:
     return cast(object | None, yaml.safe_load(path.read_text(encoding="utf-8")))
 
@@ -182,6 +176,7 @@ def _reachability_status_and_owners(
     *,
     cassette_path: Path,
     metadata_path: Path,
+    has_metadata_sidecar: bool,
     repo_root: Path,
     vcr_root: Path,
     scan_files: list[tuple[str, str]],
@@ -201,7 +196,7 @@ def _reachability_status_and_owners(
     if generated_owners:
         return "generated_reference", generated_owners
 
-    if metadata_path.exists():
+    if has_metadata_sidecar:
         return "metadata_review_required", [metadata_path.as_posix()]
     return "unowned", []
 
@@ -234,6 +229,7 @@ def iter_catalog_rows(vcr_root: Path) -> list[CassetteCatalogRow]:
         reachability_status, reachability_owner_paths = _reachability_status_and_owners(
             cassette_path=cassette_path,
             metadata_path=metadata_path,
+            has_metadata_sidecar=has_metadata_sidecar,
             repo_root=repo_root,
             vcr_root=vcr_root,
             scan_files=scan_files,
