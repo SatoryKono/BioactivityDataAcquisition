@@ -45,20 +45,6 @@ rules:
           - cell_type
           - clo_id
 
-  - path: docs/04-reference/pipelines/chembl/tissue-xwalk.csv
-    markers:
-      MISSING_DOC:
-        classification: should_fix
-        owner_issue: 3218
-        rationale: ChEMBL tissue cross-reference fields need documentation coverage.
-        fields:
-          - tissue_id
-          - pref_name
-          - bto_id
-          - caloha_id
-          - efo_id
-          - uberon_id
-
   - path: docs/04-reference/pipelines/crossref/publication-xwalk.csv
     markers:
       MISSING_DOC:
@@ -208,21 +194,6 @@ rules:
           - publication_types
           - subject_fields
           - volume
-
-  - path: docs/04-reference/pipelines/uniprot/idmapping-xwalk.csv
-    markers:
-      MISSING_DOC:
-        classification: should_fix
-        owner_issue: 3218
-        rationale: UniProt ID mapping output fields need documentation coverage.
-        fields:
-          - annotation_score
-          - gene_primary
-          - organism_common
-          - protein_name
-          - reviewed
-          - sequence_length
-          - sequence_mass
 
   - path: docs/04-reference/pipelines/uniprot/protein-xwalk.csv
     markers:

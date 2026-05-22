@@ -2,7 +2,7 @@ version: 1
 policy_scope: deterministic_identity_generation
 review_date: '2026-09-30'
 compatibility_reduction_plan:
-  linked_issue: '#4517'
+  linked_issue: '#4540'
   review_date: '2026-09-30'
   allowed_outcomes:
   - retain_occurrence_only_generator

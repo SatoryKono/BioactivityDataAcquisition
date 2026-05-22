@@ -129,7 +129,7 @@ sanctioned_public_entrypoint_governance:
     public_entrypoint_count:
       current_count: 14
       owner: '@bioetl-architecture'
-      linked_issue: '4512'
+      linked_issue: '4542'
       rationale: Permanent public entrypoints remain governed as sanctioned public
         API seams with explicit burn-down metadata, but they are not compatibility
         debt because they are not transition shims.
@@ -138,9 +138,9 @@ sanctioned_public_entrypoint_governance:
         completion gates whenever the compatibility inventory changes or quarterly
         lifecycle review runs.
     stable_public_api_count:
-      current_count: 10
+      current_count: 13
       owner: '@bioetl-architecture'
-      linked_issue: '4512'
+      linked_issue: '4542'
       rationale: Stable public entrypoints intentionally remain external patch/import
         seams and should stay explicitly bounded rather than being treated as
         hidden transition debt.
@@ -148,9 +148,9 @@ sanctioned_public_entrypoint_governance:
       review_policy: Keep the sanctioned public API set explicit and block reversion
         to internal-owner imports outside approved boundary coverage.
     narrow_first_party_callers_count:
-      current_count: 4
+      current_count: 1
       owner: '@bioetl-architecture'
-      linked_issue: '4512'
+      linked_issue: '4542'
       rationale: A small subset of sanctioned public entrypoints still needs first-party
         caller narrowing even though the public API itself remains stable.
       review_cadence: quarterly

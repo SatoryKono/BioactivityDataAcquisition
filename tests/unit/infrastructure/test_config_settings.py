@@ -152,10 +152,10 @@ class TestPipelineSettings:
     @pytest.mark.parametrize(
         ("required_profile", "policy"),
         [
-            ("replay_ready", "observe"),
             ("replay_ready", "soft_fail"),
-            ("forensic_grade", "observe"),
             ("forensic_grade", "soft_fail"),
+            ("replay_ready", "observe"),
+            ("forensic_grade", "observe"),
         ],
     )
     def test_control_plane_strict_profiles_require_hard_fail_checkpoint_policy(

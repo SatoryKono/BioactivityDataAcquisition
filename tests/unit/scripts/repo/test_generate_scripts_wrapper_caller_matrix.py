@@ -2,11 +2,24 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from scripts.engineering.repo import generate_scripts_wrapper_caller_matrix as module
 
 
-def test_render_report_lists_known_wrapper_candidates() -> None:
-    report = module._render_report(module._project_root())
+def test_render_report_lists_known_wrapper_candidates(tmp_path: Path, monkeypatch) -> None:
+    # Mock file iteration to return minimal test files
+    test_file = tmp_path / "docs" / "test.md"
+    test_file.parent.mkdir(parents=True)
+    test_file.write_text("scripts/docs/build_docs_site.sh\n", encoding="utf-8")
+
+    monkeypatch.setattr(
+        module,
+        "_iter_search_files",
+        lambda root: [test_file],
+    )
+
+    report = module._render_report(tmp_path)
 
     assert "# Scripts CLI Wrapper Caller Matrix" in report
     assert "`scripts/docs/build_docs_site.sh`" in report

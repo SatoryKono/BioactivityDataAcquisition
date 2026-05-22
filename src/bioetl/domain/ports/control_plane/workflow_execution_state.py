@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from bioetl.domain.control_plane import WorkflowExecutionState
+from bioetl.domain.control_plane.workflow_execution_state import WorkflowExecutionState
 from bioetl.domain.types import RunID
 
 __all__ = ["WorkflowExecutionStatePort"]

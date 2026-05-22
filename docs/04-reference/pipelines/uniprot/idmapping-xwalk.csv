@@ -1,15 +1,15 @@
 field,doc_spec,cfg_pipeline,cfg_schema,code_transformer,code_entity,code_gold_schema,api_endpoint,json_type,nullable,primary_key,notes
 target_id,§4.1 (as target_chembl_id),YES (PK),MISSING,idmapping_transformer.py:98,uniprot.py:44,uniprot.py:101,/idmapping/,string,false,true,"PK_MISMATCH doc says target_chembl_id; code uses target_id; RENAME"
 all_mappings,§4.2,MISSING,MISSING,idmapping_transformer.py:126,uniprot.py:63,uniprot.py:122,/idmapping/,string,true,false,OK JSON array for multiple matches
-annotation_score,MISSING,MISSING,MISSING,idmapping_transformer.py:125,uniprot.py:60,uniprot.py:119,/idmapping/,integer,true,false,MISSING_DOC
-gene_primary,MISSING,MISSING,MISSING,idmapping_transformer.py:121,uniprot.py:56,uniprot.py:115,/idmapping/,string,true,false,MISSING_DOC
+annotation_score,Notes,MISSING,MISSING,idmapping_transformer.py:125,uniprot.py:60,uniprot.py:119,/idmapping/,integer,true,false,
+gene_primary,Notes,MISSING,MISSING,idmapping_transformer.py:121,uniprot.py:56,uniprot.py:115,/idmapping/,string,true,false,
 mapping_status,§4.2,MISSING,MISSING,idmapping_transformer.py:103,uniprot.py:48,uniprot.py:107,/idmapping/,string,false,false,DERIVED
-organism_common,MISSING,MISSING,MISSING,idmapping_transformer.py:118,uniprot.py:53,uniprot.py:112,/idmapping/,string,true,false,MISSING_DOC
+organism_common,Notes,MISSING,MISSING,idmapping_transformer.py:118,uniprot.py:53,uniprot.py:112,/idmapping/,string,true,false,
 organism_scientific,§4.2 (as uniprot_organism),MISSING,MISSING,idmapping_transformer.py:117,uniprot.py:52,uniprot.py:111,/idmapping/,string,true,false,"RENAME doc says uniprot_organism; code uses organism_scientific"
-protein_name,MISSING,MISSING,MISSING,idmapping_transformer.py:120,uniprot.py:55,uniprot.py:114,/idmapping/,string,true,false,MISSING_DOC
-reviewed,MISSING,MISSING,MISSING,idmapping_transformer.py:124,uniprot.py:59,uniprot.py:118,/idmapping/,boolean,true,false,MISSING_DOC
-sequence_length,MISSING,MISSING,MISSING,idmapping_transformer.py:122,uniprot.py:57,uniprot.py:116,/idmapping/,integer,true,false,MISSING_DOC
-sequence_mass,MISSING,MISSING,MISSING,idmapping_transformer.py:123,uniprot.py:58,uniprot.py:117,/idmapping/,integer,true,false,MISSING_DOC
+protein_name,Notes,MISSING,MISSING,idmapping_transformer.py:120,uniprot.py:55,uniprot.py:114,/idmapping/,string,true,false,
+reviewed,Notes,MISSING,MISSING,idmapping_transformer.py:124,uniprot.py:59,uniprot.py:118,/idmapping/,boolean,true,false,
+sequence_length,Notes,MISSING,MISSING,idmapping_transformer.py:122,uniprot.py:57,uniprot.py:116,/idmapping/,integer,true,false,
+sequence_mass,Notes,MISSING,MISSING,idmapping_transformer.py:123,uniprot.py:58,uniprot.py:117,/idmapping/,integer,true,false,
 taxonomy_id,§4.2 (as uniprot_tax_id),MISSING,MISSING,idmapping_transformer.py:119,uniprot.py:54,uniprot.py:113,/idmapping/,integer,true,false,"RENAME doc says uniprot_tax_id; code uses taxonomy_id"
 uniprot_accession,§4.2,MISSING,MISSING,idmapping_transformer.py:99,uniprot.py:47,uniprot.py:104,/idmapping/,string,true,false,OK
 uniprot_entry_name,§4.2,MISSING,MISSING,idmapping_transformer.py:116,uniprot.py:51,uniprot.py:110,/idmapping/,string,true,false,OK

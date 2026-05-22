@@ -11,6 +11,9 @@ from bioetl.composition.bootstrap.runtime._composite_plan_support import (
     build_composite_bootstrap_plan_impl,
     create_composite_runner_from_plan_impl,
 )
+from bioetl.composition.bootstrap.runtime._runner_assembly_support import (
+    create_composite_runner_service_from_inputs,
+)
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
@@ -50,10 +53,6 @@ def bootstrap_composite_runner_via_wiring(
     create_composite_runner_fn: Callable[..., CompositePipelineRunner],
 ) -> CompositePipelineRunner:
     """Assemble and create composite runner with injected dependency builders."""
-    from bioetl.composition.bootstrap.runtime.runner_assembly import (
-        create_composite_runner_service,
-    )
-
     plan = build_composite_bootstrap_plan_impl(
         bootstrap_runtime_basics_fn=bootstrap_runtime_basics_fn,
         config=config,
@@ -67,5 +66,5 @@ def bootstrap_composite_runner_via_wiring(
         runtime=runtime,
         plan=plan,
         create_composite_runner_builder_fn=create_composite_runner_fn,
-        runner_factory=create_composite_runner_service,
+        runner_factory=create_composite_runner_service_from_inputs,
     )

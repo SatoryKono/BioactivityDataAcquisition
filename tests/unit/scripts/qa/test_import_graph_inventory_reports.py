@@ -134,13 +134,13 @@ def test_build_dead_code_inventory_flags_zero_import_candidates(tmp_path: Path) 
                 "policy:",
                 "  review_cycle_days: 90",
                 "repo_wide_zero_import_review:",
-                "  linked_issue: '#4513'",
+                "  linked_issue: '#4541'",
                 "  mode: fail-fast-zero-untriaged",
                 "  max_untriaged_zero_import_candidates: 0",
                 "  last_reviewed: '2026-05-22'",
                 "  next_review_by: '2026-08-20'",
                 "repo_wide_zero_import_classification:",
-                "  linked_issue: '#4513'",
+                "  linked_issue: '#4541'",
                 "  review_date: '2026-05-22'",
                 "  allowed_dispositions:",
                 "    - retain_canonical_owner_module",
@@ -150,7 +150,7 @@ def test_build_dead_code_inventory_flags_zero_import_candidates(tmp_path: Path) 
                 "      disposition: retain_canonical_owner_module",
                 "      reviewed_on: '2026-05-22'",
                 "      review_by: '2026-08-20'",
-                "      linked_issue: '#4513'",
+                "      linked_issue: '#4541'",
                 "      rationale: Canonical owner module retained intentionally for test coverage.",
                 "families:",
                 "  - name: sample",
@@ -173,7 +173,7 @@ def test_build_dead_code_inventory_flags_zero_import_candidates(tmp_path: Path) 
     assert payload["summary"]["triaged_entry_count"] == 1
     review_window = payload["review_window"]
     assert review_window == {
-        "linked_issue": "#4513",
+        "linked_issue": "#4541",
         "mode": "fail-fast-zero-untriaged",
         "last_reviewed": "2026-05-22",
         "next_review_by": "2026-08-20",
@@ -193,7 +193,7 @@ def test_build_dead_code_inventory_flags_zero_import_candidates(tmp_path: Path) 
         {
             "classification_status": "classified",
             "disposition": "retain_canonical_owner_module",
-            "linked_issue": "#4513",
+            "linked_issue": "#4541",
             "module_name": "bioetl.application.unused",
             "path": "src/bioetl/application/unused.py",
             "is_private_module": False,

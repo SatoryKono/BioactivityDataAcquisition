@@ -34,6 +34,8 @@ def test_module_coverage_inventory_is_committed_and_shape_is_stable() -> None:
     assert committed["canonical_coverage_lane"] == "coverage-verify"
     assert isinstance(committed["modules"], list) and committed["modules"]
     assert committed["summary"]["coverage_xml_present"] is True
+    hotspot_family_coverage = committed["summary"]["hotspot_family_coverage"]
+    assert isinstance(hotspot_family_coverage, dict) and hotspot_family_coverage
 
     for row in committed["modules"]:
         assert row["module"].startswith("bioetl")
@@ -50,6 +52,13 @@ def test_module_coverage_inventory_is_committed_and_shape_is_stable() -> None:
         coverage_percent = row["coverage_percent"]
         if coverage_percent is not None:
             assert 0.0 <= coverage_percent <= 100.0
+
+    for family_row in hotspot_family_coverage.values():
+        assert isinstance(family_row["module_count"], int)
+        assert isinstance(family_row["measured_module_count"], int)
+        assert isinstance(family_row["unmeasured_module_count"], int)
+        assert family_row["module_count"] >= family_row["measured_module_count"]
+        assert family_row["module_count"] >= family_row["unmeasured_module_count"]
 
 
 @pytest.mark.architecture
@@ -74,6 +83,25 @@ def test_module_coverage_inventory_source_tree_hash_is_current() -> None:
     )
 
     assert committed["source_tree_sha256"] == rebuilt["source_tree_sha256"]
+
+
+@pytest.mark.architecture
+def test_module_coverage_inventory_reports_measured_hotspot_family_evidence() -> None:
+    committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
+    hotspot_family_coverage = committed["summary"]["hotspot_family_coverage"]
+    assert isinstance(hotspot_family_coverage, dict)
+
+    for family_name in (
+        "application_core",
+        "composition_bootstrap_runtime",
+        "composition_factories_pipeline",
+        "application_services_control_plane",
+        "composition_runtime_builders",
+    ):
+        family_row = hotspot_family_coverage.get(family_name)
+        assert isinstance(family_row, dict), family_name
+        assert family_row["module_count"] > 0, family_name
+        assert family_row["measured_module_count"] > 0, family_name
 
 
 @pytest.mark.architecture
