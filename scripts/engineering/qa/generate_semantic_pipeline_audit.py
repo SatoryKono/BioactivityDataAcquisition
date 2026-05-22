@@ -471,6 +471,39 @@ def _review_metadata(review: dict[str, Any]) -> dict[str, Any]:
     return metadata
 
 
+def _weak_decision_lookup(review_registry: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    lookup: dict[str, dict[str, Any]] = {}
+    entries = review_registry.get("weak_cluster_decisions", [])
+    if not isinstance(entries, list):
+        return lookup
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        cluster_id = entry.get("cluster_id")
+        if isinstance(cluster_id, str) and cluster_id:
+            lookup[cluster_id] = entry
+    return lookup
+
+
+def _weak_decision_metadata(entry: dict[str, Any]) -> dict[str, Any]:
+    return {
+        key: value
+        for key, value in {
+            "field_name": entry.get("field_name", ""),
+            "decision": entry.get("decision", ""),
+            "owner": entry.get("owner", ""),
+            "semantic_scope": entry.get("semantic_scope", ""),
+            "business_owner_role": entry.get("business_owner_role", ""),
+            "composite_role": entry.get("composite_role", ""),
+            "lineage_role": entry.get("lineage_role", ""),
+            "promotion_policy": entry.get("promotion_policy", ""),
+            "authority_scope": entry.get("authority_scope", ""),
+            "rationale": entry.get("rationale", ""),
+        }.items()
+        if value not in {"", None}
+    }
+
+
 def _refresh_clusters(
     seed_registry: dict[str, Any],
     facts: dict[tuple[str, str], dict[str, Any]],
@@ -480,6 +513,7 @@ def _refresh_clusters(
 ) -> dict[str, Any]:
     clusters = []
     seen_cluster_ids: set[str] = set()
+    weak_decision_lookup = _weak_decision_lookup(review_registry)
 
     for cluster in _canonical_registry_clusters():
         cluster_id = str(cluster.get("cluster_id") or "")
@@ -571,6 +605,11 @@ def _refresh_clusters(
             continue
         if review is not None:
             refreshed_cluster["review"] = _review_metadata(review)
+        weak_decision = weak_decision_lookup.get(cluster_id)
+        if semantic_status == "WEAK" and weak_decision is not None:
+            refreshed_cluster["weak_decision"] = _weak_decision_metadata(
+                weak_decision
+            )
         refreshed_cluster["member_count"] = len(members)
         refreshed_cluster["pipeline_count"] = len(
             {member["pipeline"] for member in members}
@@ -1293,6 +1332,27 @@ def _render_report(
     normalization_counts = Counter(row["Normalization"] for row in rows)
     validation_counts = Counter(row["Validation"] for row in rows)
     typing_counts = Counter(row["Typing"] for row in rows)
+    weak_role_governed_count = sum(
+        1
+        for cluster in registry.get("clusters", [])
+        if isinstance(cluster, dict)
+        and cluster.get("semantic_status") == "WEAK"
+        and str(
+            cast(dict[str, Any], cluster.get("weak_decision", {})).get(
+                "semantic_scope", ""
+            )
+        ).startswith("role_governed_")
+    )
+    weak_explicit_contract_count = sum(
+        1
+        for cluster in registry.get("clusters", [])
+        if isinstance(cluster, dict)
+        and cluster.get("semantic_status") == "WEAK"
+        and cast(dict[str, Any], cluster.get("weak_decision", {})).get(
+            "semantic_scope"
+        )
+        == "explicit_source_owned_assay_contract"
+    )
     normalization_mismatches = normalization_counts.get(
         "DIFFERENT", 0
     ) + normalization_counts.get("CONFLICTING", 0)
@@ -1318,6 +1378,8 @@ def _render_report(
         f"- Typing conflicts: `{typing_counts.get('CONFLICTING', 0)}`",
         f"- Reviewed PARTIAL rows: `{semantic_counts.get('PARTIAL', 0)}`",
         f"- Reviewed WEAK inventory rows: `{semantic_counts.get('WEAK', 0)}`",
+        f"- Role-governed WEAK clusters: `{weak_role_governed_count}`",
+        f"- Explicit source-owned assay WEAK clusters: `{weak_explicit_contract_count}`",
         f"- Reviewed generic collision rows: `{semantic_counts.get('CONFLICTING', 0)}`",
         f"- Compatible normalization rows: `{normalization_counts.get('COMPATIBLE', 0)}`",
         f"- Compatible validation rows: `{validation_counts.get('COMPATIBLE', 0)}`",

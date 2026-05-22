@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+from collections.abc import Callable
 import json
 import re
 import subprocess
@@ -93,16 +94,15 @@ def test_no_sentinel_values(source_content_cache: dict) -> None:
 
 @pytest.mark.slow
 @pytest.mark.timeout(600)  # Increased timeout to 10 minutes
-def test_no_hardcoded_secrets() -> None:
+def test_no_hardcoded_secrets(
+    cached_subprocess_run: Callable[..., subprocess.CompletedProcess[str]],
+) -> None:
     baseline_path = REPO_ROOT / ".secrets.baseline"
     if not baseline_path.exists():
         raise AssertionError("Missing .secrets.baseline for detect-secrets scan")
 
-    result = subprocess.run(
-        [sys.executable, "-m", "detect_secrets", "scan", str(SRC)],
-        capture_output=True,
-        text=True,
-        check=False,
+    result = cached_subprocess_run(
+        [sys.executable, "-m", "detect_secrets", "scan", str(SRC)]
     )
     if result.returncode != 0:
         raise AssertionError(

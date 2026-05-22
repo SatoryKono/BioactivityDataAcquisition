@@ -22,7 +22,7 @@ from bioetl.composition.runtime_builders._run_manifest_publication_support impor
     create_manifest_record,
     create_manifest_store,
 )
-from bioetl.composition.runtime_builders._runner_builder_support import (
+from bioetl.composition.runtime_builders._runner_control_plane_policy import (
     resolve_required_artifact_lineage_layers,
     validate_required_persistence_profile,
 )

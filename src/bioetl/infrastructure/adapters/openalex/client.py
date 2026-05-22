@@ -69,7 +69,7 @@ if TYPE_CHECKING:
         HttpAdapterDependencyContext,
     )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
 from bioetl.infrastructure.adapters.openalex._constants import OPENALEX_API_BASE
 

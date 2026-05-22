@@ -339,4 +339,54 @@ measured_only_review_workflow:
   - promote
   - remove
   promotion_requires_curated_row: true
+retained_entrypoint_sunset_review:
+  review_date: '2026-09-30'
+  linked_issue: '#4498'
+  allowed_dispositions:
+  - keep_public_api
+  - narrow_internal_callers
+  - remove_after_migration
+  rows:
+  - path: src/bioetl/interfaces/cli/commands/run.py
+    disposition: keep_public_api
+    rationale: Public CLI command seam; removal would be an external breaking change.
+  - path: src/bioetl/interfaces/cli/commands/run_all.py
+    disposition: keep_public_api
+    rationale: Public CLI command seam; removal would be an external breaking change.
+  - path: src/bioetl/interfaces/cli/commands/run_composite.py
+    disposition: keep_public_api
+    rationale: Public CLI command seam; removal would be an external breaking change.
+  - path: src/bioetl/interfaces/cli/commands/health.py
+    disposition: keep_public_api
+    rationale: Public CLI command seam; removal would be an external breaking change.
+  - path: src/bioetl/interfaces/cli/commands/diagnostics.py
+    disposition: keep_public_api
+    rationale: Public CLI command seam; removal would be an external breaking change.
+  - path: src/bioetl/interfaces/cli/commands/quarantine.py
+    disposition: keep_public_api
+    rationale: Public CLI command seam; removal would be an external breaking change.
+  - path: src/bioetl/interfaces/cli/commands/maintenance.py
+    disposition: keep_public_api
+    rationale: Public CLI command seam; removal would be an external breaking change.
+  - path: src/bioetl/composition/entrypoints.py
+    disposition: keep_public_api
+    rationale: Public composition entrypoint; retained as stable integration API.
+  - path: src/bioetl/composition/health_api.py
+    disposition: keep_public_api
+    rationale: Public composition health facade; retained as stable integration API.
+  - path: src/bioetl/composition/maintenance_api.py
+    disposition: keep_public_api
+    rationale: Public composition maintenance facade; retained as stable integration API.
+  - path: src/bioetl/infrastructure/config/__init__.py
+    disposition: narrow_internal_callers
+    rationale: Public package-root facade remains, but first-party imports must continue migrating to canonical modules.
+  - path: src/bioetl/domain/composite/config.py
+    disposition: keep_public_api
+    rationale: Public domain config model entrypoint; retained as stable integration API.
+  - path: src/bioetl/domain/value_objects/activity_values.py
+    disposition: keep_public_api
+    rationale: Public value-object entrypoint; retained as stable integration API.
+  - path: src/bioetl/application/composite/merger.py
+    disposition: keep_public_api
+    rationale: Public composite merge module; retained while collaborator bundle API is canonical.
 measured_only_modules: []

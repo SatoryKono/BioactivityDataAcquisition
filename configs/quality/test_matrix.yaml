@@ -562,6 +562,7 @@ module_coverage_inventory:
   command: python -m scripts.engineering.qa report-module-coverage
   artifact: reports/quality/module-coverage-inventory.json
   coverage_xml: reports/coverage/coverage.xml
+  canonical_generation_requires_coverage_xml: true
   source_scope: src/bioetl/**/*.py
   schema_version: 1
 

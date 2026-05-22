@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-05-21",
+  "snapshot_date": "2026-05-22",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -14,7 +14,7 @@
     "twin_pairs_without_public_src_importers": 1,
     "tracked_twin_family_count": 4,
     "config_root_symbol_count": 3,
-    "config_root_src_importer_count": 80,
+    "config_root_src_importer_count": 73,
     "retained_public_export_facade_count": 4,
     "retained_public_export_facades_with_duplicate_exports": 0,
     "retained_public_export_facades_with_resolution_conflicts": 0
@@ -234,8 +234,6 @@
         "src/bioetl/composition/factories/pipeline/_factory_method_runtime_support.py",
         "src/bioetl/composition/factories/pipeline/_factory_method_types.py",
         "src/bioetl/composition/factories/pipeline/checkpoint_metadata_helpers.py",
-        "src/bioetl/composition/factories/pipeline/contract_validator.py",
-        "src/bioetl/composition/factories/pipeline/transformer_builder.py",
         "src/bioetl/composition/factories/services/_bundle_support.py",
         "src/bioetl/composition/factories/services/bundle.py",
         "src/bioetl/composition/factories/services/common_service_wiring.py",
@@ -257,18 +255,13 @@
         "src/bioetl/composition/runtime_builders/_run_manifest_refs.py",
         "src/bioetl/composition/runtime_builders/_run_manifest_support.py",
         "src/bioetl/composition/runtime_builders/_runner_input_preparation.py",
-        "src/bioetl/composition/runtime_builders/config_access.py",
         "src/bioetl/composition/runtime_builders/effective_config_artifact_builder.py",
         "src/bioetl/composition/runtime_builders/inputs_resolution_orchestration.py",
         "src/bioetl/composition/runtime_builders/inputs_resolver.py",
         "src/bioetl/composition/runtime_builders/inputs_runtime_helpers.py",
         "src/bioetl/composition/runtime_builders/observability_builder.py",
         "src/bioetl/composition/runtime_builders/runner_builder.py",
-        "src/bioetl/composition/runtime_builders/runner_input_assembly.py",
-        "src/bioetl/infrastructure/adapters/openalex/client.py",
-        "src/bioetl/infrastructure/adapters/pubmed/adapter.py",
-        "src/bioetl/infrastructure/security/pii_hasher.py",
-        "src/bioetl/infrastructure/storage/support/retention.py"
+        "src/bioetl/composition/runtime_builders/runner_input_assembly.py"
       ],
       "test_importers": [
         "tests/architecture/test_config_golden_master.py",
@@ -304,7 +297,7 @@
         "tests/unit/infrastructure/test_config_dynamic.py",
         "tests/unit/infrastructure/test_config_settings.py"
       ],
-      "src_importer_count": 80,
+      "src_importer_count": 73,
       "test_importer_count": 32
     },
     {
@@ -745,20 +738,20 @@
       "public_path": "src/bioetl/application/core/span_helpers.py",
       "private_module": "bioetl.application.core._span_helpers",
       "public_module": "bioetl.application.core.span_helpers",
-      "public_src_importer_count": 1,
+      "public_src_importer_count": 7,
       "public_test_importer_count": 0,
-      "private_src_importer_count": 7,
+      "private_src_importer_count": 1,
       "private_test_importer_count": 0,
       "public_src_importers": [
-        "src/bioetl/application/core/postrun/service.py"
-      ],
-      "private_src_importers": [
         "src/bioetl/application/core/_base_transformer_execution_support.py",
         "src/bioetl/application/core/base_transformer_execution_mixin.py",
         "src/bioetl/application/core/batch_tracing.py",
         "src/bioetl/application/core/batch_writer_tracing_mixin.py",
+        "src/bioetl/application/core/postrun/service.py",
         "src/bioetl/application/core/record_processor.py",
-        "src/bioetl/application/core/runner.py",
+        "src/bioetl/application/core/runner.py"
+      ],
+      "private_src_importers": [
         "src/bioetl/application/core/span_helpers.py"
       ]
     },
@@ -940,16 +933,13 @@
       "public_module": "bioetl.composition.runtime_builders.runner_builder_support",
       "public_src_importer_count": 2,
       "public_test_importer_count": 0,
-      "private_src_importer_count": 5,
+      "private_src_importer_count": 2,
       "private_test_importer_count": 0,
       "public_src_importers": [
         "src/bioetl/composition/bootstrap/runtime/_observability_preflight_support.py",
         "src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py"
       ],
       "private_src_importers": [
-        "src/bioetl/composition/runtime_builders/_runner_builder_orchestration.py",
-        "src/bioetl/composition/runtime_builders/inputs_resolution_orchestration.py",
-        "src/bioetl/composition/runtime_builders/run_manifest_builder.py",
         "src/bioetl/composition/runtime_builders/runner_builder.py",
         "src/bioetl/composition/runtime_builders/runner_builder_support.py"
       ]
@@ -1057,21 +1047,21 @@
       "public_module": "bioetl.application.core.span_helpers",
       "private_module": "bioetl.application.core._span_helpers",
       "canonical_first_party_module": "bioetl.application.core.span_helpers",
-      "max_public_src_importers": 1,
-      "max_private_src_importers": 7,
-      "rationale": "The public/private helper twin remains live after the earlier compatibility cleanup wave. New split-import growth must be blocked until the family is explicitly narrowed or re-reviewed.",
-      "current_public_src_importer_count": 1,
-      "current_private_src_importer_count": 7,
+      "max_public_src_importers": 7,
+      "max_private_src_importers": 1,
+      "rationale": "Private helper imports were collapsed into the public span-helper seam in issue #4485. The public budget now reflects the canonicalized importer count, while private import growth is limited to the public re-export module only.",
+      "current_public_src_importer_count": 7,
+      "current_private_src_importer_count": 1,
       "current_public_src_importers": [
-        "src/bioetl/application/core/postrun/service.py"
-      ],
-      "current_private_src_importers": [
         "src/bioetl/application/core/_base_transformer_execution_support.py",
         "src/bioetl/application/core/base_transformer_execution_mixin.py",
         "src/bioetl/application/core/batch_tracing.py",
         "src/bioetl/application/core/batch_writer_tracing_mixin.py",
+        "src/bioetl/application/core/postrun/service.py",
         "src/bioetl/application/core/record_processor.py",
-        "src/bioetl/application/core/runner.py",
+        "src/bioetl/application/core/runner.py"
+      ],
+      "current_private_src_importers": [
         "src/bioetl/application/core/span_helpers.py"
       ]
     },
@@ -1163,15 +1153,12 @@
         "owner": "bioetl.infrastructure.config",
         "status": "sanctioned_convenience_type",
         "canonical_target": "bioetl.infrastructure.config._base.Settings",
-        "max_src_importers": 61,
+        "max_src_importers": 58,
         "allowlisted_path_prefixes": [
-          "src/bioetl/composition/",
-          "src/bioetl/infrastructure/adapters/openalex/",
-          "src/bioetl/infrastructure/adapters/pubmed/",
-          "src/bioetl/infrastructure/security/"
+          "src/bioetl/composition/"
         ],
         "rationale": "`Settings` remains a retained convenience type import for composition wiring and a bounded set of infrastructure consumers, but new first-party growth through the broad package-root facade is not allowed.",
-        "current_src_importer_count": 61,
+        "current_src_importer_count": 58,
         "current_src_importers": [
           "src/bioetl/composition/bootstrap/assembly/storage.py",
           "src/bioetl/composition/bootstrap/cli/service_builders.py",
@@ -1230,10 +1217,7 @@
           "src/bioetl/composition/runtime_builders/inputs_runtime_helpers.py",
           "src/bioetl/composition/runtime_builders/observability_builder.py",
           "src/bioetl/composition/runtime_builders/runner_builder.py",
-          "src/bioetl/composition/runtime_builders/runner_input_assembly.py",
-          "src/bioetl/infrastructure/adapters/openalex/client.py",
-          "src/bioetl/infrastructure/adapters/pubmed/adapter.py",
-          "src/bioetl/infrastructure/security/pii_hasher.py"
+          "src/bioetl/composition/runtime_builders/runner_input_assembly.py"
         ]
       },
       {
@@ -1241,13 +1225,12 @@
         "owner": "bioetl.infrastructure.config",
         "status": "sanctioned_convenience_runtime",
         "canonical_target": "bioetl.infrastructure.config._base.get_settings",
-        "max_src_importers": 19,
+        "max_src_importers": 16,
         "allowlisted_path_prefixes": [
-          "src/bioetl/composition/",
-          "src/bioetl/infrastructure/storage/support/"
+          "src/bioetl/composition/"
         ],
         "rationale": "`get_settings` remains a retained convenience seam for composition runtime/bootstrap paths and one bounded infrastructure support surface. New first-party growth through the package root is not allowed.",
-        "current_src_importer_count": 18,
+        "current_src_importer_count": 16,
         "current_src_importers": [
           "src/bioetl/composition/_pipeline_execution.py",
           "src/bioetl/composition/_workflow_services.py",
@@ -1264,9 +1247,7 @@
           "src/bioetl/composition/bootstrap/runtime/composite.py",
           "src/bioetl/composition/factories/pipeline/checkpoint_metadata_helpers.py",
           "src/bioetl/composition/health_api.py",
-          "src/bioetl/composition/observability_api.py",
-          "src/bioetl/composition/runtime_builders/config_access.py",
-          "src/bioetl/infrastructure/storage/support/retention.py"
+          "src/bioetl/composition/observability_api.py"
         ]
       },
       {
@@ -1274,17 +1255,13 @@
         "owner": "bioetl.infrastructure.config",
         "status": "sanctioned_convenience_contract_policy",
         "canonical_target": "bioetl.infrastructure.config.contract_policy_loader.load_pipeline_contract_policy",
-        "max_src_importers": 3,
+        "max_src_importers": 0,
         "allowlisted_path_prefixes": [
           "src/bioetl/composition/factories/pipeline/"
         ],
         "rationale": "Contract-policy loading is still allowed through the package root only for the current pipeline factory slice. New first-party growth must go through reviewed inventory updates first.",
-        "current_src_importer_count": 3,
-        "current_src_importers": [
-          "src/bioetl/composition/factories/pipeline/_creation_wiring.py",
-          "src/bioetl/composition/factories/pipeline/contract_validator.py",
-          "src/bioetl/composition/factories/pipeline/transformer_builder.py"
-        ]
+        "current_src_importer_count": 0,
+        "current_src_importers": []
       }
     ]
   }

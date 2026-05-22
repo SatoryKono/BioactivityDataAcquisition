@@ -109,6 +109,15 @@ routes:
       - reports/quality/vcr-metadata-catalog.json
     notes: VCR metadata catalog is a quality report artifact.
 
+  - id: dead-code-inventory-quality-baseline
+    generator: scripts/engineering/qa/report_dead_code_inventory.py
+    output_kind: working_report
+    commit_policy: tracked_quality_baseline
+    outputs:
+      - reports/quality/dead-code-inventory.json
+      - reports/quality/dead-code-inventory.md
+    notes: Dead-code inventory is a tracked static-import governance baseline.
+
   - id: contract-registry-diagnostics-quality-report
     generator: scripts/engineering/ci/validate_contract_registry.py
     output_kind: working_report

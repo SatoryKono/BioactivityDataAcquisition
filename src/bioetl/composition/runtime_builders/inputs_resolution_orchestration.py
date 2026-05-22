@@ -33,7 +33,7 @@ def validate_runner_data_root_policy(
     settings: Settings,
     required_persistence_profile: str,
 ) -> None:
-    from bioetl.composition.runtime_builders._runner_builder_support import (
+    from bioetl.composition.runtime_builders._runner_control_plane_policy import (
         validate_strict_data_root_policy as _validate_strict_data_root_policy,
     )
 

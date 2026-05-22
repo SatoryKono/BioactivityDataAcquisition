@@ -43,6 +43,9 @@ from bioetl.infrastructure.config.config_ci_contract import (
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
 )
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config_from_root,
+)
 from scripts.schema import audit_effective_optionality as optionality_audit_script
 from scripts.schema import check_config_invariants as invariant_script
 from scripts.schema import check_required_filter_fields as required_filter_script
@@ -573,6 +576,46 @@ class TestConfigFilesExist:
             if not isinstance(data.get("contracts"), dict):
                 missing.append(f"{_rel(pipeline_path)}: missing contracts section")
         assert not missing, "\n".join(missing)
+
+    def test_runtime_config_primary_keys_match_contract_policy(
+        self, standard_pipelines: list[tuple[str, str, Path, dict[str, Any]]]
+    ) -> None:
+        """Loaded runtime config keys must match the typed contract policy."""
+        violations: list[str] = []
+        load_pipeline_contract_policy.cache_clear()
+        for provider, entity, pipeline_path, data in standard_pipelines:
+            pipeline = data.get("pipeline")
+            if not isinstance(pipeline, dict):
+                violations.append(f"{_rel(pipeline_path)}: missing pipeline section")
+                continue
+            pipeline_name = str(pipeline.get("pipeline_name") or "").strip()
+            expected_keys = [
+                str(key) for key in pipeline.get("business_primary_keys", [])
+            ]
+            runtime_config = load_pipeline_config_from_root(
+                pipeline_name,
+                configs_root=CONFIGS_DIR,
+            )
+            policy = load_pipeline_contract_policy(provider, entity)
+            if list(runtime_config.business_primary_keys or []) != expected_keys:
+                violations.append(
+                    f"{_rel(pipeline_path)}: runtime business_primary_keys "
+                    "do not match YAML pipeline.business_primary_keys"
+                )
+            if (
+                policy.primary_key != expected_keys
+                or policy.merge_keys != expected_keys
+            ):
+                violations.append(
+                    f"{_rel(pipeline_path)}: contract primary_key/merge_keys "
+                    "do not match pipeline.business_primary_keys"
+                )
+            if policy.contract_ref != f"{provider}.{entity}":
+                violations.append(
+                    f"{_rel(pipeline_path)}: contract_ref={policy.contract_ref!r} "
+                    f"does not match {provider}.{entity!s}"
+                )
+        assert not violations, "\n".join(violations)
 
     def test_source_config_exists(
         self, standard_pipelines: list[tuple[str, str, Path, dict[str, Any]]]

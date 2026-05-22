@@ -31,6 +31,7 @@ CURATED_INTEGRATION_MARKER_FILES = (
     Path("tests/integration/interfaces/test_cli_run_incremental.py"),
     Path("tests/integration/interfaces/test_cli_shutdown_integration.py"),
     Path("tests/integration/test_grafana_config.py"),
+    Path("tests/integration/test_grafana_surface_contracts.py"),
     Path("tests/integration/test_prometheus_rules_config.py"),
 )
 CURATED_E2E_MARKER_FILES = (

@@ -50,6 +50,7 @@ def _create_control_plane_stores() -> tuple[
     FileRunManifestStore,
     FileRunLedgerStore,
     FileEffectiveConfigArtifactStore,
+    FileHistoricalReplayUniverseStore,
 ]:
     """Create file-backed control-plane stores for CLI inspection services."""
     settings = get_settings()
@@ -67,24 +68,28 @@ def _create_control_plane_stores() -> tuple[
         FileEffectiveConfigArtifactStore(
             base_path=output_root / "effective_config",
         ),
+        FileHistoricalReplayUniverseStore(
+            base_path=output_root / "historical_replay_universe"
+        ),
     )
 
 
 def bootstrap_run_manifest_service() -> RunManifestInspectionService:
     """Bootstrap manifest/ledger inspection service for CLI commands."""
-    manifest_store, ledger_store, effective_config_store = (
+    manifest_store, ledger_store, effective_config_store, universe_store = (
         _create_control_plane_stores()
     )
     return RunManifestInspectionService(
         manifest_port=manifest_store,
         ledger_port=ledger_store,
         effective_config_artifact_port=effective_config_store,
+        historical_replay_universe_report_loader=universe_store,
     )
 
 
 def bootstrap_forensic_run_diff_service() -> ForensicRunDiffService:
     """Bootstrap unified forensic run-diff service for CLI diagnostics."""
-    manifest_store, ledger_store, effective_config_store = (
+    manifest_store, ledger_store, effective_config_store, universe_store = (
         _create_control_plane_stores()
     )
     return ForensicRunDiffService(
@@ -95,13 +100,14 @@ def bootstrap_forensic_run_diff_service() -> ForensicRunDiffService:
             manifest_port=manifest_store,
             ledger_port=ledger_store,
             effective_config_artifact_port=effective_config_store,
+            historical_replay_universe_report_loader=universe_store,
         ),
     )
 
 
 def bootstrap_historical_replay_corpus_service() -> HistoricalReplayCorpusService:
     """Bootstrap retained-corpus historical replay workflows for CLI use."""
-    manifest_store, ledger_store, _effective_config_store = (
+    manifest_store, ledger_store, _effective_config_store, _universe_store = (
         _create_control_plane_stores()
     )
     return HistoricalReplayCorpusService(
@@ -116,7 +122,7 @@ def bootstrap_historical_replay_corpus_service() -> HistoricalReplayCorpusServic
 
 def bootstrap_historical_replay_closure_service() -> HistoricalReplayClosureService:
     """Bootstrap retained-corpus closure reporting for CLI use."""
-    manifest_store, ledger_store, _effective_config_store = (
+    manifest_store, ledger_store, _effective_config_store, _universe_store = (
         _create_control_plane_stores()
     )
     corpus_service = HistoricalReplayCorpusService(
@@ -134,7 +140,7 @@ def bootstrap_historical_replay_closure_service() -> HistoricalReplayClosureServ
 
 def bootstrap_historical_replay_universe_service() -> HistoricalReplayUniverseService:
     """Bootstrap full-universe historical replay workflows for CLI use."""
-    manifest_store, ledger_store, _effective_config_store = (
+    manifest_store, ledger_store, _effective_config_store, _universe_store = (
         _create_control_plane_stores()
     )
     corpus_service = HistoricalReplayCorpusService(

@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.application.services.control_plane.run_manifest_reproducibility_claims import (
+    build_global_reproducibility_claim,
+)
 from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring_support import (
     bounded,
     string_items,
@@ -430,32 +433,6 @@ def build_supported_boundary_verdict(
         "replay_capability": replay_capability,
         "exact_replay_support_boundary": summary.get("exact_replay_support_boundary"),
         "lineage_closure_supported": lineage_supported,
-    }
-
-
-def build_global_reproducibility_claim(
-    *,
-    summary: JsonDict,
-    evidence_refs: list[str],
-) -> JsonDict:
-    claim_refs = sorted(
-        dict.fromkeys(
-            [
-                *evidence_refs,
-                "diagnostics.exact_replay_support_boundary",
-                "diagnostics.lineage_closure_boundary",
-                "diagnostics.replay_family_contract",
-            ]
-        )
-    )
-    return {
-        "scope": "project_wide_exact_replay",
-        "claimed": False,
-        "verdict": "universal_exact_replay_not_claimed",
-        "reason": "published_contract_limits_exact_replay_to_supported_boundary",
-        "exact_replay_support_boundary": summary.get("exact_replay_support_boundary"),
-        "lineage_closure_boundary": summary.get("lineage_closure_boundary"),
-        "evidence_refs": claim_refs,
     }
 
 

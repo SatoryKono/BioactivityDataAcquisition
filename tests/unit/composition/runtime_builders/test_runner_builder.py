@@ -264,10 +264,12 @@ def test_handle_control_plane_setup_returns_effective_manifest_profile(
     monkeypatch,
 ) -> None:
     """Attachment closure must follow the manifest-resolved strict profile."""
+    logger = MagicMock()
     ctx = SimpleNamespace(skip_gold=False, exact_replay=True)
     inputs = SimpleNamespace(
         settings=SimpleNamespace(data_dir="/tmp/bioetl-test-data"),
         yaml_config=SimpleNamespace(),
+        observability=SimpleNamespace(logger=logger),
     )
     captured: dict[str, object] = {}
 
@@ -309,6 +311,15 @@ def test_handle_control_plane_setup_returns_effective_manifest_profile(
 
     assert captured["manifest_id"] == "manifest-1"
     assert result.required_profile == "replay_ready"
+    logger.info.assert_called_once_with(
+        "control_plane_profile_resolved",
+        stage="bootstrap",
+        configured_required_persistence_profile="degraded_observable",
+        required_persistence_profile="replay_ready",
+        run_manifest_enabled=True,
+        run_ledger_enabled=True,
+        exact_replay=True,
+    )
 
 
 def test_build_pipeline_runner_defaults_to_provider_registry_bootstrap() -> None:

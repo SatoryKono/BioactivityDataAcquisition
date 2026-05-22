@@ -173,6 +173,7 @@ tracked_suite_inventory:
       - tests/integration/test_dashboard_navigation_contract_sync.py
       - tests/integration/test_dashboard_ux_report_freshness.py
       - tests/integration/test_grafana_config.py
+      - tests/integration/test_grafana_surface_contracts.py
       - tests/integration/test_grafana_dashboard_cta_links.py
       - tests/integration/test_grafana_dashboard_first_screen_contract.py
       - tests/integration/test_grafana_dashboard_links.py

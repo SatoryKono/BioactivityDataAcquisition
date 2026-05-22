@@ -20,9 +20,13 @@ manifests, append-only run ledgers, and the inspection surface used by
 operators and diagnostics.
 
 Current published scope: BioETL supports strict exact replay only inside the
-explicitly published snapshot-backed support boundary. The platform does not
-currently claim universal exact reproducibility for every pipeline family and
-every historical run occurrence.
+explicitly published snapshot-backed support boundary. Project-wide wording
+about **any historical run** is governed by the latest authoritative
+historical replay universe closure report rather than by this header alone:
+when that artifact reports both `universal_claim.claimed=true` and
+`durable_evidence_coverage_claim.claimed=true`, BioETL may claim universal
+historical exact replay for `all_known_historical_runs`; otherwise the global
+claim remains blocked even if supported-boundary runs score well.
 
 The current snapshot-backed boundary remains the default exact-replay path of
 the published contract. BioETL also supports one broader certified historical
@@ -308,6 +312,11 @@ Current rollout semantics:
    or critical runtime still carries a `degraded_observable` configuration, the
    effective profile is promoted to the published strict family default instead
    of silently preserving the weaker floor.
+1. Runtime surfaces must distinguish configured vs effective persistence
+   profile. Bootstrap observability may publish the configured request as
+   `configured_required_persistence_profile`, while the canonical
+   `required_persistence_profile` for one run must reflect the effective value
+   after control-plane policy resolution.
 1. The effective default is fail-closed: a production/debug-critical supported
    family launch that cannot prove immutable input snapshots, or a composite
    launch without a full snapshot envelope, is blocked before it can be claimed
@@ -1049,8 +1058,10 @@ boundary evidence.
 
 `global_reproducibility_claim` is the machine-readable project-wide claim
 surface. It remains explicit even when the inspected run scores well inside its
-supported boundary. Until the published contract changes, the platform does not
-claim universal exact reproducibility outside the supported boundary.
+supported boundary. When the latest authoritative historical replay universe
+artifact is available, this field must mirror that artifact's truth surface;
+otherwise it remains an explicit unclaimed fallback rather than silently
+inferring a universal guarantee from one run's local score.
 
 Current published lineage closure boundary for Bronze -> Silver -> Gold
 operator-grade trace/debug support covers these families:

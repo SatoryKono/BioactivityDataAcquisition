@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from dataclasses import dataclass, replace
-from typing import TYPE_CHECKING, cast
+from dataclasses import replace
+from typing import TYPE_CHECKING
 
 import click
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.interfaces.cli.commands.domains.composite.command_input import (
+    build_composite_run_command_input,
+)
 from bioetl.interfaces.cli.commands.domains.composite.execution import (
     bootstrap_composite_runner as _bootstrap_composite_runner_impl,
 )
@@ -56,29 +58,6 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.config import CompositeConfig
 
 __all__ = ["run_composite"]
-
-
-@dataclass(frozen=True, slots=True)
-class CompositeRunCommandInput:
-    """Typed CLI bundle for the ``run-composite`` command callback."""
-
-    composite: str
-    resume: bool = False
-    dry_run: bool = False
-    seed_limit: int | None = None
-    enrich_only: str | None = None
-    required_only: bool = False
-    force_enricher: str | None = None
-    use_cached_bronze: bool = False
-    cached_bronze_date: str | None = None
-    cached_bronze_path: str | None = None
-    cached_bronze_enrichers: bool | None = None
-    cached_bronze_dependencies: bool = False
-    debug: bool = False
-    health_server: bool = True
-    health_port: int = DEFAULT_HEALTH_SERVER_PORT
-    ensure_observability_backend: bool = True
-    observability_backend_port: int = DEFAULT_HEALTH_SERVER_PORT
 
 
 def _validate_composite_name(
@@ -335,7 +314,7 @@ def run_composite(**options: object) -> None:
         health_server: When True, starts an HTTP health server during execution.
         health_port: TCP port for the HTTP health server.
     """
-    cli_input = _build_composite_run_command_input(options)
+    cli_input = build_composite_run_command_input(options)
     backend_result = ensure_observability_backend_started(
         enabled=cli_input.ensure_observability_backend,
         port=cli_input.observability_backend_port,
@@ -381,39 +360,3 @@ def run_composite(**options: object) -> None:
         health_port=cli_input.health_port,
     )
     _exit_with_composite_result(success, error_message)
-
-
-def _build_composite_run_command_input(
-    options: Mapping[str, object],
-) -> CompositeRunCommandInput:
-    """Convert Click callback kwargs into the typed composite CLI bundle."""
-    return CompositeRunCommandInput(
-        composite=cast(str, options["composite"]),
-        resume=cast(bool, options.get("resume", False)),
-        dry_run=cast(bool, options.get("dry_run", False)),
-        seed_limit=cast(int | None, options.get("seed_limit")),
-        enrich_only=cast(str | None, options.get("enrich_only")),
-        required_only=cast(bool, options.get("required_only", False)),
-        force_enricher=cast(str | None, options.get("force_enricher")),
-        use_cached_bronze=cast(bool, options.get("use_cached_bronze", False)),
-        cached_bronze_date=cast(str | None, options.get("cached_bronze_date")),
-        cached_bronze_path=cast(str | None, options.get("cached_bronze_path")),
-        cached_bronze_enrichers=cast(
-            bool | None,
-            options.get("cached_bronze_enrichers"),
-        ),
-        cached_bronze_dependencies=cast(
-            bool,
-            options.get("cached_bronze_dependencies", False),
-        ),
-        debug=cast(bool, options.get("debug", False)),
-        health_server=cast(bool, options.get("health_server", True)),
-        health_port=cast(int, options.get("health_port", DEFAULT_HEALTH_SERVER_PORT)),
-        ensure_observability_backend=cast(
-            bool, options.get("ensure_observability_backend", True)
-        ),
-        observability_backend_port=cast(
-            int,
-            options.get("observability_backend_port", DEFAULT_HEALTH_SERVER_PORT),
-        ),
-    )

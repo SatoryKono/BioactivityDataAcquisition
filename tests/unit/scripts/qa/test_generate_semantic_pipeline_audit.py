@@ -184,3 +184,39 @@ def test_refresh_clusters_rebuilds_canonical_registry_membership_from_current_re
         if isinstance(member, dict)
     }
     assert pubchem_members == {"pubchem_compound"}
+
+
+def test_refresh_clusters_attaches_tracked_weak_decision_metadata() -> None:
+    seed_registry = json.loads(
+        Path(
+            "reports/semantic_pipeline_audit/semantic_cluster_registry_2026-05-21.json"
+        ).read_text(encoding="utf-8")
+    )
+    review_registry_payload = audit._load_yaml(
+        Path("configs/field_registry/semantic_audit_review_registry.yaml")
+    )
+
+    facts = audit._build_current_member_facts(seed_registry)
+    refreshed = audit._refresh_clusters(
+        seed_registry,
+        facts,
+        review_registry=review_registry_payload,
+        source_date="2026-05-21",
+    )
+    cluster_lookup = {
+        cluster["cluster_id"]: cluster
+        for cluster in refreshed["clusters"]
+        if isinstance(cluster, dict)
+    }
+
+    bao_format = cluster_lookup["shared_bao_format"]["weak_decision"]
+    assert bao_format["decision"] == "source_owned_same_name"
+    assert bao_format["semantic_scope"] == "role_governed_ontology_reference_identifier"
+    assert "ontology_unit_semantic_roles.yaml" in bao_format["authority_scope"]
+
+    assay_type = cluster_lookup["shared_assay_type"]["weak_decision"]
+    assert assay_type["semantic_scope"] == "explicit_source_owned_assay_contract"
+    assert (
+        assay_type["promotion_policy"]
+        == "require_canonical_assay_metadata_registry_before_exact"
+    )

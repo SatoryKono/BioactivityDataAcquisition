@@ -14,7 +14,9 @@ from bioetl.composition.factories.transformer_dependencies import (
     build_transformer_dependencies,
 )
 from bioetl.domain.behavior import EntityIdentityGenerator
-from bioetl.infrastructure.config import load_pipeline_contract_policy
+from bioetl.infrastructure.config.contract_policy_loader import (
+    load_pipeline_contract_policy,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.core.wiring.transformer import BaseTransformer

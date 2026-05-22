@@ -240,9 +240,7 @@ def build_composite_control_plane_bundle(
         manifest_id=manifest.manifest_id,
         execution_fingerprint=manifest.execution_fingerprint,
         run_ledger_service=run_ledger_service,
-        config_hash=legacy_config_hash_from_resolved_config_hash(
-            resolved_config_hash
-        ),
+        config_hash=legacy_config_hash_from_resolved_config_hash(resolved_config_hash),
         resolved_config_hash=resolved_config_hash or None,
         effective_config_hash=effective_config_hash or None,
         source_fingerprint=source_fingerprint or None,
@@ -307,9 +305,7 @@ def _build_composite_manifest_create_request(
         git_commit=code_revision.git_commit,
         source_revision_state=code_revision.source_revision_state,
         dependency_lock_hash=dependency_lock_hash,
-        config_hash=legacy_config_hash_from_resolved_config_hash(
-            resolved_config_hash
-        ),
+        config_hash=legacy_config_hash_from_resolved_config_hash(resolved_config_hash),
         resolved_config_hash=resolved_config_hash or None,
         effective_config_hash=effective_config_hash or None,
         source_fingerprint=source_fingerprint or None,

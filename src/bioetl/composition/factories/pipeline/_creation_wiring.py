@@ -21,7 +21,9 @@ from bioetl.composition.factories.pipeline.transformer_builder import (
     TransformerBuilder,
 )
 from bioetl.composition.services.versioning import get_git_commit, get_pipeline_version
-from bioetl.infrastructure.config import load_pipeline_contract_policy
+from bioetl.infrastructure.config.contract_policy_loader import (
+    load_pipeline_contract_policy,
+)
 from bioetl.infrastructure.config.domain_config_resolver import (
     resolve_domain_pipeline_config,
 )

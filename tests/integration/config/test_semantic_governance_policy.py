@@ -60,9 +60,10 @@ def test_weak_cluster_decisions_cover_current_high_frequency_inventory() -> None
 
     policy = payload["weak_cluster_policy"]
     decisions = payload["weak_cluster_decisions"]
+    decision_lookup = {entry["cluster_id"]: entry for entry in decisions}
 
     assert policy["weak_decision_min_rows"] == 6
-    assert len(decisions) >= 20
+    assert len(decisions) >= 25
     assert {
         entry["cluster_id"]
         for entry in decisions
@@ -88,6 +89,34 @@ def test_weak_cluster_decisions_cover_current_high_frequency_inventory() -> None
         "shared_publication_type_unified",
         "shared_volume",
     }
+    assert set(policy["tracked_cluster_ids"]) == {
+        "shared_assay_type",
+        "shared_assay_description",
+        "shared_assay_category",
+        "shared_assay_organism",
+        "shared_assay_tissue",
+        "shared_bao_format",
+        "shared_bao_label",
+        "shared_text_value",
+        "shared_units",
+    }
+    assert set(policy["role_governed_cluster_ids"]) == {
+        "shared_bao_format",
+        "shared_bao_label",
+        "shared_text_value",
+        "shared_units",
+    }
+    assert set(policy["explicit_contract_cluster_ids"]) == {
+        "shared_assay_type",
+        "shared_assay_description",
+        "shared_assay_category",
+        "shared_assay_organism",
+        "shared_assay_tissue",
+    }
+    for cluster_id in policy["tracked_cluster_ids"]:
+        entry = decision_lookup[cluster_id]
+        for key in policy["required_tracked_decision_metadata"]:
+            assert entry[key]
 
 
 def test_publication_weak_clusters_are_explicit_promotable_candidates() -> None:
@@ -119,6 +148,27 @@ def test_publication_weak_clusters_are_explicit_promotable_candidates() -> None:
         "shared_volume",
     ):
         assert decisions[cluster_id] == "promotable_candidate"
+
+
+def test_role_governed_and_assay_weak_clusters_have_explicit_semantic_scopes() -> None:
+    payload = yaml.safe_load(DEFAULT_REVIEW_REGISTRY.read_text(encoding="utf-8"))
+
+    decisions = {
+        entry["cluster_id"]: entry for entry in payload["weak_cluster_decisions"]
+    }
+
+    for cluster_id in payload["weak_cluster_policy"]["role_governed_cluster_ids"]:
+        assert decisions[cluster_id]["semantic_scope"].startswith("role_governed_")
+        assert "ontology_unit_semantic_roles.yaml" in decisions[cluster_id][
+            "authority_scope"
+        ] or decisions[cluster_id]["field_name"] == "text_value"
+
+    for cluster_id in payload["weak_cluster_policy"]["explicit_contract_cluster_ids"]:
+        assert (
+            decisions[cluster_id]["semantic_scope"]
+            == "explicit_source_owned_assay_contract"
+        )
+        assert "configs/" in decisions[cluster_id]["authority_scope"]
 
 
 def test_promotion_requirements_define_machine_enforced_evidence_contracts() -> None:

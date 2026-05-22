@@ -11,7 +11,7 @@ from bioetl.application.services.control_plane.run_ledger_service import (
 )
 from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.composition.registry_api import PipelineRegistry, create_registry
-from bioetl.composition.runtime_builders._runner_builder_support import (
+from bioetl.composition.runtime_builders._runner_control_plane_policy import (
     validate_artifact_recorder_attachment as _validate_artifact_recorder_attachment,
 )
 from bioetl.composition.runtime_builders._runner_factory_compat import (

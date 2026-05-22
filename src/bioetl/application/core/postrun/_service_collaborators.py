@@ -30,17 +30,16 @@ class ResolvedPostrunCollaborators:
     metadata_writer: MetadataWriterPort | None
 
 
-def _resolve_legacy_or_service(
-    legacy_kwargs: dict[str, object],
+def _resolve_explicit_or_service(
+    explicit_value: object | None,
     *,
-    key: str,
     services: PipelineServicesProtocol | None,
+    key: str,
     service_attr: str | None = None,
 ) -> object | None:
-    """Resolve collaborator from legacy kwargs first, then service container."""
-    resolved = legacy_kwargs.get(key)
-    if resolved is not None:
-        return resolved
+    """Resolve collaborator from explicit constructor value, then service container."""
+    if explicit_value is not None:
+        return explicit_value
     if services is None:
         return None
     return cast("object | None", getattr(services, service_attr or key, None))
@@ -50,18 +49,22 @@ def resolve_postrun_collaborators(
     *,
     services: PipelineServicesProtocol | None,
     context: PipelineContext,
-    legacy_kwargs: dict[str, object],
+    storage: object | None = None,
+    metrics: object | None = None,
+    logger: object | None = None,
+    metadata_coordinator: object | None = None,
+    metadata_writer: object | None = None,
 ) -> ResolvedPostrunCollaborators:
     """Resolve storage/metrics/logger/metadata collaborators for PostrunService."""
-    resolved_storage = _resolve_legacy_or_service(
-        legacy_kwargs,
+    resolved_storage = _resolve_explicit_or_service(
+        storage,
+        services=services,
         key="storage",
-        services=services,
     )
-    resolved_logger = _resolve_legacy_or_service(
-        legacy_kwargs,
-        key="logger",
+    resolved_logger = _resolve_explicit_or_service(
+        logger,
         services=services,
+        key="logger",
     )
     if resolved_logger is None:
         resolved_logger = context.logger
@@ -71,25 +74,25 @@ def resolve_postrun_collaborators(
             "PostrunService requires storage and logger (provide services or legacy kwargs)"
         )
 
-    resolved_metrics = _resolve_legacy_or_service(
-        legacy_kwargs,
-        key="metrics",
+    resolved_metrics = _resolve_explicit_or_service(
+        metrics,
         services=services,
+        key="metrics",
     )
     if resolved_metrics is None:
         raise AssertionError(
             "PostrunService requires metrics (provide services or legacy kwargs)"
         )
 
-    resolved_metadata_coordinator = _resolve_legacy_or_service(
-        legacy_kwargs,
+    resolved_metadata_coordinator = _resolve_explicit_or_service(
+        metadata_coordinator,
+        services=services,
         key="metadata_coordinator",
-        services=services,
     )
-    resolved_metadata_writer = _resolve_legacy_or_service(
-        legacy_kwargs,
-        key="metadata_writer",
+    resolved_metadata_writer = _resolve_explicit_or_service(
+        metadata_writer,
         services=services,
+        key="metadata_writer",
     )
     return ResolvedPostrunCollaborators(
         storage=cast("StorageMaintenancePort", resolved_storage),

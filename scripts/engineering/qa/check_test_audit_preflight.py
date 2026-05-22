@@ -15,6 +15,14 @@ LFS_POINTER_PREFIX = b"version https://git-lfs.github.com/spec/v1"
 TELEMETRY_BASELINE = Path("docs/05-engineering/test-telemetry-baseline.md")
 VCR_FIXTURE_ROOT = Path("tests/fixtures/vcr")
 DEFAULT_GIT_TIMEOUT_SECONDS = 5.0
+WINDOWS_GIT_LFS_CANDIDATES = (
+    Path("/mnt/c/Program Files/Git/mingw64/bin/git-lfs.exe"),
+    Path("/mnt/c/Program Files/Git/cmd/git-lfs.exe"),
+)
+WINDOWS_GIT_CANDIDATES = (
+    Path("/mnt/c/Program Files/Git/bin/git.exe"),
+    Path("/mnt/c/Program Files/Git/cmd/git.exe"),
+)
 STRICT_BLOCKER_IDS = (
     "missing_git_lfs",
     "git_lfs_unhealthy",
@@ -72,6 +80,79 @@ def _git_value(runner: GitRunner, args: list[str]) -> dict[str, Any]:
     }
 
 
+def _process_value(
+    command: list[str],
+    *,
+    root: Path,
+    timeout_seconds: float = DEFAULT_GIT_TIMEOUT_SECONDS,
+) -> dict[str, Any]:
+    try:
+        result = subprocess.run(
+            command,
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=timeout_seconds,
+        )
+    except subprocess.TimeoutExpired as exc:
+        return {
+            "ok": False,
+            "stdout": _normalize_process_output(exc.stdout),
+            "stderr": _normalize_process_output(exc.stderr)
+            or f"{' '.join(command)} timed out after {exc.timeout}s.",
+            "returncode": None,
+            "timed_out": True,
+        }
+    return {
+        "ok": result.returncode == 0,
+        "stdout": _normalize_process_output(result.stdout),
+        "stderr": _normalize_process_output(result.stderr),
+        "returncode": result.returncode,
+        "timed_out": False,
+    }
+
+
+def _first_existing_candidate(candidates: tuple[Path, ...]) -> str | None:
+    for candidate in candidates:
+        if candidate.exists() and candidate.is_file():
+            return candidate.as_posix()
+    return None
+
+
+def _detect_git_lfs_path(explicit_path: str | None) -> str | None:
+    if explicit_path is not None:
+        return explicit_path or None
+    return shutil.which("git-lfs") or _first_existing_candidate(
+        WINDOWS_GIT_LFS_CANDIDATES
+    )
+
+
+def _git_lfs_version(
+    *,
+    lfs_path: str,
+    root: Path,
+    git_runner: GitRunner,
+    prefer_direct_binary: bool,
+) -> dict[str, Any]:
+    if prefer_direct_binary and Path(lfs_path).exists():
+        return _process_value([lfs_path, "version"], root=root)
+    return _git_value(git_runner, ["lfs", "version"])
+
+
+def _windows_git_status(root: Path) -> dict[str, Any] | None:
+    git_path = _first_existing_candidate(WINDOWS_GIT_CANDIDATES)
+    if git_path is None:
+        return None
+    result = _process_value(
+        [git_path, "status", "--short", "--untracked-files=no"],
+        root=root,
+    )
+    if result["ok"]:
+        result["fallback"] = git_path
+    return result
+
+
 def _detect_default_branch(runner: GitRunner) -> str:
     remote_head = _git_value(
         runner,
@@ -121,20 +202,34 @@ def collect_test_audit_preflight(
 ) -> dict[str, Any]:
     """Collect preflight facts needed before treating an audit as reproducible."""
     root = root.resolve()
+    using_default_runner = runner is None
     git_runner = runner or _default_git_runner(root)
-    lfs_path = git_lfs_path if git_lfs_path is not None else shutil.which("git-lfs")
+    lfs_path = _detect_git_lfs_path(git_lfs_path)
 
     current_branch = _git_value(git_runner, ["branch", "--show-current"])
     current_commit = _git_value(git_runner, ["rev-parse", "--short", "HEAD"])
     default_branch = _detect_default_branch(git_runner)
     default_commit = _git_value(git_runner, ["rev-parse", "--short", default_branch])
     lfs_available = bool(lfs_path)
-    git_lfs_version = _git_value(git_runner, ["lfs", "version"]) if lfs_path else None
+    git_lfs_version = (
+        _git_lfs_version(
+            lfs_path=lfs_path,
+            root=root,
+            git_runner=git_runner,
+            prefer_direct_binary=using_default_runner,
+        )
+        if lfs_path
+        else None
+    )
     git_status = (
         _git_value(git_runner, ["status", "--short", "--untracked-files=no"])
         if lfs_available
         else _skipped_git_status_due_to_missing_lfs()
     )
+    if using_default_runner and lfs_available and git_status["timed_out"]:
+        fallback_status = _windows_git_status(root)
+        if fallback_status is not None:
+            git_status = fallback_status
 
     baseline_path = root / TELEMETRY_BASELINE
     baseline_exists = baseline_path.exists()

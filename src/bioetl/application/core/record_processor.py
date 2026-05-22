@@ -18,14 +18,13 @@ from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core._span_helpers import close_span
 from bioetl.application.core.batch_executor import BatchResult
 from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
+from bioetl.application.core.span_helpers import close_span
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
-    from bioetl.application.core._span_helpers import _ClosableSpan
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.batch_transformer import (
         BatchTransformer,
@@ -33,6 +32,7 @@ if TYPE_CHECKING:
     )
     from bioetl.application.core.batch_writer import BatchWriter
     from bioetl.application.core.config import RecordProcessorConfig
+    from bioetl.application.core.span_helpers import _ClosableSpan
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import TracingPort
     from bioetl.domain.types import BatchID

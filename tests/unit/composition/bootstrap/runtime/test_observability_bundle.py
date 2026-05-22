@@ -426,7 +426,7 @@ class TestBootstrapObservabilityBundleImpl:
             audit_type="NoOpAudit",
             audit_enabled=False,
             dq_monitor_enabled=False,
-            required_persistence_profile="degraded_observable",
+            configured_required_persistence_profile="degraded_observable",
             run_manifest_enabled=True,
             run_ledger_enabled=True,
             preflight_status="passed",

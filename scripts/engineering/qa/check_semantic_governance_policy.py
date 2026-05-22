@@ -293,6 +293,57 @@ def _weak_decision_findings(
     expected = {
         cluster_id for cluster_id, count in counts.items() if count >= threshold
     }
+    tracked_clusters = {
+        str(cluster_id)
+        for cluster_id in policy.get("tracked_cluster_ids", [])
+        if isinstance(cluster_id, str)
+    }
+    role_governed_clusters = {
+        str(cluster_id)
+        for cluster_id in policy.get("role_governed_cluster_ids", [])
+        if isinstance(cluster_id, str)
+    }
+    explicit_contract_clusters = {
+        str(cluster_id)
+        for cluster_id in policy.get("explicit_contract_cluster_ids", [])
+        if isinstance(cluster_id, str)
+    }
+    required_tracked_metadata = tuple(
+        str(key)
+        for key in policy.get("required_tracked_decision_metadata", [])
+        if isinstance(key, str)
+    )
+    for stale in sorted(tracked_clusters - set(counts)):
+        findings.append(
+            GovernanceFinding(
+                kind="stale_tracked_weak_cluster_policy",
+                subject=stale,
+                message=f"weak_cluster_policy tracks {stale} but it is not a current WEAK cluster",
+            )
+        )
+    for stale in sorted(role_governed_clusters - tracked_clusters):
+        findings.append(
+            GovernanceFinding(
+                kind="untracked_role_governed_weak_cluster",
+                subject=stale,
+                message=(
+                    f"weak_cluster_policy marks {stale} as role-governed but does not "
+                    "include it in tracked_cluster_ids"
+                ),
+            )
+        )
+    for stale in sorted(explicit_contract_clusters - tracked_clusters):
+        findings.append(
+            GovernanceFinding(
+                kind="untracked_explicit_contract_weak_cluster",
+                subject=stale,
+                message=(
+                    f"weak_cluster_policy marks {stale} as explicit-contract but does not "
+                    "include it in tracked_cluster_ids"
+                ),
+            )
+        )
+    expected |= tracked_clusters
     entries = payload.get("weak_cluster_decisions", [])
     if not isinstance(entries, list):
         return findings + [
@@ -331,6 +382,46 @@ def _weak_decision_findings(
                     kind="invalid_weak_cluster_decision_value",
                     subject=cluster_id,
                     message=f"weak cluster decision for {cluster_id} uses unsupported decision {decision!r}",
+                )
+            )
+        if cluster_id in tracked_clusters:
+            for key in required_tracked_metadata:
+                if not _non_empty_str(entry, key):
+                    findings.append(
+                        GovernanceFinding(
+                            kind="missing_tracked_weak_cluster_metadata",
+                            subject=cluster_id,
+                            message=(
+                                f"tracked weak cluster decision for {cluster_id} is missing {key}"
+                            ),
+                        )
+                    )
+        semantic_scope = str(entry.get("semantic_scope") or "")
+        if cluster_id in role_governed_clusters and not semantic_scope.startswith(
+            "role_governed_"
+        ):
+            findings.append(
+                GovernanceFinding(
+                    kind="invalid_role_governed_weak_scope",
+                    subject=cluster_id,
+                    message=(
+                        f"role-governed weak cluster {cluster_id} must use a "
+                        f"role_governed_* semantic_scope, got {semantic_scope!r}"
+                    ),
+                )
+            )
+        if (
+            cluster_id in explicit_contract_clusters
+            and semantic_scope != "explicit_source_owned_assay_contract"
+        ):
+            findings.append(
+                GovernanceFinding(
+                    kind="invalid_explicit_contract_weak_scope",
+                    subject=cluster_id,
+                    message=(
+                        f"explicit-contract weak cluster {cluster_id} must use "
+                        "'explicit_source_owned_assay_contract' semantic_scope"
+                    ),
                 )
             )
     for missing in sorted(expected - actual):

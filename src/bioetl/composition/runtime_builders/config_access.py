@@ -19,7 +19,7 @@ __all__ = [
 
 def get_settings():
     """Resolve settings through the infrastructure package at call time."""
-    from bioetl.infrastructure.config import get_settings as _get_settings
+    from bioetl.infrastructure.config.settings_api import get_settings as _get_settings
 
     return _get_settings()
 

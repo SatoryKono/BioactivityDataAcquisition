@@ -48,7 +48,7 @@ if TYPE_CHECKING:
         HttpAdapterDependencyContext,
     )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
 # Mapping from entity_type to DTO model class
 PUBMED_DTO_MODELS: dict[str, type[BaseModel]] = {

@@ -31,7 +31,7 @@ from bioetl.domain.normalization import (
     serialize_hash_identity_canonical_json,
 )
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.config.settings_api import get_settings
 
 if TYPE_CHECKING:
     from datetime import datetime

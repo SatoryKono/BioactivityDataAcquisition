@@ -4,17 +4,23 @@ from __future__ import annotations
 
 import ast
 from collections import Counter
+import json
 from functools import cache
 from pathlib import Path
 
 import yaml
 
-from scripts.engineering.qa.report_dead_code_inventory import build_dead_code_inventory
+from scripts.engineering.qa.report_dead_code_inventory import (
+    _render_markdown,
+    build_dead_code_inventory,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 TRIAGE_PATH = PROJECT_ROOT / "configs/quality/retirement_candidate_triage.yaml"
 SCORECARD_PATH = PROJECT_ROOT / "configs/quality/debt_scorecard.yaml"
 SRC_ROOT = PROJECT_ROOT / "src" / "bioetl"
+DEAD_CODE_JSON_PATH = PROJECT_ROOT / "reports" / "quality" / "dead-code-inventory.json"
+DEAD_CODE_MD_PATH = PROJECT_ROOT / "reports" / "quality" / "dead-code-inventory.md"
 
 
 def _load_triage() -> dict[str, object]:
@@ -94,6 +100,8 @@ def test_retirement_triage_entries_are_explicit_and_actionable() -> None:
     assert zero_import_review.get("mode") == "fail-fast-no-growth"
     assert isinstance(zero_import_review.get("inventory_command"), str)
     assert "report_dead_code_inventory" in zero_import_review["inventory_command"]
+    assert isinstance(zero_import_review.get("check_command"), str)
+    assert "--check" in zero_import_review["check_command"]
     assert isinstance(
         zero_import_review.get("max_untriaged_zero_import_candidates"), int
     )
@@ -238,3 +246,18 @@ def test_repo_wide_zero_import_candidate_count_does_not_grow() -> None:
         f"reviewed budget {budget}. Remove candidates or refresh "
         "retirement_candidate_triage.yaml intentionally."
     )
+
+
+def test_dead_code_inventory_artifacts_are_committed_and_current() -> None:
+    """Dead-code review evidence must stay materialized for zero-import triage."""
+    assert DEAD_CODE_JSON_PATH.exists()
+    assert DEAD_CODE_MD_PATH.exists()
+
+    committed = json.loads(DEAD_CODE_JSON_PATH.read_text(encoding="utf-8"))
+    expected = build_dead_code_inventory(
+        PROJECT_ROOT,
+        snapshot_date=str(committed["snapshot_date"]),
+    )
+
+    assert committed == expected
+    assert DEAD_CODE_MD_PATH.read_text(encoding="utf-8") == _render_markdown(expected)
