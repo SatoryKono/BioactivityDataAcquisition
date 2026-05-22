@@ -152,7 +152,7 @@ Notes:
 - `make setup-skills` syncs repository-local Codex `skills` and their paired `agents` into `$CODEX_HOME` (default `~/.codex`).
 - If you use Codex or GitHub Copilot MCP, run `uv run python -m scripts.engineering.dev setup-mcp` after install. If you activated the OS-appropriate environment instead of using `uv`, `python -m scripts.engineering.dev setup-mcp` is also valid.
 - For docs verification and strict site builds, use the published [Docs Verification Guide](docs/03-guides/docs-verification.md).
-- `scripts/engineering/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
+- `python -m scripts.engineering.dev setup` is a retired legacy command; it now fails fast with guidance to use `make install` or `python -m scripts.engineering.dev setup-mcp`.
 
 #### Mixed Windows + WSL Development
 
