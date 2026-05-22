@@ -27,6 +27,19 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--repo-root", default=str(PROJECT_ROOT))
     parser.add_argument("--json-out", default=str(DEFAULT_JSON_OUTPUT))
     parser.add_argument("--md-out", default=str(DEFAULT_MD_OUTPUT))
+    parser.add_argument(
+        "--snapshot-date",
+        default=None,
+        help=(
+            "Snapshot date to embed in generated artifacts. In --check mode the "
+            "existing JSON snapshot_date is reused when this is omitted."
+        ),
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail if committed dead-code inventory artifacts differ from generated output.",
+    )
     return parser.parse_args()
 
 
@@ -37,15 +50,19 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 def _load_retained_entrypoint_paths(repo_root: Path) -> set[str]:
-    payload = _load_yaml(repo_root / "configs" / "quality" / "compatibility_facade_inventory.yaml")
+    payload = _load_yaml(
+        repo_root / "configs" / "quality" / "compatibility_facade_inventory.yaml"
+    )
     rows = payload.get("retained_entrypoints", [])
     assert isinstance(rows, list)
-    return {
-        str(row["path"]) for row in rows if isinstance(row, dict) and "path" in row
-    }
+    return {str(row["path"]) for row in rows if isinstance(row, dict) and "path" in row}
 
 
-def build_dead_code_inventory(repo_root: Path) -> dict[str, object]:
+def build_dead_code_inventory(
+    repo_root: Path,
+    *,
+    snapshot_date: str | None = None,
+) -> dict[str, object]:
     from scripts.engineering.qa.import_graph_inventory import (
         collect_bioetl_importers,
         collect_zero_import_bioetl_modules,
@@ -114,7 +131,7 @@ def build_dead_code_inventory(repo_root: Path) -> dict[str, object]:
     ]
 
     return {
-        "snapshot_date": date.today().isoformat(),
+        "snapshot_date": snapshot_date or date.today().isoformat(),
         "triage_source": "configs/quality/retirement_candidate_triage.yaml",
         "static_inventory_scope": "src/bioetl",
         "summary": {
@@ -122,7 +139,9 @@ def build_dead_code_inventory(repo_root: Path) -> dict[str, object]:
             "triaged_entries_below_min_importers": sum(
                 1 for row in triaged_rows if row["verification_status"] == "below_min"
             ),
-            "repo_wide_zero_import_candidate_count": len(repo_wide_zero_import_candidates),
+            "repo_wide_zero_import_candidate_count": len(
+                repo_wide_zero_import_candidates
+            ),
         },
         "triaged_entries": triaged_rows,
         "repo_wide_zero_import_candidates": repo_wide_zero_import_candidates,
@@ -172,16 +191,48 @@ def _render_markdown(payload: dict[str, object]) -> str:
     return "\n".join(lines)
 
 
+def _existing_snapshot_date(path: Path) -> str | None:
+    if not path.exists():
+        return None
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        return None
+    snapshot_date = payload.get("snapshot_date")
+    return snapshot_date if isinstance(snapshot_date, str) else None
+
+
 def main() -> int:
     args = _parse_args()
     repo_root = Path(args.repo_root)
-    payload = build_dead_code_inventory(repo_root)
     json_out = Path(args.json_out)
     md_out = Path(args.md_out)
+    snapshot_date = args.snapshot_date
+    if args.check and snapshot_date is None:
+        snapshot_date = _existing_snapshot_date(json_out)
+    payload = build_dead_code_inventory(repo_root, snapshot_date=snapshot_date)
+    rendered_json = json.dumps(payload, indent=2) + "\n"
+    rendered_markdown = _render_markdown(payload)
+
+    if args.check:
+        if not json_out.exists():
+            print(f"[dead-code-inventory] missing JSON artifact: {json_out}")
+            return 1
+        if not md_out.exists():
+            print(f"[dead-code-inventory] missing Markdown artifact: {md_out}")
+            return 1
+        if json_out.read_text(encoding="utf-8") != rendered_json:
+            print(f"[dead-code-inventory] FAIL: JSON artifact drifted: {json_out}")
+            return 1
+        if md_out.read_text(encoding="utf-8") != rendered_markdown:
+            print(f"[dead-code-inventory] FAIL: Markdown artifact drifted: {md_out}")
+            return 1
+        print("[dead-code-inventory] PASS: artifacts are up to date")
+        return 0
+
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
-    json_out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    md_out.write_text(_render_markdown(payload), encoding="utf-8")
+    json_out.write_text(rendered_json, encoding="utf-8")
+    md_out.write_text(rendered_markdown, encoding="utf-8")
     print(
         "[dead-code-inventory] "
         f"triaged_entries={payload['summary']['triaged_entry_count']}; "

@@ -11,8 +11,8 @@ from bioetl.application.core.postrun._service_collaborators import (
 )
 
 
-def test_resolve_postrun_collaborators_prefers_legacy_kwargs() -> None:
-    """Legacy kwargs should override service-container collaborators."""
+def test_resolve_postrun_collaborators_prefers_explicit_values() -> None:
+    """Explicit collaborators should override service-container collaborators."""
     context = MagicMock()
     context.logger = MagicMock()
     services = MagicMock()
@@ -22,23 +22,21 @@ def test_resolve_postrun_collaborators_prefers_legacy_kwargs() -> None:
     services.metadata_coordinator = MagicMock(name="services_metadata_coordinator")
     services.metadata_writer = MagicMock(name="services_metadata_writer")
 
-    legacy_storage = MagicMock(name="legacy_storage")
-    legacy_logger = MagicMock(name="legacy_logger")
-    legacy_metrics = MagicMock(name="legacy_metrics")
+    explicit_storage = MagicMock(name="explicit_storage")
+    explicit_logger = MagicMock(name="explicit_logger")
+    explicit_metrics = MagicMock(name="explicit_metrics")
 
     resolved = resolve_postrun_collaborators(
         services=services,
         context=context,
-        legacy_kwargs={
-            "storage": legacy_storage,
-            "logger": legacy_logger,
-            "metrics": legacy_metrics,
-        },
+        storage=explicit_storage,
+        logger=explicit_logger,
+        metrics=explicit_metrics,
     )
 
-    assert resolved.storage is legacy_storage
-    assert resolved.logger is legacy_logger
-    assert resolved.metrics is legacy_metrics
+    assert resolved.storage is explicit_storage
+    assert resolved.logger is explicit_logger
+    assert resolved.metrics is explicit_metrics
     assert resolved.metadata_coordinator is services.metadata_coordinator
     assert resolved.metadata_writer is services.metadata_writer
 
@@ -57,7 +55,6 @@ def test_resolve_postrun_collaborators_defaults_logger_only() -> None:
     resolved = resolve_postrun_collaborators(
         services=services,
         context=context,
-        legacy_kwargs={},
     )
 
     assert resolved.storage is services.storage
@@ -68,7 +65,7 @@ def test_resolve_postrun_collaborators_defaults_logger_only() -> None:
 
 
 def test_resolve_postrun_collaborators_rejects_missing_metrics() -> None:
-    """Metrics must be provided explicitly via services or legacy kwargs."""
+    """Metrics must be provided explicitly or via services."""
     context = MagicMock()
     context.logger = MagicMock(name="context_logger")
     services = MagicMock()
@@ -82,5 +79,4 @@ def test_resolve_postrun_collaborators_rejects_missing_metrics() -> None:
         resolve_postrun_collaborators(
             services=services,
             context=context,
-            legacy_kwargs={},
         )

@@ -15,7 +15,9 @@ from bioetl.composition.providers.provider_registry import (
     ProviderDataSourceAccessProtocol,
 )
 from bioetl.domain.types import GoldSchemaType
-from bioetl.infrastructure.config import load_pipeline_contract_policy
+from bioetl.infrastructure.config.contract_policy_loader import (
+    load_pipeline_contract_policy,
+)
 from bioetl.infrastructure.config.contract_policy_validation import (
     resolve_silver_columns as _resolve_silver_columns_impl,
 )

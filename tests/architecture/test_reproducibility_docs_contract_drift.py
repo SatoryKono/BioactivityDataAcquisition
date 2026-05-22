@@ -124,6 +124,8 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
     assert "run_historical_replay_universe_campaign.py" in text
     assert "durable_evidence_coverage_claim" in text
     assert "all_known_historical_runs" in text
+    assert "historical replay universe closure report" in text
+    assert "configured_required_persistence_profile" in text
     assert "source_pack_ref" in text
     assert "evidence_residency" in text
     assert "durable evidence path" in text
@@ -207,6 +209,7 @@ def test_run_manifest_docs_define_replay_equivalence_levels() -> None:
     assert "run_historical_replay_universe_campaign.py" in runbook
     assert "durable_evidence_coverage_claim" in runbook
     assert "all_known_historical_runs" in runbook
+    assert "configured `required_persistence_profile`" in runbook
     assert "source_pack_ref" in runbook
     assert "evidence_residency" in runbook
 

@@ -43,8 +43,10 @@ Verify the active rollout semantics:
 
 - `run_manifest_enabled`
 - `run_ledger_enabled`
-- `required_persistence_profile` with allowed values
+- configured `required_persistence_profile` with allowed values
   `degraded_observable | replay_ready | forensic_grade`
+- effective `required_persistence_profile` after control-plane policy
+  resolution; this is the canonical run guarantee surface
 - `checkpoint_compatibility_policy` with allowed values `observe | soft_fail | hard_fail`
 
 Fast source-of-truth checks:
@@ -554,7 +556,9 @@ layers:
 - `supported_boundary_verdict` states whether this run satisfies that boundary
   or remains blocked/gapped;
 - `global_reproducibility_claim` states the project-wide claim status and must
-  remain explicit even when the inspected run is replay-ready.
+  remain explicit even when the inspected run is replay-ready. When the latest
+  authoritative historical replay universe artifact is available, this field
+  must mirror that artifact rather than hard-coding a weaker fallback.
 
 Interpretation examples:
 

@@ -164,6 +164,14 @@ class _InMemoryEffectiveConfigArtifactStore:
         }
 
 
+class _StaticHistoricalReplayUniverseReportLoader:
+    def __init__(self, report: dict[str, object] | None) -> None:
+        self._report = report
+
+    def load_latest_report(self) -> dict[str, object] | None:
+        return self._report
+
+
 def _make_manifest(
     *,
     manifest_id: str,
@@ -389,6 +397,61 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
         "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
     ]
+
+
+def test_show_attaches_latest_historical_replay_universe_claim_to_score() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    run_id = _run_id("show-global-claim")
+    manifest = _make_manifest(manifest_id="manifest-global-claim", run_id=run_id)
+    manifest_store.save(manifest)
+    loader = _StaticHistoricalReplayUniverseReportLoader(
+        {
+            "_artifact_path": "data/output/control/historical_replay_universe/latest.json",
+            "report_id": "historical-replay-universe-latest",
+            "universal_claim": {
+                "claimed": True,
+                "verdict": "claim_supported",
+                "reason": "all_known_historical_runs_are_exact_replayable",
+                "scope": "all_known_historical_runs",
+                "blocked_manifest_ids": [],
+            },
+            "durable_evidence_coverage_claim": {
+                "claimed": True,
+                "verdict": "claim_supported",
+                "reason": "every_known_historical_run_has_durable_evidence_coverage",
+                "scope": "all_known_historical_runs",
+                "blocked_manifest_ids": [],
+            },
+        }
+    )
+    service = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        historical_replay_universe_report_loader=loader,
+    )
+
+    result = service.show("manifest-global-claim")
+
+    score = result.diagnostics["reproducibility_audit_score"]
+    global_claim = score["global_reproducibility_claim"]
+    assert result.diagnostics["historical_replay_universe_claim"]["claimed"] is True
+    assert (
+        result.diagnostics["historical_replay_universe_claim_source"]
+        == "data/output/control/historical_replay_universe/latest.json"
+    )
+    assert (
+        result.diagnostics["historical_replay_universe_durable_evidence_claimed"]
+        is True
+    )
+    assert global_claim["claimed"] is True
+    assert global_claim["verdict"] == "universal_exact_replay_claimed"
+    assert (
+        global_claim["reason"]
+        == "latest_historical_replay_universe_artifact_supports_universal_claim"
+    )
+    assert (
+        global_claim["claim_source_artifact_path"]
+        == "data/output/control/historical_replay_universe/latest.json"
+    )
 
 
 def _expected_input_snapshots() -> list[dict[str, object]]:
@@ -701,6 +764,11 @@ def _expected_diagnostics_without_ledger(
             "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         ],
         "reproducibility_audit_score": reproducibility_audit_score,
+        "global_reproducibility_claim": (
+            reproducibility_audit_score.get("global_reproducibility_claim", {})
+            if isinstance(reproducibility_audit_score, dict)
+            else {}
+        ),
     }
 
 

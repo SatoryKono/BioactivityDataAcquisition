@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from dataclasses import asdict, dataclass
+from functools import cache
 from pathlib import Path
 from typing import cast
 
@@ -14,6 +16,11 @@ import yaml
 CATALOG_SCHEMA_VERSION = 1
 DEFAULT_VCR_ROOT = Path("tests/fixtures/vcr")
 DEFAULT_OUTPUT = Path("reports/quality/vcr-metadata-catalog.json")
+REACHABILITY_SCAN_ROOTS = (Path("tests"),)
+RF013_HEALTH_CASE_PATTERN = re.compile(
+    r"^rf013_(?P<provider>[a-z0-9_]+)_health_case_\d+$"
+)
+RF013_HEALTH_CASE_OWNER = Path("tests/integration/adapters/vcr_rebalance_support.py")
 
 
 @dataclass(frozen=True)
@@ -27,6 +34,8 @@ class CassetteCatalogRow:
     has_metadata_sidecar: bool
     metadata_rel_path: str | None
     metadata_status: str
+    reachability_status: str
+    reachability_owner_paths: list[str]
 
 
 @dataclass
@@ -93,34 +102,155 @@ def _load_metadata_payload(path: Path) -> object | None:
     return cast(object | None, yaml.safe_load(path.read_text(encoding="utf-8")))
 
 
+def _load_existing_metadata_payload(path: Path) -> object | None:
+    return cast(object | None, yaml.safe_load(path.read_text(encoding="utf-8")))
+
+
+def _is_reachability_scan_file(path: Path) -> bool:
+    if not path.is_file():
+        return False
+    if "fixtures" in path.parts:
+        return False
+    return path.suffix.lower() == ".py"
+
+
+def _iter_reachability_scan_files(repo_root: Path) -> list[Path]:
+    files: list[Path] = []
+    for root in REACHABILITY_SCAN_ROOTS:
+        scan_root = repo_root / root
+        if not scan_root.exists():
+            continue
+        files.extend(
+            path
+            for path in scan_root.rglob("*.py")
+            if _is_reachability_scan_file(path)
+        )
+    return sorted(files, key=lambda path: path.as_posix().lower())
+
+
+def _read_scan_text(path: Path) -> str:
+    return path.read_text(encoding="utf-8", errors="replace")
+
+
+def _build_reachability_scan_texts(
+    repo_root: Path,
+) -> list[tuple[str, str]]:
+    return list(_build_reachability_scan_texts_cached(repo_root.as_posix()))
+
+
+@cache
+def _build_reachability_scan_texts_cached(repo_root: str) -> tuple[tuple[str, str], ...]:
+    root = Path(repo_root)
+    return [
+        (path.relative_to(root).as_posix(), _read_scan_text(path))
+        for path in _iter_reachability_scan_files(root)
+    ]
+
+
+def _direct_reference_owner_paths(
+    *,
+    cassette_path: Path,
+    vcr_root: Path,
+    scan_texts: list[tuple[str, str]],
+) -> list[str]:
+    rel_to_vcr = cassette_path.relative_to(vcr_root).as_posix()
+    tokens = {
+        cassette_path.name,
+        cassette_path.stem,
+        rel_to_vcr,
+        f"tests/fixtures/vcr/{rel_to_vcr}",
+    }
+    owners: list[str] = []
+    for relative_path, text in scan_texts:
+        if any(token in text for token in tokens):
+            owners.append(relative_path)
+    return owners
+
+
+def _generated_reference_owner_paths(
+    *,
+    cassette_path: Path,
+    repo_root: Path,
+) -> list[str]:
+    if not RF013_HEALTH_CASE_PATTERN.match(cassette_path.stem):
+        return []
+    owner = repo_root / RF013_HEALTH_CASE_OWNER
+    return [RF013_HEALTH_CASE_OWNER.as_posix()] if owner.exists() else []
+
+
+def _reachability_status_and_owners(
+    *,
+    cassette_path: Path,
+    metadata_path: Path,
+    repo_root: Path,
+    vcr_root: Path,
+    scan_files: list[tuple[str, str]],
+) -> tuple[str, list[str]]:
+    direct_owners = _direct_reference_owner_paths(
+        cassette_path=cassette_path,
+        vcr_root=vcr_root,
+        scan_texts=scan_files,
+    )
+    if direct_owners:
+        return "direct_reference", direct_owners
+
+    generated_owners = _generated_reference_owner_paths(
+        cassette_path=cassette_path,
+        repo_root=repo_root,
+    )
+    if generated_owners:
+        return "generated_reference", generated_owners
+
+    if metadata_path.exists():
+        return "metadata_review_required", [metadata_path.as_posix()]
+    return "unowned", []
+
+
 def iter_catalog_rows(vcr_root: Path) -> list[CassetteCatalogRow]:
     """Build deterministic catalog rows for all tracked cassette files."""
     rows: list[CassetteCatalogRow] = []
     if not vcr_root.exists():
         return rows
+    repo_root = vcr_root.resolve().parents[2]
+    scan_files = _build_reachability_scan_texts(repo_root)
 
     cassette_paths = sorted(
         (path for path in vcr_root.rglob("*") if _is_cassette_file(path)),
         key=lambda path: (path.as_posix().lower(), path.as_posix()),
     )
+    metadata_payloads = {
+        path: _load_existing_metadata_payload(path)
+        for path in vcr_root.rglob("*")
+        if path.is_file() and path.name.endswith(("_meta.yaml", "_meta.yml"))
+    }
 
     for cassette_path in cassette_paths:
         rel_path = cassette_path.as_posix()
         parts = cassette_path.relative_to(vcr_root).parts
         provider = parts[0] if parts else "unknown"
         metadata_path = _metadata_path_for(cassette_path)
-        metadata_payload = _load_metadata_payload(metadata_path)
+        has_metadata_sidecar = metadata_path in metadata_payloads
+        metadata_payload = metadata_payloads.get(metadata_path)
+        reachability_status, reachability_owner_paths = _reachability_status_and_owners(
+            cassette_path=cassette_path,
+            metadata_path=metadata_path,
+            repo_root=repo_root,
+            vcr_root=vcr_root,
+            scan_files=scan_files,
+        )
         rows.append(
             CassetteCatalogRow(
                 provider=provider,
                 scenario_stem=cassette_path.stem,
                 cassette_rel_path=rel_path,
                 cassette_extension=cassette_path.suffix.lower(),
-                has_metadata_sidecar=metadata_path.exists(),
+                has_metadata_sidecar=has_metadata_sidecar,
                 metadata_rel_path=metadata_path.as_posix()
-                if metadata_path.exists()
+                if has_metadata_sidecar
                 else None,
                 metadata_status=_metadata_status(metadata_payload),
+                reachability_status=reachability_status,
+                reachability_owner_paths=reachability_owner_paths,
             )
         )
 
@@ -176,12 +306,36 @@ def build_catalog(vcr_root: Path) -> dict[str, object]:
             ),
             "provider_count": len(provider_summary),
             "duplicate_scenario_stem_count": len(duplicate_scenario_stems),
+            "direct_reachable_cassette_count": sum(
+                1 for row in rows if row.reachability_status == "direct_reference"
+            ),
+            "generated_reachable_cassette_count": sum(
+                1 for row in rows if row.reachability_status == "generated_reference"
+            ),
+            "metadata_review_required_cassette_count": sum(
+                1
+                for row in rows
+                if row.reachability_status == "metadata_review_required"
+            ),
+            "unowned_cassette_count": sum(
+                1 for row in rows if row.reachability_status == "unowned"
+            ),
         },
         "pruning": {
             "duplicate_scenario_stems": duplicate_scenario_stems,
             "orphan_metadata_sidecar_count": len(
                 actual_metadata_paths - expected_metadata_paths
             ),
+            "metadata_review_required_cassettes": [
+                row.cassette_rel_path
+                for row in rows
+                if row.reachability_status == "metadata_review_required"
+            ],
+            "unowned_cassettes": [
+                row.cassette_rel_path
+                for row in rows
+                if row.reachability_status == "unowned"
+            ],
         },
         "providers": {
             provider: asdict(summary)

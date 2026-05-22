@@ -46,7 +46,7 @@ class TestProjectSchemaFieldsIntoConfig:
 class TestValidateSchemaConfig:
     """Tests for _validate_schema_config."""
 
-    def test_valid_schema(self) -> None:
+    def test_validate_schema_config_accepts_required_groups(self) -> None:
         """Should pass for valid schema with system and business groups."""
         data_schema = {
             "column_groups": [
@@ -57,6 +57,10 @@ class TestValidateSchemaConfig:
             "gold": {"include_groups": ["system", "business"]},
         }
         _validate_schema_config(data_schema, "test.yaml")
+        assert [group["name"] for group in data_schema["column_groups"]] == [
+            "system",
+            "business",
+        ]
 
     def test_missing_column_groups(self) -> None:
         """Should raise for missing column_groups."""

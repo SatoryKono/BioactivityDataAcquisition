@@ -1,0 +1,289 @@
+"""Control-plane policy resolution helpers for runtime runner assembly."""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from dataclasses import dataclass
+
+from bioetl.composition.runtime_builders._run_manifest_refs import (
+    is_explicit_data_root_configured,
+    resolve_data_root_mode,
+)
+from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+    STRICT_PERSISTENCE_PROFILES,
+    is_critical_reproducibility_runtime,
+    normalize_required_persistence_profile,
+)
+
+_PERSISTENCE_PROFILE_ACTIVE_LAYERS = ("bronze", "silver", "gold")
+
+
+@dataclass(frozen=True, slots=True)
+class ResolvedRunnerControlPlanePolicy:
+    manifest_enabled: bool
+    ledger_enabled: bool
+    required_profile: str
+
+
+def _normalize_required_persistence_profile(required_profile: object) -> str:
+    return normalize_required_persistence_profile(required_profile)
+
+
+def _resolve_sink_layer_config(yaml_config: object, layer: str) -> object | None:
+    sink = getattr(yaml_config, "sink", None)
+    if sink is None:
+        return None
+    if isinstance(sink, Mapping):
+        return sink.get(layer)
+    return getattr(sink, layer, None)
+
+
+def _is_sink_layer_enabled(layer_config: object | None) -> bool:
+    if layer_config is None:
+        return True
+    return bool(getattr(layer_config, "enabled", True))
+
+
+def _has_lineage_sidecar_persistence(layer_config: object | None) -> bool:
+    if layer_config is None:
+        return False
+    return bool(getattr(layer_config, "save_metadata", False))
+
+
+def resolve_required_artifact_lineage_layers(
+    *,
+    yaml_config: object | None,
+    skip_gold: bool = False,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """Return active layers and layers missing metadata-sidecar persistence."""
+    if yaml_config is None:
+        default_active_layers = tuple(
+            layer
+            for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS
+            if not (layer == "gold" and skip_gold)
+        )
+        return default_active_layers, default_active_layers
+    if getattr(yaml_config, "sink", None) is None:
+        return (), ()
+    active_layer_names: list[str] = []
+    missing_lineage_layers: list[str] = []
+    for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS:
+        if layer == "gold" and skip_gold:
+            continue
+        layer_config = _resolve_sink_layer_config(yaml_config, layer)
+        if not _is_sink_layer_enabled(layer_config):
+            continue
+        active_layer_names.append(layer)
+        if not _has_lineage_sidecar_persistence(layer_config):
+            missing_lineage_layers.append(layer)
+    return tuple(active_layer_names), tuple(missing_lineage_layers)
+
+
+def validate_required_persistence_profile(
+    *,
+    manifest_enabled: bool,
+    ledger_enabled: bool,
+    required_profile: object,
+    execution_label: str,
+    exact_replay_execution_context_supported: bool = True,
+    composite_resume_rich_replay_supported: bool = True,
+    missing_artifact_lineage_layers: tuple[str, ...] = (),
+) -> None:
+    """Fail closed when static control-plane flags cannot satisfy required profile."""
+    profile = _normalize_required_persistence_profile(required_profile)
+    if profile in STRICT_PERSISTENCE_PROFILES and not manifest_enabled:
+        raise RuntimeError(
+            f"{execution_label} requires run manifests for required persistence "
+            f"profile '{profile}'; set "
+            "pipeline.control_plane.run_manifest_enabled=true"
+        )
+    if (
+        profile in STRICT_PERSISTENCE_PROFILES
+        and not exact_replay_execution_context_supported
+    ):
+        raise RuntimeError(
+            f"{execution_label} cannot satisfy required persistence profile "
+            f"'{profile}' because this execution context is outside the strict "
+            "exact-replay support boundary"
+        )
+    if profile == "forensic_grade" and not composite_resume_rich_replay_supported:
+        raise RuntimeError(
+            f"{execution_label} cannot satisfy required persistence profile "
+            f"'{profile}' because composite forensic replay requires rich "
+            "checkpoint evidence that is not persisted by the current resume model"
+        )
+    if profile in STRICT_PERSISTENCE_PROFILES and not ledger_enabled:
+        raise RuntimeError(
+            f"{execution_label} requires run ledgers for required persistence "
+            f"profile '{profile}'; set pipeline.control_plane.run_ledger_enabled=true"
+        )
+    if profile in STRICT_PERSISTENCE_PROFILES and missing_artifact_lineage_layers:
+        layers = ", ".join(missing_artifact_lineage_layers)
+        raise RuntimeError(
+            f"{execution_label} requires metadata sidecars / lineage persistence "
+            f"for active layers [{layers}] to satisfy required persistence profile "
+            f"'{profile}'; enable sink.<layer>.save_metadata for each active "
+            "published layer"
+        )
+
+
+def validate_strict_data_root_policy(
+    *,
+    settings: object,
+    required_profile: object,
+    exact_replay: bool = False,
+) -> None:
+    """Fail closed when strict reproducibility relies on fallback data roots."""
+    profile = _normalize_required_persistence_profile(required_profile)
+    if not (exact_replay or profile in STRICT_PERSISTENCE_PROFILES):
+        return
+    if is_explicit_data_root_configured(settings):
+        return
+    mode = resolve_data_root_mode(settings)
+    raise RuntimeError(
+        "Strict reproducibility contexts require an explicit settings.data_dir; "
+        f"resolved fallback data root mode '{mode}' is not allowed for required "
+        f"persistence profile '{profile}'"
+    )
+
+
+def requires_artifact_publication_closure(required_profile: object) -> bool:
+    """Return ``True`` when artifact publication must be fully wired."""
+    return (
+        _normalize_required_persistence_profile(required_profile)
+        in STRICT_PERSISTENCE_PROFILES
+    )
+
+
+def validate_artifact_recorder_attachment(
+    *,
+    required_profile: object,
+    candidate_count: int,
+    attached_count: int,
+    missing_attach_method_count: int,
+    failed_count: int,
+) -> None:
+    """Fail closed when strict profiles cannot guarantee artifact publication."""
+    if not requires_artifact_publication_closure(required_profile):
+        return
+    profile = _normalize_required_persistence_profile(required_profile)
+    if candidate_count == 0:
+        raise RuntimeError(
+            f"Required persistence profile '{profile}' requires artifact publication "
+            "closure, but no metadata-writer candidates were discovered for recorder attachment"
+        )
+    if (
+        attached_count < candidate_count
+        or missing_attach_method_count > 0
+        or failed_count > 0
+    ):
+        raise RuntimeError(
+            f"Required persistence profile '{profile}' requires artifact publication "
+            "closure, but recorder attachment was incomplete "
+            f"(candidates={candidate_count}, attached={attached_count}, "
+            f"missing_attach_method_count={missing_attach_method_count}, "
+            f"failed_count={failed_count})"
+        )
+
+
+def resolve_control_plane_flags(
+    settings: object,
+    *,
+    yaml_config: object | None = None,
+    skip_gold: bool = False,
+    required_profile_override: object | None = None,
+    exact_replay: bool = False,
+    critical_runtime: bool | None = None,
+) -> tuple[bool, bool]:
+    """Resolve control-plane feature flags for executable pipeline runs."""
+    pipeline_settings = getattr(settings, "pipeline", None)
+    control_plane = getattr(pipeline_settings, "control_plane", None)
+    manifest_enabled = bool(getattr(control_plane, "run_manifest_enabled", True))
+    ledger_enabled = bool(getattr(control_plane, "run_ledger_enabled", True))
+    required_profile = getattr(
+        control_plane,
+        "required_persistence_profile",
+        DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+    )
+    if required_profile_override is not None and str(required_profile_override).strip():
+        required_profile = required_profile_override
+    critical = (
+        is_critical_reproducibility_runtime(
+            runtime_environment=getattr(settings, "env", None),
+            debug_mode=getattr(settings, "debug", False),
+        )
+        if critical_runtime is None
+        else critical_runtime
+    )
+    if (exact_replay or critical) and _normalize_required_persistence_profile(
+        required_profile
+    ) == "degraded_observable":
+        required_profile = DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+    if not manifest_enabled:
+        raise RuntimeError(
+            "Pipeline execution requires run manifests; set "
+            "pipeline.control_plane.run_manifest_enabled=true"
+        )
+    _active_layers, missing_artifact_lineage_layers = (
+        resolve_required_artifact_lineage_layers(
+            yaml_config=yaml_config,
+            skip_gold=skip_gold,
+        )
+    )
+    validate_required_persistence_profile(
+        manifest_enabled=manifest_enabled,
+        ledger_enabled=ledger_enabled,
+        required_profile=required_profile,
+        execution_label="Pipeline execution",
+        missing_artifact_lineage_layers=missing_artifact_lineage_layers,
+    )
+    return True, ledger_enabled
+
+
+def resolve_runner_control_plane_policy(
+    settings: object,
+    *,
+    yaml_config: object | None = None,
+    skip_gold: bool = False,
+    required_profile_override: object | None = None,
+    exact_replay: bool = False,
+) -> ResolvedRunnerControlPlanePolicy:
+    """Return canonical control-plane policy for runner assembly."""
+    pipeline_settings = getattr(settings, "pipeline", None)
+    control_plane = getattr(pipeline_settings, "control_plane", None)
+    configured_profile = getattr(
+        control_plane,
+        "required_persistence_profile",
+        DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+    )
+    requested_profile = (
+        required_profile_override
+        if required_profile_override is not None
+        and str(required_profile_override).strip()
+        else configured_profile
+    )
+    critical_runtime = is_critical_reproducibility_runtime(
+        runtime_environment=getattr(settings, "env", None),
+        debug_mode=getattr(settings, "debug", False),
+    )
+    if (exact_replay or critical_runtime) and _normalize_required_persistence_profile(
+        requested_profile
+    ) == "degraded_observable":
+        requested_profile = DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+    required_profile = _normalize_required_persistence_profile(requested_profile)
+    manifest_enabled, ledger_enabled = resolve_control_plane_flags(
+        settings,
+        yaml_config=yaml_config,
+        skip_gold=skip_gold,
+        exact_replay=exact_replay,
+        critical_runtime=critical_runtime,
+        required_profile_override=(
+            requested_profile if requested_profile != configured_profile else None
+        ),
+    )
+    return ResolvedRunnerControlPlanePolicy(
+        manifest_enabled=manifest_enabled,
+        ledger_enabled=ledger_enabled,
+        required_profile=required_profile,
+    )

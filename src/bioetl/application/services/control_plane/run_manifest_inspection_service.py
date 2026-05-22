@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import cast
+from typing import Protocol, cast
 
 from bioetl.application.services.control_plane._run_manifest_inspection_mixins import (
     RunManifestInspectionDiffClassificationMixin,
@@ -26,6 +26,9 @@ from bioetl.application.services.control_plane.run_manifest_inspection_verificat
     parse_run_id,
     resolve_verify_verdict,
 )
+from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring import (
+    build_reproducibility_audit_scoring,
+)
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.ports import (
     EffectiveConfigArtifactStorePort,
@@ -43,6 +46,10 @@ __all__ = [
 ]
 
 
+class _HistoricalReplayUniverseReportLoader(Protocol):
+    def load_latest_report(self) -> dict[str, object] | None: ...
+
+
 @dataclass(slots=True)
 class RunManifestInspectionService(
     RunManifestInspectionIdentityGraphMixin,
@@ -53,6 +60,9 @@ class RunManifestInspectionService(
     manifest_port: RunManifestPort
     ledger_port: RunLedgerPort | None = None
     effective_config_artifact_port: EffectiveConfigArtifactStorePort | None = None
+    historical_replay_universe_report_loader: (
+        _HistoricalReplayUniverseReportLoader | None
+    ) = None
 
     def show(self, identifier: str) -> RunManifestInspectionResult:
         """Resolve one manifest by manifest_id or run_id."""
@@ -61,6 +71,16 @@ class RunManifestInspectionService(
         if self.ledger_port is not None:
             ledger_entries = tuple(self.ledger_port.list_entries(manifest.manifest_id))
         diagnostics = build_diagnostics_summary(manifest, ledger_entries)
+        self._attach_historical_replay_universe_claim(diagnostics)
+        diagnostics.setdefault(
+            "global_reproducibility_claim",
+            diagnostics.get("reproducibility_audit_score", {}).get(
+                "global_reproducibility_claim",
+                {},
+            )
+            if isinstance(diagnostics.get("reproducibility_audit_score"), dict)
+            else {},
+        )
         identity_graph = self._build_identity_graph(manifest, diagnostics)
         diagnostics["identity_graph"] = identity_graph
         return RunManifestInspectionResult(
@@ -68,6 +88,35 @@ class RunManifestInspectionService(
             ledger_entries=ledger_entries,
             diagnostics=diagnostics,
             identity_graph=identity_graph,
+        )
+
+    def _attach_historical_replay_universe_claim(
+        self,
+        diagnostics: dict[str, object],
+    ) -> None:
+        """Attach the latest authoritative historical-universe claim when available."""
+        loader = self.historical_replay_universe_report_loader
+        if loader is None:
+            return
+        report = loader.load_latest_report()
+        if not isinstance(report, dict):
+            return
+        universal_claim = report.get("universal_claim")
+        durable_claim = report.get("durable_evidence_coverage_claim")
+        if not isinstance(universal_claim, dict) or not isinstance(durable_claim, dict):
+            return
+        diagnostics["historical_replay_universe_claim"] = dict(universal_claim)
+        diagnostics["historical_replay_universe_claim_source"] = str(
+            report.get("_artifact_path") or report.get("report_id") or ""
+        )
+        diagnostics["historical_replay_universe_durable_evidence_claimed"] = bool(
+            durable_claim.get("claimed")
+        )
+        score = build_reproducibility_audit_scoring(diagnostics)
+        diagnostics["reproducibility_audit_score"] = score
+        diagnostics["global_reproducibility_claim"] = score.get(
+            "global_reproducibility_claim",
+            {},
         )
 
     def resolve_produced_artifacts(

@@ -220,11 +220,7 @@ def _payload_for_check(args: argparse.Namespace) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
 
-    if (
-        args.check
-        and not args.coverage_xml.exists()
-        and not args.allow_missing_coverage_xml
-    ):
+    if not args.coverage_xml.exists() and not args.allow_missing_coverage_xml:
         print(f"[module-coverage-inventory] missing coverage XML: {args.coverage_xml}")
         print(
             "[module-coverage-inventory] run the coverage-verify lane first, "

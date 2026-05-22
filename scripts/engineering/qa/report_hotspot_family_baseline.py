@@ -42,6 +42,14 @@ DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports/quality/hotspot-family-baseline.md"
 NEAR_BUDGET_RATIO = 0.8
 
 
+def _display_path(path: Path) -> str:
+    """Return a stable path label for repo-local and external output paths."""
+    try:
+        return str(path.relative_to(PROJECT_ROOT))
+    except ValueError:
+        return str(path)
+
+
 def _resolve_snapshot_date(scorecard: dict[str, object]) -> str:
     report_only = scorecard.get("hotspot_family_ratchets", {})
     if isinstance(report_only, dict):
@@ -170,12 +178,12 @@ def _write_text(path: Path, content: str) -> None:
 
 def _check_file_sync(path: Path, expected: str) -> bool:
     if not path.exists():
-        print(f"[drift] missing file: {path.relative_to(PROJECT_ROOT)}")
+        print(f"[drift] missing file: {_display_path(path)}")
         return False
     actual = path.read_text(encoding="utf-8")
     if actual == expected:
         return True
-    print(f"[drift] mismatch: {path.relative_to(PROJECT_ROOT)}")
+    print(f"[drift] mismatch: {_display_path(path)}")
     return False
 
 
@@ -246,8 +254,8 @@ def main() -> int:
     _write_text(args.md_output, markdown)
     print(
         "[updated] wrote hotspot-family baseline artifacts:\n"
-        f"  - {args.json_output.relative_to(PROJECT_ROOT)}\n"
-        f"  - {args.md_output.relative_to(PROJECT_ROOT)}"
+        f"  - {_display_path(args.json_output)}\n"
+        f"  - {_display_path(args.md_output)}"
     )
     return 0
 

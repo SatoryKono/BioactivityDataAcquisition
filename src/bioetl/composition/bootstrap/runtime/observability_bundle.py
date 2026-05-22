@@ -254,7 +254,7 @@ def _log_observability_initialized(
         audit_type=type(audit).__name__,
         audit_enabled=not isinstance(audit, NoOpAudit),
         dq_monitor_enabled=dq_monitor is not None,
-        required_persistence_profile=_control_plane_settings(
+        configured_required_persistence_profile=_control_plane_settings(
             control_plane=control_plane
         )[0],
         run_manifest_enabled=_control_plane_settings(control_plane=control_plane)[1],

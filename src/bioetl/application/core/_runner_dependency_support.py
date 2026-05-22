@@ -42,24 +42,32 @@ class PipelineRunnerDependencies:
         return self.lock_runtime_service
 
 
-def resolve_legacy_runner_dependencies(
-    legacy_kwargs: dict[str, object],
+def resolve_runner_dependencies(
+    *,
+    executor: BatchExecutor | None,
+    checkpoint_manager: CheckpointRuntimeService | None,
+    shutdown_signal: ShutdownSignal | None,
+    lock_runtime_service: LockRuntimeService | None,
+    lock_manager: LockRuntimeService | None,
+    preflight: PreflightService | None,
+    postrun: PostrunService | None,
+    lifecycle_service: MedallionLifecycleService | None,
+    observer: PipelineObserver | None,
 ) -> PipelineRunnerDependencies:
-    """Resolve legacy constructor kwargs into structured dependencies."""
+    """Resolve transitional constructor parameters into structured dependencies."""
     values = {
-        "executor": legacy_kwargs.get("executor"),
-        "checkpoint_manager": legacy_kwargs.get("checkpoint_manager"),
-        "shutdown_signal": legacy_kwargs.get("shutdown_signal"),
-        "lock_runtime_service": legacy_kwargs.get("lock_runtime_service")
-        or legacy_kwargs.get("lock_manager"),
-        "preflight": legacy_kwargs.get("preflight"),
-        "postrun": legacy_kwargs.get("postrun"),
-        "lifecycle_service": legacy_kwargs.get("lifecycle_service"),
-        "observer": legacy_kwargs.get("observer"),
+        "executor": executor,
+        "checkpoint_manager": checkpoint_manager,
+        "shutdown_signal": shutdown_signal,
+        "lock_runtime_service": lock_runtime_service or lock_manager,
+        "preflight": preflight,
+        "postrun": postrun,
+        "lifecycle_service": lifecycle_service,
+        "observer": observer,
     }
     missing = [name for name, value in values.items() if value is None]
     if missing:
-        raise AssertionError("Legacy constructor path requires all legacy parameters")
+        raise AssertionError("PipelineRunner constructor requires all dependencies")
     return PipelineRunnerDependencies(
         executor=cast("BatchExecutor", values["executor"]),
         checkpoint_manager=cast(

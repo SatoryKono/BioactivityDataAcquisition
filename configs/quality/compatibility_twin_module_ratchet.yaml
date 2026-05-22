@@ -1,6 +1,6 @@
 version: 1
 policy_scope: sanctioned_twin_module_ratchet
-review_date: "2026-05-21"
+review_date: "2026-05-22"
 ratchet_mode: no_growth
 linked_issue: "#4452"
 families:
@@ -9,12 +9,13 @@ families:
     public_module: bioetl.application.core.span_helpers
     private_module: bioetl.application.core._span_helpers
     canonical_first_party_module: bioetl.application.core.span_helpers
-    max_public_src_importers: 1
-    max_private_src_importers: 7
+    max_public_src_importers: 7
+    max_private_src_importers: 1
     rationale: >-
-      The public/private helper twin remains live after the earlier compatibility
-      cleanup wave. New split-import growth must be blocked until the family is
-      explicitly narrowed or re-reviewed.
+      Private helper imports were collapsed into the public span-helper seam in
+      issue #4485. The public budget now reflects the canonicalized importer
+      count, while private import growth is limited to the public re-export
+      module only.
   - family_id: composition.runtime_builders.run_manifest_support
     owner: bioetl.composition.runtime_builders
     public_module: bioetl.composition.runtime_builders.run_manifest_support

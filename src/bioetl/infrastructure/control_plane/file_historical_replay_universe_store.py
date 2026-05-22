@@ -34,3 +34,19 @@ class FileHistoricalReplayUniverseStore:
             json.dumps(report.to_dict(), indent=2, sort_keys=True),
         )
         return path
+
+    def load_latest_report(self) -> dict[str, object] | None:
+        """Return the newest persisted universe report payload, if any."""
+        if not self.base_path.exists():
+            return None
+        candidates = sorted(
+            self.base_path.glob("*.json"),
+            key=lambda path: (path.stat().st_mtime_ns, path.name),
+            reverse=True,
+        )
+        for path in candidates:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(payload, dict):
+                payload.setdefault("_artifact_path", str(path))
+                return payload
+        return None

@@ -7,10 +7,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from uuid import uuid4
 
-from bioetl.application.services.control_plane import _run_ledger_rich_events
-from bioetl.application.services.control_plane._run_ledger_diagnostic_support import (
-    sync_manifest_contract_defaults,
-    sync_manifest_runtime_defaults,
+from bioetl.application.services.control_plane import (
+    _run_ledger_core_events,
+    _run_ledger_rich_events,
 )
 from bioetl.application.services.control_plane._run_ledger_entry_support import (
     RunLedgerEntryRequest,
@@ -20,9 +19,6 @@ from bioetl.application.services.control_plane._run_ledger_entry_support import 
 from bioetl.domain.context import current_utc_time
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import (
-    ARTIFACT_PUBLISHED_EVENT,
-    DQ_POLICY_APPLIED_EVENT,
-    MANIFEST_CREATED_EVENT,
     RUN_FAILED_EVENT,
     RUN_FINISHED_EVENT,
     RUN_SHUTDOWN_EVENT,
@@ -65,29 +61,7 @@ class RunLedgerService:
 
     def record_manifest_created(self, manifest: RunManifest) -> RunLedgerEntry:
         """Record manifest creation as the first control-plane event."""
-        if self.manifest_id != manifest.manifest_id:
-            raise ValueError(
-                "RunLedgerService manifest_id must match the persisted manifest before recording ledger events"
-            )
-        if self.run_id != manifest.run_id:
-            raise ValueError(
-                "RunLedgerService run_id must match the persisted manifest before recording ledger events"
-            )
-        # Keep the first event diagnostics stable around runtime anchors.
-        sync_manifest_runtime_defaults(self, manifest)
-        entry = self._append(
-            event_type=MANIFEST_CREATED_EVENT,
-            status="created",
-            details={
-                "execution_fingerprint": manifest.execution_fingerprint,
-                "pipeline_name": manifest.pipeline_name,
-                "provider": manifest.provider,
-                "entity": manifest.entity,
-            },
-        )
-        # Contract/DQ anchors are still needed for subsequent lifecycle events.
-        sync_manifest_contract_defaults(self, manifest)
-        return entry
+        return _run_ledger_core_events.record_manifest_created(self, manifest)
 
     def record_run_started(self) -> RunLedgerEntry:
         """Record the transition into active execution."""
@@ -197,20 +171,13 @@ class RunLedgerService:
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record a published layer artifact tied to this manifest."""
-        if dataset_ref is None and lineage_fragment_id is None:
-            raise ValueError(
-                "Artifact publication requires dataset_ref or lineage_fragment_id"
-            )
-        payload: dict[str, object] = {"artifact_path": artifact_path}
-        if details:
-            payload.update(details)
-        return self._append(
-            event_type=ARTIFACT_PUBLISHED_EVENT,
-            status="published",
-            stage=layer,
+        return _run_ledger_core_events.record_artifact_published(
+            self,
+            layer=layer,
+            artifact_path=artifact_path,
             dataset_ref=dataset_ref,
             lineage_fragment_id=lineage_fragment_id,
-            details=payload,
+            details=details,
         )
 
     def record_dq_policy_applied(
@@ -224,20 +191,14 @@ class RunLedgerService:
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record a DQ policy outcome with stable trace anchors."""
-        payload: dict[str, object] = {}
-        if rule_id is not None:
-            payload["rule_id"] = rule_id
-        if disposition is not None:
-            payload["disposition"] = str(disposition)
-        if dq_report_path is not None:
-            payload["dq_report_path"] = dq_report_path
-        if details:
-            payload.update(details)
-        return self._append(
-            event_type=DQ_POLICY_APPLIED_EVENT,
-            status=status,
+        return _run_ledger_core_events.record_dq_policy_applied(
+            self,
             stage=stage,
-            details=payload,
+            status=status,
+            rule_id=rule_id,
+            disposition=disposition,
+            dq_report_path=dq_report_path,
+            details=details,
         )
 
     def record_composite_dependency_completed(

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from bioetl.application.services.control_plane.historical_replay_universe_policy import (
+    build_authoritative_truth_surface,
     build_durable_coverage_claim,
     build_universal_claim,
 )
@@ -33,6 +34,23 @@ def _record(
         durable_evidence_coverage=durable_evidence_coverage,
         source_pack_ref="archive-pack",
     )
+
+
+def test_build_authoritative_truth_surface_marks_universe_report_as_claim_source() -> (
+    None
+):
+    assert build_authoritative_truth_surface() == {
+        "surface": "historical_replay_universe_closure_report",
+        "scope": "all_known_historical_runs",
+        "claim_kind": "literal_any_run_exact_replay",
+        "authoritative": True,
+        "required_inputs": (
+            "local_retained_control_plane_inventory",
+            "external_archived_universe_records",
+            "durable_evidence_coverage_verdicts",
+            "historical_replay_certification_statuses",
+        ),
+    }
 
 
 def test_build_universal_claim_collects_unresolved_manifest_ids() -> None:

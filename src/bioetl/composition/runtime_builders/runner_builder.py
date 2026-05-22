@@ -25,10 +25,10 @@ from bioetl.composition.runtime_builders._runner_builder_orchestration import (
 from bioetl.composition.runtime_builders._runner_builder_support import (
     bind_manifest_logger_context as _bind_manifest_logger_context,
 )
-from bioetl.composition.runtime_builders._runner_builder_support import (
+from bioetl.composition.runtime_builders._runner_control_plane_policy import (
     resolve_runner_control_plane_policy as _resolve_runner_control_plane_policy,
 )
-from bioetl.composition.runtime_builders._runner_builder_support import (
+from bioetl.composition.runtime_builders._runner_control_plane_policy import (
     validate_strict_data_root_policy as _validate_strict_data_root_policy,
 )
 from bioetl.composition.runtime_builders.config_access import (
@@ -90,6 +90,32 @@ class _ControlPlaneSetupResult:
     required_profile: str
 
 
+def _log_effective_required_persistence_profile(
+    *,
+    inputs: _RunnerInputs,
+    configured_profile: str,
+    effective_profile: str,
+    manifest_enabled: bool,
+    ledger_enabled: bool,
+    exact_replay: bool,
+) -> None:
+    """Emit the canonical effective persistence profile after policy resolution."""
+    observability = getattr(inputs, "observability", None)
+    logger = getattr(observability, "logger", None)
+    log_info = getattr(logger, "info", None)
+    if not callable(log_info):
+        return
+    log_info(
+        "control_plane_profile_resolved",
+        stage="bootstrap",
+        configured_required_persistence_profile=configured_profile,
+        required_persistence_profile=effective_profile,
+        run_manifest_enabled=manifest_enabled,
+        run_ledger_enabled=ledger_enabled,
+        exact_replay=exact_replay,
+    )
+
+
 def _handle_control_plane_setup(
     ctx: PipelineRunContext,
     inputs: _RunnerInputs,
@@ -135,6 +161,14 @@ def _handle_control_plane_setup(
             control_plane_refs.required_persistence_profile
             or control_plane_policy.required_profile
         )
+    _log_effective_required_persistence_profile(
+        inputs=inputs,
+        configured_profile=control_plane_policy.required_profile,
+        effective_profile=effective_required_profile,
+        manifest_enabled=control_plane_policy.manifest_enabled,
+        ledger_enabled=control_plane_policy.ledger_enabled,
+        exact_replay=bool(getattr(ctx, "exact_replay", False)),
+    )
 
     return _ControlPlaneSetupResult(
         ctx=ctx,

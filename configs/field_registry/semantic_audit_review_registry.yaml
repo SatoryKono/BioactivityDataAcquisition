@@ -119,6 +119,34 @@ partial_cluster_policies:
 weak_cluster_policy:
   weak_decision_min_rows: 6
   owner: BioETL Team
+  tracked_cluster_ids:
+    - shared_assay_type
+    - shared_assay_description
+    - shared_assay_category
+    - shared_assay_organism
+    - shared_assay_tissue
+    - shared_bao_format
+    - shared_bao_label
+    - shared_text_value
+    - shared_units
+  role_governed_cluster_ids:
+    - shared_bao_format
+    - shared_bao_label
+    - shared_text_value
+    - shared_units
+  explicit_contract_cluster_ids:
+    - shared_assay_type
+    - shared_assay_description
+    - shared_assay_category
+    - shared_assay_organism
+    - shared_assay_tissue
+  required_tracked_decision_metadata:
+    - semantic_scope
+    - business_owner_role
+    - composite_role
+    - lineage_role
+    - promotion_policy
+    - authority_scope
 
 weak_cluster_decisions:
   - cluster_id: shared_pref_name
@@ -165,25 +193,154 @@ weak_cluster_decisions:
     field_name: assay_type
     decision: source_owned_same_name
     owner: BioETL Team
+    semantic_scope: explicit_source_owned_assay_contract
+    business_owner_role: chembl_assay_metadata_enum_owner
+    composite_role: inherited_assay_context_projection
+    lineage_role: assay_context_anchor_from_seed_and_activity_join
+    promotion_policy: require_canonical_assay_metadata_registry_before_exact
+    authority_scope: >-
+      configs/entities/chembl/activity.yaml + configs/entities/chembl/assay.yaml
+      + configs/composites/activity.yaml + configs/composites/assay.yaml
     rationale: >
-      assay_type exists across activity/assay surfaces with related but not
-      yet owner-centralized semantics.
+      assay_type is a reviewed assay metadata enum that originates on ChEMBL
+      assay-bearing entity contracts and is only inherited into composite
+      assay/activity projections. It remains source-owned until a dedicated
+      assay metadata registry centralizes the business owner explicitly.
+
+  - cluster_id: shared_assay_description
+    field_name: assay_description
+    decision: source_owned_same_name
+    owner: BioETL Team
+    semantic_scope: explicit_source_owned_assay_contract
+    business_owner_role: chembl_activity_assay_context_text_owner
+    composite_role: inherited_assay_context_projection
+    lineage_role: activity_to_composite_assay_context_projection
+    promotion_policy: require_canonical_assay_metadata_registry_before_exact
+    authority_scope: >-
+      configs/entities/chembl/activity.yaml + configs/composites/activity.yaml
+    rationale: >
+      assay_description is a source-owned assay-context text surface on ChEMBL
+      activity and an inherited projection on composite activity. The same name
+      does not yet prove one canonical business field family.
+
+  - cluster_id: shared_assay_category
+    field_name: assay_category
+    decision: source_owned_same_name
+    owner: BioETL Team
+    semantic_scope: explicit_source_owned_assay_contract
+    business_owner_role: chembl_assay_metadata_category_owner
+    composite_role: inherited_assay_context_projection
+    lineage_role: assay_to_composite_classification_projection
+    promotion_policy: require_canonical_assay_metadata_registry_before_exact
+    authority_scope: >-
+      configs/entities/chembl/assay.yaml + configs/composites/assay.yaml
+    rationale: >
+      assay_category is a source-owned assay classification field on ChEMBL
+      assay and an inherited composite projection. It stays WEAK by reviewed
+      contract policy instead of being promoted from name overlap alone.
+
+  - cluster_id: shared_assay_organism
+    field_name: assay_organism
+    decision: source_owned_same_name
+    owner: BioETL Team
+    semantic_scope: explicit_source_owned_assay_contract
+    business_owner_role: chembl_assay_metadata_organism_owner
+    composite_role: inherited_assay_context_projection
+    lineage_role: assay_to_composite_biological_context_projection
+    promotion_policy: require_canonical_assay_metadata_registry_before_exact
+    authority_scope: >-
+      configs/entities/chembl/assay.yaml + configs/composites/assay.yaml
+    rationale: >
+      assay_organism is a source-owned biological-context field on ChEMBL
+      assay and a composite inherited projection. Canonical promotion requires
+      an explicit assay metadata owner registry, not just shared spelling.
+
+  - cluster_id: shared_assay_tissue
+    field_name: assay_tissue
+    decision: source_owned_same_name
+    owner: BioETL Team
+    semantic_scope: explicit_source_owned_assay_contract
+    business_owner_role: chembl_assay_metadata_tissue_owner
+    composite_role: inherited_assay_context_projection
+    lineage_role: assay_to_composite_biological_context_projection
+    promotion_policy: require_canonical_assay_metadata_registry_before_exact
+    authority_scope: >-
+      configs/entities/chembl/assay.yaml + configs/composites/assay.yaml
+    rationale: >
+      assay_tissue is a source-owned assay biological-context field and a
+      composite inherited projection. It remains an explicit non-canonical
+      contract field until assay metadata ownership is centralized.
 
   - cluster_id: shared_bao_format
     field_name: bao_format
     decision: source_owned_same_name
     owner: BioETL Team
+    semantic_scope: role_governed_ontology_reference_identifier
+    business_owner_role: bao_format_code_field_owner
+    composite_role: inherited_ontology_reference_projection
+    lineage_role: assay_ontology_bundle_projection
+    promotion_policy: retain_role_split_until_canonical_ontology_alias_registry_exists
+    authority_scope: >-
+      configs/field_registry/ontology_unit_semantic_roles.yaml:
+      chembl_activity_bao_format_roles, chembl_assay_bao_format_roles
     rationale: >
-      bao_format is ontology-linked assay metadata that remains source-scoped
-      until a stronger canonical ontology role registry is introduced.
+      bao_format is governed as a BAO code field inside explicit ontology-role
+      bundles for ChEMBL activity and assay, while composite surfaces inherit
+      the resolved value. It remains non-canonical because ontology code,
+      label, IRI, mapping status, and version are separate contract roles.
 
   - cluster_id: shared_bao_label
     field_name: bao_label
     decision: source_owned_same_name
     owner: BioETL Team
+    semantic_scope: role_governed_ontology_companion_label
+    business_owner_role: bao_companion_label_owner
+    composite_role: inherited_ontology_reference_projection
+    lineage_role: assay_ontology_bundle_projection
+    promotion_policy: retain_role_split_until_canonical_ontology_alias_registry_exists
+    authority_scope: >-
+      configs/field_registry/ontology_unit_semantic_roles.yaml:
+      chembl_activity_bao_format_roles, chembl_assay_bao_format_roles
     rationale: >
-      bao_label is derived ontology companion text and therefore remains
-      source-owned rather than canonically promoted.
+      bao_label is the reviewed companion label for BAO format bundles rather
+      than a canonical identifier field. It stays source-owned because ontology
+      companion text must remain separate from code/IRI/version semantics.
+
+  - cluster_id: shared_units
+    field_name: units
+    decision: source_owned_same_name
+    owner: BioETL Team
+    semantic_scope: role_governed_measurement_raw_unit_text
+    business_owner_role: raw_measurement_unit_text_owner
+    composite_role: inherited_measurement_context_projection
+    lineage_role: original_measurement_unit_anchor
+    promotion_policy: retain_role_split_until_measurement_contract_registry_exists
+    authority_scope: >-
+      configs/field_registry/ontology_unit_semantic_roles.yaml:
+      chembl_activity_measurement_unit_roles
+    rationale: >
+      units is governed as raw measurement-unit text and must stay distinct
+      from standardized unit codes, ontology IDs, IRIs, and mapping statuses.
+      Composite activity only inherits the source value and does not create a
+      canonical alias family.
+
+  - cluster_id: shared_text_value
+    field_name: text_value
+    decision: source_owned_same_name
+    owner: BioETL Team
+    semantic_scope: role_governed_measurement_text_companion
+    business_owner_role: measurement_text_companion_owner
+    composite_role: inherited_measurement_context_projection
+    lineage_role: original_measurement_text_anchor
+    promotion_policy: retain_role_split_until_measurement_contract_registry_exists
+    authority_scope: >-
+      configs/entities/chembl/activity.yaml +
+      configs/entities/chembl/assay_parameters.yaml +
+      configs/composites/activity.yaml
+    rationale: >
+      text_value is the source textual companion for measurement payloads and
+      must remain distinct from numeric standardized values and unit/ontology
+      roles. Shared naming does not imply one canonical business identifier.
 
   - cluster_id: shared_issn
     field_name: issn

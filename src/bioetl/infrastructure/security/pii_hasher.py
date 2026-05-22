@@ -22,7 +22,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
 
 @dataclass(frozen=True, slots=True)

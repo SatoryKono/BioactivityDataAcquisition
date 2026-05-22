@@ -7,7 +7,42 @@ from collections import defaultdict
 from collections.abc import Iterable
 from pathlib import Path
 
+import pytest
+
 SRC_ROOT = Path("src/bioetl")
+ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
+    frozenset(
+        {
+            "bioetl.domain.normalization.profiles._chembl_policy_registry_data",
+            "bioetl.domain.normalization.profiles._chembl_policy_registry_defaults",
+        }
+    ): {
+        "owner": "bioetl.domain.normalization.profiles",
+        "review_date": "2026-09-30",
+        "linked_issue": "#4500",
+        "rationale": (
+            "ChEMBL normalization policy data/defaults remain in a reviewed "
+            "same-family cycle until the policy-registry twin module burn-down "
+            "removes the split data/default ownership seam."
+        ),
+    },
+    frozenset(
+        {
+            "bioetl.composition._pipeline_execution",
+            "bioetl.composition._services",
+            "bioetl.composition.observability_api",
+        }
+    ): {
+        "owner": "bioetl.composition",
+        "review_date": "2026-09-30",
+        "linked_issue": "#4500",
+        "rationale": (
+            "Composition public facades and pipeline execution services retain "
+            "a reviewed cycle while runtime-builder/bootstrap wiring is split "
+            "into a strictly one-way assembly flow."
+        ),
+    },
+}
 FORBIDDEN_RUNTIME_SCCS: tuple[frozenset[str], ...] = (
     frozenset(
         {
@@ -103,6 +138,22 @@ def _import_targets(node: ast.AST, source_module: str) -> list[str]:
     ]
 
 
+def _inside_type_checking(
+    node: ast.AST,
+    parents: dict[ast.AST, ast.AST | None],
+) -> bool:
+    current: ast.AST | None = node
+    while current is not None:
+        if isinstance(current, ast.If):
+            test = current.test
+            if isinstance(test, ast.Name) and test.id == "TYPE_CHECKING":
+                return True
+            if isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING":
+                return True
+        current = parents.get(current)
+    return False
+
+
 def _build_runtime_import_graph() -> dict[str, set[str]]:
     modules = _iter_modules()
     edges: dict[str, set[str]] = defaultdict(set)
@@ -116,20 +167,8 @@ def _build_runtime_import_graph() -> dict[str, set[str]]:
                 parents[child] = node
                 stack.append(child)
 
-        def _inside_type_checking(node: ast.AST) -> bool:
-            current: ast.AST | None = node
-            while current is not None:
-                if isinstance(current, ast.If):
-                    test = current.test
-                    if isinstance(test, ast.Name) and test.id == "TYPE_CHECKING":
-                        return True
-                    if isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING":
-                        return True
-                current = parents.get(current)
-            return False
-
         for node in ast.walk(tree):
-            if _inside_type_checking(node):
+            if _inside_type_checking(node, parents):
                 continue
             for target in _import_targets(node, module_name):
                 if target in modules:
@@ -177,6 +216,7 @@ def _iter_runtime_sccs(edges: dict[str, set[str]]) -> Iterable[frozenset[str]]:
             yield from strongconnect(node)
 
 
+@pytest.mark.architecture
 def test_runtime_import_graph_has_no_forbidden_sccs() -> None:
     """Runtime import SCC scan must stay clear of confirmed intra-layer cycles."""
     edges = _build_runtime_import_graph()
@@ -190,4 +230,30 @@ def test_runtime_import_graph_has_no_forbidden_sccs() -> None:
         "Runtime import SCC scan found forbidden strongly connected components "
         "(TYPE_CHECKING imports are ignored):\n"
         + "\n".join(f"- {', '.join(component)}" for component in blocked)
+    )
+
+
+@pytest.mark.architecture
+def test_runtime_import_graph_has_no_unreviewed_sccs() -> None:
+    """Same-layer runtime import SCCs must be explicitly owned and reviewed."""
+    edges = _build_runtime_import_graph()
+    actual_sccs = tuple(_iter_runtime_sccs(edges))
+    accepted_sccs = set(ACCEPTED_RUNTIME_SCCS)
+    unreviewed = [
+        sorted(component) for component in actual_sccs if component not in accepted_sccs
+    ]
+    stale_acceptances = [
+        sorted(component) for component in accepted_sccs if component not in actual_sccs
+    ]
+
+    assert not unreviewed, (
+        "Runtime import SCC scan found unreviewed strongly connected components. "
+        "Either remove the cycle or add an owner/rationale/review_date entry to "
+        "ACCEPTED_RUNTIME_SCCS:\n"
+        + "\n".join(f"- {', '.join(component)}" for component in unreviewed)
+    )
+    assert not stale_acceptances, (
+        "Runtime import SCC acceptances are stale; remove the entries after "
+        "breaking the cycles:\n"
+        + "\n".join(f"- {', '.join(component)}" for component in stale_acceptances)
     )

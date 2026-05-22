@@ -10,6 +10,7 @@ import sys
 from types import ModuleType
 
 import pytest
+import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_YAML = ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
@@ -204,6 +205,31 @@ def test_registry_yaml_has_expected_shape() -> None:
         registry.measured_only_review_workflow.review_cadence
         in mod.ALLOWED_MEASURED_ONLY_REVIEW_CADENCES
     )
+
+
+@pytest.mark.architecture
+def test_retained_entrypoint_sunset_review_covers_all_public_rows() -> None:
+    """Retained public entrypoints must have explicit 2026-09-30 review disposition."""
+    mod = _load_registry_module()
+    registry = mod.load_compatibility_registry(REGISTRY_YAML)
+    payload = yaml.safe_load(REGISTRY_YAML.read_text(encoding="utf-8"))
+    sunset_review = payload["retained_entrypoint_sunset_review"]
+
+    assert sunset_review["linked_issue"] == "#4498"
+    assert sunset_review["review_date"] == "2026-09-30"
+    allowed = set(sunset_review["allowed_dispositions"])
+    assert allowed == {
+        "keep_public_api",
+        "narrow_internal_callers",
+        "remove_after_migration",
+    }
+
+    rows = sunset_review["rows"]
+    paths_by_review = {row["path"]: row for row in rows}
+    assert set(paths_by_review) == {row.path for row in registry.retained_entrypoints}
+    for path, row in paths_by_review.items():
+        assert row["disposition"] in allowed, path
+        assert str(row["rationale"]).strip(), path
 
 
 @pytest.mark.architecture

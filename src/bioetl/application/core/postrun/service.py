@@ -97,7 +97,12 @@ class PostrunService(PostrunServiceSupportMixin):
         dependencies: PostrunDependencyContext | None = None,
         services: PipelineServicesProtocol | None = None,
         tracer: TracingPort | None = None,
-        **legacy_kwargs: object,
+        *,
+        storage: object | None = None,
+        metrics: object | None = None,
+        logger: object | None = None,
+        metadata_coordinator: object | None = None,
+        metadata_writer: object | None = None,
     ) -> None:
         self._config = config
         self._runtime = runtime
@@ -110,7 +115,11 @@ class PostrunService(PostrunServiceSupportMixin):
         resolved_collaborators = resolve_postrun_collaborators(
             services=services,
             context=context,
-            legacy_kwargs=legacy_kwargs,
+            storage=storage,
+            metrics=metrics,
+            logger=logger,
+            metadata_coordinator=metadata_coordinator,
+            metadata_writer=metadata_writer,
         )
         self._metrics = resolved_collaborators.metrics
         self._logger = resolved_collaborators.logger

@@ -81,10 +81,11 @@ class TestNormalizeHealthCheck:
         _normalize_health_check(source)
         assert source["health_check"]["timeout_sec"] == 10
 
-    def test_no_health_check(self) -> None:
+    def test_normalize_health_check_leaves_absent_key_unchanged(self) -> None:
         """Should be a no-op when health_check is absent."""
         source: JsonDict = {"other": "val"}
         _normalize_health_check(source)
+        assert source == {"other": "val"}
 
     def test_health_check_not_dict(self) -> None:
         """Should be a no-op when health_check is not a dict."""

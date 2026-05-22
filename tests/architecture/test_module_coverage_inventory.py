@@ -99,6 +99,28 @@ def test_module_coverage_inventory_check_requires_coverage_xml_by_default(
 
 
 @pytest.mark.architecture
+def test_module_coverage_inventory_generation_requires_coverage_xml_by_default(
+    tmp_path: Path,
+) -> None:
+    missing_coverage_xml = tmp_path / "coverage.xml"
+    artifact = tmp_path / "module-coverage-inventory.json"
+
+    rc = module_coverage_inventory_main(
+        [
+            "--repo-root",
+            str(ROOT),
+            "--coverage-xml",
+            str(missing_coverage_xml),
+            "--json-out",
+            str(artifact),
+        ]
+    )
+
+    assert rc == 1
+    assert not artifact.exists()
+
+
+@pytest.mark.architecture
 def test_coverage_verify_workflow_generates_module_coverage_inventory() -> None:
     workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
 
@@ -120,6 +142,7 @@ def test_test_matrix_declares_module_coverage_inventory_contract() -> None:
     )
     assert inventory["artifact"] == "reports/quality/module-coverage-inventory.json"
     assert inventory["coverage_xml"] == "reports/coverage/coverage.xml"
+    assert inventory["canonical_generation_requires_coverage_xml"] is True
     assert (
         coverage_lane["expected_artifacts"]["module_coverage_inventory"]
         == (inventory["artifact"])

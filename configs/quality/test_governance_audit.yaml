@@ -1,5 +1,5 @@
 schema_version: 1
-audit_date: "2026-05-18"
+audit_date: "2026-05-22"
 source: configs/quality/test_governance_audit.yaml
 issues:
   - id: "4159"
@@ -58,18 +58,18 @@ issues:
       - scripts/engineering/qa/report_test_governance_audit.py
       - tests/architecture/test_test_governance_audit.py
 budgets:
-  refined_assertless_max: 563
+  refined_assertless_max: 561
   duplicate_test_names_max: 877
   duplicate_test_name_occurrences_max: 2730
   compatibility_test_file_max: 56
-  markerless_test_functions_max: 7800
+  markerless_test_functions_max: 7782
   uuid4_call_sites_max: 404
   date_today_call_sites_max: 0
 budget_ratchet:
-  linked_issue: "#4458"
+  linked_issue: "#4488"
   mode: fail-fast-no-growth
   expected_direction: downward
-  refreshed_on: "2026-05-21"
+  refreshed_on: "2026-05-22"
   touch_policy: >-
     Refactors touching test families must reduce the applicable budget or keep
     it flat with an explicit owner rationale; increasing a debt budget requires
@@ -84,6 +84,16 @@ budget_ratchet:
     - date_today_call_sites_max
 current_issue_closeout:
   issue_set:
+    - "#4483"
+    - "#4484"
+    - "#4485"
+    - "#4486"
+    - "#4488"
+    - "#4490"
+    - "#4492"
+    - "#4494"
+    - "#4496"
+    - "#4498"
     - "#4455"
     - "#4457"
     - "#4459"
@@ -153,7 +163,7 @@ assertless_triage:
       rationale: "No-op, close/aclose, smoke, or does-not-raise behavior is the contract under test."
       next_review: "2026-09-30"
     weak_no_value:
-      count: 461
+      count: 459
       decision: burn-down
       rationale: "Candidates require assertion strengthening, merge, or removal when the owning module is edited."
       next_review: "2026-09-30"
@@ -196,6 +206,8 @@ slow_governance_scanner_cache:
   issue_ref: "#4462"
   cached_entrypoints:
     - scripts.engineering.qa.report_test_governance_audit.collect_test_governance_report
+    - tests.architecture.conftest.cached_subprocess_run
+    - tests.architecture.test_antipatterns.test_no_hardcoded_secrets
   isolated_lanes:
     - architecture-fast-boundary
     - architecture-slow-governance
@@ -208,22 +220,25 @@ oversized_test_module_inventory:
       lines: 2164
       owner: reproducibility-contracts
       target_split: integration/ci reproducibility phases
-    - path: tests/integration/test_grafana_config.py
-      lines: 2070
-      owner: observability-dashboards
-      target_split: dashboard config contracts
     - path: tests/unit/application/services/test_metadata_coordinator.py
       lines: 1994
       owner: application-services
       target_split: metadata coordinator command/query families
     - path: tests/unit/composition/runtime_builders/test_runner_builder.py
-      lines: 1999
+      lines: 2010
       owner: composition-runtime
       target_split: runner-builder factory seams
     - path: tests/unit/application/core/test_record_normalization_processor.py
       lines: 1981
       owner: application-core
       target_split: normalization processor scenarios
+  completed_splits:
+    - issue_ref: "#4505"
+      source: tests/integration/test_grafana_config.py
+      source_lines_after_split: 1374
+      extracted_surface: tests/integration/test_grafana_surface_contracts.py
+      extracted_surface_lines: 712
+      owner: observability-dashboards
 compatibility_test_inventory:
   review_cadence: quarterly
   total_files: 56

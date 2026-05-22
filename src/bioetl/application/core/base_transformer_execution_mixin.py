@@ -18,10 +18,10 @@ from bioetl.application.core._base_transformer_structural_support import (
     evaluate_semantic_shadow_decision,
     record_structural_policy_metrics,
 )
-from bioetl.application.core._span_helpers import _ClosableSpan
 from bioetl.application.core.base_transformer.errors import (
     TransformationError,
 )
+from bioetl.application.core.span_helpers import _ClosableSpan
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext

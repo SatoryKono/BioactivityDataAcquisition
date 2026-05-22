@@ -11,6 +11,7 @@ from typing import Any, cast
 import pytest
 import yaml
 
+from scripts.engineering.qa import check_test_audit_preflight as preflight
 from scripts.engineering.qa.check_test_audit_preflight import (
     STRICT_BLOCKER_IDS,
     collect_test_audit_preflight,
@@ -108,6 +109,16 @@ def test_current_test_audit_issue_closeout_tracks_live_evidence() -> None:
 
     assert closeout["decision"] == "closeable"
     assert set(closeout["issue_set"]) == {
+        "#4483",
+        "#4484",
+        "#4485",
+        "#4486",
+        "#4488",
+        "#4490",
+        "#4492",
+        "#4494",
+        "#4496",
+        "#4498",
         "#4455",
         "#4457",
         "#4459",
@@ -153,7 +164,7 @@ def test_test_governance_budgets_are_explicit_no_growth_ratchets() -> None:
     budgets = cast(YamlMap, payload["budgets"])
     ratchet = cast(YamlMap, payload["budget_ratchet"])
 
-    assert ratchet["linked_issue"] == "#4458"
+    assert ratchet["linked_issue"] in {"#4458", "#4488", "#4499"}
     assert ratchet["mode"] == "fail-fast-no-growth"
     assert ratchet["expected_direction"] == "downward"
     assert cast(str, ratchet["touch_policy"]).strip()
@@ -170,6 +181,11 @@ def test_static_test_governance_report_reuses_cached_inventory_scan() -> None:
 
     assert cache_policy["decision"] == "retained_cached_scanner"
     assert first is second
+    assert cache_policy["cached_entrypoints"] == [
+        "scripts.engineering.qa.report_test_governance_audit.collect_test_governance_report",
+        "tests.architecture.conftest.cached_subprocess_run",
+        "tests.architecture.test_antipatterns.test_no_hardcoded_secrets",
+    ]
     assert cache_policy["isolated_lanes"] == [
         "architecture-fast-boundary",
         "architecture-slow-governance",
@@ -245,6 +261,18 @@ def test_oversized_test_module_inventory_tracks_current_top_modules() -> None:
         assert actual_lines <= max_lines
         assert cast(str, entry["owner"]).strip()
         assert cast(str, entry["target_split"]).strip()
+
+    for split in cast(list[YamlMap], inventory.get("completed_splits", [])):
+        source = ROOT / cast(str, split["source"])
+        extracted = ROOT / cast(str, split["extracted_surface"])
+        assert source.exists()
+        assert extracted.exists()
+        assert len(source.read_text(encoding="utf-8").splitlines()) == int(
+            split["source_lines_after_split"]
+        )
+        assert len(extracted.read_text(encoding="utf-8").splitlines()) == int(
+            split["extracted_surface_lines"]
+        )
 
 
 @pytest.mark.architecture
@@ -372,6 +400,20 @@ def test_preflight_strict_blocker_inventory_matches_supported_policy() -> None:
     )
 
     assert strict_blockers == STRICT_BLOCKER_IDS
+
+
+@pytest.mark.architecture
+def test_preflight_discovers_wsl_visible_windows_git_lfs_candidate(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "git-lfs.exe"
+    candidate.write_text("", encoding="utf-8")
+
+    monkeypatch.setattr(preflight.shutil, "which", lambda _name: None)
+    monkeypatch.setattr(preflight, "WINDOWS_GIT_LFS_CANDIDATES", (candidate,))
+
+    assert preflight._detect_git_lfs_path(None) == candidate.as_posix()
 
 
 @pytest.mark.architecture
