@@ -65,10 +65,14 @@ def _strict_replay_merge_contract_required(
     """Return whether the active Silver write must enforce replay-safe merge guards."""
     coordinator = getattr(runtime_host, "_metadata_coordinator", None)
     run_context = getattr(coordinator, "run_context", None)
-    required_profile = str(
-        getattr(run_context, "required_persistence_profile", "") or ""
-    ).strip().lower()
-    exact_replay = bool(getattr(run_context, "exact_replay", False))
+    raw_required_profile = getattr(run_context, "required_persistence_profile", "")
+    raw_exact_replay = getattr(run_context, "exact_replay", False)
+    required_profile = (
+        raw_required_profile.strip().lower()
+        if isinstance(raw_required_profile, str)
+        else ""
+    )
+    exact_replay = raw_exact_replay if isinstance(raw_exact_replay, bool) else False
     return exact_replay or required_profile in STRICT_PERSISTENCE_PROFILES
 
 
