@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-import structlog
 from deltalake import DeltaTable
 
 # VCR cassette directory for ChEMBL pipeline tests
@@ -37,8 +36,9 @@ from bioetl.composition.factories.pipeline.registry import (
 )
 from bioetl.domain.exceptions import ApiError
 from tests.integration.pipelines.base import IntegrationPipelineTestCase
+from tests.integration.pipelines.observability import build_test_logger
 
-logger = structlog.get_logger()
+logger = build_test_logger()
 
 
 class TestChemblCompoundRecordPipeline(IntegrationPipelineTestCase):
