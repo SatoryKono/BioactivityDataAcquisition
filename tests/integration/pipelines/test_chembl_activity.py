@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-import structlog
 
 # VCR cassette directory for ChEMBL pipeline tests
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "chembl"
@@ -31,8 +30,6 @@ def vcr_config() -> dict[str, Any]:
 
 from bioetl.composition.factories.pipeline.registry import chembl_activity_factory
 from tests.integration.pipelines.base import IntegrationPipelineTestCase
-
-logger = structlog.get_logger()
 
 
 class TestChemblActivityPipeline(IntegrationPipelineTestCase):

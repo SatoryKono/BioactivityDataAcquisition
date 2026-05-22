@@ -5,11 +5,17 @@ from __future__ import annotations
 import ast
 from collections import defaultdict
 from collections.abc import Iterable
+from concurrent.futures import ThreadPoolExecutor
+from functools import cache
+import os
 from pathlib import Path
 
 import pytest
 
 SRC_ROOT = Path("src/bioetl")
+_MIN_PARALLEL_READ_FILES = 64
+_DEFAULT_READ_WORKERS = 8
+_MAX_READ_WORKERS = 16
 ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
     frozenset(
         {
@@ -101,6 +107,35 @@ def _iter_modules() -> dict[str, Path]:
     }
 
 
+def _read_worker_count(total_files: int) -> int:
+    if total_files < _MIN_PARALLEL_READ_FILES:
+        return 1
+    cpu_count = os.cpu_count() or _DEFAULT_READ_WORKERS
+    return min(total_files, _MAX_READ_WORKERS, max(_DEFAULT_READ_WORKERS, cpu_count))
+
+
+def _read_module_source(item: tuple[str, Path]) -> tuple[str, str] | None:
+    module_name, path = item
+    try:
+        return module_name, path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return None
+
+
+def _read_module_sources(modules: dict[str, Path]) -> list[tuple[str, str]]:
+    items = list(modules.items())
+    workers = _read_worker_count(len(items))
+    if workers == 1:
+        return [
+            source
+            for item in items
+            for source in [_read_module_source(item)]
+            if source is not None
+        ]
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        return [source for source in executor.map(_read_module_source, items) if source]
+
+
 def _resolve_relative_import(
     source_module: str,
     level: int,
@@ -154,11 +189,12 @@ def _inside_type_checking(
     return False
 
 
+@cache
 def _build_runtime_import_graph() -> dict[str, set[str]]:
     modules = _iter_modules()
     edges: dict[str, set[str]] = defaultdict(set)
-    for module_name, path in modules.items():
-        tree = ast.parse(path.read_text(encoding="utf-8"))
+    for module_name, source_text in _read_module_sources(modules):
+        tree = ast.parse(source_text)
         parents: dict[ast.AST, ast.AST | None] = {tree: None}
         stack = [tree]
         while stack:

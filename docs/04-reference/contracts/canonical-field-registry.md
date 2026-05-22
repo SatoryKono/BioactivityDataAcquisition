@@ -156,6 +156,12 @@ policy-reviewed semantic inventory, not blockers; they may decrease without a
 budget change, but growth requires an intentional budget update and owner
 review.
 
+For reviewed `WEAK` clusters, the generated registry may additionally attach a
+`weak_decision` block when policy has classified the cluster more precisely
+than generic same-name inventory. That metadata is used for role-governed
+ontology/unit companions and explicit source-owned assay metadata families so
+they cannot be silently promoted from lexical overlap alone.
+
 `scripts/engineering/qa/check_semantic_pair_matrix_budget.py --check` validates
 that:
 

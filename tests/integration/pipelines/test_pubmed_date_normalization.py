@@ -24,6 +24,7 @@ from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTra
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
+from tests.integration.pipelines.observability import build_test_logger
 
 
 # YYYY-MM-DD pattern
@@ -52,12 +53,10 @@ def transformer() -> PubMedPublicationTransformer:
 @pytest.fixture
 def pipeline_context() -> PipelineContext:
     """Create a minimal pipeline context for transformation."""
-    import structlog
-
     return PipelineContext(
         run_id=uuid4(),
         run_type=RunType.INCREMENTAL,
-        logger=structlog.get_logger(),
+        logger=build_test_logger(),
     )
 
 

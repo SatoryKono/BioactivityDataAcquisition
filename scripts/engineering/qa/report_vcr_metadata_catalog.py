@@ -6,8 +6,8 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 from dataclasses import asdict, dataclass
-from functools import cache
 from pathlib import Path
 from typing import cast
 
@@ -100,65 +100,91 @@ def _load_existing_metadata_payload(path: Path) -> object | None:
     return cast(object | None, yaml.safe_load(path.read_text(encoding="utf-8")))
 
 
-def _is_reachability_scan_file(path: Path) -> bool:
-    if not path.is_file():
-        return False
-    if "fixtures" in path.parts:
-        return False
-    return path.suffix.lower() == ".py"
-
-
-def _iter_reachability_scan_files(repo_root: Path) -> list[Path]:
-    files: list[Path] = []
-    for root in REACHABILITY_SCAN_ROOTS:
-        scan_root = repo_root / root
-        if not scan_root.exists():
-            continue
-        files.extend(
-            path
-            for path in scan_root.rglob("*.py")
-            if _is_reachability_scan_file(path)
-        )
-    return sorted(files, key=lambda path: path.as_posix().lower())
-
-
-def _read_scan_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8", errors="replace")
-
-
-def _build_reachability_scan_texts(
-    repo_root: Path,
-) -> list[tuple[str, str]]:
-    return list(_build_reachability_scan_texts_cached(repo_root.as_posix()))
-
-
-@cache
-def _build_reachability_scan_texts_cached(repo_root: str) -> tuple[tuple[str, str], ...]:
-    root = Path(repo_root)
-    return [
-        (path.relative_to(root).as_posix(), _read_scan_text(path))
-        for path in _iter_reachability_scan_files(root)
-    ]
-
-
-def _direct_reference_owner_paths(
-    *,
-    cassette_path: Path,
-    vcr_root: Path,
-    scan_texts: list[tuple[str, str]],
-) -> list[str]:
+def _direct_reference_tokens(*, cassette_path: Path, vcr_root: Path) -> set[str]:
     rel_to_vcr = cassette_path.relative_to(vcr_root).as_posix()
-    tokens = {
+    return {
         cassette_path.name,
         cassette_path.stem,
         rel_to_vcr,
         f"tests/fixtures/vcr/{rel_to_vcr}",
     }
-    owners: list[str] = []
-    for relative_path, text in scan_texts:
-        if any(token in text for token in tokens):
-            owners.append(relative_path)
-    return owners
+
+
+def _collect_direct_reference_owners(
+    *,
+    repo_root: Path,
+    cassette_paths: list[Path],
+    vcr_root: Path,
+) -> dict[str, list[str]]:
+    tokens_by_cassette = {
+        cassette_path.as_posix(): _direct_reference_tokens(
+            cassette_path=cassette_path,
+            vcr_root=vcr_root,
+        )
+        for cassette_path in cassette_paths
+    }
+    cassette_by_token: dict[str, set[str]] = {}
+    for cassette_rel_path, tokens in tokens_by_cassette.items():
+        for token in tokens:
+            cassette_by_token.setdefault(token, set()).add(cassette_rel_path)
+    owners_by_cassette: dict[str, set[str]] = {
+        cassette_rel_path: set() for cassette_rel_path in tokens_by_cassette
+    }
+    token_owners = _run_rg_reference_scan(
+        repo_root=repo_root,
+        tokens=sorted(cassette_by_token),
+    )
+    for token, owners in token_owners.items():
+        for cassette_rel_path in cassette_by_token.get(token, ()):
+            owners_by_cassette[cassette_rel_path].update(owners)
+    return {
+        cassette_rel_path: sorted(owners)
+        for cassette_rel_path, owners in owners_by_cassette.items()
+    }
+
+
+def _run_rg_reference_scan(
+    *,
+    repo_root: Path,
+    tokens: list[str],
+) -> dict[str, set[str]]:
+    if not tokens:
+        return {}
+    try:
+        result = subprocess.run(
+            [
+                "rg",
+                "--json",
+                "--fixed-strings",
+                "-f",
+                "-",
+                *(root.as_posix() for root in REACHABILITY_SCAN_ROOTS),
+                "-g",
+                "*.py",
+                "-g",
+                "!tests/fixtures/**",
+            ],
+            cwd=repo_root,
+            input="\n".join(tokens) + "\n",
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return {}
+    if result.returncode not in {0, 1}:
+        return {}
+    owners_by_token: dict[str, set[str]] = {}
+    for line in result.stdout.splitlines():
+        event = json.loads(line)
+        if event.get("type") != "match":
+            continue
+        data = event["data"]
+        owner = data["path"]["text"]
+        for submatch in data.get("submatches", []):
+            token = submatch["match"]["text"]
+            owners_by_token.setdefault(token, set()).add(owner)
+    return owners_by_token
 
 
 def _generated_reference_owner_paths(
@@ -177,15 +203,9 @@ def _reachability_status_and_owners(
     cassette_path: Path,
     metadata_path: Path,
     has_metadata_sidecar: bool,
+    direct_owners: list[str],
     repo_root: Path,
-    vcr_root: Path,
-    scan_files: list[tuple[str, str]],
 ) -> tuple[str, list[str]]:
-    direct_owners = _direct_reference_owner_paths(
-        cassette_path=cassette_path,
-        vcr_root=vcr_root,
-        scan_texts=scan_files,
-    )
     if direct_owners:
         return "direct_reference", direct_owners
 
@@ -207,11 +227,15 @@ def iter_catalog_rows(vcr_root: Path) -> list[CassetteCatalogRow]:
     if not vcr_root.exists():
         return rows
     repo_root = vcr_root.resolve().parents[2]
-    scan_files = _build_reachability_scan_texts(repo_root)
 
     cassette_paths = sorted(
         (path for path in vcr_root.rglob("*") if _is_cassette_file(path)),
         key=lambda path: (path.as_posix().lower(), path.as_posix()),
+    )
+    direct_owners_by_path = _collect_direct_reference_owners(
+        repo_root=repo_root,
+        cassette_paths=cassette_paths,
+        vcr_root=vcr_root,
     )
     metadata_payloads = {
         path: _load_existing_metadata_payload(path)
@@ -230,9 +254,8 @@ def iter_catalog_rows(vcr_root: Path) -> list[CassetteCatalogRow]:
             cassette_path=cassette_path,
             metadata_path=metadata_path,
             has_metadata_sidecar=has_metadata_sidecar,
+            direct_owners=direct_owners_by_path.get(cassette_path.as_posix(), []),
             repo_root=repo_root,
-            vcr_root=vcr_root,
-            scan_files=scan_files,
         )
         rows.append(
             CassetteCatalogRow(

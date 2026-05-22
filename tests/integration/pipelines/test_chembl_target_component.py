@@ -12,7 +12,6 @@ from unittest.mock import patch
 
 import pyarrow as pa
 import pytest
-import structlog
 
 # VCR cassette directory for ChEMBL pipeline tests
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "chembl"
@@ -35,8 +34,6 @@ from bioetl.composition.factories.pipeline.registry import (
 )
 from bioetl.infrastructure.schemas.silver import CHEMBL_TARGET_COMPONENT_SCHEMA
 from tests.integration.pipelines.base import IntegrationPipelineTestCase
-
-logger = structlog.get_logger()
 
 
 def _patched_silver_schema() -> pa.Schema:

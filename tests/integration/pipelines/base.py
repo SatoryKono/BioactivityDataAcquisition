@@ -10,27 +10,22 @@ from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
-import structlog
 
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.factories.pipeline import GenericPipelineFactory
 
 # Import factories to ensure they are registered/available
 from bioetl.composition.factories.storage import StorageBundle, StorageContext
-from bioetl.composition.observability import ObservabilityBundle
-from bioetl.domain.ports.noop import NoOpAudit
 from bioetl.domain.config import RuntimeConfig
-from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports import LoggerPort, MetricsPort
 from bioetl.infrastructure.config import Settings
-from bioetl.domain.ports.noop import NoOpMetrics
-from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.ports.runtime.runner import PipelineCreateRunnerRequest
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
+from tests.integration.pipelines.observability import build_test_observability_bundle
 
-logger = structlog.get_logger()
 _STARTED_AT = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
 
 
@@ -153,7 +148,7 @@ class IntegrationPipelineTestCase:
         self,
         settings: Settings,
         config: PipelineYamlConfig,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         metrics: MetricsPort,
         pipeline_name: str | None = None,
         tracing: Any = None,
@@ -277,12 +272,7 @@ class IntegrationPipelineTestCase:
 
         # Create observability bundle for testing
         # Per Unified Observability Contract, metrics must be non-None
-        observability = ObservabilityBundle(
-            logger=structlog.get_logger(),
-            metrics=NoOpMetrics(warn_on_use=False),
-            tracer=NoOpTracing(),
-            audit=NoOpAudit(),
-        )
+        observability = build_test_observability_bundle()
 
         # Create runner
         # Note: GenericPipelineFactory.create_runner uses BaseServicesFactory,
