@@ -51,6 +51,15 @@ __all__ = [
 RUN_MANIFEST_STORE_CORRUPTION = "Run manifest store corruption"
 
 
+def _emit_payload(payload: dict[str, object], output_format: str) -> None:
+    """Emit one manifest-inspection payload using shared CLI rendering."""
+    emit_inspection_payload(
+        payload,
+        output_format,
+        text_renderer=render_text_payload,
+    )
+
+
 @click.group()
 def run_manifest() -> None:
     """Inspect control-plane run manifests and ledger history."""
@@ -76,11 +85,7 @@ def show_command(identifier: str, output_format: str) -> None:
     except ValueError as exc:
         echo_error("Run manifest not found", str(exc))
         return
-    emit_inspection_payload(
-        result.to_dict(),
-        output_format,
-        text_renderer=render_text_payload,
-    )
+    _emit_payload(result.to_dict(), output_format)
 
 
 @run_manifest.command("score")
@@ -112,11 +117,7 @@ def score_command(identifier: str, output_format: str) -> None:
             {},
         ),
     }
-    emit_inspection_payload(
-        payload,
-        output_format,
-        text_renderer=render_text_payload,
-    )
+    _emit_payload(payload, output_format)
 
 
 @run_manifest.command("diff")
@@ -144,11 +145,7 @@ def diff_command(
     except ValueError as exc:
         echo_error("Run manifest diff failed", str(exc))
         return
-    emit_inspection_payload(
-        result.to_dict(),
-        output_format,
-        text_renderer=render_text_payload,
-    )
+    _emit_payload(result.to_dict(), output_format)
 
 
 @run_manifest.command("verify")
@@ -176,11 +173,7 @@ def verify_command(
     except ValueError as exc:
         echo_error("Run manifest verification failed", str(exc))
         return
-    emit_inspection_payload(
-        result.to_dict(),
-        output_format,
-        text_renderer=render_text_payload,
-    )
+    _emit_payload(result.to_dict(), output_format)
 
 
 @run_manifest.command("replay-bundle")
@@ -203,11 +196,7 @@ def replay_bundle_command(identifier: str, output_format: str) -> None:
     except ValueError as exc:
         echo_error("Run manifest not found", str(exc))
         return
-    emit_inspection_payload(
-        build_run_replay_bundle_descriptor(result).to_dict(),
-        output_format,
-        text_renderer=render_text_payload,
-    )
+    _emit_payload(build_run_replay_bundle_descriptor(result).to_dict(), output_format)
 
 
 @run_manifest.command("forensic-diff")
@@ -235,11 +224,7 @@ def forensic_diff_command(
     except ValueError as exc:
         echo_error("Forensic run diff failed", str(exc))
         return
-    emit_inspection_payload(
-        result.to_dict(),
-        output_format,
-        text_renderer=render_text_payload,
-    )
+    _emit_payload(result.to_dict(), output_format)
 
 
 @run_manifest.command("inventory")
@@ -254,11 +239,7 @@ def inventory_command(output_format: str) -> None:
     """Inventory retained manifests against the certified historical tranche."""
     service = get_historical_replay_corpus_service()
     result = service.build_certifiability_inventory()
-    emit_inspection_payload(
-        result.to_dict(),
-        output_format,
-        text_renderer=render_text_payload,
-    )
+    _emit_payload(result.to_dict(), output_format)
 
 
 @run_manifest.command("certify-historical-bulk")
@@ -285,11 +266,7 @@ def certify_historical_bulk_command(
     except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
         echo_error("Historical replay bulk certification failed", str(exc))
         return
-    emit_inspection_payload(
-        result.to_dict(),
-        output_format,
-        text_renderer=render_text_payload,
-    )
+    _emit_payload(result.to_dict(), output_format)
 
 
 @run_manifest.command("closure-report")
@@ -336,11 +313,7 @@ def closure_report_command(
     except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
         echo_error("Historical replay closure report failed", str(exc))
         return
-    emit_inspection_payload(
-        payload,
-        output_format,
-        text_renderer=render_text_payload,
-    )
+    _emit_payload(payload, output_format)
 
 
 @run_manifest.command("universe-report")
@@ -358,6 +331,16 @@ def closure_report_command(
     help="Persist the full-universe report under data/output/control/historical_replay_universe.",
 )
 @click.option(
+    "--require-universal-claim",
+    is_flag=True,
+    help="Fail closed unless the authoritative universal exact-replay claim is claimed.",
+)
+@click.option(
+    "--require-durable-evidence-coverage",
+    is_flag=True,
+    help="Fail closed unless durable evidence coverage is claimed for all known historical runs.",
+)
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -367,6 +350,8 @@ def closure_report_command(
 def universe_report_command(
     external_pack_paths: tuple[Path, ...],
     write_artifact: bool,
+    require_universal_claim: bool,
+    require_durable_evidence_coverage: bool,
     output_format: str,
 ) -> None:
     """Build one full-universe historical replay report from retained and archived corpora."""
@@ -384,14 +369,20 @@ def universe_report_command(
 
             artifact_path = persist_historical_replay_universe_report(report)
             payload = {**payload, "artifact_path": str(artifact_path)}
+        if require_universal_claim and not bool(
+            report.universal_claim.get("claimed", False)
+        ):
+            raise ValueError(
+                "Authoritative historical replay universe claim is not satisfied."
+            )
+        if require_durable_evidence_coverage and not bool(
+            report.durable_evidence_coverage_claim.get("claimed", False)
+        ):
+            raise ValueError("Durable evidence coverage claim is not satisfied.")
     except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
         echo_error("Historical replay universe report failed", str(exc))
         return
-    emit_inspection_payload(
-        payload,
-        output_format,
-        text_renderer=render_text_payload,
-    )
+    _emit_payload(payload, output_format)
 
 
 COMMANDS = (

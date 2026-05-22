@@ -45,6 +45,10 @@ class TestBronzeWriterMetadataMixin:
             "provider": "chembl",
             "entity": "activity",
             "batch_id": "batch-001",
+            "sidecar_truth_boundary": "legacy_lineage_projection_non_authoritative",
+            "authoritative_replay_artifacts": (
+                "run_manifest,lineage_fragment,layer_metadata"
+            ),
         }
 
     def test_build_bronze_metadata_backfill_run_type(self) -> None:
@@ -77,6 +81,11 @@ class TestBronzeWriterMetadataMixin:
             "batch_id": "batch-003",
             "execution_fingerprint": "fingerprint-coordinator",
             "effective_config_hash": "a" * 64,
+            "sidecar_truth_boundary": "legacy_lineage_projection_non_authoritative",
+            "authoritative_replay_artifacts": (
+                "run_manifest,lineage_fragment,layer_metadata,"
+                "effective_config_artifact"
+            ),
         }
 
         result = host._build_bronze_metadata(
@@ -92,6 +101,9 @@ class TestBronzeWriterMetadataMixin:
         assert result["manifest_id"] == "manifest-coordinator"
         assert result["execution_fingerprint"] == "fingerprint-coordinator"
         assert result["effective_config_hash"] == "a" * 64
+        assert result["sidecar_truth_boundary"] == (
+            "legacy_lineage_projection_non_authoritative"
+        )
         host._metadata_coordinator.create_bronze_lineage_sidecar.assert_called_once()
 
     def test_build_bronze_metadata_payload_returns_dict_with_runtime_key(self) -> None:

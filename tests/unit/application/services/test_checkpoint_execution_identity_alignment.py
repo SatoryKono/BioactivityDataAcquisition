@@ -43,6 +43,7 @@ def _metadata(
     normalization_profile_version: str | None = None,
     normalization_profile_hash: str | None = None,
     effective_config_artifact_id: str | None = None,
+    required_persistence_profile: str | None = None,
     input_snapshot_refs: tuple[dict[str, object], ...] = (),
     input_snapshot_ids: tuple[str, ...] = (),
     input_snapshot_fingerprint: str | None = None,
@@ -69,6 +70,7 @@ def _metadata(
         normalization_profile_version=normalization_profile_version,
         normalization_profile_hash=normalization_profile_hash,
         effective_config_artifact_id=effective_config_artifact_id,
+        required_persistence_profile=required_persistence_profile,
         input_snapshot_refs=input_snapshot_refs,
         input_snapshot_ids=input_snapshot_ids,
         input_snapshot_fingerprint=input_snapshot_fingerprint,
@@ -193,8 +195,7 @@ def test_resume_service_rejects_runtime_anchor_fingerprint_mismatch() -> None:
     assert result.compatible is False
     assert result.execution_identity_compatible is False
     assert any(
-        "Degraded runtime-anchor fingerprint mismatch" in msg
-        for msg in result.messages
+        "Degraded runtime-anchor fingerprint mismatch" in msg for msg in result.messages
     )
 
 
@@ -248,6 +249,4 @@ def test_resume_service_ignores_composite_identity_drift_when_canonical_fingerpr
 
     assert result.compatible is True
     assert result.execution_identity_compatible is True
-    assert not any(
-        "Composite run identity mismatch" in msg for msg in result.messages
-    )
+    assert not any("Composite run identity mismatch" in msg for msg in result.messages)

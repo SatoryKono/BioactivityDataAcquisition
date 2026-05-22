@@ -789,6 +789,60 @@ class TestCheckpointManagerCompatibilityPolicy:
             {"pipeline": "chembl_activity", "status": "observe_loaded_degraded"},
         )
 
+    async def test_observe_policy_blocks_non_identity_mismatch_for_strict_profiles(
+        self, mock_checkpoint_port, mock_logger, mock_metrics
+    ) -> None:
+        saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {
+                "records_processed": 84,
+                "dq_contract_compatibility_hash": "old",
+                "required_persistence_profile": "replay_ready",
+            },
+        )
+        compatibility_service = MagicMock()
+        compatibility_service.validate_checkpoint_compatibility.return_value = (
+            CheckpointCompatibilityResult.incompatible_result(
+                dq_compatible=False,
+                pipeline_compatible=True,
+                execution_identity_compatible=True,
+                messages=["dq mismatch"],
+            )
+        )
+
+        manager = CheckpointRuntimeService(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=deterministic_uuid_from_callsite("replay-sensitive"),
+            resume=True,
+            metrics=mock_metrics,
+            checkpoint_compatibility_service=compatibility_service,
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                dq_contract_compatibility_hash="new",
+                required_persistence_profile="replay_ready",
+            ),
+            compatibility_policy="observe",
+        )
+
+        result = await manager.load_checkpoint()
+
+        assert result is None
+        warning_call = mock_logger.warning.call_args
+        assert "resume blocked despite degraded observe policy" in warning_call.args[0]
+        assert warning_call.kwargs["resume_rejected"] is True
+        assert (
+            warning_call.kwargs["compatibility_disposition"]
+            == "observe_blocked_identity"
+        )
+        mock_metrics.increment_counter.assert_called_once_with(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {"pipeline": "chembl_activity", "status": "observe_blocked_identity"},
+        )
+
     async def test_hard_fail_policy_raises_on_incompatibility(
         self, mock_checkpoint_port, mock_logger, mock_metrics
     ) -> None:
@@ -1265,5 +1319,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             compatibility_policy="hard_fail",
         )
 
-        with pytest.raises(ValueError, match="Execution identity continuity not proven"):
+        with pytest.raises(
+            ValueError, match="Execution identity continuity not proven"
+        ):
             await manager.load_checkpoint()

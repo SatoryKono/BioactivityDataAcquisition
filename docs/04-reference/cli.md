@@ -125,11 +125,11 @@ bioetl workflow status <NAME> [OPTIONS]
   cache/replay options, vacuum overrides, tracing overrides, and
   `--required-persistence-profile`.
 - `--required-persistence-profile degraded_observable` is still available for
-  local diagnostic launches, but strict workflow steps do not recommend it as a
-  remediation path for missing snapshot-backed Bronze evidence. `--exact-replay`
-  and production/debug-critical launches still promote the effective profile
-  back to the strict published family default and cannot be used to bypass
-  exact-replay guardrails.
+  local diagnostic launches outside the replay-capable executable boundary, but
+  strict workflow steps do not accept it as a remediation path for missing
+  snapshot-backed Bronze evidence. Supported replay-capable launches promote
+  the effective profile back to the strict published family default or fail
+  closed, and cannot be used to bypass exact-replay guardrails.
 - pipeline-level `--resume` is intentionally not exposed on `workflow run`;
   workflow control-plane resume stays on `--resume-last`.
 - `--resume-last` использует semantic `execution_fingerprint`, а не только имя workflow.
@@ -476,6 +476,9 @@ Operational semantics:
   degraded signals могут быть только зафиксированы warning-ом.
 - strict persistence profiles (`replay_ready`, `forensic_grade`) поднимают
   effective resume policy до `hard_fail`.
+- historical universe claim surfaces не должны читаться из одного `show/score`
+  результата как global promise; literal wording про **любой historical run**
+  требует отдельного authoritative `universe-report` artifact.
 
 Resume contract:
 
@@ -605,6 +608,26 @@ Forensic/cross-surface payloads также показывают `artifact_byte_e
 bioetl run-manifest diff 7f26d7b2-2c25-4aef-bf4c-030e4f8a4f87 17f6799e-6c1a-4dd6-a7a1-b1fe2ea3e9ae
 bioetl run-manifest diff 8d166b4d-c4a8-4755-896e-cf9158c5b5ec d775f516-ff3e-4d66-a369-1417c3ff093f --format yaml
 ```
+
+#### `run-manifest universe-report` — Full-universe historical replay claim
+
+```bash
+bioetl run-manifest universe-report [--external-pack path/to/archive-pack.json ...] [--write] [--require-universal-claim] [--require-durable-evidence-coverage] [--format text|json|yaml]
+```
+
+Команда собирает authoritative full-universe historical replay artifact из
+локального retained corpus и одного или более archived/offline packs. Ключевые
+режимы:
+
+- `--write` сохраняет artifact в
+  `data/output/control/historical_replay_universe/{report_id}.json`;
+- `--require-universal-claim` завершает команду ошибкой, если
+  `universal_claim.claimed != true`;
+- `--require-durable-evidence-coverage` завершает команду ошибкой, если
+  `durable_evidence_coverage_claim.claimed != true`.
+
+Используй оба `--require-*` флага для fail-closed release/operator gates,
+когда нужна строгая проверка wording уровня "любой historical run".
 
 See also:
 
