@@ -25,7 +25,7 @@ from bioetl.application.services.control_plane.run_manifest_inspection_service i
     RunManifestInspectionService,
 )
 from bioetl.composition.factories.services.port_factories import create_metrics
-from bioetl.infrastructure.config import get_settings
+from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.control_plane import (
     FileArtifactByteComparisonAdapter,
     FileEffectiveConfigArtifactStore,

@@ -17,7 +17,7 @@ from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.bootstrap.cli.run_manifest import (
     bootstrap_run_manifest_service,
 )
-from bioetl.infrastructure.config import get_settings
+from bioetl.composition.runtime_builders.config_access import get_settings
 
 if TYPE_CHECKING:
     from bioetl.application.services.health_service import HealthService

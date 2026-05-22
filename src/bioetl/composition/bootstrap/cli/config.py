@@ -17,7 +17,7 @@ from bioetl.composition.bootstrap.cli.service_builders import build_cli_config_s
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.registry_api import PipelineRegistry, get_default_registry
 from bioetl.domain.ports import DomainConfigMapperPort, SettingsLoaderPort
-from bioetl.infrastructure.config import get_settings
+from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 from bioetl.infrastructure.config.dq_contract_config_loader import (
