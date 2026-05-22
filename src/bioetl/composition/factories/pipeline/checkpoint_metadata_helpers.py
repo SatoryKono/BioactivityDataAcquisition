@@ -118,7 +118,8 @@ def _resolve_input_snapshot_refs(
     )
     if manifest_snapshot_refs:
         return tuple(
-            _serialize_input_snapshot_ref(snapshot) for snapshot in manifest_snapshot_refs
+            _serialize_input_snapshot_ref(snapshot)
+            for snapshot in manifest_snapshot_refs
         )
 
     runtime = getattr(pipeline, "runtime", None)
@@ -162,6 +163,7 @@ def _resolve_run_context_metadata(
         "composite_run_identity",
         "execution_fingerprint",
         "silver_filter_compatibility_mode",
+        "required_persistence_profile",
     )
     return {
         field_name: (
@@ -203,6 +205,9 @@ def _build_checkpoint_run_context(
         "manifest_id": run_context_metadata["manifest_id"],
         "execution_fingerprint": execution_fingerprint,
         "silver_filter_compatibility_mode": silver_filter_compatibility_mode,
+        "required_persistence_profile": run_context_metadata[
+            "required_persistence_profile"
+        ],
         "git_commit": run_context_metadata["git_commit"],
         "dependency_lock_hash": run_context_metadata["dependency_lock_hash"],
         "effective_config_hash": identity_payload["effective_config_hash"],
@@ -258,6 +263,9 @@ def _build_checkpoint_metadata_from_identity(
         normalization_profile_version=identity_payload["normalization_profile_version"],
         normalization_profile_hash=identity_payload["normalization_profile_hash"],
         exact_replay=exact_replay,
+        required_persistence_profile=run_context_metadata[
+            "required_persistence_profile"
+        ],
         input_snapshot_refs=input_snapshot_refs,
         input_snapshot_ids=input_snapshot_ids,
         input_snapshot_fingerprint=input_snapshot_fingerprint,

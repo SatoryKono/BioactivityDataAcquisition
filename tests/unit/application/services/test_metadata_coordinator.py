@@ -157,6 +157,10 @@ class TestMetadataCoordinator:
         assert sidecar["manifest_id"] == "manifest-sidecar-001"
         assert sidecar["execution_fingerprint"] == "fingerprint-sidecar-001"
         assert sidecar["effective_config_hash"] == "e" * 64
+        assert sidecar["sidecar_truth_boundary"] == (
+            "legacy_lineage_projection_non_authoritative"
+        )
+        assert "run_manifest" in sidecar["authoritative_replay_artifacts"]
 
     def test_environment_metadata_cached(self, run_context: RunContext) -> None:
         """Test that environment metadata is cached at class level."""
@@ -686,7 +690,9 @@ class TestSilverMetadata:
                     {
                         "_run_id": str(context.run_id),
                         "_run_type": "incremental",
-                        "_source_batch_id": str(deterministic_uuid_from_callsite("replay-sensitive")),
+                        "_source_batch_id": str(
+                            deterministic_uuid_from_callsite("replay-sensitive")
+                        ),
                         "_ingestion_ts": _FIXED_TIME.isoformat(),
                         "chembl_id": "CHEMBL123",
                     }
@@ -709,7 +715,9 @@ class TestSilverMetadata:
             {
                 "_run_id": str(coordinator.run_context.run_id),
                 "_run_type": "incremental",
-                "_source_batch_id": str(deterministic_uuid_from_callsite("replay-sensitive")),
+                "_source_batch_id": str(
+                    deterministic_uuid_from_callsite("replay-sensitive")
+                ),
                 "_ingestion_ts": _FIXED_TIME.isoformat(),
                 "chembl_id": "CHEMBL123",
             }

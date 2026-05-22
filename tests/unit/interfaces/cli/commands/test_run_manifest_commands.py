@@ -374,13 +374,22 @@ class _FakeRunManifestService:
                             "snapshot_backed_source_runs_only"
                         ),
                     },
-                    "global_reproducibility_claim": {
-                        "scope": "project_wide_exact_replay",
+                    "historical_replay_universe_exact_replay_claim": {
+                        "scope": "all_known_historical_runs",
                         "claimed": False,
-                        "verdict": "universal_exact_replay_not_claimed",
+                        "verdict": "historical_universe_exact_replay_not_claimed",
                         "reason": (
-                            "published_contract_limits_exact_replay_to_"
-                            "supported_boundary"
+                            "authoritative_historical_replay_universe_artifact_unavailable"
+                        ),
+                    },
+                    "executable_run_contract_claim": {
+                        "scope": (
+                            "prospective_executable_runs_within_supported_boundary"
+                        ),
+                        "claimed": True,
+                        "verdict": "prospective_executable_run_contract_claimed",
+                        "reason": (
+                            "supported_boundary_executable_runs_promote_or_fail_closed"
                         ),
                     },
                     "scored_at": self._manifest.created_at.isoformat(),
@@ -606,6 +615,54 @@ class _FakeForensicRunDiffService:
         return _FakeForensicRunDiffResult()
 
 
+class _FakeHistoricalReplayUniverseReport:
+    def __init__(
+        self,
+        *,
+        universal_claimed: bool,
+        durable_claimed: bool,
+    ) -> None:
+        self.report_id = "historical-replay-universe-test"
+        self.universal_claim = {
+            "claimed": universal_claimed,
+            "scope": "all_known_historical_runs",
+        }
+        self.durable_evidence_coverage_claim = {
+            "claimed": durable_claimed,
+            "scope": "all_known_historical_runs",
+        }
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "report_id": self.report_id,
+            "universal_claim": self.universal_claim,
+            "durable_evidence_coverage_claim": (
+                self.durable_evidence_coverage_claim
+            ),
+        }
+
+
+class _FakeHistoricalReplayUniverseService:
+    def __init__(
+        self,
+        *,
+        universal_claimed: bool,
+        durable_claimed: bool,
+    ) -> None:
+        self._report = _FakeHistoricalReplayUniverseReport(
+            universal_claimed=universal_claimed,
+            durable_claimed=durable_claimed,
+        )
+
+    def build_universe_closure_report(
+        self,
+        *,
+        external_records: tuple[object, ...] = (),
+    ) -> _FakeHistoricalReplayUniverseReport:
+        del external_records
+        return self._report
+
+
 @pytest.fixture
 def cli_runner() -> CliRunner:
     return CliRunner()
@@ -628,6 +685,20 @@ def _patch_forensic_diff_service(monkeypatch: Any, service: object) -> None:
     monkeypatch.setattr(
         run_manifest_cmd,
         "get_forensic_run_diff_service",
+        lambda: service,
+        raising=True,
+    )
+
+
+def _patch_historical_replay_universe_service(
+    monkeypatch: Any,
+    service: object,
+) -> None:
+    import bioetl.interfaces.cli.commands.run_manifest as run_manifest_cmd
+
+    monkeypatch.setattr(
+        run_manifest_cmd,
+        "get_historical_replay_universe_service",
         lambda: service,
         raising=True,
     )
@@ -729,7 +800,10 @@ class TestRunManifestCommands:
         assert score["supported_boundary_verdict"]["scope"] == (
             "supported_boundary_run"
         )
-        assert score["global_reproducibility_claim"]["claimed"] is False
+        assert score["historical_replay_universe_exact_replay_claim"]["claimed"] is (
+            False
+        )
+        assert score["executable_run_contract_claim"]["claimed"] is True
         assert score["blockers"] == []
         assert "diagnostics.git_commit" in score["evidence_refs"]
 
@@ -757,7 +831,7 @@ class TestRunManifestCommands:
             "gold:chembl.activity@1"
         )
 
-    def test_score_text_labels_boundary_and_global_claim(
+    def test_score_text_labels_boundary_and_split_claim_surfaces(
         self,
         cli_runner: CliRunner,
         monkeypatch: Any,
@@ -775,9 +849,10 @@ class TestRunManifestCommands:
         assert "score_scope: supported_boundary_run" in result.output
         assert "supported_boundary_verdict:" in result.output
         assert "verdict: supported_boundary_satisfied" in result.output
-        assert "global_reproducibility_claim:" in result.output
-        assert "claimed: false" in result.output
-        assert "verdict: universal_exact_replay_not_claimed" in result.output
+        assert "historical_replay_universe_exact_replay_claim:" in result.output
+        assert "verdict: historical_universe_exact_replay_not_claimed" in result.output
+        assert "executable_run_contract_claim:" in result.output
+        assert "verdict: prospective_executable_run_contract_claimed" in result.output
 
     def test_show_yaml_outputs_manifest_and_diagnostics(
         self,
@@ -1099,3 +1174,59 @@ class TestRunManifestCommands:
         assert "artifact_byte_equivalence:" in result.output
         assert "artifact_completeness:" in result.output
         assert "missing_evidence:" in result.output
+
+    def test_universe_report_supports_fail_closed_claim_flags(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_historical_replay_universe_service(
+            monkeypatch,
+            _FakeHistoricalReplayUniverseService(
+                universal_claimed=True,
+                durable_claimed=True,
+            ),
+        )
+
+        result = cli_runner.invoke(
+            cli,
+            [
+                "run-manifest",
+                "universe-report",
+                "--require-universal-claim",
+                "--require-durable-evidence-coverage",
+                "--format",
+                "json",
+            ],
+        )
+
+        assert result.exit_code == 0
+        payload = json.loads(result.output)
+        assert payload["universal_claim"]["claimed"] is True
+        assert payload["durable_evidence_coverage_claim"]["claimed"] is True
+
+    def test_universe_report_fails_closed_when_required_claim_is_missing(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_historical_replay_universe_service(
+            monkeypatch,
+            _FakeHistoricalReplayUniverseService(
+                universal_claimed=False,
+                durable_claimed=True,
+            ),
+        )
+
+        result = cli_runner.invoke(
+            cli,
+            [
+                "run-manifest",
+                "universe-report",
+                "--require-universal-claim",
+            ],
+        )
+
+        assert result.exit_code == 0
+        assert "Historical replay universe report failed" in result.stderr
+        assert "Authoritative historical replay universe claim" in result.stderr

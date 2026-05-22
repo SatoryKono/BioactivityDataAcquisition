@@ -39,6 +39,11 @@ def _extract_with_fallback(
     return None
 
 
+def _extract_anchor(data: JsonDict, key: str) -> _OPTIONAL_STR:
+    """Extract optional string with like-named run-context fallback."""
+    return _extract_with_fallback(data, key, key)
+
+
 def _coerce_json_dict_sequence(value: object) -> tuple[JsonDict, ...]:
     """Coerce persisted JSON objects into an immutable tuple."""
     if not isinstance(value, list | tuple):
@@ -70,6 +75,7 @@ class CheckpointMetadata:
     normalization_profile_version: _OPTIONAL_STR = None
     normalization_profile_hash: _OPTIONAL_STR = None
     exact_replay: _OPTIONAL_BOOL = None
+    required_persistence_profile: _OPTIONAL_STR = None
     input_snapshot_refs: tuple[JsonDict, ...] = ()
     input_snapshot_ids: tuple[str, ...] = ()
     input_snapshot_fingerprint: _OPTIONAL_STR = None
@@ -91,41 +97,40 @@ class CheckpointMetadata:
             run_type=cast(_OPTIONAL_STR, legacy_metadata.get("run_type")),
             pipeline_version=legacy_metadata.get("pipeline_version"),
             git_commit=cast(_OPTIONAL_STR, legacy_metadata.get("git_commit")),
-            dependency_lock_hash=_extract_with_fallback(
-                legacy_metadata, "dependency_lock_hash", "dependency_lock_hash"
+            dependency_lock_hash=_extract_anchor(
+                legacy_metadata, "dependency_lock_hash"
             ),
             effective_config_hash=legacy_metadata.get("effective_config_hash"),
             effective_config_artifact_id=legacy_metadata.get(
                 "effective_config_artifact_id"
             ),
             execution_fingerprint=legacy_metadata.get("execution_fingerprint"),
-            composite_run_identity=_extract_with_fallback(
-                legacy_metadata, "composite_run_identity", "composite_run_identity"
+            composite_run_identity=_extract_anchor(
+                legacy_metadata, "composite_run_identity"
             ),
-            manifest_id=_extract_with_fallback(
-                legacy_metadata, "manifest_id", "manifest_id"
-            ),
+            manifest_id=_extract_anchor(legacy_metadata, "manifest_id"),
             contract_ref=cast(_OPTIONAL_STR, legacy_metadata.get("contract_ref")),
             contract_version=cast(
                 _OPTIONAL_STR,
                 legacy_metadata.get("contract_version"),
             ),
-            normalization_profile_ref=_extract_with_fallback(
+            normalization_profile_ref=_extract_anchor(
                 legacy_metadata,
                 "normalization_profile_ref",
-                "normalization_profile_ref",
             ),
-            normalization_profile_version=_extract_with_fallback(
+            normalization_profile_version=_extract_anchor(
                 legacy_metadata,
                 "normalization_profile_version",
-                "normalization_profile_version",
             ),
-            normalization_profile_hash=_extract_with_fallback(
+            normalization_profile_hash=_extract_anchor(
                 legacy_metadata,
-                "normalization_profile_hash",
                 "normalization_profile_hash",
             ),
             exact_replay=cast(_OPTIONAL_BOOL, legacy_metadata.get("exact_replay")),
+            required_persistence_profile=_extract_anchor(
+                legacy_metadata,
+                "required_persistence_profile",
+            ),
             input_snapshot_refs=coerce_snapshot_refs(
                 legacy_metadata.get("input_snapshot_refs")
             ),
@@ -135,9 +140,8 @@ class CheckpointMetadata:
             input_snapshot_fingerprint=cast(
                 _OPTIONAL_STR, legacy_metadata.get("input_snapshot_fingerprint")
             ),
-            silver_filter_compatibility_mode=_extract_with_fallback(
+            silver_filter_compatibility_mode=_extract_anchor(
                 legacy_metadata,
-                "silver_filter_compatibility_mode",
                 "silver_filter_compatibility_mode",
             ),
             memory_decision_trace=_coerce_json_dict_sequence(
@@ -166,12 +170,10 @@ class CheckpointMetadata:
             ("contract_ref", self.contract_ref),
             ("contract_version", self.contract_version),
             ("normalization_profile_ref", self.normalization_profile_ref),
-            (
-                "normalization_profile_version",
-                self.normalization_profile_version,
-            ),
+            ("normalization_profile_version", self.normalization_profile_version),
             ("normalization_profile_hash", self.normalization_profile_hash),
             ("exact_replay", self.exact_replay),
+            ("required_persistence_profile", self.required_persistence_profile),
             ("input_snapshot_refs", list(self.input_snapshot_refs)),
             ("input_snapshot_ids", list(self.input_snapshot_ids)),
             ("input_snapshot_fingerprint", self.input_snapshot_fingerprint),
@@ -200,42 +202,38 @@ class CheckpointMetadata:
             run_type=cast(_OPTIONAL_STR, data.get("run_type")),
             pipeline_version=data.get("pipeline_version"),
             git_commit=cast(_OPTIONAL_STR, data.get("git_commit")),
-            dependency_lock_hash=_extract_with_fallback(
-                data, "dependency_lock_hash", "dependency_lock_hash"
-            ),
+            dependency_lock_hash=_extract_anchor(data, "dependency_lock_hash"),
             effective_config_hash=data.get("effective_config_hash"),
             effective_config_artifact_id=data.get("effective_config_artifact_id"),
             execution_fingerprint=data.get("execution_fingerprint"),
-            composite_run_identity=_extract_with_fallback(
-                data, "composite_run_identity", "composite_run_identity"
-            ),
-            manifest_id=_extract_with_fallback(data, "manifest_id", "manifest_id"),
+            composite_run_identity=_extract_anchor(data, "composite_run_identity"),
+            manifest_id=_extract_anchor(data, "manifest_id"),
             contract_ref=cast(_OPTIONAL_STR, data.get("contract_ref")),
             contract_version=cast(_OPTIONAL_STR, data.get("contract_version")),
-            normalization_profile_ref=_extract_with_fallback(
+            normalization_profile_ref=_extract_anchor(
                 data,
                 "normalization_profile_ref",
-                "normalization_profile_ref",
             ),
-            normalization_profile_version=_extract_with_fallback(
+            normalization_profile_version=_extract_anchor(
                 data,
                 "normalization_profile_version",
-                "normalization_profile_version",
             ),
-            normalization_profile_hash=_extract_with_fallback(
+            normalization_profile_hash=_extract_anchor(
                 data,
-                "normalization_profile_hash",
                 "normalization_profile_hash",
             ),
             exact_replay=cast(_OPTIONAL_BOOL, data.get("exact_replay")),
+            required_persistence_profile=_extract_anchor(
+                data,
+                "required_persistence_profile",
+            ),
             input_snapshot_refs=coerce_snapshot_refs(data.get("input_snapshot_refs")),
             input_snapshot_ids=coerce_snapshot_ids(data.get("input_snapshot_ids")),
             input_snapshot_fingerprint=cast(
                 _OPTIONAL_STR, data.get("input_snapshot_fingerprint")
             ),
-            silver_filter_compatibility_mode=_extract_with_fallback(
+            silver_filter_compatibility_mode=_extract_anchor(
                 data,
-                "silver_filter_compatibility_mode",
                 "silver_filter_compatibility_mode",
             ),
             memory_decision_trace=_coerce_json_dict_sequence(

@@ -5,6 +5,9 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import Literal
 
+from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
+)
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
@@ -226,6 +229,10 @@ def handle_incompatible_checkpoint(
         compatibility_policy=compatibility_policy,
         execution_identity_compatible=execution_identity_compatible,
         identity_continuity_proven=identity_continuity_proven,
+        strict_persistence_required=strict_checkpoint_resume_required(
+            current_metadata=current_metadata,
+            checkpoint_metadata=checkpoint_metadata,
+        ),
     )
     forced_resume_rejection = disposition == "observe_blocked_identity"
     degraded_resume_loaded = disposition == "observe_loaded_degraded"
@@ -330,8 +337,31 @@ def _checkpoint_identity_payload(
         "contract_ref": metadata.contract_ref,
         "contract_version": metadata.contract_version,
         "exact_replay": metadata.exact_replay,
+        "required_persistence_profile": metadata.required_persistence_profile,
         "input_snapshot_ids": list(metadata.input_snapshot_ids),
     }
+
+
+def strict_checkpoint_resume_required(
+    *,
+    current_metadata: CheckpointMetadata | None,
+    checkpoint_metadata: CheckpointMetadata,
+) -> bool:
+    """Return whether resume must remain fail-closed for strict replay profiles."""
+    required_profiles = {
+        str(profile or "").strip().lower()
+        for profile in (
+            None if current_metadata is None else current_metadata.required_persistence_profile,
+            checkpoint_metadata.required_persistence_profile,
+        )
+        if str(profile or "").strip()
+    }
+    if required_profiles.intersection(STRICT_PERSISTENCE_PROFILES):
+        return True
+    return bool(
+        checkpoint_metadata.exact_replay
+        or (current_metadata.exact_replay if current_metadata is not None else False)
+    )
 
 
 def resolve_incompatible_checkpoint_disposition(
@@ -339,10 +369,15 @@ def resolve_incompatible_checkpoint_disposition(
     compatibility_policy: CheckpointCompatibilityPolicy,
     execution_identity_compatible: bool,
     identity_continuity_proven: bool = True,
+    strict_persistence_required: bool = False,
 ) -> CheckpointCompatibilityDisposition:
     """Return the bounded incompatibility disposition for telemetry and logging."""
     if compatibility_policy == "observe":
-        if not identity_continuity_proven or not execution_identity_compatible:
+        if (
+            strict_persistence_required
+            or not identity_continuity_proven
+            or not execution_identity_compatible
+        ):
             return "observe_blocked_identity"
         return "observe_loaded_degraded"
     if compatibility_policy == "soft_fail":

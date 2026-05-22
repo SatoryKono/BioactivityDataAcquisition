@@ -179,10 +179,13 @@ Equivalence interpretation:
   occurrence-only differences such as `run_id`, `manifest_id`, control-plane
   timestamps, ledger append order, host/runtime diagnostics, and occurrence
   sidecars.
-- `artifact_byte_equivalence` means the compared output artifacts or sidecars
-  are byte-for-byte identical. It is stricter than semantic replay and is not
-  implied by `verified=true` when occurrence-rich sidecars or metadata envelopes
-  are regenerated.
+- `artifact_byte_equivalence` is resolved semantic-first for structured
+  sidecars. Normalized JSON/YAML sidecars are compared after dropping
+  occurrence-only fields such as `run_id`, `manifest_id`, and occurrence-only
+  dataset provenance anchors. Raw-byte identity remains an explicit forensic
+  sub-surface. It is stricter than semantic replay and is not implied by
+  `verified=true` when occurrence-rich sidecars or metadata envelopes are
+  regenerated.
 - The sidecar `output.content_hash` is semantic: it excludes occurrence-scoped
   runtime anchors such as run IDs, manifest IDs, lineage/write timestamps, and
   host/runtime fields. If content hashes and replay anchors match but raw
@@ -245,6 +248,7 @@ bioetl run-manifest inventory --format json
 bioetl run-manifest certify-historical-bulk path/to/plan.json --format json
 bioetl run-manifest closure-report --write --format json
 bioetl run-manifest universe-report --external-pack path/to/archive-pack.json --write --format json
+bioetl run-manifest universe-report --external-pack path/to/archive-pack.json --write --require-universal-claim --require-durable-evidence-coverage --format json
 ./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --auto-certify-sources --auto-certify-composites --claim-scope-mode retained_certifiable_historical_runs --write-dispositions --write-report
 ./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --auto-certify-sources --auto-certify-composites --claim-scope-mode retained_certifiable_historical_runs --write-report --require-global-claim
 ./.venv/bin/python scripts/engineering/qa/run_historical_replay_universe_campaign.py --external-pack path/to/archive-pack.json --write-report
@@ -272,6 +276,9 @@ Interpretation:
 - `universe-report --external-pack ... --write` is the supported operator path
   for persisting a full-universe artifact from retained local evidence plus one
   or more authoritative archived/offline packs.
+- `universe-report --require-universal-claim --require-durable-evidence-coverage`
+  is the fail-closed operator path whenever release evidence or top-level
+  wording wants to claim that any historical run remains exact replayable.
 - `run_historical_replay_closure_campaign.py` is the deterministic batch path
   for retained-corpus campaigns: it builds the inventory, optionally emits a
   residual-disposition artifact, may auto-certify retained source/composite
@@ -555,10 +562,15 @@ layers:
   published boundary;
 - `supported_boundary_verdict` states whether this run satisfies that boundary
   or remains blocked/gapped;
-- `global_reproducibility_claim` states the project-wide claim status and must
-  remain explicit even when the inspected run is replay-ready. When the latest
-  authoritative historical replay universe artifact is available, this field
-  must mirror that artifact rather than hard-coding a weaker fallback.
+- `historical_replay_universe_exact_replay_claim` states the historical-corpus
+  claim status and must remain explicit even when the inspected run is
+  replay-ready. When the latest authoritative historical replay universe
+  artifact is available, this field must mirror that artifact rather than
+  hard-coding a weaker fallback.
+- `executable_run_contract_claim` states the prospective executable-run
+  guarantee for the published supported boundary. Supported replay-capable
+  families promote `degraded_observable` overrides to the strict floor or fail
+  closed before launch.
 
 Interpretation examples:
 
