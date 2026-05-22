@@ -208,6 +208,7 @@ tracked_suite_inventory:
     - tests/integration/config/test_dq_config_loading.py
     - tests/integration/config/test_generic_field_ownership.py
     - tests/integration/config/test_gold_nullable_numeric_compatibility.py
+    - tests/integration/config/test_non_chembl_contract_registry_coverage.py
     - tests/integration/config/test_ontology_unit_semantics.py
     - tests/integration/config/test_pipeline_data_storage_contracts.py
     - tests/integration/config/test_pubchem_enum_parity.py
