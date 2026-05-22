@@ -41,12 +41,15 @@ def test_windows_launchers_delegate_to_wsl_scripts_without_posix_redirects() -> 
     ).read_text(encoding="utf-8")
 
     assert "/dev/null" not in codex_bat
-    assert 'bash "%REPO_WSL%/scripts/ops/launchers/codex/codex.sh"' in codex_bat
+    assert 'bash -i "%REPO_WSL%/scripts/ops/launchers/codex/codex.sh"' in codex_bat
     assert "wslpath -a" in codex_bat
 
     assert "/dev/null" not in codex_exec_bat
     assert (
         'bash "%REPO_WSL%/scripts/ops/launchers/codex/codex-exec.sh"' in codex_exec_bat
+    )
+    assert 'bash -i "%REPO_WSL%/scripts/ops/launchers/codex/codex-exec.sh"' not in (
+        codex_exec_bat
     )
     assert "wslpath -a" in codex_exec_bat
 

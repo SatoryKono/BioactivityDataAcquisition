@@ -187,9 +187,7 @@ def create_control_plane_refs(
     return ManifestControlPlaneRefs(
         manifest_id=manifest_id,
         execution_fingerprint=execution_fingerprint,
-        config_hash=legacy_config_hash_from_resolved_config_hash(
-            resolved_config_hash
-        ),
+        config_hash=legacy_config_hash_from_resolved_config_hash(resolved_config_hash),
         resolved_config_hash=resolved_config_hash,
         effective_config_hash=effective_config_hash,
         source_fingerprint=source_fingerprint,

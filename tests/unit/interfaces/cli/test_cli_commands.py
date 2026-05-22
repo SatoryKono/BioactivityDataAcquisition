@@ -1600,8 +1600,9 @@ def test_run_command_with_cli_policy_wires_registry_and_cli_seams() -> None:
 
 
 @pytest.mark.unit
-def test_run_command_with_cli_policy_disables_transient_health_server_on_live_backend(
-) -> None:
+def test_run_command_with_cli_policy_disables_transient_health_server_on_live_backend() -> (
+    None
+):
     """CLI helper should pass a downgraded input when detached backend replaces the HTTP server."""
     from bioetl.interfaces.cli.commands import run as run_module
     from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (

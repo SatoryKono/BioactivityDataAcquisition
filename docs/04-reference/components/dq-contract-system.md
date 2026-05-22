@@ -199,7 +199,7 @@ effective_config:
       rules_count: 12
   config_files:
     - "configs/providers/chembl.yaml"
-    - "configs/entities/molecule.yaml"
+    - "configs/entities/chembl/molecule.yaml"
   environment: "production"
 ```
 

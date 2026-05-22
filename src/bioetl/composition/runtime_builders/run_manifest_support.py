@@ -15,8 +15,10 @@ from bioetl.composition.runtime_builders._run_manifest_support import (
     resolve_contract_identity,
     resolve_provider_entity,
     resolve_replay_capability,
+    resolve_replay_parentage,
     resolve_run_context_values,
     to_serializable_mapping,
+    validate_reproducible_sink_modes,
 )
 
 __all__ = [
@@ -32,6 +34,8 @@ __all__ = [
     "resolve_contract_identity",
     "resolve_provider_entity",
     "resolve_replay_capability",
+    "resolve_replay_parentage",
     "resolve_run_context_values",
     "to_serializable_mapping",
+    "validate_reproducible_sink_modes",
 ]

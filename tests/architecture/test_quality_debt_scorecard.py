@@ -316,7 +316,9 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
         "compat_sunset_scorecard_loader",
     )
     sunset_count = len(sunset_module.COMPAT_FILES) + len(sunset_module.COMPAT_MODULES)
-    expired_count = 0 if POLICY_REVIEW_DATE <= sunset_module.SUNSET_DATE else sunset_count
+    expired_count = (
+        0 if POLICY_REVIEW_DATE <= sunset_module.SUNSET_DATE else sunset_count
+    )
 
     expected_counts = {
         "transition_compat_count": len(transition_debt),
@@ -355,17 +357,39 @@ def test_debt_scorecard_declares_public_entrypoint_governance_kpis() -> None:
     assert isinstance(inventory_payload, dict)
     retained_entrypoints = inventory_payload.get("retained_entrypoints")
     assert isinstance(retained_entrypoints, list)
+    burn_down_plan = inventory_payload.get("retained_entrypoint_burn_down_plan")
+    assert isinstance(burn_down_plan, dict)
+    plan_rows = burn_down_plan.get("rows")
+    assert isinstance(plan_rows, list)
 
     metrics = governance.get("metrics", {})
     assert isinstance(metrics, dict)
-    metric = metrics.get("public_entrypoint_count")
-    assert isinstance(metric, dict)
-    assert metric.get("current_count") == len(retained_entrypoints)
-    assert isinstance(metric.get("owner"), str) and metric["owner"]
-    assert isinstance(metric.get("linked_issue"), str) and metric["linked_issue"]
-    assert isinstance(metric.get("rationale"), str) and metric["rationale"]
-    assert metric.get("review_cadence") == "quarterly"
-    assert isinstance(metric.get("review_policy"), str) and metric["review_policy"]
+    stable_count = sum(
+        1
+        for row in plan_rows
+        if isinstance(row, dict)
+        and row.get("target_state") == "retain_as_stable_public_api"
+    )
+    narrowing_count = sum(
+        1
+        for row in plan_rows
+        if isinstance(row, dict)
+        and row.get("target_state") == "narrow_first_party_callers"
+    )
+    expected_counts = {
+        "public_entrypoint_count": len(retained_entrypoints),
+        "stable_public_api_count": stable_count,
+        "narrow_first_party_callers_count": narrowing_count,
+    }
+    for metric_name, expected_count in expected_counts.items():
+        metric = metrics.get(metric_name)
+        assert isinstance(metric, dict)
+        assert metric.get("current_count") == expected_count
+        assert isinstance(metric.get("owner"), str) and metric["owner"]
+        assert isinstance(metric.get("linked_issue"), str) and metric["linked_issue"]
+        assert isinstance(metric.get("rationale"), str) and metric["rationale"]
+        assert metric.get("review_cadence") == "quarterly"
+        assert isinstance(metric.get("review_policy"), str) and metric["review_policy"]
 
 
 def test_debt_scorecard_bronze_fixture_replay_metrics_match_sources() -> None:

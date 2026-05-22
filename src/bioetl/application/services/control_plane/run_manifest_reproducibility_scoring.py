@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from bioetl.application.services.control_plane.run_manifest_reproducibility_score_cards import (
     PROFILE_SCORE_THRESHOLDS,
-    build_global_reproducibility_claim,
+    build_executable_run_contract_claim,
+    build_historical_replay_universe_exact_replay_claim,
     build_supported_boundary_verdict,
     evaluate_threshold_failures,
     overall_blockers,
@@ -65,7 +66,13 @@ def build_reproducibility_audit_scoring(summary: JsonDict) -> JsonDict:
             required_profile=required_profile,
             threshold_failures=threshold_failures,
         ),
-        "global_reproducibility_claim": build_global_reproducibility_claim(
+        "historical_replay_universe_exact_replay_claim": (
+            build_historical_replay_universe_exact_replay_claim(
+                summary=summary,
+                evidence_refs=evidence_refs,
+            )
+        ),
+        "executable_run_contract_claim": build_executable_run_contract_claim(
             summary=summary,
             evidence_refs=evidence_refs,
         ),

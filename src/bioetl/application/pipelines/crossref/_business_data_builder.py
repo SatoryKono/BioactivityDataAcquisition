@@ -341,9 +341,7 @@ def build_crossref_business_data(
                 else None
             ),
             references_raw_json=(
-                references_raw_json
-                if isinstance(references_raw_json, str)
-                else None
+                references_raw_json if isinstance(references_raw_json, str) else None
             ),
             references_canonical_json=(
                 references_canonical_json

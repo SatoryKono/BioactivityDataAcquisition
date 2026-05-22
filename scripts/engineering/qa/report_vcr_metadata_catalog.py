@@ -17,6 +17,7 @@ CATALOG_SCHEMA_VERSION = 1
 DEFAULT_VCR_ROOT = Path("tests/fixtures/vcr")
 DEFAULT_OUTPUT = Path("reports/quality/vcr-metadata-catalog.json")
 REACHABILITY_SCAN_ROOTS = (Path("tests"),)
+REVIEWED_UNREFERENCED_STATUS = "reviewed_unreferenced"
 RF013_HEALTH_CASE_PATTERN = re.compile(
     r"^rf013_(?P<provider>[a-z0-9_]+)_health_case_\d+$"
 )
@@ -94,6 +95,17 @@ def _metadata_status(metadata_payload: object) -> str:
     if isinstance(value, str) and value:
         return value
     return "present"
+
+
+def _is_reviewed_unreferenced_metadata(metadata_payload: object) -> bool:
+    if not isinstance(metadata_payload, dict):
+        return False
+    return (
+        metadata_payload.get("reachability_review_status")
+        == REVIEWED_UNREFERENCED_STATUS
+        and bool(metadata_payload.get("reachability_review_ref"))
+        and bool(metadata_payload.get("reachability_review_rationale"))
+    )
 
 
 def _load_existing_metadata_payload(path: Path) -> object | None:
@@ -203,6 +215,7 @@ def _reachability_status_and_owners(
     cassette_path: Path,
     metadata_path: Path,
     has_metadata_sidecar: bool,
+    metadata_payload: object | None,
     direct_owners: list[str],
     repo_root: Path,
 ) -> tuple[str, list[str]]:
@@ -217,6 +230,8 @@ def _reachability_status_and_owners(
         return "generated_reference", generated_owners
 
     if has_metadata_sidecar:
+        if _is_reviewed_unreferenced_metadata(metadata_payload):
+            return "metadata_reviewed", [metadata_path.as_posix()]
         return "metadata_review_required", [metadata_path.as_posix()]
     return "unowned", []
 
@@ -254,6 +269,7 @@ def iter_catalog_rows(vcr_root: Path) -> list[CassetteCatalogRow]:
             cassette_path=cassette_path,
             metadata_path=metadata_path,
             has_metadata_sidecar=has_metadata_sidecar,
+            metadata_payload=metadata_payload,
             direct_owners=direct_owners_by_path.get(cassette_path.as_posix(), []),
             repo_root=repo_root,
         )

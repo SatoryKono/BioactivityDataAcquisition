@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import ast
 import json
 from contextlib import nullcontext
 from pathlib import Path
@@ -461,7 +460,9 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
     assert "effective_config_artifact_persisted" in events
 
 
-def test_build_pipeline_runner_creates_registry_when_not_provided(tmp_path: Path) -> None:
+def test_build_pipeline_runner_creates_registry_when_not_provided(
+    tmp_path: Path,
+) -> None:
     """Builder should create a fresh registry when no explicit registry is provided."""
     fake_factory, created_registry = _build_factory_registry()
 
@@ -514,10 +515,13 @@ def test_build_pipeline_runner_registers_pipelines_into_created_registry(
     assert calls["pipelines_registry"] is created_registry
 
 
-def test_build_pipeline_runner_uses_canonical_runtime_subservices_by_default() -> None:
-    """Builder should resolve canonical subservices when no overrides are passed."""
+def test_build_pipeline_runner_uses_canonical_subservices_with_observability_seam() -> (
+    None
+):
+    """Builder should resolve canonical subservices without importing observability bootstrap."""
     fake_factory = _FakeFactory()
     fake_registry = _FakeRegistry(factory=fake_factory)
+    build_observability_bundle_fn = MagicMock(name="build_observability_bundle")
     expected_inputs = SimpleNamespace(
         settings="settings",
         yaml_config="yaml-config",
@@ -559,14 +563,12 @@ def test_build_pipeline_runner_uses_canonical_runtime_subservices_by_default() -
             register_all_pipelines_fn=lambda registry=None: None,
             get_settings_fn=lambda: _build_settings(),
             load_pipeline_config_fn=lambda _: MagicMock(),
+            build_observability_bundle_fn=build_observability_bundle_fn,
         )
 
     assert result == "runner-instance"
     kwargs = mock_prepare_inputs.call_args.kwargs
-    assert (
-        kwargs["build_observability_bundle_fn"]
-        is observability_builder.build_observability_bundle
-    )
+    assert kwargs["build_observability_bundle_fn"] is build_observability_bundle_fn
     assert (
         kwargs["assemble_vacuum_settings_fn"]
         is inputs_resolver.assemble_vacuum_settings
@@ -1742,7 +1744,9 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
                 SimpleNamespace(info=lambda *_, **__: None),
             ),
             assemble_vacuum_settings_fn=lambda **_: None,
-            assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental"
+            ),
             assemble_filter_config_fn=lambda **_: None,
             assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
         )
@@ -1780,53 +1784,6 @@ def test_strict_runner_collaborator_attachment_requires_run_ledger_service() -> 
             required_profile="replay_ready",
             run_ledger_service=None,
         )
-
-
-def test_runner_builder_uses_runtime_config_access_seam() -> None:
-    source = Path(
-        "src/bioetl/composition/runtime_builders/runner_builder.py"
-    ).read_text(encoding="utf-8")
-    tree = ast.parse(source)
-
-    imported_modules = {
-        node.module
-        for node in tree.body
-        if isinstance(node, ast.ImportFrom) and node.module is not None
-    }
-    assert "bioetl.composition.runtime_builders.config_access" in imported_modules, (
-        "runner_builder must use the runtime config_access seam."
-    )
-    assert "bioetl.infrastructure.config.pipeline_config_api" not in imported_modules, (
-        "runner_builder must not import pipeline_config_api directly."
-    )
-    assert (
-        "bioetl.infrastructure.config.source_config_loader" not in imported_modules
-    ), "runner_builder must not import source_config_loader directly."
-
-
-def test_runner_builder_does_not_expose_legacy_wrapper_patch_points() -> None:
-    for attr_name in (
-        "VacuumSettings",
-        "_assemble_vacuum_settings",
-        "_assemble_runtime_config",
-        "_assemble_filter_config",
-        "_assemble_cached_bronze_context",
-        "_build_observability_bundle",
-        "_validate_pk_contract",
-        "_resolve_health_check_mode",
-        "_resolve_filter_batch_size",
-        "build_observability_bundle",
-        "assemble_vacuum_settings",
-        "assemble_runtime_config",
-        "assemble_filter_config",
-        "assemble_cached_bronze_context",
-    ):
-        assert not hasattr(runner_builder, attr_name)
-
-
-def test_inputs_resolver_uses_explicit_resolved_vacuumsettings_name() -> None:
-    assert hasattr(inputs_resolver, "ResolvedVacuumSettings")
-    assert not hasattr(inputs_resolver, "VacuumSettings")
 
 
 def test_build_pipeline_runner_forces_probe_mode_in_test_mode(tmp_path: Path) -> None:

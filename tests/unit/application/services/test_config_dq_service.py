@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import importlib.util
-import hashlib
 import json
 import sys
 from datetime import datetime
@@ -13,9 +12,6 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.config.dq import DQConfig
-from bioetl.domain.control_plane.config_source_hashing import (
-    compute_canonical_yaml_sha256,
-)
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
     ConfigSourceRef,
@@ -342,6 +338,7 @@ def test_get_effective_config_artifact_handles_present_and_missing_dq_config() -
     assert [src.source_path for src in first_call["source_refs"]] == [
         "configs/base/pipeline.yaml",
         "configs/providers/crossref.yaml",
+        "configs/entities/crossref/publication.yaml",
     ]
 
     def _missing_dq_config(_pipeline_name: str) -> dict[str, object]:
@@ -378,16 +375,30 @@ def test_get_effective_config_artifact_publishes_explicit_dq_strict_validation()
     assert call["resolution_policy"].strict_validation is True
 
 
-def test_get_effective_config_artifact_persists_semantic_and_raw_source_hashes(
-    tmp_path: Path,
-) -> None:
+def test_get_effective_config_artifact_uses_injected_source_ref_provider() -> None:
     logger = MagicMock()
-    base_config = tmp_path / "configs" / "base" / "pipeline.yaml"
-    provider_config = tmp_path / "configs" / "providers" / "crossref.yaml"
-    base_config.parent.mkdir(parents=True, exist_ok=True)
-    provider_config.parent.mkdir(parents=True, exist_ok=True)
-    base_config.write_text("pipeline:\n  version: 1\n", encoding="utf-8")
-    provider_config.write_text("provider:\n  name: crossref\n", encoding="utf-8")
+    provider_calls: list[dict[str, str]] = []
+
+    def _source_ref_provider(*, provider: str, entity: str) -> list[ConfigSourceRef]:
+        provider_calls.append({"provider": provider, "entity": entity})
+        return [
+            ConfigSourceRef(
+                source_type="file",
+                source_path="configs/base/pipeline.yaml",
+                source_hash="semantic-base",
+                raw_source_hash="raw-base",
+                source_hash_strategy="canonical_yaml",
+                priority=1,
+            ),
+            ConfigSourceRef(
+                source_type="file",
+                source_path="configs/entities/crossref/publication.yaml",
+                source_hash="semantic-entity",
+                raw_source_hash="raw-entity",
+                source_hash_strategy="canonical_yaml",
+                priority=2,
+            ),
+        ]
 
     effective_service = _StubEffectiveConfigService(_sample_artifact_dict())
     service = ConfigDQService(
@@ -398,19 +409,20 @@ def test_get_effective_config_artifact_persists_semantic_and_raw_source_hashes(
         },
         _dq_config_loader=lambda pipeline_name: DQConfig(contract_ref="dq.crossref"),
         _effective_config_service=effective_service,
-        _repo_root=tmp_path,
+        _config_source_ref_provider=_source_ref_provider,
     )
 
     service.get_effective_config_artifact("crossref_publication")
 
     source_refs = effective_service.create_calls[0]["source_refs"]
+    assert provider_calls == [{"provider": "crossref", "entity": "publication"}]
     assert [src.source_hash for src in source_refs] == [
-        compute_canonical_yaml_sha256(base_config.read_bytes()),
-        compute_canonical_yaml_sha256(provider_config.read_bytes()),
+        "semantic-base",
+        "semantic-entity",
     ]
     assert [src.raw_source_hash for src in source_refs] == [
-        hashlib.sha256(base_config.read_bytes()).hexdigest(),
-        hashlib.sha256(provider_config.read_bytes()).hexdigest(),
+        "raw-base",
+        "raw-entity",
     ]
     assert [src.source_hash_strategy for src in source_refs] == [
         "canonical_yaml",

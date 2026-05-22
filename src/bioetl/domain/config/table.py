@@ -26,6 +26,7 @@ class IdempotencyContract(StrEnum):
     OCCURRENCE_ONLY = "occurrence_only"
     DISALLOWED = "disallowed"
 
+
 IDEMPOTENCY_CONTRACT_VALUES: frozenset[str] = frozenset(
     contract.value for contract in IdempotencyContract
 )

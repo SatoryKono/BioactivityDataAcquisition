@@ -87,7 +87,9 @@ def test_validate_blocked_lane_matches_catalog(tmp_path: Path) -> None:
 def test_validate_review_lanes_accepts_absent_transient_root_candidates(
     tmp_path: Path,
 ) -> None:
-    canonical_path = tmp_path / "reports" / "observability" / "runtime_cardinality_inventory.json"
+    canonical_path = (
+        tmp_path / "reports" / "observability" / "runtime_cardinality_inventory.json"
+    )
     canonical_path.parent.mkdir(parents=True, exist_ok=True)
     canonical_path.write_text("{}", encoding="utf-8")
 

@@ -236,9 +236,7 @@ def test_runtime_anchor_service_path_matches_domain_runtime_anchor_fingerprint()
         manifest_id=normalized_payload["manifest_id"],
         contract_ref=normalized_payload["contract_ref"],
         contract_version=normalized_payload["contract_version"],
-        effective_config_artifact_id=normalized_payload[
-            "effective_config_artifact_id"
-        ],
+        effective_config_artifact_id=normalized_payload["effective_config_artifact_id"],
     )
     checkpoint_metadata = CheckpointMetadata(
         records_processed=1,
@@ -246,9 +244,7 @@ def test_runtime_anchor_service_path_matches_domain_runtime_anchor_fingerprint()
         manifest_id=normalized_payload["manifest_id"],
         contract_ref=normalized_payload["contract_ref"],
         contract_version=normalized_payload["contract_version"],
-        effective_config_artifact_id=normalized_payload[
-            "effective_config_artifact_id"
-        ],
+        effective_config_artifact_id=normalized_payload["effective_config_artifact_id"],
     )
 
     result = service.validate_minimum_compatibility(

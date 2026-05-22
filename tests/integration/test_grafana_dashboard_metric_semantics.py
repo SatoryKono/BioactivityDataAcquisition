@@ -354,9 +354,7 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
         "Recent Terminal Runs": (9011, "bioetl_pipeline_runs_total"),
     }
 
-    for dashboard_path in (
-        Path("grafana/dashboards/bioetl-overview-v2.json"),
-    ):
+    for dashboard_path in (Path("grafana/dashboards/bioetl-overview-v2.json"),):
         dashboard = load_dashboard(dashboard_path)
         panels = {
             panel.get("title"): panel
@@ -1718,8 +1716,9 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     ):
         assert mapping_options[label]["text"] == display_label
         if label in _PROCESSED_RECORDS_PRIMARY_COLORS:
-            assert mapping_options[label]["color"] == (
-                _PROCESSED_RECORDS_PRIMARY_COLORS[label]
+            assert (
+                mapping_options[label]["color"]
+                == (_PROCESSED_RECORDS_PRIMARY_COLORS[label])
             )
         else:
             assert "color" not in mapping_options[label]

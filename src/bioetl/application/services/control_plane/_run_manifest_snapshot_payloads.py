@@ -50,12 +50,16 @@ def source_ref_payload(source_ref: RunSourceRef) -> dict[str, object]:
     }
 
 
-def source_refs_payload(source_refs: tuple[RunSourceRef, ...]) -> list[dict[str, object]]:
+def source_refs_payload(
+    source_refs: tuple[RunSourceRef, ...],
+) -> list[dict[str, object]]:
     """Return the manifest payload shape for all source references."""
     return [source_ref_payload(source_ref) for source_ref in source_refs]
 
 
-def manifest_input_snapshot_trace_refs(manifest: RunManifest) -> list[dict[str, object]]:
+def manifest_input_snapshot_trace_refs(
+    manifest: RunManifest,
+) -> list[dict[str, object]]:
     """Return deterministic flattened snapshot provenance from manifest source refs."""
     refs: list[dict[str, object]] = []
     for source_ref in manifest.source_refs:

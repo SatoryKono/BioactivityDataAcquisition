@@ -246,15 +246,17 @@ def test_run_context_factory_accepts_dataclass_contract_identity() -> None:
         provider="chembl",
         entity_type_extractor=lambda _pipeline_name: "activity",
         config_hash_getter=lambda _yaml_config: "resolved-hash",
-        contract_identity_resolver=lambda _provider, _entity: RunManifestContractIdentity(
-            contract_ref="chembl.activity",
-            contract_version="1.0.0",
-            contract_schema_hash="schema-hash",
-            dq_policy_ref="dq.policy",
-            rule_bundle_version="rules-v1",
-            normalization_profile_ref="chembl.activity",
-            normalization_profile_version="1.2.3",
-            normalization_profile_hash="profile-hash",
+        contract_identity_resolver=lambda _provider, _entity: (
+            RunManifestContractIdentity(
+                contract_ref="chembl.activity",
+                contract_version="1.0.0",
+                contract_schema_hash="schema-hash",
+                dq_policy_ref="dq.policy",
+                rule_bundle_version="rules-v1",
+                normalization_profile_ref="chembl.activity",
+                normalization_profile_version="1.2.3",
+                normalization_profile_hash="profile-hash",
+            )
         ),
     )
 

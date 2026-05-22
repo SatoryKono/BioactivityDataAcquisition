@@ -109,7 +109,9 @@ class TestCompositeGoldJsonContracts:
 
         assert properties["entity_id"]["description"] == entity_description
 
-    def test_composite_activity_taxonomy_id_is_published_with_integer_typing(self) -> None:
+    def test_composite_activity_taxonomy_id_is_published_with_integer_typing(
+        self,
+    ) -> None:
         path = CONTRACTS_DIR / "composite_activity_v1.0.json"
         contract = json.loads(path.read_text(encoding="utf-8"))
         taxonomy = contract["properties"]["taxonomy_id"]

@@ -66,9 +66,7 @@ pytestmark = pytest.mark.unit
 FIXTURE_DIR = Path("tests/fixtures/golden/reproducibility")
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 _FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
-_SOURCE_FINGERPRINT = (
-    "1750d384e3efab89c50eff0b4808a22adc1f4023c3f023e011cc50d41a2431a9"
-)
+_SOURCE_FINGERPRINT = "1750d384e3efab89c50eff0b4808a22adc1f4023c3f023e011cc50d41a2431a9"
 
 
 _InMemoryRunManifestStore = InMemoryRunManifestStore

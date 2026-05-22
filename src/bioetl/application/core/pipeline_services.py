@@ -39,6 +39,7 @@ if TYPE_CHECKING:
         SilverDQAnalyzerPort,
     )
 
+
 @dataclass(frozen=True)
 class PipelineService:
     """Injected dependencies for pipeline execution.

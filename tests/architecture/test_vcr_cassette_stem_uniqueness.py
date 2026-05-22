@@ -29,9 +29,7 @@ def test_vcr_cassette_stems_are_unique_across_fixture_tree() -> None:
         stems[path.stem].append(path.relative_to(ROOT).as_posix())
 
     duplicates = {
-        stem: paths
-        for stem, paths in sorted(stems.items())
-        if len(paths) > 1
+        stem: paths for stem, paths in sorted(stems.items()) if len(paths) > 1
     }
 
     assert duplicates == {}

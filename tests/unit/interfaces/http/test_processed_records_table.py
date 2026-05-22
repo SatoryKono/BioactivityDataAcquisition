@@ -121,9 +121,7 @@ class TestProcessedRecordsTable:
         )
         assert rows["09 gold_quarantined_records"]["row_status"] == "gold_deficit"
         assert rows["10 gold_skipped_records"]["row_status"] == "gold_deficit"
-        assert rows["11 gold_deduplicated_records"]["row_status"] == (
-            "gold_deficit"
-        )
+        assert rows["11 gold_deduplicated_records"]["row_status"] == ("gold_deficit")
         assert rows["01 bronze_records"]["percintage"] == "01 bronze_records|100%"
         assert rows["02 silver_valid_records"]["percintage"] == (
             "02 silver_valid_records|91.0%"

@@ -135,9 +135,7 @@ def test_workflow_run_options_merge_required_persistence_profile() -> None:
 
     assert merged.limit == 100
     assert merged.required_persistence_profile == "replay_ready"
-    assert merged.to_mapping()["required_persistence_profile"] == (
-        "replay_ready"
-    )
+    assert merged.to_mapping()["required_persistence_profile"] == ("replay_ready")
 
 
 @pytest.mark.unit

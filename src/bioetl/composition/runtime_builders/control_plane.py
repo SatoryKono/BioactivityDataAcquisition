@@ -5,17 +5,17 @@ from __future__ import annotations
 from dataclasses import dataclass, is_dataclass, replace
 from typing import TYPE_CHECKING, Protocol, cast
 
-import bioetl.composition.runtime_builders._run_manifest_support as _manifest_support
+import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
 from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
     resolve_manifest_reproducibility_context,
-)
-from bioetl.composition.runtime_builders._run_manifest_support import (
-    ManifestControlPlaneRefs as _ManifestControlPlaneRefs,
 )
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     create_and_persist_effective_config_artifact,
 )
 from bioetl.composition.runtime_builders.run_manifest_builder import create_run_manifest
+from bioetl.composition.runtime_builders.run_manifest_support import (
+    ManifestControlPlaneRefs as _ManifestControlPlaneRefs,
+)
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
@@ -31,6 +31,7 @@ if TYPE_CHECKING:
         RunnerInputs,
     )
     from bioetl.domain.context import PipelineRunContext
+
 
 class _MutableManifestContext(Protocol):
     manifest_id: str | None
@@ -128,15 +129,11 @@ def _extract_optional_updates_from_refs(
             control_plane_refs, "execution_fingerprint", None
         ),
         config_hash=getattr(control_plane_refs, "config_hash", None),
-        resolved_config_hash=getattr(
-            control_plane_refs, "resolved_config_hash", None
-        ),
+        resolved_config_hash=getattr(control_plane_refs, "resolved_config_hash", None),
         effective_config_hash=getattr(
             control_plane_refs, "effective_config_hash", None
         ),
-        source_fingerprint=getattr(
-            control_plane_refs, "source_fingerprint", None
-        ),
+        source_fingerprint=getattr(control_plane_refs, "source_fingerprint", None),
         dq_contract_compatibility_hash=getattr(
             control_plane_refs, "dq_contract_compatibility_hash", None
         ),
@@ -152,13 +149,9 @@ def _extract_optional_updates_from_refs(
         ),
         contract_ref=getattr(control_plane_refs, "contract_ref", None),
         contract_version=getattr(control_plane_refs, "contract_version", None),
-        contract_schema_hash=getattr(
-            control_plane_refs, "contract_schema_hash", None
-        ),
+        contract_schema_hash=getattr(control_plane_refs, "contract_schema_hash", None),
         dq_policy_ref=getattr(control_plane_refs, "dq_policy_ref", None),
-        rule_bundle_version=getattr(
-            control_plane_refs, "rule_bundle_version", None
-        ),
+        rule_bundle_version=getattr(control_plane_refs, "rule_bundle_version", None),
         normalization_profile_ref=getattr(
             control_plane_refs, "normalization_profile_ref", None
         ),

@@ -930,7 +930,9 @@ class TestBatchTransformerAggregationHelpers:
         assert result.gold_excluded_by_contract_count == 0
         assert result.records_quarantine_failed == 1
 
-    def test_apply_stream_transform_result_tracks_gold_excluded_by_contract(self) -> None:
+    def test_apply_stream_transform_result_tracks_gold_excluded_by_contract(
+        self,
+    ) -> None:
         """Stream aggregation should count records excluded from Gold by contract."""
         state = create_transform_aggregation_state()
 

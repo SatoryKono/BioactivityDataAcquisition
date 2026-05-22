@@ -62,6 +62,8 @@ def _field_validations(
         for validation in validations
         if isinstance(validation, dict) and validation.get("field") == field
     ]
+
+
 def _assert_alias_resolves_to_canonical(
     registry: SemanticFieldRegistry,
     *,

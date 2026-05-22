@@ -116,10 +116,8 @@ class TestBuildPostrunService:
             context=pipeline.context,
             dq_service=dq_service,
             lifecycle_service=lifecycle_service,
-            storage=pipeline.services.storage,
-            metrics=pipeline.services.metrics,
-            logger=logger,
             dependencies=dependencies,
+            services=pipeline.services,
             tracer=ANY,
         )
 

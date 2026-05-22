@@ -111,9 +111,7 @@ def build_universal_scope_global_claim(
         has_irrecoverable=has_irrecoverable,
     )
     if claimed:
-        reason = (
-            "all_retained_historical_runs_have_exact_replay_evidence_or_certified_parent_state"
-        )
+        reason = "all_retained_historical_runs_have_exact_replay_evidence_or_certified_parent_state"
     else:
         reason = universal_scope_claim_block_reason(
             unresolved_records=unresolved_records,

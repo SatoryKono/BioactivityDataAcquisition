@@ -239,6 +239,10 @@ def test_create_manifest_requires_git_commit_even_for_degraded_profile() -> None
             replace(
                 _make_request(),
                 git_commit=None,
+                provider="openalex",
+                entity="works",
+                pipeline_name="openalex_works",
+                contract_ref="openalex.works",
                 source_revision_state="dirty_state_unknown",
                 replay_capability=ReplayCapability.REBUILD_ONLY,
                 launch_context={
@@ -263,6 +267,10 @@ def test_create_manifest_requires_dependency_lock_even_for_degraded_profile() ->
             replace(
                 _make_request(),
                 dependency_lock_hash=None,
+                provider="openalex",
+                entity="works",
+                pipeline_name="openalex_works",
+                contract_ref="openalex.works",
                 replay_capability=ReplayCapability.REBUILD_ONLY,
                 launch_context={
                     "limit": 100,
@@ -273,6 +281,32 @@ def test_create_manifest_requires_dependency_lock_even_for_degraded_profile() ->
         )
 
     assert store.get("manifest-missing-lock-degraded") is None
+
+
+def test_create_manifest_rejects_degraded_profile_for_replay_capable_family() -> None:
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-degraded-replay-capable-family",
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="cannot persist required_persistence_profile='degraded_observable'",
+    ):
+        service.create_manifest(
+            replace(
+                _make_request(),
+                replay_capability=ReplayCapability.REBUILD_ONLY,
+                launch_context={
+                    "limit": 100,
+                    "resume": False,
+                    "required_persistence_profile": "degraded_observable",
+                },
+            )
+        )
+
+    assert store.get("manifest-degraded-replay-capable-family") is None
 
 
 def test_create_manifest_rejects_exact_capability_claim_without_snapshot_envelope() -> (
@@ -748,6 +782,10 @@ def test_create_manifest_allows_dirty_source_revision_state_for_degraded_context
     manifest = service.create_manifest(
         replace(
             _make_request(),
+            provider="openalex",
+            entity="works",
+            pipeline_name="openalex_works",
+            contract_ref="openalex.works",
             source_revision_state="dirty",
             replay_capability=ReplayCapability.REBUILD_ONLY,
             launch_context={

@@ -9,66 +9,13 @@
     "duplicate_scenario_stem_count": 0,
     "direct_reachable_cassette_count": 84,
     "generated_reachable_cassette_count": 60,
-    "metadata_review_required_cassette_count": 52,
+    "metadata_review_required_cassette_count": 0,
     "unowned_cassette_count": 0
   },
   "pruning": {
     "duplicate_scenario_stems": {},
     "orphan_metadata_sidecar_count": 0,
-    "metadata_review_required_cassettes": [
-      "tests/fixtures/vcr/chembl/test_chembl_subcellular_fraction_full_cycle.yaml",
-      "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_tissue.yaml",
-      "tests/fixtures/vcr/chembl/TestChemblActivityPipeline.test_chembl_activity_error_handling.yaml",
-      "tests/fixtures/vcr/chembl/TestChemblActivityPipeline.test_chembl_activity_happy_path.yaml",
-      "tests/fixtures/vcr/chembl/TestChemblAdapter.test_get_entity_count.yaml",
-      "tests/fixtures/vcr/chembl/TestChemblAdapter.test_health_check.yaml",
-      "tests/fixtures/vcr/chembl/TestChemblCellLinePipeline.test_chembl_cell_line_source_fields.yaml",
-      "tests/fixtures/vcr/chembl/TestChemblCompoundRecordPipeline.test_chembl_compound_record_error_handling.yaml",
-      "tests/fixtures/vcr/chembl/TestChEMBLIntegration.test_chembl_extract_transform_load.yaml",
-      "tests/fixtures/vcr/crossref/test_crossref_batch_fetch.yaml",
-      "tests/fixtures/vcr/crossref/test_crossref_fetch_by_doi.yaml",
-      "tests/fixtures/vcr/crossref/test_crossref_health_check.yaml",
-      "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_batch_dois.yaml",
-      "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_with_fallback.yaml",
-      "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_title_only_lookup.yaml",
-      "tests/fixtures/vcr/openalex/TestOpenAlexAdapterRateLimiting.test_rate_limiting_not_exceeded.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_returns_empty_list.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_single_page_response.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_name_http_503_is_handled.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_smiles_http_503_is_handled.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_aspirin.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_caffeine.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_water.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_nonexistent_name.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_with_limit.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_cid.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_smiles.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_batch.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_invalid_skipped.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_single.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_with_limit.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_aspirin.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_multiple.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_empty_skipped.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_ethanol.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_multiple.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_with_limit.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health_check_returns_healthy.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health_check_uses_water_compound.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_physicochemical_properties.yaml",
-      "tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_structural_identifiers.yaml",
-      "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_by_doi.yaml",
-      "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_filtered_with_fallback.yaml",
-      "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_health_check.yaml",
-      "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_title_only_lookup.yaml",
-      "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_health_check.yaml",
-      "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_fetch_proteins.yaml",
-      "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_health_check.yaml",
-      "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_health_check.yaml",
-      "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_mixed_results.yaml",
-      "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_multiple_ids.yaml",
-      "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_not_found_id.yaml"
-    ],
+    "metadata_review_required_cassettes": [],
     "unowned_cassettes": []
   },
   "providers": {
@@ -332,7 +279,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_subcellular_fraction_full_cycle_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/chembl/test_chembl_subcellular_fraction_full_cycle_meta.yaml"
       ]
@@ -504,7 +451,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_tissue_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_tissue_meta.yaml"
       ]
@@ -621,7 +568,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChemblActivityPipeline.test_chembl_activity_error_handling_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/chembl/TestChemblActivityPipeline.test_chembl_activity_error_handling_meta.yaml"
       ]
@@ -634,7 +581,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChemblActivityPipeline.test_chembl_activity_happy_path_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/chembl/TestChemblActivityPipeline.test_chembl_activity_happy_path_meta.yaml"
       ]
@@ -660,7 +607,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChemblAdapter.test_get_entity_count_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/chembl/TestChemblAdapter.test_get_entity_count_meta.yaml"
       ]
@@ -673,7 +620,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChemblAdapter.test_health_check_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/chembl/TestChemblAdapter.test_health_check_meta.yaml"
       ]
@@ -699,7 +646,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChemblCellLinePipeline.test_chembl_cell_line_source_fields_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/chembl/TestChemblCellLinePipeline.test_chembl_cell_line_source_fields_meta.yaml"
       ]
@@ -712,7 +659,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChemblCompoundRecordPipeline.test_chembl_compound_record_error_handling_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/chembl/TestChemblCompoundRecordPipeline.test_chembl_compound_record_error_handling_meta.yaml"
       ]
@@ -738,7 +685,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChEMBLIntegration.test_chembl_extract_transform_load_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/chembl/TestChEMBLIntegration.test_chembl_extract_transform_load_meta.yaml"
       ]
@@ -1026,7 +973,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/crossref/test_crossref_batch_fetch_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/crossref/test_crossref_batch_fetch_meta.yaml"
       ]
@@ -1039,7 +986,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/crossref/test_crossref_fetch_by_doi_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/crossref/test_crossref_fetch_by_doi_meta.yaml"
       ]
@@ -1052,7 +999,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/crossref/test_crossref_health_check_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/crossref/test_crossref_health_check_meta.yaml"
       ]
@@ -1380,7 +1327,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_batch_dois_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_batch_dois_meta.yaml"
       ]
@@ -1406,7 +1353,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_with_fallback_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_with_fallback_meta.yaml"
       ]
@@ -1446,7 +1393,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_title_only_lookup_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_title_only_lookup_meta.yaml"
       ]
@@ -1459,7 +1406,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterRateLimiting.test_rate_limiting_not_exceeded_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/openalex/TestOpenAlexAdapterRateLimiting.test_rate_limiting_not_exceeded_meta.yaml"
       ]
@@ -1554,7 +1501,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_returns_empty_list_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_returns_empty_list_meta.yaml"
       ]
@@ -1567,7 +1514,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_single_page_response_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_single_page_response_meta.yaml"
       ]
@@ -1580,7 +1527,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_name_http_503_is_handled_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_name_http_503_is_handled_meta.yaml"
       ]
@@ -1593,7 +1540,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_smiles_http_503_is_handled_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_smiles_http_503_is_handled_meta.yaml"
       ]
@@ -1606,7 +1553,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_aspirin_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_aspirin_meta.yaml"
       ]
@@ -1619,7 +1566,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_caffeine_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_caffeine_meta.yaml"
       ]
@@ -1632,7 +1579,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_water_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_water_meta.yaml"
       ]
@@ -1645,7 +1592,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_nonexistent_name_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_nonexistent_name_meta.yaml"
       ]
@@ -1658,7 +1605,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_with_limit_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_with_limit_meta.yaml"
       ]
@@ -1671,7 +1618,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_cid_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_cid_meta.yaml"
       ]
@@ -1684,7 +1631,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_smiles_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_smiles_meta.yaml"
       ]
@@ -1697,7 +1644,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_batch_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_batch_meta.yaml"
       ]
@@ -1710,7 +1657,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_invalid_skipped_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_invalid_skipped_meta.yaml"
       ]
@@ -1723,7 +1670,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_single_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_single_meta.yaml"
       ]
@@ -1736,7 +1683,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_with_limit_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_with_limit_meta.yaml"
       ]
@@ -1749,7 +1696,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_aspirin_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_aspirin_meta.yaml"
       ]
@@ -1762,7 +1709,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_multiple_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_multiple_meta.yaml"
       ]
@@ -1775,7 +1722,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_empty_skipped_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_empty_skipped_meta.yaml"
       ]
@@ -1788,7 +1735,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_ethanol_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_ethanol_meta.yaml"
       ]
@@ -1801,7 +1748,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_multiple_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_multiple_meta.yaml"
       ]
@@ -1814,7 +1761,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_with_limit_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_with_limit_meta.yaml"
       ]
@@ -1827,7 +1774,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health_check_returns_healthy_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health_check_returns_healthy_meta.yaml"
       ]
@@ -1840,7 +1787,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health_check_uses_water_compound_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health_check_uses_water_compound_meta.yaml"
       ]
@@ -1853,7 +1800,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_physicochemical_properties_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_physicochemical_properties_meta.yaml"
       ]
@@ -1866,7 +1813,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_structural_identifiers_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_structural_identifiers_meta.yaml"
       ]
@@ -2473,7 +2420,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_by_doi_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_by_doi_meta.yaml"
       ]
@@ -2486,7 +2433,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_filtered_with_fallback_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_filtered_with_fallback_meta.yaml"
       ]
@@ -2513,7 +2460,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_health_check_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_health_check_meta.yaml"
       ]
@@ -2526,7 +2473,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_title_only_lookup_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_title_only_lookup_meta.yaml"
       ]
@@ -2632,7 +2579,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_health_check_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_health_check_meta.yaml"
       ]
@@ -2645,7 +2592,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_fetch_proteins_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_fetch_proteins_meta.yaml"
       ]
@@ -2658,7 +2605,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_health_check_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_health_check_meta.yaml"
       ]
@@ -2671,7 +2618,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_health_check_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_health_check_meta.yaml"
       ]
@@ -2684,7 +2631,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_mixed_results_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_mixed_results_meta.yaml"
       ]
@@ -2697,7 +2644,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_multiple_ids_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_multiple_ids_meta.yaml"
       ]
@@ -2710,7 +2657,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_not_found_id_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_review_required",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_not_found_id_meta.yaml"
       ]

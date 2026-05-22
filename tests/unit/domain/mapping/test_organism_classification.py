@@ -220,7 +220,9 @@ class TestGenusFallback:
             ("Chlamydomonas reinhardtii", CellularityType.UNICELLULAR),
         ],
     )
-    def test_genus_level_fallback(self, organism: str, expected: CellularityType) -> None:
+    def test_genus_level_fallback(
+        self, organism: str, expected: CellularityType
+    ) -> None:
         result = classify_organism(organism, None)
         assert result.organism_class == expected
         assert result.source == "organism_name"

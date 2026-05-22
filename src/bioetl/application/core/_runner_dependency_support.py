@@ -54,7 +54,11 @@ def resolve_runner_dependencies(
     lifecycle_service: MedallionLifecycleService | None,
     observer: PipelineObserver | None,
 ) -> PipelineRunnerDependencies:
-    """Resolve transitional constructor parameters into structured dependencies."""
+    """Resolve transitional constructor parameters into structured dependencies.
+
+    Compatibility shim for legacy direct runner kwargs. Review for removal after
+    2026-09-30 once test-only callers migrate to ``PipelineRunnerDependencies``.
+    """
     values = {
         "executor": executor,
         "checkpoint_manager": checkpoint_manager,

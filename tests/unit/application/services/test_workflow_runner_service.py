@@ -351,7 +351,12 @@ async def test_workflow_runner_callbacks_follow_start_then_complete_order() -> N
     result = await service.run_workflow(
         config,
         step_started_callback=lambda step, fingerprint=None: events.append(
-            ("started", step.step_id, getattr(step, "transform_name", None), fingerprint)
+            (
+                "started",
+                step.step_id,
+                getattr(step, "transform_name", None),
+                fingerprint,
+            )
         ),
         step_completed_callback=lambda result: events.append(
             ("completed", result.step_id, result.status, None)
@@ -367,7 +372,9 @@ async def test_workflow_runner_callbacks_follow_start_then_complete_order() -> N
 
 
 @pytest.mark.asyncio
-async def test_workflow_runner_callbacks_record_failed_then_skipped_transition() -> None:
+async def test_workflow_runner_callbacks_record_failed_then_skipped_transition() -> (
+    None
+):
     metrics = _RecordingMetrics()
     service = WorkflowRunnerService(
         pipeline_runner=_FailingPipelineRunner(),  # type: ignore[arg-type]
@@ -412,7 +419,9 @@ async def test_workflow_runner_callbacks_record_failed_then_skipped_transition()
 
 
 @pytest.mark.asyncio
-async def test_workflow_runner_transform_fingerprint_skip_still_emits_callbacks() -> None:
+async def test_workflow_runner_transform_fingerprint_skip_still_emits_callbacks() -> (
+    None
+):
     metrics = _RecordingMetrics()
     pipeline_runner = _PipelineRunner()
     registry = WorkflowTransformRegistry()

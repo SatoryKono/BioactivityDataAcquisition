@@ -413,9 +413,12 @@ def extract_all_comments(
             )
             serialized[canonical_sidecar_field] = serialized.get(field_name)
     else:
-        for _, raw_sidecar_field, canonical_sidecar_field, _ in (
-            _UNIPROT_SEMANTIC_COMMENT_SIDECARS
-        ):
+        for (
+            _,
+            raw_sidecar_field,
+            canonical_sidecar_field,
+            _,
+        ) in _UNIPROT_SEMANTIC_COMMENT_SIDECARS:
             serialized[raw_sidecar_field] = None
             serialized[canonical_sidecar_field] = None
     return serialized

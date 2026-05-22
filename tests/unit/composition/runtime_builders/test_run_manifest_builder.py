@@ -70,16 +70,14 @@ def test_build_manifest_create_request_uses_named_contract_identity_fields(
     assert request_inputs.dq_policy_ref == identity.dq_policy_ref
     assert request_inputs.rule_bundle_version == identity.rule_bundle_version
     assert (
-        request_inputs.normalization_profile_ref
-        == identity.normalization_profile_ref
+        request_inputs.normalization_profile_ref == identity.normalization_profile_ref
     )
     assert (
         request_inputs.normalization_profile_version
         == identity.normalization_profile_version
     )
     assert (
-        request_inputs.normalization_profile_hash
-        == identity.normalization_profile_hash
+        request_inputs.normalization_profile_hash == identity.normalization_profile_hash
     )
     assert request_inputs.reproducibility_context.required_persistence_profile == (
         "replay_ready"
@@ -119,10 +117,7 @@ def test_create_control_plane_refs_uses_named_contract_identity_fields() -> None
     assert refs.dq_policy_ref == identity.dq_policy_ref
     assert refs.rule_bundle_version == identity.rule_bundle_version
     assert refs.normalization_profile_ref == identity.normalization_profile_ref
-    assert (
-        refs.normalization_profile_version
-        == identity.normalization_profile_version
-    )
+    assert refs.normalization_profile_version == identity.normalization_profile_version
     assert refs.normalization_profile_hash == identity.normalization_profile_hash
     assert refs.required_persistence_profile == "replay_ready"
     assert refs.source_fingerprint == "source-fingerprint-1"

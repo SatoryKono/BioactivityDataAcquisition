@@ -56,9 +56,10 @@ if not defined REPO_WSL (
     exit /b 1
 )
 
+REM Run with stdin/stdout/stderr connected to terminal
 if defined WSL_DISTRO (
-    "%WSL_EXE%" -d "%WSL_DISTRO%" -- bash "%REPO_WSL%/scripts/ops/launchers/codex/codex.sh" %*
+    "%WSL_EXE%" -d "%WSL_DISTRO%" -- bash -i "%REPO_WSL%/scripts/ops/launchers/codex/codex.sh" %*
 ) else (
-    "%WSL_EXE%" -- bash "%REPO_WSL%/scripts/ops/launchers/codex/codex.sh" %*
+    "%WSL_EXE%" -- bash -i "%REPO_WSL%/scripts/ops/launchers/codex/codex.sh" %*
 )
 exit /b %errorlevel%

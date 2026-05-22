@@ -904,17 +904,15 @@
       "public_path": "src/bioetl/composition/runtime_builders/run_manifest_support.py",
       "private_module": "bioetl.composition.runtime_builders._run_manifest_support",
       "public_module": "bioetl.composition.runtime_builders.run_manifest_support",
-      "public_src_importer_count": 4,
+      "public_src_importer_count": 12,
       "public_test_importer_count": 4,
-      "private_src_importer_count": 9,
+      "private_src_importer_count": 1,
       "private_test_importer_count": 1,
       "public_src_importers": [
         "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py",
         "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py",
         "src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py",
-        "src/bioetl/composition/factories/pipeline/run_context_factory.py"
-      ],
-      "private_src_importers": [
+        "src/bioetl/composition/factories/pipeline/run_context_factory.py",
         "src/bioetl/composition/runtime_builders/_effective_config_artifact_builder_support.py",
         "src/bioetl/composition/runtime_builders/_run_manifest_builder_policy.py",
         "src/bioetl/composition/runtime_builders/_run_manifest_create_spec_support.py",
@@ -922,7 +920,9 @@
         "src/bioetl/composition/runtime_builders/_run_manifest_publication_support.py",
         "src/bioetl/composition/runtime_builders/control_plane.py",
         "src/bioetl/composition/runtime_builders/effective_config_artifact_builder.py",
-        "src/bioetl/composition/runtime_builders/run_manifest_builder.py",
+        "src/bioetl/composition/runtime_builders/run_manifest_builder.py"
+      ],
+      "private_src_importers": [
         "src/bioetl/composition/runtime_builders/run_manifest_support.py"
       ]
     },
@@ -1071,18 +1071,16 @@
       "public_module": "bioetl.composition.runtime_builders.run_manifest_support",
       "private_module": "bioetl.composition.runtime_builders._run_manifest_support",
       "canonical_first_party_module": "bioetl.composition.runtime_builders.run_manifest_support",
-      "max_public_src_importers": 4,
-      "max_private_src_importers": 9,
-      "rationale": "This runtime-builder twin still carries the heaviest split-import skew in the current census and needs a no-growth ratchet while narrowing remains pending.",
-      "current_public_src_importer_count": 4,
-      "current_private_src_importer_count": 9,
+      "max_public_src_importers": 12,
+      "max_private_src_importers": 1,
+      "rationale": "Issue #4485 collapsed first-party runtime-builder imports onto the public `run_manifest_support` seam. The public budget now reflects the canonicalized importer count, while private imports are limited to the public re-export module only.",
+      "current_public_src_importer_count": 12,
+      "current_private_src_importer_count": 1,
       "current_public_src_importers": [
         "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py",
         "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py",
         "src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py",
-        "src/bioetl/composition/factories/pipeline/run_context_factory.py"
-      ],
-      "current_private_src_importers": [
+        "src/bioetl/composition/factories/pipeline/run_context_factory.py",
         "src/bioetl/composition/runtime_builders/_effective_config_artifact_builder_support.py",
         "src/bioetl/composition/runtime_builders/_run_manifest_builder_policy.py",
         "src/bioetl/composition/runtime_builders/_run_manifest_create_spec_support.py",
@@ -1090,7 +1088,9 @@
         "src/bioetl/composition/runtime_builders/_run_manifest_publication_support.py",
         "src/bioetl/composition/runtime_builders/control_plane.py",
         "src/bioetl/composition/runtime_builders/effective_config_artifact_builder.py",
-        "src/bioetl/composition/runtime_builders/run_manifest_builder.py",
+        "src/bioetl/composition/runtime_builders/run_manifest_builder.py"
+      ],
+      "current_private_src_importers": [
         "src/bioetl/composition/runtime_builders/run_manifest_support.py"
       ]
     },
@@ -1157,7 +1157,7 @@
         "allowlisted_path_prefixes": [
           "src/bioetl/composition/"
         ],
-        "rationale": "`Settings` remains a retained convenience type import for composition wiring and a bounded set of infrastructure consumers, but new first-party growth through the broad package-root facade is not allowed.",
+        "rationale": "`Settings` remains a retained convenience type import for composition wiring, but new first-party growth through the broad package-root facade is not allowed.",
         "current_src_importer_count": 58,
         "current_src_importers": [
           "src/bioetl/composition/bootstrap/assembly/storage.py",
@@ -1229,7 +1229,7 @@
         "allowlisted_path_prefixes": [
           "src/bioetl/composition/"
         ],
-        "rationale": "`get_settings` remains a retained convenience seam for composition runtime/bootstrap paths and one bounded infrastructure support surface. New first-party growth through the package root is not allowed.",
+        "rationale": "`get_settings` remains a retained convenience seam for composition runtime/bootstrap paths. New first-party growth through the package root is not allowed.",
         "current_src_importer_count": 16,
         "current_src_importers": [
           "src/bioetl/composition/_pipeline_execution.py",

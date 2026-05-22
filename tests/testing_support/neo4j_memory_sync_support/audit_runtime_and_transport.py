@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from .common import *  # noqa: F401,F403
 
+
 def test_live_managed_count_helpers_batch_labels_and_relations() -> None:
     class StubClient:
         def query(
@@ -586,4 +587,3 @@ def test_neo4j_http_client_reports_all_transport_attempts(monkeypatch) -> None:
     assert "attempts:" in message
     assert f"{HOST_DOCKER_INTERNAL_HTTP_URI}/db/neo4j/tx/commit" in message
     assert f"{LOCALHOST_HTTP_URI}/db/neo4j/tx/commit" in message
-

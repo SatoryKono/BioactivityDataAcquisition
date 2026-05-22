@@ -37,9 +37,7 @@ class PublicationControlledVocabularyLoader(PublicationVocabularyPort):
             registry[(provider_name.lower(), field_name)] = frozenset(
                 self._field_values(payload, field_payload)
             )
-        return PublicationControlledVocabularyRegistry(
-            allowed_values_by_field=registry
-        )
+        return PublicationControlledVocabularyRegistry(allowed_values_by_field=registry)
 
     def _load_payload(self) -> JsonDict:
         try:
@@ -54,12 +52,18 @@ class PublicationControlledVocabularyLoader(PublicationVocabularyPort):
     ) -> tuple[tuple[str, str, JsonDict], ...]:
         fields: list[tuple[str, str, JsonDict]] = []
         for provider_name, provider_payload in providers.items():
-            if not isinstance(provider_name, str) or not isinstance(provider_payload, dict):
+            if not isinstance(provider_name, str) or not isinstance(
+                provider_payload, dict
+            ):
                 continue
             for field_name, field_payload in provider_payload.items():
-                if not isinstance(field_name, str) or not isinstance(field_payload, dict):
+                if not isinstance(field_name, str) or not isinstance(
+                    field_payload, dict
+                ):
                     continue
-                fields.append((provider_name, field_name, cast(JsonDict, field_payload)))
+                fields.append(
+                    (provider_name, field_name, cast(JsonDict, field_payload))
+                )
         return tuple(fields)
 
     @staticmethod

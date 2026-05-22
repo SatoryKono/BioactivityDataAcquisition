@@ -261,8 +261,7 @@ class TestCheckpointCompatibilityService:
         assert result.compatible is False
         assert result.execution_identity_compatible is False
         assert any(
-            "Execution identity continuity not proven" in msg
-            for msg in result.messages
+            "Execution identity continuity not proven" in msg for msg in result.messages
         )
 
     def test_validate_composite_run_identity_missing(self) -> None:
@@ -280,8 +279,7 @@ class TestCheckpointCompatibilityService:
         assert result.compatible is False
         assert result.execution_identity_compatible is False
         assert any(
-            "Execution identity continuity not proven" in msg
-            for msg in result.messages
+            "Execution identity continuity not proven" in msg for msg in result.messages
         )
 
     def test_validate_matching_execution_fingerprint_overrides_composite_drift(

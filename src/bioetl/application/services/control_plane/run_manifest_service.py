@@ -25,6 +25,10 @@ from bioetl.domain.control_plane import (
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
+    normalize_required_persistence_profile,
+)
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    resolve_reproducibility_family_profile,
 )
 from bioetl.domain.control_plane.run_manifest import (
     DOCUMENTED_SOURCE_REVISION_STATES,
@@ -51,9 +55,10 @@ def _validate_executable_code_provenance(
         request.launch_context.get("required_persistence_profile")
         or "degraded_observable"
     )
-    strict_code_provenance_required = bool(
-        request.launch_context.get("exact_replay")
-    ) or required_profile in STRICT_PERSISTENCE_PROFILES
+    strict_code_provenance_required = (
+        bool(request.launch_context.get("exact_replay"))
+        or required_profile in STRICT_PERSISTENCE_PROFILES
+    )
     if not code_provenance.git_commit:
         raise RuntimeError(
             "Run manifest requires git_commit code provenance for every "
@@ -61,8 +66,7 @@ def _validate_executable_code_provenance(
         )
     if (
         strict_code_provenance_required
-        and str(code_provenance.source_revision_state or "").strip().lower()
-        != "clean"
+        and str(code_provenance.source_revision_state or "").strip().lower() != "clean"
     ):
         raise RuntimeError(
             "Run manifest requires clean source_revision_state for exact "
@@ -128,6 +132,35 @@ def _validate_exact_replay_snapshot_claim(request: RunManifestCreateSpec) -> Non
         )
 
 
+def _validate_replay_capable_profile_floor(request: RunManifestCreateSpec) -> None:
+    """Reject executable opt-downs below the published floor for replay-capable families."""
+    configured_profile = normalize_required_persistence_profile(
+        request.launch_context.get("required_persistence_profile")
+    )
+    if configured_profile != "degraded_observable":
+        return
+    execution_context = str(
+        request.launch_context.get("execution_context") or "source"
+    ).strip()
+    profile = resolve_reproducibility_family_profile(
+        provider=request.provider,
+        entity=request.entity,
+        contract_ref=request.contract_ref,
+        execution_context=(
+            "composite" if execution_context == "composite" else "source"
+        ),
+    )
+    if (
+        profile.strict_exact_replay_supported
+        and profile.default_required_persistence_profile in STRICT_PERSISTENCE_PROFILES
+    ):
+        raise RuntimeError(
+            "Run manifest cannot persist required_persistence_profile="
+            "'degraded_observable' for replay-capable executable families; "
+            "promote the run to the published strict persistence floor or fail closed"
+        )
+
+
 @dataclass(slots=True)
 class RunManifestService(
     RunManifestHydrationMixin,
@@ -186,6 +219,7 @@ class RunManifestService(
         normalized_run_type = self._normalize_run_type(request.run_type)
         code_provenance = self._build_code_provenance(request)
         _validate_documented_code_provenance(code_provenance)
+        _validate_replay_capable_profile_floor(request)
         _validate_exact_replay_snapshot_claim(request)
         _validate_strict_input_snapshots(request)
         _validate_executable_code_provenance(request, code_provenance)

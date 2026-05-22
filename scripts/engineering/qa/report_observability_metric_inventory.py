@@ -18,6 +18,7 @@ import argparse
 import ast
 import json
 import re
+import subprocess
 import sys
 from collections import defaultdict
 from datetime import date
@@ -42,6 +43,7 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (  
 )
 
 _CANONICAL_METRIC_RE = re.compile(r"\bbioetl_[a-z0-9_]+\b")
+_PROMETHEUS_METRIC_NAME_RE = re.compile(r"^[A-Za-z_:][A-Za-z0-9_:]*$")
 
 _RUNTIME_SCAN_ROOT = Path("src/bioetl")
 _REGISTERED_SCAN_ROOT = Path("src/bioetl/infrastructure/observability")
@@ -178,10 +180,37 @@ def _iter_text_files(root: Path) -> list[Path]:
         return []
     if root.is_file():
         return [root] if root.suffix in _TEXT_SUFFIXES else []
+    discovered = _iter_text_files_with_rg(root)
+    if discovered:
+        return discovered
     return sorted(
         path
         for path in root.rglob("*")
         if path.is_file() and path.suffix in _TEXT_SUFFIXES
+    )
+
+
+def _iter_text_files_with_rg(root: Path) -> list[Path]:
+    globs = [
+        pattern
+        for suffix in sorted(_TEXT_SUFFIXES)
+        for pattern in ("-g", f"*{suffix}")
+    ]
+    try:
+        result = subprocess.run(
+            ["rg", "--files", root.as_posix(), *globs],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return []
+    if result.returncode not in {0, 1}:
+        return []
+    return sorted(
+        Path(line)
+        for line in result.stdout.splitlines()
+        if line and Path(line).suffix in _TEXT_SUFFIXES
     )
 
 
@@ -685,8 +714,20 @@ def _partition_helper_metric_candidates(
     for metric_name in metric_names:
         if metric_name.startswith("bioetl_"):
             helper_metric_names.add(metric_name)
-        else:
+        elif _is_metric_like_alias_name(metric_name):
             alias_metric_names.add(metric_name)
+
+
+def _is_metric_like_alias_name(metric_name: str) -> bool:
+    """Return True only for plausible Prometheus-style alias metric names."""
+    normalized = metric_name.strip()
+    if not normalized:
+        return False
+    if not _PROMETHEUS_METRIC_NAME_RE.fullmatch(normalized):
+        return False
+    if "_" not in normalized:
+        return False
+    return normalized.endswith(tuple(_PROMETHEUS_FAMILY_SUFFIXES))
 
 
 def _record_runtime_mentions(
@@ -700,10 +741,11 @@ def _record_runtime_mentions(
     alias_metric_names: set[str],
 ) -> None:
     for metric_name in sorted(direct_metric_names):
-        target = (
-            canonical_mentions if metric_name.startswith("bioetl_") else alias_mentions
-        )
-        target[metric_name].append(relative_path)
+        if metric_name.startswith("bioetl_"):
+            canonical_mentions[metric_name].append(relative_path)
+            continue
+        if _is_metric_like_alias_name(metric_name):
+            alias_mentions[metric_name].append(relative_path)
     for metric_name in sorted(helper_metric_names - direct_metric_names):
         helper_backed_mentions[metric_name].append(relative_path)
     for metric_name in sorted(alias_metric_names):

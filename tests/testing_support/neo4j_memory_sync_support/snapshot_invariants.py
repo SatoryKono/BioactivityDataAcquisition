@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from .common import *  # noqa: F401,F403
 
+
 def test_snapshot_invariants_are_clean() -> None:
     _, snapshot = _snapshot()
 

@@ -46,6 +46,8 @@ def build_cross_surface_replay_diff(
     left_manifest: RunManifest,
     right_manifest: RunManifest,
     classification: dict[str, object],
+    left_artifact_refs: tuple[dict[str, object], ...] = (),
+    right_artifact_refs: tuple[dict[str, object], ...] = (),
 ) -> dict[str, object]:
     """Return one replay-oriented diff across manifest-adjacent surfaces."""
     effective_config_match = (
@@ -89,6 +91,8 @@ def build_cross_surface_replay_diff(
         "run_artifacts": build_run_artifact_diff_payload(
             left_manifest=left_manifest,
             right_manifest=right_manifest,
+            left_artifact_refs=left_artifact_refs,
+            right_artifact_refs=right_artifact_refs,
         ),
     }
 
@@ -125,9 +129,7 @@ def build_effective_config_store_verification(
         }
 
     left_artifact = effective_config_artifact_port.get_by_run_id(left_manifest.run_id)
-    right_artifact = effective_config_artifact_port.get_by_run_id(
-        right_manifest.run_id
-    )
+    right_artifact = effective_config_artifact_port.get_by_run_id(right_manifest.run_id)
     left_occurrence = effective_config_artifact_port.get_occurrence_by_run_id(
         left_manifest.run_id
     )

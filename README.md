@@ -216,6 +216,9 @@ uv sync --extra dev --extra tracing
    cp .env.example .env
    ```
 
+   AI/runtime agents must not create or edit `.env` files without explicit
+   per-task approval; this copy step is for a human local setup session.
+
    *Note: Secrets follow the pattern `BIOETL_{PROVIDER}_{KEY}`. UniProt remains public by default and `BIOETL_UNIPROT_API_KEY` is optional. OpenAlex production-like runs should set `BIOETL_OPENALEX_API_KEY`; `BIOETL_OPENALEX_EMAIL` is only contact attribution and does not replace the API key.*
 
    **Environment Variables:**

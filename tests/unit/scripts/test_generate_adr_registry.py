@@ -56,7 +56,9 @@ def test_extract_adr_metadata_recovers_decision_date_from_table_when_header_is_p
     generator = ADRRegistryGenerator()
 
     metadata = generator.extract_adr_metadata(
-        Path("docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md")
+        Path(
+            "docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md"
+        )
     )
 
     assert metadata is not None

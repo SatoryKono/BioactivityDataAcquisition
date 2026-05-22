@@ -58,6 +58,62 @@ def _load_retained_entrypoint_paths(repo_root: Path) -> set[str]:
     return {str(row["path"]) for row in rows if isinstance(row, dict) and "path" in row}
 
 
+def _build_review_window(
+    triage_payload: dict[str, Any],
+    *,
+    snapshot_date: str,
+) -> dict[str, object]:
+    zero_import_review = triage_payload.get("repo_wide_zero_import_review", {})
+    if not isinstance(zero_import_review, dict):
+        zero_import_review = {}
+    policy = triage_payload.get("policy", {})
+    if not isinstance(policy, dict):
+        policy = {}
+    last_reviewed = zero_import_review.get("last_reviewed")
+    next_review_by = zero_import_review.get("next_review_by")
+    return {
+        "linked_issue": zero_import_review.get("linked_issue"),
+        "mode": zero_import_review.get("mode"),
+        "last_reviewed": last_reviewed,
+        "next_review_by": next_review_by,
+        "review_cycle_days": policy.get("review_cycle_days"),
+        "max_untriaged_zero_import_candidates": zero_import_review.get(
+            "max_untriaged_zero_import_candidates"
+        ),
+        "snapshot_matches_last_reviewed": snapshot_date == last_reviewed,
+        "guardrail_note": (
+            "Zero static importer count is a review signal only; removals must "
+            "still verify public entrypoints and dynamic/plugin import paths."
+        ),
+    }
+
+
+def _load_repo_wide_zero_import_classifications(
+    triage_payload: dict[str, Any],
+) -> tuple[dict[str, dict[str, object]], set[str]]:
+    section = triage_payload.get("repo_wide_zero_import_classification", {})
+    assert isinstance(section, dict)
+    entries = section.get("entries", [])
+    assert isinstance(entries, list)
+    allowed = section.get("allowed_dispositions", [])
+    assert isinstance(allowed, list)
+    classification_by_path: dict[str, dict[str, object]] = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        module_path = entry.get("module_path")
+        if isinstance(module_path, str):
+            classification_by_path[module_path] = entry
+    return classification_by_path, {str(item) for item in allowed}
+
+
+def _review_window_is_stale(review_window: dict[str, object]) -> bool:
+    next_review_by = review_window.get("next_review_by")
+    if not isinstance(next_review_by, str):
+        return False
+    return date.today() > date.fromisoformat(next_review_by)
+
+
 def build_dead_code_inventory(
     repo_root: Path,
     *,
@@ -73,6 +129,9 @@ def build_dead_code_inventory(
         repo_root / "configs" / "quality" / "retirement_candidate_triage.yaml"
     )
     retained_entrypoint_paths = _load_retained_entrypoint_paths(repo_root)
+    repo_wide_classifications, allowed_repo_wide_dispositions = (
+        _load_repo_wide_zero_import_classifications(triage_payload)
+    )
 
     triaged_rows: list[dict[str, object]] = []
     families = triage_payload.get("families", [])
@@ -124,16 +183,54 @@ def build_dead_code_inventory(
                 }
             )
 
-    repo_wide_zero_import_candidates = [
-        row
-        for row in collect_zero_import_bioetl_modules(repo_root)
-        if str(row["path"]) not in retained_entrypoint_paths
-    ]
+    repo_wide_zero_import_candidates: list[dict[str, object]] = []
+    repo_wide_disposition_counts: dict[str, int] = {}
+    untriaged_candidates: list[dict[str, object]] = []
+    for row in collect_zero_import_bioetl_modules(repo_root):
+        module_path = str(row["path"])
+        if module_path in retained_entrypoint_paths:
+            continue
+        enriched = dict(row)
+        classification = repo_wide_classifications.get(module_path)
+        if classification is None:
+            enriched["classification_status"] = "untriaged"
+            untriaged_candidates.append(enriched)
+            repo_wide_zero_import_candidates.append(enriched)
+            continue
+        module_name = classification.get("module_name")
+        if isinstance(module_name, str):
+            assert module_name == row["module_name"], (
+                f"repo_wide_zero_import_classification module_name mismatch for "
+                f"{module_path}: {module_name!r} != {row['module_name']!r}"
+            )
+        disposition = classification.get("disposition")
+        assert isinstance(disposition, str) and disposition in allowed_repo_wide_dispositions
+        repo_wide_disposition_counts[disposition] = (
+            repo_wide_disposition_counts.get(disposition, 0) + 1
+        )
+        enriched.update(
+            {
+                "classification_status": "classified",
+                "disposition": disposition,
+                "reviewed_on": classification.get("reviewed_on"),
+                "review_by": classification.get("review_by"),
+                "linked_issue": classification.get("linked_issue"),
+                "rationale": classification.get("rationale"),
+            }
+        )
+        repo_wide_zero_import_candidates.append(enriched)
+
+    resolved_snapshot_date = snapshot_date or date.today().isoformat()
+    review_window = _build_review_window(
+        triage_payload,
+        snapshot_date=resolved_snapshot_date,
+    )
 
     return {
-        "snapshot_date": snapshot_date or date.today().isoformat(),
+        "snapshot_date": resolved_snapshot_date,
         "triage_source": "configs/quality/retirement_candidate_triage.yaml",
         "static_inventory_scope": "src/bioetl",
+        "review_window": review_window,
         "summary": {
             "triaged_entry_count": len(triaged_rows),
             "triaged_entries_below_min_importers": sum(
@@ -142,6 +239,16 @@ def build_dead_code_inventory(
             "repo_wide_zero_import_candidate_count": len(
                 repo_wide_zero_import_candidates
             ),
+            "repo_wide_classified_zero_import_candidate_count": len(
+                repo_wide_zero_import_candidates
+            )
+            - len(untriaged_candidates),
+            "repo_wide_untriaged_zero_import_candidate_count": len(
+                untriaged_candidates
+            ),
+            "repo_wide_disposition_counts": dict(
+                sorted(repo_wide_disposition_counts.items())
+            ),
         },
         "triaged_entries": triaged_rows,
         "repo_wide_zero_import_candidates": repo_wide_zero_import_candidates,
@@ -149,9 +256,11 @@ def build_dead_code_inventory(
 
 
 def _render_markdown(payload: dict[str, object]) -> str:
+    review_window = payload["review_window"]
     summary = payload["summary"]
     triaged_rows = payload["triaged_entries"]
     zero_rows = payload["repo_wide_zero_import_candidates"]
+    assert isinstance(review_window, dict)
     assert isinstance(summary, dict)
     assert isinstance(triaged_rows, list)
     assert isinstance(zero_rows, list)
@@ -159,8 +268,18 @@ def _render_markdown(payload: dict[str, object]) -> str:
         "# Dead Code Inventory",
         "",
         f"- snapshot_date: {payload['snapshot_date']}",
+        f"- linked_issue: {review_window['linked_issue']}",
+        f"- last_reviewed: {review_window['last_reviewed']}",
+        f"- next_review_by: {review_window['next_review_by']}",
+        f"- review_cycle_days: {review_window['review_cycle_days']}",
         f"- triaged_entry_count: {summary['triaged_entry_count']}",
+        f"- repo_wide_zero_import_candidate_count: {summary['repo_wide_zero_import_candidate_count']}",
+        "- repo_wide_classified_zero_import_candidate_count: "
+        f"{summary['repo_wide_classified_zero_import_candidate_count']}",
+        "- repo_wide_untriaged_zero_import_candidate_count: "
+        f"{summary['repo_wide_untriaged_zero_import_candidate_count']}",
         "- note: zero static importer count is a review signal, not automatic removal proof",
+        f"- guardrail: {review_window['guardrail_note']}",
         "",
         "## Triage Verification",
         "",
@@ -180,13 +299,15 @@ def _render_markdown(payload: dict[str, object]) -> str:
             "",
             "## Repo-wide Zero-import Candidates",
             "",
-            "| Module | Path |",
-            "| --- | --- |",
+            "| Module | Disposition | Path |",
+            "| --- | --- | --- |",
         ]
     )
     for row in zero_rows:
         assert isinstance(row, dict)
-        lines.append(f"| `{row['module_name']}` | `{row['path']}` |")
+        lines.append(
+            f"| `{row['module_name']}` | `{row.get('disposition', 'untriaged')}` | `{row['path']}` |"
+        )
     lines.append("")
     return "\n".join(lines)
 
@@ -225,6 +346,25 @@ def main() -> int:
             return 1
         if md_out.read_text(encoding="utf-8") != rendered_markdown:
             print(f"[dead-code-inventory] FAIL: Markdown artifact drifted: {md_out}")
+            return 1
+        review_window = payload["review_window"]
+        assert isinstance(review_window, dict)
+        if _review_window_is_stale(review_window):
+            print(
+                "[dead-code-inventory] FAIL: review window is stale: "
+                f"next_review_by={review_window.get('next_review_by')}"
+            )
+            return 1
+        summary = payload["summary"]
+        assert isinstance(summary, dict)
+        untriaged = summary["repo_wide_untriaged_zero_import_candidate_count"]
+        max_untriaged = review_window.get("max_untriaged_zero_import_candidates")
+        if isinstance(max_untriaged, int) and untriaged > max_untriaged:
+            print(
+                "[dead-code-inventory] FAIL: repo-wide zero-import candidates remain "
+                "untriaged: "
+                f"{untriaged} > {max_untriaged}"
+            )
             return 1
         print("[dead-code-inventory] PASS: artifacts are up to date")
         return 0

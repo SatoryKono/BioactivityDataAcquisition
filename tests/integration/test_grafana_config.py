@@ -1371,4 +1371,3 @@ def test_control_plane_dashboard_uses_control_plane_native_variable_sources() ->
     assert "bioetl_control_plane_manifest_writes_total" not in run_type_query_text
     assert "bioetl_records_processed_total" not in pipeline_query_text
     assert "bioetl_records_processed_total" not in run_type_query_text
-

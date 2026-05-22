@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 from collections import Counter
+from datetime import date, timedelta
 import json
 from functools import cache
 from pathlib import Path
@@ -11,6 +12,7 @@ from pathlib import Path
 import yaml
 
 from scripts.engineering.qa.report_dead_code_inventory import (
+    _review_window_is_stale,
     _render_markdown,
     build_dead_code_inventory,
 )
@@ -43,6 +45,16 @@ def _iter_triage_entries(triage: dict[str, object]) -> list[dict[str, object]]:
         for entry in family.get("entries", [])
         if isinstance(entry, dict)
     ]
+
+
+def _iter_repo_wide_zero_import_entries(
+    triage: dict[str, object],
+) -> list[dict[str, object]]:
+    section = triage.get("repo_wide_zero_import_classification", {})
+    assert isinstance(section, dict)
+    entries = section.get("entries", [])
+    assert isinstance(entries, list)
+    return [entry for entry in entries if isinstance(entry, dict)]
 
 
 @cache
@@ -96,8 +108,8 @@ def test_retirement_triage_entries_are_explicit_and_actionable() -> None:
     assert policy.get("review_cycle_days") == 90
     zero_import_review = triage.get("repo_wide_zero_import_review", {})
     assert isinstance(zero_import_review, dict)
-    assert zero_import_review.get("linked_issue") == "#4451"
-    assert zero_import_review.get("mode") == "fail-fast-no-growth"
+    assert zero_import_review.get("linked_issue") == "#4513"
+    assert zero_import_review.get("mode") == "fail-fast-zero-untriaged"
     assert isinstance(zero_import_review.get("inventory_command"), str)
     assert "report_dead_code_inventory" in zero_import_review["inventory_command"]
     assert isinstance(zero_import_review.get("check_command"), str)
@@ -105,11 +117,25 @@ def test_retirement_triage_entries_are_explicit_and_actionable() -> None:
     assert isinstance(
         zero_import_review.get("max_untriaged_zero_import_candidates"), int
     )
+    assert isinstance(zero_import_review.get("last_reviewed"), str)
+    assert isinstance(zero_import_review.get("next_review_by"), str)
 
     families = triage.get("families", [])
     assert isinstance(families, list) and families
     entries = list(_iter_triage_entries(triage))
     assert entries, "Expected at least one retirement-triage entry"
+    repo_wide = triage.get("repo_wide_zero_import_classification", {})
+    assert isinstance(repo_wide, dict)
+    assert repo_wide.get("linked_issue") == "#4513"
+    assert repo_wide.get("review_date") == "2026-05-22"
+    assert set(repo_wide.get("allowed_dispositions", [])) == {
+        "retain_module_entrypoint",
+        "retain_dynamic_entrypoint",
+        "retain_public_facade",
+        "retain_compat_shim",
+        "retain_canonical_owner_module",
+    }
+    assert _iter_repo_wide_zero_import_entries(triage)
 
     for entry in entries:
         disposition = entry.get("disposition")
@@ -228,7 +254,7 @@ def test_neo4j_memory_calibration_candidates_match_triage_decisions() -> None:
 
 
 def test_repo_wide_zero_import_candidate_count_does_not_grow() -> None:
-    """Repo-wide zero-import candidates must stay under the reviewed debt budget."""
+    """Repo-wide zero-import candidates must stay fully classified under budget."""
     triage = _load_triage()
     zero_import_review = triage["repo_wide_zero_import_review"]
     assert isinstance(zero_import_review, dict)
@@ -238,14 +264,36 @@ def test_repo_wide_zero_import_candidate_count_does_not_grow() -> None:
     inventory = build_dead_code_inventory(PROJECT_ROOT)
     summary = inventory["summary"]
     assert isinstance(summary, dict)
-    actual = summary["repo_wide_zero_import_candidate_count"]
+    actual = summary["repo_wide_untriaged_zero_import_candidate_count"]
     assert isinstance(actual, int)
 
     assert actual <= budget, (
-        f"Repo-wide zero-import candidate count grew to {actual}, above the "
+        f"Repo-wide untriaged zero-import candidate count grew to {actual}, above the "
         f"reviewed budget {budget}. Remove candidates or refresh "
         "retirement_candidate_triage.yaml intentionally."
     )
+
+
+def test_repo_wide_zero_import_classification_exactly_covers_candidates() -> None:
+    """Every repo-wide zero-import candidate must have one explicit classification."""
+    triage = _load_triage()
+    classified = {
+        str(entry["module_path"]): entry for entry in _iter_repo_wide_zero_import_entries(triage)
+    }
+
+    inventory = build_dead_code_inventory(PROJECT_ROOT)
+    zero_candidates = inventory["repo_wide_zero_import_candidates"]
+    assert isinstance(zero_candidates, list)
+    actual_paths = {str(row["path"]) for row in zero_candidates}
+
+    assert set(classified) == actual_paths
+    for path, entry in classified.items():
+        assert isinstance(entry.get("module_name"), str) and entry["module_name"]
+        assert isinstance(entry.get("disposition"), str) and entry["disposition"]
+        assert isinstance(entry.get("reviewed_on"), str) and entry["reviewed_on"]
+        assert isinstance(entry.get("review_by"), str) and entry["review_by"]
+        assert isinstance(entry.get("linked_issue"), str) and entry["linked_issue"]
+        assert isinstance(entry.get("rationale"), str) and entry["rationale"].strip()
 
 
 def test_dead_code_inventory_artifacts_are_committed_and_current() -> None:
@@ -260,4 +308,38 @@ def test_dead_code_inventory_artifacts_are_committed_and_current() -> None:
     )
 
     assert committed == expected
+    summary = committed["summary"]
+    assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
     assert DEAD_CODE_MD_PATH.read_text(encoding="utf-8") == _render_markdown(expected)
+
+
+def test_dead_code_inventory_review_window_stays_fresh() -> None:
+    """The repo-wide dead-code inventory must stay within the governed review window."""
+    triage = _load_triage()
+    policy = triage["policy"]
+    assert isinstance(policy, dict)
+    zero_import_review = triage["repo_wide_zero_import_review"]
+    assert isinstance(zero_import_review, dict)
+
+    review_cycle_days = policy["review_cycle_days"]
+    assert isinstance(review_cycle_days, int)
+    last_reviewed = date.fromisoformat(str(zero_import_review["last_reviewed"]))
+    next_review_by = date.fromisoformat(str(zero_import_review["next_review_by"]))
+    assert next_review_by == last_reviewed + timedelta(days=review_cycle_days), (
+        "Dead-code zero-import review window must track policy.review_cycle_days "
+        "from the last reviewed date."
+    )
+    committed = json.loads(DEAD_CODE_JSON_PATH.read_text(encoding="utf-8"))
+    review_window = committed["review_window"]
+    assert isinstance(review_window, dict)
+    assert not _review_window_is_stale(review_window), (
+        "Dead-code zero-import review window is stale. Refresh "
+        "reports/quality/dead-code-inventory.{json,md} and advance "
+        "repo_wide_zero_import_review.last_reviewed/next_review_by."
+    )
+    assert committed["snapshot_date"] == zero_import_review["last_reviewed"]
+    assert review_window["linked_issue"] == zero_import_review["linked_issue"]
+    assert review_window["last_reviewed"] == zero_import_review["last_reviewed"]
+    assert review_window["next_review_by"] == zero_import_review["next_review_by"]
+    assert review_window["review_cycle_days"] == review_cycle_days
+    assert review_window["snapshot_matches_last_reviewed"] is True

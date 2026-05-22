@@ -26,6 +26,7 @@ from typing import TypeVar, cast
 from urllib import error, parse, request
 
 import yaml
+
 from bioetl.infrastructure.config.contract_registry_loader import (
     DEFAULT_CONTRACT_REGISTRY_PATH,
     load_contract_registry_payload,

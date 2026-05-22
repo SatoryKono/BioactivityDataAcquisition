@@ -108,7 +108,9 @@ class _CompositeRunnerLedgerLifecycleMixin:
         """Append ``run_shutdown`` when control-plane ledger is attached."""
         record_run_shutdown(self)
 
-    def _record_seed_stage_started(self: CompositeRunnerControlPlaneHostProtocol) -> None:
+    def _record_seed_stage_started(
+        self: CompositeRunnerControlPlaneHostProtocol,
+    ) -> None:
         """Append one ``stage_started`` entry for seed phase."""
         record_seed_stage_started(self)
 
@@ -126,7 +128,9 @@ class _CompositeRunnerLedgerLifecycleMixin:
         """Append one ``stage_started`` entry for enrichment phase."""
         record_enrichment_stage_started(self, enricher_names)
 
-    def _record_merge_stage_started(self: CompositeRunnerControlPlaneHostProtocol) -> None:
+    def _record_merge_stage_started(
+        self: CompositeRunnerControlPlaneHostProtocol,
+    ) -> None:
         """Append one ``stage_started`` entry for merge phase."""
         record_merge_stage_started(self)
 

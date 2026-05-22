@@ -5,7 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from bioetl.application.services.control_plane.run_manifest_reproducibility_claims import (
-    build_global_reproducibility_claim,
+    build_executable_run_contract_claim,
+    build_historical_replay_universe_exact_replay_claim,
 )
 from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring_support import (
     bounded,
@@ -439,7 +440,9 @@ def build_supported_boundary_verdict(
 __all__ = [
     "PROFILE_SCORE_THRESHOLDS",
     "ScoreCardRecord",
+    "build_executable_run_contract_claim",
     "build_global_reproducibility_claim",
+    "build_historical_replay_universe_exact_replay_claim",
     "build_supported_boundary_verdict",
     "evaluate_threshold_failures",
     "overall_blockers",

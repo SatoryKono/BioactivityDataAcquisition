@@ -59,9 +59,7 @@ class ChemblCompoundRecordApiRecord(BaseModel):
     document_chembl_id: str | None = Field(
         default=None, description="Linked document ChEMBL ID"
     )
-    compound_key: str | None = Field(
-        default=None, description="Provider compound key"
-    )
+    compound_key: str | None = Field(default=None, description="Provider compound key")
     compound_name: str | None = Field(
         default=None, description="Provider compound name"
     )
@@ -123,9 +121,7 @@ class ChemblPublicationSimilarityApiRecord(BaseModel):
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
-    document_1_chembl_id: str = Field(
-        description="Primary document ChEMBL identifier"
-    )
+    document_1_chembl_id: str = Field(description="Primary document ChEMBL identifier")
     document_2_chembl_id: str = Field(
         description="Secondary document ChEMBL identifier"
     )

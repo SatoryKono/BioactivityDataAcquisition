@@ -68,7 +68,9 @@ class IntegrationPipelineTestCase:
 
         original_resolve = _context_resolution.resolve_storage_paths
 
-        def patched_resolve_storage_paths(settings, bronze_config, silver_config, gold_config):
+        def patched_resolve_storage_paths(
+            settings, bronze_config, silver_config, gold_config
+        ):
             """Always use test paths regardless of test_mode."""
             return (
                 False,  # use_yaml_paths = False
@@ -87,6 +89,7 @@ class IntegrationPipelineTestCase:
 
         # Patch bronze cleanup at the class level to prevent file removal during tests
         from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+
         original_bronze_cleanup = BronzeWriter.cleanup_old_files
 
         async def no_op_bronze_cleanup(self, *args, **kwargs):
@@ -96,29 +99,33 @@ class IntegrationPipelineTestCase:
 
         # Patch create_storage_adapter to force test paths
         from bioetl.composition.factories.storage._helpers import create_storage_adapter
+
         original_create_adapter = create_storage_adapter
 
         def patched_create_adapter(*args, **kwargs):
             """Force bronze writer to use test paths."""
-            ctx = args[0] if args else kwargs.get('ctx')
-            if ctx and hasattr(ctx, 'bronze_path'):
+            ctx = args[0] if args else kwargs.get("ctx")
+            if ctx and hasattr(ctx, "bronze_path"):
                 # Force the context to use test paths
                 from dataclasses import replace
-                ctx = replace(ctx,
+
+                ctx = replace(
+                    ctx,
                     bronze_path=Path(self.bronze_path),
                     silver_path=Path(self.silver_path),
-                    gold_path=Path(self.gold_path))
+                    gold_path=Path(self.gold_path),
+                )
                 if args:
                     args = (ctx,) + args[1:]
                 else:
-                    kwargs['ctx'] = ctx
+                    kwargs["ctx"] = ctx
             return original_create_adapter(*args, **kwargs)
 
         # Patch StorageFactory.create to return local paths
         # Patch at multiple import locations to ensure coverage
         with patch(
             "bioetl.composition.factories.storage._helpers.create_storage_adapter",
-            side_effect=patched_create_adapter
+            side_effect=patched_create_adapter,
         ):
             with patch(
                 "bioetl.composition.factories.storage.StorageFactory.create"
@@ -131,13 +138,19 @@ class IntegrationPipelineTestCase:
                     with patch(
                         "bioetl.composition.factories.services.factory.StorageFactory.create"
                     ) as mock_create_services:
-                        mock_create_services.side_effect = self._create_local_storage_context
+                        mock_create_services.side_effect = (
+                            self._create_local_storage_context
+                        )
                         with patch(
                             "bioetl.composition.factories.services.common_service_wiring.StorageFactory.create"
                         ) as mock_create_wiring:
-                            mock_create_wiring.side_effect = self._create_local_storage_context
+                            mock_create_wiring.side_effect = (
+                                self._create_local_storage_context
+                            )
                             with patch.object(
-                                _context_resolution, "resolve_storage_paths", patched_resolve_storage_paths
+                                _context_resolution,
+                                "resolve_storage_paths",
+                                patched_resolve_storage_paths,
                             ):
                                 yield
 

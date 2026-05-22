@@ -153,8 +153,15 @@ def test_runtime_cardinality_evidence_artifact_is_committed_and_governed() -> No
 
     runtime_emitters = actual["runtime_emitters"]
     helper_backed_emitters = actual["helper_backed_emitters"]
+    alias_emitters = actual.get("alias_emitters", {})
     assert isinstance(runtime_emitters, dict)
     assert isinstance(helper_backed_emitters, dict)
+    assert isinstance(alias_emitters, dict)
+    for metric_name in alias_emitters:
+        assert inventory._is_metric_like_alias_name(metric_name), (
+            "Alias emitter evidence must contain only Prometheus-style metric names: "
+            f"{metric_name!r}"
+        )
 
     allowlist_payload = yaml.safe_load(ALLOWLIST_PATH.read_text(encoding="utf-8"))
     allowlisted_runtime_cardinality = sorted(
@@ -171,7 +178,9 @@ def test_runtime_cardinality_evidence_artifact_is_committed_and_governed() -> No
 
     expected = inventory.collect_metric_inventory(ROOT)
     mismatched_keys = sorted(
-        key for key in sorted(set(actual) | set(expected)) if actual.get(key) != expected.get(key)
+        key
+        for key in sorted(set(actual) | set(expected))
+        if actual.get(key) != expected.get(key)
     )
     assert actual == expected, (
         "Runtime cardinality evidence artifact is stale or inconsistent with the "

@@ -6,6 +6,7 @@ import scripts.memory.sync as memory_sync_module
 
 from .common import *  # noqa: F401,F403
 
+
 def test_memory_mapping_path_prefers_canonical_graph_mapping(tmp_path: Path) -> None:
     canonical = tmp_path / "src/memory/graph"
     canonical.mkdir(parents=True)

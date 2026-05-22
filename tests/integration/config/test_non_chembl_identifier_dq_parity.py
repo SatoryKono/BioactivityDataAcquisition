@@ -74,7 +74,7 @@ def test_governed_publication_identifier_arrays_publish_canonical_json_patterns(
             r'^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'
         ),
         ("crossref", "publication", "issn_list"): (
-            r'^\[(\"[0-9Xx-]+\"(,\"[0-9Xx-]+\")*)?\]$'
+            r"^\[(\"[0-9Xx-]+\"(,\"[0-9Xx-]+\")*)?\]$"
         ),
         ("openalex", "publication", "author_openalex_ids"): (
             r'^\[("A\d+"(,"A\d+")*)?\]$'
@@ -82,9 +82,7 @@ def test_governed_publication_identifier_arrays_publish_canonical_json_patterns(
         ("openalex", "publication", "author_orcids"): (
             r'^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'
         ),
-        ("openalex", "publication", "institution_ids"): (
-            r'^\[("I\d+"(,"I\d+")*)?\]$'
-        ),
+        ("openalex", "publication", "institution_ids"): (r'^\[("I\d+"(,"I\d+")*)?\]$'),
         ("openalex", "publication", "ror_ids"): (
             r'^\[("https://ror\.org/[a-z0-9]+"(,"https://ror\.org/[a-z0-9]+")*)?\]$'
         ),
@@ -112,12 +110,8 @@ def test_governed_publication_identifier_arrays_publish_canonical_json_patterns(
         ("uniprot", "protein", "secondary_accessions"): (
             r'^\[("[A-Z0-9]{6,10}"(,"[A-Z0-9]{6,10}")*)?\]$'
         ),
-        ("uniprot", "protein", "chembl_ids"): (
-            r'^\[("CHEMBL\d+"(,"CHEMBL\d+")*)?\]$'
-        ),
-        ("uniprot", "protein", "drugbank_ids"): (
-            r'^\[("DB\d{5}"(,"DB\d{5}")*)?\]$'
-        ),
+        ("uniprot", "protein", "chembl_ids"): (r'^\[("CHEMBL\d+"(,"CHEMBL\d+")*)?\]$'),
+        ("uniprot", "protein", "drugbank_ids"): (r'^\[("DB\d{5}"(,"DB\d{5}")*)?\]$'),
         ("uniprot", "protein", "go_terms"): (
             r'^\[(("GO:\d{7}"|\{[^\]]*"id":"GO:\d{7}"[^\]]*\})(,("GO:\d{7}"|\{[^\]]*"id":"GO:\d{7}"[^\]]*\}))*)?\]$'
         ),

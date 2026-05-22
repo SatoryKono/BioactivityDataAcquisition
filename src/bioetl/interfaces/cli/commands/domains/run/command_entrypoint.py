@@ -221,8 +221,7 @@ def _add_persistence_profile_options() -> CommandDecorator:
             ),
             default=None,
             help=(
-                "Override the required control-plane persistence profile for "
-                "this run"
+                "Override the required control-plane persistence profile for this run"
             ),
         )(cmd)
         return cmd

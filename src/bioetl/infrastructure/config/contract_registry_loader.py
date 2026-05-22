@@ -54,7 +54,9 @@ def load_contract_registry_payload(registry_path: Path | None = None) -> JsonDic
     except yaml.YAMLError as exc:
         raise ValueError(f"Malformed contract registry YAML: {path}") from exc
     if not isinstance(payload, dict):
-        raise ValueError(f"Malformed contract registry: expected mapping root in {path}")
+        raise ValueError(
+            f"Malformed contract registry: expected mapping root in {path}"
+        )
     return payload
 
 
@@ -76,7 +78,9 @@ def load_contract_registry_entries(
     payload = load_contract_registry_payload(path)
     entries = payload.get("entries")
     if not isinstance(entries, dict):
-        raise ValueError(f"Malformed contract registry: entries must be a mapping in {path}")
+        raise ValueError(
+            f"Malformed contract registry: entries must be a mapping in {path}"
+        )
     normalized_entries: dict[str, dict[str, object]] = {}
     for contract_ref, entry in entries.items():
         if not isinstance(entry, dict):

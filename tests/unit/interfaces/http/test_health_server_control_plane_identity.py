@@ -239,7 +239,9 @@ def test_control_plane_identity_domain_severity_maps_identity_graph_value(
     )
 
 
-def test_control_plane_identity_domain_severity_fails_exact_replay_missing_anchor() -> None:
+def test_control_plane_identity_domain_severity_fails_exact_replay_missing_anchor() -> (
+    None
+):
     assert (
         domain_severity(
             SPEC_BY_NAME["effective_config_hash"],
@@ -254,7 +256,9 @@ def test_control_plane_identity_domain_severity_fails_exact_replay_missing_ancho
     )
 
 
-def test_control_plane_identity_domain_severity_fails_terminal_missing_manifest() -> None:
+def test_control_plane_identity_domain_severity_fails_terminal_missing_manifest() -> (
+    None
+):
     run_id = RunID(uuid4())
     terminal_entry = RunLedgerEntry(
         entry_id="ledger-terminal",
@@ -291,7 +295,9 @@ class _CountingRunLedgerStore(InMemoryRunLedgerStore):
         return super().list_entries_by_run_id(run_id)
 
 
-def test_control_plane_filter_options_narrows_manifest_catalog_before_ledger_reads() -> None:
+def test_control_plane_filter_options_narrows_manifest_catalog_before_ledger_reads() -> (
+    None
+):
     """Scoped run_id queries should not walk unrelated manifests/ledger entries."""
     manifest_store = InMemoryRunManifestStore()
     ledger_store = _CountingRunLedgerStore()

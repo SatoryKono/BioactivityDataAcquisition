@@ -170,8 +170,6 @@ def build_postrun_service(
         dq_service=dq_service,
         lifecycle_service=lifecycle_service,
         dependencies=dependencies,
+        services=pipeline.services,
         tracer=resolved_tracer,
-        storage=pipeline.services.storage,
-        metrics=pipeline.services.metrics,
-        logger=logger_port,
     )

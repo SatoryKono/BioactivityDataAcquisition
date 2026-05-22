@@ -39,7 +39,9 @@ def test_chembl_dto_registry_covers_remaining_api_backed_aliases() -> None:
     assert CHEMBL_DTO_MODELS["document_similarity"] is PublicationSimilarityRecord
 
 
-def test_chembl_record_and_response_registries_cover_remaining_api_backed_entities() -> None:
+def test_chembl_record_and_response_registries_cover_remaining_api_backed_entities() -> (
+    None
+):
     expected_entities = {
         "activity",
         "assay",

@@ -1,25 +1,25 @@
 ---
 id: mcp-setup
-title: Sync MCP runtime config
+title: Configure MCP runtime
 task_id: mcp-setup
-created_at: '2026-05-21T06:15:34Z'
+created_at: '2026-05-22T08:12:56Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- scripts/ai/codex/helper/ensure-mcp.sh
-summary: Ran canonical ensure-mcp sync and MCP smoke check; registration is healthy
-  and PATH warning is non-blocking.
+- scripts/ai/codex/setup_mcp.py
+summary: Validated and synchronized MCP workspace config plus ~/.codex/config.toml;
+  no tracked repo diffs remained.
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Sync MCP runtime config
+- Title: Configure MCP runtime
 
 ## Outcome
 
-- Ran canonical ensure-mcp sync and MCP smoke check; registration is healthy and PATH warning is non-blocking.
+- Validated and synchronized MCP workspace config plus ~/.codex/config.toml; no tracked repo diffs remained.
 
 ## Lessons learned
 

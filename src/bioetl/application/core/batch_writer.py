@@ -102,6 +102,42 @@ class BatchWriterOptions:
     column_orderer: ColumnOrderService | None = None
 
 
+def _resolve_batch_writer_constructor_options(
+    *,
+    options: BatchWriterOptions | None,
+    tracer: TracingPort | None,
+    lock_validator: BatchWriterLockValidator | None,
+    data_schema_config: DataSchemaConfig | None,
+    column_orderer: ColumnOrderService | None,
+) -> BatchWriterOptions:
+    """Resolve legacy direct writer kwargs into the canonical options bundle.
+
+    Compatibility shim for direct constructor kwargs. Review for removal after
+    2026-09-30 once callers rely on ``options=BatchWriterOptions(...)`` only.
+    """
+    if options is None:
+        return BatchWriterOptions(
+            tracer=tracer,
+            lock_validator=lock_validator,
+            data_schema_config=data_schema_config,
+            column_orderer=column_orderer,
+        )
+    if any(
+        collaborator is not None
+        for collaborator in (
+            tracer,
+            lock_validator,
+            data_schema_config,
+            column_orderer,
+        )
+    ):
+        raise TypeError(
+            "BatchWriter accepts either options=BatchWriterOptions(...) or "
+            "direct collaborator parameters, not both"
+        )
+    return options
+
+
 class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracingMixin):
     """Writes records to medallion layers via narrow write-only port."""
 
@@ -136,28 +172,13 @@ class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracin
         self._config = config
         self._gold_validator = gold_validator
         self._error_classifier = error_classifier
-        if options is None:
-            opts = BatchWriterOptions(
-                tracer=tracer,
-                lock_validator=lock_validator,
-                data_schema_config=data_schema_config,
-                column_orderer=column_orderer,
-            )
-        elif any(
-            collaborator is not None
-            for collaborator in (
-                tracer,
-                lock_validator,
-                data_schema_config,
-                column_orderer,
-            )
-        ):
-            raise TypeError(
-                "BatchWriter accepts either options=BatchWriterOptions(...) or "
-                "direct collaborator parameters, not both"
-            )
-        else:
-            opts = options
+        opts = _resolve_batch_writer_constructor_options(
+            options=options,
+            tracer=tracer,
+            lock_validator=lock_validator,
+            data_schema_config=data_schema_config,
+            column_orderer=column_orderer,
+        )
         self._batch_metrics = batch_metrics
         self._tracer = opts.tracer
         self._lock_validator = opts.lock_validator

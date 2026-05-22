@@ -9,7 +9,9 @@ from typing import Any
 import pytest
 import yaml
 
-from scripts.engineering.qa.import_graph_inventory import collect_exact_module_import_usage
+from scripts.engineering.qa.import_graph_inventory import (
+    collect_exact_module_import_usage,
+)
 from scripts.engineering.qa.report_compatibility_importer_census import (
     _render_markdown,
     build_compatibility_importer_census,
@@ -58,11 +60,16 @@ def test_tracked_twin_family_ratchet_matches_live_census() -> None:
         live = live_rows[str(row["family_id"])]
         assert live["public_module"] == row["public_module"]
         assert live["private_module"] == row["private_module"]
-        assert live["canonical_first_party_module"] == row["canonical_first_party_module"]
-        assert live["current_public_src_importer_count"] <= row["max_public_src_importers"]
-        assert live["current_private_src_importer_count"] <= row[
-            "max_private_src_importers"
-        ]
+        assert (
+            live["canonical_first_party_module"] == row["canonical_first_party_module"]
+        )
+        assert (
+            live["current_public_src_importer_count"] <= row["max_public_src_importers"]
+        )
+        assert (
+            live["current_private_src_importer_count"]
+            <= row["max_private_src_importers"]
+        )
 
 
 @pytest.mark.architecture
@@ -101,7 +108,8 @@ def test_infrastructure_config_root_facade_inventory_matches_live_src_importers(
             f"{len(current_paths)} > {row['max_src_importers']}"
         )
         assert all(
-            any(path.startswith(prefix) for prefix in prefixes) for path in current_paths
+            any(path.startswith(prefix) for prefix in prefixes)
+            for path in current_paths
         ), (
             f"{symbol_name} root-facade importers escaped the allowlisted prefixes: "
             f"{sorted(current_paths)}"

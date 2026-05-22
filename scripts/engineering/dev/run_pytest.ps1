@@ -21,6 +21,7 @@ $PytestArgs = @($args)
 $NeedsDefaultFlags = $true
 $PytestNarrow = $false
 $PytestWithCoverage = $env:BIOETL_PYTEST_WITH_COVERAGE -eq "1"
+$PytestNoCov = $env:BIOETL_PYTEST_NO_COV -eq "1"
 $CollectOnly = $false
 $SkipPreflight = $false
 $FilteredArgs = @()
@@ -64,6 +65,38 @@ function Test-CoveragePluginNeeded {
         }
     }
     return $false
+}
+
+function Remove-CoverageArgs {
+    param(
+        [string[]]$Args
+    )
+
+    $Filtered = @()
+    $SkipNext = $false
+    foreach ($Arg in $Args) {
+        if ($SkipNext) {
+            $SkipNext = $false
+            continue
+        }
+
+        if ($Arg -in @("--cov", "--cov-report", "--cov-config")) {
+            $SkipNext = $true
+            continue
+        }
+        if (
+            $Arg -eq "--no-cov" -or
+            $Arg -like "--cov=*" -or
+            $Arg -like "--cov-report=*" -or
+            $Arg -like "--cov-config=*"
+        ) {
+            continue
+        }
+
+        $Filtered += $Arg
+    }
+
+    return ,$Filtered
 }
 
 function Test-XdistPluginNeeded {
@@ -163,6 +196,10 @@ foreach ($Arg in $PytestArgs) {
         $PytestWithCoverage = $true
         continue
     }
+    if ($Arg -eq "--no-cov") {
+        $PytestNoCov = $true
+        continue
+    }
     if ($Arg -eq "--skip-preflight") {
         $SkipPreflight = $true
         continue
@@ -177,6 +214,9 @@ foreach ($Arg in $PytestArgs) {
 }
 
 $PytestArgs = $FilteredArgs
+if ($PytestNoCov) {
+    $PytestArgs = Remove-CoverageArgs -Args $PytestArgs
+}
 $PreflightScope = ""
 if ($env:BIOETL_PREFLIGHT_SCOPE) {
     $PreflightScope = $env:BIOETL_PREFLIGHT_SCOPE
@@ -226,7 +266,7 @@ if ($NeedsDefaultFlags) {
         $PytestArgs = @("-q", "--maxfail=1") + $PytestArgs
     } else {
         $PytestArgs = @("-q", "--maxfail=1") + $PytestArgs
-        if ($PytestWithCoverage) {
+        if ($PytestWithCoverage -and -not $PytestNoCov) {
             $PytestArgs = @("--cov=src/bioetl", "--cov-report=term") + $PytestArgs
         }
     }

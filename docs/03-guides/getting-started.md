@@ -127,6 +127,8 @@ cp .env.example .env
 ```
 
 Open `.env` and verify the settings. For local development, the defaults are usually sufficient.
+AI/runtime agents must not create or edit `.env` files without explicit
+per-task approval; this command is a human local setup step.
 
 **Key Variables:**
 

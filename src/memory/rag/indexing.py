@@ -94,9 +94,7 @@ def _resolve_rag_sources(
     max_sources: int | None,
 ) -> list[Path]:
     if build_scope == WORKFLOW_BUILD_SCOPE:
-        source_limit = (
-            WORKFLOW_RAG_MAX_SOURCES if max_sources is None else max_sources
-        )
+        source_limit = WORKFLOW_RAG_MAX_SOURCES if max_sources is None else max_sources
         return iter_rag_sources(
             root,
             selected_ids=WORKFLOW_RAG_SOURCE_IDS,

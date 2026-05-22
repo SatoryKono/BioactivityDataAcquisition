@@ -91,6 +91,14 @@ not be compared as if they were `unit-fast`, `unit-parallel-safe`, or
 `suite_name` from `configs/quality/test_matrix.yaml`; raw marker/path commands
 are acceptable only as local diagnostics.
 
+Developer wrappers such as `scripts/engineering/dev/run_tests.py`,
+`python -m scripts.engineering.dev run-tests`, and
+`scripts/engineering/dev/run_tests.sh` are convenience entry points for local
+feedback. Treat their command aliases (`unit`, `arch`, `integration`, `changed`,
+and similar) as local UX shortcuts unless a command explicitly records one of
+the `test_lanes.lanes[*].suite_name` values from `configs/quality/test_matrix.yaml`.
+Do not use wrapper command names as comparable CI/local telemetry identifiers.
+
 The QA entrypoint can record named lane runs as JUnit XML plus JSON summaries:
 
 ```bash

@@ -10,12 +10,17 @@ policy:
     New legacy-shape normalizers are not allowed unless they are registered here
     with a removal date or a permanent canonical-alias rationale.
   burn_down:
-    linked_issue: "#4473"
+    linked_issue: "#4516"
     mode: fail-fast-no-growth
     accepted_shape_max: 2
     migration_supported_shape_max: 0
     retired_rejected_shape_min: 6
     expired_shape_policy: "fail-ci"
+  accepted_shape_exit_strategy:
+    linked_issue: "#4516"
+    review_date: "2026-09-30"
+    allowed_strategies:
+      - retain-permanent-canonical-alias
   constraints:
     - "Domain must not import infrastructure or perform I/O."
     - "Config normalization remains an infrastructure boundary before schema validation."
@@ -44,6 +49,7 @@ accepted_shapes:
       pydantic validation and does not affect domain identity or persisted data.
     review_decision: retain-permanent
     decision_recorded_on: "2026-05-12"
+    exit_strategy: retain-permanent-canonical-alias
     risk: low
 
   - id: source.rate_limit_with_api_key_alias
@@ -61,6 +67,7 @@ accepted_shapes:
       widening runtime behavior or metric labels.
     review_decision: retain-permanent
     decision_recorded_on: "2026-05-12"
+    exit_strategy: retain-permanent-canonical-alias
     risk: low
 
 retired_rejected_shapes:

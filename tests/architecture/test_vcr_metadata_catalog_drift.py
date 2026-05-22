@@ -66,7 +66,9 @@ def test_vcr_metadata_catalog_tracks_cassettes_not_sidecars() -> None:
     assert pruning["duplicate_scenario_stems"] == {}
     assert pruning["orphan_metadata_sidecar_count"] == 0
     assert totals["unowned_cassette_count"] == 0
+    assert totals["metadata_review_required_cassette_count"] == 0
     assert pruning["unowned_cassettes"] == []
+    assert pruning["metadata_review_required_cassettes"] == []
     assert not any(
         cassette["cassette_rel_path"].endswith(("_meta.yaml", "_meta.yml"))
         for cassette in cassettes
@@ -77,4 +79,5 @@ def test_vcr_metadata_catalog_tracks_cassettes_not_sidecars() -> None:
         "direct_reference",
         "generated_reference",
         "metadata_review_required",
+        "metadata_reviewed",
     }

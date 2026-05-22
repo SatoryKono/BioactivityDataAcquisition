@@ -544,8 +544,7 @@ def test_collect_reports_workspace_evidence_marks_local_only_candidates_for_prun
         == "PRUNE_CANDIDATE"
     )
     assert (
-        by_path["reports/quality/_tmp_field_level_diagnostics.csv"].ttl_expired
-        is True
+        by_path["reports/quality/_tmp_field_level_diagnostics.csv"].ttl_expired is True
     )
     assert (
         by_path["reports/quality/_tmp_field_level_diagnostics.csv"].retention_entry_id
@@ -562,9 +561,7 @@ def test_collect_reports_workspace_evidence_marks_local_only_candidates_for_prun
         == "PRUNE_CANDIDATE"
     )
     assert (
-        by_path[
-            "reports/quality/pretest_guardrails_20260419_174602.json"
-        ].ttl_expired
+        by_path["reports/quality/pretest_guardrails_20260419_174602.json"].ttl_expired
         is True
     )
     assert (

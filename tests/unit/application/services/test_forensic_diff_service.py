@@ -246,12 +246,12 @@ def test_forensic_diff_reports_byte_mismatch_when_artifacts_differ() -> None:
 
     with TemporaryDirectory() as temp_dir:
         root = Path(temp_dir)
-        left_artifact = root / "left.json"
-        right_artifact = root / "right.json"
+        left_artifact = root / "left.bin"
+        right_artifact = root / "right.bin"
         left_artifact.write_text("left", encoding="utf-8")
         right_artifact.write_text("right", encoding="utf-8")
-        left_meta = root / "left_metadata.yaml"
-        right_meta = root / "right_metadata.yaml"
+        left_meta = root / "left_metadata.txt"
+        right_meta = root / "right_metadata.txt"
         left_meta.write_text("left-meta", encoding="utf-8")
         right_meta.write_text("right-meta", encoding="utf-8")
         ledger_store.append(
@@ -297,3 +297,77 @@ def test_forensic_diff_reports_byte_mismatch_when_artifacts_differ() -> None:
     assert payload["artifact_byte_equivalence"]["available"] is True
     assert payload["artifact_byte_equivalence"]["equivalent"] is False
     assert payload["artifact_byte_equivalence"]["mismatched_artifacts"]
+
+
+def test_forensic_diff_reports_occurrence_only_sidecar_drift_as_semantic_match() -> (
+    None
+):
+    manifest_store = InMemoryRunManifestStore()
+    ledger_store = InMemoryRunLedgerStore()
+    left_run_id = RunID(uuid4())
+    right_run_id = RunID(uuid4())
+    manifest_store.save(
+        make_run_manifest(manifest_id="manifest-left", run_id=left_run_id)
+    )
+    manifest_store.save(
+        make_run_manifest(manifest_id="manifest-right", run_id=right_run_id)
+    )
+
+    with TemporaryDirectory() as temp_dir:
+        root = Path(temp_dir)
+        left_meta = root / "left_metadata.yaml"
+        right_meta = root / "right_metadata.yaml"
+        left_meta.write_text(
+            "run_id: left\nmanifest_id: manifest-left\nvalue: stable\n",
+            encoding="utf-8",
+        )
+        right_meta.write_text(
+            "run_id: right\nmanifest_id: manifest-right\nvalue: stable\n",
+            encoding="utf-8",
+        )
+        ledger_store.append(
+            RunLedgerEntry(
+                entry_id="artifact-left",
+                manifest_id="manifest-left",
+                run_id=left_run_id,
+                event_type="artifact_published",
+                occurred_at=FIXED_TIME,
+                stage="silver",
+                dataset_ref="silver:chembl.activity@1",
+                lineage_fragment_id="silver:fragment-1",
+                details={
+                    "artifact_path": str(left_meta),
+                    "metadata_path": str(left_meta),
+                },
+            )
+        )
+        ledger_store.append(
+            RunLedgerEntry(
+                entry_id="artifact-right",
+                manifest_id="manifest-right",
+                run_id=right_run_id,
+                event_type="artifact_published",
+                occurred_at=FIXED_TIME,
+                stage="silver",
+                dataset_ref="silver:chembl.activity@1",
+                lineage_fragment_id="silver:fragment-1",
+                details={
+                    "artifact_path": str(right_meta),
+                    "metadata_path": str(right_meta),
+                },
+            )
+        )
+        service = ForensicRunDiffService(
+            manifest_port=manifest_store,
+            ledger_port=ledger_store,
+            artifact_byte_comparison_port=FileArtifactByteComparisonAdapter(),
+        )
+
+        payload = service.compare("manifest-left", "manifest-right").to_dict()
+
+    assert payload["artifact_byte_equivalence"]["available"] is True
+    assert payload["artifact_byte_equivalence"]["equivalent"] is True
+    assert payload["artifact_byte_equivalence"]["semantic_equivalent"] is True
+    assert payload["artifact_byte_equivalence"]["raw_byte_equivalent"] is False
+    assert payload["artifact_byte_equivalence"]["occurrence_only"] is True
+    assert payload["artifact_byte_equivalence"]["occurrence_only_artifacts"]

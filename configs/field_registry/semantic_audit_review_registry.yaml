@@ -1,7 +1,7 @@
 version: "1.2.0"
-reviewed_on: "2026-05-21"
+reviewed_on: "2026-05-22"
 owner: BioETL Team
-source_matrix: reports/semantic_pipeline_audit/semantic_pair_matrix_2026-05-21.csv
+source_matrix: reports/semantic_pipeline_audit/semantic_pair_matrix_2026-05-22.csv
 
 # Risk reviews are intentionally empty: the semantic pair matrix now reports
 # CRITICAL=0, HIGH=0, MEDIUM=0 without reviewed risk caps.

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from uuid import UUID
 
+import pytest
+
 from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.application.services.control_plane.effective_config_service import (
     EffectiveConfigService,
@@ -21,6 +23,8 @@ from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRe
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.types.dq_contracts import DQDisposition
 from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
+
+pytestmark = pytest.mark.unit
 
 
 def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:

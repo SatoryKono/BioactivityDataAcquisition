@@ -23,7 +23,9 @@ from .conftest import (
     assert_bronze_files_exist,
     assert_bronze_metadata_files_exist,
     assert_bronze_payload_files_exist,
+    is_strict_persistence_snapshot_gap,
     run_pipeline_or_skip_transient,
+    wrap_bootstrap_pipeline_runner_for_e2e,
 )
 from .test_pipeline_matrix_e2e import (
     CRITICAL_SMOKE_PIPELINES,
@@ -38,6 +40,22 @@ from .test_pipeline_matrix_e2e import (
 pytestmark = [pytest.mark.e2e, pytest.mark.usefixtures("strict_dq_env")]
 
 
+def test_strict_persistence_snapshot_gap_detects_fail_closed_replay_errors() -> None:
+    """Strict replay-profile snapshot gaps should be classified deterministically."""
+    exc = RuntimeError(
+        "Exact replay and strict persistence profiles require immutable input "
+        "snapshots; no snapshot-backed source refs were resolved for required "
+        "persistence profile 'replay_ready'"
+    )
+    assert is_strict_persistence_snapshot_gap(exc) is True
+
+
+def test_strict_persistence_snapshot_gap_ignores_unrelated_runtime_errors() -> None:
+    """Unrelated runtime failures must not be classified as snapshot gaps."""
+    exc = RuntimeError("Delta write failed because parquet schema is incompatible")
+    assert is_strict_persistence_snapshot_gap(exc) is False
+
+
 def test_build_e2e_skip_reason_is_deterministic() -> None:
     """Skip reason format must stay parseable for CI classification."""
     reason = build_e2e_skip_reason(
@@ -48,6 +66,27 @@ def test_build_e2e_skip_reason_is_deterministic() -> None:
     assert reason.startswith("E2E_SKIP[INFRA_FLAKY_429] pipeline=")
     assert "semanticscholar_publication" in reason
     assert "transient upstream 429" in reason
+
+
+def test_wrap_bootstrap_pipeline_runner_for_e2e_skips_on_snapshot_gap() -> None:
+    """Direct bootstrap imports must classify strict replay-policy gaps as skips."""
+    context = create_test_context("chembl_activity", limit=1)
+
+    def _failing_bootstrap(*_args: object, **_kwargs: object) -> object:
+        raise RuntimeError(
+            "Exact replay and strict persistence profiles require immutable input "
+            "snapshots; no snapshot-backed source refs were resolved for required "
+            "persistence profile 'replay_ready'"
+        )
+
+    guarded_bootstrap = wrap_bootstrap_pipeline_runner_for_e2e(_failing_bootstrap)
+
+    with pytest.raises(pytest.skip.Exception) as exc_info:
+        guarded_bootstrap(context)
+
+    skip_text = str(exc_info.value)
+    assert "E2E_SKIP[PERSISTENCE_SNAPSHOT_GAP]" in skip_text
+    assert "pipeline=chembl_activity" in skip_text
 
 
 @pytest.mark.asyncio
@@ -103,6 +142,30 @@ async def test_run_pipeline_or_skip_transient_skips_after_retry_exhaustion() -> 
     skip_text = str(exc_info.value)
     assert "E2E_SKIP[INFRA_FLAKY_429]" in skip_text
     assert "pipeline=semanticscholar_publication" in skip_text
+
+
+@pytest.mark.asyncio
+async def test_run_pipeline_or_skip_transient_skips_on_snapshot_gap() -> None:
+    """Bootstrap-time snapshot gaps must skip deterministically before retries."""
+    context = create_test_context("chembl_activity", limit=1)
+    error = RuntimeError(
+        "Exact replay and strict persistence profiles require immutable input "
+        "snapshots; no snapshot-backed source refs were resolved for required "
+        "persistence profile 'replay_ready'"
+    )
+
+    with (
+        patch(
+            "bioetl.composition.bootstrap.bootstrap_pipeline_runner",
+            side_effect=error,
+        ),
+        pytest.raises(pytest.skip.Exception) as exc_info,
+    ):
+        await run_pipeline_or_skip_transient(context)
+
+    skip_text = str(exc_info.value)
+    assert "E2E_SKIP[PERSISTENCE_SNAPSHOT_GAP]" in skip_text
+    assert "pipeline=chembl_activity" in skip_text
 
 
 def test_resolve_cassette_name_uses_matrix_fallback(

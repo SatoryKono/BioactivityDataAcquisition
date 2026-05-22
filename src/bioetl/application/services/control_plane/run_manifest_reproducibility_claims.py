@@ -5,7 +5,23 @@ from __future__ import annotations
 JsonDict = dict[str, object]
 
 
-def build_global_reproducibility_claim(
+def _claim_evidence_refs(
+    *,
+    evidence_refs: list[str],
+    include_historical_claim: bool,
+) -> list[str]:
+    refs = [
+        *evidence_refs,
+        "diagnostics.exact_replay_support_boundary",
+        "diagnostics.lineage_closure_boundary",
+        "diagnostics.replay_family_contract",
+    ]
+    if include_historical_claim:
+        refs.append("diagnostics.historical_replay_universe_claim")
+    return sorted(dict.fromkeys(refs))
+
+
+def build_historical_replay_universe_exact_replay_claim(
     *,
     summary: JsonDict,
     evidence_refs: list[str],
@@ -13,16 +29,9 @@ def build_global_reproducibility_claim(
     historical_universe_claim = summary.get("historical_replay_universe_claim")
     historical_universe_source = summary.get("historical_replay_universe_claim_source")
     if isinstance(historical_universe_claim, dict):
-        claim_refs = sorted(
-            dict.fromkeys(
-                [
-                    *evidence_refs,
-                    "diagnostics.historical_replay_universe_claim",
-                    "diagnostics.exact_replay_support_boundary",
-                    "diagnostics.lineage_closure_boundary",
-                    "diagnostics.replay_family_contract",
-                ]
-            )
+        claim_refs = _claim_evidence_refs(
+            evidence_refs=evidence_refs,
+            include_historical_claim=True,
         )
         artifact_path = (
             str(historical_universe_source).strip()
@@ -35,12 +44,14 @@ def build_global_reproducibility_claim(
         )
         fully_claimed = exact_replay_supported and durable_supported
         return {
-            "scope": "project_wide_exact_replay",
+            "scope": str(
+                historical_universe_claim.get("scope") or "all_known_historical_runs"
+            ),
             "claimed": fully_claimed,
             "verdict": (
-                "universal_exact_replay_claimed"
+                "historical_universe_exact_replay_claimed"
                 if fully_claimed
-                else "universal_exact_replay_not_claimed"
+                else "historical_universe_exact_replay_not_claimed"
             ),
             "reason": (
                 "latest_historical_replay_universe_artifact_supports_universal_claim"
@@ -59,21 +70,15 @@ def build_global_reproducibility_claim(
             "claim_source_artifact_path": artifact_path,
             "evidence_refs": claim_refs,
         }
-    claim_refs = sorted(
-        dict.fromkeys(
-            [
-                *evidence_refs,
-                "diagnostics.exact_replay_support_boundary",
-                "diagnostics.lineage_closure_boundary",
-                "diagnostics.replay_family_contract",
-            ]
-        )
+    claim_refs = _claim_evidence_refs(
+        evidence_refs=evidence_refs,
+        include_historical_claim=False,
     )
     return {
-        "scope": "project_wide_exact_replay",
+        "scope": "all_known_historical_runs",
         "claimed": False,
-        "verdict": "universal_exact_replay_not_claimed",
-        "reason": "published_contract_limits_exact_replay_to_supported_boundary",
+        "verdict": "historical_universe_exact_replay_not_claimed",
+        "reason": "authoritative_historical_replay_universe_artifact_unavailable",
         "exact_replay_support_boundary": summary.get("exact_replay_support_boundary"),
         "lineage_closure_boundary": summary.get("lineage_closure_boundary"),
         "authoritative_truth_surface": "historical_replay_universe_closure_report",
@@ -82,4 +87,31 @@ def build_global_reproducibility_claim(
     }
 
 
-__all__ = ["build_global_reproducibility_claim"]
+def build_executable_run_contract_claim(
+    *,
+    summary: JsonDict,
+    evidence_refs: list[str],
+) -> JsonDict:
+    claim_refs = _claim_evidence_refs(
+        evidence_refs=evidence_refs,
+        include_historical_claim=False,
+    )
+    return {
+        "scope": "prospective_executable_runs_within_supported_boundary",
+        "claimed": True,
+        "verdict": "prospective_executable_run_contract_claimed",
+        "reason": "supported_boundary_executable_runs_promote_or_fail_closed",
+        "exact_replay_support_boundary": summary.get("exact_replay_support_boundary"),
+        "lineage_closure_boundary": summary.get("lineage_closure_boundary"),
+        "authoritative_truth_surface": "published_control_plane_contract",
+        "claim_source_artifact_path": (
+            "docs/04-reference/contracts/run-manifest-ledger.md"
+        ),
+        "evidence_refs": claim_refs,
+    }
+
+
+__all__ = [
+    "build_executable_run_contract_claim",
+    "build_historical_replay_universe_exact_replay_claim",
+]

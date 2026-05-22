@@ -436,7 +436,10 @@ async def test_pipeline_matrix_smoke(
                 )
             )
         # For pubchem_compound, allow DQ threshold errors but skip Silver validation
-        if isinstance(exc, DataQualityThresholdError) and pipeline_case.pipeline_name == "pubchem_compound":
+        if (
+            isinstance(exc, DataQualityThresholdError)
+            and pipeline_case.pipeline_name == "pubchem_compound"
+        ):
             silver_validation_skipped = True
         else:
             raise
@@ -457,7 +460,9 @@ async def test_pipeline_matrix_smoke(
         )
         assert len(bronze_files) >= 1
         if not silver_validation_skipped:
-            assert_silver_table_has_records(e2e_data_dir, pipeline_case.pipeline_name, 1)
+            assert_silver_table_has_records(
+                e2e_data_dir, pipeline_case.pipeline_name, 1
+            )
     except (AssertionError, DeltaError, TableNotFoundError) as exc:
         if _requires_non_empty_cassette_contract(pipeline_case.pipeline_name):
             pytest.fail(

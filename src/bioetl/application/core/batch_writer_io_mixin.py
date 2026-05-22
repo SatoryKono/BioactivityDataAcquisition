@@ -166,10 +166,9 @@ class BatchWriterIOMixin:
                 available_cols = self._collect_record_columns(records)
                 schema_payload = self._gold_schema_policy_by_version
             else:
-                available_cols = (
-                    list(self._get_schema_columns(self._gold_schema) or ())
-                    or self._collect_record_columns(records)
-                )
+                available_cols = list(
+                    self._get_schema_columns(self._gold_schema) or ()
+                ) or self._collect_record_columns(records)
                 column_order, rename_map = self._resolve_layer_columns(
                     "gold", available_cols
                 )

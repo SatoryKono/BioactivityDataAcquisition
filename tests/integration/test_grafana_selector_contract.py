@@ -156,7 +156,9 @@ def test_control_plane_selector_context_contract_is_local_only() -> None:
     assert isinstance(resolver, dict)
     assert resolver.get("status") == "shipped"
     assert resolver.get("endpoint") == "/ops/control-plane/selector-context"
-    assert resolver.get("filter_options_endpoint") == "/ops/control-plane/filter-options"
+    assert (
+        resolver.get("filter_options_endpoint") == "/ops/control-plane/filter-options"
+    )
     assert resolver.get("local_only") is True
 
     forbidden = set(resolver.get("forbidden", []))

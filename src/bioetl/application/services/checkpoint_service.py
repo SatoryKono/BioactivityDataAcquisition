@@ -38,6 +38,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import CheckpointPort, LoggerPort, MetricsPort, TracingPort
 
+
 @dataclass
 class CheckpointService:
     """Service for administrative checkpoint operations.

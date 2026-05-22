@@ -62,7 +62,7 @@ budgets:
   duplicate_test_names_max: 877
   duplicate_test_name_occurrences_max: 2730
   compatibility_test_file_max: 56
-  markerless_test_functions_max: 7782
+  markerless_test_functions_max: 7776
   uuid4_call_sites_max: 404
   date_today_call_sites_max: 0
 budget_ratchet:
@@ -105,12 +105,20 @@ current_issue_closeout:
     - "#4468"
     - "#4469"
     - "#4470"
+    - "#4506"
+    - "#4507"
+    - "#4508"
+    - "#4509"
   decision: closeable
   evidence:
     - reports/quality/module-coverage-inventory.json
     - scripts/engineering/qa/report_test_governance_audit.py
     - configs/quality/test_governance_audit.yaml
     - reports/quality/vcr-metadata-catalog.json
+    - scripts/engineering/qa/report_vcr_metadata_catalog.py
+    - tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
+    - tests/unit/application/services/test_run_manifest_inspection_dq_traceability.py
+    - tests/integration/pipelines/observability.py
     - tests/integration/test_observability_emission_integration.py
     - tests/architecture/test_test_governance_audit.py
 preflight:
@@ -217,15 +225,15 @@ oversized_test_module_inventory:
   split_on_touch: true
   top_modules:
     - path: tests/integration/ci/test_reproducibility_contract_suite.py
-      lines: 2164
+      lines: 2171
       owner: reproducibility-contracts
       target_split: integration/ci reproducibility phases
     - path: tests/unit/application/services/test_metadata_coordinator.py
-      lines: 1994
+      lines: 2002
       owner: application-services
       target_split: metadata coordinator command/query families
     - path: tests/unit/composition/runtime_builders/test_runner_builder.py
-      lines: 2010
+      lines: 1910
       owner: composition-runtime
       target_split: runner-builder factory seams
     - path: tests/unit/application/core/test_record_normalization_processor.py
@@ -235,10 +243,22 @@ oversized_test_module_inventory:
   completed_splits:
     - issue_ref: "#4505"
       source: tests/integration/test_grafana_config.py
-      source_lines_after_split: 1374
+      source_lines_after_split: 1373
       extracted_surface: tests/integration/test_grafana_surface_contracts.py
       extracted_surface_lines: 712
       owner: observability-dashboards
+    - issue_ref: "#4506"
+      source: tests/unit/composition/runtime_builders/test_runner_builder.py
+      source_lines_after_split: 1910
+      extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
+      extracted_surface_lines: 93
+      owner: composition-runtime
+    - issue_ref: "#4506"
+      source: tests/unit/application/services/test_run_manifest_inspection_service.py
+      source_lines_after_split: 1885
+      extracted_surface: tests/unit/application/services/test_run_manifest_inspection_dq_traceability.py
+      extracted_surface_lines: 164
+      owner: application-services
 compatibility_test_inventory:
   review_cadence: quarterly
   total_files: 56

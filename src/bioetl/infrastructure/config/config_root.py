@@ -24,7 +24,9 @@ def get_default_repo_root() -> Path:
     for candidate in source_path.parents:
         if not (candidate / "configs").is_dir():
             continue
-        if (candidate / "pyproject.toml").is_file() or (candidate / "AGENTS.md").is_file():
+        if (candidate / "pyproject.toml").is_file() or (
+            candidate / "AGENTS.md"
+        ).is_file():
             return candidate
     return source_path.parents[4]
 
