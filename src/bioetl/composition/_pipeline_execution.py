@@ -22,9 +22,7 @@ from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_run
 from bioetl.composition.bootstrap.runtime.pipeline_context_builder import (
     build_pipeline_context,
 )
-from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.factories.pipeline.runner import create_metrics_extractor
-from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.domain.exceptions import BioETLError
