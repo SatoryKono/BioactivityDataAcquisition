@@ -699,6 +699,7 @@ def main() -> int:
     tracked_paths = layout_state["tracked_paths"]
     tracked_root_files = layout_state["tracked_root_files"]
     tracked_root_dirs = layout_state["tracked_root_dirs"]
+    allowed_root_dirs = layout_state["allowed_root_dirs"]
     unexpected_root_files = layout_state["unexpected_root_files"]
     unexpected_root_dirs = layout_state["unexpected_root_dirs"]
     missing_allowed_files = layout_state["missing_allowed_files"]
