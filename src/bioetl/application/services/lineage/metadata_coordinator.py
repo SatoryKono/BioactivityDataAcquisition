@@ -69,6 +69,7 @@ __all__ = [
     "MetadataCoordinator",
 ]
 
+
 class MetadataCoordinator(MetadataCoordinatorPort):
     """Centralized coordinator for metadata creation across Medallion layers.
 
@@ -106,7 +107,9 @@ class MetadataCoordinator(MetadataCoordinatorPort):
     def _strict_manifest_id_required(self) -> bool:
         """Return whether sidecar lineage must close over manifest identity."""
         profile = str(self._context.required_persistence_profile or "").strip().lower()
-        return bool(self._context.exact_replay) or profile in STRICT_PERSISTENCE_PROFILES
+        return (
+            bool(self._context.exact_replay) or profile in STRICT_PERSISTENCE_PROFILES
+        )
 
     @classmethod
     def _get_environment_metadata(cls) -> EnvironmentMetadata:
@@ -252,6 +255,19 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             "batch_id": str(batch_id),
             "execution_fingerprint": self._context.execution_fingerprint or "",
             "effective_config_hash": self._context.effective_config_hash or "",
+            "effective_config_artifact_id": (
+                self._context.effective_config_artifact_id or ""
+            ),
+            "contract_ref": self._context.contract_ref or "",
+            "contract_version": self._context.contract_version or "",
+            "required_persistence_profile": (
+                self._context.required_persistence_profile or ""
+            ),
+            "sidecar_truth_boundary": "legacy_lineage_projection_non_authoritative",
+            "authoritative_replay_artifacts": (
+                "run_manifest,lineage_fragment,layer_metadata,"
+                "effective_config_artifact"
+            ),
         }
 
     def create_silver_metadata(self, input_data: SilverMetadataInput) -> SilverMetadata:

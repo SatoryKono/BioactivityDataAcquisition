@@ -9,6 +9,9 @@ from typing import Literal, Protocol, cast
 
 import pyarrow as pa
 
+from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
+)
 from bioetl.domain.config import KeyNullabilityRule
 from bioetl.domain.medallion import SilverWriteMode, WriteMode, WriteModePolicy
 from bioetl.domain.ports import LoggerPort, MetricsPort, SilverValidatorPort
@@ -54,6 +57,39 @@ class _SilverPayloadPreparationRuntimeProtocol(Protocol):
         records: list[BronzeRecord],
         on_schema_mismatch: Literal["error", "evolve", "ignore"],
     ) -> None: ...
+
+
+def _strict_replay_merge_contract_required(
+    runtime_host: object,
+) -> bool:
+    """Return whether the active Silver write must enforce replay-safe merge guards."""
+    coordinator = getattr(runtime_host, "_metadata_coordinator", None)
+    run_context = getattr(coordinator, "run_context", None)
+    required_profile = str(
+        getattr(run_context, "required_persistence_profile", "") or ""
+    ).strip().lower()
+    exact_replay = bool(getattr(run_context, "exact_replay", False))
+    return exact_replay or required_profile in STRICT_PERSISTENCE_PROFILES
+
+
+def _enforce_replay_safe_merge_contract(
+    *,
+    runtime_host: object,
+    table_name: str,
+    validated_mode: SilverWriteMode,
+    arrow_data: pa.Table,
+) -> None:
+    """Fail closed when strict merge replay would otherwise downgrade to full-row updates."""
+    if validated_mode != SilverWriteMode.MERGE:
+        return
+    if not _strict_replay_merge_contract_required(runtime_host):
+        return
+    if "content_hash" in arrow_data.schema.names:
+        return
+    raise ValueError(
+        "Replay-capable Silver merge requires content_hash in the prepared payload: "
+        f"table={table_name}"
+    )
 
 
 def _resolve_payload_runtime_host(
@@ -103,6 +139,12 @@ async def _prepare_silver_write_payload_impl(
         arrow_data=validated.arrow_data,
     )
     runtime_host = _resolve_payload_runtime_host(host)
+    _enforce_replay_safe_merge_contract(
+        runtime_host=runtime_host,
+        table_name=table_name,
+        validated_mode=validated.validated_mode,
+        arrow_data=validated.arrow_data,
+    )
     await runtime_host._check_schema_drift(
         schema_request.table_name,
         schema_request.records,

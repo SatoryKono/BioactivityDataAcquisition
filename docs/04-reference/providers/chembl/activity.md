@@ -369,6 +369,12 @@ ______________________________________________________________________
 
 **Metadata sidecar** (`.meta.json`):
 
+This legacy file-level sidecar is an operator-facing occurrence projection, not
+an authoritative replay dossier. Exact replay/debug reconstruction must use the
+immutable control-plane and lineage surfaces (`run_manifest`, canonical layer
+metadata, lineage fragment, effective-config artifact, and ledger evidence)
+instead of treating `.meta.json` as standalone source of truth.
+
 ```json
 {
     "run_id": "uuid",
