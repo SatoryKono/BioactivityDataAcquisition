@@ -8,5 +8,5 @@ cell_source_taxonomy_id,S2.3,YES,EMPTY,cell_line_transformer.py:89,chembl.py:606
 cellosaurus_id,S2.4,YES,EMPTY,cell_line_transformer.py:93,chembl.py:611,cell_line.py:67,chembl.py:259,string,true,false,OK
 cl_lincs_id,S2.4,YES,EMPTY,cell_line_transformer.py:97,chembl.py:612,cell_line.py:77,chembl.py:260,string,true,false,OK
 efo_id,S2.4,YES,EMPTY,cell_line_transformer.py:98,chembl.py:613,cell_line.py:81,chembl.py:261,string,true,false,OK
-cell_type,MISSING,MISSING,EMPTY,cell_line_transformer.py:91,MISSING,cell_line.py:61,MISSING,string,true,false,MISSING_DOC;MISSING_GOLD
-clo_id,MISSING,MISSING,EMPTY,cell_line_transformer.py:96,MISSING,cell_line.py:73,MISSING,string,true,false,MISSING_DOC;MISSING_GOLD
+cell_type,S2.2,YES,EMPTY,cell_line_transformer.py:91,chembl.py:608,cell_line.py:61,chembl.py:259,string,true,false,OK
+clo_id,S2.4,YES,EMPTY,cell_line_transformer.py:96,chembl.py:614,cell_line.py:73,chembl.py:262,string,true,false,OK

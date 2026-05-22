@@ -33,8 +33,10 @@ class ChEMBLCellLineGoldSchema(StrictGoldContractSchema):
     )  # Standardized name
 
     # External identifiers
+    cell_type: Series[str] = pa.Field(nullable=True)
     cellosaurus_id: Series[str] = pa.Field(nullable=True)
     cl_lincs_id: Series[str] = pa.Field(nullable=True)
+    clo_id: Series[str] = pa.Field(nullable=True)
     efo_id: Series[str] = pa.Field(nullable=True)
 
 

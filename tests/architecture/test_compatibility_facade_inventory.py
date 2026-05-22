@@ -215,7 +215,7 @@ def test_retained_entrypoint_burn_down_plan_covers_all_public_rows() -> None:
     payload = yaml.safe_load(REGISTRY_YAML.read_text(encoding="utf-8"))
     burn_down_plan = payload["retained_entrypoint_burn_down_plan"]
 
-    assert burn_down_plan["linked_issue"] == "#4542"
+    assert burn_down_plan["linked_issue"] == "#4565"
     assert burn_down_plan["review_date"] == "2026-09-30"
     allowed_phases = set(burn_down_plan["allowed_phases"])
     assert allowed_phases == {

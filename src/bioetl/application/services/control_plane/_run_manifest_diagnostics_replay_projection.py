@@ -19,6 +19,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
     _resolve_exact_replay_support_boundary,
     _resolve_replay_family_contract,
 )
+from bioetl.application.services.control_plane._run_manifest_replay_family_contract_payload import (
+    build_replay_family_contract_payload,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_state import (
     _build_replay_state_projection,
     _resolve_broader_historical_exact_replay_state,
@@ -136,31 +139,7 @@ def _build_operator_replay_projection_payload(
             manifest
         ),
         "replay_family_contract": replay_family_contract,
-        "replay_support_state": replay_family_contract.get("support_state"),
-        "post_capture_replayable_parent_supported": replay_family_contract.get(
-            "post_capture_replayable_parent_supported"
-        ),
-        "post_capture_replayable_parent_boundary": replay_family_contract.get(
-            "post_capture_replayable_parent_boundary"
-        ),
-        "historical_live_run_upgrade_policy": replay_family_contract.get(
-            "historical_live_run_upgrade_policy"
-        ),
-        "historical_live_run_upgrade_boundary": replay_family_contract.get(
-            "historical_live_run_upgrade_boundary"
-        ),
-        "historical_live_run_upgrade_reason": replay_family_contract.get(
-            "historical_live_run_upgrade_reason"
-        ),
-        "broader_historical_exact_replay_policy": replay_family_contract.get(
-            "broader_historical_exact_replay_policy"
-        ),
-        "broader_historical_exact_replay_boundary": replay_family_contract.get(
-            "broader_historical_exact_replay_boundary"
-        ),
-        "broader_historical_exact_replay_reason": replay_family_contract.get(
-            "broader_historical_exact_replay_reason"
-        ),
+        **build_replay_family_contract_payload(replay_family_contract),
         "broader_historical_exact_replay_state": replay_inputs[
             "broader_historical_exact_replay_state"
         ],

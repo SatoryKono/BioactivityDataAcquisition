@@ -2,31 +2,31 @@ version: 1
 policy_scope: infrastructure_config_root_facade
 review_date: "2026-05-22"
 target_module: bioetl.infrastructure.config
-new_src_import_policy: allowlisted_only_no_growth
-linked_issue: "#4453"
+new_src_import_policy: external_only_zero_first_party_growth
+linked_issue: "#4564"
 symbols:
   - symbol: Settings
     owner: bioetl.infrastructure.config
     status: sanctioned_convenience_type
     canonical_target: bioetl.infrastructure.config._base.Settings
-    max_src_importers: 58
+    max_src_importers: 0
     allowlisted_path_prefixes:
       - src/bioetl/composition/
     rationale: >-
-      `Settings` remains a retained convenience type import for composition
-      wiring, but new first-party growth through the broad package-root facade
-      is not allowed.
+      `Settings` remains an external convenience type import, but first-party
+      source modules must import the canonical owner type directly instead of
+      flowing through the broad package-root facade.
   - symbol: get_settings
     owner: bioetl.infrastructure.config
     status: sanctioned_convenience_runtime
     canonical_target: bioetl.infrastructure.config._base.get_settings
-    max_src_importers: 16
+    max_src_importers: 0
     allowlisted_path_prefixes:
       - src/bioetl/composition/
     rationale: >-
-      `get_settings` remains a retained convenience seam for composition
-      runtime/bootstrap paths. New first-party growth through the package root
-      is not allowed.
+      `get_settings` remains an external convenience seam, but first-party
+      runtime/bootstrap paths must import the canonical owner helper directly
+      instead of flowing through the package root.
   - symbol: load_pipeline_contract_policy
     owner: bioetl.infrastructure.config
     status: sanctioned_convenience_contract_policy

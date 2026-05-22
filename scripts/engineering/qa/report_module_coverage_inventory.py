@@ -239,6 +239,28 @@ def _load_hotspot_family_prefixes(repo_root: Path) -> dict[str, tuple[str, ...]]
     return family_prefixes
 
 
+def _load_hotspot_family_thresholds(
+    repo_root: Path,
+) -> dict[str, dict[str, float | int]]:
+    scorecard_path = repo_root / "configs" / "quality" / "debt_scorecard.yaml"
+    payload = yaml.safe_load(scorecard_path.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    threshold_payload = payload.get("hotspot_family_coverage_thresholds", {})
+    assert isinstance(threshold_payload, dict)
+    families = threshold_payload.get("families", {})
+    assert isinstance(families, dict)
+    thresholds: dict[str, dict[str, float | int]] = {}
+    for family_name, row in families.items():
+        if not isinstance(family_name, str) or not isinstance(row, dict):
+            continue
+        thresholds[family_name] = {
+            key: value
+            for key, value in row.items()
+            if isinstance(value, int | float)
+        }
+    return thresholds
+
+
 def _status_is_measured(status: str) -> bool:
     return status in {
         "no_executable_lines",
@@ -254,6 +276,7 @@ def _build_hotspot_family_coverage(
     repo_root: Path,
 ) -> dict[str, dict[str, Any]]:
     families = _load_hotspot_family_prefixes(repo_root)
+    thresholds = _load_hotspot_family_thresholds(repo_root)
     family_coverage: dict[str, dict[str, Any]] = {}
     for family_name, prefixes in families.items():
         family_rows = [
@@ -264,9 +287,18 @@ def _build_hotspot_family_coverage(
         measured_module_count = sum(
             1 for row in family_rows if _status_is_measured(str(row["coverage_status"]))
         )
+        covered_module_count = sum(
+            1
+            for row in family_rows
+            if str(row["coverage_status"]) in {"partially_covered", "fully_covered"}
+        )
         unmeasured_module_count = sum(
             1 for row in family_rows if str(row["coverage_status"]) == "unmeasured"
         )
+        executable_lines_total = sum(
+            int(row["executable_lines"] or 0) for row in family_rows
+        )
+        covered_lines_total = sum(int(row["covered_lines"] or 0) for row in family_rows)
         coverage_percents = [
             float(row["coverage_percent"])
             for row in family_rows
@@ -276,10 +308,41 @@ def _build_hotspot_family_coverage(
         for row in family_rows:
             status = str(row["coverage_status"])
             status_counts[status] = status_counts.get(status, 0) + 1
+        covered_line_percent = (
+            round(100.0 * covered_lines_total / executable_lines_total, 2)
+            if executable_lines_total
+            else None
+        )
+        family_thresholds = thresholds.get(family_name, {})
+        threshold_status = "pass"
+        if measured_module_count < int(
+            family_thresholds.get("min_measured_module_count", measured_module_count)
+        ):
+            threshold_status = "fail"
+        if unmeasured_module_count > int(
+            family_thresholds.get(
+                "max_unmeasured_module_count",
+                unmeasured_module_count,
+            )
+        ):
+            threshold_status = "fail"
+        if covered_module_count < int(
+            family_thresholds.get("min_covered_module_count", covered_module_count)
+        ):
+            threshold_status = "fail"
+        min_covered_line_percent = family_thresholds.get("min_covered_line_percent")
+        if (
+            isinstance(min_covered_line_percent, int | float)
+            and covered_line_percent is not None
+            and covered_line_percent < float(min_covered_line_percent)
+        ):
+            threshold_status = "fail"
         family_coverage[family_name] = {
             "module_count": len(family_rows),
             "measured_module_count": measured_module_count,
+            "covered_module_count": covered_module_count,
             "unmeasured_module_count": unmeasured_module_count,
+            "covered_line_percent": covered_line_percent,
             "measured_percent": (
                 round(100.0 * measured_module_count / len(family_rows), 2)
                 if family_rows
@@ -294,6 +357,8 @@ def _build_hotspot_family_coverage(
                 else None
             ),
             "status_counts": dict(sorted(status_counts.items())),
+            "thresholds": family_thresholds,
+            "threshold_status": threshold_status,
         }
     return family_coverage
 

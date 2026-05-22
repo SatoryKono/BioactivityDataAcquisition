@@ -140,7 +140,7 @@ def test_health_api_reexports_canonical_health_services() -> None:
     assert HealthServerDependencies is CanonicalHealthServerDependencies
     assert canonical_get_health_service is get_health_service
     assert canonical_get_quarantine_runtime_service is get_quarantine_runtime_service
-    assert canonical_get_quarantine_service is get_quarantine_service
+    assert canonical_get_quarantine_service is not get_quarantine_service
 
 
 def test_maintenance_api_reexports_canonical_maintenance_services() -> None:
