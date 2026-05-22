@@ -108,7 +108,7 @@ def test_retirement_triage_entries_are_explicit_and_actionable() -> None:
     assert policy.get("review_cycle_days") == 90
     zero_import_review = triage.get("repo_wide_zero_import_review", {})
     assert isinstance(zero_import_review, dict)
-    assert zero_import_review.get("linked_issue") == "#4513"
+    assert zero_import_review.get("linked_issue") == "#4541"
     assert zero_import_review.get("mode") == "fail-fast-zero-untriaged"
     assert isinstance(zero_import_review.get("inventory_command"), str)
     assert "report_dead_code_inventory" in zero_import_review["inventory_command"]
@@ -126,7 +126,7 @@ def test_retirement_triage_entries_are_explicit_and_actionable() -> None:
     assert entries, "Expected at least one retirement-triage entry"
     repo_wide = triage.get("repo_wide_zero_import_classification", {})
     assert isinstance(repo_wide, dict)
-    assert repo_wide.get("linked_issue") == "#4513"
+    assert repo_wide.get("linked_issue") == "#4541"
     assert repo_wide.get("review_date") == "2026-05-22"
     assert set(repo_wide.get("allowed_dispositions", [])) == {
         "retain_module_entrypoint",

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from bioetl.domain.control_plane import RunLedgerEntry
+from bioetl.domain.control_plane.run_ledger import RunLedgerEntry
 from bioetl.domain.types import RunID
 
 __all__ = ["RunLedgerPort"]

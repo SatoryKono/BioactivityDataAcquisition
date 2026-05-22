@@ -85,6 +85,7 @@ shards:
     paths:
       - tests/unit/application/composite
       - tests/unit/application/core
+    workers_override: 0
   - name: S4-app-services
     wave: 2
     paths:

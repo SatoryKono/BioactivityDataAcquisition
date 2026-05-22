@@ -1,30 +1,31 @@
 """Domain execution context objects.
 
-The runtime model is intentionally split:
-- ``PipelineRunContext`` carries launch-time execution parameters used to
-  assemble and start a pipeline run.
-- ``PipelineContext`` carries in-run processing state used by record, batch,
-  and write paths after launch-time resolution is complete.
-
-Control-plane provenance is modeled separately via
-``bioetl.domain.control_plane.run_manifest.RunManifest`` and must not be folded
-back into a universal runtime manifest object.
+``PipelineRunContext`` carries launch-time execution parameters, while
+``PipelineContext`` carries in-run processing state after launch-time
+resolution completes. There is no universal runtime manifest object;
+control-plane provenance remains separate via
+``bioetl.domain.control_plane.run_manifest.RunManifest``.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any
+from importlib import import_module
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.context_cached_bronze import CachedBronzeContext
 from bioetl.domain.context_filtering import InputFilterContext, VacuumSettings
-from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BatchID, ExecutionContext, RunID, RunType
 from bioetl.domain.types.contract_identity import (
     ContractIdentity,
     DQContractCompatibility,
 )
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort
+else:
+    LoggerPort = import_module("bioetl.domain.ports.observability.logging").LoggerPort
 
 __all__ = [
     "MISSING_RUNTIME_TIMESTAMP",
@@ -35,16 +36,12 @@ __all__ = [
     "VacuumSettings",
     "current_utc_time",
 ]
-
-
 MISSING_RUNTIME_TIMESTAMP = datetime(1970, 1, 1, tzinfo=UTC)
 """Deterministic sentinel for compatibility-only direct context construction."""
-
 
 def current_utc_time() -> datetime:
     """Return the sanctioned domain UTC timestamp source."""
     return datetime.now(UTC)
-
 
 def _normalize_correlation_value(value: object | None) -> str | None:
     """Normalize one optional correlation field to a non-empty string."""

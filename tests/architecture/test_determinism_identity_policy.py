@@ -145,7 +145,7 @@ def test_determinism_identity_policy_has_expected_shape() -> None:
     assert date.fromisoformat(str(payload["review_date"])) >= POLICY_REVIEW_DATE
     reduction_plan = payload.get("compatibility_reduction_plan")
     assert isinstance(reduction_plan, dict)
-    assert reduction_plan.get("linked_issue") == "#4517"
+    assert reduction_plan.get("linked_issue") == "#4540"
     assert reduction_plan.get("review_date") == "2026-09-30"
     assert set(reduction_plan.get("allowed_outcomes", [])) == {
         "retain_occurrence_only_generator",

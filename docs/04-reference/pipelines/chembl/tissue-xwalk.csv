@@ -1,7 +1,7 @@
 field,doc_spec,cfg_pipeline,cfg_schema,code_transformer,code_entity,code_silver_schema,code_gold_schema,json_type,nullable,primary_key,notes
-tissue_id,MISSING,YES,EMPTY,tissue_transformer.py:61,chembl_tissue.py:26,MISSING,MISSING,string,false,true,MISSING_DOC;CANONICAL_PK;LEGACY_ALIAS:tissue_chembl_id
-pref_name,MISSING,YES,EMPTY,tissue_transformer.py:63,chembl_tissue.py:29,MISSING,chembl.py:652,string,false,false,MISSING_DOC
-bto_id,MISSING,YES,EMPTY,tissue_transformer.py:65,chembl_tissue.py:32,MISSING,chembl.py:659,string,true,false,MISSING_DOC
-caloha_id,MISSING,YES,EMPTY,tissue_transformer.py:66,chembl_tissue.py:33,MISSING,chembl.py:664,string,true,false,MISSING_DOC
-efo_id,MISSING,YES,EMPTY,tissue_transformer.py:67,chembl_tissue.py:34,MISSING,chembl.py:669,string,true,false,MISSING_DOC
-uberon_id,MISSING,YES,EMPTY,tissue_transformer.py:68,chembl_tissue.py:35,MISSING,chembl.py:674,string,true,false,MISSING_DOC
+tissue_id,Notes,YES,EMPTY,tissue_transformer.py:61,chembl_tissue.py:26,MISSING,MISSING,string,false,true,CANONICAL_PK;LEGACY_ALIAS:tissue_chembl_id
+pref_name,Notes,YES,EMPTY,tissue_transformer.py:63,chembl_tissue.py:29,MISSING,chembl.py:652,string,false,false,
+bto_id,Notes,YES,EMPTY,tissue_transformer.py:65,chembl_tissue.py:32,MISSING,chembl.py:659,string,true,false,
+caloha_id,Notes,YES,EMPTY,tissue_transformer.py:66,chembl_tissue.py:33,MISSING,chembl.py:664,string,true,false,
+efo_id,Notes,YES,EMPTY,tissue_transformer.py:67,chembl_tissue.py:34,MISSING,chembl.py:669,string,true,false,
+uberon_id,Notes,YES,EMPTY,tissue_transformer.py:68,chembl_tissue.py:35,MISSING,chembl.py:674,string,true,false,

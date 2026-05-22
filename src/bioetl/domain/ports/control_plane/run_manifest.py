@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.control_plane.run_manifest import RunManifest
 from bioetl.domain.types import RunID
 
 __all__ = ["RunManifestPort"]

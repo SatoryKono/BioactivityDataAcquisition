@@ -113,7 +113,6 @@ def load_domain_pipeline_config(
         domain_mapper=domain_mapper,
     )
 
-
 __all__ = [
     "DomainConfigResolver",
     "load_domain_pipeline_config",

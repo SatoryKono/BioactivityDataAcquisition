@@ -11,6 +11,8 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from scripts.engineering.qa.file_discovery import discover_files
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -74,24 +76,75 @@ def _iter_source_modules(repo_root: Path) -> list[Path]:
     ]
 
 
-def _coverage_filename_to_repo_path(filename: str) -> str | None:
+def _coverage_source_roots(
+    root: ET.Element,
+    *,
+    repo_root: Path,
+    coverage_xml: Path,
+) -> tuple[Path, ...]:
+    source_roots: list[Path] = []
+    sources_node = root.find("sources")
+    if sources_node is None:
+        return ()
+    for source_node in sources_node.findall("source"):
+        raw_value = str(source_node.text or "").strip()
+        if not raw_value:
+            continue
+        source_path = Path(raw_value)
+        if not source_path.is_absolute():
+            repo_candidate = (repo_root / source_path).resolve()
+            xml_candidate = (coverage_xml.parent / source_path).resolve()
+            source_path = repo_candidate if repo_candidate.exists() else xml_candidate
+        else:
+            source_path = source_path.resolve()
+        source_roots.append(source_path)
+    return tuple(source_roots)
+
+
+def _coverage_filename_to_repo_path(
+    filename: str,
+    *,
+    repo_root: Path,
+    source_roots: tuple[Path, ...],
+) -> str | None:
     normalized = filename.replace("\\", "/")
     if normalized.startswith("src/bioetl/"):
         return normalized
     if normalized.startswith("bioetl/"):
         return f"src/{normalized}"
+    for source_root in source_roots:
+        candidate = (source_root / normalized).resolve()
+        if not candidate.exists():
+            continue
+        try:
+            return candidate.relative_to(repo_root).as_posix()
+        except ValueError:
+            continue
     return None
 
 
-def _parse_coverage_xml(coverage_xml: Path) -> dict[str, dict[str, int]]:
+def _parse_coverage_xml(
+    coverage_xml: Path,
+    *,
+    repo_root: Path,
+) -> dict[str, dict[str, int]]:
     if not coverage_xml.exists():
         return {}
 
     root = ET.parse(coverage_xml).getroot()
+    source_roots = _coverage_source_roots(
+        root,
+        repo_root=repo_root,
+        coverage_xml=coverage_xml,
+    )
     coverage_by_path: dict[str, dict[str, int]] = {}
     for class_node in root.iter("class"):
         filename = class_node.attrib.get("filename", "")
-        repo_path = _coverage_filename_to_repo_path(filename)
+        repo_path = _coverage_filename_to_repo_path(
+            filename,
+            repo_root=repo_root,
+            source_roots=source_roots,
+        )
         if repo_path is None:
             continue
 
@@ -139,6 +192,64 @@ def _coverage_percent(coverage_entry: dict[str, int] | None) -> float | None:
     return round(100.0 * coverage_entry["covered_lines"] / executable_lines, 2)
 
 
+def _load_hotspot_family_prefixes(repo_root: Path) -> dict[str, tuple[str, ...]]:
+    scorecard_path = repo_root / "configs" / "quality" / "debt_scorecard.yaml"
+    payload = yaml.safe_load(scorecard_path.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    ratchets = payload.get("hotspot_family_ratchets", {})
+    assert isinstance(ratchets, dict)
+    families = ratchets.get("families", [])
+    assert isinstance(families, list)
+    family_prefixes: dict[str, tuple[str, ...]] = {}
+    for family in families:
+        if not isinstance(family, dict):
+            continue
+        name = family.get("name")
+        prefixes = family.get("path_prefixes", [])
+        if not isinstance(name, str) or not isinstance(prefixes, list):
+            continue
+        normalized_prefixes = tuple(
+            prefix for prefix in prefixes if isinstance(prefix, str) and prefix
+        )
+        if normalized_prefixes:
+            family_prefixes[name] = normalized_prefixes
+    return family_prefixes
+
+
+def _status_is_measured(status: str) -> bool:
+    return status in {
+        "no_executable_lines",
+        "uncovered",
+        "fully_covered",
+        "partially_covered",
+    }
+
+
+def _build_hotspot_family_coverage(
+    rows: list[dict[str, Any]],
+    *,
+    repo_root: Path,
+) -> dict[str, dict[str, int]]:
+    families = _load_hotspot_family_prefixes(repo_root)
+    family_coverage: dict[str, dict[str, int]] = {}
+    for family_name, prefixes in families.items():
+        family_rows = [
+            row
+            for row in rows
+            if any(str(row["path"]).startswith(prefix) for prefix in prefixes)
+        ]
+        family_coverage[family_name] = {
+            "module_count": len(family_rows),
+            "measured_module_count": sum(
+                1 for row in family_rows if _status_is_measured(str(row["coverage_status"]))
+            ),
+            "unmeasured_module_count": sum(
+                1 for row in family_rows if str(row["coverage_status"]) == "unmeasured"
+            ),
+        }
+    return family_coverage
+
+
 def build_module_coverage_inventory(
     *,
     repo_root: Path = PROJECT_ROOT,
@@ -149,7 +260,7 @@ def build_module_coverage_inventory(
     repo_root = repo_root.resolve()
     coverage_xml = coverage_xml.resolve()
     coverage_xml_exists = coverage_xml.exists()
-    coverage_by_path = _parse_coverage_xml(coverage_xml)
+    coverage_by_path = _parse_coverage_xml(coverage_xml, repo_root=repo_root)
     source_paths = _iter_source_modules(repo_root)
     rows: list[dict[str, Any]] = []
 
@@ -185,6 +296,8 @@ def build_module_coverage_inventory(
         status = str(row["coverage_status"])
         status_counts[status] = status_counts.get(status, 0) + 1
 
+    hotspot_family_coverage = _build_hotspot_family_coverage(rows, repo_root=repo_root)
+
     return {
         "schema_version": 1,
         "snapshot_date": snapshot_date or date.today().isoformat(),
@@ -200,6 +313,7 @@ def build_module_coverage_inventory(
             "source_module_count": len(rows),
             "coverage_xml_present": coverage_xml_exists,
             "status_counts": dict(sorted(status_counts.items())),
+            "hotspot_family_coverage": hotspot_family_coverage,
         },
         "modules": rows,
     }
