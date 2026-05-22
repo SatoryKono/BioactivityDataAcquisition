@@ -17,7 +17,7 @@ from bioetl.composition.bootstrap.assembly.metrics_service import (
     create_metrics_service,
 )
 from bioetl.composition.observability_resolution import resolve_tracing_port
-from bioetl.infrastructure.config import get_settings
+from bioetl.composition.runtime_builders.config_access import get_settings
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort

@@ -20,7 +20,7 @@ from bioetl.domain.ports import (
     QuarantinePort,
 )
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
-from bioetl.infrastructure.config import get_settings
+from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
 from bioetl.infrastructure.storage.support.checkpoint_writer import (
     FileCompositeCheckpointWriter,

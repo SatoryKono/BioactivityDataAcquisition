@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from bioetl.domain.ports.noop import NoOpMetrics
-from bioetl.infrastructure.config import get_settings
+from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.control_plane import FileControlPlaneArtifactLifecycleStore
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 

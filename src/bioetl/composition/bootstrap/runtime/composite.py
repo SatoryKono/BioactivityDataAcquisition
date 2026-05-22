@@ -132,7 +132,7 @@ def _bootstrap_runtime_basics(
     from bioetl.composition.bootstrap.runtime.tracing_bootstrap import (
         bootstrap_tracer,
     )
-    from bioetl.infrastructure.config import get_settings
+    from bioetl.composition.runtime_builders.config_access import get_settings
     from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
     def _bootstrap_logger(
