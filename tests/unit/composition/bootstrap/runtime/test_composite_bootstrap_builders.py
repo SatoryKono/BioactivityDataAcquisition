@@ -9,6 +9,7 @@ import pytest
 
 from bioetl.composition.bootstrap.runtime import composite_bootstrap_builders
 from bioetl.composition.bootstrap.runtime import runtime_basics
+from bioetl.composition.bootstrap.runtime import runner_assembly
 
 
 @pytest.mark.unit
@@ -21,6 +22,10 @@ def test_passthrough_builder_exports_alias_runtime_basics() -> None:
     assert (
         composite_bootstrap_builders.build_support_services
         is runtime_basics.build_support_services
+    )
+    assert (
+        composite_bootstrap_builders.create_composite_runner
+        is runner_assembly.create_composite_runner
     )
 
 

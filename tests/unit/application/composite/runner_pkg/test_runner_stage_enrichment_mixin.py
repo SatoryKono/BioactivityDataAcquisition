@@ -61,6 +61,7 @@ class _EnrichmentHarness(_CompositeRunnerStageEnrichmentMixin):
         # Seam implementations
         self._seam_enrichers_to_run: list[Any] = []
         self._seam_check_required_raises: bool = False
+        self._required_enricher_check_calls = 0
 
     # --- seam stubs ---
 
@@ -68,6 +69,7 @@ class _EnrichmentHarness(_CompositeRunnerStageEnrichmentMixin):
         return self._seam_enrichers_to_run
 
     def _call_check_required_enrichers(self, results: Any) -> None:
+        self._required_enricher_check_calls += 1
         if self._seam_check_required_raises:
             raise InvalidStateError("Required enricher failed: req_a")
 
@@ -141,7 +143,9 @@ def test_record_completed_enrichment_results_when_success_then_state_updated() -
     new_state = harness._record_completed_enrichment_results(state, results)
 
     state.with_enricher_completed.assert_called_once_with(
-        "enricher_a", results["enricher_a"]
+        "enricher_a",
+        results["enricher_a"],
+        clock=harness._clock,
     )
     assert new_state is state
 
@@ -170,7 +174,22 @@ def test_record_completed_enrichment_results_when_skipped_then_state_updated() -
 
     harness._record_completed_enrichment_results(state, results)
 
-    state.with_enricher_completed.assert_called_once()
+    state.with_enricher_completed.assert_called_once_with(
+        "enricher_a",
+        skipped,
+        clock=harness._clock,
+    )
+
+
+@pytest.mark.unit
+def test_record_completed_enrichment_results_when_clock_missing_then_raises() -> None:
+    harness = _EnrichmentHarness()
+    harness._clock = None
+    state = make_runner_state(state=CompositePipelineState.SEED_COMPLETED)
+    results = {"enricher_a": success_enrichment("enricher_a")}
+
+    with pytest.raises(RuntimeError, match="ClockPort is required"):
+        harness._record_completed_enrichment_results(state, results)
 
 
 # ---------------------------------------------------------------------------
@@ -318,7 +337,9 @@ async def test_validate_required_enrichment_results_when_all_ok_then_no_exceptio
     harness._seam_check_required_raises = False
     state = make_runner_state(state=CompositePipelineState.SEED_COMPLETED)
 
-    await harness._validate_required_enrichment_results(state, {})  # must not raise
+    await harness._validate_required_enrichment_results(state, {})
+
+    assert harness._required_enricher_check_calls == 1
 
 
 @pytest.mark.unit

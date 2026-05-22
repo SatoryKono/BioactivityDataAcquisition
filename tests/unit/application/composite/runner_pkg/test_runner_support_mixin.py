@@ -633,4 +633,6 @@ def test_check_required_enrichers_when_all_pass_then_no_exception() -> None:
         )
     }
 
-    harness._check_required_enrichers(results)  # must not raise
+    harness._check_required_enrichers(results)
+
+    assert results["req_a"].status == EnrichmentStatus.SUCCESS

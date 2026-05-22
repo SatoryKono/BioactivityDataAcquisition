@@ -15,9 +15,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.composite.checkpoint import (
-    _checkpoint_runtime as checkpoint_runtime,
-)
 from bioetl.application.composite.checkpoint.service import (
     CompositeCheckpointService,
     CompositeCheckpointServiceContext,
@@ -38,6 +35,7 @@ from tests.helpers.clock import FixedClock
 FIXED_CHECKPOINT_TIME = datetime(2024, 6, 2, 12, 0, tzinfo=UTC)
 VALID_EFFECTIVE_HASH = "a" * 64
 ALTERNATE_EFFECTIVE_HASH = "b" * 64
+_DEFAULT_CLOCK = object()
 
 
 @dataclass(frozen=True)
@@ -75,22 +73,6 @@ def _anchors(
     )
 
 
-def _freeze_checkpoint_support_now(
-    monkeypatch: pytest.MonkeyPatch, current_time: datetime
-) -> None:
-    """Freeze checkpoint support time for deterministic stale-check tests."""
-
-    class _FrozenDateTime(datetime):
-        @classmethod
-        def now(cls, tz: UTC | None = None) -> datetime:
-            if tz is None:
-                return current_time
-            return current_time.astimezone(tz)
-
-    monkeypatch.setattr(checkpoint_runtime, "datetime", _FrozenDateTime)
-    monkeypatch.setattr(checkpoint_runtime, "current_utc_time", lambda: current_time)
-
-
 def _make_logger() -> MagicMock:
     """Create a mock LoggerPort (accepts **kwargs via MagicMock)."""
     logger = MagicMock()
@@ -121,13 +103,16 @@ def _make_service(
     expected_anchors: _ExpectedCheckpointAnchors | None = None,
     run_ledger_port: MagicMock | None = None,
     metrics: MagicMock | None = None,
-    clock: FixedClock | None = None,
+    clock: FixedClock | None | object = _DEFAULT_CLOCK,
 ) -> tuple[CompositeCheckpointService, MagicMock, MagicMock]:
     """Convenience factory — returns (service, storage_mock, logger_mock)."""
     s = storage if storage is not None else _make_storage()
     lg = logger if logger is not None else _make_logger()
     mt = metrics if metrics is not None else MagicMock()
     anchors = expected_anchors or _ExpectedCheckpointAnchors()
+    resolved_clock = (
+        FixedClock(FIXED_CHECKPOINT_TIME) if clock is _DEFAULT_CLOCK else clock
+    )
     svc = CompositeCheckpointService(
         CompositeCheckpointServiceContext(
             composite_name=composite_name,
@@ -147,7 +132,7 @@ def _make_service(
             expected_manifest_id=anchors.manifest_id,
             run_ledger_port=run_ledger_port,
             metrics=mt,
-            clock=clock,
+            clock=resolved_clock,
         )
     )
     return svc, s, lg
@@ -1465,14 +1450,11 @@ class TestListAll:
         """Tests for _warn_if_checkpoint_stale staleness detection."""
 
     @pytest.mark.asyncio
-    async def test_stale_checkpoint_emits_warning(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    async def test_stale_checkpoint_emits_warning(self) -> None:
         """Resuming a 48h-old checkpoint emits a staleness warning."""
         storage = _make_storage()
         logger = _make_logger()
         current_time = datetime(2024, 6, 3, 12, 0, tzinfo=UTC)
-        _freeze_checkpoint_support_now(monkeypatch, current_time)
         old_time = current_time - timedelta(hours=48)
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
@@ -1494,6 +1476,7 @@ class TestListAll:
                 storage=storage,
                 logger=logger,
                 resume=True,
+                clock=FixedClock(current_time),
             )
         )
         await svc.load()
@@ -1502,14 +1485,11 @@ class TestListAll:
         assert any("stale" in c.lower() for c in warning_calls)
 
     @pytest.mark.asyncio
-    async def test_fresh_checkpoint_no_staleness_warning(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    async def test_fresh_checkpoint_no_staleness_warning(self) -> None:
         """A 1h-old checkpoint does not trigger staleness warning."""
         storage = _make_storage()
         logger = _make_logger()
         current_time = datetime(2024, 6, 3, 12, 0, tzinfo=UTC)
-        _freeze_checkpoint_support_now(monkeypatch, current_time)
         recent_time = current_time - timedelta(hours=1)
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
@@ -1531,6 +1511,7 @@ class TestListAll:
                 storage=storage,
                 logger=logger,
                 resume=True,
+                clock=FixedClock(current_time),
             )
         )
         await svc.load()
@@ -1539,14 +1520,11 @@ class TestListAll:
         assert not any("stale" in c.lower() for c in warning_calls)
 
     @pytest.mark.asyncio
-    async def test_staleness_check_disabled_with_zero_threshold(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    async def test_staleness_check_disabled_with_zero_threshold(self) -> None:
         """Setting threshold to 0 disables staleness warnings."""
         storage = _make_storage()
         logger = _make_logger()
         current_time = datetime(2024, 6, 3, 12, 0, tzinfo=UTC)
-        _freeze_checkpoint_support_now(monkeypatch, current_time)
         old_time = current_time - timedelta(hours=48)
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
@@ -1569,6 +1547,7 @@ class TestListAll:
                 logger=logger,
                 resume=True,
                 stale_checkpoint_threshold_hours=0,
+                clock=FixedClock(current_time),
             )
         )
         await svc.load()
@@ -1582,6 +1561,41 @@ class TestListAll:
             CompositeCheckpointService._DEFAULT_STALE_THRESHOLD_HOURS
             == pytest.approx(24.0)
         )
+
+    @pytest.mark.asyncio
+    async def test_resume_staleness_check_requires_clock_when_reference_time_missing(
+        self,
+    ) -> None:
+        """Replay-critical stale-checks must not fall back to wall-clock time."""
+        storage = _make_storage()
+        logger = _make_logger()
+        old_time = datetime(2024, 6, 1, 12, 0, tzinfo=UTC)
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-001",
+            state=CompositePipelineState.ENRICHING,
+            created_at=old_time,
+            updated_at=old_time,
+            seed_completed=True,
+            composite_run_identity="run-001",
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(state_data.to_dict())
+        storage.list_glob.return_value = ["composite_my_composite_run-001.json"]
+
+        svc = CompositeCheckpointService(
+            CompositeCheckpointServiceContext(
+                composite_name="my_composite",
+                run_id="run-001",
+                storage=storage,
+                logger=logger,
+                resume=True,
+                clock=None,
+            )
+        )
+
+        with pytest.raises(RuntimeError, match="ClockPort is required"):
+            await svc.load()
 
 
 # ---------------------------------------------------------------------------

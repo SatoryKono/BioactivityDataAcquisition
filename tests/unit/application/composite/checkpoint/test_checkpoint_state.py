@@ -22,6 +22,8 @@ from bioetl.domain.composite.result import (
 from bioetl.domain.composite.state import CompositePipelineState
 from tests.helpers.clock import FixedClock
 
+_FIXED_CLOCK = FixedClock(datetime(2026, 4, 23, 9, 0, tzinfo=UTC))
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -170,26 +172,26 @@ class TestWithSeedCompleted:
     def test_sets_seed_completed_true(self) -> None:
         """with_seed_completed sets seed_completed=True."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
-        result = initial.with_seed_completed(_make_seed_result())
+        result = initial.with_seed_completed(_make_seed_result(), clock=_FIXED_CLOCK)
         assert result.seed_completed is True
 
     def test_stores_seed_result(self) -> None:
         """with_seed_completed stores the provided SeedResult."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
         seed = _make_seed_result(records_extracted=200, records_silver=180)
-        updated = initial.with_seed_completed(seed)
+        updated = initial.with_seed_completed(seed, clock=_FIXED_CLOCK)
         assert updated.seed_result is seed
 
     def test_sets_state_to_seed_completed(self) -> None:
         """FSM state transitions to SEED_COMPLETED."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
-        updated = initial.with_seed_completed(_make_seed_result())
+        updated = initial.with_seed_completed(_make_seed_result(), clock=_FIXED_CLOCK)
         assert updated.state == CompositePipelineState.SEED_COMPLETED
 
     def test_preserves_composite_name_and_run_id(self) -> None:
         """Immutable fields composite_name and run_id are preserved."""
         initial = CompositeCheckpointState(composite_name="comp", run_id="run-42")
-        updated = initial.with_seed_completed(_make_seed_result())
+        updated = initial.with_seed_completed(_make_seed_result(), clock=_FIXED_CLOCK)
         assert updated.composite_name == "comp"
         assert updated.run_id == "run-42"
 
@@ -199,13 +201,13 @@ class TestWithSeedCompleted:
         initial = CompositeCheckpointState(
             composite_name="c", run_id="r", created_at=created
         )
-        updated = initial.with_seed_completed(_make_seed_result())
+        updated = initial.with_seed_completed(_make_seed_result(), clock=_FIXED_CLOCK)
         assert updated.created_at == created
 
     def test_sets_updated_at(self) -> None:
         """updated_at is set to a non-None datetime."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
-        updated = initial.with_seed_completed(_make_seed_result())
+        updated = initial.with_seed_completed(_make_seed_result(), clock=_FIXED_CLOCK)
         assert updated.updated_at is not None
 
     def test_uses_injected_clock_for_updated_at(self) -> None:
@@ -227,7 +229,7 @@ class TestWithSeedCompleted:
             run_id="r",
             completed_enrichers=frozenset({"crossref"}),
         )
-        updated = initial.with_seed_completed(_make_seed_result())
+        updated = initial.with_seed_completed(_make_seed_result(), clock=_FIXED_CLOCK)
         assert "crossref" in updated.completed_enrichers
 
 
@@ -244,20 +246,24 @@ class TestWithDependencyCompleted:
         """with_dependency_completed adds the name to completed_dependencies."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
         dep = _make_dependency_result(pipeline_name="uniprot")
-        updated = initial.with_dependency_completed("uniprot", dep)
+        updated = initial.with_dependency_completed("uniprot", dep, clock=_FIXED_CLOCK)
         assert "uniprot" in updated.completed_dependencies
 
     def test_stores_dependency_result(self) -> None:
         """with_dependency_completed stores result in dependency_results dict."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
         dep = _make_dependency_result(pipeline_name="uniprot")
-        updated = initial.with_dependency_completed("uniprot", dep)
+        updated = initial.with_dependency_completed("uniprot", dep, clock=_FIXED_CLOCK)
         assert updated.dependency_results["uniprot"] is dep
 
     def test_sets_state_to_dependencies_running(self) -> None:
         """FSM state transitions to DEPENDENCIES_RUNNING."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
-        updated = initial.with_dependency_completed("dep1", _make_dependency_result())
+        updated = initial.with_dependency_completed(
+            "dep1",
+            _make_dependency_result(),
+            clock=_FIXED_CLOCK,
+        )
         assert updated.state == CompositePipelineState.DEPENDENCIES_RUNNING
 
     def test_accumulates_multiple_dependencies(self) -> None:
@@ -266,8 +272,12 @@ class TestWithDependencyCompleted:
         dep1 = _make_dependency_result(pipeline_name="uniprot")
         dep2 = _make_dependency_result(pipeline_name="chebi")
 
-        updated1 = initial.with_dependency_completed("uniprot", dep1)
-        updated2 = updated1.with_dependency_completed("chebi", dep2)
+        updated1 = initial.with_dependency_completed(
+            "uniprot",
+            dep1,
+            clock=_FIXED_CLOCK,
+        )
+        updated2 = updated1.with_dependency_completed("chebi", dep2, clock=_FIXED_CLOCK)
 
         assert updated2.completed_dependencies == frozenset({"uniprot", "chebi"})
         assert len(updated2.dependency_results) == 2
@@ -275,7 +285,11 @@ class TestWithDependencyCompleted:
     def test_original_state_not_mutated(self) -> None:
         """Original state is not changed after transition."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
-        _ = initial.with_dependency_completed("dep", _make_dependency_result())
+        _ = initial.with_dependency_completed(
+            "dep",
+            _make_dependency_result(),
+            clock=_FIXED_CLOCK,
+        )
         assert initial.completed_dependencies == frozenset()
 
 
@@ -292,20 +306,24 @@ class TestWithEnricherCompleted:
         """with_enricher_completed adds enricher name to completed_enrichers."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
         er = _make_enrichment_result(enricher_name="crossref")
-        updated = initial.with_enricher_completed("crossref", er)
+        updated = initial.with_enricher_completed("crossref", er, clock=_FIXED_CLOCK)
         assert "crossref" in updated.completed_enrichers
 
     def test_stores_enrichment_result(self) -> None:
         """with_enricher_completed stores result in enrichment_results."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
         er = _make_enrichment_result(enricher_name="crossref")
-        updated = initial.with_enricher_completed("crossref", er)
+        updated = initial.with_enricher_completed("crossref", er, clock=_FIXED_CLOCK)
         assert updated.enrichment_results["crossref"] is er
 
     def test_sets_state_to_enriching(self) -> None:
         """FSM state transitions to ENRICHING."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
-        updated = initial.with_enricher_completed("e1", _make_enrichment_result())
+        updated = initial.with_enricher_completed(
+            "e1",
+            _make_enrichment_result(),
+            clock=_FIXED_CLOCK,
+        )
         assert updated.state == CompositePipelineState.ENRICHING
 
     def test_accumulates_multiple_enrichers(self) -> None:
@@ -315,8 +333,10 @@ class TestWithEnricherCompleted:
         er2 = _make_enrichment_result(enricher_name="pubmed")
 
         updated = initial.with_enricher_completed(
-            "crossref", er1
-        ).with_enricher_completed("pubmed", er2)
+            "crossref",
+            er1,
+            clock=_FIXED_CLOCK,
+        ).with_enricher_completed("pubmed", er2, clock=_FIXED_CLOCK)
 
         assert updated.completed_enrichers == frozenset({"crossref", "pubmed"})
         assert len(updated.enrichment_results) == 2
@@ -326,13 +346,21 @@ class TestWithEnricherCompleted:
         initial = CompositeCheckpointState(
             composite_name="c", run_id="r", seed_completed=True
         )
-        updated = initial.with_enricher_completed("e1", _make_enrichment_result())
+        updated = initial.with_enricher_completed(
+            "e1",
+            _make_enrichment_result(),
+            clock=_FIXED_CLOCK,
+        )
         assert updated.seed_completed is True
 
     def test_original_state_not_mutated(self) -> None:
         """Original state is not changed after transition."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
-        _ = initial.with_enricher_completed("e1", _make_enrichment_result())
+        _ = initial.with_enricher_completed(
+            "e1",
+            _make_enrichment_result(),
+            clock=_FIXED_CLOCK,
+        )
         assert initial.completed_enrichers == frozenset()
 
 
@@ -348,7 +376,7 @@ class TestWithState:
     def test_updates_fsm_state(self) -> None:
         """with_state replaces the FSM state field."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
-        updated = initial.with_state(CompositePipelineState.MERGING)
+        updated = initial.with_state(CompositePipelineState.MERGING, clock=_FIXED_CLOCK)
         assert updated.state == CompositePipelineState.MERGING
 
     def test_preserves_all_other_fields(self) -> None:
@@ -364,7 +392,10 @@ class TestWithState:
             enrichment_results={"crossref": enricher},
             created_at=created,
         )
-        updated = initial.with_state(CompositePipelineState.ENRICHMENT_COMPLETED)
+        updated = initial.with_state(
+            CompositePipelineState.ENRICHMENT_COMPLETED,
+            clock=_FIXED_CLOCK,
+        )
 
         assert updated.composite_name == "my_comp"
         assert updated.run_id == "run-99"
@@ -375,7 +406,7 @@ class TestWithState:
     def test_sets_updated_at(self) -> None:
         """with_state sets a non-None updated_at."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
-        updated = initial.with_state(CompositePipelineState.FAILED)
+        updated = initial.with_state(CompositePipelineState.FAILED, clock=_FIXED_CLOCK)
         assert updated.updated_at is not None
 
     def test_with_state_uses_injected_clock_for_updated_at(self) -> None:
@@ -393,7 +424,7 @@ class TestWithState:
     def test_can_transition_to_failed(self) -> None:
         """with_state allows any FSM state value including FAILED."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
-        updated = initial.with_state(CompositePipelineState.FAILED)
+        updated = initial.with_state(CompositePipelineState.FAILED, clock=_FIXED_CLOCK)
         assert updated.state == CompositePipelineState.FAILED
 
 
@@ -843,18 +874,18 @@ class TestImmutability:
     def test_with_seed_completed_does_not_change_original(self) -> None:
         """Original state is unchanged after with_seed_completed."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
-        _ = initial.with_seed_completed(_make_seed_result())
+        _ = initial.with_seed_completed(_make_seed_result(), clock=_FIXED_CLOCK)
         assert initial.seed_completed is False
         assert initial.state == CompositePipelineState.NOT_STARTED
 
     def test_with_enricher_completed_does_not_change_original(self) -> None:
         """Original state is unchanged after with_enricher_completed."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
-        _ = initial.with_enricher_completed("e1", _make_enrichment_result())
+        _ = initial.with_enricher_completed("e1", _make_enrichment_result(), clock=_FIXED_CLOCK)
         assert initial.completed_enrichers == frozenset()
 
     def test_with_state_does_not_change_original(self) -> None:
         """Original state is unchanged after with_state."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
-        _ = initial.with_state(CompositePipelineState.FAILED)
+        _ = initial.with_state(CompositePipelineState.FAILED, clock=_FIXED_CLOCK)
         assert initial.state == CompositePipelineState.NOT_STARTED

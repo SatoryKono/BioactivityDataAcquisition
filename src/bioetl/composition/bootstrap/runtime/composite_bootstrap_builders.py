@@ -92,67 +92,12 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from uuid import UUID
 
-    import polars as pl
-
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-    from bioetl.application.composite.runtime_wiring_api import (
-        CompositePipelineRunner,
-        PipelineRunner,
-    )
-    from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
-        CompositeSupportServices,
-    )
     from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort, TracingPort
+    from bioetl.domain.ports import LockPort, LoggerPort, TracingPort
     from bioetl.infrastructure.config import Settings
 
+    # Preserve the stable runtime-config facade in this module's type surface.
+    _RuntimeConfigFacade = CompositeRuntimeConfig
 
-def create_composite_runner(
-    *,
-    config: CompositeConfig,
-    runtime: CompositeRuntimeConfig,
-    run_id: str,
-    logger: LoggerPort,
-    metrics: MetricsPort | None,
-    tracer: TracingPort | None,
-    lock: LockPort,
-    seed_runner_factory: Callable[[], PipelineRunner],
-    dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
-    enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
-    support_services: CompositeSupportServices,
-    runner_factory: Callable[..., CompositePipelineRunner],
-) -> CompositePipelineRunner:
-    """Create fully wired CompositePipelineRunner.
-
-    Args:
-        config: CompositeConfig for this composite run.
-        runtime: Runtime options for the composite run.
-        run_id: UUID string identifying this run.
-        logger: Structured logger forwarded to the runner.
-        lock: LockPort used for runtime execution safety.
-        seed_runner_factory: Callable that creates a seed-phase PipelineRunner.
-        dependencies_runner_factory: Callable that creates a dependency-phase
-            PipelineRunner given a pipeline name and keys DataFrame.
-        enricher_runner_factory: Callable that creates an enricher-phase
-            PipelineRunner given a pipeline name and keys DataFrame.
-        support_services: Bundle of support services (checkpoint, merger, etc.).
-        runner_factory: Factory callable used to instantiate
-            CompositePipelineRunner with all wired dependencies.
-
-    Returns:
-        Fully wired CompositePipelineRunner ready for execution.
-    """
-    return _create_composite_runner_impl(
-        config=config,
-        runtime=runtime,
-        run_id=run_id,
-        logger=logger,
-        metrics=metrics,
-        tracer=tracer,
-        lock=lock,
-        seed_runner_factory=seed_runner_factory,
-        dependencies_runner_factory=dependencies_runner_factory,
-        enricher_runner_factory=enricher_runner_factory,
-        support_services=support_services,
-        runner_factory=runner_factory,
-    )
+create_composite_runner = _create_composite_runner_impl

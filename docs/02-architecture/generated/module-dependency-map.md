@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `1915`
-- Internal import edges (raw): `7654`
+- Internal import edges (raw): `7656`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `333`
@@ -21,9 +21,9 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1289 OK| application
-    application -->|1137 OK| domain
-    composition -->|292 OK| application
+    application -->|1294 OK| application
+    application -->|1135 OK| domain
+    composition -->|291 OK| application
     composition -->|646 OK| composition
     composition -->|439 OK| domain
     composition -->|355 OK| infrastructure
@@ -40,9 +40,9 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1289 | allowed |
-| `application`    | `domain`         |    1137 | allowed |
-| `composition`    | `application`    |     292 | allowed |
+| `application`    | `application`    |    1294 | allowed |
+| `application`    | `domain`         |    1135 | allowed |
+| `composition`    | `application`    |     291 | allowed |
 | `composition`    | `composition`    |     646 | allowed |
 | `composition`    | `domain`         |     439 | allowed |
 | `composition`    | `infrastructure` |     355 | allowed |
@@ -77,7 +77,7 @@ flowchart LR
 | `composition.bootstrap`        | `infrastructure.config`         |      48 |
 | `composition.bootstrap`        | `domain.ports`                  |      47 |
 | `infrastructure.storage`       | `domain.value_objects`          |      46 |
-| `composition.bootstrap`        | `application.composite`         |      43 |
+| `composition.bootstrap`        | `application.composite`         |      42 |
 | `composition.factories`        | `infrastructure.config`         |      41 |
 | `application.core`             | `domain.context`                |      38 |
 | `composition.factories`        | `infrastructure.storage`        |      38 |

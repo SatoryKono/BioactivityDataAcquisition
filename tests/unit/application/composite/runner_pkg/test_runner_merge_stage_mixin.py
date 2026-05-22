@@ -23,6 +23,7 @@ from bioetl.domain.composite.result import (
 )
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import BioETLError, StorageError
+from tests.helpers.clock import fixed_test_clock
 
 
 # ---------------------------------------------------------------------------
@@ -82,6 +83,7 @@ class _MergeHarness(CompositeRunnerMergeStageMixin):
         self._observer_logger = MagicMock()
         self._observer = CompositeLifecycleObserverService(logger=self._observer_logger)
         self._run_id_str = "run-merge-test"
+        self._clock = fixed_test_clock()
         self._fsm = MagicMock()
         self._merger = MagicMock()
         merge_call = AsyncMock(
@@ -128,7 +130,10 @@ def test_transition_to_merging_state_when_called_then_validates_and_logs_fsm() -
         CompositePipelineState.MERGING,
     )
     harness._fsm.log_fsm_transition.assert_called_once()
-    state.with_state.assert_called_once_with(CompositePipelineState.MERGING)
+    state.with_state.assert_called_once_with(
+        CompositePipelineState.MERGING,
+        clock=harness._clock,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -149,7 +154,10 @@ def test_handle_dry_run_merge_skip_when_called_then_logs_and_returns_completed_s
     assert returned.state == CompositePipelineState.COMPLETED
     harness._logger.info.assert_called_once()
     harness._fsm.log_fsm_transition.assert_called_once()
-    state.with_state.assert_called_once_with(CompositePipelineState.COMPLETED)
+    state.with_state.assert_called_once_with(
+        CompositePipelineState.COMPLETED,
+        clock=harness._clock,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -182,7 +190,10 @@ def test_transition_to_completed_state_when_not_completed_then_transitions() -> 
         CompositePipelineState.COMPLETED,
     )
     harness._fsm.log_fsm_transition.assert_called_once()
-    state.with_state.assert_called_once_with(CompositePipelineState.COMPLETED)
+    state.with_state.assert_called_once_with(
+        CompositePipelineState.COMPLETED,
+        clock=harness._clock,
+    )
 
 
 # ---------------------------------------------------------------------------

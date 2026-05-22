@@ -13,9 +13,11 @@ ISSUE_BACKED_HOTSPOT_FAMILIES = {
     "application_services_control_plane": "#4454",
     "composition_runtime_builders": "#4456",
 }
+ACTIVE_ISSUE_BACKED_HOTSPOT_FAMILIES = {
+    "composition_bootstrap_runtime": "#4534",
+}
 ACTIVE_HOTSPOT_CLOSEOUT_FAMILIES = {
     "application_core",
-    "composition_bootstrap_runtime",
     "composition_factories_pipeline",
 }
 
@@ -246,6 +248,11 @@ def test_current_hotspot_closeout_families_are_issue_linked() -> None:
         family = by_name[family_name]
         assert family["linked_issue"] == issue
         assert family["ratchet_stage"] == "reviewed-baseline"
+
+    for family_name, issue in ACTIVE_ISSUE_BACKED_HOTSPOT_FAMILIES.items():
+        family = by_name[family_name]
+        assert family["linked_issue"] == issue
+        assert family["ratchet_stage"] == "active"
 
     for family_name in ACTIVE_HOTSPOT_CLOSEOUT_FAMILIES:
         family = by_name[family_name]

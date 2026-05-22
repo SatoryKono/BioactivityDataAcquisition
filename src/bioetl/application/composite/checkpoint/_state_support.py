@@ -5,8 +5,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, TypeVar, cast
 
+from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.domain.composite.state import CompositePipelineState
-from bioetl.domain.context import current_utc_time
 
 if TYPE_CHECKING:
     from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
@@ -23,8 +23,8 @@ TCheckpointState = TypeVar("TCheckpointState", bound="CompositeCheckpointState")
 
 
 def _current_utc_now(clock: ClockPort | None = None) -> datetime:
-    """Return current UTC timestamp from an injected clock when available."""
-    return clock.now() if clock is not None else current_utc_time()
+    """Return current UTC timestamp from the required ClockPort seam."""
+    return resolve_runtime_clock(clock).now()
 
 
 def with_seed_completed(

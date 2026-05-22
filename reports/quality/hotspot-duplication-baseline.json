@@ -1,9 +1,9 @@
 {
   "summary": {
-    "snapshot_date": "2026-05-21",
+    "snapshot_date": "2026-05-22",
     "targets": 5,
-    "total_duplicate_clusters": 46,
-    "total_raw_duplicate_clusters": 46,
+    "total_duplicate_clusters": 43,
+    "total_raw_duplicate_clusters": 43,
     "total_excluded_duplicate_clusters": 0
   },
   "normalization": {
@@ -11,9 +11,9 @@
   },
   "trend": {
     "status": "compared_to_previous",
-    "snapshot_date": "2026-05-21",
-    "previous_snapshot_date": "2026-05-20",
-    "total_duplicate_cluster_delta": -5,
+    "snapshot_date": "2026-05-22",
+    "previous_snapshot_date": "2026-05-21",
+    "total_duplicate_cluster_delta": -3,
     "targets": [
       {
         "target": "src/bioetl/application/core",
@@ -23,21 +23,21 @@
       },
       {
         "target": "src/bioetl/composition/bootstrap/runtime",
-        "current_duplicate_count": 8,
+        "current_duplicate_count": 5,
         "previous_duplicate_count": 8,
-        "delta_duplicate_count": 0
+        "delta_duplicate_count": -3
       },
       {
         "target": "src/bioetl/composition/factories/pipeline",
         "current_duplicate_count": 0,
-        "previous_duplicate_count": 2,
-        "delta_duplicate_count": -2
+        "previous_duplicate_count": 0,
+        "delta_duplicate_count": 0
       },
       {
         "target": "src/bioetl/application/services/control_plane",
         "current_duplicate_count": 17,
-        "previous_duplicate_count": 20,
-        "delta_duplicate_count": -3
+        "previous_duplicate_count": 17,
+        "delta_duplicate_count": 0
       },
       {
         "target": "src/bioetl/composition/runtime_builders",
@@ -119,8 +119,8 @@
             },
             {
               "module": "bioetl.application.core.pipeline_services",
-              "start_line": 82,
-              "end_line": 90
+              "start_line": 83,
+              "end_line": 91
             }
           ]
         },
@@ -225,8 +225,8 @@
     {
       "target": "src/bioetl/composition/bootstrap/runtime",
       "returncode": 8,
-      "duplicate_count": 8,
-      "raw_duplicate_count": 8,
+      "duplicate_count": 5,
+      "raw_duplicate_count": 5,
       "excluded_duplicate_count": 0,
       "top_pairs": [
         {
@@ -239,21 +239,7 @@
         {
           "modules": [
             "bioetl.composition.bootstrap.runtime._composite_plan_support",
-            "bioetl.composition.bootstrap.runtime.runner_bootstrap_wiring"
-          ],
-          "duplicate_clusters": 2
-        },
-        {
-          "modules": [
-            "bioetl.composition.bootstrap.runtime._composite_plan_support",
             "bioetl.composition.bootstrap.runtime.composite_bootstrap_builders"
-          ],
-          "duplicate_clusters": 1
-        },
-        {
-          "modules": [
-            "bioetl.composition.bootstrap.runtime.composite_bootstrap_builders",
-            "bioetl.composition.bootstrap.runtime.runner_assembly"
           ],
           "duplicate_clusters": 1
         },
@@ -279,54 +265,6 @@
               "module": "bioetl.composition.bootstrap.runtime.composite_control_plane_builder",
               "start_line": 182,
               "end_line": 197
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py",
-          "line": 1,
-          "modules": [
-            {
-              "module": "bioetl.composition.bootstrap.runtime._composite_plan_support",
-              "start_line": 206,
-              "end_line": 219
-            },
-            {
-              "module": "bioetl.composition.bootstrap.runtime.runner_bootstrap_wiring",
-              "start_line": 53,
-              "end_line": 66
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py",
-          "line": 1,
-          "modules": [
-            {
-              "module": "bioetl.composition.bootstrap.runtime.composite_bootstrap_builders",
-              "start_line": 145,
-              "end_line": 156
-            },
-            {
-              "module": "bioetl.composition.bootstrap.runtime.runner_assembly",
-              "start_line": 159,
-              "end_line": 170
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py",
-          "line": 1,
-          "modules": [
-            {
-              "module": "bioetl.composition.bootstrap.runtime._composite_plan_support",
-              "start_line": 229,
-              "end_line": 249
-            },
-            {
-              "module": "bioetl.composition.bootstrap.runtime.runner_bootstrap_wiring",
-              "start_line": 75,
-              "end_line": 85
             }
           ]
         },
@@ -551,8 +489,8 @@
           "modules": [
             {
               "module": "bioetl.application.services.control_plane._run_manifest_replay_taxonomy",
-              "start_line": 249,
-              "end_line": 256
+              "start_line": 214,
+              "end_line": 221
             },
             {
               "module": "bioetl.application.services.control_plane.run_manifest_replay_taxonomy",
@@ -631,8 +569,8 @@
           "modules": [
             {
               "module": "bioetl.application.services.control_plane.run_manifest_service",
-              "start_line": 133,
-              "end_line": 142
+              "start_line": 171,
+              "end_line": 180
             },
             {
               "module": "bioetl.application.services.control_plane.workflow_manifest_service",
@@ -684,8 +622,8 @@
             },
             {
               "module": "bioetl.application.services.control_plane.run_manifest_inspection_service",
-              "start_line": 35,
-              "end_line": 40
+              "start_line": 38,
+              "end_line": 43
             }
           ]
         },
@@ -772,14 +710,14 @@
           "line": 1,
           "modules": [
             {
-              "module": "bioetl.composition.runtime_builders._run_manifest_refs",
-              "start_line": 192,
-              "end_line": 208
+              "module": "bioetl.composition.runtime_builders._run_manifest_support",
+              "start_line": 42,
+              "end_line": 71
             },
             {
-              "module": "bioetl.composition.runtime_builders.control_plane",
-              "start_line": 209,
-              "end_line": 225
+              "module": "bioetl.composition.runtime_builders.run_manifest_support",
+              "start_line": 23,
+              "end_line": 41
             }
           ]
         },
@@ -788,14 +726,14 @@
           "line": 1,
           "modules": [
             {
-              "module": "bioetl.composition.runtime_builders._run_manifest_support",
-              "start_line": 42,
-              "end_line": 55
+              "module": "bioetl.composition.runtime_builders._run_manifest_refs",
+              "start_line": 190,
+              "end_line": 206
             },
             {
-              "module": "bioetl.composition.runtime_builders.run_manifest_support",
-              "start_line": 21,
-              "end_line": 34
+              "module": "bioetl.composition.runtime_builders.control_plane",
+              "start_line": 202,
+              "end_line": 218
             }
           ]
         },
@@ -810,8 +748,8 @@
             },
             {
               "module": "bioetl.composition.runtime_builders._run_manifest_snapshot_support",
-              "start_line": 98,
-              "end_line": 108
+              "start_line": 102,
+              "end_line": 112
             }
           ]
         },
@@ -826,8 +764,8 @@
             },
             {
               "module": "bioetl.composition.runtime_builders._run_manifest_snapshot_support",
-              "start_line": 98,
-              "end_line": 107
+              "start_line": 102,
+              "end_line": 111
             }
           ]
         },
@@ -836,9 +774,9 @@
           "line": 1,
           "modules": [
             {
-              "module": "bioetl.composition.runtime_builders._runner_builder_support",
-              "start_line": 232,
-              "end_line": 240
+              "module": "bioetl.composition.runtime_builders._runner_control_plane_policy",
+              "start_line": 226,
+              "end_line": 234
             },
             {
               "module": "bioetl.composition.runtime_builders.run_manifest_builder",
@@ -869,8 +807,8 @@
           "modules": [
             {
               "module": "bioetl.composition.runtime_builders.control_plane",
-              "start_line": 317,
-              "end_line": 324
+              "start_line": 310,
+              "end_line": 317
             },
             {
               "module": "bioetl.composition.runtime_builders.effective_config_artifact_builder",
@@ -917,8 +855,8 @@
           "modules": [
             {
               "module": "bioetl.composition.runtime_builders.control_plane",
-              "start_line": 310,
-              "end_line": 315
+              "start_line": 303,
+              "end_line": 308
             },
             {
               "module": "bioetl.composition.runtime_builders.effective_config_artifact_builder",
@@ -933,8 +871,8 @@
           "modules": [
             {
               "module": "bioetl.composition.runtime_builders.control_plane",
-              "start_line": 209,
-              "end_line": 214
+              "start_line": 202,
+              "end_line": 207
             },
             {
               "module": "bioetl.composition.runtime_builders.run_manifest_builder",
@@ -949,8 +887,8 @@
           "modules": [
             {
               "module": "bioetl.composition.runtime_builders.control_plane",
-              "start_line": 279,
-              "end_line": 284
+              "start_line": 272,
+              "end_line": 277
             },
             {
               "module": "bioetl.composition.runtime_builders.run_manifest_builder",
@@ -965,8 +903,8 @@
           "modules": [
             {
               "module": "bioetl.composition.runtime_builders._run_manifest_refs",
-              "start_line": 192,
-              "end_line": 197
+              "start_line": 190,
+              "end_line": 195
             },
             {
               "module": "bioetl.composition.runtime_builders.run_manifest_builder",

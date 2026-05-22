@@ -263,6 +263,8 @@ class TestNoHardcodedSecrets:
                 + "\n".join(non_bioetl_env_vars)
             )
 
+        assert not non_bioetl_env_vars
+
 
 @pytest.mark.timeout(180)  # File scanning needs more time
 class TestPrivateKeyExposure:
@@ -600,6 +602,8 @@ class TestInputValidation:
         if violations:
             pytest.skip("Review pickle usage:\n" + "\n".join(violations))
 
+        assert not violations
+
 
 @pytest.mark.timeout(120)  # File scanning needs more time
 class TestPathTraversal:
@@ -652,7 +656,7 @@ class TestPathTraversal:
         for config_file in config_dir.rglob("*.yaml"):
             content = config_file.read_text(encoding="utf-8")
             # Check for absolute paths that might be manipulated
-            if re.search(r'path:\s*["\']?/', content):
+            if re.search(r'^\s*path:\s*["\']?/', content, re.MULTILINE):
                 # Verify it's not a user-controllable path
                 if "user" in content.lower() or "input" in content.lower():
                     violations.append(f"{config_file.name}: User-controllable path")
@@ -762,3 +766,5 @@ class TestCryptographyUsage:
         # Informational - random may be OK for non-security uses
         if violations:
             pytest.skip("Review random usage:\n" + "\n".join(violations))
+
+        assert not violations

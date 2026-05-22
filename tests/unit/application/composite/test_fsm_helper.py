@@ -16,6 +16,7 @@ from bioetl.application.composite.fsm_helper import (
     FSMStateHelperService as FSMStateHelper,
 )
 from bioetl.domain.composite.state import CompositePipelineState
+from tests.helpers.clock import fixed_test_clock
 
 
 @dataclass
@@ -152,7 +153,10 @@ class TestFSMStateHelperHandleResumeFromFailed:
             completed_enrichers=frozenset(),
         )
 
-        result = fsm_helper.handle_resume_from_failed(state)
+        result = fsm_helper.handle_resume_from_failed(
+            state,
+            clock=fixed_test_clock(),
+        )
         assert result.state == CompositePipelineState.NOT_STARTED
 
     def test_resume_from_failed_enrichment_partial(
@@ -167,7 +171,10 @@ class TestFSMStateHelperHandleResumeFromFailed:
             completed_enrichers=frozenset(["provider1.entity1"]),  # 1 of 2 completed
         )
 
-        result = fsm_helper.handle_resume_from_failed(state)
+        result = fsm_helper.handle_resume_from_failed(
+            state,
+            clock=fixed_test_clock(),
+        )
         assert result.state == CompositePipelineState.ENRICHING
 
     def test_resume_from_failed_merge_failed(self, fsm_helper: FSMStateHelper) -> None:
@@ -182,7 +189,10 @@ class TestFSMStateHelperHandleResumeFromFailed:
             ),  # All completed
         )
 
-        result = fsm_helper.handle_resume_from_failed(state)
+        result = fsm_helper.handle_resume_from_failed(
+            state,
+            clock=fixed_test_clock(),
+        )
         assert result.state == CompositePipelineState.ENRICHMENT_COMPLETED
 
 

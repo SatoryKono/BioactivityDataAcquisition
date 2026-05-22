@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from bioetl.domain.config import ValidationConfig
 from bioetl.domain.value_objects import (
     DOI,

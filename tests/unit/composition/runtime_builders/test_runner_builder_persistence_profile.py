@@ -61,6 +61,9 @@ def test_build_pipeline_runner_rejects_replay_ready_bounded_live_capture(
             assemble_runtime_config_fn=lambda **_: SimpleNamespace(
                 run_type="incremental"
             ),
+            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
+                enabled=False
+            ),
         )
 
     assert fake_factory.kwargs is None
@@ -220,6 +223,9 @@ def test_build_pipeline_runner_blocks_prod_degraded_override_without_snapshots(
             pipeline_config=_build_pipeline_config(),
             assemble_runtime_config_fn=lambda **_: SimpleNamespace(
                 run_type="incremental"
+            ),
+            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
+                enabled=False
             ),
         )
     assert fake_factory.kwargs is None

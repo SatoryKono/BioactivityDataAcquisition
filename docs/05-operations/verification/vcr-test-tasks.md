@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # VCR Test Tasks
 
-> **Status:** Historical verification artifact.
+> **Status:** Historical verification artifact (non-normative).
 > This page no longer carries actionable VCR recording, refresh, or pruning
 > tasks. Current VCR governance is generated and enforced through the canonical
 > metadata catalog.

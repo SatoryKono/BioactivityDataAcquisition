@@ -15,6 +15,10 @@ from bioetl.domain.composite.result import (
     SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
+from tests.helpers.clock import FixedClock
+
+
+_FIXED_CLOCK = FixedClock(datetime(2026, 5, 22, 12, 0, tzinfo=UTC))
 
 
 class TestCompositeCheckpointStateCreation:
@@ -63,7 +67,7 @@ class TestWithSeedCompleted:
             keys_generated=90,
             duration_seconds=10.5,
         )
-        updated = initial.with_seed_completed(seed_result)
+        updated = initial.with_seed_completed(seed_result, clock=_FIXED_CLOCK)
         assert updated.seed_completed is True
         assert updated.seed_result == seed_result
 
@@ -81,7 +85,7 @@ class TestWithSeedCompleted:
             keys_generated=90,
             duration_seconds=10.5,
         )
-        updated = initial.with_seed_completed(seed_result)
+        updated = initial.with_seed_completed(seed_result, clock=_FIXED_CLOCK)
         assert updated.state == CompositePipelineState.SEED_COMPLETED
 
     def test_preserves_other_fields(self):
@@ -99,7 +103,7 @@ class TestWithSeedCompleted:
             keys_generated=90,
             duration_seconds=10.5,
         )
-        updated = initial.with_seed_completed(seed_result)
+        updated = initial.with_seed_completed(seed_result, clock=_FIXED_CLOCK)
         assert updated.composite_name == "test_composite"
         assert updated.run_id == "run-123"
         assert updated.created_at == created_at
@@ -117,7 +121,7 @@ class TestWithSeedCompleted:
             keys_generated=90,
             duration_seconds=10.5,
         )
-        updated = initial.with_seed_completed(seed_result)
+        updated = initial.with_seed_completed(seed_result, clock=_FIXED_CLOCK)
         assert updated.updated_at is not None
 
 
@@ -138,7 +142,11 @@ class TestWithEnricherCompleted:
             records_not_found=5,
             duration_seconds=10.5,
         )
-        updated = initial.with_enricher_completed("crossref", result)
+        updated = initial.with_enricher_completed(
+            "crossref",
+            result,
+            clock=_FIXED_CLOCK,
+        )
         assert "crossref" in updated.completed_enrichers
         assert updated.enrichment_results["crossref"] == result
 
@@ -156,7 +164,11 @@ class TestWithEnricherCompleted:
             records_not_found=5,
             duration_seconds=10.5,
         )
-        updated = initial.with_enricher_completed("crossref", result)
+        updated = initial.with_enricher_completed(
+            "crossref",
+            result,
+            clock=_FIXED_CLOCK,
+        )
         assert updated.state == CompositePipelineState.ENRICHING
 
     def test_accumulates_multiple_enrichers(self):
@@ -180,8 +192,16 @@ class TestWithEnricherCompleted:
             records_not_found=20,
             duration_seconds=15.0,
         )
-        updated1 = initial.with_enricher_completed("crossref", result1)
-        updated2 = updated1.with_enricher_completed("pubmed", result2)
+        updated1 = initial.with_enricher_completed(
+            "crossref",
+            result1,
+            clock=_FIXED_CLOCK,
+        )
+        updated2 = updated1.with_enricher_completed(
+            "pubmed",
+            result2,
+            clock=_FIXED_CLOCK,
+        )
         assert updated2.completed_enrichers == frozenset({"crossref", "pubmed"})
         assert len(updated2.enrichment_results) == 2
 
@@ -207,7 +227,11 @@ class TestWithEnricherCompleted:
             records_not_found=5,
             duration_seconds=10.5,
         )
-        updated = initial.with_enricher_completed("crossref", enricher_result)
+        updated = initial.with_enricher_completed(
+            "crossref",
+            enricher_result,
+            clock=_FIXED_CLOCK,
+        )
         assert updated.seed_completed is True
         assert updated.seed_result == seed_result
 
@@ -222,7 +246,10 @@ class TestWithState:
             run_id="run-123",
             state=CompositePipelineState.ENRICHING,
         )
-        updated = initial.with_state(CompositePipelineState.ENRICHMENT_COMPLETED)
+        updated = initial.with_state(
+            CompositePipelineState.ENRICHMENT_COMPLETED,
+            clock=_FIXED_CLOCK,
+        )
         assert updated.state == CompositePipelineState.ENRICHMENT_COMPLETED
 
     def test_preserves_all_other_fields(self):
@@ -252,7 +279,10 @@ class TestWithState:
             enrichment_results={"crossref": enricher_result},
             created_at=created_at,
         )
-        updated = initial.with_state(CompositePipelineState.MERGING)
+        updated = initial.with_state(
+            CompositePipelineState.MERGING,
+            clock=_FIXED_CLOCK,
+        )
         assert updated.composite_name == initial.composite_name
         assert updated.run_id == initial.run_id
         assert updated.seed_completed == initial.seed_completed
@@ -268,7 +298,10 @@ class TestWithState:
             run_id="run-123",
             state=CompositePipelineState.ENRICHING,
         )
-        updated = initial.with_state(CompositePipelineState.FAILED)
+        updated = initial.with_state(
+            CompositePipelineState.FAILED,
+            clock=_FIXED_CLOCK,
+        )
         assert updated.state == CompositePipelineState.FAILED
 
     def test_updates_timestamp(self):
@@ -277,7 +310,10 @@ class TestWithState:
             composite_name="test_composite",
             run_id="run-123",
         )
-        updated = initial.with_state(CompositePipelineState.SEED_RUNNING)
+        updated = initial.with_state(
+            CompositePipelineState.SEED_RUNNING,
+            clock=_FIXED_CLOCK,
+        )
         assert updated.updated_at is not None
 
 

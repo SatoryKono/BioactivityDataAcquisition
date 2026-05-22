@@ -58,11 +58,11 @@ issues:
       - scripts/engineering/qa/report_test_governance_audit.py
       - tests/architecture/test_test_governance_audit.py
 budgets:
-  refined_assertless_max: 561
-  duplicate_test_names_max: 877
-  duplicate_test_name_occurrences_max: 2730
+  refined_assertless_max: 547
+  duplicate_test_names_max: 876
+  duplicate_test_name_occurrences_max: 2728
   compatibility_test_file_max: 56
-  markerless_test_functions_max: 7776
+  markerless_test_functions_max: 7137
   uuid4_call_sites_max: 404
   date_today_call_sites_max: 0
 budget_ratchet:
@@ -109,6 +109,7 @@ current_issue_closeout:
     - "#4507"
     - "#4508"
     - "#4509"
+    - "#4536"
   decision: closeable
   evidence:
     - reports/quality/module-coverage-inventory.json
@@ -116,6 +117,10 @@ current_issue_closeout:
     - configs/quality/test_governance_audit.yaml
     - reports/quality/vcr-metadata-catalog.json
     - scripts/engineering/qa/report_vcr_metadata_catalog.py
+    - tests/smoke/test_smoke.py
+    - tests/security/test_security.py
+    - tests/unit/domain/value_objects/test_identifiers.py
+    - tests/unit/application/pipelines/openalex/test_extractors.py
     - tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
     - tests/unit/application/services/test_run_manifest_inspection_dq_traceability.py
     - tests/integration/pipelines/observability.py
@@ -171,7 +176,7 @@ assertless_triage:
       rationale: "No-op, close/aclose, smoke, or does-not-raise behavior is the contract under test."
       next_review: "2026-09-30"
     weak_no_value:
-      count: 459
+      count: 445
       decision: burn-down
       rationale: "Candidates require assertion strengthening, merge, or removal when the owning module is edited."
       next_review: "2026-09-30"
@@ -183,8 +188,8 @@ assertless_triage:
       - tests/unit/application/core/
       - tests/unit/infrastructure/control_plane/
 duplicate_name_triage:
-  total_duplicate_names: 877
-  duplicate_occurrences: 2730
+  total_duplicate_names: 876
+  duplicate_occurrences: 2728
   top_generic_names:
     - name: test_default_values
       count: 38
@@ -727,6 +732,19 @@ remediation_closeout:
         - configs/quality/test_governance_audit.yaml
         - tests/architecture/test_test_governance_audit.py::test_compatibility_inventory_covers_every_detected_compatibility_test_file
       closeout: "All 54 compatibility/legacy test files have owner, decision, protected surface, review date, and rationale inventory."
+    - issue: "#4536"
+      decision: closeable
+      evidence:
+        - configs/quality/test_governance_audit.yaml
+        - scripts/engineering/qa/report_test_governance_audit.py
+        - tests/smoke/test_smoke.py
+        - tests/security/test_security.py
+        - tests/unit/domain/value_objects/test_identifiers.py
+        - tests/unit/domain/value_objects/test_publications.py
+        - tests/unit/application/pipelines/crossref/test_extractors.py
+        - tests/unit/application/pipelines/openalex/test_extractors.py
+        - tests/unit/application/pipelines/semanticscholar/test_extractors.py
+      closeout: "Focused weak-test cleanup plus module-level unit marks ratcheted refined assertless debt from 561 to 547, duplicate-name debt from 877/2730 to 876/2728, and markerless test functions from 7776 to 7137."
 file_backed_domain_contract_tests:
   decision: retained_contract_lane_exception
   rationale: "These tests intentionally validate config/fixture contracts against domain constants or hash-policy snapshots; they are not pure in-memory unit tests."

@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
-from bioetl.domain.context import current_utc_time
+from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.domain.exceptions import BioETLError, StorageError
 from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort, MetricsPort
 
@@ -104,7 +104,7 @@ def warn_if_checkpoint_stale(
 
     current_time = reference_time
     if current_time is None:
-        current_time = clock.now() if clock is not None else current_utc_time()
+        current_time = resolve_runtime_clock(clock).now()
     age = current_time - ref_time
     if age.total_seconds() <= stale_threshold_hours * 3600:
         return

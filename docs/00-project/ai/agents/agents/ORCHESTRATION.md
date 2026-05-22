@@ -414,7 +414,7 @@ ______________________________________________________________________
 | `.codex/agents/py-*.md`                                | Спецификации субагентов для Codex CLI    |
 | `.codex/agents/ORCHESTRATION.md`                       | Каноническая orchestration карта рантайма |
 | `docs/00-project/RULES.md`                             | Архитектурные правила проекта            |
-| `docs/02-architecture/decisions/`                      | ADR-001..ADR-043                         |
+| `docs/02-architecture/decisions/`                      | ADR-001..ADR-047                         |
 | `docs/00-project/glossary.md`                          | Терминология                             |
 | `tests/architecture/`                                  | Автоматические проверки инвариантов      |
 | `docs/00-project/ai/agents/scripts/py-config-bot-1.py` | Автоматическая проверка конфигов         |

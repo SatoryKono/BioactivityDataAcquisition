@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from scripts.engineering.qa.report_hotspot_family_baseline import (
     _budget_warnings_for_family,
+    _merge_reviewed_baseline_metrics,
     _resolve_snapshot_date,
 )
 
@@ -50,3 +51,52 @@ def test_budget_warnings_ignore_metrics_below_threshold() -> None:
     }
 
     assert _budget_warnings_for_family(family) == []
+
+
+def test_merge_reviewed_baseline_metrics_prefers_scorecard_snapshot() -> None:
+    family = {
+        "name": "application_services_control_plane",
+        "ratchet_stage": "reviewed-baseline",
+        "metrics": {
+            "duplication_clusters": 17,
+            "files": 66,
+            "total_loc": 12998,
+            "files_ge_250_loc": 22,
+            "helper_function_ratio": 0.496,
+            "max_internal_fan_in": 6,
+            "max_internal_fan_in_module": "bioetl.application.services.control_plane.helpers",
+        },
+    }
+    measured = {
+        "name": "application_services_control_plane",
+        "duplication_clusters": 17,
+        "files": 71,
+        "total_loc": 13453,
+        "files_ge_250_loc": 21,
+        "helper_function_ratio": 0.499,
+        "max_internal_fan_in": 6,
+        "max_internal_fan_in_module": "bioetl.application.services.control_plane.helpers",
+    }
+
+    merged = _merge_reviewed_baseline_metrics(family=family, measured=measured)
+
+    assert merged["files"] == 66
+    assert merged["total_loc"] == 12998
+    assert merged["files_ge_250_loc"] == 22
+    assert merged["helper_function_ratio"] == 0.496
+
+
+def test_merge_reviewed_baseline_metrics_keeps_live_metrics_for_active_family() -> None:
+    family = {
+        "name": "composition_bootstrap_runtime",
+        "ratchet_stage": "active",
+        "metrics": {"files_ge_250_loc": 99},
+    }
+    measured = {
+        "name": "composition_bootstrap_runtime",
+        "files_ge_250_loc": 5,
+    }
+
+    merged = _merge_reviewed_baseline_metrics(family=family, measured=measured)
+
+    assert merged["files_ge_250_loc"] == 5

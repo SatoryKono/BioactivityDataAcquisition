@@ -1933,7 +1933,7 @@ fields:
 | [ADR-042](../02-architecture/decisions/ADR-042-testing-strategy-matrix.md)            | Testing Strategy Matrix & Fixture Gov.     | Accepted                                | 2026-03-09 |
 | [ADR-043](../02-architecture/decisions/ADR-043-documentation-knowledge-management.md) | Documentation & Knowledge Management       | Accepted                                | 2026-03-09 |
 | [ADR-044](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)  | Run Manifest and Run Ledger Control Plane  | Accepted                                | 2026-03-24 |
-| [ADR-045](../02-architecture/decisions/ADR-045-dq-contract-system.md)                  | Data Quality Contract System               | Accepted                                | 2026-04-02 |
+| [ADR-045](../02-architecture/decisions/ADR-045-dq-contract-system.md)                  | Data Quality Contract System               | Accepted                                | 2026-03-26 |
 | [ADR-046](../02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md)        | Checkpoint Versus Ledger-Based Resume      | Accepted                                | 2026-05-06 |
 | [ADR-047](../02-architecture/decisions/ADR-047-workflow-control-plane.md)             | Workflow Control Plane for Declarative Workflows | Accepted                           | 2026-05-08 |
 

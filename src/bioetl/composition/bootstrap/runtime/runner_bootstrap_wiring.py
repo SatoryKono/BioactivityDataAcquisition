@@ -8,9 +8,8 @@ from typing import TYPE_CHECKING
 from bioetl.application.composite.runner_pkg import CompositePipelineRunner
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime._composite_plan_support import (
-    build_bootstrap_runner_factories,
-    build_bootstrap_runtime_resources,
-    build_bootstrap_support_services,
+    build_composite_bootstrap_plan_impl,
+    create_composite_runner_from_plan_impl,
 )
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
@@ -51,35 +50,22 @@ def bootstrap_composite_runner_via_wiring(
     create_composite_runner_fn: Callable[..., CompositePipelineRunner],
 ) -> CompositePipelineRunner:
     """Assemble and create composite runner with injected dependency builders."""
-    runtime_resources = build_bootstrap_runtime_resources(
+    from bioetl.composition.bootstrap.runtime.runner_assembly import (
+        create_composite_runner_service,
+    )
+
+    plan = build_composite_bootstrap_plan_impl(
         bootstrap_runtime_basics_fn=bootstrap_runtime_basics_fn,
         config=config,
+        runtime=runtime,
         run_id=run_id,
-    )
-    seed_runner_factory, dependencies_runner_factory, enricher_runner_factory = (
-        build_bootstrap_runner_factories(
-            build_runner_factories_fn=build_runner_factories_fn,
-            config=config,
-            runtime=runtime,
-            logger=runtime_resources.logger,
-        )
-    )
-    support_services = build_bootstrap_support_services(
+        build_runner_factories_fn=build_runner_factories_fn,
         build_support_services_fn=build_support_services_fn,
-        config=config,
-        runtime=runtime,
-        resources=runtime_resources,
     )
-    return create_composite_runner_fn(
+    return create_composite_runner_from_plan_impl(
         config=config,
         runtime=runtime,
-        run_id=runtime_resources.run_id,
-        logger=runtime_resources.logger,
-        metrics=runtime_resources.metrics,
-        tracer=runtime_resources.tracer,
-        lock=runtime_resources.lock,
-        seed_runner_factory=seed_runner_factory,
-        dependencies_runner_factory=dependencies_runner_factory,
-        enricher_runner_factory=enricher_runner_factory,
-        support_services=support_services,
+        plan=plan,
+        create_composite_runner_builder_fn=create_composite_runner_fn,
+        runner_factory=create_composite_runner_service,
     )
