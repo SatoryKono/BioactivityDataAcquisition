@@ -136,6 +136,7 @@ log_test.txt
 .gemini/
 .jules/
 .junie/
+.qodo/
 
 # OS
 .DS_Store

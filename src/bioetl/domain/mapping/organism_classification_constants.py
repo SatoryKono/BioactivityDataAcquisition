@@ -221,6 +221,7 @@ ORGANISM_GENUS_CLASS_MAP: Final[dict[str, CellularityType]] = {
     "agaricus": CellularityType.MULTICELLULAR,
     "malassezia": CellularityType.UNICELLULAR,
     "pneumocystis": CellularityType.UNICELLULAR,
+    "trichophyton": CellularityType.MULTICELLULAR,
     # Bacteria
     "aeromonas": CellularityType.UNICELLULAR,
     "alcaligenes": CellularityType.UNICELLULAR,

@@ -56,7 +56,7 @@ if TYPE_CHECKING:
         SilverValidatorPort,
         TracingPort,
     )
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config._base import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [

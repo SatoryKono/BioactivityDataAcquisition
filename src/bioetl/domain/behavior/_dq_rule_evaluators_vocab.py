@@ -3,16 +3,23 @@
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
+from bioetl.domain.mapping.organism_classification import classify_organism
 from bioetl.domain.schemas.constants import (
     TARGET_COMPONENT_RELATIONSHIPS,
     TARGET_COMPONENT_TYPES,
 )
 
+if TYPE_CHECKING:
+    from bioetl.domain.types import JsonDict
+
 TARGET_XREF_SOURCE_DB_VALUES = frozenset(
     {
         "AlphaFoldDB",
+        "CGD",
         "ChEBI",
         "DrugBank",
         "ExpressionAtlas",
@@ -36,6 +43,7 @@ TARGET_XREF_SOURCE_DB_VALUES = frozenset(
         "UniProt",
     }
 )
+_TARGET_BINOMIAL_PATTERN = re.compile(r"^[A-Z][a-z]+ [a-z]+.*$")
 
 _ValidationStrategy = Callable[[object, str | None], bool]
 
@@ -178,4 +186,31 @@ def _decode_json_list_like(value: str) -> list[object] | None:
     return parsed if isinstance(parsed, list) else None
 
 
-__all__ = ["_resolve_custom_validation_strategy"]
+def validate_target_organism_rule_violated(
+    record: JsonDict,
+    value: object,
+) -> bool:
+    """Accept classifiable target organism labels, not only binomials.
+
+    ChEMBL target organisms legitimately include genus-only labels, umbrella
+    taxa such as ``Bacteria``, and virus names with strain suffixes. The
+    historical binomial-only regex is retained as a permissive fallback for
+    unresolved scientific names so we widen acceptance without becoming stricter
+    for already-valid binomial labels.
+    """
+    if not isinstance(value, str):
+        return True
+    organism = value.strip()
+    if not organism:
+        return True
+
+    classification = classify_organism(organism, record.get("taxonomy_id"))
+    if classification.organism_class is not None:
+        return False
+    return _TARGET_BINOMIAL_PATTERN.search(organism) is None
+
+
+__all__ = [
+    "_resolve_custom_validation_strategy",
+    "validate_target_organism_rule_violated",
+]

@@ -22,6 +22,7 @@ from bioetl.domain.behavior._dq_rule_evaluators_cross import (
 )
 from bioetl.domain.behavior._dq_rule_evaluators_vocab import (
     _resolve_custom_validation_strategy,
+    validate_target_organism_rule_violated,
 )
 from bioetl.domain.behavior._dq_value_coercion import (
     _coerce_list_like,
@@ -104,6 +105,9 @@ def _custom_rule_violated(
     # Special case: SMILES validation
     if validator_name == "smiles_validator":
         return value is not None and not validate_smiles(str(value))
+
+    if validator_name == "validate_target_organism_supported_name":
+        return validate_target_organism_rule_violated(record, value)
 
     # Dispatch to vocabulary validation strategy
     strategy = _resolve_custom_validation_strategy(validator_name)

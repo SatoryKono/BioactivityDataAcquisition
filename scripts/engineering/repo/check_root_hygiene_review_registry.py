@@ -181,6 +181,8 @@ def _validate_candidate_live_state(
     abs_path = repo_root / path
     if live_state == "absent_from_root_baseline" and abs_path.exists():
         issues.append(f"{path}: marked absent_from_root_baseline but path exists")
+    if live_state == "present_local_only_root_surface":
+        return
     if live_state != "absent_from_root_baseline" and not abs_path.exists():
         issues.append(f"{path}: marked present but path is missing")
 

@@ -38,7 +38,7 @@ from .observability_bundle import (
 from .tracing_bootstrap import bootstrap_tracer as _bootstrap_tracer_impl
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config._base import Settings
 
 __all__ = [
     "MetricsServerError",

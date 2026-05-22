@@ -13,7 +13,7 @@ from bioetl.domain.ports import MetricsPort, TracingPort
 from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config._base import Settings
 
 __all__ = ["resolve_metrics_port", "resolve_tracing_port"]
 

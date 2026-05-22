@@ -30,7 +30,7 @@ from bioetl.domain.ports import (
     TracingPort,
 )
 from bioetl.domain.types import RunID
-from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.config._base import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 if TYPE_CHECKING:

@@ -2,24 +2,19 @@
 
 from __future__ import annotations
 
-from bioetl.composition.runtime_builders._run_manifest_support import (
-    __all__ as _PRIVATE_ALL,
-    ManifestControlPlaneRefs,
-    RunManifestContractIdentity,
-    build_launch_context_snapshot,
-    build_planned_artifacts,
-    build_run_source_refs,
-    control_plane_root,
-    create_control_plane_refs,
-    legacy_config_hash_from_resolved_config_hash,
-    normalize_snapshot,
-    resolve_contract_identity,
-    resolve_provider_entity,
-    resolve_replay_capability,
-    resolve_replay_parentage,
-    resolve_run_context_values,
-    to_serializable_mapping,
-    validate_reproducible_sink_modes,
-)
+from importlib import import_module
 
-__all__ = list(_PRIVATE_ALL)
+_PRIVATE_MODULE = "bioetl.composition.runtime_builders._run_manifest_support"
+__all__ = list(getattr(import_module(_PRIVATE_MODULE), "__all__"))
+
+
+def __getattr__(name: str) -> object:
+    """Resolve public helper exports lazily from the private owner module."""
+    if name not in __all__:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    return getattr(import_module(_PRIVATE_MODULE), name)
+
+
+def __dir__() -> list[str]:
+    """Expose lazy helper exports to introspection and wildcard imports."""
+    return sorted(set(globals()) | set(__all__))

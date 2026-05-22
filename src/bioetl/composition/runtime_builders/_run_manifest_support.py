@@ -38,7 +38,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config._base import Settings
 
 __all__ = [
     "ManifestControlPlaneRefs",

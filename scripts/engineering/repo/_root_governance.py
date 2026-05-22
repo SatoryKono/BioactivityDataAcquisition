@@ -125,6 +125,19 @@ def approved_root_directories(catalog: dict[str, Any]) -> frozenset[str]:
     return frozenset(approved_dirs)
 
 
+def local_tolerated_root_directories(catalog: dict[str, Any]) -> frozenset[str]:
+    """Return approved untracked local-only root directories from the catalog."""
+    section = catalog.get("local_tolerated_root_dirs")
+    if not isinstance(section, dict):
+        return frozenset()
+    approved_roots = section.get("approved_roots", [])
+    if not isinstance(approved_roots, list):
+        raise RuntimeError(
+            "Structure catalog local_tolerated_root_dirs.approved_roots must be a list"
+        )
+    return frozenset(collect_cataloged_paths(approved_roots))
+
+
 def blocked_cleanup_paths(catalog: dict[str, Any]) -> frozenset[str]:
     """Return blocked cleanup zones from the structure catalog."""
     return frozenset(collect_cataloged_paths(catalog["blocked_cleanup_zones"]))

@@ -37,7 +37,7 @@ from bioetl.domain.control_plane.effective_config_environment import (
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.config._base import Settings
 
 _EXECUTION_AFFECTING_SETTINGS_SURFACES = semantic_runtime_env_dependencies()
 

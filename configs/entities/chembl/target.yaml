@@ -105,10 +105,10 @@ quality:
             nullable: true
             error_message: Invalid target_type value
         -   field: organism
-            type: pattern
-            pattern: ^[A-Z][a-z]+ [a-z]+.*$
+            type: custom
+            validator: validate_target_organism_supported_name
             nullable: true
-            error_message: organism should be in binomial nomenclature
+            error_message: organism must remain a supported ChEMBL target organism label when present
         -   field: taxonomy_id
             type: range
             min: 1

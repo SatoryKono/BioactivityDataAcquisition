@@ -53,9 +53,12 @@ ______________________________________________________________________
   проектные runtime/editor integrations.
 - Editor/vendor/tooling roots such as `.ai/`, `.aiassistant/`, `ai/`,
   `.jules/`, `.junie/`, `.sonarlint/`, `.windsurf/`, `.agent-work/`,
-  `.agentbridge/`, `.agents/`, and `.cache/` MAY существовать в рабочем
-  дереве, но MUST оставаться untracked и игнорироваться `.gitignore`, если не
-  были явно promoted через structure governance.
+  `.agentbridge/`, `.agents/`, `.benchmarks/`, `.cache/`, `.qodo/`,
+  `.pytest_cache/`, `.ruff_cache/`, `.hypothesis/`,
+  `.import_linter_cache/`, `.venv/`, `node_modules/`, and `test-output/`
+  MAY существовать в рабочем дереве, но MUST оставаться untracked и
+  игнорироваться `.gitignore`, если не были явно promoted через structure
+  governance.
 - `.idea/`, `.vscode/`, and `.cursor/` MAY содержать curated shared project
   metadata (например, run configurations, scopes, inspections, словарь), но по
   умолчанию рассматриваются как local/editor state surfaces и MUST оставаться
@@ -63,6 +66,13 @@ ______________________________________________________________________
 - Generated/runtime root trees such as `node_modules/`, `output/`, `test-output/`,
   `logs/`, `MagicMock/`, `caddy/`, and local package trees like
   `.python-user/` MUST NOT попадать в git-index.
+- Root `logs/` MUST NOT использоваться как canonical retained log sink.
+  Long-lived local/runtime log outputs MUST route into `reports/logs/`; any
+  reintroduced root `logs/` tree is local clutter unless an explicit structure
+  governance decision says otherwise.
+- Root-level ad-hoc Python scratch/test files such as `test_*.py` MUST NOT
+  оставаться в корне даже как ignored local clutter. They SHOULD be deleted or
+  moved under `tests/**` or `scripts/**` with an explicit owner.
 - Noncanonical documentation roots such as `concepts/` MUST NOT оставаться
   tracked в корне; documentation content MUST жить под `docs/**`, а historical
   or foreign-format doc carryovers SHOULD переезжать в `docs/99-archive/**`.

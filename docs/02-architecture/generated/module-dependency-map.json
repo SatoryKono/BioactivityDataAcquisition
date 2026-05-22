@@ -1,23 +1,23 @@
 {
   "summary": {
-    "scanned_modules": 1915,
-    "total_internal_imports": 7656,
+    "scanned_modules": 1920,
+    "total_internal_imports": 7665,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
-    "cross_layer_group_edges_total": 333,
+    "cross_layer_group_edges_total": 330,
     "violations": 0
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1294,
+      "imports": 1302,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1135,
+      "imports": 1134,
       "allowed": true
     },
     {
@@ -29,7 +29,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 646,
+      "imports": 665,
       "allowed": true
     },
     {
@@ -41,7 +41,7 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 355,
+      "imports": 338,
       "allowed": true
     },
     {
@@ -170,11 +170,6 @@
     },
     {
       "source": "composition.bootstrap",
-      "target": "infrastructure.config",
-      "imports": 48
-    },
-    {
-      "source": "composition.bootstrap",
       "target": "domain.ports",
       "imports": 47
     },
@@ -191,11 +186,16 @@
     {
       "source": "composition.factories",
       "target": "infrastructure.config",
-      "imports": 41
+      "imports": 40
     },
     {
       "source": "application.core",
       "target": "domain.context",
+      "imports": 38
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "infrastructure.config",
       "imports": 38
     },
     {
@@ -319,14 +319,14 @@
       "imports": 17
     },
     {
-      "source": "application.core",
-      "target": "domain.value_objects",
-      "imports": 17
-    },
-    {
       "source": "infrastructure.schemas",
       "target": "domain.config",
       "imports": 17
+    },
+    {
+      "source": "application.core",
+      "target": "domain.value_objects",
+      "imports": 16
     },
     {
       "source": "composition.factories",

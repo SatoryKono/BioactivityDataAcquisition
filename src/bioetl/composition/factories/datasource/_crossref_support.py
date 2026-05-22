@@ -38,7 +38,7 @@ from bioetl.infrastructure.adapters.crossref.types import (
     CrossRefSearchPaginator,
 )
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.config._base import Settings
 
 
 @dataclass(frozen=True)

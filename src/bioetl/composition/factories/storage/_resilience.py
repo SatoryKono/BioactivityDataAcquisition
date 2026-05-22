@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.config._base import Settings
 from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
     DEFAULT_SILVER_MERGE_POLICY,
