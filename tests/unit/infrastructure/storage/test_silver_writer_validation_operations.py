@@ -13,6 +13,9 @@ from bioetl.domain.normalization import (
     normalize_hash_identity_record,
     serialize_hash_identity_canonical_json,
 )
+from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+    _strict_replay_merge_contract_required,
+)
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _content_identity,
     _deduplicate_by_primary_keys_impl,
@@ -106,6 +109,42 @@ class TestDeduplicateByPrimaryKeysImpl:
         assert _content_identity(record) == serialize_hash_identity_canonical_json(
             normalize_hash_identity_record(record)
         )
+
+
+@pytest.mark.unit
+class TestStrictReplayMergeContractRequired:
+    """Tests for strict replay merge guard activation."""
+
+    def test_missing_mock_run_context_does_not_enable_strict_contract(self) -> None:
+        """Bare MagicMock coordinators must not implicitly enable exact replay."""
+        host = MagicMock()
+        host._metadata_coordinator = MagicMock()
+
+        assert _strict_replay_merge_contract_required(host) is False
+
+    def test_exact_replay_true_enables_strict_contract(self) -> None:
+        """Explicit exact replay requests should enforce replay-safe merge guards."""
+        run_context = MagicMock()
+        run_context.exact_replay = True
+        run_context.required_persistence_profile = ""
+        coordinator = MagicMock()
+        coordinator.run_context = run_context
+        host = MagicMock()
+        host._metadata_coordinator = coordinator
+
+        assert _strict_replay_merge_contract_required(host) is True
+
+    def test_strict_required_profile_enables_strict_contract(self) -> None:
+        """Strict persistence profiles should enforce replay-safe merge guards."""
+        run_context = MagicMock()
+        run_context.exact_replay = False
+        run_context.required_persistence_profile = "replay_ready"
+        coordinator = MagicMock()
+        coordinator.run_context = run_context
+        host = MagicMock()
+        host._metadata_coordinator = coordinator
+
+        assert _strict_replay_merge_contract_required(host) is True
 
 
 @pytest.mark.unit
