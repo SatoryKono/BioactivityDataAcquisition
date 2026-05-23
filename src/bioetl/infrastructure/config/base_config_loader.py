@@ -141,13 +141,8 @@ class BaseConfigLoader[T](ABC):
         """
         # Default: simple concatenation with deduplication for string lists
         if base and isinstance(base[0], str):
-            seen: set[str] = set()
-            result: list[str] = []
-            for item in base + override:
-                if item not in seen:
-                    seen.add(item)
-                    result.append(item)
-            return result
+            # Optimized: C-level iteration and insertion-order preservation via dict.fromkeys
+            return list(dict.fromkeys(base + override))
         # Non-string lists: just concatenate
         return base + override
 

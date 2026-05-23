@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import itertools
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
@@ -86,14 +87,8 @@ class BatchWriterColumnsMixin:
 
     def _collect_record_columns(self, records: list[GoldRecord]) -> list[str]:
         """Collect columns in stable first-seen order."""
-        columns: list[str] = []
-        seen: set[str] = set()
-        for record in records:
-            for key in record:
-                if key not in seen:
-                    seen.add(key)
-                    columns.append(key)
-        return columns
+        # Optimized: C-level iteration and insertion-order preservation via dict.fromkeys
+        return list(dict.fromkeys(itertools.chain.from_iterable(records)))
 
     def _get_column_order(self, columns: Sequence[str]) -> list[str] | None:
         """Resolve explicit column order from configured column groups."""
