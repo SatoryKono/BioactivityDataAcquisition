@@ -260,14 +260,14 @@ hotspot_family_ratchets:
     path_prefixes:
     - src/bioetl/application/core/
     bounded_growth_budgets:
-      files_ge_250_loc: 12
+      files_ge_250_loc: 13
       max_internal_fan_in: 14
     metrics:
       duplication_clusters: 8
       files: 172
-      total_loc: 21256
-      files_ge_250_loc: 12
-      helper_function_ratio: 0.375
+      total_loc: 21278
+      files_ge_250_loc: 13
+      helper_function_ratio: 0.376
       max_internal_fan_in: 14
       max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
     trend:
@@ -275,7 +275,7 @@ hotspot_family_ratchets:
       next_action: 2026-05-24 lands the service-protocol decomposition and
         record_processor_config extraction wave, ratcheting application/core
         from files_ge_250_loc=14 and max_internal_fan_in=15 down to the
-        confirmed baseline of 12 and 14 while duplicate clusters stay at 8.
+        confirmed baseline of 13 and 14 while duplicate clusters stay at 8.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023

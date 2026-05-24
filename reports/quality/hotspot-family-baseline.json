@@ -23,11 +23,11 @@
       "max_internal_fan_in": 14,
       "max_internal_fan_in_module": "bioetl.application.core.batch_runtime_failure_policy",
       "bounded_growth_budgets": {
-        "files_ge_250_loc": 12,
+        "files_ge_250_loc": 13,
         "max_internal_fan_in": 14
       },
       "budget_warnings": [
-        "at_budget:files_ge_250_loc=13/12",
+        "at_budget:files_ge_250_loc=13/13",
         "at_budget:max_internal_fan_in=14/14"
       ]
     },

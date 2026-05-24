@@ -1127,6 +1127,11 @@ minimal identity contract:
 - inspection diagnostics expose `artifact_publication_closure`; supported
   replay-ready and forensic-grade decisions must treat any non-`closed` value
   as missing produced-artifact publication evidence.
+- `exact_replay`, `replay_ready`, and `forensic_grade` metadata publication
+  must fail closed when a Bronze, Silver, or Gold writer cannot persist the
+  canonical lineage fragment because no lineage store is wired or the metadata
+  bundle did not produce a fragment; optional no-op lineage persistence is
+  allowed only for degraded profiles.
 
 The lineage fragment anchor itself is intentionally split:
 

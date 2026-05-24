@@ -37,12 +37,12 @@ __all__ = ["BatchProcessingSupportService"]
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-    from bioetl.application.core.pipeline_runtime_service_protocols import (
-        PipelineDataSourceServicesProtocol,
-    )
     from bioetl.application.core.batch_tracing import BatchTracingManagerService
     from bioetl.application.core.batch_transformer import BatchTransformer
     from bioetl.application.core.batch_writer import BatchWriter
+    from bioetl.application.core.pipeline_runtime_service_protocols import (
+        PipelineDataSourceServicesProtocol,
+    )
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterProtocol,
     )

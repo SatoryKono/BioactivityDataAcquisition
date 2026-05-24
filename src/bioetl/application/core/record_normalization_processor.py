@@ -21,7 +21,6 @@ from bioetl.application.core._record_normalization_runtime_support import (
 from bioetl.application.core._record_normalization_runtime_support import (
     project_normalization_findings as _project_normalization_findings,
 )
-from bioetl.application.core.record_processor_config import ContentHashPolicyByVersion
 from bioetl.application.core.normalization_fallbacks import (
     UNHANDLED_FALLBACK_NORMALIZATION,
     canonicalize_json_like_string,
@@ -30,6 +29,7 @@ from bioetl.application.core.normalization_fallbacks import (
 )
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
 from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.core.record_processor_config import ContentHashPolicyByVersion
 from bioetl.domain.normalization.json import serialize_json_canonical
 from bioetl.domain.normalization.profiles import (
     FieldRule,

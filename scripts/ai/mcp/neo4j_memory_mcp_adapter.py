@@ -153,6 +153,11 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return args
 
 
+def _join_thread(thread: threading.Thread, *, timeout: float) -> bool:
+    thread.join(timeout=timeout)
+    return not thread.is_alive()
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parse_args(argv)
     process = subprocess.Popen(
@@ -166,37 +171,41 @@ def main(argv: Sequence[str] | None = None) -> int:
     assert process.stderr is not None
 
     errors: Queue[PumpError] = Queue()
-    threads = [
-        threading.Thread(
-            target=_pump_framed_to_line,
-            kwargs={
-                "source": sys.stdin.buffer,
-                "target": process.stdin,
-                "errors": errors,
-            },
-            daemon=True,
-        ),
-        threading.Thread(
-            target=_pump_line_to_framed,
-            kwargs={
-                "source": process.stdout,
-                "target": sys.stdout.buffer,
-                "errors": errors,
-            },
-            daemon=True,
-        ),
-        threading.Thread(
-            target=_pump_stderr,
-            kwargs={"source": process.stderr, "target": sys.stderr.buffer},
-            daemon=True,
-        ),
-    ]
+    client_to_server_thread = threading.Thread(
+        target=_pump_framed_to_line,
+        kwargs={
+            "source": sys.stdin.buffer,
+            "target": process.stdin,
+            "errors": errors,
+        },
+        daemon=True,
+    )
+    server_to_client_thread = threading.Thread(
+        target=_pump_line_to_framed,
+        kwargs={
+            "source": process.stdout,
+            "target": sys.stdout.buffer,
+            "errors": errors,
+        },
+        daemon=False,
+    )
+    stderr_thread = threading.Thread(
+        target=_pump_stderr,
+        kwargs={"source": process.stderr, "target": sys.stderr.buffer},
+        daemon=False,
+    )
+    threads = (
+        client_to_server_thread,
+        server_to_client_thread,
+        stderr_thread,
+    )
     for thread in threads:
         thread.start()
 
     returncode = process.wait()
-    for thread in threads:
-        thread.join(timeout=1.0)
+    _join_thread(server_to_client_thread, timeout=5.0)
+    _join_thread(stderr_thread, timeout=5.0)
+    _join_thread(client_to_server_thread, timeout=1.0)
 
     if not errors.empty():
         error = errors.get()

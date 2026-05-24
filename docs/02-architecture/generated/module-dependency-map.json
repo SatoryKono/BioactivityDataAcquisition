@@ -35,7 +35,7 @@
     {
       "source": "composition",
       "target": "domain",
-      "imports": 441,
+      "imports": 440,
       "allowed": true
     },
     {
@@ -53,7 +53,7 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 788,
+      "imports": 789,
       "allowed": true
     },
     {

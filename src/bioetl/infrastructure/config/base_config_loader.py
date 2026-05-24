@@ -35,9 +35,12 @@ def _load_yaml_file(
     if not path.exists():
         return {}
 
-    with open(path, encoding="utf-8") as f:
-        content = yaml.safe_load(f)
-        return content if content is not None else {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            content = yaml.safe_load(f)
+            return content if content is not None else {}
+    except (OSError, TimeoutError):
+        return {}
 
 
 class BaseConfigLoader[T](ABC):

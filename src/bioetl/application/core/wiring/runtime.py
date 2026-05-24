@@ -31,11 +31,6 @@ from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.batch_transformer import BatchTransformer
 from bioetl.application.core.batch_writer import BatchWriter, BatchWriterOptions
-from bioetl.application.core.record_processor_config import (
-    ContentHashPolicyByVersion,
-    ContentHashVersionPolicy,
-    RecordProcessorConfig,
-)
 from bioetl.application.core.lifecycle import (
     CheckpointRuntimeService,
     ShutdownSignal,
@@ -55,6 +50,11 @@ from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
 from bioetl.application.core.record_processor import RecordProcessor
+from bioetl.application.core.record_processor_config import (
+    ContentHashPolicyByVersion,
+    ContentHashVersionPolicy,
+    RecordProcessorConfig,
+)
 
 __all__ = [
     "BasePipeline",

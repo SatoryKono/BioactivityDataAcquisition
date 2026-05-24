@@ -135,7 +135,9 @@ class InputFilterExtractionParamsSuiteBase(ExtractionParamsSuiteBase):
 
 
 def has_any_cassette(*cassette_names: str) -> bool:
-    """Return whether any supported cassette filename exists."""
+    """Return whether any supported cassette filename exists or recording is enabled."""
+    if os.environ.get("VCR_RECORD_MODE") == "new_episodes":
+        return True
     return any(
         (CASSETTE_DIR / cassette_name).exists() for cassette_name in cassette_names
     )

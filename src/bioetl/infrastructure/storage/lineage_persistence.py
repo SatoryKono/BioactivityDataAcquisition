@@ -11,6 +11,9 @@ from bioetl.domain.behavior.composite_metadata_helpers import (
     parse_composite_field_sources,
     parse_composite_list,
 )
+from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
+)
 from bioetl.domain.ports import LineageStorePort
 
 if TYPE_CHECKING:
@@ -20,6 +23,7 @@ if TYPE_CHECKING:
 __all__ = [
     "emit_composite_source_selection_metrics",
     "emit_lineage_refs_missing_metric",
+    "lineage_fragment_publication_required",
     "persist_lineage_fragment_if_present",
     "resolve_metadata_and_lineage_fragment",
 ]
@@ -46,6 +50,15 @@ def _emit_lineage_fragment_metric(
             "status": status,
         },
     )
+
+
+def lineage_fragment_publication_required(coordinator: object | None) -> bool:
+    """Return whether the coordinator run context requires lineage persistence."""
+    run_context = getattr(coordinator, "run_context", None)
+    exact_replay = getattr(run_context, "exact_replay", False) is True
+    raw_profile = getattr(run_context, "required_persistence_profile", "")
+    profile = raw_profile.strip().lower() if isinstance(raw_profile, str) else ""
+    return exact_replay or profile in STRICT_PERSISTENCE_PROFILES
 
 
 def emit_lineage_refs_missing_metric(
@@ -191,9 +204,22 @@ async def persist_lineage_fragment_if_present(
     metrics: MetricsPort | None = None,
     pipeline_name: str | None = None,
     layer: str | None = None,
+    required: bool = False,
 ) -> None:
     """Persist one lineage fragment when lineage storage is configured."""
-    if lineage_store is None or lineage_fragment is None:
+    if lineage_fragment is None:
+        if required:
+            raise RuntimeError(
+                "Strict metadata publication requires a lineage fragment: "
+                f"pipeline={pipeline_name or 'unknown'}, layer={layer or 'unknown'}"
+            )
+        return
+    if lineage_store is None:
+        if required:
+            raise RuntimeError(
+                "Strict metadata publication requires a lineage store: "
+                f"pipeline={pipeline_name or 'unknown'}, layer={layer or 'unknown'}"
+            )
         return
     try:
         await asyncio.to_thread(lineage_store.save, lineage_fragment)

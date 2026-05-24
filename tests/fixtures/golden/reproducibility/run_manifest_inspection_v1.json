@@ -170,18 +170,6 @@
         "diagnostics.source_revision_state"
       ],
       "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
-      "governed_full_corpus_gate": {
-        "authoritative_truth_surface": "historical_replay_universe_closure_report",
-        "gate_kind": "universal_historical_exact_replay",
-        "reason": "authoritative_historical_replay_universe_artifact_unavailable",
-        "required_claims": {
-          "durable_evidence_coverage_claim": false,
-          "universal_claim": false
-        },
-        "satisfied": false,
-        "scope": "all_known_historical_runs",
-        "verdict": "gate_blocked"
-      },
       "lineage_closure_boundary": {
         "family": "chembl.activity",
         "reason": "family_within_supported_boundary",
