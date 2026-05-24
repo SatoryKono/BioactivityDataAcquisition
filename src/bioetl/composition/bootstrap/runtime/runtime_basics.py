@@ -63,7 +63,7 @@ def bootstrap_runtime_basics(
     storage_bootstrapper: Callable[..., object],
     lock_factory: Callable[[], LockPort],
     uuid_factory: Callable[[], UUID],
-) -> tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort]:
+) -> CompositeInfrastructureContext:
     """Build base runtime dependencies shared across composite bootstrap.
 
     Args:
@@ -81,7 +81,7 @@ def bootstrap_runtime_basics(
             for deterministic testing.
 
     Returns:
-        Tuple of (run_id, settings, logger, metrics, tracer, storage, lock) for the composite run.
+        CompositeInfrastructureContext with the typed runtime resource bundle for the composite run.
     """
     effective_run_id = run_id or str(uuid_factory())
     settings = settings_provider()
@@ -114,7 +114,16 @@ def bootstrap_runtime_basics(
         settings=settings,
     )
     lock = lock_factory()
-    return effective_run_id, settings, logger, metrics, tracer, storage, lock
+    return CompositeInfrastructureContext(
+        run_id=effective_run_id,
+        settings=settings,
+        logger=logger,
+        metrics=metrics,
+        tracer=tracer,
+        storage=storage,
+        lock=lock,
+        clock=clock,
+    )
 
 
 def build_runner_factories(

@@ -205,11 +205,33 @@ content_hash_datetime_policy:
       description: Timestamp-sensitive business identity contract.
       datetime_normalization: utc_iso_microseconds
       distinguishes_same_day_timestamps: true
-      migration_status: opt_in_until_hash_backfill_plan_exists
+      migration_status: opt_in_during_reviewed_backfill
   invariants:
   - Existing content_hash values must not be silently rewritten.
   - Versioned hash policy must be recorded before changing defaults.
   - META_FIELDS and underscore-prefixed runtime fields remain excluded.
+  datetime_hash_backfill_plan:
+    issue: "#4587"
+    owner: architecture-governance
+    status: reviewed_plan_recorded
+    default_switch_target: v2_datetime_utc
+    default_switch_gate: All timestamp-sensitive entity inventories are backfilled,
+      replay golden fixtures are regenerated under versioned policy metadata, and
+      historical v1_date hashes remain readable through explicit compatibility
+      metadata.
+    phases:
+    - id: inventory
+      exit_criteria: Enumerate fields whose source values can carry sub-day
+        timestamp semantics and classify date-only sources separately.
+    - id: dual_write
+      exit_criteria: Persist v1_date and v2_datetime_utc evidence side by side
+        for migrated entities without rewriting historical content_hash values.
+    - id: backfill
+      exit_criteria: Generate reviewed mapping from historical v1_date hashes to
+        v2_datetime_utc hashes for timestamp-sensitive entities.
+    - id: ratchet
+      exit_criteria: Change active_policy to v2_datetime_utc only after CI proves
+        compatibility readers and replay fixtures remain deterministic.
   timestamp_sensitive_entity_inventory:
   - provider: uniprot
     entity: protein

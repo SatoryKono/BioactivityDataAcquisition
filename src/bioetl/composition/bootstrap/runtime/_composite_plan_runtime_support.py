@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import inspect
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, TypeGuard
 
@@ -50,9 +49,6 @@ class _NamedRuntimeBundle(Protocol):
     lock: LockPort
 
 
-_LEGACY_RUNTIME_BASICS_TUPLE_LEN = 7
-
-
 def build_bootstrap_runtime_resources(
     *,
     bootstrap_runtime_basics_fn: Callable[..., object],
@@ -61,17 +57,6 @@ def build_bootstrap_runtime_resources(
 ) -> BootstrapRuntimeResources:
     """Resolve the canonical runtime-basics resource bundle."""
     resolved_bundle = bootstrap_runtime_basics_fn(config=config, run_id=run_id)
-    if _is_legacy_runtime_basics_tuple(resolved_bundle):
-        legacy_bundle = resolved_bundle
-        return BootstrapRuntimeResources(
-            run_id=legacy_bundle[0],
-            settings=legacy_bundle[1],
-            logger=legacy_bundle[2],
-            metrics=legacy_bundle[3],
-            tracer=legacy_bundle[4],
-            storage=legacy_bundle[5],
-            lock=legacy_bundle[6],
-        )
     if isinstance(resolved_bundle, CompositeInfrastructureContext) or _has_named_bundle(
         resolved_bundle
     ):
@@ -90,7 +75,7 @@ def build_bootstrap_runtime_resources(
     raise TypeError(
         "bootstrap_runtime_basics_fn must return CompositeInfrastructureContext "
         "or another named runtime bundle exposing run_id/settings/logger/"
-        "metrics/tracer/storage/lock"
+        "metrics/tracer/storage/lock; legacy tuple bundles are no longer supported"
     )
 
 
@@ -102,27 +87,12 @@ def build_bootstrap_support_services(
     resources: BootstrapRuntimeResources,
 ) -> object:
     """Resolve support services from the shared resource bundle."""
-    call_kwargs: dict[str, object] = {
-        "config": config,
-        "runtime": runtime,
-        "infra_context": resources.infra_context or resources,
-    }
     if resources.infra_context is None:
-        call_kwargs.update(
-            {
-                "run_id": resources.run_id,
-                "settings": resources.settings,
-                "logger": resources.logger,
-                "metrics": resources.metrics,
-                "tracer": resources.tracer,
-                "storage": resources.storage,
-                "lock": resources.lock,
-                "clock": resources.clock,
-            }
-        )
-    return _call_supported_kwargs(
-        build_support_services_fn,
-        call_kwargs,
+        raise TypeError("bootstrap runtime resources must carry infra_context")
+    return build_support_services_fn(
+        config=config,
+        runtime=runtime,
+        infra_context=resources.infra_context,
     )
 
 
@@ -139,34 +109,3 @@ def _has_named_bundle(resolved_bundle: object) -> TypeGuard[_NamedRuntimeBundle]
             "lock",
         )
     )
-
-
-def _is_legacy_runtime_basics_tuple(
-    resolved_bundle: object,
-) -> TypeGuard[
-    tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort]
-]:
-    return isinstance(resolved_bundle, tuple) and len(resolved_bundle) == (
-        _LEGACY_RUNTIME_BASICS_TUPLE_LEN
-    )
-
-
-def _call_supported_kwargs(
-    build_support_services_fn: Callable[..., object],
-    call_kwargs: dict[str, object],
-) -> object:
-    try:
-        parameters = inspect.signature(build_support_services_fn).parameters
-    except (TypeError, ValueError):
-        return build_support_services_fn(**call_kwargs)
-
-    if any(
-        parameter.kind is inspect.Parameter.VAR_KEYWORD
-        for parameter in parameters.values()
-    ):
-        return build_support_services_fn(**call_kwargs)
-
-    supported_kwargs = {
-        name: value for name, value in call_kwargs.items() if name in parameters
-    }
-    return build_support_services_fn(**supported_kwargs)

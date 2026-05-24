@@ -104,6 +104,19 @@ def test_composite_runtime_bootstrap_runner_stays_plan_based() -> None:
 
 
 @pytest.mark.unit
+def test_runtime_plan_support_retires_legacy_runtime_compatibility() -> None:
+    """Runtime plan support must stay on explicit named-bundle contracts."""
+    from bioetl.composition.bootstrap.runtime import (
+        _composite_plan_runtime_support as plan_runtime_support,
+    )
+
+    source = inspect.getsource(plan_runtime_support)
+    assert "_is_legacy_runtime_basics_tuple" not in source
+    assert "_call_supported_kwargs" not in source
+    assert "inspect.signature" not in source
+
+
+.mark.unit
 def test_observability_runtime_public_exports_stable() -> None:
     """Observability runtime facade should preserve stable public __all__."""
     assert observability_runtime.__all__ == [

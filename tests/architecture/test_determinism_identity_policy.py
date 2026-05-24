@@ -208,6 +208,24 @@ def test_determinism_identity_policy_has_expected_shape() -> None:
     }
     assert isinstance(hash_policy_budget.get("ratchet_policy"), str)
 
+    datetime_policy = payload.get("content_hash_datetime_policy")
+    assert isinstance(datetime_policy, dict)
+    assert datetime_policy.get("active_policy") == "v1_date"
+    assert datetime_policy.get("migration_target") == "v2_datetime_utc"
+    backfill_plan = datetime_policy.get("datetime_hash_backfill_plan")
+    assert isinstance(backfill_plan, dict)
+    assert backfill_plan.get("issue") == "#4587"
+    assert backfill_plan.get("status") == "reviewed_plan_recorded"
+    assert backfill_plan.get("default_switch_target") == "v2_datetime_utc"
+    phases = backfill_plan.get("phases")
+    assert isinstance(phases, list)
+    assert [phase.get("id") for phase in phases if isinstance(phase, dict)] == [
+        "inventory",
+        "dual_write",
+        "backfill",
+        "ratchet",
+    ]
+
 
 @pytest.mark.architecture
 def test_uuid4_identity_generators_are_policy_allowlisted() -> None:

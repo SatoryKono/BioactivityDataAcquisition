@@ -105,6 +105,10 @@ def test_control_plane_identity_evidence_static_contract_is_frozen() -> None:
     anchor_names = {spec.name for spec in ANCHOR_SPECS}
     assert set(SOURCE_MODEL_BY_NAME) == anchor_names
     assert set(DRILLDOWN_TARGET_BY_NAME) == anchor_names
+    assert SPEC_BY_NAME["resolved_config_hash"].priority == "P1"
+    assert SOURCE_MODEL_BY_NAME["resolved_config_hash"].source_quality == "authoritative"
+    assert SPEC_BY_NAME["config_hash"].priority == "P2"
+    assert SOURCE_MODEL_BY_NAME["config_hash"].source_quality == "compatibility_alias"
 
     forbidden_label_names = {
         "run_id",
@@ -112,6 +116,7 @@ def test_control_plane_identity_evidence_static_contract_is_frozen() -> None:
         "execution_fingerprint",
         "effective_config_hash",
         "effective_config_artifact_id",
+        "resolved_config_hash",
         "config_hash",
         "contract_schema_hash",
         "dq_contract_compatibility_hash",
@@ -473,6 +478,7 @@ class TestHealthServerControlPlaneSelector:
                     pipeline_version="1.0.0",
                     git_commit="def5678",
                     config_hash="feedface",
+                    resolved_config_hash="feedface",
                     effective_config_hash=(
                         "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                     ),
@@ -551,6 +557,7 @@ class TestHealthServerControlPlaneSelector:
                     pipeline_version="2.0.0",
                     git_commit="jkl3456",
                     config_hash="badc0de",
+                    resolved_config_hash="badc0de",
                     effective_config_hash=(
                         "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
                     ),
@@ -1233,6 +1240,10 @@ class TestHealthServerControlPlaneSelector:
             "effective_config_artifact"
         )
         assert rows["effective_config_hash"]["source_quality"] == "authoritative"
+        assert rows["resolved_config_hash"]["value_full"] == "feedface"
+        assert rows["resolved_config_hash"]["source_quality"] == "authoritative"
+        assert rows["config_hash"]["source_quality"] == "compatibility_alias"
+        assert rows["config_hash"]["copy"] is False
         assert rows["effective_config_hash"]["drilldown_type"] == "effective_config"
         assert rows["effective_config_hash"]["drilldown_target"] == (
             "effective_config.hash:"

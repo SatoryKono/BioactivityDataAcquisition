@@ -23,6 +23,28 @@ from bioetl.composition.bootstrap.runtime.runner_assembly import (
 )
 
 
+def _runtime_bundle(
+    *,
+    run_id: str = "effective-rid",
+    settings: object | None = None,
+    logger: object | None = None,
+    metrics: object | None = None,
+    tracer: object | None = None,
+    storage: object | None = None,
+    lock: object | None = None,
+) -> SimpleNamespace:
+    return SimpleNamespace(
+        run_id=run_id,
+        settings=settings or SimpleNamespace(),
+        logger=logger or MagicMock(),
+        metrics=metrics or MagicMock(),
+        tracer=tracer or MagicMock(),
+        storage=storage or MagicMock(),
+        lock=lock or MagicMock(),
+        clock=None,
+    )
+
+
 @pytest.mark.unit
 class TestCreateCompositeRunnerService:
     """Tests for create_composite_runner_service."""
@@ -235,7 +257,14 @@ class TestBootstrapCompositeRunner:
         lock = MagicMock()
 
         bootstrap_basics = MagicMock(
-            return_value=("rid", settings, logger, metrics, MagicMock(), storage, lock)
+            return_value=_runtime_bundle(
+                run_id="rid",
+                settings=settings,
+                logger=logger,
+                metrics=metrics,
+                storage=storage,
+                lock=lock,
+            )
         )
         seed_f = MagicMock()
         dep_f = MagicMock()
@@ -262,11 +291,11 @@ class TestBootstrapCompositeRunner:
         build_support.assert_called_once()
         create_runner.assert_called_once()
 
-    def test_passes_run_id_downstream(self) -> None:
-        """Effective run_id from basics is forwarded to create_runner."""
+    def test_rejects_legacy_runtime_basics_tuple(self) -> None:
+        """The composite bootstrap plan must not accept the retired tuple seam."""
         bootstrap_basics = MagicMock(
             return_value=(
-                "effective-rid",
+                "rid",
                 SimpleNamespace(),
                 MagicMock(),
                 MagicMock(),
@@ -275,6 +304,21 @@ class TestBootstrapCompositeRunner:
                 MagicMock(),
             )
         )
+
+        with pytest.raises(TypeError, match="legacy tuple bundles"):
+            bootstrap_composite_runner(
+                config=MagicMock(),
+                runtime=MagicMock(),
+                run_id=None,
+                bootstrap_runtime_basics_fn=bootstrap_basics,
+                build_runner_factories_fn=MagicMock(),
+                build_support_services_fn=MagicMock(),
+                create_composite_runner_fn=MagicMock(),
+            )
+
+    def test_passes_run_id_downstream(self) -> None:
+        """Effective run_id from basics is forwarded to create_runner."""
+        bootstrap_basics = MagicMock(return_value=_runtime_bundle())
         create_runner = MagicMock(return_value=MagicMock())
 
         bootstrap_composite_runner(
@@ -300,14 +344,13 @@ class TestBootstrapCompositeRunner:
         storage = MagicMock()
         lock = MagicMock()
         bootstrap_basics = MagicMock(
-            return_value=(
-                "effective-rid",
-                settings,
-                logger,
-                metrics,
-                MagicMock(),
-                storage,
-                lock,
+            return_value=_runtime_bundle(
+                run_id="effective-rid",
+                settings=settings,
+                logger=logger,
+                metrics=metrics,
+                storage=storage,
+                lock=lock,
             )
         )
         build_support = MagicMock(return_value=SimpleNamespace())
@@ -325,7 +368,8 @@ class TestBootstrapCompositeRunner:
         )
 
         call_kwargs = build_support.call_args[1]
-        assert call_kwargs["settings"] is settings
-        assert call_kwargs["logger"] is logger
-        assert call_kwargs["storage"] is storage
-        assert call_kwargs["run_id"] == "effective-rid"
+        infra_context = call_kwargs["infra_context"]
+        assert infra_context.settings is settings
+        assert infra_context.logger is logger
+        assert infra_context.storage is storage
+        assert infra_context.run_id == "effective-rid"

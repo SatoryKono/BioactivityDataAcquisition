@@ -838,7 +838,16 @@ New manifest creation, diagnostics, inspection output, metadata sidecars, and
 lineage nodes MUST preserve those fields separately. Backward-compatible
 consumers MAY still read legacy `config_hash`, but manifest hydration and new
 control-plane write paths MUST NOT synthesize missing `resolved_config_hash` or
-`effective_config_hash` values from it.
+`effective_config_hash` values from it. Control-plane identity evidence presents
+`resolved_config_hash` as first-class declarative provenance and keeps
+`config_hash` in the legacy compatibility details tier only.
+
+Datetime-sensitive content hashes remain on the reviewed `v1_date` compatibility
+default until the `#4587` backfill plan in
+`configs/quality/determinism_identity_policy.yaml` completes inventory,
+dual-write, historical backfill, and ratchet phases. First-party replay logic
+MUST treat `execution_fingerprint`, `resolved_config_hash`, and
+`effective_config_hash` as the canonical replay anchors during that migration.
 
 All new executable manifests require `git_commit`, `clean`
 `source_revision_state`, and `dependency_lock_hash` to be present, regardless
