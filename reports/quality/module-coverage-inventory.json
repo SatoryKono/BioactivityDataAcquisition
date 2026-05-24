@@ -1263,7 +1263,7 @@
       "missing_lines": 48,
       "module": "bioetl.application.core._record_normalization_hash_support",
       "path": "src/bioetl/application/core/_record_normalization_hash_support.py",
-      "source_lines": 210
+      "source_lines": 212
     },
     {
       "coverage_percent": 32.43,
@@ -1593,7 +1593,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.batch_processing_support",
       "path": "src/bioetl/application/core/batch_processing_support.py",
-      "source_lines": 228
+      "source_lines": 227
     },
     {
       "coverage_percent": 0.0,
@@ -1733,7 +1733,7 @@
       "missing_lines": 22,
       "module": "bioetl.application.core.config",
       "path": "src/bioetl/application/core/config.py",
-      "source_lines": 205
+      "source_lines": 107
     },
     {
       "coverage_percent": 0.0,
@@ -1856,6 +1856,26 @@
       "source_lines": 42
     },
     {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.application.core.pipeline_aux_service_protocols",
+      "path": "src/bioetl/application/core/pipeline_aux_service_protocols.py",
+      "source_lines": 69
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.application.core.pipeline_observability_service_protocols",
+      "path": "src/bioetl/application/core/pipeline_observability_service_protocols.py",
+      "source_lines": 41
+    },
+    {
       "coverage_percent": 0.0,
       "coverage_status": "uncovered",
       "covered_lines": 0,
@@ -1866,6 +1886,16 @@
       "source_lines": 5
     },
     {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.application.core.pipeline_runtime_service_protocols",
+      "path": "src/bioetl/application/core/pipeline_runtime_service_protocols.py",
+      "source_lines": 84
+    },
+    {
       "coverage_percent": 0.0,
       "coverage_status": "uncovered",
       "covered_lines": 0,
@@ -1873,7 +1903,7 @@
       "missing_lines": 28,
       "module": "bioetl.application.core.pipeline_service_protocols",
       "path": "src/bioetl/application/core/pipeline_service_protocols.py",
-      "source_lines": 83
+      "source_lines": 51
     },
     {
       "coverage_percent": 0.0,
@@ -1994,6 +2024,16 @@
       "module": "bioetl.application.core.record_processor",
       "path": "src/bioetl/application/core/record_processor.py",
       "source_lines": 248
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.application.core.record_processor_config",
+      "path": "src/bioetl/application/core/record_processor_config.py",
+      "source_lines": 123
     },
     {
       "coverage_percent": 0.0,
@@ -2643,7 +2683,7 @@
       "missing_lines": 65,
       "module": "bioetl.application.core.preflight.service",
       "path": "src/bioetl/application/core/preflight/service.py",
-      "source_lines": 240
+      "source_lines": 262
     },
     {
       "coverage_percent": 100.0,
@@ -4583,7 +4623,7 @@
       "missing_lines": 2,
       "module": "bioetl.application.services.control_plane._run_manifest_diagnostics_persistence_profiles",
       "path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profiles.py",
-      "source_lines": 174
+      "source_lines": 173
     },
     {
       "coverage_percent": 100.0,
@@ -4943,7 +4983,7 @@
       "missing_lines": 3,
       "module": "bioetl.application.services.control_plane.run_manifest_replay_taxonomy",
       "path": "src/bioetl/application/services/control_plane/run_manifest_replay_taxonomy.py",
-      "source_lines": 14
+      "source_lines": 23
     },
     {
       "coverage_percent": 73.08,
@@ -5553,7 +5593,7 @@
       "missing_lines": 77,
       "module": "bioetl.composition._pipeline_execution",
       "path": "src/bioetl/composition/_pipeline_execution.py",
-      "source_lines": 246
+      "source_lines": 254
     },
     {
       "coverage_percent": 0.0,
@@ -5673,7 +5713,7 @@
       "missing_lines": 23,
       "module": "bioetl.composition.execution_api",
       "path": "src/bioetl/composition/execution_api.py",
-      "source_lines": 120
+      "source_lines": 127
     },
     {
       "coverage_percent": 0.0,
@@ -6343,7 +6383,7 @@
       "missing_lines": 29,
       "module": "bioetl.composition.bootstrap.runtime.pipeline_context_builder",
       "path": "src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py",
-      "source_lines": 97
+      "source_lines": 106
     },
     {
       "coverage_percent": 0.0,
@@ -7613,7 +7653,7 @@
       "missing_lines": 10,
       "module": "bioetl.composition.runtime_builders._run_manifest_builder_policy",
       "path": "src/bioetl/composition/runtime_builders/_run_manifest_builder_policy.py",
-      "source_lines": 167
+      "source_lines": 170
     },
     {
       "coverage_percent": 66.67,
@@ -7673,7 +7713,7 @@
       "missing_lines": 6,
       "module": "bioetl.composition.runtime_builders._run_manifest_support",
       "path": "src/bioetl/composition/runtime_builders/_run_manifest_support.py",
-      "source_lines": 264
+      "source_lines": 265
     },
     {
       "coverage_percent": 0.0,
@@ -7783,7 +7823,7 @@
       "missing_lines": 3,
       "module": "bioetl.composition.runtime_builders.input_snapshot_resolution",
       "path": "src/bioetl/composition/runtime_builders/input_snapshot_resolution.py",
-      "source_lines": 13
+      "source_lines": 27
     },
     {
       "coverage_percent": 100.0,
@@ -8363,7 +8403,7 @@
       "missing_lines": 59,
       "module": "bioetl.domain.behavior._dq_rule_evaluators",
       "path": "src/bioetl/domain/behavior/_dq_rule_evaluators.py",
-      "source_lines": 228
+      "source_lines": 244
     },
     {
       "coverage_percent": 34.48,
@@ -8383,7 +8423,7 @@
       "missing_lines": 66,
       "module": "bioetl.domain.behavior._dq_rule_evaluators_vocab",
       "path": "src/bioetl/domain/behavior/_dq_rule_evaluators_vocab.py",
-      "source_lines": 216
+      "source_lines": 221
     },
     {
       "coverage_percent": 30.0,
@@ -19237,30 +19277,40 @@
     }
   ],
   "schema_version": 1,
-  "snapshot_date": "2026-05-22",
-  "source_tree_sha256": "7ae6d1452b65a66e8860b151b2cbc4298598a5cd076588658311fa5165a305cb",
+  "snapshot_date": "2026-05-24",
+  "source_tree_sha256": "97d694910a9f27e9aaaa1957ef7200b29534e73ea457ba4f3aa7a1ceaae24b7c",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
       "application_core": {
-        "allowlisted_unmeasured_module_count": 0,
-        "allowlisted_unmeasured_modules": [],
+        "allowlisted_unmeasured_module_count": 4,
+        "allowlisted_unmeasured_modules": [
+          "src/bioetl/application/core/pipeline_aux_service_protocols.py",
+          "src/bioetl/application/core/pipeline_observability_service_protocols.py",
+          "src/bioetl/application/core/pipeline_runtime_service_protocols.py",
+          "src/bioetl/application/core/record_processor_config.py"
+        ],
         "coverage_percent_avg": 20.75,
         "coverage_percent_min": 0.0,
         "covered_line_percent": 16.29,
         "covered_module_count": 53,
         "measured_module_count": 168,
-        "measured_percent": 100.0,
-        "module_count": 168,
+        "measured_percent": 97.67,
+        "module_count": 172,
         "status_counts": {
           "fully_covered": 18,
           "partially_covered": 35,
-          "uncovered": 115
+          "uncovered": 115,
+          "unmeasured": 4
         },
         "threshold_status": "pass",
         "thresholds": {
           "allowlisted_unmeasured_paths": [
-            "src/bioetl/application/core/_batch_processing_metrics_support.py"
+            "src/bioetl/application/core/_batch_processing_metrics_support.py",
+            "src/bioetl/application/core/pipeline_aux_service_protocols.py",
+            "src/bioetl/application/core/pipeline_observability_service_protocols.py",
+            "src/bioetl/application/core/pipeline_runtime_service_protocols.py",
+            "src/bioetl/application/core/record_processor_config.py"
           ],
           "max_unmeasured_module_count": 0,
           "min_covered_line_percent": 0.0,
@@ -19269,7 +19319,7 @@
         },
         "unexpected_unmeasured_module_count": 0,
         "unexpected_unmeasured_modules": [],
-        "unmeasured_module_count": 0
+        "unmeasured_module_count": 4
       },
       "application_services_control_plane": {
         "allowlisted_unmeasured_module_count": 0,
@@ -19381,18 +19431,38 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 1923,
+    "source_module_count": 1927,
     "status_counts": {
       "fully_covered": 282,
       "partially_covered": 520,
       "uncovered": 1103,
-      "unmeasured": 18
+      "unmeasured": 22
     },
-    "unmeasured_module_count": 18,
+    "unmeasured_module_count": 22,
     "unmeasured_modules": [
       {
         "module": "bioetl.__main__",
         "path": "src/bioetl/__main__.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.application.core.pipeline_aux_service_protocols",
+        "path": "src/bioetl/application/core/pipeline_aux_service_protocols.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.application.core.pipeline_observability_service_protocols",
+        "path": "src/bioetl/application/core/pipeline_observability_service_protocols.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.application.core.pipeline_runtime_service_protocols",
+        "path": "src/bioetl/application/core/pipeline_runtime_service_protocols.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.application.core.record_processor_config",
+        "path": "src/bioetl/application/core/record_processor_config.py",
         "reason": "coverage_xml_has_no_class_entry"
       },
       {

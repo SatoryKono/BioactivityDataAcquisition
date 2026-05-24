@@ -59,6 +59,31 @@ def test_parse_markdown_note_can_skip_body_loading(tmp_path: Path) -> None:
     assert note.body == ""
 
 
+def test_parse_markdown_note_metadata_only_preserves_quoted_numeric_strings(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "quoted.md"
+    path.write_text(
+        "---\n"
+        "id: '3467'\n"
+        "task_id: \"3507\"\n"
+        "created_at: '2026-04-20T00:00:00Z'\n"
+        "ttl_days: 14\n"
+        "confidence: episodic\n"
+        "source_refs:\n"
+        "- src/memory/README.md\n"
+        "---\n\n"
+        "# Session\n",
+        encoding="utf-8",
+    )
+
+    note = parse_markdown_note(path, include_body=False)
+
+    assert note.metadata["id"] == "3467"
+    assert note.metadata["task_id"] == "3507"
+    assert note.metadata["ttl_days"] == 14
+
+
 def test_promote_note_moves_episodic_into_curated(tmp_path: Path) -> None:
     source = create_note(
         note_kind="episodic-summary",

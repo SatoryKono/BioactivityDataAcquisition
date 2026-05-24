@@ -46,7 +46,7 @@ if TYPE_CHECKING:
         TracingPort,
     )
     from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
     from bioetl.infrastructure.schemas.pipeline_contract_policy import (
         PipelineContractPolicy,

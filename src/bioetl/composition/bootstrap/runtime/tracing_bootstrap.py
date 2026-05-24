@@ -10,7 +10,7 @@ from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.infrastructure.observability import OpenTelemetryTracer
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
 TracerFactory = Callable[[str], TracingPort]
 

@@ -38,6 +38,7 @@ REBUILD_ONLY_DIRS = (
     "src/memory/graph/indexes",
     "src/memory/timeline/events",
 )
+DEFAULT_EPISODIC_NOTE_SCAN_LIMIT = 200
 
 
 @dataclass(frozen=True, slots=True)
@@ -379,15 +380,41 @@ def _note_dirs(root: Path) -> dict[str, list[Path]]:
     }
 
 
-def _iter_note_paths(root: Path) -> list[tuple[str, Path]]:
+def _bounded_episodic_note_paths(
+    directory: Path,
+    *,
+    limit: int | None,
+) -> list[Path]:
+    paths = [
+        path
+        for path in directory.rglob("*.md")
+        if path.name != "README.md" and "templates" not in path.parts
+    ]
+    if limit is None or len(paths) <= limit:
+        return sorted(paths)
+    return sorted(paths, key=lambda path: path.stat().st_mtime, reverse=True)[:limit]
+
+
+def _iter_note_paths(
+    root: Path,
+    *,
+    include_all_episodic_notes: bool = False,
+) -> list[tuple[str, Path]]:
     result: list[tuple[str, Path]] = []
     for artifact_class, directories in _note_dirs(root).items():
         for directory in directories:
             if not directory.exists():
                 continue
-            for path in sorted(directory.rglob("*.md")):
-                if path.name == "README.md" or "templates" in path.parts:
-                    continue
+            if artifact_class == "episodic_note":
+                limit = None if include_all_episodic_notes else DEFAULT_EPISODIC_NOTE_SCAN_LIMIT
+                note_paths = _bounded_episodic_note_paths(directory, limit=limit)
+            else:
+                note_paths = [
+                    path
+                    for path in sorted(directory.rglob("*.md"))
+                    if path.name != "README.md" and "templates" not in path.parts
+                ]
+            for path in note_paths:
                 result.append((artifact_class, path))
     return result
 
@@ -812,6 +839,8 @@ def _validate_note_files(
     policy_payloads: dict[str, Any],
     catalog_payloads: dict[str, Any],
     issues: list[ValidationIssue],
+    *,
+    include_all_episodic_notes: bool,
 ) -> None:
     placement_rules = catalog_payloads.get("placement_rules.yaml", {})
     retention_policy = policy_payloads.get("retention.yaml", {})
@@ -825,7 +854,10 @@ def _validate_note_files(
     }
     curated_notes: list[tuple[Path, dict[str, Any]]] = []
 
-    for artifact_class, path in _iter_note_paths(memory_root):
+    for artifact_class, path in _iter_note_paths(
+        memory_root,
+        include_all_episodic_notes=include_all_episodic_notes,
+    ):
         try:
             note = parse_markdown_note(
                 path,
@@ -871,6 +903,7 @@ def validate_memory_scaffold(
     root: Path | None = None,
     *,
     include_working_tree_junk: bool = False,
+    include_all_episodic_notes: bool = False,
 ) -> list[ValidationIssue]:
     """Validate the baseline project-memory scaffold and note contracts."""
     memory_root = _memory_root(root)
@@ -918,6 +951,7 @@ def validate_memory_scaffold(
             policy_payloads,
             catalog_payloads,
             issues,
+            include_all_episodic_notes=include_all_episodic_notes,
         )
 
     return issues

@@ -1,6 +1,6 @@
 {
   "summary": {
-    "snapshot_date": "2026-05-22",
+    "snapshot_date": "2026-05-24",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
     "budget_warnings": 10
@@ -16,19 +16,19 @@
         "src/bioetl/application/core/"
       ],
       "duplication_clusters": 8,
-      "files": 168,
-      "total_loc": 21068,
+      "files": 172,
+      "total_loc": 21256,
       "files_ge_250_loc": 12,
       "helper_function_ratio": 0.375,
       "max_internal_fan_in": 14,
-      "max_internal_fan_in_module": "bioetl.application.core.pipeline_service_protocols",
+      "max_internal_fan_in_module": "bioetl.application.core.batch_runtime_failure_policy",
       "bounded_growth_budgets": {
-        "files_ge_250_loc": 14,
-        "max_internal_fan_in": 15
+        "files_ge_250_loc": 12,
+        "max_internal_fan_in": 14
       },
       "budget_warnings": [
-        "near_budget:files_ge_250_loc=12/14",
-        "near_budget:max_internal_fan_in=14/15"
+        "at_budget:files_ge_250_loc=12/12",
+        "at_budget:max_internal_fan_in=14/14"
       ]
     },
     {
@@ -42,7 +42,7 @@
       ],
       "duplication_clusters": 5,
       "files": 42,
-      "total_loc": 5556,
+      "total_loc": 5565,
       "files_ge_250_loc": 5,
       "helper_function_ratio": 0.351,
       "max_internal_fan_in": 6,

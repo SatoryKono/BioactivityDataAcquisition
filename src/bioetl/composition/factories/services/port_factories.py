@@ -21,7 +21,7 @@ from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = [
     "create_checkpoint",

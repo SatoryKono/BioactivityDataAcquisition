@@ -23,6 +23,11 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Also fail on untracked Python cache files below src/memory.",
     )
+    parser.add_argument(
+        "--include-all-episodic-notes",
+        action="store_true",
+        help="Validate the full episodic note history instead of the bounded fast-path scan.",
+    )
     return parser
 
 
@@ -34,7 +39,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
     issues = validate_memory_scaffold(
-        include_working_tree_junk=args.include_working_tree_junk
+        include_working_tree_junk=args.include_working_tree_junk,
+        include_all_episodic_notes=args.include_all_episodic_notes,
     )
 
     if args.json:

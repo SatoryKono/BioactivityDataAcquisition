@@ -10,7 +10,7 @@ from bioetl.composition.observability_resolution import resolve_metrics_port
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.filtering import InputFilterConfig
 from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
-from bioetl.infrastructure.config._base import Settings
+from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 from .datasource.data_source_factory import DataSourceCreatorProtocol

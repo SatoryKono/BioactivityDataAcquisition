@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bioetl.domain.config import RuntimeConfig
-from bioetl.infrastructure.config._base import Settings
+from bioetl.infrastructure.config.settings_api import Settings
 
 
 def apply_optional_control_plane_kwargs(

@@ -5,9 +5,6 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.core._runner_observability import (
-    emit_preflight_health_results,
-)
 from bioetl.application.core.preflight.health_aggregator import HealthAggregator
 from bioetl.application.core.preflight.medallion_validator import (
     MedallionConfigValidator,
@@ -16,6 +13,7 @@ from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAM
 from bioetl.domain.types import (
     ConfigValidationError,
     HealthReport,
+    HealthStatus,
     PreflightReport,
 )
 
@@ -45,6 +43,30 @@ class _PreflightExecutionHostProtocol(Protocol):
     _observer: PipelineObserver
 
 
+def _emit_preflight_health_results(
+    host: _PreflightExecutionHostProtocol,
+    report: HealthReport | None,
+    *,
+    runner_stage: str,
+) -> None:
+    """Emit component-level preflight health results through PipelineObserver."""
+    if report is None:
+        return
+    health_check_mode = getattr(host._runtime, "health_check_mode", "strict")
+    for result in report.results:
+        host._observer.emit_health_check_result(
+            component=result.component,
+            healthy=result.status != HealthStatus.UNHEALTHY,
+            duration_ms=result.duration_seconds * 1000.0,
+            provider=result.provider,
+            latency_ms=result.latency_ms,
+            health_check_mode=health_check_mode,
+            fallback_reason=result.probe_fallback_reason,
+            health_status=result.status.value,
+            runner_stage=runner_stage,
+        )
+
+
 async def validate_infrastructure(host: _PreflightExecutionHostProtocol) -> None:
     """Validate infrastructure health before pipeline execution."""
     start_time = time.perf_counter()
@@ -60,7 +82,7 @@ async def validate_infrastructure(host: _PreflightExecutionHostProtocol) -> None
     if report is None:
         return
     duration = time.perf_counter() - start_time
-    emit_preflight_health_results(
+    _emit_preflight_health_results(
         host,
         report,
         runner_stage=_PREFLIGHT_STAGE_NAME,

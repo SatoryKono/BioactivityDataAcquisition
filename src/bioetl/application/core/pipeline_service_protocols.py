@@ -1,4 +1,4 @@
-"""Compatibility aggregate protocol contracts for pipeline service bundles."""
+"""Aggregate protocol contracts for pipeline service bundles."""
 
 from __future__ import annotations
 

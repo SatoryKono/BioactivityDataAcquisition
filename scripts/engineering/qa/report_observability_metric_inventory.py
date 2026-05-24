@@ -282,7 +282,10 @@ def _module_path_from_import(module_name: str, repo_root: Path) -> Path | None:
 
 
 def _collect_module_string_bindings(path: Path) -> dict[str, str]:
-    text = path.read_text(encoding="utf-8")
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (UnicodeDecodeError, OSError, TimeoutError):
+        return {}
     try:
         tree = ast.parse(text)
     except SyntaxError:
@@ -519,7 +522,7 @@ def _module_string_bindings(
     if module_path not in cache:
         try:
             cache[module_path] = _collect_module_string_bindings(module_path)
-        except UnicodeDecodeError:
+        except (UnicodeDecodeError, OSError, TimeoutError):
             cache[module_path] = {}
     return cache[module_path]
 

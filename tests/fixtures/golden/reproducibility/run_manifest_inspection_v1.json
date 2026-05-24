@@ -20,6 +20,72 @@
     "append_mode_semantic_sinks": [],
     "artifact_publication_closure": "disabled",
     "artifact_refs": [],
+    "authoritative_replay_dossier": {
+      "authoritative_replay_artifacts": [
+        "run_manifest",
+        "effective_config_artifact",
+        "lineage_fragment",
+        "layer_metadata",
+        "checkpoint_metadata",
+        "input_snapshot_envelope"
+      ],
+      "canonical_execution_identity": {
+        "execution_fingerprint": "fp-golden-001",
+        "payload": {
+          "contract_ref": "chembl.activity",
+          "contract_version": "1.2.0",
+          "dq_contract_compatibility_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "effective_config_artifact_id": "eca-golden-001",
+          "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "exact_replay": "true",
+          "git_commit": "abc1234",
+          "input_snapshot_fingerprint": "2f847242c9547e889e852f7a4dc132293b43ba0e72d766fa2b7a91166decd6a9",
+          "normalization_profile_hash": null,
+          "normalization_profile_ref": null,
+          "normalization_profile_version": null,
+          "pipeline_name": "chembl_activity",
+          "pipeline_version": "1.0.0",
+          "run_type": "incremental",
+          "silver_filter_compatibility_mode": "structural_only_auto_promote"
+        }
+      },
+      "checkpoint_identity": {
+        "contract_ref": "chembl.activity",
+        "contract_version": "1.2.0",
+        "effective_config_artifact_id": "eca-golden-001",
+        "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "execution_fingerprint": "fp-golden-001",
+        "input_snapshot_identity_fingerprint": "2f847242c9547e889e852f7a4dc132293b43ba0e72d766fa2b7a91166decd6a9",
+        "input_snapshot_ids": [
+          "snapshot-golden-001"
+        ],
+        "required_persistence_profile": "replay_ready"
+      },
+      "contract_ref": "chembl.activity",
+      "contract_version": "1.2.0",
+      "effective_config_artifact_id": "eca-golden-001",
+      "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+      "execution_fingerprint": "fp-golden-001",
+      "git_commit": "abc1234",
+      "identity_graph_complete": null,
+      "input_snapshot_content_hashes": [
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      ],
+      "input_snapshot_identity_fingerprint": "2f847242c9547e889e852f7a4dc132293b43ba0e72d766fa2b7a91166decd6a9",
+      "input_snapshot_ids": [
+        "snapshot-golden-001"
+      ],
+      "lineage_fragment_ids": [],
+      "manifest_id": "manifest-golden-001",
+      "planned_artifact_count": null,
+      "published_artifact_count": 0,
+      "published_artifact_refs": [],
+      "required_persistence_profile": "replay_ready",
+      "run_id": "00000000-0000-0000-0000-000000000901",
+      "snapshot_status": "full",
+      "truth_boundary": "authoritative_replay_artifacts_only"
+    },
     "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
     "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
     "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",
@@ -104,6 +170,18 @@
         "diagnostics.source_revision_state"
       ],
       "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+      "governed_full_corpus_gate": {
+        "authoritative_truth_surface": "historical_replay_universe_closure_report",
+        "gate_kind": "universal_historical_exact_replay",
+        "reason": "authoritative_historical_replay_universe_artifact_unavailable",
+        "required_claims": {
+          "durable_evidence_coverage_claim": false,
+          "universal_claim": false
+        },
+        "satisfied": false,
+        "scope": "all_known_historical_runs",
+        "verdict": "gate_blocked"
+      },
       "lineage_closure_boundary": {
         "family": "chembl.activity",
         "reason": "family_within_supported_boundary",
@@ -177,6 +255,18 @@
         "diagnostics.source_revision_state"
       ],
       "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+      "governed_full_corpus_gate": {
+        "authoritative_truth_surface": "historical_replay_universe_closure_report",
+        "gate_kind": "universal_historical_exact_replay",
+        "reason": "authoritative_historical_replay_universe_artifact_unavailable",
+        "required_claims": {
+          "durable_evidence_coverage_claim": false,
+          "universal_claim": false
+        },
+        "satisfied": false,
+        "scope": "all_known_historical_runs",
+        "verdict": "gate_blocked"
+      },
       "lineage_closure_boundary": {
         "family": "chembl.activity",
         "reason": "family_within_supported_boundary",
@@ -217,6 +307,72 @@
     },
     "identity_graph": {
       "append_mode_semantic_sinks": [],
+      "authoritative_replay_dossier": {
+        "authoritative_replay_artifacts": [
+          "run_manifest",
+          "effective_config_artifact",
+          "lineage_fragment",
+          "layer_metadata",
+          "checkpoint_metadata",
+          "input_snapshot_envelope"
+        ],
+        "canonical_execution_identity": {
+          "execution_fingerprint": "fp-golden-001",
+          "payload": {
+            "contract_ref": "chembl.activity",
+            "contract_version": "1.2.0",
+            "dq_contract_compatibility_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "effective_config_artifact_id": "eca-golden-001",
+            "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "exact_replay": "true",
+            "git_commit": "abc1234",
+            "input_snapshot_fingerprint": "2f847242c9547e889e852f7a4dc132293b43ba0e72d766fa2b7a91166decd6a9",
+            "normalization_profile_hash": null,
+            "normalization_profile_ref": null,
+            "normalization_profile_version": null,
+            "pipeline_name": "chembl_activity",
+            "pipeline_version": "1.0.0",
+            "run_type": "incremental",
+            "silver_filter_compatibility_mode": "structural_only_auto_promote"
+          }
+        },
+        "checkpoint_identity": {
+          "contract_ref": "chembl.activity",
+          "contract_version": "1.2.0",
+          "effective_config_artifact_id": "eca-golden-001",
+          "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "execution_fingerprint": "fp-golden-001",
+          "input_snapshot_identity_fingerprint": "2f847242c9547e889e852f7a4dc132293b43ba0e72d766fa2b7a91166decd6a9",
+          "input_snapshot_ids": [
+            "snapshot-golden-001"
+          ],
+          "required_persistence_profile": "replay_ready"
+        },
+        "contract_ref": "chembl.activity",
+        "contract_version": "1.2.0",
+        "effective_config_artifact_id": "eca-golden-001",
+        "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+        "execution_fingerprint": "fp-golden-001",
+        "git_commit": "abc1234",
+        "identity_graph_complete": null,
+        "input_snapshot_content_hashes": [
+          "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        ],
+        "input_snapshot_identity_fingerprint": "2f847242c9547e889e852f7a4dc132293b43ba0e72d766fa2b7a91166decd6a9",
+        "input_snapshot_ids": [
+          "snapshot-golden-001"
+        ],
+        "lineage_fragment_ids": [],
+        "manifest_id": "manifest-golden-001",
+        "planned_artifact_count": null,
+        "published_artifact_count": 0,
+        "published_artifact_refs": [],
+        "required_persistence_profile": "replay_ready",
+        "run_id": "00000000-0000-0000-0000-000000000901",
+        "snapshot_status": "full",
+        "truth_boundary": "authoritative_replay_artifacts_only"
+      },
       "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
       "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
       "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",
@@ -1008,6 +1164,18 @@
           "diagnostics.source_revision_state"
         ],
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+        "governed_full_corpus_gate": {
+          "authoritative_truth_surface": "historical_replay_universe_closure_report",
+          "gate_kind": "universal_historical_exact_replay",
+          "reason": "authoritative_historical_replay_universe_artifact_unavailable",
+          "required_claims": {
+            "durable_evidence_coverage_claim": false,
+            "universal_claim": false
+          },
+          "satisfied": false,
+          "scope": "all_known_historical_runs",
+          "verdict": "gate_blocked"
+        },
         "lineage_closure_boundary": {
           "family": "chembl.activity",
           "reason": "family_within_supported_boundary",
@@ -1328,6 +1496,72 @@
   },
   "identity_graph": {
     "append_mode_semantic_sinks": [],
+    "authoritative_replay_dossier": {
+      "authoritative_replay_artifacts": [
+        "run_manifest",
+        "effective_config_artifact",
+        "lineage_fragment",
+        "layer_metadata",
+        "checkpoint_metadata",
+        "input_snapshot_envelope"
+      ],
+      "canonical_execution_identity": {
+        "execution_fingerprint": "fp-golden-001",
+        "payload": {
+          "contract_ref": "chembl.activity",
+          "contract_version": "1.2.0",
+          "dq_contract_compatibility_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "effective_config_artifact_id": "eca-golden-001",
+          "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "exact_replay": "true",
+          "git_commit": "abc1234",
+          "input_snapshot_fingerprint": "2f847242c9547e889e852f7a4dc132293b43ba0e72d766fa2b7a91166decd6a9",
+          "normalization_profile_hash": null,
+          "normalization_profile_ref": null,
+          "normalization_profile_version": null,
+          "pipeline_name": "chembl_activity",
+          "pipeline_version": "1.0.0",
+          "run_type": "incremental",
+          "silver_filter_compatibility_mode": "structural_only_auto_promote"
+        }
+      },
+      "checkpoint_identity": {
+        "contract_ref": "chembl.activity",
+        "contract_version": "1.2.0",
+        "effective_config_artifact_id": "eca-golden-001",
+        "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "execution_fingerprint": "fp-golden-001",
+        "input_snapshot_identity_fingerprint": "2f847242c9547e889e852f7a4dc132293b43ba0e72d766fa2b7a91166decd6a9",
+        "input_snapshot_ids": [
+          "snapshot-golden-001"
+        ],
+        "required_persistence_profile": "replay_ready"
+      },
+      "contract_ref": "chembl.activity",
+      "contract_version": "1.2.0",
+      "effective_config_artifact_id": "eca-golden-001",
+      "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+      "execution_fingerprint": "fp-golden-001",
+      "git_commit": "abc1234",
+      "identity_graph_complete": null,
+      "input_snapshot_content_hashes": [
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      ],
+      "input_snapshot_identity_fingerprint": "2f847242c9547e889e852f7a4dc132293b43ba0e72d766fa2b7a91166decd6a9",
+      "input_snapshot_ids": [
+        "snapshot-golden-001"
+      ],
+      "lineage_fragment_ids": [],
+      "manifest_id": "manifest-golden-001",
+      "planned_artifact_count": null,
+      "published_artifact_count": 0,
+      "published_artifact_refs": [],
+      "required_persistence_profile": "replay_ready",
+      "run_id": "00000000-0000-0000-0000-000000000901",
+      "snapshot_status": "full",
+      "truth_boundary": "authoritative_replay_artifacts_only"
+    },
     "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
     "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
     "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",

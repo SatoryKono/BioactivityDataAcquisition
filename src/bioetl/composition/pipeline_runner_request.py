@@ -18,7 +18,7 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 if TYPE_CHECKING:
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = [
     "build_pipeline_create_runner_request",

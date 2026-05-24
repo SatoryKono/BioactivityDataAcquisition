@@ -20,7 +20,7 @@ from bioetl.composition.factories.storage.resilience import (
     create_silver_atomic_retry_policy,
     create_silver_merge_resilience_policy,
 )
-from bioetl.infrastructure.config._base import Settings, get_settings
+from bioetl.infrastructure.config.settings_api import Settings, get_settings
 from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter

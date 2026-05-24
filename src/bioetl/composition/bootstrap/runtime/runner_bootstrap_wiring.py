@@ -28,7 +28,7 @@ if TYPE_CHECKING:
         CompositeSupportServices,
     )
     from bioetl.domain.ports import LockPort
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
 
 def bootstrap_composite_runner_via_wiring(

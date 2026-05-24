@@ -38,7 +38,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = [
     "ManifestControlPlaneRefs",
@@ -114,6 +114,7 @@ def validate_reproducible_sink_modes(
     *,
     yaml_config: object,
     strict_replay_requested: bool,
+    replay_capable_family: bool = False,
 ) -> None:
     """Validate append-mode semantic outputs against explicit idempotency policy."""
     sink = getattr(yaml_config, "sink", None)
@@ -154,12 +155,12 @@ def validate_reproducible_sink_modes(
             layer_config=layer_config,
             contract=contract,
         )
-    if strict_replay_requested and append_layers:
+    if (strict_replay_requested or replay_capable_family) and append_layers:
         details = ", ".join(
             f"sink.{layer_name}.mode=append" for layer_name in append_layers
         )
         raise RuntimeError(
-            "Strict reproducibility contexts cannot use append-mode Silver/Gold "
+            "Replay-capable pipeline families cannot use append-mode Silver/Gold "
             f"semantic outputs ({details}); use merge/upsert, overwrite, or SCD2 "
             "semantics with stable keys instead"
         )

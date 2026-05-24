@@ -10,7 +10,7 @@ from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import (
         PipelineYamlConfig,
         SinkLayerConfig,

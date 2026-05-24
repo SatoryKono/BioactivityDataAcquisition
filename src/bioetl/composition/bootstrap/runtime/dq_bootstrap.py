@@ -11,7 +11,7 @@ from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
 
 class _ConfigurableDQMonitor(DQMonitorPort, Protocol):

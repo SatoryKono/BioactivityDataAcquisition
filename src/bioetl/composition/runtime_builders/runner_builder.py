@@ -61,7 +61,7 @@ if TYPE_CHECKING:
         PipelineRunContext,
     )
     from bioetl.domain.filtering import InputFilterConfig
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import (
         PipelineYamlConfig,
     )

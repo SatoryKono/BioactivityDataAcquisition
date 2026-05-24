@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from bioetl.domain.ports import LoggerPort
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.config._base import Settings
+from bioetl.infrastructure.config.settings_api import Settings
 
 
 def resolve_mailto(kwargs: dict[str, object], settings: Settings | None) -> str:

@@ -19,7 +19,7 @@ from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManif
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.control_plane import RunLedgerEntry
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
 
 def resolve_exact_replay_cached_bronze_context(

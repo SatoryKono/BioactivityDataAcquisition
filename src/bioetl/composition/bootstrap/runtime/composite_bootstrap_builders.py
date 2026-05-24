@@ -95,7 +95,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.ports import LockPort, LoggerPort, TracingPort
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
     # Preserve the stable runtime-config facade in this module's type surface.
     _RuntimeConfigFacade = CompositeRuntimeConfig
