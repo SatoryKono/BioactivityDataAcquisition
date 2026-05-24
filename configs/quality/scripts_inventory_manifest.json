@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-24T14:21:04.702940+00:00",
+  "generated_at": "2026-05-24T16:49:41.102405+00:00",
   "summary": {
     "total_scripts": 396,
     "status_counts": {
@@ -6713,7 +6713,7 @@
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 426,
+          "line": 462,
           "source_group": "scripts",
           "text": "if should_run_preflight && [[ -f \"scripts/engineering/dev/pretest_guardrails.sh\" ]]; then"
         }
@@ -7029,7 +7029,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 93,
+      "reference_count": 94,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7108,13 +7108,13 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 558,
+          "line": 561,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 649,
+          "line": 652,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
@@ -9277,7 +9277,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 217,
+          "line": 220,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -9592,7 +9592,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 591,
+          "line": 594,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         },
@@ -9655,7 +9655,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 592,
+          "line": 595,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -9682,7 +9682,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 215,
+          "line": 218,
           "source_group": "docs",
           "text": "- `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`"
         },
@@ -11364,7 +11364,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": "Makefile",
@@ -11410,7 +11410,7 @@
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 486,
+          "line": 522,
           "source_group": "scripts",
           "text": "if [[ -f \"scripts/ops/launchers/codex/setup_plugins.sh\" ]]; then"
         }
@@ -11632,7 +11632,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 217,
+          "line": 220,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },

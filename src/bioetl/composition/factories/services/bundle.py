@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )
@@ -20,25 +19,6 @@ from bioetl.composition.factories.services._bundle_support import (
 )
 from bioetl.composition.factories.services._bundle_support import (
     create_pipeline_data_source as _create_pipeline_data_source_impl,
-)
-from bioetl.composition.factories.services.factory import BaseServicesFactory
-from bioetl.composition.factories.services.observability_api import (
-    _create_cached_bronze_data_source as _create_cached_bronze_data_source_impl,
-)
-from bioetl.composition.factories.services.observability_api import (
-    _create_data_source as _create_data_source_impl,
-)
-from bioetl.composition.factories.services.observability_api import (
-    create_shared_metrics,
-)
-from bioetl.composition.services.versioning import (
-    compute_config_hash as _compute_config_hash_direct,
-)
-from bioetl.infrastructure.config.converters import (
-    yaml_config_to_domain as _yaml_config_to_domain_direct,
-)
-from bioetl.infrastructure.config.pipeline_config_api import (
-    load_pipeline_config as _load_pipeline_config_direct,
 )
 
 if TYPE_CHECKING:
@@ -58,6 +38,7 @@ if TYPE_CHECKING:
     )
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+    from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
 
 __all__ = [
     "PipelineCreationInputs",
@@ -73,6 +54,10 @@ PipelineCreationInputs = _PipelineCreationInputs
 
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     """Load pipeline YAML configuration using the canonical config API seam."""
+    from bioetl.infrastructure.config.pipeline_config_api import (
+        load_pipeline_config as _load_pipeline_config_direct,
+    )
+
     return _load_pipeline_config_direct(pipeline_name)
 
 
@@ -81,6 +66,10 @@ def yaml_config_to_domain(
     resolved_dq_config: DQConfig | None = None,
 ) -> PipelineConfig:
     """Convert YAML pipeline config to domain config with optional DQ overrides."""
+    from bioetl.infrastructure.config.converters import (
+        yaml_config_to_domain as _yaml_config_to_domain_direct,
+    )
+
     return _yaml_config_to_domain_direct(
         yaml_config=yaml_config,
         resolved_dq_config=resolved_dq_config,
@@ -89,6 +78,10 @@ def yaml_config_to_domain(
 
 def compute_config_hash(config: PipelineYamlConfig | dict[str, object]) -> str:
     """Compute deterministic config hash for run-manifest and cache identity."""
+    from bioetl.composition.services.versioning import (
+        compute_config_hash as _compute_config_hash_direct,
+    )
+
     config_hash: str = _compute_config_hash_direct(config)
     return config_hash
 
@@ -96,6 +89,8 @@ def compute_config_hash(config: PipelineYamlConfig | dict[str, object]) -> str:
 def _resolve_service_bundle_dependencies(
     override: ServiceBundleDependencies | None = None,
 ) -> ServiceBundleDependencies:
+    from bioetl.composition.factories.services.factory import BaseServicesFactory
+
     return resolve_service_bundle_dependencies(
         override=override,
         load_pipeline_config_fn=load_pipeline_config,
@@ -110,8 +105,20 @@ def _extract_entity_type(pipeline_name: str) -> str | None:
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
 
 
-_create_data_source = _create_data_source_impl
-_create_cached_bronze_data_source = _create_cached_bronze_data_source_impl
+def _create_data_source(*args: object, **kwargs: object) -> object:
+    from bioetl.composition.factories.services.observability_api import (
+        _create_data_source as _create_data_source_impl,
+    )
+
+    return _create_data_source_impl(*args, **kwargs)
+
+
+def _create_cached_bronze_data_source(*args: object, **kwargs: object) -> object:
+    from bioetl.composition.factories.services.observability_api import (
+        _create_cached_bronze_data_source as _create_cached_bronze_data_source_impl,
+    )
+
+    return _create_cached_bronze_data_source_impl(*args, **kwargs)
 
 
 def _create_pipeline_data_source(
@@ -157,6 +164,10 @@ def build_pipeline_services(
     """Build the shared pipeline service bundle for one pipeline run."""
     deps = _resolve_service_bundle_dependencies(_deps)
     pipeline_config = config or deps.load_pipeline_config(pipeline_name)
+    from bioetl.composition.factories.services.observability_api import (
+        create_shared_metrics,
+    )
+
     shared_metrics = create_shared_metrics(
         settings=settings,
         base_services_factory=deps.base_services_factory,

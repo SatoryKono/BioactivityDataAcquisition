@@ -41,10 +41,10 @@ def test_config_root_resolver_allows_explicit_repo_override(tmp_path: Path) -> N
 def test_get_default_repo_root_points_to_repository_root() -> None:
     repo_root = get_default_repo_root()
 
-    assert repo_root.name == "BioactivityDataAcquisition2"
     assert (repo_root / "src").is_dir()
     assert (repo_root / "configs").is_dir()
     assert (repo_root / "pyproject.toml").is_file()
+    assert (repo_root / "src" / "bioetl").is_dir()
 
 
 def test_get_pipeline_config_falls_back_to_repo_root_when_cwd_is_src(

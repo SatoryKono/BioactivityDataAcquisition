@@ -15,4 +15,4 @@ from tests.testing_support.neo4j_memory_sync import (  # noqa: F401
     test_snapshot_invariants_require_workflow_job_parent_links,
 )
 
-pytestmark = pytest.mark.memory
+pytestmark = [pytest.mark.memory, pytest.mark.timeout(180)]

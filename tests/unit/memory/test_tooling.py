@@ -8,6 +8,7 @@ import os
 import shutil
 import subprocess
 import sys
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -18,6 +19,25 @@ from memory.tooling.refresh_all import refresh_all
 import pytest
 
 pytestmark = pytest.mark.repo_backed
+
+
+def _ignore_memory_package_runtime_payloads(
+    memory_source_root: Path,
+) -> Callable[[str, list[str]], set[str]]:
+    def _ignore(directory: str, names: list[str]) -> set[str]:
+        relative_dir = Path(directory).relative_to(memory_source_root)
+        ignored = {"__pycache__"} & set(names)
+        if relative_dir == Path("."):
+            ignored.update({"curated", "derived", "episodic"} & set(names))
+        if relative_dir == Path("rag"):
+            ignored.update({"manifests"} & set(names))
+        if relative_dir == Path("timeline"):
+            ignored.update({"events"} & set(names))
+        if relative_dir == Path("graph"):
+            ignored.update({"exports", "indexes", "projections"} & set(names))
+        return ignored
+
+    return _ignore
 
 
 def test_refresh_all_generates_rag_and_timeline_outputs(tmp_path: Path) -> None:
@@ -223,8 +243,13 @@ def test_memory_workflow_module_help_does_not_emit_runpy_warning(
     memory_local_tmp_path: Path,
 ) -> None:
     repo_root = Path(__file__).resolve().parents[3]
+    memory_source_root = repo_root / "src" / "memory"
     sandbox_src_root = memory_local_tmp_path / "src"
-    shutil.copytree(repo_root / "src" / "memory", sandbox_src_root / "memory")
+    shutil.copytree(
+        memory_source_root,
+        sandbox_src_root / "memory",
+        ignore=_ignore_memory_package_runtime_payloads(memory_source_root),
+    )
     env = os.environ.copy()
     pythonpath_entries = [str(sandbox_src_root)]
     if env.get("PYTHONPATH"):

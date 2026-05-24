@@ -3,15 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
-from bioetl.application.core.base import BasePipeline
-from bioetl.application.core.base_transformer import BaseTransformer
-from bioetl.application.core.base_transformer.types import (
-    TransformerDependencyContext,
-)
-from bioetl.application.core.pipeline_services import PipelineService
-from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.factories.pipeline._factory_method_control_plane import (
     apply_optional_control_plane_kwargs as _apply_optional_control_plane_kwargs,
 )
@@ -50,19 +43,28 @@ from bioetl.composition.factories.services.bundle import (
     build_pipeline_services,
     create_pipeline_with_services,
 )
-from bioetl.domain.behavior import EntityIdentityGenerator
-from bioetl.domain.filtering import (
-    GoldFilterConfig,
-    SilverFilterConfig,
-)
-from bioetl.domain.ports import (
-    ContractPolicyProtocol,
-    DataNormalizationPort,
-    MetricsPort,
-    PiiHasherPort,
-    TracingPort,
-)
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+
+if TYPE_CHECKING:
+    from bioetl.application.core.base import BasePipeline
+    from bioetl.application.core.base_transformer import BaseTransformer
+    from bioetl.application.core.base_transformer.types import (
+        TransformerDependencyContext,
+    )
+    from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.application.core.runner import PipelineRunner
+    from bioetl.domain.behavior import EntityIdentityGenerator
+    from bioetl.domain.filtering import (
+        GoldFilterConfig,
+        SilverFilterConfig,
+    )
+    from bioetl.domain.ports import (
+        ContractPolicyProtocol,
+        DataNormalizationPort,
+        MetricsPort,
+        PiiHasherPort,
+        TracingPort,
+    )
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 build_create_pipeline_with_services_request = (

@@ -25,6 +25,21 @@ from memory.validation import (
 )
 
 
+def _copy_minimal_memory_scaffold(memory_root: Path) -> None:
+    """Copy only contract resources needed by validator unit tests."""
+    for directory_name in ("policy", "catalog", "schemas"):
+        shutil.copytree(MEMORY_ROOT / directory_name, memory_root / directory_name)
+    for relative_dir in (
+        "curated/decisions",
+        "curated/incidents",
+        "curated/lessons",
+        "curated/domain_knowledge",
+        "episodic/sessions",
+        "episodic/summaries",
+    ):
+        (memory_root / relative_dir).mkdir(parents=True, exist_ok=True)
+
+
 def test_required_memory_resource_files_exist() -> None:
     assert [path.name for path in iter_policy_paths()] == list(REQUIRED_POLICY_FILES)
     assert [path.name for path in iter_catalog_paths()] == list(REQUIRED_CATALOG_FILES)
@@ -40,7 +55,7 @@ def test_memory_scaffold_validation_passes() -> None:
 
 def test_memory_scaffold_validation_accepts_valid_note_files(tmp_path: Path) -> None:
     memory_root = tmp_path / "memory"
-    shutil.copytree(MEMORY_ROOT, memory_root)
+    _copy_minimal_memory_scaffold(memory_root)
 
     write_markdown_note(
         memory_root / "curated" / "lessons" / "valid-lesson.md",
@@ -84,7 +99,7 @@ def test_memory_scaffold_validation_skips_episodic_body_reads(
     monkeypatch,
 ) -> None:
     memory_root = tmp_path / "memory"
-    shutil.copytree(MEMORY_ROOT, memory_root)
+    _copy_minimal_memory_scaffold(memory_root)
 
     write_markdown_note(
         memory_root / "episodic" / "sessions" / "valid-session.md",
@@ -123,7 +138,7 @@ def test_memory_scaffold_validation_bounds_default_episodic_scan(
     monkeypatch,
 ) -> None:
     memory_root = memory_local_tmp_path / "memory"
-    shutil.copytree(MEMORY_ROOT, memory_root)
+    _copy_minimal_memory_scaffold(memory_root)
 
     # Patch the limit to a small value to avoid network drive timeouts
     # while still testing the boundary behavior
@@ -158,7 +173,7 @@ def test_memory_scaffold_validation_bounds_default_episodic_scan(
 
 def test_memory_scaffold_validation_flags_invalid_note_files(tmp_path: Path) -> None:
     memory_root = tmp_path / "memory"
-    shutil.copytree(MEMORY_ROOT, memory_root)
+    _copy_minimal_memory_scaffold(memory_root)
 
     write_markdown_note(
         memory_root / "curated" / "lessons" / "broken-lesson.md",
@@ -189,7 +204,7 @@ def test_memory_scaffold_validation_flags_duplicate_curated_titles(
     tmp_path: Path,
 ) -> None:
     memory_root = tmp_path / "memory"
-    shutil.copytree(MEMORY_ROOT, memory_root)
+    _copy_minimal_memory_scaffold(memory_root)
 
     body = "# Lesson\n\n## Observation\n\n- Stable lesson\n\n## Reuse guidance\n\n- Reuse again later.\n"
     write_markdown_note(
@@ -233,7 +248,7 @@ def test_memory_scaffold_validation_flags_invalid_storage_policy(
     tmp_path: Path,
 ) -> None:
     memory_root = tmp_path / "memory"
-    shutil.copytree(MEMORY_ROOT, memory_root)
+    _copy_minimal_memory_scaffold(memory_root)
 
     (memory_root / "policy" / "storage.yaml").write_text(
         """version: 1
@@ -281,7 +296,7 @@ def test_memory_scaffold_validation_can_flag_working_tree_python_cache(
     tmp_path: Path,
 ) -> None:
     memory_root = tmp_path / "memory"
-    shutil.copytree(MEMORY_ROOT, memory_root)
+    _copy_minimal_memory_scaffold(memory_root)
     cache_file = memory_root / "__pycache__" / "query.cpython-312.pyc"
     cache_file.parent.mkdir(parents=True, exist_ok=True)
     cache_file.write_bytes(b"cache")
@@ -300,7 +315,7 @@ def test_memory_scaffold_validation_tolerates_root_init_bootstrap_cache(
     tmp_path: Path,
 ) -> None:
     memory_root = tmp_path / "memory"
-    shutil.copytree(MEMORY_ROOT, memory_root)
+    _copy_minimal_memory_scaffold(memory_root)
     cache_file = memory_root / "__pycache__" / "__init__.cpython-313.pyc"
     cache_file.parent.mkdir(parents=True, exist_ok=True)
     cache_file.write_bytes(b"cache")

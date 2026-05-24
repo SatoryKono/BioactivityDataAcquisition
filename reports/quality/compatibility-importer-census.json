@@ -814,7 +814,7 @@
       "public_src_importer_count": 2,
       "public_test_importer_count": 0,
       "private_src_importer_count": 2,
-      "private_test_importer_count": 0,
+      "private_test_importer_count": 1,
       "public_src_importers": [
         "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py",
         "src/bioetl/composition/factories/pipeline/checkpoint_metadata_helpers.py"

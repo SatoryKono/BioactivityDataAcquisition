@@ -21,4 +21,4 @@ from tests.testing_support.neo4j_memory_sync import (  # noqa: F401
     test_verify_expected_group_counts_uses_sync_run_for_targeted_relation_checks,
 )
 
-pytestmark = pytest.mark.memory
+pytestmark = [pytest.mark.memory, pytest.mark.timeout(180)]

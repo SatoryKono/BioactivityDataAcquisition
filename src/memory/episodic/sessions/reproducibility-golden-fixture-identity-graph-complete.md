@@ -1,8 +1,8 @@
 ---
-id: fix-reproducibility-golden-fixtures
-title: fix-reproducibility-golden-fixtures
-task_id: fix-reproducibility-golden-fixtures
-created_at: '2026-05-24T16:44:20Z'
+id: reproducibility-golden-fixture-identity-graph-complete
+title: update-reproducibility-golden-fixtures
+task_id: reproducibility-golden-fixture-identity-graph-complete
+created_at: '2026-05-24T16:45:34Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
@@ -15,7 +15,7 @@ query: reproducibility-golden-fixtures-identity-graph-complete
 
 ## Task
 
-- Title: fix-reproducibility-golden-fixtures
+- Title: update-reproducibility-golden-fixtures
 - Retrieval query: reproducibility-golden-fixtures-identity-graph-complete
 
 ## Retrieved context

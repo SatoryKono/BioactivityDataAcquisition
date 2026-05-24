@@ -742,6 +742,7 @@ def _expected_diagnostics_without_ledger(
             "within_launch_time_snapshot_boundary"
         ),
         "historical_live_run_upgrade_state": ("not_needed_snapshot_backed_at_launch"),
+        "identity_graph_complete": None,
         "replay_occurrence_kind": "launch_time_snapshot_backed_run",
         "post_capture_replayable_parent_supported": True,
         "post_capture_replayable_parent_boundary": (

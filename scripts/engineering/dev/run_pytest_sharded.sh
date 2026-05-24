@@ -653,7 +653,7 @@ start_log_tailer() {
 
     touch "$log_file"
     tail -n +1 -f "$log_file" 2>/dev/null | sed -u "s/^/[${shard}] /" &
-    printf '%s\n' "$!"
+    STARTED_LOG_TAILER_PID="$!"
     return 0
 }
 
@@ -699,10 +699,10 @@ run_wave() {
         local -a shard_extra_args=( $shard_extra_args_string )
         cmd+=("${paths[@]}")
         shard_workers="$(workers_for_shard "$shard")"
-        if [[ "$shard_workers" =~ ^[0-9]+$ ]] && (( shard_workers > 0 )); then
+        if [[ "$shard_workers" =~ ^[0-9]+$ ]] && (( shard_workers > 1 )); then
             cmd+=(-n "$shard_workers")
         fi
-        if [[ -n "$DIST_MODE" && "$shard_workers" =~ ^[0-9]+$ && "$shard_workers" -gt 0 ]]; then
+        if [[ -n "$DIST_MODE" && "$shard_workers" =~ ^[0-9]+$ && "$shard_workers" -gt 1 ]]; then
             cmd+=(--dist="$DIST_MODE")
         fi
         if [[ "$DISABLE_COVERAGE" == "1" ]]; then
@@ -729,7 +729,8 @@ run_wave() {
         : >"$log_file"
 
         if [[ "$TAIL_LOGS" == "1" && "$STREAM_LOGS" != "1" ]]; then
-            tail_pids+=("$(start_log_tailer "$shard" "$log_file")")
+            start_log_tailer "$shard" "$log_file"
+            tail_pids+=("$STARTED_LOG_TAILER_PID")
         fi
 
         if [[ "$STREAM_LOGS" == "1" ]]; then

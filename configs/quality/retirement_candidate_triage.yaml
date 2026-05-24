@@ -144,13 +144,6 @@ repo_wide_zero_import_classification:
       review_by: "2026-08-20"
       linked_issue: "#4541"
       rationale: CLI control-plane lifecycle bootstrap wiring is loaded through command/bootstrap registration rather than direct static imports.
-    - module_path: src/bioetl/composition/factories/storage/adapter.py
-      module_name: bioetl.composition.factories.storage.adapter
-      disposition: retain_compat_shim
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Legacy storage bundle shim remains intentionally available during the reviewed deprecation window and cannot be retired from zero-import evidence alone.
     - module_path: src/bioetl/composition/monitoring/deprecation_tracker.py
       module_name: bioetl.composition.monitoring.deprecation_tracker
       disposition: retain_canonical_owner_module
@@ -186,6 +179,48 @@ repo_wide_zero_import_classification:
       review_by: "2026-08-20"
       linked_issue: "#4541"
       rationale: PubChem standardization catalog remains the canonical normalization vocabulary owner module for runtime/domain access.
+    - module_path: src/bioetl/domain/ports/data_normalization.py
+      module_name: bioetl.domain.ports.data_normalization
+      disposition: retain_canonical_owner_module
+      reviewed_on: "2026-05-24"
+      review_by: "2026-08-20"
+      linked_issue: "#4541"
+      rationale: Data-normalization port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
+    - module_path: src/bioetl/domain/ports/data_source.py
+      module_name: bioetl.domain.ports.data_source
+      disposition: retain_canonical_owner_module
+      reviewed_on: "2026-05-24"
+      review_by: "2026-08-20"
+      linked_issue: "#4541"
+      rationale: Data-source port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
+    - module_path: src/bioetl/domain/ports/delta_reader.py
+      module_name: bioetl.domain.ports.delta_reader
+      disposition: retain_canonical_owner_module
+      reviewed_on: "2026-05-24"
+      review_by: "2026-08-20"
+      linked_issue: "#4541"
+      rationale: Delta-reader port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
+    - module_path: src/bioetl/domain/ports/export.py
+      module_name: bioetl.domain.ports.export
+      disposition: retain_canonical_owner_module
+      reviewed_on: "2026-05-24"
+      review_by: "2026-08-20"
+      linked_issue: "#4541"
+      rationale: Export port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
+    - module_path: src/bioetl/domain/ports/filtering.py
+      module_name: bioetl.domain.ports.filtering
+      disposition: retain_canonical_owner_module
+      reviewed_on: "2026-05-24"
+      review_by: "2026-08-20"
+      linked_issue: "#4541"
+      rationale: Filtering port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
+    - module_path: src/bioetl/domain/ports/idmapping.py
+      module_name: bioetl.domain.ports.idmapping
+      disposition: retain_canonical_owner_module
+      reviewed_on: "2026-05-24"
+      review_by: "2026-08-20"
+      linked_issue: "#4541"
+      rationale: ID-mapping port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
     - module_path: src/bioetl/domain/ports/logger_port.py
       module_name: bioetl.domain.ports.logger_port
       disposition: retain_canonical_owner_module
@@ -193,6 +228,41 @@ repo_wide_zero_import_classification:
       review_by: "2026-08-20"
       linked_issue: "#4541"
       rationale: LoggerPort remains the canonical domain protocol module even though consumers import it through package-root exports.
+    - module_path: src/bioetl/domain/ports/pii.py
+      module_name: bioetl.domain.ports.pii
+      disposition: retain_canonical_owner_module
+      reviewed_on: "2026-05-24"
+      review_by: "2026-08-20"
+      linked_issue: "#4541"
+      rationale: PII port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
+    - module_path: src/bioetl/domain/ports/publication_strategy.py
+      module_name: bioetl.domain.ports.publication_strategy
+      disposition: retain_canonical_owner_module
+      reviewed_on: "2026-05-24"
+      review_by: "2026-08-20"
+      linked_issue: "#4541"
+      rationale: Publication-strategy port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
+    - module_path: src/bioetl/domain/ports/resilience.py
+      module_name: bioetl.domain.ports.resilience
+      disposition: retain_canonical_owner_module
+      reviewed_on: "2026-05-24"
+      review_by: "2026-08-20"
+      linked_issue: "#4541"
+      rationale: Resilience port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
+    - module_path: src/bioetl/domain/ports/serialization.py
+      module_name: bioetl.domain.ports.serialization
+      disposition: retain_canonical_owner_module
+      reviewed_on: "2026-05-24"
+      review_by: "2026-08-20"
+      linked_issue: "#4541"
+      rationale: Serialization port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
+    - module_path: src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py
+      module_name: bioetl.domain.ports.workflow_foreign_key_reconciliation
+      disposition: retain_canonical_owner_module
+      reviewed_on: "2026-05-24"
+      review_by: "2026-08-20"
+      linked_issue: "#4541"
+      rationale: Workflow foreign-key reconciliation port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
     - module_path: src/bioetl/domain/transformations/_hashing_normalization.py
       module_name: bioetl.domain.transformations._hashing_normalization
       disposition: retain_compat_shim
@@ -214,13 +284,20 @@ repo_wide_zero_import_classification:
       review_by: "2026-08-20"
       linked_issue: "#4541"
       rationale: Quality transformations remain a canonical domain owner module behind package-root exports and strategy selection.
-    - module_path: src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py
-      module_name: bioetl.infrastructure.adapters.pubmed.pubmed_client
-      disposition: retain_compat_shim
-      reviewed_on: "2026-05-22"
+    - module_path: src/bioetl/domain/types/gold_contracts.py
+      module_name: bioetl.domain.types.gold_contracts
+      disposition: retain_canonical_owner_module
+      reviewed_on: "2026-05-24"
       review_by: "2026-08-20"
       linked_issue: "#4541"
-      rationale: Historical PubMed client shim remains intentionally retained for reviewed legacy imports.
+      rationale: Gold contract type definitions remain canonical domain owner modules even when imported through package-root type surfaces.
+    - module_path: src/bioetl/domain/types/gold_schema_policy.py
+      module_name: bioetl.domain.types.gold_schema_policy
+      disposition: retain_canonical_owner_module
+      reviewed_on: "2026-05-24"
+      review_by: "2026-08-20"
+      linked_issue: "#4541"
+      rationale: Gold schema policy type definitions remain canonical domain owner modules even when imported through package-root type surfaces.
     - module_path: src/bioetl/infrastructure/export/export_catalog_adapter.py
       module_name: bioetl.infrastructure.export.export_catalog_adapter
       disposition: retain_canonical_owner_module

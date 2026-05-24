@@ -7,25 +7,9 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core.wiring.factory import ShutdownSignal
-from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
-from bioetl.composition.factories.pipeline.construction_types import (
-    _SchemaBuilder,
-)
+from bioetl.composition.factories.pipeline.construction_types import _SchemaBuilder
 from bioetl.composition.factories.pipeline.control_plane_artifacts import (
     ControlPlaneArtifacts,
-)
-from bioetl.composition.factories.pipeline.run_context_factory import (
-    RunContextFactory,
-)
-from bioetl.composition.factories.pipeline.transformer_builder import (
-    TransformerBuilder,
-)
-from bioetl.composition.services.versioning import get_git_commit, get_pipeline_version
-from bioetl.infrastructure.config.contract_policy_loader import (
-    load_pipeline_contract_policy,
-)
-from bioetl.infrastructure.config.domain_config_resolver import (
-    resolve_domain_pipeline_config,
 )
 
 if TYPE_CHECKING:
@@ -35,6 +19,7 @@ if TYPE_CHECKING:
         BasePipeline,
         PipelineService,
     )
+    from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
     from bioetl.application.core.wiring.transformer import BaseTransformer
     from bioetl.composition.factories.datasource.data_source_factory import (
         DataSourceCreatorProtocol,
@@ -147,6 +132,18 @@ def _build_metadata_coordinator(
     extract_entity_type: EntityTypeExtractor,
 ) -> MetadataCoordinator:
     """Build the metadata coordinator from the canonical run context factory."""
+    from bioetl.application.services.lineage.metadata_coordinator import (
+        MetadataCoordinator,
+    )
+
+    from bioetl.composition.factories.pipeline.run_context_factory import (
+        RunContextFactory,
+    )
+    from bioetl.composition.services.versioning import (
+        get_git_commit,
+        get_pipeline_version,
+    )
+
     request = inputs.request
     run_context_factory = RunContextFactory(
         pipeline_name=inputs.pipeline_name,
@@ -185,6 +182,13 @@ def _build_pipeline_transformer(
     extract_entity_type: EntityTypeExtractor,
 ) -> BaseTransformer | None:
     """Build the runtime transformer while preserving the public factory seam."""
+    from bioetl.composition.factories.pipeline.transformer_builder import (
+        TransformerBuilder,
+    )
+    from bioetl.infrastructure.config.contract_policy_loader import (
+        load_pipeline_contract_policy,
+    )
+
     request = inputs.request
     return TransformerBuilder(
         provider=inputs.provider,
@@ -230,6 +234,10 @@ def _create_pipeline_with_services_impl(
         deps=deps,
         extract_entity_type=extract_entity_type,
     )
+    from bioetl.infrastructure.config.domain_config_resolver import (
+        resolve_domain_pipeline_config,
+    )
+
     domain_config = resolve_domain_pipeline_config(
         yaml_config,
         relaxed_dq=request.settings.pipeline.relaxed_dq,

@@ -1,19 +1,181 @@
 """Composition-facing seams for application-core assembly.
 
-This package groups the stable wiring APIs used by ``composition/`` so the
-top-level ``application.core`` family keeps fewer mixed-purpose modules.
-Legacy flat facades (``*_wiring_api.py``) remain for compatibility.
+This package groups the stable wiring APIs used by ``composition/`` while
+avoiding eager imports of the entire wiring surface during package
+initialization.
 """
 
 from __future__ import annotations
 
-from bioetl.application.core.wiring.factory import *  # noqa: F403
-from bioetl.application.core.wiring.factory import __all__ as _FACTORY_ALL
-from bioetl.application.core.wiring.registry import *  # noqa: F403
-from bioetl.application.core.wiring.registry import __all__ as _REGISTRY_ALL
-from bioetl.application.core.wiring.runtime import *  # noqa: F403
-from bioetl.application.core.wiring.runtime import __all__ as _RUNTIME_ALL
-from bioetl.application.core.wiring.transformer import *  # noqa: F403
-from bioetl.application.core.wiring.transformer import __all__ as _TRANSFORMER_ALL
+from importlib import import_module
+from typing import TYPE_CHECKING
 
-__all__ = [*_FACTORY_ALL, *_RUNTIME_ALL, *_TRANSFORMER_ALL, *_REGISTRY_ALL]
+if TYPE_CHECKING:
+    from bioetl.application.core.wiring.factory import (
+        BasePipeline,
+        BatchExecutor,
+        CheckpointRuntimeService,
+        LockRuntimeService,
+        PipelineRunner,
+        PipelineRunnerDependencies,
+        PipelineService,
+        PostrunService,
+        PreflightService,
+        ShutdownSignal,
+    )
+    from bioetl.application.core.wiring.registry import (
+        ActivityTransformer,
+        AssayParametersTransformer,
+        AssayTransformer,
+        CellLineTransformer,
+        CompoundRecordTransformer,
+        CrossRefPublicationTransformer,
+        GenericPipeline,
+        IDMappingTransformer,
+        MoleculeTransformer,
+        OpenAlexPublicationTransformer,
+        ProteinClassTransformer,
+        PubChemCompoundTransformer,
+        PubMedPublicationTransformer,
+        PublicationSimilarityTransformer,
+        PublicationTermTransformer,
+        PublicationTransformer,
+        SemanticScholarPublicationTransformer,
+        SubcellularFractionTransformer,
+        TargetComponentTransformer,
+        TargetTransformer,
+        TissueTransformer,
+        UniProtProteinTransformer,
+    )
+    from bioetl.application.core.wiring.runtime import (
+        BatchCheckpointRecoveryService,
+        BatchExecutionFSM,
+        BatchExecutionLifecycleService,
+        BatchExecutionRunService,
+        BatchExecutionStateService,
+        BatchExecutorDependencies,
+        BatchExtractionLoopService,
+        BatchMemoryManagerService,
+        BatchMetricsRecorderService,
+        BatchProcessingComponents,
+        BatchProcessingService,
+        BatchProcessingSupportService,
+        BatchProgressService,
+        BatchTracingManagerService,
+        BatchTransformer,
+        BatchWriter,
+        BatchWriterOptions,
+        ContentHashPolicyByVersion,
+        ContentHashVersionPolicy,
+        GoldFilterCallback,
+        GoldTransformCallback,
+        PipelineStorageProtocol,
+        QuarantineRuntimeService,
+        RecordNormalizationProcessor,
+        RecordProcessor,
+        RecordProcessorConfig,
+        TransformCallback,
+    )
+    from bioetl.application.core.wiring.transformer import (
+        DefaultContractPolicy,
+        NoOpStructuralPolicy,
+        StructuralPolicyProtocol,
+        TransformerDependencyContext,
+        build_structural_policy,
+    )
+
+_EXPORT_GROUPS = {
+    "bioetl.application.core.wiring.factory": (
+        "BasePipeline",
+        "BatchExecutor",
+        "CheckpointRuntimeService",
+        "LockRuntimeService",
+        "PipelineRunner",
+        "PipelineRunnerDependencies",
+        "PipelineService",
+        "PostrunService",
+        "PreflightService",
+        "ShutdownSignal",
+    ),
+    "bioetl.application.core.wiring.registry": (
+        "ActivityTransformer",
+        "AssayParametersTransformer",
+        "AssayTransformer",
+        "CellLineTransformer",
+        "CompoundRecordTransformer",
+        "CrossRefPublicationTransformer",
+        "GenericPipeline",
+        "IDMappingTransformer",
+        "MoleculeTransformer",
+        "OpenAlexPublicationTransformer",
+        "ProteinClassTransformer",
+        "PubChemCompoundTransformer",
+        "PubMedPublicationTransformer",
+        "PublicationSimilarityTransformer",
+        "PublicationTermTransformer",
+        "PublicationTransformer",
+        "SemanticScholarPublicationTransformer",
+        "SubcellularFractionTransformer",
+        "TargetComponentTransformer",
+        "TargetTransformer",
+        "TissueTransformer",
+        "UniProtProteinTransformer",
+    ),
+    "bioetl.application.core.wiring.runtime": (
+        "BatchCheckpointRecoveryService",
+        "BatchExecutionFSM",
+        "BatchExecutionLifecycleService",
+        "BatchExecutionRunService",
+        "BatchExecutionStateService",
+        "BatchExecutorDependencies",
+        "BatchExtractionLoopService",
+        "BatchMemoryManagerService",
+        "BatchMetricsRecorderService",
+        "BatchProcessingComponents",
+        "BatchProcessingService",
+        "BatchProcessingSupportService",
+        "BatchProgressService",
+        "BatchTracingManagerService",
+        "BatchTransformer",
+        "BatchWriter",
+        "BatchWriterOptions",
+        "ContentHashPolicyByVersion",
+        "ContentHashVersionPolicy",
+        "GoldFilterCallback",
+        "GoldTransformCallback",
+        "PipelineStorageProtocol",
+        "QuarantineRuntimeService",
+        "RecordNormalizationProcessor",
+        "RecordProcessor",
+        "RecordProcessorConfig",
+        "TransformCallback",
+    ),
+    "bioetl.application.core.wiring.transformer": (
+        "DefaultContractPolicy",
+        "NoOpStructuralPolicy",
+        "StructuralPolicyProtocol",
+        "TransformerDependencyContext",
+        "build_structural_policy",
+    ),
+}
+
+_EXPORT_MODULES = {
+    export_name: module_name
+    for module_name, export_names in _EXPORT_GROUPS.items()
+    for export_name in export_names
+}
+
+__all__ = list(_EXPORT_MODULES)
+
+
+def __getattr__(name: str) -> object:
+    module_name = _EXPORT_MODULES.get(name)
+    if module_name is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    value = getattr(import_module(module_name), name)
+    globals()[name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(__all__))
