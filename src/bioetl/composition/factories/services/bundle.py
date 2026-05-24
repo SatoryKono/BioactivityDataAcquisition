@@ -16,6 +16,7 @@ from bioetl.composition.factories.pipeline.creation_support import (
     _PipelineCreationInputs,
     _ServiceBundleDeps,
 )
+from bioetl.composition.factories.services import factory as _services_factory_module
 from bioetl.composition.factories.services._bundle_support import (
     ServiceBundleDependencies,
     resolve_service_bundle_dependencies,
@@ -23,7 +24,6 @@ from bioetl.composition.factories.services._bundle_support import (
 from bioetl.composition.factories.services._bundle_support import (
     create_pipeline_data_source as _create_pipeline_data_source_impl,
 )
-from bioetl.composition.factories.services import factory as _services_factory_module
 from bioetl.composition.factories.services.factory import BaseServicesFactory
 from bioetl.domain.config import DQConfig, PipelineConfig
 from bioetl.domain.context import CachedBronzeContext

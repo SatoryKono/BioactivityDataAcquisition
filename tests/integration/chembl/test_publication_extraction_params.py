@@ -11,6 +11,10 @@ from tests.integration.chembl.extraction_params_support import (
     InputFilterExtractionParamsSuiteBase,
 )
 
+# Ownership anchor for VCR metadata catalog reachability; pytest-vcr still
+# resolves this cassette from the test class and method name automatically.
+VCR_CASSETTE_NAME = "TestPublicationExtractionParams.test_publication_filtered_api_request.yaml"
+
 
 PUBLICATION_CASE = ExtractionParamsCase(
     entity_type="publication",

@@ -389,14 +389,7 @@ def _architecture_skip_count(request: pytest.FixtureRequest) -> int:
     if len(architecture_items) >= 50:
         return _count_skip_markers(architecture_items)
 
-    cache_key = _architecture_skip_cache_key(Path.cwd())
-    cached_skipped = _cached_architecture_skip_count(request, cache_key)
-    if cached_skipped is not None:
-        return cached_skipped
-
-    skipped = _collect_architecture_skip_count(Path.cwd())
-    request.config.cache.set(cache_key, skipped)
-    return skipped
+    return _collect_architecture_skip_count(Path.cwd())
 
 
 @pytest.mark.timeout(240)
