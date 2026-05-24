@@ -98,6 +98,9 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
         assert run_type.get("current", {}).get("value") == "$__all"
 
     provider = _variables("bioetl-provider-health-v2.json")
+    assert provider["workflow"].get("multi") is False
+    assert provider["workflow"].get("includeAll") is True
+    assert provider["workflow"].get("current", {}).get("value") == "$__all"
     assert provider["pipeline"].get("multi") is False
     assert provider["pipeline"].get("includeAll") is False
     assert provider["pipeline"].get("current", {}).get("value") == "unknown"

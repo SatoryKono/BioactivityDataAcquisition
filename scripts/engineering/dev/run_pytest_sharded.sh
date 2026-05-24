@@ -38,6 +38,7 @@ JUNIT_DIR="$DEFAULT_JUNIT_DIR"
 TEST_HEALTH_SUITE="${BIOETL_PYTEST_SHARDED_TEST_HEALTH_SUITE:-coverage-verify}"
 TEST_HEALTH_REPORTS_DIR="${BIOETL_PYTEST_SHARDED_TEST_HEALTH_REPORTS_DIR:-$DEFAULT_TEST_HEALTH_REPORTS_DIR}"
 TEST_HEALTH_ROLLUP_MD="${BIOETL_PYTEST_SHARDED_TEST_HEALTH_ROLLUP_MD:-$TEST_HEALTH_REPORTS_DIR/rollup.md}"
+TEST_HEALTH_TIMEOUT_SECONDS="${BIOETL_PYTEST_SHARDED_TEST_HEALTH_TIMEOUT_SECONDS:-60}"
 FORCE_MOUNTED_COVERAGE="${BIOETL_PYTEST_SHARDED_FORCE_COVERAGE:-0}"
 STREAM_LOGS=0
 TAIL_LOGS=0
@@ -848,7 +849,8 @@ collect_test_health_summary() {
     local command_display
     command_display="$(shell_join bash scripts/engineering/dev/run_pytest_sharded.sh "$@")"
 
-    "$python_bin" -m scripts.engineering.qa test-health \
+    local -a test_health_cmd=(
+        "$python_bin" -m scripts.engineering.qa test-health
         --suite "$TEST_HEALTH_SUITE" \
         --run-id "$run_id" \
         --reports-dir "$TEST_HEALTH_REPORTS_DIR" \
@@ -856,10 +858,20 @@ collect_test_health_summary() {
         --command "$command_display" \
         --exit-code "$exit_code" \
         --last 30 \
-        --markdown-out "$TEST_HEALTH_ROLLUP_MD" || {
+        --markdown-out "$TEST_HEALTH_ROLLUP_MD"
+    )
+
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "${TEST_HEALTH_TIMEOUT_SECONDS}s" "${test_health_cmd[@]}" || {
+            echo "[run_pytest_sharded][warn] Test-health summary generation failed or timed out." >&2
+            return 0
+        }
+    else
+        "${test_health_cmd[@]}" || {
             echo "[run_pytest_sharded][warn] Test-health summary generation failed." >&2
             return 0
         }
+    fi
     return 0
 }
 

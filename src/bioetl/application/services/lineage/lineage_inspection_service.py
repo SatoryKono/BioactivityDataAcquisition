@@ -199,10 +199,11 @@ class LineageInspectionService:
         semantic: bool = False,
     ) -> LineageFragmentInspectionResult:
         """Resolve one lineage fragment by occurrence id by default."""
-        if semantic:
-            fragment = self.lineage_store.get(fragment_id)
-        else:
-            fragment = self.lineage_store.get_occurrence(fragment_id)
+        fragment = (
+            self.lineage_store.get(fragment_id)
+            if semantic
+            else self.lineage_store.get_occurrence(fragment_id)
+        )
         if fragment is None:
             raise ValueError(
                 f"Lineage fragment not found for identifier: {fragment_id}"

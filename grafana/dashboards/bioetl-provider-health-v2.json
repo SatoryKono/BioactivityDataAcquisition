@@ -2435,9 +2435,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "text": "unknown",
-          "value": "unknown"
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": {
           "type": "prometheus",
@@ -2446,7 +2446,7 @@
         "definition": "label_values(bioetl_workflow_runs_total, workflow)",
         "description": "Shared operator context: workflow evidence selector. This selector does not imply exact current-status intersection unless the dashboard explicitly documents that semantics.",
         "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "label": "Workflow",
         "multi": false,
         "name": "workflow",
