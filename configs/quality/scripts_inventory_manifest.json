@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-22T20:03:18.182133+00:00",
+  "generated_at": "2026-05-24T13:33:28.575889+00:00",
   "summary": {
-    "total_scripts": 395,
+    "total_scripts": 396,
     "status_counts": {
-      "active": 358,
+      "active": 359,
       "supporting": 37
     },
     "reference_group_coverage": {
@@ -12,9 +12,9 @@
       "build": 3,
       "ci": 58,
       "docs": 152,
-      "scripts": 315,
+      "scripts": 316,
       "skills": 8,
-      "tests": 159
+      "tests": 160
     }
   },
   "scripts": [
@@ -305,7 +305,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 52,
+          "line": 55,
           "source_group": "scripts",
           "text": "\"diagnose-codex-wsl\": \"../ai/codex/diagnose_wsl.sh\","
         },
@@ -1053,7 +1053,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 53,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"setup-agents\": \"../ai/codex/setup_agents.sh\","
         },
@@ -1119,7 +1119,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 55,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"setup-skills\": \"../ai/codex/setup_skills.sh\","
         },
@@ -1659,7 +1659,7 @@
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 52,
+          "line": 54,
           "source_group": "scripts",
           "text": "For MCP operational tooling, see [scripts/ai/mcp/__main__.py](/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/__main__.py)."
         }
@@ -9122,7 +9122,7 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 205,
+          "line": 215,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }
@@ -9328,7 +9328,7 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 234,
+          "line": 237,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_closure_campaign.py --require-global-claim`"
         },
@@ -9381,19 +9381,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 13,
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 231,
+          "line": 234,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py` persists"
         },
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 237,
+          "line": 240,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-universal-claim`"
+        },
+        {
+          "path": "docs/04-reference/contracts/run-manifest-ledger.md",
+          "line": 243,
+          "source_group": "docs",
+          "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-durable-evidence-coverage`"
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
@@ -9424,12 +9430,6 @@
           "line": 24220,
           "source_group": "docs",
           "text": "<li><code>scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-universal-claim</code>"
-        },
-        {
-          "path": "docs/site/05-operations/runbooks/run-manifest-inspection/index.html",
-          "line": 23859,
-          "source_group": "docs",
-          "text": "<a id=\"__codelineno-6-8\" name=\"__codelineno-6-8\" href=\"#__codelineno-6-8\"></a>./.venv/bin/python<span class=\"w\"> </span>scripts/engineering/qa/run_historical_replay_universe_campaign.py<span class=\"w\""
         }
       ]
     },
@@ -10582,13 +10582,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 10,
       "references": [
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
           "line": 174,
           "source_group": "docs",
           "text": "| `scripts.ops`                     | `uv run python -m scripts.ops`                     | Ops: salt rotation, Grafana, deploy         |"
+        },
+        {
+          "path": "docs/05-operations/01-monitoring-guide.md",
+          "line": 502,
+          "source_group": "docs",
+          "text": "python -m scripts.ops check-observability-ports --json"
+        },
+        {
+          "path": "docs/05-operations/01-monitoring-guide.md",
+          "line": 560,
+          "source_group": "docs",
+          "text": "1. Запустите `python -m scripts.ops check-observability-ports --json`."
         },
         {
           "path": "docs/site/00-project/ai/memory/agent-memory/index.html",
@@ -10610,21 +10622,15 @@
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 31,
+          "line": 24,
           "source_group": "scripts",
-          "text": "- `python -m scripts.ops codex-headless`, `diagnose-codex-wsl`, `setup-agents`,"
+          "text": "`python -m scripts.ops check-observability-ports --json`"
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 52,
+          "line": 33,
           "source_group": "scripts",
-          "text": "For MCP operational tooling, see [scripts/ai/mcp/__main__.py](/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/__main__.py)."
-        },
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 15,
-          "source_group": "tests",
-          "text": "content = Path(\"scripts/ops/__main__.py\").read_text(encoding=\"utf-8\")"
+          "text": "- `python -m scripts.ops codex-headless`, `diagnose-codex-wsl`, `setup-agents`,"
         }
       ]
     },
@@ -11530,7 +11536,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 59,
+          "line": 62,
           "source_group": "scripts",
           "text": "\"delete-branches\": \"maintenance/git/delete-stale-branches.sh\","
         }
@@ -11545,7 +11551,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 48,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"triage-issues\": \"maintenance/github/triage_cleanup_issue_wave.sh\","
         }
@@ -11560,7 +11566,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 47,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"update-issue\": \"maintenance/github/update_github_issue.sh\","
         }
@@ -11599,7 +11605,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 40,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"salt-rotate\": \"maintenance/security/salt_rotate.py\","
         }
@@ -11707,9 +11713,30 @@
         },
         {
           "path": "tests/architecture/test_test_structural_debt.py",
-          "line": 19,
+          "line": 20,
           "source_group": "tests",
           "text": "\"tests/testing_support/neo4j_memory_sync.py::test_snapshot_contains_core_repo_surfaces\": 295,"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/observability/check_published_observability_endpoints.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 43,
+          "source_group": "scripts",
+          "text": "\"check-observability-ports\": \"observability/check_published_observability_endpoints.py\","
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_check_published_observability_endpoints.py",
+          "line": 117,
+          "source_group": "tests",
+          "text": "expected_target=\"observability/check_published_observability_endpoints.py\","
         }
       ]
     },
@@ -11722,7 +11749,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 41,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"rerender-grafana\": \"observability/grafana/rerender_grafana_screenshots.py\","
         },
@@ -11779,7 +11806,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 58,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"deploy\": \"runtime/deploy/deploy-bioetl.sh\","
         }
@@ -12265,7 +12292,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 56,
+          "line": 59,
           "source_group": "scripts",
           "text": "\"check-skills\": \"support/skills/check_ai_skills_layout.sh\","
         }
