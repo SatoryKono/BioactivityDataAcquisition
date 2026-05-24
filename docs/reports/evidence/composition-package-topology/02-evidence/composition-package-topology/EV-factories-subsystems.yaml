@@ -1,0 +1,18 @@
+id: EV-composition-package-topology-factories-is-subdivided-into-datasource-dq-pipeline-services-and-storage-subsystems
+pillar: composition-package-topology
+source:
+  type: experiment
+  ref: "docs/reports/evidence/composition-package-topology/02-evidence/composition-package-topology/RAW-composition-package-topology-2026-03-20.md; find src/bioetl/composition/factories -maxdepth 2 -type d | sort"
+  retrieved_at: 2026-03-20
+claim: "The `factories` package is the largest composition subtree and is subdivided into `datasource`, `dq`, `pipeline`, `services`, and `storage` subpackages."
+quote: "src/bioetl/composition/factories/datasource ... dq ... pipeline ... services ... storage"
+confidence: 0.99
+assumptions:
+  - "The visible subpackages correspond to the active factory responsibilities used by composition wiring."
+notes: "This package concentration suggests factory wiring is intentionally centralized under composition rather than scattered across application or infrastructure."
+tags:
+  - composition
+  - factories
+  - datasource
+  - pipeline
+  - storage
