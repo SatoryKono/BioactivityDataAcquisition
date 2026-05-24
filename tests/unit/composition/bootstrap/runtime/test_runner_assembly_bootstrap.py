@@ -8,8 +8,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-_VALID_RUN_ID = "12345678-1234-5678-1234-567812345678"
-
 from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
     CompositeSupportServices,
 )
@@ -21,6 +19,8 @@ from bioetl.composition.bootstrap.runtime.runner_assembly import (
     create_composite_runner,
     create_composite_runner_service,
 )
+
+_VALID_RUN_ID = "12345678-1234-5678-1234-567812345678"
 
 
 def _runtime_bundle(
