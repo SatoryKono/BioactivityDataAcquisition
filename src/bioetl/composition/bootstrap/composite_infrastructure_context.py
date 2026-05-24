@@ -5,8 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from bioetl.domain.ports.observability import LoggerPort, MetricsPort, TracingPort
-from bioetl.domain.ports.runtime import ClockPort, LockPort
+from bioetl.domain.ports import (
+    ClockPort,
+    LockPort,
+    LoggerPort,
+    MetricsPort,
+    TracingPort,
+)
 from bioetl.infrastructure.config.settings_api import Settings
 
 

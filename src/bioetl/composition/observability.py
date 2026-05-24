@@ -16,8 +16,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports.audit import AuditPort
-from bioetl.domain.ports.observability import LoggerPort, MetricsPort, TracingPort
+from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DQMonitorPort

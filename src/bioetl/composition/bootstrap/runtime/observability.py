@@ -8,8 +8,8 @@ from uuid import UUID
 
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.exceptions import MetricsServerError
-from bioetl.domain.ports.audit import AuditPort
-from bioetl.domain.ports.observability import (
+from bioetl.domain.ports import (
+    AuditPort,
     DQMonitorPort,
     LoggerPort,
     MetricsPort,
