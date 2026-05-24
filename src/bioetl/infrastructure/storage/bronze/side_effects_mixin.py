@@ -17,6 +17,7 @@ from bioetl.infrastructure.storage.bronze.reporting_helpers import (
     build_bronze_audit_entry,
 )
 from bioetl.infrastructure.storage.lineage_persistence import (
+    lineage_fragment_publication_required,
     persist_lineage_fragment_if_present,
 )
 
@@ -126,6 +127,9 @@ class BronzeWriterSideEffectsMixin:
             metrics=getattr(host, "_metrics", None),
             pipeline_name=f"{provider}_{entity}",
             layer="bronze",
+            required=lineage_fragment_publication_required(
+                getattr(host, "_metadata_coordinator", None)
+            ),
         )
         host.logger.debug(
             "bronze_metadata_written",

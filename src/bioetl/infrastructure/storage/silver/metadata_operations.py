@@ -25,6 +25,7 @@ from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.lineage_persistence import (
     emit_composite_source_selection_metrics,
     emit_lineage_refs_missing_metric,
+    lineage_fragment_publication_required,
     persist_lineage_fragment_if_present,
     resolve_metadata_and_lineage_fragment,
 )
@@ -274,6 +275,9 @@ async def _execute_prepared_silver_metadata_write_operation(
         metrics=getattr(host, "_metrics", None),
         pipeline_name=f"{prepared.provider_name}_{prepared.entity_name}",
         layer="silver",
+        required=lineage_fragment_publication_required(
+            getattr(host, "_metadata_coordinator", None)
+        ),
     )
     _emit_prepared_silver_metadata_metrics(host, prepared)
 

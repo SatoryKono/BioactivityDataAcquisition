@@ -58,6 +58,21 @@ def _load_retained_entrypoint_paths(repo_root: Path) -> set[str]:
     return {str(row["path"]) for row in rows if isinstance(row, dict) and "path" in row}
 
 
+def _resolve_snapshot_date(
+    triage_payload: dict[str, Any],
+    *,
+    requested_snapshot_date: str | None,
+) -> str:
+    if isinstance(requested_snapshot_date, str) and requested_snapshot_date.strip():
+        return requested_snapshot_date
+    zero_import_review = triage_payload.get("repo_wide_zero_import_review", {})
+    if isinstance(zero_import_review, dict):
+        last_reviewed = zero_import_review.get("last_reviewed")
+        if isinstance(last_reviewed, str) and last_reviewed.strip():
+            return last_reviewed
+    return date.today().isoformat()
+
+
 def _build_review_window(
     triage_payload: dict[str, Any],
     *,
@@ -220,7 +235,10 @@ def build_dead_code_inventory(
         )
         repo_wide_zero_import_candidates.append(enriched)
 
-    resolved_snapshot_date = snapshot_date or date.today().isoformat()
+    resolved_snapshot_date = _resolve_snapshot_date(
+        triage_payload,
+        requested_snapshot_date=snapshot_date,
+    )
     review_window = _build_review_window(
         triage_payload,
         snapshot_date=resolved_snapshot_date,

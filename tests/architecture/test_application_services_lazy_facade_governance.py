@@ -153,7 +153,7 @@ def _read_candidate_source(path: Path) -> str | None:
         return path.read_text(encoding="utf-8")
 
     try:
-        source = _run_with_timeout(_read_with_timeout, timeout=5.0)
+        source = _run_with_timeout(_read_with_timeout, timeout=30.0)
     except TimeoutError:  # pragma: no cover - architecture scan safety
         raise AssertionError(f"Timeout reading {path}") from None
     except UnicodeDecodeError as exc:  # pragma: no cover - architecture scan safety

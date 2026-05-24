@@ -28,8 +28,7 @@ if TYPE_CHECKING:
     )
     from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.domain.context import PipelineRunContext
-    from bioetl.domain.ports import ClockPort
-    from bioetl.domain.ports import ExecutionMetricsRunnerPort
+    from bioetl.domain.ports import ClockPort, ExecutionMetricsRunnerPort
 
 _PIPELINE_EXECUTION_MODULE = "bioetl.composition._pipeline_execution"
 _PIPELINE_RUNNER_MODELS_MODULE = (

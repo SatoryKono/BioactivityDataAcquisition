@@ -17,6 +17,7 @@ from bioetl.infrastructure.storage.gold.metadata_payloads import (
 from bioetl.infrastructure.storage.lineage_persistence import (
     emit_composite_source_selection_metrics,
     emit_lineage_refs_missing_metric,
+    lineage_fragment_publication_required,
     persist_lineage_fragment_if_present,
     resolve_metadata_and_lineage_fragment,
 )
@@ -180,6 +181,9 @@ async def _persist_gold_metadata_write(
         metrics=getattr(host, "_metrics", None),
         pipeline_name=f"{prepared.provider_name}_{prepared.entity_name}",
         layer="gold",
+        required=lineage_fragment_publication_required(
+            getattr(host, "_metadata_coordinator", None)
+        ),
     )
     pipeline_name = f"{prepared.provider_name}_{prepared.entity_name}"
     if isinstance(prepared.request, _GoldMetadataWriteRequest):

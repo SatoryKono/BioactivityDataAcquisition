@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.application.core.record_processor_config import RecordProcessorConfig
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
+from bioetl.application.core.record_processor_config import RecordProcessorConfig
 
 
 def build_default_normalization_processor(
