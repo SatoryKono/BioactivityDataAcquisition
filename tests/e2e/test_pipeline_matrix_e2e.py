@@ -32,8 +32,9 @@ from bioetl.domain.exceptions.network import ExternalServiceError
 
 from .conftest import (
     assert_bronze_files_exist,
+    assert_bronze_metadata_files_exist,
+    assert_run_manifest_exists,
     assert_silver_table_has_records,
-    build_e2e_skip_reason,
     create_test_context,
     is_external_healthcheck_playback_failure,
     run_pipeline_or_skip_transient,
@@ -222,6 +223,9 @@ PIPELINE_CASE_BY_NAME: dict[str, PipelineE2ECase] = {
 MATRIX_REPLAY_DEFERRED_PIPELINES: frozenset[str] = frozenset(
     {
         "chembl_tissue",
+        "chembl_assay_parameters",
+        "chembl_protein_class",
+        "chembl_target_component",
         "composite_activity",
         "composite_assay",
         "composite_molecule",
@@ -495,10 +499,11 @@ async def test_pipeline_matrix_smoke(
                     detail=str(exc),
                 )
             )
-        pytest.skip(
-            build_e2e_skip_reason(
-                "INFRA_FLAKY_CASSETTE_EMPTY",
-                pipeline_name=pipeline_case.pipeline_name,
-                detail=str(exc),
-            )
+        metadata_files = assert_bronze_metadata_files_exist(
+            e2e_data_dir,
+            pipeline_case.provider,
+            pipeline_case.entity,
         )
+        manifest = assert_run_manifest_exists(e2e_data_dir, ctx.run_id)
+        assert metadata_files
+        assert manifest["run_id"] == str(ctx.run_id)
