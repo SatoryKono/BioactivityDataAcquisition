@@ -293,7 +293,8 @@ docs/reports/evidence/documentation-internal-surface-governance/02-evidence/inte
 .env.local
 .env.local
 
-!scripts/docs/build/mkdocs_build.py
+!scripts/docs/build/
+!scripts/docs/build/**
 !/docs/99-archive/
 /docs/99-archive/*
 !/docs/99-archive/legacy-05-architecture/
