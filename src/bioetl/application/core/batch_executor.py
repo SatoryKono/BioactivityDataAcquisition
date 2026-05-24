@@ -43,9 +43,9 @@ _SHARED_FAILURE_POLICY = _RF005_SHARED_FAILURE_POLICY
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
-    from bioetl.application.core.config import RecordProcessorConfig
-    from bioetl.application.core.pipeline_service_protocols import (
-        PipelineServicesProtocol,
+    from bioetl.application.core.record_processor_config import RecordProcessorConfig
+    from bioetl.application.core.pipeline_aux_service_protocols import (
+        PipelineExecutionServicesProtocol,
     )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort
@@ -81,7 +81,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
 
     def __init__(
         self,
-        services: PipelineServicesProtocol,
+        services: PipelineExecutionServicesProtocol,
         context: PipelineContext,
         config: RecordProcessorConfig,
         dependencies: BatchExecutorDependencies,

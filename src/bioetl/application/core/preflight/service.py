@@ -20,8 +20,8 @@ from bioetl.domain.types import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.core.pipeline_service_protocols import (
-        PipelineServicesProtocol,
+    from bioetl.application.core.pipeline_runtime_service_protocols import (
+        PipelineHealthServicesProtocol,
     )
     from bioetl.application.observability.observer import PipelineObserver
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
@@ -40,7 +40,7 @@ class _PreflightExecutionHostProtocol(Protocol):
     """Runner attributes required by preflight execution."""
 
     _runtime: RuntimeConfig
-    _services: PipelineServicesProtocol
+    _services: PipelineHealthServicesProtocol
     _preflight_service: PreflightService
     _observer: PipelineObserver
 
@@ -96,7 +96,7 @@ class PreflightService:
 
     async def validate_infrastructure(
         self,
-        services: PipelineServicesProtocol,
+        services: PipelineHealthServicesProtocol,
         *,
         raise_on_unhealthy: bool = True,
     ) -> HealthReport:
@@ -160,7 +160,7 @@ class PreflightService:
 
     async def validate_preflight(
         self,
-        services: PipelineServicesProtocol,
+        services: PipelineHealthServicesProtocol,
         runtime: RuntimeConfig,
         bronze_path: str,
         silver_path: str,

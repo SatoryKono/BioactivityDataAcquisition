@@ -1,26 +1,25 @@
 ---
 id: codex-mcp-setup
-title: Configure Codex MCP
+title: Configure MCP for Codex runtime
 task_id: codex-mcp-setup
-created_at: '2026-05-22T08:02:23Z'
+created_at: '2026-05-24T12:07:13Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- scripts/ai/codex/helper/ensure-mcp.sh
-summary: Verified the Codex MCP configuration, ran the repo-managed ensure step, and
-  confirmed the registered MCP servers plus the managed Codex config block point at
-  the current repository.
+- .mcp.json
+summary: Verified BioETL MCP workspace and global Codex MCP configuration are already
+  synchronized; no file changes were required.
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Configure Codex MCP
+- Title: Configure MCP for Codex runtime
 
 ## Outcome
 
-- Verified the Codex MCP configuration, ran the repo-managed ensure step, and confirmed the registered MCP servers plus the managed Codex config block point at the current repository.
+- Verified BioETL MCP workspace and global Codex MCP configuration are already synchronized; no file changes were required.
 
 ## Lessons learned
 

@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from scripts.engineering.qa.report_module_coverage_inventory import (
-    build_module_coverage_inventory,
+    compute_source_tree_sha256,
     main as module_coverage_inventory_main,
 )
 from scripts.engineering.qa.file_discovery import discover_files
@@ -111,12 +111,9 @@ def test_module_coverage_inventory_covers_every_source_module() -> None:
 @pytest.mark.architecture
 def test_module_coverage_inventory_source_tree_hash_is_current() -> None:
     committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
-    rebuilt = build_module_coverage_inventory(
-        repo_root=ROOT,
-        snapshot_date=str(committed["snapshot_date"]),
+    assert committed["source_tree_sha256"] == compute_source_tree_sha256(
+        repo_root=ROOT
     )
-
-    assert committed["source_tree_sha256"] == rebuilt["source_tree_sha256"]
 
 
 @pytest.mark.architecture
@@ -216,6 +213,11 @@ def test_test_matrix_declares_module_coverage_inventory_contract() -> None:
     assert inventory["canonical_lane"] == "coverage-verify"
     assert inventory["generator"] == (
         "scripts/engineering/qa/report_module_coverage_inventory.py"
+    )
+    assert inventory["authoritative_status_source"] == "live_ci_coverage_verify"
+    assert (
+        inventory["committed_artifact_refresh_policy"]
+        == "green_coverage_verify_run_only"
     )
     assert inventory["artifact"] == "reports/quality/module-coverage-inventory.json"
     assert inventory["coverage_xml"] == "reports/coverage/coverage.xml"

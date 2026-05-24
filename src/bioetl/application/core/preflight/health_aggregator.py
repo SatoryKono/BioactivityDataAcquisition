@@ -20,8 +20,8 @@ from bioetl.domain.exceptions import InfrastructureError
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
 
 if TYPE_CHECKING:
-    from bioetl.application.core.pipeline_service_protocols import (
-        PipelineServicesProtocol,
+    from bioetl.application.core.pipeline_runtime_service_protocols import (
+        PipelineHealthServicesProtocol,
     )
     from bioetl.domain.ports import (
         ClockPort,
@@ -53,7 +53,7 @@ class HealthAggregator:
         self._health_check_mode = health_check_mode
         self._clock = clock
 
-    async def check_all(self, services: PipelineServicesProtocol) -> HealthReport:
+    async def check_all(self, services: PipelineHealthServicesProtocol) -> HealthReport:
         """Check storage and data source health in parallel.
 
         Args:
@@ -86,7 +86,7 @@ class HealthAggregator:
 
     async def _check_storage(
         self,
-        services: PipelineServicesProtocol,
+        services: PipelineHealthServicesProtocol,
     ) -> ComponentHealthResult:
         component = "storage"
         start_time = time.perf_counter()
@@ -110,7 +110,7 @@ class HealthAggregator:
         return result
 
     async def _check_data_source(
-        self, services: PipelineServicesProtocol
+        self, services: PipelineHealthServicesProtocol
     ) -> ComponentHealthResult:
         """Check data source health, preferring enhanced check_health API."""
         component = "data_source"

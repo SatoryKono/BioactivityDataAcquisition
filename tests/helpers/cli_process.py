@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
 import os
 import subprocess
 import sys
+from types import ModuleType
+from typing import Callable
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -62,6 +66,42 @@ def run_python_cli(
         env=env,
         timeout=timeout,
     )
+
+
+def run_main_in_process(
+    main_fn: Callable[[list[str] | None], int | None],
+    *args: str,
+) -> subprocess.CompletedProcess[str]:
+    """Run one main(argv) function in-process and capture stdout/stderr."""
+    stdout = StringIO()
+    stderr = StringIO()
+    returncode = 0
+    with redirect_stdout(stdout), redirect_stderr(stderr):
+        try:
+            result = main_fn(list(args))
+        except SystemExit as exc:
+            code = exc.code
+            returncode = code if isinstance(code, int) else (0 if code is None else 1)
+        else:
+            returncode = 0 if result is None else int(result)
+    return subprocess.CompletedProcess(
+        args=list(args),
+        returncode=returncode,
+        stdout=stdout.getvalue(),
+        stderr=stderr.getvalue(),
+    )
+
+
+def assert_router_python_command(
+    router_module: ModuleType,
+    command_name: str,
+    *,
+    expected_target: str,
+) -> None:
+    """Assert that one delegated router command targets the expected Python script."""
+    spec = router_module.COMMAND_SPECS[command_name]
+    assert spec.runner == "python"
+    assert spec.target == expected_target
 
 
 def assert_process_succeeded(result: subprocess.CompletedProcess[str]) -> None:

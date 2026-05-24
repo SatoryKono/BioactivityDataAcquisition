@@ -339,6 +339,9 @@ def _resolve_imported_string_bindings(
     resolved_cache = cache if cache is not None else {}
     bindings: dict[str, str] = {}
     for node in _import_from_nodes(tree):
+        relevant_aliases = _imported_string_constant_aliases(node.names)
+        if not relevant_aliases:
+            continue
         module_bindings = _module_string_bindings(
             node.module,
             repo_root=repo_root,
@@ -346,7 +349,7 @@ def _resolve_imported_string_bindings(
         )
         if module_bindings is None:
             continue
-        _merge_imported_string_aliases(bindings, module_bindings, node.names)
+        _merge_imported_string_aliases(bindings, module_bindings, relevant_aliases)
     return bindings
 
 
@@ -484,6 +487,20 @@ def _import_from_nodes(tree: ast.AST) -> list[ast.ImportFrom]:
         node
         for node in ast.walk(tree)
         if isinstance(node, ast.ImportFrom) and node.module is not None
+    ]
+
+
+def _looks_like_imported_string_constant_name(name: str) -> bool:
+    """Return whether an imported name looks like a UPPER_SNAKE_CASE constant."""
+    return any(ch.isalpha() for ch in name) and name.upper() == name
+
+
+def _imported_string_constant_aliases(aliases: list[ast.alias]) -> list[ast.alias]:
+    """Keep only aliases worth resolving as imported string constants."""
+    return [
+        alias
+        for alias in aliases
+        if alias.name != "*" and _looks_like_imported_string_constant_name(alias.name)
     ]
 
 

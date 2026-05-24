@@ -361,6 +361,12 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
             ledger_entries_present=True,
         ),
         "occurrence_only_diagnostics": [],
+        "authoritative_replay_dossier": _expected_authoritative_replay_dossier(
+            manifest,
+            planned_artifact_count=0,
+            published_artifact_count=0,
+            identity_graph_complete=False,
+        ),
     }
     assert result.diagnostics["identity_graph"]["manifest_id"] == "manifest-1"
     assert result.diagnostics["identity_graph"]["run_id"] == str(run_id)
@@ -507,6 +513,61 @@ def _expected_input_snapshots() -> list[dict[str, object]]:
     ]
 
 
+def _expected_authoritative_replay_dossier(
+    manifest: RunManifest,
+    *,
+    planned_artifact_count: int | None,
+    published_artifact_count: int,
+    identity_graph_complete: bool | None,
+) -> dict[str, object]:
+    snapshot_fingerprint = _expected_input_snapshot_identity_fingerprint(manifest)
+    return {
+        "truth_boundary": "authoritative_replay_artifacts_only",
+        "authoritative_replay_artifacts": [
+            "run_manifest",
+            "effective_config_artifact",
+            "lineage_fragment",
+            "layer_metadata",
+            "checkpoint_metadata",
+            "input_snapshot_envelope",
+        ],
+        "manifest_id": manifest.manifest_id,
+        "run_id": str(manifest.run_id),
+        "execution_fingerprint": manifest.execution_fingerprint,
+        "git_commit": "abc1234",
+        "effective_config_artifact_id": "eca-123",
+        "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
+        "contract_ref": "chembl.activity",
+        "contract_version": "1.2.0",
+        "required_persistence_profile": "replay_ready",
+        "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+        "snapshot_status": "full",
+        "input_snapshot_ids": ["snapshot-1"],
+        "input_snapshot_content_hashes": ["sha256:snapshot-1"],
+        "input_snapshot_identity_fingerprint": snapshot_fingerprint,
+        "lineage_fragment_ids": [],
+        "published_artifact_refs": [],
+        "planned_artifact_count": planned_artifact_count,
+        "published_artifact_count": published_artifact_count,
+        "identity_graph_complete": identity_graph_complete,
+        "checkpoint_identity": {
+            "required_persistence_profile": "replay_ready",
+            "execution_fingerprint": manifest.execution_fingerprint,
+            "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
+            "effective_config_artifact_id": "eca-123",
+            "contract_ref": "chembl.activity",
+            "contract_version": "1.2.0",
+            "input_snapshot_identity_fingerprint": snapshot_fingerprint,
+            "input_snapshot_ids": ["snapshot-1"],
+        },
+        "canonical_execution_identity": _expected_canonical_execution_identity(
+            manifest,
+            requested_exact_replay=True,
+            snapshot_fingerprint=snapshot_fingerprint,
+        ),
+    }
+
+
 def _expected_identity_graph_without_ledger(
     manifest: RunManifest,
     *,
@@ -607,6 +668,12 @@ def _expected_identity_graph_without_ledger(
             ledger_entries_present=False,
         ),
         "occurrence_only_diagnostics": [],
+        "authoritative_replay_dossier": _expected_authoritative_replay_dossier(
+            manifest,
+            planned_artifact_count=None,
+            published_artifact_count=0,
+            identity_graph_complete=None,
+        ),
     }
 
 
@@ -721,6 +788,12 @@ def _expected_diagnostics_without_ledger(
         ),
         "artifact_publication_closure": "disabled",
         "identity_graph": identity_graph,
+        "authoritative_replay_dossier": _expected_authoritative_replay_dossier(
+            manifest,
+            planned_artifact_count=None,
+            published_artifact_count=0,
+            identity_graph_complete=None,
+        ),
         "persistence_profile": {
             "attained_profile": "degraded_observable",
             "required_profile": "replay_ready",

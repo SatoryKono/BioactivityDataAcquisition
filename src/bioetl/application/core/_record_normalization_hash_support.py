@@ -5,11 +5,13 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.core.config import ContentHashVersionPolicy
+from bioetl.application.core.record_processor_config import ContentHashVersionPolicy
 from bioetl.domain.transformations import generate_content_hash
 
 if TYPE_CHECKING:
-    from bioetl.application.core.config import ContentHashPolicyByVersion
+    from bioetl.application.core.record_processor_config import (
+        ContentHashPolicyByVersion,
+    )
     from bioetl.domain.normalization.profiles import FieldRule
     from bioetl.domain.types import JsonDict
 

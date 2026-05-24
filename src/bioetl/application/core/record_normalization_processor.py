@@ -21,7 +21,7 @@ from bioetl.application.core._record_normalization_runtime_support import (
 from bioetl.application.core._record_normalization_runtime_support import (
     project_normalization_findings as _project_normalization_findings,
 )
-from bioetl.application.core.config import ContentHashPolicyByVersion
+from bioetl.application.core.record_processor_config import ContentHashPolicyByVersion
 from bioetl.application.core.normalization_fallbacks import (
     UNHANDLED_FALLBACK_NORMALIZATION,
     canonicalize_json_like_string,

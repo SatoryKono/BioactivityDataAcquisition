@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import cast
 from uuid import uuid4
 
@@ -13,8 +14,8 @@ from bioetl.domain.context import (
     PipelineRunContext,
     VacuumSettings,
 )
+from bioetl.domain.ports import ClockPort
 from bioetl.domain.types import ExecutionContext, RunID, RunType
-from bioetl.infrastructure.time import SystemClock
 
 __all__ = ["build_pipeline_context"]
 
@@ -69,10 +70,18 @@ def _build_cached_bronze_context(options: RunOptions) -> CachedBronzeContext:
     return CachedBronzeContext.disabled()
 
 
-def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext:
+def build_pipeline_context(
+    name: str,
+    options: RunOptions,
+    *,
+    clock: ClockPort | None = None,
+    started_at: datetime | None = None,
+) -> PipelineRunContext:
     """Build a PipelineRunContext from user-facing options."""
-    clock = SystemClock()
-    started_at, _ = capture_runtime_timing_anchor(clock=clock)
+    started_at, _ = capture_runtime_timing_anchor(
+        clock=clock,
+        started_at=started_at,
+    )
     return PipelineRunContext(
         pipeline_name=name,
         run_id=cast(RunID, uuid4()),

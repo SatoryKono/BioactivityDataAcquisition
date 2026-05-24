@@ -827,7 +827,10 @@ def _validate_note_files(
 
     for artifact_class, path in _iter_note_paths(memory_root):
         try:
-            note = parse_markdown_note(path)
+            note = parse_markdown_note(
+                path,
+                include_body=artifact_class == "curated_note",
+            )
         except Exception as exc:
             issues.append(
                 ValidationIssue(

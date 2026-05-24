@@ -34,10 +34,10 @@ if TYPE_CHECKING:
     from bioetl.application.core.batch_tracing import BatchTracingManagerService
     from bioetl.application.core.batch_transformer import BatchTransformer
     from bioetl.application.core.batch_writer import BatchWriter
-    from bioetl.application.core.config import RecordProcessorConfig
-    from bioetl.application.core.pipeline_service_protocols import (
-        PipelineServicesProtocol,
+    from bioetl.application.core.pipeline_runtime_service_protocols import (
+        PipelineDataSourceServicesProtocol,
     )
+    from bioetl.application.core.record_processor_config import RecordProcessorConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
@@ -57,7 +57,7 @@ class BatchProcessingService:
     def __init__(
         self,
         *,
-        services: PipelineServicesProtocol,
+        services: PipelineDataSourceServicesProtocol,
         context: PipelineContext,
         config: RecordProcessorConfig,
         components: BatchProcessingComponents,

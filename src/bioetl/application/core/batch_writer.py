@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.composite.column_service import ColumnOrderService
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-    from bioetl.application.core.config import RecordProcessorConfig
+    from bioetl.application.core.record_processor_config import RecordProcessorConfig
     from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier

@@ -19,7 +19,7 @@ from bioetl.domain.types import JsonDict
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
-    from bioetl.application.core.config import RecordProcessorConfig
+    from bioetl.application.core.record_processor_config import RecordProcessorConfig
     from bioetl.application.core.span_helpers import _ClosableSpan
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import TracingPort

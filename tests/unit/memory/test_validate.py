@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
+from typing import Any
 
 from memory.notes import write_markdown_note
 from memory.resources import (
@@ -74,6 +75,45 @@ def test_memory_scaffold_validation_accepts_valid_note_files(tmp_path: Path) -> 
     )
 
     assert validate_memory_scaffold(memory_root) == []
+
+
+def test_memory_scaffold_validation_skips_episodic_body_reads(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    memory_root = tmp_path / "memory"
+    shutil.copytree(MEMORY_ROOT, memory_root)
+
+    write_markdown_note(
+        memory_root / "episodic" / "sessions" / "valid-session.md",
+        metadata={
+            "id": "valid-session",
+            "title": "Valid session",
+            "task_id": "task-123",
+            "created_at": "2026-04-20T00:00:00Z",
+            "ttl_days": 14,
+            "confidence": "episodic",
+            "source_refs": ["src/memory/README.md"],
+            "summary": "Working context.",
+        },
+        body="# Session\n\n- Current context\n",
+    )
+
+    original_parse = validate_memory_scaffold.__globals__["parse_markdown_note"]
+    include_body_flags: list[bool] = []
+
+    def recording_parse(path: Path, *, include_body: bool = True) -> Any:
+        include_body_flags.append(include_body)
+        return original_parse(path, include_body=include_body)
+
+    monkeypatch.setitem(
+        validate_memory_scaffold.__globals__,
+        "parse_markdown_note",
+        recording_parse,
+    )
+
+    assert validate_memory_scaffold(memory_root) == []
+    assert False in include_body_flags
 
 
 def test_memory_scaffold_validation_flags_invalid_note_files(tmp_path: Path) -> None:

@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from tests.helpers import assert_cli_succeeded, run_python_cli
-
+from scripts.ops import __main__ as ops_router
 from scripts.ops.observability import check_published_observability_endpoints as subject
+from tests.helpers import assert_router_python_command, run_main_in_process
 
 
 def test_classify_diagnosis_flags_published_port_gap() -> None:
@@ -110,15 +110,16 @@ def test_main_returns_zero_when_published_probe_is_healthy(
     assert "prometheus: diagnosis=published_healthy published=ok container=skipped" in captured.out
 
 
-def test_scripts_ops_router_exposes_check_observability_ports_help_smoke() -> None:
-    result = run_python_cli(
-        "-m",
-        "scripts.ops",
+def test_scripts_ops_router_exposes_check_observability_ports_command() -> None:
+    assert_router_python_command(
+        ops_router,
         "check-observability-ports",
-        "--help",
+        expected_target="observability/check_published_observability_endpoints.py",
     )
 
-    assert_cli_succeeded(result)
-    assert (
-        "Check host-published Grafana/Prometheus-style endpoints" in result.stdout
-    )
+
+def test_parser_help_describes_check_observability_ports_command() -> None:
+    result = run_main_in_process(subject.main, "--help")
+
+    assert result.returncode == 0
+    assert "Check host-published Grafana/Prometheus-style endpoints" in result.stdout

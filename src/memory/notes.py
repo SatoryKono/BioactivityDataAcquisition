@@ -43,34 +43,91 @@ def normalize_text_key(value: str) -> str:
     return " ".join(value.strip().lower().split())
 
 
-def parse_markdown_note(path: Path) -> MemoryNote:
+def parse_markdown_note(path: Path, *, include_body: bool = True) -> MemoryNote:
     """Parse a markdown note with YAML frontmatter."""
-    text = path.read_text(encoding="utf-8")
-    lines = text.splitlines(keepends=True)
-    if not lines:
-        raise ValueError(f"note is missing YAML frontmatter: {path}")
-    first_line = lines[0].strip()
-    if (
-        first_line != FRONTMATTER_DELIMITER
-        and not LEGACY_FRONTMATTER_DELIMITER_PATTERN.match(first_line)
-    ):
-        raise ValueError(f"note is missing YAML frontmatter: {path}")
+    with path.open("r", encoding="utf-8") as handle:
+        first_line = handle.readline()
+        if not first_line:
+            raise ValueError(f"note is missing YAML frontmatter: {path}")
+        first_line = first_line.strip()
+        if (
+            first_line != FRONTMATTER_DELIMITER
+            and not LEGACY_FRONTMATTER_DELIMITER_PATTERN.match(first_line)
+        ):
+            raise ValueError(f"note is missing YAML frontmatter: {path}")
 
-    delimiter = first_line
-    end_index: int | None = None
-    for idx in range(1, len(lines)):
-        if lines[idx].strip() == delimiter:
-            end_index = idx
-            break
-    if end_index is None:
-        raise ValueError(f"note frontmatter is not terminated: {path}")
+        delimiter = first_line
+        if not include_body:
+            metadata = _read_frontmatter_metadata_only(handle, delimiter, path)
+            return MemoryNote(metadata=metadata, body="")
+        metadata_lines: list[str] = []
+        for line in handle:
+            if line.strip() == delimiter:
+                metadata_text = "".join(metadata_lines)
+                metadata = _load_frontmatter_metadata(metadata_text)
+                if not isinstance(metadata, dict):
+                    raise ValueError(f"note frontmatter must be a mapping: {path}")
+                body = handle.read().lstrip("\n") if include_body else ""
+                return MemoryNote(metadata=metadata, body=body)
+            metadata_lines.append(line)
 
-    metadata_text = "".join(lines[1:end_index])
-    metadata = _load_frontmatter_metadata(metadata_text)
-    if not isinstance(metadata, dict):
-        raise ValueError(f"note frontmatter must be a mapping: {path}")
-    body = "".join(lines[end_index + 1 :]).lstrip("\n")
-    return MemoryNote(metadata=metadata, body=body)
+    raise ValueError(f"note frontmatter is not terminated: {path}")
+
+
+def _read_frontmatter_metadata_only(
+    handle: Any,
+    delimiter: str,
+    path: Path,
+) -> dict[str, Any]:
+    """Parse simple frontmatter fields without loading the note body."""
+    metadata: dict[str, Any] = {}
+    current_list_key: str | None = None
+
+    for line in handle:
+        stripped = line.strip()
+        if stripped == delimiter:
+            return metadata
+        if not stripped:
+            continue
+        if stripped.startswith("- ") and current_list_key is not None:
+            metadata[current_list_key].append(_coerce_frontmatter_scalar(stripped[2:]))
+            continue
+        if ":" not in line:
+            current_list_key = None
+            continue
+        key, raw_value = line.split(":", 1)
+        key = key.strip()
+        value = raw_value.strip()
+        if not key:
+            current_list_key = None
+            continue
+        if not value:
+            metadata[key] = []
+            current_list_key = key
+            continue
+        metadata[key] = _coerce_frontmatter_scalar(value)
+        current_list_key = None
+
+    raise ValueError(f"note frontmatter is not terminated: {path}")
+
+
+def _coerce_frontmatter_scalar(value: str) -> Any:
+    """Coerce simple YAML scalar values used in note frontmatter."""
+    normalized = value.strip()
+    if len(normalized) >= 2 and normalized[0] == normalized[-1] and normalized[0] in {
+        '"',
+        "'",
+    }:
+        normalized = normalized[1:-1]
+    if normalized in {"null", "~"}:
+        return None
+    if normalized.isdigit():
+        return int(normalized)
+    if normalized == "true":
+        return True
+    if normalized == "false":
+        return False
+    return normalized
 
 
 def _load_frontmatter_metadata(metadata_text: str) -> dict[str, Any]:

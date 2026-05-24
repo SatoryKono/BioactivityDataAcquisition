@@ -147,7 +147,11 @@ def create_pipeline_runner(
         >>> runner = create_pipeline_runner("chembl_activity", options)
         >>> await runner.run()
     """
-    run_context = build_pipeline_context(name, options)
+    run_context = build_pipeline_context(
+        name,
+        options,
+        clock=SystemClock(),
+    )
     return _create_pipeline_runner_from_context(run_context)
 
 
@@ -168,7 +172,11 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     Returns:
         RunResult with execution status, record counts, and timing information.
     """
-    run_context = build_pipeline_context(name, options)
+    run_context = build_pipeline_context(
+        name,
+        options,
+        clock=SystemClock(),
+    )
     started_at, started_monotonic = capture_runtime_timing_anchor(
         started_at=run_context.started_at,
         clock=SystemClock(),

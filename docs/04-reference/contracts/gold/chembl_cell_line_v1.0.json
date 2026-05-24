@@ -72,6 +72,14 @@
       "nullable": true,
       "description": ""
     },
+    "cell_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "cellosaurus_id": {
       "type": [
         "string",
@@ -81,6 +89,14 @@
       "description": ""
     },
     "cl_lincs_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "clo_id": {
       "type": [
         "string",
         "null"

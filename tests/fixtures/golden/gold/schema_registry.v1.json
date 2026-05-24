@@ -862,12 +862,22 @@
           "dtype": "str",
           "nullable": true
         },
+        "cell_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "cellosaurus_id": {
           "description": "",
           "dtype": "str",
           "nullable": true
         },
         "cl_lincs_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "clo_id": {
           "description": "",
           "dtype": "str",
           "nullable": true

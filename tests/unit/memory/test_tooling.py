@@ -233,6 +233,7 @@ def test_memory_workflow_module_help_does_not_emit_runpy_warning() -> None:
         capture_output=True,
         text=True,
         check=False,
+        timeout=30,
     )
 
     assert result.returncode == 0

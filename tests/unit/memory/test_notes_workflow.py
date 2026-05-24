@@ -44,6 +44,21 @@ def test_create_curated_lesson_note(tmp_path: Path) -> None:
     assert "## Reuse guidance" in note.body
 
 
+def test_parse_markdown_note_can_skip_body_loading(tmp_path: Path) -> None:
+    path = create_note(
+        note_kind="episodic-session",
+        title="Skip body",
+        task_id="task-skip",
+        source_refs=["src/memory/README.md"],
+        output_path=tmp_path / "session.md",
+    )
+
+    note = parse_markdown_note(path, include_body=False)
+
+    assert note.metadata["task_id"] == "task-skip"
+    assert note.body == ""
+
+
 def test_promote_note_moves_episodic_into_curated(tmp_path: Path) -> None:
     source = create_note(
         note_kind="episodic-summary",

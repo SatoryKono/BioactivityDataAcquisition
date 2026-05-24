@@ -31,7 +31,7 @@ if TYPE_CHECKING:
         TransformResult,
     )
     from bioetl.application.core.batch_writer import BatchWriter
-    from bioetl.application.core.config import RecordProcessorConfig
+    from bioetl.application.core.record_processor_config import RecordProcessorConfig
     from bioetl.application.core.span_helpers import _ClosableSpan
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import TracingPort
