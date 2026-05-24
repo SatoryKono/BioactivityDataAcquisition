@@ -558,6 +558,8 @@ mutation_testing:
 module_coverage_inventory:
   enabled: true
   canonical_lane: coverage-verify
+  authoritative_status_source: live_ci_coverage_verify
+  committed_artifact_refresh_policy: green_coverage_verify_run_only
   generator: scripts/engineering/qa/report_module_coverage_inventory.py
   command: python -m scripts.engineering.qa report-module-coverage
   artifact: reports/quality/module-coverage-inventory.json

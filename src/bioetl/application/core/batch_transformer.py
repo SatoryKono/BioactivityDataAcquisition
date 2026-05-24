@@ -55,7 +55,7 @@ from bioetl.application.core.transformer_runtime.streaming import (
 from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
-    from bioetl.application.core.config import RecordProcessorConfig
+    from bioetl.application.core.record_processor_config import RecordProcessorConfig
     from bioetl.application.core.protocols import (
         GoldFilterCallback,
         GoldTransformCallback,

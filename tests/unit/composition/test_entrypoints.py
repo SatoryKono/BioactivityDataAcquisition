@@ -27,8 +27,11 @@ from bioetl.composition.entrypoints import (
     build_pipeline_context,
 )
 from bioetl.domain.types import RunType
+from tests.helpers.clock import FixedClock
 
 CACHED_BRONZE_PATH = "test-output/bronze"
+_FIXED_CONTEXT_TIME = datetime(2026, 5, 24, 12, 0, tzinfo=UTC)
+_FIXED_CONTEXT_CLOCK = FixedClock(_FIXED_CONTEXT_TIME)
 
 
 @pytest.mark.unit
@@ -224,7 +227,11 @@ class TestBuildPipelineContext:
     def test_basic_context(self):
         """Test building context with default options."""
         options = RunOptions()
-        ctx = build_pipeline_context("chembl_activity", options)
+        ctx = build_pipeline_context(
+            "chembl_activity",
+            options,
+            clock=_FIXED_CONTEXT_CLOCK,
+        )
 
         assert ctx.pipeline_name == "chembl_activity"
         assert ctx.run_type == RunType.INCREMENTAL
@@ -236,7 +243,11 @@ class TestBuildPipelineContext:
     def test_context_with_rebuild(self):
         """Test building context with rebuild run type."""
         options = RunOptions(run_type="rebuild", limit=100)
-        ctx = build_pipeline_context("pubchem_compound", options)
+        ctx = build_pipeline_context(
+            "pubchem_compound",
+            options,
+            clock=_FIXED_CONTEXT_CLOCK,
+        )
 
         assert ctx.run_type == RunType.REBUILD
         assert ctx.limit == 100
@@ -245,7 +256,11 @@ class TestBuildPipelineContext:
     def test_context_propagates_required_persistence_profile(self):
         """Test building context with an explicit persistence profile."""
         options = RunOptions(required_persistence_profile="degraded_observable")
-        ctx = build_pipeline_context("chembl_publication", options)
+        ctx = build_pipeline_context(
+            "chembl_publication",
+            options,
+            clock=_FIXED_CONTEXT_CLOCK,
+        )
 
         assert ctx.required_persistence_profile == "degraded_observable"
 
@@ -256,7 +271,11 @@ class TestBuildPipelineContext:
             filter_column="chembl_id",
             filter_field="molecule_id",
         )
-        ctx = build_pipeline_context("chembl_activity", options)
+        ctx = build_pipeline_context(
+            "chembl_activity",
+            options,
+            clock=_FIXED_CONTEXT_CLOCK,
+        )
 
         assert ctx.input_filter.enabled is True
         assert ctx.input_filter.source_path == "/path/to/ids.csv"
@@ -266,14 +285,22 @@ class TestBuildPipelineContext:
     def test_context_without_input_filter(self):
         """Test building context without input filter."""
         options = RunOptions()
-        ctx = build_pipeline_context("chembl_activity", options)
+        ctx = build_pipeline_context(
+            "chembl_activity",
+            options,
+            clock=_FIXED_CONTEXT_CLOCK,
+        )
 
         assert ctx.input_filter.enabled is False
 
     def test_context_with_vacuum_config(self):
         """Test building context with vacuum configuration."""
         options = RunOptions(vacuum_after_run=True, vacuum_retention_days=14)
-        ctx = build_pipeline_context("chembl_activity", options)
+        ctx = build_pipeline_context(
+            "chembl_activity",
+            options,
+            clock=_FIXED_CONTEXT_CLOCK,
+        )
 
         assert ctx.vacuum.enabled is True
         assert ctx.vacuum.retention_days == 14
@@ -281,7 +308,11 @@ class TestBuildPipelineContext:
     def test_context_vacuum_none_uses_yaml(self):
         """Test vacuum=None preserves tri-state for YAML merge."""
         options = RunOptions(vacuum_after_run=None)
-        ctx = build_pipeline_context("chembl_activity", options)
+        ctx = build_pipeline_context(
+            "chembl_activity",
+            options,
+            clock=_FIXED_CONTEXT_CLOCK,
+        )
 
         assert ctx.vacuum.enabled is None  # Tri-state: use YAML default
 
@@ -293,7 +324,11 @@ class TestBuildPipelineContext:
             ValueError,
             match="exact replay currently requires --use-cached-bronze or",
         ):
-            build_pipeline_context("chembl_activity", options)
+            build_pipeline_context(
+                "chembl_activity",
+                options,
+                clock=_FIXED_CONTEXT_CLOCK,
+            )
 
     def test_context_propagates_exact_replay_with_cached_bronze(self):
         """Legacy entrypoint should preserve replay intent when cache mode is enabled."""
@@ -303,7 +338,11 @@ class TestBuildPipelineContext:
             cached_bronze_date="2026-03-12",
             exact_replay=True,
         )
-        ctx = build_pipeline_context("chembl_activity", options)
+        ctx = build_pipeline_context(
+            "chembl_activity",
+            options,
+            clock=_FIXED_CONTEXT_CLOCK,
+        )
 
         assert ctx.exact_replay is True
         assert ctx.cached_bronze.enabled is True
@@ -317,7 +356,11 @@ class TestBuildPipelineContext:
             replay_of_manifest_id="manifest-parent",
             exact_replay=True,
         )
-        ctx = build_pipeline_context("chembl_activity", options)
+        ctx = build_pipeline_context(
+            "chembl_activity",
+            options,
+            clock=_FIXED_CONTEXT_CLOCK,
+        )
 
         assert ctx.exact_replay is True
         assert ctx.cached_bronze.enabled is False
@@ -330,11 +373,26 @@ class TestBuildPipelineContext:
             resume_run_id=str(uuid4()),
             resume_manifest_id="manifest-resume-anchor",
         )
-        ctx = build_pipeline_context("chembl_activity", options)
+        ctx = build_pipeline_context(
+            "chembl_activity",
+            options,
+            clock=_FIXED_CONTEXT_CLOCK,
+        )
 
         assert ctx.resume is True
         assert ctx.resume_run_id == options.resume_run_id
         assert ctx.resume_manifest_id == "manifest-resume-anchor"
+
+    def test_context_uses_injected_clock_for_started_at(self) -> None:
+        options = RunOptions()
+
+        ctx = build_pipeline_context(
+            "chembl_activity",
+            options,
+            clock=_FIXED_CONTEXT_CLOCK,
+        )
+
+        assert ctx.started_at == _FIXED_CONTEXT_TIME
 
 
 @pytest.mark.unit

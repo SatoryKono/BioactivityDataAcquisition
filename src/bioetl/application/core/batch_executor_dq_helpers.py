@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 from bioetl.domain.context import current_utc_time
 
 if TYPE_CHECKING:
-    from bioetl.application.core.config import RecordProcessorConfig
+    from bioetl.application.core.record_processor_config import RecordProcessorConfig
     from bioetl.application.services.dq_report_service import DQReportContext
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort, MetricsPort

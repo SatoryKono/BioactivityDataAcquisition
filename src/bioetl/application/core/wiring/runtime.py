@@ -31,7 +31,7 @@ from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.batch_transformer import BatchTransformer
 from bioetl.application.core.batch_writer import BatchWriter, BatchWriterOptions
-from bioetl.application.core.config import (
+from bioetl.application.core.record_processor_config import (
     ContentHashPolicyByVersion,
     ContentHashVersionPolicy,
     RecordProcessorConfig,

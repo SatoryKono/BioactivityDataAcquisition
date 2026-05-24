@@ -508,6 +508,29 @@ def test_collect_metric_inventory_detects_direct_prometheus_collectors(
     ]
 
 
+def test_resolve_imported_string_bindings_skips_non_constant_imports(
+    monkeypatch: object,
+) -> None:
+    tree = inventory.ast.parse("from bioetl.domain.types import RunID\n")
+
+    def _unexpected_module_lookup(*args: object, **kwargs: object) -> object:
+        raise AssertionError("non-constant imports should not trigger module reads")
+
+    monkeypatch.setattr(
+        inventory,
+        "_module_string_bindings",
+        _unexpected_module_lookup,
+    )
+
+    resolved = inventory._resolve_imported_string_bindings(
+        tree,
+        repo_root=Path("/tmp/repo"),
+        cache={},
+    )
+
+    assert resolved == {}
+
+
 def test_collect_metric_inventory_honors_declared_recording_rule_metrics(
     tmp_path: Path,
     monkeypatch: object,

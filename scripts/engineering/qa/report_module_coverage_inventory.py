@@ -99,6 +99,20 @@ def _iter_source_modules(repo_root: Path) -> list[Path]:
     ]
 
 
+def compute_source_tree_sha256(
+    *,
+    repo_root: Path = PROJECT_ROOT,
+) -> str:
+    """Return the committed source-tree digest without rebuilding full coverage rows."""
+    repo_root = repo_root.resolve()
+    source_paths = _iter_source_modules(repo_root)
+    _, source_tree_sha256 = _read_source_module_snapshots(
+        source_paths,
+        repo_root,
+    )
+    return source_tree_sha256
+
+
 def _coverage_source_roots(
     root: ET.Element,
     *,

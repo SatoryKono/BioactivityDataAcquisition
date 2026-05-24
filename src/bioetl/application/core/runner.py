@@ -35,8 +35,8 @@ if TYPE_CHECKING:
         LockRuntimeService,
     )
     from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
-    from bioetl.application.core.pipeline_service_protocols import (
-        PipelineServicesProtocol,
+    from bioetl.application.core.pipeline_observability_service_protocols import (
+        PipelineRunnerServicesProtocol,
     )
     from bioetl.application.core.postrun.service import PostrunService
     from bioetl.application.core.preflight.service import PreflightService
@@ -72,7 +72,7 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         self,
         config: PipelineConfig,
         runtime: RuntimeConfig,
-        services: PipelineServicesProtocol,
+        services: PipelineRunnerServicesProtocol,
         context: PipelineContext,
         dependencies: PipelineRunnerDependencies | None = None,
         *,
@@ -157,7 +157,7 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         return None if manifest_id is None else str(manifest_id)
 
     @property
-    def services(self) -> PipelineServicesProtocol:
+    def services(self) -> PipelineRunnerServicesProtocol:
         """Access injected services."""
         return self._services
 

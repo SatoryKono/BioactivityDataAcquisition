@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
-    from bioetl.application.core.pipeline_service_protocols import (
-        PipelineServicesProtocol,
+    from bioetl.application.core.pipeline_aux_service_protocols import (
+        PipelinePostrunServicesProtocol,
     )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
@@ -33,7 +33,7 @@ class ResolvedPostrunCollaborators:
 def _resolve_explicit_or_service(
     explicit_value: object | None,
     *,
-    services: PipelineServicesProtocol | None,
+    services: PipelinePostrunServicesProtocol | None,
     key: str,
     service_attr: str | None = None,
 ) -> object | None:
@@ -47,7 +47,7 @@ def _resolve_explicit_or_service(
 
 def resolve_postrun_collaborators(
     *,
-    services: PipelineServicesProtocol | None,
+    services: PipelinePostrunServicesProtocol | None,
     context: PipelineContext,
     storage: object | None = None,
     metrics: object | None = None,

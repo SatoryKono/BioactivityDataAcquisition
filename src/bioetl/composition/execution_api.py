@@ -7,6 +7,8 @@ from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from bioetl.application.services.execution.pipeline_runner_models import (
         PipelineRunResult as PipelineRunResult,
     )
@@ -26,6 +28,7 @@ if TYPE_CHECKING:
     )
     from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.ports import ClockPort
     from bioetl.domain.ports import ExecutionMetricsRunnerPort
 
 _PIPELINE_EXECUTION_MODULE = "bioetl.composition._pipeline_execution"
@@ -65,7 +68,11 @@ __all__ = [
 if TYPE_CHECKING:
 
     def build_pipeline_context(
-        name: str, options: RunOptions
+        name: str,
+        options: RunOptions,
+        *,
+        clock: ClockPort | None = None,
+        started_at: datetime | None = None,
     ) -> PipelineRunContext: ...
 
     def create_pipeline_runner(

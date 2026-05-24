@@ -20,6 +20,7 @@ TARGETS: tuple[Path, ...] = (
     Path("src/bioetl/application/services/control_plane"),
     Path("src/bioetl/application/services/control_plane/run_manifest_service.py"),
     Path("src/bioetl/composition/_pipeline_execution.py"),
+    Path("src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py"),
 )
 
 
@@ -83,6 +84,22 @@ def _current_utc_time_refs(py_file: Path) -> list[str]:
     return refs
 
 
+def _system_clock_constructor_refs(py_file: Path) -> list[str]:
+    if _relative_path(py_file) != (
+        "src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py"
+    ):
+        return []
+    source = py_file.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    refs: list[str] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        if isinstance(node.func, ast.Name) and node.func.id == "SystemClock":
+            refs.append(f"{_relative_path(py_file)}:{node.lineno}: SystemClock()")
+    return refs
+
+
 def test_replay_critical_time_seams_do_not_read_wall_clock_directly() -> None:
     """Replay-critical helpers must not create implicit current timestamps."""
     violations: list[str] = []
@@ -90,6 +107,7 @@ def test_replay_critical_time_seams_do_not_read_wall_clock_directly() -> None:
         for py_file in _iter_python_files(target):
             violations.extend(_datetime_now_calls(py_file))
             violations.extend(_current_utc_time_refs(py_file))
+            violations.extend(_system_clock_constructor_refs(py_file))
 
     assert not violations, (
         "Wall-clock reads found in replay-critical runtime paths:\n"

@@ -19,9 +19,9 @@ from bioetl.domain.normalization import canonicalize_json_string
 from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
-    from bioetl.application.core.config import RecordProcessorConfig
-    from bioetl.application.core.pipeline_service_protocols import (
-        PipelineServicesProtocol,
+    from bioetl.application.core.record_processor_config import RecordProcessorConfig
+    from bioetl.application.core.pipeline_aux_service_protocols import (
+        PipelineExecutionServicesProtocol,
     )
     from bioetl.application.services.dq_report_service import DQReportContext
     from bioetl.domain.context import PipelineContext
@@ -45,7 +45,7 @@ class _BatchExecutorDQMixin:
     same input corpus.
     """
 
-    _services: PipelineServicesProtocol
+    _services: PipelineExecutionServicesProtocol
     _context: PipelineContext
     _config: RecordProcessorConfig
     _logger: LoggerPort
