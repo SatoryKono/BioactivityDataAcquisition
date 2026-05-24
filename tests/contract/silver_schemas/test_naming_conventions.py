@@ -19,6 +19,12 @@ from tests.contract.silver_schemas.conftest import (
     extract_field_metadata,
 )
 
+CHEMBL_SCHEMAS = tuple(
+    sorted(
+        schema_name for schema_name in SILVER_SCHEMAS if schema_name.startswith("chembl_")
+    )
+)
+
 
 @pytest.mark.contracts
 @pytest.mark.no_api
@@ -285,12 +291,9 @@ class TestForeignKeyNaming:
                 )
             )
 
-    @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
+    @pytest.mark.parametrize("schema_name", CHEMBL_SCHEMAS)
     def test_chembl_fk_naming_consistency(self, schema_name: str) -> None:
         """ChEMBL foreign keys MUST follow {entity}_chembl_id pattern."""
-        if not schema_name.startswith("chembl_"):
-            pytest.skip(f"{schema_name} is not a ChEMBL schema")
-
         schema_class = SILVER_SCHEMAS[schema_name]
         fields = extract_field_metadata(schema_class)
 
