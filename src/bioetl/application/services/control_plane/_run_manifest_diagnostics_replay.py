@@ -96,7 +96,6 @@ def _resolve_manifest_replay_readiness_verdict(
     )
 
 
-
 def _resolve_resume_guarantee(
     *,
     continuation_mode: str,
@@ -127,6 +126,7 @@ def _resolve_resume_guarantee(
             False,
         )
     return ("no_resume_guarantee", "none", False)
+
 
 def _build_resume_contract(
     *,

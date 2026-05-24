@@ -202,12 +202,7 @@ class LineageInspectionService:
         if semantic:
             fragment = self.lineage_store.get(fragment_id)
         else:
-            get_occurrence = getattr(
-                self.lineage_store,
-                "get_occurrence",
-                self.lineage_store.get,
-            )
-            fragment = get_occurrence(fragment_id)
+            fragment = self.lineage_store.get_occurrence(fragment_id)
         if fragment is None:
             raise ValueError(
                 f"Lineage fragment not found for identifier: {fragment_id}"

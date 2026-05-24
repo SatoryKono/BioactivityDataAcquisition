@@ -1,6 +1,4 @@
-"""Property-based tests for port contracts using Hypothesis. Python version check for Hypothesis compatibility Python version check for Hypothesis compatibility
-PYTHON_314 = sys.version_info >= (3, 14)
-PYTHON_314 = sys.version_info >= (3, 14)
+"""Property-based tests for port contracts using Hypothesis.
 
 These tests use property-based testing to verify that port implementations
 maintain their contracts across a wide range of inputs and edge cases.
@@ -35,12 +33,6 @@ pytestmark = [pytest.mark.slow, pytest.mark.hypothesis, pytest.mark.architecture
 def run_async(coro) -> Any:
     """Run async coroutine in sync context for hypothesis tests."""
     return asyncio.run(coro)
-
-
-def _skip_python_314_hypothesis_reflection_issue() -> None:
-    """Keep the Python 3.14 Hypothesis workaround without decorator-based skip debt."""
-    if PYTHON_314:
-        pytest.skip("Hypothesis lambda reflection issues on Python 3.14")
 
 
 # ============================================================================
@@ -648,7 +640,6 @@ class TestJsonEncoderPortProperties:
     @settings(deadline=None)
     def test_dumps_loads_roundtrip(self, data: Any) -> None:
         """Property: dumps() followed by loads() MUST preserve data."""
-        _skip_python_314_hypothesis_reflection_issue()
         from bioetl.infrastructure.serialization.encoders import StdLibJsonEncoder
 
         encoder = StdLibJsonEncoder()
@@ -675,7 +666,6 @@ class TestJsonEncoderPortProperties:
     @settings(deadline=None)
     def test_dumps_canonical_is_deterministic(self, data: dict[str, Any]) -> None:
         """Property: dumps_canonical() MUST produce identical output for same input."""
-        _skip_python_314_hypothesis_reflection_issue()
         from bioetl.infrastructure.serialization.encoders import StdLibJsonEncoder
 
         encoder = StdLibJsonEncoder()
@@ -698,7 +688,6 @@ class TestJsonEncoderPortProperties:
     @settings(deadline=None)
     def test_dumps_canonical_sorts_keys(self, data: dict[str, Any]) -> None:
         """Property: dumps_canonical() MUST produce sorted keys."""
-        _skip_python_314_hypothesis_reflection_issue()
         from bioetl.infrastructure.serialization.encoders import StdLibJsonEncoder
 
         encoder = StdLibJsonEncoder()

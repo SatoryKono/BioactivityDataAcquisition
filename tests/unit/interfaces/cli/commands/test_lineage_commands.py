@@ -42,7 +42,7 @@ class _FakeLineageService:
             created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
-    def show_fragment(self, fragment_id: str) -> LineageFragmentInspectionResult:
+    def show_fragment(self, fragment_id: str, semantic: bool = False) -> LineageFragmentInspectionResult:
         if fragment_id == "missing":
             raise ValueError("missing")
         return LineageFragmentInspectionResult(fragment=self._fragment)
