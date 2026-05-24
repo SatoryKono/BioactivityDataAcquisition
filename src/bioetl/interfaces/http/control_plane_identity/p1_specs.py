@@ -7,11 +7,11 @@ from bioetl.interfaces.http.control_plane_identity.types import AnchorSpec
 P1_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
     AnchorSpec(
         "P1",
-        "config_hash",
-        "Source Config Hash",
-        "RunCodeProvenance.config_hash",
+        "resolved_config_hash",
+        "Resolved Config Hash",
+        "RunCodeProvenance.resolved_config_hash",
         "sha256 hex",
-        "Raw pipeline config provenance.",
+        "Resolved declarative config provenance.",
         "details only; compact short",
         True,
         "Manifest/config diff",

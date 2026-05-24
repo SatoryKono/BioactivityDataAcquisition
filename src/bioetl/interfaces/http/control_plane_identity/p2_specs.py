@@ -31,6 +31,18 @@ P2_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
     ),
     AnchorSpec(
         "P2",
+        "config_hash",
+        "Legacy Config Hash",
+        "RunCodeProvenance.config_hash compatibility alias",
+        "sha256 hex",
+        "Legacy alias of resolved_config_hash for older consumers; not a semantic replay anchor.",
+        "details only; compact short",
+        False,
+        "Manifest/code-provenance compatibility view",
+        "INFO",
+    ),
+    AnchorSpec(
+        "P2",
         "planned_artifacts",
         "Planned Artifacts",
         "RunManifest.planned_artifacts",

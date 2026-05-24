@@ -33,6 +33,9 @@ SOURCE_MODEL_BY_NAME: dict[str, AnchorSourceModel] = {
     "effective_config_hash": AnchorSourceModel(
         "effective_config_artifact", "authoritative"
     ),
+    "resolved_config_hash": AnchorSourceModel(
+        "run_manifest_code_provenance", "authoritative"
+    ),
     "effective_config_artifact_id": AnchorSourceModel(
         "effective_config_artifact", "authoritative"
     ),
@@ -57,7 +60,9 @@ SOURCE_MODEL_BY_NAME: dict[str, AnchorSourceModel] = {
     "identity_graph_complete": AnchorSourceModel(
         "identity_graph_diagnostics", "derived"
     ),
-    "config_hash": AnchorSourceModel("run_manifest_code_provenance", "authoritative"),
+    "config_hash": AnchorSourceModel(
+        "run_manifest_code_provenance_compatibility", "compatibility_alias"
+    ),
     "dq_policy_ref": AnchorSourceModel("contract_registry", "authoritative"),
     "rule_bundle_version": AnchorSourceModel("contract_registry", "authoritative"),
     "dq_contract_compatibility_hash": AnchorSourceModel(
@@ -120,6 +125,11 @@ DRILLDOWN_TARGET_BY_NAME: dict[str, DrilldownTarget] = {
     "effective_config_hash": DrilldownTarget(
         "effective_config", "effective_config.hash:{value}", "Effective config diff"
     ),
+    "resolved_config_hash": DrilldownTarget(
+        "manifest_section",
+        "manifest.code_provenance.resolved_config_hash:{value}",
+        "Resolved declarative config diff",
+    ),
     "effective_config_artifact_id": DrilldownTarget(
         "effective_config",
         "effective_config.artifact:{value}",
@@ -165,7 +175,7 @@ DRILLDOWN_TARGET_BY_NAME: dict[str, DrilldownTarget] = {
     "config_hash": DrilldownTarget(
         "manifest_section",
         "manifest.code_provenance.config_hash:{value}",
-        "Source config diff",
+        "Legacy config-hash compatibility value",
     ),
     "dq_policy_ref": DrilldownTarget(
         "contract_registry", "dq.policy:{value}", "DQ policy"
