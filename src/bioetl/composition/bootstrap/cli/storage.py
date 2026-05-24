@@ -37,11 +37,11 @@ from bioetl.composition.bootstrap.cli.noop import (
     create_noop_observability_bundle,
 )
 from bioetl.composition.registry_api import get_default_registry
+from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.domain.context import current_utc_time
 from bioetl.domain.ports import BronzeStoragePort
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
-from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
 )

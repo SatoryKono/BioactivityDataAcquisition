@@ -121,6 +121,21 @@ _PROMETHEUS_FAMILY_SUFFIXES: Final[frozenset[str]] = frozenset(
         "_validated",
     }
 )
+_NON_METRIC_ALIAS_PREFIXES: Final[tuple[str, ...]] = (
+    "get_",
+    "set_",
+    "track_",
+    "resolve_",
+    "build_",
+    "collect_",
+    "render_",
+    "validate_",
+    "latest_",
+    "missing_",
+    "degraded_",
+    "run_manifest_",
+    "run_ledger_",
+)
 _IGNORED_DOC_METRIC_NAMES: Final[frozenset[str]] = frozenset(
     {
         "bioetl_alerts",
@@ -726,6 +741,8 @@ def _is_metric_like_alias_name(metric_name: str) -> bool:
     if not _PROMETHEUS_METRIC_NAME_RE.fullmatch(normalized):
         return False
     if "_" not in normalized:
+        return False
+    if normalized.startswith(_NON_METRIC_ALIAS_PREFIXES):
         return False
     return normalized.endswith(tuple(_PROMETHEUS_FAMILY_SUFFIXES))
 

@@ -15,6 +15,8 @@ from bioetl.domain.types import QuarantineRecordStatus
 from bioetl.interfaces.cli import cli
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def cli_runner() -> CliRunner:

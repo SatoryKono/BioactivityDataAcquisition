@@ -28,6 +28,8 @@ from bioetl.application.core.base_transformer.structural_policy import (
     StructuralPolicyOutcome,
 )
 from bioetl.domain.context import PipelineContext
+
+pytestmark = pytest.mark.unit
 from bioetl.domain.entities import Bioactivity
 from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
 from bioetl.domain.types import BatchID, RunType

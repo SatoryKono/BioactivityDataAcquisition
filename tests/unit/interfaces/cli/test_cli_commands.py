@@ -20,6 +20,8 @@ from click.testing import CliRunner
 from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview, LayerInfo
 from bioetl.interfaces.cli.main import cli
 
+pytestmark = pytest.mark.unit
+
 TEST_SILVER_PATH = "test-output/silver/chembl/activity"
 TEST_GOLD_PATH = "test-output/gold/chembl/activity"
 

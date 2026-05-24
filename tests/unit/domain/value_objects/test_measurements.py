@@ -16,6 +16,8 @@ from bioetl.domain.value_objects import (
     PChemblValue,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestConcentrationUnit:
     """Tests for ConcentrationUnit enum."""

@@ -51,11 +51,11 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_snapsho
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
     compute_input_snapshot_identity_fingerprint as _compute_input_snapshot_identity_fingerprint,
 )
-from bioetl.application.services.control_plane._run_manifest_replay_family_contract_payload import (
-    build_replay_family_contract_payload as _build_replay_family_contract_payload,
-)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_summary import (
     _build_exact_replay_anchors,
+)
+from bioetl.application.services.control_plane._run_manifest_replay_family_contract_payload import (
+    build_replay_family_contract_payload as _build_replay_family_contract_payload,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (

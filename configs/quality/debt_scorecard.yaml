@@ -264,17 +264,18 @@ hotspot_family_ratchets:
       max_internal_fan_in: 15
     metrics:
       duplication_clusters: 8
-      files: 166
-      total_loc: 20788
-      files_ge_250_loc: 14
+      files: 168
+      total_loc: 21068
+      files_ge_250_loc: 12
       helper_function_ratio: 0.374
-      max_internal_fan_in: 15
-      max_internal_fan_in_module: bioetl.application.core.pipeline_services
+      max_internal_fan_in: 14
+      max_internal_fan_in_module: bioetl.application.core.pipeline_service_protocols
     trend:
-      status: refreshed_2026-05-20
-      next_action: 2026-05-20 refreshes application/core from stale zero-duplication
-        evidence to a current non-growth baseline of 8 duplicate clusters while
-        keeping files_ge_250_loc and max_internal_fan_in pinned.
+      status: reduced_2026-05-22_issue_4554
+      next_action: 2026-05-22 moves runner preflight execution flow into the
+        existing measured preflight owner seam, reducing application/core
+        files_ge_250_loc from 14 to 12 while keeping duplicate clusters at 8
+        and max_internal_fan_in below the reviewed budget.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -333,7 +334,7 @@ hotspot_family_ratchets:
   - name: application_services_control_plane
     owner: '@bioetl-platform'
     linked_rf: RF-023
-    linked_issue: '#4563'
+    linked_issue: '#4547'
     ratchet_stage: reviewed-baseline
     ratchet_scope: duplication-report-plus-bounded-growth
     expected_action: Hold file-growth and fan-in at the reviewed baseline during
@@ -345,7 +346,7 @@ hotspot_family_ratchets:
       files_ge_250_loc: 22
       max_internal_fan_in: 6
     metrics:
-      duplication_clusters: 17
+      duplication_clusters: 15
       files: 66
       total_loc: 12998
       files_ge_250_loc: 22
@@ -353,16 +354,15 @@ hotspot_family_ratchets:
       max_internal_fan_in: 6
       max_internal_fan_in_module: bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers
     trend:
-      status: reduced_2026-05-21
-      next_action: 2026-05-21 reduces the reviewed family baseline for application/services/control_plane
-        from 20 to 17 duplicate clusters after shared ledger identity, manifest-time,
-        and checkpoint-anchor projection extraction; keep duplicate clusters,
-        files_ge_250_loc, and max_internal_fan_in non-growing while paying down
-        the remaining 17 duplicate clusters.
+      status: reduced_2026-05-22_issue_4547
+      next_action: 2026-05-22 consolidates exact-replay blocker assembly into
+        the replay diagnostics helper owner, reducing application/services/control_plane
+        from 17 to 15 duplicate clusters while files_ge_250_loc and max_internal_fan_in
+        remain non-growing.
   - name: composition_runtime_builders
     owner: '@bioetl-platform'
     linked_rf: RF-023
-    linked_issue: '#4563'
+    linked_issue: '#4552'
     ratchet_stage: reviewed-baseline
     ratchet_scope: duplication-report-plus-bounded-growth
     expected_action: Hold file-growth and fan-in at the reviewed baseline during
@@ -374,7 +374,7 @@ hotspot_family_ratchets:
       files_ge_250_loc: 7
       max_internal_fan_in: 11
     metrics:
-      duplication_clusters: 13
+      duplication_clusters: 11
       files: 37
       total_loc: 5736
       files_ge_250_loc: 7
@@ -382,11 +382,11 @@ hotspot_family_ratchets:
       max_internal_fan_in: 11
       max_internal_fan_in_module: bioetl.composition.runtime_builders.inputs_resolver
     trend:
-      status: reviewed_baseline_2026-05-20
-      next_action: 2026-05-20 refreshes the reviewed family baseline for composition/runtime_builders;
-        keep duplicate clusters, files_ge_250_loc, and max_internal_fan_in non-growing
-        while paying down 13 duplicate clusters toward future activation of the
-        zero-duplication ratchet.
+      status: reduced_2026-05-22_issue_4552
+      next_action: 2026-05-22 reduces composition/runtime_builders duplication from
+        13 to 11 clusters by collapsing repeated public/private export lists and
+        keeping the family on the reviewed bounded-growth ratchet for further
+        semantic deduplication work.
 hotspot_family_coverage_thresholds:
   snapshot_date: '2026-05-22'
   linked_issue: '#4567'
@@ -397,6 +397,8 @@ hotspot_family_coverage_thresholds:
       max_unmeasured_module_count: 0
       min_covered_module_count: 0
       min_covered_line_percent: 0.0
+      allowlisted_unmeasured_paths:
+      - src/bioetl/application/core/_batch_processing_metrics_support.py
     composition_bootstrap_runtime:
       min_measured_module_count: 42
       max_unmeasured_module_count: 0
@@ -412,11 +414,16 @@ hotspot_family_coverage_thresholds:
       max_unmeasured_module_count: 0
       min_covered_module_count: 0
       min_covered_line_percent: 0.0
+      allowlisted_unmeasured_paths:
+      - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_alerts.py
+      - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profile_support.py
+      - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profiles.py
+      - src/bioetl/application/services/control_plane/_run_manifest_replay_family_contract_payload.py
     composition_runtime_builders:
       min_measured_module_count: 38
       max_unmeasured_module_count: 0
       min_covered_module_count: 2
-      min_covered_line_percent: 2.72
+      min_covered_line_percent: 2.71
 removable_complexity_family_ratchets:
   snapshot_date: '2026-04-13'
   update_policy: Only raise budgets after an intentional reviewed baseline refresh

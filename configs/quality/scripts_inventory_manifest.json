@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-22T10:40:57.495183+00:00",
+  "generated_at": "2026-05-22T20:03:18.182133+00:00",
   "summary": {
     "total_scripts": 395,
     "status_counts": {
@@ -14,7 +14,7 @@
       "docs": 152,
       "scripts": 315,
       "skills": 8,
-      "tests": 158
+      "tests": 159
     }
   },
   "scripts": [
@@ -406,7 +406,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 211,
+          "line": 210,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.ps1\","
         }
@@ -421,7 +421,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 212,
+          "line": 211,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.sh\","
         }
@@ -630,7 +630,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 213,
+          "line": 212,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/setup-env.sh\","
         }
@@ -765,7 +765,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 210,
+          "line": 209,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/test-basic.sh\","
         }
@@ -1104,7 +1104,7 @@
         },
         {
           "path": "scripts/engineering/dev/__main__.py",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "COMMAND_SPECS[\"setup-mcp\"] = module_command(\"scripts.ai.codex.setup_mcp\")"
         }
@@ -1344,7 +1344,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 214,
+          "line": 213,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/check-env.ps1\","
         }
@@ -1509,7 +1509,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 215,
+          "line": 214,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/setup-env.sh\","
         }
@@ -1788,7 +1788,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 152,
+          "line": 164,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         }
@@ -1821,7 +1821,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 149,
+          "line": 161,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         }
@@ -2641,7 +2641,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 216,
+          "line": 215,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.ps1\","
         }
@@ -2662,7 +2662,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 217,
+          "line": 216,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.sh\","
         }
@@ -2683,7 +2683,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 218,
+          "line": 217,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.ps1\","
         }
@@ -2728,7 +2728,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 219,
+          "line": 218,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.sh\","
         }
@@ -2857,7 +2857,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 206,
+          "line": 205,
           "source_group": "scripts",
           "text": "\"scripts/check_dq_dsl_parity.py\","
         }
@@ -2941,7 +2941,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 204,
+          "line": 203,
           "source_group": "scripts",
           "text": "\"scripts/ci_check_docs_parity.sh\","
         }
@@ -4680,7 +4680,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/docs/README.md",
@@ -4708,7 +4708,13 @@
         },
         {
           "path": "tests/unit/scripts/repo/test_generate_scripts_wrapper_caller_matrix.py",
-          "line": 12,
+          "line": 14,
+          "source_group": "tests",
+          "text": "test_file.write_text(\"scripts/docs/build_docs_site.sh\\n\", encoding=\"utf-8\")"
+        },
+        {
+          "path": "tests/unit/scripts/repo/test_generate_scripts_wrapper_caller_matrix.py",
+          "line": 25,
           "source_group": "tests",
           "text": "assert \"`scripts/docs/build_docs_site.sh`\" in report"
         }
@@ -6010,7 +6016,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 220,
+          "line": 239,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"apply_ci_fixes.py\""
         }
@@ -6157,7 +6163,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 140,
+          "line": 159,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"quality_integral_gate.py\""
         }
@@ -6262,7 +6268,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 208,
+          "line": 207,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/update_test_telemetry_baseline.py\","
         }
@@ -6319,7 +6325,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 207,
+          "line": 206,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_control_plane_artifacts.py\","
         }
@@ -6490,7 +6496,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 36,
+      "reference_count": 40,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -6614,7 +6620,7 @@
         },
         {
           "path": "scripts/engineering/dev/__main__.py",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"install-deps\": \"install_deps.py\","
         }
@@ -6635,7 +6641,7 @@
         },
         {
           "path": "scripts/engineering/dev/__main__.py",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"mock-metrics\": \"metrics_mock_server.py\","
         }
@@ -6722,7 +6728,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/__main__.py",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"migrate-deprecated-names\": \"python/migrate_deprecated_names.py\","
         }
@@ -6749,7 +6755,7 @@
         },
         {
           "path": "scripts/engineering/dev/__main__.py",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"probe-quality\": \"quality_gate_probe.py\","
         }
@@ -6776,7 +6782,7 @@
         },
         {
           "path": "scripts/engineering/dev/__main__.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"mock-quarantine\": \"quarantine_explorer_mock_server.py\","
         }
@@ -7186,13 +7192,13 @@
         },
         {
           "path": "scripts/engineering/dev/__main__.py",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"run-tests\": \"run_tests.py\","
         },
         {
           "path": "scripts/engineering/dev/__main__.py",
-          "line": 83,
+          "line": 104,
           "source_group": "scripts",
           "text": "commands={\"test-changed\": python_command(\"run_tests.py\", \"changed\")},"
         },
@@ -7477,7 +7483,7 @@
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 84,
+          "line": 98,
           "source_group": "docs",
           "text": "python3 scripts/engineering/diagnostics/audit_structure.py --path ."
         },
@@ -8518,7 +8524,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 304,
+          "line": 323,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         }
@@ -8927,7 +8933,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 307,
+          "line": 326,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         }
@@ -9116,7 +9122,7 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 142,
+          "line": 205,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }
@@ -9322,7 +9328,7 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 228,
+          "line": 234,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_closure_campaign.py --require-global-claim`"
         },
@@ -9340,7 +9346,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 282,
+          "line": 291,
           "source_group": "docs",
           "text": "- `run_historical_replay_closure_campaign.py` is the deterministic batch path"
         },
@@ -9379,13 +9385,13 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 225,
+          "line": 231,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py` persists"
         },
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 231,
+          "line": 237,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-universal-claim`"
         },
@@ -9403,7 +9409,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 287,
+          "line": 296,
           "source_group": "docs",
           "text": "- `run_historical_replay_universe_campaign.py` is the full-universe path: it"
         },
@@ -9807,13 +9813,13 @@
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 83,
+          "line": 97,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py"
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 114,
+          "line": 128,
           "source_group": "docs",
           "text": "`scripts/engineering/repo/audit_root_cleanliness.py` MUST использовать этот"
         },
@@ -11722,7 +11728,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 192,
+          "line": 211,
           "source_group": "tests",
           "text": "/ \"rerender_grafana_screenshots.py\""
         }
@@ -11818,7 +11824,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 220,
+          "line": 219,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/docker/restart-docker.ps1\","
         }
@@ -12220,7 +12226,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 205,
+          "line": 204,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/repo/cleanup_repository.py\","
         },
@@ -12574,7 +12580,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 194,
+          "line": 193,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/generate_contracts.py\","
         },

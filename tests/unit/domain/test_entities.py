@@ -18,6 +18,8 @@ from bioetl.domain.entities import (
 from bioetl.domain.types import ContentHash, EntityID, RunType
 from tests.helpers.clock import FIXED_TEST_TIME
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def base_entity_kwargs():

@@ -19,9 +19,6 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
     _resolve_exact_replay_support_boundary,
     _resolve_replay_family_contract,
 )
-from bioetl.application.services.control_plane._run_manifest_replay_family_contract_payload import (
-    build_replay_family_contract_payload,
-)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_state import (
     _build_replay_state_projection,
     _resolve_broader_historical_exact_replay_state,
@@ -31,6 +28,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
     _resolve_replay_capability_reason,
     _resolve_replay_mode,
     _resolve_replay_occurrence_kind,
+)
+from bioetl.application.services.control_plane._run_manifest_replay_family_contract_payload import (
+    build_replay_family_contract_payload,
 )
 from bioetl.application.services.control_plane._run_manifest_replay_taxonomy import (
     build_replay_taxonomy_projection,

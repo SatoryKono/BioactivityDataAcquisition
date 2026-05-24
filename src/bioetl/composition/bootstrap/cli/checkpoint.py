@@ -38,8 +38,8 @@ from bioetl.composition.observability_resolution import (
     resolve_metrics_port,
     resolve_tracing_port,
 )
-from bioetl.domain.types import RunID
 from bioetl.composition.runtime_builders.config_access import get_settings
+from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (

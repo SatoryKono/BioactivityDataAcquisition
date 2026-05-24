@@ -1,25 +1,25 @@
 ---
 id: mcp-setup
-title: Configure MCP runtime
+title: Setup MCP runtime
 task_id: mcp-setup
-created_at: '2026-05-22T08:12:56Z'
+created_at: '2026-05-24T12:02:08Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - scripts/ai/codex/setup_mcp.py
-summary: Validated and synchronized MCP workspace config plus ~/.codex/config.toml;
-  no tracked repo diffs remained.
+summary: 'Verified that BioETL MCP runtime is already configured for Codex: workspace
+  configs, ~/.codex managed block, and repo check script all pass without changes.'
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Configure MCP runtime
+- Title: Setup MCP runtime
 
 ## Outcome
 
-- Validated and synchronized MCP workspace config plus ~/.codex/config.toml; no tracked repo diffs remained.
+- Verified that BioETL MCP runtime is already configured for Codex: workspace configs, ~/.codex managed block, and repo check script all pass without changes.
 
 ## Lessons learned
 

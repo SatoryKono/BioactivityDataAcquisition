@@ -20,6 +20,8 @@ AI-facing setup and MCP operational scripts live under `scripts/ai/`.
 - launchers under `launchers/codex/`
 - setup/bootstrap commands such as `launchers/codex/setup_plugins.sh`
 - supported non-memory Python commands exposed through `python -m scripts.ops`
+- observability smoke checks such as
+  `python -m scripts.ops check-observability-ports --json`
 
 The Codex launcher cluster is intentionally mixed:
 

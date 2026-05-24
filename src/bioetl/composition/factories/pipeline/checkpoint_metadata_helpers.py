@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.composition.runtime_builders.input_snapshot_resolution import (
     resolve_cached_bronze_input_snapshot_refs,
     resolve_manifest_input_snapshot_refs,
@@ -14,7 +15,6 @@ from bioetl.domain.normalization import (
     compute_input_snapshot_identity_fingerprint,
 )
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
-from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.config.silver_filter_migration import (
     resolve_silver_filter_compatibility_mode,
 )
