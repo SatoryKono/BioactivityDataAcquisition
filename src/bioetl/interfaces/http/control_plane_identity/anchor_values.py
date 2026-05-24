@@ -72,6 +72,7 @@ def _manifest_anchor_values(
         "pipeline_version": code.pipeline_version,
         "effective_config_hash": diagnostic_value(diagnostics, "effective_config_hash")
         or code.effective_config_hash,
+        "resolved_config_hash": code.resolved_config_hash,
         "effective_config_artifact_id": diagnostic_value(
             diagnostics, "effective_config_artifact_id"
         )
