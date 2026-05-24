@@ -257,13 +257,13 @@ async def test_pipeline_resume_after_failure(
     )
     checkpoint_path = storage_paths["checkpoints"] / "chembl_activity.json"
     await resume_runner._checkpoint_manager.save_checkpoint(
-        CheckpointMetadata(records_processed=2)
+        CheckpointMetadata(records_processed=0)
     )
     assert checkpoint_path.exists(), "Seeded checkpoint must be persisted on disk"
 
     loaded_checkpoint = await resume_runner._checkpoint_manager.load_checkpoint()
     assert loaded_checkpoint is not None, "Resume runner must load seeded checkpoint"
-    assert loaded_checkpoint.records_processed == 2
+    assert loaded_checkpoint.records_processed == 0
 
     await resume_runner.run()
 

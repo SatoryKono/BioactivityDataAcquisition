@@ -23,6 +23,7 @@ from bioetl.composition.factories.services._bundle_support import (
 from bioetl.composition.factories.services._bundle_support import (
     create_pipeline_data_source as _create_pipeline_data_source_impl,
 )
+from bioetl.composition.factories.services import factory as _services_factory_module
 from bioetl.composition.factories.services.factory import BaseServicesFactory
 from bioetl.domain.config import DQConfig, PipelineConfig
 from bioetl.domain.context import CachedBronzeContext
@@ -55,6 +56,7 @@ __all__ = [
 ]
 
 PipelineCreationInputs = _PipelineCreationInputs
+_DEFAULT_BASE_SERVICES_FACTORY = BaseServicesFactory
 
 
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
@@ -83,6 +85,14 @@ def compute_config_hash(config: PipelineYamlConfig | dict[str, object]) -> str:
     return config_hash
 
 
+def _resolve_base_services_factory() -> type[BaseServicesFactory]:
+    """Respect both bundle-local and canonical factory patch seams."""
+    local_factory = BaseServicesFactory
+    if local_factory is not _DEFAULT_BASE_SERVICES_FACTORY:
+        return local_factory
+    return _services_factory_module.BaseServicesFactory
+
+
 def _resolve_service_bundle_dependencies(
     override: ServiceBundleDependencies | None = None,
 ) -> ServiceBundleDependencies:
@@ -91,7 +101,7 @@ def _resolve_service_bundle_dependencies(
         load_pipeline_config_fn=load_pipeline_config,
         yaml_config_to_domain_fn=yaml_config_to_domain,
         compute_config_hash_fn=compute_config_hash,
-        base_services_factory=BaseServicesFactory,
+        base_services_factory=_resolve_base_services_factory(),
     )
 
 
