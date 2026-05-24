@@ -5717,12 +5717,14 @@ def _link_source_backed_file_structure(
     config: dict[str, object],
 ) -> None:
     source_backed_labels = _source_backed_file_structure_labels()
+    path_kind_cache: dict[str, str | None] = {}
     for node in tuple(snapshot.nodes.values()):
         _link_source_backed_node_structure(
             snapshot,
             root,
             node,
             source_backed_labels=source_backed_labels,
+            path_kind_cache=path_kind_cache,
             today=today,
             zone_roots=zone_roots,
             config=config,
@@ -5735,6 +5737,7 @@ def _link_source_backed_node_structure(
     node: GraphNode,
     *,
     source_backed_labels: set[str],
+    path_kind_cache: dict[str, str | None],
     today: str,
     zone_roots: dict[str, tuple[str, ...]],
     config: dict[str, object],
@@ -5747,13 +5750,8 @@ def _link_source_backed_node_structure(
     if _is_excluded_file_structure_path(source_path_value, config):
         return
 
-    source_path = root / source_path_value
-    try:
-        is_directory = source_path.is_dir()
-    except OSError:
-        # File or directory is corrupted or unreadable, skip it
-        return
-    if is_directory:
+    path_kind = _source_backed_path_kind(root, source_path_value, path_kind_cache)
+    if path_kind == "directory":
         _link_source_backed_directory_structure(
             snapshot,
             node.key,
@@ -5761,23 +5759,39 @@ def _link_source_backed_node_structure(
             config=config,
         )
         return
-    try:
-        is_file = source_path.is_file()
-    except OSError:
-        # File or directory is corrupted or unreadable, skip it
-        return
-    if not is_file:
+    if path_kind != "file":
         return
     _link_source_backed_file_node(
         snapshot,
         root,
         node.key,
-        source_path,
+        root / source_path_value,
         source_path_value=source_path_value,
         today=today,
         zone_roots=zone_roots,
         config=config,
     )
+
+
+def _source_backed_path_kind(
+    root: Path,
+    source_path_value: str,
+    path_kind_cache: dict[str, str | None],
+) -> str | None:
+    if source_path_value in path_kind_cache:
+        return path_kind_cache[source_path_value]
+    source_path = root / source_path_value
+    try:
+        if source_path.is_dir():
+            path_kind_cache[source_path_value] = "directory"
+        elif source_path.is_file():
+            path_kind_cache[source_path_value] = "file"
+        else:
+            path_kind_cache[source_path_value] = None
+    except OSError:
+        # File or directory is corrupted or unreadable, skip it.
+        path_kind_cache[source_path_value] = None
+    return path_kind_cache[source_path_value]
 
 
 def _source_backed_file_structure_labels() -> set[str]:

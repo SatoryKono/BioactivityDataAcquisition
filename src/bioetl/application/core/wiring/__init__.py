@@ -77,6 +77,7 @@ if TYPE_CHECKING:
         TransformCallback,
     )
     from bioetl.application.core.wiring.transformer import (
+        BaseTransformer,
         DefaultContractPolicy,
         NoOpStructuralPolicy,
         StructuralPolicyProtocol,
@@ -151,6 +152,7 @@ _EXPORT_GROUPS = {
         "TransformCallback",
     ),
     "bioetl.application.core.wiring.transformer": (
+        "BaseTransformer",
         "DefaultContractPolicy",
         "NoOpStructuralPolicy",
         "StructuralPolicyProtocol",

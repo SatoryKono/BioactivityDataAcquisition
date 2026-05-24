@@ -12,9 +12,6 @@ from bioetl.application.core.wiring.factory import (
     PipelineRunner,
     PipelineService,
 )
-from bioetl.composition.factories.datasource.data_source_factory import (
-    DataSourceCreatorProtocol,
-)
 from bioetl.composition.factories.pipeline.assembler_helpers import (
     _FactoryLike,
     build_factory_context,
@@ -37,6 +34,9 @@ from bioetl.composition.pipeline_runner_request import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.composition.factories.datasource.data_source_factory import (
+        DataSourceCreatorProtocol,
+    )
     from bioetl.application.core.wiring.transformer import (
         BaseTransformer,
         TransformerDependencyContext,
@@ -124,7 +124,7 @@ class GenericPipelineFactory[TPipeline: "BasePipeline"]:
             provider_registry=provider_registry,
             data_source_creator=data_source_creator,
             get_data_source_creator_fn=cast(
-                Callable[..., DataSourceCreatorProtocol],
+                Callable[..., object],
                 _public_assembler_seam("get_data_source_creator"),
             ),
         )

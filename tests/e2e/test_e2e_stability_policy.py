@@ -228,7 +228,7 @@ def test_non_empty_contract_covers_all_matrix_pipelines() -> None:
 
 
 def test_deferred_matrix_cases_are_excluded_from_default_smoke_parametrization() -> None:
-    """Replay-unsupported matrix cases stay declared but are not collected by default."""
+    """Deferred matrix cases stay declared but are not collected by default."""
     active = {case.pipeline_name for case in ACTIVE_PIPELINE_CASES}
     declared = {case.pipeline_name for case in PIPELINE_CASES}
 
