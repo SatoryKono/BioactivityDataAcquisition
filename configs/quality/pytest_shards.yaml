@@ -55,6 +55,7 @@ shards:
     paths:
       - tests/unit/composition
       - tests/unit/interfaces
+    workers_override: 0
     extra_pytest_args:
       - --ignore=tests/unit/composition/runtime_builders/test_runner_builder.py
       - --ignore=tests/unit/composition/runtime_builders/test_run_manifest_support.py

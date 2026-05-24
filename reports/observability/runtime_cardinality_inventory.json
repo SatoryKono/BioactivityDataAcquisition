@@ -2051,11 +2051,487 @@
     ]
   },
   "rules_without_registry": [],
+  "runtime_cardinality_evidence": {
+    "bioetl_checkpoint_load_events_total": [
+      "observed_series_count=0",
+      "approved_max_series=500",
+      "runtime_emitter_count=3",
+      "label_keys=pipeline,status"
+    ],
+    "bioetl_health_check_latency_seconds": [
+      "observed_series_count=0",
+      "approved_max_series=500",
+      "runtime_emitter_count=3",
+      "label_keys=provider"
+    ],
+    "bioetl_pipeline_runs_total": [
+      "observed_series_count=0",
+      "approved_max_series=500",
+      "runtime_emitter_count=3",
+      "label_keys=pipeline,run_type,status"
+    ]
+  },
+  "runtime_cardinality_observed_series": {
+    "bioetl_adapter_batch_size": [
+      "observed_series_count=0"
+    ],
+    "bioetl_adapter_dropped_duplicates_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_adapter_error_taxonomy_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_adapter_fallback_attempts_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_adapter_fallback_hit_rate": [
+      "observed_series_count=0"
+    ],
+    "bioetl_adapter_fallback_hits_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_adapter_request_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_adapter_requests_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_audit_query_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_audit_query_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_audit_write_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_audit_write_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_batch_lifecycle_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_batch_lifecycle_records_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_batch_size_records": [
+      "observed_series_count=0"
+    ],
+    "bioetl_bronze_bytes_freed_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_bronze_bytes_written_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_bronze_files_removed_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_bronze_records_written_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_bronze_write_attempts_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_bronze_write_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_bronze_write_total_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_checkpoint_compatibility_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_checkpoint_load_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_checkpoint_operator_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_checkpoint_operator_operations_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_checkpoint_save_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_checkpoint_save_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_circuit_breaker_failure_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_circuit_breaker_open_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_circuit_breaker_state": [
+      "observed_series_count=0"
+    ],
+    "bioetl_circuit_breaker_success_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_circuit_breaker_trips_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_composite_phase_errors_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_composite_phase_loss_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_composite_phase_records_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_composite_phase_retries_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_composite_source_selection_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_control_plane_ledger_append_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_control_plane_ledger_appends_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_control_plane_lifecycle_apply_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_control_plane_lifecycle_delete_candidates": [
+      "observed_series_count=1"
+    ],
+    "bioetl_control_plane_lifecycle_deleted_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_control_plane_manifest_write_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_control_plane_manifest_writes_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_control_plane_read_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_control_plane_reads_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_control_plane_terminal_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_data_freshness_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_data_source_retries_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_data_source_retry_exhausted_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_dq_anomaly_detected": [
+      "observed_series_count=0"
+    ],
+    "bioetl_dq_baseline_samples": [
+      "observed_series_count=0"
+    ],
+    "bioetl_dq_baseline_updated": [
+      "observed_series_count=0"
+    ],
+    "bioetl_dq_check_duration_ms": [
+      "observed_series_count=0"
+    ],
+    "bioetl_dq_check_failures_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_dq_context_build_failures_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_dq_dispositions_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_dq_monitor_disabled_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_dq_monitor_enabled": [
+      "observed_series_count=0"
+    ],
+    "bioetl_dq_records_quarantined_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_dq_report_generated_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_dq_report_skipped_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_dq_soft_threshold_exceeded": [
+      "observed_series_count=0"
+    ],
+    "bioetl_dq_validation_failures_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_dq_validation_record_count": [
+      "observed_series_count=0"
+    ],
+    "bioetl_dq_validation_score": [
+      "observed_series_count=0"
+    ],
+    "bioetl_errors_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_filter_combinations_loaded_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_filter_ids_duplicates_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_filter_ids_loaded_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_gold_lifecycle_state_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_gold_validation_failures_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_gold_write_attempts_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_gold_write_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_gold_write_outcomes_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_health_check_degraded_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_health_check_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_health_check_failures_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_health_check_latency_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_health_check_mode_latency_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_health_check_mode_status": [
+      "observed_series_count=0"
+    ],
+    "bioetl_health_check_status": [
+      "observed_series_count=0"
+    ],
+    "bioetl_health_check_success_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_http_request_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_http_request_errors_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_http_retries_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_http_retry_budget_exhausted_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_infrastructure_validated": [
+      "observed_series_count=0"
+    ],
+    "bioetl_lineage_fragments_emitted_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_lineage_refs_missing_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_memory_batch_resize_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_memory_monitor_fallback_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_memory_pressure_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_memory_pressure_state": [
+      "observed_series_count=0"
+    ],
+    "bioetl_metadata_write_outcomes_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_metadata_write_retries_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_metrics_publication_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_observability_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_observability_runtime_status": [
+      "observed_series_count=0"
+    ],
+    "bioetl_output_artifact_publication_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_phase_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_pipeline_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_pipeline_health_check_passed": [
+      "observed_series_count=0"
+    ],
+    "bioetl_pipeline_runs_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_pipeline_stage_expected": [
+      "observed_series_count=0"
+    ],
+    "bioetl_policy_violations_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_postrun_phase_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_postrun_phase_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_probe_mode_fallback_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_provider_health_status": [
+      "observed_series_count=0"
+    ],
+    "bioetl_publication_raw_vocab_unknown_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_quarantine_operator_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_quarantine_operator_operations_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_quarantine_records_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_rate_limiter_tokens_available": [
+      "observed_series_count=0"
+    ],
+    "bioetl_rate_limiter_wait_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_record_flow_invariants_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_record_flow_records_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_records_processed_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_replay_drift_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_replay_lag_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_replay_reconstructability_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_shutdown_completed": [
+      "observed_series_count=0"
+    ],
+    "bioetl_shutdown_initiated": [
+      "observed_series_count=0"
+    ],
+    "bioetl_silver_csv_export_failures_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_silver_csv_export_start_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_silver_csv_export_success_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_silver_filter_rejections_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_silver_merge_failures_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_silver_merge_retries_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_silver_optimize_start_total": [
+      "observed_series_count=1"
+    ],
+    "bioetl_silver_optimize_success_total": [
+      "observed_series_count=1"
+    ],
+    "bioetl_silver_vacuum_files_removed": [
+      "observed_series_count=1"
+    ],
+    "bioetl_silver_vacuum_start_total": [
+      "observed_series_count=1"
+    ],
+    "bioetl_silver_vacuum_success_total": [
+      "observed_series_count=1"
+    ],
+    "bioetl_silver_validation_failures_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_stage_backlog_records": [
+      "observed_series_count=0"
+    ],
+    "bioetl_stage_lag_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_stage_records_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_storage_optimization_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_structural_policy_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_structural_policy_shadow_comparisons_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_traced_runs_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_transform_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_transform_errors_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_vacuum_files_removed_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_workflow_current_status": [
+      "observed_series_count=0"
+    ],
+    "bioetl_workflow_runs_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_workflow_step_duration_seconds": [
+      "observed_series_count=0"
+    ],
+    "bioetl_workflow_step_events_total": [
+      "observed_series_count=0"
+    ]
+  },
   "runtime_cardinality_review_required": [
     "bioetl_checkpoint_load_events_total",
     "bioetl_health_check_latency_seconds",
     "bioetl_pipeline_runs_total"
   ],
+  "runtime_cardinality_threshold_violations": [],
   "runtime_emitters": {
     "bioetl_adapter_batch_size": [
       "src/bioetl/infrastructure/adapters/base_metrics.py"

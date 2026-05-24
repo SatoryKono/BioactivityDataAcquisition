@@ -28,7 +28,9 @@ from .conftest import (
     wrap_bootstrap_pipeline_runner_for_e2e,
 )
 from .test_pipeline_matrix_e2e import (
+    ACTIVE_PIPELINE_CASES,
     CRITICAL_SMOKE_PIPELINES,
+    MATRIX_REPLAY_DEFERRED_PIPELINES,
     NON_EMPTY_CASSETTE_CONTRACT_PIPELINES,
     PIPELINE_CASES,
     PipelineE2ECase,
@@ -199,6 +201,15 @@ def test_non_empty_contract_covers_all_matrix_pipelines() -> None:
         _requires_non_empty_cassette_contract(name)
         for name in NON_EMPTY_CASSETTE_CONTRACT_PIPELINES
     )
+
+
+def test_deferred_matrix_cases_are_excluded_from_default_smoke_parametrization() -> None:
+    """Replay-unsupported matrix cases stay declared but are not collected by default."""
+    active = {case.pipeline_name for case in ACTIVE_PIPELINE_CASES}
+    declared = {case.pipeline_name for case in PIPELINE_CASES}
+
+    assert MATRIX_REPLAY_DEFERRED_PIPELINES <= declared
+    assert active.isdisjoint(MATRIX_REPLAY_DEFERRED_PIPELINES)
 
 
 def test_bronze_payload_assertion_does_not_accept_metadata_only(

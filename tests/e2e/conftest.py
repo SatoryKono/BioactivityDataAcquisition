@@ -18,6 +18,7 @@ import asyncio
 import json
 import os
 import shutil
+import tempfile
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from dataclasses import replace
@@ -363,17 +364,20 @@ def clone_e2e_data_dir_snapshot(snapshot_dir: Path, target_dir: Path) -> None:
 def e2e_data_dir(tmp_path: Path, monkeypatch) -> Generator[Path, None, None]:
     """Создание временной директории данных с настройкой окружения.
 
-    Создаёт структуру директорий Medallion Architecture:
-    - bronze/
-    - silver/
-    - gold/
-    - checkpoints/
-    - quarantine/
+    Предпочитает локальный temp-root, чтобы Delta Lake не упирался в mounted
+    pytest tmp-path на Windows/network storage.
     """
+    del tmp_path  # mounted pytest temp may point to a slow Windows/network drive
     del monkeypatch  # kept for backward-compatible fixture signature
-    data_dir = tmp_path / "bioetl_data"
-    with managed_e2e_data_dir(data_dir) as prepared_dir:
-        yield prepared_dir
+
+    temp_root = Path("/tmp") if Path("/tmp").exists() else Path(tempfile.gettempdir())
+    sandbox_dir = Path(tempfile.mkdtemp(prefix="bioetl-e2e-", dir=str(temp_root)))
+    data_dir = sandbox_dir / "bioetl_data"
+    try:
+        with managed_e2e_data_dir(data_dir) as prepared_dir:
+            yield prepared_dir
+    finally:
+        shutil.rmtree(sandbox_dir, ignore_errors=True)
 
 
 @pytest.fixture

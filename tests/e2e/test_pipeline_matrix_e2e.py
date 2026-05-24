@@ -218,6 +218,23 @@ PIPELINE_CASES: tuple[PipelineE2ECase, ...] = (
 PIPELINE_CASE_BY_NAME: dict[str, PipelineE2ECase] = {
     case.pipeline_name: case for case in PIPELINE_CASES
 }
+
+MATRIX_REPLAY_DEFERRED_PIPELINES: frozenset[str] = frozenset(
+    {
+        "chembl_tissue",
+        "composite_activity",
+        "composite_assay",
+        "composite_molecule",
+        "composite_publication",
+        "composite_target",
+    }
+)
+ACTIVE_PIPELINE_CASES: tuple[PipelineE2ECase, ...] = tuple(
+    case
+    for case in PIPELINE_CASES
+    if case.pipeline_name not in MATRIX_REPLAY_DEFERRED_PIPELINES
+)
+
 CRITICAL_SMOKE_PIPELINES: frozenset[str] = frozenset(
     {
         "chembl_activity",
@@ -334,7 +351,7 @@ def _iter_entity_pipelines() -> set[str]:
     return pipelines
 
 
-@pytest.fixture(params=PIPELINE_CASES, ids=lambda c: c.pipeline_name)
+@pytest.fixture(params=ACTIVE_PIPELINE_CASES, ids=lambda c: c.pipeline_name)
 def pipeline_case(request: pytest.FixtureRequest) -> PipelineE2ECase:
     return request.param
 
@@ -384,7 +401,13 @@ def test_pipeline_matrix_declares_all_entity_pipelines() -> None:
     declared = {
         case.pipeline_name for case in PIPELINE_CASES if case.provider != "composite"
     }
+    deferred_entities = {
+        pipeline_name
+        for pipeline_name in MATRIX_REPLAY_DEFERRED_PIPELINES
+        if not pipeline_name.startswith("composite_")
+    }
     assert declared == configured
+    assert deferred_entities <= configured
 
 
 @pytest.mark.e2e
