@@ -72,7 +72,7 @@ def normalize_text_key(value: str) -> str:
 def parse_markdown_note(path: Path, *, include_body: bool = True) -> MemoryNote:
     """Parse a markdown note with YAML frontmatter."""
     try:
-        handle = _open_with_timeout(path, timeout=5.0)
+        handle = _open_with_timeout(path, timeout=30.0)
     except (OSError, TimeoutError) as exc:
         raise ValueError(f"failed to open note file: {exc}") from exc
     with handle:

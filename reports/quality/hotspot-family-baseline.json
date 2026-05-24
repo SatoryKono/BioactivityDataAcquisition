@@ -17,9 +17,9 @@
       ],
       "duplication_clusters": 8,
       "files": 172,
-      "total_loc": 21256,
-      "files_ge_250_loc": 12,
-      "helper_function_ratio": 0.375,
+      "total_loc": 21278,
+      "files_ge_250_loc": 13,
+      "helper_function_ratio": 0.376,
       "max_internal_fan_in": 14,
       "max_internal_fan_in_module": "bioetl.application.core.batch_runtime_failure_policy",
       "bounded_growth_budgets": {
@@ -27,7 +27,7 @@
         "max_internal_fan_in": 14
       },
       "budget_warnings": [
-        "at_budget:files_ge_250_loc=12/12",
+        "at_budget:files_ge_250_loc=13/12",
         "at_budget:max_internal_fan_in=14/14"
       ]
     },
