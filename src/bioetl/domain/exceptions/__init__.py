@@ -1,126 +1,75 @@
-"""Domain layer exceptions.
+"""Domain-layer exception facade with lazy re-exports.
 
-Implements centralized exception hierarchy for all BioETL errors.
-All exceptions should inherit from BioETLError to enable consistent error handling.
-
-Each exception class defines an explicit `error_type` attribute for deterministic
-error classification (see ErrorClassifier).
-
-Exception Categories (§7 RULES.md):
-    - ValidationErrors: Schema and data format validation errors
-    - DataQualityErrors: Batch-level data quality issues
-    - NetworkErrors: Network connectivity and external service errors
-    - InfrastructureErrors: Storage, filesystem, and environment errors
-    - InternalErrors: Critical application errors requiring immediate attention
-
-This module re-exports all exceptions for backward compatibility with:
-    from bioetl.domain.exceptions import SomeError
-
-External Service Exceptions (RULES.md §7.2):
-    Domain layer provides abstract exceptions for external service errors.
-    Application layer should catch these abstract exceptions, not provider-specific ones.
-
-    - ExternalServiceError: Base for all external service errors
-    - ServiceUnavailableError: Service is down (5xx, timeout)
-    - RateLimitExceededError: Rate limit exceeded (429)
-    - ServiceAuthenticationError: Auth failed (401/403)
-    - DataValidationError: Invalid data from external source
-
-Provider-Specific Exceptions:
-    Provider-specific API errors (CrossRefApiError, etc.) are
-    defined in infrastructure.adapters.{provider}.exceptions. Application layer
-    should catch ExternalServiceError instead.
+This module preserves historical `from bioetl.domain.exceptions import X` imports
+without eagerly importing every exception module at package import time. Eager
+re-export caused expensive import graphs and collection hangs in test/runtime
+contexts that only needed one submodule.
 """
 
 from __future__ import annotations
 
-# =============================================================================
-# Base Classes
-# =============================================================================
-from bioetl.domain.exceptions.base import (
-    BioETLError,
-    CriticalError,
-    DataQualityError,
-    RecoverableError,
-)
-from bioetl.domain.exceptions.bounded_context import (
-    DomainExceptionContext,
-    get_domain_exception_context,
-)
+from importlib import import_module
+from typing import TYPE_CHECKING
 
-# =============================================================================
-# DataQualityErrors - Batch-level data quality issues
-# =============================================================================
-from bioetl.domain.exceptions.data_quality import (
-    DataQualityThresholdError,
-)
-
-# =============================================================================
-# InfrastructureErrors - Storage, filesystem, and environment errors
-# =============================================================================
-from bioetl.domain.exceptions.infrastructure import (
-    BronzeValidationError,
-    BucketNotFoundError,
-    CachedBronzeEmptyError,
-    DeltaOptimizeError,
-    DeltaSchemaValidationError,
-    DeltaTransactionError,
-    DeltaWriteConflictError,
-    InfrastructureError,
-    SchemaEvolutionError,
-    StorageError,
-    StorageQuotaExceededError,
-    TableNotFoundError,
-    UploadError,
-)
-
-# =============================================================================
-# InternalErrors - Critical application errors
-# =============================================================================
-from bioetl.domain.exceptions.internal import (
-    AuthFailureError,
-    CheckpointConflictError,
-    InvalidStateError,
-    LockAcquisitionError,
-    LockLostError,
-    MergeConflictError,
-    MetricsServerError,
-    PolicyViolationError,
-    RunnerAlreadyExecutedError,
-)
-
-# =============================================================================
-# NetworkErrors - Network connectivity and external service errors
-# =============================================================================
-from bioetl.domain.exceptions.network import (
-    ApiError,
-    CircuitBreakerOpenError,
-    DataValidationError,
-    ExternalServiceError,
-    NetworkError,
-    RateLimitError,
-    RateLimitExceededError,
-    RetryExhaustedError,
-    ServiceAuthenticationError,
-    ServiceUnavailableError,
-    TimeoutError,
-)
-
-# =============================================================================
-# PipelineShutdown - Graceful shutdown signal exception and reason enum
-# =============================================================================
-from bioetl.domain.exceptions.pipeline_shutdown import (
-    PipelineShutdownError,
-    ShutdownReason,
-)
-
-# =============================================================================
-# ValidationErrors - Schema and data format validation
-# =============================================================================
-from bioetl.domain.exceptions.validation import (
-    SchemaViolationError,
-    ValidationError,
-)
+if TYPE_CHECKING:
+    from bioetl.domain.exceptions.base import (
+        BioETLError,
+        CriticalError,
+        DataQualityError,
+        RecoverableError,
+    )
+    from bioetl.domain.exceptions.bounded_context import (
+        DomainExceptionContext,
+        get_domain_exception_context,
+    )
+    from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
+    from bioetl.domain.exceptions.infrastructure import (
+        BronzeValidationError,
+        BucketNotFoundError,
+        CachedBronzeEmptyError,
+        DeltaOptimizeError,
+        DeltaSchemaValidationError,
+        DeltaTransactionError,
+        DeltaWriteConflictError,
+        InfrastructureError,
+        SchemaEvolutionError,
+        StorageError,
+        StorageQuotaExceededError,
+        TableNotFoundError,
+        UploadError,
+    )
+    from bioetl.domain.exceptions.internal import (
+        AuthFailureError,
+        CheckpointConflictError,
+        InvalidStateError,
+        LockAcquisitionError,
+        LockLostError,
+        MergeConflictError,
+        MetricsServerError,
+        PolicyViolationError,
+        RunnerAlreadyExecutedError,
+    )
+    from bioetl.domain.exceptions.network import (
+        ApiError,
+        CircuitBreakerOpenError,
+        DataValidationError,
+        ExternalServiceError,
+        NetworkError,
+        RateLimitError,
+        RateLimitExceededError,
+        RetryExhaustedError,
+        ServiceAuthenticationError,
+        ServiceUnavailableError,
+        TimeoutError,
+    )
+    from bioetl.domain.exceptions.pipeline_shutdown import (
+        PipelineShutdownError,
+        ShutdownReason,
+    )
+    from bioetl.domain.exceptions.validation import (
+        SchemaViolationError,
+        ValidationError,
+    )
 
 __all__ = [
     "ApiError",
@@ -168,3 +117,63 @@ __all__ = [
     "ValidationError",
     "get_domain_exception_context",
 ]
+
+_EXPORT_MODULES = {
+    "ApiError": "bioetl.domain.exceptions.network",
+    "AuthFailureError": "bioetl.domain.exceptions.internal",
+    "BioETLError": "bioetl.domain.exceptions.base",
+    "BronzeValidationError": "bioetl.domain.exceptions.infrastructure",
+    "BucketNotFoundError": "bioetl.domain.exceptions.infrastructure",
+    "CachedBronzeEmptyError": "bioetl.domain.exceptions.infrastructure",
+    "CheckpointConflictError": "bioetl.domain.exceptions.internal",
+    "CircuitBreakerOpenError": "bioetl.domain.exceptions.network",
+    "CriticalError": "bioetl.domain.exceptions.base",
+    "DataQualityError": "bioetl.domain.exceptions.base",
+    "DataQualityThresholdError": "bioetl.domain.exceptions.data_quality",
+    "DataValidationError": "bioetl.domain.exceptions.network",
+    "DeltaOptimizeError": "bioetl.domain.exceptions.infrastructure",
+    "DeltaSchemaValidationError": "bioetl.domain.exceptions.infrastructure",
+    "DeltaTransactionError": "bioetl.domain.exceptions.infrastructure",
+    "DeltaWriteConflictError": "bioetl.domain.exceptions.infrastructure",
+    "DomainExceptionContext": "bioetl.domain.exceptions.bounded_context",
+    "ExternalServiceError": "bioetl.domain.exceptions.network",
+    "InfrastructureError": "bioetl.domain.exceptions.infrastructure",
+    "InvalidStateError": "bioetl.domain.exceptions.internal",
+    "LockAcquisitionError": "bioetl.domain.exceptions.internal",
+    "LockLostError": "bioetl.domain.exceptions.internal",
+    "MergeConflictError": "bioetl.domain.exceptions.internal",
+    "MetricsServerError": "bioetl.domain.exceptions.internal",
+    "NetworkError": "bioetl.domain.exceptions.network",
+    "PipelineShutdownError": "bioetl.domain.exceptions.pipeline_shutdown",
+    "PolicyViolationError": "bioetl.domain.exceptions.internal",
+    "RateLimitError": "bioetl.domain.exceptions.network",
+    "RateLimitExceededError": "bioetl.domain.exceptions.network",
+    "RecoverableError": "bioetl.domain.exceptions.base",
+    "RetryExhaustedError": "bioetl.domain.exceptions.network",
+    "RunnerAlreadyExecutedError": "bioetl.domain.exceptions.internal",
+    "SchemaEvolutionError": "bioetl.domain.exceptions.infrastructure",
+    "SchemaViolationError": "bioetl.domain.exceptions.validation",
+    "ServiceAuthenticationError": "bioetl.domain.exceptions.network",
+    "ServiceUnavailableError": "bioetl.domain.exceptions.network",
+    "ShutdownReason": "bioetl.domain.exceptions.pipeline_shutdown",
+    "StorageError": "bioetl.domain.exceptions.infrastructure",
+    "StorageQuotaExceededError": "bioetl.domain.exceptions.infrastructure",
+    "TableNotFoundError": "bioetl.domain.exceptions.infrastructure",
+    "TimeoutError": "bioetl.domain.exceptions.network",
+    "UploadError": "bioetl.domain.exceptions.infrastructure",
+    "ValidationError": "bioetl.domain.exceptions.validation",
+    "get_domain_exception_context": "bioetl.domain.exceptions.bounded_context",
+}
+
+
+def __getattr__(name: str) -> object:
+    module_name = _EXPORT_MODULES.get(name)
+    if module_name is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    value = getattr(import_module(module_name), name)
+    globals()[name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(__all__))

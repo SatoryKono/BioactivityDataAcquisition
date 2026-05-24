@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 from datetime import UTC, datetime
@@ -218,18 +219,22 @@ def test_memory_tooling_package_exports_submodules_lazily() -> None:
     assert callable(query_module.query_all)
 
 
-@pytest.mark.skip(reason="Network drive timeout - module imports timeout on E:\\g-drive")
-def test_memory_workflow_module_help_does_not_emit_runpy_warning() -> None:
+def test_memory_workflow_module_help_does_not_emit_runpy_warning(
+    memory_local_tmp_path: Path,
+) -> None:
     repo_root = Path(__file__).resolve().parents[3]
+    sandbox_src_root = memory_local_tmp_path / "src"
+    shutil.copytree(repo_root / "src" / "memory", sandbox_src_root / "memory")
     env = os.environ.copy()
-    pythonpath_entries = [str(repo_root / "scripts"), str(repo_root / "src")]
+    pythonpath_entries = [str(sandbox_src_root)]
     if env.get("PYTHONPATH"):
         pythonpath_entries.append(env["PYTHONPATH"])
     env["PYTHONPATH"] = os.pathsep.join(pythonpath_entries)
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
 
     result = subprocess.run(
         [sys.executable, "-m", "memory.tooling.workflow", "--help"],
-        cwd=repo_root,
+        cwd=memory_local_tmp_path,
         env=env,
         capture_output=True,
         text=True,

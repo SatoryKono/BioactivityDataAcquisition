@@ -249,6 +249,12 @@ tests = [
     { name = "syrupy" },
     { name = "vcrpy" },
 ]
+tests-full = [
+    { name = "import-linter" },
+    { name = "pytest-benchmark" },
+    { name = "radon" },
+    { name = "vulture" },
+]
 tracing = [
     { name = "opentelemetry-api" },
     { name = "opentelemetry-exporter-otlp" },
@@ -276,6 +282,7 @@ requires-dist = [
     { name = "hypothesis", marker = "extra == 'dev'", specifier = ">=6.100" },
     { name = "hypothesis", marker = "extra == 'tests'", specifier = ">=6.100" },
     { name = "import-linter", marker = "extra == 'dev'", specifier = ">=2.0" },
+    { name = "import-linter", marker = "extra == 'tests-full'", specifier = ">=2.0" },
     { name = "jsonschema", marker = "extra == 'dev'", specifier = ">=4.20" },
     { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.6,<2.0" },
     { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.5" },
@@ -317,6 +324,7 @@ requires-dist = [
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.24" },
     { name = "pytest-asyncio", marker = "extra == 'tests'", specifier = ">=0.24" },
     { name = "pytest-benchmark", marker = "extra == 'dev'", specifier = ">=4.0" },
+    { name = "pytest-benchmark", marker = "extra == 'tests-full'", specifier = ">=4.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.0" },
     { name = "pytest-cov", marker = "extra == 'tests'", specifier = ">=4.0" },
     { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.3" },
@@ -327,6 +335,7 @@ requires-dist = [
     { name = "pytest-xdist", marker = "extra == 'tests'", specifier = ">=3.5" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "radon", marker = "extra == 'dev'", specifier = ">=6.0" },
+    { name = "radon", marker = "extra == 'tests-full'", specifier = ">=6.0" },
     { name = "respx", marker = "extra == 'dev'", specifier = ">=0.21" },
     { name = "respx", marker = "extra == 'tests'", specifier = ">=0.21" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4" },
@@ -338,10 +347,11 @@ requires-dist = [
     { name = "vcrpy", marker = "extra == 'dev'", specifier = ">=6.0" },
     { name = "vcrpy", marker = "extra == 'tests'", specifier = ">=6.0" },
     { name = "vulture", marker = "extra == 'dev'", specifier = ">=2.11" },
+    { name = "vulture", marker = "extra == 'tests-full'", specifier = ">=2.11" },
     { name = "xenon", marker = "extra == 'dev'", specifier = ">=0.9" },
     { name = "zstandard", specifier = ">=0.22" },
 ]
-provides-extras = ["tracing", "performance", "export", "tests", "dev", "docs"]
+provides-extras = ["tracing", "performance", "export", "tests", "tests-full", "dev", "docs"]
 
 [package.metadata.requires-dev]
 dev = [{ name = "bioetl", extras = ["dev"] }]

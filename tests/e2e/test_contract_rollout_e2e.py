@@ -103,7 +103,6 @@ def _versioned_table_path(
     return base_path / provider / table_name.split(".", 1)[1]
 
 
-@pytest.mark.skip(reason="Network drive timeout - Delta Lake write operations timeout on E:\\g-drive")
 @pytest.mark.e2e
 @pytest.mark.asyncio
 async def test_contract_rollout_affects_hash_false_dual_write_keeps_same_hash(
@@ -143,7 +142,6 @@ async def test_contract_rollout_affects_hash_false_dual_write_keeps_same_hash(
     assert v1_table.to_pyarrow_table().to_pylist()[0]["content_hash"] == "stable-hash"
 
 
-@pytest.mark.skip(reason="Network drive timeout - Delta Lake write operations timeout on E:\\g-drive")
 @pytest.mark.e2e
 @pytest.mark.asyncio
 async def test_contract_rollout_affects_hash_true_dual_write_projects_version_hashes(
@@ -193,7 +191,6 @@ async def test_contract_rollout_affects_hash_true_dual_write_projects_version_ha
     assert v2_rows[0]["content_hash"] == "hash-v2"
 
 
-@pytest.mark.skip(reason="Network drive timeout - Delta Lake write operations timeout on E:\\g-drive")
 @pytest.mark.e2e
 @pytest.mark.asyncio
 async def test_contract_rollout_cutover_and_rollback_change_read_priority(

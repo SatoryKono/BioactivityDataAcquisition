@@ -33,6 +33,10 @@ BIOETL_WSL_VENV_DIR="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}"
 PYTEST_RUNTIME_ENV_FILE="$REPO_ROOT/.pytest_cache/setup_plugins_runtime.sh"
 TEMP_PYTEST_VENV_DIR="/tmp/$(basename "$REPO_ROOT")-pytest-runtime-venv"
 
+requires_full_test_capabilities() {
+    [[ "${BIOETL_REQUIRE_TEST_CAPABILITIES:-0}" == "1" ]]
+}
+
 log_info() {
     local message="${1:-}"
     echo -e "${BLUE}[setup-plugins]${NC} ${message}"
@@ -117,7 +121,7 @@ if [[ "$IS_WSL" == true ]]; then
     else
         log_warn "Python runtime not found."
         log_warn "Install uv or activate a Python environment, then rerun:"
-        echo "  uv sync --extra dev --extra tests --extra tracing"
+        echo "  uv sync --extra dev --extra tests --extra tests_full --extra tracing"
         exit 1
     fi
 elif [[ -x "$WINDOWS_REPO_VENV_PYTHON" ]]; then
@@ -144,7 +148,7 @@ elif command -v python3 >/dev/null 2>&1; then
 else
     log_warn "Python runtime not found."
     log_warn "Install uv or activate a Python environment, then rerun:"
-    echo "  uv sync --extra dev --extra tests --extra tracing"
+    echo "  uv sync --extra dev --extra tests --extra tests_full --extra tracing"
     exit 1
 fi
 
@@ -179,8 +183,9 @@ pytest_only_stamp_is_fresh() {
         [[ -e "$tracked" && "$tracked" -nt "$stamp_file" ]] && return 1
     done
 
-    run_python - <<'PY' >/dev/null 2>&1
+    BIOETL_REQUIRE_TEST_CAPABILITIES="${BIOETL_REQUIRE_TEST_CAPABILITIES:-0}" run_python - <<'PY' >/dev/null 2>&1
 import importlib.util
+import os
 
 required = (
     "pytest",
@@ -198,9 +203,18 @@ required = (
     "structlog",
     "pandera",
     "respx",
-    "bandit",
-    "stevedore",
 )
+
+if os.environ.get("BIOETL_REQUIRE_TEST_CAPABILITIES") == "1":
+    required += (
+        "opentelemetry.sdk",
+        "orjson",
+        "polars",
+        "radon",
+        "vulture",
+        "importlinter",
+        "pytest_benchmark",
+    )
 
 raise SystemExit(0 if all(importlib.util.find_spec(module) is not None for module in required) else 1)
 PY
@@ -245,8 +259,9 @@ python_has_required_pytest_modules() {
         return 1
     fi
 
-    "$resolved_python" - <<'PY' >/dev/null 2>&1
+    BIOETL_REQUIRE_TEST_CAPABILITIES="${BIOETL_REQUIRE_TEST_CAPABILITIES:-0}" "$resolved_python" - <<'PY' >/dev/null 2>&1
 import importlib.util
+import os
 
 required = (
     "pytest",
@@ -264,9 +279,18 @@ required = (
     "structlog",
     "pandera",
     "respx",
-    "bandit",
-    "stevedore",
 )
+
+if os.environ.get("BIOETL_REQUIRE_TEST_CAPABILITIES") == "1":
+    required += (
+        "opentelemetry.sdk",
+        "orjson",
+        "polars",
+        "radon",
+        "vulture",
+        "importlinter",
+        "pytest_benchmark",
+    )
 
 raise SystemExit(0 if all(importlib.util.find_spec(module) is not None for module in required) else 1)
 PY
@@ -296,7 +320,7 @@ def extend(items: list[str]) -> None:
 
 extend(project.get("dependencies", []))
 optional = project.get("optional-dependencies", {})
-for key in ("tests", "dev", "tracing"):
+for key in ("tests", "tests_full", "dev", "tracing"):
     extend(optional.get(key, []))
 
 for dep in deps:
@@ -378,10 +402,10 @@ install_dev_dependencies() {
 
     if [[ "$USE_UV" == true ]]; then
         log_info "Syncing dev/test dependencies via uv..."
-        uv sync --extra dev --extra tests --extra tracing
+        uv sync --extra dev --extra tests --extra tests_full --extra tracing
     else
         log_info "Installing dev/test dependencies via pip..."
-        if "$PYTHON_BIN" -m pip install -e ".[dev,tests,tracing]"; then
+        if "$PYTHON_BIN" -m pip install -e ".[dev,tests,tests_full,tracing]"; then
             return 0
         fi
         if [[ "$PYTHON_KIND" == "$PYTHON_KIND_POSIX_VENV" || "$PYTHON_KIND" == "$PYTHON_KIND_WINDOWS_VENV" ]]; then
@@ -390,7 +414,7 @@ install_dev_dependencies() {
             return 0
         fi
         log_warn "Pip install blocked by externally managed environment, retrying with --break-system-packages"
-        if "$PYTHON_BIN" -m pip install --break-system-packages -e ".[dev,tests,tracing]"; then
+        if "$PYTHON_BIN" -m pip install --break-system-packages -e ".[dev,tests,tests_full,tracing]"; then
             return 0
         fi
         log_warn "Still blocked; creating temporary pytest runtime under /tmp"
@@ -399,8 +423,9 @@ install_dev_dependencies() {
 }
 
 check_pytest_plugins() {
-    run_python - <<'PY'
+    BIOETL_REQUIRE_TEST_CAPABILITIES="${BIOETL_REQUIRE_TEST_CAPABILITIES:-0}" run_python - <<'PY'
 import importlib.util
+import os
 
 required = {
     "pytest": "pytest",
@@ -418,9 +443,19 @@ required = {
     "structlog": "structlog",
     "pandera": "pandera",
     "respx": "respx",
-    "bandit": "bandit",
-    "stevedore": "stevedore",
 }
+if os.environ.get("BIOETL_REQUIRE_TEST_CAPABILITIES") == "1":
+    required.update(
+        {
+            "opentelemetry.sdk": "opentelemetry-sdk",
+            "orjson": "orjson",
+            "polars": "polars",
+            "radon": "radon",
+            "vulture": "vulture",
+            "importlinter": "import-linter",
+            "pytest_benchmark": "pytest-benchmark",
+        }
+    )
 missing = [pkg for module, pkg in required.items() if importlib.util.find_spec(module) is None]
 if missing:
     print("[setup-plugins][error] Missing pytest plugins:", ", ".join(missing))

@@ -465,8 +465,8 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
 
   ```bash
   source "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/activate"
-  # dev already includes pytest, pytest-cov, pytest-xdist, pytest-timeout, VCR, etc.
-  pip install -e ".[dev,tracing]"
+  # dev + tests_full cover pytest, VCR, architecture tooling, and benchmark extras.
+  pip install -e ".[dev,tests,tests_full,tracing]"
   python -m pytest tests --cov=src/bioetl --cov-report=term
   ```
 
@@ -480,24 +480,24 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
   With `uv`, the equivalent is:
 
   ```bash
-  uv sync --extra dev --extra tracing
+  uv sync --extra dev --extra tests --extra tests_full --extra tracing
   uv run python -m pytest tests --cov=src/bioetl --cov-report=term
   ```
 
   To include tracing and pre-commit plugin setup:
 
   ```bash
-  uv sync --extra dev --extra tests --extra tracing
+  uv sync --extra dev --extra tests --extra tests_full --extra tracing
   uv run python -m pre_commit install --install-hooks
   ```
 
   Если `pytest` сообщает об отсутствии обязательных плагинов (`pytest-asyncio`, `pytest-cov`, `pytest-xdist`, `pytest-timeout`, `pytest-vcr`), выполните повторную синхронизацию:
 
   ```bash
-  uv sync --extra dev --extra tests --extra tracing
+  uv sync --extra dev --extra tests --extra tests_full --extra tracing
   ```
 
-  Скрипт `bash scripts/engineering/dev/run_pytest.sh` проверяет наличие плагинов и автоматически доустанавливает их при необходимости.
+  Скрипт `bash scripts/engineering/dev/run_pytest.sh` проверяет наличие плагинов и автоматически доустанавливает их при необходимости. Для architecture / benchmark / observability / serialization surfaces он также требует полный capability set из extra `tests_full`.
 
 - **Run All Tests**:
 

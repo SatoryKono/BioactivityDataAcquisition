@@ -346,6 +346,7 @@ def _attach_base_summary_artifact_defaults(
     summary["artifact_publication_closure"] = summary["produced_artifact_trace"].get(
         "artifact_publication_closure"
     )
+    summary["identity_graph_complete"] = None
     return summary
 
 

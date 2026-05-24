@@ -129,7 +129,6 @@ def _append_shadow_only_row(table_path: Path) -> None:
     )
 
 
-@pytest.mark.skip(reason="Network drive timeout - Delta Lake write operations timeout on E:\\g-drive")
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
