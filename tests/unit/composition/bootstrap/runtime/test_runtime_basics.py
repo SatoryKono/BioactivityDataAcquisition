@@ -35,8 +35,8 @@ def _make_runtime() -> CompositeRuntimeConfig:
 class TestBootstrapRuntimeBasics:
     """Tests for bootstrap_runtime_basics."""
 
-    def test_returns_seven_element_tuple(self) -> None:
-        """bootstrap_runtime_basics returns run_id/settings/logger/metrics/tracer/storage/lock."""
+    def test_returns_infrastructure_context(self) -> None:
+        """bootstrap_runtime_basics returns the typed infrastructure context."""
         config = _make_config()
         settings = SimpleNamespace(metrics_enabled=False)
         logger = MagicMock()
@@ -55,15 +55,15 @@ class TestBootstrapRuntimeBasics:
             uuid_factory=lambda: _FIXED_UUID,
         )
 
-        assert len(result) == 7
-        run_id, s, lg, mt, tr, st, lk = result
-        assert run_id == str(_FIXED_UUID)
-        assert s is settings
-        assert lg is logger
-        assert mt is not None
-        assert tr is tracer
-        assert st is storage
-        assert lk is lock
+        assert isinstance(result, CompositeInfrastructureContext)
+        assert result.run_id == str(_FIXED_UUID)
+        assert result.settings is settings
+        assert result.logger is logger
+        assert result.metrics is not None
+        assert result.tracer is tracer
+        assert result.storage is storage
+        assert result.lock is lock
+        assert result.clock is not None
 
     def test_uses_provided_run_id(self) -> None:
         """When run_id is provided, it is used instead of generating a new one."""
@@ -83,7 +83,7 @@ class TestBootstrapRuntimeBasics:
             uuid_factory=MagicMock(),
         )
 
-        assert result[0] == provided_run_id
+        assert result.run_id == provided_run_id
 
     def test_generates_run_id_when_none(self) -> None:
         """When run_id is None, uuid_factory is called to generate one."""
@@ -103,7 +103,7 @@ class TestBootstrapRuntimeBasics:
         )
 
         uuid_factory.assert_called_once()
-        assert result[0] == str(_FIXED_UUID)
+        assert result.run_id == str(_FIXED_UUID)
 
     def test_storage_bootstrapper_called_with_csv_export(self) -> None:
         """storage_bootstrapper receives explicit runtime context and ports."""
