@@ -19,13 +19,34 @@ from tests.contract.silver_schemas.conftest import (
     extract_field_metadata,
 )
 
+CHEMBL_SCHEMAS = tuple(
+    sorted(
+        schema_name for schema_name in SILVER_SCHEMAS if schema_name.startswith("chembl_")
+    )
+)
+STRING_PMID_SCHEMAS = tuple(
+    sorted(
+        schema_name
+        for schema_name, schema_class in SILVER_SCHEMAS.items()
+        if "pmid" in (fields := extract_field_metadata(schema_class))
+        and "str" in fields["pmid"]["dtype"].lower()
+    )
+)
+PCHEMBL_VALUE_SCHEMAS = tuple(
+    sorted(
+        schema_name
+        for schema_name, schema_class in SILVER_SCHEMAS.items()
+        if "pchembl_value" in extract_field_metadata(schema_class)
+    )
+)
+
 
 @pytest.mark.contracts
 @pytest.mark.no_api
 class TestRegexValidations:
     """Tests for regex pattern validations."""
 
-    @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
+    @pytest.mark.parametrize("schema_name", CHEMBL_SCHEMAS)
     def test_chembl_id_pattern_consistent(self, schema_name: str) -> None:
         """ChEMBL ID fields MUST use CHEMBL_ID_PATTERN.
 
