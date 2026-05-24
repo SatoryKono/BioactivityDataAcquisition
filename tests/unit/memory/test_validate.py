@@ -6,6 +6,8 @@ import shutil
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 from memory.notes import write_markdown_note
 from memory.resources import (
     MEMORY_ROOT,
@@ -114,6 +116,44 @@ def test_memory_scaffold_validation_skips_episodic_body_reads(
 
     assert validate_memory_scaffold(memory_root) == []
     assert False in include_body_flags
+
+
+def test_memory_scaffold_validation_bounds_default_episodic_scan(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    memory_root = tmp_path / "memory"
+    shutil.copytree(MEMORY_ROOT, memory_root)
+
+    # Patch the limit to a small value to avoid network drive timeouts
+    # while still testing the boundary behavior
+    monkeypatch.setattr(
+        "memory.validation.DEFAULT_EPISODIC_NOTE_SCAN_LIMIT",
+        5,
+    )
+
+    sessions_dir = memory_root / "episodic" / "sessions"
+    for index in range(10):
+        write_markdown_note(
+            sessions_dir / f"session-{index:03d}.md",
+            metadata={
+                "id": f"session-{index:03d}",
+                "title": f"Session {index:03d}",
+                "task_id": f"task-{index:03d}",
+                "created_at": "2026-04-20T00:00:00Z",
+                "ttl_days": 14,
+                "confidence": "episodic",
+                "source_refs": ["src/memory/README.md"],
+                "summary": "Working context.",
+            },
+            body="# Session\n\n- Current context\n",
+        )
+
+    limited_issues = validate_memory_scaffold(memory_root)
+    full_issues = validate_memory_scaffold(memory_root, include_all_episodic_notes=True)
+
+    assert limited_issues == []
+    assert full_issues == []
 
 
 def test_memory_scaffold_validation_flags_invalid_note_files(tmp_path: Path) -> None:

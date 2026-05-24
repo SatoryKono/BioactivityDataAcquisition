@@ -35,8 +35,8 @@ ______________________________________________________________________
 ### Затронутые области
 
 - `src/bioetl/domain/aggregates/` — новый пакет
-- `src/bioetl/domain/value-objects/` — новый пакет
-- `src/bioetl/domain/types.py` — расширен новыми типами
+- `src/bioetl/domain/value_objects/` — новый пакет rich value objects
+- `src/bioetl/domain/types/` — новый пакет типизированных идентификаторов и domain type aliases
 - `src/bioetl/domain/exceptions/` — добавлены DDD-исключения
 
 ## Decision
@@ -52,20 +52,29 @@ class Batch:
     """Aggregate Root для коллекции записей.
 
     Инварианты:
-        1. Все записи имеют один batch-id
-        2. Записи нельзя добавить после seal()
-        3. batch-id неизменяем
+        1. Все записи имеют один batch_id
+        2. Записи нельзя добавить после seal(...)
+        3. batch_id и run_id неизменяемы
         4. Индексы записей последовательны
         5. Карантинные записи отслеживаются отдельно
     """
 
-    def add-record(self, data: dict) -> BatchRecord: ...
-    def quarantine-record(self, record: BatchRecord, error: str) -> BatchRecord: ...
-    def seal(self) -> None: ...
-    def mark-writing(self) -> None: ...
-    def mark-committed(self, layer: str) -> None: ...
-    def mark-failed(self, layer: str, error: str) -> None: ...
-    def collect-events(self) -> list[DomainEvent]: ...
+    @classmethod
+    def create(cls, run_id: RunID, *, created_at: datetime) -> Batch: ...
+
+    def add_record(self, data: BronzeRecord) -> BatchRecord: ...
+    def quarantine_record(
+        self,
+        record: BatchRecord,
+        error: str,
+        *,
+        quarantined_at: datetime,
+    ) -> BatchRecord: ...
+    def seal(self, sealed_at: datetime) -> None: ...
+    def mark_writing(self) -> None: ...
+    def mark_committed(self, layer: str, committed_at: datetime) -> None: ...
+    def mark_failed(self, layer: str, error: str, *, failed_at: datetime) -> None: ...
+    def collect_events(self) -> list[DomainEvent]: ...
 ```
 
 **State Machine:**
@@ -84,18 +93,28 @@ class PipelineRun:
     Инварианты:
         1. status == COMPLETED только если все стадии SUCCESS
         2. status == FAILED если хотя бы одна стадия FAILED
-        3. end-time != None только для терминальных статусов
+        3. ended_at != None только для терминальных статусов
         4. stages нельзя модифицировать после терминального статуса
-        5. run-id неизменяем после создания
+        5. run_id неизменяем после создания
     """
 
-    def start(self) -> None: ...
-    def record-stage-start(self, stage: str) -> None: ...
-    def record-stage-success(self, stage: str, records: int) -> None: ...
-    def record-stage-failure(self, stage: str, error: str) -> None: ...
-    def complete(self) -> None: ...
-    def fail(self, error: str) -> None: ...
-    def shutdown(self) -> None: ...
+    def start(self, started_at: datetime) -> None: ...
+    def record_stage_start(self, stage: str, started_at: datetime) -> None: ...
+    def record_stage_success(
+        self,
+        stage: str,
+        records_processed: int,
+        completed_at: datetime,
+    ) -> None: ...
+    def record_stage_failure(
+        self,
+        stage: str,
+        error: str,
+        failed_at: datetime,
+    ) -> None: ...
+    def complete(self, completed_at: datetime) -> None: ...
+    def fail(self, error: str, *, failed_at: datetime) -> None: ...
+    def shutdown(self, shutdown_at: datetime) -> None: ...
 ```
 
 **State Machine:**
@@ -113,39 +132,36 @@ class QuarantineEntry:
     """Aggregate для записи в карантине.
 
     Инварианты:
-        1. entry-id неизменяем
+        1. entry_id неизменяем
         2. Статус переходит только в указанном порядке
         3. Повторные попытки (retries) инкрементируются атомарно
     """
 
-    def mark-retrying(self) -> None: ...
-    def mark-recovered(self) -> None: ...
-    def mark-dead-letter(self, reason: str) -> None: ...
+    def mark_retrying(self, retried_at: datetime) -> None: ...
+    def mark_recovered(self, recovered_at: datetime) -> None: ...
+    def mark_dead_letter(self, reason: str, dead_lettered_at: datetime) -> None: ...
 ```
 
 ### 2. Добавлены Value Objects
 
-Строго типизированные идентификаторы в `domain/value-objects/`:
+Строго типизированные runtime identifiers живут в `domain/types/`, а rich value
+objects с валидацией и нормализацией живут в `domain/value_objects/`:
 
 ```python
-# Типизированные идентификаторы
-class RunID(UUID): ...
+# Типизированные идентификаторы и type aliases
+RunID = NewType("RunID", UUID)
+BatchID = NewType("BatchID", UUID)
+EntityID = NewType("EntityID", str)
+ContentHash = NewType("ContentHash", str)
 
-
-class BatchID(UUID): ...
-
-
-class EntityID(str): ...
-
-
-class ContentHash(str): ...
-
-
-# Измерения
-class Measurement:
+# Rich value objects
+class ChemblId(ValueObject[str]): ...
+class UniProtId(ValueObject[str]): ...
+class PubChemCid(ValueObject[int]): ...
+class ActivityValue:
     value: float
     unit: str
-    relation: str  # "=", ">", "<", "~"
+    relation: RelationOperator
 ```
 
 ### 3. Добавлены Domain Events
@@ -155,15 +171,15 @@ class Measurement:
 | Event               | Aggregate   | Когда                              |
 | ------------------- | ----------- | ---------------------------------- |
 | `BatchCreated`      | Batch       | После `Batch.create()`             |
-| `BatchSealed`       | Batch       | После `batch.seal()`               |
-| `BatchWritten`      | Batch       | После `batch.mark-committed()`     |
-| `BatchFailed`       | Batch       | После `batch.mark-failed()`        |
-| `RecordQuarantined` | Batch       | После `batch.quarantine-record()`  |
-| `RunStarted`        | PipelineRun | После `run.start()`                |
-| `StageCompleted`    | PipelineRun | После `run.record-stage-success()` |
-| `StageFailed`       | PipelineRun | После `run.record-stage-failure()` |
-| `RunCompleted`      | PipelineRun | После `run.complete()`             |
-| `RunFailed`         | PipelineRun | После `run.fail()`                 |
+| `BatchSealed`       | Batch       | После `batch.seal(...)`            |
+| `BatchWritten`      | Batch       | После `batch.mark_committed(...)`  |
+| `BatchFailed`       | Batch       | После `batch.mark_failed(...)`     |
+| `RecordQuarantined` | Batch       | После `batch.quarantine_record(...)` |
+| `RunStarted`        | PipelineRun | После `run.start(...)`             |
+| `StageCompleted`    | PipelineRun | После `run.record_stage_success(...)` |
+| `StageFailed`       | PipelineRun | После `run.record_stage_failure(...)` |
+| `RunCompleted`      | PipelineRun | После `run.complete(...)`          |
+| `RunFailed`         | PipelineRun | После `run.fail(...)`              |
 
 ### 4. Структура domain слоя после рефакторинга
 
@@ -171,19 +187,23 @@ class Measurement:
 src/bioetl/domain/
 ├── aggregates/           # DDD Aggregates
 │   ├── __init__.py
-│   ├── batch.py          # Batch Aggregate (536 LOC)
-│   ├── pipeline_run.py   # PipelineRun Aggregate (574 LOC)
-│   ├── quarantine_entry.py # QuarantineEntry Aggregate (517 LOC)
-│   └── events.py         # Domain Events (197 LOC)
+│   ├── batch.py          # Public Batch facade
+│   ├── pipeline_run.py   # Public PipelineRun facade
+│   ├── quarantine_entry.py
+│   └── events.py
 ├── value_objects/        # Value Objects
 │   ├── __init__.py
-│   ├── identifiers.py    # RunID, BatchID, EntityID, ContentHash
-│   └── measurements.py   # Measurement, IC50, etc.
+│   ├── identifiers.py    # ChemblId, UniProtId, PubChemCid
+│   └── activity_measurement.py   # ActivityValue
+├── types/                # Typed identifiers and domain type aliases
+│   ├── __init__.py
+│   ├── identifiers.py
+│   ├── enums.py
+│   └── checkpoint_metadata.py
 ├── entities/             # Domain Entities (per provider)
 ├── schemas/              # Pydantic/Pandera schemas
 ├── ports/                # Protocol interfaces
 ├── exceptions/           # Classified exceptions
-├── types.py              # Type aliases
 ├── medallion.py          # WriteMode enums
 └── ...
 ```
@@ -219,32 +239,32 @@ src/bioetl/domain/
 
 ```python
 # application/core/record_processor.py
-async def process-batch(self, records: list[dict]) -> None:
-    batch = Batch.create(run-id=self._run_id)
+async def process_batch(self, records: list[dict]) -> None:
+    now = self._clock.now()
+    batch = Batch.create(run_id=self._run_id, created_at=now)
 
     for record in records:
-        batch.add-record(record)
+        batch.add_record(record)
 
-    # Валидация
-    for record in batch.all-records:
-        if not self.-validate(record.data):
-            batch.quarantine-record(record, "Validation failed")
+    for record in batch.records:
+        if not self._validate(record.data):
+            batch.quarantine_record(
+                record,
+                "Validation failed",
+                quarantined_at=self._clock.now(),
+            )
 
-    batch.seal()
-
-    # Запись
-    batch.mark-writing()
+    batch.seal(self._clock.now())
+    batch.mark_writing()
     try:
-        await self.-writer.write(batch.records)
-        batch.mark-committed("silver")
-    except Exception as e:
-        batch.mark-failed("silver", str(e))
+        await self._writer.write(batch.records)
+        batch.mark_committed("silver", committed_at=self._clock.now())
+    except Exception as exc:
+        batch.mark_failed("silver", str(exc), failed_at=self._clock.now())
         raise
 
-    # Публикация событий
-    events = batch.collect-events()
-    for event in events:
-        await self.-event-bus.publish(event)
+    for event in batch.collect_events():
+        await self._event_bus.publish(event)
 ```
 
 ### PipelineRun Aggregate в PipelineRunner
@@ -252,33 +272,45 @@ async def process-batch(self, records: list[dict]) -> None:
 ```python
 # application/core/runner.py
 async def run(self) -> None:
-    run = PipelineRun.create(
-        run-id=self._run_id,
-        pipeline-name=self.-config.pipeline-name,
-        run-type=self.-runtime.run-type,
+    run = PipelineRun(
+        run_id=self._run_id,
+        run_type=self._runtime.run_type,
+        pipeline_name=self._config.pipeline_name,
     )
 
-    run.start()
+    run.start(self._clock.now())
 
     try:
-        run.record-stage-start("preflight")
-        await self.-preflight()
-        run.record-stage-success("preflight", records-processed=0)
+        run.record_stage_start("preflight", self._clock.now())
+        await self._preflight()
+        run.record_stage_success(
+            "preflight",
+            records_processed=0,
+            completed_at=self._clock.now(),
+        )
 
-        run.record-stage-start("execution")
-        processed = await self.-execute()
-        run.record-stage-success("execution", records-processed=processed)
+        run.record_stage_start("execution", self._clock.now())
+        processed = await self._execute()
+        run.record_stage_success(
+            "execution",
+            records_processed=processed,
+            completed_at=self._clock.now(),
+        )
 
-        run.record-stage-start("postrun")
-        await self.-postrun()
-        run.record-stage-success("postrun", records-processed=0)
+        run.record_stage_start("postrun", self._clock.now())
+        await self._postrun()
+        run.record_stage_success(
+            "postrun",
+            records_processed=0,
+            completed_at=self._clock.now(),
+        )
 
-        run.complete()
-    except Exception as e:
-        run.fail(str(e))
+        run.complete(self._clock.now())
+    except Exception as exc:
+        run.fail(str(exc), failed_at=self._clock.now())
         raise
     finally:
-        events = run.collect-events()
+        events = run.collect_events()
         # Publish events...
 ```
 

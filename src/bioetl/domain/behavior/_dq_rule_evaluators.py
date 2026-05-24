@@ -95,28 +95,44 @@ def _not_empty_list_rule_violated(value: object) -> bool:
     return len(list_like) == 0
 
 
+def _smiles_rule_violated(record: JsonDict, value: object) -> bool:
+    from bioetl.domain.validation.chemical import validate_smiles
+
+    del record
+    return value is not None and not validate_smiles(str(value))
+
+
+def _target_organism_rule_violated(record: JsonDict, value: object) -> bool:
+    return validate_target_organism_rule_violated(record, value)
+
+
+def _hierarchy_no_self_reference_rule_violated(
+    record: JsonDict,
+    value: object,
+) -> bool:
+    del value
+    return _custom_cross_rule_violated(record, "validate_hierarchy_no_self_reference")
+
+
+_SPECIAL_CUSTOM_RULE_EVALUATORS = {
+    "smiles_validator": _smiles_rule_violated,
+    "validate_target_organism_supported_name": _target_organism_rule_violated,
+    "validate_hierarchy_no_self_reference": _hierarchy_no_self_reference_rule_violated,
+}
+
+
 def _custom_rule_violated(
     record: JsonDict,
     value: object,
     validator_name: str | None,
 ) -> bool:
-    from bioetl.domain.validation.chemical import validate_smiles
+    special_evaluator = _SPECIAL_CUSTOM_RULE_EVALUATORS.get(validator_name)
+    if special_evaluator is not None:
+        return special_evaluator(record, value)
 
-    # Special case: SMILES validation
-    if validator_name == "smiles_validator":
-        return value is not None and not validate_smiles(str(value))
-
-    if validator_name == "validate_target_organism_supported_name":
-        return validate_target_organism_rule_violated(record, value)
-
-    # Dispatch to vocabulary validation strategy
     strategy = _resolve_custom_validation_strategy(validator_name)
     if strategy is not None:
         return strategy(value, validator_name)
-
-    # Special case: cross-field validation
-    if validator_name == "validate_hierarchy_no_self_reference":
-        return _custom_cross_rule_violated(record, validator_name)
 
     return False
 

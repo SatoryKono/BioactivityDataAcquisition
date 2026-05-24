@@ -9,7 +9,8 @@ import ast
 import os
 import shutil
 import subprocess
-from concurrent.futures import ThreadPoolExecutor
+import threading
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
 from functools import lru_cache
 from pathlib import Path
 
@@ -148,14 +149,44 @@ def _paths_from_search_output(output: str) -> tuple[Path, ...]:
 
 
 def _read_candidate_source(path: Path) -> str | None:
+    def _read_with_timeout() -> str:
+        return path.read_text(encoding="utf-8")
+
     try:
-        source = path.read_text(encoding="utf-8")
+        source = _run_with_timeout(_read_with_timeout, timeout=5.0)
+    except TimeoutError:  # pragma: no cover - architecture scan safety
+        raise AssertionError(f"Timeout reading {path}") from None
     except UnicodeDecodeError as exc:  # pragma: no cover - architecture scan safety
         raise AssertionError(f"Unable to decode {path}: {exc}") from exc
 
     if not any(marker in source for marker in _PACKAGE_ROOT_IMPORT_MARKERS):
         return None
     return source
+
+
+def _run_with_timeout(func, timeout: float):
+    """Run a function with a timeout to prevent hangs on locked files."""
+    result = None
+    exception = None
+
+    def _target():
+        nonlocal result, exception
+        try:
+            result = func()
+        except Exception as e:
+            exception = e
+
+    thread = threading.Thread(target=_target)
+    thread.start()
+    thread.join(timeout=timeout)
+
+    if thread.is_alive():
+        raise TimeoutError(f"Function did not complete within {timeout} seconds")
+
+    if exception is not None:
+        raise exception
+
+    return result
 
 
 def _parse_import_tree(path: Path, source: str) -> ast.Module:

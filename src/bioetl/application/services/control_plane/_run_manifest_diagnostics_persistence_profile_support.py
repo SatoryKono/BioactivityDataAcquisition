@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import cast
 
 __all__ = [
-    "PersistenceInputs",
+    "PersistenceProfileContext",
     "build_composite_resume_reconstructability",
     "build_forensic_grade_missing_requirements",
     "build_persistence_surfaces",
@@ -16,7 +16,7 @@ __all__ = [
 
 
 @dataclass(frozen=True, slots=True)
-class PersistenceInputs:
+class PersistenceProfileContext:
     """Derived persistence inputs reused across profile assembly helpers."""
 
     lineage_closure_boundary: dict[str, object]
@@ -39,7 +39,7 @@ def resolve_persistence_inputs(
     artifact_refs: list[dict[str, object]],
     lineage_fragment_ids: set[str],
     missing_link_count: int,
-) -> PersistenceInputs:
+) -> PersistenceProfileContext:
     """Compute the derived booleans used by persistence profile assembly."""
     lineage_closure_boundary = cast(
         "dict[str, object]",
@@ -57,7 +57,7 @@ def resolve_persistence_inputs(
         replay_family_contract.get("contract") or ""
     ).strip()
     composite_execution_context = replay_family_contract_name.startswith("composite_")
-    return PersistenceInputs(
+    return PersistenceProfileContext(
         lineage_closure_boundary=lineage_closure_boundary,
         lineage_closure_boundary_supported=bool(
             lineage_closure_boundary.get("supported", False)
@@ -117,7 +117,7 @@ def build_forensic_grade_missing_requirements(
 
 def build_persistence_surfaces(
     *,
-    inputs: PersistenceInputs,
+    inputs: PersistenceProfileContext,
     ledger_entries_present: bool,
 ) -> dict[str, bool]:
     """Return the persisted-evidence surface map for diagnostics output."""

@@ -145,7 +145,7 @@ def _write_artifacts(
     matrix_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     matrix_path.write_text(matrix_content, encoding="utf-8", newline="")
-    report_path.write_text(report_content, encoding="utf-8")
+    report_path.write_text(report_content, encoding="utf-8", newline="")
 
 
 def _artifact_matches(path: Path, expected: str) -> bool:

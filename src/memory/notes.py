@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import threading
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -17,6 +18,31 @@ LEGACY_INDENTED_TOP_LEVEL_KEY_PATTERN = re.compile(
 )
 SLUG_PATTERN = re.compile(r"[^a-z0-9]+")
 HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
+
+
+def _open_with_timeout(path: Path, timeout: float):
+    """Open a file with a timeout to prevent hangs on network drives."""
+    handle = None
+    exception = None
+
+    def _target():
+        nonlocal handle, exception
+        try:
+            handle = path.open("r", encoding="utf-8")
+        except Exception as e:
+            exception = e
+
+    thread = threading.Thread(target=_target)
+    thread.start()
+    thread.join(timeout=timeout)
+
+    if thread.is_alive():
+        raise TimeoutError(f"File open did not complete within {timeout} seconds: {path}")
+
+    if exception is not None:
+        raise exception
+
+    return handle
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,7 +71,11 @@ def normalize_text_key(value: str) -> str:
 
 def parse_markdown_note(path: Path, *, include_body: bool = True) -> MemoryNote:
     """Parse a markdown note with YAML frontmatter."""
-    with path.open("r", encoding="utf-8") as handle:
+    try:
+        handle = _open_with_timeout(path, timeout=5.0)
+    except (OSError, TimeoutError) as exc:
+        raise ValueError(f"failed to open note file: {exc}") from exc
+    with handle:
         first_line = handle.readline()
         if not first_line:
             raise ValueError(f"note is missing YAML frontmatter: {path}")
@@ -86,6 +116,9 @@ def _read_frontmatter_metadata_only(
     for line in handle:
         stripped = line.strip()
         if stripped == delimiter:
+            ttl_days = metadata.get("ttl_days")
+            if isinstance(ttl_days, str) and ttl_days.isdigit():
+                metadata["ttl_days"] = int(ttl_days)
             return metadata
         if not stripped:
             continue
@@ -114,11 +147,13 @@ def _read_frontmatter_metadata_only(
 def _coerce_frontmatter_scalar(value: str) -> Any:
     """Coerce simple YAML scalar values used in note frontmatter."""
     normalized = value.strip()
-    if len(normalized) >= 2 and normalized[0] == normalized[-1] and normalized[0] in {
-        '"',
-        "'",
-    }:
-        normalized = normalized[1:-1]
+    was_quoted = (
+        len(normalized) >= 2
+        and normalized[0] == normalized[-1]
+        and normalized[0] in {'"', "'"}
+    )
+    if was_quoted:
+        return normalized[1:-1]
     if normalized in {"null", "~"}:
         return None
     if normalized.isdigit():

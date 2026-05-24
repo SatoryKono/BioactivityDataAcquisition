@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.types import RunID
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
 
 def _create_and_persist_effective_config_artifact_payload(

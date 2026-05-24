@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     )
     from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = ["create_crossref_adapter"]
 

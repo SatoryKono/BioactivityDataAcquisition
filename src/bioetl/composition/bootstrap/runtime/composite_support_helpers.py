@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import LoggerPort, MetricsPort
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
 FIELD_GROUP_CONFIG_DIR = Path("configs/composites/field_groups")
 

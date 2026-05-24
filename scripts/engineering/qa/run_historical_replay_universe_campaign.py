@@ -96,6 +96,14 @@ def _load_external_records(paths: list[str]) -> tuple[HistoricalReplayUniverseEx
     return tuple(records)
 
 
+def _has_required_universal_exact_replay_claim(report: object) -> bool:
+    """Return whether the report may back universal exact-replay wording."""
+    gate = getattr(report, "governed_full_corpus_gate", {})
+    if not isinstance(gate, dict):
+        return False
+    return bool(gate.get("satisfied", False))
+
+
 def main() -> int:
     args = _parse_args()
     settings = get_settings()
@@ -142,10 +150,11 @@ def main() -> int:
         },
         "universal_claim": report.universal_claim,
         "durable_evidence_coverage_claim": report.durable_evidence_coverage_claim,
+        "governed_full_corpus_gate": report.governed_full_corpus_gate,
     }
     print(json.dumps(payload, indent=2, sort_keys=True))
-    if args.require_universal_claim and not bool(
-        report.universal_claim.get("claimed", False)
+    if args.require_universal_claim and not _has_required_universal_exact_replay_claim(
+        report
     ):
         return 1
     if args.require_durable_evidence_coverage and not bool(

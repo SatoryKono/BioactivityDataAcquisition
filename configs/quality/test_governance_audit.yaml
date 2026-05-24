@@ -260,7 +260,7 @@ oversized_test_module_inventory:
       owner: composition-runtime
     - issue_ref: "#4506"
       source: tests/unit/application/services/test_run_manifest_inspection_service.py
-      source_lines_after_split: 1915
+      source_lines_after_split: 1988
       extracted_surface: tests/unit/application/services/test_run_manifest_inspection_dq_traceability.py
       extracted_surface_lines: 164
       owner: application-services

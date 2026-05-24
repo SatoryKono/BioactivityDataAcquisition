@@ -64,7 +64,7 @@ if TYPE_CHECKING:
         MetricsPort,
         TracingPort,
     )
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
     type BootstrapRuntimeBasicsResult = CompositeInfrastructureContext
     type SeedRunnerFactory = Callable[[], PipelineRunner]

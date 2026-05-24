@@ -53,7 +53,7 @@ if TYPE_CHECKING:
         SettingsLoaderPort,
         TracingPort,
     )
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = [
     "build_cli_audit_inspection_service",

@@ -14,7 +14,7 @@ from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
 MetricsFactory = Callable[[], MetricsPort]
 MetricsServiceFactory = Callable[..., MetricsService]

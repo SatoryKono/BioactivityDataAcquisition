@@ -108,6 +108,9 @@ def resolve_manifest_reproducibility_context(
         yaml_config=inputs.yaml_config,
         strict_replay_requested=bool(getattr(ctx, "exact_replay", False))
         or required_persistence_profile in STRICT_PERSISTENCE_PROFILES,
+        replay_capable_family=bool(
+            reproducibility_profile.strict_exact_replay_supported
+        ),
     )
     return ManifestReproducibilityContext(
         configured_required_persistence_profile=configured_required_profile,

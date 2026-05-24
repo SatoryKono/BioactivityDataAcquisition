@@ -234,7 +234,7 @@ hotspot_budgets:
     class_size: 1
     god_object: 1
 hotspot_family_ratchets:
-  snapshot_date: '2026-05-22'
+  snapshot_date: '2026-05-24'
   mode: fail-fast
   artifact_policy:
     duplication_command: uv run python -m scripts.engineering.qa report-duplication-baseline --targets src/bioetl/application/core src/bioetl/composition/bootstrap/runtime src/bioetl/composition/factories/pipeline src/bioetl/application/services/control_plane src/bioetl/composition/runtime_builders --json-out reports/quality/hotspot-duplication-baseline.json --md-out reports/quality/hotspot-duplication-baseline.md --history-jsonl reports/quality/hotspot-duplication-history.jsonl
@@ -260,22 +260,22 @@ hotspot_family_ratchets:
     path_prefixes:
     - src/bioetl/application/core/
     bounded_growth_budgets:
-      files_ge_250_loc: 14
-      max_internal_fan_in: 15
+      files_ge_250_loc: 12
+      max_internal_fan_in: 14
     metrics:
       duplication_clusters: 8
-      files: 168
-      total_loc: 21068
+      files: 172
+      total_loc: 21256
       files_ge_250_loc: 12
-      helper_function_ratio: 0.374
+      helper_function_ratio: 0.375
       max_internal_fan_in: 14
-      max_internal_fan_in_module: bioetl.application.core.pipeline_service_protocols
+      max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
     trend:
-      status: reduced_2026-05-22_issue_4554
-      next_action: 2026-05-22 moves runner preflight execution flow into the
-        existing measured preflight owner seam, reducing application/core
-        files_ge_250_loc from 14 to 12 while keeping duplicate clusters at 8
-        and max_internal_fan_in below the reviewed budget.
+      status: reduced_2026-05-24_issue_4562
+      next_action: 2026-05-24 lands the service-protocol decomposition and
+        record_processor_config extraction wave, ratcheting application/core
+        from files_ge_250_loc=14 and max_internal_fan_in=15 down to the
+        confirmed baseline of 12 and 14 while duplicate clusters stay at 8.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -293,10 +293,10 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 5
       files: 42
-      total_loc: 5562
+      total_loc: 5565
       files_ge_250_loc: 5
       helper_function_ratio: 0.351
-      max_internal_fan_in: 7
+      max_internal_fan_in: 6
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.composite_support_services_factory
     trend:
       status: reduced_2026-05-22_issue_4534
@@ -320,7 +320,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 31
-      total_loc: 4479
+      total_loc: 4507
       files_ge_250_loc: 4
       helper_function_ratio: 0.47
       max_internal_fan_in: 4
@@ -399,6 +399,10 @@ hotspot_family_coverage_thresholds:
       min_covered_line_percent: 0.0
       allowlisted_unmeasured_paths:
       - src/bioetl/application/core/_batch_processing_metrics_support.py
+      - src/bioetl/application/core/pipeline_aux_service_protocols.py
+      - src/bioetl/application/core/pipeline_observability_service_protocols.py
+      - src/bioetl/application/core/pipeline_runtime_service_protocols.py
+      - src/bioetl/application/core/record_processor_config.py
     composition_bootstrap_runtime:
       min_measured_module_count: 42
       max_unmeasured_module_count: 0

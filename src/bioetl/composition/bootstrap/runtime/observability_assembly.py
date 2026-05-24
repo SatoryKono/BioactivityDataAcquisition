@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.runtime.observability_bundle import (
         _ObservabilityComponents,
     )
-    from bioetl.infrastructure.config._base import Settings
+    from bioetl.infrastructure.config.settings_api import Settings
 
 
 def create_observability_bundle(

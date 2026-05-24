@@ -23,7 +23,7 @@ During architecture review, the question arose whether the `composition/` module
 
 ## Decision
 
-We have chosen to **keep `composition/` as a separate top-level module**, distinct from `interfaces/`. The Composition Root is not an interface adapter but a dedicated wiring layer responsible for assembling the application's dependency graph.
+We have chosen to **keep `composition/` as a separate top-level module**, distinct from `interfaces/`. The Composition Root is not an interface adapter but a dedicated wiring layer responsible for assembling the application's dependency graph and exposing composition-owned entrypoints that interface adapters consume.
 
 ```
 src/bioetl/
@@ -46,9 +46,9 @@ src/bioetl/
 | Layer          | Responsibility                                        | Knows About                                                      |
 | -------------- | ----------------------------------------------------- | ---------------------------------------------------------------- |
 | `interfaces/`  | Handle incoming requests (CLI commands, HTTP, events) | domain, application, composition                                 |
-| `composition/` | Wire dependencies, create object graph                | **ALL layers** (domain, application, infrastructure, interfaces) |
+| `composition/` | Wire dependencies, create object graph                | domain, application, infrastructure, composition-owned helpers   |
 
-Composition Root has a unique privilege: it is the **only place** that knows about concrete infrastructure implementations and how to assemble them. Merging it into `interfaces/` would blur this distinction.
+Composition Root has a unique privilege: it is the **only place** that knows about concrete infrastructure implementations and how to assemble them. The active import policy also forbids `composition -> interfaces`, so interface adapters consume composition-owned entrypoints; wiring does not reach back into adapters.
 
 ### 2. Import Matrix Preservation
 
@@ -69,8 +69,13 @@ interfaces             ✅        ✅             ❌             ✅           
 > obtain concrete runtime wiring through `composition` entrypoints or call
 > application services behind ports. `tests/architecture/test_interfaces_no_infrastructure.py`
 > and `.importlinter` enforce this policy with no active legacy allowlist.
+>
+> **Note (2026-05-24):** `.importlinter` also enforces `composition-no-interfaces`.
+> Composition-owned bootstrap/runtime helpers must remain import-clean from
+> `bioetl.interfaces`; the dependency direction is `interfaces -> composition`,
+> never the reverse.
 
-Key observation: `composition/` remains the primary DI layer. `interfaces/` must not import from `infrastructure/`; it uses `composition/` to get fully assembled objects. If we merge composition into interfaces, we:
+Key observation: `composition/` remains the primary DI layer. `interfaces/` must not import from `infrastructure/`; it uses `composition/` to get fully assembled objects. `composition/` in turn must not import `interfaces/`; it exposes boundary entrypoints that interfaces call. If we merge composition into interfaces, we:
 
 - Lose the explicit separation of wiring concern
 - Make it harder to identify where dependency assembly happens
@@ -93,7 +98,7 @@ runner = bootstrap_pipeline_runner(...)
 # Future: HTTP API, Lambda handlers, etc.
 ```
 
-Composition Root is **infrastructure-agnostic orchestration**, not tied to any specific interface.
+Composition Root is **interface-consumed assembly**, not an interface implementation. CLI entrypoints, integration tests, and future HTTP/runtime shells depend on `composition`; `composition` itself stays isolated from `interfaces`.
 
 ### 4. Clean Architecture Alignment
 
@@ -103,7 +108,7 @@ In Clean Architecture (Robert C. Martin), the Composition Root is explicitly cal
 
 This is distinct from:
 
-- **Controllers/Presenters** (our `interfaces/`) — handle I/O
+- **Controllers/Presenters** (our `interfaces/`) — handle I/O and invoke composition-owned entrypoints at the process boundary
 - **Use Cases** (our `application/`) — orchestrate business logic
 - **Gateways** (our `infrastructure/`) — implement ports
 
