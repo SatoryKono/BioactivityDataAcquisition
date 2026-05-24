@@ -34,16 +34,17 @@ def test_replay_capable_family_rejects_occurrence_only_append_output() -> None:
 
 def test_non_replay_family_may_keep_occurrence_only_append_output() -> None:
     """Degraded/debug-only families can still classify append output as occurrence-only."""
-    validate_reproducible_sink_modes(
+    result = validate_reproducible_sink_modes(
         yaml_config=_yaml_config(contract="occurrence_only"),
         strict_replay_requested=False,
         replay_capable_family=False,
     )
+    assert result is None
 
 
 def test_append_log_requires_and_accepts_machine_readable_evidence() -> None:
     """Append-log semantics remain valid only with explicit identity evidence."""
-    validate_reproducible_sink_modes(
+    result = validate_reproducible_sink_modes(
         yaml_config=_yaml_config(
             contract="append_log",
             evidence={"append_log_identity_fields": ("run_id", "batch_id")},
@@ -51,6 +52,7 @@ def test_append_log_requires_and_accepts_machine_readable_evidence() -> None:
         strict_replay_requested=False,
         replay_capable_family=False,
     )
+    assert result is None
 
 
 def test_strict_replay_rejects_append_output_even_with_evidence() -> None:
