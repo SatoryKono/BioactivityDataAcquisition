@@ -5,9 +5,6 @@ from __future__ import annotations
 from bioetl.application.services.control_plane._run_manifest_diagnostics_base_helpers import (
     _resolve_source_posture,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_blockers import (
-    _resolve_exact_replay_blockers,
-)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
     _build_replay_parentage,
     _collect_append_mode_semantic_sinks,
@@ -18,6 +15,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
     _is_composite_execution_context,
     _is_full_scan_idempotent_rebuild,
     _requires_resume_without_snapshot_reason,
+    _resolve_exact_replay_blockers,
     _resolve_exact_replay_supported_reason,
     _resolve_reproducibility_profile,
 )

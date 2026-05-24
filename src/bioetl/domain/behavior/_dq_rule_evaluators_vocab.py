@@ -207,6 +207,11 @@ def validate_target_organism_rule_violated(
     classification = classify_organism(organism, record.get("taxonomy_id"))
     if classification.organism_class is not None:
         return False
+    # When a taxonomy_id is present but still unresolved, the record carries
+    # explicit unsupported organism evidence and should not be rescued by the
+    # permissive binomial-name fallback.
+    if classification.taxonomy_id is not None:
+        return True
     return _TARGET_BINOMIAL_PATTERN.search(organism) is None
 
 

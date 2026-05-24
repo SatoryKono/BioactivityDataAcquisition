@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Literal, cast
+from typing import Literal
 
 from bioetl.application.services.control_plane._run_manifest_diagnostics_persistence_profile_support import (
-    PersistenceInputs,
     build_composite_resume_reconstructability,
     build_forensic_grade_missing_requirements,
     build_persistence_surfaces,

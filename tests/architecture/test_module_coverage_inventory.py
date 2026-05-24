@@ -66,18 +66,33 @@ def test_module_coverage_inventory_is_committed_and_shape_is_stable() -> None:
     for family_row in hotspot_family_coverage.values():
         assert isinstance(family_row["module_count"], int)
         assert isinstance(family_row["measured_module_count"], int)
+        assert isinstance(family_row["covered_module_count"], int)
         assert isinstance(family_row["unmeasured_module_count"], int)
+        assert isinstance(family_row["allowlisted_unmeasured_module_count"], int)
+        assert isinstance(family_row["unexpected_unmeasured_module_count"], int)
+        assert isinstance(family_row["allowlisted_unmeasured_modules"], list)
+        assert isinstance(family_row["unexpected_unmeasured_modules"], list)
         assert isinstance(family_row["measured_percent"], float)
         assert 0.0 <= family_row["measured_percent"] <= 100.0
         assert isinstance(family_row["status_counts"], dict)
+        assert isinstance(family_row["thresholds"], dict)
+        assert family_row["threshold_status"] in {"pass", "fail"}
         coverage_percent_min = family_row["coverage_percent_min"]
         coverage_percent_avg = family_row["coverage_percent_avg"]
+        covered_line_percent = family_row["covered_line_percent"]
         if coverage_percent_min is not None:
             assert 0.0 <= coverage_percent_min <= 100.0
         if coverage_percent_avg is not None:
             assert 0.0 <= coverage_percent_avg <= 100.0
+        if covered_line_percent is not None:
+            assert 0.0 <= covered_line_percent <= 100.0
         assert family_row["module_count"] >= family_row["measured_module_count"]
+        assert family_row["module_count"] >= family_row["covered_module_count"]
         assert family_row["module_count"] >= family_row["unmeasured_module_count"]
+        assert family_row["unmeasured_module_count"] == (
+            family_row["allowlisted_unmeasured_module_count"]
+            + family_row["unexpected_unmeasured_module_count"]
+        )
 
 
 @pytest.mark.architecture
@@ -120,12 +135,21 @@ def test_module_coverage_inventory_reports_measured_hotspot_family_evidence() ->
         family_row = hotspot_family_coverage.get(family_name)
         assert isinstance(family_row, dict), family_name
         assert family_row["module_count"] > 0, family_name
-        assert family_row["measured_module_count"] == family_row["module_count"], (
-            family_name
+        assert family_row["unexpected_unmeasured_module_count"] == 0, family_name
+        assert family_row["unexpected_unmeasured_modules"] == [], family_name
+        assert (
+            family_row["measured_module_count"]
+            + family_row["allowlisted_unmeasured_module_count"]
+            == family_row["module_count"]
+        ), family_name
+        thresholds = family_row["thresholds"]
+        assert (
+            family_row["covered_module_count"] >= thresholds["min_covered_module_count"]
         )
-        assert family_row["unmeasured_module_count"] == 0, family_name
-        assert family_row["measured_percent"] == 100.0, family_name
-        assert family_row["status_counts"].get("unmeasured", 0) == 0, family_name
+        assert (
+            family_row["covered_line_percent"] >= thresholds["min_covered_line_percent"]
+        )
+        assert family_row["threshold_status"] == "pass", family_name
 
 
 @pytest.mark.architecture

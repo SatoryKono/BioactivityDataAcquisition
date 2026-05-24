@@ -2,14 +2,14 @@ version: 1
 policy_scope: deterministic_identity_generation
 review_date: '2026-09-30'
 compatibility_reduction_plan:
-  linked_issue: '#4540'
+  linked_issue: '#4569'
   review_date: '2026-09-30'
   allowed_outcomes:
   - retain_occurrence_only_generator
   - keep_compatibility_alias_but_block_new_semantics
   - keep_hash_policy_split_until_backfill
   occurrence_identity_budget:
-    max_allowed_call_sites: 18
+    max_allowed_call_sites: 17
     ratchet_policy: No new uuid4-based occurrence identity generators may be added
       without explicit policy review and test evidence.
   replay_hash_policy_budget:
@@ -167,23 +167,14 @@ allowed_occurrence_identity_generators:
     operator actions and not for semantic replay identity.
   issue: '#4472'
 - path: src/bioetl/composition/observability_api.py
-  symbol: push_metrics_to_gateway
+  symbol: _build_metrics_gateway_logger
   generator: uuid4
-  identity_field: metrics_correlation_run_id
+  identity_field: metrics_gateway_correlation_run_id
   semantic_classification: occurrence-only
   replay_semantics: excluded_from_execution_fingerprint
   rationale: Metrics gateway helper fallback IDs are observability correlation
-    identifiers for push/delete operations, not semantic execution identity.
-  issue: '#4472'
-- path: src/bioetl/composition/observability_api.py
-  symbol: delete_metrics_from_gateway
-  generator: uuid4
-  identity_field: metrics_cleanup_correlation_run_id
-  semantic_classification: occurrence-only
-  replay_semantics: excluded_from_execution_fingerprint
-  rationale: Metrics gateway cleanup fallback IDs are observability correlation
-    identifiers for delete operations, not semantic execution identity.
-  issue: '#4467'
+    identifiers shared by push/delete operations and not semantic execution identity.
+  issue: '#4569'
 legacy_config_hash_policy:
   field: config_hash
   alias_of: resolved_config_hash

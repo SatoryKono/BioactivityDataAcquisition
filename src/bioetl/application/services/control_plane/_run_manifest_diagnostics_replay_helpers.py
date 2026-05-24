@@ -239,6 +239,29 @@ def _requires_dependency_lock_provenance(
     return not manifest.code_provenance.dependency_lock_hash
 
 
+def _resolve_exact_replay_blockers(
+    *,
+    manifest: RunManifest,
+    policy_assessment: ReproducibilityPolicyAssessment,
+) -> list[str]:
+    """Return explicit blockers preventing exact replay eligibility."""
+    profile = _resolve_reproducibility_profile(manifest)
+    append_mode_sinks = _collect_append_mode_semantic_sinks(manifest)
+    return [
+        *_profile_exact_replay_blockers(profile),
+        *_append_mode_exact_replay_blockers(append_mode_sinks),
+        *_snapshot_exact_replay_blockers(
+            manifest=manifest,
+            policy_assessment=policy_assessment,
+        ),
+        *_dependency_lock_exact_replay_blockers(
+            manifest=manifest,
+            profile=profile,
+            policy_assessment=policy_assessment,
+        ),
+    ]
+
+
 def _resolve_reproducibility_profile(
     manifest: RunManifest,
 ) -> ReproducibilityFamilyProfile:

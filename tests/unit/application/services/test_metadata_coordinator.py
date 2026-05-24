@@ -32,6 +32,9 @@ from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
+
+pytestmark = pytest.mark.unit
+
 _FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
 
 

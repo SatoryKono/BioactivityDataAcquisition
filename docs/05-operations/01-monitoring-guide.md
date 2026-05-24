@@ -492,6 +492,25 @@ provisioned.
 uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
 ```
 
+### Published-port smoke baseline
+
+Когда dashboards и container health выглядят корректно, но host-side доступ к
+`localhost:3000` / `localhost:9090` ведёт себя нестабильно, используйте
+published-port smoke instead of guessing from container status:
+
+```bash
+python -m scripts.ops check-observability-ports --json
+```
+
+Интерпретация:
+
+- `healthy`: host-published URL и container-internal endpoint оба healthy.
+- `published_port_unreachable_but_container_healthy`: dashboards/rules внутри
+  стека живы, а проблема находится в host port publishing, WSL/localhost
+  forwarding, firewall, VPN, proxy или local transport path.
+- `published_and_container_unhealthy`: broken не только published port, но и
+  внутренний service endpoint; начинайте с container/runtime triage.
+
 ## 4. Гарантии качества мониторинга
 
 Все конфигурации дашбордов проходят автоматическую проверку (**Contract Testing**). Это гарантирует, что:
@@ -536,6 +555,18 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
   1. Проверьте, что пайплайн-процесс запущен и не завершился с ошибкой.
   1. Убедитесь, что пайплайн запущен с метриками (`BIOETL_METRICS_ENABLED=true`).
   1. Проверьте доступность endpoint метрик на порту 8000 (`/metrics`).
+- **Grafana/Prometheus container healthy, но `localhost:3000` / `localhost:9090`
+  из shell или браузера не открываются**:
+  1. Запустите `python -m scripts.ops check-observability-ports --json`.
+  1. Если diagnosis=`published_port_unreachable_but_container_healthy`,
+     считайте это published-port / host transport defect, а не broken dashboard JSON.
+  1. Проверьте Docker Desktop localhost forwarding, WSL-to-host networking,
+     local firewall/VPN/proxy filtering и опубликованные `ports:` в
+     `docker-compose.monitoring.yml`.
+  1. Для container-internal proof используйте:
+     `docker exec bioetl-grafana wget -qO- http://127.0.0.1:3000/api/health`
+     и
+     `docker exec bioetl-prometheus wget -qO- http://127.0.0.1:9090/-/healthy`.
 - **Loki drilldown не находит событие**:
   1. Сначала проверьте, что общий запрос `{job="bioetl"}` вообще возвращает строки.
   1. Zero lines могут быть легитимны, если Loki shipping/profile выключен или выбранный run не отгрузил BioETL streams в текущем окне.

@@ -59,9 +59,6 @@
     "circuit_breaker_state": [
       "src/bioetl/infrastructure/adapters/_error_handling_support.py"
     ],
-    "degraded_evidence_count": [
-      "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py"
-    ],
     "dq_status": [
       "src/bioetl/infrastructure/quarantine/filtered_read_support.py"
     ],
@@ -69,19 +66,10 @@
       "src/bioetl/application/services/data_quality_service.py",
       "src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py"
     ],
-    "get_last_pressure_state": [
-      "src/bioetl/application/core/batch_memory_manager.py"
-    ],
     "health_check_passed": [
       "src/bioetl/infrastructure/adapters/_health_check_observability.py"
     ],
-    "latest_status": [
-      "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py"
-    ],
     "lineage_status": [
-      "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py"
-    ],
-    "missing_evidence_count": [
       "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py"
     ],
     "quality_score": [
@@ -102,23 +90,11 @@
     "retry_count": [
       "src/bioetl/infrastructure/adapters/_error_handling_support.py"
     ],
-    "run_ledger_enabled": [
-      "src/bioetl/composition/bootstrap/runtime/observability_bundle.py"
-    ],
-    "run_manifest_enabled": [
-      "src/bioetl/composition/bootstrap/runtime/observability_bundle.py"
-    ],
     "target_size": [
       "src/bioetl/infrastructure/storage/silver/operations/maintenance_operations.py"
     ],
     "total_count": [
       "src/bioetl/infrastructure/quarantine/statistics_support.py"
-    ],
-    "track_processed_records": [
-      "src/bioetl/application/core/_quarantine_support.py"
-    ],
-    "track_quarantined_records": [
-      "src/bioetl/application/core/_quarantine_support.py"
     ],
     "write_duration_ms": [
       "src/bioetl/infrastructure/storage/metadata_writer_helpers.py"
@@ -128,26 +104,18 @@
     "audit_entries_count",
     "checkpoint_status",
     "circuit_breaker_state",
-    "degraded_evidence_count",
     "dq_status",
     "error_rate",
-    "get_last_pressure_state",
     "health_check_passed",
-    "latest_status",
     "lineage_status",
-    "missing_evidence_count",
     "quality_score",
     "quarantine_status",
     "quarantined_count",
     "record_count",
     "records_count",
     "retry_count",
-    "run_ledger_enabled",
-    "run_manifest_enabled",
     "target_size",
     "total_count",
-    "track_processed_records",
-    "track_quarantined_records",
     "write_duration_ms"
   ],
   "dashboarded_metrics": [

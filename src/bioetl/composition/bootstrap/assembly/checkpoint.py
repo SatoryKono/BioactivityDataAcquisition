@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.domain.ports import (
     CheckpointPort,
     CompositeCheckpointPort,
@@ -20,7 +21,6 @@ from bioetl.domain.ports import (
     QuarantinePort,
 )
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
-from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
 from bioetl.infrastructure.storage.support.checkpoint_writer import (
     FileCompositeCheckpointWriter,

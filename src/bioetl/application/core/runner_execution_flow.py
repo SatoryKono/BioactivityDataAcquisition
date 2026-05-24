@@ -20,7 +20,7 @@ from bioetl.application.core._runner_observability import (
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
 )
-from bioetl.application.core.runner_preflight_flow import validate_infrastructure
+from bioetl.application.core.preflight.service import validate_infrastructure
 from bioetl.application.observability.observer import LifecyclePhase
 from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAMES
 

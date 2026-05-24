@@ -241,7 +241,7 @@ def _load_hotspot_family_prefixes(repo_root: Path) -> dict[str, tuple[str, ...]]
 
 def _load_hotspot_family_thresholds(
     repo_root: Path,
-) -> dict[str, dict[str, float | int]]:
+) -> dict[str, dict[str, Any]]:
     scorecard_path = repo_root / "configs" / "quality" / "debt_scorecard.yaml"
     payload = yaml.safe_load(scorecard_path.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
@@ -249,14 +249,21 @@ def _load_hotspot_family_thresholds(
     assert isinstance(threshold_payload, dict)
     families = threshold_payload.get("families", {})
     assert isinstance(families, dict)
-    thresholds: dict[str, dict[str, float | int]] = {}
+    thresholds: dict[str, dict[str, Any]] = {}
     for family_name, row in families.items():
         if not isinstance(family_name, str) or not isinstance(row, dict):
             continue
+        numeric_thresholds = {
+            key: value for key, value in row.items() if isinstance(value, int | float)
+        }
+        allowlisted_paths = tuple(
+            str(path)
+            for path in row.get("allowlisted_unmeasured_paths", [])
+            if isinstance(path, str) and path
+        )
         thresholds[family_name] = {
-            key: value
-            for key, value in row.items()
-            if isinstance(value, int | float)
+            **numeric_thresholds,
+            "allowlisted_unmeasured_paths": allowlisted_paths,
         }
     return thresholds
 
@@ -295,6 +302,24 @@ def _build_hotspot_family_coverage(
         unmeasured_module_count = sum(
             1 for row in family_rows if str(row["coverage_status"]) == "unmeasured"
         )
+        family_thresholds = thresholds.get(family_name, {})
+        allowlisted_unmeasured_paths = {
+            str(path)
+            for path in family_thresholds.get("allowlisted_unmeasured_paths", ())
+            if isinstance(path, str)
+        }
+        allowlisted_unmeasured_modules = [
+            str(row["path"])
+            for row in family_rows
+            if str(row["coverage_status"]) == "unmeasured"
+            and str(row["path"]) in allowlisted_unmeasured_paths
+        ]
+        unexpected_unmeasured_modules = [
+            str(row["path"])
+            for row in family_rows
+            if str(row["coverage_status"]) == "unmeasured"
+            and str(row["path"]) not in allowlisted_unmeasured_paths
+        ]
         executable_lines_total = sum(
             int(row["executable_lines"] or 0) for row in family_rows
         )
@@ -313,16 +338,15 @@ def _build_hotspot_family_coverage(
             if executable_lines_total
             else None
         )
-        family_thresholds = thresholds.get(family_name, {})
         threshold_status = "pass"
         if measured_module_count < int(
             family_thresholds.get("min_measured_module_count", measured_module_count)
         ):
             threshold_status = "fail"
-        if unmeasured_module_count > int(
+        if len(unexpected_unmeasured_modules) > int(
             family_thresholds.get(
                 "max_unmeasured_module_count",
-                unmeasured_module_count,
+                len(unexpected_unmeasured_modules),
             )
         ):
             threshold_status = "fail"
@@ -342,6 +366,10 @@ def _build_hotspot_family_coverage(
             "measured_module_count": measured_module_count,
             "covered_module_count": covered_module_count,
             "unmeasured_module_count": unmeasured_module_count,
+            "allowlisted_unmeasured_module_count": len(allowlisted_unmeasured_modules),
+            "unexpected_unmeasured_module_count": len(unexpected_unmeasured_modules),
+            "allowlisted_unmeasured_modules": sorted(allowlisted_unmeasured_modules),
+            "unexpected_unmeasured_modules": sorted(unexpected_unmeasured_modules),
             "covered_line_percent": covered_line_percent,
             "measured_percent": (
                 round(100.0 * measured_module_count / len(family_rows), 2)

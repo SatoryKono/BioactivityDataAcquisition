@@ -1,27 +1,27 @@
 ---
-id: setup-mcp
-title: Setup MCP runtime config
-task_id: setup-mcp
-created_at: '2026-05-24T12:04:27Z'
+id: codex-update-20260524
+title: Update Codex surfaces
+task_id: codex-update-20260524
+created_at: '2026-05-24T11:57:07Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- AGENTS.md
+- <add-source-ref>
 summary: Active task session context.
-query: mcp
+query: codex
 ---
 
 # Session note
 
 ## Task
 
-- Title: Setup MCP runtime config
-- Retrieval query: mcp
+- Title: Update Codex surfaces
+- Retrieval query: codex
 
 ## Retrieved context
 
 - Catalog hits: 0
-- RAG hits: 4
+- RAG hits: 10
 - Timeline hits: 0
 
 ## Working notes

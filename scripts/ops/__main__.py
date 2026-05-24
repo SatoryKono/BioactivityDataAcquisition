@@ -7,6 +7,8 @@ Usage:
 
 Stable commands:
     salt-rotate        Rotate PII hashing salt
+    check-observability-ports
+                       Compare published observability endpoints with container health
     rerender-grafana   Rerender Grafana dashboard screenshots
     wsl-proxy          Start WSL proxy helper
     codex              Launch Codex via repo-local bootstrap adapter (shell)
@@ -38,6 +40,7 @@ from scripts.engineering.common.cli_dispatch import (
 
 COMMAND_SPECS = {
     "salt-rotate": "maintenance/security/salt_rotate.py",
+    "check-observability-ports": "observability/check_published_observability_endpoints.py",
     "rerender-grafana": "observability/grafana/rerender_grafana_screenshots.py",
     "wsl-proxy": "runtime/wsl/wsl_proxy.py",
 }

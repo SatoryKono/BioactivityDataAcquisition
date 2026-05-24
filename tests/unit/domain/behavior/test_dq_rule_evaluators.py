@@ -167,3 +167,21 @@ def test_target_organism_custom_rule_rejects_unclassifiable_non_binomial_name() 
         )
         is True
     )
+
+
+def test_target_organism_custom_rule_keeps_binomial_fallback_without_taxonomy_id() -> (
+    None
+):
+    rule = FieldValidation(
+        field="organism",
+        validation_type="custom",
+        validator="validate_target_organism_supported_name",
+    )
+
+    assert (
+        _field_rule_violated(
+            {"organism": "Unknown blob"},
+            rule,
+        )
+        is False
+    )
