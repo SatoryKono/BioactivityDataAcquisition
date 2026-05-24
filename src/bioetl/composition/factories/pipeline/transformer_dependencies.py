@@ -15,7 +15,8 @@ from bioetl.composition.observability_resolution import (
     resolve_metrics_port,
     resolve_tracing_port,
 )
-from bioetl.domain.behavior import DefaultDataNormalizer, EntityIdentityGenerator
+from bioetl.domain.behavior.data_normalization_service import DefaultDataNormalizer
+from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
 from bioetl.domain.ports import (
     ContractPolicyProtocol,
     DataNormalizationPort,

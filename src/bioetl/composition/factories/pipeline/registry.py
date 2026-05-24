@@ -20,7 +20,7 @@ from bioetl.composition.factories.pipeline.registry_manifest import (
     PIPELINE_CONFIGS,
 )
 from bioetl.composition.registry_default import get_default_registry
-from bioetl.domain.ports import PipelineFactoryPort
+from bioetl.domain.ports.runtime import PipelineFactoryPort
 
 _registry_module = import_module("bioetl.composition.registry")
 PipelineDefinition = _registry_module.PipelineDefinition

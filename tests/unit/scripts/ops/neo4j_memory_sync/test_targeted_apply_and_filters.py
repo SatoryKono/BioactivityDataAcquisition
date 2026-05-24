@@ -19,4 +19,4 @@ from tests.testing_support.neo4j_memory_sync import (  # noqa: F401
     test_targeted_apply_required_anchor_labels_identifies_missing_base_labels,
 )
 
-pytestmark = pytest.mark.memory
+pytestmark = [pytest.mark.memory, pytest.mark.timeout(180)]

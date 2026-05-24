@@ -3,13 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
-from bioetl.application.core.wiring.transformer import BaseTransformer
-from bioetl.composition.factories.datasource.data_source_factory import (
-    DataSourceCreatorProtocol,
-)
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _CreateFactoryRunnerRequest,
     _CreatePipelineWithServicesRequest,
@@ -18,6 +13,13 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     create_factory_runner,
 )
 
+
+if TYPE_CHECKING:
+    from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
+    from bioetl.application.core.wiring.transformer import BaseTransformer
+    from bioetl.composition.factories.datasource.data_source_factory import (
+        DataSourceCreatorProtocol,
+    )
 
 class _FactoryLike(Protocol):
     @property

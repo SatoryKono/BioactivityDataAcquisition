@@ -5,14 +5,16 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 from unittest.mock import MagicMock
 
 import pytest
 
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.resilience import AdapterConfig
-from bioetl.infrastructure.adapters.chembl import ChemblAdapter
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 
 CASSETTE_DIR = Path(__file__).parents[2] / "fixtures" / "vcr" / "chembl"
 
@@ -144,6 +146,10 @@ def build_chembl_adapter(
     page_size: int | None = None,
 ) -> ChemblAdapter:
     """Create one adapter configured with extraction params for the case."""
+    # Defer the heavy adapter import so unrelated pytest collection does not pull
+    # the full ChEMBL adapter graph through tests.conftest plugin loading.
+    from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+
     adapter_config = None
     if page_size is not None:
         adapter_config = AdapterConfig(page_size=page_size)

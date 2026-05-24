@@ -1,37 +1,53 @@
 """Filter configuration for pipeline filtering.
 
-This package provides:
-- Input filtering: API requests based on input IDs from external sources (CSV files)
-- Gold filtering: Configurable column-based filters for Gold layer records
-
-All public classes are re-exported from this module for backwards compatibility.
+This facade preserves historical ``from bioetl.domain.filtering import X``
+imports without eagerly importing all filtering submodules.
 """
 
 from __future__ import annotations
 
-from bioetl.domain.filtering._base_filter_config import BaseFilterConfig, FilterDecision
-from bioetl.domain.filtering.column_filter import FilterOperator, GoldColumnFilter
-from bioetl.domain.filtering.gold_config import GoldFilterConfig
-from bioetl.domain.filtering.input_config import FilterColumn, InputFilterConfig
-from bioetl.domain.filtering.list_filters import (
-    GoldListContainsFilter,
-    GoldListLengthFilter,
-)
-from bioetl.domain.filtering.load_result import FilterLoadResult
-from bioetl.domain.filtering.range_filter import GoldRangeFilter
-from bioetl.domain.filtering.silver_config import SilverFilterConfig
+from importlib import import_module
 
-__all__ = [
-    "BaseFilterConfig",
-    "FilterColumn",
-    "FilterDecision",
-    "FilterLoadResult",
-    "FilterOperator",
-    "GoldColumnFilter",
-    "GoldFilterConfig",
-    "GoldListContainsFilter",
-    "GoldListLengthFilter",
-    "GoldRangeFilter",
-    "InputFilterConfig",
-    "SilverFilterConfig",
-]
+_EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
+    "bioetl.domain.filtering._base_filter_config": (
+        "BaseFilterConfig",
+        "FilterDecision",
+    ),
+    "bioetl.domain.filtering.column_filter": (
+        "FilterOperator",
+        "GoldColumnFilter",
+    ),
+    "bioetl.domain.filtering.gold_config": ("GoldFilterConfig",),
+    "bioetl.domain.filtering.input_config": (
+        "FilterColumn",
+        "InputFilterConfig",
+    ),
+    "bioetl.domain.filtering.list_filters": (
+        "GoldListContainsFilter",
+        "GoldListLengthFilter",
+    ),
+    "bioetl.domain.filtering.load_result": ("FilterLoadResult",),
+    "bioetl.domain.filtering.range_filter": ("GoldRangeFilter",),
+    "bioetl.domain.filtering.silver_config": ("SilverFilterConfig",),
+}
+
+_EXPORT_MODULES = {
+    export_name: module_name
+    for module_name, export_names in _EXPORT_GROUPS.items()
+    for export_name in export_names
+}
+
+__all__ = list(_EXPORT_MODULES)
+
+
+def __getattr__(name: str) -> object:
+    module_name = _EXPORT_MODULES.get(name)
+    if module_name is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    value = getattr(import_module(module_name), name)
+    globals()[name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(__all__))

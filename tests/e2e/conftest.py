@@ -783,6 +783,10 @@ def guard_bootstrap_pipeline_runner_for_e2e(
     """Patch direct bootstrap imports so legacy E2E modules honor policy skips."""
     import bioetl.composition.bootstrap as bootstrap_package
     from bioetl.composition.bootstrap.runtime import pipeline as runtime_pipeline
+    from bioetl.composition.runtime_builders import (
+        _input_snapshot_resolution,
+        _run_manifest_support,
+    )
 
     guarded_bootstrap = wrap_bootstrap_pipeline_runner_for_e2e(
         runtime_pipeline.bootstrap_pipeline_runner
@@ -802,14 +806,13 @@ def guard_bootstrap_pipeline_runner_for_e2e(
     if module is not None and hasattr(module, "bootstrap_pipeline_runner"):
         monkeypatch.setattr(module, "bootstrap_pipeline_runner", guarded_bootstrap)
 
-    from bioetl.composition.runtime_builders import _run_manifest_support
-
     original_resolve_input_snapshots = (
         _run_manifest_support.resolve_pipeline_input_snapshot_refs
     )
+    has_vcr_marker = request.node.get_closest_marker("vcr") is not None
     fallback_snapshot_refs = (
         ()
-        if is_vcr_recording_mode()
+        if is_vcr_recording_mode() or not has_vcr_marker
         else _build_vcr_cassette_input_snapshot_refs(request)
     )
 
@@ -817,12 +820,17 @@ def guard_bootstrap_pipeline_runner_for_e2e(
         refs = original_resolve_input_snapshots(**kwargs)
         if refs:
             return refs
-        if request.node.get_closest_marker("vcr") is None:
+        if not has_vcr_marker:
             return refs
         return fallback_snapshot_refs
 
     monkeypatch.setattr(
         "bioetl.composition.runtime_builders._run_manifest_support.resolve_pipeline_input_snapshot_refs",
+        _resolve_pipeline_input_snapshot_refs_with_vcr_fallback,
+    )
+    monkeypatch.setattr(
+        _input_snapshot_resolution,
+        "resolve_pipeline_input_snapshot_refs",
         _resolve_pipeline_input_snapshot_refs_with_vcr_fallback,
     )
 

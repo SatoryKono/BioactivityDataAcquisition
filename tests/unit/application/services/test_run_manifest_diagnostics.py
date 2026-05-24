@@ -423,6 +423,7 @@ def _expected_provenance_only_summary_without_score(
         "historical_live_run_upgrade_state": (
             "awaiting_input_snapshot_published_evidence"
         ),
+        "identity_graph_complete": None,
         "replay_control_plane_state": "post_capture_parent_candidate",
         "replay_occurrence_kind": "ordinary_live_capture",
         "exact_replay_eligible": False,

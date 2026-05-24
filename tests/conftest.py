@@ -4,7 +4,7 @@ import asyncio
 import sys
 from functools import cache
 from pathlib import Path
-from typing import Any
+from typing import Any, Generator
 
 import pytest
 from tests.helpers.vcr_config import (

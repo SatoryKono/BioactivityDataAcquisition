@@ -419,11 +419,6 @@ class TestDocsVersionSync:
 class TestVersionFormat:
     """Тесты формата версии."""
 
-    @pytest.fixture
-    def project_root(self) -> Path:
-        """Получить корневую директорию проекта."""
-        return get_project_root()
-
     def test_rules_version_format(self, project_root: Path) -> None:
         """RULES.md версия MUST соответствовать формату X.Y.
 

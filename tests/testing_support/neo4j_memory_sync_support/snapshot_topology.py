@@ -1186,14 +1186,11 @@ def test_snapshot_contains_complexity_candidates_with_simplification_links() -> 
 
 @pytest.mark.timeout(180)
 def test_sync_statements_include_management_metadata() -> None:
-    _, snapshot = _snapshot()
-    project_node = snapshot.nodes[
-        next(
-            key
-            for key in snapshot.nodes
-            if key.label == "project" and key.name == "BioETL"
-        )
-    ]
+    snapshot = GraphSnapshot()
+    project_key = snapshot.add_node("project", "BioETL")
+    module_node = snapshot.add_node("module_surface", "src/example.py")
+    snapshot.add_relation(project_key, "CONTAINS", module_node)
+    project_node = snapshot.nodes[project_key]
     relation = next(iter(snapshot.relations.values()))
 
     node_statement = _node_statement(project_node, "sync-run-1")

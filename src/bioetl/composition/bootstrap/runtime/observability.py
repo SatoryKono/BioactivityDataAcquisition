@@ -8,18 +8,16 @@ from uuid import UUID
 
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.exceptions import MetricsServerError
-from bioetl.domain.ports import (
-    AuditPort,
+from bioetl.domain.ports.audit import AuditPort
+from bioetl.domain.ports.observability import (
     DQMonitorPort,
     LoggerPort,
     MetricsPort,
     TracingPort,
 )
-from bioetl.infrastructure.observability import (
-    OpenTelemetryTracer,
-    PrometheusMetrics,
-    UnifiedLogger,
-)
+from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
+from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 

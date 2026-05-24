@@ -5,19 +5,16 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.metrics_service import MetricsService
-from bioetl.composition.bootstrap.assembly.metrics_service import (
-    create_metrics_service,
-)
-from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports.observability import MetricsPort
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 
 if TYPE_CHECKING:
+    from bioetl.application.services.metrics_service import MetricsService
     from bioetl.infrastructure.config.settings_api import Settings
 
 MetricsFactory = Callable[[], MetricsPort]
-MetricsServiceFactory = Callable[..., MetricsService]
+MetricsServiceFactory = Callable[..., object]
 
 __all__ = [
     "bootstrap_metrics",
@@ -114,7 +111,14 @@ def maybe_start_metrics_server(
         return False
 
     obs = observability
-    service_factory = metrics_service_factory or create_metrics_service
+    if metrics_service_factory is None:
+        from bioetl.composition.bootstrap.assembly.metrics_service import (
+            create_metrics_service as _create_metrics_service,
+        )
+
+        service_factory = _create_metrics_service
+    else:
+        service_factory = metrics_service_factory
     service = service_factory()
     result = service.start(
         port=settings.metrics_port,

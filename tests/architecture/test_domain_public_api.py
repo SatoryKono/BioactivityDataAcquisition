@@ -32,6 +32,9 @@ def test_domain_all_is_complete() -> None:
         "__spec__",
         # Special imports (from __future__ import annotations)
         "annotations",
+        # Internal imports for lazy loading mechanism
+        "TYPE_CHECKING",
+        "import_module",
         # Submodules (accessible as bioetl.domain.<name> but not re-exported)
         "aggregates",  # Aggregate submodule
         "config",

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from importlib import import_module
 
+import pytest
+
 
 def test_pubmed_package_root_reexports_canonical_adapter() -> None:
     """PubMed package root should expose canonical adapter objects."""
@@ -11,10 +13,10 @@ def test_pubmed_package_root_reexports_canonical_adapter() -> None:
     canonical_cls = import_module(
         "bioetl.infrastructure.adapters.pubmed.adapter"
     ).PubMedAdapter
-    legacy_module_cls = import_module(
-        "bioetl.infrastructure.adapters.pubmed.pubmed_client"
-    ).PubMedAdapter
-    assert package_module.PubMedAdapter is canonical_cls is legacy_module_cls
+    assert package_module.PubMedAdapter is canonical_cls
+
+    with pytest.raises(ModuleNotFoundError):
+        import_module("bioetl.infrastructure.adapters.pubmed.pubmed_client")
 
 
 def test_pubmed_canonical_adapter_module_exposes_public_factory_alias() -> None:
@@ -22,13 +24,10 @@ def test_pubmed_canonical_adapter_module_exposes_public_factory_alias() -> None:
     package_module = import_module("bioetl.infrastructure.adapters.pubmed")
     canonical_module = import_module("bioetl.infrastructure.adapters.pubmed.adapter")
     canonical_factory = canonical_module.create_pubmed_adapter
-    legacy_factory = import_module(
-        "bioetl.infrastructure.adapters.pubmed.pubmed_client"
-    )._create_pubmed_adapter
 
     assert package_module.create_pubmed_adapter is canonical_factory
-    assert canonical_factory is legacy_factory
     assert hasattr(canonical_module, "_create_pubmed_adapter")
+    assert canonical_factory is canonical_module._create_pubmed_adapter
 
 
 def test_semanticscholar_package_root_reexports_canonical_adapter() -> None:

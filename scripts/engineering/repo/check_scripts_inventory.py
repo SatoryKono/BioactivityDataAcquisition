@@ -1136,6 +1136,9 @@ def _validate_stale_registry_entries(
             continue
         status = str(row_value.get("status", "unknown"))
         if status not in target_statuses:
+            decision = entry_value.get("decision")
+            if _status_from_lifecycle_decision(str(decision)) == "supporting":
+                continue
             stale.append(f"{path}: status changed to {status}")
 
     return stale, invalid

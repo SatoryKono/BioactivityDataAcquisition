@@ -12,4 +12,4 @@ from tests.testing_support.neo4j_memory_sync import (  # noqa: F401
     test_resolve_neo4j_connection_uses_audit_instance_when_live_audit_mode_enabled,
 )
 
-pytestmark = pytest.mark.memory
+pytestmark = [pytest.mark.memory, pytest.mark.timeout(180)]

@@ -7,38 +7,37 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.base import BasePipeline
-from bioetl.application.core.base_transformer import BaseTransformer
-from bioetl.composition.factories.datasource.data_source_factory import (
-    DataSourceCreatorProtocol,
-)
 from bioetl.composition.factories.pipeline.control_plane_artifacts import (
     ControlPlaneArtifacts,
 )
 from bioetl.composition.factories.pipeline.creation_support import (
     _PipelineCreationRequest,
 )
-from bioetl.composition.observability import ObservabilityBundle
-from bioetl.domain.context import CachedBronzeContext
-from bioetl.domain.filtering import InputFilterConfig
-from bioetl.domain.ports import (
-    AuditPort,
-    DQMonitorPort,
-    LoggerPort,
-    MetricsPort,
-    PipelineCreateRunnerRequest,
-    TracingPort,
-)
-from bioetl.domain.types import RunID
-from bioetl.infrastructure.config.settings_api import Settings
-from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 if TYPE_CHECKING:
     import pyarrow as pa
 
+    from bioetl.application.core.base import BasePipeline
+    from bioetl.application.core.base_transformer import BaseTransformer
+    from bioetl.composition.factories.datasource.data_source_factory import (
+        DataSourceCreatorProtocol,
+    )
+    from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
-    from bioetl.domain.ports import DataSourcePort
-    from bioetl.domain.types import GoldSchemaType
+    from bioetl.domain.context import CachedBronzeContext
+    from bioetl.domain.filtering import InputFilterConfig
+    from bioetl.domain.ports import (
+        AuditPort,
+        DQMonitorPort,
+        DataSourcePort,
+        LoggerPort,
+        MetricsPort,
+        PipelineCreateRunnerRequest,
+        TracingPort,
+    )
+    from bioetl.domain.types import GoldSchemaType, RunID
+    from bioetl.infrastructure.config.settings_api import Settings
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 @dataclass(frozen=True, slots=True)

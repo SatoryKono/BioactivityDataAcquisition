@@ -20,4 +20,4 @@ from tests.testing_support.neo4j_memory_sync import (  # noqa: F401
     test_workflow_quality_gates_detect_repo_gate_signals,
 )
 
-pytestmark = pytest.mark.memory
+pytestmark = [pytest.mark.memory, pytest.mark.timeout(180)]

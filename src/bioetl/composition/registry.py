@@ -13,7 +13,7 @@ from __future__ import annotations
 import threading
 from typing import TYPE_CHECKING, NamedTuple
 
-from bioetl.domain.ports import PipelineFactoryPort
+from bioetl.domain.ports.runtime import PipelineFactoryPort
 
 if TYPE_CHECKING:
     import pyarrow as pa

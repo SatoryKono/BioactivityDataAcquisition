@@ -9,6 +9,7 @@ import httpx
 import pytest
 
 from bioetl.domain.exceptions.network import ExternalServiceError
+from tests.helpers.vcr_config import build_cassette_dir
 
 from .conftest import (
     E2E_FIXED_RUN_ID,
@@ -41,6 +42,28 @@ from .test_pipeline_matrix_e2e import (
 )
 
 pytestmark = [pytest.mark.e2e, pytest.mark.usefixtures("strict_dq_env")]
+
+
+@pytest.fixture
+def vcr_cassette_dir(request: pytest.FixtureRequest) -> Path:
+    """Route VCR-backed policy probes to one known-good ChEMBL cassette set."""
+    if request.node.name != "test_vcr_request_exposes_snapshot_refs":
+        return build_cassette_dir(
+            fixtures_root=Path(__file__).resolve().parents[1] / "fixtures" / "vcr",
+            provider_dir="chembl",
+        )
+    return build_cassette_dir(
+        fixtures_root=Path(__file__).resolve().parents[1] / "fixtures" / "vcr",
+        provider_dir="chembl",
+    )
+
+
+@pytest.fixture
+def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
+    """Pin one real cassette file for the policy probe."""
+    if request.node.name == "test_vcr_request_exposes_snapshot_refs":
+        return "test_chembl_activity_full_run"
+    return request.node.name
 
 
 def test_strict_persistence_snapshot_gap_detects_fail_closed_replay_errors() -> None:
@@ -258,6 +281,20 @@ def test_build_vcr_cassette_input_snapshot_refs_is_deterministic(
     assert refs[0].immutable_uri is not None
     assert refs[0].immutable_uri.startswith("vcr://")
     assert refs[0].immutable_uri.endswith("test_case.yaml")
+
+
+@pytest.mark.vcr
+def test_vcr_request_exposes_snapshot_refs(
+    request: pytest.FixtureRequest,
+) -> None:
+    """Real pytest-vcr requests must resolve immutable cassette snapshot refs."""
+    refs = _build_vcr_cassette_input_snapshot_refs(request)
+
+    assert len(refs) == 1
+    assert refs[0].snapshot_id.startswith("sha256:")
+    assert refs[0].content_hash
+    assert refs[0].immutable_uri is not None
+    assert refs[0].immutable_uri.endswith("test_chembl_activity_full_run.yaml")
 
 
 def test_build_e2e_fail_reason_is_deterministic() -> None:

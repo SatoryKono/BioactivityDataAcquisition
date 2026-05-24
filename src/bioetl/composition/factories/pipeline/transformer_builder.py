@@ -13,7 +13,7 @@ from bioetl.composition.factories.pipeline.construction_types import (
 from bioetl.composition.factories.transformer_dependencies import (
     build_transformer_dependencies,
 )
-from bioetl.domain.behavior import EntityIdentityGenerator
+from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
 )
