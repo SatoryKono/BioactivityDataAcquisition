@@ -1,0 +1,22 @@
+id: EV-artifact-surface-reduction-need-further-pruning-is-now-policy-change-not-cleanup
+pillar: artifact-surface-reduction-need
+source:
+  type: internal-doc
+  ref:
+    - docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md
+    - docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md
+    - docs/02-architecture/diagrams/governance/diagrams-index.md
+  retrieved_at: 2026-03-21
+claim: "Any additional PNG surface pruning would now require a policy change because governance already documents PNG as a compatibility/export layer and routes PNG validation through a curated manifest."
+quote: "PNG публикуются там, где нужен compatibility/export surface."
+confidence: 0.92
+assumptions:
+  - "Governance docs represent the intended maintenance model."
+  - "When a surface is explicitly documented as compatibility/export, deletion is no longer a routine cleanup."
+notes: "This supports a watchlist posture rather than an urgent pruning wave."
+tags:
+  - diagrams
+  - governance
+  - png
+  - policy
+  - watchlist
