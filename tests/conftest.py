@@ -332,6 +332,17 @@ def project_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _pin_test_cwd_to_project_root(project_root: Path) -> Generator[None, None, None]:
+    """Run the test session from repo root even when wrappers launch pytest elsewhere."""
+    previous_cwd = Path.cwd()
+    os.chdir(project_root)
+    try:
+        yield
+    finally:
+        os.chdir(previous_cwd)
+
+
 @pytest.fixture(scope="session")
 def src_dir(project_root: Path) -> Path:
     """Return the `src` directory used by architecture tests."""

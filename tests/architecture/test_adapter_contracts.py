@@ -17,6 +17,8 @@ from __future__ import annotations
 import ast
 import inspect
 import re
+import shutil
+import subprocess
 from concurrent.futures import ThreadPoolExecutor
 from importlib import import_module
 from pathlib import Path
@@ -161,6 +163,66 @@ def _legacy_module_import_violations(
     return violations
 
 
+def _iter_python_files_matching_any(
+    roots: tuple[Path, ...],
+    patterns: frozenset[str] | set[str] | dict[str, str],
+) -> list[Path]:
+    """Return Python files containing any exact pattern without full-tree AST parsing."""
+    pattern_values = list(patterns)
+    if not pattern_values:
+        return []
+
+    existing_roots = [root for root in roots if root.exists()]
+    if not existing_roots:
+        return []
+
+    rg = shutil.which("rg")
+    if rg is not None:
+        command = [rg, "--files-with-matches", "--fixed-strings"]
+        for pattern in pattern_values:
+            command.extend(("--regexp", pattern))
+        command.extend(("--glob", "*.py"))
+        command.extend(str(root) for root in existing_roots)
+        result = subprocess.run(
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode in {0, 1}:
+            return sorted(Path(line) for line in result.stdout.splitlines() if line)
+
+    matched: list[Path] = []
+    for search_root in existing_roots:
+        for py_file in sorted(search_root.rglob("*.py")):
+            if "__pycache__" in py_file.parts:
+                continue
+            try:
+                content = py_file.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError):
+                continue
+            if any(pattern in content for pattern in pattern_values):
+                matched.append(py_file)
+    return matched
+
+
+def _parse_python_file(py_file: Path) -> ast.Module:
+    return ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
+
+
+def _legacy_module_import_violations_for_files(
+    root: Path,
+    py_files: list[Path],
+) -> list[str]:
+    violations: list[str] = []
+    for py_file in py_files:
+        rel_path = py_file.relative_to(root).as_posix()
+        violations.extend(
+            _legacy_module_violations_for_tree(rel_path, _parse_python_file(py_file))
+        )
+    return violations
+
+
 def _expected_root_import_name(
     node: ast.ImportFrom,
     disallowed_modules: dict[str, str],
@@ -217,6 +279,27 @@ def _package_root_import_violations(
             continue
         violations.extend(
             _package_root_violations_for_tree(root, py_file, tree, disallowed_modules)
+        )
+    return violations
+
+
+def _package_root_import_violations_for_files(
+    root: Path,
+    allowed_files: set[Path],
+    disallowed_modules: dict[str, str],
+    py_files: list[Path],
+) -> list[str]:
+    violations: list[str] = []
+    for py_file in py_files:
+        if py_file in allowed_files:
+            continue
+        violations.extend(
+            _package_root_violations_for_tree(
+                root,
+                py_file,
+                _parse_python_file(py_file),
+                disallowed_modules,
+            )
         )
     return violations
 
@@ -314,15 +397,16 @@ class TestAdapterMixinPolicy:
     def test_src_does_not_import_legacy_adapter_mixin_modules(
         self,
         src_dir: Path,
-        source_ast_cache: dict[Path, ast.Module],
-        test_ast_cache: dict[Path, ast.Module],
     ) -> None:
         """Removed legacy adapter-mixin module paths must stay absent everywhere."""
-        violations: list[str] = []
         root = src_dir.parent
-        violations = _legacy_module_import_violations(
+        candidate_files = _iter_python_files_matching_any(
+            (src_dir, root / "tests"),
+            REMOVED_SHIM_IMPORT_PATHS,
+        )
+        violations = _legacy_module_import_violations_for_files(
             root,
-            (source_ast_cache, test_ast_cache),
+            candidate_files,
         )
 
         assert not violations, (
@@ -504,8 +588,6 @@ class TestAdapterPortCompliance:
     def test_primary_adapter_classes_use_package_root_imports(
         self,
         src_dir: Path,
-        source_ast_cache: dict[Path, ast.Module],
-        test_ast_cache: dict[Path, ast.Module],
     ) -> None:
         """Primary adapter classes should be imported from provider package roots."""
         disallowed_modules = {
@@ -570,11 +652,15 @@ class TestAdapterPortCompliance:
             / "test_compatibility.py",
         }
 
-        violations = _package_root_import_violations(
+        candidate_files = _iter_python_files_matching_any(
+            (src_dir, src_dir.parent / "tests"),
+            disallowed_modules,
+        )
+        violations = _package_root_import_violations_for_files(
             src_dir.parent,
             allowed_files,
             disallowed_modules,
-            (source_ast_cache, test_ast_cache),
+            candidate_files,
         )
 
         assert not violations, (

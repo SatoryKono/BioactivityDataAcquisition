@@ -1,40 +1,46 @@
-"""Domain layer public API with explicit, non-lazy exports."""
+"""Domain layer public API with lazy exports.
+
+This package preserves historical ``from bioetl.domain import ...`` usage
+without eagerly importing the entire domain tree during package import. The
+previous eager facade pulled in large dependency graphs during test collection
+and CLI startup, which could stall collection before any test executed.
+"""
 
 from __future__ import annotations
 
-from bioetl.domain import behavior as behavior
-from bioetl.domain import composite as composite
-from bioetl.domain import constants as constants
-from bioetl.domain import contracts as contracts
-from bioetl.domain import control_plane as control_plane
-from bioetl.domain import error_types as error_types
-from bioetl.domain import exceptions as exceptions
-from bioetl.domain import lineage as lineage
-from bioetl.domain import observability_contract as observability_contract
-from bioetl.domain import observability_event_mapping as observability_event_mapping
-from bioetl.domain import observability_metric_names as observability_metric_names
-from bioetl.domain import ports as ports
-from bioetl.domain import (
-    pubchem_standardization_catalog as pubchem_standardization_catalog,
-)
-from bioetl.domain import (
-    runtime_observability_publication_contract as runtime_observability_publication_contract,
-)
-from bioetl.domain import types as types
-from bioetl.domain import types_config_validation as types_config_validation
-from bioetl.domain import workflow as workflow
-from bioetl.domain import context_cached_bronze as context_cached_bronze
-from bioetl.domain import context_filtering as context_filtering
-from bioetl.domain.events import PipelineEvent
-from bioetl.domain.observability_event_mapping import (
-    DomainEventObservabilityEnvelope,
-    map_domain_event_to_observability_event,
-)
-from bioetl.domain.runtime_observability_publication_contract import (
-    get_runtime_observability_publication_contract,
-    is_canonical_runtime_observability_emitter,
-)
-from bioetl.domain.version import get_version
+from importlib import import_module
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import bioetl.domain.behavior as behavior
+    import bioetl.domain.composite as composite
+    import bioetl.domain.constants as constants
+    import bioetl.domain.context_cached_bronze as context_cached_bronze
+    import bioetl.domain.context_filtering as context_filtering
+    import bioetl.domain.contracts as contracts
+    import bioetl.domain.control_plane as control_plane
+    import bioetl.domain.error_types as error_types
+    import bioetl.domain.exceptions as exceptions
+    import bioetl.domain.lineage as lineage
+    import bioetl.domain.observability_contract as observability_contract
+    import bioetl.domain.observability_event_mapping as observability_event_mapping
+    import bioetl.domain.observability_metric_names as observability_metric_names
+    import bioetl.domain.ports as ports
+    import bioetl.domain.pubchem_standardization_catalog as pubchem_standardization_catalog
+    import bioetl.domain.runtime_observability_publication_contract as runtime_observability_publication_contract
+    import bioetl.domain.types as types
+    import bioetl.domain.types_config_validation as types_config_validation
+    import bioetl.domain.workflow as workflow
+    from bioetl.domain.events import PipelineEvent
+    from bioetl.domain.observability_event_mapping import (
+        DomainEventObservabilityEnvelope,
+        map_domain_event_to_observability_event,
+    )
+    from bioetl.domain.runtime_observability_publication_contract import (
+        get_runtime_observability_publication_contract,
+        is_canonical_runtime_observability_emitter,
+    )
+    from bioetl.domain.version import get_version
 
 __all__ = [
     "DomainEventObservabilityEnvelope",
@@ -60,3 +66,67 @@ __all__ = [
     "types_config_validation",
     "workflow",
 ]
+
+_MODULE_EXPORTS = {
+    "behavior": "bioetl.domain.behavior",
+    "composite": "bioetl.domain.composite",
+    "constants": "bioetl.domain.constants",
+    "context_cached_bronze": "bioetl.domain.context_cached_bronze",
+    "context_filtering": "bioetl.domain.context_filtering",
+    "contracts": "bioetl.domain.contracts",
+    "control_plane": "bioetl.domain.control_plane",
+    "error_types": "bioetl.domain.error_types",
+    "exceptions": "bioetl.domain.exceptions",
+    "lineage": "bioetl.domain.lineage",
+    "observability_contract": "bioetl.domain.observability_contract",
+    "observability_event_mapping": "bioetl.domain.observability_event_mapping",
+    "observability_metric_names": "bioetl.domain.observability_metric_names",
+    "ports": "bioetl.domain.ports",
+    "pubchem_standardization_catalog": "bioetl.domain.pubchem_standardization_catalog",
+    "runtime_observability_publication_contract": "bioetl.domain.runtime_observability_publication_contract",
+    "types": "bioetl.domain.types",
+    "types_config_validation": "bioetl.domain.types_config_validation",
+    "workflow": "bioetl.domain.workflow",
+}
+
+_ATTRIBUTE_EXPORTS = {
+    "DomainEventObservabilityEnvelope": (
+        "bioetl.domain.observability_event_mapping",
+        "DomainEventObservabilityEnvelope",
+    ),
+    "PipelineEvent": ("bioetl.domain.events", "PipelineEvent"),
+    "get_runtime_observability_publication_contract": (
+        "bioetl.domain.runtime_observability_publication_contract",
+        "get_runtime_observability_publication_contract",
+    ),
+    "get_version": ("bioetl.domain.version", "get_version"),
+    "is_canonical_runtime_observability_emitter": (
+        "bioetl.domain.runtime_observability_publication_contract",
+        "is_canonical_runtime_observability_emitter",
+    ),
+    "map_domain_event_to_observability_event": (
+        "bioetl.domain.observability_event_mapping",
+        "map_domain_event_to_observability_event",
+    ),
+}
+
+
+def __getattr__(name: str) -> object:
+    module_name = _MODULE_EXPORTS.get(name)
+    if module_name is not None:
+        value = import_module(module_name)
+        globals()[name] = value
+        return value
+
+    export = _ATTRIBUTE_EXPORTS.get(name)
+    if export is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+    module_name, attribute_name = export
+    value = getattr(import_module(module_name), attribute_name)
+    globals()[name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(__all__) | set(_MODULE_EXPORTS) | set(_ATTRIBUTE_EXPORTS))

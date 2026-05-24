@@ -404,7 +404,7 @@ class TestCompositeMoleculeConfig:
             assert config.seed.pipeline == "chembl_molecule"
             assert len(config.enrichers) == 1
             assert config.enrichers[0].pipeline == "pubchem_compound"
-        except FileNotFoundError:
-            pytest.skip("Composite config not yet deployed")
+        except FileNotFoundError as exc:
+            pytest.fail(f"Composite config is missing unexpectedly: {exc}")
         except ValueError as e:
             pytest.fail(f"Config validation failed: {e}")

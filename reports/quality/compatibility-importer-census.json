@@ -832,7 +832,7 @@
       "public_src_importer_count": 12,
       "public_test_importer_count": 5,
       "private_src_importer_count": 0,
-      "private_test_importer_count": 1,
+      "private_test_importer_count": 2,
       "public_src_importers": [
         "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py",
         "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py",

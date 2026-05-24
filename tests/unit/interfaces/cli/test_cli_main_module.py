@@ -51,11 +51,11 @@ class TestCliMainModule:
                 [sys.executable, "-m", "bioetl.interfaces.cli", "--help"],
                 capture_output=True,
                 text=True,
-                timeout=60,  # Increased for Windows cold-start latency
+                timeout=120,
                 env=env,
             )
-        except subprocess.TimeoutExpired:
-            pytest.skip("Subprocess timeout - CLI startup too slow (Windows/CI issue)")
+        except subprocess.TimeoutExpired as exc:
+            pytest.fail(f"CLI help subprocess timed out unexpectedly: {exc}")
 
         # Help should exit with 0 and show usage info
         assert result.returncode == 0, f"stderr: {result.stderr}"

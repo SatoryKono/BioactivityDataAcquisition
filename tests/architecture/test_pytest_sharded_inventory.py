@@ -46,6 +46,8 @@ def test_pytest_shard_inventory_declares_canonical_schema_and_aliases() -> None:
         "S1-domain-services",
         "S2-comp-iface",
         "S7-crosscutting-architecture-a",
+        "S7-crosscutting-architecture-a2",
+        "S7-crosscutting-architecture-a3",
         "S3-app-foundation",
         "S4-app-services",
         "S7-crosscutting-architecture-b",
@@ -60,12 +62,16 @@ def test_pytest_shard_inventory_declares_canonical_schema_and_aliases() -> None:
     aliases = inventory["aliases"]
     assert aliases["S7-crosscutting-architecture"]["expands_to"] == [
         "S7-crosscutting-architecture-a",
+        "S7-crosscutting-architecture-a2",
+        "S7-crosscutting-architecture-a3",
         "S7-crosscutting-architecture-b",
         "S7-crosscutting-architecture-c",
         "S7-crosscutting-architecture-d",
     ]
     assert aliases["S7-architecture-fast-boundary"]["expands_to"] == [
         "S7-crosscutting-architecture-a",
+        "S7-crosscutting-architecture-a2",
+        "S7-crosscutting-architecture-a3",
         "S7-crosscutting-architecture-b",
         "S7-crosscutting-architecture-c",
         "S7-crosscutting-architecture-d",
@@ -128,7 +134,10 @@ def test_sharded_runner_dry_run_expands_architecture_alias_from_inventory() -> N
     dry_run_lines = [
         line for line in result.stdout.splitlines() if line.startswith("[dry-run]")
     ]
-    assert len(dry_run_lines) == 4
+    assert len(dry_run_lines) == 6
+    assert any(r"test_\[c-z\]\*.py" in line for line in dry_run_lines)
+    assert any(r"test_\[a-b\]\*.py" in line for line in dry_run_lines)
+    assert any(r"test_\[d-z\]\*.py" in line for line in dry_run_lines)
     assert any(r"test_\[g-z\]\*.py" in line for line in dry_run_lines)
     assert any(r"test_\[a-f\]\*.py" in line for line in dry_run_lines)
     assert any(r"test_\[a-l\]\*.py" in line for line in dry_run_lines)

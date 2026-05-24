@@ -14,7 +14,7 @@ from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
-CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "chembl"
+CASSETTE_DIR = Path(__file__).parents[2] / "fixtures" / "vcr" / "chembl"
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,8 +26,6 @@ class ExtractionParamsCase:
     expected_query_parts: tuple[str, ...]
     record_id_field: str
     input_filter_field: str | None = None
-    cassette_names: tuple[str, ...] = ()
-    cassette_hint: str = ""
 
 
 class ExtractionParamsSuiteBase:
@@ -132,23 +130,6 @@ class InputFilterExtractionParamsSuiteBase(ExtractionParamsSuiteBase):
     ) -> None:
         """Input filter and extraction params must stay on separate fields."""
         assert_input_filter_field_not_overlapping(extraction_case)
-
-
-def has_any_cassette(*cassette_names: str) -> bool:
-    """Return whether any supported cassette filename exists or recording is enabled."""
-    if os.environ.get("VCR_RECORD_MODE") == "new_episodes":
-        return True
-    return any(
-        (CASSETTE_DIR / cassette_name).exists() for cassette_name in cassette_names
-    )
-
-
-def build_missing_cassette_reason(cassette_hint: str) -> str:
-    """Build a stable skip reason for not-yet-recorded VCR cassettes."""
-    return (
-        "VCR cassette not yet recorded. "
-        f"Record with: VCR_RECORD_MODE=new_episodes pytest -k {cassette_hint}"
-    )
 
 
 def _build_extraction_params(case: ExtractionParamsCase) -> ExtractionParams:

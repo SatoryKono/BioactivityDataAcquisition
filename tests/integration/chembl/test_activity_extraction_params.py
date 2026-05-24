@@ -11,8 +11,6 @@ from tests.integration.chembl.extraction_params_support import (
     ExtractionParamsCase,
     ExtractionParamsSuiteBase,
     build_chembl_adapter,
-    build_missing_cassette_reason,
-    has_any_cassette,
 )
 
 ACTIVITY_CASE = ExtractionParamsCase(
@@ -38,12 +36,6 @@ ACTIVITY_CASE = ExtractionParamsCase(
         "standard_flag=1",
     ),
     record_id_field="activity_id",
-    cassette_names=(
-        "TestActivityExtractionParams.test_filtered_api_request",
-        "TestActivityExtractionParams.test_filtered_api_request.yaml",
-        "chembl_activity_filtered.yaml",
-    ),
-    cassette_hint="test_filtered_api_request",
 )
 
 
@@ -72,10 +64,6 @@ class TestActivityExtractionParams(ExtractionParamsSuiteBase):
         assert metadata.query_string is None
 
     @pytest.mark.vcr
-    @pytest.mark.skipif(
-        not has_any_cassette(*ACTIVITY_CASE.cassette_names),
-        reason=build_missing_cassette_reason(ACTIVITY_CASE.cassette_hint),
-    )
     async def test_filtered_api_request(
         self,
         token_bucket: Any,

@@ -13,6 +13,7 @@ from bioetl.domain.exceptions.network import ExternalServiceError
 from .conftest import (
     E2E_FIXED_RUN_ID,
     E2E_FIXED_STARTED_AT,
+    _build_vcr_cassette_input_snapshot_refs,
     _resolve_e2e_provider_cassette_dir,
     build_e2e_run_context,
     build_e2e_skip_reason,
@@ -229,6 +230,34 @@ def test_bronze_payload_assertion_does_not_accept_metadata_only(
     ]
     with pytest.raises(AssertionError, match="No raw Bronze payload files found"):
         assert_bronze_files_exist(tmp_path, "pubchem", "compound")
+
+
+def test_build_vcr_cassette_input_snapshot_refs_is_deterministic(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Cassette-backed playback should expose stable immutable snapshot evidence."""
+    cassette_path = tmp_path / "chembl" / "test_case.yaml"
+    cassette_path.parent.mkdir(parents=True)
+    cassette_path.write_text("interactions:\n- request: {}\n", encoding="utf-8")
+
+    monkeypatch.setattr(
+        "tests.e2e.conftest.resolve_requested_cassette_path",
+        lambda _request: cassette_path,
+    )
+    monkeypatch.setattr(
+        "tests.e2e.conftest.is_git_lfs_pointer",
+        lambda _path: False,
+    )
+
+    refs = _build_vcr_cassette_input_snapshot_refs(object())  # type: ignore[arg-type]
+
+    assert len(refs) == 1
+    assert refs[0].snapshot_id.startswith("sha256:")
+    assert refs[0].content_hash
+    assert refs[0].immutable_uri is not None
+    assert refs[0].immutable_uri.startswith("vcr://")
+    assert refs[0].immutable_uri.endswith("test_case.yaml")
 
 
 def test_build_e2e_fail_reason_is_deterministic() -> None:
