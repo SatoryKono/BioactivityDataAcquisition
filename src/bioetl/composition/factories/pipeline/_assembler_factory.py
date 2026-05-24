@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TypeVar, cast
 
 import pyarrow as pa
 
@@ -11,6 +11,13 @@ from bioetl.application.core.wiring.factory import (
     BasePipeline,
     PipelineRunner,
     PipelineService,
+)
+from bioetl.application.core.wiring.transformer import (
+    BaseTransformer,
+    TransformerDependencyContext,
+)
+from bioetl.composition.factories.datasource.data_source_factory import (
+    DataSourceCreatorProtocol,
 )
 from bioetl.composition.factories.pipeline.assembler_helpers import (
     _FactoryLike,
@@ -32,39 +39,30 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
 from bioetl.composition.pipeline_runner_request import (
     build_pipeline_create_runner_request_from_kwargs as _build_pipeline_create_runner_request_from_kwargs,
 )
-
-if TYPE_CHECKING:
-    from bioetl.composition.factories.datasource.data_source_factory import (
-        DataSourceCreatorProtocol,
-    )
-    from bioetl.application.core.wiring.transformer import (
-        BaseTransformer,
-        TransformerDependencyContext,
-    )
-    from bioetl.composition.providers.provider_registry import (
-        ProviderDataSourceAccessProtocol,
-    )
-    from bioetl.domain.behavior import EntityIdentityGenerator
-    from bioetl.domain.filtering import (
-        GoldFilterConfig,
-        InputFilterConfig,
-        SilverFilterConfig,
-    )
-    from bioetl.domain.ports import (
-        AuditPort,
-        ContractPolicyProtocol,
-        DataNormalizationPort,
-        DataSourcePort,
-        DQMonitorPort,
-        LoggerPort,
-        MetricsPort,
-        PiiHasherPort,
-        PipelineCreateRunnerRequest,
-        TracingPort,
-    )
-    from bioetl.domain.types import GoldSchemaType
-    from bioetl.infrastructure.config.settings_api import Settings
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.composition.providers.provider_registry import (
+    ProviderDataSourceAccessProtocol,
+)
+from bioetl.domain.behavior import EntityIdentityGenerator
+from bioetl.domain.filtering import (
+    GoldFilterConfig,
+    InputFilterConfig,
+    SilverFilterConfig,
+)
+from bioetl.domain.ports import (
+    AuditPort,
+    ContractPolicyProtocol,
+    DataNormalizationPort,
+    DataSourcePort,
+    DQMonitorPort,
+    LoggerPort,
+    MetricsPort,
+    PiiHasherPort,
+    PipelineCreateRunnerRequest,
+    TracingPort,
+)
+from bioetl.domain.types import GoldSchemaType
+from bioetl.infrastructure.config.settings_api import Settings
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 

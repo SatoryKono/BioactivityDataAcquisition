@@ -6,13 +6,7 @@ from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-    from bioetl.composition.registry import (
-        PipelineDefinition,
-        PipelineRegistry,
-        create_registry,
-    )
-    from bioetl.composition.registry_default import get_default_registry
+    pass
 
 _PUBLIC_EXPORTS = {
     "PipelineDefinition": (

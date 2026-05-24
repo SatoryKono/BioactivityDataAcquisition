@@ -33,9 +33,14 @@ if TYPE_CHECKING:
         ClassificationStats,
         OrganismClassifier,
     )
-    from bioetl.domain.behavior.phased_migration_support import PhasedMigrationCoordinator
+    from bioetl.domain.behavior.phased_migration_support import (
+        PhasedMigrationCoordinator,
+    )
     from bioetl.domain.behavior.preflight_governance import PreflightGovernor
-    from bioetl.domain.behavior.text_similarity import jaccard_similarity, normalize_text
+    from bioetl.domain.behavior.text_similarity import (
+        jaccard_similarity,
+        normalize_text,
+    )
     from bioetl.domain.behavior.unit_converter import UnitConverter
     from bioetl.domain.behavior.value_validator import ValueValidator
 

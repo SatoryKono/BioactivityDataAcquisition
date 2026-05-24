@@ -103,7 +103,7 @@ async def _run_runtime_pipeline(
     with ExitStack() as stack:
         for target in (
             "bioetl.composition.factories.storage._helpers.load_pipeline_contract_policy",
-            "bioetl.composition.factories.pipeline._creation_wiring.load_pipeline_contract_policy",
+            "bioetl.infrastructure.config.contract_policy_loader.load_pipeline_contract_policy",
             "bioetl.composition.factories.pipeline.contract_validator.load_pipeline_contract_policy",
         ):
             stack.enter_context(patch(target, return_value=contract_policy))

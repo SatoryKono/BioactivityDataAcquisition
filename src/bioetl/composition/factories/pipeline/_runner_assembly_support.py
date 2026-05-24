@@ -4,12 +4,19 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
-from bioetl.application.core.lifecycle import LockRuntimeService
+import pyarrow as pa
+
+from bioetl.application.core.base import BasePipeline
+from bioetl.application.core.batch_executor import BatchExecutor
+from bioetl.application.core.lifecycle import (
+    CheckpointRuntimeService,
+    LockRuntimeService,
+)
 from bioetl.application.core.lifecycle.lock_runtime_service import (
     LockRuntimeServiceCreateContext,
 )
+from bioetl.application.core.postrun import PostrunService
 from bioetl.application.core.preflight import (
     HealthAggregator,
     MedallionConfigValidator,
@@ -29,21 +36,13 @@ from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.composition.factories.services.pipeline_builder import (
     BatchExecutorBuildRequest,
 )
+from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import WriteModePolicy
+from bioetl.domain.ports import LoggerPort
+from bioetl.domain.types import GoldSchemaType
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.time import SystemClock
-
-if TYPE_CHECKING:
-    import pyarrow as pa
-
-    from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.batch_executor import BatchExecutor
-    from bioetl.application.core.lifecycle import CheckpointRuntimeService
-    from bioetl.application.core.postrun import PostrunService
-    from bioetl.composition.observability import ObservabilityBundle
-    from bioetl.domain.ports import LoggerPort
-    from bioetl.domain.types import GoldSchemaType
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 @dataclass(frozen=True, slots=True)

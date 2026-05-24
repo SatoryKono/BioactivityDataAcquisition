@@ -11,8 +11,8 @@ import pyarrow as pa
 from bioetl.application.core.wiring.factory import (
     BasePipeline,
     PipelineService,
+    ShutdownSignal,
 )
-from bioetl.application.core.wiring.factory import ShutdownSignal
 from bioetl.application.core.wiring.transformer import BaseTransformer
 from bioetl.application.services.lineage.metadata_coordinator import (
     MetadataCoordinator,
@@ -22,13 +22,13 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 )
 from bioetl.composition.factories.pipeline.construction_types import (
     EntityTypeExtractor,
+    _SchemaBuilder,
+)
+from bioetl.composition.factories.pipeline.control_plane_artifacts import (
+    ControlPlaneArtifacts,
 )
 from bioetl.composition.factories.pipeline.run_context_factory import (
     RunContextFactory,
-)
-from bioetl.composition.factories.pipeline.construction_types import _SchemaBuilder
-from bioetl.composition.factories.pipeline.control_plane_artifacts import (
-    ControlPlaneArtifacts,
 )
 from bioetl.composition.factories.pipeline.transformer_builder import (
     TransformerBuilder,

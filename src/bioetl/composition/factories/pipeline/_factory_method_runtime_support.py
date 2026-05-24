@@ -4,8 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, cast
+from typing import Any, cast
 
+import pyarrow as pa
+
+from bioetl.application.core.base import BasePipeline
+from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.factories.pipeline._factory_method_control_plane import (
     resolve_strict_gold_validation,
 )
@@ -13,28 +17,19 @@ from bioetl.composition.factories.pipeline._factory_method_types import (
     _CreatePipelineWithServicesRequest,
     _PipelineFactoryContext,
 )
+from bioetl.composition.factories.pipeline.control_plane_artifacts import (
+    ControlPlaneArtifacts as _ControlPlaneArtifacts,
+)
 from bioetl.composition.factories.pipeline.creation_support import (
     _PipelineCreationInputs,
 )
-
-if TYPE_CHECKING:
-    import pyarrow as pa
-
-    from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.runner import PipelineRunner
-    from bioetl.composition.factories.pipeline._factory_method_types import (
-        _CreatePipelineWithServicesRequest,
-    )
-    from bioetl.composition.factories.pipeline.control_plane_artifacts import (
-        ControlPlaneArtifacts as _ControlPlaneArtifacts,
-    )
-    from bioetl.composition.observability import ObservabilityBundle
-    from bioetl.domain.config import RuntimeConfig
-    from bioetl.domain.context import CachedBronzeContext
-    from bioetl.domain.filtering import InputFilterConfig
-    from bioetl.domain.types import GoldSchemaType, RunID
-    from bioetl.infrastructure.config.settings_api import Settings
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.composition.observability import ObservabilityBundle
+from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.context import CachedBronzeContext
+from bioetl.domain.filtering import InputFilterConfig
+from bioetl.domain.types import GoldSchemaType, RunID
+from bioetl.infrastructure.config.settings_api import Settings
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 def create_pipeline_instance_from_request(

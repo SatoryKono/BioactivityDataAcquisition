@@ -148,8 +148,8 @@ async def test_vacuum_respects_retention_days(
     """
     await _seed_chembl_activity_silver(e2e_data_dir)
 
-    # Execute one more run to create a new version.
-    ctx = create_test_context("chembl_activity", limit=5)
+    # Advanced-scenario playback cassettes capture the follow-up run at limit=3.
+    ctx = create_test_context("chembl_activity", limit=3)
     await _run_pipeline_or_skip_policy_envelope(ctx)
 
     # Verify table has records
@@ -385,7 +385,7 @@ async def test_failed_run_preserves_partial_data(
     initial_count = await _seed_chembl_activity_silver(e2e_data_dir)
 
     # Seed fixture already provides the first run; execute the follow-up run only.
-    ctx2 = create_test_context("chembl_activity", limit=5)
+    ctx2 = create_test_context("chembl_activity", limit=3)
     await _run_pipeline_or_skip_policy_envelope(ctx2)
 
     # Data should be preserved/incremented
@@ -452,7 +452,7 @@ async def test_backfill_clears_silver_only(
     # Backfill run
     ctx2 = create_test_context(
         "chembl_activity",
-        limit=5,
+        limit=3,
         run_type=RunType.BACKFILL,
     )
     await _run_pipeline_or_skip_policy_envelope(ctx2)
@@ -462,4 +462,4 @@ async def test_backfill_clears_silver_only(
         e2e_data_dir,
         expected_min=1,
     )
-    assert backfill_count <= 5
+    assert backfill_count <= 3
