@@ -57,7 +57,9 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _load_external_records(paths: list[str]) -> tuple[HistoricalReplayUniverseExternalRecord, ...]:
+def _load_external_records(
+    paths: list[str],
+) -> tuple[HistoricalReplayUniverseExternalRecord, ...]:
     records: list[HistoricalReplayUniverseExternalRecord] = []
     for raw_path in paths:
         path = Path(raw_path)
@@ -65,10 +67,14 @@ def _load_external_records(paths: list[str]) -> tuple[HistoricalReplayUniverseEx
         pack_ref = str(payload.get("pack_id") or path.name)
         raw_records = payload.get("records")
         if not isinstance(raw_records, list):
-            raise ValueError(f"External universe pack {path} must contain a records list")
+            raise ValueError(
+                f"External universe pack {path} must contain a records list"
+            )
         for item in raw_records:
             if not isinstance(item, dict):
-                raise ValueError(f"External universe pack {path} contains a non-object record")
+                raise ValueError(
+                    f"External universe pack {path} contains a non-object record"
+                )
             records.append(
                 HistoricalReplayUniverseExternalRecord(
                     manifest_id=str(item["manifest_id"]).strip(),

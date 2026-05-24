@@ -159,10 +159,20 @@ def validate_reproducible_sink_modes(
         details = ", ".join(
             f"sink.{layer_name}.mode=append" for layer_name in append_layers
         )
-        raise RuntimeError(
-            "Replay-capable pipeline families cannot use append-mode Silver/Gold "
+        guidance = (
             f"semantic outputs ({details}); use merge/upsert, overwrite, or SCD2 "
             "semantics with stable keys instead"
+        )
+        if strict_replay_requested:
+            raise RuntimeError(
+                "Strict reproducibility contexts cannot use append-mode "
+                "Silver/Gold "
+                f"{guidance}. Replay-capable pipeline families cannot use "
+                "append-mode Silver/Gold semantic outputs either"
+            )
+        raise RuntimeError(
+            "Replay-capable pipeline families cannot use append-mode Silver/Gold "
+            f"{guidance}"
         )
 
 

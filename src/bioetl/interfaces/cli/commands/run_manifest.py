@@ -60,6 +60,14 @@ def _emit_payload(payload: dict[str, object], output_format: str) -> None:
     )
 
 
+def _has_required_universal_exact_replay_claim(report: object) -> bool:
+    """Return whether the report may back universal exact-replay wording."""
+    gate = getattr(report, "governed_full_corpus_gate", {})
+    if not isinstance(gate, dict):
+        return False
+    return bool(gate.get("satisfied", False))
+
+
 @click.group()
 def run_manifest() -> None:
     """Inspect control-plane run manifests and ledger history."""
@@ -337,7 +345,7 @@ def closure_report_command(
 @click.option(
     "--require-universal-claim",
     is_flag=True,
-    help="Fail closed unless the authoritative universal exact-replay claim is claimed.",
+    help="Fail closed unless the governed full-corpus universal exact-replay gate is satisfied.",
 )
 @click.option(
     "--require-durable-evidence-coverage",
@@ -376,7 +384,9 @@ def universe_report_command(
     except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
         echo_error("Historical replay universe report failed", str(exc))
         return
-    if require_universal_claim and not bool(report.universal_claim.get("claimed", False)):
+    if require_universal_claim and not _has_required_universal_exact_replay_claim(
+        report
+    ):
         raise click.ClickException(
             "Authoritative historical replay universe claim is not satisfied."
         )
