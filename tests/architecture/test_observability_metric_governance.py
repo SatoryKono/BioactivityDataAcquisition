@@ -63,10 +63,13 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
         "runtime_cardinality_review_required_field": (
             "runtime_cardinality_review_required"
         ),
+        "runtime_cardinality_threshold_violations_field": (
+            "runtime_cardinality_threshold_violations"
+        ),
     }
 
     runtime_cardinality_review = payload["runtime_cardinality_review"]
-    assert runtime_cardinality_review["heuristic"] == "multi_emitter_static_proxy"
+    assert runtime_cardinality_review["heuristic"] == "runtime_evidence_with_static_hotspot_seed"
     assert runtime_cardinality_review["min_distinct_emitters"] >= 3
     assert (
         runtime_cardinality_review["exception_allowlist_field"]
@@ -106,10 +109,12 @@ def test_runtime_cardinality_allowlist_entries_require_metadata() -> None:
         owner = str(entry["owner"])
         reason = str(entry["reason"])
         review_date = str(entry["review_date"])
+        approved_max_series = entry.get("approved_max_series")
 
         assert metric
         assert owner.startswith("@")
         assert reason.strip()
+        assert isinstance(approved_max_series, int) and approved_max_series > 0
         assert date.fromisoformat(review_date) >= POLICY_REVIEW_DATE, (
             "runtime_cardinality_review_required lifecycle exception has expired "
             f"review_date: metric={metric} review_date={review_date}"
@@ -139,6 +144,9 @@ def test_runtime_cardinality_evidence_artifact_is_committed_and_governed() -> No
         "declared_risky_label_review_required",
         "runtime_label_contract_violations",
         "runtime_label_contract_unresolved",
+        "runtime_cardinality_evidence",
+        "runtime_cardinality_observed_series",
+        "runtime_cardinality_threshold_violations",
     }
     for key in (
         "declared_metrics",
@@ -147,6 +155,7 @@ def test_runtime_cardinality_evidence_artifact_is_committed_and_governed() -> No
         "declared_risky_label_review_required",
         "runtime_label_contract_violations",
         "runtime_label_contract_unresolved",
+        "runtime_cardinality_threshold_violations",
     ):
         assert isinstance(actual[key], list), f"{key} must be a list"
         assert actual[key] == sorted(actual[key]), f"{key} must be deterministic"
@@ -154,9 +163,16 @@ def test_runtime_cardinality_evidence_artifact_is_committed_and_governed() -> No
     runtime_emitters = actual["runtime_emitters"]
     helper_backed_emitters = actual["helper_backed_emitters"]
     alias_emitters = actual.get("alias_emitters", {})
+    runtime_cardinality_evidence = actual.get("runtime_cardinality_evidence", {})
+    runtime_cardinality_observed_series = actual.get(
+        "runtime_cardinality_observed_series",
+        {},
+    )
     assert isinstance(runtime_emitters, dict)
     assert isinstance(helper_backed_emitters, dict)
     assert isinstance(alias_emitters, dict)
+    assert isinstance(runtime_cardinality_evidence, dict)
+    assert isinstance(runtime_cardinality_observed_series, dict)
     for metric_name in alias_emitters:
         assert inventory._is_metric_like_alias_name(metric_name), (
             "Alias emitter evidence must contain only Prometheus-style metric names: "

@@ -16,19 +16,21 @@ governance_views:
   dashboarded_without_emission_field: dashboarded_without_emission
   alerted_without_emission_field: alerted_without_emission
   runtime_cardinality_review_required_field: runtime_cardinality_review_required
+  runtime_cardinality_threshold_violations_field: runtime_cardinality_threshold_violations
 runtime_cardinality_review:
-  heuristic: multi_emitter_static_proxy
+  heuristic: runtime_evidence_with_static_hotspot_seed
   min_distinct_emitters: 3
   rationale: >
-    Repo-static inventory cannot measure live label cardinality directly, so the
-    governance layer uses multi-emitter metric families as a bounded review
-    proxy that still surfaces likely operator-significant hotspots.
+    Static multi-emitter inventory seeds the review set, and the replayable
+    evidence artifact records current-process observed Prometheus series counts
+    plus approved thresholds for governed metric families.
   exception_allowlist_field: runtime_cardinality_review_required
   exception_metadata_fields:
   - metric
   - owner
   - reason
   - review_date
+  - approved_max_series
   evidence_collection:
     mode: replayable_inventory_evidence_workflow
     artifact: reports/observability/runtime_cardinality_inventory.json

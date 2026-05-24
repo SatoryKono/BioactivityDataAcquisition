@@ -18,6 +18,8 @@ LEGACY_IMPLEMENTATION_PATHS = frozenset(
 REMOVED_CLIENT_SHIM_MODULES = frozenset(
     {
         "bioetl.infrastructure.adapters.pubmed.client",
+        "bioetl.infrastructure.adapters.pubmed.pubmed_client",
+        "bioetl.composition.factories.storage.adapter",
         "bioetl.infrastructure.adapters.semanticscholar.client",
     }
 )
@@ -30,6 +32,20 @@ REMOVED_CLIENT_SHIM_FILES = frozenset(
         / "adapters"
         / "pubmed"
         / "client.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "adapters"
+        / "pubmed"
+        / "pubmed_client.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "composition"
+        / "factories"
+        / "storage"
+        / "adapter.py",
         ROOT
         / "src"
         / "bioetl"
@@ -59,13 +75,6 @@ ALLOWED_SRC_FILES = frozenset(
         / "bioetl"
         / "infrastructure"
         / "adapters"
-        / "pubmed"
-        / "pubmed_client.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "infrastructure"
-        / "adapters"
         / "semanticscholar"
         / "client.py",
     }
@@ -86,13 +95,6 @@ ALLOWED_RETAINED_ENTRYPOINT_SRC_FILES = frozenset(
         / "adapters"
         / "pubmed"
         / "adapter.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "infrastructure"
-        / "adapters"
-        / "pubmed"
-        / "pubmed_client.py",
         ROOT
         / "src"
         / "bioetl"

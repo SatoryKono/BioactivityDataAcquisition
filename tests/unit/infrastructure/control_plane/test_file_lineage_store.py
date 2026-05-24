@@ -189,6 +189,8 @@ def test_file_store_preserves_occurrence_specific_history_for_semantically_equiv
     assert second_loaded[0].manifest_id == "manifest-2"
     assert store.list_by_manifest_id("manifest-1") == first_loaded
     assert store.list_by_manifest_id("manifest-2") == second_loaded
+    assert store.get_occurrence(first_loaded[0].stored_fragment_id or "") == first_loaded[0]
+    assert store.get_occurrence(second_loaded[0].stored_fragment_id or "") == second_loaded[0]
 
     with pytest.raises(
         ValueError,

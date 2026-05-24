@@ -192,9 +192,22 @@ class LineageInspectionService:
     lineage_store: LineageStorePort
     manifest_port: RunManifestPort | None = None
 
-    def show_fragment(self, fragment_id: str) -> LineageFragmentInspectionResult:
-        """Resolve one lineage fragment by identifier."""
-        fragment = self.lineage_store.get(fragment_id)
+    def show_fragment(
+        self,
+        fragment_id: str,
+        *,
+        semantic: bool = False,
+    ) -> LineageFragmentInspectionResult:
+        """Resolve one lineage fragment by occurrence id by default."""
+        if semantic:
+            fragment = self.lineage_store.get(fragment_id)
+        else:
+            get_occurrence = getattr(
+                self.lineage_store,
+                "get_occurrence",
+                self.lineage_store.get,
+            )
+            fragment = get_occurrence(fragment_id)
         if fragment is None:
             raise ValueError(
                 f"Lineage fragment not found for identifier: {fragment_id}"

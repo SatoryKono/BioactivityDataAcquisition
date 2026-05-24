@@ -42,13 +42,12 @@ governance:
       rationale: Strict typing is already stabilized repo-wide and stays zero-budget.
       ratchet_policy: ratchet only downward from zero
     architecture_skip_count:
-      max_count: 3
+      max_count: 0
       owner: '@bioetl-architecture'
       linked_rf: RF-ARCH-015
-      rationale: Marker-skip budget now matches the three explicit architecture
-        skipif tests still present in the suite and stays fail-fast against any
-        re-expansion.
-      ratchet_policy: ratchet only after skip inventory shrinks
+      rationale: Decorator-based architecture skip debt is retired; the suite
+        must stay free of explicit skip/skipif markers.
+      ratchet_policy: ratchet only downward from zero
   review_policy:
     new_exemption_requires:
     - value
@@ -105,6 +104,16 @@ compatibility_debt_metrics:
         public API and no longer count toward compatibility debt.
       ratchet_policy: Zero-budget fail-fast metric for curated transition-only compatibility
         residue.
+    retained_public_entrypoint_burden:
+      current_count: 14
+      max_count: 14
+      owner: '-architecture'
+      linked_issue: '4575'
+      rationale: Retained public entrypoints are stable external API, but their
+        size and first-party dependency burden are blocking governance debt when
+        they grow without review.
+      ratchet_policy: Fail on growth; ratchet max_count downward only after retained
+        public entrypoints are removed or first-party callers are narrowed.
     sunset_compat_count:
       current_count: 0
       owner: '@bioetl-architecture'

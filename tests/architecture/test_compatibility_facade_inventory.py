@@ -213,6 +213,17 @@ def test_retained_entrypoint_burn_down_plan_covers_all_public_rows() -> None:
     mod = _load_registry_module()
     registry = mod.load_compatibility_registry(REGISTRY_YAML)
     payload = yaml.safe_load(REGISTRY_YAML.read_text(encoding="utf-8"))
+    burden_policy = payload["retained_public_entrypoint_burden_policy"]
+    assert burden_policy["linked_issue"] == "#4575"
+    assert burden_policy["blocking_metric"] == "retained_public_entrypoint_burden"
+    assert burden_policy["first_party_growth_policy"] == "fail_fast_on_growth"
+    assert set(burden_policy["tracked_facades"]) == {
+        "bioetl.composition.entrypoints",
+        "bioetl.composition.health_api",
+        "bioetl.infrastructure.config",
+        "bioetl.application.services.control_plane",
+    }
+
     burn_down_plan = payload["retained_entrypoint_burn_down_plan"]
 
     assert burn_down_plan["linked_issue"] == "#4565"

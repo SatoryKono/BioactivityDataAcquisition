@@ -50,6 +50,18 @@ def _list_python_files(root: Path) -> list[Path]:
     return sorted(python_files)
 
 
+def _list_markdown_files(root: Path) -> list[Path]:
+    """Collect Markdown files under ``root`` faster than ``Path.rglob`` on /mnt/*."""
+    markdown_files: list[Path] = []
+    for current_root, dirnames, filenames in os.walk(root):
+        dirnames[:] = [dirname for dirname in dirnames if dirname != "__pycache__"]
+        current_path = Path(current_root)
+        for filename in filenames:
+            if filename.endswith(".md"):
+                markdown_files.append(current_path / filename)
+    return sorted(markdown_files)
+
+
 def _cache_worker_count(total_files: int) -> int:
     """Choose a conservative worker count for mounted-worktree file reads."""
     if total_files < _MIN_PARALLEL_CACHE_FILES:
@@ -383,7 +395,7 @@ def test_ast_cache(
 def docs_markdown_files(project_root: Path) -> list[Path]:
     """Sorted list of all markdown files under docs/."""
     docs_root = project_root / "docs"
-    return sorted(p for p in docs_root.rglob("*.md") if "__pycache__" not in p.parts)
+    return _list_markdown_files(docs_root)
 
 
 @pytest.fixture(scope="session")

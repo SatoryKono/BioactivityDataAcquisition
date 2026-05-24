@@ -1153,7 +1153,9 @@ The lineage fragment anchor itself is intentionally split:
 - when more than one stored occurrence exists for the same semantic fragment,
   operator tooling must treat direct lookup by semantic `fragment_id` as
   ambiguous and resolve history through `run_id` or `manifest_id` instead of
-  silently returning an arbitrary occurrence record.
+  silently returning an arbitrary occurrence record; forensic `lineage
+  show-fragment` lookup defaults to occurrence-scoped `stored_fragment_id`, and
+  semantic fragment lookup is an explicit diagnostic mode.
 
 Bundle assembly MUST fail closed on mismatched preexisting sidecar anchors
 instead of silently overwriting them with lineage-derived values.

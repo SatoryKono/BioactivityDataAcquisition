@@ -378,43 +378,43 @@ providers:
       ]
     vcr_cassettes: MUST
     contract_tests: MUST
-    golden_masters: SHOULD
+    golden_masters: MUST
 
   pubchem:
     entities: [compound]
     vcr_cassettes: MUST
     contract_tests: MUST
-    golden_masters: SHOULD
+    golden_masters: MUST
 
   uniprot:
     entities: [protein, idmapping]
     vcr_cassettes: MUST
     contract_tests: MUST
-    golden_masters: SHOULD
+    golden_masters: MUST
 
   pubmed:
     entities: [publication]
     vcr_cassettes: MUST
     contract_tests: MUST
-    golden_masters: SHOULD
+    golden_masters: MUST
 
   crossref:
     entities: [publication]
     vcr_cassettes: MUST
     contract_tests: MUST
-    golden_masters: MAY
+    golden_masters: MUST
 
   openalex:
     entities: [publication]
     vcr_cassettes: MUST
     contract_tests: MUST
-    golden_masters: MAY
+    golden_masters: MUST
 
   semanticscholar:
     entities: [publication]
     vcr_cassettes: MUST
     contract_tests: SHOULD
-    golden_masters: MAY
+    golden_masters: MUST
 
 # ── Entity-level test ownership ──────────────────────────────
 

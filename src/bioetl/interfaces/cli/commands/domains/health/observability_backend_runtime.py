@@ -72,6 +72,47 @@ def probe_observability_backend(
         return False
 
 
+def _build_detached_backend_popen_kwargs(
+    *,
+    os_name: str = os.name,
+    subprocess_module: object = subprocess,
+) -> dict[str, object]:
+    """Build platform-specific detached subprocess kwargs for the backend."""
+    kwargs: dict[str, object] = {
+        "stdin": subprocess.DEVNULL,
+        "stdout": subprocess.DEVNULL,
+        "stderr": subprocess.DEVNULL,
+    }
+    if os_name == "nt":
+        detached_process = int(getattr(subprocess_module, "DETACHED_PROCESS", 0))
+        new_process_group = int(
+            getattr(subprocess_module, "CREATE_NEW_PROCESS_GROUP", 0)
+        )
+        create_no_window = int(getattr(subprocess_module, "CREATE_NO_WINDOW", 0))
+        kwargs["creationflags"] = (
+            detached_process | new_process_group | create_no_window
+        )
+
+        startupinfo_factory = getattr(subprocess_module, "STARTUPINFO", None)
+        if callable(startupinfo_factory):
+            startupinfo = startupinfo_factory()
+            startf_use_show_window = int(
+                getattr(subprocess_module, "STARTF_USESHOWWINDOW", 0)
+            )
+            has_sw_hide = hasattr(subprocess_module, "SW_HIDE")
+            sw_hide = int(getattr(subprocess_module, "SW_HIDE", 0))
+            if startf_use_show_window:
+                startupinfo.dwFlags = (
+                    int(getattr(startupinfo, "dwFlags", 0)) | startf_use_show_window
+                )
+            if has_sw_hide:
+                startupinfo.wShowWindow = sw_hide
+            kwargs["startupinfo"] = startupinfo
+    else:
+        kwargs["start_new_session"] = True
+    return kwargs
+
+
 def start_detached_quarantine_backend(
     *,
     bind_host: str = DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST,
@@ -91,17 +132,7 @@ def start_detached_quarantine_backend(
         "--port",
         str(port),
     ]
-    kwargs: dict[str, object] = {
-        "stdin": subprocess.DEVNULL,
-        "stdout": subprocess.DEVNULL,
-        "stderr": subprocess.DEVNULL,
-    }
-    if os.name == "nt":
-        detached_process = int(getattr(subprocess, "DETACHED_PROCESS", 0))
-        new_process_group = int(getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0))
-        kwargs["creationflags"] = detached_process | new_process_group
-    else:
-        kwargs["start_new_session"] = True
+    kwargs = _build_detached_backend_popen_kwargs()
     return popen_factory(command, **kwargs)
 
 

@@ -24,8 +24,8 @@ FIXTURE_GOVERNANCE = "fixture_governance"
 CASSETTE_METADATA_PARTIAL = "fixture_governance.cassette_metadata=partial"
 
 
-def test_classify_test_health_environment_limited_green() -> None:
-    """Skip- and provider-gated confidence should be environment-limited."""
+def test_classify_test_health_blocks_zero_debt_environment_gaps() -> None:
+    """Zero-debt architecture and provider gaps should block green."""
     architecture_stats = ArchitectureTestStats(
         tests=120,
         failures=0,
@@ -52,8 +52,8 @@ def test_classify_test_health_environment_limited_green() -> None:
         suite_green=True,
     )
 
-    assert result.status == "environment_limited_green"
-    assert "network opt-in gated" in " | ".join(result.reasons)
+    assert result.status == "non_green"
+    assert "architecture skip budget is zero" in " | ".join(result.reasons)
     assert "pilot provider" in " | ".join(result.reasons)
     assert result.architecture_skip_count == 12
     assert result.live_contract_pilot_provider_count == 1
@@ -158,8 +158,8 @@ def test_classify_test_health_fully_exercised_green() -> None:
     assert result.staged_rollout_flags == ()
 
 
-def test_classify_test_health_marks_contract_e2e_memory_lanes_as_not_run() -> None:
-    """Explicit not-run confidence lanes should keep the result environment-limited."""
+def test_classify_test_health_blocks_missing_contract_e2e_memory_lanes() -> None:
+    """Explicit not-run confidence lanes should block green."""
     architecture_stats = ArchitectureTestStats(
         tests=80,
         failures=0,
@@ -221,7 +221,7 @@ def test_classify_test_health_marks_contract_e2e_memory_lanes_as_not_run() -> No
         suite_green=True,
     )
 
-    assert result.status == "environment_limited_green"
+    assert result.status == "non_green"
     assert "canonical contracts lane" in " | ".join(result.reasons)
     assert "canonical e2e lane" in " | ".join(result.reasons)
     assert "dedicated CI memory-tests lane remains separate" in " | ".join(
