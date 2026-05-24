@@ -18,6 +18,7 @@ MetricsServiceFactory = Callable[..., object]
 
 __all__ = [
     "bootstrap_metrics",
+    "create_metrics_service",
     "maybe_start_metrics_server",
     "resolve_metrics_fail_fast",
 ]
@@ -86,6 +87,15 @@ def bootstrap_metrics(
     return factory()
 
 
+def create_metrics_service(*args: object, **kwargs: object) -> object:
+    """Compat seam for runtime tests patching metrics-service creation."""
+    from bioetl.composition.bootstrap.assembly.metrics_service import (
+        create_metrics_service as _create_metrics_service,
+    )
+
+    return _create_metrics_service(*args, **kwargs)
+
+
 def maybe_start_metrics_server(
     settings: Settings,
     metrics_service_factory: MetricsServiceFactory | None = None,
@@ -112,11 +122,7 @@ def maybe_start_metrics_server(
 
     obs = observability
     if metrics_service_factory is None:
-        from bioetl.composition.bootstrap.assembly.metrics_service import (
-            create_metrics_service as _create_metrics_service,
-        )
-
-        service_factory = _create_metrics_service
+        service_factory = create_metrics_service
     else:
         service_factory = metrics_service_factory
     service = service_factory()

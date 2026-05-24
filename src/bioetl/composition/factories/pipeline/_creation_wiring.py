@@ -4,41 +4,50 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import Protocol, cast
 
+import pyarrow as pa
+
+from bioetl.application.core.wiring.factory import (
+    BasePipeline,
+    PipelineService,
+)
 from bioetl.application.core.wiring.factory import ShutdownSignal
+from bioetl.application.core.wiring.transformer import BaseTransformer
+from bioetl.application.services.lineage.metadata_coordinator import (
+    MetadataCoordinator,
+)
+from bioetl.composition.factories.datasource.data_source_factory import (
+    DataSourceCreatorProtocol,
+)
+from bioetl.composition.factories.pipeline.construction_types import (
+    EntityTypeExtractor,
+)
+from bioetl.composition.factories.pipeline.run_context_factory import (
+    RunContextFactory,
+)
 from bioetl.composition.factories.pipeline.construction_types import _SchemaBuilder
 from bioetl.composition.factories.pipeline.control_plane_artifacts import (
     ControlPlaneArtifacts,
 )
-
-if TYPE_CHECKING:
-    import pyarrow as pa
-
-    from bioetl.application.core.wiring.factory import (
-        BasePipeline,
-        PipelineService,
-    )
-    from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
-    from bioetl.application.core.wiring.transformer import BaseTransformer
-    from bioetl.composition.factories.datasource.data_source_factory import (
-        DataSourceCreatorProtocol,
-    )
-    from bioetl.composition.factories.pipeline.construction_types import (
-        EntityTypeExtractor,
-    )
-    from bioetl.domain.config import DQConfig, PipelineConfig, RuntimeConfig
-    from bioetl.domain.ports import (
-        AuditPort,
-        DQMonitorPort,
-        LoggerPort,
-        MetricsPort,
-        SilverValidatorPort,
-        TracingPort,
-    )
-    from bioetl.domain.types import RunID
-    from bioetl.infrastructure.config.settings_api import Settings
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.composition.factories.pipeline.transformer_builder import (
+    TransformerBuilder,
+)
+from bioetl.domain.config import DQConfig, PipelineConfig, RuntimeConfig
+from bioetl.domain.ports import (
+    AuditPort,
+    DQMonitorPort,
+    LoggerPort,
+    MetricsPort,
+    SilverValidatorPort,
+    TracingPort,
+)
+from bioetl.domain.types import RunID
+from bioetl.infrastructure.config.domain_config_resolver import (
+    resolve_domain_pipeline_config,
+)
+from bioetl.infrastructure.config.settings_api import Settings
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 class _ServiceBundleDeps(Protocol):
@@ -132,13 +141,6 @@ def _build_metadata_coordinator(
     extract_entity_type: EntityTypeExtractor,
 ) -> MetadataCoordinator:
     """Build the metadata coordinator from the canonical run context factory."""
-    from bioetl.application.services.lineage.metadata_coordinator import (
-        MetadataCoordinator,
-    )
-
-    from bioetl.composition.factories.pipeline.run_context_factory import (
-        RunContextFactory,
-    )
     from bioetl.composition.services.versioning import (
         get_git_commit,
         get_pipeline_version,
@@ -182,9 +184,6 @@ def _build_pipeline_transformer(
     extract_entity_type: EntityTypeExtractor,
 ) -> BaseTransformer | None:
     """Build the runtime transformer while preserving the public factory seam."""
-    from bioetl.composition.factories.pipeline.transformer_builder import (
-        TransformerBuilder,
-    )
     from bioetl.infrastructure.config.contract_policy_loader import (
         load_pipeline_contract_policy,
     )
@@ -234,10 +233,6 @@ def _create_pipeline_with_services_impl(
         deps=deps,
         extract_entity_type=extract_entity_type,
     )
-    from bioetl.infrastructure.config.domain_config_resolver import (
-        resolve_domain_pipeline_config,
-    )
-
     domain_config = resolve_domain_pipeline_config(
         yaml_config,
         relaxed_dq=request.settings.pipeline.relaxed_dq,

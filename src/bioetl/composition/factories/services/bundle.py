@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
+from bioetl.application.core.base import BasePipeline
+from bioetl.application.core.pipeline_services import PipelineService
+from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )
+from bioetl.composition.factories.services.factory import BaseServicesFactory
 from bioetl.composition.factories.pipeline.creation_support import (
     _BuildPipelineServicesFn,
     _create_pipeline_with_services_impl,
@@ -20,25 +24,26 @@ from bioetl.composition.factories.services._bundle_support import (
 from bioetl.composition.factories.services._bundle_support import (
     create_pipeline_data_source as _create_pipeline_data_source_impl,
 )
-
-if TYPE_CHECKING:
-    from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.domain.config import DQConfig, PipelineConfig
-    from bioetl.domain.context import CachedBronzeContext
-    from bioetl.domain.filtering import InputFilterConfig
-    from bioetl.domain.ports import (
-        AuditPort,
-        DataSourcePort,
-        DQMonitorPort,
-        LoggerPort,
-        MetricsPort,
-        SilverValidatorPort,
-        TracingPort,
-    )
-    from bioetl.infrastructure.config.settings_api import Settings
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-    from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
+from bioetl.domain.config import DQConfig, PipelineConfig
+from bioetl.domain.context import CachedBronzeContext
+from bioetl.domain.filtering import InputFilterConfig
+from bioetl.domain.ports import (
+    AuditPort,
+    DataSourcePort,
+    DQMonitorPort,
+    LoggerPort,
+    MetricsPort,
+    SilverValidatorPort,
+    TracingPort,
+)
+from bioetl.infrastructure.config.converters import (
+    yaml_config_to_domain as _yaml_config_to_domain_direct,
+)
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config as _load_pipeline_config_direct,
+)
+from bioetl.infrastructure.config.settings_api import Settings
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
     "PipelineCreationInputs",
@@ -54,10 +59,6 @@ PipelineCreationInputs = _PipelineCreationInputs
 
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     """Load pipeline YAML configuration using the canonical config API seam."""
-    from bioetl.infrastructure.config.pipeline_config_api import (
-        load_pipeline_config as _load_pipeline_config_direct,
-    )
-
     return _load_pipeline_config_direct(pipeline_name)
 
 
@@ -66,10 +67,6 @@ def yaml_config_to_domain(
     resolved_dq_config: DQConfig | None = None,
 ) -> PipelineConfig:
     """Convert YAML pipeline config to domain config with optional DQ overrides."""
-    from bioetl.infrastructure.config.converters import (
-        yaml_config_to_domain as _yaml_config_to_domain_direct,
-    )
-
     return _yaml_config_to_domain_direct(
         yaml_config=yaml_config,
         resolved_dq_config=resolved_dq_config,
@@ -89,8 +86,6 @@ def compute_config_hash(config: PipelineYamlConfig | dict[str, object]) -> str:
 def _resolve_service_bundle_dependencies(
     override: ServiceBundleDependencies | None = None,
 ) -> ServiceBundleDependencies:
-    from bioetl.composition.factories.services.factory import BaseServicesFactory
-
     return resolve_service_bundle_dependencies(
         override=override,
         load_pipeline_config_fn=load_pipeline_config,

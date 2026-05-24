@@ -397,20 +397,6 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         CHEMBL_ADAPTER_IMPL_SURFACE,
     ),
     (
-        "adapter_impl_surface",
-        CHEMBL_ADAPTER_IMPL_SURFACE,
-        "DEPENDS_ON",
-        "port_surface",
-        "bioetl.domain.ports.observability.logging.LoggerPort",
-    ),
-    (
-        "adapter_surface",
-        CHEMBL_ADAPTER_SURFACE,
-        "DEPENDS_ON",
-        "port_surface",
-        "bioetl.domain.ports.observability.logging.LoggerPort",
-    ),
-    (
         "pipeline_surface",
         "chembl_activity",
         "DEPENDS_ON",

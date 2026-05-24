@@ -1468,7 +1468,7 @@ def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:
         "ruled_without_runtime",
         "compatibility_alias_candidates",
     ):
-        values = report[key]
+        values = report.get(key, [])
         assert isinstance(values, list)
         lines.append(f"\n{key} ({len(values)}):")
         if not values:
