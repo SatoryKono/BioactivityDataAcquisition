@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import re
 import subprocess
@@ -22,6 +23,9 @@ RF013_HEALTH_CASE_PATTERN = re.compile(
     r"^rf013_(?P<provider>[a-z0-9_]+)_health_case_\d+$"
 )
 RF013_HEALTH_CASE_OWNER = Path("tests/integration/adapters/vcr_rebalance_support.py")
+CLASS_METHOD_STEM_PATTERN = re.compile(
+    r"^(?P<class_name>[A-Za-z_][A-Za-z0-9_]*)\.(?P<method_name>[A-Za-z_][A-Za-z0-9_]*)$"
+)
 
 
 @dataclass(frozen=True)
@@ -149,6 +153,12 @@ def _collect_direct_reference_owners(
     for token, owners in token_owners.items():
         for cassette_rel_path in cassette_by_token.get(token, ()):
             owners_by_cassette[cassette_rel_path].update(owners)
+    class_method_owners = _collect_class_method_reference_owners(
+        repo_root=repo_root,
+        cassette_paths=cassette_paths,
+    )
+    for cassette_rel_path, owners in class_method_owners.items():
+        owners_by_cassette.setdefault(cassette_rel_path, set()).update(owners)
     return {
         cassette_rel_path: sorted(owners)
         for cassette_rel_path, owners in owners_by_cassette.items()
@@ -210,18 +220,7 @@ def _run_python_reference_scan(
     if not tokens:
         return owners_by_token
 
-    candidate_files: list[Path] = []
-    for root in REACHABILITY_SCAN_ROOTS:
-        scan_root = repo_root / root
-        if not scan_root.exists():
-            continue
-        candidate_files.extend(
-            path
-            for path in scan_root.rglob("*.py")
-            if "tests/fixtures" not in path.as_posix()
-        )
-
-    for path in candidate_files:
+    for path in _iter_reachability_scan_files(repo_root):
         try:
             content = path.read_text(encoding="utf-8")
         except OSError:
@@ -232,6 +231,72 @@ def _run_python_reference_scan(
                 owners_by_token.setdefault(token, set()).add(owner)
 
     return owners_by_token
+
+
+def _iter_reachability_scan_files(repo_root: Path) -> list[Path]:
+    candidate_files: list[Path] = []
+    for root in REACHABILITY_SCAN_ROOTS:
+        scan_root = repo_root / root
+        if not scan_root.exists():
+            continue
+        candidate_files.extend(
+            path
+            for path in scan_root.rglob("*.py")
+            if "tests/fixtures" not in path.as_posix()
+        )
+    return candidate_files
+
+
+def _collect_class_method_reference_owners(
+    *,
+    repo_root: Path,
+    cassette_paths: list[Path],
+) -> dict[str, list[str]]:
+    class_method_stems = {
+        cassette_path.as_posix(): match.group("class_name", "method_name")
+        for cassette_path in cassette_paths
+        if (match := CLASS_METHOD_STEM_PATTERN.match(cassette_path.stem)) is not None
+    }
+    if not class_method_stems:
+        return {}
+
+    owners_by_cassette: dict[str, set[str]] = {
+        cassette_rel_path: set() for cassette_rel_path in class_method_stems
+    }
+    for path in _iter_reachability_scan_files(repo_root):
+        try:
+            content = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        class_method_pairs = _extract_class_method_pairs(content)
+        if not class_method_pairs:
+            continue
+        owner = path.relative_to(repo_root).as_posix()
+        for cassette_rel_path, pair in class_method_stems.items():
+            if pair in class_method_pairs:
+                owners_by_cassette[cassette_rel_path].add(owner)
+
+    return {
+        cassette_rel_path: sorted(owners)
+        for cassette_rel_path, owners in owners_by_cassette.items()
+        if owners
+    }
+
+
+def _extract_class_method_pairs(content: str) -> set[tuple[str, str]]:
+    try:
+        tree = ast.parse(content)
+    except SyntaxError:
+        return set()
+
+    pairs: set[tuple[str, str]] = set()
+    for node in tree.body:
+        if not isinstance(node, ast.ClassDef):
+            continue
+        for child in node.body:
+            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                pairs.add((node.name, child.name))
+    return pairs
 
 
 def _generated_reference_owner_paths(

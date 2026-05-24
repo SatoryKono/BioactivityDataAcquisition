@@ -25,6 +25,7 @@ from tests.contract.conftest import (
 )
 
 CHEMBL_API_BASE = "https://www.ebi.ac.uk/chembl/api/data"
+CHEMBL_TARGET_CONTRACT_PARAMS = {"target_chembl_id": "CHEMBL1824", "limit": 1}
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 pytestmark = pytest.mark.network
 
@@ -130,7 +131,7 @@ class TestChemblContract:
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.get(
                 f"{CHEMBL_API_BASE}/target.json",
-                params={"limit": 1},
+                params=CHEMBL_TARGET_CONTRACT_PARAMS,
             )
 
         assert response.status_code == 200
@@ -150,7 +151,7 @@ class TestChemblContract:
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.get(
                 f"{CHEMBL_API_BASE}/target.json",
-                params={"limit": 1},
+                params=CHEMBL_TARGET_CONTRACT_PARAMS,
             )
 
         assert response.status_code == 200
