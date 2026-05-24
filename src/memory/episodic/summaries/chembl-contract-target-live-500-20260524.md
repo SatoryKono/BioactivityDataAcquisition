@@ -2,7 +2,7 @@
 id: chembl-contract-target-live-500-20260524
 title: Fix ChEMBL target live contract 500
 task_id: chembl-contract-target-live-500-20260524
-created_at: '2026-05-24T17:58:37Z'
+created_at: '2026-05-24T18:02:36Z'
 ttl_days: 14
 confidence: episodic
 source_refs:

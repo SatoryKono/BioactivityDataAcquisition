@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1925,
-    "total_internal_imports": 7682,
+    "scanned_modules": 1923,
+    "total_internal_imports": 7577,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 330,
@@ -11,7 +11,7 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 1312,
+      "imports": 1276,
       "allowed": true
     },
     {
@@ -23,31 +23,31 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 291,
+      "imports": 287,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 665,
+      "imports": 659,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 440,
+      "imports": 439,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 337,
+      "imports": 339,
       "allowed": true
     },
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1293,
+      "imports": 1233,
       "allowed": true
     },
     {
@@ -134,14 +134,14 @@
       "imports": 71
     },
     {
-      "source": "composition.factories",
-      "target": "application.core",
-      "imports": 71
-    },
-    {
       "source": "infrastructure.storage",
       "target": "domain.types",
       "imports": 69
+    },
+    {
+      "source": "composition.factories",
+      "target": "application.core",
+      "imports": 68
     },
     {
       "source": "application.services",
@@ -156,7 +156,7 @@
     {
       "source": "composition.factories",
       "target": "domain.ports",
-      "imports": 63
+      "imports": 62
     },
     {
       "source": "interfaces.cli",
@@ -166,7 +166,7 @@
     {
       "source": "composition.bootstrap",
       "target": "application.services",
-      "imports": 60
+      "imports": 59
     },
     {
       "source": "composition.bootstrap",
@@ -206,7 +206,7 @@
     {
       "source": "composition.factories",
       "target": "domain.types",
-      "imports": 36
+      "imports": 35
     },
     {
       "source": "infrastructure.adapters",
@@ -324,6 +324,11 @@
       "imports": 17
     },
     {
+      "source": "composition.bootstrap",
+      "target": "infrastructure.observability",
+      "imports": 17
+    },
+    {
       "source": "infrastructure.schemas",
       "target": "domain.config",
       "imports": 17
@@ -344,11 +349,6 @@
       "imports": 15
     },
     {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.observability",
-      "imports": 15
-    },
-    {
       "source": "infrastructure.control_plane",
       "target": "domain.control_plane",
       "imports": 15
@@ -364,6 +364,11 @@
       "imports": 15
     },
     {
+      "source": "composition.factories",
+      "target": "domain.behavior",
+      "imports": 14
+    },
+    {
       "source": "interfaces.http",
       "target": "domain.control_plane",
       "imports": 14
@@ -371,11 +376,6 @@
     {
       "source": "application.services",
       "target": "domain.lineage",
-      "imports": 13
-    },
-    {
-      "source": "composition.factories",
-      "target": "domain.behavior",
       "imports": 13
     },
     {
