@@ -225,9 +225,12 @@ Certified historical replay is therefore bounded but operationalized:
 - the full-universe artifact now carries one explicit
   `governed_full_corpus_gate` verdict. Universal historical exact-replay
   wording is allowed only when that gate reports `satisfied=true`;
-- `bioetl run-manifest universe-report --require-universal-claim` and
-  `--require-durable-evidence-coverage` are the operator-facing non-zero
-  fail-closed gates for that wording;
+- `bioetl run-manifest universe-report --require-universal-claim` enforces
+  `governed_full_corpus_gate.satisfied=true`, which implies both
+  `universal_claim.claimed=true` and
+  `durable_evidence_coverage_claim.claimed=true`;
+- `bioetl run-manifest universe-report --require-durable-evidence-coverage`
+  remains the narrower durable-coverage-only non-zero gate;
 - `scripts/engineering/qa/run_historical_replay_universe_campaign.py` persists
   a full-universe closure artifact by merging the local retained corpus with
   one or more authoritative external universe packs for archived/offline runs;
@@ -235,9 +238,10 @@ Certified historical replay is therefore bounded but operationalized:
   fails closed when the retained-corpus closure artifact still cannot make the
   published global replay claim;
 - `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-universal-claim`
-  and `--require-durable-evidence-coverage` fail closed when the merged
-  full-universe artifact cannot make the stronger universal or durable-evidence
-  claims;
+  fails closed unless `governed_full_corpus_gate.satisfied=true`, preventing
+  universal wording from passing without durable evidence coverage;
+- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-durable-evidence-coverage`
+  remains the narrower durable-coverage-only non-zero gate;
 - each external universe pack is the authoritative bridge from retained local
   control-plane evidence to the full historical-run universe and must carry one
   record per historical occurrence with
