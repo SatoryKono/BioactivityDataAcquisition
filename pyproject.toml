@@ -84,6 +84,13 @@ tests = [
     "ruff>=0.4",
     "detect-secrets>=1.4",
 ]
+tests_full = [
+    # Full-suite capability contract for architecture, observability, and benchmark surfaces
+    "pytest-benchmark>=4.0",
+    "import-linter>=2.0",
+    "radon>=6.0",
+    "vulture>=2.11",
+]
 dev = [
     "pytest>=9.0.3",
     "pytest-cov>=4.0",

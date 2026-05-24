@@ -173,6 +173,9 @@ instrumentation теперь opt-in: используйте `--with-coverage` и
 CI coverage semantics не меняются и остаются привязаны к lane
 `coverage-verify`. WSL-обёртка дополнительно вызывает
 `scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest.
+Для `tests/architecture`, `tests/benchmarks`, observability / serialization /
+polars-heavy unit surfaces wrapper автоматически требует расширенный capability
+set из `.[tests_full]`.
 
 Supported policy slice for issue `#2598`:
 

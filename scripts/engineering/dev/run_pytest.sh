@@ -315,11 +315,31 @@ _needs_hypothesis_plugin_for_selection() {
         tests/architecture/test_port_contracts_hypothesis.py
 }
 
+_needs_full_test_capabilities_for_selection() {
+    if ! _has_selected_test_paths; then
+        return 0
+    fi
+
+    if _selected_has_exact_test_root; then
+        return 0
+    fi
+
+    _paths_match_any \
+        tests/architecture \
+        tests/benchmarks \
+        tests/unit/application/core \
+        tests/unit/composition/bootstrap/runtime \
+        tests/unit/infrastructure/observability \
+        tests/unit/infrastructure/serialization
+}
+
 python_has_required_test_runtime() {
     local python_bin="$1"
+    local require_full_capabilities="${2:-0}"
     [[ -x "$python_bin" ]] || return 1
-    "$python_bin" - <<'PY' >/dev/null 2>&1
+    BIOETL_REQUIRE_TEST_CAPABILITIES="$require_full_capabilities" "$python_bin" - <<'PY' >/dev/null 2>&1
 import importlib.util
+import os
 
 required = (
     "pytest",
@@ -338,6 +358,17 @@ required = (
     "pandera",
     "respx",
 )
+
+if os.environ.get("BIOETL_REQUIRE_TEST_CAPABILITIES") == "1":
+    required += (
+        "opentelemetry.sdk",
+        "orjson",
+        "polars",
+        "radon",
+        "vulture",
+        "importlinter",
+        "pytest_benchmark",
+    )
 
 raise SystemExit(0 if all(importlib.util.find_spec(module) is not None for module in required) else 1)
 PY
@@ -422,6 +453,11 @@ if _needs_cov_plugin "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}" && [[ -z "${COVER
 fi
 
 _collect_selected_test_paths "${PYTEST_ARGS[@]}"
+REQUIRE_FULL_TEST_CAPABILITIES=0
+if _needs_full_test_capabilities_for_selection; then
+    REQUIRE_FULL_TEST_CAPABILITIES=1
+fi
+export BIOETL_REQUIRE_TEST_CAPABILITIES="$REQUIRE_FULL_TEST_CAPABILITIES"
 
 if should_run_preflight && [[ -f "scripts/engineering/dev/pretest_guardrails.sh" ]]; then
     preflight_scope="$(determine_preflight_scope)"
@@ -494,15 +530,26 @@ if [[ -f "$PYTEST_RUNTIME_ENV_FILE" ]]; then
     source "$PYTEST_RUNTIME_ENV_FILE"
 fi
 
-if [[ -n "${BIOETL_PYTEST_RUNTIME_PYTHON:-}" ]] && python_has_required_test_runtime "$BIOETL_PYTEST_RUNTIME_PYTHON"; then
+if [[ -n "${BIOETL_PYTEST_RUNTIME_PYTHON:-}" ]]; then
+    runtime_bin_dir="$(dirname "$BIOETL_PYTEST_RUNTIME_PYTHON")"
+    case ":${PATH:-}:" in
+        *":$runtime_bin_dir:"*)
+            ;;
+        *)
+            export PATH="$runtime_bin_dir${PATH:+:$PATH}"
+            ;;
+    esac
+fi
+
+if [[ -n "${BIOETL_PYTEST_RUNTIME_PYTHON:-}" ]] && python_has_required_test_runtime "$BIOETL_PYTEST_RUNTIME_PYTHON" "$REQUIRE_FULL_TEST_CAPABILITIES"; then
     exec "$BIOETL_PYTEST_RUNTIME_PYTHON" -m pytest "${PYTEST_PLUGIN_ARGS[@]}" "${DEFAULT_IGNORES[@]}" "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
 fi
 
-if [[ -x "$BIOETL_WSL_VENV_DIR/bin/python" ]] && python_has_required_test_runtime "$BIOETL_WSL_VENV_DIR/bin/python"; then
+if [[ -x "$BIOETL_WSL_VENV_DIR/bin/python" ]] && python_has_required_test_runtime "$BIOETL_WSL_VENV_DIR/bin/python" "$REQUIRE_FULL_TEST_CAPABILITIES"; then
     exec "$BIOETL_WSL_VENV_DIR/bin/python" -m pytest "${PYTEST_PLUGIN_ARGS[@]}" "${DEFAULT_IGNORES[@]}" "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
 fi
 
-if [[ -x ".venv/bin/python" ]] && python_has_required_test_runtime ".venv/bin/python"; then
+if [[ -x ".venv/bin/python" ]] && python_has_required_test_runtime ".venv/bin/python" "$REQUIRE_FULL_TEST_CAPABILITIES"; then
     exec .venv/bin/python -m pytest "${PYTEST_PLUGIN_ARGS[@]}" "${DEFAULT_IGNORES[@]}" "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
 fi
 
