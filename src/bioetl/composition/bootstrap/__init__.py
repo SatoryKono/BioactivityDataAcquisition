@@ -70,7 +70,18 @@ _PUBLIC_EXPORTS = {
     ),
 }
 
-__all__ = list(_PUBLIC_EXPORTS)
+__all__: list[str] = [
+    "bootstrap_composite_runner",
+    "bootstrap_dq_monitor",
+    "bootstrap_logger",
+    "bootstrap_metrics",
+    "bootstrap_observability_bundle",
+    "bootstrap_pipeline_runner",
+    "bootstrap_tracer",
+    "load_composite_config",
+    "load_pipeline_config",
+    "maybe_start_metrics_server",
+]
 
 
 def __getattr__(name: str) -> object:

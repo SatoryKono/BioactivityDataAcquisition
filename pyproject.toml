@@ -414,9 +414,16 @@ known-first-party = ["bioetl", "tests"]
 "tests/benchmarks/**/*.py" = ["ARG002"]
 # Domain __init__.py uses semantic grouping with comments in __all__ (not alphabetical)
 # I001: Import order handled by isort (semantic grouping with comments)
-"src/bioetl/domain/__init__.py" = ["RUF022", "I001"]
+"src/bioetl/domain/__init__.py" = ["RUF022", "I001", "F401"]
 # Crossref schema __init__.py uses semantic grouping, isort handles sorting
 "src/bioetl/domain/schemas/crossref/__init__.py" = ["I001"]
+# Lazy public facades keep TYPE_CHECKING imports for static analyzers while
+# runtime exports are resolved through __getattr__ tables.
+"src/bioetl/application/core/wiring/__init__.py" = ["F401"]
+"src/bioetl/composition/bootstrap/__init__.py" = ["F401"]
+"src/bioetl/composition/factories/dq/__init__.py" = ["F401"]
+"src/bioetl/composition/providers/__init__.py" = ["F401"]
+"src/bioetl/domain/behavior/__init__.py" = ["F401"]
 # Entrypoints uses semantic grouping with comments in __all__ (not alphabetical)
 "src/bioetl/composition/entrypoints.py" = ["RUF022"]
 # Tools scripts use print() for output, may have simpler patterns, and are not production code

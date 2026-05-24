@@ -14,7 +14,7 @@ from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.resilience import AdapterConfig
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+    from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
 CASSETTE_DIR = Path(__file__).parents[2] / "fixtures" / "vcr" / "chembl"
 
@@ -148,7 +148,7 @@ def build_chembl_adapter(
     """Create one adapter configured with extraction params for the case."""
     # Defer the heavy adapter import so unrelated pytest collection does not pull
     # the full ChEMBL adapter graph through tests.conftest plugin loading.
-    from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+    from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
     adapter_config = None
     if page_size is not None:

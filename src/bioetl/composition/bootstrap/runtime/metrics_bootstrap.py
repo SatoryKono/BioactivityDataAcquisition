@@ -5,8 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+from bioetl.domain.ports import MetricsPort
 from bioetl.domain.ports.noop import NoOpMetrics
-from bioetl.domain.ports.observability import MetricsPort
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 
 if TYPE_CHECKING:
@@ -120,10 +120,11 @@ def maybe_start_metrics_server(
         return False
 
     obs = observability
-    if metrics_service_factory is None:
-        service_factory = create_metrics_service
-    else:
-        service_factory = metrics_service_factory
+    service_factory = (
+        create_metrics_service
+        if metrics_service_factory is None
+        else metrics_service_factory
+    )
     service = service_factory()
     result = service.start(
         port=settings.metrics_port,
