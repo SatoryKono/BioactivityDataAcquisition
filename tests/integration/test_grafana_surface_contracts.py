@@ -510,15 +510,23 @@ def test_range_aware_summary_panels_use_selected_time_range(
     )
 
 
-@pytest.mark.skip("Alert condition panels do not exist in bioetl-runtime.json")
 @pytest.mark.parametrize(
     ("panel_title", "expected_recording_metrics"),
-    [],
+    [
+        ("Runtime Blockers", ["bioetl_runtime_current_blocker_reason"]),
+        (
+            "Monitor Runtime Blockers",
+            [
+                "bioetl_runtime_current_blocker_reason",
+                "bioetl_runtime_current_status",
+            ],
+        ),
+    ],
 )
 def test_runtime_alert_condition_panels_use_recording_rules(
     panel_title: str, expected_recording_metrics: list[str]
 ) -> None:
-    """Runtime alert-summary panels should consume shipped recording rules."""
+    """Runtime blocker panels should consume shipped recording-rule metrics."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     panel = next(
         (
@@ -542,9 +550,8 @@ def test_runtime_alert_condition_panels_use_recording_rules(
         )
 
 
-@pytest.mark.skip("Expected panels do not exist in bioetl-runtime.json tracing row")
-def test_runtime_first_action_row_precedes_condition_cards_in_order() -> None:
-    """Runtime tracing row should expose First Action CTA block before condition cards."""
+def test_runtime_tracing_row_orders_log_hygiene_panels() -> None:
+    """Runtime tracing row should keep log-hygiene panels in canonical order."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     tracing_row = next(
         (
@@ -560,19 +567,17 @@ def test_runtime_first_action_row_precedes_condition_cards_in_order() -> None:
     nested = tracing_row.get("panels", [])
     titles = [panel.get("title") for panel in nested]
     expected_sequence = [
-        "First Action",
-        "Pipeline conditions",
-        "DQ conditions",
-        "Control Plane conditions",
-        "Provider health checks",
+        "Inspect Warning Logs",
+        "Inspect GLOBAL Unstructured Logs",
+        "Inspect Top Warning Events by Message / Range",
+        "Track GLOBAL Log Hygiene Trend",
     ]
     for title in expected_sequence:
         assert title in titles, f"Runtime tracing row missing panel '{title}'"
 
     indices = [titles.index(title) for title in expected_sequence]
     assert indices == sorted(indices), (
-        "Runtime First Action CTA panels must appear before existing condition cards "
-        "in the expected order"
+        "Runtime tracing row log-hygiene panels must appear in the canonical order"
     )
 
 

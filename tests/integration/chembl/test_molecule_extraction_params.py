@@ -9,8 +9,6 @@ import pytest
 from tests.integration.chembl.extraction_params_support import (
     ExtractionParamsCase,
     InputFilterExtractionParamsSuiteBase,
-    build_missing_cassette_reason,
-    has_any_cassette,
 )
 
 
@@ -28,12 +26,6 @@ MOLECULE_CASE = ExtractionParamsCase(
     ),
     record_id_field="molecule_chembl_id",
     input_filter_field="molecule_id",
-    cassette_names=(
-        "TestMoleculeExtractionParams.test_molecule_filtered_api_request",
-        "TestMoleculeExtractionParams.test_molecule_filtered_api_request.yaml",
-        "chembl_molecule_filtered.yaml",
-    ),
-    cassette_hint="test_molecule_filtered_api_request",
 )
 
 
@@ -44,10 +36,6 @@ class TestMoleculeExtractionParams(InputFilterExtractionParamsSuiteBase):
     CASE = MOLECULE_CASE
 
     @pytest.mark.vcr
-    @pytest.mark.skipif(
-        not has_any_cassette(*MOLECULE_CASE.cassette_names),
-        reason=build_missing_cassette_reason(MOLECULE_CASE.cassette_hint),
-    )
     async def test_molecule_filtered_api_request(
         self,
         token_bucket: Any,

@@ -9,8 +9,6 @@ import pytest
 from tests.integration.chembl.extraction_params_support import (
     ExtractionParamsCase,
     InputFilterExtractionParamsSuiteBase,
-    build_missing_cassette_reason,
-    has_any_cassette,
 )
 
 
@@ -28,12 +26,6 @@ TARGET_CASE = ExtractionParamsCase(
     ),
     record_id_field="target_chembl_id",
     input_filter_field="target_id",
-    cassette_names=(
-        "TestTargetExtractionParams.test_target_filtered_api_request",
-        "TestTargetExtractionParams.test_target_filtered_api_request.yaml",
-        "chembl_target_filtered.yaml",
-    ),
-    cassette_hint="test_target_filtered_api_request",
 )
 
 
@@ -44,10 +36,6 @@ class TestTargetExtractionParams(InputFilterExtractionParamsSuiteBase):
     CASE = TARGET_CASE
 
     @pytest.mark.vcr
-    @pytest.mark.skipif(
-        not has_any_cassette(*TARGET_CASE.cassette_names),
-        reason=build_missing_cassette_reason(TARGET_CASE.cassette_hint),
-    )
     async def test_target_filtered_api_request(
         self,
         token_bucket: Any,

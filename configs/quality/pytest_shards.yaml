@@ -8,12 +8,16 @@ aliases:
   S7-crosscutting-architecture:
     expands_to:
       - S7-crosscutting-architecture-a
+      - S7-crosscutting-architecture-a2
+      - S7-crosscutting-architecture-a3
       - S7-crosscutting-architecture-b
       - S7-crosscutting-architecture-c
       - S7-crosscutting-architecture-d
   S7-architecture-fast-boundary:
     expands_to:
       - S7-crosscutting-architecture-a
+      - S7-crosscutting-architecture-a2
+      - S7-crosscutting-architecture-a3
       - S7-crosscutting-architecture-b
       - S7-crosscutting-architecture-c
       - S7-crosscutting-architecture-d
@@ -66,7 +70,7 @@ shards:
     workers_override: 0
     extra_pytest_args:
       - --timeout=300
-      - --ignore-glob=tests/architecture/test_[g-z]*.py
+      - --ignore-glob=tests/architecture/test_[c-z]*.py
       - --ignore=tests/architecture/test_antipatterns.py
       - --ignore=tests/architecture/test_any_budget.py
       - --ignore=tests/architecture/test_scripts_catalog_governance.py
@@ -81,6 +85,32 @@ shards:
       - --ignore=tests/architecture/test_docs_governance_workflow.py
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
       - --ignore=tests/architecture/test_quality_burndown_priorities.py
+  - name: S7-crosscutting-architecture-a2
+    wave: 1
+    paths:
+      - tests/architecture
+    workers_override: 0
+    extra_pytest_args:
+      - --timeout=300
+      - --ignore-glob=tests/architecture/test_[a-b]*.py
+      - --ignore-glob=tests/architecture/test_[d-z]*.py
+      - --ignore=tests/architecture/test_code_metrics.py
+      - --ignore=tests/architecture/test_check_doc_links_guardrails.py
+      - --ignore=tests/architecture/test_compatibility_facade_inventory.py
+      - --ignore=tests/architecture/test_compatibility_importer_census_governance.py
+  - name: S7-crosscutting-architecture-a3
+    wave: 2
+    paths:
+      - tests/architecture
+    workers_override: 0
+    extra_pytest_args:
+      - --timeout=300
+      - --ignore-glob=tests/architecture/test_[a-c]*.py
+      - --ignore-glob=tests/architecture/test_[g-z]*.py
+      - --ignore=tests/architecture/test_diagram_regression_workflow.py
+      - --ignore=tests/architecture/test_docs_governance_workflow.py
+      - --ignore=tests/architecture/test_docs_version_sync.py
+      - --ignore=tests/architecture/test_documentation_sync.py
   - name: S3-app-foundation
     wave: 2
     paths:

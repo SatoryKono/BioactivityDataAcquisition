@@ -15,6 +15,7 @@ E2E тесты используют локальное файловое хран
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import os
 import shutil
@@ -32,12 +33,16 @@ from tests.helpers.clock import FIXED_TEST_TIME
 from tests.helpers.vcr_config import (
     build_cassette_dir,
     infer_provider_cassette_dir,
+    is_vcr_recording_mode,
+    is_git_lfs_pointer,
     resolve_cassette_name,
+    resolve_requested_cassette_path,
 )
 
 if TYPE_CHECKING:
     import httpx
 
+    from bioetl.domain.control_plane import RunInputSnapshotRef
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.exceptions.network import ExternalServiceError
     from bioetl.domain.resilience import RetryConfig
@@ -129,6 +134,36 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
             if existing_timeout is None:
                 # Add default E2E timeout
                 item.add_marker(pytest.mark.timeout(E2E_DEFAULT_TIMEOUT))
+
+
+def _build_vcr_cassette_input_snapshot_refs(
+    request: pytest.FixtureRequest,
+) -> tuple[RunInputSnapshotRef, ...]:
+    """Return one deterministic immutable snapshot ref derived from VCR playback."""
+    from bioetl.domain.control_plane import RunInputSnapshotRef
+
+    cassette_path = resolve_requested_cassette_path(request)
+    if cassette_path is None or not cassette_path.exists():
+        return ()
+    if is_git_lfs_pointer(cassette_path):
+        return ()
+
+    payload = cassette_path.read_bytes()
+    content_hash = hashlib.sha256(payload).hexdigest()
+    snapshot_id = f"sha256:{content_hash}"
+    fixtures_root = Path(__file__).resolve().parents[1]
+    try:
+        cassette_locator = cassette_path.relative_to(fixtures_root).as_posix()
+    except ValueError:
+        cassette_locator = cassette_path.as_posix()
+    immutable_uri = f"vcr://{cassette_locator}"
+    return (
+        RunInputSnapshotRef(
+            snapshot_id=snapshot_id,
+            content_hash=content_hash,
+            immutable_uri=immutable_uri,
+        ),
+    )
 
 
 def _resolve_e2e_provider_cassette_dir(
@@ -766,6 +801,30 @@ def guard_bootstrap_pipeline_runner_for_e2e(
     module = getattr(request.node, "module", None)
     if module is not None and hasattr(module, "bootstrap_pipeline_runner"):
         monkeypatch.setattr(module, "bootstrap_pipeline_runner", guarded_bootstrap)
+
+    from bioetl.composition.runtime_builders import _run_manifest_support
+
+    original_resolve_input_snapshots = (
+        _run_manifest_support.resolve_pipeline_input_snapshot_refs
+    )
+    fallback_snapshot_refs = (
+        ()
+        if is_vcr_recording_mode()
+        else _build_vcr_cassette_input_snapshot_refs(request)
+    )
+
+    def _resolve_pipeline_input_snapshot_refs_with_vcr_fallback(**kwargs: object):
+        refs = original_resolve_input_snapshots(**kwargs)
+        if refs:
+            return refs
+        if request.node.get_closest_marker("vcr") is None:
+            return refs
+        return fallback_snapshot_refs
+
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders._run_manifest_support.resolve_pipeline_input_snapshot_refs",
+        _resolve_pipeline_input_snapshot_refs_with_vcr_fallback,
+    )
 
     yield
 

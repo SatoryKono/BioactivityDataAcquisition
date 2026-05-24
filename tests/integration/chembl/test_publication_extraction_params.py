@@ -9,8 +9,6 @@ import pytest
 from tests.integration.chembl.extraction_params_support import (
     ExtractionParamsCase,
     InputFilterExtractionParamsSuiteBase,
-    build_missing_cassette_reason,
-    has_any_cassette,
 )
 
 
@@ -28,12 +26,6 @@ PUBLICATION_CASE = ExtractionParamsCase(
     ),
     record_id_field="document_chembl_id",
     input_filter_field="publication_id",
-    cassette_names=(
-        "TestPublicationExtractionParams.test_publication_filtered_api_request",
-        "TestPublicationExtractionParams.test_publication_filtered_api_request.yaml",
-        "chembl_publication_filtered.yaml",
-    ),
-    cassette_hint="test_publication_filtered_api_request",
 )
 
 
@@ -44,10 +36,6 @@ class TestPublicationExtractionParams(InputFilterExtractionParamsSuiteBase):
     CASE = PUBLICATION_CASE
 
     @pytest.mark.vcr
-    @pytest.mark.skipif(
-        not has_any_cassette(*PUBLICATION_CASE.cassette_names),
-        reason=build_missing_cassette_reason(PUBLICATION_CASE.cassette_hint),
-    )
     async def test_publication_filtered_api_request(
         self,
         token_bucket: Any,
