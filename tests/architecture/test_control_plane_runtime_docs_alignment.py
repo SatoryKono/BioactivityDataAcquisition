@@ -56,6 +56,9 @@ def test_published_control_plane_docs_describe_dual_mode_resume_contract() -> No
         "ordinary resume uses checkpoint snapshot state",
         "composite resume uses checkpoint snapshot state as the base",
         "last_event_id",
+        "compatibility_checked_checkpoint_snapshot_resume",
+        "bounded_composite_reconstructive_resume",
+        "strict_evidence_boundary_exact_replay",
     )
     for path in PUBLISHED_CONTROL_PLANE_DOCS:
         text = path.read_text(encoding="utf-8").lower()
@@ -155,6 +158,10 @@ def test_contract_doc_enumerates_supported_execution_paths() -> None:
         "`composite resume`",
         "manifest exists before execution starts",
         "no supported execution path may bypass manifest creation",
+        "resume_contract",
+        "resume_guarantee",
+        "resume_evidence_source",
+        "ledger_suffix_replay",
     )
     missing = [fragment for fragment in expected_fragments if fragment not in text]
     assert not missing, (

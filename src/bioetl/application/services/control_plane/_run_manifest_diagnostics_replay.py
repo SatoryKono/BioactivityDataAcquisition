@@ -96,6 +96,38 @@ def _resolve_manifest_replay_readiness_verdict(
     )
 
 
+
+def _resolve_resume_guarantee(
+    *,
+    continuation_mode: str,
+) -> tuple[str, str, bool]:
+    """Map continuation taxonomy to the published resume guarantee."""
+    if continuation_mode == "exact_replay":
+        return (
+            "strict_evidence_boundary_exact_replay",
+            "manifest_input_snapshots_and_control_plane_anchors",
+            False,
+        )
+    if continuation_mode == "checkpoint_snapshot_plus_ledger_suffix_resume":
+        return (
+            "bounded_composite_reconstructive_resume",
+            "checkpoint_snapshot_plus_ledger_suffix",
+            True,
+        )
+    if continuation_mode == "checkpoint_snapshot_only_resume":
+        return (
+            "compatibility_checked_checkpoint_snapshot_resume",
+            "checkpoint_snapshot",
+            False,
+        )
+    if continuation_mode == "full_scan_idempotent_rebuild":
+        return (
+            "idempotent_rebuild_not_checkpoint_resume",
+            "full_scan_content_hash_deduplication",
+            False,
+        )
+    return ("no_resume_guarantee", "none", False)
+
 def _build_resume_contract(
     *,
     manifest: RunManifest,
@@ -123,6 +155,9 @@ def _build_resume_contract(
         requested_exact_replay=requested_exact_replay,
         resume_requested=resume_requested,
     )
+    guarantee, evidence_source, ledger_suffix_replay = _resolve_resume_guarantee(
+        continuation_mode=continuation_mode,
+    )
     return {
         "resume_requested": resume_requested,
         "requested_exact_replay": requested_exact_replay,
@@ -142,6 +177,9 @@ def _build_resume_contract(
             else "checkpoint_snapshot_only"
         ),
         "continuation_mode": continuation_mode,
+        "resume_guarantee": guarantee,
+        "resume_evidence_source": evidence_source,
+        "ledger_suffix_replay": ledger_suffix_replay,
         "semantic_identity_anchor": "execution_fingerprint",
         "occurrence_identity_anchor": "run_id",
     }

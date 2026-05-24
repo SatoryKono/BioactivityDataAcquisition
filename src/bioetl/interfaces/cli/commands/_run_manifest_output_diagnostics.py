@@ -64,6 +64,7 @@ def _diagnostics_replay_items(
         "exact_replay_anchors",
         "replay_mode",
         "continuation_mode",
+        "resume_contract",
         "replay_of_run_id",
         "replay_of_manifest_id",
         "replay_parentage",

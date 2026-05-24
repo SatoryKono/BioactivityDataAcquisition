@@ -445,6 +445,22 @@ This asymmetry is intentional. The current contract finishes the existing
 composite replay model without requiring every runner to implement the same
 ledger-driven state projection.
 
+Runner-family resume guarantees are deliberately non-interchangeable:
+
+| Continuation mode | Execution context | Evidence source | Published guarantee | Ledger suffix replay |
+| ----------------- | ----------------- | --------------- | ------------------- | -------------------- |
+| `checkpoint_snapshot_only_resume` | ordinary | checkpoint snapshot | `compatibility_checked_checkpoint_snapshot_resume` | no |
+| `checkpoint_snapshot_plus_ledger_suffix_resume` | composite | checkpoint snapshot plus ledger suffix after `last_event_id` | `bounded_composite_reconstructive_resume` | yes |
+| `exact_replay` | ordinary or composite inside supported boundary | manifest input snapshots and control-plane anchors | `strict_evidence_boundary_exact_replay` | no resume suffix claim |
+| `full_scan_idempotent_rebuild` | full-scan-only pipeline | full scan plus content-hash deduplication | `idempotent_rebuild_not_checkpoint_resume` | no |
+| `rebuild_only` | any unsupported continuation | none | `no_resume_guarantee` | no |
+
+The `resume_contract` diagnostics object publishes these distinctions through
+`continuation_mode`, `resume_mode`, `resume_guarantee`,
+`resume_evidence_source`, and `ledger_suffix_replay`. Operators must not treat
+ordinary checkpoint-only resume as composite reconstructive resume or as exact
+replay.
+
 ## Supported Execution Paths
 
 The current control-plane contract is defined against these supported execution

@@ -486,6 +486,12 @@ Resume contract:
   without ledger suffix replay;
 - composite resume uses checkpoint snapshot state as the base and then replays
   the ledger suffix strictly after `last_event_id`.
+- `resume_contract.resume_guarantee` publishes the operator guarantee: ordinary
+  `checkpoint_snapshot_only_resume` is
+  `compatibility_checked_checkpoint_snapshot_resume`, composite
+  `checkpoint_snapshot_plus_ledger_suffix_resume` is
+  `bounded_composite_reconstructive_resume`, and exact replay remains
+  `strict_evidence_boundary_exact_replay`.
 
 Canonical storage layout:
 

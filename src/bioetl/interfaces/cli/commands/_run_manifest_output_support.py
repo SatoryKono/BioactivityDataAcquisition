@@ -187,6 +187,7 @@ def render_reproducibility_compact_section(
             ("replay_capability", policy.get("replay_capability")),
             ("mode", policy.get("operator_replay_mode")),
             ("continuation_mode", policy.get("continuation_mode")),
+            ("resume_contract", diagnostics.get("resume_contract")),
             (
                 "replay_capability_reason",
                 policy.get("replay_capability_reason"),
