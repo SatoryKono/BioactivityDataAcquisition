@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     ObservabilityBackendEnsureResult,
+    _build_detached_backend_popen_kwargs,
     build_observability_backend_health_url,
     ensure_observability_backend_started,
     should_disable_transient_health_server,
@@ -130,6 +132,36 @@ def test_wait_for_backend_ready_polls_until_success() -> None:
     assert ready is True
     assert probe.call_count == 3
     assert sleep.call_count == 2
+
+
+def test_build_detached_backend_popen_kwargs_uses_new_session_on_posix() -> None:
+    kwargs = _build_detached_backend_popen_kwargs(os_name="posix")
+
+    assert kwargs["start_new_session"] is True
+    assert "creationflags" not in kwargs
+    assert "startupinfo" not in kwargs
+
+
+def test_build_detached_backend_popen_kwargs_hides_windows_console() -> None:
+    startupinfo = SimpleNamespace(dwFlags=0, wShowWindow=5)
+    fake_subprocess = SimpleNamespace(
+        DETACHED_PROCESS=0x00000008,
+        CREATE_NEW_PROCESS_GROUP=0x00000200,
+        CREATE_NO_WINDOW=0x08000000,
+        STARTF_USESHOWWINDOW=0x00000001,
+        SW_HIDE=0,
+        STARTUPINFO=lambda: startupinfo,
+    )
+
+    kwargs = _build_detached_backend_popen_kwargs(
+        os_name="nt",
+        subprocess_module=fake_subprocess,
+    )
+
+    assert kwargs["creationflags"] == 0x08000208
+    assert kwargs["startupinfo"] is startupinfo
+    assert startupinfo.dwFlags == 0x00000001
+    assert startupinfo.wShowWindow == 0
 
 
 def test_should_disable_transient_health_server_only_on_matching_live_backend() -> None:

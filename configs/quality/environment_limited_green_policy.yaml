@@ -7,11 +7,7 @@ current_baseline:
   accepted_steady_state_reasons:
     - live_network_opt_in_gate
     - live_api_gate_mode_non_always
-  transitional_reasons:
-    - architecture_suite_skips
-    - contract_lane_not_run
-    - e2e_lane_not_run
-    - memory_lane_not_run
+  transitional_reasons: []
   disallowed_reopened_gap_reasons:
     - pilot_provider_count
     - vcr_only_provider_count
@@ -35,14 +31,13 @@ measurement_policy:
     vcr_only_provider_count: 0
 reason_policy:
   - skip_class: architecture_suite_skips
-    posture: transitional_debt
-    allowed_in_current_baseline: true
+    posture: blocking_zero_debt
+    allowed_in_current_baseline: false
     rationale: >-
-      Historical architecture skips now sit behind an explicit coarse budget of
-      three measured skipif tests, but they remain debt to retire rather than the
-      target steady state.
-    next_hardening_target: retire the remaining three skipif tests and ratchet the
-      budget to zero
+      Architecture skipif debt is retired and the coarse budget is zero; any
+      architecture skip now blocks the confidence classification instead of
+      producing environment-limited green.
+    next_hardening_target: keep architecture skip budget at zero
   - skip_class: live_network_opt_in_gate
     posture: accepted_steady_state_policy
     allowed_in_current_baseline: true
@@ -59,32 +54,29 @@ reason_policy:
       current baseline and therefore still maps to environment-limited green.
     next_hardening_target: revisit only if policy shifts from scheduled to always-on
   - skip_class: contract_lane_not_run
-    posture: transitional_debt
-    allowed_in_current_baseline: true
+    posture: blocking_required_lane
+    allowed_in_current_baseline: false
     rationale: >-
-      The current quality-gate confidence slice can report green without the
+      The quality-gate confidence slice must not report green without the
       canonical contracts lane, but that is an explicit confidence limitation
       rather than a provider-baseline reopening.
-    next_hardening_target: include contracts lane evidence in the blocking
-      quality-gate confidence slice
+    next_hardening_target: keep contracts lane evidence in the blocking quality-gate confidence slice
   - skip_class: e2e_lane_not_run
-    posture: transitional_debt
-    allowed_in_current_baseline: true
+    posture: blocking_required_lane
+    allowed_in_current_baseline: false
     rationale: >-
-      The current quality-gate confidence slice can report green without the
+      The quality-gate confidence slice must not report green without the
       canonical e2e lane, so full pipeline confidence remains environment-limited.
-    next_hardening_target: include e2e lane evidence in the blocking quality-gate
-      confidence slice
+    next_hardening_target: keep e2e lane evidence in the blocking quality-gate confidence slice
   - skip_class: memory_lane_not_run
-    posture: transitional_debt
-    allowed_in_current_baseline: true
+    posture: blocking_required_lane
+    allowed_in_current_baseline: false
     rationale: >-
-      The quality-integral gate confidence slice can report green without
+      The quality-integral gate confidence slice must not report green without
       executing the dedicated CI memory-tests lane. Neo4j and MCP memory
       confidence is still blocking at the workflow level, but remains outside
       this local classification.
-    next_hardening_target: feed memory-tests telemetry into the quality-integral
-      gate classification without adding memory tooling to the coverage path
+    next_hardening_target: keep memory-tests telemetry blocking in the quality-integral gate classification
   - skip_class: pilot_provider_count
     posture: reopened_baseline_gap
     allowed_in_current_baseline: false

@@ -115,8 +115,7 @@ def test_runtime_plan_support_retires_legacy_runtime_compatibility() -> None:
     assert "_call_supported_kwargs" not in source
     assert "inspect.signature" not in source
 
-
-.mark.unit
+@pytest.mark.unit
 def test_observability_runtime_public_exports_stable() -> None:
     """Observability runtime facade should preserve stable public __all__."""
     assert observability_runtime.__all__ == [

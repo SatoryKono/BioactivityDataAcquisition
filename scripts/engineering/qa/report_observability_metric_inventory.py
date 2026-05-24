@@ -153,6 +153,7 @@ _CHECK_DRIFT_KEYS: Final[tuple[str, ...]] = (
     "declared_risky_label_review_required",
     "runtime_label_contract_violations",
     "runtime_label_contract_unresolved",
+    "runtime_cardinality_threshold_violations",
 )
 _ALLOWLIST_METADATA_REQUIRED_KEYS: Final[frozenset[str]] = frozenset(
     {
@@ -1073,6 +1074,88 @@ def _extract_rule_metric_names(groups: list[object]) -> list[str]:
     return sorted(metric_names)
 
 
+def _load_runtime_cardinality_thresholds(repo_root: Path) -> dict[str, int]:
+    """Load approved runtime-cardinality thresholds from governed allowlist."""
+    allowlist_path = repo_root / _DEFAULT_DRIFT_ALLOWLIST
+    if not allowlist_path.exists():
+        return {}
+    try:
+        import yaml
+    except ImportError:
+        return {}
+    payload = yaml.safe_load(allowlist_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        return {}
+    allowed = payload.get("allowed", {})
+    if not isinstance(allowed, dict):
+        return {}
+    thresholds: dict[str, int] = {}
+    for entry in allowed.get("runtime_cardinality_review_required", []):
+        if not isinstance(entry, dict):
+            continue
+        metric = entry.get("metric")
+        approved_max = entry.get("approved_max_series")
+        if isinstance(metric, str) and isinstance(approved_max, int):
+            thresholds[metric] = approved_max
+    return thresholds
+
+
+def _observed_runtime_series_counts() -> dict[str, int]:
+    """Return current-process observed series counts from registered collectors."""
+    counts: dict[str, int] = {}
+    for registry in (COUNTERS, GAUGES, HISTOGRAMS):
+        for metric_name, metric in registry.items():
+            observed_labelsets: set[tuple[tuple[str, str], ...]] = set()
+            for family in metric.collect():
+                for sample in family.samples:
+                    sample_name = str(sample.name)
+                    if not (
+                        sample_name == metric_name
+                        or sample_name.startswith(f"{metric_name}_")
+                    ):
+                        continue
+                    observed_labelsets.add(
+                        tuple(sorted((str(k), str(v)) for k, v in sample.labels.items()))
+                    )
+            counts[metric_name] = len(observed_labelsets)
+    return counts
+
+
+def _runtime_cardinality_evidence_rows(
+    *,
+    metric_names: list[str],
+    combined_emitters: dict[str, list[str]],
+    observed_series_counts: dict[str, int],
+    thresholds: dict[str, int],
+) -> dict[str, list[str]]:
+    evidence: dict[str, list[str]] = {}
+    for metric_name in metric_names:
+        labels = sorted(REGISTERED_PROMETHEUS_METRIC_LABELS.get(metric_name, ()))
+        rows = [
+            f"observed_series_count={observed_series_counts.get(metric_name, 0)}",
+            f"approved_max_series={thresholds.get(metric_name, 0)}",
+            f"runtime_emitter_count={len(set(combined_emitters.get(metric_name, [])))}",
+            "label_keys=" + ",".join(labels),
+        ]
+        evidence[metric_name] = rows
+    return evidence
+
+
+def _runtime_cardinality_threshold_violations(
+    *,
+    observed_series_counts: dict[str, int],
+    thresholds: dict[str, int],
+) -> list[str]:
+    violations: list[str] = []
+    for metric_name, approved_max in sorted(thresholds.items()):
+        observed = observed_series_counts.get(metric_name, 0)
+        if observed > approved_max:
+            violations.append(
+                f"{metric_name} observed_series_count={observed} approved_max_series={approved_max}"
+            )
+    return violations
+
+
 def collect_metric_inventory(
     repo_root: Path,
 ) -> dict[str, list[str] | dict[str, list[str]]]:
@@ -1127,6 +1210,20 @@ def collect_metric_inventory(
         for metric_name, emitter_paths in combined_emitters.items()
         if len(set(emitter_paths)) >= 3
     )
+    observed_series_counts = _observed_runtime_series_counts()
+    cardinality_thresholds = _load_runtime_cardinality_thresholds(repo_root)
+    runtime_cardinality_evidence = _runtime_cardinality_evidence_rows(
+        metric_names=runtime_cardinality_review_required,
+        combined_emitters=combined_emitters,
+        observed_series_counts=observed_series_counts,
+        thresholds=cardinality_thresholds,
+    )
+    runtime_cardinality_threshold_violations = (
+        _runtime_cardinality_threshold_violations(
+            observed_series_counts=observed_series_counts,
+            thresholds=cardinality_thresholds,
+        )
+    )
     declared_risky_label_review_required = sorted(
         metric_name
         for metric_name, label_names in REGISTERED_PROMETHEUS_METRIC_LABELS.items()
@@ -1146,6 +1243,14 @@ def collect_metric_inventory(
         "dashboarded_without_emission": sorted(documented_without_runtime),
         "alerted_without_emission": sorted(ruled_without_runtime),
         "runtime_cardinality_review_required": runtime_cardinality_review_required,
+        "runtime_cardinality_evidence": runtime_cardinality_evidence,
+        "runtime_cardinality_observed_series": {
+            metric_name: [f"observed_series_count={count}"]
+            for metric_name, count in sorted(observed_series_counts.items())
+        },
+        "runtime_cardinality_threshold_violations": (
+            runtime_cardinality_threshold_violations
+        ),
         "declared_risky_label_review_required": (
             declared_risky_label_review_required
         ),
@@ -1342,6 +1447,7 @@ def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:
         "declared_risky_label_review_required",
         "runtime_label_contract_violations",
         "runtime_label_contract_unresolved",
+        "runtime_cardinality_threshold_violations",
         "live_metrics",
         "direct_live_metrics",
         "helper_backed_live_metrics",

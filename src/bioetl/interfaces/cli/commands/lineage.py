@@ -211,17 +211,26 @@ def lineage() -> None:
 @lineage.command("show-fragment")
 @click.argument("fragment_id")
 @click.option(
+    "--semantic",
+    is_flag=True,
+    help="Use diagnostic semantic fragment-id lookup instead of occurrence id.",
+)
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
     default="text",
     help="Output format",
 )
-def show_fragment_command(fragment_id: str, output_format: str) -> None:
+def show_fragment_command(
+    fragment_id: str,
+    semantic: bool,
+    output_format: str,
+) -> None:
     """Show one lineage fragment by FRAGMENT_ID."""
     service = get_lineage_service()
     try:
-        result = service.show_fragment(fragment_id)
+        result = service.show_fragment(fragment_id, semantic=semantic)
     except ValueError as exc:
         echo_error("Lineage fragment not found", str(exc))
         return

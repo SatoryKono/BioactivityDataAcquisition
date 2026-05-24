@@ -206,6 +206,27 @@ class FileLineageStore(LineageStorePort):
                     atomic_write_text(fragment_path, existing_fragment_payload)
             raise
 
+    def get_occurrence(self, fragment_id: str) -> LineageGraphFragment | None:
+        """Load one stored occurrence fragment id without semantic fallback."""
+        started_at = perf_counter()
+        status = "success"
+        try:
+            fragment = self._load_fragment(fragment_id)
+            if fragment is None:
+                status = "miss"
+            return fragment
+        except (OSError, TypeError, ValueError):
+            status = "failed"
+            raise
+        finally:
+            emit_control_plane_read_metrics(
+                self.metrics,
+                store="lineage",
+                operation="get_occurrence",
+                status=status,
+                duration_seconds=perf_counter() - started_at,
+            )
+
     def get(self, fragment_id: str) -> LineageGraphFragment | None:
         """Load one fragment by identifier if present."""
         started_at = perf_counter()

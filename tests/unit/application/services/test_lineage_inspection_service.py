@@ -25,26 +25,37 @@ from tests.helpers.control_plane import InMemoryRunManifestStore
 
 class _InMemoryLineageStore(LineageStorePort):
     def __init__(self) -> None:
-        self._items: dict[str, LineageGraphFragment] = {}
+        self._items: list[LineageGraphFragment] = []
 
     def save(self, fragment: LineageGraphFragment) -> None:
-        self._items[fragment.fragment_id] = fragment
+        self._items.append(fragment)
 
     def get(self, fragment_id: str) -> LineageGraphFragment | None:
-        return self._items.get(fragment_id)
+        return next(
+            (item for item in self._items if item.fragment_id == fragment_id),
+            None,
+        )
+
+    def get_occurrence(self, fragment_id: str) -> LineageGraphFragment | None:
+        return next(
+            (
+                item
+                for item in self._items
+                if (item.stored_fragment_id or item.fragment_id) == fragment_id
+            ),
+            None,
+        )
 
     def list_by_run_id(self, run_id: RunID) -> list[LineageGraphFragment]:
-        return [item for item in self._items.values() if item.run_id == str(run_id)]
+        return [item for item in self._items if item.run_id == str(run_id)]
 
     def list_by_manifest_id(self, manifest_id: str) -> list[LineageGraphFragment]:
-        return [
-            item for item in self._items.values() if item.manifest_id == manifest_id
-        ]
+        return [item for item in self._items if item.manifest_id == manifest_id]
 
     def list_by_node_id(self, node_id: str) -> list[LineageGraphFragment]:
         return [
             item
-            for item in self._items.values()
+            for item in self._items
             if any(node.node_id == node_id for node in item.nodes)
         ]
 
@@ -84,12 +95,27 @@ def test_show_fragment_returns_stored_fragment() -> None:
     store.save(fragment)
     service = LineageInspectionService(lineage_store=store)
 
-    result = service.show_fragment("silver:fragment-1")
+    result = service.show_fragment("silver:fragment-1:occurrence:abc123")
 
     assert result.fragment == fragment
     assert result.to_dict()["fragment"]["stored_fragment_id"] == (
         "silver:fragment-1:occurrence:abc123"
     )
+
+
+def test_show_fragment_semantic_lookup_is_explicit() -> None:
+    store = _InMemoryLineageStore()
+    fragment = LineageGraphFragment(
+        fragment_id="silver:fragment-1",
+        stored_fragment_id="silver:fragment-1:occurrence:abc123",
+        created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+    )
+    store.save(fragment)
+    service = LineageInspectionService(lineage_store=store)
+
+    result = service.show_fragment("silver:fragment-1", semantic=True)
+
+    assert result.fragment == fragment
 
 
 def test_trace_returns_upstream_and_downstream_relations() -> None:

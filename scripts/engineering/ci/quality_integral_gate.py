@@ -566,6 +566,31 @@ def _build_skip_classes(
     return tuple(classes)
 
 
+def _blocking_confidence_reasons(
+    architecture_stats: ArchitectureTestStats,
+    contract_context: ContractTestingContext,
+    not_run_lane_entries: tuple[dict[str, str], ...],
+) -> list[str]:
+    reasons: list[str] = []
+    if architecture_stats.skipped > 0:
+        reasons.append(
+            f"architecture suite carries {architecture_stats.skipped} skip(s); "
+            "architecture skip budget is zero"
+        )
+    if contract_context.vcr_only_providers:
+        reasons.append(
+            "live minimum baseline excludes "
+            f"{len(contract_context.vcr_only_providers)} VCR-only provider(s)"
+        )
+    if contract_context.pilot_providers:
+        reasons.append(
+            "live minimum baseline includes "
+            f"{len(contract_context.pilot_providers)} pilot provider(s)"
+        )
+    reasons.extend(entry["reason"] for entry in not_run_lane_entries)
+    return reasons
+
+
 def _classify_test_health(
     architecture_stats: ArchitectureTestStats,
     test_matrix: dict[str, object],
@@ -607,6 +632,32 @@ def _classify_test_health(
             skip_classes=skip_classes,
             staged_rollout_flags=staged_flags,
         )
+    blocking_confidence_reasons = _blocking_confidence_reasons(
+        architecture_stats,
+        contract_context,
+        not_run_lane_entries,
+    )
+    if blocking_confidence_reasons:
+        return TestHealthClassification(
+            status="non_green",
+            summary=(
+                "Suite passed, but required confidence evidence is missing or "
+                "explicitly outside the zero-debt baseline."
+            ),
+            reasons=tuple(blocking_confidence_reasons),
+            architecture_skip_count=architecture_stats.skipped,
+            architecture_skip_ratio=skip_ratio,
+            live_contract_enforced_provider_count=len(
+                contract_context.enforced_providers
+            ),
+            live_contract_pilot_provider_count=len(contract_context.pilot_providers),
+            live_contract_vcr_only_provider_count=len(
+                contract_context.vcr_only_providers
+            ),
+            skip_classes=skip_classes,
+            staged_rollout_flags=staged_flags,
+        )
+
     environment_reasons = _environment_limited_reasons(
         architecture_stats,
         contract_context,
@@ -698,11 +749,8 @@ def _environment_limited_reasons(
     contract_context: ContractTestingContext,
     not_run_lane_entries: tuple[dict[str, str], ...],
 ) -> list[str]:
+    del architecture_stats, not_run_lane_entries
     reasons: list[str] = []
-    if architecture_stats.skipped > 0:
-        reasons.append(
-            f"architecture suite still carries {architecture_stats.skipped} skips"
-        )
     if contract_context.network_opt_in_required:
         reasons.append("live contract execution is network opt-in gated")
     if (
@@ -710,17 +758,6 @@ def _environment_limited_reasons(
         and contract_context.live_api_gate_mode != "always"
     ):
         reasons.append(f"live API gate mode is {contract_context.live_api_gate_mode}")
-    if contract_context.vcr_only_providers:
-        reasons.append(
-            "live minimum baseline excludes "
-            f"{len(contract_context.vcr_only_providers)} VCR-only provider(s)"
-        )
-    if contract_context.pilot_providers:
-        reasons.append(
-            "live minimum baseline includes "
-            f"{len(contract_context.pilot_providers)} pilot provider(s)"
-        )
-    reasons.extend(entry["reason"] for entry in not_run_lane_entries)
     return reasons
 
 

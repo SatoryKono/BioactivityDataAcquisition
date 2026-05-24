@@ -77,7 +77,7 @@ class TestEnvironmentLimitedGreenPolicy:
         assert budget_ref.get("scorecard_path") == "configs/quality/debt_scorecard.yaml"
         assert budget_ref.get("coarse_budget_key") == "architecture_skip_count"
         coarse_budgets = scorecard.get("governance", {}).get("coarse_budgets", {})
-        assert coarse_budgets.get("architecture_skip_count", {}).get("max_count") == 3
+        assert coarse_budgets.get("architecture_skip_count", {}).get("max_count") == 0
 
     def test_environment_limited_tracking_has_numerical_threshold(self) -> None:
         policy = _load_yaml(POLICY_PATH)
@@ -109,7 +109,7 @@ class TestEnvironmentLimitedGreenPolicy:
             entries["live_api_gate_mode_non_always"]["posture"]
             == "accepted_steady_state_policy"
         )
-        assert entries["architecture_suite_skips"]["posture"] == "transitional_debt"
+        assert entries["architecture_suite_skips"]["posture"] == "blocking_zero_debt"
         assert entries["pilot_provider_count"]["posture"] == "reopened_baseline_gap"
         assert entries["vcr_only_provider_count"]["posture"] == "reopened_baseline_gap"
 

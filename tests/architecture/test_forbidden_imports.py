@@ -19,12 +19,24 @@ See CLAUDE.md §2.1 Matrix of Imports and §11 Anti-Patterns.
 from __future__ import annotations
 
 import ast
+import os
 import re
 from pathlib import Path
 
 
 def _python_files(path: Path, *, skip_private: bool = False) -> list[Path]:
-    files = sorted(path.rglob("*.py"))
+    files: list[Path] = []
+    for current_root, dirnames, filenames in os.walk(path):
+        dirnames[:] = [
+            dirname
+            for dirname in dirnames
+            if dirname not in {"__pycache__", ".worktrees"}
+        ]
+        current_path = Path(current_root)
+        for filename in filenames:
+            if filename.endswith(".py"):
+                files.append(current_path / filename)
+    files.sort()
     if skip_private:
         files = [py_file for py_file in files if not py_file.name.startswith("_")]
     return files

@@ -322,6 +322,7 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
 
     expected_counts = {
         "transition_compat_count": len(transition_debt),
+        "retained_public_entrypoint_burden": len(retained_entrypoints),
         "sunset_compat_count": sunset_count,
         "expired_compat_count": expired_count,
     }
@@ -337,6 +338,9 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
         assert (
             isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]
         )
+
+    retained_burden_metric = metrics["retained_public_entrypoint_burden"]
+    assert retained_burden_metric.get("max_count") == len(retained_entrypoints)
 
     expired_metric = metrics["expired_compat_count"]
     assert expired_metric.get("max_count") == 0

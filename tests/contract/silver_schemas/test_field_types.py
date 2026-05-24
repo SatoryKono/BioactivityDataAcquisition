@@ -16,6 +16,14 @@ from tests.contract.silver_schemas.conftest import (
     extract_field_metadata,
 )
 
+NON_GLOBAL_COERCE_SCHEMAS = tuple(
+    sorted(
+        schema_name
+        for schema_name, schema_class in SILVER_SCHEMAS.items()
+        if not getattr(schema_class.Config, "coerce", False)
+    )
+)
+
 
 def _has_nullable_int_dtype_guard(annotation_repr: str, dtype_repr: str) -> bool:
     """Return True when nullable-int annotation has explicit pandas dtype guard."""
@@ -404,7 +412,7 @@ class TestDatetimeFields:
 class TestFieldCoercion:
     """Tests for field coercion settings."""
 
-    @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
+    @pytest.mark.parametrize("schema_name", NON_GLOBAL_COERCE_SCHEMAS)
     def test_coerce_used_appropriately(self, schema_name: str) -> None:
         """Field coercion SHOULD be explicit and justified.
 
@@ -416,8 +424,6 @@ class TestFieldCoercion:
         coerce=True SHOULD NOT be used to hide data quality issues.
         """
         schema_class = SILVER_SCHEMAS[schema_name]
-        if getattr(schema_class.Config, "coerce", False):
-            pytest.skip("Schema uses global coerce; field-level checks not applicable.")
         schema_model = schema_class.to_schema()
 
         coerced_fields = []

@@ -18,10 +18,9 @@ ACTIVE_DOC_EXCLUDES = (
 )
 
 
-def _iter_active_markdown_files() -> list[Path]:
+def _iter_active_markdown_files(docs_markdown_files: list[Path]) -> list[Path]:
     files: list[Path] = [ROOT / "README.md"]
-    docs_root = ROOT / "docs"
-    files.extend(sorted(docs_root.rglob("*.md")))
+    files.extend(docs_markdown_files)
     return [
         path
         for path in files
@@ -40,12 +39,18 @@ def test_root_env_example_exists_as_canonical_template_surface() -> None:
 
 
 @pytest.mark.architecture
-def test_active_docs_do_not_reference_noncanonical_configs_env_example() -> None:
+def test_active_docs_do_not_reference_noncanonical_configs_env_example(
+    docs_markdown_files: list[Path],
+    docs_text_cache: dict[Path, str],
+) -> None:
     """Contributor-facing docs must not point at configs/.env.example."""
     offending: list[str] = []
     needle = "configs/.env.example"
-    for path in _iter_active_markdown_files():
-        content = path.read_text(encoding="utf-8")
+    for path in _iter_active_markdown_files(docs_markdown_files):
+        if path == ROOT / "README.md":
+            content = path.read_text(encoding="utf-8")
+        else:
+            content = docs_text_cache[path]
         if needle in content:
             offending.append(path.relative_to(ROOT).as_posix())
 

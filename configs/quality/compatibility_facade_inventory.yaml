@@ -339,6 +339,18 @@ measured_only_review_workflow:
   - promote
   - remove
   promotion_requires_curated_row: true
+retained_public_entrypoint_burden_policy:
+  linked_issue: "#4575"
+  blocking_metric: retained_public_entrypoint_burden
+  first_party_growth_policy: fail_fast_on_growth
+  tracked_facades:
+  - bioetl.composition.entrypoints
+  - bioetl.composition.health_api
+  - bioetl.infrastructure.config
+  - bioetl.application.services.control_plane
+  rationale: Retained public entrypoints are stable external API, but first-party
+    imports through those facades remain architectural burden and must be visible
+    as blocking governance debt when the reviewed surface grows.
 retained_entrypoint_burn_down_plan:
   review_date: '2026-09-30'
   linked_issue: '#4565'

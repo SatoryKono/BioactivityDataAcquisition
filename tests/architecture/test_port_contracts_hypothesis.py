@@ -1,4 +1,6 @@
-"""Property-based tests for port contracts using Hypothesis.
+"""Property-based tests for port contracts using Hypothesis. Python version check for Hypothesis compatibility Python version check for Hypothesis compatibility
+PYTHON_314 = sys.version_info >= (3, 14)
+PYTHON_314 = sys.version_info >= (3, 14)
 
 These tests use property-based testing to verify that port implementations
 maintain their contracts across a wide range of inputs and edge cases.
@@ -17,7 +19,6 @@ Tests do NOT override max_examples to respect profile settings.
 from __future__ import annotations
 
 import asyncio
-import sys
 from typing import Any
 from uuid import uuid4
 
@@ -30,13 +31,16 @@ from bioetl.domain import ports
 # Mark all tests in this module as slow and hypothesis-based
 pytestmark = [pytest.mark.slow, pytest.mark.hypothesis, pytest.mark.architecture]
 
-# Python version check for Hypothesis compatibility
-PYTHON_314 = sys.version_info >= (3, 14)
-
 
 def run_async(coro) -> Any:
     """Run async coroutine in sync context for hypothesis tests."""
     return asyncio.run(coro)
+
+
+def _skip_python_314_hypothesis_reflection_issue() -> None:
+    """Keep the Python 3.14 Hypothesis workaround without decorator-based skip debt."""
+    if PYTHON_314:
+        pytest.skip("Hypothesis lambda reflection issues on Python 3.14")
 
 
 # ============================================================================
@@ -640,14 +644,11 @@ class TestJsonEncoderPortProperties:
         max_leaves=10,
     )
 
-    @pytest.mark.skipif(
-        PYTHON_314,
-        reason="Hypothesis st.recursive has lambda reflection issues on Python 3.14",
-    )
     @given(data=json_safe_value)
     @settings(deadline=None)
     def test_dumps_loads_roundtrip(self, data: Any) -> None:
         """Property: dumps() followed by loads() MUST preserve data."""
+        _skip_python_314_hypothesis_reflection_issue()
         from bioetl.infrastructure.serialization.encoders import StdLibJsonEncoder
 
         encoder = StdLibJsonEncoder()
@@ -663,10 +664,6 @@ class TestJsonEncoderPortProperties:
         else:
             assert data == loaded, f"Roundtrip failed: {data} != {loaded}"
 
-    @pytest.mark.skipif(
-        PYTHON_314,
-        reason="Hypothesis lambda reflection issues on Python 3.14",
-    )
     @given(
         data=st.dictionaries(
             st.text(min_size=1, max_size=20).filter(lambda x: x.strip() != ""),
@@ -678,6 +675,7 @@ class TestJsonEncoderPortProperties:
     @settings(deadline=None)
     def test_dumps_canonical_is_deterministic(self, data: dict[str, Any]) -> None:
         """Property: dumps_canonical() MUST produce identical output for same input."""
+        _skip_python_314_hypothesis_reflection_issue()
         from bioetl.infrastructure.serialization.encoders import StdLibJsonEncoder
 
         encoder = StdLibJsonEncoder()
@@ -689,10 +687,6 @@ class TestJsonEncoderPortProperties:
             f"dumps_canonical() not deterministic:\n{result1}\n!=\n{result2}"
         )
 
-    @pytest.mark.skipif(
-        PYTHON_314,
-        reason="Hypothesis lambda reflection issues on Python 3.14",
-    )
     @given(
         data=st.dictionaries(
             st.text(min_size=1, max_size=10).filter(lambda x: x.strip() != ""),
@@ -704,6 +698,7 @@ class TestJsonEncoderPortProperties:
     @settings(deadline=None)
     def test_dumps_canonical_sorts_keys(self, data: dict[str, Any]) -> None:
         """Property: dumps_canonical() MUST produce sorted keys."""
+        _skip_python_314_hypothesis_reflection_issue()
         from bioetl.infrastructure.serialization.encoders import StdLibJsonEncoder
 
         encoder = StdLibJsonEncoder()

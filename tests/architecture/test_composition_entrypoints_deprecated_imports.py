@@ -124,6 +124,8 @@ def test_first_party_src_does_not_import_deprecated_entrypoint_symbols() -> None
     """Production code must not depend on removed entrypoint shims."""
     legacy_symbols = _legacy_entrypoint_symbols()
     assert legacy_symbols == set()
+    if not legacy_symbols:
+        return
     violations = [
         violation
         for path in _iter_python_files()
