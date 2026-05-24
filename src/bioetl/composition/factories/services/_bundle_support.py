@@ -4,30 +4,23 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
+from bioetl.application.core.base import BasePipeline
+from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.composition.factories.datasource.data_source_factory import (
+    DataSourceCreatorProtocol,
+)
 from bioetl.composition.factories.pipeline.creation_support import (
     _PipelineCreationInputs,
     _PipelineCreationRequest,
 )
-
-if TYPE_CHECKING:
-    from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.base_transformer import BaseTransformer
-    from bioetl.composition.factories.datasource.data_source_factory import (
-        DataSourceCreatorProtocol,
-    )
-    from bioetl.composition.factories.services.factory import BaseServicesFactory
-    from bioetl.domain.config import DQConfig, PipelineConfig
-    from bioetl.domain.context import CachedBronzeContext
-    from bioetl.domain.filtering import InputFilterConfig
-    from bioetl.domain.ports import (
-        DataSourcePort,
-        LoggerPort,
-        MetricsPort,
-    )
-    from bioetl.infrastructure.config.settings_api import Settings
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.composition.factories.services.factory import BaseServicesFactory
+from bioetl.domain.config import DQConfig, PipelineConfig
+from bioetl.domain.context import CachedBronzeContext
+from bioetl.domain.filtering import InputFilterConfig
+from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+from bioetl.infrastructure.config.settings_api import Settings
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 @dataclass(frozen=True, slots=True)

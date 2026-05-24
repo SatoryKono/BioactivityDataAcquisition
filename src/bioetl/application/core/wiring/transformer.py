@@ -10,18 +10,7 @@ from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.application.core.base_transformer import (
-        BaseTransformer,
-        TransformerDependencyContext,
-    )
-    from bioetl.application.core.base_transformer.contract_policy import (
-        DefaultContractPolicy,
-    )
-    from bioetl.application.core.base_transformer.structural_policy import (
-        NoOpStructuralPolicy,
-        StructuralPolicyProtocol,
-        build_structural_policy,
-    )
+    pass
 
 _PUBLIC_EXPORTS = {
     "BaseTransformer": (

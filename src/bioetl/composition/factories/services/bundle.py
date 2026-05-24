@@ -10,7 +10,6 @@ from bioetl.application.services.lineage.metadata_coordinator import MetadataCoo
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )
-from bioetl.composition.factories.services.factory import BaseServicesFactory
 from bioetl.composition.factories.pipeline.creation_support import (
     _BuildPipelineServicesFn,
     _create_pipeline_with_services_impl,
@@ -24,6 +23,7 @@ from bioetl.composition.factories.services._bundle_support import (
 from bioetl.composition.factories.services._bundle_support import (
     create_pipeline_data_source as _create_pipeline_data_source_impl,
 )
+from bioetl.composition.factories.services.factory import BaseServicesFactory
 from bioetl.domain.config import DQConfig, PipelineConfig
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.filtering import InputFilterConfig

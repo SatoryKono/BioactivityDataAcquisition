@@ -15,11 +15,11 @@ from bioetl.domain.ports.observability import (
     MetricsPort,
     TracingPort,
 )
+from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
 from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
-from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 from .dq_bootstrap import bootstrap_dq_monitor as _bootstrap_dq_monitor_impl
 from .logger_bootstrap import bootstrap_logger as _bootstrap_logger_impl

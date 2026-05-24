@@ -3,11 +3,27 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
+
+import pyarrow as pa
 
 from bioetl.application.core.wiring.runtime import (
+    BasePipeline,
+    BatchExecutor,
     BatchProcessingComponents,
     CheckpointRuntimeService,
+    GoldFilterCallback,
+    GoldTransformCallback,
+    PipelineService,
+    RecordProcessor,
+    RecordProcessorConfig,
+    TransformCallback,
+)
+from bioetl.application.observability.domain_event_emitter import (
+    DomainEventEmitterProtocol,
+)
+from bioetl.application.services.checkpoint_compatibility_service import (
+    CheckpointCompatibilityService,
 )
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.services._pipeline_batch_executor_types import (
@@ -23,38 +39,18 @@ from bioetl.composition.factories.services.pipeline_processing_components_builde
 from bioetl.composition.factories.services.pipeline_record_processor_builder import (
     create_record_processor_from_pipeline as build_record_processor_from_pipeline,
 )
-
-if TYPE_CHECKING:
-    import pyarrow as pa
-
-    from bioetl.application.core.wiring.runtime import (
-        BasePipeline,
-        BatchExecutor,
-        GoldFilterCallback,
-        GoldTransformCallback,
-        PipelineService,
-        RecordProcessor,
-        RecordProcessorConfig,
-        TransformCallback,
-    )
-    from bioetl.application.observability.domain_event_emitter import (
-        DomainEventEmitterProtocol,
-    )
-    from bioetl.application.services.checkpoint_compatibility_service import (
-        CheckpointCompatibilityService,
-    )
-    from bioetl.domain.context import PipelineContext
-    from bioetl.domain.error_classifier import ErrorClassifier
-    from bioetl.domain.medallion import LoadingStrategy
-    from bioetl.domain.ports import (
-        CheckpointPort,
-        GoldValidatorPort,
-        LoggerPort,
-        MetricsPort,
-        TracingPort,
-    )
-    from bioetl.domain.types import GoldSchemaType, RunID
-    from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
+from bioetl.domain.context import PipelineContext
+from bioetl.domain.error_classifier import ErrorClassifier
+from bioetl.domain.medallion import LoadingStrategy
+from bioetl.domain.ports import (
+    CheckpointPort,
+    GoldValidatorPort,
+    LoggerPort,
+    MetricsPort,
+    TracingPort,
+)
+from bioetl.domain.types import GoldSchemaType, RunID
+from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 
 def create_batch_processing_components(
