@@ -463,7 +463,6 @@ def _expected_continuation_mode(
     )
 
 
-
 def _expected_resume_guarantee(continuation_mode: str) -> tuple[str, str, bool]:
     if continuation_mode == "exact_replay":
         return (
@@ -490,6 +489,7 @@ def _expected_resume_guarantee(continuation_mode: str) -> tuple[str, str, bool]:
             False,
         )
     return ("no_resume_guarantee", "none", False)
+
 
 def expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
     """Build resume-contract expectations for manifest diagnostics."""

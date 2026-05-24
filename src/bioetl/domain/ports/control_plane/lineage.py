@@ -22,6 +22,10 @@ class LineageStorePort(Protocol):
         """Load a lineage fragment by identifier."""
         ...
 
+    def get_occurrence(self, fragment_id: str) -> LineageGraphFragment | None:
+        """Load one stored occurrence fragment id without semantic fallback."""
+        ...
+
     def list_by_run_id(self, run_id: RunID) -> list[LineageGraphFragment]:
         """Return fragments linked to one run identifier."""
         ...

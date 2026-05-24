@@ -208,9 +208,7 @@ def _iter_text_files(root: Path) -> list[Path]:
 
 def _iter_text_files_with_rg(root: Path) -> list[Path]:
     globs = [
-        pattern
-        for suffix in sorted(_TEXT_SUFFIXES)
-        for pattern in ("-g", f"*{suffix}")
+        pattern for suffix in sorted(_TEXT_SUFFIXES) for pattern in ("-g", f"*{suffix}")
     ]
     try:
         result = subprocess.run(
@@ -630,7 +628,10 @@ def _direct_metric_name(
 
 def _collector_base_metric_expr(node: ast.Call) -> ast.expr | None:
     func = node.func
-    if not isinstance(func, ast.Attribute) or func.attr not in _DIRECT_COLLECTOR_TERMINAL_METHODS:
+    if (
+        not isinstance(func, ast.Attribute)
+        or func.attr not in _DIRECT_COLLECTOR_TERMINAL_METHODS
+    ):
         return None
     if isinstance(func.value, ast.Call):
         labels_call = func.value
@@ -797,14 +798,21 @@ def _scan_runtime_metric_file(
     import_binding_cache: dict[Path, dict[str, str]],
     repo_attribute_bindings: dict[str, str] | None = None,
     preloaded_text: str | None = None,
-) -> tuple[
-    str,
-    set[str],
-    set[str],
-    set[str],
-    list[tuple[str, frozenset[str] | None, int]],
-] | None:
-    text = preloaded_text if preloaded_text is not None else _read_runtime_candidate_text(path)
+) -> (
+    tuple[
+        str,
+        set[str],
+        set[str],
+        set[str],
+        list[tuple[str, frozenset[str] | None, int]],
+    ]
+    | None
+):
+    text = (
+        preloaded_text
+        if preloaded_text is not None
+        else _read_runtime_candidate_text(path)
+    )
     if text is None:
         return None
     try:
@@ -1115,7 +1123,9 @@ def _observed_runtime_series_counts() -> dict[str, int]:
                     ):
                         continue
                     observed_labelsets.add(
-                        tuple(sorted((str(k), str(v)) for k, v in sample.labels.items()))
+                        tuple(
+                            sorted((str(k), str(v)) for k, v in sample.labels.items())
+                        )
                     )
             counts[metric_name] = len(observed_labelsets)
     return counts
@@ -1173,9 +1183,7 @@ def collect_metric_inventory(
         alias_mentions,
         label_contract_violations,
         label_contract_unresolved,
-    ) = (
-        _scan_runtime_metric_calls(repo_root)
-    )
+    ) = _scan_runtime_metric_calls(repo_root)
     label_contract_unresolved = _filter_declared_label_contract_metrics(
         label_contract_unresolved,
         declared_label_contract_metrics,
@@ -1204,7 +1212,9 @@ def collect_metric_inventory(
     dead_metrics = registry_only_metrics - docs_set - rules_set
     documented_without_runtime = (docs_set & runtime_registered_set) - runtime_set
     ruled_without_runtime = (rules_set & runtime_registered_set) - runtime_set
-    combined_emitters = _combine_metric_emitters(runtime_mentions, helper_backed_mentions)
+    combined_emitters = _combine_metric_emitters(
+        runtime_mentions, helper_backed_mentions
+    )
     runtime_cardinality_review_required = sorted(
         metric_name
         for metric_name, emitter_paths in combined_emitters.items()
@@ -1251,9 +1261,7 @@ def collect_metric_inventory(
         "runtime_cardinality_threshold_violations": (
             runtime_cardinality_threshold_violations
         ),
-        "declared_risky_label_review_required": (
-            declared_risky_label_review_required
-        ),
+        "declared_risky_label_review_required": (declared_risky_label_review_required),
         "declared_label_contract_metrics": sorted(declared_label_contract_metrics),
         "runtime_label_contract_violations": label_contract_violations,
         "runtime_label_contract_unresolved": label_contract_unresolved,
@@ -1478,7 +1486,9 @@ def _write_evidence_report(
 ) -> None:
     if evidence_path is None:
         return
-    resolved_path = evidence_path if evidence_path.is_absolute() else repo_root / evidence_path
+    resolved_path = (
+        evidence_path if evidence_path.is_absolute() else repo_root / evidence_path
+    )
     resolved_path.parent.mkdir(parents=True, exist_ok=True)
     resolved_path.write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n",
@@ -1487,7 +1497,9 @@ def _write_evidence_report(
 
 
 def _resolved_allowlist_path(repo_root: Path, allowlist_path: Path) -> Path:
-    return allowlist_path if allowlist_path.is_absolute() else repo_root / allowlist_path
+    return (
+        allowlist_path if allowlist_path.is_absolute() else repo_root / allowlist_path
+    )
 
 
 def _metric_inventory_violations(
