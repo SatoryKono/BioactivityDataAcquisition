@@ -700,9 +700,47 @@ def test_build_diagnostics_summary_distinguishes_resume_only_runs() -> None:
         summary["resume_contract"]["continuation_mode"]
         == "checkpoint_snapshot_only_resume"
     )
+    assert (
+        summary["resume_contract"]["resume_guarantee"]
+        == "compatibility_checked_checkpoint_snapshot_resume"
+    )
+    assert summary["resume_contract"]["resume_evidence_source"] == "checkpoint_snapshot"
+    assert summary["resume_contract"]["ledger_suffix_replay"] is False
     assert summary["input_snapshot_count"] == 0
     assert summary["snapshot_status"] == "none"
     assert summary["input_snapshots"] == []
+
+
+def test_build_diagnostics_summary_distinguishes_composite_resume_guarantee() -> None:
+    base_manifest = _make_manifest()
+    manifest = replace(
+        base_manifest,
+        provider="composite",
+        entity="composite_activity",
+        launch_context={
+            **base_manifest.launch_context,
+            "execution_context": "composite",
+            "resume": True,
+            "exact_replay": False,
+        },
+        replay_capability=ReplayCapability.RESUME_ONLY,
+    )
+
+    summary = build_diagnostics_summary(manifest, ())
+
+    assert summary["continuation_mode"] == (
+        "checkpoint_snapshot_plus_ledger_suffix_resume"
+    )
+    assert summary["resume_contract"]["resume_mode"] == (
+        "checkpoint_snapshot_plus_ledger_suffix"
+    )
+    assert summary["resume_contract"]["resume_guarantee"] == (
+        "bounded_composite_reconstructive_resume"
+    )
+    assert summary["resume_contract"]["resume_evidence_source"] == (
+        "checkpoint_snapshot_plus_ledger_suffix"
+    )
+    assert summary["resume_contract"]["ledger_suffix_replay"] is True
 
 
 def test_build_diagnostics_summary_classifies_full_scan_idempotent_rebuild() -> None:
@@ -722,6 +760,15 @@ def test_build_diagnostics_summary_classifies_full_scan_idempotent_rebuild() -> 
         summary["resume_contract"]["continuation_mode"]
         == "full_scan_idempotent_rebuild"
     )
+    assert (
+        summary["resume_contract"]["resume_guarantee"]
+        == "idempotent_rebuild_not_checkpoint_resume"
+    )
+    assert (
+        summary["resume_contract"]["resume_evidence_source"]
+        == "full_scan_content_hash_deduplication"
+    )
+    assert summary["resume_contract"]["ledger_suffix_replay"] is False
 
 
 def test_build_diagnostics_summary_surfaces_required_profile_gap() -> None:

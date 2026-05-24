@@ -422,6 +422,14 @@ The supported resume contract is intentionally dual-mode:
 - full-scan pipelines block checkpoint resume and should be diagnosed as
   idempotent rebuilds with Silver `content_hash` deduplication.
 
+Resume guarantees in `resume_contract` are machine-readable: ordinary
+`checkpoint_snapshot_only_resume` reports
+`compatibility_checked_checkpoint_snapshot_resume`; composite
+`checkpoint_snapshot_plus_ledger_suffix_resume` reports
+`bounded_composite_reconstructive_resume`; exact replay reports
+`strict_evidence_boundary_exact_replay`. The `ledger_suffix_replay` flag should
+be true only for the composite bounded reconstructive path.
+
 Composite resume currently follows a checkpoint snapshot + ledger suffix replay
 model.
 
@@ -689,6 +697,9 @@ than silently accepting the bundle as canonical.
   `full_scan_idempotent_rebuild`, and `rebuild_only` as distinct operational
   states. In particular, ordinary checkpoint resume is not composite ledger
   suffix replay, and `full_scan_idempotent_rebuild` is not checkpoint resume.
+- `resume_contract.resume_guarantee`, `resume_contract.resume_evidence_source`,
+  and `resume_contract.ledger_suffix_replay` expose the same distinction in a
+  machine-readable form for automation.
 - `alert_signals.immutable_input_snapshot_gap=true` means the run is still on
   the ordinary source boundary, but immutable cached-Bronze input snapshots are
   missing, so strict exact replay cannot be claimed yet;

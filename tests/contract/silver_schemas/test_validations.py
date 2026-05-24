@@ -53,9 +53,6 @@ class TestRegexValidations:
         Pattern: ^CHEMBL[0-9]+$
         Examples: CHEMBL25, CHEMBL1234567
         """
-        if not schema_name.startswith("chembl_"):
-            pytest.skip(f"{schema_name} is not a ChEMBL schema")
-
         schema_class = SILVER_SCHEMAS[schema_name]
         fields = extract_field_metadata(schema_class)
 
@@ -92,7 +89,7 @@ class TestRegexValidations:
                         "Expected: ^CHEMBL[0-9]+$"
                     )
 
-    @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
+    @pytest.mark.parametrize("schema_name", STRING_PMID_SCHEMAS)
     def test_pmid_pattern_if_present(self, schema_name: str) -> None:
         """PMID fields MUST have numeric validation.
 
@@ -100,12 +97,6 @@ class TestRegexValidations:
         """
         schema_class = SILVER_SCHEMAS[schema_name]
         fields = extract_field_metadata(schema_class)
-
-        if "pmid" not in fields:
-            pytest.skip(f"{schema_name} has no pmid field")
-
-        if "str" not in fields["pmid"]["dtype"].lower():
-            pytest.skip(f"{schema_name}.pmid is not a string field")
 
         checks = fields["pmid"].get("checks", [])
         has_regex = any("regex" in c for c in checks)
@@ -170,21 +161,15 @@ class TestRangeValidations:
                     f"{schema_name}.{field}: Percentage missing upper bound (le=100)."
                 )
 
-    @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
+    @pytest.mark.parametrize("schema_name", PCHEMBL_VALUE_SCHEMAS)
     def test_pchembl_value_range(self, schema_name: str) -> None:
         """pChEMBL value MUST be in range 0-14.
 
         pChEMBL = -log10(molar IC50, XC50, EC50, etc.)
         Typical range: 3-12, theoretical max: ~14
         """
-        if schema_name != "chembl_activity":
-            pytest.skip(f"{schema_name} has no pchembl_value")
-
         schema_class = SILVER_SCHEMAS[schema_name]
         fields = extract_field_metadata(schema_class)
-
-        if "pchembl_value" not in fields:
-            pytest.skip("pchembl_value field not found")
 
         checks = fields["pchembl_value"].get("checks", [])
         check_types = {c.get("type") for c in checks}

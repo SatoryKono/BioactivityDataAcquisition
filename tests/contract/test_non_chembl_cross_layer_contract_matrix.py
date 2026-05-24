@@ -55,6 +55,13 @@ GOLD_SCHEMA_REGISTRY: dict[str, type[pa.DataFrameModel]] = {
     "uniprot_idmapping": UniProtIDMappingGoldSchema,
     "uniprot_protein": UniProtProteinGoldSchema,
 }
+GOLD_OPTIONAL_FIXTURE_FIELDS: frozenset[tuple[str, str]] = frozenset(
+    {
+        # OpenAlex keeps Crossref's raw provider type only for upstream
+        # normalization evidence; Gold ships the unified publication type.
+        ("openalex_publication", "type_crossref"),
+    }
+)
 
 
 def _load_fixture() -> dict[str, Any]:
@@ -148,7 +155,8 @@ def test_non_chembl_observed_value_fixture_has_cross_layer_field_coverage() -> N
             assert field_name in config_fields, f"{pipeline_name}.{field_name}: config"
             assert field_name in silver_fields, f"{pipeline_name}.{field_name}: Silver"
             assert field_name in domain_fields, f"{pipeline_name}.{field_name}: domain"
-            assert field_name in gold_fields, f"{pipeline_name}.{field_name}: Gold"
+            if (pipeline_name, field_name) not in GOLD_OPTIONAL_FIXTURE_FIELDS:
+                assert field_name in gold_fields, f"{pipeline_name}.{field_name}: Gold"
             assert (pipeline_name, field_name) in rows_by_key, (
                 f"{pipeline_name}.{field_name}: generated matrix"
             )
@@ -571,9 +579,7 @@ def test_target_composite_excludes_no_legacy_uniprot_aliases() -> None:
     target_config = yaml.safe_load(
         Path("configs/composites/target.yaml").read_text(encoding="utf-8")
     )
-    excludes = set(
-        target_config["composite"]["merge"]["field_selection"]["exclude_fields"]
-    )
+    excludes = set(target_config["composite"]["merge"]["exclude_fields"])
 
     assert "uniprot.protein.organism_id" not in excludes
     assert "uniprot.protein.gene_names" not in excludes

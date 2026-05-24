@@ -199,6 +199,14 @@ The supported resume model is intentionally dual-mode:
   while `composite_run_identity` remains occurrence-scoped auxiliary diagnostic
   evidence and must not override a matching canonical execution identity.
 
+The diagnostics contract must publish the resulting guarantee explicitly:
+ordinary `checkpoint_snapshot_only_resume` maps to
+`compatibility_checked_checkpoint_snapshot_resume`, while composite
+`checkpoint_snapshot_plus_ledger_suffix_resume` maps to
+`bounded_composite_reconstructive_resume`. Exact replay remains the separate
+`strict_evidence_boundary_exact_replay` guarantee inside the supported snapshot
+boundary.
+
 ADR-044 therefore does not require one universal replay algorithm across all
 runner families. The stability requirement is a shared control-plane contract,
 not identical resume internals.

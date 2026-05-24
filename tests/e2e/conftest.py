@@ -18,6 +18,7 @@ import asyncio
 import json
 import os
 import shutil
+import tempfile
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from dataclasses import replace
