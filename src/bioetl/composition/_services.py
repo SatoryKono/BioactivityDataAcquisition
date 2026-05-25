@@ -87,9 +87,7 @@ _BOOTSTRAP_EXPORT_MODULES: dict[str, str] = {
     "bootstrap_metrics_service": "bioetl.composition.bootstrap.cli.metrics",
     "bootstrap_observability_workflow_service": "bioetl.composition.bootstrap.cli.checkpoint",
     "bootstrap_pipeline_runner_service": "bioetl.composition.bootstrap.runtime.runner",
-    "bootstrap_quarantine_adapter": (
-        "bioetl.composition.bootstrap.assembly.checkpoint"
-    ),
+    "bootstrap_quarantine_adapter": "bioetl.composition.bootstrap.assembly.checkpoint",
     "bootstrap_quarantine_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
     "bootstrap_run_manifest_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
     "bootstrap_vacuum_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
@@ -110,11 +108,6 @@ def _invoke_bootstrap(name: str, *args: object, **kwargs: object) -> object:
     return bootstrap_fn(*args, **kwargs)
 
 
-def _resolve_bootstrap_callable(name: str) -> Callable[[], object]:
-    """Resolve dynamically exported bootstrap hooks as zero-arg callables."""
-    return cast("Callable[[], object]", resolve_bootstrap_attr(name))
-
-
 def _ensure_registrations(
     registry: PipelineRegistry | None = None,
     *,
@@ -131,9 +124,7 @@ def _ensure_provider_registrations() -> None:
     _ensure_registrations(scope="providers")
 
 
-def _ensure_pipeline_registrations(
-    registry: PipelineRegistry | None = None,
-) -> None:
+def _ensure_pipeline_registrations(registry: PipelineRegistry | None = None) -> None:
     """Ensure full provider and pipeline factory registration."""
     _ensure_registrations(registry=registry, scope="pipelines")
 
@@ -141,17 +132,13 @@ def _ensure_pipeline_registrations(
 def get_checkpoint_service() -> CheckpointService:
     """Get checkpoint administration service."""
     _ensure_provider_registrations()
-    return cast(
-        "CheckpointService",
-        _invoke_bootstrap("bootstrap_checkpoint_service"),
-    )
+    return cast("CheckpointService", _invoke_bootstrap("bootstrap_checkpoint_service"))
 
 
 def get_audit_service() -> AuditInspectionService:
     """Get an audit inspection service for operator diagnostics operations."""
     _ensure_provider_registrations()
-    bootstrap = _resolve_bootstrap_callable("bootstrap_audit_inspection_service")
-    return cast("AuditInspectionService", bootstrap())
+    return cast("AuditInspectionService", _invoke_bootstrap("bootstrap_audit_inspection_service"))
 
 
 def get_quarantine_service() -> QuarantineService:
@@ -160,19 +147,13 @@ def get_quarantine_service() -> QuarantineService:
     Quarantine admin/explorer operations read shared storage directly and do not
     require provider or pipeline registration before bootstrap.
     """
-    return cast(
-        "QuarantineService",
-        _invoke_bootstrap("bootstrap_quarantine_service"),
-    )
+    return cast("QuarantineService", _invoke_bootstrap("bootstrap_quarantine_service"))
 
 
 def get_bronze_cleanup_service() -> BronzeCleanupService:
     """Get Bronze cleanup service."""
     _ensure_provider_registrations()
-    return cast(
-        "BronzeCleanupService",
-        _invoke_bootstrap("bootstrap_bronze_cleanup_service"),
-    )
+    return cast("BronzeCleanupService", _invoke_bootstrap("bootstrap_bronze_cleanup_service"))
 
 
 def get_vacuum_service() -> VacuumService:
@@ -210,10 +191,7 @@ def get_pipeline_runner_service(
 ) -> PipelineRunnerService:
     """Get universal pipeline runner service."""
     _ensure_pipeline_registrations(registry=registry)
-    return cast(
-        "PipelineRunnerService",
-        _invoke_bootstrap("bootstrap_pipeline_runner_service", registry=registry),
-    )
+    return cast("PipelineRunnerService", _invoke_bootstrap("bootstrap_pipeline_runner_service", registry=registry))
 
 
 def get_workflow_runner_service(
@@ -261,59 +239,43 @@ def get_config_service() -> object:
 def get_contract_migration_service() -> object:
     """Get the contract migration planner service."""
     _ensure_provider_registrations()
-    bootstrap = cast(
-        "Callable[[], object]",
-        resolve_bootstrap_attr("bootstrap_contract_migration_service"),
-    )
-    return bootstrap()
+    return _invoke_bootstrap("bootstrap_contract_migration_service")
 
 
 def get_run_manifest_service() -> RunManifestInspectionService:
     """Get a run-manifest inspection service for control-plane operations."""
     _ensure_provider_registrations()
-    bootstrap = _resolve_bootstrap_callable("bootstrap_run_manifest_service")
-    return cast("RunManifestInspectionService", bootstrap())
+    return cast("RunManifestInspectionService", _invoke_bootstrap("bootstrap_run_manifest_service"))
 
 
 def get_forensic_run_diff_service() -> ForensicRunDiffService:
     """Get a unified forensic run-diff service for control-plane diagnostics."""
     _ensure_provider_registrations()
-    bootstrap = _resolve_bootstrap_callable("bootstrap_forensic_run_diff_service")
-    return cast("ForensicRunDiffService", bootstrap())
+    return cast("ForensicRunDiffService", _invoke_bootstrap("bootstrap_forensic_run_diff_service"))
 
 
 def get_historical_replay_corpus_service() -> HistoricalReplayCorpusService:
     """Get retained-corpus historical replay workflows for CLI operations."""
     _ensure_provider_registrations()
-    bootstrap = _resolve_bootstrap_callable(
-        "bootstrap_historical_replay_corpus_service"
-    )
-    return cast("HistoricalReplayCorpusService", bootstrap())
+    return cast("HistoricalReplayCorpusService", _invoke_bootstrap("bootstrap_historical_replay_corpus_service"))
 
 
 def get_historical_replay_closure_service() -> HistoricalReplayClosureService:
     """Get retained-corpus closure reporting workflows for CLI operations."""
     _ensure_provider_registrations()
-    bootstrap = _resolve_bootstrap_callable(
-        "bootstrap_historical_replay_closure_service"
-    )
-    return cast("HistoricalReplayClosureService", bootstrap())
+    return cast("HistoricalReplayClosureService", _invoke_bootstrap("bootstrap_historical_replay_closure_service"))
 
 
 def get_historical_replay_universe_service() -> HistoricalReplayUniverseService:
     """Get full-universe historical replay workflows for CLI operations."""
     _ensure_provider_registrations()
-    bootstrap = _resolve_bootstrap_callable(
-        "bootstrap_historical_replay_universe_service"
-    )
-    return cast("HistoricalReplayUniverseService", bootstrap())
+    return cast("HistoricalReplayUniverseService", _invoke_bootstrap("bootstrap_historical_replay_universe_service"))
 
 
 def get_lineage_service() -> LineageInspectionService:
     """Get a lineage inspection service for traceability operations."""
     _ensure_provider_registrations()
-    bootstrap = _resolve_bootstrap_callable("bootstrap_lineage_service")
-    return cast("LineageInspectionService", bootstrap())
+    return cast("LineageInspectionService", _invoke_bootstrap("bootstrap_lineage_service"))
 
 
 def get_health_service() -> HealthService:
@@ -325,8 +287,7 @@ def get_health_service() -> HealthService:
 def get_observability_workflow_service() -> ObservabilityWorkflowService:
     """Get workflow-level observability diagnostics helpers."""
     _ensure_provider_registrations()
-    bootstrap = _resolve_bootstrap_callable("bootstrap_observability_workflow_service")
-    return cast("ObservabilityWorkflowService", bootstrap())
+    return cast("ObservabilityWorkflowService", _invoke_bootstrap("bootstrap_observability_workflow_service"))
 
 
 def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
