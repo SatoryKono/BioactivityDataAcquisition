@@ -401,7 +401,6 @@ class TestRecordProcessorProcessBatch:
     async def test_dq_thresholds_follow_yaml_hard_fail(
         self,
         tmp_path,
-        monkeypatch,
         mock_services,
         mock_error_classifier,
         mock_context,
@@ -411,10 +410,12 @@ class TestRecordProcessorProcessBatch:
 
         pipeline_name = "tmp_pipeline"
         _write_temp_pipeline_config(tmp_path, pipeline_name, 0.1, 0.4)
-        monkeypatch.chdir(tmp_path)
         get_pipeline_config.cache_clear()
 
-        config = get_pipeline_config(pipeline_name)
+        config = get_pipeline_config(
+            pipeline_name,
+            config_root=str(tmp_path / "configs"),
+        )
 
         async def transform(ctx, record, index):
             await asyncio.sleep(0)
@@ -453,7 +454,6 @@ class TestRecordProcessorProcessBatch:
     async def test_dq_thresholds_follow_yaml_soft_threshold_prevents_warning(
         self,
         tmp_path,
-        monkeypatch,
         mock_services,
         mock_error_classifier,
         mock_context,
@@ -463,10 +463,12 @@ class TestRecordProcessorProcessBatch:
 
         pipeline_name = "tmp_pipeline_alt"
         _write_temp_pipeline_config(tmp_path, pipeline_name, 0.8, 0.95)
-        monkeypatch.chdir(tmp_path)
         get_pipeline_config.cache_clear()
 
-        config = get_pipeline_config(pipeline_name)
+        config = get_pipeline_config(
+            pipeline_name,
+            config_root=str(tmp_path / "configs"),
+        )
 
         async def transform(ctx, record, index):
             await asyncio.sleep(0)
