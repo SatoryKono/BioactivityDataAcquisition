@@ -66,6 +66,8 @@ def _iter_legacy_wrapper_mentions() -> list[str]:
         patterns=tuple(sorted(_LEGACY_ROOT_WRAPPER_PATHS)),
         paths=_GIT_SCAN_PATHS,
         excluded_prefixes=_SKIPPED_PATH_PREFIXES,
+        suffixes=_SCANNED_SUFFIXES,
+        timeout=10.0,
     )
 
     violations: list[str] = []

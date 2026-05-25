@@ -14,7 +14,7 @@ def normalize_required_persistence_profile(required_profile: object) -> str:
         if required_profile is not None
         else DEFAULT_REQUIRED_PERSISTENCE_PROFILE
     )
-    return profile or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+    return (profile or DEFAULT_REQUIRED_PERSISTENCE_PROFILE).replace("-", "_")
 
 
 def _uses_family_strict_floor(

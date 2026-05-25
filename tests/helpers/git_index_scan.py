@@ -22,6 +22,7 @@ def git_grep_fixed(
     patterns: tuple[str, ...],
     paths: tuple[str, ...],
     excluded_prefixes: tuple[str, ...] = (),
+    suffixes: tuple[str, ...] = (),
     timeout: float = 30.0,
 ) -> tuple[GitGrepMatch, ...]:
     """Run bounded ``git grep -F`` over tracked files only.
@@ -33,19 +34,29 @@ def git_grep_fixed(
     for pattern in patterns:
         command.extend(("-e", pattern))
     command.append("--")
-    command.extend(paths)
+    if suffixes:
+        command.extend(
+            f":(glob){path}/**/*{suffix}" for path in paths for suffix in suffixes
+        )
+    else:
+        command.extend(paths)
     command.extend(f":(exclude){prefix}**" for prefix in excluded_prefixes)
 
-    result = subprocess.run(
-        command,
-        cwd=root,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        check=False,
-        timeout=timeout,
-    )
+    try:
+        result = subprocess.run(
+            command,
+            cwd=root,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise AssertionError(
+            f"git grep scan timed out after {timeout:.1f}s: {command!r}"
+        ) from exc
     if result.returncode == 1:
         return ()
     if result.returncode != 0:
@@ -65,18 +76,24 @@ def git_tracked_files(
     root: Path,
     paths: tuple[str, ...],
     suffixes: tuple[str, ...] = (),
+    timeout: float = 30.0,
 ) -> tuple[Path, ...]:
     """Return tracked files under ``paths`` without walking the filesystem."""
-    result = subprocess.run(
-        ["git", "ls-files", "--", *paths],
-        cwd=root,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        check=False,
-        timeout=timeout,
-    )
+    try:
+        result = subprocess.run(
+            ["git", "ls-files", "--", *paths],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise AssertionError(
+            f"git ls-files scan timed out after {timeout:.1f}s: {paths!r}"
+        ) from exc
     if result.returncode != 0:
         raise AssertionError(
             "git ls-files scan failed with exit code "

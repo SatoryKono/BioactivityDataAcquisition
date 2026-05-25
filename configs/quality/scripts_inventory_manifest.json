@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-25T05:11:58.000604+00:00",
+  "generated_at": "2026-05-25T07:40:37.714539+00:00",
   "summary": {
     "total_scripts": 396,
     "status_counts": {
@@ -2974,7 +2974,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
-          "line": 288,
+          "line": 292,
           "source_group": "docs",
           "text": "python -m scripts.diagrams check quality-gates"
         }
@@ -7548,7 +7548,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
-          "line": 267,
+          "line": 271,
           "source_group": "docs",
           "text": "python -m scripts.engineering.qa check-c901"
         },
@@ -7560,7 +7560,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-plan-bot.md",
-          "line": 251,
+          "line": 253,
           "source_group": "docs",
           "text": "python -m scripts.engineering.qa check-c901 --mode report"
         },
@@ -7716,7 +7716,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
-          "line": 268,
+          "line": 272,
           "source_group": "docs",
           "text": "python -m scripts.engineering.qa check-naming-pkg --check"
         },
@@ -9261,7 +9261,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 50,
+      "reference_count": 51,
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -9468,13 +9468,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
-          "line": 273,
+          "line": 277,
           "source_group": "docs",
           "text": "python -m scripts.engineering.repo check-catalog"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-plan-bot.md",
-          "line": 262,
+          "line": 264,
           "source_group": "docs",
           "text": "python -m scripts.engineering.repo check-catalog"
         },
@@ -9537,13 +9537,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
-          "line": 272,
+          "line": 276,
           "source_group": "docs",
           "text": "python -m scripts.engineering.repo check-inventory --check"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-plan-bot.md",
-          "line": 261,
+          "line": 263,
           "source_group": "docs",
           "text": "python -m scripts.engineering.repo check-inventory --check"
         },
@@ -10079,13 +10079,13 @@
         },
         {
           "path": "docs/05-operations/01-monitoring-guide.md",
-          "line": 502,
+          "line": 509,
           "source_group": "docs",
           "text": "python -m scripts.ops check-observability-ports --json"
         },
         {
           "path": "docs/05-operations/01-monitoring-guide.md",
-          "line": 560,
+          "line": 567,
           "source_group": "docs",
           "text": "1. Запустите `python -m scripts.ops check-observability-ports --json`."
         },
