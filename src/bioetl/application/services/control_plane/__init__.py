@@ -1,4 +1,9 @@
-"""Canonical control-plane service seams."""
+"""Canonical control-plane service seams.
+
+Responsibility-focused subpackage facades are available under:
+`manifest`, `ledger`, `replay`, `effective_config`, and `workflow`.
+The package root remains the compatibility-preserving lazy export surface.
+"""
 
 from __future__ import annotations
 

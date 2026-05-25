@@ -188,7 +188,7 @@ src/bioetl/
 
 **Ключевые ограничения** (детали в `RULES.md` §1.1):
 
-- **Матрица импортов**: `domain` ← `application` ← `composition` → `infrastructure`; `interfaces` может импортировать всё
+- **Матрица импортов**: `domain` ← `application` ← `composition` → `infrastructure`; `interfaces` может импортировать `domain`, `application` и `composition`, но не `infrastructure` напрямую
 - **Нарушение = Блокер PR**. Проверяется `import-linter` и `tests/architecture/`
 - **DI**: Зависимости передаются в конструктор. `composition/bootstrap/` — единственное место сборки
 

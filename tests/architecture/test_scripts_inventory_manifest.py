@@ -5,7 +5,8 @@ from __future__ import annotations
 import json
 
 import pytest
-from tests.helpers import repo_root, run_repo_python
+from scripts.engineering.repo import __main__ as repo_router
+from tests.helpers import assert_router_python_command, repo_root, run_repo_python
 
 
 def test_scripts_inventory_manifest_exists_and_has_required_keys() -> None:
@@ -30,16 +31,24 @@ def test_scripts_inventory_manifest_exists_and_has_required_keys() -> None:
     assert "status_counts" in summary
 
 
+def test_scripts_inventory_dispatcher_targets_canonical_checker() -> None:
+    """Router command and architecture guard must exercise the same checker."""
+    assert_router_python_command(
+        repo_router,
+        "check-inventory",
+        expected_target="check_scripts_inventory.py",
+    )
+
+
 @pytest.mark.slow
 @pytest.mark.timeout(600)
 def test_scripts_inventory_manifest_drift_check_passes() -> None:
-    """Committed manifest must match current scripts inventory."""
+    """Committed manifest must match current scripts inventory via the router."""
     root = repo_root()
-    script_path = (
-        root / "scripts" / "engineering" / "repo" / "check_scripts_inventory.py"
-    )
     result = run_repo_python(
-        str(script_path),
+        "-m",
+        "scripts.engineering.repo",
+        "check-inventory",
         "--check",
         "--manifest",
         "configs/quality/scripts_inventory_manifest.json",
@@ -51,5 +60,5 @@ def test_scripts_inventory_manifest_drift_check_passes() -> None:
         "Scripts inventory drift check failed.\n"
         f"stdout:\n{result.stdout}\n"
         f"stderr:\n{result.stderr}\n"
-        "Run scripts/engineering/repo/check_scripts_inventory.py --update to refresh manifest."
+        "Run python -m scripts.engineering.repo sync-inventory to refresh manifest."
     )

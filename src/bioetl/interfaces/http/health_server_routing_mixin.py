@@ -165,7 +165,7 @@ class HealthServerRoutingMixin:
         if value is None:
             return False
         normalized = value.strip()
-        return normalized in {"All", "$__all"}
+        return normalized in {"All", "$__all", "__all", "*"}
 
     def _read_optional_scope_param(
         self,

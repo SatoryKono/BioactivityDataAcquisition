@@ -191,6 +191,7 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
         "bioetl-provider-health-v2.json": {
             "Monitor GLOBAL Provider Severity Matrix": "bioetl_provider_current_status",
             "Inspect Provider Top Causes": "bioetl_provider_current_cause",
+            "Monitor Provider Telemetry Freshness": "bioetl_provider_current_status",
         },
         "bioetl-dq-v2.json": {
             "Monitor DQ Current Status": "bioetl_dq_current_status",
@@ -306,6 +307,7 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
         "bioetl-provider-health-v2.json": [
             "Monitor GLOBAL Provider Severity Matrix",
             "Inspect Provider Top Causes",
+            "Monitor Provider Telemetry Freshness",
         ],
         "bioetl-dq-v2.json": [
             "Monitor DQ Current Status",

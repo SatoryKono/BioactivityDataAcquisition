@@ -138,6 +138,18 @@ def resolve_effective_required_persistence_profile(
     )
 
 
+def is_degraded_observable_profile_requested(
+    required_persistence_profile: object,
+) -> bool:
+    """Return whether a launch explicitly requested the local degraded floor."""
+    if required_persistence_profile is None:
+        return False
+    profile_text = str(required_persistence_profile).strip()
+    if not profile_text:
+        return False
+    return normalize_required_persistence_profile(profile_text) == "degraded_observable"
+
+
 def assess_reproducibility_policy(
     *,
     source_refs: tuple[RunSourceRef, ...],
@@ -206,6 +218,7 @@ __all__ = [
     "assess_reproducibility_policy",
     "build_snapshot_envelope_status",
     "is_critical_reproducibility_runtime",
+    "is_degraded_observable_profile_requested",
     "normalize_required_persistence_profile",
     "resolve_effective_required_persistence_profile",
     "resolve_replay_capability",

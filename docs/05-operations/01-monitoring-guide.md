@@ -290,6 +290,10 @@ tracing-backed log hygiene живёт в collapsed row
   projection пуста, трактуйте это как explainability gap и проверяйте raw
   provider status plus optional rate-limit/circuit-breaker telemetry before
   replay or escalation.
+- **Monitor Provider Telemetry Freshness**: first-screen trust marker for
+  `bioetl_provider_current_status`; `0=OK`, `1=WARN`, `null=UNKNOWN`.
+  WARN here means no current-status samples in the last 15m, so an empty
+  severity matrix is a telemetry gap, not proof that providers are healthy.
 - **Monitor Current Provider Health Status**: table panel по
   `bioetl_provider_health_status{provider}` с fail-closed fallback через
   provider universe и явным mapping: `0=UNHEALTHY`, `1=DEGRADED`,
@@ -336,9 +340,11 @@ tracing-backed log hygiene живёт в collapsed row
   as `WARN` or `UNKNOWN`, not as unconditional green.
 - **Current-context row below the answer row**: `Monitor: Data Quality Score
   (Volume-weighted)`, `Monitor: Worst-Entity DQ Score`,
-  `Monitor: Worst Data Freshness Lag (seconds)`, `Track: Records Quarantined in Range`,
-  `Track: Soft Threshold Exceeded in Range` и `Track: Silver Filter Rejects in Range`
-  дают compact supporting context до перехода к full-width historical evidence.
+  `Monitor: Worst Data Freshness Lag (seconds)`, `Review: Latest Successful Data Timestamp`,
+  `Track: Records Quarantined in Range`, `Track: Soft Threshold Exceeded in Range`
+  и `Track: Silver Filter Rejects in Range` дают compact supporting context до
+  перехода к full-width historical evidence. Latest timestamp остаётся
+  supporting freshness anchor и не должен визуально маскироваться под verdict card.
 - **Track Range Evidence: Bronze -> Silver -> Gold**: полноширинный
   selected-range flow panel ниже current-context row.
 - **Monitor: Silver Validation Failures / Gold Strict Validation Failures / DQ Impact on Deliverability**:
@@ -346,15 +352,16 @@ tracing-backed log hygiene живёт в collapsed row
 - **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы. `Worst Data
   Freshness Lag (seconds)` теперь показывает самый stale entity в выбранном
   scope через `max(time() - bioetl_data_freshness_seconds)`, а
-  `Review: Latest Successful Data Timestamp` остаётся отдельным latest-success anchor.
-  Это intentionally разные сигналы: latest success не должен маскировать worst
-  freshness lag.
+  `Review: Latest Successful Data Timestamp` остаётся latest-success anchor
+  внутри compact current-context band. Это intentionally разные сигналы:
+  latest success не должен маскировать worst freshness lag.
 - **Drilldown**: navigation bus `0. Control Plane`, `1. Overview`,
   `2. Runtime`, `3. Provider Health`, `5. Workflow`, `Silver Reject Explorer`,
   `Explore Logs`, `Explore Traces`. Panel-level dashboard handoffs запрещены:
   replay/checkpoint traceability открывается через `0. Control Plane` в
   top-level шине.
-  Tempo handoff уже ограничен текущими `$pipeline/$run_type`.
+  Tempo handoff intentionally ships only bounded `$pipeline` scope; `$run_type`
+  не передаётся в TraceQL, чтобы `All` selector не схлопывался в пустой trace-search.
 
 #### Silver Reject Explorer
 

@@ -1081,6 +1081,7 @@ first screen.
 | 9101 | Monitor GLOBAL Provider Severity Matrix        | Table          | `bioetl_provider_current_status`                                                                                     | Current provider severity: `0=OK`, `1=DEGRADED`, `2=FAILING`, `null=UNKNOWN`; derived summary semantics, не фильтруется по pipeline. Raw `bioetl_provider_health_status` uses a different contract: `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`. |
 | 9102 | Inspect Critical Providers                     | Table          | `bioetl_provider_current_status >= 1`                                                                                | Только providers с current `DEGRADED`/`FAILING`; missing current-status telemetry остаётся в `Monitor GLOBAL Provider Severity Matrix` как `UNKNOWN`. Panel exposes direct provider incident runbook handoff. |
 | 9103 | Inspect Provider Top Causes                    | Table          | `topk(5, bioetl_provider_current_cause > 0)`                                                                         | Current cause chips: raw health status, failure rate, retry exhaustion, latency, HTTP errors, rate-limit pressure. This panel can stay non-empty while `Monitor GLOBAL Provider Severity Matrix` still reads `0 (OK)` because cause projection includes early-warning provider signals independent of current-status projection. Empty table means no active provider causes are currently above zero; if severity is still non-OK, treat that as an explainability gap. Panel exposes direct provider incident runbook handoff. |
+| 9104 | Monitor Provider Telemetry Freshness           | Stat           | `((count(count_over_time(bioetl_provider_current_status[15m])) > bool 0) * 0) or absent(...) * 1`                    | First-screen trust marker: `0=OK`, `1=WARN`, `null=UNKNOWN`. Missing current-status samples in the last 15m mean telemetry gap, not proof that providers are healthy. |
 | 9002 | First Action                                   | Text           | n/a                                                                                                                  | CTA block sits on the same first-screen row as `ID` and `Processed Records`, using the rightmost shared-shell slot (`w=8`, `h=6`). Review the GLOBAL severity matrix, inspect critical providers, or inspect provider top causes before leaving the dashboard. |
 | 1   | Track Health Check Latency by Provider (p95)    | Timeseries     | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__interval])))`                                       | Selected-range evidence: p95 latency trend по выбранным providers; `No data` сохраняется как diagnostic gap, не маскируется в `0s`. |
 | 114 | Monitor Current Provider Health Status          | Table          | `max by (provider) (bioetl_provider_health_status{provider=~"$provider"}) or ((bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0) / (bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0))` | Текущий raw status по provider с mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`; если provider universe существует без raw status sample, panel остаётся `UNKNOWN`. |
@@ -1757,7 +1758,8 @@ sum(rate(bioetl_circuit_breaker_success_total{adapter="chembl"}[5m]))
 
 1. какой provider сейчас `DEGRADED`/`FAILING`/`UNKNOWN`;
 2. какие providers уже вышли из нормального состояния;
-3. какая причина сейчас доминирует.
+3. какая причина сейчас доминирует;
+4. есть ли свежая current-status telemetry.
 
 Практический порядок чтения:
 
@@ -1772,6 +1774,9 @@ sum(rate(bioetl_circuit_breaker_success_total{adapter="chembl"}[5m]))
   current-status projection. Empty table means no canonical provider cause is
   currently above zero; if severity is still non-OK, treat that as an
   explainability gap and continue triage from the severity matrix.
+- `Monitor Provider Telemetry Freshness` — first-screen trust marker for
+  `bioetl_provider_current_status`; missing 15m samples mean telemetry gap, not
+  healthy provider state.
 - Ниже первого экрана идут только selected-range evidence panels:
   health-check counters, failure/degraded trends, retry exhaustion, repeated
   per-provider p95 gauge, adapter endpoint latency, HTTP error volume,
@@ -2170,7 +2175,7 @@ ______________________________________________________________________
 | 0. Control Plane          | `bioetl-control-plane-v1`       | 2            | 50 / 5        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Replay/resume safety, telemetry gap detection, terminal ledger evidence, GLOBAL read diagnostics, missing-signal markers |
 | 1. Overview               | `bioetl-overview-v2`            | 1            | 20 / 3        | 30s     | 12h        | Prometheus      | L0 broken/degraded answer and operational handoff |
 | 2. Runtime                | `bioetl-runtime`                | 2            | 34 / 4        | 30s     | 12h        | Prometheus + Quarantine Explorer identity + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
-| 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 26 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Provider latency, health, retries, failure ratios |
+| 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 28 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Provider latency, health, retries, failure ratios |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 33 / 2        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | DQ score, quarantine, freshness, validation failures |
 | 5. Workflow               | `bioetl-workflow-overview`      | 2            | 13 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Selected-range workflow run and step evidence with `First Action` in the shared shell plus collapsed step diagnostics |
 | Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 11 / 0        | 1m      | 24h        | Quarantine Explorer API | Record-level browsing and action handoff for Silver rejects |

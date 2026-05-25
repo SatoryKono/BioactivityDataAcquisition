@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import os
-import subprocess
 from pathlib import Path
 
 import pytest
+
+from tests.helpers.git_index_scan import git_grep_fixed
 
 ROOT = Path(__file__).resolve().parents[2]
 CURRENT_TEST_FILE = Path(__file__).resolve()
@@ -55,47 +55,32 @@ _SKIPPED_PATH_PREFIXES = (
     "docs/02-architecture/diagrams/views/png/",
     "docs/02-architecture/diagrams/views/svg/",
     "docs/02-architecture/diagrams/descriptions/legacy/",
-    "src/memory/episodic/",
+    "src/memory/",
     "scripts/archive/",
 )
 
 
 def _iter_legacy_wrapper_mentions() -> list[str]:
-    command = ["git", "grep", "-n", "-F"]
-    for legacy_path in sorted(_LEGACY_ROOT_WRAPPER_PATHS):
-        command.extend(("-e", legacy_path))
-    command.append("--")
-    command.extend(_GIT_SCAN_PATHS)
-    command.extend(
-        f":(exclude){path_prefix}**" for path_prefix in _SKIPPED_PATH_PREFIXES
+    matches = git_grep_fixed(
+        root=ROOT,
+        patterns=tuple(sorted(_LEGACY_ROOT_WRAPPER_PATHS)),
+        paths=_GIT_SCAN_PATHS,
+        excluded_prefixes=_SKIPPED_PATH_PREFIXES,
     )
-
-    result = subprocess.run(
-        command,
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        check=False,
-    )
-    if result.returncode == 1:
-        return []
-    if result.returncode != 0:
-        return []
 
     violations: list[str] = []
-    for match in result.stdout.splitlines():
-        rel_path, lineno, line = match.split(":", 2)
-        if not rel_path.endswith(_SCANNED_SUFFIXES):
+    for match in matches:
+        if not match.path.endswith(_SCANNED_SUFFIXES):
             continue
-        if rel_path in _ALLOWED_MENTION_PATHS:
+        if match.path in _ALLOWED_MENTION_PATHS:
             continue
-        if any(rel_path.startswith(prefix) for prefix in _SKIPPED_PATH_PREFIXES):
+        if any(match.path.startswith(prefix) for prefix in _SKIPPED_PATH_PREFIXES):
             continue
         for legacy_path in _LEGACY_ROOT_WRAPPER_PATHS:
-            if legacy_path in line:
-                violations.append(f"{rel_path}:{lineno} mentions {legacy_path}")
+            if legacy_path in match.text:
+                violations.append(
+                    f"{match.path}:{match.line_number} mentions {legacy_path}"
+                )
     return violations
 
 

@@ -439,7 +439,7 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 - **CTAs**: Review severity matrix, Inspect critical providers, Inspect provider top causes
 
 ### First-screen структура
-- **Tier 1**: `GLOBAL Provider Scope`, `Monitor GLOBAL Provider Severity Matrix`, `Inspect Critical Providers`, `Inspect Provider Top Causes`, `First Action`
+- **Tier 1**: `GLOBAL Provider Scope`, `Monitor GLOBAL Provider Severity Matrix`, `Inspect Critical Providers`, `Inspect Provider Top Causes`, `Monitor Provider Telemetry Freshness`, `First Action`
 - **Tier 2**: provider detail panels и runbook links ниже
 - **Tier 3**: selected-range evidence
 - **Tier 4**: collapsed diagnostics
@@ -450,6 +450,7 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 ### Специфические требования
 - Provider-first dashboard
 - Panel `id=114` остаётся raw source enum (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже first screen как evidence
+- Panel `id=9104` остаётся first-screen trust marker for `bioetl_provider_current_status` freshness; missing 15m samples mean telemetry gap, not healthy provider state
 - `Inspect Provider Top Causes` может быть непустой даже при `GLOBAL severity = OK` (early-warning provider signals независимо от current-status projection)
 - Если status остаётся non-OK, а canonical cause projection пуста, `Inspect Provider Top Causes` остаётся empty table (explainability gap, не healthy state)
 - Переходы из pipeline-scoped dashboards сохраняют `pipeline_context=$pipeline` и fail-close к `provider=unknown`

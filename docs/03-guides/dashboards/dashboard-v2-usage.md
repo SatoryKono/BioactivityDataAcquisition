@@ -172,10 +172,13 @@ dashboard-specific `Status` or `First Action` route.
   signals` row backed by `/ops/control-plane/identity-evidence`.
 1. `bioetl-provider-health-v2`, first-screen GLOBAL answer row:
    `GLOBAL Provider Scope`, `Monitor GLOBAL Provider Severity Matrix`,
-   `Inspect Critical Providers`, `Inspect Provider Top Causes` и `First Action`
+   `Inspect Critical Providers`, `Inspect Provider Top Causes`,
+   `Monitor Provider Telemetry Freshness` и `First Action`
    отвечают на вопрос «какой provider degraded/failing и почему». Panel `id=114`
    остаётся raw source enum (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже
-   first screen как evidence. `Inspect Provider Top Causes` может оставаться
+   first screen как evidence. `Monitor Provider Telemetry Freshness` отделяет
+   empty severity matrix от telemetry gap: если current-status samples нет за
+   15m, это не healthy state. `Inspect Provider Top Causes` может оставаться
    непустой даже при `GLOBAL severity = OK`, потому что canonical cause
    projection включает early-warning provider signals независимо от
    current-status projection; это diagnostic lead, а не самостоятельное
@@ -197,8 +200,10 @@ dashboard-specific `Status` or `First Action` route.
    not an independent second signal.
    band: `Monitor: Data Quality Score (Volume-weighted)`,
    `Monitor: Worst-Entity DQ Score`, `Monitor: Worst Data Freshness Lag (seconds)`,
-   `Track: Records Quarantined in Range`, `Track: Soft Threshold Exceeded in Range`
-   и `Track: Silver Filter Rejects in Range`. Полноширинный
+   `Review: Latest Successful Data Timestamp`, `Track: Records Quarantined in Range`,
+   `Track: Soft Threshold Exceeded in Range` и `Track: Silver Filter Rejects in Range`.
+   Latest timestamp stays a supporting freshness anchor and must not read like a
+   verdict card. Полноширинный
    `Track Range Evidence: Bronze -> Silver -> Gold` идёт ниже как
    `Review: First Action` stays the canonical DQ CTA: review current status,
    inspect current reasons, or open `Silver Reject Explorer` without leaking
@@ -437,11 +442,14 @@ Variable handoff policy for dashboard links remains strict and bounded:
   Panel `id=114` (`Monitor Current Provider Health Status`) показывает явный enum
   raw-source mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY` as below-fold
   evidence, while canonical first-screen severity remains `Status` plus
-  `Monitor GLOBAL Provider Severity Matrix`. Raw status stays fail-closed
+  `Monitor GLOBAL Provider Severity Matrix`. Panel `id=9104`
+  (`Monitor Provider Telemetry Freshness`) is the first-screen trust marker:
+  missing `bioetl_provider_current_status` samples in the last 15m mean telemetry
+  gap, not proof that providers are healthy. Raw status stays fail-closed
   `UNKNOWN`, если provider universe существует, а raw status sample отсутствует.
   
   **First 2 clicks (L1):**
-  1. Click #1: открыть `bioetl-provider-health-v2`, проверить `Monitor GLOBAL Provider Severity Matrix` (`id=9101`), `Inspect Critical Providers` (`id=9102`) и `Inspect Provider Top Causes` (`id=9103`).
+  1. Click #1: открыть `bioetl-provider-health-v2`, проверить `Monitor GLOBAL Provider Severity Matrix` (`id=9101`), `Inspect Critical Providers` (`id=9102`), `Inspect Provider Top Causes` (`id=9103`) и `Monitor Provider Telemetry Freshness` (`id=9104`).
   2. Click #2: перейти в `2. Runtime` при active degradation/failure trend или
      в `0. Control Plane` при симптомах retry exhaustion/state inconsistency.
 - `bioetl-dq-v2`: dashboard links `0. Control Plane`, `1. Overview`,
@@ -508,7 +516,8 @@ Variable handoff policy for dashboard links remains strict and bounded:
   dashboards предварительно фильтруют TraceQL по `span."bioetl.pipeline"`, а
   provider dashboard — по `span."bioetl.provider"`. `run_type` intentionally
   не шиппится в TraceQL handoff, потому что `includeAll` Grafana selector может
-  схлопнуться в пустой regex. Это не заменяет correlation по `trace_id` /
+  схлопнуться в пустой regex. Это сохраняет bounded pipeline scope без ложного
+  `run_type` filter. Это не заменяет correlation по `trace_id` /
   `span_id`, но убирает пустой `{}` и делает handoff полезнее уже на первом
   клике.
 - `bioetl-runtime` row `Tracing-only Log Hygiene` содержит Loki-backed panels

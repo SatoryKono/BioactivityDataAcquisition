@@ -202,9 +202,11 @@ ______________________________________________________________________
 | **application**    |   OK   |     OK      |       NO       |     NO      |     NO     |
 | **infrastructure** |   OK   |     NO      |       OK       |     NO      |     NO     |
 | **composition**    |   OK   |     OK      |       OK       |     OK      |     NO     |
-| **interfaces**     |   OK   |     OK      |       OK       |     OK      |     OK     |
+| **interfaces**     |   OK   |     OK      |       NO       |     OK      |     OK     |
 
 Every RF-\* MUST be validated against this matrix before inclusion in plan.
+Direct `interfaces -> infrastructure` imports are forbidden; route concrete
+runtime wiring through composition-owned entrypoints.
 
 ______________________________________________________________________
 
