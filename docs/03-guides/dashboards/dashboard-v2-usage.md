@@ -200,10 +200,10 @@ dashboard-specific `Status` or `First Action` route.
    not an independent second signal.
    band: `Monitor: Data Quality Score (Volume-weighted)`,
    `Monitor: Worst-Entity DQ Score`, `Monitor: Worst Data Freshness Lag (seconds)`,
-   `Review: Latest Successful Data Timestamp`, `Track: Records Quarantined in Range`,
-   `Track: Soft Threshold Exceeded in Range` и `Track: Silver Filter Rejects in Range`.
-   Latest timestamp stays a supporting freshness anchor and must not read like a
-   verdict card. Полноширинный
+   `Track: Records Quarantined in Range`, `Track: Soft Threshold Exceeded in Range`
+   и `Track: Silver Filter Rejects in Range`. `Review: Latest Successful Data Timestamp`
+   остаётся отдельным supporting freshness anchor на первом экране и не должен
+   визуально читаться как verdict card. Полноширинный
    `Track Range Evidence: Bronze -> Silver -> Gold` идёт ниже как
    `Review: First Action` stays the canonical DQ CTA: review current status,
    inspect current reasons, or open `Silver Reject Explorer` without leaking
@@ -514,10 +514,9 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - Loki drilldown использует безопасный low-cardinality entrypoint `{job="bioetl"}` без dashboard-variable interpolation внутри encoded Explore payload. Это сознательный baseline: Grafana надёжно не подставляет `$pipeline/$provider` в `left=...`, поэтому дополнительное сужение оператор делает уже в самом Explore. Tempo drilldown открывает trace search в том же временном окне; детальная correlation идёт через `trace_id` / `span_id`, а не через Prometheus labels.
 - Tempo drilldown теперь тоже открывается contextual: pipeline-scoped
   dashboards предварительно фильтруют TraceQL по `span."bioetl.pipeline"`, а
-  provider dashboard — по `span."bioetl.provider"`. `run_type` intentionally
-  не шиппится в TraceQL handoff, потому что `includeAll` Grafana selector может
-  схлопнуться в пустой regex. Это сохраняет bounded pipeline scope без ложного
-  `run_type` filter. Это не заменяет correlation по `trace_id` /
+  provider dashboard — по `span."bioetl.provider"`. Pipeline-scoped handoff
+  по-прежнему шиппит bounded `pipeline/run_type` TraceQL scope. Это не заменяет
+  correlation по `trace_id` /
   `span_id`, но убирает пустой `{}` и делает handoff полезнее уже на первом
   клике.
 - `bioetl-runtime` row `Tracing-only Log Hygiene` содержит Loki-backed panels

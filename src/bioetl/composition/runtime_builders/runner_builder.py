@@ -59,6 +59,7 @@ from bioetl.composition.runtime_builders.runner_builder_wiring import (
 from bioetl.composition.runtime_builders.runner_input_assembly import (
     prepare_runner_context_and_inputs as _prepare_runner_context_and_inputs,
 )
+from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.domain.control_plane.reproducibility_policy import (
     is_degraded_observable_profile_requested,
 )
@@ -86,6 +87,8 @@ __all__ = [
     "RunnerFactoryWiring",
     "RunnerInputWiring",
     "build_pipeline_runner",
+    "ensure_providers_loaded",
+    "load_source_config",
 ]
 
 
@@ -94,6 +97,8 @@ _DEFAULT_RUNNER_INPUT_WIRING = RunnerInputWiring(
     load_pipeline_config=_load_pipeline_config,
     load_source_config=_load_source_config,
 )
+
+load_source_config = _load_source_config
 
 
 def _set_context_attribute(ctx: object, attr_name: str, attr_value: object) -> object:
@@ -215,11 +220,11 @@ def build_pipeline_runner(
     factory_wiring: RunnerFactoryWiring | None = None,
     input_wiring: RunnerInputWiring | None = None,
     create_registry_fn: Callable[[], PipelineRegistry] | None = None,
-    ensure_providers_loaded_fn: Callable[[], None] | None = None,
+    ensure_providers_loaded_fn: Callable[[], None] | None = ensure_providers_loaded,
     register_all_pipelines_fn: Callable[..., None] | None = None,
     get_settings_fn: Callable[[], Settings] | None = None,
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] | None = None,
-    load_source_config_fn: Callable[..., object] | None = None,
+    load_source_config_fn: Callable[..., object] | None = load_source_config,
     build_observability_bundle_fn: Callable[..., ObservabilityBundle] | None = None,
     assemble_vacuum_settings_fn: Callable[..., ResolvedVacuumSettings] | None = None,
     assemble_runtime_config_fn: Callable[..., RuntimeConfig] | None = None,
