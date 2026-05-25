@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.infrastructure.observability.prometheus_metric_label_policies import (
+from bioetl.infrastructure.observability._prometheus_metric_label_normalizers import (
     normalize_adapter_operation_label,
     normalize_dq_disposition,
     normalize_filter_source_kind_label,

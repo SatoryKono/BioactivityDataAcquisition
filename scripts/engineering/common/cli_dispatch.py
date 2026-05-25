@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import importlib
+import inspect
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -34,6 +36,37 @@ def shell_command(script_name: str, *prefix_args: str) -> CommandSpec:
     return CommandSpec("shell", script_name, tuple(prefix_args))
 
 
+def _run_module_command_in_process(spec: CommandSpec, argv: list[str]) -> int:
+    """Run a module command in-process to avoid nested subprocess transport hangs."""
+    module = importlib.import_module(spec.target)
+    main = getattr(module, "main", None)
+    if not callable(main):
+        raise AttributeError(f"{spec.target} does not expose a callable main()")
+
+    forwarded_argv = [*spec.prefix_args, *argv]
+    original_argv = sys.argv
+    try:
+        sys.argv = [spec.target, *forwarded_argv]
+        try:
+            parameter_count = len(inspect.signature(main).parameters)
+        except (TypeError, ValueError):
+            parameter_count = 0
+
+        result = main(forwarded_argv) if parameter_count else main()
+    except SystemExit as exc:
+        code = exc.code
+        if code is None:
+            return 0
+        if isinstance(code, int):
+            return code
+        print(code, file=sys.stderr)
+        return 1
+    finally:
+        sys.argv = original_argv
+
+    return 0 if result is None else int(result)
+
+
 def run_command(
     spec: CommandSpec,
     argv: list[str],
@@ -44,7 +77,7 @@ def run_command(
     command: list[str]
 
     if spec.runner == "module":
-        command = [sys.executable, "-m", spec.target, *spec.prefix_args, *argv]
+        return _run_module_command_in_process(spec, argv)
     elif spec.runner == "python":
         if base_dir is None:
             raise ValueError("base_dir is required for python command specs")

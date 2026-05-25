@@ -25,6 +25,10 @@ from bioetl.application.core.field_specs import (
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
+from bioetl.application.pipelines.chembl.alias_policy import (
+    CHEMBL_GOLD_PUBLICATION_IDENTIFIER_PROJECTIONS,
+    get_bronze_provider_aliases,
+)
 from bioetl.application.pipelines.chembl.provider_aliases import (
     normalize_provider_aliases,
 )
@@ -51,17 +55,6 @@ _ACTION_TYPE_FIELDS: JsonDict = {  # Any: converter callables or None
     "action_type": None,
     "description": None,
     "parent_type": None,
-}
-
-_PUBLICATION_IDENTIFIER_ALIASES: dict[str, tuple[str, ...]] = {
-    "publication_doi": ("publication_doi", "doi", "document_doi"),
-    "publication_pmid": (
-        "publication_pmid",
-        "pmid",
-        "pubmed_id",
-        "document_pubmed_id",
-    ),
-    "publication_pmc_id": ("publication_pmc_id", "pmc_id", "document_pmc_id"),
 }
 
 _ONTOLOGY_COMPANION_DEFAULTS: JsonDict = {
@@ -189,9 +182,9 @@ class ActivityTransformer(BaseChemblTransformer):
     entity_class = Bioactivity
     primary_id_field = "activity_id"
     default_entity_type = "activity"
-    _PROVIDER_ALIASES: ClassVar[Mapping[str, str]] = {
-        "molecule_id": "molecule_chembl_id"
-    }
+    _PROVIDER_ALIASES: ClassVar[Mapping[str, str]] = get_bronze_provider_aliases(
+        "activity"
+    )
 
     def _prepare_record(
         self,
@@ -257,7 +250,9 @@ class ActivityTransformer(BaseChemblTransformer):
         """Extract publication identifiers from canonical and provider aliases."""
         return {
             target_field: cls._first_truthy_value(record, *aliases)
-            for target_field, aliases in _PUBLICATION_IDENTIFIER_ALIASES.items()
+            for target_field, aliases in (
+                CHEMBL_GOLD_PUBLICATION_IDENTIFIER_PROJECTIONS.items()
+            )
         }
 
     @staticmethod

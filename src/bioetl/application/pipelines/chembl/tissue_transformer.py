@@ -15,6 +15,10 @@ from typing import TYPE_CHECKING
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
+from bioetl.application.pipelines.chembl.alias_policy import get_bronze_provider_aliases
+from bioetl.application.pipelines.chembl.provider_aliases import (
+    normalize_provider_aliases,
+)
 from bioetl.domain.entities.chembl_tissue import Tissue
 
 if TYPE_CHECKING:
@@ -35,12 +39,11 @@ class TissueTransformer(BaseChemblTransformer):
         self,
         record: BronzeRecord,
     ) -> BronzeRecord:
-        """Support both unified and legacy tissue identifier field names."""
-        if "tissue_id" not in record and record.get("tissue_chembl_id") is not None:
-            record_with_alias = dict(record)
-            record_with_alias["tissue_id"] = record_with_alias.get("tissue_chembl_id")
-            record = record_with_alias
-        return record
+        """Normalize versioned provider-native tissue aliases."""
+        return normalize_provider_aliases(
+            record,
+            get_bronze_provider_aliases("tissue"),
+        )
 
     def _extract_business_data(
         self,

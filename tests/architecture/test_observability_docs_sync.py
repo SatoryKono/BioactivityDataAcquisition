@@ -184,7 +184,8 @@ def test_monitoring_docs_track_modular_observability_code_paths() -> None:
         "src/bioetl/domain/ports/noop/_metrics.py",
         "src/bioetl/infrastructure/observability/_metrics_defs_*.py",
         "src/bioetl/infrastructure/observability/prometheus_metric_registries.py",
-        "src/bioetl/infrastructure/observability/prometheus_metric_label_policies.py",
+        "src/bioetl/infrastructure/observability/prometheus_metric_label_dispatch.py",
+        "src/bioetl/infrastructure/observability/prometheus_metric_label_policy_sets.py",
     ):
         assert required_token in grafana_readme, (
             f"grafana/README.md is missing current observability path: {required_token}"
