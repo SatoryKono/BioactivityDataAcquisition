@@ -443,6 +443,7 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/ledger/__init__.py
       - src/bioetl/application/services/control_plane/manifest/__init__.py
       - src/bioetl/application/services/control_plane/replay/__init__.py
+      - src/bioetl/application/services/control_plane/run_manifest_exact_replay_blockers.py
       - src/bioetl/application/services/control_plane/run_manifest_validation.py
       - src/bioetl/application/services/control_plane/workflow/__init__.py
     composition_runtime_builders:
@@ -453,6 +454,7 @@ hotspot_family_coverage_thresholds:
       allowlisted_unmeasured_paths:
       - src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py
       - src/bioetl/composition/runtime_builders/runner_builder_wiring.py
+      - src/bioetl/composition/runtime_builders/runner_control_plane_assembly.py
 removable_complexity_family_ratchets:
   snapshot_date: '2026-04-13'
   update_policy: Only raise budgets after an intentional reviewed baseline refresh

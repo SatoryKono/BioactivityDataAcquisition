@@ -863,8 +863,8 @@
         "src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py"
       ],
       "private_src_importers": [
-        "src/bioetl/composition/runtime_builders/runner_builder.py",
-        "src/bioetl/composition/runtime_builders/runner_builder_support.py"
+        "src/bioetl/composition/runtime_builders/runner_builder_support.py",
+        "src/bioetl/composition/runtime_builders/runner_control_plane_assembly.py"
       ]
     },
     {

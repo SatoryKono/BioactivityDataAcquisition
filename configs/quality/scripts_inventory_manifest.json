@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-25T11:38:18.913075+00:00",
+  "generated_at": "2026-05-25T15:03:12.103456+00:00",
   "summary": {
     "total_scripts": 396,
     "status_counts": {
@@ -7377,7 +7377,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 164,
+      "reference_count": 165,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -8848,7 +8848,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 366,
+          "line": 379,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_vcr_metadata_catalog.py\","
         }
@@ -9229,7 +9229,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 185,
+          "line": 198,
           "source_group": "tests",
           "text": "\"python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90\""
         },
@@ -9261,7 +9261,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 51,
+      "reference_count": 54,
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -11065,13 +11065,13 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 367,
+          "line": 380,
           "source_group": "tests",
           "text": "\"scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py\","
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 417,
+          "line": 430,
           "source_group": "tests",
           "text": "assert \"backfill_vcr_metadata_sidecars.py\" in migrations_readme"
         }
@@ -11700,7 +11700,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 66,
+      "reference_count": 67,
       "references": [
         {
           "path": ".github/workflows/quality-debt-weekly.yml",
