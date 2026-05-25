@@ -45,14 +45,15 @@ def _resolve_optional_functions(
     Callable[[PipelineRunContext], CachedBronzeContext],
 ]:
     """Resolve optional function parameters to their implementations."""
-    from bioetl.composition.runtime_builders.observability_builder import (
-        build_observability_bundle,
-    )
+    if build_observability_bundle_fn is None:
+        from bioetl.composition.runtime_builders.observability_builder import (
+            build_observability_bundle as resolved_observability_bundle,
+        )
+    else:
+        resolved_observability_bundle = build_observability_bundle_fn
 
     return (
-        build_observability_bundle
-        if build_observability_bundle_fn is None
-        else build_observability_bundle_fn,
+        resolved_observability_bundle,
         assemble_vacuum_settings
         if assemble_vacuum_settings_fn is None
         else assemble_vacuum_settings_fn,
