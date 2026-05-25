@@ -77,3 +77,24 @@ def test_active_hotspot_family_file_growth_budgets_hold_reviewed_baseline() -> N
             "ratchet stable or intentionally refresh the reviewed hotspot-family "
             "baseline."
         )
+
+
+def test_refactored_hotspot_module_line_budgets_hold() -> None:
+    """Recently split hotspot modules must not grow back into orchestration blobs."""
+    module_budgets = {
+        "src/bioetl/composition/runtime_builders/runner_builder.py": 200,
+        "src/bioetl/composition/runtime_builders/runner_control_plane_assembly.py": 180,
+        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_helpers.py": 360,
+        "src/bioetl/application/services/control_plane/run_manifest_exact_replay_blockers.py": 120,
+        "src/bioetl/application/composite/runner_pkg/runner_execution_orchestrator.py": 220,
+    }
+
+    for rel_path, max_lines in module_budgets.items():
+        actual_lines = len(
+            (PROJECT_ROOT / rel_path).read_text(encoding="utf-8").splitlines()
+        )
+        assert actual_lines <= max_lines, (
+            f"{rel_path} has {actual_lines} lines, exceeding ratcheted budget "
+            f"{max_lines}. Extract a focused helper/service instead of regrowing "
+            "the hotspot module."
+        )

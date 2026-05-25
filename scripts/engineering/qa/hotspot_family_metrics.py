@@ -227,17 +227,41 @@ def _import_from_targets(
     return tuple(targets)
 
 
+def _is_type_checking_guard(test: ast.AST) -> bool:
+    """Return whether an ``if`` test guards type-only imports."""
+    if isinstance(test, ast.Name):
+        return test.id == "TYPE_CHECKING"
+    if isinstance(test, ast.Attribute):
+        return test.attr == "TYPE_CHECKING"
+    return False
+
+
+def _iter_runtime_import_nodes(
+    node: ast.AST,
+) -> tuple[ast.Import | ast.ImportFrom, ...]:
+    """Return import nodes that execute at runtime, ignoring TYPE_CHECKING blocks."""
+    imports: list[ast.Import | ast.ImportFrom] = []
+    for child in ast.iter_child_nodes(node):
+        if isinstance(child, ast.If) and _is_type_checking_guard(child.test):
+            for else_child in child.orelse:
+                imports.extend(_iter_runtime_import_nodes(else_child))
+            continue
+        if isinstance(child, (ast.Import, ast.ImportFrom)):
+            imports.append(child)
+            continue
+        imports.extend(_iter_runtime_import_nodes(child))
+    return tuple(imports)
+
+
 def _seen_internal_targets_for_module(
     tree: ast.AST,
     *,
     source_module: str,
     family_modules: set[str],
 ) -> set[str]:
-    """Collect unique internal import targets referenced by one module."""
+    """Collect unique runtime internal import targets referenced by one module."""
     seen_targets: set[str] = set()
-    for node in ast.walk(tree):
-        if not isinstance(node, (ast.Import, ast.ImportFrom)):
-            continue
+    for node in _iter_runtime_import_nodes(tree):
         seen_targets.update(
             resolve_internal_import_targets(
                 node,

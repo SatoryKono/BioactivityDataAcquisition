@@ -8,6 +8,8 @@ import re
 import pytest
 import yaml
 
+from tests.helpers.vcr_config import STRICT_LFS_POINTER_BLOCKER_PATTERNS
+
 ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = ROOT / "configs" / "quality" / "integration_vcr_policy.yaml"
 MATRIX_PATH = ROOT / "configs" / "quality" / "test_matrix.yaml"
@@ -148,6 +150,17 @@ class TestIntegrationVcrPolicy:
             )
             for relative_path in provider_evidence["tracked_adapter_tests"]:
                 assert (ROOT / relative_path).exists()
+
+    def test_policy_declares_strict_lfs_pointer_blocker_patterns(self) -> None:
+        policy = _load_yaml(POLICY_PATH)
+        patterns = policy["vcr_policy"]["strict_lfs_pointer_blocker_patterns"]
+
+        assert patterns == list(STRICT_LFS_POINTER_BLOCKER_PATTERNS)
+
+        conftest = CONFTST_PATH.read_text(encoding="utf-8")
+        assert "is_git_lfs_pointer" in conftest
+        assert "is_strict_lfs_pointer_blocked_cassette" in conftest
+        assert "pytest.fail" in conftest
 
     def test_policy_declares_canonical_replay_and_refresh_examples(self) -> None:
         policy = _load_yaml(POLICY_PATH)

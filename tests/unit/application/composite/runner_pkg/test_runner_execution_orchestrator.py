@@ -9,6 +9,7 @@ import pytest
 
 from bioetl.application.composite.runner_pkg.runner_execution_orchestrator import (
     CompositeLockedExecutionRequest,
+    CompositeRunPhaseService,
     execute_locked_run_phases,
 )
 from bioetl.domain.composite.result import (
@@ -137,3 +138,12 @@ async def test_execute_locked_run_phases_preserves_canonical_phase_order() -> No
     assert result.execution_context.dependency_results is host.dependency_results
     assert result.execution_context.enrichment_results is host.enrichment_results
     assert result.execution_context.merge_result is host.merge_result
+
+
+@pytest.mark.unit
+def test_composite_run_phase_service_exposes_explicit_phase_methods() -> None:
+    service = CompositeRunPhaseService()
+
+    assert callable(service.execute_pre_merge)
+    assert callable(service.execute_merge)
+    assert callable(service.execute)

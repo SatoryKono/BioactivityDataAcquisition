@@ -333,6 +333,36 @@ def _check_stale_registry_entries(
             violations.append(f"stale lifecycle entry not found in manifest: {path}")
 
 
+def _check_entrypoint_surfaces(
+    *,
+    root: Path,
+    catalog: dict[str, object],
+    violations: list[str],
+) -> None:
+    entrypoints = _as_dict(catalog.get("entrypoints"))
+    if not entrypoints:
+        violations.append("catalog missing entrypoints policy section")
+        return
+
+    path_maps = (
+        _as_dict(entrypoints.get("package_console_scripts")),
+        _as_dict(entrypoints.get("script_routers")),
+    )
+    for mapping in path_maps:
+        for name, rel_path in sorted(mapping.items()):
+            if not isinstance(rel_path, str) or not rel_path.strip():
+                violations.append(f"entrypoints.{name} must map to a non-empty path")
+                continue
+            if not (root / rel_path).is_file():
+                violations.append(
+                    f"entrypoint target does not exist: {name} -> {rel_path}"
+                )
+
+    for rel_path in _as_list_of_str(entrypoints.get("workflow_surfaces")):
+        if not (root / rel_path).is_file():
+            violations.append(f"entrypoint workflow surface does not exist: {rel_path}")
+
+
 def _check_lifecycle_coverage(
     *,
     root: Path,
@@ -435,6 +465,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     _check_catalog_structure(root=root, catalog=catalog, violations=violations)
+    _check_entrypoint_surfaces(root=root, catalog=catalog, violations=violations)
     _check_root_wrappers(root=root, catalog=catalog, violations=violations)
     _check_lifecycle_coverage(root=root, catalog=catalog, violations=violations)
 

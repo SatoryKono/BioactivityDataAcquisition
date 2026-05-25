@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 __all__ = [
     "CompositeLockedExecutionContext",
     "CompositeLockedExecutionResult",
+    "CompositeRunPhaseService",
     "execute_locked_run_phases",
 ]
 
@@ -147,22 +148,51 @@ async def _run_merge_phase(
     )
 
 
+@dataclass(frozen=True, slots=True)
+class CompositeRunPhaseService:
+    """Application service that owns lock-held composite phase ordering."""
+
+    async def execute_pre_merge(
+        self,
+        host: _CompositeLockedExecutionHostProtocol,
+        request: CompositeLockedExecutionContext,
+    ) -> _CompositePreMergeExecutionResult:
+        """Execute seed, dependency, and enrichment phases before merge."""
+        return await _run_pre_merge_phases(host, request)
+
+    async def execute_merge(
+        self,
+        host: _CompositeLockedExecutionHostProtocol,
+        pre_merge_result: _CompositePreMergeExecutionResult,
+    ) -> tuple[CompositeCheckpointState, MergeResult | None]:
+        """Execute the merge phase from explicit pre-merge outputs."""
+        return await _run_merge_phase(host, pre_merge_result)
+
+    async def execute(
+        self,
+        host: _CompositeLockedExecutionHostProtocol,
+        request: CompositeLockedExecutionContext,
+    ) -> CompositeLockedExecutionResult:
+        """Execute composite phases in the canonical lock-held order."""
+        pre_merge_result = await self.execute_pre_merge(host, request)
+        state, merge_result = await self.execute_merge(host, pre_merge_result)
+        return CompositeLockedExecutionResult(
+            state=state,
+            execution_context=_build_execution_context(
+                seed_result=pre_merge_result.seed_result,
+                dependency_results=pre_merge_result.dependency_results,
+                enrichment_results=pre_merge_result.enrichment_results,
+                merge_result=merge_result,
+            ),
+        )
+
+
 async def execute_locked_run_phases(
     host: _CompositeLockedExecutionHostProtocol,
     request: CompositeLockedExecutionContext,
 ) -> CompositeLockedExecutionResult:
     """Execute composite phases in the canonical lock-held order."""
-    pre_merge_result = await _run_pre_merge_phases(host, request)
-    state, merge_result = await _run_merge_phase(host, pre_merge_result)
-    return CompositeLockedExecutionResult(
-        state=state,
-        execution_context=_build_execution_context(
-            seed_result=pre_merge_result.seed_result,
-            dependency_results=pre_merge_result.dependency_results,
-            enrichment_results=pre_merge_result.enrichment_results,
-            merge_result=merge_result,
-        ),
-    )
+    return await CompositeRunPhaseService().execute(host, request)
 
 
 CompositeLockedExecutionRequest = CompositeLockedExecutionContext

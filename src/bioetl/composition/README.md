@@ -139,6 +139,9 @@ StorageFactory
 - Pipeline registration from interface entrypoints must also go through
   `composition.registry_api.register_all_pipelines`, not
   `composition.factories.pipeline.registry`.
+- Provider-only administrative service entrypoints must use the provider registration
+  scope from `composition._registration.ensure_runtime_registrations`; only runtime
+  runner entrypoints should request full pipeline registration.
 - Internal modules such as `_pipeline_execution`, `_resource_management`, and `_services`
   stay private to `composition/` plus dedicated entrypoint tests.
 - New first-party integration surfaces SHOULD prefer specialized `*_api.py`
