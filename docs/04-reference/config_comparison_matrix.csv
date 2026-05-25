@@ -22,7 +22,7 @@ composite.normalized_anchor_policy,—,—,(dict),—,(dict),—,—,—,—,—
 composite.normalized_join_key_policy,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.seed,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.version,1.0.0,1.0.0,1.0.0,1.1.0,1.2.0,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-contracts.hash_datetime_policy,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,v2_datetime_utc
+contracts.hash_datetime_policy,—,—,—,—,—,—,—,—,—,—,—,—,v1_date,—,—,—,—,—,—,—,—,—,—,—,—,v2_datetime_utc
 contracts.hash_include,—,—,—,—,—,[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]
 contracts.merge_keys,—,—,—,—,—,"[""activity_id""]","[""assay_id""]","[""assay_param_id""]","[""cell_id""]","[""record_id""]","[""molecule_id""]","[""protein_class_id""]","[""publication_id""]","[""sim_id""]","[""publication_id"", ""term_type"", ""term""]","[""subcellular_fraction""]","[""target_id""]","[""component_id""]","[""tissue_id""]","[""doi""]","[""openalex_id""]","[""molecule_id""]","[""pmid""]","[""paper_id""]","[""target_id""]","[""accession""]"
 contracts.primary_key,—,—,—,—,—,"[""activity_id""]","[""assay_id""]","[""assay_param_id""]","[""cell_id""]","[""record_id""]","[""molecule_id""]","[""protein_class_id""]","[""publication_id""]","[""sim_id""]","[""publication_id"", ""term_type"", ""term""]","[""subcellular_fraction""]","[""target_id""]","[""component_id""]","[""tissue_id""]","[""doi""]","[""openalex_id""]","[""molecule_id""]","[""pmid""]","[""paper_id""]","[""target_id""]","[""accession""]"

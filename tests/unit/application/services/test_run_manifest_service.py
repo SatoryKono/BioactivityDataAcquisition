@@ -201,12 +201,30 @@ def test_create_manifest_does_not_alias_missing_effective_hash() -> None:
         replay_capability=ReplayCapability.REBUILD_ONLY,
     )
 
-    manifest = service.create_manifest(request)
+    with pytest.raises(RuntimeError, match="requires effective_config_hash"):
+        service.create_manifest(request)
 
-    provenance = manifest.code_provenance
-    assert provenance.config_hash == "c" * 64
-    assert provenance.resolved_config_hash == "a" * 64
-    assert provenance.effective_config_hash is None
+    assert store.get("manifest-missing-effective-hash") is None
+
+
+def test_create_manifest_requires_resolved_config_hash() -> None:
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-missing-resolved-hash",
+    )
+    request = replace(
+        _make_request(),
+        config_hash="c" * 64,
+        resolved_config_hash=None,
+        effective_config_hash="a" * 64,
+        replay_capability=ReplayCapability.REBUILD_ONLY,
+    )
+
+    with pytest.raises(RuntimeError, match="requires resolved_config_hash"):
+        service.create_manifest(request)
+
+    assert store.get("manifest-missing-resolved-hash") is None
 
 
 def test_create_manifest_preserves_resume_only_replay_capability() -> None:

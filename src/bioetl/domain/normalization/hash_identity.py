@@ -6,9 +6,9 @@ This module defines the explicit domain-owned contract used by:
 - canonical JSON bytes for hash identity material
 
 The semantics here are intentionally narrower than general domain
-normalization. In particular, ``datetime`` values collapse to ``date`` ISO
-strings to preserve the historical content-hash contract until a deliberate
-hash migration is approved.
+normalization. By default, ``datetime`` values retain timestamp precision in a
+canonical UTC representation. Historical date-only hashes remain available only
+through an explicit ``datetime_policy="v1_date"`` compatibility request.
 """
 
 from __future__ import annotations
@@ -157,7 +157,7 @@ def normalize_hash_identity_value(
     value: object,
     *,
     sort_nested_sequences: bool,
-    datetime_policy: HashDatetimePolicy = "v1_date",
+    datetime_policy: HashDatetimePolicy = "v2_datetime_utc",
 ) -> object:
     """Normalize one value for deterministic hash identity material."""
     if isinstance(value, dict):
@@ -221,7 +221,7 @@ def normalize_hash_identity_record(
     include_fields: set[str] | None = None,
     exclude_fields: set[str] | None = None,
     sort_nested_sequence_fields: set[str] | None = None,
-    datetime_policy: HashDatetimePolicy = "v1_date",
+    datetime_policy: HashDatetimePolicy = "v2_datetime_utc",
 ) -> JsonDict:
     """Normalize a record using the canonical hash-identity contract."""
     resolved_exclude_fields = exclude_fields or set()

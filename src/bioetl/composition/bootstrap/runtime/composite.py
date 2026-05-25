@@ -29,6 +29,9 @@ from bioetl.composition.bootstrap.runtime._composite_plan_support import (
 from bioetl.composition.bootstrap.runtime._composite_plan_support import (
     load_composite_config_impl as _load_runtime_composite_config_impl,
 )
+from bioetl.composition.bootstrap.runtime.compatibility import (
+    apply_runtime_compatibility_patches,
+)
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.infrastructure.config.composite_config_api import (
     DEFAULT_COMPOSITE_CONFIG_DIR,
@@ -289,6 +292,7 @@ def bootstrap_composite_runner(
     run_id: str | None = None,
 ) -> CompositePipelineRunner:
     """Create a ``CompositePipelineRunner`` with all dependencies."""
+    apply_runtime_compatibility_patches()
     plan = _build_composite_bootstrap_plan(
         config=config, runtime=runtime, run_id=run_id
     )

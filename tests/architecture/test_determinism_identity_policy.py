@@ -151,6 +151,7 @@ def test_determinism_identity_policy_has_expected_shape() -> None:
         "retain_occurrence_only_generator",
         "keep_compatibility_alias_but_block_new_semantics",
         "keep_hash_policy_split_until_backfill",
+        "v2_default_active_with_explicit_v1_date_compatibility",
     }
 
     entries = payload.get("allowed_occurrence_identity_generators")
@@ -210,12 +211,16 @@ def test_determinism_identity_policy_has_expected_shape() -> None:
 
     datetime_policy = payload.get("content_hash_datetime_policy")
     assert isinstance(datetime_policy, dict)
-    assert datetime_policy.get("active_policy") == "v1_date"
+    assert datetime_policy.get("active_policy") == "v2_datetime_utc"
     assert datetime_policy.get("migration_target") == "v2_datetime_utc"
+    assert (
+        datetime_policy.get("reviewed_outcome")
+        == "v2_default_active_with_explicit_v1_date_compatibility"
+    )
     backfill_plan = datetime_policy.get("datetime_hash_backfill_plan")
     assert isinstance(backfill_plan, dict)
     assert backfill_plan.get("issue") == "#4587"
-    assert backfill_plan.get("status") == "reviewed_plan_recorded"
+    assert backfill_plan.get("status") == "deterministic_default_switched"
     assert backfill_plan.get("default_switch_target") == "v2_datetime_utc"
     phases = backfill_plan.get("phases")
     assert isinstance(phases, list)

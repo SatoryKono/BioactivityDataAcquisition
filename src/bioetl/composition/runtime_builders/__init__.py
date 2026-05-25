@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.composition.registry_api import PipelineRegistry
-    from bioetl.composition.runtime_builders.inputs_resolver import (
+    from bioetl.composition.runtime_builders.inputs_runtime_models import (
         ResolvedVacuumSettings,
     )
     from bioetl.composition.runtime_builders.ledger_collaborator import (

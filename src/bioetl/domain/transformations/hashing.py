@@ -67,7 +67,7 @@ def normalize_for_hash(
     include_fields: set[str] | None = None,
     exclude_fields: set[str] | None = None,
     set_like_fields: set[str] | None = None,
-    datetime_policy: HashDatetimePolicy = "v1_date",
+    datetime_policy: HashDatetimePolicy = "v2_datetime_utc",
 ) -> JsonDict:
     """Normalize record before hashing to ensure consistency.
 
@@ -119,7 +119,7 @@ def generate_content_hash(
     include_fields: set[str] | None = None,
     exclude_fields: set[str] | None = None,
     set_like_fields: set[str] | None = None,
-    datetime_policy: HashDatetimePolicy = "v1_date",
+    datetime_policy: HashDatetimePolicy = "v2_datetime_utc",
 ) -> ContentHash:
     """Generate SHA256 content hash for record versioning.
 

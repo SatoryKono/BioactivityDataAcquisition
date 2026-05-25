@@ -36,6 +36,27 @@ def test_timestamp_sensitive_hash_policy_inventory_matches_entity_configs() -> N
         )
 
 
+def test_date_only_hash_policy_inventory_matches_entity_configs() -> None:
+    policy = _load_yaml(POLICY_PATH)
+    hash_policy = cast(dict[str, object], policy["content_hash_datetime_policy"])
+    inventory = cast(
+        list[dict[str, object]],
+        hash_policy.get("date_only_entity_inventory", []),
+    )
+    assert inventory, "Date-only content-hash compatibility inventory is empty"
+
+    for item in inventory:
+        provider = str(item["provider"])
+        entity = str(item["entity"])
+        expected_policy = str(item["configured_policy"])
+        config = _load_yaml(ROOT / "configs" / "entities" / provider / f"{entity}.yaml")
+        contracts = cast(dict[str, object], config.get("contracts", {}))
+        assert contracts.get("hash_datetime_policy") == expected_policy, (
+            f"{provider}.{entity} must declare explicit "
+            f"contracts.hash_datetime_policy={expected_policy}"
+        )
+
+
 def test_hash_datetime_policy_values_are_known() -> None:
     allowed = {"v1_date", "v2_datetime_utc"}
     for config_path in (ROOT / "configs" / "entities").rglob("*.yaml"):

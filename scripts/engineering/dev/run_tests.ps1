@@ -4,7 +4,7 @@ $ErrorActionPreference = "Stop"
 # Thin facade for backward compatibility.
 # Canonical implementation: scripts/engineering/dev/run_tests.py
 
-$rootDir = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
+$rootDir = (Resolve-Path (Join-Path $PSScriptRoot "../../..")).Path
 Set-Location $rootDir
 
 $pythonCmd = Get-Command py -ErrorAction SilentlyContinue

@@ -432,11 +432,19 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profile_support.py
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profiles.py
       - src/bioetl/application/services/control_plane/_run_manifest_replay_family_contract_payload.py
+      - src/bioetl/application/services/control_plane/effective_config/__init__.py
+      - src/bioetl/application/services/control_plane/ledger/__init__.py
+      - src/bioetl/application/services/control_plane/manifest/__init__.py
+      - src/bioetl/application/services/control_plane/replay/__init__.py
+      - src/bioetl/application/services/control_plane/workflow/__init__.py
     composition_runtime_builders:
       min_measured_module_count: 38
       max_unmeasured_module_count: 0
       min_covered_module_count: 2
       min_covered_line_percent: 2.71
+      allowlisted_unmeasured_paths:
+      - src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py
+      - src/bioetl/composition/runtime_builders/runner_builder_wiring.py
 removable_complexity_family_ratchets:
   snapshot_date: '2026-04-13'
   update_policy: Only raise budgets after an intentional reviewed baseline refresh

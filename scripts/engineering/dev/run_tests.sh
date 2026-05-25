@@ -3,7 +3,7 @@
 # Canonical implementation: scripts/engineering/dev/run_tests.py
 set -euo pipefail
 
-PROJECT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+PROJECT_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 cd "$PROJECT_DIR"
 
 detect_python() {

@@ -35,7 +35,7 @@ class PipelineContractPolicy(BaseModel):
     merge_keys: list[str] = Field(min_length=1)
     hash_include: list[str] = Field(default_factory=list)
     hash_exclude: list[str] = Field(default_factory=list)
-    hash_datetime_policy: str = Field(default="v1_date")
+    hash_datetime_policy: str = Field(default="v2_datetime_utc")
     rename_map: dict[str, str] = Field(default_factory=dict)
     contract_ref: str = Field(default="")
     active_version: str = Field(default="")

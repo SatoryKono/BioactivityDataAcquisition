@@ -355,6 +355,7 @@ contracts:
     merge_keys:
         - publication_id
     hash_include: []
+    hash_datetime_policy: v1_date
 hash_policy:
     provider: chembl
     entity: publication

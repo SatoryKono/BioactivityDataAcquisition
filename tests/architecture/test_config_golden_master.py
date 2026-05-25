@@ -36,20 +36,6 @@ SNAPSHOT_FILE = SNAPSHOT_DIR / "pipeline_configs.json"
 MATRIX_PATH = Path("configs/quality/test_matrix.yaml")
 EXCLUDED_PROVIDER_SURFACES = frozenset({"chembl", "composite"})
 
-# List of all pipeline config names to test
-PIPELINES = [
-    "chembl_activity",
-    "chembl_molecule",
-    "chembl_publication_term",
-    "crossref_publication",
-    "openalex_publication",
-    "pubchem_compound",
-    "pubmed_publication",
-    "semanticscholar_publication",
-    "uniprot_protein",
-    "uniprot_idmapping",
-]
-
 
 def _convert_for_json(obj: Any) -> Any:
     """Convert non-JSON-serializable types for snapshotting."""
@@ -111,6 +97,14 @@ def _golden_master_registry() -> dict[str, tuple[str, ...]]:
         str(provider): tuple(str(pipeline) for pipeline in config.get("pipelines", []))
         for provider, config in providers.items()
     }
+
+
+# Matrix-declared inventory is the source of truth for golden-master coverage.
+PIPELINES = [
+    pipeline
+    for pipelines in _golden_master_registry().values()
+    for pipeline in pipelines
+]
 
 
 @pytest.mark.parametrize("pipeline_name", PIPELINES)
