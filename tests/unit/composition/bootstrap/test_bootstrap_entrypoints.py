@@ -208,7 +208,7 @@ class TestBootstrapPipeline:
         "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.bootstrap_observability_bundle"
     )
     @patch(
-        "bioetl.composition.runtime_builders.runner_builder.create_run_manifest_with_effective_config"
+        "bioetl.composition.runtime_builders.runner_control_plane_assembly.create_run_manifest_with_effective_config"
     )
     @patch("bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.get_settings")
     def test_bootstrap_pipeline_creates_runner_without_starting_server(
@@ -292,7 +292,7 @@ class TestBootstrapPipeline:
         "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.create_pipeline_config_loader"
     )
     @patch(
-        "bioetl.composition.runtime_builders.runner_builder.create_run_manifest_with_effective_config"
+        "bioetl.composition.runtime_builders.runner_control_plane_assembly.create_run_manifest_with_effective_config"
     )
     def test_bootstrap_pipeline_chembl_activity(
         self,
@@ -407,7 +407,7 @@ class TestBootstrapVacuumConfig:
         ctx = _create_pipeline_context()
 
         with patch(
-            "bioetl.composition.runtime_builders.runner_builder.create_run_manifest_with_effective_config",
+            "bioetl.composition.runtime_builders.runner_control_plane_assembly.create_run_manifest_with_effective_config",
             return_value=(
                 SimpleNamespace(
                     manifest_id="manifest-test-1",
@@ -492,7 +492,7 @@ class TestBootstrapVacuumConfig:
         )
 
         with patch(
-            "bioetl.composition.runtime_builders.runner_builder.create_run_manifest_with_effective_config",
+            "bioetl.composition.runtime_builders.runner_control_plane_assembly.create_run_manifest_with_effective_config",
             return_value=(
                 SimpleNamespace(
                     manifest_id="manifest-test-2",
