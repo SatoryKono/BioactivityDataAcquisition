@@ -246,7 +246,7 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Monitor: Ledger Append Failures": "or vector(0)",
             "Monitor: Checkpoint Incompatibilities": "or vector(0)",
             "Monitor: GLOBAL Control-Plane Read Failures": "or vector(0)",
-            "Monitor: GLOBAL Control-Plane Read Failure Ratio": "or vector(0)",
+            "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity": "or vector(0)",
             "Monitor: Checkpoint Load Failures": "or vector(0)",
             "Monitor: Checkpoint Save Failures": "or vector(0)",
             "Monitor: GLOBAL Checkpoint Operator Failures": "or vector(0)",
