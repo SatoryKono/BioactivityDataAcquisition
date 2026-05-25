@@ -51,6 +51,17 @@ def _get_bootstrap_pipeline_runner_function() -> ast.FunctionDef:
     return bootstrap_func
 
 
+def _get_prepare_runtime_registry_function() -> ast.FunctionDef:
+    phases_file = (
+        COMPOSITION_DIR / "bootstrap" / "runtime" / "pipeline_bootstrap_phases.py"
+    )
+    source = phases_file.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    prepare_func = _find_named_function(tree, "prepare_runtime_registry")
+    assert prepare_func is not None, "prepare_runtime_registry function not found"
+    return prepare_func
+
+
 def _find_named_function(tree: ast.AST, name: str) -> ast.FunctionDef | None:
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and node.name == name:
@@ -95,7 +106,13 @@ def test_bootstrap_uses_explicit_registration():
     as part of the CLI/runtime split (see CLAUDE.md §2.1).
     """
     bootstrap_func = _get_bootstrap_pipeline_runner_function()
-    calls_register = _function_calls_name(bootstrap_func, "register_all_pipelines")
+    prepare_registry_func = _get_prepare_runtime_registry_function()
+    calls_register = _function_calls_name(
+        bootstrap_func, "register_all_pipelines"
+    ) or (
+        _function_calls_name(bootstrap_func, "prepare_runtime_registry")
+        and _function_calls_name(prepare_registry_func, "register_all_pipelines")
+    )
 
     assert calls_register, (
         "bootstrap_pipeline_runner() must explicitly call register_all_pipelines() "
