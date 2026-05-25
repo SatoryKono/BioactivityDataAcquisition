@@ -312,6 +312,3 @@ def test_finalize_pre_silver_projects_malformed_json_findings_to_dq_warning() ->
         dq_warn=True,
         proposed_normalized_outcome=None,
     )
-
-
-@pytest.mark.unit

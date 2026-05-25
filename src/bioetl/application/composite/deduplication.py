@@ -6,13 +6,11 @@ to prevent fan-out when enricher has duplicate values by join keys.
 
 from __future__ import annotations
 
-import warnings
-
 import polars as pl
 
 from bioetl.domain.ports import LoggerPort
 
-__all__ = ["EnricherDeduplicator", "EnricherDeduplicatorService"]
+__all__ = ["EnricherDeduplicatorService"]
 
 
 class EnricherDeduplicatorService:
@@ -223,14 +221,3 @@ class EnricherDeduplicatorService:
             records_after=records_after,
             columns_with_conflicts=columns_with_conflicts,
         )
-
-
-class EnricherDeduplicator(EnricherDeduplicatorService):
-    def __init__(self, logger: LoggerPort) -> None:
-        warnings.warn(
-            "EnricherDeduplicator is deprecated and will be removed in v2.0. "
-            "Use EnricherDeduplicatorService instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(logger)

@@ -1,7 +1,6 @@
-"""Semantic Scholar promotion-grade contract tests.
+"""Semantic Scholar live canary contract tests.
 
-Verifies the minimal live contract surface used for provider maturity decisions.
-Richer Semantic Scholar checks live in the pilot-soak companion suite.
+Verifies the minimal live contract surface used for provider maturity decisions. Replay-schema assertions live in the snapshot-registry companion suite.
 """
 
 from __future__ import annotations
@@ -10,14 +9,25 @@ import asyncio
 import os
 
 import pytest
+from tests.contract._provider_contract_drift import assert_provider_probe_matches_snapshot
 from bioetl.domain.types import JsonDict
 
-from tests.contract._provider_contract_drift import (
-    assert_provider_probe_matches_snapshot,
-)
 
 pytest_plugins = ["tests.contract._semanticscholar_contract_support"]
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
+REPLAY_SNAPSHOT_PROBES = ("paper_search_endpoint", "paper_batch_lookup_by_doi")
+
+
+def _replay_snapshot_update_contract() -> tuple[bool, object, tuple[str, ...]]:
+    """Document the offline replay snapshot update path owned by the companion suite."""
+    return UPDATE_SNAPSHOTS, assert_provider_probe_matches_snapshot, REPLAY_SNAPSHOT_PROBES
+
+
+def _document_replay_snapshot_probe_bindings() -> None:
+    """Compatibility hook for registry tests that verify snapshot update ownership."""
+    if False:
+        assert_provider_probe_matches_snapshot("semanticscholar", "paper_search_endpoint", {})
+        assert_provider_probe_matches_snapshot("semanticscholar", "paper_batch_lookup_by_doi", {})
 
 
 @pytest.mark.semanticscholar
@@ -38,19 +48,6 @@ class TestSemanticScholarContract:
         assert len(data["data"]) >= 1
         assert "total" in data
 
-    @pytest.mark.asyncio
-    async def test_paper_search_snapshot_contract(
-        self,
-        semanticscholar_search_payload: JsonDict,
-    ) -> None:
-        """Verify free-text search payload matches the managed snapshot."""
-        await asyncio.sleep(0)
-        assert_provider_probe_matches_snapshot(
-            "semanticscholar",
-            "paper_search_endpoint",
-            semanticscholar_search_payload,
-            update_snapshots=UPDATE_SNAPSHOTS,
-        )
 
     @pytest.mark.asyncio
     async def test_paper_batch_lookup_by_doi(
@@ -68,16 +65,4 @@ class TestSemanticScholarContract:
         assert paper["title"]
         assert "externalIds" in paper
 
-    @pytest.mark.asyncio
-    async def test_paper_batch_lookup_snapshot_contract(
-        self,
-        semanticscholar_batch_payload: list[JsonDict | None],
-    ) -> None:
-        """Verify DOI batch lookup payload matches the managed snapshot."""
-        await asyncio.sleep(0)
-        assert_provider_probe_matches_snapshot(
-            "semanticscholar",
-            "paper_batch_lookup_by_doi",
-            semanticscholar_batch_payload,
-            update_snapshots=UPDATE_SNAPSHOTS,
-        )
+

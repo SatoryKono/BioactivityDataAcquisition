@@ -16,7 +16,12 @@ from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from tests.benchmarks.conftest import calculate_payload_size_mb
 
-pytestmark = pytest.mark.timeout(300)
+pytestmark = [
+    pytest.mark.benchmark,
+    pytest.mark.performance,
+    pytest.mark.serial,
+    pytest.mark.timeout(120),
+]
 
 
 class FakeLogger:

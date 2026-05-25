@@ -311,9 +311,9 @@ Compatibility bridge и collaborator bundle для `MergeService` находят
 | `coalesce_policy.py`          | `CoalescePolicyService`   | Coalesce стратегии (prefer_seed и др.) |
 | `aggregator.py`               | `EnricherAggregator`      | Агрегация результатов enrichers        |
 | `cross_validator.py`          | `CrossValidatorService`   | Cross-validation merge результатов     |
-| `deduplication.py`            | `DeduplicationService`    | Дедупликация записей                   |
+| `deduplication.py`            | `EnricherDeduplicatorService` | Дедупликация записей               |
 | `coordinator_result_mixin.py` | Result mixin              | Формирование результата координатора   |
-| `fsm_helper.py`               | `FSMStateHelper`          | Управление FSM состояниями             |
+| `fsm_helper.py`               | `FSMStateHelperService`   | Управление FSM состояниями             |
 
 **Preflight validation:**
 

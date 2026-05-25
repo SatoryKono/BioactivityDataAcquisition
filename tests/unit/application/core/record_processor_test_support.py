@@ -128,8 +128,8 @@ def _create_record_processor_config(
         "pipeline_name": pipeline_name,
         "provider": provider,
         "entity_type": entity_type,
-        "silver_schema": object(),
-        "gold_schema": object(),
+        "silver_schema": None,
+        "gold_schema": None,
     }
     if table_config is not None:
         config_kwargs["table_config"] = table_config

@@ -24,6 +24,10 @@ from tests.integration._grafana_test_support import (
     get_panel_expressions,
     load_dashboard,
 )
+from tests.integration.grafana_contract_specs import (
+    CONTROL_PLANE_GLOBAL_READ_PANEL_TITLES,
+    CONTROL_PLANE_GLOBAL_SCOPE_EXPECTATIONS,
+)
 
 
 pytestmark = pytest.mark.integration
@@ -805,16 +809,7 @@ def test_control_plane_has_replay_resume_blockers_panel() -> None:
 
 def test_control_plane_lookup_panels_disclose_global_scope() -> None:
     """Control-plane read panels must disclose that they are global, not pipeline-scoped."""
-    expectations = {
-        "bioetl-control-plane-v1.json": (
-            "Monitor: GLOBAL Control-Plane Read Failures",
-            "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity",
-            "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
-            "Track: GLOBAL Control-Plane Reads by Store / Operation / Status",
-            "Monitor: GLOBAL Checkpoint Operator Failures",
-            "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
-        ),
-    }
+    expectations = CONTROL_PLANE_GLOBAL_SCOPE_EXPECTATIONS
 
     for dashboard_name, panel_titles in expectations.items():
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
@@ -831,14 +826,7 @@ def test_control_plane_lookup_panels_disclose_global_scope() -> None:
 
 def test_control_plane_read_panels_do_not_filter_on_missing_pipeline_label() -> None:
     """Control-plane read panels must not filter global metrics by pipeline."""
-    expectations = {
-        "bioetl-control-plane-v1.json": (
-            "Monitor: GLOBAL Control-Plane Read Failures",
-            "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity",
-            "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
-            "Track: GLOBAL Control-Plane Reads by Store / Operation / Status",
-        ),
-    }
+    expectations = CONTROL_PLANE_GLOBAL_READ_PANEL_TITLES
 
     forbidden_metrics = (
         "bioetl_control_plane_reads_total",

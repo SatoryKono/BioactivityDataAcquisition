@@ -14,20 +14,7 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     RunOptions,
     RunResult,
 )
-from bioetl.composition._registration import ensure_runtime_registrations
-from bioetl.composition.bootstrap.runtime.observability import (
-    maybe_start_metrics_server,
-)
-from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
-from bioetl.composition.bootstrap.runtime.pipeline_context_builder import (
-    build_pipeline_context,
-)
-from bioetl.composition.factories.pipeline.runner import create_metrics_extractor
 from bioetl.composition.registry_api import PipelineRegistry
-from bioetl.composition.runtime_builders.config_access import get_settings
-from bioetl.domain.exceptions import BioETLError
-from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
-from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
@@ -45,8 +32,35 @@ __all__ = [
 ]
 
 
+def get_settings() -> object:
+    """Resolve runtime settings lazily while keeping a patchable module seam."""
+    from bioetl.composition.runtime_builders.config_access import get_settings as impl
+
+    return impl()
+
+
+def maybe_start_metrics_server(settings: object) -> object:
+    """Resolve metrics-server startup lazily while keeping a patchable seam."""
+    from bioetl.composition.bootstrap.runtime.observability import (
+        maybe_start_metrics_server as impl,
+    )
+
+    return impl(settings)
+
+
+def build_pipeline_context(*args: object, **kwargs: object) -> object:
+    """Forward to the canonical runtime context builder lazily."""
+    from bioetl.composition.bootstrap.runtime.pipeline_context_builder import (
+        build_pipeline_context as build_pipeline_context_impl,
+    )
+
+    return build_pipeline_context_impl(*args, **kwargs)
+
+
 def _ensure_registrations(registry: PipelineRegistry | None = None) -> None:
     """Ensure providers and pipelines are registered for shared entrypoints."""
+    from bioetl.composition._registration import ensure_runtime_registrations
+
     ensure_runtime_registrations(registry=registry)
 
 
@@ -147,6 +161,8 @@ def create_pipeline_runner(
         >>> runner = create_pipeline_runner("chembl_activity", options)
         >>> await runner.run()
     """
+    from bioetl.infrastructure.time import SystemClock
+
     run_context = build_pipeline_context(
         name,
         options,
@@ -159,6 +175,10 @@ def _create_pipeline_runner_from_context(
     run_context: PipelineRunContext,
 ) -> ExecutionMetricsRunnerPort:
     """Build a runnable pipeline runner from a prepared execution context."""
+    from bioetl.composition.bootstrap.runtime.pipeline import (
+        bootstrap_pipeline_runner,
+    )
+
     return _require_execution_metrics_runner(bootstrap_pipeline_runner(run_context))
 
 
@@ -172,6 +192,11 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     Returns:
         RunResult with execution status, record counts, and timing information.
     """
+    from bioetl.composition.factories.pipeline.runner import create_metrics_extractor
+    from bioetl.domain.exceptions import BioETLError
+    from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
+    from bioetl.infrastructure.time import SystemClock
+
     run_context = build_pipeline_context(
         name,
         options,

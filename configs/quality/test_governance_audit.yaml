@@ -237,24 +237,24 @@ oversized_test_module_inventory:
       lines: 2001
       owner: application-services
       target_split: metadata coordinator command/query families
-    - path: tests/unit/composition/runtime_builders/test_runner_builder.py
-      lines: 1973
-      owner: composition-runtime
-      target_split: runner-builder factory seams
-    - path: tests/unit/application/core/test_record_normalization_processor.py
-      lines: 1981
-      owner: application-core
-      target_split: normalization processor scenarios
+    - path: tests/unit/application/services/test_run_manifest_inspection_service.py
+      lines: 1989
+      owner: application-services
+      target_split: run manifest inspection scenario families
+    - path: tests/unit/application/pipelines/pubmed/test_pubmed_transformer.py
+      lines: 1936
+      owner: application-pipelines
+      target_split: PubMed transformer classification and normalization scenarios
   completed_splits:
     - issue_ref: "#4505"
       source: tests/integration/test_grafana_config.py
-      source_lines_after_split: 1373
+      source_lines_after_split: 1361
       extracted_surface: tests/integration/test_grafana_surface_contracts.py
       extracted_surface_lines: 717
       owner: observability-dashboards
     - issue_ref: "#4506"
-      source: tests/unit/composition/runtime_builders/test_runner_builder.py
-      source_lines_after_split: 1973
+      source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
+      source_lines_after_split: 1109
       extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
       extracted_surface_lines: 125
       owner: composition-runtime

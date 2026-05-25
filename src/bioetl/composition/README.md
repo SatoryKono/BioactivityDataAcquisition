@@ -42,9 +42,6 @@ composition/
 │   ├── registration_bio.py     # ChEMBL, PubChem, UniProt
 │   └── _registration_contracts.py  # Leaf contracts for provider assembly support
 │
-├── monitoring/                 # Composition-local monitoring support
-│   └── deprecation_tracker.py  # Tracks deprecated surface usage during runtime assembly
-│
 ├── runtime_builders/           # Late-stage runtime assembly
 │   ├── runner_builder.py       # RunnerBuilder — assembles PipelineRunner
 │   ├── inputs_resolver.py      # Resolves RunnerInputs from config

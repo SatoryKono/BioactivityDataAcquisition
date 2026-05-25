@@ -1,4 +1,4 @@
-"""Unit tests for FSMStateHelper.
+"""Unit tests for FSMStateHelperService.
 
 Tests the FSM helper utilities extracted from CompositePipelineRunner.
 """
@@ -13,7 +13,7 @@ import pytest
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.fsm_helper import (
-    FSMStateHelperService as FSMStateHelper,
+    FSMStateHelperService,
 )
 from bioetl.domain.composite.state import CompositePipelineState
 from tests.helpers.clock import fixed_test_clock
@@ -55,9 +55,9 @@ def composite_config() -> FakeCompositeConfig:
 
 
 @pytest.fixture
-def fsm_helper(composite_config: Any, mock_logger: MagicMock) -> FSMStateHelper:
+def fsm_helper(composite_config: Any, mock_logger: MagicMock) -> FSMStateHelperService:
     """Create an FSM helper instance."""
-    return FSMStateHelper(
+    return FSMStateHelperService(
         config=composite_config,
         logger=mock_logger,
         run_id="test-run-123",
@@ -68,7 +68,7 @@ class TestFSMStateHelperLogTransition:
     """Tests for FSM state transition logging."""
 
     def test_log_fsm_transition(
-        self, fsm_helper: FSMStateHelper, mock_logger: MagicMock
+        self, fsm_helper: FSMStateHelperService, mock_logger: MagicMock
     ) -> None:
         """Should log FSM state transitions."""
         fsm_helper.log_fsm_transition(
@@ -85,7 +85,7 @@ class TestFSMStateHelperLogTransition:
         assert call_args[1]["stage"] == "seed_start"
 
     def test_log_fsm_transition_with_extra(
-        self, fsm_helper: FSMStateHelper, mock_logger: MagicMock
+        self, fsm_helper: FSMStateHelperService, mock_logger: MagicMock
     ) -> None:
         """Should include extra context in transition logs."""
         fsm_helper.log_fsm_transition(
@@ -103,7 +103,7 @@ class TestFSMStateHelperValidateTransition:
     """Tests for FSM state transition validation."""
 
     def test_validate_valid_transition(
-        self, fsm_helper: FSMStateHelper, mock_logger: MagicMock
+        self, fsm_helper: FSMStateHelperService, mock_logger: MagicMock
     ) -> None:
         """Should return True for valid transitions."""
         result = fsm_helper.validate_fsm_transition(
@@ -114,7 +114,7 @@ class TestFSMStateHelperValidateTransition:
         mock_logger.warning.assert_not_called()
 
     def test_validate_invalid_transition(
-        self, fsm_helper: FSMStateHelper, mock_logger: MagicMock
+        self, fsm_helper: FSMStateHelperService, mock_logger: MagicMock
     ) -> None:
         """Should return False and log warning for invalid transitions."""
         # NOT_STARTED cannot go directly to MERGING
@@ -126,7 +126,7 @@ class TestFSMStateHelperValidateTransition:
         mock_logger.warning.assert_called_once()
 
     def test_validate_resume_from_failed(
-        self, fsm_helper: FSMStateHelper, mock_logger: MagicMock
+        self, fsm_helper: FSMStateHelperService, mock_logger: MagicMock
     ) -> None:
         """Should allow transitions from FAILED when allow_resume=True."""
         result = fsm_helper.validate_fsm_transition(
@@ -142,7 +142,7 @@ class TestFSMStateHelperHandleResumeFromFailed:
     """Tests for resume from failed state handling."""
 
     def test_resume_from_failed_seed_not_completed(
-        self, fsm_helper: FSMStateHelper
+        self, fsm_helper: FSMStateHelperService
     ) -> None:
         """Should resume to NOT_STARTED if seed wasn't completed."""
         state = CompositeCheckpointState(
@@ -160,7 +160,7 @@ class TestFSMStateHelperHandleResumeFromFailed:
         assert result.state == CompositePipelineState.NOT_STARTED
 
     def test_resume_from_failed_enrichment_partial(
-        self, fsm_helper: FSMStateHelper
+        self, fsm_helper: FSMStateHelperService
     ) -> None:
         """Should resume to ENRICHING if some enrichers completed."""
         state = CompositeCheckpointState(
@@ -177,7 +177,9 @@ class TestFSMStateHelperHandleResumeFromFailed:
         )
         assert result.state == CompositePipelineState.ENRICHING
 
-    def test_resume_from_failed_merge_failed(self, fsm_helper: FSMStateHelper) -> None:
+    def test_resume_from_failed_merge_failed(
+        self, fsm_helper: FSMStateHelperService
+    ) -> None:
         """Should resume to ENRICHMENT_COMPLETED if all enrichers done but merge failed."""
         state = CompositeCheckpointState(
             composite_name="test_composite",
@@ -200,7 +202,7 @@ class TestFSMStateHelperLogResumeContext:
     """Tests for resume context logging."""
 
     def test_log_resume_context(
-        self, fsm_helper: FSMStateHelper, mock_logger: MagicMock
+        self, fsm_helper: FSMStateHelperService, mock_logger: MagicMock
     ) -> None:
         """Should log detailed resume context."""
         state = CompositeCheckpointState(

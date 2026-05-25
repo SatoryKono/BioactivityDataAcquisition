@@ -34,8 +34,8 @@ review classifies them as real semantic identity rather than lexical overlap.
 
 | Cluster | Legacy / Provider-Native Names | Canonical Name | Active Pipelines | Runtime Status |
 | ------- | ------------------------------ | -------------- | ---------------- | -------------- |
-| ChEMBL assay business identifier | `assay_chembl_id` | `assay_id` | `chembl_assay`, `chembl_activity`, `composite_assay`, `composite_activity` | canonical_internal_with_legacy_input_filter |
-| ChEMBL molecule business identifier | `molecule_chembl_id` | `molecule_id` | `chembl_molecule`, `chembl_activity`, `chembl_compound_record`, `composite_molecule`, `composite_activity` | canonical_internal_with_legacy_input_filter |
+| ChEMBL assay business identifier | `assay_chembl_id` | `assay_id` | `chembl_assay`, `chembl_activity`, `composite_assay`, `composite_activity` | canonical_internal_with_provider_native_ingestion_boundary |
+| ChEMBL molecule business identifier | `molecule_chembl_id` | `molecule_id` | `chembl_molecule`, `chembl_activity`, `chembl_compound_record`, `composite_molecule`, `composite_activity` | canonical_internal_with_provider_native_ingestion_boundary |
 | PubMed publication identifier | `pubmed_id` | `pmid` | `pubmed_publication`, `chembl_publication`, `crossref_publication`, `openalex_publication`, `semanticscholar_publication`, `composite_publication` | canonical_internal_with_legacy_input_filter |
 | Digital Object Identifier | `doi` | `doi` | `chembl_publication`, `crossref_publication`, `openalex_publication`, `pubmed_publication`, `semanticscholar_publication`, `composite_publication` | canonical_internal_and_external |
 | Publication display title | `pubmed_title`, `openalex_title` | `title` | `pubmed_publication`, `openalex_publication`, `crossref_publication`, `semanticscholar_publication`, `chembl_publication`, `composite_publication` | canonical_internal_with_legacy_aliases_retired |

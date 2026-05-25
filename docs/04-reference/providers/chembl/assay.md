@@ -121,7 +121,7 @@ ______________________________________________________________________
 
 `src/bioetl/application/pipelines/chembl/assay_transformer.py` делает следующее:
 
-1. Поддерживает legacy alias: если пришёл `assay_chembl_id`, он подставляется в `assay_id`.
+1. Нормализует provider-native `assay_chembl_id` в canonical `assay_id` на ingestion boundary.
 1. Маппит плоские поля через declarative field groups.
 1. Разворачивает вложенный `variant_sequence` через `flatten_nested_dict()`.
 1. Нормализует `assay_tax_id -> assay_taxonomy_id` и `variant_tax_id -> variant_taxonomy_id`.

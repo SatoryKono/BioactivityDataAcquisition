@@ -29,91 +29,11 @@ from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import InvalidStateError, StorageError
 from tests.unit.application.composite import runner_test_support as support
 
+pytest_plugins = ("tests.unit.application.composite.fsm_test_support",)
+
 if TYPE_CHECKING:
     from bioetl.application.composite.checkpoint.state import (
         CompositeCheckpointState,
-    )
-
-
-@pytest.fixture
-def mock_logger() -> MagicMock:
-    """Create a mock LoggerPort."""
-    return support.create_mock_logger()
-
-
-@pytest.fixture
-def mock_lock() -> AsyncMock:
-    """Create a mock LockPort."""
-    return support.create_mock_lock(release_value=False)
-
-
-@pytest.fixture
-def mock_key_extractor() -> AsyncMock:
-    """Create a mock KeyExtractorService."""
-    return support.create_crossref_key_extractor()
-
-
-@pytest.fixture
-def mock_coordinator() -> AsyncMock:
-    """Create a mock EnrichmentCoordinatorService."""
-    return support.create_successful_crossref_coordinator()
-
-
-@pytest.fixture
-def mock_merger() -> AsyncMock:
-    """Create a mock MergeService."""
-    return support.create_successful_crossref_merger()
-
-
-@pytest.fixture
-def mock_checkpoint_manager() -> AsyncMock:
-    """Create a mock composite checkpoint service that tracks state transitions."""
-    return support.create_tracking_checkpoint_manager()
-
-
-@pytest.fixture
-def mock_seed_runner_factory() -> object:
-    """Create a mock seed runner factory."""
-    return support.create_magic_seed_runner_factory()
-
-
-@pytest.fixture
-def mock_enricher_runner_factory() -> object:
-    """Create a mock enricher runner factory."""
-    return support.create_magic_enricher_runner_factory()
-
-
-@pytest.fixture
-def sample_composite_config() -> MagicMock:
-    """Create a sample CompositeConfig."""
-    return support.create_required_crossref_composite_config()
-
-
-@pytest.fixture
-def runner(
-    sample_composite_config,
-    mock_seed_runner_factory,
-    mock_enricher_runner_factory,
-    mock_key_extractor,
-    mock_coordinator,
-    mock_merger,
-    mock_checkpoint_manager,
-    mock_logger,
-    mock_lock,
-) -> CompositePipelineRunner:
-    """Create a CompositePipelineRunner instance for testing."""
-    return support.create_runner(
-        config=sample_composite_config,
-        runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
-        logger=mock_logger,
-        checkpoint_manager=mock_checkpoint_manager,
-        seed_runner_factory=mock_seed_runner_factory,
-        enricher_runner_factory=mock_enricher_runner_factory,
-        key_extractor=mock_key_extractor,
-        coordinator=mock_coordinator,
-        merger=mock_merger,
-        lock=mock_lock,
-        run_id="00000000-0000-0000-0000-000000000123",
     )
 
 

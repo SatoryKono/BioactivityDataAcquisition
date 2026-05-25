@@ -206,6 +206,7 @@ markers = [
     "vcr: VCR.py recorded HTTP interactions",
     "performance: Performance regression tests (optional CI stage)",
     "architecture: Architecture tests (layer boundaries, contracts)",
+    "contract: Contract tests (compatibility alias for singular marker usage)",
     "contracts: Contract tests (API contracts, schema stability)",
     "benchmark: Benchmark tests (excluded from standard runs, run with -m benchmark)",
     "smoke: Smoke tests (quick sanity checks for local development)",
@@ -441,7 +442,7 @@ known-first-party = ["bioetl", "tests"]
 # Composition factories may have unused args for interface consistency
 # E402: Allow imports after future imports and docstrings
 # ARG005: Unused lambda arguments for interface consistency
-"src/bioetl/composition/**/*.py" = ["ARG001", "ARG002", "ARG004", "ARG005", "E402"]
+"src/bioetl/composition/**/*.py" = ["ARG001", "ARG002", "ARG004", "ARG005", "E402", "I001"]
 # Interfaces layer
 "src/bioetl/interfaces/**/*.py" = ["ARG001", "ARG002"]
 # Memory graph module is a standalone tool; print() is expected, line lengths are relaxed

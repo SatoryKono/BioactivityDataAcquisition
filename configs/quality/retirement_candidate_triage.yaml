@@ -130,13 +130,6 @@ repo_wide_zero_import_classification:
       review_by: "2026-08-20"
       linked_issue: "#4541"
       rationale: CLI control-plane lifecycle bootstrap wiring is loaded through command/bootstrap registration rather than direct static imports.
-    - module_path: src/bioetl/composition/monitoring/deprecation_tracker.py
-      module_name: bioetl.composition.monitoring.deprecation_tracker
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Deprecation tracker remains the canonical monitoring owner module even when static importer count is currently zero.
     - module_path: src/bioetl/composition/runtime_builders/cached_bronze_snapshot_support.py
       module_name: bioetl.composition.runtime_builders.cached_bronze_snapshot_support
       disposition: retain_public_facade

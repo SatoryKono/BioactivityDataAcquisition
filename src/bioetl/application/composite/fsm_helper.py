@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -201,24 +200,7 @@ class FSMStateHelperService:
         )
 
 
-class FSMStateHelper(FSMStateHelperService):
-    def __init__(
-        self,
-        config: CompositeConfig,
-        logger: LoggerPort,
-        run_id: str,
-    ) -> None:
-        warnings.warn(
-            "FSMStateHelper is deprecated and will be removed in v2.0. "
-            "Use FSMStateHelperService instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(config, logger, run_id)
-
-
 __all__ = [
-    "FSMStateHelper",
     "FSMStateHelperService",
     "ResumePhaseInfo",
     "ResumePhasePlan",

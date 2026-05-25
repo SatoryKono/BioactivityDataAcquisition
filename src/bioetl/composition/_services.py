@@ -6,7 +6,6 @@ from collections.abc import Callable
 from importlib import import_module
 from typing import TYPE_CHECKING, cast
 
-from bioetl.composition._registration import ensure_runtime_registrations
 from bioetl.composition._service_protocols import (
     BronzeCleanupServiceProtocol,
     HealthServerDependenciesProtocol,
@@ -118,6 +117,8 @@ def _resolve_bootstrap_callable(name: str) -> Callable[[], object]:
 
 def _ensure_registrations(registry: PipelineRegistry | None = None) -> None:
     """Ensure providers and pipelines are registered lazily to avoid cycles."""
+    from bioetl.composition._registration import ensure_runtime_registrations
+
     ensure_runtime_registrations(registry=registry)
 
 
