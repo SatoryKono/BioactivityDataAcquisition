@@ -1,7 +1,7 @@
 # Non-ChEMBL Observed Value Inventory
 
 - source: `tracked_non_chembl_bronze_fixtures_and_vcr_derived_edge_samples`
-- observed_fixture_path: `tests\fixtures\normalization\non_chembl_observed_values.yaml`
+- observed_fixture_path: `tests/fixtures/normalization/non_chembl_observed_values.yaml`
 
 ## Sections
 

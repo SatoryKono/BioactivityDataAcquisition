@@ -7,8 +7,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _DEFAULT_SITE_DIR = _REPO_ROOT / "docs" / "site"

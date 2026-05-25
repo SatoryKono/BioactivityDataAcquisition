@@ -1,25 +1,25 @@
 {
   "fixture_inputs": {
     "openalex": [
-      "tests\\fixtures\\bronze\\openalex\\publication\\sample_ci_2026-04-29.jsonl",
-      "tests\\fixtures\\bronze\\openalex\\publication\\sample_edge_nested_vocab_2026-05-05.jsonl"
+      "tests/fixtures/bronze/openalex/publication/sample_ci_2026-04-29.jsonl",
+      "tests/fixtures/bronze/openalex/publication/sample_edge_nested_vocab_2026-05-05.jsonl"
     ],
     "pubchem": [
-      "tests\\fixtures\\bronze\\pubchem\\compound\\sample_ci_2026-04-24.jsonl"
+      "tests/fixtures/bronze/pubchem/compound/sample_ci_2026-04-24.jsonl"
     ],
     "pubmed": [
-      "tests\\fixtures\\bronze\\pubmed\\publication\\sample_edge_publication_types_mesh_2026-05-05.jsonl"
+      "tests/fixtures/bronze/pubmed/publication/sample_edge_publication_types_mesh_2026-05-05.jsonl"
     ],
     "semanticscholar": [
-      "tests\\fixtures\\bronze\\semanticscholar\\publication\\sample_ci_2026-04-30.jsonl",
-      "tests\\fixtures\\bronze\\semanticscholar\\publication\\sample_edge_publication_types_citations_2026-05-05.jsonl"
+      "tests/fixtures/bronze/semanticscholar/publication/sample_ci_2026-04-30.jsonl",
+      "tests/fixtures/bronze/semanticscholar/publication/sample_edge_publication_types_citations_2026-05-05.jsonl"
     ],
     "uniprot": [
-      "tests\\fixtures\\bronze\\uniprot\\protein\\sample_ci_2026-04-24.jsonl",
-      "tests\\fixtures\\bronze\\uniprot\\protein\\sample_edge_semantic_payloads_2026-05-12.jsonl"
+      "tests/fixtures/bronze/uniprot/protein/sample_ci_2026-04-24.jsonl",
+      "tests/fixtures/bronze/uniprot/protein/sample_edge_semantic_payloads_2026-05-12.jsonl"
     ]
   },
-  "observed_fixture_path": "tests\\fixtures\\normalization\\non_chembl_observed_values.yaml",
+  "observed_fixture_path": "tests/fixtures/normalization/non_chembl_observed_values.yaml",
   "sections": {
     "crossref_publication_types": [
       "book-chapter",
