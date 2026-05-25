@@ -6,8 +6,6 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-import pytest
-
 from memory.notes import write_markdown_note
 from memory.resources import (
     MEMORY_ROOT,
@@ -19,6 +17,7 @@ from memory.resources import (
     iter_schema_paths,
 )
 from memory.validation import (
+    _bounded_episodic_note_paths,
     _is_tracked_generated_memory_artifact,
     _validate_note_placement,
     validate_memory_scaffold,
@@ -169,6 +168,34 @@ def test_memory_scaffold_validation_bounds_default_episodic_scan(
 
     assert limited_issues == []
     assert full_issues == []
+
+
+def test_bounded_episodic_note_paths_does_not_stat_notes(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    sessions_dir = tmp_path / "sessions"
+    sessions_dir.mkdir()
+    for index in range(10):
+        (sessions_dir / f"session-{index:03d}.md").write_text(
+            "# Session\n\n- Current context\n",
+            encoding="utf-8",
+        )
+
+    def fail_stat(self: Path) -> object:
+        raise AssertionError(f"unexpected stat call for {self}")
+
+    monkeypatch.setattr(Path, "stat", fail_stat)
+
+    note_paths = _bounded_episodic_note_paths(sessions_dir, limit=5)
+
+    assert [path.name for path in note_paths] == [
+        "session-000.md",
+        "session-001.md",
+        "session-002.md",
+        "session-003.md",
+        "session-004.md",
+    ]
 
 
 def test_memory_scaffold_validation_flags_invalid_note_files(tmp_path: Path) -> None:
