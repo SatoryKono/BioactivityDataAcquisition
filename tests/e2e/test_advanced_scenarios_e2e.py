@@ -15,13 +15,13 @@ import asyncio
 import json
 from datetime import UTC
 from pathlib import Path
-from uuid import uuid4
 
 import pyarrow as pa
 import pytest
 from deltalake import DeltaTable, write_deltalake
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import BatchID, RunID, RunType
+from tests.helpers.deterministic_ids import deterministic_uuid
 from .conftest import (
     _resolve_silver_table_path,
     assert_bronze_files_exist,
@@ -215,7 +215,7 @@ async def test_vacuum_runs_after_successful_pipeline(e2e_data_dir: Path):
     # Create context with vacuum enabled
     ctx = PipelineRunContext(
         pipeline_name="chembl_activity",
-        run_id=RunID(uuid4()),
+        run_id=RunID(deterministic_uuid("advanced.e2e.vacuum.run")),
         run_type=RunType.INCREMENTAL,
         resume=False,
         limit=5,
@@ -416,7 +416,7 @@ async def test_pipeline_resumes_from_checkpoint(e2e_data_dir: Path):
     )
 
     pipeline_name = "test_pipeline"
-    run_id = RunID(uuid4())
+    run_id = RunID(deterministic_uuid("advanced.e2e.checkpoint.run"))
 
     # Save checkpoint with metadata containing state
     await checkpoint.save(

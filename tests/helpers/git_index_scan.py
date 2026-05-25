@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import subprocess
 
+_GIT_GREP_TIMEOUT_RETURN_CODE = -2
 _WINDOWS_GIT_FAILURE_CODES = {-1, 4294967295}
 
 
@@ -59,7 +60,9 @@ def _iter_candidate_files(
                     continue
                 path = current_root_path / file_name
                 relative_path = path.relative_to(root).as_posix()
-                if any(relative_path.startswith(prefix) for prefix in excluded_prefixes):
+                if any(
+                    relative_path.startswith(prefix) for prefix in excluded_prefixes
+                ):
                     continue
                 try:
                     if path.is_file():
@@ -71,6 +74,115 @@ def _iter_candidate_files(
 
 def _use_filesystem_fallback(returncode: int) -> bool:
     return returncode in _WINDOWS_GIT_FAILURE_CODES
+
+
+def _use_git_grep_retry(returncode: int) -> bool:
+    return returncode == _GIT_GREP_TIMEOUT_RETURN_CODE or _use_filesystem_fallback(
+        returncode
+    )
+
+
+def _build_git_grep_command(
+    *,
+    patterns: tuple[str, ...],
+    pathspecs: tuple[str, ...],
+    excluded_prefixes: tuple[str, ...],
+) -> list[str]:
+    command = ["git", "grep", "-n", "-F"]
+    for pattern in patterns:
+        command.extend(("-e", pattern))
+    command.append("--")
+    command.extend(pathspecs)
+    command.extend(f":(exclude){prefix}**" for prefix in excluded_prefixes)
+    return command
+
+
+def _git_grep_pathspecs(
+    *,
+    paths: tuple[str, ...],
+    suffixes: tuple[str, ...],
+) -> tuple[str, ...]:
+    if suffixes:
+        return tuple(
+            f":(glob){path}/**/*{suffix}" for path in paths for suffix in suffixes
+        )
+    return paths
+
+
+def _git_grep_pathspec_batches(
+    *,
+    paths: tuple[str, ...],
+    suffixes: tuple[str, ...],
+) -> tuple[tuple[str, ...], ...]:
+    if suffixes:
+        return tuple(
+            (f":(glob){path}/**/*{suffix}",) for path in paths for suffix in suffixes
+        )
+    return tuple((path,) for path in paths)
+
+
+def _parse_git_grep_matches(stdout: str) -> tuple[GitGrepMatch, ...]:
+    matches: list[GitGrepMatch] = []
+    for line in stdout.splitlines():
+        path, line_number, text = line.split(":", 2)
+        matches.append(GitGrepMatch(path=path, line_number=line_number, text=text))
+    return tuple(matches)
+
+
+def _run_git_grep(
+    *,
+    root: Path,
+    command: list[str],
+    timeout: float,
+) -> subprocess.CompletedProcess[str]:
+    try:
+        return subprocess.run(
+            command,
+            cwd=root,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired:
+        return subprocess.CompletedProcess(
+            command,
+            _GIT_GREP_TIMEOUT_RETURN_CODE,
+            "",
+            f"git grep scan timed out after {timeout:.1f}s",
+        )
+
+
+def _git_grep_fixed_in_batches(
+    *,
+    root: Path,
+    patterns: tuple[str, ...],
+    paths: tuple[str, ...],
+    excluded_prefixes: tuple[str, ...],
+    suffixes: tuple[str, ...],
+    timeout: float,
+) -> tuple[GitGrepMatch, ...] | None:
+    matches: list[GitGrepMatch] = []
+    for pathspecs in _git_grep_pathspec_batches(paths=paths, suffixes=suffixes):
+        command = _build_git_grep_command(
+            patterns=patterns,
+            pathspecs=pathspecs,
+            excluded_prefixes=excluded_prefixes,
+        )
+        result = _run_git_grep(root=root, command=command, timeout=timeout)
+        if result.returncode == 1:
+            continue
+        if _use_git_grep_retry(result.returncode):
+            return None
+        if result.returncode != 0:
+            raise AssertionError(
+                "git grep scan failed with exit code "
+                f"{result.returncode}: {result.stderr}"
+            )
+        matches.extend(_parse_git_grep_matches(result.stdout))
+    return tuple(matches)
 
 
 def _filesystem_grep_fixed(
@@ -90,18 +202,20 @@ def _filesystem_grep_fixed(
     ):
         relative_path = path.relative_to(root).as_posix()
         try:
-            lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+            lines = path.open(encoding="utf-8", errors="replace")
         except OSError:
             continue
-        for index, line in enumerate(lines, start=1):
-            if any(pattern in line for pattern in patterns):
-                matches.append(
-                    GitGrepMatch(
-                        path=relative_path,
-                        line_number=str(index),
-                        text=line,
+        with lines:
+            for index, line in enumerate(lines, start=1):
+                line = line.rstrip("\r\n")
+                if any(pattern in line for pattern in patterns):
+                    matches.append(
+                        GitGrepMatch(
+                            path=relative_path,
+                            line_number=str(index),
+                            text=line,
+                        )
                     )
-                )
     return tuple(matches)
 
 
@@ -132,36 +246,25 @@ def git_grep_fixed(
     Architecture tests should prefer this over ``Path.rglob`` for repo-wide
     source scans, especially on Windows/WSL mounted worktrees.
     """
-    command = ["git", "grep", "-n", "-F"]
-    for pattern in patterns:
-        command.extend(("-e", pattern))
-    command.append("--")
-    if suffixes:
-        command.extend(
-            f":(glob){path}/**/*{suffix}" for path in paths for suffix in suffixes
-        )
-    else:
-        command.extend(paths)
-    command.extend(f":(exclude){prefix}**" for prefix in excluded_prefixes)
-
-    try:
-        result = subprocess.run(
-            command,
-            cwd=root,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            check=False,
-            timeout=timeout,
-        )
-    except subprocess.TimeoutExpired as exc:
-        raise AssertionError(
-            f"git grep scan timed out after {timeout:.1f}s: {command!r}"
-        ) from exc
+    command = _build_git_grep_command(
+        patterns=patterns,
+        pathspecs=_git_grep_pathspecs(paths=paths, suffixes=suffixes),
+        excluded_prefixes=excluded_prefixes,
+    )
+    result = _run_git_grep(root=root, command=command, timeout=timeout)
     if result.returncode == 1:
         return ()
-    if _use_filesystem_fallback(result.returncode):
+    if _use_git_grep_retry(result.returncode):
+        batched_matches = _git_grep_fixed_in_batches(
+            root=root,
+            patterns=patterns,
+            paths=paths,
+            excluded_prefixes=excluded_prefixes,
+            suffixes=suffixes,
+            timeout=timeout,
+        )
+        if batched_matches is not None:
+            return batched_matches
         return _filesystem_grep_fixed(
             root=root,
             patterns=patterns,
@@ -174,11 +277,7 @@ def git_grep_fixed(
             f"git grep scan failed with exit code {result.returncode}: {result.stderr}"
         )
 
-    matches: list[GitGrepMatch] = []
-    for line in result.stdout.splitlines():
-        path, line_number, text = line.split(":", 2)
-        matches.append(GitGrepMatch(path=path, line_number=line_number, text=text))
-    return tuple(matches)
+    return _parse_git_grep_matches(result.stdout)
 
 
 def git_tracked_files(
@@ -216,9 +315,11 @@ def git_tracked_files(
             f"{result.returncode}: {result.stderr}"
         )
     files = tuple(
-        root / rel_path
+        path
         for rel_path in result.stdout.splitlines()
-        if not suffixes or rel_path.endswith(suffixes)
+        if (not suffixes or rel_path.endswith(suffixes))
+        for path in (root / rel_path,)
+        if path.exists()
     )
     return files
 

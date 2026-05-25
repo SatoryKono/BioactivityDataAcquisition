@@ -14,18 +14,16 @@ from bioetl.infrastructure.observability._prometheus_metric_label_normalizers im
     normalize_observability_mode,
     normalize_postrun_phase,
     normalize_publication_status,
-    normalize_runtime_phase,
-    normalize_runtime_stage,
-    normalize_silver_filter_field,
-    normalize_stage_model_outcome,
-    normalize_stage_model_stage,
-    normalize_terminal_status,
     normalize_publication_vocab_field,
     normalize_publication_vocab_handling,
     normalize_publication_vocab_provider,
-)
-from bioetl.infrastructure.observability._prometheus_metric_label_normalizers import (
+    normalize_runtime_phase,
+    normalize_runtime_stage,
+    normalize_silver_filter_field,
     normalize_source_file_label,
+    normalize_stage_model_outcome,
+    normalize_stage_model_stage,
+    normalize_terminal_status,
 )
 from bioetl.infrastructure.observability.prometheus_metrics import (
     COUNTERS,

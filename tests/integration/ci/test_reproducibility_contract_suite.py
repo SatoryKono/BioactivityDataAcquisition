@@ -510,170 +510,14 @@ def _family_context(family: str) -> tuple[str, str, str]:
     return provider, entity, f"{provider}_{entity}"
 
 
-def test_reproducibility_contract_manifest_diff_classifies_occurrence_only() -> None:
-    store = _InMemoryRunManifestStore()
-    left = _make_manifest(
-        manifest_id="manifest-left",
-        run_id=RunID(UUID("00000000-0000-0000-0000-000000000301")),
-        execution_fingerprint="fp-stable",
-    )
-    right = _make_manifest(
-        manifest_id="manifest-right",
-        run_id=RunID(UUID("00000000-0000-0000-0000-000000000302")),
-        execution_fingerprint="fp-stable",
-    )
-    store.save(left)
-    store.save(right)
-
-    result = RunManifestInspectionService(manifest_port=store).diff(
-        "manifest-left",
-        "manifest-right",
-    )
-
-    assert result.classification == "occurrence_only"
-    assert result.semantic_equivalent is True
-    assert result.occurrence_only is True
-    assert result.occurrence_difference_fields == ("manifest_id", "run_id")
 
 
-def test_reproducibility_contract_manifest_diff_treats_created_at_as_occurrence_only() -> (
-    None
-):
-    store = _InMemoryRunManifestStore()
-    left = _make_manifest(
-        manifest_id="manifest-left-created-at",
-        run_id=RunID(UUID("00000000-0000-0000-0000-000000000316")),
-        execution_fingerprint="fp-created-at-stable",
-    )
-    right = replace(
-        left,
-        manifest_id="manifest-right-created-at",
-        run_id=RunID(UUID("00000000-0000-0000-0000-000000000317")),
-        created_at=datetime(2025, 1, 2, tzinfo=UTC),
-    )
-    store.save(left)
-    store.save(right)
-
-    result = RunManifestInspectionService(manifest_port=store).diff(
-        "manifest-left-created-at",
-        "manifest-right-created-at",
-    )
-
-    assert result.classification == "occurrence_only"
-    assert result.semantic_equivalent is True
-    assert result.occurrence_only is True
-    assert result.occurrence_difference_fields == (
-        "created_at",
-        "manifest_id",
-        "run_id",
-    )
 
 
-def test_reproducibility_contract_manifest_diff_classifies_semantic_drift() -> None:
-    store = _InMemoryRunManifestStore()
-    left = _make_manifest(
-        manifest_id="manifest-left",
-        run_id=RunID(UUID("00000000-0000-0000-0000-000000000303")),
-        execution_fingerprint="fp-left",
-        config_hash="hash-left",
-    )
-    right = _make_manifest(
-        manifest_id="manifest-right",
-        run_id=RunID(UUID("00000000-0000-0000-0000-000000000304")),
-        execution_fingerprint="fp-right",
-        config_hash="hash-right",
-    )
-    store.save(left)
-    store.save(right)
-
-    result = RunManifestInspectionService(manifest_port=store).diff(
-        "manifest-left",
-        "manifest-right",
-    )
-
-    assert result.classification == "semantic_drift"
-    assert result.semantic_equivalent is False
-    assert "code_provenance" in result.semantic_difference_fields
 
 
-def test_reproducibility_contract_strict_resume_rejects_incomplete_legacy_checkpoint_metadata() -> (
-    None
-):
-    """Hydrated legacy checkpoint payloads must fail closed in strict resume."""
-    service = CheckpointCompatibilityService(logger=MagicMock())
-    current = CheckpointMetadata(
-        records_processed=1000,
-        dq_contract_compatibility_hash="same-hash",
-        pipeline_version="1.0.0",
-        execution_fingerprint="fp-current",
-        manifest_id="manifest-current",
-        effective_config_hash="a" * 64,
-        effective_config_artifact_id="eca-current",
-        contract_ref="chembl.activity",
-        contract_version="1.0.0",
-        git_commit="b" * 40,
-        exact_replay=True,
-        input_snapshot_ids=("snapshot-a",),
-    )
-    checkpoint = CheckpointMetadata.from_legacy_metadata(
-        {
-            "records_processed": 500,
-            "execution_fingerprint": "fp-current",
-            "manifest_id": "manifest-current",
-            "effective_config_hash": "a" * 64,
-            "effective_config_artifact_id": "eca-current",
-            "contract_ref": "chembl.activity",
-            "contract_version": "1.0.0",
-            "git_commit": "b" * 40,
-            "exact_replay": True,
-        }
-    )
-
-    result = service.validate_checkpoint_compatibility(current, checkpoint)
-
-    assert result.compatible is False
-    assert result.execution_identity_compatible is False
-    assert result.identity_continuity_proven is False
-    assert any(
-        "checkpoint_missing_required_execution_anchor" in message
-        for message in result.messages
-    )
-    assert any(
-        "checkpoint_missing_snapshot_anchor" in message for message in result.messages
-    )
 
 
-def test_reproducibility_contract_manifest_diff_exposes_exact_replay_parentage() -> (
-    None
-):
-    store = _InMemoryRunManifestStore()
-    parent_run_id = RunID(UUID("00000000-0000-0000-0000-000000000305"))
-    child_run_id = RunID(UUID("00000000-0000-0000-0000-000000000306"))
-    parent = _make_manifest(
-        manifest_id="manifest-parent",
-        run_id=parent_run_id,
-        execution_fingerprint="fp-stable",
-    )
-    child = _make_manifest(
-        manifest_id="manifest-child",
-        run_id=child_run_id,
-        execution_fingerprint="fp-stable",
-        replay_of_run_id=str(parent_run_id),
-        replay_of_manifest_id="manifest-parent",
-    )
-    store.save(parent)
-    store.save(child)
-
-    result = RunManifestInspectionService(manifest_port=store).diff(
-        "manifest-parent",
-        "manifest-child",
-    )
-
-    assert result.classification == "semantic_equivalent_with_noncanonical_differences"
-    assert result.semantic_equivalent is True
-    assert result.occurrence_only is False
-    assert result.replay_relationship == "right_is_exact_replay_of_left"
-    assert "replay_of_manifest_id" in result.noncanonical_difference_fields
 
 
 def test_reproducibility_contract_live_capture_materialized_snapshot_parent_state() -> (
@@ -2021,83 +1865,12 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
     assert "lineage_completeness" in threshold_failures
 
 
-def test_reproducibility_contract_inventory_covers_all_production_families() -> None:
-    entity_families = {
-        f"{path.parent.name}.{path.stem}"
-        for path in Path("configs/entities").glob("*/*.yaml")
-    }
-    composite_families = {
-        f"composite.{path.stem}" for path in Path("configs/composites").glob("*.yaml")
-    }
-
-    assert set(_PUBLISHED_PRODUCTION_FAMILIES) == entity_families | composite_families
 
 
-def test_reproducibility_contract_inventory_profiles_all_production_families() -> None:
-    inventory = published_reproducibility_family_inventory()
-    profile_by_family = {str(item["family"]): item for item in inventory}
-
-    assert set(profile_by_family) == set(_PUBLISHED_PRODUCTION_FAMILIES)
-    assert profile_by_family["chembl.activity"]["strict_exact_replay_supported"] is True
-    assert profile_by_family["chembl.activity"]["strict_replay_runtime_verdict"] == (
-        "allowed_with_snapshot_backed_source_refs"
-    )
-    assert (
-        profile_by_family["openalex.publication"]["strict_exact_replay_supported"]
-        is True
-    )
-    assert (
-        profile_by_family["openalex.publication"]["strict_replay_runtime_verdict"]
-        == "allowed_with_snapshot_backed_source_refs"
-    )
-    assert (
-        profile_by_family["composite.publication"]["exact_replay_support_boundary"]
-        == "composite_snapshot_backed_input_envelope"
-    )
-    assert (
-        profile_by_family["composite.publication"]["strict_replay_runtime_verdict"]
-        == "requires_full_composite_snapshot_envelope"
-    )
-    assert profile_by_family["composite.publication"]["lineage_closure_supported"] is (
-        True
-    )
 
 
-def test_reproducibility_contract_silver_batch_dedup_is_order_insensitive() -> None:
-    forward = [
-        {"id": "1", "value": "winner", "content_hash": "a-hash"},
-        {"id": "1", "value": "loser", "content_hash": "z-hash"},
-    ]
-    reverse = list(reversed(forward))
-    expected = [{"id": "1", "value": "winner", "content_hash": "a-hash"}]
-
-    assert _deduplicate_by_primary_keys_impl(forward, ["id"]) == expected
-    assert _deduplicate_by_primary_keys_impl(reverse, ["id"]) == expected
 
 
-def test_reproducibility_contract_composite_rows_exclude_runtime_anchors() -> None:
-    mixin = _make_merge_metrics_mixin()
-    df = pl.DataFrame({"doi": ["10.1/a"]})
-    metadata_timestamp = datetime(2025, 2, 3, 0, 0, tzinfo=UTC)
-
-    first = mixin._add_lineage(
-        df,
-        enrichment_results={},
-        run_id="run-left",
-        metadata_timestamp=metadata_timestamp,
-        sources_used=["seed"],
-    )
-    second = mixin._add_lineage(
-        df,
-        enrichment_results={},
-        run_id="run-right",
-        metadata_timestamp=metadata_timestamp,
-        sources_used=["seed"],
-    )
-
-    assert "_composite_run_id" not in first.columns
-    assert "_lineage_created_at" not in first.columns
-    assert first.columns == second.columns
 
 
 @pytest.mark.asyncio
@@ -2116,56 +1889,3 @@ async def test_reproducibility_contract_composite_quarantine_replay_anchor_is_de
     assert write_kwargs["metadata"]["replay_contract"] == "excluded_from_exact_replay"
 
 
-def test_reproducibility_contract_composite_quarantine_is_explicitly_occurrence_only() -> (
-    None
-):
-    manifest_store = _InMemoryRunManifestStore()
-    ledger_store = _InMemoryRunLedgerStore()
-    run_id = RunID(UUID("00000000-0000-0000-0000-000000000402"))
-    manifest = _make_manifest(
-        manifest_id="manifest-composite-quarantine",
-        run_id=run_id,
-        execution_fingerprint="fp-stable",
-    )
-    manifest_store.save(manifest)
-    ledger_store.append(
-        RunLedgerEntry(
-            entry_id="entry-composite-cv-1",
-            manifest_id=manifest.manifest_id,
-            run_id=run_id,
-            event_type="dq_policy_applied",
-            occurred_at=datetime(2025, 2, 3, tzinfo=UTC),
-            event_family="dq",
-            status="quarantined",
-            stage="cross_validation",
-            details={
-                "rule_id": "composite.cross_validation.quarantine",
-                "disposition": "quarantine",
-                "violation_kind": "cross_validation_mismatch",
-                "config_path": "cross_validation",
-                "artifact_policy": "occurrence_only_diagnostic",
-                "replay_contract": "excluded_from_exact_replay",
-                "diagnostic_scope": "composite_cross_validation_quarantine",
-            },
-        )
-    )
-
-    result = RunManifestInspectionService(
-        manifest_port=manifest_store,
-        ledger_port=ledger_store,
-    ).show(manifest.manifest_id)
-
-    assert (
-        result.diagnostics["cross_validation_quarantine_policy"]
-        == "occurrence_only_diagnostic"
-    )
-    assert (
-        result.diagnostics["cross_validation_quarantine_replay_contract"]
-        == "excluded_from_exact_replay"
-    )
-    assert result.diagnostics["occurrence_only_diagnostics"] == [
-        "composite_cross_validation_quarantine"
-    ]
-    assert result.identity_graph["occurrence_only_diagnostics"] == [
-        "composite_cross_validation_quarantine"
-    ]

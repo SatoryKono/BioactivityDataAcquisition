@@ -20,8 +20,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import BioETLError
-from bioetl.infrastructure.observability._prometheus_metric_label_normalizers import (
-    normalize_adapter_endpoint_label,
+from bioetl.infrastructure.observability.prometheus_metric_label_dispatch import (
+    normalize_metric_dispatch_labels,
 )
 
 if TYPE_CHECKING:
@@ -91,19 +91,25 @@ class AdapterMetricsRecorder:
             raise
         finally:
             duration = time.perf_counter() - start
-            normalized_endpoint = normalize_adapter_endpoint_label(endpoint)
-            labels = {"provider": self.provider, "endpoint": normalized_endpoint}
             if self.metrics is not None:
+                duration_labels = normalize_metric_dispatch_labels(
+                    "bioetl_adapter_request_duration_seconds",
+                    {"provider": self.provider, "endpoint": endpoint},
+                )
                 self.metrics.observe_histogram(
                     "bioetl_adapter_request_duration_seconds",
                     duration,
-                    labels,
+                    duration_labels,
                 )
 
+                request_labels = normalize_metric_dispatch_labels(
+                    "bioetl_adapter_requests_total",
+                    {"provider": self.provider, "endpoint": endpoint, "status": status},
+                )
                 self.metrics.increment_counter(
                     "bioetl_adapter_requests_total",
                     1,
-                    {**labels, "status": status},
+                    request_labels,
                 )
 
     def record_batch_size(self, endpoint: str, size: int) -> None:
@@ -122,11 +128,14 @@ class AdapterMetricsRecorder:
         """
         if self.metrics is None:
             return
-        normalized_endpoint = normalize_adapter_endpoint_label(endpoint)
+        labels = normalize_metric_dispatch_labels(
+            "bioetl_adapter_batch_size",
+            {"provider": self.provider, "endpoint": endpoint},
+        )
         self.metrics.observe_histogram(
             "bioetl_adapter_batch_size",
             float(size),
-            {"provider": self.provider, "endpoint": normalized_endpoint},
+            labels,
         )
 
     def record_dropped_duplicates(self, entity_type: str, count: int = 1) -> None:

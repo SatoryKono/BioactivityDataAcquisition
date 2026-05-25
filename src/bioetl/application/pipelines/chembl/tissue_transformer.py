@@ -12,10 +12,10 @@ __all__ = ["TissueTransformer"]
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.pipelines.chembl.alias_policy import get_bronze_provider_aliases
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
-from bioetl.application.pipelines.chembl.alias_policy import get_bronze_provider_aliases
 from bioetl.application.pipelines.chembl.provider_aliases import (
     normalize_provider_aliases,
 )

@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `1935`
-- Internal import edges (raw): `7653`
+- Scanned modules: `1934`
+- Internal import edges (raw): `7652`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `330`
@@ -21,15 +21,15 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1304 OK| application
-    application -->|1142 OK| domain
+    application -->|1307 OK| application
+    application -->|1141 OK| domain
     composition -->|287 OK| application
     composition -->|686 OK| composition
     composition -->|444 OK| domain
     composition -->|343 OK| infrastructure
     domain -->|1232 OK| domain
     infrastructure -->|791 OK| domain
-    infrastructure -->|972 OK| infrastructure
+    infrastructure -->|969 OK| infrastructure
     interfaces -->|76 OK| application
     interfaces -->|65 OK| composition
     interfaces -->|59 OK| domain
@@ -40,15 +40,15 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1304 | allowed |
-| `application`    | `domain`         |    1142 | allowed |
+| `application`    | `application`    |    1307 | allowed |
+| `application`    | `domain`         |    1141 | allowed |
 | `composition`    | `application`    |     287 | allowed |
 | `composition`    | `composition`    |     686 | allowed |
 | `composition`    | `domain`         |     444 | allowed |
 | `composition`    | `infrastructure` |     343 | allowed |
 | `domain`         | `domain`         |    1232 | allowed |
 | `infrastructure` | `domain`         |     791 | allowed |
-| `infrastructure` | `infrastructure` |     972 | allowed |
+| `infrastructure` | `infrastructure` |     969 | allowed |
 | `interfaces`     | `application`    |      76 | allowed |
 | `interfaces`     | `composition`    |      65 | allowed |
 | `interfaces`     | `domain`         |      59 | allowed |
@@ -115,9 +115,9 @@ flowchart LR
 | `infrastructure.quality`       | `domain.types`                  |      15 |
 | `composition.factories`        | `domain.behavior`               |      14 |
 | `interfaces.http`              | `domain.control_plane`          |      14 |
-| `application.services`         | `domain.lineage`                |      13 |
 | `composition.runtime_builders` | `infrastructure.schemas`        |      13 |
 | `interfaces.cli`               | `composition.registry_api`      |      13 |
+| `application.services`         | `domain.behavior`               |      12 |
 
 ## Policy Violations
 

@@ -1,0 +1,155 @@
+"""Owner inventory for module-level lazy export facades."""
+
+from __future__ import annotations
+
+import ast
+from pathlib import Path
+import subprocess
+
+import pytest
+
+ROOT = Path(__file__).resolve().parents[2]
+SRC_ROOT = ROOT / "src" / "bioetl"
+
+EXPECTED_LAZY_EXPORT_FACADES = {
+    "src/bioetl/application/core/wiring/__init__.py": "public_package_facade",
+    "src/bioetl/application/core/wiring/factory.py": "compatibility_facade",
+    "src/bioetl/application/core/wiring/registry.py": "compatibility_facade",
+    "src/bioetl/application/core/wiring/transformer.py": "compatibility_facade",
+    "src/bioetl/application/pipelines/common/blocks.py": "dynamic_entrypoint",
+    "src/bioetl/application/services/control_plane/__init__.py": (
+        "public_package_facade"
+    ),
+    "src/bioetl/composition/bootstrap/__init__.py": "public_package_facade",
+    "src/bioetl/composition/bootstrap/cli/__init__.py": "public_package_facade",
+    "src/bioetl/composition/bootstrap/runtime/__init__.py": (
+        "public_package_facade"
+    ),
+    "src/bioetl/composition/bootstrap/runtime/composite.py": "compatibility_facade",
+    "src/bioetl/composition/control_plane_api.py": "public_facade",
+    "src/bioetl/composition/entrypoints.py": "public_facade",
+    "src/bioetl/composition/execution_api.py": "public_facade",
+    "src/bioetl/composition/factories/__init__.py": "public_package_facade",
+    "src/bioetl/composition/factories/dq/__init__.py": "public_package_facade",
+    "src/bioetl/composition/factories/pipeline/__init__.py": (
+        "public_package_facade"
+    ),
+    "src/bioetl/composition/factories/services/__init__.py": (
+        "public_package_facade"
+    ),
+    "src/bioetl/composition/health_api.py": "public_facade",
+    "src/bioetl/composition/maintenance_api.py": "public_facade",
+    "src/bioetl/composition/providers/__init__.py": "public_package_facade",
+    "src/bioetl/composition/registry_api.py": "public_facade",
+    "src/bioetl/composition/resources_api.py": "public_facade",
+    "src/bioetl/composition/runtime_builders/run_manifest_support.py": (
+        "compatibility_facade"
+    ),
+    "src/bioetl/domain/__init__.py": "public_package_facade",
+    "src/bioetl/domain/behavior/__init__.py": "public_package_facade",
+    "src/bioetl/domain/config/__init__.py": "public_package_facade",
+    "src/bioetl/domain/exceptions/__init__.py": "public_package_facade",
+    "src/bioetl/domain/filtering/__init__.py": "public_package_facade",
+    "src/bioetl/domain/normalization/profiles/__init__.py": (
+        "public_package_facade"
+    ),
+    "src/bioetl/domain/ports/__init__.py": "public_package_facade",
+    "src/bioetl/domain/types/__init__.py": "public_package_facade",
+    "src/bioetl/domain/value_objects/__init__.py": "public_package_facade",
+    "src/bioetl/infrastructure/adapters/http/health_monitor.py": (
+        "compatibility_facade"
+    ),
+    "src/bioetl/infrastructure/config/__init__.py": "public_package_facade",
+    "src/bioetl/infrastructure/export/__init__.py": "public_package_facade",
+    "src/bioetl/infrastructure/observability/__init__.py": "public_package_facade",
+    "src/bioetl/interfaces/cli/commands/__init__.py": "public_package_facade",
+    "src/bioetl/interfaces/cli/commands/domains/composite/__init__.py": (
+        "public_package_facade"
+    ),
+    "src/bioetl/interfaces/cli/commands/domains/diagnostics/__init__.py": (
+        "public_package_facade"
+    ),
+    "src/bioetl/interfaces/cli/commands/domains/health/__init__.py": (
+        "public_package_facade"
+    ),
+    "src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py": (
+        "public_package_facade"
+    ),
+    "src/bioetl/interfaces/cli/commands/domains/quarantine/__init__.py": (
+        "public_package_facade"
+    ),
+    "src/bioetl/interfaces/cli/commands/domains/run/__init__.py": (
+        "public_package_facade"
+    ),
+    "src/bioetl/interfaces/cli/commands/domains/run_all/__init__.py": (
+        "public_package_facade"
+    ),
+}
+
+ALLOWED_CLASSIFICATIONS = frozenset(
+    {
+        "compatibility_facade",
+        "dynamic_entrypoint",
+        "public_facade",
+        "public_package_facade",
+    }
+)
+
+
+def _has_module_level_getattr(path: Path) -> bool:
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    return any(
+        isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and node.name == "__getattr__"
+        for node in tree.body
+    )
+
+
+def _module_level_lazy_export_paths() -> set[str]:
+    result = subprocess.run(
+        ["rg", "--files-with-matches", "def __getattr__", "src/bioetl", "--glob", "*.py"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode in {0, 1}, result.stderr
+    candidate_paths = (
+        ROOT / line.strip()
+        for line in result.stdout.splitlines()
+        if line.strip()
+    )
+    return {
+        path.relative_to(ROOT).as_posix()
+        for path in candidate_paths
+        if _has_module_level_getattr(path)
+    }
+
+
+@pytest.mark.architecture
+def test_module_level_lazy_export_facades_are_owner_classified() -> None:
+    """New lazy export facades require an explicit owner classification."""
+    actual_paths = _module_level_lazy_export_paths()
+    expected_paths = set(EXPECTED_LAZY_EXPORT_FACADES)
+
+    assert actual_paths == expected_paths, (
+        "Module-level lazy export facade inventory drifted. Classify each new "
+        "__getattr__ surface as public API, dynamic entrypoint, compatibility "
+        "facade, or remove it.\n"
+        f"unclassified={sorted(actual_paths - expected_paths)}\n"
+        f"stale={sorted(expected_paths - actual_paths)}"
+    )
+    assert set(EXPECTED_LAZY_EXPORT_FACADES.values()) <= ALLOWED_CLASSIFICATIONS
+
+
+@pytest.mark.architecture
+def test_lazy_export_facade_inventory_has_owner_test_coverage() -> None:
+    """Compatibility-sensitive lazy export groups must have dedicated owner tests."""
+    required_owner_tests = {
+        "tests/architecture/test_compatibility_importer_census_governance.py",
+        "tests/architecture/test_compatibility_freeze_guards.py",
+        "tests/architecture/test_application_services_lazy_facade_governance.py",
+        "tests/architecture/test_domain_public_api.py",
+    }
+    for test_path in required_owner_tests:
+        assert (ROOT / test_path).exists(), test_path

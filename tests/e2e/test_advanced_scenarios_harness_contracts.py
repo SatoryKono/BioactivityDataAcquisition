@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from pathlib import Path
-from uuid import uuid4
 
 import pytest
 
 from bioetl.domain.types import BatchID
+from tests.helpers.deterministic_ids import deterministic_uuid
 from tests.e2e.test_advanced_scenarios_e2e import (
     _make_threadless_quarantine_harness_adapter,
 )
@@ -31,7 +31,7 @@ async def test_quarantine_records_are_persisted_via_harness_adapter_contract(e2e
     await manager.quarantine_record(
         record={"entity_id": "test_entity_1", "data": {"value": 123}},
         error_type=ErrorType.DATA_QUALITY,
-        batch_id=BatchID(uuid4()),
+        batch_id=BatchID(deterministic_uuid("advanced.harness.quarantine.batch")),
         error_details="Test DQ error",
         ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
@@ -55,7 +55,7 @@ async def test_quarantine_can_be_inspected_via_harness_adapter_contract(e2e_data
             pipeline="test_pipeline",
             error_code="DataQualityError",
             payload={"entity_id": f"entity_{i}"},
-            bronze_batch_id=BatchID(uuid4()),
+            bronze_batch_id=BatchID(deterministic_uuid("advanced.harness.quarantine.batch")),
             metadata={"error_message": f"Error {i}"},
             ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )

@@ -78,7 +78,7 @@ Recommended agent split:
 - Prometheus also records bounded quarantine reason labels through
   `quarantine_records_total`, but current normalization collapses Silver filter
   rejects to a coarse `filtered_out_silver` bucket in
-  `src/bioetl/infrastructure/observability/prometheus_metric_label_policies.py`.
+  `src/bioetl/infrastructure/observability/prometheus_metric_label_dispatch.py`.
 
 ## Gaps
 
@@ -403,7 +403,8 @@ Tasks:
 Likely files:
 
 - `src/bioetl/infrastructure/observability/prometheus_metrics.py`
-- `src/bioetl/infrastructure/observability/prometheus_metric_label_policies.py`
+- `src/bioetl/infrastructure/observability/prometheus_metric_label_dispatch.py`
+- `src/bioetl/infrastructure/observability/prometheus_metric_label_policy_sets.py`
 - `docs/03-guides/metrics-monitoring.md`
 
 Acceptance criteria:

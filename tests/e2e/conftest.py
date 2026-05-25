@@ -20,6 +20,7 @@ import json
 import os
 import shutil
 import tempfile
+from urllib.parse import unquote, urlparse
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from dataclasses import replace
@@ -116,6 +117,40 @@ def _load_delta_table() -> type[Any]:
     from deltalake import DeltaTable
 
     return DeltaTable
+
+
+@cache
+def _load_pyarrow_parquet() -> Any:
+    """Import pyarrow.parquet lazily for direct Parquet reads in E2E assertions."""
+    import pyarrow.parquet as pq
+
+    return pq
+
+
+def _delta_file_path_from_uri(uri: str) -> Path:
+    """Normalize one Delta file URI to a local filesystem path."""
+    if uri.startswith("file://"):
+        parsed = urlparse(uri)
+        normalized_path = unquote(parsed.path)
+        if (
+            len(normalized_path) >= 3
+            and normalized_path[0] == "/"
+            and normalized_path[2] == ":"
+        ):
+            normalized_path = normalized_path[1:]
+        return Path(normalized_path)
+    return Path(uri)
+
+
+def _read_delta_records(table_path: Path) -> list[dict[str, Any]]:
+    """Read active Delta rows via file URIs, avoiding full snapshot materialization."""
+    dt = _load_delta_table()(str(table_path))
+    pq = _load_pyarrow_parquet()
+    records: list[dict[str, Any]] = []
+    for uri in dt.file_uris():
+        parquet_path = _delta_file_path_from_uri(uri)
+        records.extend(pq.read_table(parquet_path).to_pylist())
+    return records
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
@@ -268,6 +303,36 @@ def preserve_bronze_payloads_for_e2e() -> Generator[None, None, None]:
         yield
     finally:
         BronzeWriter.cleanup_old_files = original_cleanup
+
+
+@pytest.fixture(autouse=True)
+def skip_silver_compaction_for_e2e() -> Generator[None, None, None]:
+    """Skip postrun Silver compaction in E2E to avoid Delta maintenance hangs.
+
+    E2E scenarios validate end-to-end extraction and persisted artifacts, not
+    retention/maintenance behavior. On Windows, delta-rs deduplication may keep
+    a background executor thread alive after timeout, which can block the next
+    test assertion when it opens the same Silver table. Keep maintenance
+    coverage in its dedicated unit/integration suites and make E2E deterministic.
+    """
+    from bioetl.application.core.postrun.compact_orchestrator import (
+        CompactionResult,
+        PostrunCompactService,
+    )
+
+    original_run_if_needed = PostrunCompactService.run_if_needed
+
+    async def _skip_compaction(
+        self: PostrunCompactService,  # pragma: no cover - exercised through E2E runs
+    ) -> CompactionResult:
+        self._logger.info("silver_compact_skipped_in_e2e")
+        return CompactionResult(status="skipped")
+
+    PostrunCompactService.run_if_needed = _skip_compaction
+    try:
+        yield
+    finally:
+        PostrunCompactService.run_if_needed = original_run_if_needed
 
 
 @pytest.fixture
@@ -1140,9 +1205,7 @@ def assert_silver_table_has_records(
     """
     table_path = _resolve_silver_table_path(data_dir, table_name)
 
-    dt = _load_delta_table()(str(table_path))
-    df = dt.to_pyarrow_table()
-    count = len(df)
+    count = len(_read_delta_records(table_path))
 
     if count < expected_min:
         raise AssertionError(
@@ -1196,8 +1259,7 @@ def assert_gold_table_has_records(
             f"flat={', '.join(str(base) for base in gold_bases)}"
         )
 
-    dt = _load_delta_table()(str(table_path))
-    count = len(dt.to_pyarrow_table())
+    count = len(_read_delta_records(table_path))
 
     if count < expected_min:
         raise AssertionError(
@@ -1222,8 +1284,7 @@ def get_silver_records(data_dir: Path, table_name: str) -> list[dict]:
     """
     table_path = _resolve_silver_table_path(data_dir, table_name)
 
-    dt = _load_delta_table()(str(table_path))
-    records = dt.to_pyarrow_table().to_pylist()
+    records = _read_delta_records(table_path)
 
     # Validate that records are dictionaries
     for i, record in enumerate(records):
@@ -1258,8 +1319,7 @@ def get_gold_records(data_dir: Path, table_name: str) -> list[dict]:
         if flat_path.exists() and (flat_path / "_delta_log").exists():
             table_path = flat_path
 
-    dt = _load_delta_table()(str(table_path))
-    records = dt.to_pyarrow_table().to_pylist()
+    records = _read_delta_records(table_path)
 
     # Validate that records are dictionaries
     for i, record in enumerate(records):

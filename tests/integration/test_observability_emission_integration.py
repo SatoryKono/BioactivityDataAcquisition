@@ -256,3 +256,42 @@ def test_pipeline_observer_emits_tracing_spans_through_recording_port() -> None:
     assert span.attributes["bioetl.preflight_completed"] is True
     assert span.attributes["bioetl.status"] == "success"
     assert "bioetl.duration_ms" in span.attributes
+
+
+@pytest.mark.integration
+def test_pipeline_observer_records_failure_span_and_error_metrics() -> None:
+    metrics = RecordingMetrics()
+    logger = RecordingLogger()
+    tracer = RecordingTracing()
+    observer = PipelineObserver(
+        pipeline_name="chembl_activity",
+        run_id=deterministic_uuid("observability.integration.failure.run"),
+        run_type=RunType.INCREMENTAL,
+        metrics=metrics,
+        logger=logger,  # type: ignore[arg-type]
+        clock=FixedClock(FIXED_TEST_TIME),
+        tracer=tracer,  # type: ignore[arg-type]
+        manifest_id="manifest-observability-failure",
+        contract_ref="chembl/activity/gold",
+        contract_version="1.0.0",
+    )
+
+    with pytest.raises(RuntimeError, match="observer boom"):
+        with observer:
+            raise RuntimeError("observer boom")
+
+    assert any(
+        name == "bioetl_pipeline_runs_total"
+        and labels["pipeline"] == "chembl_activity"
+        and labels["status"] == "failed"
+        for name, _value, labels in metrics.counters
+    )
+    assert len(tracer.spans) == 1
+    span = tracer.spans[0]
+    assert span.exited is True
+    assert len(span.exceptions) == 2
+    assert all(isinstance(exc, RuntimeError) for exc in span.exceptions)
+    assert all(str(exc) == "observer boom" for exc in span.exceptions)
+    assert span.attributes["bioetl.status"] == "failed"
+    assert span.attributes["error"] is True
+    assert tracer.flushed == 1

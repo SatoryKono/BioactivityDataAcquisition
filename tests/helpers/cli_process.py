@@ -2,16 +2,17 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 import os
 import subprocess
 import sys
-from types import ModuleType
-from typing import Callable
 from pathlib import Path
+from types import ModuleType
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_REPO_COMMAND_TIMEOUT_SECONDS = 60.0
 
 
 def repo_root() -> Path:
@@ -23,9 +24,13 @@ def run_repo_command(
     *args: str,
     cwd: Path | None = None,
     env: dict[str, str] | None = None,
-    timeout: float | None = None,
+    timeout: float | None = DEFAULT_REPO_COMMAND_TIMEOUT_SECONDS,
 ) -> subprocess.CompletedProcess[str]:
-    """Run a repository-relative subprocess command with stable defaults."""
+    """Run a repository-relative subprocess command with stable defaults.
+
+    Subprocess smoke tests should fail locally instead of waiting for the
+    suite-level pytest-timeout when a delegated CLI blocks before closing pipes.
+    """
     return subprocess.run(
         list(args),
         cwd=cwd or REPO_ROOT,
@@ -41,7 +46,7 @@ def run_repo_python(
     *args: str,
     cwd: Path | None = None,
     env: dict[str, str] | None = None,
-    timeout: float | None = None,
+    timeout: float | None = DEFAULT_REPO_COMMAND_TIMEOUT_SECONDS,
 ) -> subprocess.CompletedProcess[str]:
     """Run one Python command from the repository root by default."""
     return run_repo_command(
@@ -57,7 +62,7 @@ def run_python_cli(
     *args: str,
     cwd: Path | None = None,
     env: dict[str, str] | None = None,
-    timeout: float | None = None,
+    timeout: float | None = DEFAULT_REPO_COMMAND_TIMEOUT_SECONDS,
 ) -> subprocess.CompletedProcess[str]:
     """Backward-compatible alias for repository-root Python CLI execution."""
     return run_repo_python(
