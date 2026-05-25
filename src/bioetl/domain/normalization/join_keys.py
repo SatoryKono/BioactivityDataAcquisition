@@ -11,7 +11,6 @@ from bioetl.domain.normalization.identifiers import (
     normalize_pmid,
 )
 from bioetl.domain.normalization.text import normalize_title
-from bioetl.domain.value_objects import InChIKey
 from bioetl.domain.value_objects.identifiers import ChemblId, UniProtId
 
 __all__ = [
@@ -58,6 +57,8 @@ def _normalize_join_key_pmc_id(value: str) -> str | None:
 
 def _normalize_join_key_inchi_key(value: str) -> str | None:
     """Normalize InChIKey join text through the canonical value object seam."""
+    from bioetl.domain.value_objects.chemical import InChIKey
+
     normalized = InChIKey.from_raw(value)
     return None if normalized is None else normalized.value
 

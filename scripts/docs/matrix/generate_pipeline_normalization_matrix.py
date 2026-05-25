@@ -1750,6 +1750,11 @@ def _row_policy_metadata(
     )
     if semantic_category == "free_text" and "controlled-vocabulary" in notes.casefold():
         semantic_category = "controlled_vocabulary"
+    if (
+        controlled_vocabulary_source == _CHEMBL_REFERENCE_SOURCES_CONFIG
+        and semantic_category == "canonical_identifier"
+    ):
+        semantic_category = "reference_identifier"
     policy_scope = _policy_scope(
         provider=provider,
         entity=entity,

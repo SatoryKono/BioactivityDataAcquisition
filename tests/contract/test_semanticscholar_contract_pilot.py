@@ -9,14 +9,14 @@ from __future__ import annotations
 import asyncio
 import pytest
 from bioetl.domain.types import JsonDict
-from tests.contract import _semanticscholar_contract_support as semanticscholar_support
 
 pytest_plugins = ["tests.contract._semanticscholar_contract_support"]
+STABLE_DOI = "10.1038/s41586-020-2649-2"
 
 
 @pytest.mark.semanticscholar
 @pytest.mark.pilot_soak
-@pytest.mark.timeout(120)
+@pytest.mark.timeout(300)
 class TestSemanticScholarPilotContract:
     """Pilot-only Semantic Scholar live assertions."""
 
@@ -33,7 +33,7 @@ class TestSemanticScholarPilotContract:
         assert isinstance(external_ids, dict)
         assert (
             external_ids.get("DOI", "").lower()
-            == semanticscholar_support.STABLE_DOI.lower()
+            == STABLE_DOI.lower()
         )
 
     @pytest.mark.asyncio

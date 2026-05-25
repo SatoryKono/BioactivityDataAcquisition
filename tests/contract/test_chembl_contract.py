@@ -30,6 +30,23 @@ UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 pytestmark = pytest.mark.network
 
 
+async def _request_or_skip(
+    client: httpx.AsyncClient,
+    method: str,
+    url: str,
+    **kwargs: object,
+) -> httpx.Response:
+    """Execute request and skip on transient network/provider outages."""
+    try:
+        response = await client.request(method, url, **kwargs)
+    except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as exc:
+        pytest.skip(f"ChEMBL endpoint not reachable: {exc}")
+
+    if response.status_code in {429, 500, 502, 503, 504}:
+        pytest.skip(f"ChEMBL temporary server error: HTTP {response.status_code}")
+    return response
+
+
 @pytest.mark.chembl
 class TestChemblContract:
     """Contract tests for ChEMBL REST API."""
@@ -38,7 +55,11 @@ class TestChemblContract:
     async def test_status_endpoint_available(self) -> None:
         """Verify /status.json endpoint exists and returns valid response."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(f"{CHEMBL_API_BASE}/status.json")
+            response = await _request_or_skip(
+                client,
+                "GET",
+                f"{CHEMBL_API_BASE}/status.json",
+            )
 
         assert response.status_code == 200
         data = response.json()
@@ -50,7 +71,9 @@ class TestChemblContract:
     async def test_activity_endpoint_schema(self) -> None:
         """Verify activity endpoint returns expected schema."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{CHEMBL_API_BASE}/activity.json",
                 params={"limit": 1},
             )
@@ -75,7 +98,9 @@ class TestChemblContract:
     async def test_activity_snapshot_contract(self) -> None:
         """Verify the provider-facing activity payload matches the snapshot."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{CHEMBL_API_BASE}/activity.json",
                 params={"limit": 1},
             )
@@ -92,7 +117,9 @@ class TestChemblContract:
     async def test_molecule_endpoint_schema(self) -> None:
         """Verify molecule endpoint returns expected schema."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{CHEMBL_API_BASE}/molecule.json",
                 params={"limit": 1},
             )
@@ -112,7 +139,9 @@ class TestChemblContract:
     async def test_molecule_snapshot_contract(self) -> None:
         """Verify the provider-facing molecule payload matches the snapshot."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{CHEMBL_API_BASE}/molecule.json",
                 params={"limit": 1},
             )
@@ -129,7 +158,9 @@ class TestChemblContract:
     async def test_target_endpoint_schema(self) -> None:
         """Verify target endpoint returns expected schema."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{CHEMBL_API_BASE}/target.json",
                 params=CHEMBL_TARGET_CONTRACT_PARAMS,
             )
@@ -149,7 +180,9 @@ class TestChemblContract:
     async def test_target_snapshot_contract(self) -> None:
         """Verify the provider-facing target payload matches the snapshot."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{CHEMBL_API_BASE}/target.json",
                 params=CHEMBL_TARGET_CONTRACT_PARAMS,
             )
@@ -166,7 +199,9 @@ class TestChemblContract:
     async def test_assay_endpoint_schema(self) -> None:
         """Verify assay endpoint returns expected schema."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{CHEMBL_API_BASE}/assay.json",
                 params={"limit": 1},
             )
@@ -187,7 +222,9 @@ class TestChemblContract:
     async def test_pagination_meta_structure(self) -> None:
         """Verify pagination metadata structure."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{CHEMBL_API_BASE}/molecule.json",
                 params={"limit": 5},
             )
@@ -209,7 +246,9 @@ class TestChemblContract:
         """Verify server-side filtering capability."""
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Filter molecules by type
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{CHEMBL_API_BASE}/molecule.json",
                 params={"molecule_type": "Small molecule", "limit": 5},
             )
@@ -227,7 +266,11 @@ class TestChemblContract:
         chembl_id = "CHEMBL25"  # Aspirin
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(f"{CHEMBL_API_BASE}/molecule/{chembl_id}.json")
+            response = await _request_or_skip(
+                client,
+                "GET",
+                f"{CHEMBL_API_BASE}/molecule/{chembl_id}.json",
+            )
 
         assert response.status_code == 200
         data = response.json()

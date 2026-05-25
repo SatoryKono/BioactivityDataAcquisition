@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-24T16:49:41.102405+00:00",
+  "generated_at": "2026-05-24T19:36:42.135775+00:00",
   "summary": {
     "total_scripts": 396,
     "status_counts": {
@@ -6055,13 +6055,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 602,
+          "line": 595,
           "source_group": "tests",
           "text": "skip_rate = Path(\"scripts/engineering/ci/check_e2e_matrix_skip_rate.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 626,
+          "line": 619,
           "source_group": "tests",
           "text": "assert \"check_e2e_matrix_skip_rate.py\" in content"
         }
@@ -6094,13 +6094,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 603,
+          "line": 596,
           "source_group": "tests",
           "text": "rerun = Path(\"scripts/engineering/ci/check_e2e_rerun_stability.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 627,
+          "line": 620,
           "source_group": "tests",
           "text": "assert \"check_e2e_rerun_stability.py\" in content"
         }

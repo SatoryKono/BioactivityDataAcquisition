@@ -5743,7 +5743,7 @@
       "missing_lines": 10,
       "module": "bioetl.composition.observability",
       "path": "src/bioetl/composition/observability.py",
-      "source_lines": 145
+      "source_lines": 144
     },
     {
       "coverage_percent": 0.0,
@@ -5853,7 +5853,7 @@
       "missing_lines": 15,
       "module": "bioetl.composition.bootstrap.composite_infrastructure_context",
       "path": "src/bioetl/composition/bootstrap/composite_infrastructure_context.py",
-      "source_lines": 24
+      "source_lines": 29
     },
     {
       "coverage_percent": 0.0,
@@ -10823,7 +10823,7 @@
       "missing_lines": 38,
       "module": "bioetl.domain.normalization.join_keys",
       "path": "src/bioetl/domain/normalization/join_keys.py",
-      "source_lines": 214
+      "source_lines": 215
     },
     {
       "coverage_percent": 66.22,
@@ -19258,7 +19258,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-05-24",
-  "source_tree_sha256": "98139df78a81324ef4c37893f049bb6bcd434bb2d9a041fae870b93a307719ef",
+  "source_tree_sha256": "519704e7855a9eda9db6a68be4a9888e95bd06999f98054aab7e6c223af8516d",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

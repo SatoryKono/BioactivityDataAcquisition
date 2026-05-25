@@ -21,7 +21,7 @@ UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 
 
 @pytest.mark.semanticscholar
-@pytest.mark.timeout(120)
+@pytest.mark.timeout(300)
 class TestSemanticScholarContract:
     """Promotion-grade Semantic Scholar live contract checks."""
 
