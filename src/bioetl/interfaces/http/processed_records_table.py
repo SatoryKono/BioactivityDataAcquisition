@@ -150,7 +150,6 @@ def build_processed_records_table_payload(
 
     for spec in PROCESSED_RECORDS_ROW_SPECS:
         raw_value = _as_float(metric_values.get(spec.metric))
-
         value_text = _padded_count_text(raw_value, value_width)
         percentage_text = _format_percentage(
             value=raw_value,
@@ -400,7 +399,6 @@ def _format_percentage(
         return "100%" if value is not None else "No data"
     if value is None:
         return "No data"
-
     if bronze_value is None or bronze_value == 0:
         return "No data"
 
