@@ -21,7 +21,9 @@ from tests.contract.silver_schemas.conftest import (
 
 CHEMBL_SCHEMAS = tuple(
     sorted(
-        schema_name for schema_name in SILVER_SCHEMAS if schema_name.startswith("chembl_")
+        schema_name
+        for schema_name in SILVER_SCHEMAS
+        if schema_name.startswith("chembl_")
     )
 )
 STRING_PMID_SCHEMAS = tuple(

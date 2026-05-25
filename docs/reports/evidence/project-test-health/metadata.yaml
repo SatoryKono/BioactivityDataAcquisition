@@ -1,0 +1,13 @@
+id: project-test-health-metadata
+status: captured
+schema_version: 1
+policy_scope: non_canonical_evidence_summary
+generator_module: scripts.engineering.qa.test_health
+owner: quality
+freshness_window_days: 7
+last_verified: "2026-05-24"
+allowed_interpretation: backlog_signal_only
+canonical_sources:
+  - configs/quality/test_matrix.yaml
+  - configs/quality/test_health_reporting.yaml
+  - configs/quality/fixture_governance_ledger.yaml

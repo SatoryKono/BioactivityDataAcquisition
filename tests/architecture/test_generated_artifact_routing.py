@@ -113,8 +113,9 @@ def test_generated_artifact_routing_classifies_docs_helper_surfaces() -> None:
         if route.get("id") == "docs-export-merged-markdown"
     )
     assert docs_export_route["commit_policy"] == "ignored_local_export"
-    assert "docs/exports/full-documentation-no-plans-reports-skills.merged.md" in (
-        docs_export_route["outputs"]
+    assert (
+        "docs/exports/full-documentation-no-plans-reports-skills.merged.md"
+        in (docs_export_route["outputs"])
     )
 
 

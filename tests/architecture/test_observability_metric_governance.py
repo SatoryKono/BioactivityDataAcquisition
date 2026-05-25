@@ -69,7 +69,10 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
     }
 
     runtime_cardinality_review = payload["runtime_cardinality_review"]
-    assert runtime_cardinality_review["heuristic"] == "runtime_evidence_with_static_hotspot_seed"
+    assert (
+        runtime_cardinality_review["heuristic"]
+        == "runtime_evidence_with_static_hotspot_seed"
+    )
     assert runtime_cardinality_review["min_distinct_emitters"] >= 3
     assert (
         runtime_cardinality_review["exception_allowlist_field"]

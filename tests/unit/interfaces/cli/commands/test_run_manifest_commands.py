@@ -711,9 +711,7 @@ class _FakeHistoricalReplayUniverseReport:
         return {
             "report_id": self.report_id,
             "universal_claim": self.universal_claim,
-            "durable_evidence_coverage_claim": (
-                self.durable_evidence_coverage_claim
-            ),
+            "durable_evidence_coverage_claim": (self.durable_evidence_coverage_claim),
             "governed_full_corpus_gate": self.governed_full_corpus_gate,
         }
 

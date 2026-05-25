@@ -66,7 +66,7 @@ def test_parse_markdown_note_metadata_only_preserves_quoted_numeric_strings(
     path.write_text(
         "---\n"
         "id: '3467'\n"
-        "task_id: \"3507\"\n"
+        'task_id: "3507"\n'
         "created_at: '2026-04-20T00:00:00Z'\n"
         "ttl_days: 14\n"
         "confidence: episodic\n"

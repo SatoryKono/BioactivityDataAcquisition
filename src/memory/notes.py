@@ -37,7 +37,9 @@ def _open_with_timeout(path: Path, timeout: float):
     thread.join(timeout=timeout)
 
     if thread.is_alive():
-        raise TimeoutError(f"File open did not complete within {timeout} seconds: {path}")
+        raise TimeoutError(
+            f"File open did not complete within {timeout} seconds: {path}"
+        )
 
     if exception is not None:
         raise exception

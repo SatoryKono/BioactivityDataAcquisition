@@ -65,7 +65,9 @@ def _candidate_python_paths(root: Path) -> tuple[Path, ...]:
         return git_paths
 
     return tuple(
-        path for path in sorted(root.rglob("*.py")) if _read_candidate_source(path) is not None
+        path
+        for path in sorted(root.rglob("*.py"))
+        if _read_candidate_source(path) is not None
     )
 
 

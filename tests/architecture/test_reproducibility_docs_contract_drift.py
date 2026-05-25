@@ -140,8 +140,7 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
     assert "Reproducibility Support Matrix" in text
     assert (
         "Current published lineage closure boundary for Bronze -> Silver -> Gold "
-        "operator-grade trace/debug support covers these families:"
-        not in text
+        "operator-grade trace/debug support covers these families:" not in text
     )
     assert "## Reproducibility Scoring Rubric" in text
     assert "|   100 | `forensic_grade`" in text

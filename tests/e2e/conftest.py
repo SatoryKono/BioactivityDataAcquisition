@@ -692,10 +692,7 @@ def _skip_strict_persistence_snapshot_gap(
         build_e2e_skip_reason(
             "PERSISTENCE_SNAPSHOT_GAP",
             pipeline_name=context.pipeline_name,
-            detail=(
-                "strict snapshot policy blocked cassette-backed playback: "
-                f"{exc}"
-            ),
+            detail=(f"strict snapshot policy blocked cassette-backed playback: {exc}"),
         )
     )
 

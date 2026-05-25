@@ -1,0 +1,8 @@
+artifact:
+  path: "docs/reports/evidence/project-legacy-compatibility-remediation/03-synthesis/CROSS-SYNTHESIS-project-legacy-compatibility-remediation.md"
+  sha256: "5245ad6053ceadb53d53d6df7ccc32fdf2e0f71bbb2fe6e31daae02ff5c694a3"
+  byte_size: 11921
+  status: "recovered-canonical-copy"
+source_inputs: []
+recovery_note:
+  verification_scope: "does not prove byte-for-byte identity"
