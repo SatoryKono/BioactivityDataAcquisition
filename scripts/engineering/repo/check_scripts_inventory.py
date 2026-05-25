@@ -76,6 +76,7 @@ SKIP_PATH_PREFIXES: Final[tuple[str, ...]] = (
     "docs/plans/",
     "docs/refactoring_plans/",
     "docs/reports/",
+    "docs/site/",
     "tests/fixtures/",
 )
 SKIP_FILE_EXTENSIONS: Final[set[str]] = {

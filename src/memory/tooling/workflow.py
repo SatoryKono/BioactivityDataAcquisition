@@ -42,6 +42,52 @@ def _rag_max_sources() -> int:
     return WORKFLOW_RAG_MAX_SOURCES
 
 
+def refresh_all(*args: object, **kwargs: object) -> dict[str, Any]:
+    """Module seam for workflow-time refresh, patchable in integration tests."""
+    from memory.tooling.refresh_all import refresh_all as _refresh_all
+
+    return _refresh_all(*args, **kwargs)
+
+
+def validate_memory_scaffold() -> list[object]:
+    """Module seam for scaffold validation, patchable in integration tests."""
+    from memory.validation import validate_memory_scaffold as _validate
+
+    return _validate()
+
+
+def prune_episodic_notes(*, apply: bool = False) -> dict[str, Any]:
+    """Module seam for episodic pruning, patchable in integration tests."""
+    from memory.tooling.prune import prune_episodic_notes as _prune
+
+    return _prune(apply=apply)
+
+
+def promote_note(
+    source: Path,
+    *,
+    target_kind: str,
+    summary: str,
+    move: bool = False,
+) -> Path:
+    """Module seam for note promotion, patchable in integration tests."""
+    from memory.tooling.promote_note import promote_note as _promote_note
+
+    return _promote_note(
+        source,
+        target_kind=target_kind,
+        summary=summary,
+        move=move,
+    )
+
+
+def review_curated_notes(root: Path | None = None) -> dict[str, Any]:
+    """Module seam for curated review ritual, patchable in integration tests."""
+    from memory.tooling.review_curated import review_curated_notes as _review
+
+    return _review(root)
+
+
 def _write_note(*, path: Path, metadata: dict[str, Any], body: str) -> None:
     from memory.notes import write_markdown_note
 
@@ -178,8 +224,6 @@ def _refresh_pre_task_surfaces(
     repo_root = (
         refresh_repo_root or _discover_repo_root() or Path(__file__).resolve().parents[3]
     )
-    from memory.tooling.refresh_all import refresh_all
-
     refresh_report = refresh_all(
         repo_root.resolve(),
         resolved_output_root.resolve(),
@@ -410,8 +454,6 @@ def post_task_workflow(
         body=_summary_note_body(title, summary),
     )
 
-    from memory.validation import validate_memory_scaffold
-
     validation_issues = validate_memory_scaffold()
     if validation_issues:
         return {
@@ -436,8 +478,6 @@ def post_task_workflow(
             or _discover_repo_root()
             or Path(__file__).resolve().parents[3]
         )
-        from memory.tooling.refresh_all import refresh_all
-
         refresh_report = refresh_all(
             repo_root.resolve(),
             output_root.resolve(),
@@ -450,17 +490,10 @@ def post_task_workflow(
             allow_partial=True,
         )
 
-    if run_prune:
-        from memory.tooling.prune import prune_episodic_notes
-
-        prune_report = prune_episodic_notes(apply=False)
-    else:
-        prune_report = None
+    prune_report = prune_episodic_notes(apply=False) if run_prune else None
 
     curated_path: Path | None = None
     if promote_to is not None:
-        from memory.tooling.promote_note import promote_note
-
         curated_path = promote_note(
             summary_path,
             target_kind=promote_to,
@@ -487,8 +520,6 @@ def review_curated_workflow(
     curated_root: Path | None = None,
 ) -> dict[str, Any]:
     """Run the regular curated-memory review ritual."""
-    from memory.tooling.review_curated import review_curated_notes
-
     report = review_curated_notes(curated_root)
     summary = report["summary"]
     cadence = "Run this review on a regular engineering cadence and before release or audit checkpoints."
