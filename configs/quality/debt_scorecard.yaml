@@ -95,15 +95,14 @@ compatibility_debt_metrics:
   sunset_source: tests/architecture/test_compat_sunset.py
   metrics:
     transition_compat_count:
-      current_count: 1
-      max_count: 1
+      current_count: 0
+      max_count: 0
       target_count: 0
       owner: '@bioetl-architecture'
       linked_issue: '4029'
-      rationale: One reviewed transition-only compatibility shim remains active in
-        the observability metric-label policy split. Sanctioned public entrypoints
-        are tracked separately as stable public API and no longer count toward compatibility
-        debt.
+      rationale: Transition-only compatibility shims are currently burned down to
+        zero. Sanctioned public entrypoints are tracked separately as stable public
+        API and no longer count toward compatibility debt.
       ratchet_policy: Fail on growth; ratchet current/max_count toward target_count
         zero as transition-only compatibility shims are removed.
     retained_public_entrypoint_burden:

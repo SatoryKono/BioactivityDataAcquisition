@@ -11,7 +11,7 @@ from collections.abc import Mapping
 from typing import Protocol
 
 from bioetl.domain.ports import MetricLabels, MetricsPort, resolve_metric_labels
-from bioetl.infrastructure.observability.prometheus_metric_label_policies import (
+from bioetl.infrastructure.observability.prometheus_metric_label_dispatch import (
     normalize_metric_dispatch_labels,
 )
 from bioetl.infrastructure.observability.prometheus_metric_registries import (

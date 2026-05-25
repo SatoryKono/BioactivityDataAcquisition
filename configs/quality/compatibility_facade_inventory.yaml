@@ -8,19 +8,7 @@ tracked_docstring_prefixes:
 - Composition-level compatibility
 - Pipeline factory compatibility-only facade
 - Storage compatibility-only facade
-transition_debt:
-- path: src/bioetl/infrastructure/observability/prometheus_metric_label_policies.py
-  compatibility_role: Compatibility facade that preserves the pre-split Prometheus metric label policy import surface over dispatch and policy-set owners.
-  canonical_target: bioetl.infrastructure.observability.prometheus_metric_dispatch
-  status: compat-shim
-  owner: bioetl.infrastructure.observability
-  introduced_in: 2026-05 observability label policy split
-  review_date: '2026-09-30'
-  external_breaking_change_required: true
-  internal_callers_zero: false
-  allowed_call_sites: '`src`: transitional imports remain limited to reviewed observability owners such as `bioetl.infrastructure.adapters.base_metrics` and `bioetl.infrastructure.observability.prometheus_metrics`; `tests`: compatibility import/patch coverage may target the facade while new production code prefers the split owner modules directly'
-  migration_path: Migrate first-party runtime imports to `bioetl.infrastructure.observability.prometheus_metric_dispatch` and `bioetl.infrastructure.observability.prometheus_metric_policy_sets`; keep the facade only as a compatibility seam for existing imports.
-  exit_criteria: First-party runtime imports migrate to the split owner modules, compatibility-only tests remain, and the facade can be removed through an explicit breaking-change review.
+transition_debt: []
 retained_entrypoints:
 - path: src/bioetl/interfaces/cli/commands/run.py
   compatibility_role: Permanent public run command seam over the retained domain

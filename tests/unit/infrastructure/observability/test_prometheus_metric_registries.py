@@ -8,7 +8,7 @@ from bioetl.infrastructure.observability.metrics_definitions import __all__ as d
 from bioetl.infrastructure.observability.metrics_export_names import (
     METRICS_DEFINITION_EXPORT_NAMES,
 )
-from bioetl.infrastructure.observability.prometheus_metric_label_policies import (
+from bioetl.infrastructure.observability.prometheus_metric_label_policy_sets import (
     APPROVED_ENDPOINT_LABEL_METRICS,
     APPROVED_SOURCE_FILE_LABEL_METRICS,
     APPROVED_TABLE_LABEL_METRICS,

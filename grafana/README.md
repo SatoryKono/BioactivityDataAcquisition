@@ -178,7 +178,8 @@ src/bioetl/
     ├── metrics_definitions.py         # Compatibility aggregate export surface
     ├── _metrics_defs_*.py             # Canonical grouped metric definitions
     ├── prometheus_metric_registries.py # Canonical COUNTERS/GAUGES/HISTOGRAMS inventory
-    ├── prometheus_metric_label_policies.py # Bounded label policy and denylist
+    ├── prometheus_metric_label_dispatch.py # Bounded label dispatch and validation
+    ├── prometheus_metric_label_policy_sets.py # Label allow/deny policy sets
     ├── prometheus_metrics.py          # PrometheusMetrics adapter (реализация MetricsPort)
     ├── server.py                      # HTTP-сервер для /metrics endpoint
     └── anomaly/                       # DataQualityMonitor implementation family
@@ -1978,7 +1979,7 @@ Legacy v1 dashboards сохранены только как archived comparison 
    MY_NEW_METRIC = Counter("bioetl_my_new_metric", "Description", ["label1", "label2"])
    ```
 1. Зарегистрируйте её в `src/bioetl/infrastructure/observability/prometheus_metric_registries.py`.
-1. Если добавляете labels, синхронизируйте bounded policy в `src/bioetl/infrastructure/observability/prometheus_metric_label_policies.py`.
+1. Если добавляете labels, синхронизируйте bounded policy в `src/bioetl/infrastructure/observability/prometheus_metric_label_dispatch.py` и `src/bioetl/infrastructure/observability/prometheus_metric_label_policy_sets.py`.
 1. Вызывайте через MetricsPort в application-коде:
    ```python
    self._metrics.increment_counter("my_new_metric", value=1, labels={"label1": "val"})
