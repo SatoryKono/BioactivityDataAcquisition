@@ -401,6 +401,40 @@ hotspot_family_ratchets:
         13 to 11 clusters by collapsing repeated public/private export lists and keeping
         the family on the reviewed bounded-growth ratchet for further semantic deduplication
         work.
+oversized_source_module_inventory:
+  linked_issue: '#4679'
+  split_on_touch: true
+  max_tracked_lines: 500
+  top_modules:
+  - path: src/bioetl/application/pipelines/common/base_publication_transformer.py
+    lines: 500
+    owner: '@bioetl-application'
+    target_split: separate publication normalization, persistence shaping, and provenance helpers
+  - path: src/bioetl/application/services/checkpoint_compatibility_service.py
+    lines: 497
+    owner: '@bioetl-control-plane'
+    target_split: split checkpoint policy evaluation from diagnostic payload assembly
+  - path: src/bioetl/infrastructure/config/_base.py
+    lines: 478
+    owner: '@bioetl-config'
+    target_split: separate config discovery, validation, and environment resolution helpers
+  - path: src/bioetl/application/services/lineage/metadata_lineage_node_builders.py
+    lines: 477
+    owner: '@bioetl-lineage'
+    target_split: split node identity builders from metadata enrichment helpers
+  - path: src/bioetl/infrastructure/control_plane/file_run_ledger_store.py
+    lines: 471
+    owner: '@bioetl-control-plane'
+    target_split: separate file IO, record serialization, and query helpers
+  - path: src/bioetl/application/services/data_quality_service.py
+    lines: 465
+    owner: '@bioetl-dq'
+    target_split: split DQ orchestration from anomaly and severity policy helpers
+  - path: src/bioetl/application/services/control_plane/run_manifest_reproducibility_score_cards.py
+    lines: 456
+    owner: '@bioetl-reproducibility'
+    target_split: separate score-card policy rules from manifest projection helpers
+
 hotspot_family_coverage_thresholds:
   snapshot_date: '2026-05-22'
   linked_issue: '#4567'
@@ -432,8 +466,8 @@ hotspot_family_coverage_thresholds:
     application_services_control_plane:
       min_measured_module_count: 71
       max_unmeasured_module_count: 0
-      min_covered_module_count: 0
-      min_covered_line_percent: 0.0
+      min_covered_module_count: 70
+      min_covered_line_percent: 70.0
       allowlisted_unmeasured_paths:
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_alerts.py
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profile_support.py
@@ -449,8 +483,8 @@ hotspot_family_coverage_thresholds:
     composition_runtime_builders:
       min_measured_module_count: 38
       max_unmeasured_module_count: 0
-      min_covered_module_count: 2
-      min_covered_line_percent: 2.71
+      min_covered_module_count: 38
+      min_covered_line_percent: 80.0
       allowlisted_unmeasured_paths:
       - src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py
       - src/bioetl/composition/runtime_builders/runner_builder_wiring.py

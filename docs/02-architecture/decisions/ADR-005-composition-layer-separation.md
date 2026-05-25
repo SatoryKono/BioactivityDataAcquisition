@@ -237,7 +237,11 @@ src/bioetl/
 
 ## Acceptance Criteria
 
-- [ ] The decision is documented with current status, date, and owner metadata.
-- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
-- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
-- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.
+- [x] The decision is documented with current status, date, and owner metadata.
+- [x] The implementation path or adoption boundary is testable and linked from the ADR.
+- [x] Supersession or migration impact is documented when the decision changes an earlier posture or is marked not applicable.
+- [x] Related docs, contracts, and operational guidance are aligned with this ADR.
+
+2026-05-25 review note: acceptance status was reconciled during the AR-014
+evidence-refresh follow-up. Future changes to this ADR require updating the
+`Compliance`, `Verification`, and linked governance tests in the same change.

@@ -53,7 +53,7 @@ def bootstrap_runtime_basics(
         settings_provider: Callable returning global Settings.
         logger_bootstrapper: Callable accepting (pipeline_name, run_uuid, log_level)
             and returning a LoggerPort.
-        storage_bootstrapper: Callable returning a storage adapter (any type).
+        storage_bootstrapper: Callable returning the composite runtime storage port.
         lock_factory: Callable returning a LockPort implementation.
         uuid_factory: Callable returning a new UUID (injectable for testing).
 

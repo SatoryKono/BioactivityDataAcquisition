@@ -1070,7 +1070,7 @@ class TestMolecularWeight:
         with pytest.raises(ValueError, match="outside range"):
             MolecularWeight(10.0)  # At bound, but bounds are exclusive
 
-    def test_above_maximum_raises(self) -> None:
+    def test_molecular_weight_above_maximum_raises(self) -> None:
         """Test that MW above maximum raises ValueError."""
         with pytest.raises(ValueError, match="outside range"):
             MolecularWeight(15000.0)  # Above default max of 10000.0

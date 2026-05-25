@@ -333,6 +333,37 @@ def _check_stale_registry_entries(
             violations.append(f"stale lifecycle entry not found in manifest: {path}")
 
 
+def _check_active_script_count_budget(
+    *,
+    lifecycle: dict[str, object],
+    manifest_payload: dict[str, object],
+    manifest_rel: str,
+    violations: list[str],
+) -> None:
+    budget = lifecycle.get("active_script_count_max")
+    if budget is None:
+        return
+    if not isinstance(budget, int) or budget < 0:
+        violations.append(
+            "lifecycle.active_script_count_max must be a non-negative int"
+        )
+        return
+
+    summary = _as_dict(manifest_payload.get("summary"))
+    status_counts = _as_dict(summary.get("status_counts"))
+    active_count = status_counts.get("active")
+    if not isinstance(active_count, int):
+        violations.append(
+            f"manifest active script count missing or malformed: {manifest_rel}"
+        )
+        return
+    if active_count > budget:
+        violations.append(
+            "active script count exceeds lifecycle.active_script_count_max "
+            f"({active_count} > {budget})"
+        )
+
+
 def _check_entrypoint_surfaces(
     *,
     root: Path,
@@ -391,6 +422,12 @@ def _check_lifecycle_coverage(
     if payloads is None:
         return
     manifest_payload, registry_payload = payloads
+    _check_active_script_count_budget(
+        lifecycle=lifecycle,
+        manifest_payload=manifest_payload,
+        manifest_rel=manifest_rel,
+        violations=violations,
+    )
     scripts = manifest_payload.get("scripts", [])
     entries = _as_dict(registry_payload.get("entries"))
     if not isinstance(scripts, list):

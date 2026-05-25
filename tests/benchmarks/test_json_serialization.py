@@ -75,6 +75,8 @@ class TestJsonEncoderPerformance:
             ops_per_sec,
             elapsed / iterations,
         )
+        assert elapsed > 0
+        assert ops_per_sec > 0
 
     @pytest.mark.benchmark
     def test_stdlib_dumps_medium(self, medium_payload: list[dict[str, Any]]) -> None:
@@ -94,6 +96,8 @@ class TestJsonEncoderPerformance:
             ops_per_sec,
             elapsed / iterations,
         )
+        assert elapsed > 0
+        assert ops_per_sec > 0
 
     @pytest.mark.benchmark
     @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
@@ -114,6 +118,8 @@ class TestJsonEncoderPerformance:
             ops_per_sec,
             elapsed / iterations,
         )
+        assert elapsed > 0
+        assert ops_per_sec > 0
 
     @pytest.mark.benchmark
     @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
@@ -134,6 +140,8 @@ class TestJsonEncoderPerformance:
             ops_per_sec,
             elapsed / iterations,
         )
+        assert elapsed > 0
+        assert ops_per_sec > 0
 
     @pytest.mark.benchmark
     @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
@@ -247,6 +255,10 @@ class TestJsonEncoderPerformance:
         logger.info("Speedup:           %.2fx", speedup)
         logger.info("%s", "=" * 60)
 
+        assert stdlib_mean > 0
+        assert orjson_mean > 0
+        assert speedup > 0
+
 
 class TestBatchSerializationPerformance:
     """Benchmark batch serialization patterns used in Bronze writer."""
@@ -269,6 +281,9 @@ class TestBatchSerializationPerformance:
         logger.info("StdLib batch: %.4fs, %.2f MB/s", elapsed, mb_per_sec)
         logger.info("  Records: %d", len(large_payload))
         logger.info("  Total size: %.2f MB", total_bytes / (1024 * 1024))
+        assert len(record_bytes) == len(large_payload)
+        assert total_bytes > 0
+        assert mb_per_sec > 0
 
     @pytest.mark.benchmark
     @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
@@ -289,6 +304,9 @@ class TestBatchSerializationPerformance:
         logger.info("Orjson batch: %.4fs, %.2f MB/s", elapsed, mb_per_sec)
         logger.info("  Records: %d", len(large_payload))
         logger.info("  Total size: %.2f MB", total_bytes / (1024 * 1024))
+        assert len(record_bytes) == len(large_payload)
+        assert total_bytes > 0
+        assert mb_per_sec > 0
 
 
 if __name__ == "__main__":

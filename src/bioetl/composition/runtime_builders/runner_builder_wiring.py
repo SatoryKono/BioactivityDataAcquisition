@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING
 
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
@@ -60,6 +60,14 @@ class RunnerInputWiring:
     ] = assemble_cached_bronze_context
 
 
+@dataclass(frozen=True, slots=True)
+class RunnerBuilderWiring:
+    """Canonical aggregate wiring seam for runtime runner construction."""
+
+    factory: RunnerFactoryWiring = field(default_factory=RunnerFactoryWiring)
+    inputs: RunnerInputWiring = field(default_factory=RunnerInputWiring)
+
+
 def resolve_runner_factory_wiring(
     wiring: RunnerFactoryWiring | None = None,
     *,
@@ -77,6 +85,50 @@ def resolve_runner_factory_wiring(
     if register_all_pipelines_fn is not None:
         overrides["register_all_pipelines"] = register_all_pipelines_fn
     return replace(resolved, **overrides) if overrides else resolved
+
+
+def resolve_runner_builder_wiring(
+    wiring: RunnerBuilderWiring | None = None,
+    *,
+    factory_wiring: RunnerFactoryWiring | None = None,
+    input_wiring: RunnerInputWiring | None = None,
+    create_registry_fn: Callable[[], PipelineRegistry] | None = None,
+    ensure_providers_loaded_fn: Callable[[], None] | None = None,
+    register_all_pipelines_fn: Callable[..., None] | None = None,
+    get_settings_fn: Callable[[], Settings] | None = None,
+    load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] | None = None,
+    load_source_config_fn: Callable[..., object] | None = None,
+    build_observability_bundle_fn: Callable[..., ObservabilityBundle] | None = None,
+    assemble_vacuum_settings_fn: Callable[..., ResolvedVacuumSettings] | None = None,
+    assemble_runtime_config_fn: Callable[..., RuntimeConfig] | None = None,
+    assemble_filter_config_fn: Callable[..., InputFilterConfig | None] | None = None,
+    assemble_cached_bronze_context_fn: Callable[
+        [PipelineRunContext], CachedBronzeContext
+    ]
+    | None = None,
+) -> RunnerBuilderWiring:
+    """Return aggregate runner wiring with legacy keyword overrides applied."""
+    resolved = wiring or RunnerBuilderWiring()
+    resolved_factory = resolve_runner_factory_wiring(
+        factory_wiring or resolved.factory,
+        create_registry_fn=create_registry_fn,
+        ensure_providers_loaded_fn=ensure_providers_loaded_fn,
+        register_all_pipelines_fn=register_all_pipelines_fn,
+    )
+    resolved_inputs = resolve_runner_input_wiring(
+        input_wiring or resolved.inputs,
+        get_settings_fn=get_settings_fn,
+        load_pipeline_config_fn=load_pipeline_config_fn,
+        load_source_config_fn=load_source_config_fn,
+        build_observability_bundle_fn=build_observability_bundle_fn,
+        assemble_vacuum_settings_fn=assemble_vacuum_settings_fn,
+        assemble_runtime_config_fn=assemble_runtime_config_fn,
+        assemble_filter_config_fn=assemble_filter_config_fn,
+        assemble_cached_bronze_context_fn=assemble_cached_bronze_context_fn,
+    )
+    if resolved_factory is resolved.factory and resolved_inputs is resolved.inputs:
+        return resolved
+    return RunnerBuilderWiring(factory=resolved_factory, inputs=resolved_inputs)
 
 
 def resolve_runner_input_wiring(
@@ -117,8 +169,10 @@ def resolve_runner_input_wiring(
 
 
 __all__ = [
+    "RunnerBuilderWiring",
     "RunnerFactoryWiring",
     "RunnerInputWiring",
+    "resolve_runner_builder_wiring",
     "resolve_runner_factory_wiring",
     "resolve_runner_input_wiring",
 ]
