@@ -15,6 +15,7 @@ from bioetl.composition.runtime_builders import _run_manifest_builder_policy
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import runner_builder
+from bioetl.composition.runtime_builders import runner_control_plane_assembly
 from bioetl.composition.runtime_builders._runner_builder_orchestration import (
     attach_runner_control_plane_collaborators,
 )
