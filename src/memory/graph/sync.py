@@ -2941,11 +2941,11 @@ def _dashboard_panel_target_metrics(panel: dict[str, object]) -> set[str]:
 
 
 def _parse_python_ast(path: Path) -> ast.AST | None:
-    if not path.is_file() or path.suffix != ".py":
+    if path.suffix != ".py":
         return None
     try:
         return ast.parse(_read_text(path), filename=str(path))
-    except SyntaxError:
+    except (OSError, SyntaxError, UnicodeDecodeError):
         return None
 
 
@@ -5750,7 +5750,9 @@ def _link_source_backed_node_structure(
     if _is_excluded_file_structure_path(source_path_value, config):
         return
 
-    path_kind = _source_backed_path_kind(root, source_path_value, path_kind_cache)
+    path_kind = _source_backed_path_kind(
+        snapshot, source_path_value, path_kind_cache
+    )
     if path_kind == "directory":
         _link_source_backed_directory_structure(
             snapshot,
@@ -5774,22 +5776,18 @@ def _link_source_backed_node_structure(
 
 
 def _source_backed_path_kind(
-    root: Path,
+    snapshot: GraphSnapshot,
     source_path_value: str,
     path_kind_cache: dict[str, str | None],
 ) -> str | None:
     if source_path_value in path_kind_cache:
         return path_kind_cache[source_path_value]
-    source_path = root / source_path_value
-    try:
-        if source_path.is_dir():
-            path_kind_cache[source_path_value] = "directory"
-        elif source_path.is_file():
-            path_kind_cache[source_path_value] = "file"
-        else:
-            path_kind_cache[source_path_value] = None
-    except OSError:
-        # File or directory is corrupted or unreadable, skip it.
+
+    if NodeKey("directory_surface", source_path_value) in snapshot.nodes:
+        path_kind_cache[source_path_value] = "directory"
+    elif NodeKey("file_surface", source_path_value) in snapshot.nodes:
+        path_kind_cache[source_path_value] = "file"
+    else:
         path_kind_cache[source_path_value] = None
     return path_kind_cache[source_path_value]
 
