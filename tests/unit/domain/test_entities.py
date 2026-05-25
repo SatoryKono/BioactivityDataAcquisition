@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import uuid4
+from uuid import UUID
 
 import pytest
 
@@ -20,6 +20,9 @@ from tests.helpers.clock import FIXED_TEST_TIME
 
 pytestmark = pytest.mark.unit
 
+_FIXED_RUN_ID = UUID("11111111-1111-4111-8111-111111111111")
+_FIXED_SOURCE_BATCH_ID = UUID("22222222-2222-4222-8222-222222222222")
+
 
 @pytest.fixture
 def base_entity_kwargs():
@@ -27,9 +30,9 @@ def base_entity_kwargs():
     return {
         "entity_id": EntityID("TEST123"),
         "content_hash": ContentHash("abc123hash"),
-        "run_id": uuid4(),
+        "run_id": _FIXED_RUN_ID,
         "run_type": RunType.INCREMENTAL,
-        "source_batch_id": uuid4(),
+        "source_batch_id": _FIXED_SOURCE_BATCH_ID,
         "ingestion_ts": FIXED_TEST_TIME,
         "_index": 0,
     }
