@@ -13,6 +13,7 @@ import pytest
 from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import runner_builder
 from bioetl.composition.runtime_builders import runner_input_assembly
+from bioetl.composition.runtime_builders import runner_builder_wiring
 
 pytestmark = pytest.mark.unit
 
@@ -91,3 +92,34 @@ def test_runner_input_assembly_lazy_resolves_default_observability_builder(
     assert resolved[2] is inputs_resolver.assemble_runtime_config
     assert resolved[3] is inputs_resolver.assemble_filter_config
     assert resolved[4] is inputs_resolver.assemble_cached_bronze_context
+
+
+def test_runner_builder_exposes_typed_wiring_bundles() -> None:
+    """Runtime builder fan-in should be grouped behind typed wiring bundles."""
+    assert hasattr(runner_builder, "RunnerFactoryWiring")
+    assert hasattr(runner_builder, "RunnerInputWiring")
+
+    create_registry = MagicMock(name="create_registry")
+    wiring = runner_builder_wiring.resolve_runner_factory_wiring(
+        runner_builder_wiring.RunnerFactoryWiring(),
+        create_registry_fn=create_registry,
+    )
+
+    assert wiring.create_registry is create_registry
+    assert callable(wiring.ensure_providers_loaded)
+    assert callable(wiring.register_all_pipelines)
+
+
+def test_runner_input_wiring_applies_legacy_overrides_without_mutating_base() -> None:
+    """Legacy keyword patch points must resolve into one immutable bundle."""
+    base = runner_builder_wiring.RunnerInputWiring()
+    load_pipeline_config = MagicMock(name="load_pipeline_config")
+
+    resolved = runner_builder_wiring.resolve_runner_input_wiring(
+        base,
+        load_pipeline_config_fn=load_pipeline_config,
+    )
+
+    assert resolved is not base
+    assert resolved.load_pipeline_config is load_pipeline_config
+    assert base.load_pipeline_config is not load_pipeline_config

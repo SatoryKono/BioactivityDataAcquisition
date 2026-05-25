@@ -258,7 +258,11 @@ ______________________________________________________________________
 | **application**    |   OK   |     OK      |       NO       |     NO      |     NO     |
 | **infrastructure** |   OK   |     NO      |       OK       |     NO      |     NO     |
 | **composition**    |   OK   |     OK      |       OK       |     OK      |     NO     |
-| **interfaces**     |   OK   |     OK      |       OK       |     OK      |     OK     |
+| **interfaces**     |   OK   |     OK      |       NO       |     OK      |     OK     |
+
+> Direct `interfaces -> infrastructure` imports are forbidden by ADR-005 and
+> `.importlinter`; interfaces must obtain concrete runtime wiring through
+> composition-owned entrypoints.
 
 > Infrastructure может импортировать ВСЁ из domain (ports, types, exceptions, entities, config).
 > Ports MUST импортироваться через фасад: `from bioetl.domain.ports import X`.

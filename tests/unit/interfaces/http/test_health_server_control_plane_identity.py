@@ -989,6 +989,32 @@ class TestHealthServerControlPlaneSelector:
         assert rows["Provider.Entity [Version]"] == "chembl.activity [1.0.0]"
 
     @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_table_unknown_pipeline_scope_fails_fast(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Dashboard fallback scope should return no-manifest state without guessing."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-table?"
+            "pipeline=unknown&run_type=__all&run_id=-",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        rows = {item["parameter"]: item["value"] for item in data["rows"]}
+        assert data["resolved_via"] == "no_manifest_for_scope"
+        assert data["pipeline"] == "unknown"
+        assert data["run_type"] == []
+        assert data["selected_run_id"] is None
+        assert rows["Manifest ID [Control Plane]"] == "not available for current scope"
+        assert rows["Provider.Entity [Version]"] == "unknown"
+
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_treats_run_id_dash_as_unselected(
         self,
         running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],

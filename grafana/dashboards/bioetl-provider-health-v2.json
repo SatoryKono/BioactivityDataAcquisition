@@ -792,7 +792,7 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 7,
+        "w": 6,
         "x": 0,
         "y": 17
       },
@@ -903,8 +903,8 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 7,
-        "x": 7,
+        "w": 6,
+        "x": 6,
         "y": 17
       },
       "id": 9102,
@@ -994,8 +994,8 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 10,
-        "x": 14,
+        "w": 8,
+        "x": 12,
         "y": 17
       },
       "id": 9103,
@@ -1053,6 +1053,105 @@
       ],
       "title": "Inspect Provider Top Causes",
       "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Current provider telemetry freshness marker for the first screen. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. If no bioetl_provider_current_status samples exist in the last 15m, this panel returns WARN so the empty severity matrix is treated as a telemetry gap, not as proof that providers are healthy.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "WARN",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "CRIT",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "noValue": "UNKNOWN",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 20,
+        "y": 17
+      },
+      "id": 9104,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "10.4.0",
+      "targets": [
+        {
+          "expr": "((count(count_over_time(bioetl_provider_current_status[15m])) > bool 0) * 0) or (absent(count_over_time(bioetl_provider_current_status[15m])) * 1)",
+          "format": "time_series",
+          "instant": true,
+          "legendFormat": "Provider current-status freshness",
+          "refId": "A"
+        }
+      ],
+      "title": "Monitor Provider Telemetry Freshness",
+      "type": "stat"
     },
     {
       "id": 9002,

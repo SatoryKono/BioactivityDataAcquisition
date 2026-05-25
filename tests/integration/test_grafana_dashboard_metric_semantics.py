@@ -1208,6 +1208,57 @@ def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> No
     assert {"null", "nan"} <= matches
 
 
+def test_provider_telemetry_freshness_marks_missing_current_status_as_warn() -> None:
+    """Provider first screen must expose telemetry freshness separately from health."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Monitor Provider Telemetry Freshness"
+        ),
+        None,
+    )
+    assert panel is not None, "Panel 'Monitor Provider Telemetry Freshness' not found"
+
+    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
+    assert len(expressions) == 1
+    expression = expressions[0]
+    assert "count_over_time(bioetl_provider_current_status[15m])" in expression
+    assert "absent(count_over_time(bioetl_provider_current_status[15m]))" in expression
+    assert "or vector(0)" not in expression
+    assert "$__range" not in expression
+
+    defaults = panel.get("fieldConfig", {}).get("defaults", {})
+    assert defaults.get("unit") == "none"
+    assert defaults.get("thresholds", {}).get("steps") == [
+        {"color": "green", "value": None},
+        {"color": "orange", "value": 1},
+        {"color": "red", "value": 2},
+    ]
+    value_mapping = next(
+        mapping
+        for mapping in defaults.get("mappings", [])
+        if mapping.get("type") == "value"
+    )
+    assert value_mapping["options"]["0"]["text"] == "OK"
+    assert value_mapping["options"]["1"]["text"] == "WARN"
+    special_mapping = next(
+        mapping
+        for mapping in defaults.get("mappings", [])
+        if mapping.get("type") == "special"
+    )
+    assert special_mapping["options"]["match"] == "null"
+    assert special_mapping["options"]["result"]["text"] == "UNKNOWN"
+    assert panel.get("options", {}).get("colorMode") == "background"
+
+    description = str(panel.get("description", "")).lower()
+    assert "telemetry gap" in description
+    assert "not as proof that providers are healthy" in description
+
+
 def test_provider_critical_table_keeps_severity_only_scope() -> None:
     """Critical providers table must only show active degraded/failing rows."""
     dashboard = load_dashboard(

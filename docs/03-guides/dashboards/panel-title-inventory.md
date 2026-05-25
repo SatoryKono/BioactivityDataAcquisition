@@ -137,6 +137,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 9101 | Monitor GLOBAL Provider Severity Matrix |
 | bioetl-provider-health-v2.json | 9102 | Inspect Critical Providers |
 | bioetl-provider-health-v2.json | 9103 | Inspect Provider Top Causes |
+| bioetl-provider-health-v2.json | 9104 | Monitor Provider Telemetry Freshness |
 | bioetl-provider-health-v2.json | 9400 | Provenance |
 | bioetl-provider-health-v2.json | 9401 | Status |
 | bioetl-provider-health-v2.json | 9402 | ID |

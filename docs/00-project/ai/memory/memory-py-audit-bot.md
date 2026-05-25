@@ -51,7 +51,11 @@ This is the single most important rule to verify.
 | **application**    |   OK   |     OK      |       NO       |     NO      |     NO     |
 | **infrastructure** |   OK   |     NO      |       OK       |     NO      |     NO     |
 | **composition**    |   OK   |     OK      |       OK       |     OK      |     NO     |
-| **interfaces**     |   OK   |     OK      |       OK       |     OK      |     OK     |
+| **interfaces**     |   OK   |     OK      |       NO       |     OK      |     OK     |
+
+Direct `interfaces -> infrastructure` imports are forbidden by ADR-005 and
+`.importlinter`; interfaces must route concrete runtime wiring through
+composition-owned entrypoints.
 
 ### Detection Commands
 

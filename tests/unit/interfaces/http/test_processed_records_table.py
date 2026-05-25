@@ -193,6 +193,32 @@ class TestProcessedRecordsTable:
         assert "$__range" not in query
         assert "or vector(0)" not in query
 
+    def test_unknown_pipeline_scope_returns_no_data_without_prometheus(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Dashboard fallback scope should fail fast instead of fanning out Prometheus."""
+
+        def fail_fetch(**_: object) -> dict[str, float | None]:
+            raise AssertionError("unknown pipeline scope must not query Prometheus")
+
+        monkeypatch.setattr(
+            processed_records_module, "fetch_processed_record_values", fail_fetch
+        )
+
+        payload = (
+            processed_records_module.build_processed_records_table_payload_from_prometheus(
+                prometheus_base_url="http://prometheus.example",
+                pipeline="unknown",
+                run_type="__all",
+            )
+        )
+
+        assert payload["pipeline"] == "unknown"
+        assert payload["run_type"] == []
+        assert len(payload["rows"]) == 11
+        assert all("No data" in str(row["value"]) for row in payload["rows"])
+        assert all("No data" in str(row["percintage"]) for row in payload["rows"])
+
     @pytest.mark.asyncio
     async def test_observability_processed_records_endpoint_returns_rows(
         self, monkeypatch: pytest.MonkeyPatch

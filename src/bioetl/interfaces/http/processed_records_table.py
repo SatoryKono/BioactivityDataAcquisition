@@ -128,7 +128,8 @@ _GOLD_PARAMETERS = frozenset(
     for spec in PROCESSED_RECORDS_ROW_SPECS
     if spec.parameter[3:7] == "gold"
 )
-_ALL_SCOPE_TOKENS = {"All", "$__all", "*"}
+_ALL_SCOPE_TOKENS = {"All", "$__all", "__all", "*"}
+_UNKNOWN_SCOPE = "unknown"
 
 
 def build_processed_records_table_payload(
@@ -206,6 +207,14 @@ def build_processed_records_table_payload_from_prometheus(
     run_type: str | None,
 ) -> dict[str, object]:
     """Fetch current accounting metrics and return the dashboard table payload."""
+    if _is_unknown_scope(pipeline):
+        metric_values = {spec.metric: None for spec in PROCESSED_RECORDS_ROW_SPECS}
+        return build_processed_records_table_payload(
+            metric_values=metric_values,
+            pipeline=pipeline,
+            run_type=run_type,
+        )
+
     metric_values = fetch_processed_record_values(
         prometheus_base_url=prometheus_base_url,
         pipeline=pipeline,
@@ -314,6 +323,10 @@ def _selector_tokens(raw: str | None) -> tuple[str, ...]:
         if token not in tokens:
             tokens.append(token)
     return tuple(tokens)
+
+
+def _is_unknown_scope(raw: str | None) -> bool:
+    return _selector_tokens(raw) == (_UNKNOWN_SCOPE,)
 
 
 def _promql_string(raw: str) -> str:

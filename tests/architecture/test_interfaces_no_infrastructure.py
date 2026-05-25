@@ -145,6 +145,30 @@ class TestInterfacesNoDIrectInfrastructure:
             "Interfaces layer doc must state that direct interfaces->infrastructure imports are forbidden."
         )
 
+    def test_ai_memory_import_matrices_forbid_direct_infrastructure(self) -> None:
+        """AI memory mirrors must not preserve the legacy interfaces->infra claim."""
+        memory_paths = (
+            Path("docs/00-project/ai/memory/agent-memory.md"),
+            Path("docs/00-project/ai/memory/memory-py-audit-bot.md"),
+            Path("docs/00-project/ai/memory/memory-py-plan-bot.md"),
+            Path("docs/00-project/ai/agents/guides/CLAUDE.md"),
+            Path("docs/00-project/ai/agents/guides/AGENT.md"),
+        )
+
+        stale_tokens = (
+            "| **interfaces**     |   OK   |     OK      |       OK",
+            "interfaces` может импортировать всё",
+        )
+        for memory_path in memory_paths:
+            content = memory_path.read_text(encoding="utf-8")
+            assert not any(token in content for token in stale_tokens), (
+                f"{memory_path} still preserves legacy interfaces->infrastructure guidance"
+            )
+            assert (
+                "interfaces -> infrastructure" in content
+                or "не `infrastructure` напрямую" in content
+            )
+
     def test_all_interfaces_files_no_direct_infrastructure_imports(self):
         """All interfaces modules must route infrastructure access through composition."""
         violations: list[str] = []

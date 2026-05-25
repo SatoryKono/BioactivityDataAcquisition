@@ -9,10 +9,7 @@ from typing import TYPE_CHECKING
 from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
 )
-from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.observability import ObservabilityBundle
-from bioetl.composition.providers import ensure_providers_loaded
-from bioetl.composition.registry_api import PipelineRegistry, create_registry
 from bioetl.composition.runtime_builders._runner_builder_orchestration import (
     attach_runner_control_plane_collaborators as _attach_runner_control_plane_collaborators,
 )
@@ -31,34 +28,39 @@ from bioetl.composition.runtime_builders._runner_control_plane_policy import (
 from bioetl.composition.runtime_builders._runner_control_plane_policy import (
     validate_strict_data_root_policy as _validate_strict_data_root_policy,
 )
-from bioetl.composition.runtime_builders.config_access import (
-    get_settings,
-    load_pipeline_config,
-    load_source_config,
-)
 from bioetl.composition.runtime_builders.control_plane import (
     attach_manifest_id,
     create_run_manifest_with_effective_config,
 )
 from bioetl.composition.runtime_builders.inputs_resolver import (
-    ResolvedVacuumSettings,
-    prepare_runner_inputs,
+    RunnerInputs as _RunnerInputs,
 )
 from bioetl.composition.runtime_builders.inputs_resolver import (
-    RunnerInputs as _RunnerInputs,
+    prepare_runner_inputs,
 )
 from bioetl.composition.runtime_builders.ledger_collaborator import (
     PipelineRunnerProtocol,
 )
+from bioetl.composition.runtime_builders.runner_builder_wiring import (
+    RunnerFactoryWiring,
+    RunnerInputWiring,
+    resolve_runner_factory_wiring,
+    resolve_runner_input_wiring,
+)
 from bioetl.composition.runtime_builders.runner_input_assembly import (
     prepare_runner_context_and_inputs as _prepare_runner_context_and_inputs,
 )
-from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.control_plane.reproducibility_policy import (
-    normalize_required_persistence_profile,
+    is_degraded_observable_profile_requested,
 )
 
 if TYPE_CHECKING:
+    from bioetl.composition.observability import ObservabilityBundle
+    from bioetl.composition.registry_api import PipelineRegistry
+    from bioetl.composition.runtime_builders.inputs_resolver import (
+        ResolvedVacuumSettings,
+    )
+    from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import (
         CachedBronzeContext,
         PipelineRunContext,
@@ -70,7 +72,12 @@ if TYPE_CHECKING:
     )
 
 
-__all__ = ["PipelineRunnerProtocol", "build_pipeline_runner"]
+__all__ = [
+    "PipelineRunnerProtocol",
+    "RunnerFactoryWiring",
+    "RunnerInputWiring",
+    "build_pipeline_runner",
+]
 
 
 def _set_context_attribute(ctx: object, attr_name: str, attr_value: object) -> object:
@@ -79,17 +86,6 @@ def _set_context_attribute(ctx: object, attr_name: str, attr_value: object) -> o
         return replace(ctx, **{attr_name: attr_value})
     setattr(ctx, attr_name, attr_value)
     return ctx
-
-
-def _is_degraded_profile_opt_down_requested(ctx: object) -> bool:
-    """Return whether this launch explicitly requested the local degraded floor."""
-    requested_profile = getattr(ctx, "required_persistence_profile", None)
-    if requested_profile is None or not str(requested_profile).strip():
-        return False
-    return (
-        normalize_required_persistence_profile(requested_profile)
-        == "degraded_observable"
-    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -131,7 +127,9 @@ def _handle_control_plane_setup(
     inputs: _RunnerInputs,
 ) -> _ControlPlaneSetupResult:
     """Handle control plane setup including manifest and ledger services."""
-    degraded_profile_opt_down_requested = _is_degraded_profile_opt_down_requested(ctx)
+    degraded_profile_opt_down_requested = is_degraded_observable_profile_requested(
+        getattr(ctx, "required_persistence_profile", None)
+    )
     control_plane_policy = _resolve_runner_control_plane_policy(
         inputs.settings,
         yaml_config=inputs.yaml_config,
@@ -198,12 +196,14 @@ def build_pipeline_runner(
     ctx: PipelineRunContext,
     registry: PipelineRegistry | None = None,
     *,
-    create_registry_fn: Callable[[], PipelineRegistry] = create_registry,
-    ensure_providers_loaded_fn: Callable[[], None] = ensure_providers_loaded,
-    register_all_pipelines_fn: Callable[..., None] = register_all_pipelines,
-    get_settings_fn: Callable[[], Settings] = get_settings,
-    load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] = load_pipeline_config,
-    load_source_config_fn: Callable[..., object] = load_source_config,
+    factory_wiring: RunnerFactoryWiring | None = None,
+    input_wiring: RunnerInputWiring | None = None,
+    create_registry_fn: Callable[[], PipelineRegistry] | None = None,
+    ensure_providers_loaded_fn: Callable[[], None] | None = None,
+    register_all_pipelines_fn: Callable[..., None] | None = None,
+    get_settings_fn: Callable[[], Settings] | None = None,
+    load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] | None = None,
+    load_source_config_fn: Callable[..., object] | None = None,
     build_observability_bundle_fn: Callable[..., ObservabilityBundle] | None = None,
     assemble_vacuum_settings_fn: Callable[..., ResolvedVacuumSettings] | None = None,
     assemble_runtime_config_fn: Callable[..., RuntimeConfig] | None = None,
@@ -213,17 +213,20 @@ def build_pipeline_runner(
     ]
     | None = None,
 ) -> PipelineRunnerProtocol:
-    """Assemble and return a fully configured ``PipelineRunner``."""
-    factory_bootstrap = _bootstrap_runner_factory(
-        pipeline_name=ctx.pipeline_name,
-        registry=registry,
+    """Assemble and return a fully configured ``PipelineRunner``.
+
+    ``factory_wiring`` and ``input_wiring`` are the canonical composition seams.
+    The individual ``*_fn`` keyword overrides are retained for focused tests and
+    compatibility call sites while they migrate to the typed bundles.
+    """
+    factory_wiring = resolve_runner_factory_wiring(
+        factory_wiring,
         create_registry_fn=create_registry_fn,
         ensure_providers_loaded_fn=ensure_providers_loaded_fn,
         register_all_pipelines_fn=register_all_pipelines_fn,
     )
-
-    ctx, inputs = _prepare_runner_context_and_inputs(
-        ctx=ctx,
+    input_wiring = resolve_runner_input_wiring(
+        input_wiring,
         get_settings_fn=get_settings_fn,
         load_pipeline_config_fn=load_pipeline_config_fn,
         load_source_config_fn=load_source_config_fn,
@@ -232,6 +235,25 @@ def build_pipeline_runner(
         assemble_runtime_config_fn=assemble_runtime_config_fn,
         assemble_filter_config_fn=assemble_filter_config_fn,
         assemble_cached_bronze_context_fn=assemble_cached_bronze_context_fn,
+    )
+    factory_bootstrap = _bootstrap_runner_factory(
+        pipeline_name=ctx.pipeline_name,
+        registry=registry,
+        create_registry_fn=factory_wiring.create_registry,
+        ensure_providers_loaded_fn=factory_wiring.ensure_providers_loaded,
+        register_all_pipelines_fn=factory_wiring.register_all_pipelines,
+    )
+
+    ctx, inputs = _prepare_runner_context_and_inputs(
+        ctx=ctx,
+        get_settings_fn=input_wiring.get_settings,
+        load_pipeline_config_fn=input_wiring.load_pipeline_config,
+        load_source_config_fn=input_wiring.load_source_config,
+        build_observability_bundle_fn=input_wiring.build_observability_bundle,
+        assemble_vacuum_settings_fn=input_wiring.assemble_vacuum_settings,
+        assemble_runtime_config_fn=input_wiring.assemble_runtime_config,
+        assemble_filter_config_fn=input_wiring.assemble_filter_config,
+        assemble_cached_bronze_context_fn=input_wiring.assemble_cached_bronze_context,
         prepare_runner_inputs_fn=prepare_runner_inputs,
     )
     control_plane_setup = _handle_control_plane_setup(ctx, inputs)

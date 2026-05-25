@@ -141,7 +141,10 @@ current-status recording rules (`bioetl_runtime_current_status`,
 `bioetl_provider_current_status`, `bioetl_dq_current_status`) plus reason/cause
 tables before any selected-range evidence. Range counters, trends, raw tables,
 Silver reject breakdowns, logs, and traces stay below the first-screen answer
-row or in collapsed diagnostic rows.
+row or in collapsed diagnostic rows. `bioetl-provider-health-v2` also exposes
+`Monitor Provider Telemetry Freshness` on the first screen so missing
+`bioetl_provider_current_status` samples are treated as telemetry gap, not
+healthy provider state.
 
 `bioetl-overview-v2` exposes visible `workflow`, `pipeline`, `run_type`, and
 `run_id` selectors. Pipeline/run_type remain the canonical current-status

@@ -65,7 +65,7 @@ Current canonical Overview baseline:
 | --- | --- | --- |
 | "What is broken or degraded now?" | `bioetl-overview-v2` | `Status`, then `First Action` |
 | Runtime failures / lag / blocker drift | `bioetl-runtime` | `Runtime Status`, `Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Runtime Blockers` |
-| Provider degradation or retry exhaustion | `bioetl-provider-health-v2` | `Monitor GLOBAL Provider Severity Matrix`, `Inspect Provider Top Causes` |
+| Provider degradation, retry exhaustion, or provider telemetry gap | `bioetl-provider-health-v2` | `Monitor GLOBAL Provider Severity Matrix`, `Inspect Provider Top Causes`, `Monitor Provider Telemetry Freshness` |
 | DQ quality or quarantine increase | `bioetl-dq-v2` | `Monitor DQ Current Status`, `Monitor DQ Threshold State`, `Inspect DQ Current Reasons` |
 | Replay confidence / checkpoint issues | `bioetl-control-plane-v1` | `Track: Replay / Resume Blockers in Range` |
 | Exact rejected record evidence | `bioetl-silver-reject-explorer` | `Main records table` (by `payload_hash`) |

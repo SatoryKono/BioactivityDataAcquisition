@@ -10,6 +10,7 @@ from bioetl.domain.control_plane import (
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
     assess_reproducibility_policy,
+    is_degraded_observable_profile_requested,
     resolve_effective_required_persistence_profile,
     resolve_replay_capability,
 )
@@ -266,3 +267,10 @@ def test_unsupported_family_launch_preserves_degraded_override() -> None:
         )
         == "degraded_observable"
     )
+
+
+def test_degraded_observable_profile_request_is_domain_policy() -> None:
+    """Composition should consume this pure profile decision from domain."""
+    assert is_degraded_observable_profile_requested("degraded-observable") is True
+    assert is_degraded_observable_profile_requested("replay_ready") is False
+    assert is_degraded_observable_profile_requested(None) is False
