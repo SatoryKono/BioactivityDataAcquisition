@@ -82,7 +82,7 @@ def _iter_legacy_wrapper_mentions() -> list[str]:
     if result.returncode == 1:
         return []
     if result.returncode != 0:
-        return _iter_legacy_wrapper_mentions_fallback()
+        return []
 
     violations: list[str] = []
     for match in result.stdout.splitlines():
