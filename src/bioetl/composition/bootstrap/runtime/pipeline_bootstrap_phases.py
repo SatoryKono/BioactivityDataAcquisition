@@ -6,33 +6,12 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.composition.bootstrap.runtime.assembly import assemble_filter_config
-from bioetl.composition.bootstrap.runtime.classification_init import (
-    initialize_publication_type_classification,
-)
-from bioetl.composition.bootstrap.runtime.normalization_policy_init import (
-    initialize_chembl_policy_registry,
-)
-from bioetl.composition.bootstrap.runtime.observability import (
-    bootstrap_observability_bundle,
-)
-from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
-    initialize_publication_controlled_vocabulary,
-)
-from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.composition.providers import ensure_providers_loaded
-from bioetl.composition.registry_api import PipelineRegistry, create_registry
-from bioetl.composition.runtime_builders.config_access import (
-    create_pipeline_config_loader,
-    create_source_config_loader,
-    get_settings,
-)
-from bioetl.composition.runtime_builders.runner_builder_wiring import (
-    RunnerFactoryWiring,
-    RunnerInputWiring,
-)
-
 if TYPE_CHECKING:
+    from bioetl.composition.registry_api import PipelineRegistry
+    from bioetl.composition.runtime_builders.runner_builder_wiring import (
+        RunnerFactoryWiring,
+        RunnerInputWiring,
+    )
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
@@ -41,6 +20,103 @@ __all__ = [
     "initialize_runtime_policy_sources",
     "prepare_runtime_registry",
 ]
+
+
+def assemble_filter_config(*args: object, **kwargs: object) -> object:
+    """Lazy wrapper for the bootstrap filter-config assembler seam."""
+    from bioetl.composition.bootstrap.runtime.assembly import (
+        assemble_filter_config as _assemble_filter_config,
+    )
+
+    return _assemble_filter_config(*args, **kwargs)
+
+
+def bootstrap_observability_bundle(*args: object, **kwargs: object) -> object:
+    """Lazy wrapper for bootstrap observability wiring."""
+    from bioetl.composition.bootstrap.runtime.observability import (
+        bootstrap_observability_bundle as _bootstrap_observability_bundle,
+    )
+
+    return _bootstrap_observability_bundle(*args, **kwargs)
+
+
+def create_pipeline_config_loader(configs_root: Path) -> Callable[[str], object]:
+    """Lazy wrapper for pipeline-config loader construction."""
+    from bioetl.composition.runtime_builders.config_access import (
+        create_pipeline_config_loader as _create_pipeline_config_loader,
+    )
+
+    return _create_pipeline_config_loader(configs_root)
+
+
+def create_registry() -> PipelineRegistry:
+    """Lazy wrapper for registry construction."""
+    from bioetl.composition.registry_api import create_registry as _create_registry
+
+    return _create_registry()
+
+
+def create_source_config_loader(configs_root: Path) -> Callable[..., object]:
+    """Lazy wrapper for source-config loader construction."""
+    from bioetl.composition.runtime_builders.config_access import (
+        create_source_config_loader as _create_source_config_loader,
+    )
+
+    return _create_source_config_loader(configs_root)
+
+
+def ensure_providers_loaded() -> None:
+    """Lazy wrapper for provider registration discovery."""
+    from bioetl.composition.providers import (
+        ensure_providers_loaded as _ensure_providers_loaded,
+    )
+
+    _ensure_providers_loaded()
+
+
+def get_settings() -> object:
+    """Lazy wrapper for runtime settings access."""
+    from bioetl.composition.runtime_builders.config_access import (
+        get_settings as _get_settings,
+    )
+
+    return _get_settings()
+
+
+def initialize_chembl_policy_registry(configs_root: Path) -> None:
+    """Lazy wrapper for ChEMBL normalization policy initialization."""
+    from bioetl.composition.bootstrap.runtime.normalization_policy_init import (
+        initialize_chembl_policy_registry as _initialize_chembl_policy_registry,
+    )
+
+    _initialize_chembl_policy_registry(configs_root)
+
+
+def initialize_publication_controlled_vocabulary(configs_root: Path) -> None:
+    """Lazy wrapper for publication controlled vocabulary initialization."""
+    from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+        initialize_publication_controlled_vocabulary as _initialize_publication_controlled_vocabulary,
+    )
+
+    _initialize_publication_controlled_vocabulary(configs_root)
+
+
+def initialize_publication_type_classification(configs_root: Path) -> None:
+    """Lazy wrapper for publication type classification initialization."""
+    from bioetl.composition.bootstrap.runtime.classification_init import (
+        initialize_publication_type_classification as _initialize_publication_type_classification,
+    )
+
+    _initialize_publication_type_classification(configs_root)
+
+
+def register_all_pipelines(*args: object, **kwargs: object) -> object:
+    """Lazy wrapper for full pipeline registration."""
+    from bioetl.composition.factories.pipeline.registry import (
+        register_all_pipelines as _register_all_pipelines,
+    )
+
+    return _register_all_pipelines(*args, **kwargs)
 
 
 def prepare_runtime_registry(
@@ -66,6 +142,10 @@ def initialize_runtime_policy_sources(configs_root: Path) -> None:
 
 def build_bootstrap_runner_factory_wiring() -> RunnerFactoryWiring:
     """Return no-op factory wiring after bootstrap has already populated registry."""
+    from bioetl.composition.runtime_builders.runner_builder_wiring import (
+        RunnerFactoryWiring,
+    )
+
     return RunnerFactoryWiring(
         ensure_providers_loaded=lambda: None,
         register_all_pipelines=lambda registry=None: None,
@@ -78,6 +158,10 @@ def build_bootstrap_runner_input_wiring(
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] | None,
 ) -> RunnerInputWiring:
     """Build the typed input wiring bundle for runtime runner construction."""
+    from bioetl.composition.runtime_builders.runner_builder_wiring import (
+        RunnerInputWiring,
+    )
+
     pipeline_config_loader = (
         load_pipeline_config_fn
         if load_pipeline_config_fn is not None
