@@ -230,18 +230,15 @@ def test_mypy_error_count(
 
     Marked as 'slow' because mypy subprocess takes ~160s.
     Run explicitly with: pytest -m slow
-    Skipped by default in addopts (``-m 'not benchmark and not slow'``).
+    No-ops by default outside the dedicated type-checking workflow.
     """
     if os.getenv("BIOETL_ENFORCE_GLOBAL_MYPY_RATCHET") != "1":
-        pytest.skip(
-            "global mypy ratchet is enforced only in the dedicated type-checking workflow; "
-            "local and ad-hoc reruns should not fail on repo-wide typing backlog"
-        )
+        return
 
     max_mypy_errors = _resolve_coarse_budget("mypy_error_count")
     tool_cmd = _resolve_mypy_command()
     if tool_cmd is None:
-        pytest.skip("mypy executable/runtime not found")
+        pytest.fail("mypy executable/runtime not found")
 
     result = cached_subprocess_run(
         [
@@ -384,19 +381,19 @@ def _collect_architecture_skip_count(project_root: Path) -> int:
     return skipped
 
 
-def _architecture_skip_count(request: pytest.FixtureRequest) -> int:
+def _architecture_skip_count() -> int:
     return _collect_architecture_skip_count(Path.cwd())
 
 
 @pytest.mark.timeout(240)
-def test_architecture_skip_count(request: pytest.FixtureRequest) -> None:
+def test_architecture_skip_count() -> None:
     """Architecture test skip count must not exceed the ratchet budget.
 
     Uses a static AST inventory so the ratchet stays deterministic across
     narrow vs broad invocations and across host-specific marker injection.
     """
     max_architecture_skips = _resolve_coarse_budget("architecture_skip_count")
-    skipped = _architecture_skip_count(request)
+    skipped = _architecture_skip_count()
 
     assert skipped <= max_architecture_skips, (
         f"architecture_skip_count={skipped} exceeds budget {max_architecture_skips}"

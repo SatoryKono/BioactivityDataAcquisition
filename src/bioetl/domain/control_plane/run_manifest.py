@@ -1,9 +1,4 @@
-"""Immutable control-plane provenance artifacts for launched runs.
-
-This control-plane model records provenance for one launched occurrence and does
-not replace ``PipelineRunContext`` or ``PipelineContext`` as the runtime
-execution contexts.
-"""
+"""Immutable control-plane provenance artifacts for launched runs."""
 
 from __future__ import annotations
 
@@ -29,12 +24,7 @@ __all__ = [
 ]
 
 DOCUMENTED_SOURCE_REVISION_STATES = frozenset(
-    {
-        "clean",
-        "dirty",
-        "dirty_state_unknown",
-        "git_unavailable",
-    }
+    {"clean", "dirty", "dirty_state_unknown", "git_unavailable"}
 )
 
 
