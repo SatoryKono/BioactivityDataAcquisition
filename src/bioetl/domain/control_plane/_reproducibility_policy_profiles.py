@@ -23,11 +23,15 @@ def _uses_family_strict_floor(
     family_default_profile: str,
     strict_persistence_profiles: frozenset[str],
     allow_degraded_opt_down: bool,
+    exact_replay_requested: bool,
+    critical_runtime: bool,
 ) -> bool:
     """Return whether the configured profile must inherit the family floor."""
     return (
         configured_profile == "degraded_observable"
         and not allow_degraded_opt_down
+        and not exact_replay_requested
+        and not critical_runtime
         and family_default_profile in strict_persistence_profiles
     )
 
@@ -64,17 +68,19 @@ def resolve_effective_required_persistence_profile(
     """Resolve the effective policy profile for one run launch."""
     configured = normalize_required_persistence_profile(configured_required_profile)
     family_default = normalize_required_persistence_profile(family_default_profile)
+    if _inherits_strict_family_default(
+        configured_profile=configured,
+        family_default_profile=family_default,
+        strict_persistence_profiles=strict_persistence_profiles,
+        exact_replay_requested=exact_replay_requested,
+        critical_runtime=critical_runtime,
+    ):
+        return family_default
     if _uses_family_strict_floor(
         configured_profile=configured,
         family_default_profile=family_default,
         strict_persistence_profiles=strict_persistence_profiles,
         allow_degraded_opt_down=allow_degraded_opt_down,
-    ):
-        return family_default
-    if _inherits_strict_family_default(
-        configured_profile=configured,
-        family_default_profile=family_default,
-        strict_persistence_profiles=strict_persistence_profiles,
         exact_replay_requested=exact_replay_requested,
         critical_runtime=critical_runtime,
     ):

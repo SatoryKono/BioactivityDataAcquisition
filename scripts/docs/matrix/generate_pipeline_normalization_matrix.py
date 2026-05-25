@@ -15,6 +15,38 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
+DEFAULT_OUT_DIR = Path("docs/reports/generated/pipeline_normalization_field_matrix")
+
+
+def _build_arg_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Generate deterministic normalization field-matrix artifacts for all pipelines."
+    )
+    parser.add_argument(
+        "--out-dir",
+        type=Path,
+        default=DEFAULT_OUT_DIR,
+        help="Output directory for generated artifacts.",
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Exit with status 1 when artifacts on disk differ from generated output.",
+    )
+    return parser
+
+
+def _maybe_exit_help_only_cli() -> None:
+    """Short-circuit CLI help before importing heavy runtime dependencies."""
+    if __name__ != "__main__":
+        return
+    if not any(arg in {"-h", "--help"} for arg in sys.argv[1:]):
+        return
+    _build_arg_parser().parse_args()
+
+
+_maybe_exit_help_only_cli()
+
 import pyarrow as pa
 import yaml
 
@@ -129,7 +161,6 @@ from bioetl.infrastructure.schemas.silver import (
     UNIPROT_PROTEIN_SCHEMA,
 )
 
-DEFAULT_OUT_DIR = Path("docs/reports/generated/pipeline_normalization_field_matrix")
 CSV_NAME = "pipeline_normalization_field_matrix.csv"
 MD_NAME = "pipeline_normalization_field_matrix.md"
 NON_CHEMBL_MD_NAME = "non_chembl_normalization_field_matrix.md"
@@ -3204,21 +3235,7 @@ def check_artifacts(out_dir: Path) -> int:
 
 
 def _arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Generate deterministic normalization field-matrix artifacts for all pipelines."
-    )
-    parser.add_argument(
-        "--out-dir",
-        type=Path,
-        default=DEFAULT_OUT_DIR,
-        help="Output directory for generated artifacts.",
-    )
-    parser.add_argument(
-        "--check",
-        action="store_true",
-        help="Exit with status 1 when artifacts on disk differ from generated output.",
-    )
-    return parser
+    return _build_arg_parser()
 
 
 def main() -> int:

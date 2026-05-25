@@ -10,6 +10,50 @@ from collections import Counter
 from pathlib import Path
 from typing import Any, cast
 
+
+def _build_help_arg_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=20,
+        help="Maximum number of rows to render per Markdown section (default: 20)",
+    )
+    parser.add_argument(
+        "--json-out",
+        type=Path,
+        default=None,
+        help="Optional path for machine-readable JSON output",
+    )
+    parser.add_argument(
+        "--markdown-out",
+        type=Path,
+        default=None,
+        help="Optional path for Markdown output",
+    )
+    parser.add_argument(
+        "--max-fallback-business-fields",
+        type=int,
+        default=None,
+        help=(
+            "Optional ratchet threshold. Exit non-zero when "
+            "fallback_business_field_count exceeds this value."
+        ),
+    )
+    return parser
+
+
+def _maybe_exit_help_only_cli() -> None:
+    """Short-circuit CLI help before importing heavy matrix-generation code."""
+    if __name__ != "__main__":
+        return
+    if not any(arg in {"-h", "--help"} for arg in sys.argv[1:]):
+        return
+    _build_help_arg_parser().parse_args()
+
+
+_maybe_exit_help_only_cli()
+
 if __package__ in {None, ""}:
     repo_root = Path(__file__).resolve().parents[3]
     sys.path.insert(0, str(repo_root))
@@ -216,35 +260,7 @@ def _write_text(path: Path, content: str) -> None:
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--limit",
-        type=int,
-        default=20,
-        help="Maximum number of rows to render per Markdown section (default: 20)",
-    )
-    parser.add_argument(
-        "--json-out",
-        type=Path,
-        default=None,
-        help="Optional path for machine-readable JSON output",
-    )
-    parser.add_argument(
-        "--markdown-out",
-        type=Path,
-        default=None,
-        help="Optional path for Markdown output",
-    )
-    parser.add_argument(
-        "--max-fallback-business-fields",
-        type=int,
-        default=None,
-        help=(
-            "Optional ratchet threshold. Exit non-zero when "
-            "fallback_business_field_count exceeds this value."
-        ),
-    )
-    return parser
+    return _build_help_arg_parser()
 
 
 def main(argv: list[str] | None = None) -> int:
