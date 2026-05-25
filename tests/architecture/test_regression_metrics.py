@@ -385,10 +385,6 @@ def _collect_architecture_skip_count(project_root: Path) -> int:
 
 
 def _architecture_skip_count(request: pytest.FixtureRequest) -> int:
-    architecture_items = _architecture_session_items(request)
-    if len(architecture_items) >= 50:
-        return _count_skip_markers(architecture_items)
-
     return _collect_architecture_skip_count(Path.cwd())
 
 
@@ -396,9 +392,8 @@ def _architecture_skip_count(request: pytest.FixtureRequest) -> int:
 def test_architecture_skip_count(request: pytest.FixtureRequest) -> None:
     """Architecture test skip count must not exceed the ratchet budget.
 
-    Uses already collected session items during broad architecture runs. Falls
-    back to a static AST inventory for narrow targeted invocations so the check
-    stays deterministic without nested pytest collection.
+    Uses a static AST inventory so the ratchet stays deterministic across
+    narrow vs broad invocations and across host-specific marker injection.
     """
     max_architecture_skips = _resolve_coarse_budget("architecture_skip_count")
     skipped = _architecture_skip_count(request)

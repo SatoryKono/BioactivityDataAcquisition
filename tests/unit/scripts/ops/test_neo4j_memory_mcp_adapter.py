@@ -57,7 +57,7 @@ for raw_line in sys.stdin:
         [sys.executable, str(adapter), "--", sys.executable, str(server)],
         # Windows CI runners can exhibit higher process startup/jitter near the
         # tail of long suites; this test validates transport bridging semantics.
-        timeout_seconds=15.0,
+        timeout_seconds=45.0,
     )
 
     assert result.ok is True

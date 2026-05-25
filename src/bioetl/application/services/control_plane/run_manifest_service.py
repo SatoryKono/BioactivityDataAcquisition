@@ -68,15 +68,40 @@ def _validate_executable_code_provenance(
         strict_code_provenance_required
         and str(code_provenance.source_revision_state or "").strip().lower() != "clean"
     ):
+        profile_context = _format_strict_code_provenance_profile_context(request)
         raise RuntimeError(
             "Run manifest requires clean source_revision_state for exact "
             "replay, replay_ready, and forensic_grade contexts"
+            f" ({profile_context})"
         )
     if not code_provenance.dependency_lock_hash:
         raise RuntimeError(
             "Run manifest requires dependency_lock_hash code provenance for "
             "every executable run manifest"
         )
+
+
+def _format_strict_code_provenance_profile_context(
+    request: RunManifestCreateSpec,
+) -> str:
+    """Return operator-facing profile context for strict dirty-source failures."""
+    raw_required_profile = (
+        request.launch_context.get("required_persistence_profile")
+        or "degraded_observable"
+    )
+    required_profile = normalize_required_persistence_profile(raw_required_profile)
+    configured_profile = normalize_required_persistence_profile(
+        request.launch_context.get("configured_required_persistence_profile")
+        or raw_required_profile
+    )
+    fields = [
+        f"pipeline={request.pipeline_name}",
+        f"configured_required_persistence_profile={configured_profile}",
+        f"required_persistence_profile={required_profile}",
+    ]
+    if configured_profile != required_profile:
+        fields.append("profile_was_promoted=true")
+    return ", ".join(fields)
 
 
 def _validate_documented_code_provenance(
