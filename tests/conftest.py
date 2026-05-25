@@ -4,7 +4,8 @@ import asyncio
 import sys
 from functools import cache
 from pathlib import Path
-from typing import Any, Generator
+from typing import Any
+from collections.abc import Generator
 
 import pytest
 from tests.helpers.vcr_config import (
@@ -12,6 +13,7 @@ from tests.helpers.vcr_config import (
     ensure_default_vcr_record_mode,
     is_vcr_recording_mode,
     is_git_lfs_pointer,
+    is_strict_lfs_pointer_blocked_cassette,
     query_ignore_email,
     resolve_requested_cassette_path,
 )
@@ -65,10 +67,8 @@ def pytest_configure(config):
 def pytest_itemcollected(item: pytest.Item) -> None:
     """Track pre-deselection collection volume for `--last-failed` runs."""
     config = item.config
-    setattr(
-        config,
-        "_bioetl_last_failed_collected_count",
-        _last_failed_collected_count(config) + 1,
+    config._bioetl_last_failed_collected_count = (
+        _last_failed_collected_count(config) + 1
     )
 
 
@@ -127,7 +127,7 @@ def _is_last_failed_run(config: pytest.Config) -> bool:
 
 def _reset_last_failed_collection_state(config: pytest.Config) -> None:
     """Initialize per-session collection state used by last-failed policy."""
-    setattr(config, "_bioetl_last_failed_collected_count", 0)
+    config._bioetl_last_failed_collected_count = 0
 
 
 def _last_failed_collected_count(config: pytest.Config) -> int:
@@ -386,6 +386,12 @@ def _vcr_marker(request: pytest.FixtureRequest) -> None:
     if cassette_path is not None and is_git_lfs_pointer(cassette_path):
         if is_vcr_recording_mode():
             cassette_path.unlink(missing_ok=True)
+        elif is_strict_lfs_pointer_blocked_cassette(cassette_path):
+            pytest.fail(
+                "Replay-critical VCR cassette is an unresolved Git LFS pointer; "
+                f"run git lfs pull before replaying this cassette: {cassette_path}",
+                pytrace=False,
+            )
         else:
             pytest.skip(
                 "VCR cassette is a Git LFS pointer; run git lfs pull before replaying "

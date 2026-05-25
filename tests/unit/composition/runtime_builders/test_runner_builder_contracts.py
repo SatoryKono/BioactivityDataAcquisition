@@ -12,6 +12,7 @@ import pytest
 
 from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import runner_builder
+from bioetl.composition.runtime_builders import runner_control_plane_assembly
 from bioetl.composition.runtime_builders import runner_input_assembly
 from bioetl.composition.runtime_builders import runner_builder_wiring
 
@@ -58,6 +59,13 @@ def test_runner_builder_does_not_expose_legacy_wrapper_patch_points() -> None:
         "assemble_cached_bronze_context",
     ):
         assert not hasattr(runner_builder, attr_name)
+
+
+def test_runner_builder_uses_dedicated_control_plane_assembler() -> None:
+    assert hasattr(runner_control_plane_assembly, "ControlPlaneSetupResult")
+    assert hasattr(runner_control_plane_assembly, "assemble_runner_control_plane")
+    assert not hasattr(runner_builder, "_ControlPlaneSetupResult")
+    assert not hasattr(runner_builder, "_handle_control_plane_setup")
 
 
 def test_inputs_resolver_uses_explicit_resolved_vacuumsettings_name() -> None:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from fnmatch import fnmatch
 import os
 import sys
 from pathlib import Path
@@ -32,6 +33,13 @@ QUERY_IGNORE_EMAIL_MATCH_ON: tuple[str, ...] = (
 
 _GIT_LFS_POINTER_PREFIX = b"version https://git-lfs.github.com/spec/v1"
 _VCR_IGNORED_QUERY_KEYS = {"email", "api_key", "key"}
+STRICT_LFS_POINTER_BLOCKER_PATTERNS: tuple[str, ...] = (
+    "tests/fixtures/vcr/*/provider_contract_*.yaml",
+    "tests/fixtures/vcr/*/test_*_full_cycle.yaml",
+    "tests/fixtures/vcr/*/test_*_full_run.yaml",
+)
+
+
 _PROVIDER_VCR_DIR_HINTS: tuple[str, ...] = (
     "chembl",
     "crossref",
@@ -74,6 +82,22 @@ def is_git_lfs_pointer(path: Path) -> bool:
             return handle.read(len(_GIT_LFS_POINTER_PREFIX)) == _GIT_LFS_POINTER_PREFIX
     except OSError:
         return False
+
+
+def is_strict_lfs_pointer_blocked_cassette(
+    path: Path,
+    *,
+    repo_root: Path | None = None,
+) -> bool:
+    """Return whether an unresolved pointer must fail rather than skip replay."""
+    root = repo_root or Path.cwd()
+    try:
+        normalized = path.resolve().relative_to(root.resolve()).as_posix()
+    except ValueError:
+        normalized = path.as_posix()
+    return any(
+        fnmatch(normalized, pattern) for pattern in STRICT_LFS_POINTER_BLOCKER_PATTERNS
+    )
 
 
 def resolve_requested_cassette_path(

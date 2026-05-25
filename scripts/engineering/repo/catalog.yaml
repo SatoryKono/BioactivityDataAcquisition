@@ -29,6 +29,16 @@ policies:
   - generate_test_github_issues.py
   - optimized_test_runner.py
   - test_selection_strategy.py
+entrypoints:
+  package_console_scripts:
+    bioetl: src/bioetl/interfaces/cli/main.py
+  script_routers:
+    scripts.engineering.qa: scripts/engineering/qa/__main__.py
+    scripts.engineering.repo: scripts/engineering/repo/__main__.py
+    scripts.schema: scripts/schema/__main__.py
+  workflow_surfaces:
+    - .github/workflows/tests.yml
+    - .github/workflows/contract-tests.yml
 lifecycle:
   manifest_path: configs/quality/scripts_inventory_manifest.json
   registry_path: configs/quality/scripts_lifecycle_registry.json

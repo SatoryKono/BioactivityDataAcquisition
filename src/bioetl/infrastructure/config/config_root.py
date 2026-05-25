@@ -36,6 +36,7 @@ class ConfigRootResolver:
     """Resolve the canonical tracked ``configs/`` directory for this checkout."""
 
     repo_root: Path = field(default_factory=get_default_repo_root)
+    prefer_cwd_configs: bool = False
 
     @staticmethod
     def _is_rooted_explicit_path(path: Path) -> bool:
@@ -51,13 +52,19 @@ class ConfigRootResolver:
             ):
                 return explicit_root
             return (self.repo_root / explicit_root).resolve()
-        if self.repo_root == get_default_repo_root():
+        if self.prefer_cwd_configs and self.repo_root == get_default_repo_root():
             cwd_configs = (Path.cwd() / "configs").resolve()
             if cwd_configs.is_dir():
                 return cwd_configs
         return (self.repo_root / "configs").resolve()
 
 
-def resolve_configs_root(configs_root: Path | None = None) -> Path:
+def resolve_configs_root(
+    configs_root: Path | None = None,
+    *,
+    prefer_cwd_configs: bool = False,
+) -> Path:
     """Convenience wrapper for the canonical config-root resolver."""
-    return ConfigRootResolver().resolve(configs_root)
+    return ConfigRootResolver(prefer_cwd_configs=prefer_cwd_configs).resolve(
+        configs_root
+    )

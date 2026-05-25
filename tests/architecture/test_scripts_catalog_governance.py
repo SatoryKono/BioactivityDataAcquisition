@@ -8,6 +8,8 @@ import io
 import sys
 from pathlib import Path
 
+import yaml
+
 
 def _project_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -40,3 +42,19 @@ def test_scripts_catalog_governance_check_passes() -> None:
         f"stdout:\n{stdout.getvalue()}\n"
         f"stderr:\n{stderr.getvalue()}\n"
     )
+
+
+def test_scripts_catalog_declares_entrypoint_surfaces() -> None:
+    """Entrypoint and router surfaces must be catalogued, not implicit."""
+    root = _project_root()
+    catalog_path = root / "scripts" / "engineering" / "repo" / "catalog.yaml"
+    catalog = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
+
+    entrypoints = catalog["entrypoints"]
+    assert entrypoints["package_console_scripts"]["bioetl"] == (
+        "src/bioetl/interfaces/cli/main.py"
+    )
+    for rel_path in entrypoints["script_routers"].values():
+        assert (root / rel_path).is_file()
+    for rel_path in entrypoints["workflow_surfaces"]:
+        assert (root / rel_path).is_file()

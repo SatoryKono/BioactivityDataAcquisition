@@ -351,6 +351,10 @@ vcr_policy:
   default_record_modes:
     ci: none
     local: none
+  strict_lfs_pointer_blocker_patterns:
+  - tests/fixtures/vcr/*/provider_contract_*.yaml
+  - tests/fixtures/vcr/*/test_*_full_cycle.yaml
+  - tests/fixtures/vcr/*/test_*_full_run.yaml
   supported_refresh_record_modes:
   - new_episodes
   legacy_compatibility_record_modes:

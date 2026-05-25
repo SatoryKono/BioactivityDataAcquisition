@@ -15,6 +15,21 @@ from bioetl.application.services.control_plane._historical_replay_certification 
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
     lookup_mapping_path,
 )
+from bioetl.application.services.control_plane.run_manifest_exact_replay_blockers import (
+    append_mode_exact_replay_blockers as _append_mode_exact_replay_blockers,
+)
+from bioetl.application.services.control_plane.run_manifest_exact_replay_blockers import (
+    dependency_lock_exact_replay_blockers as _dependency_lock_exact_replay_blockers,
+)
+from bioetl.application.services.control_plane.run_manifest_exact_replay_blockers import (
+    profile_exact_replay_blockers as _profile_exact_replay_blockers,
+)
+from bioetl.application.services.control_plane.run_manifest_exact_replay_blockers import (
+    requires_dependency_lock_provenance as _requires_dependency_lock_provenance,
+)
+from bioetl.application.services.control_plane.run_manifest_exact_replay_blockers import (
+    snapshot_exact_replay_blockers as _snapshot_exact_replay_blockers,
+)
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
@@ -171,72 +186,6 @@ def _is_append_enabled_sink(sink_name: object, sink_settings: object) -> bool:
     mode = str(sink_settings.get("mode") or "").strip().lower()
     enabled = sink_settings.get("enabled")
     return mode == "append" and enabled is not False
-
-
-def _profile_exact_replay_blockers(profile: object) -> list[str]:
-    if getattr(profile, "strict_exact_replay_supported", False):
-        return []
-    return ["family_outside_supported_exact_replay_boundary"]
-
-
-def _append_mode_exact_replay_blockers(append_mode_sinks: list[str]) -> list[str]:
-    if not append_mode_sinks:
-        return []
-    return ["append_mode_semantic_outputs"]
-
-
-def _snapshot_exact_replay_blockers(
-    *,
-    manifest: RunManifest,
-    policy_assessment: ReproducibilityPolicyAssessment,
-) -> list[str]:
-    snapshot_envelope = policy_assessment.snapshot_envelope
-    if not getattr(snapshot_envelope, "any_input_snapshots", False):
-        return ["immutable_input_snapshots_missing"]
-    if not getattr(snapshot_envelope, "full_snapshot_envelope", False):
-        return [
-            "partial_input_snapshot_envelope",
-            *(
-                f"input_snapshot_missing:{source_ref}"
-                for source_ref in getattr(
-                    snapshot_envelope, "missing_snapshot_source_refs", []
-                )
-            ),
-        ]
-    if manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
-        return ["exact_replay_capability_unavailable"]
-    return []
-
-
-def _dependency_lock_exact_replay_blockers(
-    *,
-    manifest: RunManifest,
-    profile: object,
-    policy_assessment: ReproducibilityPolicyAssessment,
-) -> list[str]:
-    if not _requires_dependency_lock_provenance(
-        manifest=manifest,
-        profile=profile,
-        policy_assessment=policy_assessment,
-    ):
-        return []
-    return ["dependency_lock_provenance_missing"]
-
-
-def _requires_dependency_lock_provenance(
-    *,
-    manifest: RunManifest,
-    profile: object,
-    policy_assessment: ReproducibilityPolicyAssessment,
-) -> bool:
-    if not getattr(profile, "strict_exact_replay_supported", False):
-        return False
-    if (
-        not getattr(policy_assessment, "strict_requirement_requested", False)
-        and manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
-    ):
-        return False
-    return not manifest.code_provenance.dependency_lock_hash
 
 
 def _resolve_exact_replay_blockers(

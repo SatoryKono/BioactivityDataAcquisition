@@ -5,6 +5,9 @@ from pathlib import Path
 import pytest
 
 from bioetl.infrastructure.config import get_pipeline_config
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config_from_root,
+)
 from bioetl.infrastructure.config.config_root import (
     ConfigRootResolver,
     get_default_repo_root,
@@ -30,6 +33,28 @@ def test_resolve_configs_root_resolves_relative_path_from_repo_root() -> None:
     repo_root = get_default_repo_root()
 
     assert resolve_configs_root(Path("configs")) == (repo_root / "configs").resolve()
+
+
+def test_resolve_configs_root_ignores_cwd_configs_by_default(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo_root = get_default_repo_root()
+    (tmp_path / "configs").mkdir()
+    monkeypatch.chdir(tmp_path)
+
+    assert resolve_configs_root() == (repo_root / "configs").resolve()
+
+
+def test_resolve_configs_root_can_opt_into_cwd_configs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    cwd_configs = tmp_path / "configs"
+    cwd_configs.mkdir()
+    monkeypatch.chdir(tmp_path)
+
+    assert resolve_configs_root(prefer_cwd_configs=True) == cwd_configs.resolve()
 
 
 def test_config_root_resolver_allows_explicit_repo_override(tmp_path: Path) -> None:
@@ -63,7 +88,40 @@ def test_get_pipeline_config_falls_back_to_repo_root_when_cwd_is_src(
     assert config.entity_type == "assay"
 
 
-def test_get_pipeline_config_prefers_cwd_local_configs_directory(
+def test_get_pipeline_config_ignores_cwd_local_configs_by_default(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config_dir = tmp_path / "configs" / "entities" / "tmp"
+    config_dir.mkdir(parents=True)
+    (config_dir / "pipeline.yaml").write_text(
+        "\n".join(
+            [
+                "version: '1.0.0'",
+                "provider: tmp",
+                "entity: pipeline",
+                "pipeline:",
+                "  pipeline_name: tmp_pipeline",
+                "  provider: tmp",
+                "  entity_type: pipeline",
+                "  business_primary_keys: ['id']",
+                "  silver_table: 'tmp.pipeline'",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.chdir(tmp_path)
+    get_pipeline_config.cache_clear()
+
+    try:
+        with pytest.raises(ValueError, match="Configuration file not found"):
+            get_pipeline_config("tmp_pipeline")
+    finally:
+        get_pipeline_config.cache_clear()
+
+
+def test_get_pipeline_config_uses_explicit_configs_root(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -120,12 +178,11 @@ def test_get_pipeline_config_prefers_cwd_local_configs_directory(
     )
 
     monkeypatch.chdir(tmp_path)
-    get_pipeline_config.cache_clear()
 
-    try:
-        config = get_pipeline_config("tmp_pipeline")
-    finally:
-        get_pipeline_config.cache_clear()
+    config = load_pipeline_config_from_root(
+        "tmp_pipeline",
+        configs_root=tmp_path / "configs",
+    )
 
     assert config.provider == "tmp"
     assert config.entity_type == "pipeline"

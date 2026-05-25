@@ -47,13 +47,9 @@ from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
 def _get_pipeline_config_root(config_root: str | None) -> Path:
-    """Resolve helper config root with cwd-local override for test worktrees."""
+    """Resolve helper config root without implicit cwd-sensitive overrides."""
     if config_root is not None:
-        return Path(config_root)
-
-    cwd_configs = (Path.cwd() / "configs").resolve()
-    if cwd_configs.is_dir():
-        return cwd_configs
+        return resolve_configs_root(Path(config_root))
     return resolve_configs_root()
 
 

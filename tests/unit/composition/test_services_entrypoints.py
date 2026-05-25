@@ -48,7 +48,7 @@ class TestGetCheckpointService:
 
             result = get_checkpoint_service()
 
-        mock_ensure.assert_called_once()
+        mock_ensure.assert_called_once_with(scope="providers")
         mock_bootstrap.assert_called_once_with("bootstrap_checkpoint_service")
         assert result is mock_service
 
@@ -106,7 +106,7 @@ class TestGetBronzeCleanupService:
 
             result = get_bronze_cleanup_service()
 
-        mock_ensure.assert_called_once()
+        mock_ensure.assert_called_once_with(scope="providers")
         mock_bootstrap.assert_called_once_with("bootstrap_bronze_cleanup_service")
         assert result is mock_service
 
@@ -135,7 +135,7 @@ class TestGetVacuumService:
 
             result = get_vacuum_service()
 
-        mock_ensure.assert_called_once()
+        mock_ensure.assert_called_once_with(scope="providers")
         mock_bootstrap.assert_called_once_with("bootstrap_vacuum_service")
         assert result is mock_service
 
@@ -164,7 +164,7 @@ class TestGetExportService:
 
             result = get_export_service()
 
-        mock_ensure.assert_called_once()
+        mock_ensure.assert_called_once_with(scope="providers")
         mock_bootstrap.assert_called_once_with("bootstrap_export_service")
         assert result is mock_service
 
@@ -193,7 +193,7 @@ class TestGetLockService:
 
             result = get_lock_service()
 
-        mock_ensure.assert_called_once()
+        mock_ensure.assert_called_once_with(scope="providers")
         mock_bootstrap.assert_called_once_with("bootstrap_lock_service")
         assert result is mock_service
 
@@ -297,7 +297,7 @@ class TestGetPipelineRunnerService:
 
             result = get_pipeline_runner_service()
 
-        mock_ensure.assert_called_once()
+        mock_ensure.assert_called_once_with(registry=None, scope="pipelines")
         mock_bootstrap.assert_called_once_with(
             "bootstrap_pipeline_runner_service", registry=None
         )
@@ -319,7 +319,7 @@ class TestGetPipelineRunnerService:
 
             result = get_pipeline_runner_service(registry=registry)
 
-        mock_ensure.assert_called_once_with(registry=registry)
+        mock_ensure.assert_called_once_with(registry=registry, scope="pipelines")
         mock_bootstrap.assert_called_once_with(
             "bootstrap_pipeline_runner_service",
             registry=registry,
@@ -351,7 +351,7 @@ class TestGetConfigService:
 
             result = get_config_service()
 
-        mock_ensure.assert_called_once()
+        mock_ensure.assert_called_once_with(scope="providers")
         mock_bootstrap.assert_called_once_with("bootstrap_config_service")
         assert result is mock_service
 
@@ -380,7 +380,7 @@ class TestGetHealthService:
 
             result = get_health_service()
 
-        mock_ensure.assert_called_once()
+        mock_ensure.assert_called_once_with(scope="providers")
         mock_bootstrap.assert_called_once_with("bootstrap_health_service")
         assert result is mock_service
 
@@ -438,7 +438,7 @@ class TestGetMetricsService:
 
             result = get_metrics_service()
 
-        mock_ensure.assert_called_once()
+        mock_ensure.assert_called_once_with(scope="providers")
         mock_bootstrap.assert_called_once_with("bootstrap_metrics_service")
         assert result is mock_service
 
@@ -467,7 +467,7 @@ class TestGetAdrService:
 
             result = get_adr_service()
 
-        mock_ensure.assert_called_once()
+        mock_ensure.assert_called_once_with(scope="providers")
         mock_bootstrap.assert_called_once_with("bootstrap_adr_service")
         assert result is mock_service
 
