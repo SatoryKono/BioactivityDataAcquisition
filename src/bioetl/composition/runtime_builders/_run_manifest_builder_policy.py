@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 class ManifestReproducibilityContext:
     configured_required_persistence_profile: str
     required_persistence_profile: str
+    required_persistence_profile_opt_down: bool
     strict_exact_replay_supported: bool
     family: str
     replay_family_contract: str
@@ -93,16 +94,24 @@ def resolve_manifest_reproducibility_context(
         contract_ref=contract_ref,
         execution_context="source",
     )
+    critical_runtime = is_critical_reproducibility_runtime(
+        runtime_environment=getattr(inputs.settings, "env", None),
+        debug_mode=getattr(inputs.settings, "debug", False),
+    )
+    degraded_opt_down_requested = (
+        bool(getattr(ctx, "required_persistence_profile_opt_down", False))
+        and configured_required_profile == "degraded_observable"
+        and not bool(getattr(ctx, "exact_replay", False))
+        and not critical_runtime
+    )
     required_persistence_profile = resolve_effective_required_persistence_profile(
         configured_required_profile=configured_required_profile,
         family_default_profile=(
             reproducibility_profile.default_required_persistence_profile
         ),
         exact_replay_requested=bool(getattr(ctx, "exact_replay", False)),
-        critical_runtime=is_critical_reproducibility_runtime(
-            runtime_environment=getattr(inputs.settings, "env", None),
-            debug_mode=getattr(inputs.settings, "debug", False),
-        ),
+        critical_runtime=critical_runtime,
+        allow_degraded_opt_down=degraded_opt_down_requested,
     )
     _manifest_support.validate_reproducible_sink_modes(
         yaml_config=inputs.yaml_config,
@@ -115,6 +124,10 @@ def resolve_manifest_reproducibility_context(
     return ManifestReproducibilityContext(
         configured_required_persistence_profile=configured_required_profile,
         required_persistence_profile=required_persistence_profile,
+        required_persistence_profile_opt_down=(
+            degraded_opt_down_requested
+            and required_persistence_profile == "degraded_observable"
+        ),
         strict_exact_replay_supported=(
             reproducibility_profile.strict_exact_replay_supported
         ),

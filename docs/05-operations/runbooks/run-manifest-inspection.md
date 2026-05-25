@@ -586,8 +586,9 @@ layers:
   hard-coding a weaker fallback.
 - `executable_run_contract_claim` states the prospective executable-run
   guarantee for the published supported boundary. Supported replay-capable
-  families promote `degraded_observable` overrides to the strict floor or fail
-  closed before launch.
+  families promote default/deployment `degraded_observable` floors to the
+  strict floor or fail closed before launch; explicit local diagnostic opt-downs
+  remain degraded and must not be interpreted as replay-ready evidence.
 
 Interpretation examples:
 

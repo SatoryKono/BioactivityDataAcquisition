@@ -124,12 +124,13 @@ bioetl workflow status <NAME> [OPTIONS]
   overrides as `bioetl run`, such as `--limit`, CSV/filter options,
   cache/replay options, vacuum overrides, tracing overrides, and
   `--required-persistence-profile`.
-- `--required-persistence-profile degraded_observable` is still available for
-  local diagnostic launches outside the replay-capable executable boundary, but
-  strict workflow steps do not accept it as a remediation path for missing
-  snapshot-backed Bronze evidence. Supported replay-capable launches promote
-  the effective profile back to the strict published family default or fail
-  closed, and cannot be used to bypass exact-replay guardrails.
+- `--required-persistence-profile degraded_observable` is still available as an
+  explicit local diagnostic opt-down for non-`--exact-replay`, non-critical
+  launches that should remain observable without claiming the `replay_ready`
+  evidence floor. `--exact-replay`, production/debug critical runtimes, and
+  strict workflow steps still promote the effective profile back to the
+  published family default or fail closed, so this flag cannot bypass
+  exact-replay guardrails.
 - pipeline-level `--resume` is intentionally not exposed on `workflow run`;
   workflow control-plane resume stays on `--resume-last`.
 - `--resume-last` использует semantic `execution_fingerprint`, а не только имя workflow.

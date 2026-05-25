@@ -103,16 +103,16 @@ lifecycle и artifact publication events, связанную через `manifes
 - `replay_ready` — default floor for executable runs; runtime требует
   `run_manifest_enabled=true` и execution
   context внутри опубликованной strict exact-replay support boundary;
-- `degraded_observable` — explicit legacy opt-down only for families outside
-  the published replay-capable executable boundary; it is no longer the default
-  floor for executable runs;
+- `degraded_observable` — explicit local diagnostic opt-down for
+  non-`--exact-replay`, non-critical launches that must remain observable
+  without claiming the `replay_ready` evidence floor; it is no longer the
+  default floor for executable runs;
 - `forensic_grade` — runtime требует и `run_manifest_enabled=true`, и
   `run_ledger_enabled=true`, и replay-ready / lineage-closure surfaces внутри
   той же опубликованной boundary.
 
-Для локального live/backfill запуска вне replay-capable supported boundary,
-который должен остаться observable, но не заявлять `replay_ready` evidence
-floor, используйте per-run override:
+Для локального live/backfill запуска, который должен остаться observable, но
+не заявлять `replay_ready` evidence floor, используйте per-run override:
 
 ```bash
 bioetl workflow run chembl_publication --limit 1000 --required-persistence-profile degraded_observable

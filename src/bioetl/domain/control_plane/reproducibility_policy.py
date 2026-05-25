@@ -123,6 +123,7 @@ def resolve_effective_required_persistence_profile(
     strict_persistence_profiles: frozenset[str] | None = None,
     exact_replay_requested: bool = False,
     critical_runtime: bool = False,
+    allow_degraded_opt_down: bool = False,
 ) -> str:
     """Resolve the effective policy profile against the central strict set."""
     return _resolve_effective_required_persistence_profile(
@@ -133,6 +134,7 @@ def resolve_effective_required_persistence_profile(
         ),
         exact_replay_requested=exact_replay_requested,
         critical_runtime=critical_runtime,
+        allow_degraded_opt_down=allow_degraded_opt_down,
     )
 
 

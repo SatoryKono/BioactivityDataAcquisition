@@ -231,6 +231,32 @@ def test_supported_family_launch_promotes_degraded_override_to_strict_floor() ->
     )
 
 
+def test_explicit_local_opt_down_preserves_degraded_profile_for_supported_family() -> (
+    None
+):
+    assert (
+        resolve_effective_required_persistence_profile(
+            configured_required_profile="degraded_observable",
+            family_default_profile="replay_ready",
+            exact_replay_requested=False,
+            allow_degraded_opt_down=True,
+        )
+        == "degraded_observable"
+    )
+
+
+def test_exact_replay_ignores_local_degraded_opt_down() -> None:
+    assert (
+        resolve_effective_required_persistence_profile(
+            configured_required_profile="degraded_observable",
+            family_default_profile="replay_ready",
+            exact_replay_requested=True,
+            allow_degraded_opt_down=True,
+        )
+        == "replay_ready"
+    )
+
+
 def test_unsupported_family_launch_preserves_degraded_override() -> None:
     assert (
         resolve_effective_required_persistence_profile(

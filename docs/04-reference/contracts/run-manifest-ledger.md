@@ -525,10 +525,11 @@ persistence-profile taxonomy:
 `required_persistence_profile` is the declared minimum profile requested by the
 runtime/deployment for that run. The current published contract is:
 
-- `degraded_observable` remains valid only for families outside the published
-  replay-capable executable boundary. Replay-capable executable families do not
-  preserve this weaker floor: they promote to the published strict floor or
-  fail closed before the run is claimed as executable;
+- `degraded_observable` remains valid for families outside the published
+  replay-capable executable boundary and for explicit local diagnostic opt-downs
+  on non-exact, non-critical launches. Default/deployment floors for
+  replay-capable executable families still promote to the published strict floor
+  or fail closed before the run is claimed as replay-ready executable evidence;
 - `replay_ready` is the default floor for executable runs;
 - `replay_ready` is only valid inside the strict exact-replay support boundary;
   execution contexts outside that boundary must fail closed during bootstrap

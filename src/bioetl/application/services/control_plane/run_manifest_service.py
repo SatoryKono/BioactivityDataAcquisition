@@ -158,7 +158,7 @@ def _validate_exact_replay_snapshot_claim(request: RunManifestCreateSpec) -> Non
 
 
 def _validate_replay_capable_profile_floor(request: RunManifestCreateSpec) -> None:
-    """Reject executable opt-downs below the published floor for replay-capable families."""
+    """Reject non-diagnostic opt-downs below replay-capable family floors."""
     configured_profile = normalize_required_persistence_profile(
         request.launch_context.get("required_persistence_profile")
     )
@@ -179,11 +179,26 @@ def _validate_replay_capable_profile_floor(request: RunManifestCreateSpec) -> No
         profile.strict_exact_replay_supported
         and profile.default_required_persistence_profile in STRICT_PERSISTENCE_PROFILES
     ):
+        if _is_explicit_degraded_profile_opt_down(request):
+            return
         raise RuntimeError(
             "Run manifest cannot persist required_persistence_profile="
             "'degraded_observable' for replay-capable executable families; "
             "promote the run to the published strict persistence floor or fail closed"
         )
+
+
+def _is_explicit_degraded_profile_opt_down(request: RunManifestCreateSpec) -> bool:
+    """Return whether a local non-strict run explicitly opted down to degraded."""
+    if bool(request.launch_context.get("exact_replay")):
+        return False
+    if not bool(request.launch_context.get("required_persistence_profile_opt_down")):
+        return False
+    configured_profile = normalize_required_persistence_profile(
+        request.launch_context.get("configured_required_persistence_profile")
+        or request.launch_context.get("required_persistence_profile")
+    )
+    return configured_profile == "degraded_observable"
 
 
 @dataclass(slots=True)

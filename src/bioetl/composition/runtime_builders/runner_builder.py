@@ -54,6 +54,9 @@ from bioetl.composition.runtime_builders.runner_input_assembly import (
     prepare_runner_context_and_inputs as _prepare_runner_context_and_inputs,
 )
 from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.control_plane.reproducibility_policy import (
+    normalize_required_persistence_profile,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.context import (
@@ -70,16 +73,23 @@ if TYPE_CHECKING:
 __all__ = ["PipelineRunnerProtocol", "build_pipeline_runner"]
 
 
-def _set_context_attribute(
-    ctx: object,
-    attr_name: str,
-    attr_value: object,
-) -> object:
+def _set_context_attribute(ctx: object, attr_name: str, attr_value: object) -> object:
     """Set an attribute on a context object, handling both dataclass and SimpleNamespace."""
     if is_dataclass(ctx):
         return replace(ctx, **{attr_name: attr_value})
     setattr(ctx, attr_name, attr_value)
     return ctx
+
+
+def _is_degraded_profile_opt_down_requested(ctx: object) -> bool:
+    """Return whether this launch explicitly requested the local degraded floor."""
+    requested_profile = getattr(ctx, "required_persistence_profile", None)
+    if requested_profile is None or not str(requested_profile).strip():
+        return False
+    return (
+        normalize_required_persistence_profile(requested_profile)
+        == "degraded_observable"
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -121,6 +131,7 @@ def _handle_control_plane_setup(
     inputs: _RunnerInputs,
 ) -> _ControlPlaneSetupResult:
     """Handle control plane setup including manifest and ledger services."""
+    degraded_profile_opt_down_requested = _is_degraded_profile_opt_down_requested(ctx)
     control_plane_policy = _resolve_runner_control_plane_policy(
         inputs.settings,
         yaml_config=inputs.yaml_config,
@@ -137,6 +148,11 @@ def _handle_control_plane_setup(
         ctx,
         "required_persistence_profile",
         control_plane_policy.required_profile,
+    )
+    ctx = _set_context_attribute(
+        ctx,
+        "required_persistence_profile_opt_down",
+        degraded_profile_opt_down_requested,
     )
     run_ledger_service: RunLedgerService | None = None
 

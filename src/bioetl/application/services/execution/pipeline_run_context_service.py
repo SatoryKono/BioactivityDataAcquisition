@@ -96,6 +96,10 @@ class PipelineRunContextService:
             cached_bronze=cached_bronze,
             exact_replay=options.exact_replay,
             required_persistence_profile=options.required_persistence_profile,
+            required_persistence_profile_opt_down=(
+                str(options.required_persistence_profile or "").strip()
+                == "degraded_observable"
+            ),
             tracing_enabled_override=options.enable_tracing,
         )
 
