@@ -2613,17 +2613,21 @@ def _is_ignored_repo_path(path: Path) -> bool:
     return "__pycache__" in path.parts
 
 
+def _normalize_repo_relative_path(relative_path: str) -> str:
+    return relative_path.replace("\\", "/").strip().strip("/")
+
+
 def _is_excluded_file_structure_path(
     relative_path: str, config: dict[str, object]
 ) -> bool:
-    path = Path(relative_path)
+    normalized = _normalize_repo_relative_path(relative_path)
+    path = Path(normalized)
     excluded_dir_names = {
         name for name in _as_string_list(config.get("excluded_dir_names")) if name
     }
     if any(part in excluded_dir_names for part in path.parts):
         return True
 
-    normalized = relative_path.strip("/")
     excluded_prefixes = [
         prefix.strip("/")
         for prefix in _as_string_list(config.get("excluded_prefixes"))
@@ -5958,7 +5962,7 @@ def _relation_backed_file_structure_labels() -> set[str]:
 
 
 def _relation_backed_parent_relative(root: Path, source_path_value: str) -> str | None:
-    normalized_path = source_path_value.replace("\\", "/").rstrip("/")
+    normalized_path = _normalize_repo_relative_path(source_path_value)
     if not normalized_path:
         return None
     target_path = root / normalized_path
@@ -9871,19 +9875,21 @@ def _docs_drift_sources(
         source_path = node.properties.get("source_path")
         if not isinstance(source_path, str):
             continue
-        normalized_source_path = source_path.strip("/")
+        normalized_source_path = _normalize_repo_relative_path(source_path)
+        if not normalized_source_path:
+            continue
         if any(
             normalized_source_path == prefix
             or normalized_source_path.startswith(f"{prefix}/")
             for prefix in _DOCS_DRIFT_EXCLUDED_PREFIXES
         ):
             continue
-        if _is_excluded_file_structure_path(source_path, config):
+        if _is_excluded_file_structure_path(normalized_source_path, config):
             continue
-        if Path(source_path).suffix.lower() not in _DOCS_DRIFT_TEXT_EXTENSIONS:
+        if Path(normalized_source_path).suffix.lower() not in _DOCS_DRIFT_TEXT_EXTENSIONS:
             continue
-        doc_path = root / source_path
-        text = cached_text.get(source_path)
+        doc_path = root / normalized_source_path
+        text = cached_text.get(normalized_source_path)
         if text is None:
             try:
                 text = _read_text(doc_path)
@@ -9892,8 +9898,8 @@ def _docs_drift_sources(
                 # unreadable on a given checkout or platform mount. Skip them
                 # instead of failing the entire snapshot build.
                 continue
-            cached_text[source_path] = text
-        yield node.key, source_path, text
+            cached_text[normalized_source_path] = text
+        yield node.key, normalized_source_path, text
 
 
 def _doc_reference_context(

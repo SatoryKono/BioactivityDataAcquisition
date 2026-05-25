@@ -145,17 +145,11 @@ class RunManifest:
             "entity",
         ):
             _require_non_empty_text(getattr(self, field_name), field_name)
-        object.__setattr__(
-            self,
-            "created_at",
-            normalize_manifest_created_at(self.created_at),
-        )
+        set_attr = object.__setattr__
+        freeze = freeze_manifest_payload
+        set_attr(self, "created_at", normalize_manifest_created_at(self.created_at))
         for field_name in ("launch_context", "runtime_config", "resolved_config"):
-            object.__setattr__(
-                self,
-                field_name,
-                freeze_manifest_payload(getattr(self, field_name)),
-            )
+            set_attr(self, field_name, freeze(getattr(self, field_name)))
 
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-serializable manifest payload."""

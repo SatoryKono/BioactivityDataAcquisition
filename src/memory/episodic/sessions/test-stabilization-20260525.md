@@ -2,13 +2,13 @@
 id: test-stabilization-20260525
 title: Stabilize project tests
 task_id: test-stabilization-20260525
-created_at: '2026-05-25T07:50:56Z'
+created_at: '2026-05-25T13:00:41Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- tests
+- <add-source-ref>
 summary: Active task session context.
-query: pytest full suite failed to start assertion snapshot dashboard architecture
+query: pytest sharded bootstrap pipeline failures
 ---
 
 # Session note
@@ -16,7 +16,7 @@ query: pytest full suite failed to start assertion snapshot dashboard architectu
 ## Task
 
 - Title: Stabilize project tests
-- Retrieval query: pytest full suite failed to start assertion snapshot dashboard architecture
+- Retrieval query: pytest sharded bootstrap pipeline failures
 
 ## Retrieved context
 

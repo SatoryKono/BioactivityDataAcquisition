@@ -69,7 +69,10 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
     }
 
     runtime_cardinality_review = payload["runtime_cardinality_review"]
-    assert runtime_cardinality_review["heuristic"] == "runtime_evidence_with_static_hotspot_seed"
+    assert (
+        runtime_cardinality_review["heuristic"]
+        == "runtime_evidence_with_static_hotspot_seed"
+    )
     assert runtime_cardinality_review["min_distinct_emitters"] >= 3
     assert (
         runtime_cardinality_review["exception_allowlist_field"]
@@ -184,11 +187,17 @@ def test_runtime_cardinality_evidence_artifact_is_committed_and_governed() -> No
         entry["metric"]
         for entry in allowlist_payload["allowed"]["runtime_cardinality_review_required"]
     )
-    assert actual["runtime_cardinality_review_required"] == (
+    assert actual["runtime_cardinality_reviewed"] == (
         allowlisted_runtime_cardinality
     ), (
         "Runtime cardinality evidence must stay aligned with the governed "
         "allowlist metadata. Regenerate it with:\n"
+        f"{REGENERATION_COMMAND}"
+    )
+    assert actual["runtime_cardinality_review_required"] == [], (
+        "Runtime cardinality review required must contain only unreviewed "
+        "multi-emitter candidates. Allowlisted metrics belong in "
+        "runtime_cardinality_reviewed. Regenerate it with:\n"
         f"{REGENERATION_COMMAND}"
     )
 

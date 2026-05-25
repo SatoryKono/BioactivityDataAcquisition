@@ -1675,3 +1675,26 @@ def test_docs_drift_sources_skips_unreadable_doc_artifacts(
 
     assert list(_docs_drift_sources(snapshot, tmp_path, {})) == []
     assert doc_key in snapshot.nodes
+
+
+def test_docs_drift_sources_skips_windows_style_excluded_report_paths(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    source_path = (
+        r"docs\reports\evidence\project-legacy-compatibility-remediation"
+        r"\.quarantined-03-synthesis-corrupt-20260521"
+        r"\CROSS-SYNTHESIS-project-legacy-compatibility-remediation.md"
+    )
+    snapshot = GraphSnapshot()
+    snapshot.add_node(
+        "doc_artifact",
+        source_path,
+        source_path=source_path,
+    )
+
+    def _fail_if_read(_path: Path) -> str:
+        raise AssertionError("excluded report paths must not be read")
+
+    monkeypatch.setattr("scripts.memory.sync._read_text", _fail_if_read)
+
+    assert list(_docs_drift_sources(snapshot, tmp_path, {})) == []
