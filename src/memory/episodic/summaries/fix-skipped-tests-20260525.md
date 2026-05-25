@@ -6,7 +6,7 @@ created_at: '2026-05-25T10:07:48Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- <add-source-ref>
+- tests/architecture/test_regression_metrics.py
 summary: Replaced runtime pytest.skip in test_mypy_error_count with a local no-op
   return outside BIOETL_ENFORCE_GLOBAL_MYPY_RATCHET, and made missing mypy fail in
   the enforcing workflow. Also removed an unused request fixture from architecture
@@ -25,4 +25,4 @@ summary: Replaced runtime pytest.skip in test_mypy_error_count with a local no-o
 
 ## Lessons learned
 
-- Replace with durable follow-up if needed
+- Runtime `pytest.skip` in architecture ratchet tests can create skip debt even when static skip-marker budgets pass.
