@@ -38,11 +38,11 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 122 | Monitor: Lineage Refs Missing |
 | bioetl-control-plane-v1.json | 130 | Track: Replay / Resume Blockers in Range |
 | bioetl-control-plane-v1.json | 131 | Track: Manifest Writes by Status |
-| bioetl-control-plane-v1.json | 132 | Monitor: Manifest Write Failure Ratio |
-| bioetl-control-plane-v1.json | 133 | Monitor: Ledger Append Failure Ratio |
+| bioetl-control-plane-v1.json | 132 | Monitor: Manifest Write Failure Ratio Severity |
+| bioetl-control-plane-v1.json | 133 | Monitor: Ledger Append Failure Ratio Severity |
 | bioetl-control-plane-v1.json | 134 | Track: Replay Drift by Type |
 | bioetl-control-plane-v1.json | 135 | Track: Replay Lag Trend |
-| bioetl-control-plane-v1.json | 136 | Monitor: GLOBAL Control-Plane Read Failure Ratio |
+| bioetl-control-plane-v1.json | 136 | Monitor: GLOBAL Control-Plane Read Failure Ratio Severity |
 | bioetl-control-plane-v1.json | 137 | Monitor: Lineage Fragment Persistence Failures |
 | bioetl-control-plane-v1.json | 138 | Inspect: Missing Lineage Refs by Layer / Type |
 | bioetl-control-plane-v1.json | 139 | Review: Remaining Replay-Safety Signals |

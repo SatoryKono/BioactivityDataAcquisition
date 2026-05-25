@@ -40,8 +40,8 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-> Примечание: в репозитории сейчас поставляются `bioetl-runtime.json`
-> и `*-v2.json`.
+> Примечание: в репозитории сейчас поставляются Control Plane, Runtime,
+> Workflow, Silver Reject Explorer и `*-v2` dashboard surfaces.
 > Исторические v1 surfaces ниже сведены к краткой archival note, без подробного operator walkthrough.
 >
 > Роль этого документа: setup/reference для monitoring stack.
@@ -160,12 +160,13 @@ grafana/
 │   └── dashboards/
 │       └── bioetl.yaml                # Dashboard provisioning config
 └── dashboards/
+    ├── bioetl-control-plane-v1.json   # 0. Control Plane, replay/resume safety
     ├── bioetl-overview-v2.json        # 1. Overview, canonical frozen v3 baseline
-    ├── bioetl-dq-v2.json              # Data Quality для последнего запуска (v2)
-    ├── bioetl-runtime.json            # L2 runtime triage: blockers, latency, backlog, handoffs
-    ├── bioetl-provider-health-v2.json # Здоровье провайдеров (v2)
-    ├── bioetl-silver-reject-explorer.json # Record-level Silver reject explorer
-    └── bioetl-workflow-overview.json  # Declarative workflow run/step overview
+    ├── bioetl-runtime.json            # 2. Runtime triage: blockers, latency, backlog, handoffs
+    ├── bioetl-provider-health-v2.json # 3. Provider Health (v2)
+    ├── bioetl-dq-v2.json              # 4. Data Quality (v2)
+    ├── bioetl-workflow-overview.json  # 5. Declarative workflow run/step overview
+    └── bioetl-silver-reject-explorer.json # Record-level Silver reject explorer
 
 docker-compose.monitoring.yml          # Docker Compose для стека мониторинга
 
@@ -2164,15 +2165,15 @@ ______________________________________________________________________
 
 ## 26. Сводная таблица дашбордов
 
-| Dashboard                 | UID                             | JSON version | Panels | Refresh | Time Range | Primary surface | Purpose |
-| ------------------------- | ------------------------------- | ------------ | ------ | ------- | ---------- | --------------- | ------- |
-| 0. Control Plane          | `bioetl-control-plane-v1`       | 2            | 38     | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Replay/resume safety, telemetry gap detection, terminal ledger evidence, GLOBAL read diagnostics, missing-signal markers |
-| 1. Overview               | `bioetl-overview-v2`            | 5            | 27     | 30s     | 12h        | Prometheus      | L0 broken/degraded answer and operational handoff |
-| 2. Runtime                | `bioetl-runtime`                | 2            | 27     | 30s     | 12h        | Prometheus + Quarantine Explorer identity + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
-| 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 21     | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Provider latency, health, retries, failure ratios |
-| 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 25     | 30s     | 12h        | Prometheus + Quarantine Explorer identity | DQ score, quarantine, freshness, validation failures |
-| 5. Workflow               | `bioetl-workflow-overview`      | 2            | 11     | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Selected-range workflow run and step evidence with `First Action` in the shared shell plus collapsed step diagnostics |
-| Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 10     | 1m      | 24h        | Quarantine Explorer API | Record-level browsing and action handoff for Silver rejects |
+| Dashboard                 | UID                             | JSON version | Panels / rows | Refresh | Time Range | Primary surface | Purpose |
+| ------------------------- | ------------------------------- | ------------ | ------------- | ------- | ---------- | --------------- | ------- |
+| 0. Control Plane          | `bioetl-control-plane-v1`       | 2            | 50 / 5        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Replay/resume safety, telemetry gap detection, terminal ledger evidence, GLOBAL read diagnostics, missing-signal markers |
+| 1. Overview               | `bioetl-overview-v2`            | 1            | 20 / 3        | 30s     | 12h        | Prometheus      | L0 broken/degraded answer and operational handoff |
+| 2. Runtime                | `bioetl-runtime`                | 2            | 34 / 4        | 30s     | 12h        | Prometheus + Quarantine Explorer identity + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
+| 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 26 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Provider latency, health, retries, failure ratios |
+| 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 33 / 2        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | DQ score, quarantine, freshness, validation failures |
+| 5. Workflow               | `bioetl-workflow-overview`      | 2            | 13 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Selected-range workflow run and step evidence with `First Action` in the shared shell plus collapsed step diagnostics |
+| Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 11 / 0        | 1m      | 24h        | Quarantine Explorer API | Record-level browsing and action handoff for Silver rejects |
 
 ______________________________________________________________________
 

@@ -808,7 +808,7 @@ def test_control_plane_lookup_panels_disclose_global_scope() -> None:
     expectations = {
         "bioetl-control-plane-v1.json": (
             "Monitor: GLOBAL Control-Plane Read Failures",
-            "Monitor: GLOBAL Control-Plane Read Failure Ratio",
+            "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity",
             "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
             "Track: GLOBAL Control-Plane Reads by Store / Operation / Status",
             "Monitor: GLOBAL Checkpoint Operator Failures",
@@ -834,7 +834,7 @@ def test_control_plane_read_panels_do_not_filter_on_missing_pipeline_label() -> 
     expectations = {
         "bioetl-control-plane-v1.json": (
             "Monitor: GLOBAL Control-Plane Read Failures",
-            "Monitor: GLOBAL Control-Plane Read Failure Ratio",
+            "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity",
             "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
             "Track: GLOBAL Control-Plane Reads by Store / Operation / Status",
         ),

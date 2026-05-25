@@ -591,9 +591,9 @@ Variable handoff policy for dashboard links remains strict and bounded:
   terminal evidence grouped by `terminal_status`. Эта панель pipeline-scoped only:
   metric contract не несёт `run_type`, поэтому `run_type` selector здесь не
   влияет на breakdown.
-- `control-plane.Manifest/Ledger Failure Ratio`: severity projection за
+- `control-plane.Manifest/Ledger Failure Ratio Severity`: severity projection за
   фиксированное окно `30m`: `0=OK`, `1=WARN` при `>0`, `2=CRIT` при `>0.10`.
-- `control-plane.Monitor: GLOBAL Control-Plane Read Failure Ratio`: severity
+- `control-plane.Monitor: GLOBAL Control-Plane Read Failure Ratio Severity`: severity
   projection за фиксированное окно `30m`: `0=OK` при `<=5%`, `1=WARN` при `>5%`,
   `2=CRIT` при `>10%`.
 - `control-plane latency p50/p95/p99`: histogram-backed panels сохраняют

@@ -1309,7 +1309,8 @@
                 "value": null
               }
             ]
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
@@ -1321,7 +1322,7 @@
       },
       "id": 2,
       "options": {
-        "colorMode": "background",
+        "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
@@ -1511,7 +1512,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "blue",
                 "value": null
               }
             ]
@@ -1540,7 +1541,7 @@
       },
       "id": 105,
       "options": {
-        "colorMode": "background",
+        "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
