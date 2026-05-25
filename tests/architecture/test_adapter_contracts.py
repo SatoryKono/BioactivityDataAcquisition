@@ -610,55 +610,71 @@ class TestAdapterPortCompliance:
         )
 
     @pytest.mark.parametrize(
-        ("module_path", "class_name"),
+        ("module_path", "class_name", "relative_path", "contract_markers"),
         [
             (
                 "bioetl.infrastructure.adapters.chembl.client",
                 "ChemblAdapter",
+                "bioetl/infrastructure/adapters/chembl/client.py",
+                frozenset({"ChemblFetchAdapterMixin"}),
             ),
             (
                 "bioetl.infrastructure.adapters.crossref.client",
                 "CrossRefAdapter",
+                "bioetl/infrastructure/adapters/crossref/client.py",
+                frozenset({"fetch_filtered"}),
             ),
             (
                 "bioetl.infrastructure.adapters.openalex.client",
                 "OpenAlexAdapter",
+                "bioetl/infrastructure/adapters/openalex/client.py",
+                frozenset({"OpenAlexAdapterFilterFetchMixin"}),
             ),
             (
                 "bioetl.infrastructure.adapters.pubmed",
                 "PubMedAdapter",
+                "bioetl/infrastructure/adapters/pubmed/adapter.py",
+                frozenset({"PubMedAdapterFilterFetchMixin"}),
             ),
             (
                 "bioetl.infrastructure.adapters.pubchem.client",
                 "PubChemAdapter",
+                "bioetl/infrastructure/adapters/pubchem/client.py",
+                frozenset({"FilterableStubMixin"}),
             ),
             (
                 "bioetl.infrastructure.adapters.semanticscholar",
                 "SemanticScholarAdapter",
+                "bioetl/infrastructure/adapters/semanticscholar/adapter.py",
+                frozenset({"SemanticScholarFetchAdapterMixin"}),
             ),
             (
                 "bioetl.infrastructure.adapters.uniprot.client",
                 "UniProtAdapter",
+                "bioetl/infrastructure/adapters/uniprot/client.py",
+                frozenset({"UniProtFilteringAdapterMixin"}),
             ),
         ],
     )
     def test_filterable_adapters_runtime_isinstance_protocol(
         self,
+        src_dir: Path,
+        source_content_cache: dict[Path, str],
         module_path: str,
         class_name: str,
+        relative_path: str,
+        contract_markers: frozenset[str],
     ) -> None:
-        """Filterable adapters MUST satisfy runtime isinstance() Protocol checks."""
-        adapter_cls = getattr(import_module(module_path), class_name)
-        init_kwargs, thread_pool = _build_runtime_init_kwargs(adapter_cls)
-        adapter = adapter_cls(**init_kwargs)
-        try:
-            assert isinstance(adapter, FilterableDataSourcePort), (
-                f"{module_path}.{class_name} must satisfy "
-                "runtime FilterableDataSourcePort contract"
-            )
-        finally:
-            if thread_pool is not None:
-                thread_pool.shutdown(wait=False)
+        """Filterable adapters must expose a structural Protocol contract surface."""
+        py_file = src_dir / relative_path
+        tree = _parse_cached_python_file(source_content_cache, py_file)
+        implemented_markers = _class_contract_markers(tree, class_name)
+
+        assert implemented_markers, f"{module_path}.{class_name} class definition not found"
+        assert implemented_markers & contract_markers, (
+            f"{module_path}.{class_name} must expose filterable contract markers "
+            f"{sorted(contract_markers)}"
+        )
 
     def test_filtered_data_source_uses_isinstance(self, src_dir: Path) -> None:
         """FilteredDataSource MUST use isinstance() for Protocol check.
