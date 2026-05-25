@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import argparse
 import ast
+import hashlib
+import json
 import sys
 from collections import Counter
 from collections.abc import Iterable
@@ -111,6 +113,7 @@ class DependencySnapshot:
     cross_layer_group_edges: list[GroupEdge]
     cross_layer_group_edges_total: int
     violations: list[LayerEdge]
+    source_fingerprint: str
 
 
 def _module_name_from_path(path: Path, src_root: Path) -> str:
@@ -132,6 +135,25 @@ def _iter_modules(src_root: Path) -> Iterable[tuple[str, Path]]:
         if "__pycache__" in py_file.parts:
             continue
         yield _module_name_from_path(py_file, src_root), py_file
+
+
+def _source_fingerprint(src_root: Path) -> str:
+    """Return one cheap content-adjacent fingerprint for source-tree drift checks."""
+    digest = hashlib.sha256()
+    for py_file in sorted(src_root.rglob("*.py")):
+        if py_file.name.endswith(".pyi"):
+            continue
+        if "__pycache__" in py_file.parts:
+            continue
+        rel_path = py_file.relative_to(src_root).as_posix()
+        stat = py_file.stat()
+        digest.update(rel_path.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(str(stat.st_size).encode("ascii"))
+        digest.update(b"\0")
+        digest.update(str(stat.st_mtime_ns).encode("ascii"))
+        digest.update(b"\0")
+    return digest.hexdigest()
 
 
 def _layer_of(module_name: str) -> str | None:
@@ -250,6 +272,7 @@ def collect_dependency_snapshot(src_root: Path) -> DependencySnapshot:
     """Parse project imports and return aggregated dependency snapshot."""
     layer_counter: Counter[tuple[str, str]] = Counter()
     group_counter: Counter[tuple[str, str]] = Counter()
+    source_fingerprint = _source_fingerprint(src_root)
 
     scanned_modules = 0
     total_internal_imports = 0
@@ -304,6 +327,7 @@ def collect_dependency_snapshot(src_root: Path) -> DependencySnapshot:
         cross_layer_group_edges=group_edges,
         cross_layer_group_edges_total=group_edges_total,
         violations=violations,
+        source_fingerprint=source_fingerprint,
     )
 
 
@@ -426,8 +450,6 @@ def build_markdown(snapshot: DependencySnapshot) -> str:
 
 def build_json(snapshot: DependencySnapshot) -> str:
     """Render machine-readable JSON report."""
-    import json
-
     payload = {
         "summary": {
             "scanned_modules": snapshot.scanned_modules,
@@ -436,6 +458,7 @@ def build_json(snapshot: DependencySnapshot) -> str:
             "cross_layer_group_edges": len(snapshot.cross_layer_group_edges),
             "cross_layer_group_edges_total": snapshot.cross_layer_group_edges_total,
             "violations": len(snapshot.violations),
+            "source_fingerprint": snapshot.source_fingerprint,
         },
         "layer_edges": [asdict(edge) for edge in snapshot.layer_edges],
         "cross_layer_group_edges": [
@@ -482,6 +505,59 @@ def _markdown_to_write(path: Path, markdown: str) -> str:
     return f"{frontmatter}{markdown}" if frontmatter else markdown
 
 
+def _snapshot_from_json_payload(payload: dict[str, object]) -> DependencySnapshot | None:
+    """Rehydrate one snapshot from the committed JSON artifact."""
+    summary = payload.get("summary")
+    layer_edges = payload.get("layer_edges")
+    group_edges = payload.get("cross_layer_group_edges")
+    violations = payload.get("violations")
+    if not isinstance(summary, dict):
+        return None
+    if not isinstance(layer_edges, list):
+        return None
+    if not isinstance(group_edges, list):
+        return None
+    if not isinstance(violations, list):
+        return None
+
+    source_fingerprint = summary.get("source_fingerprint")
+    if not isinstance(source_fingerprint, str) or not source_fingerprint:
+        return None
+
+    try:
+        return DependencySnapshot(
+            scanned_modules=int(summary["scanned_modules"]),
+            total_internal_imports=int(summary["total_internal_imports"]),
+            layer_edges=[LayerEdge(**edge) for edge in layer_edges],
+            cross_layer_group_edges=[GroupEdge(**edge) for edge in group_edges],
+            cross_layer_group_edges_total=int(summary["cross_layer_group_edges_total"]),
+            violations=[LayerEdge(**edge) for edge in violations],
+            source_fingerprint=source_fingerprint,
+        )
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def _load_cached_snapshot(
+    json_output: Path,
+    *,
+    src_root: Path,
+) -> DependencySnapshot | None:
+    """Return one cached snapshot when source fingerprint still matches."""
+    if not json_output.exists():
+        return None
+    try:
+        payload = json.loads(json_output.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    snapshot = _snapshot_from_json_payload(payload)
+    if snapshot is None:
+        return None
+    if snapshot.source_fingerprint != _source_fingerprint(src_root):
+        return None
+    return snapshot
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate/check architecture dependency map artifacts.",
@@ -520,7 +596,13 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    snapshot = collect_dependency_snapshot(args.src_root)
+    snapshot = (
+        _load_cached_snapshot(args.json_output, src_root=args.src_root)
+        if args.check
+        else None
+    )
+    if snapshot is None:
+        snapshot = collect_dependency_snapshot(args.src_root)
     markdown = build_markdown(snapshot)
     json_text = build_json(snapshot)
 

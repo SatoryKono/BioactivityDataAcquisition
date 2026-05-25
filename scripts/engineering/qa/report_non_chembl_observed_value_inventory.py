@@ -66,6 +66,11 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _relative_posix_path(path: Path) -> str:
+    """Render repo-relative paths with stable POSIX separators across OSes."""
+    return path.relative_to(PROJECT_ROOT).as_posix()
+
+
 def build_inventory_payload() -> dict[str, object]:
     observed = _load_yaml(OBSERVED_FIXTURE_PATH)["pipelines"]
     publication_vocab = extract_publication_nested_vocab(
@@ -78,7 +83,7 @@ def build_inventory_payload() -> dict[str, object]:
 
     return {
         "source": "tracked_non_chembl_bronze_fixtures_and_vcr_derived_edge_samples",
-        "observed_fixture_path": str(OBSERVED_FIXTURE_PATH.relative_to(PROJECT_ROOT)),
+        "observed_fixture_path": _relative_posix_path(OBSERVED_FIXTURE_PATH),
         "sections": {
             "publication_nested_vocab": publication_vocab,
             "crossref_publication_types": sorted(
@@ -98,18 +103,13 @@ def build_inventory_payload() -> dict[str, object]:
             "pubchem_property_vocab": pubchem_vocab,
         },
         "fixture_inputs": {
-            "openalex": [
-                str(path.relative_to(PROJECT_ROOT)) for path in _OPENALEX_PATHS
-            ],
+            "openalex": [_relative_posix_path(path) for path in _OPENALEX_PATHS],
             "semanticscholar": [
-                str(path.relative_to(PROJECT_ROOT))
-                for path in _SEMANTICSCHOLAR_PATHS
+                _relative_posix_path(path) for path in _SEMANTICSCHOLAR_PATHS
             ],
-            "pubmed": [str(path.relative_to(PROJECT_ROOT)) for path in _PUBMED_PATHS],
-            "uniprot": [
-                str(path.relative_to(PROJECT_ROOT)) for path in _UNIPROT_PATHS
-            ],
-            "pubchem": [str(path.relative_to(PROJECT_ROOT)) for path in _PUBCHEM_PATHS],
+            "pubmed": [_relative_posix_path(path) for path in _PUBMED_PATHS],
+            "uniprot": [_relative_posix_path(path) for path in _UNIPROT_PATHS],
+            "pubchem": [_relative_posix_path(path) for path in _PUBCHEM_PATHS],
         },
     }
 

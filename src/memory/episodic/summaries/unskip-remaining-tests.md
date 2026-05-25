@@ -2,15 +2,14 @@
 id: unskip-remaining-tests
 title: Unskip remaining tests and fix runtime blockers
 task_id: unskip-remaining-tests
-created_at: '2026-05-24T19:32:49Z'
+created_at: '2026-05-25T03:33:16Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
-summary: Enabled opt-in contract lanes, fixed ChEMBL/Semantic Scholar live contract
-  behavior, refreshed stale non-ChEMBL inventory artifacts, and repaired pipeline
-  normalization field-matrix classification. E2E/integration/contract suites are clean
-  apart from external provider skips; architecture full run is still long-running.
+summary: Fixed memory.tooling.workflow help-path timeout by removing heavy top-level
+  imports from src/memory/tooling/workflow.py and deferring memory query/refresh imports
+  until command execution. The targeted memory tooling tests now pass.
 ---
 
 # Episodic summary
@@ -21,7 +20,7 @@ summary: Enabled opt-in contract lanes, fixed ChEMBL/Semantic Scholar live contr
 
 ## Outcome
 
-- Enabled opt-in contract lanes, fixed ChEMBL/Semantic Scholar live contract behavior, refreshed stale non-ChEMBL inventory artifacts, and repaired pipeline normalization field-matrix classification. E2E/integration/contract suites are clean apart from external provider skips; architecture full run is still long-running.
+- Fixed memory.tooling.workflow help-path timeout by removing heavy top-level imports from src/memory/tooling/workflow.py and deferring memory query/refresh imports until command execution. The targeted memory tooling tests now pass.
 
 ## Lessons learned
 
