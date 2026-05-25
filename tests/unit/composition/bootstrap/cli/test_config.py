@@ -51,6 +51,7 @@ class TestBootstrapConfigService:
         bootstrap_config_service()
 
         mock_register.assert_called_once()
+        assert "registry" in mock_register.call_args.kwargs
 
     @patch("bioetl.composition.bootstrap.cli.config.register_all_pipelines")
     def test_each_call_creates_new_instance(
@@ -132,17 +133,17 @@ class TestBootstrapConfigService:
         assert call_order.index("register") < call_order.index("init")
 
     @patch("bioetl.composition.bootstrap.cli.config.register_all_pipelines")
-    def test_uses_explicit_registry_without_registering(
+    def test_registers_explicit_registry_in_composition_root(
         self,
         mock_register: MagicMock,
     ) -> None:
-        """Explicit registry injection should bypass bootstrap-time registration."""
+        """Explicit registry injection keeps registration in the composition root."""
         registry = PipelineRegistry()
 
         result = bootstrap_config_service(registry=registry)
 
         assert result._registry_accessor() is registry
-        mock_register.assert_not_called()
+        mock_register.assert_called_once_with(registry=registry)
 
     @patch("bioetl.composition.bootstrap.cli.config.load_dq_config_for_pipeline")
     @patch("bioetl.composition.bootstrap.cli.config.register_all_pipelines")

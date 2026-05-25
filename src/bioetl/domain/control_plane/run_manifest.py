@@ -1,4 +1,8 @@
-"""Immutable control-plane provenance artifacts for launched runs."""
+"""Immutable control-plane provenance artifacts for launched runs.
+
+Run manifests do not replace ``PipelineRunContext`` or ``PipelineContext``;
+they document persisted control-plane provenance for replay and diagnostics.
+"""
 
 from __future__ import annotations
 

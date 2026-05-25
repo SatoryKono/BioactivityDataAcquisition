@@ -1222,15 +1222,27 @@ def collect_metric_inventory(
     combined_emitters = _combine_metric_emitters(
         runtime_mentions, helper_backed_mentions
     )
-    runtime_cardinality_review_required = sorted(
+    observed_series_counts = _observed_runtime_series_counts()
+    cardinality_thresholds = _load_runtime_cardinality_thresholds(repo_root)
+    drift_allowlist = _load_drift_allowlist(repo_root / _DEFAULT_DRIFT_ALLOWLIST)
+    reviewed_runtime_cardinality = drift_allowlist.get(
+        "runtime_cardinality_review_required", set()
+    ) | set(cardinality_thresholds)
+    runtime_cardinality_candidates = sorted(
         metric_name
         for metric_name, emitter_paths in combined_emitters.items()
         if len(set(emitter_paths)) >= 3
     )
-    observed_series_counts = _observed_runtime_series_counts()
-    cardinality_thresholds = _load_runtime_cardinality_thresholds(repo_root)
+    runtime_cardinality_reviewed = sorted(
+        set(runtime_cardinality_candidates) & reviewed_runtime_cardinality
+    )
+    runtime_cardinality_review_required = [
+        metric_name
+        for metric_name in runtime_cardinality_candidates
+        if metric_name not in reviewed_runtime_cardinality
+    ]
     runtime_cardinality_evidence = _runtime_cardinality_evidence_rows(
-        metric_names=runtime_cardinality_review_required,
+        metric_names=runtime_cardinality_candidates,
         combined_emitters=combined_emitters,
         observed_series_counts=observed_series_counts,
         thresholds=cardinality_thresholds,
@@ -1241,12 +1253,24 @@ def collect_metric_inventory(
             thresholds=cardinality_thresholds,
         )
     )
-    declared_risky_label_review_required = sorted(
+    declared_risky_label_candidates = sorted(
         metric_name
         for metric_name, label_names in REGISTERED_PROMETHEUS_METRIC_LABELS.items()
         if metric_name in declared_set
         and bool(set(label_names) & _CARDINALITY_RISK_LABEL_NAMES)
     )
+    reviewed_risky_labels = drift_allowlist.get(
+        "declared_risky_label_review_required",
+        set(),
+    )
+    declared_risky_label_reviewed = sorted(
+        set(declared_risky_label_candidates) & reviewed_risky_labels
+    )
+    declared_risky_label_review_required = [
+        metric_name
+        for metric_name in declared_risky_label_candidates
+        if metric_name not in reviewed_risky_labels
+    ]
 
     report: dict[str, list[str] | dict[str, list[str]]] = {
         "declared_metrics": registered,
@@ -1259,6 +1283,8 @@ def collect_metric_inventory(
         "alerted_without_declaration": sorted(rules_set - registered_set),
         "dashboarded_without_emission": sorted(documented_without_runtime),
         "alerted_without_emission": sorted(ruled_without_runtime),
+        "runtime_cardinality_review_candidates": runtime_cardinality_candidates,
+        "runtime_cardinality_reviewed": runtime_cardinality_reviewed,
         "runtime_cardinality_review_required": runtime_cardinality_review_required,
         "runtime_cardinality_evidence": runtime_cardinality_evidence,
         "runtime_cardinality_observed_series": {
@@ -1268,6 +1294,8 @@ def collect_metric_inventory(
         "runtime_cardinality_threshold_violations": (
             runtime_cardinality_threshold_violations
         ),
+        "declared_risky_label_review_candidates": declared_risky_label_candidates,
+        "declared_risky_label_reviewed": declared_risky_label_reviewed,
         "declared_risky_label_review_required": (declared_risky_label_review_required),
         "declared_label_contract_metrics": sorted(declared_label_contract_metrics),
         "runtime_label_contract_violations": label_contract_violations,
@@ -1458,7 +1486,11 @@ def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:
         "alerted_without_declaration",
         "dashboarded_without_emission",
         "alerted_without_emission",
+        "runtime_cardinality_review_candidates",
+        "runtime_cardinality_reviewed",
         "runtime_cardinality_review_required",
+        "declared_risky_label_review_candidates",
+        "declared_risky_label_reviewed",
         "declared_risky_label_review_required",
         "runtime_label_contract_violations",
         "runtime_label_contract_unresolved",

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
 from pathlib import Path
 import subprocess
 
@@ -23,19 +24,48 @@ def _iter_candidate_files(
     root: Path,
     paths: tuple[str, ...],
     suffixes: tuple[str, ...],
+    excluded_prefixes: tuple[str, ...] = (),
 ) -> tuple[Path, ...]:
     candidates: list[Path] = []
     for raw_path in paths:
         target = root / raw_path
-        if target.is_file():
+        try:
+            is_file = target.is_file()
+        except OSError:
+            continue
+        if is_file:
             if not suffixes or target.name.endswith(suffixes):
                 candidates.append(target)
             continue
-        if not target.is_dir():
+        try:
+            is_dir = target.is_dir()
+        except OSError:
             continue
-        candidates.extend(
-            path for path in target.rglob("*") if path.is_file() and path.name.endswith(suffixes)
-        )
+        if not is_dir:
+            continue
+        for current_root, dir_names, file_names in os.walk(target, topdown=True):
+            current_root_path = Path(current_root)
+            current_rel = current_root_path.relative_to(root).as_posix()
+            dir_names[:] = [
+                dir_name
+                for dir_name in dir_names
+                if not any(
+                    f"{current_rel}/{dir_name}/".startswith(prefix)
+                    for prefix in excluded_prefixes
+                )
+            ]
+            for file_name in file_names:
+                if suffixes and not file_name.endswith(suffixes):
+                    continue
+                path = current_root_path / file_name
+                relative_path = path.relative_to(root).as_posix()
+                if any(relative_path.startswith(prefix) for prefix in excluded_prefixes):
+                    continue
+                try:
+                    if path.is_file():
+                        candidates.append(path)
+                except OSError:
+                    continue
     return tuple(sorted(set(candidates)))
 
 
@@ -52,14 +82,18 @@ def _filesystem_grep_fixed(
     suffixes: tuple[str, ...],
 ) -> tuple[GitGrepMatch, ...]:
     matches: list[GitGrepMatch] = []
-    for path in _iter_candidate_files(root=root, paths=paths, suffixes=suffixes):
+    for path in _iter_candidate_files(
+        root=root,
+        paths=paths,
+        suffixes=suffixes,
+        excluded_prefixes=excluded_prefixes,
+    ):
         relative_path = path.relative_to(root).as_posix()
-        if any(relative_path.startswith(prefix) for prefix in excluded_prefixes):
+        try:
+            lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        except OSError:
             continue
-        for index, line in enumerate(
-            path.read_text(encoding="utf-8", errors="replace").splitlines(),
-            start=1,
-        ):
+        for index, line in enumerate(lines, start=1):
             if any(pattern in line for pattern in patterns):
                 matches.append(
                     GitGrepMatch(
@@ -77,7 +111,11 @@ def _filesystem_tracked_files(
     paths: tuple[str, ...],
     suffixes: tuple[str, ...],
 ) -> tuple[Path, ...]:
-    return _iter_candidate_files(root=root, paths=paths, suffixes=suffixes)
+    return _iter_candidate_files(
+        root=root,
+        paths=paths,
+        suffixes=suffixes,
+    )
 
 
 def git_grep_fixed(

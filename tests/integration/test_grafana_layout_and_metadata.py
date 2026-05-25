@@ -602,7 +602,7 @@ def test_control_plane_failure_ratio_thresholds_match_descriptions() -> None:
     for title in (
         "Monitor: Manifest Write Failure Ratio",
         "Monitor: Ledger Append Failure Ratio",
-        "Monitor: GLOBAL Control-Plane Read Failure Ratio",
+        "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity",
     ):
         panel = panels.get(title)
         assert panel is not None
@@ -611,7 +611,7 @@ def test_control_plane_failure_ratio_thresholds_match_descriptions() -> None:
             for target in panel.get("targets", [])
             if isinstance(target.get("expr"), str)
         )
-        if title == "Monitor: GLOBAL Control-Plane Read Failure Ratio":
+        if title == "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity":
             assert "> bool 0.05" in expr
             assert "> bool 0.10" in expr
         else:

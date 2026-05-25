@@ -148,7 +148,7 @@ ______________________________________________________________________
 | ------------- | ------------------------------------------------------------------------- |
 | Конфигурация  | `configs/entities/chembl/publication_term.yaml`                           |
 | Трансформер   | `src/bioetl/application/pipelines/chembl/publication_term_transformer.py` |
-| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`                   |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/pipeline_types.py`               |
 | Сущность      | `src/bioetl/domain/entities/chembl_structures.py` (PublicationTerm)       |
 | Схема         | `src/bioetl/domain/schemas/chembl/publication_term.py`                    |
 

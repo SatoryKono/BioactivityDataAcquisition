@@ -21,14 +21,14 @@ CONFIG_LOADER_PORT_MAX_LINES = 55
 
 REQUIRED_DOMAIN_CONFIG_RESOLVER_IMPORTS = {
     "bioetl.infrastructure.config.converters",
+    "bioetl.infrastructure.config.dq_config_loader",
     "bioetl.infrastructure.config.pipeline_config_api",
-    "bioetl.infrastructure.config.pipeline_config_loader",
+    "bioetl.infrastructure.config.pipeline_dq_resolution",
 }
 
 FORBIDDEN_DOMAIN_CONFIG_RESOLVER_PREFIXES = (
     "bioetl.composition",
     "bioetl.interfaces",
-    "bioetl.infrastructure.config.dq_config_loader",
     "bioetl.infrastructure.config.filter_config_loader",
 )
 
@@ -89,7 +89,6 @@ def test_domain_config_resolver_exposes_only_expected_public_surface() -> None:
     }
     assert top_level_defs == {
         "DomainConfigMapper",
-        "PipelineConfigDQResolver",
         "PipelineConfigDQResolverProvider",
         "DomainConfigResolver",
         "resolve_domain_pipeline_config",

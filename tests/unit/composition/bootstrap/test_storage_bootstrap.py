@@ -33,6 +33,13 @@ SILVER_PATH = TEST_ROOT / "silver"
 GOLD_PATH = TEST_ROOT / "gold"
 
 
+def _registry_with_pipelines(*pipeline_names: str) -> MagicMock:
+    """Create an explicit registry double for table-collector tests."""
+    registry = MagicMock(spec=PipelineRegistry)
+    registry.list_pipelines.return_value = list(pipeline_names)
+    return registry
+
+
 def _make_storage_settings(tmp_path: Path) -> SimpleNamespace:
     """Create the minimal settings object required by storage bootstrap."""
     return SimpleNamespace(
@@ -216,26 +223,24 @@ class TestCreateTableCollector:
 
     def test_returns_callable(self) -> None:
         """Test that _create_table_collector returns a callable."""
-        collector = _create_table_collector()
+        collector = _create_table_collector(registry=_registry_with_pipelines())
 
         assert callable(collector)
 
     @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
-    @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
     def test_collects_silver_tables(
         self,
-        mock_registry: MagicMock,
         mock_load_config: MagicMock,
     ) -> None:
         """Test collection of silver tables."""
         # Setup mocks before creating collector
-        mock_registry.return_value.list_pipelines.return_value = ["pipeline1"]
+        registry = _registry_with_pipelines("pipeline1")
         mock_config = MagicMock()
         mock_config.silver_table = "silver.table1"
         mock_config.gold_table = "gold.table1"
         mock_load_config.return_value = mock_config
 
-        collector = _create_table_collector()
+        collector = _create_table_collector(registry=registry)
 
         tables = collector("silver")
 
@@ -243,20 +248,18 @@ class TestCreateTableCollector:
         assert tables[0] == ("silver.table1", "silver")
 
     @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
-    @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
     def test_collects_gold_tables(
         self,
-        mock_registry: MagicMock,
         mock_load_config: MagicMock,
     ) -> None:
         """Test collection of gold tables."""
-        mock_registry.return_value.list_pipelines.return_value = ["pipeline1"]
+        registry = _registry_with_pipelines("pipeline1")
         mock_config = MagicMock()
         mock_config.silver_table = "silver.table1"
         mock_config.gold_table = "gold.table1"
         mock_load_config.return_value = mock_config
 
-        collector = _create_table_collector()
+        collector = _create_table_collector(registry=registry)
 
         tables = collector("gold")
 
@@ -264,20 +267,18 @@ class TestCreateTableCollector:
         assert tables[0] == ("gold.table1", "gold")
 
     @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
-    @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
     def test_collects_all_tables(
         self,
-        mock_registry: MagicMock,
         mock_load_config: MagicMock,
     ) -> None:
         """Test collection of all tables."""
-        mock_registry.return_value.list_pipelines.return_value = ["pipeline1"]
+        registry = _registry_with_pipelines("pipeline1")
         mock_config = MagicMock()
         mock_config.silver_table = "silver.table1"
         mock_config.gold_table = "gold.table1"
         mock_load_config.return_value = mock_config
 
-        collector = _create_table_collector()
+        collector = _create_table_collector(registry=registry)
 
         tables = collector("all")
 
@@ -287,41 +288,37 @@ class TestCreateTableCollector:
         assert layers == {"silver", "gold"}
 
     @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
-    @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
     def test_raises_on_missing_config(
         self,
-        mock_registry: MagicMock,
         mock_load_config: MagicMock,
     ) -> None:
         """Test that missing pipeline config raises ValueError."""
-        mock_registry.return_value.list_pipelines.return_value = ["pipeline1"]
+        registry = _registry_with_pipelines("pipeline1")
         mock_load_config.side_effect = ValueError("Config not found")
 
-        collector = _create_table_collector()
+        collector = _create_table_collector(registry=registry)
 
         # Should raise ValueError instead of silently failing
         with pytest.raises(ValueError, match="Config not found"):
             collector("all")
 
     @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
-    @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
     def test_deduplicates_tables(
         self,
-        mock_registry: MagicMock,
         mock_load_config: MagicMock,
     ) -> None:
         """Test that duplicate tables are deduplicated."""
         # Two pipelines with same tables
-        mock_registry.return_value.list_pipelines.return_value = [
+        registry = _registry_with_pipelines(
             "pipeline1",
             "pipeline2",
-        ]
+        )
         mock_config = MagicMock()
         mock_config.silver_table = "shared.silver"
         mock_config.gold_table = "shared.gold"
         mock_load_config.return_value = mock_config
 
-        collector = _create_table_collector()
+        collector = _create_table_collector(registry=registry)
 
         tables = collector("all")
 
@@ -329,14 +326,12 @@ class TestCreateTableCollector:
         assert len(tables) == 2
 
     @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
-    @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
     def test_handles_none_tables(
         self,
-        mock_registry: MagicMock,
         mock_load_config: MagicMock,
     ) -> None:
         """Test handling of pipelines with None tables."""
-        mock_registry.return_value.list_pipelines.return_value = ["pipeline1"]
+        registry = _registry_with_pipelines("pipeline1")
         mock_config = MagicMock()
         mock_config.provider = "chembl"
         mock_config.entity_type = "activity"
@@ -344,7 +339,7 @@ class TestCreateTableCollector:
         mock_config.gold_table = None
         mock_load_config.return_value = mock_config
 
-        collector = _create_table_collector()
+        collector = _create_table_collector(registry=registry)
 
         tables = collector("all")
 
@@ -352,17 +347,15 @@ class TestCreateTableCollector:
         assert tables == [("chembl.activity", "silver"), ("chembl.activity", "gold")]
 
     @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
-    @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
     def test_returns_sorted_tables(
         self,
-        mock_registry: MagicMock,
         mock_load_config: MagicMock,
     ) -> None:
         """Test that tables are returned sorted alphabetically."""
-        mock_registry.return_value.list_pipelines.return_value = [
+        registry = _registry_with_pipelines(
             "pipeline_z",
             "pipeline_a",
-        ]
+        )
 
         def config_for_pipeline(name: str) -> MagicMock:
             config = MagicMock()
@@ -378,7 +371,7 @@ class TestCreateTableCollector:
 
         mock_load_config.side_effect = config_for_pipeline
 
-        collector = _create_table_collector()
+        collector = _create_table_collector(registry=registry)
 
         tables = collector("silver")
 
@@ -386,16 +379,34 @@ class TestCreateTableCollector:
         table_names = [t[0] for t in tables]
         assert table_names == sorted(table_names)
 
+    @patch("bioetl.composition.bootstrap.cli.storage.register_all_pipelines")
+    @patch("bioetl.composition.bootstrap.cli.storage.create_registry")
+    def test_default_collector_creates_and_registers_explicit_registry(
+        self,
+        mock_create_registry: MagicMock,
+        mock_register_all_pipelines: MagicMock,
+    ) -> None:
+        """Default collector path must construct a fresh registered registry."""
+        registry = _registry_with_pipelines()
+        mock_create_registry.return_value = registry
+
+        collector = _create_table_collector()
+
+        assert callable(collector)
+        mock_create_registry.assert_called_once_with()
+        mock_register_all_pipelines.assert_called_once_with(registry=registry)
+
     @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
-    @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
+    @patch("bioetl.composition.bootstrap.cli.storage.create_registry")
+    @patch("bioetl.composition.bootstrap.cli.storage.register_all_pipelines")
     def test_explicit_registry_bypasses_default_registry_lookup(
         self,
-        mock_get_default_registry: MagicMock,
+        mock_register_all_pipelines: MagicMock,
+        mock_create_registry: MagicMock,
         mock_load_config: MagicMock,
     ) -> None:
-        """Explicit registry injection should avoid module-level fallback helper."""
-        registry = MagicMock(spec=PipelineRegistry)
-        registry.list_pipelines.return_value = ["pipeline1"]
+        """Explicit registry injection should avoid fallback registry creation."""
+        registry = _registry_with_pipelines("pipeline1")
         mock_config = MagicMock()
         mock_config.silver_table = "silver.table1"
         mock_config.gold_table = "gold.table1"
@@ -406,4 +417,5 @@ class TestCreateTableCollector:
         tables = collector("all")
 
         assert tables == [("silver.table1", "silver"), ("gold.table1", "gold")]
-        mock_get_default_registry.assert_not_called()
+        mock_create_registry.assert_not_called()
+        mock_register_all_pipelines.assert_not_called()

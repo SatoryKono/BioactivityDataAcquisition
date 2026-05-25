@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-05-22",
+  "snapshot_date": "2026-05-25",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -9,7 +9,7 @@
     "removed_compatibility_surfaces_with_src_importers": 0,
     "removed_compatibility_surfaces_with_test_importers": 0,
     "removed_compatibility_surfaces_still_present": 0,
-    "twin_pair_count": 20,
+    "twin_pair_count": 19,
     "twin_pairs_with_private_src_importers": 18,
     "twin_pairs_without_public_src_importers": 1,
     "tracked_twin_family_count": 4,
@@ -945,22 +945,6 @@
       "private_src_importers": [
         "src/bioetl/infrastructure/adapters/circuit_breaker_contract.py"
       ]
-    },
-    {
-      "private_path": "src/bioetl/infrastructure/storage/_audit_normalization.py",
-      "public_path": "src/bioetl/infrastructure/storage/audit_normalization.py",
-      "private_module": "bioetl.infrastructure.storage._audit_normalization",
-      "public_module": "bioetl.infrastructure.storage.audit_normalization",
-      "public_src_importer_count": 3,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 0,
-      "private_test_importer_count": 0,
-      "public_src_importers": [
-        "src/bioetl/infrastructure/storage/_audit_normalization.py",
-        "src/bioetl/infrastructure/storage/gold/metadata_audit.py",
-        "src/bioetl/infrastructure/storage/silver/audit_operations.py"
-      ],
-      "private_src_importers": []
     }
   ],
   "tracked_twin_families": [

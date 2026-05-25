@@ -8,11 +8,15 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
+from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config,
     load_pipeline_config_from_root,
 )
-from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
+from bioetl.infrastructure.config.pipeline_dq_resolution import (
+    DQConfigResolver,
+    resolve_pipeline_dq_config,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.config import DQConfig, PipelineConfig
@@ -29,17 +33,6 @@ class DomainConfigMapper(Protocol):
     ) -> PipelineConfig: ...
 
 
-class PipelineConfigDQResolver(Protocol):
-    """Typed resolver seam for DQ enrichment of validated pipeline YAML config."""
-
-    def resolve_dq_config(
-        self,
-        yaml_config: PipelineYamlConfig,
-    ) -> DQConfig:
-        """Resolve the DQ config that should accompany this YAML pipeline config."""
-        ...
-
-
 class PipelineConfigDQResolverProvider(Protocol):
     """Typed provider seam for creating pipeline DQ resolvers."""
 
@@ -48,7 +41,7 @@ class PipelineConfigDQResolverProvider(Protocol):
         configs_root: Path,
         *,
         relaxed_dq: bool = False,
-    ) -> PipelineConfigDQResolver: ...
+    ) -> DQConfigResolver: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,7 +49,7 @@ class DomainConfigResolver:
     """Resolve domain config from validated YAML config plus hierarchical DQ config."""
 
     configs_root: Path = Path("configs")
-    loader_class: PipelineConfigDQResolverProvider = PipelineConfigLoader
+    dq_resolver_provider: PipelineConfigDQResolverProvider = DQConfigLoader
     domain_mapper: DomainConfigMapper = yaml_config_to_domain
 
     def resolve(
@@ -66,8 +59,14 @@ class DomainConfigResolver:
         relaxed_dq: bool,
     ) -> PipelineConfig:
         """Resolve domain config from YAML with DQ loader composition."""
-        config_loader = self.loader_class(self.configs_root, relaxed_dq=relaxed_dq)
-        resolved_dq = config_loader.resolve_dq_config(yaml_config)
+        dq_resolver = self.dq_resolver_provider(
+            self.configs_root,
+            relaxed_dq=relaxed_dq,
+        )
+        resolved_dq = resolve_pipeline_dq_config(
+            yaml_config,
+            dq_loader=dq_resolver,
+        )
         return self.domain_mapper(yaml_config, resolved_dq_config=resolved_dq)
 
 
@@ -76,13 +75,13 @@ def resolve_domain_pipeline_config(
     *,
     configs_root: Path = Path("configs"),
     relaxed_dq: bool = False,
-    loader_class: PipelineConfigDQResolverProvider = PipelineConfigLoader,
+    dq_resolver_provider: PipelineConfigDQResolverProvider = DQConfigLoader,
     domain_mapper: DomainConfigMapper = yaml_config_to_domain,
 ) -> PipelineConfig:
     """Resolve domain config from an already validated YAML pipeline config."""
     resolver = DomainConfigResolver(
         configs_root=configs_root,
-        loader_class=loader_class,
+        dq_resolver_provider=dq_resolver_provider,
         domain_mapper=domain_mapper,
     )
     return resolver.resolve(yaml_config, relaxed_dq=relaxed_dq)
@@ -94,7 +93,7 @@ def load_domain_pipeline_config(
     configs_root: Path = Path("configs"),
     relaxed_dq: bool = False,
     yaml_loader: Callable[[str], PipelineYamlConfig] = load_pipeline_config,
-    loader_class: PipelineConfigDQResolverProvider = PipelineConfigLoader,
+    dq_resolver_provider: PipelineConfigDQResolverProvider = DQConfigLoader,
     domain_mapper: DomainConfigMapper = yaml_config_to_domain,
 ) -> PipelineConfig:
     """Load domain config through the canonical function-based config flow."""
@@ -109,9 +108,10 @@ def load_domain_pipeline_config(
         yaml_config,
         configs_root=configs_root,
         relaxed_dq=relaxed_dq,
-        loader_class=loader_class,
+        dq_resolver_provider=dq_resolver_provider,
         domain_mapper=domain_mapper,
     )
+
 
 __all__ = [
     "DomainConfigResolver",

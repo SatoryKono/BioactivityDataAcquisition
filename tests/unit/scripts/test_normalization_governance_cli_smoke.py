@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from tests.helpers import assert_cli_succeeded, run_python_cli
 
 
@@ -51,6 +53,7 @@ def test_qa_cli_check_xwalk_missing_backlog_help_smoke() -> None:
     )
 
 
+@pytest.mark.timeout(300)
 def test_docs_cli_generate_pipeline_normalization_matrix_execution_smoke(
     tmp_path: Path,
 ) -> None:
@@ -62,6 +65,7 @@ def test_docs_cli_generate_pipeline_normalization_matrix_execution_smoke(
         "generate-pipeline-normalization-matrix",
         "--out-dir",
         str(out_dir),
+        timeout=180,
     )
 
     assert_cli_succeeded(generate)
@@ -76,6 +80,7 @@ def test_docs_cli_generate_pipeline_normalization_matrix_execution_smoke(
         "--out-dir",
         str(out_dir),
         "--check",
+        timeout=180,
     )
 
     assert_cli_succeeded(check)

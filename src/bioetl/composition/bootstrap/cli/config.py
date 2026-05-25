@@ -15,7 +15,7 @@ from bioetl.composition.bootstrap.cli.config_helpers import get_pipeline_yaml_fo
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.bootstrap.cli.service_builders import build_cli_config_service
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.composition.registry_api import PipelineRegistry, get_default_registry
+from bioetl.composition.registry_api import PipelineRegistry, create_registry
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.domain.ports import DomainConfigMapperPort, SettingsLoaderPort
 from bioetl.infrastructure.config.config_root import resolve_configs_root
@@ -27,13 +27,26 @@ from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config_from_root,
 )
 
-__all__ = ["bootstrap_config_service", "create_pipeline_config_loader"]
+__all__ = [
+    "bootstrap_config_service",
+    "create_pipeline_config_loader",
+    "create_registered_pipeline_registry",
+]
 
 
 def create_pipeline_config_loader(configs_root: Path) -> Callable[[str], object]:
     return lambda pipeline_name: load_pipeline_config_from_root(
         pipeline_name, configs_root=configs_root
     )
+
+
+def create_registered_pipeline_registry(
+    registry: PipelineRegistry | None = None,
+) -> PipelineRegistry:
+    """Create or populate an explicit pipeline registry for CLI composition."""
+    effective_registry = registry if registry is not None else create_registry()
+    register_all_pipelines(registry=effective_registry)
+    return effective_registry
 
 
 def bootstrap_config_service(
@@ -44,11 +57,10 @@ def bootstrap_config_service(
     """Assemble the CLI-facing ConfigService with default composition wiring."""
     resolved_configs_root = resolve_configs_root(configs_root)
     pipeline_config_loader = create_pipeline_config_loader(resolved_configs_root)
+    effective_registry = create_registered_pipeline_registry(registry)
     return build_cli_config_service(
-        registry=registry,
+        registry=effective_registry,
         logger_factory=create_noop_logger,
-        register_pipelines=register_all_pipelines,
-        default_registry_accessor=get_default_registry,
         settings_loader=cast(SettingsLoaderPort, get_settings),
         pipeline_config_loader=pipeline_config_loader,
         domain_config_mapper=cast(DomainConfigMapperPort, yaml_config_to_domain),

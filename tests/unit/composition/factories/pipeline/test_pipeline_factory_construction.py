@@ -27,6 +27,8 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 def _make_yaml_config(**overrides: object) -> PipelineYamlConfig:
     defaults = {
+        "provider": "chembl",
+        "entity_type": "activity",
         "content_hash": SimpleNamespace(include=[], exclude=[]),
         "content_hash_policy": None,
         "transform": SimpleNamespace(
@@ -34,6 +36,22 @@ def _make_yaml_config(**overrides: object) -> PipelineYamlConfig:
         ),
         "silver_filters": None,
         "gold_filters": None,
+        "dq_overrides": SimpleNamespace(
+            field_validations=[],
+            cross_field_validations=[],
+            conditional_validations=[],
+            soft_fail_threshold=0.05,
+            hard_fail_threshold=0.20,
+            strict_validation=False,
+            invalid_record_policy="drop",
+            report=SimpleNamespace(
+                enabled=True,
+                format="json",
+                include_sample_failures=True,
+                sample_size=10,
+                output_path=None,
+            ),
+        ),
     }
     defaults.update(overrides)
     return cast(PipelineYamlConfig, SimpleNamespace(**defaults))
@@ -98,7 +116,15 @@ class _DummyLoader:
         self.configs_root = configs_root
         self.relaxed_dq = relaxed_dq
 
-    def resolve_dq_config(self, _yaml_config: PipelineYamlConfig) -> str:
+    def load(
+        self,
+        provider: str,
+        entity: str,
+        inline_overrides: object = None,
+    ) -> str:
+        assert provider
+        assert entity
+        assert inline_overrides is None
         return "resolved-dq"
 
 
@@ -117,7 +143,7 @@ def test_domain_config_resolver_uses_loader_and_mapper() -> None:
 
     resolver = DomainConfigResolver(
         configs_root=Path("configs"),
-        loader_class=_DummyLoader,
+        dq_resolver_provider=_DummyLoader,
         domain_mapper=_mapper,
     )
     result = resolver.resolve(yaml_config, relaxed_dq=True)

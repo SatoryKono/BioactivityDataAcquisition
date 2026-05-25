@@ -513,7 +513,7 @@ ______________________________________________________________________
 | Сущность      | `src/bioetl/domain/entities/bioactivity/_entity.py`                          |
 | Трансформер   | `src/bioetl/application/pipelines/chembl/activity_transformer.py`            |
 | Gold sink     | Enabled in `configs/entities/chembl/activity.yaml`                           |
-| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`                      |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/pipeline_types.py`                  |
 | Silver Schema | `src/bioetl/infrastructure/schemas/silver.py`                                |
 | Bronze Writer | `src/bioetl/infrastructure/storage/bronze_writer.py`                         |
 | Silver Writer | `src/bioetl/infrastructure/storage/silver_writer.py`                         |

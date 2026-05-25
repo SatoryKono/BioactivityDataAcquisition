@@ -126,7 +126,7 @@ ______________________________________________________________________
 | ------------- | ------------------------------------------------------------------ |
 | Конфигурация  | `configs/entities/chembl/cell_line.yaml`                           |
 | Трансформер   | `src/bioetl/application/pipelines/chembl/cell_line_transformer.py` |
-| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`            |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/pipeline_types.py`        |
 | Схема         | `src/bioetl/domain/schemas/chembl/cell_line.py`                    |
 | Сущность      | `src/bioetl/domain/entities/chembl_structures_foundation.py`       |
 | Фабрика       | `src/bioetl/composition/factories/pipeline/registry.py`            |

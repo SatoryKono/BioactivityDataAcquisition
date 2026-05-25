@@ -437,19 +437,27 @@ class TestCompositionRootIntegrity:
 
         content = bootstrap_file.read_text(encoding="utf-8")
 
-        # Check that bootstrap uses factory imports
+        phase_file = bootstrap_file.with_name("pipeline_bootstrap_phases.py")
+        phase_content = (
+            phase_file.read_text(encoding="utf-8") if phase_file.exists() else ""
+        )
+
+        # Check that bootstrap delegates object creation through the runtime phase
+        # seam, where factory imports are kept lazy to avoid import-time startup cost.
         expected_patterns = [
-            r"from.*factories.*import",  # Uses factory imports
-            r"Factory\(",  # Uses factory instances
+            r"from.*factories.*import",  # Direct factory import fallback
+            r"Factory\(",  # Direct factory instance fallback
+            r"pipeline_bootstrap_phases",  # Delegates to the phase seam
         ]
 
         has_factory_usage = any(
             re.search(pattern, content) for pattern in expected_patterns
         )
+        phase_has_factory_usage = "bioetl.composition.factories" in phase_content
 
-        assert has_factory_usage, (
+        assert has_factory_usage and phase_has_factory_usage, (
             "bootstrap_pipeline_runner() should delegate to factories for object creation.\n"
-            "Expected factory imports or usage, found none."
+            "Expected direct factory usage or phase-helper factory delegation, found none."
         )
 
     def test_factories_exist_in_composition(self, src_dir: Path) -> None:

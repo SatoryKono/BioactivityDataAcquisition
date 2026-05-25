@@ -140,8 +140,7 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
     assert "Reproducibility Support Matrix" in text
     assert (
         "Current published lineage closure boundary for Bronze -> Silver -> Gold "
-        "operator-grade trace/debug support covers these families:"
-        not in text
+        "operator-grade trace/debug support covers these families:" not in text
     )
     assert "## Reproducibility Scoring Rubric" in text
     assert "|   100 | `forensic_grade`" in text
@@ -275,6 +274,11 @@ def test_run_manifest_config_hash_legacy_alias_contract_is_documented_and_wired(
     assert "`resolved_config_hash`;" in contract
     assert "must not treat" in contract
     assert "`config_hash` as a synonym for `effective_config_hash`" in contract
+    assert (
+        "Datetime-sensitive content hashes use the reviewed `v2_datetime_utc` default"
+        in contract
+    )
+    assert "Historical `v1_date` hash compatibility is limited" in contract
     assert "`config_hash`" in runbook
     assert "legacy compatibility" in runbook
     assert "legacy_config_hash_from_resolved_config_hash" not in policy

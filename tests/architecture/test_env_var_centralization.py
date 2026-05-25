@@ -176,9 +176,6 @@ class TestEnvVarCentralization:
         self, composition_python_files: list[Path]
     ) -> None:
         """Verify that files in ALLOWED_COMPOSITION_FILES actually exist."""
-        if not ALLOWED_COMPOSITION_FILES:
-            pytest.skip("No allowed files in composition layer (expected)")
-
         existing_names = {f.name for f in composition_python_files}
         missing = ALLOWED_COMPOSITION_FILES - existing_names
 

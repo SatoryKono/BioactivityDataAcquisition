@@ -169,7 +169,7 @@ ______________________________________________________________________
 | ------------- | ------------------------------------------------------------------------ |
 | Конфигурация  | `configs/entities/chembl/compound_record.yaml`                           |
 | Трансформер   | `src/bioetl/application/pipelines/chembl/compound_record_transformer.py` |
-| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`                  |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/pipeline_types.py`              |
 | Сущность      | `src/bioetl/domain/entities/chembl_compound_record.py`                   |
 | Схема         | `src/bioetl/domain/schemas/chembl/compound_record.py`                    |
 

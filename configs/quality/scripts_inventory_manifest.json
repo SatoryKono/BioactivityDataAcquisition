@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-25T09:56:17.364819+00:00",
+  "generated_at": "2026-05-25T11:38:18.913075+00:00",
   "summary": {
     "total_scripts": 396,
     "status_counts": {
@@ -5803,13 +5803,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 590,
+          "line": 587,
           "source_group": "tests",
           "text": "skip_rate = Path(\"scripts/engineering/ci/check_e2e_matrix_skip_rate.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 614,
+          "line": 611,
           "source_group": "tests",
           "text": "assert \"check_e2e_matrix_skip_rate.py\" in content"
         }
@@ -5842,13 +5842,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 591,
+          "line": 588,
           "source_group": "tests",
           "text": "rerun = Path(\"scripts/engineering/ci/check_e2e_rerun_stability.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 615,
+          "line": 612,
           "source_group": "tests",
           "text": "assert \"check_e2e_rerun_stability.py\" in content"
         }
@@ -8887,7 +8887,7 @@
         },
         {
           "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
-          "line": 217,
+          "line": 216,
           "source_group": "tests",
           "text": "assert \"run_historical_replay_closure_campaign.py\" in runbook"
         }
@@ -8944,7 +8944,7 @@
         },
         {
           "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
-          "line": 224,
+          "line": 223,
           "source_group": "tests",
           "text": "assert \"run_historical_replay_universe_campaign.py\" in runbook"
         }
@@ -9771,19 +9771,19 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 144,
+          "line": 146,
           "source_group": "docs",
           "text": "| `src/bioetl/interfaces/cli/commands/run.py` | Permanent public run command seam over the retained domain helper modules under `bioetl.interfaces.cli.commands.domains.run`. | `bioetl.interfaces.cli.c"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 47,
+          "line": 48,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 53,
+          "line": 55,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`"
         },

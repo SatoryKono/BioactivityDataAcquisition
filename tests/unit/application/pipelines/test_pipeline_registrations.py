@@ -111,17 +111,12 @@ class TestPipelineRegistrations:
             "ChEMBLTissuePipeline",
         ],
     )
-    def test_chembl_compat_module_re_exports_canonical_pipeline_types(
+    def test_chembl_pipeline_types_module_exports_marker_classes(
         self, class_name: str
     ) -> None:
-        """Legacy _pipelines imports should resolve to canonical pipeline_types classes."""
+        """Canonical pipeline_types exports should expose ChEMBL marker classes."""
         canonical_module = importlib.import_module(
             "bioetl.application.pipelines.chembl.pipeline_types"
         )
-        compat_module = importlib.import_module(
-            "bioetl.application.pipelines.chembl._pipelines"
-        )
 
-        assert getattr(compat_module, class_name) is getattr(
-            canonical_module, class_name
-        )
+        assert getattr(canonical_module, class_name)

@@ -49,6 +49,12 @@ def test_date_only_hash_policy_inventory_matches_entity_configs() -> None:
         provider = str(item["provider"])
         entity = str(item["entity"])
         expected_policy = str(item["configured_policy"])
+        assert expected_policy == "v1_date", (
+            f"{provider}.{entity} date-only compatibility must declare v1_date"
+        )
+        assert str(item.get("rationale", "")).strip(), (
+            f"{provider}.{entity} date-only compatibility requires a rationale"
+        )
         config = _load_yaml(ROOT / "configs" / "entities" / provider / f"{entity}.yaml")
         contracts = cast(dict[str, object], config.get("contracts", {}))
         assert contracts.get("hash_datetime_policy") == expected_policy, (
@@ -69,3 +75,34 @@ def test_hash_datetime_policy_values_are_known() -> None:
             f"{config_path.relative_to(ROOT)}: unsupported "
             f"contracts.hash_datetime_policy={value!r}"
         )
+
+
+def test_v1_date_hash_policy_is_inventory_gated() -> None:
+    policy = _load_yaml(POLICY_PATH)
+    hash_policy = cast(dict[str, object], policy["content_hash_datetime_policy"])
+    date_only_inventory = {
+        (str(item["provider"]), str(item["entity"]))
+        for item in cast(
+            list[dict[str, object]],
+            hash_policy.get("date_only_entity_inventory", []),
+        )
+    }
+
+    undeclared: list[str] = []
+    for config_path in (ROOT / "configs" / "entities").rglob("*.yaml"):
+        config = _load_yaml(config_path)
+        contracts = config.get("contracts")
+        if not isinstance(contracts, dict):
+            continue
+        if contracts.get("hash_datetime_policy") != "v1_date":
+            continue
+        provider = str(config.get("provider"))
+        entity = str(config.get("entity"))
+        if (provider, entity) not in date_only_inventory:
+            undeclared.append(str(config_path.relative_to(ROOT)))
+
+    assert not undeclared, (
+        "v1_date hash datetime compatibility must be declared in "
+        "determinism_identity_policy.yaml date_only_entity_inventory:\n"
+        + "\n".join(undeclared)
+    )

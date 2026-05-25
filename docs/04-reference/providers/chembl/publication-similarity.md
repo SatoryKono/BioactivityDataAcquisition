@@ -113,7 +113,7 @@ ______________________________________________________________________
 | ------------- | ------------------------------------------------------------------------------- |
 | Конфигурация  | `configs/entities/chembl/publication_similarity.yaml`                           |
 | Трансформер   | `src/bioetl/application/pipelines/chembl/publication_similarity_transformer.py` |
-| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`                         |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/pipeline_types.py`                     |
 
 ______________________________________________________________________
 

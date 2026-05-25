@@ -25,13 +25,21 @@ def _make_yaml_config() -> PipelineYamlConfig:
 
 
 class _DummyLoader:
-    """Loader test double exposing the DQ resolver contract only."""
+    """Loader test double exposing the canonical DQ load contract only."""
 
     def __init__(self, configs_root: Path, *, relaxed_dq: bool = False) -> None:
         self.configs_root = configs_root
         self.relaxed_dq = relaxed_dq
 
-    def resolve_dq_config(self, _yaml_config: PipelineYamlConfig) -> str:
+    def load(
+        self,
+        provider: str,
+        entity: str,
+        inline_overrides: object = None,
+    ) -> str:
+        assert provider
+        assert entity
+        assert inline_overrides is None
         return "resolved-dq"
 
 
@@ -47,7 +55,7 @@ def test_domain_config_resolver_uses_loader_and_mapper() -> None:
 
     resolver = DomainConfigResolver(
         configs_root=Path("configs"),
-        loader_class=_DummyLoader,
+        dq_resolver_provider=_DummyLoader,
         domain_mapper=_mapper,
     )
 
@@ -77,7 +85,7 @@ def test_load_domain_pipeline_config_uses_canonical_function_flow() -> None:
         configs_root=Path("custom-configs"),
         relaxed_dq=True,
         yaml_loader=_yaml_loader,
-        loader_class=_DummyLoader,
+        dq_resolver_provider=_DummyLoader,
         domain_mapper=_mapper,
     )
 
@@ -119,7 +127,7 @@ def test_load_domain_pipeline_config_honors_explicit_configs_root_for_default_ya
         configs_root=Path("custom-configs"),
         relaxed_dq=False,
         yaml_loader=resolver_module.load_pipeline_config,
-        loader_class=_DummyLoader,
+        dq_resolver_provider=_DummyLoader,
         domain_mapper=_mapper,
     )
 
@@ -144,7 +152,7 @@ def test_resolve_domain_pipeline_config_uses_resolver_builder_and_mapper() -> No
         yaml_config,
         configs_root=Path("custom-configs"),
         relaxed_dq=True,
-        loader_class=_DummyLoader,
+        dq_resolver_provider=_DummyLoader,
         domain_mapper=_mapper,
     )
 

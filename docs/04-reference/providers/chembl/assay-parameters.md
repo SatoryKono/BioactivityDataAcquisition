@@ -153,7 +153,7 @@ ______________________________________________________________________
 | ------------- | ------------------------------------------------------------------------- |
 | Конфигурация  | `configs/entities/chembl/assay_parameters.yaml`                           |
 | Трансформер   | `src/bioetl/application/pipelines/chembl/assay_parameters_transformer.py` |
-| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`                   |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/pipeline_types.py`               |
 
 ______________________________________________________________________
 
