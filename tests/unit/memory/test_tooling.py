@@ -256,6 +256,8 @@ def test_memory_workflow_module_help_does_not_emit_runpy_warning(
         pythonpath_entries.append(env["PYTHONPATH"])
     env["PYTHONPATH"] = os.pathsep.join(pythonpath_entries)
     env["PYTHONDONTWRITEBYTECODE"] = "1"
+    # Set MEMORY_ROOT to the sandbox to prevent discovery from hanging
+    env["MEMORY_ROOT"] = str(sandbox_src_root / "memory")
 
     result = subprocess.run(
         [sys.executable, "-m", "memory.tooling.workflow", "--help"],

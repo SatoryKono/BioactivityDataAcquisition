@@ -1,4 +1,4 @@
-"""Unit tests for runtime compatibility bootstrap patches."""
+"""Unit tests for runtime bootstrap patching."""
 
 from __future__ import annotations
 
