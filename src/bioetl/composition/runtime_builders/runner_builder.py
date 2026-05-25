@@ -28,6 +28,15 @@ from bioetl.composition.runtime_builders._runner_control_plane_policy import (
 from bioetl.composition.runtime_builders._runner_control_plane_policy import (
     validate_strict_data_root_policy as _validate_strict_data_root_policy,
 )
+from bioetl.composition.runtime_builders.config_access import (
+    get_settings as _get_settings,
+)
+from bioetl.composition.runtime_builders.config_access import (
+    load_pipeline_config as _load_pipeline_config,
+)
+from bioetl.composition.runtime_builders.config_access import (
+    load_source_config as _load_source_config,
+)
 from bioetl.composition.runtime_builders.control_plane import (
     attach_manifest_id,
     create_run_manifest_with_effective_config,
@@ -78,6 +87,13 @@ __all__ = [
     "RunnerInputWiring",
     "build_pipeline_runner",
 ]
+
+
+_DEFAULT_RUNNER_INPUT_WIRING = RunnerInputWiring(
+    get_settings=_get_settings,
+    load_pipeline_config=_load_pipeline_config,
+    load_source_config=_load_source_config,
+)
 
 
 def _set_context_attribute(ctx: object, attr_name: str, attr_value: object) -> object:
@@ -226,7 +242,7 @@ def build_pipeline_runner(
         register_all_pipelines_fn=register_all_pipelines_fn,
     )
     input_wiring = resolve_runner_input_wiring(
-        input_wiring,
+        input_wiring or _DEFAULT_RUNNER_INPUT_WIRING,
         get_settings_fn=get_settings_fn,
         load_pipeline_config_fn=load_pipeline_config_fn,
         load_source_config_fn=load_source_config_fn,
