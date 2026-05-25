@@ -2609,7 +2609,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor: Manifest Write Failure Ratio Severity",
+          "title": "Monitor: Manifest Write Failure Ratio",
           "type": "stat"
         },
         {
@@ -2700,7 +2700,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor: Ledger Append Failure Ratio Severity",
+          "title": "Monitor: Ledger Append Failure Ratio",
           "type": "stat"
         }
       ],
@@ -2896,7 +2896,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity",
+          "title": "Monitor: GLOBAL Control-Plane Read Failure Ratio",
           "type": "stat"
         },
         {

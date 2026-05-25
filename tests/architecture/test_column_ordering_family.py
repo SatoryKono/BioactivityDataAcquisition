@@ -17,16 +17,18 @@ SRC_ALLOWLIST: frozenset[Path] = frozenset()
 TEST_ALLOWLIST: frozenset[Path] = frozenset()
 
 
-def _python_files(root: Path) -> list[Path]:
-    return sorted(root.rglob("*.py"))
-
-
-def _symbol_hits(root: Path, allowlist: frozenset[Path]) -> list[str]:
+def _symbol_hits_from_cache(
+    content_cache: dict[Path, str],
+    *,
+    root: Path,
+    allowlist: frozenset[Path],
+) -> list[str]:
     hits: list[str] = []
-    for py_file in _python_files(root):
+    for py_file, source in sorted(content_cache.items()):
+        if not py_file.is_relative_to(root):
+            continue
         if py_file in allowlist:
             continue
-        source = py_file.read_text(encoding="utf-8")
         for symbol in DEPRECATED_SYMBOLS:
             if symbol in source:
                 hits.append(f"{py_file.relative_to(ROOT)} -> {symbol}")
@@ -34,8 +36,14 @@ def _symbol_hits(root: Path, allowlist: frozenset[Path]) -> list[str]:
 
 
 @pytest.mark.architecture
-def test_no_runtime_imports_of_deprecated_column_ordering_symbols() -> None:
-    hits = _symbol_hits(SRC_ROOT / "bioetl", SRC_ALLOWLIST)
+def test_no_runtime_imports_of_deprecated_column_ordering_symbols(
+    source_content_cache: dict[Path, str],
+) -> None:
+    hits = _symbol_hits_from_cache(
+        source_content_cache,
+        root=SRC_ROOT / "bioetl",
+        allowlist=SRC_ALLOWLIST,
+    )
     assert hits == [], (
         "Deprecated column-ordering symbols must stay removed from runtime src:\n"
         + "\n".join(f"  - {hit}" for hit in hits)
@@ -43,14 +51,22 @@ def test_no_runtime_imports_of_deprecated_column_ordering_symbols() -> None:
 
 
 @pytest.mark.architecture
-def test_application_and_integration_tests_use_canonical_column_order_service() -> None:
+def test_application_and_integration_tests_use_canonical_column_order_service(
+    test_content_cache: dict[Path, str],
+) -> None:
     roots = (
         TEST_ROOT / "unit" / "application" / "composite",
         TEST_ROOT / "integration" / "composite",
     )
     hits: list[str] = []
     for root in roots:
-        hits.extend(_symbol_hits(root, frozenset()))
+        hits.extend(
+            _symbol_hits_from_cache(
+                test_content_cache,
+                root=root,
+                allowlist=frozenset(),
+            )
+        )
     assert hits == [], (
         "First-party tests must use ColumnOrderService as the canonical default "
         "surface:\n" + "\n".join(f"  - {hit}" for hit in hits)
