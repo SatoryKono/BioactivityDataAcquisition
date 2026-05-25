@@ -13241,12 +13241,6 @@ def _link_pipeline_normalization_modules(
 
 def _build_normalization_pipeline_evidence() -> dict[str, dict[str, JsonValue]]:
     try:
-        from scripts.docs.generate_pipeline_normalization_field_matrix import (
-            FALLBACK_BUSINESS,
-            FALLBACK_TECHNICAL_PASSTHROUGH,
-            build_field_matrix_rows,
-        )
-
         from bioetl.domain.normalization.profiles.registry import (
             NORMALIZATION_PROFILE_REGISTRY,
             resolve_normalization_profile_module_path,
@@ -13255,17 +13249,15 @@ def _build_normalization_pipeline_evidence() -> dict[str, dict[str, JsonValue]]:
         return {}
 
     evidence: dict[str, dict[str, JsonValue]] = {}
-    _accumulate_field_matrix_evidence(
-        evidence,
-        build_field_matrix_rows(),
-        fallback_business=FALLBACK_BUSINESS,
-        fallback_technical_passthrough=FALLBACK_TECHNICAL_PASSTHROUGH,
-    )
-    _enrich_registry_normalization_evidence(
-        evidence,
-        NORMALIZATION_PROFILE_REGISTRY,
-        resolve_normalization_profile_module_path,
-    )
+    for (provider, entity), profile in NORMALIZATION_PROFILE_REGISTRY.items():
+        pipeline_name = f"{provider}_{entity}"
+        payload = _empty_normalization_evidence_payload()
+        payload["normalization_profile_registered"] = True
+        payload["normalization_profile_module_path"] = (
+            resolve_normalization_profile_module_path(provider, entity)
+        )
+        payload["profile_field_count"] = len(profile.field_rules)
+        evidence[pipeline_name] = payload
     _finalize_normalization_evidence_defaults(evidence)
     return evidence
 
