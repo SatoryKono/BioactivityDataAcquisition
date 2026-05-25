@@ -102,7 +102,7 @@ async def _chembl_live_contract_ready() -> None:
         )
 
 
-.mark.chembl
+@pytest.mark.chembl
 class TestChemblContract:
     """Contract tests for ChEMBL REST API."""
 
