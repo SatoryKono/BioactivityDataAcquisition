@@ -1,24 +1,24 @@
 {
   "summary": {
-    "scanned_modules": 1931,
-    "total_internal_imports": 7614,
+    "scanned_modules": 1937,
+    "total_internal_imports": 7642,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "3661f477a39fb4741a9170412ec833e515a5147e4ceae242cfcbca35c1f0854b"
+    "source_fingerprint": "b55d6b6dd1a88190d1f67e5a293e16c651f1938484fc4bf9c57782c489b6b9cf"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1295,
+      "imports": 1297,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1138,
+      "imports": 1139,
       "allowed": true
     },
     {
@@ -30,7 +30,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 670,
+      "imports": 686,
       "allowed": true
     },
     {
@@ -42,7 +42,7 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 341,
+      "imports": 342,
       "allowed": true
     },
     {
@@ -54,13 +54,13 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 789,
+      "imports": 791,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 966,
+      "imports": 972,
       "allowed": true
     },
     {
@@ -127,7 +127,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 72
+      "imports": 73
     },
     {
       "source": "application.services",
@@ -145,13 +145,13 @@
       "imports": 68
     },
     {
-      "source": "application.services",
-      "target": "domain.types",
-      "imports": 66
-    },
-    {
       "source": "infrastructure.storage",
       "target": "domain.ports",
+      "imports": 67
+    },
+    {
+      "source": "application.services",
+      "target": "domain.types",
       "imports": 66
     },
     {
@@ -215,13 +215,13 @@
       "imports": 34
     },
     {
-      "source": "composition.factories",
-      "target": "infrastructure.adapters",
-      "imports": 31
-    },
-    {
       "source": "infrastructure.storage",
       "target": "domain.models",
+      "imports": 32
+    },
+    {
+      "source": "composition.factories",
+      "target": "infrastructure.adapters",
       "imports": 31
     },
     {

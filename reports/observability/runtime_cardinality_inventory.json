@@ -2768,7 +2768,7 @@
     ],
     "bioetl_output_artifact_publication_events_total": [
       "src/bioetl/application/observability/pipeline_metrics.py",
-      "src/bioetl/infrastructure/storage/metadata_writer_helpers.py"
+      "src/bioetl/infrastructure/storage/metadata_artifact_publication.py"
     ],
     "bioetl_phase_duration_seconds": [
       "src/bioetl/application/composite/_lifecycle_observer_tracing_helpers.py",

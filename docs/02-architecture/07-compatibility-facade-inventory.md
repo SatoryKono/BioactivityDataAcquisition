@@ -130,12 +130,14 @@ Scorecard alignment:
 
 | Path                                                        | Compatibility role | Canonical target | Status | Owner | Introduced in | Allowed call sites | Remove by / review date | Migration path | Exit criteria |
 | ----------------------------------------------------------- | ------------------ | ---------------- | ------ | ----- | ------------- | ------------------ | ----------------------- | -------------- | ------------- |
+| `src/bioetl/infrastructure/observability/prometheus_metric_label_policies.py` | Compatibility facade that preserves the pre-split Prometheus metric label policy import surface over dispatch and policy-set owners. | `bioetl.infrastructure.observability.prometheus_metric_dispatch` | `compat-shim` | `bioetl.infrastructure.observability` | `2026-05 observability label policy split` | `src`: transitional imports remain limited to reviewed observability owners such as `bioetl.infrastructure.adapters.base_metrics` and `bioetl.infrastructure.observability.prometheus_metrics`; `tests`: compatibility import/patch coverage may target the facade while new production code prefers the split owner modules directly | `2026-09-30` | Migrate first-party runtime imports to `bioetl.infrastructure.observability.prometheus_metric_dispatch` and `bioetl.infrastructure.observability.prometheus_metric_policy_sets`; keep the facade only as a compatibility seam for existing imports. | First-party runtime imports migrate to the split owner modules, compatibility-only tests remain, and the facade can be removed through an explicit breaking-change review. |
 
-Current baseline status: empty. The last reduction wave removed the deprecated
-storage adapter shim (`composition/factories/storage/adapter.py`) and the
-checkpoint anchor-context shim
-(`application/composite/checkpoint/anchor_context.py`), so any new row here is
-an immediate regression.
+Current baseline status: one reviewed observability transition shim remains
+while label-policy call sites migrate to split owner modules. The last
+reduction wave removed the deprecated storage adapter shim
+(`composition/factories/storage/adapter.py`) and the checkpoint anchor-context
+shim (`application/composite/checkpoint/anchor_context.py`), so any additional
+row here is an immediate regression.
 
 ### Sanctioned Public Entrypoints
 

@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 import subprocess
 
+_WINDOWS_GIT_FAILURE_CODES = {-1, 4294967295}
+
 
 @dataclass(frozen=True, slots=True)
 class GitGrepMatch:
@@ -14,6 +16,68 @@ class GitGrepMatch:
     path: str
     line_number: str
     text: str
+
+
+def _iter_candidate_files(
+    *,
+    root: Path,
+    paths: tuple[str, ...],
+    suffixes: tuple[str, ...],
+) -> tuple[Path, ...]:
+    candidates: list[Path] = []
+    for raw_path in paths:
+        target = root / raw_path
+        if target.is_file():
+            if not suffixes or target.name.endswith(suffixes):
+                candidates.append(target)
+            continue
+        if not target.is_dir():
+            continue
+        candidates.extend(
+            path for path in target.rglob("*") if path.is_file() and path.name.endswith(suffixes)
+        )
+    return tuple(sorted(set(candidates)))
+
+
+def _use_filesystem_fallback(returncode: int) -> bool:
+    return returncode in _WINDOWS_GIT_FAILURE_CODES
+
+
+def _filesystem_grep_fixed(
+    *,
+    root: Path,
+    patterns: tuple[str, ...],
+    paths: tuple[str, ...],
+    excluded_prefixes: tuple[str, ...],
+    suffixes: tuple[str, ...],
+) -> tuple[GitGrepMatch, ...]:
+    matches: list[GitGrepMatch] = []
+    for path in _iter_candidate_files(root=root, paths=paths, suffixes=suffixes):
+        relative_path = path.relative_to(root).as_posix()
+        if any(relative_path.startswith(prefix) for prefix in excluded_prefixes):
+            continue
+        for index, line in enumerate(
+            path.read_text(encoding="utf-8", errors="replace").splitlines(),
+            start=1,
+        ):
+            if any(pattern in line for pattern in patterns):
+                matches.append(
+                    GitGrepMatch(
+                        path=relative_path,
+                        line_number=str(index),
+                        text=line,
+                    )
+                )
+    return tuple(matches)
+
+
+def _filesystem_tracked_files(
+    *,
+    root: Path,
+    paths: tuple[str, ...],
+    suffixes: tuple[str, ...],
+) -> tuple[Path, ...]:
+    return _iter_candidate_files(root=root, paths=paths, suffixes=suffixes)
 
 
 def git_grep_fixed(
@@ -59,6 +123,14 @@ def git_grep_fixed(
         ) from exc
     if result.returncode == 1:
         return ()
+    if _use_filesystem_fallback(result.returncode):
+        return _filesystem_grep_fixed(
+            root=root,
+            patterns=patterns,
+            paths=paths,
+            excluded_prefixes=excluded_prefixes,
+            suffixes=suffixes,
+        )
     if result.returncode != 0:
         raise AssertionError(
             f"git grep scan failed with exit code {result.returncode}: {result.stderr}"
@@ -94,6 +166,12 @@ def git_tracked_files(
         raise AssertionError(
             f"git ls-files scan timed out after {timeout:.1f}s: {paths!r}"
         ) from exc
+    if _use_filesystem_fallback(result.returncode):
+        return _filesystem_tracked_files(
+            root=root,
+            paths=paths,
+            suffixes=suffixes,
+        )
     if result.returncode != 0:
         raise AssertionError(
             "git ls-files scan failed with exit code "

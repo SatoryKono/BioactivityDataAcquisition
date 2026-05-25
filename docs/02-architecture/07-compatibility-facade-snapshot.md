@@ -5,18 +5,18 @@
 ## Summary
 
 - Registry YAML: `configs/quality/compatibility_facade_inventory.yaml`
-- Curated inventory rows: `14`
-- Transition debt rows: `0`
+- Curated inventory rows: `15`
+- Transition debt rows: `1`
 - Sanctioned public entrypoint rows: `14`
 - Retained review entrypoints: `0`
 - Permanent public entrypoints: `14`
-- Measured tracked modules: `14`
+- Measured tracked modules: `15`
 - Measured-only modules outside curated inventory: `0`
-- Discovered docstring-tracked modules: `0`
+- Discovered docstring-tracked modules: `1`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
-- Curated rows requiring external breaking change process: `14`
+- Curated rows requiring external breaking change process: `15`
 - Curated rows marked internal-callers-zero: `0`
 - First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`
@@ -40,6 +40,7 @@
 - `src/bioetl/domain/composite/config.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
 - `src/bioetl/infrastructure/config/__init__.py`
+- `src/bioetl/infrastructure/observability/prometheus_metric_label_policies.py`
 - `src/bioetl/interfaces/cli/commands/diagnostics.py`
 - `src/bioetl/interfaces/cli/commands/health.py`
 - `src/bioetl/interfaces/cli/commands/maintenance.py`
@@ -50,6 +51,7 @@
 
 ## Curated Row Governance Metadata
 
+- `src/bioetl/infrastructure/observability/prometheus_metric_label_policies.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run_all.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run_composite.py` — external breaking change required: `true`, internal callers zero: `false`
@@ -103,7 +105,7 @@
 
 ### Discovered Docstring-Tracked Modules
 
-- None.
+- `src/bioetl/infrastructure/observability/prometheus_metric_label_policies.py`
 
 ### Unexpected Docstring-Tracked Modules
 
