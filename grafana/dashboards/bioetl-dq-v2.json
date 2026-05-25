@@ -1878,7 +1878,7 @@
           "refId": "A"
         }
       ],
-      "description": "Latest successful data timestamp for the selected pipeline scope. This is compact current-context evidence rather than a first-answer verdict or selected-range proof. UNKNOWN means no freshness proof is available now; next action: inspect DQ Current Reasons and the DQ investigation runbook before treating stale or blank values as healthy.",
+      "description": "Latest successful data timestamp for the selected pipeline scope. This is current freshness context and compact supporting evidence rather than a first-answer verdict or selected-range proof. UNKNOWN means no freshness proof is available now; next action: inspect DQ Current Reasons and the DQ investigation runbook before treating stale or blank values as healthy.",
       "title": "Review: Latest Successful Data Timestamp",
       "type": "stat"
     },
