@@ -10,6 +10,7 @@ See:
 
 from __future__ import annotations
 
+import asyncio
 import os
 
 import httpx
@@ -27,7 +28,29 @@ from tests.contract.conftest import (
 CHEMBL_API_BASE = "https://www.ebi.ac.uk/chembl/api/data"
 CHEMBL_TARGET_CONTRACT_PARAMS = {"target_chembl_id": "CHEMBL1824", "limit": 1}
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
+_CHEMBL_TRANSIENT_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
+_CHEMBL_REQUEST_RETRY_ATTEMPTS = 3
+_CHEMBL_REQUEST_RETRY_DELAY_SECONDS = 2.0
+_CHEMBL_RESPONSE_CACHE: dict[tuple[str, str, tuple[tuple[str, str], ...]], httpx.Response] = {}
 pytestmark = pytest.mark.network
+
+
+def _request_cache_key(
+    method: str,
+    url: str,
+    **kwargs: object,
+) -> tuple[str, str, tuple[tuple[str, str], ...]]:
+    params = kwargs.get("params")
+    if params is None:
+        normalized_params: tuple[tuple[str, str], ...] = ()
+    else:
+        normalized_params = tuple(
+            sorted(
+                (str(key), str(value))
+                for key, value in httpx.QueryParams(params).multi_items()
+            )
+        )
+    return (method.upper(), url, normalized_params)
 
 
 async def _request_or_skip(
@@ -36,20 +59,50 @@ async def _request_or_skip(
     url: str,
     **kwargs: object,
 ) -> httpx.Response:
-    """Execute request and skip only on clearly transient network/provider outages."""
-    try:
-        response = await client.request(method, url, **kwargs)
-    except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as exc:
-        pytest.skip(f"ChEMBL endpoint not reachable: {exc}")
+    """Execute request with light retry and cache for transient provider outages."""
+    cache_key = _request_cache_key(method, url, **kwargs)
+    cached_response = _CHEMBL_RESPONSE_CACHE.get(cache_key)
+    if cached_response is not None:
+        return cached_response
 
-    # Live provider contract probes should fail only on durable schema drift, not
-    # on upstream transport or transient server outages beyond repo control.
-    if response.status_code == 429 or 500 <= response.status_code < 600:
-        pytest.skip(f"ChEMBL temporary server error: HTTP {response.status_code}")
-    return response
+    last_transport_error: Exception | None = None
+    for attempt in range(1, _CHEMBL_REQUEST_RETRY_ATTEMPTS + 1):
+        try:
+            response = await client.request(method, url, **kwargs)
+            await response.aread()
+        except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as exc:
+            last_transport_error = exc
+            if attempt >= _CHEMBL_REQUEST_RETRY_ATTEMPTS:
+                pytest.skip(f"ChEMBL endpoint not reachable: {exc}")
+        else:
+            if response.status_code not in _CHEMBL_TRANSIENT_STATUS_CODES:
+                _CHEMBL_RESPONSE_CACHE[cache_key] = response
+                return response
+            if attempt >= _CHEMBL_REQUEST_RETRY_ATTEMPTS:
+                pytest.skip(
+                    f"ChEMBL temporary server error after {_CHEMBL_REQUEST_RETRY_ATTEMPTS} attempts: "
+                    f"HTTP {response.status_code}"
+                )
+
+        await asyncio.sleep(_CHEMBL_REQUEST_RETRY_DELAY_SECONDS * attempt)
+
+    if last_transport_error is not None:
+        pytest.skip(f"ChEMBL endpoint not reachable: {last_transport_error}")
+    pytest.skip("ChEMBL temporary server error: retry budget exhausted")
 
 
-@pytest.mark.chembl
+@pytest.fixture(scope="module", autouse=True)
+async def _chembl_live_contract_ready() -> None:
+    """Probe ChEMBL once per module so repeated endpoint outages fail closed early."""
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        await _request_or_skip(
+            client,
+            "GET",
+            f"{CHEMBL_API_BASE}/status.json",
+        )
+
+
+.mark.chembl
 class TestChemblContract:
     """Contract tests for ChEMBL REST API."""
 
