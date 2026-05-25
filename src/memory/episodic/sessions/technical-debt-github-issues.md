@@ -2,14 +2,14 @@
 id: technical-debt-github-issues
 title: Prepare GitHub issues for technical debt audit findings
 task_id: technical-debt-github-issues
-created_at: '2026-05-25T09:22:11Z'
+created_at: '2026-05-25T12:02:38Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
 summary: Active task session context.
-query: technical debt github issues compatibility shims default registry PipelineConfigLoader
-  duplication observability coverage determinism config_hash
+query: technical debt audit GitHub issues compatibility facades duplication architecture
+  drift coverage VCR observability BioETL
 ---
 
 # Session note
@@ -17,7 +17,7 @@ query: technical debt github issues compatibility shims default registry Pipelin
 ## Task
 
 - Title: Prepare GitHub issues for technical debt audit findings
-- Retrieval query: technical debt github issues compatibility shims default registry PipelineConfigLoader duplication observability coverage determinism config_hash
+- Retrieval query: technical debt audit GitHub issues compatibility facades duplication architecture drift coverage VCR observability BioETL
 
 ## Retrieved context
 
