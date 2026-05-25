@@ -19,7 +19,7 @@ def test_handle_control_plane_setup_returns_effective_manifest_profile(
     captured: dict[str, object] = {}
 
     monkeypatch.setattr(
-        runner_builder,
+        runner_control_plane_assembly,
         "_resolve_runner_control_plane_policy",
         lambda *_, **__: SimpleNamespace(
             manifest_enabled=True,
@@ -28,7 +28,7 @@ def test_handle_control_plane_setup_returns_effective_manifest_profile(
         ),
     )
     monkeypatch.setattr(
-        runner_builder,
+        runner_control_plane_assembly,
         "create_run_manifest_with_effective_config",
         lambda **_: (
             SimpleNamespace(
@@ -39,12 +39,12 @@ def test_handle_control_plane_setup_returns_effective_manifest_profile(
         ),
     )
     monkeypatch.setattr(
-        runner_builder,
+        runner_control_plane_assembly,
         "attach_manifest_id",
         lambda effective_ctx, **_: effective_ctx,
     )
     monkeypatch.setattr(
-        runner_builder,
+        runner_control_plane_assembly,
         "_bind_manifest_logger_context",
         lambda effective_inputs, manifest_id: (
             captured.setdefault("manifest_id", manifest_id),
@@ -52,7 +52,7 @@ def test_handle_control_plane_setup_returns_effective_manifest_profile(
         )[1],
     )
 
-    result = runner_builder._handle_control_plane_setup(ctx, inputs)
+    result = runner_control_plane_assembly.assemble_runner_control_plane(ctx, inputs)
 
     assert captured["manifest_id"] == "manifest-1"
     assert result.required_profile == "replay_ready"
@@ -294,8 +294,8 @@ def test_build_pipeline_runner_uses_canonical_subservices_with_observability_sea
         ) as mock_prepare_inputs,
         patch.object(
             runner_builder,
-            "_handle_control_plane_setup",
-            return_value=runner_builder._ControlPlaneSetupResult(
+            "_assemble_runner_control_plane",
+            return_value=runner_control_plane_assembly.ControlPlaneSetupResult(
                 ctx=context,
                 inputs=expected_inputs,
                 run_ledger_service=None,
@@ -440,5 +440,4 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
     ledger_payload = json.loads(ledger_path.read_text(encoding="utf-8").splitlines()[0])
     assert ledger_payload["manifest_id"] == manifest_id
     assert ledger_payload["event_type"] == "manifest_created"
-
 
