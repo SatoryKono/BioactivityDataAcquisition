@@ -80,13 +80,13 @@ def _load_bronze_payload_rows(payload_path: Path) -> list[dict[str, object]]:
     return rows or [{"_payload_file": payload_path.name}]
 
 
-def _materialize_chembl_activity_silver_fallback(
+def _materialize_chembl_activity_silver_harness_fallback(
     data_dir: Path,
     *,
     expected_min: int = 1,
     max_rows: int | None = None,
 ) -> int:
-    """Create one minimal local Silver table from Bronze payloads as a last resort."""
+    """Create one minimal local Silver table from Bronze payloads as a deterministic harness-mode last resort."""
     try:
         payload_files = assert_bronze_files_exist(data_dir, "chembl", "activity")
     except AssertionError:
@@ -153,7 +153,7 @@ async def _seed_chembl_activity_silver(data_dir: Path, *, limit: int = 3) -> int
             last_error = exc
 
     detail = str(last_error) if last_error is not None else "no detail captured"
-    fallback_count = _materialize_chembl_activity_silver_fallback(
+    fallback_count = _materialize_chembl_activity_silver_harness_fallback(
         data_dir,
         expected_min=1,
         max_rows=max(1, limit),
@@ -180,7 +180,7 @@ def _assert_chembl_activity_silver_or_skip(
             expected_min=expected_min,
         )
     except AssertionError as exc:
-        fallback_count = _materialize_chembl_activity_silver_fallback(
+        fallback_count = _materialize_chembl_activity_silver_harness_fallback(
             data_dir,
             expected_min=expected_min,
         )
@@ -276,10 +276,10 @@ async def test_vacuum_respects_retention_days(
 # ============================================================================
 
 
-def _make_threadless_quarantine_adapter(
+def _make_threadless_quarantine_harness_adapter(
     quarantine: UnifiedQuarantineAdapter,
 ) -> UnifiedQuarantineAdapter:
-    """Use a deterministic in-test quarantine store instead of Delta engine."""
+    """Use a deterministic harness-mode quarantine store instead of the Delta-backed production path."""
     stored_records: list[dict[str, object]] = []
 
     async def _write_many_without_thread(records: list[dict[str, object]]) -> None:
@@ -318,7 +318,7 @@ def _make_threadless_quarantine_adapter(
 
 @pytest.mark.e2e
 @pytest.mark.asyncio
-async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
+async def test_quarantine_records_are_persisted_via_harness_adapter_contract(e2e_data_dir: Path):
     """E2E: Failed records are written to quarantine.
 
     Per RULES.md §2.6:
@@ -335,7 +335,7 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
     quarantine_path = e2e_data_dir / "quarantine"
     quarantine_path.mkdir(exist_ok=True)
 
-    quarantine = _make_threadless_quarantine_adapter(
+    quarantine = _make_threadless_quarantine_harness_adapter(
         UnifiedQuarantineAdapter(
             base_path=str(quarantine_path),
         )
@@ -369,7 +369,7 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
 
 @pytest.mark.e2e
 @pytest.mark.asyncio
-async def test_quarantine_can_be_inspected(e2e_data_dir: Path):
+async def test_quarantine_can_be_inspected_via_harness_adapter_contract(e2e_data_dir: Path):
     """E2E: Quarantine records can be listed and inspected.
 
     Tests the quarantine inspection flow used by CLI commands.
@@ -382,7 +382,7 @@ async def test_quarantine_can_be_inspected(e2e_data_dir: Path):
     quarantine_path = e2e_data_dir / "quarantine"
     quarantine_path.mkdir(exist_ok=True)
 
-    quarantine = _make_threadless_quarantine_adapter(
+    quarantine = _make_threadless_quarantine_harness_adapter(
         UnifiedQuarantineAdapter(
             base_path=str(quarantine_path),
         )
