@@ -13,6 +13,12 @@ place to remove known topology drift; older `2026-03-20` raw evidence files in
 other layer packs remain historical inputs and should not be treated as the
 latest package-count baseline.
 
+Current-baseline note (2026-05-25): architectural planning and GitHub issues
+MUST cite this summary or a newer regenerated package-topology pack for current
+counts. Raw files dated before `2026-05-21` are retained only as historical
+evidence and must be refreshed before they are used as line-item topology
+evidence.
+
 > Это summary — repo-only evidence layer для package-topology
 > интерпретации. Он помогает калибровать structural observations, но не
 > заменяет canonical architecture guidance в `docs/00-project/` и

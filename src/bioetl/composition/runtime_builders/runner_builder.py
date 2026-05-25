@@ -32,10 +32,10 @@ from bioetl.composition.runtime_builders.ledger_collaborator import (
     PipelineRunnerProtocol,
 )
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
+    RunnerBuilderWiring,
     RunnerFactoryWiring,
     RunnerInputWiring,
-    resolve_runner_factory_wiring,
-    resolve_runner_input_wiring,
+    resolve_runner_builder_wiring,
 )
 from bioetl.composition.runtime_builders.runner_input_assembly import (
     prepare_runner_context_and_inputs as _prepare_runner_context_and_inputs,
@@ -64,6 +64,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "PipelineRunnerProtocol",
+    "RunnerBuilderWiring",
     "RunnerFactoryWiring",
     "RunnerInputWiring",
     "build_pipeline_runner",
@@ -77,6 +78,9 @@ _DEFAULT_RUNNER_INPUT_WIRING = RunnerInputWiring(
     load_pipeline_config=_load_pipeline_config,
     load_source_config=_load_source_config,
 )
+_DEFAULT_RUNNER_BUILDER_WIRING = RunnerBuilderWiring(
+    inputs=_DEFAULT_RUNNER_INPUT_WIRING,
+)
 
 load_source_config = _load_source_config
 
@@ -85,6 +89,7 @@ def build_pipeline_runner(
     ctx: PipelineRunContext,
     registry: PipelineRegistry | None = None,
     *,
+    wiring: RunnerBuilderWiring | None = None,
     factory_wiring: RunnerFactoryWiring | None = None,
     input_wiring: RunnerInputWiring | None = None,
     create_registry_fn: Callable[[], PipelineRegistry] | None = None,
@@ -92,7 +97,7 @@ def build_pipeline_runner(
     register_all_pipelines_fn: Callable[..., None] | None = None,
     get_settings_fn: Callable[[], Settings] | None = None,
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] | None = None,
-    load_source_config_fn: Callable[..., object] | None = load_source_config,
+    load_source_config_fn: Callable[..., object] | None = None,
     build_observability_bundle_fn: Callable[..., ObservabilityBundle] | None = None,
     assemble_vacuum_settings_fn: Callable[..., ResolvedVacuumSettings] | None = None,
     assemble_runtime_config_fn: Callable[..., RuntimeConfig] | None = None,
@@ -104,18 +109,24 @@ def build_pipeline_runner(
 ) -> PipelineRunnerProtocol:
     """Assemble and return a fully configured ``PipelineRunner``.
 
-    ``factory_wiring`` and ``input_wiring`` are the canonical composition seams.
-    The individual ``*_fn`` keyword overrides are retained for focused tests and
-    compatibility call sites while they migrate to the typed bundles.
+    ``wiring`` is the canonical composition seam. ``factory_wiring`` and
+    ``input_wiring`` are transitional typed sub-bundles. The individual ``*_fn``
+    keyword overrides are retained for focused tests and compatibility call
+    sites while they migrate to the aggregate bundle.
     """
-    factory_wiring = resolve_runner_factory_wiring(
-        factory_wiring,
+    effective_ensure_providers_loaded_fn = ensure_providers_loaded_fn
+    if ensure_providers_loaded_fn is ensure_providers_loaded and (
+        wiring is not None or factory_wiring is not None
+    ):
+        effective_ensure_providers_loaded_fn = None
+
+    resolved_wiring = resolve_runner_builder_wiring(
+        wiring or _DEFAULT_RUNNER_BUILDER_WIRING,
+        factory_wiring=factory_wiring,
+        input_wiring=input_wiring,
         create_registry_fn=create_registry_fn,
-        ensure_providers_loaded_fn=ensure_providers_loaded_fn,
+        ensure_providers_loaded_fn=effective_ensure_providers_loaded_fn,
         register_all_pipelines_fn=register_all_pipelines_fn,
-    )
-    input_wiring = resolve_runner_input_wiring(
-        input_wiring or _DEFAULT_RUNNER_INPUT_WIRING,
         get_settings_fn=get_settings_fn,
         load_pipeline_config_fn=load_pipeline_config_fn,
         load_source_config_fn=load_source_config_fn,
@@ -125,6 +136,8 @@ def build_pipeline_runner(
         assemble_filter_config_fn=assemble_filter_config_fn,
         assemble_cached_bronze_context_fn=assemble_cached_bronze_context_fn,
     )
+    factory_wiring = resolved_wiring.factory
+    input_wiring = resolved_wiring.inputs
     factory_bootstrap = _bootstrap_runner_factory(
         pipeline_name=ctx.pipeline_name,
         registry=registry,

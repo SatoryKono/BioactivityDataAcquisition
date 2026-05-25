@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
+    CompositeRuntimeStorageProtocol,
 )
 
-__all__ = ["CompositeInfrastructureContext"]
+__all__ = ["CompositeInfrastructureContext", "CompositeRuntimeStorageProtocol"]

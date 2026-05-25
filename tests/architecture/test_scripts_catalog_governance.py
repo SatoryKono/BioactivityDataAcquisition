@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import contextlib
 import importlib.util
+import json
 import io
 import sys
 from pathlib import Path
@@ -42,6 +43,23 @@ def test_scripts_catalog_governance_check_passes() -> None:
         f"stdout:\n{stdout.getvalue()}\n"
         f"stderr:\n{stderr.getvalue()}\n"
     )
+
+
+def test_scripts_catalog_caps_active_script_surface() -> None:
+    """Active script count must be governed by a no-growth lifecycle cap."""
+    root = _project_root()
+    catalog_path = root / "scripts" / "engineering" / "repo" / "catalog.yaml"
+    manifest_path = root / "configs" / "quality" / "scripts_inventory_manifest.json"
+    catalog = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    active_count = manifest["summary"]["status_counts"]["active"]
+
+    lifecycle = catalog["lifecycle"]
+    assert lifecycle["active_script_count_policy"] == "fail-fast-no-growth"
+    assert lifecycle["active_script_count_max"] == active_count
+    assert lifecycle["active_script_count_owner"]
+    assert lifecycle["active_script_count_review_by"]
 
 
 def test_scripts_catalog_declares_entrypoint_surfaces() -> None:

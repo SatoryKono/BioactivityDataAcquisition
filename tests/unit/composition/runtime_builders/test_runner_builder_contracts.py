@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import inspect
 import sys
 from pathlib import Path
 from types import ModuleType
@@ -104,6 +105,7 @@ def test_runner_input_assembly_lazy_resolves_default_observability_builder(
 
 def test_runner_builder_exposes_typed_wiring_bundles() -> None:
     """Runtime builder fan-in should be grouped behind typed wiring bundles."""
+    assert hasattr(runner_builder, "RunnerBuilderWiring")
     assert hasattr(runner_builder, "RunnerFactoryWiring")
     assert hasattr(runner_builder, "RunnerInputWiring")
 
@@ -116,6 +118,46 @@ def test_runner_builder_exposes_typed_wiring_bundles() -> None:
     assert wiring.create_registry is create_registry
     assert callable(wiring.ensure_providers_loaded)
     assert callable(wiring.register_all_pipelines)
+
+
+def test_runner_builder_wiring_applies_legacy_overrides_without_mutating_base() -> None:
+    """Legacy keyword patch points must resolve into one immutable bundle."""
+    base = runner_builder_wiring.RunnerBuilderWiring()
+    create_registry = MagicMock(name="create_registry")
+    load_pipeline_config = MagicMock(name="load_pipeline_config")
+
+    resolved = runner_builder_wiring.resolve_runner_builder_wiring(
+        base,
+        create_registry_fn=create_registry,
+        load_pipeline_config_fn=load_pipeline_config,
+    )
+
+    assert resolved is not base
+    assert resolved.factory.create_registry is create_registry
+    assert resolved.inputs.load_pipeline_config is load_pipeline_config
+    assert base.factory.create_registry is not create_registry
+    assert base.inputs.load_pipeline_config is not load_pipeline_config
+
+
+def test_build_pipeline_runner_override_surface_is_capped() -> None:
+    """Ad hoc builder injection must not grow outside the typed wiring seam."""
+    params = inspect.signature(runner_builder.build_pipeline_runner).parameters
+    legacy_override_names = {name for name in params if name.endswith("_fn")}
+
+    assert "wiring" in params
+    assert legacy_override_names == {
+        "create_registry_fn",
+        "ensure_providers_loaded_fn",
+        "register_all_pipelines_fn",
+        "get_settings_fn",
+        "load_pipeline_config_fn",
+        "load_source_config_fn",
+        "build_observability_bundle_fn",
+        "assemble_vacuum_settings_fn",
+        "assemble_runtime_config_fn",
+        "assemble_filter_config_fn",
+        "assemble_cached_bronze_context_fn",
+    }
 
 
 def test_runner_input_wiring_applies_legacy_overrides_without_mutating_base() -> None:

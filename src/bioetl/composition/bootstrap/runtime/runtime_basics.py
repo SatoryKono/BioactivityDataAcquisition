@@ -73,7 +73,7 @@ def bootstrap_runtime_basics(
         settings_provider: Zero-argument callable that returns global Settings.
         logger_bootstrapper: Callable accepting (pipeline_name, run_uuid, log_level)
             and returning a LoggerPort.
-        storage_bootstrapper: Callable returning a storage bundle; called with
+        storage_bootstrapper: Callable returning the composite runtime storage port; called with
             explicit ``RunContext`` and ports so storage assembly does not
             generate runtime identity.
         lock_factory: Zero-argument callable returning a LockPort.
