@@ -8,30 +8,73 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from memory.artifact_readiness import rag_chunks_ready, timeline_events_ready
-from memory.notes import slugify, utc_now_iso, write_markdown_note
-from memory.query import (
-    DEFAULT_PROFILE,
-    TASK_PROFILES,
-    default_rag_chunks_path,
-    default_timeline_dir,
-    query_all,
-    query_catalog,
-)
-from memory.rag.filters import WORKFLOW_RAG_MAX_SOURCES
-from memory.resources import discover_memory_root, discover_repo_root
-from memory.tooling.promote_note import promote_note
-from memory.tooling.prune import prune_episodic_notes
-from memory.tooling.refresh_all import refresh_all
-from memory.tooling.review_curated import review_curated_notes
-from memory.validation import validate_memory_scaffold
-
 WORKFLOW_PRUNE_PREVIEW_LIMIT = 10
+DEFAULT_PROFILE = "general"
+
+
+def _discover_memory_root() -> Path:
+    from memory.resources import discover_memory_root
+
+    return discover_memory_root()
+
+
+def _discover_repo_root() -> Path | None:
+    from memory.resources import discover_repo_root
+
+    return discover_repo_root()
+
+
+def _query_defaults() -> tuple[Path, Path]:
+    from memory.query import default_rag_chunks_path, default_timeline_dir
+
+    return default_rag_chunks_path(), default_timeline_dir()
+
+
+def _query_runtime() -> tuple[dict[str, object], Any, Any]:
+    from memory.query import TASK_PROFILES, query_all, query_catalog
+
+    return TASK_PROFILES, query_all, query_catalog
+
+
+def _rag_max_sources() -> int:
+    from memory.rag.filters import WORKFLOW_RAG_MAX_SOURCES
+
+    return WORKFLOW_RAG_MAX_SOURCES
+
+
+def _write_note(*, path: Path, metadata: dict[str, Any], body: str) -> None:
+    from memory.notes import write_markdown_note
+
+    write_markdown_note(path, metadata=metadata, body=body)
+
+
+def _slugify_task_id(task_id: str) -> str:
+    from memory.notes import slugify
+
+    return slugify(task_id)
+
+
+def _utc_now() -> str:
+    from memory.notes import utc_now_iso
+
+    return utc_now_iso()
+
+
+def _rag_chunks_ready(path: Path) -> bool:
+    from memory.artifact_readiness import rag_chunks_ready
+
+    return rag_chunks_ready(path)
+
+
+def _timeline_events_ready(path: Path) -> bool:
+    from memory.artifact_readiness import timeline_events_ready
+
+    return timeline_events_ready(path)
 
 
 def _default_note_path(task_id: str, *, kind: str) -> Path:
-    memory_root = discover_memory_root()
-    slug = slugify(task_id)
+    memory_root = _discover_memory_root()
+    slug = _slugify_task_id(task_id)
     if kind == "session":
         return memory_root / "episodic" / "sessions" / f"{slug}.md"
     if kind == "summary":
@@ -99,13 +142,13 @@ def _compact_prune_report(report: dict[str, Any] | None) -> dict[str, Any] | Non
 
 def _default_pre_task_chunks_path(output_root: Path | None) -> Path:
     if output_root is None:
-        return default_rag_chunks_path()
+        return _query_defaults()[0]
     return output_root / "rag" / "manifests" / "chunks.jsonl"
 
 
 def _default_pre_task_events_dir(output_root: Path | None) -> Path:
     if output_root is None:
-        return default_timeline_dir()
+        return _query_defaults()[1]
     return output_root / "timeline" / "events"
 
 
@@ -133,8 +176,10 @@ def _refresh_pre_task_surfaces(
         tempfile.mkdtemp(prefix="memory-pre-task-")
     )
     repo_root = (
-        refresh_repo_root or discover_repo_root() or Path(__file__).resolve().parents[3]
+        refresh_repo_root or _discover_repo_root() or Path(__file__).resolve().parents[3]
     )
+    from memory.tooling.refresh_all import refresh_all
+
     refresh_report = refresh_all(
         repo_root.resolve(),
         resolved_output_root.resolve(),
@@ -143,7 +188,7 @@ def _refresh_pre_task_surfaces(
         include_graph_export=False,
         rag_build_scope="workflow",
         rag_focus_query=retrieval_query,
-        rag_max_sources=WORKFLOW_RAG_MAX_SOURCES,
+        rag_max_sources=_rag_max_sources(),
         allow_partial=True,
     )
     return (
@@ -167,8 +212,8 @@ def _resolve_pre_task_surfaces(
     resolved_chunks_path, resolved_events_dir = _pre_task_surfaces(
         chunks_path=chunks_path, events_dir=events_dir, output_root=output_root
     )
-    chunks_ready = rag_chunks_ready(resolved_chunks_path)
-    events_ready = timeline_events_ready(resolved_events_dir)
+    chunks_ready = _rag_chunks_ready(resolved_chunks_path)
+    events_ready = _timeline_events_ready(resolved_events_dir)
     if not run_refresh_if_missing:
         return resolved_chunks_path, resolved_events_dir, output_root, None
     if chunks_ready and events_ready:
@@ -183,9 +228,9 @@ def _resolve_pre_task_surfaces(
             include_timeline=not events_ready,
         )
     )
-    if not chunks_ready and rag_chunks_ready(refreshed_chunks_path):
+    if not chunks_ready and _rag_chunks_ready(refreshed_chunks_path):
         resolved_chunks_path = refreshed_chunks_path
-    if not events_ready and timeline_events_ready(refreshed_events_dir):
+    if not events_ready and _timeline_events_ready(refreshed_events_dir):
         resolved_events_dir = refreshed_events_dir
     return resolved_chunks_path, resolved_events_dir, output_root, refresh_report
 
@@ -194,7 +239,7 @@ def _pre_task_missing_artifacts(
     chunks_path: Path, events_dir: Path
 ) -> list[dict[str, str]]:
     missing: list[dict[str, str]] = []
-    if not rag_chunks_ready(chunks_path):
+    if not _rag_chunks_ready(chunks_path):
         missing.append(
             {
                 "kind": "rag_chunks",
@@ -202,7 +247,7 @@ def _pre_task_missing_artifacts(
                 "reason": "missing_or_empty_rag_chunk_manifest",
             }
         )
-    if not timeline_events_ready(events_dir):
+    if not _timeline_events_ready(events_dir):
         missing.append(
             {
                 "kind": "timeline_events",
@@ -222,9 +267,10 @@ def _empty_pre_task_retrieval(
     missing_artifacts: list[dict[str, str]],
 ) -> dict[str, Any]:
     catalog_hits: list[dict[str, Any]] = []
+    _, _, query_catalog_fn = _query_runtime()
     lowered_query = query.lower()
     for view in ("sources", "owners", "zones", "placement"):
-        payload = query_catalog(view)
+        payload = query_catalog_fn(view)
         haystack = json.dumps(
             payload["payload"], sort_keys=True, ensure_ascii=True
         ).lower()
@@ -278,6 +324,10 @@ def pre_task_workflow(
         )
     )
 
+    task_profiles, query_all_fn, _ = _query_runtime()
+    if profile not in task_profiles:
+        raise ValueError(f"unsupported task profile: {profile}")
+
     missing_artifacts = _pre_task_missing_artifacts(
         resolved_chunks_path, resolved_events_dir
     )
@@ -290,7 +340,7 @@ def pre_task_workflow(
             missing_artifacts=missing_artifacts,
         )
     else:
-        retrieval = query_all(
+        retrieval = query_all_fn(
             query=retrieval_query,
             chunks_path=resolved_chunks_path,
             events_dir=resolved_events_dir,
@@ -300,13 +350,13 @@ def pre_task_workflow(
     session_path: Path | None = None
     if create_session_note:
         session_path = session_note_path or _default_note_path(task_id, kind="session")
-        write_markdown_note(
-            session_path,
+        _write_note(
+            path=session_path,
             metadata={
-                "id": slugify(task_id),
+                "id": _slugify_task_id(task_id),
                 "title": title,
                 "task_id": task_id,
-                "created_at": utc_now_iso(),
+                "created_at": _utc_now(),
                 "ttl_days": 14,
                 "confidence": "episodic",
                 "source_refs": source_refs or ["<add-source-ref>"],
@@ -345,13 +395,13 @@ def post_task_workflow(
 ) -> dict[str, Any]:
     """Run the standard post-task memory flow."""
     summary_path = summary_note_path or _default_note_path(task_id, kind="summary")
-    write_markdown_note(
-        summary_path,
+    _write_note(
+        path=summary_path,
         metadata={
-            "id": slugify(task_id),
+            "id": _slugify_task_id(task_id),
             "title": title,
             "task_id": task_id,
-            "created_at": utc_now_iso(),
+            "created_at": _utc_now(),
             "ttl_days": 14,
             "confidence": "episodic",
             "source_refs": source_refs or ["<add-source-ref>"],
@@ -359,6 +409,8 @@ def post_task_workflow(
         },
         body=_summary_note_body(title, summary),
     )
+
+    from memory.validation import validate_memory_scaffold
 
     validation_issues = validate_memory_scaffold()
     if validation_issues:
@@ -381,9 +433,11 @@ def post_task_workflow(
             output_root = Path(tempfile.mkdtemp(prefix="memory-post-task-"))
         repo_root = (
             refresh_repo_root
-            or discover_repo_root()
+            or _discover_repo_root()
             or Path(__file__).resolve().parents[3]
         )
+        from memory.tooling.refresh_all import refresh_all
+
         refresh_report = refresh_all(
             repo_root.resolve(),
             output_root.resolve(),
@@ -392,14 +446,21 @@ def post_task_workflow(
             include_graph_export=False,
             rag_build_scope="workflow",
             rag_focus_query=title,
-            rag_max_sources=WORKFLOW_RAG_MAX_SOURCES,
+            rag_max_sources=_rag_max_sources(),
             allow_partial=True,
         )
 
-    prune_report = prune_episodic_notes(apply=False) if run_prune else None
+    if run_prune:
+        from memory.tooling.prune import prune_episodic_notes
+
+        prune_report = prune_episodic_notes(apply=False)
+    else:
+        prune_report = None
 
     curated_path: Path | None = None
     if promote_to is not None:
+        from memory.tooling.promote_note import promote_note
+
         curated_path = promote_note(
             summary_path,
             target_kind=promote_to,
@@ -426,6 +487,8 @@ def review_curated_workflow(
     curated_root: Path | None = None,
 ) -> dict[str, Any]:
     """Run the regular curated-memory review ritual."""
+    from memory.tooling.review_curated import review_curated_notes
+
     report = review_curated_notes(curated_root)
     summary = report["summary"]
     cadence = "Run this review on a regular engineering cadence and before release or audit checkpoints."
@@ -462,7 +525,7 @@ def _build_parser() -> argparse.ArgumentParser:
     pre_parser.add_argument("--skip-refresh-if-missing", action="store_true")
     pre_parser.add_argument("--limit", type=int, default=10)
     pre_parser.add_argument(
-        "--profile", choices=tuple(TASK_PROFILES.keys()), default=DEFAULT_PROFILE
+        "--profile", default=DEFAULT_PROFILE, help="Task retrieval profile (validated at runtime)."
     )
     pre_parser.add_argument("--skip-session-note", action="store_true")
     pre_parser.add_argument("--json", action="store_true")

@@ -5,6 +5,7 @@ Measures Delta Lake write throughput with merge/append operations.
 
 import asyncio
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
@@ -14,6 +15,8 @@ import pytest
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from tests.benchmarks.conftest import calculate_payload_size_mb
+
+pytestmark = pytest.mark.timeout(300)
 
 
 class FakeLogger:
@@ -83,44 +86,36 @@ def _prepare_records_for_delta(
     return prepared
 
 
-@pytest.mark.benchmark(group="delta")
-def test_delta_write_append_small(benchmark, small_payload, delta_output_dir):
-    """Benchmark Delta append with small payload (100 records)."""
-    logger = FakeLogger()
-    writer = SilverWriter(base_path=delta_output_dir, logger=logger)
-
-    schema = _create_activity_schema()
-    records = _prepare_records_for_delta(small_payload)
-    table_name = f"benchmark_small_{uuid4().hex[:8]}"
-
-    async def write_batch():
-        return await writer.write_silver(
-            table_name=table_name,
-            records=records,
-            schema=schema,
-            primary_keys=["id"],
-            mode=SilverWriteMode.APPEND,
-        )
-
-    result = benchmark(lambda: asyncio.run(write_batch()))
-
-    assert result is not None
-
-    size_mb = calculate_payload_size_mb(small_payload)
-    benchmark.extra_info["payload_size_mb"] = round(size_mb, 3)
-    benchmark.extra_info["records"] = len(records)
-    benchmark.extra_info["mode"] = "append"
+def _create_silver_writer(base_path: Path) -> SilverWriter:
+    """Create an isolated Silver writer rooted at one benchmark round path."""
+    return SilverWriter(base_path=base_path, logger=FakeLogger())
 
 
-@pytest.mark.benchmark(group="delta")
-def test_delta_write_append_medium(benchmark, medium_payload, delta_output_dir):
-    """Benchmark Delta append with medium payload (1000 records)."""
-    logger = FakeLogger()
-    writer = SilverWriter(base_path=delta_output_dir, logger=logger)
+def _append_round_setup(
+    *,
+    delta_output_dir: Path,
+    table_prefix: str,
+    payload: list[dict[str, Any]],
+) -> tuple[tuple[SilverWriter, str, list[dict[str, Any]], pa.Schema], dict[str, Any]]:
+    """Prepare one isolated append round for pytest-benchmark pedantic mode."""
+    round_root = delta_output_dir / f"{table_prefix}_{uuid4().hex[:8]}"
+    round_root.mkdir(parents=True, exist_ok=True)
+    writer = _create_silver_writer(round_root)
+    return (
+        writer,
+        "benchmark_table",
+        _prepare_records_for_delta(payload),
+        _create_activity_schema(),
+    ), {}
 
-    schema = _create_activity_schema()
-    records = _prepare_records_for_delta(medium_payload)
-    table_name = f"benchmark_medium_{uuid4().hex[:8]}"
+
+def _run_append_round(
+    writer: SilverWriter,
+    table_name: str,
+    records: list[dict[str, Any]],
+    schema: pa.Schema,
+):
+    """Execute one isolated Silver append write."""
 
     async def write_batch():
         return await writer.write_silver(
@@ -131,59 +126,22 @@ def test_delta_write_append_medium(benchmark, medium_payload, delta_output_dir):
             mode=SilverWriteMode.APPEND,
         )
 
-    result = benchmark(lambda: asyncio.run(write_batch()))
-
-    assert result is not None
-
-    size_mb = calculate_payload_size_mb(medium_payload)
-    benchmark.extra_info["payload_size_mb"] = round(size_mb, 3)
-    benchmark.extra_info["records"] = len(records)
-    benchmark.extra_info["mode"] = "append"
+    return asyncio.run(write_batch())
 
 
-@pytest.mark.benchmark(group="delta")
-def test_delta_write_append_large(benchmark, large_payload, delta_output_dir):
-    """Benchmark Delta append with large payload (5000 records)."""
-    logger = FakeLogger()
-    writer = SilverWriter(base_path=delta_output_dir, logger=logger)
-
+def _merge_round_setup(
+    *,
+    delta_output_dir: Path,
+    payload: list[dict[str, Any]],
+) -> tuple[tuple[SilverWriter, str, list[dict[str, Any]], pa.Schema], dict[str, Any]]:
+    """Prepare one isolated merge round with a seeded Delta table."""
+    round_root = delta_output_dir / f"benchmark_merge_{uuid4().hex[:8]}"
+    round_root.mkdir(parents=True, exist_ok=True)
+    writer = _create_silver_writer(round_root)
+    records = _prepare_records_for_delta(payload)
     schema = _create_activity_schema()
-    records = _prepare_records_for_delta(large_payload)
-    table_name = f"benchmark_large_{uuid4().hex[:8]}"
+    table_name = "benchmark_table"
 
-    async def write_batch():
-        return await writer.write_silver(
-            table_name=table_name,
-            records=records,
-            schema=schema,
-            primary_keys=["id"],
-            mode=SilverWriteMode.APPEND,
-        )
-
-    result = benchmark(lambda: asyncio.run(write_batch()))
-
-    assert result is not None
-
-    size_mb = calculate_payload_size_mb(large_payload)
-    benchmark.extra_info["payload_size_mb"] = round(size_mb, 3)
-    benchmark.extra_info["records"] = len(records)
-    benchmark.extra_info["mode"] = "append"
-
-
-@pytest.mark.benchmark(group="delta_merge")
-def test_delta_write_merge_medium(benchmark, medium_payload, delta_output_dir):
-    """Benchmark Delta merge with medium payload (1000 records).
-
-    Merge is more expensive than append due to deduplication logic.
-    """
-    logger = FakeLogger()
-    writer = SilverWriter(base_path=delta_output_dir, logger=logger)
-
-    schema = _create_activity_schema()
-    records = _prepare_records_for_delta(medium_payload)
-    table_name = f"benchmark_merge_{uuid4().hex[:8]}"
-
-    # First write to create the table
     async def initial_write():
         return await writer.write_silver(
             table_name=table_name,
@@ -194,8 +152,17 @@ def test_delta_write_merge_medium(benchmark, medium_payload, delta_output_dir):
         )
 
     asyncio.run(initial_write())
+    return (writer, table_name, records, schema), {}
 
-    # Benchmark merge operation
+
+def _run_merge_round(
+    writer: SilverWriter,
+    table_name: str,
+    records: list[dict[str, Any]],
+    schema: pa.Schema,
+):
+    """Execute one isolated Silver merge write against a seeded table."""
+
     async def merge_batch():
         return await writer.write_silver(
             table_name=table_name,
@@ -205,11 +172,94 @@ def test_delta_write_merge_medium(benchmark, medium_payload, delta_output_dir):
             mode=SilverWriteMode.MERGE,
         )
 
-    result = benchmark(lambda: asyncio.run(merge_batch()))
+    return asyncio.run(merge_batch())
+
+
+@pytest.mark.benchmark(group="delta")
+def test_delta_write_append_small(benchmark, small_payload, delta_output_dir):
+    """Benchmark Delta append with small payload (100 records)."""
+    result = benchmark.pedantic(
+        _run_append_round,
+        setup=lambda: _append_round_setup(
+            delta_output_dir=delta_output_dir,
+            table_prefix="benchmark_small",
+            payload=small_payload,
+        ),
+        rounds=1,
+        iterations=1,
+    )
+
+    assert result is not None
+
+    size_mb = calculate_payload_size_mb(small_payload)
+    benchmark.extra_info["payload_size_mb"] = round(size_mb, 3)
+    benchmark.extra_info["records"] = len(small_payload)
+    benchmark.extra_info["mode"] = "append"
+
+
+@pytest.mark.benchmark(group="delta")
+def test_delta_write_append_medium(benchmark, medium_payload, delta_output_dir):
+    """Benchmark Delta append with medium payload (1000 records)."""
+    result = benchmark.pedantic(
+        _run_append_round,
+        setup=lambda: _append_round_setup(
+            delta_output_dir=delta_output_dir,
+            table_prefix="benchmark_medium",
+            payload=medium_payload,
+        ),
+        rounds=1,
+        iterations=1,
+    )
 
     assert result is not None
 
     size_mb = calculate_payload_size_mb(medium_payload)
     benchmark.extra_info["payload_size_mb"] = round(size_mb, 3)
-    benchmark.extra_info["records"] = len(records)
+    benchmark.extra_info["records"] = len(medium_payload)
+    benchmark.extra_info["mode"] = "append"
+
+
+@pytest.mark.benchmark(group="delta")
+def test_delta_write_append_large(benchmark, large_payload, delta_output_dir):
+    """Benchmark Delta append with large payload (5000 records)."""
+    result = benchmark.pedantic(
+        _run_append_round,
+        setup=lambda: _append_round_setup(
+            delta_output_dir=delta_output_dir,
+            table_prefix="benchmark_large",
+            payload=large_payload,
+        ),
+        rounds=1,
+        iterations=1,
+    )
+
+    assert result is not None
+
+    size_mb = calculate_payload_size_mb(large_payload)
+    benchmark.extra_info["payload_size_mb"] = round(size_mb, 3)
+    benchmark.extra_info["records"] = len(large_payload)
+    benchmark.extra_info["mode"] = "append"
+
+
+@pytest.mark.benchmark(group="delta_merge")
+def test_delta_write_merge_medium(benchmark, medium_payload, delta_output_dir):
+    """Benchmark Delta merge with medium payload (1000 records).
+
+    Merge is more expensive than append due to deduplication logic.
+    """
+    result = benchmark.pedantic(
+        _run_merge_round,
+        setup=lambda: _merge_round_setup(
+            delta_output_dir=delta_output_dir,
+            payload=medium_payload,
+        ),
+        rounds=1,
+        iterations=1,
+    )
+
+    assert result is not None
+
+    size_mb = calculate_payload_size_mb(medium_payload)
+    benchmark.extra_info["payload_size_mb"] = round(size_mb, 3)
+    benchmark.extra_info["records"] = len(medium_payload)
     benchmark.extra_info["mode"] = "merge"

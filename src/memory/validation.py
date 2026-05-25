@@ -385,14 +385,14 @@ def _bounded_episodic_note_paths(
     *,
     limit: int | None,
 ) -> list[Path]:
-    paths = [
+    paths = sorted(
         path
         for path in directory.rglob("*.md")
         if path.name != "README.md" and "templates" not in path.parts
-    ]
-    if limit is None or len(paths) <= limit:
-        return sorted(paths)
-    return sorted(paths, key=lambda path: path.stat().st_mtime, reverse=True)[:limit]
+    )
+    if limit is None:
+        return paths
+    return paths[:limit]
 
 
 def _iter_note_paths(
