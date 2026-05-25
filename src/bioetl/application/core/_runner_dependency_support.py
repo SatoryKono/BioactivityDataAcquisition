@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
+from warnings import warn
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
@@ -59,6 +60,12 @@ def resolve_runner_dependencies(
     Compatibility shim for legacy direct runner kwargs. Review for removal after
     2026-09-30 once test-only callers migrate to ``PipelineRunnerDependencies``.
     """
+    warn(
+        "PipelineRunner legacy direct dependency kwargs are deprecated and will be "
+        "removed after 2026-09-30; pass PipelineRunnerDependencies instead.",
+        DeprecationWarning,
+        stacklevel=3,
+    )
     values = {
         "executor": executor,
         "checkpoint_manager": checkpoint_manager,

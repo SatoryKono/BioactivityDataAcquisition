@@ -208,5 +208,8 @@ class RecordNormalizationHashSupportMixin:
                 profile_exclude=profile_exclude,
                 policy=policy,
             ),
-            str(getattr(policy, "datetime_policy", "v1_date") or "v1_date"),
+            str(
+                getattr(policy, "datetime_policy", "v2_datetime_utc")
+                or "v2_datetime_utc"
+            ),
         )

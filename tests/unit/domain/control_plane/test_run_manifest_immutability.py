@@ -123,3 +123,41 @@ def test_run_manifest_round_trip_keeps_canonical_payload_snapshot() -> None:
 
     assert loaded_manifest.to_dict() == payload
     assert loaded_manifest == manifest
+
+
+@pytest.mark.parametrize(
+    ("field_name", "value"),
+    [
+        ("manifest_id", ""),
+        ("execution_fingerprint", " "),
+        ("schema_version", ""),
+        ("pipeline_name", ""),
+        ("provider", ""),
+        ("entity", ""),
+    ],
+)
+def test_run_manifest_requires_mandatory_identity_fields(
+    field_name: str,
+    value: str,
+) -> None:
+    kwargs = {field_name: value}
+
+    with pytest.raises(ValueError, match=f"RunManifest.{field_name}"):
+        RunManifest(
+            manifest_id=kwargs.get("manifest_id", "manifest_immutable"),
+            execution_fingerprint=kwargs.get(
+                "execution_fingerprint",
+                "exec_fingerprint_immutable",
+            ),
+            schema_version=kwargs.get("schema_version", "1.0"),
+            created_at=datetime(2023, 1, 1, 12, 0, 0),
+            run_id=RunID(UUID("12345678-1234-5678-1234-567812345678")),
+            run_type=RunType.INCREMENTAL,
+            pipeline_name=kwargs.get("pipeline_name", "chembl_activity"),
+            provider=kwargs.get("provider", "chembl"),
+            entity=kwargs.get("entity", "activity"),
+            launch_context={},
+            runtime_config={},
+            resolved_config={},
+            code_provenance=RunCodeProvenance(config_hash="config_hash_123"),
+        )

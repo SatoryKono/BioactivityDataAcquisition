@@ -121,6 +121,13 @@ _PROMETHEUS_FAMILY_SUFFIXES: Final[frozenset[str]] = frozenset(
         "_validated",
     }
 )
+_PROMETHEUS_ALIAS_SUFFIXES: Final[frozenset[str]] = frozenset(
+    {
+        "_bytes",
+        "_seconds",
+        "_total",
+    }
+)
 _NON_METRIC_ALIAS_PREFIXES: Final[tuple[str, ...]] = (
     "get_",
     "set_",
@@ -766,7 +773,7 @@ def _is_metric_like_alias_name(metric_name: str) -> bool:
         return False
     if normalized.startswith(_NON_METRIC_ALIAS_PREFIXES):
         return False
-    return normalized.endswith(tuple(_PROMETHEUS_FAMILY_SUFFIXES))
+    return normalized.endswith(tuple(_PROMETHEUS_ALIAS_SUFFIXES))
 
 
 def _record_runtime_mentions(

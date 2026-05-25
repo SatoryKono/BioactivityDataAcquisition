@@ -115,6 +115,15 @@ def test_runtime_plan_support_retires_legacy_runtime_compatibility() -> None:
     assert "_call_supported_kwargs" not in source
     assert "inspect.signature" not in source
 
+
+@pytest.mark.unit
+def test_runtime_facade_does_not_apply_pandera_patch_at_import_time() -> None:
+    """Runtime facade must expose compatibility patching without import-time side effects."""
+    source = inspect.getsource(runtime_facade)
+    assert "apply_pandera_typing_compat_if_needed()" not in source
+    assert "apply_runtime_compatibility_patches" in runtime_facade.__all__
+
+
 @pytest.mark.unit
 def test_observability_runtime_public_exports_stable() -> None:
     """Observability runtime facade should preserve stable public __all__."""

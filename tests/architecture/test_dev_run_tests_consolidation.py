@@ -20,6 +20,7 @@ def test_sh_wrapper_delegates_to_backend() -> None:
         encoding="utf-8"
     )
     assert "scripts/engineering/dev/run_tests.py" in content
+    assert 'dirname "$0")/../../..' in content
 
 
 def test_ps1_wrapper_delegates_to_backend() -> None:
@@ -29,6 +30,7 @@ def test_ps1_wrapper_delegates_to_backend() -> None:
         encoding="utf-8"
     )
     assert "scripts/engineering/dev/run_tests.py" in content
+    assert 'Join-Path $PSScriptRoot "../../.."' in content
 
 
 def test_changed_wrapper_delegates_to_backend_changed_command() -> None:
@@ -38,3 +40,4 @@ def test_changed_wrapper_delegates_to_backend_changed_command() -> None:
         encoding="utf-8"
     )
     assert "scripts/engineering/dev/run_tests.py changed" in content
+    assert 'dirname "$0")/../../..' in content

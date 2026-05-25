@@ -38,6 +38,12 @@ DOCUMENTED_SOURCE_REVISION_STATES = frozenset(
 )
 
 
+def _require_non_empty_text(value: object, field_name: str) -> None:
+    """Reject missing semantic identity fields before manifest persistence."""
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"RunManifest.{field_name} must be a non-empty string")
+
+
 class ReplayCapability(StrEnum):
     """Exact-replay capability classification for one manifested run."""
 
@@ -136,6 +142,15 @@ class RunManifest:
 
     def __post_init__(self) -> None:
         """Keep manifest timestamps canonical across serialize/deserialize cycles."""
+        for field_name in (
+            "manifest_id",
+            "execution_fingerprint",
+            "schema_version",
+            "pipeline_name",
+            "provider",
+            "entity",
+        ):
+            _require_non_empty_text(getattr(self, field_name), field_name)
         object.__setattr__(
             self,
             "created_at",

@@ -1,26 +1,26 @@
 ---
 id: technical-debt-github-issues
-title: Prepare GitHub issues for technical debt audit
+title: Prepare GitHub issues for technical debt audit findings
 task_id: technical-debt-github-issues
-created_at: '2026-05-25T04:42:18Z'
+created_at: '2026-05-25T09:26:55Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
-summary: Created GitHub issues RF-010 through RF-019 for technical debt audit remediation,
-  and detected existing RF-009 retained public entrypoint issue without duplicating
-  it.
+summary: 'Used .env GITHUB_TOKEN without printing it and created follow-up GitHub
+  issues #4625-#4630 for residual technical-debt audit findings, avoiding duplicate
+  closed RF-010..RF-019 issues.'
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Prepare GitHub issues for technical debt audit
+- Title: Prepare GitHub issues for technical debt audit findings
 
 ## Outcome
 
-- Created GitHub issues RF-010 through RF-019 for technical debt audit remediation, and detected existing RF-009 retained public entrypoint issue without duplicating it.
+- Used .env GITHUB_TOKEN without printing it and created follow-up GitHub issues #4625-#4630 for residual technical-debt audit findings, avoiding duplicate closed RF-010..RF-019 issues.
 
 ## Lessons learned
 

@@ -10,6 +10,7 @@ from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
 )
 from bioetl.composition.observability import ObservabilityBundle
+from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.composition.runtime_builders._runner_builder_orchestration import (
     attach_runner_control_plane_collaborators as _attach_runner_control_plane_collaborators,
 )
@@ -59,7 +60,6 @@ from bioetl.composition.runtime_builders.runner_builder_wiring import (
 from bioetl.composition.runtime_builders.runner_input_assembly import (
     prepare_runner_context_and_inputs as _prepare_runner_context_and_inputs,
 )
-from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.domain.control_plane.reproducibility_policy import (
     is_degraded_observable_profile_requested,
 )

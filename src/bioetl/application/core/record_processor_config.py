@@ -26,7 +26,7 @@ class ContentHashVersionPolicy:
     version: str
     include_fields: frozenset[str] = field(default_factory=frozenset)
     exclude_fields: frozenset[str] = field(default_factory=frozenset)
-    datetime_policy: str = "v1_date"
+    datetime_policy: str = "v2_datetime_utc"
 
 
 @dataclass(frozen=True, slots=True)

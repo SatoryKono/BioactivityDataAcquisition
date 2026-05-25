@@ -17,17 +17,12 @@ from __future__ import annotations
 from importlib import import_module
 from typing import Any
 
-from bioetl.infrastructure.compat.pandera_compat import (
-    apply_pandera_typing_compat_if_needed,
-)
-
 _RUNTIME_OBSERVABILITY_MODULE = "bioetl.composition.bootstrap.runtime.observability"
 _RUNTIME_ASSEMBLY_MODULE = "bioetl.composition.bootstrap.runtime.assembly"
 
-apply_pandera_typing_compat_if_needed()
-
 __all__ = [
     "MetricsServerError",
+    "apply_runtime_compatibility_patches",
     "assemble_filter_config",
     "assemble_runtime_config",
     "assemble_vacuum_settings",
@@ -48,6 +43,7 @@ _PUBLIC_EXPORTS: dict[str, str] = {
     "MetricsServerError": _RUNTIME_OBSERVABILITY_MODULE,
     "assemble_filter_config": _RUNTIME_ASSEMBLY_MODULE,
     "assemble_runtime_config": _RUNTIME_ASSEMBLY_MODULE,
+    "apply_runtime_compatibility_patches": "bioetl.composition.bootstrap.runtime.compatibility",
     "assemble_vacuum_settings": _RUNTIME_ASSEMBLY_MODULE,
     "bootstrap_composite_runner": "bioetl.composition.bootstrap.runtime.composite",
     "bootstrap_dq_monitor": _RUNTIME_OBSERVABILITY_MODULE,

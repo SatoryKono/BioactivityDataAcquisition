@@ -49,75 +49,8 @@
   ],
   "alerted_without_declaration": [],
   "alerted_without_emission": [],
-  "alias_emitters": {
-    "audit_entries_count": [
-      "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py"
-    ],
-    "checkpoint_status": [
-      "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py"
-    ],
-    "circuit_breaker_state": [
-      "src/bioetl/infrastructure/adapters/_error_handling_support.py"
-    ],
-    "dq_status": [
-      "src/bioetl/infrastructure/quarantine/filtered_read_support.py"
-    ],
-    "error_rate": [
-      "src/bioetl/application/services/data_quality_service.py",
-      "src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py"
-    ],
-    "health_check_passed": [
-      "src/bioetl/infrastructure/adapters/_health_check_observability.py"
-    ],
-    "lineage_status": [
-      "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py"
-    ],
-    "quality_score": [
-      "src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py"
-    ],
-    "quarantine_status": [
-      "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py"
-    ],
-    "quarantined_count": [
-      "src/bioetl/application/services/data_quality_service.py"
-    ],
-    "record_count": [
-      "src/bioetl/application/services/data_quality_service.py"
-    ],
-    "records_count": [
-      "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py"
-    ],
-    "retry_count": [
-      "src/bioetl/infrastructure/adapters/_error_handling_support.py"
-    ],
-    "target_size": [
-      "src/bioetl/infrastructure/storage/silver/operations/maintenance_operations.py"
-    ],
-    "total_count": [
-      "src/bioetl/infrastructure/quarantine/statistics_support.py"
-    ],
-    "write_duration_ms": [
-      "src/bioetl/infrastructure/storage/metadata_writer_helpers.py"
-    ]
-  },
-  "compatibility_alias_candidates": [
-    "audit_entries_count",
-    "checkpoint_status",
-    "circuit_breaker_state",
-    "dq_status",
-    "error_rate",
-    "health_check_passed",
-    "lineage_status",
-    "quality_score",
-    "quarantine_status",
-    "quarantined_count",
-    "record_count",
-    "records_count",
-    "retry_count",
-    "target_size",
-    "total_count",
-    "write_duration_ms"
-  ],
+  "alias_emitters": {},
+  "compatibility_alias_candidates": [],
   "dashboarded_metrics": [
     "bioetl_adapter_batch_size",
     "bioetl_adapter_dropped_duplicates_total",
@@ -1148,6 +1081,7 @@
       "docs/03-guides/dashboards/README.md",
       "docs/03-guides/dashboards/dashboard-checklist-per-dashboard.md",
       "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
+      "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/design-system.md",
       "docs/05-operations/01-monitoring-guide.md",
       "grafana/README.md",

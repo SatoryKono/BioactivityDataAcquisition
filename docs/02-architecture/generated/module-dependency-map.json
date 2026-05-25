@@ -1,18 +1,18 @@
 {
   "summary": {
-    "scanned_modules": 1923,
-    "total_internal_imports": 7578,
+    "scanned_modules": 1931,
+    "total_internal_imports": 7614,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "9782bca0e585bc80d767dc6f470535abbfa771c35695de9fdc0cb91abbdeefff"
+    "source_fingerprint": "3661f477a39fb4741a9170412ec833e515a5147e4ceae242cfcbca35c1f0854b"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1276,
+      "imports": 1295,
       "allowed": true
     },
     {
@@ -30,19 +30,19 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 659,
+      "imports": 670,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 440,
+      "imports": 443,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 339,
+      "imports": 341,
       "allowed": true
     },
     {
@@ -60,7 +60,7 @@
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 965,
+      "imports": 966,
       "allowed": true
     },
     {
@@ -256,18 +256,18 @@
     },
     {
       "source": "composition.runtime_builders",
+      "target": "domain.context",
+      "imports": 25
+    },
+    {
+      "source": "composition.runtime_builders",
       "target": "domain.control_plane",
       "imports": 25
     },
     {
       "source": "composition.runtime_builders",
-      "target": "domain.context",
-      "imports": 24
-    },
-    {
-      "source": "composition.runtime_builders",
       "target": "infrastructure.config",
-      "imports": 24
+      "imports": 25
     },
     {
       "source": "infrastructure.config",
@@ -380,14 +380,14 @@
       "imports": 13
     },
     {
-      "source": "interfaces.cli",
-      "target": "composition.registry_api",
+      "source": "composition.runtime_builders",
+      "target": "infrastructure.schemas",
       "imports": 13
     },
     {
-      "source": "application.services",
-      "target": "domain.behavior",
-      "imports": 12
+      "source": "interfaces.cli",
+      "target": "composition.registry_api",
+      "imports": 13
     }
   ],
   "violations": []

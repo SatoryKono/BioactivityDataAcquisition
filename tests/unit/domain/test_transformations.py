@@ -53,13 +53,16 @@ class TestNormalizeForHash:
         assert normalized == {"pi": 3.1415926536}
 
     def test_date_to_iso(self):
-        """REQ-ID-005: Dates should be converted to ISO format."""
+        """REQ-ID-005: Dates and datetimes should use canonical ISO format."""
         record = {
             "date": date(2025, 12, 15),
             "datetime": datetime(2025, 12, 15, 10, 30, 0),
         }
         normalized = normalize_for_hash(record)
-        assert normalized == {"date": "2025-12-15", "datetime": "2025-12-15"}
+        assert normalized == {
+            "date": "2025-12-15",
+            "datetime": "2025-12-15T10:30:00.000000Z",
+        }
 
     def test_string_strip(self):
         """REQ-ID-006: Strings should be stripped."""

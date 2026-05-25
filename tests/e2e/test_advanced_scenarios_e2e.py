@@ -276,6 +276,46 @@ async def test_vacuum_respects_retention_days(
 # ============================================================================
 
 
+def _make_threadless_quarantine_adapter(
+    quarantine: UnifiedQuarantineAdapter,
+) -> UnifiedQuarantineAdapter:
+    """Use a deterministic in-test quarantine store instead of Delta engine."""
+    stored_records: list[dict[str, object]] = []
+
+    async def _write_many_without_thread(records: list[dict[str, object]]) -> None:
+        if not records:
+            return
+        normalized_records = [quarantine._normalize_record(record) for record in records]
+        stored_records.extend(normalized_records)
+        (Path(quarantine.base_path) / "_delta_log").mkdir(parents=True, exist_ok=True)
+
+    async def _inspect_without_delta(
+        pipeline: str,
+        limit: int = 100,
+        error_code: str | None = None,
+        run_id: str | None = None,
+        dq_status: object | None = None,
+    ) -> list[dict[str, object]]:
+        matched: list[dict[str, object]] = []
+        expected_status = getattr(dq_status, "value", dq_status)
+        for record in stored_records:
+            if record.get("pipeline") != pipeline:
+                continue
+            if error_code is not None and record.get("error_code") != error_code:
+                continue
+            if run_id is not None and record.get("run_id") != run_id:
+                continue
+            if expected_status is not None and record.get("dq_status") != expected_status:
+                continue
+            matched.append(record)
+        return matched[:limit]
+
+    quarantine.write_many = _write_many_without_thread  # type: ignore[method-assign]
+    quarantine.inspect = _inspect_without_delta  # type: ignore[method-assign]
+    return quarantine
+
+
+
 @pytest.mark.e2e
 @pytest.mark.asyncio
 async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
@@ -295,8 +335,10 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
     quarantine_path = e2e_data_dir / "quarantine"
     quarantine_path.mkdir(exist_ok=True)
 
-    quarantine = UnifiedQuarantineAdapter(
-        base_path=str(quarantine_path),
+    quarantine = _make_threadless_quarantine_adapter(
+        UnifiedQuarantineAdapter(
+            base_path=str(quarantine_path),
+        )
     )
 
     manager = QuarantineRuntimeService(
@@ -340,8 +382,10 @@ async def test_quarantine_can_be_inspected(e2e_data_dir: Path):
     quarantine_path = e2e_data_dir / "quarantine"
     quarantine_path.mkdir(exist_ok=True)
 
-    quarantine = UnifiedQuarantineAdapter(
-        base_path=str(quarantine_path),
+    quarantine = _make_threadless_quarantine_adapter(
+        UnifiedQuarantineAdapter(
+            base_path=str(quarantine_path),
+        )
     )
 
     # Write multiple quarantine records

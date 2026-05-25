@@ -15,19 +15,28 @@ from bioetl.domain.transformations import generate_content_hash
 pytestmark = pytest.mark.unit
 
 
-def test_hash_identity_normalizes_datetime_to_date_iso() -> None:
-    """Hash identity keeps the historical date-only datetime contract."""
+def test_hash_identity_v1_normalizes_datetime_to_date_iso() -> None:
+    """Explicit v1 compatibility keeps the historical date-only contract."""
     record = {
         "published_on": date(2025, 12, 15),
         "measured_at": datetime(2025, 12, 15, 10, 30, 0),
     }
 
-    normalized = normalize_hash_identity_record(record)
+    normalized = normalize_hash_identity_record(record, datetime_policy="v1_date")
 
     assert normalized == {
         "published_on": "2025-12-15",
         "measured_at": "2025-12-15",
     }
+
+
+def test_hash_identity_default_preserves_full_utc_datetime_precision() -> None:
+    """Default hash identity uses the timestamp-sensitive v2 policy."""
+    record = {"measured_at": datetime(2025, 12, 15, 10, 30, tzinfo=UTC)}
+
+    normalized = normalize_hash_identity_record(record)
+
+    assert normalized == {"measured_at": "2025-12-15T10:30:00.000000Z"}
 
 
 def test_hash_identity_v2_preserves_full_utc_datetime_precision() -> None:
@@ -54,23 +63,20 @@ def test_hash_identity_v2_preserves_full_utc_datetime_precision() -> None:
 
 
 def test_generate_content_hash_v2_distinguishes_same_day_timestamps() -> None:
-    """v1 compatibility collapses dates; v2 timestamp-sensitive policy does not."""
+    """Default v2 distinguishes timestamps; explicit v1 compatibility collapses."""
     first = {"measured_at": datetime(2025, 12, 15, 10, 30, tzinfo=UTC)}
     second = {"measured_at": datetime(2025, 12, 15, 11, 30, tzinfo=UTC)}
 
-    assert generate_content_hash(first, "test") == generate_content_hash(
-        second,
-        "test",
-    )
     assert generate_content_hash(
         first,
         "test",
-        datetime_policy="v2_datetime_utc",
-    ) != generate_content_hash(
+        datetime_policy="v1_date",
+    ) == generate_content_hash(
         second,
         "test",
-        datetime_policy="v2_datetime_utc",
+        datetime_policy="v1_date",
     )
+    assert generate_content_hash(first, "test") != generate_content_hash(second, "test")
 
 
 def test_hash_identity_can_sort_nested_sequence_fields() -> None:

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-25T07:40:37.714539+00:00",
+  "generated_at": "2026-05-25T09:14:42.796297+00:00",
   "summary": {
     "total_scripts": 396,
     "status_counts": {
@@ -6901,7 +6901,7 @@
         },
         {
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
-          "line": 28,
+          "line": 29,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/run_tests.ps1\").read_text("
         }
@@ -7120,7 +7120,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
-          "line": 37,
+          "line": 39,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/test_changed.sh\").read_text("
         }
@@ -10079,13 +10079,13 @@
         },
         {
           "path": "docs/05-operations/01-monitoring-guide.md",
-          "line": 509,
+          "line": 506,
           "source_group": "docs",
           "text": "python -m scripts.ops check-observability-ports --json"
         },
         {
           "path": "docs/05-operations/01-monitoring-guide.md",
-          "line": 567,
+          "line": 564,
           "source_group": "docs",
           "text": "1. Запустите `python -m scripts.ops check-observability-ports --json`."
         },

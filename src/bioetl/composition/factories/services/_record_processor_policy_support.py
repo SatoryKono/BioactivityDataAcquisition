@@ -80,10 +80,11 @@ def extract_hash_policy_by_version(
     write_versions = getattr(rollout, "write_versions", None)
     affects_hash = bool(getattr(rollout, "affects_hash", False))
     datetime_policy = str(
-        getattr(contract_policy, "hash_datetime_policy", "v1_date") or "v1_date"
+        getattr(contract_policy, "hash_datetime_policy", "v2_datetime_utc")
+        or "v2_datetime_utc"
     ).strip()
     if datetime_policy not in {"v1_date", "v2_datetime_utc"}:
-        datetime_policy = "v1_date"
+        datetime_policy = "v2_datetime_utc"
 
     normalized_active_version = (
         str(active_version).strip() if active_version is not None else ""
