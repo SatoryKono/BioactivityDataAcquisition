@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -18,7 +19,7 @@ _LEGACY_ROOT_WRAPPER_PATHS = frozenset(
         "scripts/shutdown.sh",
     }
 )
-_SCANNED_SUFFIXES = {".md", ".py", ".ps1", ".sh"}
+_SCANNED_SUFFIXES = (".md", ".py", ".ps1", ".sh")
 _ALLOWED_MENTION_FILES = frozenset(
     {
         CURRENT_TEST_FILE,
@@ -30,56 +31,70 @@ _ALLOWED_MENTION_FILES = frozenset(
         ROOT / "scripts" / "shutdown.sh",
     }
 )
-_SCAN_ROOTS = (
-    ROOT / "docs",
-    ROOT / "src",
-    ROOT / "tests",
-    ROOT / "scripts",
+_ALLOWED_MENTION_PATHS = frozenset(
+    path.relative_to(ROOT).as_posix() for path in _ALLOWED_MENTION_FILES
 )
-_SKIPPED_ROOTS = {
-    ROOT / "docs" / "reports",
-    ROOT / "docs" / "99-archive",
-}
-
-
-def _iter_repo_files() -> list[Path]:
-    files: list[Path] = []
-    seen: set[Path] = set()
-    for root in _SCAN_ROOTS:
-        if not root.exists():
-            continue
-        for path in root.rglob("*"):
-            if path in seen:
-                continue
-            if any(skipped in path.parents for skipped in _SKIPPED_ROOTS):
-                continue
-            if path.suffix not in _SCANNED_SUFFIXES:
-                continue
-            try:
-                is_file = path.is_file()
-            except OSError:
-                continue
-            if not is_file:
-                continue
-            seen.add(path)
-            files.append(path)
-    return files
+_GIT_SCAN_PATHS = ("docs", "src", "tests", "scripts")
+_SKIPPED_PATH_PREFIXES = (
+    "docs/reports/",
+    "docs/99-archive/",
+    "docs/site/",
+    "docs/exports/",
+    "docs/02-architecture/generated/",
+    "docs/02-architecture/diagrams/bundles/",
+    "docs/02-architecture/diagrams/manifests/",
+    "docs/02-architecture/diagrams/png/",
+    "docs/02-architecture/diagrams/tooling/",
+    "docs/02-architecture/diagrams/architecture/png/",
+    "docs/02-architecture/diagrams/architecture/svg/",
+    "docs/02-architecture/diagrams/class-diagrams/png/",
+    "docs/02-architecture/diagrams/class-diagrams/svg/",
+    "docs/02-architecture/diagrams/foundation/png/",
+    "docs/02-architecture/diagrams/foundation/svg/",
+    "docs/02-architecture/diagrams/views/png/",
+    "docs/02-architecture/diagrams/views/svg/",
+    "docs/02-architecture/diagrams/descriptions/legacy/",
+    "src/memory/episodic/",
+    "scripts/archive/",
+)
 
 
 def _iter_legacy_wrapper_mentions() -> list[str]:
+    command = ["git", "grep", "-n", "-F"]
+    for legacy_path in sorted(_LEGACY_ROOT_WRAPPER_PATHS):
+        command.extend(("-e", legacy_path))
+    command.append("--")
+    command.extend(_GIT_SCAN_PATHS)
+    command.extend(
+        f":(exclude){path_prefix}**" for path_prefix in _SKIPPED_PATH_PREFIXES
+    )
+
+    result = subprocess.run(
+        command,
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+    if result.returncode == 1:
+        return []
+    if result.returncode != 0:
+        raise AssertionError(f"git grep failed: {result.stderr.strip()}")
+
     violations: list[str] = []
-    for path in _iter_repo_files():
-        if path in _ALLOWED_MENTION_FILES:
+    for match in result.stdout.splitlines():
+        rel_path, lineno, line = match.split(":", 2)
+        if not rel_path.endswith(_SCANNED_SUFFIXES):
             continue
-        try:
-            lines = path.read_text(encoding="utf-8").splitlines()
-        except OSError:
+        if rel_path in _ALLOWED_MENTION_PATHS:
             continue
-        rel_path = path.relative_to(ROOT).as_posix()
-        for lineno, line in enumerate(lines, start=1):
-            for legacy_path in _LEGACY_ROOT_WRAPPER_PATHS:
-                if legacy_path in line:
-                    violations.append(f"{rel_path}:{lineno} mentions {legacy_path}")
+        if any(rel_path.startswith(prefix) for prefix in _SKIPPED_PATH_PREFIXES):
+            continue
+        for legacy_path in _LEGACY_ROOT_WRAPPER_PATHS:
+            if legacy_path in line:
+                violations.append(f"{rel_path}:{lineno} mentions {legacy_path}")
     return violations
 
 

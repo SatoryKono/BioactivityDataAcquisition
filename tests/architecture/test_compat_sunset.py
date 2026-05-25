@@ -134,40 +134,44 @@ REMOVED_COMPAT_MODULES: dict[str, Path] = {
 }
 
 
-@pytest.mark.parametrize("name,path", COMPAT_FILES.items(), ids=COMPAT_FILES.keys())
-def test_compat_file_sunset(name: str, path: Path) -> None:
+def _assert_compat_surface_sunset(
+    surfaces: dict[str, Path],
+    *,
+    surface_kind: str,
+    removal_hint: str,
+) -> None:
+    """Validate sunset policy for the currently tracked compatibility inventory."""
+    today = POLICY_REVIEW_DATE
+    for name, path in surfaces.items():
+        exists = path.exists()
+        if today <= SUNSET_DATE:
+            assert exists, (
+                f"Compat {surface_kind} {name} was removed before sunset date "
+                f"{SUNSET_DATE}. If intentional, remove this test entry."
+            )
+        else:
+            assert not exists, (
+                f"Compat {surface_kind} {name} still exists after sunset date "
+                f"{SUNSET_DATE}. {removal_hint}"
+            )
+
+
+def test_compat_file_sunset() -> None:
     """Before sunset: compat file MUST exist. After sunset: MUST be removed."""
-    today = POLICY_REVIEW_DATE
-    exists = path.exists()
-
-    if today <= SUNSET_DATE:
-        assert exists, (
-            f"Compat file {name} was removed before sunset date {SUNSET_DATE}. "
-            f"If intentional, remove this test entry."
-        )
-    else:
-        assert not exists, (
-            f"Compat file {name} still exists after sunset date {SUNSET_DATE}. "
-            f"Migrate callers to canonical imports and remove the file."
-        )
+    _assert_compat_surface_sunset(
+        COMPAT_FILES,
+        surface_kind="file",
+        removal_hint="Migrate callers to canonical imports and remove the file.",
+    )
 
 
-@pytest.mark.parametrize("name,path", COMPAT_MODULES.items(), ids=COMPAT_MODULES.keys())
-def test_compat_module_sunset(name: str, path: Path) -> None:
+def test_compat_module_sunset() -> None:
     """Before sunset: compat module MUST exist. After sunset: MUST be removed."""
-    today = POLICY_REVIEW_DATE
-    exists = path.exists()
-
-    if today <= SUNSET_DATE:
-        assert exists, (
-            f"Compat module {name} was removed before sunset date {SUNSET_DATE}. "
-            f"If intentional, remove this test entry."
-        )
-    else:
-        assert not exists, (
-            f"Compat module {name} still exists after sunset date {SUNSET_DATE}. "
-            f"Migrate consumers to narrow ports and remove the aggregate."
-        )
+    _assert_compat_surface_sunset(
+        COMPAT_MODULES,
+        surface_kind="module",
+        removal_hint="Migrate consumers to narrow ports and remove the aggregate.",
+    )
 
 
 @pytest.mark.parametrize(

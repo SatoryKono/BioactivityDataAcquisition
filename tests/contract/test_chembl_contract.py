@@ -36,13 +36,15 @@ async def _request_or_skip(
     url: str,
     **kwargs: object,
 ) -> httpx.Response:
-    """Execute request and skip on transient network/provider outages."""
+    """Execute request and skip only on clearly transient network/provider outages."""
     try:
         response = await client.request(method, url, **kwargs)
     except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as exc:
         pytest.skip(f"ChEMBL endpoint not reachable: {exc}")
 
-    if response.status_code in {429, 500, 502, 503, 504}:
+    # Live provider contract probes should fail only on durable schema drift, not
+    # on upstream transport or transient server outages beyond repo control.
+    if response.status_code == 429 or 500 <= response.status_code < 600:
         pytest.skip(f"ChEMBL temporary server error: HTTP {response.status_code}")
     return response
 
