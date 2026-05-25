@@ -174,32 +174,28 @@ def mock_logger():
 class TestBootstrapPipeline:
     """Tests for bootstrap_pipeline_runner function."""
 
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.bootstrap_observability_bundle"
-    )
-    @patch("bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.get_settings")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.prepare_runtime_registry")
     def test_bootstrap_pipeline_unknown_pipeline_raises(
         self,
-        mock_get_settings: MagicMock,
-        mock_bootstrap_observability_bundle: MagicMock,
-        mock_settings: MagicMock,
-        mock_logger: MagicMock,
+        mock_prepare_runtime_registry: MagicMock,
     ):
         """Test that unknown pipeline name raises ValueError."""
         from bioetl.composition.bootstrap.runtime.pipeline import (
             bootstrap_pipeline_runner,
         )
 
-        settings = _create_bootstrap_settings(
-            metrics_enabled=True,
-            metrics_server_enabled=True,
+        mock_prepare_runtime_registry.side_effect = ValueError(
+            "Unknown pipeline name"
         )
-        mock_get_settings.return_value = settings
 
         # Runner bootstrap now resolves the factory through the registry first.
         ctx = _create_pipeline_context(pipeline_name="unknown_pipeline")
         with pytest.raises(ValueError, match="Unknown pipeline name"):
             bootstrap_pipeline_runner(ctx)
+        mock_prepare_runtime_registry.assert_called_once_with(
+            registry=None,
+            pipeline_name="unknown_pipeline",
+        )
 
     @patch("bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.create_registry")
     @patch(
