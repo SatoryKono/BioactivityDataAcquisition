@@ -245,18 +245,19 @@ class TestDateNormalization:
     """Test date/datetime normalization."""
 
     def test_datetime_normalized_to_date_iso(self) -> None:
-        """Datetime should be normalized to date ISO string."""
+        """Datetime should be normalized to date ISO string with v1_date policy."""
         service = EntityIdentityGenerator()
 
-        # Different times on same date should produce same hash
+        # Different times on same date should produce same hash with v1_date policy
         dt1 = datetime(2024, 1, 15, 10, 30, 0)
         dt2 = datetime(2024, 1, 15, 23, 59, 59)
 
         record1 = {"timestamp": dt1}
         record2 = {"timestamp": dt2}
 
-        hash1 = service.compute_content_hash("test", record1)
-        hash2 = service.compute_content_hash("test", record2)
+        # Use v1_date policy to collapse datetime to date-only
+        hash1 = service.compute_content_hash("test", record1, datetime_policy="v1_date")
+        hash2 = service.compute_content_hash("test", record2, datetime_policy="v1_date")
 
         assert hash1 == hash2
 

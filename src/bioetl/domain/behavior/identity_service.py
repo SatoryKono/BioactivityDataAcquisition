@@ -119,6 +119,7 @@ class EntityIdentityGenerator:
         exclude_none: bool = False,
         include_fields: set[str] | None = None,
         exclude_fields: set[str] | None = None,
+        datetime_policy: str = "v2_datetime_utc",
     ) -> ContentHash:
         """Compute SHA256 content hash for record versioning.
 
@@ -137,6 +138,7 @@ class EntityIdentityGenerator:
                 hash, overriding the instance-level default include policy.
             exclude_fields: Optional additional set of fields to exclude from
                 the hash, merged with the instance-level exclude policy.
+            datetime_policy: Datetime normalization policy ('v1_date' or 'v2_datetime_utc').
 
         Returns:
             ContentHash (SHA256 hex digest, 64 characters).
@@ -160,6 +162,7 @@ class EntityIdentityGenerator:
             exclude_none=exclude_none,
             include_fields=resolved_include_fields,
             exclude_fields=resolved_exclude_fields,
+            datetime_policy=datetime_policy,
         )
 
     def _normalize_for_hash(
