@@ -259,7 +259,7 @@ def _run_all_with_cli_policy(
     cli_input: RunAllCommandInput,
 ) -> None:
     """Resolve registry and execute the prepared run-all policy flow."""
-    registry = resolve_context_registry(click_context)
+    registry = resolve_context_registry(click_context) or build_cli_registry()
     run_all_command_flow(
         cli_input=cli_input,
         registry=registry,

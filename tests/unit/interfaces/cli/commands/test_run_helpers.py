@@ -68,6 +68,22 @@ class TestValidatePipelineName:
 
         assert result == "chembl_activity"
 
+    def test_valid_pipeline_caches_fallback_registry_on_context(
+        self, mock_registry: MagicMock
+    ) -> None:
+        """Fallback validation registry should be reused by command execution."""
+        click_context = MagicMock(spec=click.Context)
+        click_context.obj = None
+
+        with patch(
+            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
+            return_value=mock_registry,
+        ):
+            result = validate_pipeline_name(click_context, None, "chembl_activity")
+
+        assert result == "chembl_activity"
+        assert click_context.obj is mock_registry
+
     def test_invalid_pipeline_raises_bad_parameter(
         self, mock_registry: MagicMock
     ) -> None:

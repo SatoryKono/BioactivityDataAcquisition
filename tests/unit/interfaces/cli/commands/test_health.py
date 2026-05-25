@@ -652,10 +652,16 @@ class TestHealthServerAsyncExecution:
         async def cancelling_sleep(seconds: float) -> None:
             raise asyncio.CancelledError()
 
-        with patch("asyncio.sleep", side_effect=cancelling_sleep):
+        with (
+            patch("asyncio.sleep", side_effect=cancelling_sleep),
+            patch(
+                "bioetl.interfaces.cli.commands.health._start_health_observability"
+            ) as mock_start_observability,
+        ):
             result = cli_runner.invoke(cli, ["health", "server"])
 
         # Verify server was started and stopped
+        mock_start_observability.assert_called_once_with()
         mock_server.start.assert_called_once()
         mock_server.stop.assert_called_once()
         assert "Health server stopped." in result.output
@@ -683,12 +689,18 @@ class TestHealthServerAsyncExecution:
         async def cancelling_sleep(seconds: float) -> None:
             raise asyncio.CancelledError()
 
-        with patch("asyncio.sleep", side_effect=cancelling_sleep):
+        with (
+            patch("asyncio.sleep", side_effect=cancelling_sleep),
+            patch(
+                "bioetl.interfaces.cli.commands.health._start_health_observability"
+            ) as mock_start_observability,
+        ):
             cli_runner.invoke(
                 cli,
                 ["health", "server", "--host", "127.0.0.1", "--port", "9000"],
             )
 
+        mock_start_observability.assert_called_once_with()
         # Verify HealthServer was called with correct options
         mock_server_cls.assert_called_once_with(
             host="127.0.0.1",
@@ -722,9 +734,15 @@ class TestHealthServerAsyncExecution:
         async def cancelling_sleep(seconds: float) -> None:
             raise asyncio.CancelledError()
 
-        with patch("asyncio.sleep", side_effect=cancelling_sleep):
+        with (
+            patch("asyncio.sleep", side_effect=cancelling_sleep),
+            patch(
+                "bioetl.interfaces.cli.commands.health._start_health_observability"
+            ) as mock_start_observability,
+        ):
             cli_runner.invoke(cli, ["health", "server"])
 
+        mock_start_observability.assert_called_once_with()
         # Verify entrypoint was called to get dependencies
         mock_get_deps.assert_called_once()
         # Verify HealthServer was called with default options

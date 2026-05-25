@@ -28,6 +28,21 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
+def _count_delta_rows(dt: DeltaTable, resolved_path: Path) -> int:
+    """Return row count using metadata when available."""
+    native_count = getattr(dt, "count", None)
+    if callable(native_count):
+        try:
+            return int(native_count())
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except BaseException:
+            pass  # Why: delta-rs may panic on empty tables; fall through.
+
+    dt_fresh = DeltaTable(str(resolved_path))
+    return int(dt_fresh.to_pyarrow_table(columns=[]).num_rows)
+
+
 class DeltaReader:
     """Read-only accessor for Delta Lake tables.
 
@@ -99,12 +114,16 @@ class DeltaReader:
                     f"Delta table not found: {resolved_path}"
                 ) from e
 
-            # Use scanner with early-stop for limited reads (avoids full table load).
+            # Use scanner.head for both limited and full reads. On Windows/Python
+            # 3.13 delta-rs full-table to_pyarrow_table can hang inside the
+            # native dataset scan; scanner.head(row_count) follows the same
+            # stable path used by limited reads while preserving full-read
+            # semantics.
+            scanner = dt.to_pyarrow_dataset().scanner(columns=columns)
             if limit is not None:
-                scanner = dt.to_pyarrow_dataset().scanner(columns=columns)
                 return scanner.head(limit)
 
-            return dt.to_pyarrow_table(columns=columns)
+            return scanner.head(_count_delta_rows(dt, resolved_path))
 
         self._logger.debug(
             "Reading Delta table",
@@ -198,19 +217,7 @@ class DeltaReader:
                     f"Delta table not found: {resolved_path}"
                 ) from e
 
-            native_count = getattr(dt, "count", None)
-            if callable(native_count):
-                try:
-                    return int(native_count())
-                except (KeyboardInterrupt, SystemExit):
-                    raise
-                except BaseException:
-                    pass  # Why: delta-rs may panic on empty tables; fall through
-
-            # Fallback: re-create DeltaTable (prior call may poison internal lock)
-            # and count rows via PyArrow (reads footer metadata, not full data).
-            dt_fresh = DeltaTable(str(resolved_path))
-            return int(dt_fresh.to_pyarrow_table(columns=[]).num_rows)
+            return _count_delta_rows(dt, resolved_path)
 
         return await loop.run_in_executor(None, _count_rows)
 

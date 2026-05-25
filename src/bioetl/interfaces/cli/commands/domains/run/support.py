@@ -107,6 +107,8 @@ def validate_pipeline_name(
     if not available or value not in available:
         fallback_registry = build_cli_registry()
         fallback_available = list(fallback_registry.list_pipelines())
+        if click_context is not None and click_context.obj is None:
+            click_context.obj = fallback_registry
         if fallback_available or not available:
             available = fallback_available
     if value not in available:

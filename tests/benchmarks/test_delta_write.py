@@ -4,6 +4,7 @@ Measures Delta Lake write throughput with merge/append operations.
 """
 
 import asyncio
+from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -13,6 +14,9 @@ import pyarrow as pa
 import pytest
 
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.infrastructure.storage.delta.resilience import (
+    build_default_silver_merge_policy,
+)
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from tests.benchmarks.conftest import calculate_payload_size_mb
 
@@ -93,7 +97,17 @@ def _prepare_records_for_delta(
 
 def _create_silver_writer(base_path: Path) -> SilverWriter:
     """Create an isolated Silver writer rooted at one benchmark round path."""
-    return SilverWriter(base_path=base_path, logger=FakeLogger())
+    return SilverWriter(
+        base_path=base_path,
+        logger=FakeLogger(),
+        merge_resilience_policy=replace(
+            build_default_silver_merge_policy(),
+            # Benchmarks run inside pytest's outer timeout and should measure merge
+            # throughput rather than trip the production-facing 45s safety window
+            # on slower local Windows filesystems.
+            execution_timeout_seconds=90.0,
+        ),
+    )
 
 
 def _append_round_setup(

@@ -5,8 +5,9 @@ from pathlib import Path
 
 import yaml
 
+from scripts.engineering.qa import __main__ as qa_router
 from scripts.engineering.qa import report_dashboard_inventory as inventory
-from tests.helpers.cli_process import assert_cli_succeeded, run_python_cli
+from tests.helpers import run_main_in_process
 
 
 def _write_json(path: Path, payload: dict) -> None:
@@ -244,16 +245,17 @@ def test_build_health_summary_marks_noncanonical_root_config(
     assert "non-canonical style='light'" in dashboard_summary["issues"]
 
 
+def test_scripts_engineering_qa_router_exposes_report_dashboard_inventory_command() -> None:
+    spec = qa_router.COMMAND_SPECS["report-dashboard-inventory"]
+    assert spec.runner == "module"
+    assert spec.target == "scripts.engineering.qa.report_dashboard_inventory"
+
+
 def test_qa_cli_report_dashboard_inventory_help_mentions_health_and_deployed_dir() -> (
     None
 ):
-    result = run_python_cli(
-        "-m",
-        "scripts.engineering.qa",
-        "report-dashboard-inventory",
-        "--help",
-    )
+    result = run_main_in_process(inventory.main, "--help")
 
-    assert_cli_succeeded(result)
+    assert result.returncode == 0
     assert "--health-summary" in result.stdout
     assert "--deployed-dir" in result.stdout

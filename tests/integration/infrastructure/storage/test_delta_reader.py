@@ -133,6 +133,48 @@ class TestReadTable:
         assert result.num_rows == 3
         assert set(result.column_names) == {"id", "name"}
 
+    async def test_read_table_full_read_uses_scanner_head(
+        self,
+        tmp_path: Path,
+        mock_logger: MagicMock,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Full reads should avoid delta-rs to_pyarrow_table native scan hangs."""
+        expected = pa.table({"id": ["1", "2"]})
+        captured: dict[str, object] = {}
+
+        class _FakeScanner:
+            def head(self, limit: int) -> pa.Table:
+                captured["limit"] = limit
+                return expected
+
+        class _FakeDataset:
+            def scanner(self, columns: list[str] | None = None) -> _FakeScanner:
+                captured["columns"] = columns
+                return _FakeScanner()
+
+        class _FakeDeltaTable:
+            def __init__(self, table_uri: str) -> None:
+                captured["table_uri"] = table_uri
+
+            def count(self) -> int:
+                return expected.num_rows
+
+            def to_pyarrow_dataset(self) -> _FakeDataset:
+                return _FakeDataset()
+
+            def to_pyarrow_table(self, columns: list[str] | None = None) -> pa.Table:
+                raise AssertionError(f"unexpected full-table read: columns={columns}")
+
+        monkeypatch.setattr(delta_reader_module, "DeltaTable", _FakeDeltaTable)
+        reader = DeltaReader(base_path=tmp_path, logger=mock_logger)
+
+        result = await reader.read_table("provider/entity", columns=["id"])
+
+        assert result == expected
+        assert captured["columns"] == ["id"]
+        assert captured["limit"] == expected.num_rows
+
     async def test_read_table_with_limit(
         self,
         reader: DeltaReader,

@@ -486,7 +486,7 @@ def _render_health_summary(summary: dict[str, object]) -> str:
     return "\n".join(lines)
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
     parser.add_argument("--check", action="store_true", help="Fail on canonical parity mismatches")
@@ -504,7 +504,7 @@ def main() -> int:
         action="store_true",
         help="Emit per-dashboard local health rollup over docs/provisioning/deployment contracts",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     inventory = _load_inventory()
     parity_errors, parity_by_dashboard = _check_parity(inventory)
