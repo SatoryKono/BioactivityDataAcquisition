@@ -114,9 +114,11 @@ def test_no_metrics_server_direct_call_in_bootstrap_pipeline():
     as part of the CLI/runtime split (see CLAUDE.md §2.1).
     """
     bootstrap_func = _get_bootstrap_pipeline_runner_function()
+    calls_start_metrics_server = _function_calls_name(
+        bootstrap_func, "start_metrics_server"
+    )
 
-    if _function_calls_name(bootstrap_func, "start_metrics_server"):
-        raise AssertionError(
-            "bootstrap_pipeline_runner() must not call start_metrics_server() directly. "
-            "Use bootstrap_metrics() or bootstrap_observability_bundle() instead."
-        )
+    assert not calls_start_metrics_server, (
+        "bootstrap_pipeline_runner() must not call start_metrics_server() directly. "
+        "Use bootstrap_metrics() or bootstrap_observability_bundle() instead."
+    )

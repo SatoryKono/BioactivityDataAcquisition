@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-25T03:43:49.239379+00:00",
+  "generated_at": "2026-05-25T04:37:24.726770+00:00",
   "summary": {
     "total_scripts": 396,
     "status_counts": {
@@ -4351,7 +4351,7 @@
       "references": [
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 13,
+          "line": 14,
           "source_group": "tests",
           "text": "\"scripts/docker-setup.ps1\","
         }
@@ -4366,7 +4366,7 @@
       "references": [
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 14,
+          "line": 15,
           "source_group": "tests",
           "text": "\"scripts/docker-setup.sh\","
         }
@@ -5803,13 +5803,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 595,
+          "line": 590,
           "source_group": "tests",
           "text": "skip_rate = Path(\"scripts/engineering/ci/check_e2e_matrix_skip_rate.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 619,
+          "line": 614,
           "source_group": "tests",
           "text": "assert \"check_e2e_matrix_skip_rate.py\" in content"
         }
@@ -5842,13 +5842,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 596,
+          "line": 591,
           "source_group": "tests",
           "text": "rerun = Path(\"scripts/engineering/ci/check_e2e_rerun_stability.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 620,
+          "line": 615,
           "source_group": "tests",
           "text": "assert \"check_e2e_rerun_stability.py\" in content"
         }
@@ -12226,13 +12226,13 @@
       "references": [
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 17,
+          "line": 18,
           "source_group": "tests",
           "text": "\"scripts/shutdown.ps1\","
         },
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 29,
+          "line": 30,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"shutdown.ps1\","
         }
@@ -12247,13 +12247,13 @@
       "references": [
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 18,
+          "line": 19,
           "source_group": "tests",
           "text": "\"scripts/shutdown.sh\","
         },
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 30,
+          "line": 31,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"shutdown.sh\","
         }
@@ -12268,13 +12268,13 @@
       "references": [
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 15,
+          "line": 16,
           "source_group": "tests",
           "text": "\"scripts/startup.ps1\","
         },
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 27,
+          "line": 28,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"startup.ps1\","
         }
@@ -12289,13 +12289,13 @@
       "references": [
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 16,
+          "line": 17,
           "source_group": "tests",
           "text": "\"scripts/startup.sh\","
         },
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 28,
+          "line": 29,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"startup.sh\","
         }
