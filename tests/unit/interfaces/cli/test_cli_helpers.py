@@ -614,3 +614,20 @@ class TestMainEntryPoint:
 
         mock_build_registry.assert_not_called()
         mock_cli.assert_called_once_with()
+
+    @patch("bioetl.interfaces.cli.main._build_main_registry")
+    def test_help_paths_do_not_build_registry(
+        self,
+        mock_build_registry,
+        cli_runner: CliRunner,
+    ) -> None:
+        """Help and non-registry commands must stay lightweight."""
+        for args in (
+            ["health", "--help"],
+            ["health", "server", "--help"],
+            ["run", "--help"],
+        ):
+            result = cli_runner.invoke(cli, args)
+            assert result.exit_code == 0
+
+        mock_build_registry.assert_not_called()

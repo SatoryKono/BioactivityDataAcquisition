@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 # ruff: noqa: F403,F405
+from bioetl.composition.runtime_builders.runner_builder_wiring import (
+    resolve_runner_factory_wiring,
+)
+
 from tests.unit.composition.runtime_builders.runner_builder_test_support import *  # noqa: F403,F405
 
 def test_handle_control_plane_setup_returns_effective_manifest_profile(
@@ -68,11 +72,10 @@ def test_handle_control_plane_setup_returns_effective_manifest_profile(
 
 
 def test_build_pipeline_runner_defaults_to_provider_registry_bootstrap() -> None:
-    """Default provider bootstrap should come from the named loader helper."""
-    default_fn = runner_builder.build_pipeline_runner.__kwdefaults__[
-        "ensure_providers_loaded_fn"
-    ]
-    assert default_fn is runner_builder.ensure_providers_loaded
+    """Default factory wiring should use the named provider loader helper."""
+    wiring = resolve_runner_factory_wiring()
+
+    assert wiring.ensure_providers_loaded is runner_builder.ensure_providers_loaded
 
 
 def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
@@ -440,4 +443,3 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
     ledger_payload = json.loads(ledger_path.read_text(encoding="utf-8").splitlines()[0])
     assert ledger_payload["manifest_id"] == manifest_id
     assert ledger_payload["event_type"] == "manifest_created"
-

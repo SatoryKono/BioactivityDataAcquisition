@@ -165,6 +165,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        # Keep the bridge transport unbuffered so framed<->line forwarding does
+        # not depend on platform-specific pipe buffering behavior.
+        bufsize=0,
     )
     assert process.stdin is not None
     assert process.stdout is not None
