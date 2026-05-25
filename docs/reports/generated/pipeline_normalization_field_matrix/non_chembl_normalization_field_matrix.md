@@ -12,7 +12,7 @@ Governance columns expose controlled-vocabulary sources, content_hash scope, con
 
 Entity coverage is entity-scoped only; composite join-key and control-plane surfaces are reported separately below.
 
-- entity_record / explicit_profile_coverage_pct: `100.00%` (`405` / `405`) Percent of shipped entity-record fields covered by explicit normalization profiles.
+- entity_record / explicit_profile_coverage_pct: `100.00%` (`857` / `857`) Percent of shipped entity-record fields covered by explicit normalization profiles.
 - composite_join_key / composite_join_key_policy_coverage_pct: `100.00%` (`13` / `13`) Percent of configured composite join-key fields covered by explicit join-key normalization policies.
 - composite_source_field / composite_sensitive_source_field_profile_coverage_pct: `100.00%` (`19` / `19`) Percent of composite-sensitive source fields covered by explicit source normalization profiles.
 - control_plane_reproducibility / control_plane_normalization_coverage_pct: `100.00%` (`6` / `6`) Percent of governed control-plane and reproducibility normalization seams covered by canonical normalization contracts.
