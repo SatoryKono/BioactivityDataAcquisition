@@ -146,12 +146,9 @@ def _source_fingerprint(src_root: Path) -> str:
         if "__pycache__" in py_file.parts:
             continue
         rel_path = py_file.relative_to(src_root).as_posix()
-        stat = py_file.stat()
         digest.update(rel_path.encode("utf-8"))
         digest.update(b"\0")
-        digest.update(str(stat.st_size).encode("ascii"))
-        digest.update(b"\0")
-        digest.update(str(stat.st_mtime_ns).encode("ascii"))
+        digest.update(hashlib.sha256(py_file.read_bytes()).digest())
         digest.update(b"\0")
     return digest.hexdigest()
 

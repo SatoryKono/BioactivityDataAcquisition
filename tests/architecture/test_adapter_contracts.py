@@ -192,18 +192,87 @@ def _iter_python_files_matching_any(
         if result.returncode in {0, 1}:
             return sorted(Path(line) for line in result.stdout.splitlines() if line)
 
+    git = shutil.which("git")
+    if git is not None:
+        try:
+            repo_root_result = subprocess.run(
+                [git, "rev-parse", "--show-toplevel"],
+                check=False,
+                capture_output=True,
+                text=True,
+                cwd=existing_roots[0],
+            )
+        except OSError:
+            repo_root_result = None
+        if (
+            repo_root_result is not None
+            and repo_root_result.returncode == 0
+            and repo_root_result.stdout.strip()
+        ):
+            repo_root = Path(repo_root_result.stdout.strip())
+            relative_roots = [
+                root.relative_to(repo_root)
+                for root in existing_roots
+                if root.is_relative_to(repo_root)
+            ]
+            if relative_roots:
+                command = [git, "grep", "-l", "-F"]
+                for pattern in pattern_values:
+                    command.extend(("-e", pattern))
+                command.append("--")
+                command.extend(str(root) for root in relative_roots)
+                result = subprocess.run(
+                    command,
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                    cwd=repo_root,
+                )
+                if result.returncode in {0, 1}:
+                    return sorted(
+                        repo_root / line
+                        for line in result.stdout.splitlines()
+                        if line.endswith(".py")
+                    )
+
     matched: list[Path] = []
     for search_root in existing_roots:
         for py_file in sorted(search_root.rglob("*.py")):
             if "__pycache__" in py_file.parts:
                 continue
             try:
-                content = py_file.read_text(encoding="utf-8")
-            except (OSError, UnicodeDecodeError):
+                with py_file.open(encoding="utf-8", errors="ignore") as handle:
+                    for line in handle:
+                        if any(pattern in line for pattern in pattern_values):
+                            matched.append(py_file)
+                            break
+            except OSError:
+                continue
+    return matched
+
+
+def _iter_cached_python_files_matching_any(
+    roots: tuple[Path, ...],
+    patterns: frozenset[str] | set[str] | dict[str, str],
+    *content_caches: dict[Path, str],
+) -> list[Path]:
+    """Return cached Python files containing any exact pattern."""
+    pattern_values = list(patterns)
+    if not pattern_values:
+        return []
+
+    existing_roots = tuple(root for root in roots if root.exists())
+    if not existing_roots:
+        return []
+
+    matched: set[Path] = set()
+    for content_cache in content_caches:
+        for py_file, content in content_cache.items():
+            if not any(py_file.is_relative_to(root) for root in existing_roots):
                 continue
             if any(pattern in content for pattern in pattern_values):
-                matched.append(py_file)
-    return matched
+                matched.add(py_file)
+    return sorted(matched)
 
 
 def _parse_python_file(py_file: Path) -> ast.Module:
@@ -304,6 +373,39 @@ def _package_root_import_violations_for_files(
     return violations
 
 
+def _ast_base_name(base: ast.expr) -> str | None:
+    if isinstance(base, ast.Name):
+        return base.id
+    if isinstance(base, ast.Attribute):
+        return base.attr
+    return None
+
+
+def _class_contract_markers(tree: ast.Module, class_name: str) -> set[str]:
+    for node in tree.body:
+        if not isinstance(node, ast.ClassDef) or node.name != class_name:
+            continue
+        base_names = {
+            base_name
+            for base in node.bases
+            if (base_name := _ast_base_name(base)) is not None
+        }
+        method_names = {
+            child.name
+            for child in node.body
+            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef))
+        }
+        return base_names | method_names
+    return set()
+
+
+def _parse_cached_python_file(
+    source_content_cache: dict[Path, str],
+    py_file: Path,
+) -> ast.Module:
+    return ast.parse(source_content_cache[py_file], filename=str(py_file))
+
+
 class TestAdapterHealthCheck:
     """Tests ensuring adapters have proper health check methods."""
 
@@ -397,12 +499,16 @@ class TestAdapterMixinPolicy:
     def test_src_does_not_import_legacy_adapter_mixin_modules(
         self,
         src_dir: Path,
+        source_content_cache: dict[Path, str],
+        test_content_cache: dict[Path, str],
     ) -> None:
         """Removed legacy adapter-mixin module paths must stay absent everywhere."""
         root = src_dir.parent
-        candidate_files = _iter_python_files_matching_any(
+        candidate_files = _iter_cached_python_files_matching_any(
             (src_dir, root / "tests"),
             REMOVED_SHIM_IMPORT_PATHS,
+            source_content_cache,
+            test_content_cache,
         )
         violations = _legacy_module_import_violations_for_files(
             root,

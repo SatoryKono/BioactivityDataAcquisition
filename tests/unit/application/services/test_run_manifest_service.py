@@ -770,6 +770,35 @@ def test_create_manifest_requires_clean_source_revision_state_for_strict_replay(
     assert store.get("manifest-dirty-source") is None
 
 
+def test_create_manifest_reports_promoted_profile_on_dirty_source_state() -> None:
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-promoted-dirty-source",
+    )
+
+    with pytest.raises(RuntimeError) as exc_info:
+        service.create_manifest(
+            replace(
+                _make_request(),
+                source_revision_state="dirty",
+                launch_context={
+                    "limit": 100,
+                    "resume": False,
+                    "configured_required_persistence_profile": "degraded_observable",
+                    "required_persistence_profile": "replay_ready",
+                },
+            )
+        )
+
+    message = str(exc_info.value)
+    assert "configured_required_persistence_profile=degraded_observable" in message
+    assert "required_persistence_profile=replay_ready" in message
+    assert "profile_was_promoted=true" in message
+    assert "pipeline=chembl_activity" in message
+    assert store.get("manifest-promoted-dirty-source") is None
+
+
 def test_create_manifest_allows_dirty_source_revision_state_for_degraded_context() -> (
     None
 ):
