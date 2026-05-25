@@ -36,8 +36,6 @@ def test_normalize_record_applies_identifier_date_json_and_hash_rules() -> None:
         )
     )
 
-
-@pytest.mark.unit
 def test_compute_content_hash_is_idempotent_for_normalized_payload() -> None:
     processor = build_normalization_processor(provider="crossref")
     normalized_payload = {
@@ -372,6 +370,3 @@ def test_finalize_pre_silver_skips_versioned_hash_projection_when_rollout_does_n
 
     assert silver_record is not None
     assert "_content_hashes_by_version" not in silver_record
-
-
-@pytest.mark.unit

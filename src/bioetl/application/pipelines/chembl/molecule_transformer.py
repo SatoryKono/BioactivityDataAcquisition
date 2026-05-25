@@ -6,7 +6,8 @@ Uses declarative field_specs DSL for mapping where applicable.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from bioetl.application.core.dict_transformers import flatten_nested_dict
 from bioetl.application.core.field_specs import (
@@ -17,6 +18,9 @@ from bioetl.application.core.field_specs import (
 )
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
+)
+from bioetl.application.pipelines.chembl.provider_aliases import (
+    normalize_provider_aliases,
 )
 from bioetl.domain.entities import Molecule
 from bioetl.domain.transformations import safe_float, safe_int
@@ -159,16 +163,16 @@ class MoleculeTransformer(BaseChemblTransformer):
 
     entity_class = Molecule
     primary_id_field = "molecule_id"
+    _PROVIDER_ALIASES: ClassVar[Mapping[str, str]] = {
+        "molecule_id": "molecule_chembl_id"
+    }
 
     def _prepare_record(
         self,
         record: BronzeRecord,
     ) -> BronzeRecord:
-        """Support both unified and legacy molecule identifier field names."""
-        if "molecule_id" not in record and record.get("molecule_chembl_id") is not None:
-            record = dict(record)
-            record["molecule_id"] = record.get("molecule_chembl_id")
-        return record
+        """Normalize provider-native molecule identifiers at the ingestion boundary."""
+        return normalize_provider_aliases(record, self._PROVIDER_ALIASES)
 
     def _extract_business_data(
         self,

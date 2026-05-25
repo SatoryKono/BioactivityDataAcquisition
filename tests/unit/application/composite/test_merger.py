@@ -41,7 +41,7 @@ def _merge_runtime_symbols() -> dict[str, object]:
 
     return {
         "EnricherAggregator": EnricherAggregator,
-        "EnricherDeduplicator": EnricherDeduplicatorService,
+        "EnricherDeduplicatorService": EnricherDeduplicatorService,
         "MergeCollaboratorGroup": MergeCollaboratorGroup,
         "MergeService": MergeService,
         "_path_to_table_name": _path_to_table_name,
@@ -79,8 +79,8 @@ def mock_logger():
 
 @pytest.fixture
 def deduplicator(mock_logger):
-    """Create an EnricherDeduplicator instance."""
-    deduplicator_cls = _merge_runtime_symbols()["EnricherDeduplicator"]
+    """Create an EnricherDeduplicatorService instance."""
+    deduplicator_cls = _merge_runtime_symbols()["EnricherDeduplicatorService"]
     return deduplicator_cls(mock_logger)  # type: ignore[misc, operator]
 
 
@@ -1110,7 +1110,7 @@ class TestInferPipelineFromTable:
 
 @pytest.mark.unit
 class TestCheckDuplicates:
-    """Tests for EnricherDeduplicator._check_duplicates helper."""
+    """Tests for EnricherDeduplicatorService._check_duplicates helper."""
 
     def test_no_duplicates(self, deduplicator):
         """Test returns False when no duplicates."""
@@ -1170,7 +1170,7 @@ class TestCheckDuplicates:
 
 @pytest.mark.unit
 class TestDeduplicateEnricher:
-    """Tests for EnricherDeduplicator.deduplicate and related helpers."""
+    """Tests for EnricherDeduplicatorService.deduplicate and related helpers."""
 
     def test_no_duplicates_returns_unchanged(self, deduplicator):
         """Test no duplicates returns DataFrame unchanged."""

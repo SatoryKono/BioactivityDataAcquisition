@@ -6,12 +6,13 @@ Uses declarative field_specs DSL for mapping where applicable.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, ClassVar, cast
+
 from bioetl.domain.types import GoldRecord, JsonDict
 
 __all__ = ["AssayTransformer"]
 
-
-from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.dict_transformers import flatten_nested_dict
 from bioetl.application.core.field_specs import (
@@ -23,6 +24,9 @@ from bioetl.application.core.field_specs import (
 )
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
+)
+from bioetl.application.pipelines.chembl.provider_aliases import (
+    normalize_provider_aliases,
 )
 from bioetl.domain.entities import Assay
 from bioetl.domain.transformations import (
@@ -149,16 +153,14 @@ class AssayTransformer(BaseChemblTransformer):
 
     entity_class = Assay
     primary_id_field = "assay_id"
+    _PROVIDER_ALIASES: ClassVar[Mapping[str, str]] = {"assay_id": "assay_chembl_id"}
 
     def _prepare_record(
         self,
         record: BronzeRecord,
     ) -> BronzeRecord:
-        """Support both unified and legacy assay identifier field names."""
-        if "assay_id" not in record and record.get("assay_chembl_id") is not None:
-            record = dict(record)
-            record["assay_id"] = record.get("assay_chembl_id")
-        return record
+        """Normalize provider-native assay identifiers at the ingestion boundary."""
+        return normalize_provider_aliases(record, self._PROVIDER_ALIASES)
 
     def _extract_business_data(
         self,
@@ -202,7 +204,7 @@ class AssayTransformer(BaseChemblTransformer):
             ),
             "assay_parameters": self.serialize_json(record.get("assay_parameters")),
         }
-        # Support both unified and legacy FK source fields.
+        # Accept canonical FK fields when tests or staged fixtures already normalized them.
         business_data["target_id"] = business_data.get("target_id") or record.get(
             "target_id"
         )
@@ -221,7 +223,7 @@ class AssayTransformer(BaseChemblTransformer):
         *,
         business_data: JsonDict,
     ) -> JsonDict:
-        """Project legacy ChEMBL input aliases to the canonical Silver assay shape."""
+        """Ensure Silver assay records retain the canonical description field."""
         description = silver_record.get("assay_description")
         if description is None:
             description = silver_record.pop("description", None)
@@ -238,7 +240,7 @@ class AssayTransformer(BaseChemblTransformer):
         context: PipelineContext,
         silver_record: GoldRecord,
     ) -> GoldRecord:
-        """Re-project canonical Silver assay fields to the legacy Gold contract."""
+        """Project canonical Silver assay fields to the versioned Gold contract."""
         gold_record = super().transform_for_gold(context, silver_record)
         gold_record["description"] = gold_record.pop("assay_description", None)
         return gold_record

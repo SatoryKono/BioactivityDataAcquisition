@@ -9,7 +9,8 @@ from __future__ import annotations
 __all__ = ["ActivityTransformer"]
 
 
-from typing import TYPE_CHECKING, cast
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from bioetl.application.core.base_transformer import TransformationError
 from bioetl.application.core.dict_transformers import flatten_nested_dict
@@ -23,6 +24,9 @@ from bioetl.application.core.field_specs import (
 )
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
+)
+from bioetl.application.pipelines.chembl.provider_aliases import (
+    normalize_provider_aliases,
 )
 from bioetl.domain.entities import Bioactivity
 from bioetl.domain.transformations import safe_float
@@ -185,6 +189,16 @@ class ActivityTransformer(BaseChemblTransformer):
     entity_class = Bioactivity
     primary_id_field = "activity_id"
     default_entity_type = "activity"
+    _PROVIDER_ALIASES: ClassVar[Mapping[str, str]] = {
+        "molecule_id": "molecule_chembl_id"
+    }
+
+    def _prepare_record(
+        self,
+        record: BronzeRecord,
+    ) -> BronzeRecord:
+        """Normalize provider-native activity identifiers at the ingestion boundary."""
+        return normalize_provider_aliases(record, self._PROVIDER_ALIASES)
 
     @staticmethod
     def _extract_ligand_efficiency(
@@ -280,11 +294,10 @@ class ActivityTransformer(BaseChemblTransformer):
             Dictionary of Activity business fields.
 
         """
-        # Support both unified and legacy identifier names
-        molecule_id = record.get("molecule_chembl_id") or record.get("molecule_id")
+        molecule_id = record.get("molecule_id")
         if not molecule_id:
             raise TransformationError(
-                "Missing required field: molecule_chembl_id or molecule_id",
+                "Missing required field: molecule_id",
                 field="molecule_id",
             )
 
@@ -320,7 +333,7 @@ class ActivityTransformer(BaseChemblTransformer):
             business_data
         )
 
-        # Support both unified and legacy FK source fields from input record
+        # Accept canonical FK fields when tests or staged fixtures already normalized them.
         business_data["target_id"] = business_data.get("target_id") or record.get(
             "target_id"
         )

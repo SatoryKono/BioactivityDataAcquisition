@@ -31,6 +31,36 @@ pytest_plugins = ("tests.unit.application.core.transformer_test_support",)
 
 
 @pytest.fixture
+def mock_storage():
+    """Create mock medallion storage for RecordProcessor tests."""
+    storage = MagicMock()
+    storage.write_bronze = AsyncMock()
+    storage.write_silver = AsyncMock()
+    storage.write_gold = AsyncMock()
+    return storage
+
+
+@pytest.fixture
+def mock_services(mock_storage):
+    """Create mock pipeline services used by the record processor."""
+    services = MagicMock(spec=PipelineService)
+    services.storage = mock_storage
+    services.metrics = MagicMock(spec=MetricsPort)
+    services.quarantine = MagicMock()
+    services.quarantine.write = AsyncMock()
+    services.quarantine.write_many = AsyncMock()
+    return services
+
+
+@pytest.fixture
+def mock_gold_validator():
+    """Create mock gold validator that accepts records by default."""
+    validator = MagicMock()
+    validator.validate = MagicMock(return_value=ValidationResult(valid=True))
+    return validator
+
+
+@pytest.fixture
 def record_processor(
     mock_services,
     mock_error_classifier,

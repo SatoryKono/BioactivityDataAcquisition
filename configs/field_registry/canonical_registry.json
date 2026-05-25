@@ -28,8 +28,8 @@
         "configs/composites/assay.yaml",
         "configs/composites/activity.yaml"
       ],
-      "migration_status": "canonical_internal_with_legacy_input_filter",
-      "notes": "Internal config, DQ, join and contract surfaces use assay_id. Provider-native input filters retain assay_chembl_id as the external column name."
+      "migration_status": "canonical_internal_with_provider_native_ingestion_boundary",
+      "notes": "Internal config, DQ, join and contract surfaces use assay_id. Provider-native ChEMBL input filters retain assay_chembl_id as the external column name and normalize it at the transformer ingestion boundary."
     },
     {
       "cluster_id": "chembl_molecule_identifier",
@@ -54,8 +54,8 @@
         "configs/composites/molecule.yaml",
         "configs/composites/activity.yaml"
       ],
-      "migration_status": "canonical_internal_with_legacy_input_filter",
-      "notes": "Internal schema, merge and DQ surfaces use molecule_id for ChEMBL-seeded molecule identity. PubChem CID is a provider-local identifier family and must not be treated as the same business identifier. Provider-native ChEMBL filters still accept molecule_chembl_id at the ingestion boundary."
+      "migration_status": "canonical_internal_with_provider_native_ingestion_boundary",
+      "notes": "Internal schema, merge and DQ surfaces use molecule_id for ChEMBL-seeded molecule identity. PubChem CID is a provider-local identifier family and must not be treated as the same business identifier. Provider-native ChEMBL filters still accept molecule_chembl_id and normalize it at the transformer ingestion boundary."
     },
     {
       "cluster_id": "pubchem_cid_identifier",

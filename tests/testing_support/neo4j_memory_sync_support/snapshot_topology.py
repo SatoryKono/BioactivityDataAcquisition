@@ -1698,3 +1698,29 @@ def test_docs_drift_sources_skips_windows_style_excluded_report_paths(
     monkeypatch.setattr("scripts.memory.sync._read_text", _fail_if_read)
 
     assert list(_docs_drift_sources(snapshot, tmp_path, {})) == []
+
+
+def test_docs_drift_sources_skips_absolute_windows_excluded_report_paths(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    root = tmp_path / "BioactivityDataAcquisition2"
+    root.mkdir()
+    source_path = (
+        r"E:\g-drive\05_AI\github\BioactivityDataAcquisition2"
+        r"\docs\reports\evidence\project-legacy-compatibility-remediation"
+        r"\.quarantined-03-synthesis-corrupt-20260521"
+        r"\CROSS-SYNTHESIS-project-legacy-compatibility-remediation.md"
+    )
+    snapshot = GraphSnapshot()
+    snapshot.add_node(
+        "doc_artifact",
+        source_path,
+        source_path=source_path,
+    )
+
+    def _fail_if_read(_path: Path) -> str:
+        raise AssertionError("absolute excluded report paths must not be read")
+
+    monkeypatch.setattr("scripts.memory.sync._read_text", _fail_if_read)
+
+    assert list(_docs_drift_sources(snapshot, root, {})) == []

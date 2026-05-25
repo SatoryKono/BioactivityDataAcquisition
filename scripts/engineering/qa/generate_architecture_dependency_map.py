@@ -234,12 +234,15 @@ def _allowed_edge(source_layer: str, target_layer: str) -> bool:
     return target_layer in allowed_targets
 
 
-def _parsed_module_tree(source_file: Path) -> ast.AST | None:
+def _parsed_module_tree_from_source(source: str) -> ast.AST | None:
     try:
-        source = source_file.read_text(encoding="utf-8")
         return ast.parse(source)
     except SyntaxError:
         return None
+
+
+def _parsed_module_tree(source_file: Path) -> ast.AST | None:
+    return _parsed_module_tree_from_source(source_file.read_text(encoding="utf-8"))
 
 
 def _record_import_target(
@@ -269,19 +272,26 @@ def collect_dependency_snapshot(src_root: Path) -> DependencySnapshot:
     """Parse project imports and return aggregated dependency snapshot."""
     layer_counter: Counter[tuple[str, str]] = Counter()
     group_counter: Counter[tuple[str, str]] = Counter()
-    source_fingerprint = _source_fingerprint(src_root)
+    source_digest = hashlib.sha256()
 
     scanned_modules = 0
     total_internal_imports = 0
 
     for source_module, source_file in _iter_modules(src_root):
+        rel_path = source_file.relative_to(src_root).as_posix()
+        source_bytes = source_file.read_bytes()
+        source_digest.update(rel_path.encode("utf-8"))
+        source_digest.update(b"\0")
+        source_digest.update(hashlib.sha256(source_bytes).digest())
+        source_digest.update(b"\0")
+
         source_layer = _layer_of(source_module)
         source_group = _group_of(source_module)
         if source_layer is None or source_group is None:
             continue
 
         scanned_modules += 1
-        tree = _parsed_module_tree(source_file)
+        tree = _parsed_module_tree_from_source(source_bytes.decode("utf-8"))
         if tree is None:
             continue
 
@@ -324,7 +334,7 @@ def collect_dependency_snapshot(src_root: Path) -> DependencySnapshot:
         cross_layer_group_edges=group_edges,
         cross_layer_group_edges_total=group_edges_total,
         violations=violations,
-        source_fingerprint=source_fingerprint,
+        source_fingerprint=source_digest.hexdigest(),
     )
 
 
@@ -502,7 +512,9 @@ def _markdown_to_write(path: Path, markdown: str) -> str:
     return f"{frontmatter}{markdown}" if frontmatter else markdown
 
 
-def _snapshot_from_json_payload(payload: dict[str, object]) -> DependencySnapshot | None:
+def _snapshot_from_json_payload(
+    payload: dict[str, object],
+) -> DependencySnapshot | None:
     """Rehydrate one snapshot from the committed JSON artifact."""
     summary = payload.get("summary")
     layer_edges = payload.get("layer_edges")

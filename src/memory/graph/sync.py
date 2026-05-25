@@ -2617,6 +2617,29 @@ def _normalize_repo_relative_path(relative_path: str) -> str:
     return relative_path.replace("\\", "/").strip().strip("/")
 
 
+def _coerce_repo_relative_path(root: Path, raw_path: str) -> str:
+    normalized = _normalize_repo_relative_path(raw_path)
+    if not normalized:
+        return ""
+
+    root_normalized = _normalize_repo_relative_path(root.resolve().as_posix())
+    normalized_lower = normalized.casefold()
+    root_lower = root_normalized.casefold()
+    if normalized_lower == root_lower:
+        return ""
+    if normalized_lower.startswith(f"{root_lower}/"):
+        return normalized[len(root_normalized) + 1 :]
+
+    root_anchor = root.resolve().name.casefold()
+    parts = [part for part in normalized.split("/") if part]
+    parts_lower = [part.casefold() for part in parts]
+    if root_anchor in parts_lower:
+        anchor_index = parts_lower.index(root_anchor)
+        return "/".join(parts[anchor_index + 1 :])
+
+    return normalized
+
+
 def _is_excluded_file_structure_path(
     relative_path: str, config: dict[str, object]
 ) -> bool:
@@ -9875,7 +9898,7 @@ def _docs_drift_sources(
         source_path = node.properties.get("source_path")
         if not isinstance(source_path, str):
             continue
-        normalized_source_path = _normalize_repo_relative_path(source_path)
+        normalized_source_path = _coerce_repo_relative_path(root, source_path)
         if not normalized_source_path:
             continue
         if any(

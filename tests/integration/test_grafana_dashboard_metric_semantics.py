@@ -11,6 +11,9 @@ from tests.integration._grafana_test_support import (
     get_panel_expressions,
     load_dashboard,
 )
+from tests.integration.grafana_contract_specs import (
+    SUMMARY_ZERO_FALLBACK_EXPECTATIONS,
+)
 
 
 pytestmark = pytest.mark.integration
@@ -217,54 +220,7 @@ def test_design_system_documents_missing_data_panel_class_contract() -> None:
 
 def test_summary_queries_use_zero_fallbacks() -> None:
     """Count summaries may synthesize zero only where absence means no events."""
-    expected_panel_snippets = {
-        "bioetl-runtime.json": {
-            "Track Records by Stage / Interval": "or vector(0)",
-            "Monitor Pipeline Alert Conditions": "or vector(0)",
-            "Inspect DQ Alert Conditions": "or vector(0)",
-            "Inspect Control-plane Alert Conditions": "or vector(0)",
-            "Inspect GLOBAL Provider Alert Conditions": "or vector(0)",
-            "Track GLOBAL Shutdown Initiated by Reason / Interval": "or vector(0)",
-            "Track GLOBAL Shutdown Completed by Reason / Interval": "or vector(0)",
-        },
-        "bioetl-provider-health-v2.json": {
-            "Monitor Healthy Checks (Selected Range)": "or vector(0)",
-            "Monitor Degraded Checks (Selected Range)": "or vector(0)",
-            "Track Provider Failure Rate (Selected Range)": "or vector(0)",
-            "Track Health Checks Total (Selected Range)": "or vector(0)",
-            "Inspect HTTP Errors by Method/Error Type": "or vector(0)",
-        },
-        "bioetl-dq-v2.json": {
-            "Track: Records Quarantined in Range": "or vector(0)",
-            "Track: Silver Filter Rejects in Range": "or vector(0)",
-            "Track: Silver Validation Failures in Range": "or vector(0)",
-            "Monitor: Silver Validation Failures": "or vector(0)",
-            "Monitor: Gold Strict Validation Failures": "or vector(0)",
-        },
-        "bioetl-control-plane-v1.json": {
-            "Monitor: Manifest Write Failures": "or vector(0)",
-            "Monitor: Ledger Append Failures": "or vector(0)",
-            "Monitor: Checkpoint Incompatibilities": "or vector(0)",
-            "Monitor: GLOBAL Control-Plane Read Failures": "or vector(0)",
-            "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity": "or vector(0)",
-            "Monitor: Checkpoint Load Failures": "or vector(0)",
-            "Monitor: Checkpoint Save Failures": "or vector(0)",
-            "Monitor: GLOBAL Checkpoint Operator Failures": "or vector(0)",
-            "Monitor: Replay Not Reconstructable": "or vector(0)",
-            "Monitor: Replay Drift": "or vector(0)",
-            "Track: Replay / Resume Blockers in Range": "or vector(0)",
-            "Track: GLOBAL Audit Write Outcomes": "or vector(0)",
-            "Track: GLOBAL Audit Query Outcomes": "or vector(0)",
-            "Monitor: Lineage Fragment Persistence Failures": "or vector(0)",
-            "Monitor: Lineage Refs Missing": "or vector(0)",
-        },
-        "bioetl-workflow-overview.json": {
-            "Failed Workflow Runs / Range": "or vector(0)",
-            "Failed Pipeline Steps / Range": "or vector(0)",
-            "Failed Transform Steps / Range": "or vector(0)",
-            "Skipped Step Events / Range": "or vector(0)",
-        },
-    }
+    expected_panel_snippets = SUMMARY_ZERO_FALLBACK_EXPECTATIONS
 
     for dashboard_name, panel_expectations in expected_panel_snippets.items():
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)

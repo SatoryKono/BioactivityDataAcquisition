@@ -17,15 +17,6 @@ from bioetl.composition._pipeline_execution import (
     VacuumOptions,
     _ensure_registrations,
 )
-from bioetl.composition.bootstrap.cli.checkpoint import (
-    bootstrap_checkpoint_runtime_service,
-    bootstrap_quarantine_runtime_service,
-)
-from bioetl.composition.bootstrap.cli.storage import (
-    bootstrap_cleanup_service,
-    bootstrap_lifecycle_service,
-)
-from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable
@@ -100,6 +91,51 @@ class CleanupPreviewProtocol(Protocol):
     """Minimal preview payload contract for cleanup dry-run operations."""
 
     total_files: int
+
+
+def bootstrap_quarantine_runtime_service(pipeline: str) -> object:
+    """Resolve the quarantine runtime bootstrap lazily for patch-friendly tests."""
+    from bioetl.composition.bootstrap.cli.checkpoint import (
+        bootstrap_quarantine_runtime_service as impl,
+    )
+
+    return impl(pipeline)
+
+
+def bootstrap_checkpoint_runtime_service(pipeline: str) -> object:
+    """Resolve the checkpoint runtime bootstrap lazily for patch-friendly tests."""
+    from bioetl.composition.bootstrap.cli.checkpoint import (
+        bootstrap_checkpoint_runtime_service as impl,
+    )
+
+    return impl(pipeline)
+
+
+def bootstrap_lifecycle_service() -> object:
+    """Resolve the lifecycle bootstrap lazily for patch-friendly tests."""
+    from bioetl.composition.bootstrap.cli.storage import (
+        bootstrap_lifecycle_service as impl,
+    )
+
+    return impl()
+
+
+def bootstrap_cleanup_service() -> object:
+    """Resolve the cleanup bootstrap lazily for patch-friendly tests."""
+    from bioetl.composition.bootstrap.cli.storage import (
+        bootstrap_cleanup_service as impl,
+    )
+
+    return impl()
+
+
+def load_pipeline_config(pipeline: str) -> object:
+    """Resolve pipeline config loading lazily for patch-friendly tests."""
+    from bioetl.infrastructure.config.pipeline_config_api import (
+        load_pipeline_config as impl,
+    )
+
+    return impl(pipeline)
 
 
 def _bootstrap_registered_resource[**_P, _T](

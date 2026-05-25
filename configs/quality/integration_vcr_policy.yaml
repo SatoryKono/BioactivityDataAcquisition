@@ -276,6 +276,7 @@ tracked_suite_inventory:
       full_pipeline: tests/e2e/test_full_pipeline.py
       full_pipeline_chain: tests/e2e/test_full_pipeline_chain_e2e.py
     operational_and_governance_surfaces:
+    - tests/e2e/test_advanced_scenarios_harness_contracts.py
     - tests/e2e/test_cli_safety.py
     - tests/e2e/test_contract_rollout_e2e.py
     - tests/e2e/test_contract_rollout_runtime_e2e.py

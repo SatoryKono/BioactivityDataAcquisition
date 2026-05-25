@@ -8,7 +8,8 @@ from __future__ import annotations
 __all__ = ["TargetTransformer"]
 
 
-from typing import TYPE_CHECKING, Any, cast
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from bioetl.application.core.dict_transformers import (
     aggregate_nested_lists,
@@ -16,6 +17,9 @@ from bioetl.application.core.dict_transformers import (
 )
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
+)
+from bioetl.application.pipelines.chembl.provider_aliases import (
+    normalize_provider_aliases,
 )
 from bioetl.domain.entities import Target
 from bioetl.domain.transformations import safe_int
@@ -32,16 +36,14 @@ class TargetTransformer(BaseChemblTransformer):
 
     entity_class = Target
     primary_id_field = "target_id"
+    _PROVIDER_ALIASES: ClassVar[Mapping[str, str]] = {"target_id": "target_chembl_id"}
 
     def _prepare_record(
         self,
         record: BronzeRecord,
     ) -> BronzeRecord:
-        """Support both unified and legacy target identifier field names."""
-        if "target_id" not in record and record.get("target_chembl_id") is not None:
-            record = dict(record)
-            record["target_id"] = record.get("target_chembl_id")
-        return record
+        """Normalize provider-native target identifiers at the ingestion boundary."""
+        return normalize_provider_aliases(record, self._PROVIDER_ALIASES)
 
     def _flatten_target_components(
         self,
