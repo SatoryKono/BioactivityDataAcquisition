@@ -10,6 +10,15 @@ from collections import Counter
 from pathlib import Path
 from typing import Any, cast
 
+# Keep these import-light so router-level ``--help`` does not load the matrix
+# generator and its runtime dependencies before argparse can exit.
+FALLBACK_BUSINESS = "fallback_business"
+FALLBACK_TECHNICAL_PASSTHROUGH = "fallback_technical_passthrough"
+FALLBACK_SOURCES = {
+    FALLBACK_BUSINESS,
+    FALLBACK_TECHNICAL_PASSTHROUGH,
+}
+
 
 def _build_help_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -59,23 +68,11 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(repo_root))
     sys.path.insert(0, str(repo_root / "src"))
 
-from scripts.docs.matrix.generate_pipeline_normalization_matrix import (
-    FALLBACK_BUSINESS,
-    FALLBACK_TECHNICAL_PASSTHROUGH,
-    build_entity_profile_coverage_kpi,
-    build_field_matrix_rows,
-    build_profile_semantic_invariants,
-    build_surface_coverage_kpis,
-)
-
-FALLBACK_SOURCES = {
-    FALLBACK_BUSINESS,
-    FALLBACK_TECHNICAL_PASSTHROUGH,
-}
-
 
 def _fallback_rows() -> list[dict[str, str]]:
-    rows = build_field_matrix_rows()
+    from scripts.docs.matrix import generate_pipeline_normalization_matrix as matrix
+
+    rows = matrix.build_field_matrix_rows()
     return sorted(
         (row for row in rows if row["normalization_source"] in FALLBACK_SOURCES),
         key=lambda row: (
@@ -148,15 +145,17 @@ def _build_payload(
 
 def build_fallback_inventory_payload() -> dict[str, object]:
     """Return the current fallback normalization inventory payload."""
-    all_rows = build_field_matrix_rows()
+    from scripts.docs.matrix import generate_pipeline_normalization_matrix as matrix
+
+    all_rows = matrix.build_field_matrix_rows()
     fallback_rows = [
         row for row in all_rows if row["normalization_source"] in FALLBACK_SOURCES
     ]
     return _build_payload(
         fallback_rows,
-        coverage_kpi=build_entity_profile_coverage_kpi(all_rows),
-        surface_kpis=build_surface_coverage_kpis(all_rows),
-        semantic_invariants=build_profile_semantic_invariants(),
+        coverage_kpi=matrix.build_entity_profile_coverage_kpi(all_rows),
+        surface_kpis=matrix.build_surface_coverage_kpis(all_rows),
+        semantic_invariants=matrix.build_profile_semantic_invariants(),
     )
 
 

@@ -67,6 +67,9 @@ _RUNTIME_EXCLUDE_PARTS = (
     "src/bioetl/domain",
 )
 _TEXT_SUFFIXES = {".py", ".md", ".json", ".yml", ".yaml"}
+_TEXT_DISCOVERY_TIMEOUT_SECONDS: Final[float] = 20.0
+_METRIC_MENTION_GREP_TIMEOUT_SECONDS: Final[float] = 20.0
+_METRIC_MENTION_GREP_CHUNK_SIZE: Final[int] = 128
 _RUNTIME_METRIC_METHODS = frozenset(
     {"increment_counter", "observe_histogram", "set_gauge"}
 )
@@ -222,9 +225,12 @@ def _iter_text_files_with_rg(root: Path) -> list[Path]:
             ["rg", "--files", root.as_posix(), *globs],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             check=False,
+            timeout=_TEXT_DISCOVERY_TIMEOUT_SECONDS,
         )
-    except OSError:
+    except (OSError, subprocess.TimeoutExpired):
         return []
     if result.returncode not in {0, 1}:
         return []
@@ -246,14 +252,85 @@ def _scan_canonical_metric_mentions(
     paths: list[Path],
     repo_root: Path,
 ) -> dict[str, list[str]]:
+    grep_mentions = _scan_canonical_metric_mentions_with_git_grep(paths, repo_root)
+    if grep_mentions is not None:
+        return grep_mentions
+
     mentions: dict[str, list[str]] = defaultdict(list)
     for path in paths:
         try:
             text = path.read_text(encoding="utf-8")
-        except UnicodeDecodeError:
+        except (OSError, UnicodeDecodeError):
             continue
         for metric_name in sorted(set(_CANONICAL_METRIC_RE.findall(text))):
             mentions[metric_name].append(_as_repo_relative(path, repo_root))
+    return _normalize_mapping_lists(mentions)
+
+
+def _scan_canonical_metric_mentions_with_git_grep(
+    paths: list[Path],
+    repo_root: Path,
+) -> dict[str, list[str]] | None:
+    """Scan tracked text files without blocking Python on file reads.
+
+    Windows/GDrive checkouts can stall indefinitely on ``Path.read_text`` for
+    hydrated or locked documentation files. In real checkouts prefer bounded
+    ``git grep`` and keep direct reads only for temporary unit-test trees.
+    """
+    if not (repo_root / ".git").exists():
+        return None
+
+    relative_paths: list[str] = []
+    for path in paths:
+        try:
+            relative_paths.append(path.relative_to(repo_root).as_posix())
+        except ValueError:
+            return None
+    if not relative_paths:
+        return {}
+
+    mentions: dict[str, list[str]] = defaultdict(list)
+    for index in range(0, len(relative_paths), _METRIC_MENTION_GREP_CHUNK_SIZE):
+        chunk = relative_paths[index : index + _METRIC_MENTION_GREP_CHUNK_SIZE]
+        try:
+            result = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    repo_root.as_posix(),
+                    "grep",
+                    "-I",
+                    "-n",
+                    "--no-color",
+                    "bioetl_",
+                    "--",
+                    *chunk,
+                ],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                check=False,
+                timeout=_METRIC_MENTION_GREP_TIMEOUT_SECONDS,
+            )
+        except OSError:
+            return None
+        except subprocess.TimeoutExpired:
+            return _normalize_mapping_lists(mentions)
+        if result.returncode == 1:
+            continue
+        if result.returncode != 0:
+            return None
+
+        for line in (result.stdout or "").splitlines():
+            path_text, separator, remainder = line.partition(":")
+            if not separator:
+                continue
+            _line_number, separator, text = remainder.partition(":")
+            if not separator:
+                continue
+            for metric_name in sorted(set(_CANONICAL_METRIC_RE.findall(text))):
+                mentions[metric_name].append(path_text)
     return _normalize_mapping_lists(mentions)
 
 

@@ -22,6 +22,8 @@ TARGETS = (
     "tests/integration/test_pubchem_pipeline.py",
     "tests/integration/test_uniprot_pipeline.py",
     "tests/integration/workflow/test_workflow_runner_service.py",
+    "tests/e2e/test_advanced_scenarios_e2e.py",
+    "tests/e2e/test_advanced_scenarios_harness_contracts.py",
     "tests/e2e/test_pipeline_with_schema_drift_e2e.py",
 )
 

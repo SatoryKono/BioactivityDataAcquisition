@@ -5,6 +5,8 @@ from __future__ import annotations
 from datetime import date
 import json
 from pathlib import Path
+import subprocess
+import sys
 
 import pytest
 from scripts.engineering.qa import report_observability_metric_inventory as inventory
@@ -25,6 +27,27 @@ REGENERATION_COMMAND = (
     "--repo-root . "
     "--write-evidence reports/observability/runtime_cardinality_inventory.json"
 )
+
+
+def _collect_fresh_metric_inventory() -> dict[str, object]:
+    """Collect inventory in a fresh process to avoid test-order metric pollution."""
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_observability_metric_inventory",
+            "--repo-root",
+            str(ROOT),
+            "--json",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    loaded = json.loads(result.stdout)
+    assert isinstance(loaded, dict)
+    return loaded
 
 
 @pytest.mark.architecture
@@ -201,7 +224,7 @@ def test_runtime_cardinality_evidence_artifact_is_committed_and_governed() -> No
         f"{REGENERATION_COMMAND}"
     )
 
-    expected = inventory.collect_metric_inventory(ROOT)
+    expected = _collect_fresh_metric_inventory()
     mismatched_keys = sorted(
         key
         for key in sorted(set(actual) | set(expected))

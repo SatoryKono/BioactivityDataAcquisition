@@ -318,13 +318,6 @@ compatibility_test_inventory:
       policy_ref: "#4209"
       review_date: "2026-09-30"
       rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_compat_sunset.py
-      decision: sunset_review
-      owner: architecture-governance
-      protected_surface: "architecture/compat sunset"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
     - path: tests/architecture/test_compatibility_facade_inventory.py
       decision: retained_public_facade_contract
       owner: architecture-governance
@@ -423,6 +416,13 @@ compatibility_test_inventory:
       policy_ref: "#4209"
       review_date: "2026-09-30"
       rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
+    - path: tests/architecture/test_lazy_export_facade_inventory.py
+      decision: retained_public_facade_contract
+      owner: architecture-governance
+      protected_surface: "architecture/lazy export facade inventory"
+      policy_ref: "#4209"
+      review_date: "2026-09-30"
+      rationale: "Tracked compatibility-sensitive lazy export facade inventory; retained while public and compatibility facade surfaces remain supported."
     - path: tests/architecture/test_domain_service_normalization_compat_usage.py
       decision: retained_compatibility_contract
       owner: architecture-governance

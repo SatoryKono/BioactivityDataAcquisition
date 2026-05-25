@@ -109,13 +109,6 @@ repo_wide_zero_import_classification:
       review_by: "2026-08-20"
       linked_issue: "#4541"
       rationale: Manifest diagnostics identity helpers remain the canonical owner module behind control-plane diagnostics assembly.
-    - module_path: src/bioetl/application/services/lineage/metadata_lineage_bundle.py
-      module_name: bioetl.application.services.lineage.metadata_lineage_bundle
-      disposition: retain_public_facade
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Metadata lineage bundle stays as a sanctioned public re-export over the canonical lineage bundle implementation.
     - module_path: src/bioetl/composition/bootstrap/cli/adr.py
       module_name: bioetl.composition.bootstrap.cli.adr
       disposition: retain_dynamic_entrypoint

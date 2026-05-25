@@ -297,7 +297,6 @@ def test_compatibility_inventory_covers_every_detected_compatibility_test_file()
             "retained_compatibility_contract",
             "retained_governance_guard",
             "retained_public_facade_contract",
-            "sunset_review",
         }
         assert cast(str, entry["owner"])
         assert cast(str, entry["protected_surface"])
@@ -388,6 +387,10 @@ def test_repo_backed_unit_test_exceptions_are_explicitly_classified() -> None:
         assert entry["target_lane"] == "repo-backed-unit"
         text = (ROOT / cast(str, entry["path"])).read_text(encoding="utf-8")
         assert "pytest.mark.repo_backed" in text
+        assert "pytest.mark.memory" not in text, (
+            f"{entry['path']} is classified for repo-backed-unit but is marked "
+            "memory; memory tests are excluded from the repo-backed-unit lane"
+        )
         assert cast(str, entry["protected_surface"]).strip()
 
 

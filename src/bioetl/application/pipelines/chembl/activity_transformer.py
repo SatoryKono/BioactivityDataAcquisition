@@ -22,12 +22,12 @@ from bioetl.application.core.field_specs import (
     map_field_groups,
     simple_fields,
 )
-from bioetl.application.pipelines.chembl.base_chembl_transformer import (
-    BaseChemblTransformer,
-)
 from bioetl.application.pipelines.chembl.alias_policy import (
     CHEMBL_GOLD_PUBLICATION_IDENTIFIER_PROJECTIONS,
     get_bronze_provider_aliases,
+)
+from bioetl.application.pipelines.chembl.base_chembl_transformer import (
+    BaseChemblTransformer,
 )
 from bioetl.application.pipelines.chembl.provider_aliases import (
     normalize_provider_aliases,

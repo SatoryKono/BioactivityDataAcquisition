@@ -3,11 +3,17 @@
 from __future__ import annotations
 
 import ast
+from datetime import date
+from importlib import import_module
 from pathlib import Path
 
 import pytest
 
+from scripts.engineering.qa.file_discovery import discover_files
+
 ROOT = Path(__file__).resolve().parents[2]
+SUNSET_DATE = date(2026, 6, 30)
+POLICY_REVIEW_DATE = date(2026, 5, 15)
 LEGACY_DATASOURCE_FACTORY_MODULE = "bioetl.composition.factories.datasource.factory"
 INTERNAL_COMPOSITION_ENTRYPOINT_MODULES = (
     "bioetl.composition._pipeline_execution",
@@ -37,6 +43,18 @@ CONFIG_LOAD_API_MODULE = "bioetl.infrastructure.config_load_api"
 CONFIG_LOAD_API_MODULE_PATH = (
     ROOT / "src" / "bioetl" / "infrastructure" / "config_load_api.py"
 )
+REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE = (
+    "bioetl.application.services.checkpoint_compatibility_service_v2"
+)
+REMOVED_CHECKPOINT_COMPATIBILITY_V2_PATH = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "services"
+    / "checkpoint_compatibility_service_v2.py"
+)
+BASE_PIPELINE_CONFIG = ROOT / "configs" / "base" / "pipeline.yaml"
 INFRASTRUCTURE_CONFIG_PUBLIC_MODULE = "bioetl.infrastructure.config"
 SERVICES_CREATION_API_COMPAT_MODULE = (
     "bioetl.composition.factories.services.creation_api"
@@ -208,6 +226,126 @@ CANONICAL_PROVIDER_SURFACE_DOC_FILES = frozenset(
         ROOT / "docs" / "04-reference" / "api" / "composition.md",
     }
 )
+REMOVED_COMPAT_MODULES: dict[str, Path] = {
+    "application services cli_run_orchestration_service facade": Path(
+        "src/bioetl/application/services/cli_run_orchestration_service.py"
+    ),
+    "application services cli_run_orchestration_contracts facade": Path(
+        "src/bioetl/application/services/cli_run_orchestration_contracts.py"
+    ),
+    "application services cli_run_orchestration_models facade": Path(
+        "src/bioetl/application/services/cli_run_orchestration_models.py"
+    ),
+    "application services lineage_inspection_service facade": Path(
+        "src/bioetl/application/services/lineage_inspection_service.py"
+    ),
+    "application services metadata_coordinator facade": Path(
+        "src/bioetl/application/services/metadata_coordinator.py"
+    ),
+    "application services run_ledger_service facade": Path(
+        "src/bioetl/application/services/run_ledger_service.py"
+    ),
+    "application services run_manifest_inspection_service facade": Path(
+        "src/bioetl/application/services/run_manifest_inspection_service.py"
+    ),
+    "application services pipeline_run_context_service facade": Path(
+        "src/bioetl/application/services/pipeline_run_context_service.py"
+    ),
+    "application services pipeline_run_execution_service facade": Path(
+        "src/bioetl/application/services/pipeline_run_execution_service.py"
+    ),
+    "application services pipeline_run_lifecycle_service facade": Path(
+        "src/bioetl/application/services/pipeline_run_lifecycle_service.py"
+    ),
+    "application services pipeline_runner_models facade": Path(
+        "src/bioetl/application/services/pipeline_runner_models.py"
+    ),
+    "application services pipeline_runner_service facade": Path(
+        "src/bioetl/application/services/pipeline_runner_service.py"
+    ),
+    "application services checkpoint_compatibility_runtime facade": Path(
+        "src/bioetl/application/services/checkpoint_compatibility_runtime.py"
+    ),
+    "application services run_manifest_diagnostics facade": Path(
+        "src/bioetl/application/services/run_manifest_diagnostics.py"
+    ),
+    "application services effective_config_service facade": Path(
+        "src/bioetl/application/services/effective_config_service.py"
+    ),
+    "application services run_manifest_service facade": Path(
+        "src/bioetl/application/services/run_manifest_service.py"
+    ),
+    "cli inspection_output compat wrapper": Path(
+        "src/bioetl/interfaces/cli/commands/inspection_output.py"
+    ),
+    "cli run_manifest_output compat wrapper": Path(
+        "src/bioetl/interfaces/cli/commands/run_manifest_output.py"
+    ),
+    "cli maintenance plan facade": Path("src/bioetl/interfaces/cli/commands/plan.py"),
+    "aggregate_port.py (StoragePort)": Path(
+        "src/bioetl/domain/ports/storage/aggregate_port.py"
+    ),
+    "domain normalization_authors compat wrapper": Path(
+        "src/bioetl/domain/normalization_authors.py"
+    ),
+    "domain normalization_pages compat wrapper": Path(
+        "src/bioetl/domain/normalization_pages.py"
+    ),
+    "domain normalization_dates compat wrapper": Path(
+        "src/bioetl/domain/normalization_dates.py"
+    ),
+    "domain normalization_chembl compat wrapper": Path(
+        "src/bioetl/domain/normalization_chembl.py"
+    ),
+    "domain publication_field_groups facade": Path(
+        "src/bioetl/domain/value_objects/publication_field_groups.py"
+    ),
+    "domain services doi_normalization compat wrapper": Path(
+        "src/bioetl/domain/services/doi_normalization.py"
+    ),
+    "domain services pmid_normalization compat wrapper": Path(
+        "src/bioetl/domain/services/pmid_normalization.py"
+    ),
+    "domain services date_normalization compat wrapper": Path(
+        "src/bioetl/domain/services/date_normalization.py"
+    ),
+    "domain services text_normalization compat wrapper": Path(
+        "src/bioetl/domain/services/text_normalization.py"
+    ),
+    "domain services _date_helpers compat wrapper": Path(
+        "src/bioetl/domain/services/_date_helpers.py"
+    ),
+    "application checkpoint legacy wrapper": Path(
+        "src/bioetl/application/core/lifecycle/_checkpoint_legacy.py"
+    ),
+}
+
+
+def _find_importers(root: Path, module_name: str) -> list[str]:
+    violations: list[str] = []
+    parent_module, _, leaf_name = module_name.rpartition(".")
+    for relative_path in discover_files(str(root.resolve()), ".py"):
+        path = root / relative_path
+        text = path.read_text(encoding="utf-8")
+        if module_name not in text and leaf_name not in text:
+            continue
+        tree = ast.parse(text)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                names = {alias.name for alias in node.names}
+                if module_name in names:
+                    violations.append(path.relative_to(ROOT).as_posix())
+                    break
+            if isinstance(node, ast.ImportFrom):
+                imported_names = {alias.name for alias in node.names}
+                if node.module == module_name or (
+                    node.module == parent_module and leaf_name in imported_names
+                ):
+                    violations.append(path.relative_to(ROOT).as_posix())
+                    break
+    return violations
+
+
 CANONICAL_DATASOURCE_DOC_FILES = frozenset(
     {
         ROOT / "docs" / "02-architecture" / "03-infrastructure-layer.md",
@@ -1428,3 +1566,35 @@ def test_selected_public_runtime_facades_do_not_mutate_module_globals() -> None:
         "Mutable compatibility export caching must stay retired from public runtime "
         "facades:\n" + "\n".join(offenders)
     )
+
+
+@pytest.mark.parametrize(
+    "name,path",
+    REMOVED_COMPAT_MODULES.items(),
+    ids=REMOVED_COMPAT_MODULES.keys(),
+)
+def test_removed_compatibility_modules_stay_removed(name: str, path: Path) -> None:
+    """Removed compatibility modules must not silently return."""
+    assert not (ROOT / path).exists(), (
+        f"Removed compatibility module {name} exists again at {path}. "
+        "Use the canonical narrow-port or normalization surface instead."
+    )
+
+
+@pytest.mark.architecture
+def test_checkpoint_compatibility_v2_surface_stays_removed_and_unimportable() -> None:
+    """Removed checkpoint compatibility V2 surface must stay absent everywhere."""
+    assert not REMOVED_CHECKPOINT_COMPATIBILITY_V2_PATH.exists()
+    with pytest.raises(ModuleNotFoundError):
+        import_module(REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE)
+    assert not _find_importers(ROOT / "src", REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE)
+    assert not _find_importers(ROOT / "tests", REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE)
+
+
+@pytest.mark.architecture
+def test_removed_pipeline_base_yaml_fallback_surface_stays_absent() -> None:
+    """Historical pipeline base fallback path must not silently return."""
+    assert POLICY_REVIEW_DATE <= SUNSET_DATE
+    text = BASE_PIPELINE_CONFIG.read_text(encoding="utf-8")
+    assert "configs/pipelines/_base.yaml" not in text
+    assert not (ROOT / "configs" / "pipelines").exists()

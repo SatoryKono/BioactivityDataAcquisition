@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 
 from scripts.engineering.qa import report_observability_metric_inventory as inventory
 
@@ -127,6 +128,39 @@ def test_filter_documented_metric_mentions_ignores_generated_series_and_group_na
 
     assert filtered == {
         "bioetl_dq_check_duration_ms": ["docs/03-guides/metrics-monitoring.md"]
+    }
+
+
+def test_scan_canonical_metric_mentions_prefers_bounded_git_grep(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    (tmp_path / ".git").mkdir()
+    docs_dir = tmp_path / "docs" / "03-guides"
+    docs_dir.mkdir(parents=True)
+    metric_doc = docs_dir / "metrics.md"
+    metric_doc.write_text("unused", encoding="utf-8")
+
+    def fail_read_text(self: Path, *args: object, **kwargs: object) -> str:
+        raise AssertionError(f"unexpected direct read: {self}")
+
+    def fake_run(*args: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
+        assert kwargs["timeout"] == inventory._METRIC_MENTION_GREP_TIMEOUT_SECONDS
+        return subprocess.CompletedProcess(
+            args=args,
+            returncode=0,
+            stdout=(
+                "docs/03-guides/metrics.md:7:"
+                "bioetl_git_grep_total bioetl_git_grep_total\n"
+            ),
+            stderr="",
+        )
+
+    monkeypatch.setattr(Path, "read_text", fail_read_text)
+    monkeypatch.setattr(inventory.subprocess, "run", fake_run)
+
+    assert inventory._scan_canonical_metric_mentions([metric_doc], tmp_path) == {
+        "bioetl_git_grep_total": ["docs/03-guides/metrics.md"]
     }
 
 

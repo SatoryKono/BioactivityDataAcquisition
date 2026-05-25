@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-25T15:03:12.103456+00:00",
+  "generated_at": "2026-05-25T18:04:39.175675+00:00",
   "summary": {
     "total_scripts": 396,
     "status_counts": {
@@ -8744,7 +8744,7 @@
         },
         {
           "path": "tests/architecture/test_observability_metric_governance.py",
-          "line": 40,
+          "line": 63,
           "source_group": "tests",
           "text": "== \"scripts/engineering/qa/report_observability_metric_inventory.py\""
         }
@@ -9771,19 +9771,19 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 146,
+          "line": 145,
           "source_group": "docs",
           "text": "| `src/bioetl/interfaces/cli/commands/run.py` | Permanent public run command seam over the retained domain helper modules under `bioetl.interfaces.cli.commands.domains.run`. | `bioetl.interfaces.cli.c"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 48,
+          "line": 47,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 55,
+          "line": 53,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`"
         },
