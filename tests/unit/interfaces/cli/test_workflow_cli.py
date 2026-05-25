@@ -578,6 +578,39 @@ def test_workflow_run_rejects_strict_profile_without_cached_bronze(
     assert "degraded_observable" not in result.output
 
 
+def test_workflow_run_accepts_explicit_degraded_diagnostic_without_cached_bronze(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    import bioetl.interfaces.cli.commands.workflow as workflow_cmd
+
+    fake_service = _FakeWorkflowRunnerService()
+    monkeypatch.setattr(
+        workflow_cmd,
+        "get_workflow_execution_service",
+        lambda registry=None: fake_service,
+        raising=True,
+    )
+
+    result = cli_runner.invoke(
+        cli,
+        [
+            "workflow",
+            "run",
+            "chembl_publication",
+            "--limit",
+            "5",
+            "--required-persistence-profile",
+            "degraded_observable",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert fake_service.received_config is not None
+    step = fake_service.received_config.steps[0]
+    assert step.run_options.required_persistence_profile == "degraded_observable"
+
+
 def test_workflow_status_json_payload_includes_explicit_limits(
     cli_runner: CliRunner,
     monkeypatch: Any,

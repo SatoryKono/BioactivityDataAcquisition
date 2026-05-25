@@ -309,6 +309,38 @@ def test_create_manifest_rejects_degraded_profile_for_replay_capable_family() ->
     assert store.get("manifest-degraded-replay-capable-family") is None
 
 
+def test_create_manifest_allows_explicit_degraded_opt_down_for_replay_capable_family() -> (
+    None
+):
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-degraded-opt-down",
+    )
+
+    manifest = service.create_manifest(
+        replace(
+            _make_request(),
+            source_revision_state="dirty",
+            replay_capability=ReplayCapability.REBUILD_ONLY,
+            launch_context={
+                "limit": 100,
+                "resume": False,
+                "configured_required_persistence_profile": "degraded_observable",
+                "required_persistence_profile": "degraded_observable",
+                "required_persistence_profile_opt_down": True,
+            },
+        )
+    )
+
+    assert manifest.code_provenance.source_revision_state == "dirty"
+    assert manifest.launch_context["required_persistence_profile"] == (
+        "degraded_observable"
+    )
+    assert manifest.launch_context["required_persistence_profile_opt_down"] is True
+    assert store.get("manifest-degraded-opt-down") == manifest
+
+
 def test_create_manifest_rejects_exact_capability_claim_without_snapshot_envelope() -> (
     None
 ):

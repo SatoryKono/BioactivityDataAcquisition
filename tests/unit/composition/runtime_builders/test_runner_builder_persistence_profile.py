@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -123,6 +124,59 @@ def test_build_pipeline_runner_rejects_missing_provenance_even_with_degraded_ove
             ),
         )
     assert fake_factory.kwargs is None
+
+
+@pytest.mark.unit
+def test_build_pipeline_runner_preserves_explicit_degraded_opt_down_with_dirty_source(
+    tmp_path: Path,
+) -> None:
+    """Local diagnostic opt-downs must not claim replay-ready on dirty source."""
+    fake_factory, fake_registry = _build_factory_registry()
+
+    with patch(
+        "bioetl.composition.runtime_builders._run_manifest_builder_policy.get_code_revision_provenance",
+        return_value=SimpleNamespace(
+            git_commit="deadbeef" * 5,
+            source_revision_state="dirty",
+            dependency_lock_hash="sha256:test-lock",
+        ),
+    ):
+        result = _call_build_pipeline_runner(
+            _build_context(
+                limit=25,
+                exact_replay=False,
+                required_persistence_profile="degraded_observable",
+            ),
+            registry=fake_registry,
+            settings=_build_settings(
+                data_dir=str(tmp_path),
+                control_plane=SimpleNamespace(
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=True,
+                    required_persistence_profile="replay_ready",
+                ),
+            ),
+            pipeline_config=_build_pipeline_config(),
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental"
+            ),
+        )
+
+    assert result == "runner-instance"
+    assert isinstance(fake_factory.kwargs, dict)
+    manifest_id = fake_factory.kwargs["manifest_id"]
+    manifest_path = (
+        tmp_path / "output" / "control" / "run_manifest" / f"{manifest_id}.json"
+    )
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert payload["code_provenance"]["source_revision_state"] == "dirty"
+    assert payload["launch_context"]["configured_required_persistence_profile"] == (
+        "degraded_observable"
+    )
+    assert payload["launch_context"]["required_persistence_profile"] == (
+        "degraded_observable"
+    )
+    assert payload["launch_context"]["required_persistence_profile_opt_down"] is True
 
 
 @pytest.mark.unit

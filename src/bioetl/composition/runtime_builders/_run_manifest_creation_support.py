@@ -103,6 +103,13 @@ def _build_manifest_launch_context(
         required_persistence_profile=_read_attr(
             reproducibility_context, "required_persistence_profile"
         ),
+        required_persistence_profile_opt_down=bool(
+            _read_attr(
+                reproducibility_context,
+                "required_persistence_profile_opt_down",
+                False,
+            )
+        ),
         strict_exact_replay_supported=_read_attr(
             reproducibility_context, "strict_exact_replay_supported"
         ),

@@ -316,6 +316,7 @@ def _resolve_workflow_step_required_profile(
         configured_required_profile=configured_profile,
         family_default_profile=profile.default_required_persistence_profile,
         exact_replay_requested=exact_replay,
+        allow_degraded_opt_down=configured_profile == "degraded_observable",
     )
 
 

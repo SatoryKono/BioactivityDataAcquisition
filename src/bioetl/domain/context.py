@@ -231,6 +231,7 @@ class PipelineRunContext:
     )
     exact_replay: bool = False
     required_persistence_profile: str | None = None
+    required_persistence_profile_opt_down: bool = False
 
     limit: int | None = None
     query: str | None = None

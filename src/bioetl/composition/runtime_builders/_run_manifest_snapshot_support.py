@@ -58,6 +58,7 @@ def build_launch_context_snapshot(
     execution_context_value: str,
     configured_required_persistence_profile: str | None = None,
     required_persistence_profile: str,
+    required_persistence_profile_opt_down: bool = False,
     strict_exact_replay_supported: bool | None = None,
     reproducibility_family: str | None = None,
     replay_family_contract: str | None = None,
@@ -79,6 +80,8 @@ def build_launch_context_snapshot(
             "exact_replay_support_boundary": exact_replay_support_boundary,
         }
     )
+    if required_persistence_profile_opt_down:
+        snapshot["required_persistence_profile_opt_down"] = True
     _add_reproducibility_profile_fields(
         snapshot,
         strict_exact_replay_supported=strict_exact_replay_supported,

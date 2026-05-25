@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-25T04:37:24.726770+00:00",
+  "generated_at": "2026-05-25T05:11:58.000604+00:00",
   "summary": {
     "total_scripts": 396,
     "status_counts": {
@@ -4351,7 +4351,7 @@
       "references": [
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 14,
+          "line": 15,
           "source_group": "tests",
           "text": "\"scripts/docker-setup.ps1\","
         }
@@ -4366,7 +4366,7 @@
       "references": [
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 15,
+          "line": 16,
           "source_group": "tests",
           "text": "\"scripts/docker-setup.sh\","
         }
@@ -12226,13 +12226,13 @@
       "references": [
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 18,
+          "line": 19,
           "source_group": "tests",
           "text": "\"scripts/shutdown.ps1\","
         },
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 30,
+          "line": 31,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"shutdown.ps1\","
         }
@@ -12247,13 +12247,13 @@
       "references": [
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 19,
+          "line": 20,
           "source_group": "tests",
           "text": "\"scripts/shutdown.sh\","
         },
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 31,
+          "line": 32,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"shutdown.sh\","
         }
@@ -12268,13 +12268,13 @@
       "references": [
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 16,
+          "line": 17,
           "source_group": "tests",
           "text": "\"scripts/startup.ps1\","
         },
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 28,
+          "line": 29,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"startup.ps1\","
         }
@@ -12289,13 +12289,13 @@
       "references": [
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 17,
+          "line": 18,
           "source_group": "tests",
           "text": "\"scripts/startup.sh\","
         },
         {
           "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
-          "line": 29,
+          "line": 30,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"startup.sh\","
         }

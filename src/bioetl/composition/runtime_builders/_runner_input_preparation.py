@@ -85,6 +85,10 @@ def _resolve_required_persistence_profile(
                 runtime_environment=getattr(settings, "env", None),
                 debug_mode=getattr(settings, "debug", False),
             ),
+            allow_degraded_opt_down=(
+                normalize_required_persistence_profile(requested_profile)
+                == "degraded_observable"
+            ),
         )
     pipeline_settings = getattr(settings, "pipeline", None)
     control_plane = getattr(pipeline_settings, "control_plane", None)
