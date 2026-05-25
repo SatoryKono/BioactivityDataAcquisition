@@ -1,23 +1,23 @@
 ---
 id: architecture-review-20260525
-title: Evidence-based architecture review and refactoring plan
+title: Architecture review and refactoring roadmap
 task_id: architecture-review-20260525
-created_at: '2026-05-25T07:47:01Z'
+created_at: '2026-05-25T15:21:59Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
 summary: Active task session context.
-query: architecture boundaries hexagonal DDD control plane runtime builders tests
-  governance hotspots debt scorecard importlinter docs drift
+query: architecture review layer boundaries hexagonal DDD module boundaries composition
+  DI tests governance config entrypoints hotspots debt scorecard
 ---
 
 # Session note
 
 ## Task
 
-- Title: Evidence-based architecture review and refactoring plan
-- Retrieval query: architecture boundaries hexagonal DDD control plane runtime builders tests governance hotspots debt scorecard importlinter docs drift
+- Title: Architecture review and refactoring roadmap
+- Retrieval query: architecture review layer boundaries hexagonal DDD module boundaries composition DI tests governance config entrypoints hotspots debt scorecard
 
 ## Retrieved context
 

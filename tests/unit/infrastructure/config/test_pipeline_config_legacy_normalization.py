@@ -10,6 +10,7 @@ import yaml
 from bioetl.infrastructure.config.pipeline_config_api import (
     PipelineConfigReadPayload,
     load_pipeline_config,
+    load_pipeline_config_from_root,
 )
 from bioetl.infrastructure.config.pipeline_normalizers import (
     apply_pipeline_schema_normalization,
@@ -117,8 +118,10 @@ def test_pipeline_loader_uses_unified_schema_section(
         schema=schema_payload,
     )
 
-    monkeypatch.chdir(tmp_path)
-    loaded = load_pipeline_config("demo_canonical_schema")
+    loaded = load_pipeline_config_from_root(
+        "demo_canonical_schema",
+        configs_root=tmp_path / "configs",
+    )
     assert _schema_signature(loaded) == {
         "column_groups": _normalize_column_groups(schema_payload["column_groups"]),
         "data_schema": {
@@ -191,8 +194,10 @@ def test_pipeline_loader_projects_root_hash_policy_as_authoritative_runtime_obje
         },
     )
 
-    monkeypatch.chdir(tmp_path)
-    loaded = load_pipeline_config("chembl_activity")
+    loaded = load_pipeline_config_from_root(
+        "chembl_activity",
+        configs_root=tmp_path / "configs",
+    )
 
     assert loaded.content_hash.include == []
     assert loaded.content_hash.exclude == []
@@ -258,12 +263,14 @@ def test_pipeline_loader_rejects_non_empty_legacy_hash_shims_when_root_policy_pr
         },
     )
 
-    monkeypatch.chdir(tmp_path)
     with pytest.raises(
         ValueError,
         match=r"schema\.content_hash\.include must be empty",
     ):
-        load_pipeline_config("chembl_activity")
+        load_pipeline_config_from_root(
+            "chembl_activity",
+            configs_root=tmp_path / "configs",
+        )
 
 
 def test_pipeline_loader_rejects_chembl_field_ordering_hash_policy_mirrors(
@@ -320,9 +327,11 @@ def test_pipeline_loader_rejects_chembl_field_ordering_hash_policy_mirrors(
         },
     )
 
-    monkeypatch.chdir(tmp_path)
     with pytest.raises(ValueError, match="field_ordering must be empty for ChEMBL"):
-        load_pipeline_config("chembl_activity")
+        load_pipeline_config_from_root(
+            "chembl_activity",
+            configs_root=tmp_path / "configs",
+        )
 
 
 def test_pipeline_schema_normalizer_golden_vector(
@@ -372,11 +381,10 @@ def test_pipeline_schema_normalizer_golden_vector(
     assert {k: unified_cfg.get(k) for k in expected} == expected
 
 
-def test_load_pipeline_config_cache_isolated_by_working_directory(
+def test_load_pipeline_config_cache_isolated_by_explicit_config_root(
     tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Cache key must include cwd context for the same logical pipeline name."""
+    """Cache key must include explicit config root for the same pipeline name."""
     load_pipeline_config.cache_clear()
 
     def write_pipeline(root: Path, *, extra_hash: str) -> None:
@@ -409,10 +417,14 @@ def test_load_pipeline_config_cache_isolated_by_working_directory(
     write_pipeline(dir_one, extra_hash="_one")
     write_pipeline(dir_two, extra_hash="_two")
 
-    monkeypatch.chdir(dir_one)
-    config_one = load_pipeline_config("demo_item")
-    monkeypatch.chdir(dir_two)
-    config_two = load_pipeline_config("demo_item")
+    config_one = load_pipeline_config_from_root(
+        "demo_item",
+        configs_root=dir_one / "configs",
+    )
+    config_two = load_pipeline_config_from_root(
+        "demo_item",
+        configs_root=dir_two / "configs",
+    )
 
     assert config_one.content_hash.exclude == ["_one"]
     assert config_two.content_hash.exclude == ["_two"]
