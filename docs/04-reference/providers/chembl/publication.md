@@ -144,7 +144,7 @@ ______________________________________________________________________
 | Трансформер    | `src/bioetl/application/pipelines/chembl/publication_transformer.py` |
 | Arrow schema   | `src/bioetl/infrastructure/schemas/silver_chembl_core.py`            |
 | Pandera schema | `src/bioetl/domain/schemas/chembl/publication.py`                    |
-| Pipeline defs  | `src/bioetl/application/pipelines/chembl/_pipelines.py`              |
+| Pipeline defs  | `src/bioetl/application/pipelines/chembl/pipeline_types.py`          |
 
 ## Contract References
 

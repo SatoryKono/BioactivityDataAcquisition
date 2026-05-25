@@ -3090,13 +3090,24 @@ def render_csv(rows: list[dict[str, str]]) -> str:
     return output.getvalue()
 
 
-def render_markdown(rows: list[dict[str, str]]) -> str:
+def render_markdown(
+    rows: list[dict[str, str]],
+    *,
+    surface_kpis: list[dict[str, object]] | None = None,
+    semantic_kpis: list[dict[str, object]] | None = None,
+) -> str:
     headers = list(CSV_COLUMNS)
-    surface_kpis = build_surface_coverage_kpis(rows)
-    semantic_kpis = build_profile_semantic_invariants()
+    effective_surface_kpis = (
+        build_surface_coverage_kpis(rows) if surface_kpis is None else surface_kpis
+    )
+    effective_semantic_kpis = (
+        build_profile_semantic_invariants()
+        if semantic_kpis is None
+        else semantic_kpis
+    )
     lines = _markdown_intro_lines()
-    lines.extend(_surface_kpi_lines(surface_kpis))
-    lines.extend(_semantic_kpi_lines(semantic_kpis))
+    lines.extend(_surface_kpi_lines(effective_surface_kpis))
+    lines.extend(_semantic_kpi_lines(effective_semantic_kpis))
     lines.extend(_markdown_table_lines(rows, headers))
     lines.append("")
     return "\n".join(lines)
@@ -3184,18 +3195,41 @@ def _markdown_table_row(row: dict[str, str], headers: list[str]) -> str:
     return "| " + " | ".join(row.get(header, "") for header in headers) + " |"
 
 
-def build_artifacts() -> dict[str, str]:
-    rows = build_field_matrix_rows()
+def build_artifacts(
+    rows: list[dict[str, str]] | None = None,
+    *,
+    surface_kpis: list[dict[str, object]] | None = None,
+    semantic_kpis: list[dict[str, object]] | None = None,
+) -> dict[str, str]:
+    matrix_rows = build_field_matrix_rows() if rows is None else rows
+    effective_surface_kpis = (
+        build_surface_coverage_kpis(matrix_rows)
+        if surface_kpis is None
+        else surface_kpis
+    )
+    effective_semantic_kpis = (
+        build_profile_semantic_invariants()
+        if semantic_kpis is None
+        else semantic_kpis
+    )
     non_chembl_rows = [
         row
-        for row in rows
+        for row in matrix_rows
         if row["pipeline_kind"] == ENTITY_PIPELINE_KIND
         and row["pipeline_name"] in NON_CHEMBL_PIPELINES
     ]
     return {
-        CSV_NAME: render_csv(rows),
-        MD_NAME: render_markdown(rows),
-        NON_CHEMBL_MD_NAME: render_markdown(non_chembl_rows),
+        CSV_NAME: render_csv(matrix_rows),
+        MD_NAME: render_markdown(
+            matrix_rows,
+            surface_kpis=effective_surface_kpis,
+            semantic_kpis=effective_semantic_kpis,
+        ),
+        NON_CHEMBL_MD_NAME: render_markdown(
+            non_chembl_rows,
+            surface_kpis=effective_surface_kpis,
+            semantic_kpis=effective_semantic_kpis,
+        ),
     }
 
 
@@ -3206,10 +3240,14 @@ def _normalize_newlines(payload: str) -> str:
 
 def write_artifacts(out_dir: Path) -> dict[str, object]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    artifacts = build_artifacts()
     rows = build_field_matrix_rows()
     surface_kpis = build_surface_coverage_kpis(rows)
     semantic_kpis = build_profile_semantic_invariants()
+    artifacts = build_artifacts(
+        rows,
+        surface_kpis=surface_kpis,
+        semantic_kpis=semantic_kpis,
+    )
     for name, payload in artifacts.items():
         (out_dir / name).write_text(payload, encoding="utf-8", newline="\n")
     return {

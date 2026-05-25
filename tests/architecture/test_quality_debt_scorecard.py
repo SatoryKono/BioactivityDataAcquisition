@@ -333,6 +333,10 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
         )
         assert metric.get("current_count") == expected_count
         assert isinstance(metric.get("owner"), str) and metric["owner"]
+        assert str(metric["owner"]).startswith("@"), (
+            f"compatibility_debt_metrics.metrics.{metric_name}.owner must use a "
+            "reviewable team handle"
+        )
         assert isinstance(metric.get("linked_issue"), str) and metric["linked_issue"]
         assert isinstance(metric.get("rationale"), str) and metric["rationale"]
         assert (
@@ -462,8 +466,8 @@ def test_debt_scorecard_bronze_fixture_replay_metrics_match_sources() -> None:
         )
 
 
-def test_transition_compatibility_budget_is_zero_budget_fail_fast() -> None:
-    """Transition compatibility residue must remain a zero-budget fail-fast metric."""
+def test_transition_compatibility_budget_tracks_active_debt_and_zero_target() -> None:
+    """Transition compatibility residue must be explicit and ratcheted to zero."""
     scorecard = load_debt_scorecard()
     compatibility = scorecard.get("compatibility_debt_metrics", {})
     assert isinstance(compatibility, dict)
@@ -472,12 +476,10 @@ def test_transition_compatibility_budget_is_zero_budget_fail_fast() -> None:
 
     transition_metric = metrics.get("transition_compat_count")
     assert isinstance(transition_metric, dict)
-    assert transition_metric.get("current_count") == 0
-    assert transition_metric.get("max_count") == 0
-    assert (
-        transition_metric.get("ratchet_policy")
-        == "Zero-budget fail-fast metric for curated transition-only compatibility residue."
-    )
+    assert transition_metric.get("target_count") == 0
+    assert transition_metric.get("max_count") == transition_metric.get("current_count")
+    assert "Fail on growth" in str(transition_metric.get("ratchet_policy"))
+    assert "target_count" in str(transition_metric.get("ratchet_policy"))
 
 
 def test_debt_scorecard_enforces_budget_only_temporary_windows() -> None:

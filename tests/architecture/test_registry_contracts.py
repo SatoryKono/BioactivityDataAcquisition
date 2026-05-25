@@ -144,6 +144,25 @@ class TestRegistryProtocol:
             + "\n".join(f"  - {item}" for item in violations)
         )
 
+    def test_cli_bootstrap_paths_avoid_pipeline_default_registry_access(
+        self,
+        src_dir: Path,
+    ) -> None:
+        """CLI bootstrap should assemble explicit registries in the Composition Root."""
+        bootstrap_path = src_dir / "bioetl" / "composition" / "bootstrap" / "cli"
+        violations: list[str] = []
+
+        for py_file in bootstrap_path.rglob("*.py"):
+            content = py_file.read_text(encoding="utf-8")
+            if "get_default_registry" in content:
+                violations.append(f"{py_file.relative_to(src_dir)}")
+
+        assert not violations, (
+            "CLI bootstrap must use explicit pipeline registries instead of the "
+            "compatibility default registry seam.\n"
+            + "\n".join(f"  - {item}" for item in violations)
+        )
+
     def test_src_paths_avoid_raw_class_level_provider_registry_calls(
         self,
         src_dir: Path,

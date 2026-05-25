@@ -126,7 +126,7 @@ ______________________________________________________________________
 | ------------- | ---------------------------------------------------------------------- |
 | Конфигурация  | `configs/entities/chembl/protein_class.yaml`                           |
 | Трансформер   | `src/bioetl/application/pipelines/chembl/protein_class_transformer.py` |
-| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`                |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/pipeline_types.py`            |
 
 ______________________________________________________________________
 

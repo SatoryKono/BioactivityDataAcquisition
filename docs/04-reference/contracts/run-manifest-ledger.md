@@ -859,12 +859,13 @@ control-plane write paths MUST NOT synthesize missing `resolved_config_hash` or
 `resolved_config_hash` as first-class declarative provenance and keeps
 `config_hash` in the legacy compatibility details tier only.
 
-Datetime-sensitive content hashes remain on the reviewed `v1_date` compatibility
-default until the `#4587` backfill plan in
-`configs/quality/determinism_identity_policy.yaml` completes inventory,
-dual-write, historical backfill, and ratchet phases. First-party replay logic
-MUST treat `execution_fingerprint`, `resolved_config_hash`, and
-`effective_config_hash` as the canonical replay anchors during that migration.
+Datetime-sensitive content hashes use the reviewed `v2_datetime_utc` default.
+Historical `v1_date` hash compatibility is limited to explicitly documented
+date-only entity config declarations while the backfill plan in
+`configs/quality/determinism_identity_policy.yaml` preserves historical hash
+readability. First-party replay logic MUST treat `execution_fingerprint`,
+`resolved_config_hash`, and `effective_config_hash` as the canonical replay
+anchors during that migration.
 
 All new executable manifests require `git_commit`, `clean`
 `source_revision_state`, and `dependency_lock_hash` to be present, regardless

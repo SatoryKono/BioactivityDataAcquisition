@@ -626,6 +626,52 @@ def test_collect_metric_inventory_flags_multi_emitter_cardinality_review_candida
     assert report["runtime_cardinality_review_required"] == ["bioetl_hotspot_total"]
 
 
+def test_collect_metric_inventory_marks_thresholded_cardinality_metrics_reviewed(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset({"bioetl_hotspot_total"}),
+    )
+
+    runtime_dir = tmp_path / "src" / "bioetl" / "application"
+    runtime_dir.mkdir(parents=True)
+    for idx in range(3):
+        (runtime_dir / f"emitters_{idx}.py").write_text(
+            'metrics.increment_counter("bioetl_hotspot_total", labels={})\n',
+            encoding="utf-8",
+        )
+
+    config_dir = tmp_path / "configs" / "quality"
+    config_dir.mkdir(parents=True)
+    (config_dir / "observability_metric_inventory_allowlist.yaml").write_text(
+        "\n".join(
+            [
+                "allowed:",
+                "  runtime_cardinality_review_required:",
+                "    - metric: bioetl_hotspot_total",
+                '      owner: "@bioetl-observability"',
+                '      reason: "Reviewed bounded multi-emitter fanout"',
+                "      review_date: '2026-09-30'",
+                "      approved_max_series: 42",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert report["runtime_cardinality_review_candidates"] == ["bioetl_hotspot_total"]
+    assert report["runtime_cardinality_reviewed"] == ["bioetl_hotspot_total"]
+    assert report["runtime_cardinality_review_required"] == []
+    evidence = report["runtime_cardinality_evidence"]
+    assert isinstance(evidence, dict)
+    assert "approved_max_series=42" in evidence["bioetl_hotspot_total"]
+
+
 def test_collect_metric_inventory_detects_runtime_metric_without_registry(
     tmp_path: Path,
     monkeypatch: object,
@@ -750,6 +796,45 @@ def test_collect_metric_inventory_flags_declared_risky_label_review_candidates(
     report = inventory.collect_metric_inventory(tmp_path)
 
     assert report["declared_risky_label_review_required"] == ["bioetl_reviewed_total"]
+
+
+def test_collect_metric_inventory_marks_allowlisted_risky_labels_reviewed(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset({"bioetl_reviewed_total"}),
+    )
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_LABELS",
+        {"bioetl_reviewed_total": frozenset({"pipeline", "table"})},
+    )
+
+    config_dir = tmp_path / "configs" / "quality"
+    config_dir.mkdir(parents=True)
+    (config_dir / "observability_metric_inventory_allowlist.yaml").write_text(
+        "\n".join(
+            [
+                "allowed:",
+                "  declared_risky_label_review_required:",
+                "    - metric: bioetl_reviewed_total",
+                '      owner: "@bioetl-observability"',
+                '      reason: "Reviewed bounded table label"',
+                "      review_date: '2026-09-30'",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert report["declared_risky_label_review_candidates"] == ["bioetl_reviewed_total"]
+    assert report["declared_risky_label_reviewed"] == ["bioetl_reviewed_total"]
+    assert report["declared_risky_label_review_required"] == []
 
 
 def test_validate_metric_inventory_reports_unallowed_drift() -> None:

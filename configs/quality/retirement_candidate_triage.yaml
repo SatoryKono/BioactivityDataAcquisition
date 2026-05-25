@@ -74,13 +74,6 @@ repo_wide_zero_import_classification:
       review_by: "2026-08-20"
       linked_issue: "#4541"
       rationale: Aggregate pipeline-service protocol facade retained as the sanctioned import seam over narrower runtime, observability, and auxiliary protocol modules.
-    - module_path: src/bioetl/application/pipelines/chembl/_pipelines.py
-      module_name: bioetl.application.pipelines.chembl._pipelines
-      disposition: retain_compat_shim
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Import-preserving ChEMBL pipeline re-export surface kept for compatibility while canonical marker classes stay split across newer modules.
     - module_path: src/bioetl/application/pipelines/common/blocks.py
       module_name: bioetl.application.pipelines.common.blocks
       disposition: retain_dynamic_entrypoint
@@ -102,20 +95,13 @@ repo_wide_zero_import_classification:
       review_by: "2026-08-20"
       linked_issue: "#4541"
       rationale: PubMed strategy owner module remains part of runtime/provider strategy selection even when direct static imports are absent.
-    - module_path: src/bioetl/application/services/_checkpoint_compatibility_messages.py
-      module_name: bioetl.application.services._checkpoint_compatibility_messages
-      disposition: retain_compat_shim
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Checkpoint compatibility re-export surface is intentionally retained while older import paths remain supported.
     - module_path: src/bioetl/application/services/_checkpoint_compatibility_runtime_core.py
       module_name: bioetl.application.services._checkpoint_compatibility_runtime_core
-      disposition: retain_compat_shim
-      reviewed_on: "2026-05-22"
+      disposition: retain_canonical_owner_module
+      reviewed_on: "2026-05-25"
       review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Checkpoint runtime compatibility helpers remain intentionally split as an import-preserving seam rather than dead code.
+      linked_issue: "#4628"
+      rationale: Runtime checkpoint compatibility verdict helpers remain active application-service logic; the module is a canonical helper owner, not an import-preserving shim.
     - module_path: src/bioetl/application/services/control_plane/_run_manifest_diagnostics_identity.py
       module_name: bioetl.application.services.control_plane._run_manifest_diagnostics_identity
       disposition: retain_canonical_owner_module
@@ -263,13 +249,6 @@ repo_wide_zero_import_classification:
       review_by: "2026-08-20"
       linked_issue: "#4541"
       rationale: Workflow foreign-key reconciliation port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
-    - module_path: src/bioetl/domain/transformations/_hashing_normalization.py
-      module_name: bioetl.domain.transformations._hashing_normalization
-      disposition: retain_compat_shim
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Hash-normalization shim is intentionally retained as the canonical compatibility seam for older import paths.
     - module_path: src/bioetl/domain/transformations/drift.py
       module_name: bioetl.domain.transformations.drift
       disposition: retain_canonical_owner_module
@@ -312,13 +291,6 @@ repo_wide_zero_import_classification:
       review_by: "2026-08-20"
       linked_issue: "#4541"
       rationale: Export writer adapter remains the canonical infrastructure owner module behind package-root exports.
-    - module_path: src/bioetl/infrastructure/storage/_audit_normalization.py
-      module_name: bioetl.infrastructure.storage._audit_normalization
-      disposition: retain_compat_shim
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Audit-normalization shim remains intentionally retained as the public compatibility seam for older imports.
     - module_path: src/bioetl/infrastructure/storage/bronze/metadata_builders.py
       module_name: bioetl.infrastructure.storage.bronze.metadata_builders
       disposition: retain_canonical_owner_module

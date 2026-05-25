@@ -103,11 +103,11 @@ from the broader canonical control-plane datetime normalization.
 Decision:
 
 1. Keep the current hash-identity split.
-1. Keep the active compatibility policy as `v1_date`, where datetime values
-   continue to normalize to date-only ISO material for `content_hash`.
-1. Define `v2_datetime_utc` as the explicit migration target for timestamp-
-   sensitive hashes. This policy normalizes datetimes to UTC ISO-8601 `Z`
-   material with microsecond precision.
+1. Use `v2_datetime_utc` as the active default for timestamp-sensitive hashes.
+   This policy normalizes datetimes to UTC ISO-8601 `Z` material with
+   microsecond precision.
+1. Retain `v1_date` only as an explicit date-only compatibility policy for
+   reviewed source fields whose business identity has no sub-day semantics.
 1. Do not silently migrate existing `content_hash` surfaces to
    `v2_datetime_utc` as part of routine cleanup work.
 1. Treat any future convergence as an explicit breaking-change migration with
@@ -115,8 +115,9 @@ Decision:
 
 The machine-readable policy surface is
 `configs/quality/determinism_identity_policy.yaml`. Runtime callers that need
-timestamp-sensitive identity must select the versioned policy explicitly; the
-default remains `v1_date` for backwards compatibility.
+timestamp-sensitive identity must use the active `v2_datetime_utc` policy.
+Historical `v1_date` compatibility is valid only when the entity appears in the
+date-only inventory and declares `contracts.hash_datetime_policy: v1_date`.
 
 Affected canonical consumers of the current hash-identity contract include:
 

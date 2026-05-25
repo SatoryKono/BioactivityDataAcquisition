@@ -36,7 +36,8 @@ from bioetl.composition.bootstrap.cli.noop import (
     create_noop_logger,
     create_noop_observability_bundle,
 )
-from bioetl.composition.registry_api import get_default_registry
+from bioetl.composition.factories.pipeline.registry import register_all_pipelines
+from bioetl.composition.registry_api import create_registry
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.domain.context import current_utc_time
 from bioetl.domain.ports import BronzeStoragePort
@@ -191,7 +192,9 @@ def _create_table_collector(
     registry: PipelineRegistry | None = None,
 ) -> Callable[[str], list[tuple[str, str]]]:
     """Create a callable that gathers Silver/Gold table names from registry configs."""
-    effective_registry = registry if registry is not None else get_default_registry()
+    effective_registry = registry if registry is not None else create_registry()
+    if registry is None:
+        register_all_pipelines(registry=effective_registry)
 
     def collect_tables(layer: str) -> list[tuple[str, str]]:
         """Collect `(table_name, layer)` pairs for requested layer scope."""

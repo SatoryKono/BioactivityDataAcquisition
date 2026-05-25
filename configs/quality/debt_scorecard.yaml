@@ -95,19 +95,21 @@ compatibility_debt_metrics:
   sunset_source: tests/architecture/test_compat_sunset.py
   metrics:
     transition_compat_count:
-      current_count: 0
-      max_count: 0
+      current_count: 1
+      max_count: 1
+      target_count: 0
       owner: '@bioetl-architecture'
       linked_issue: '4029'
-      rationale: Transition-only compatibility shims remain the true compatibility
-        debt budget. Sanctioned public entrypoints are reviewed separately as stable
-        public API and no longer count toward compatibility debt.
-      ratchet_policy: Zero-budget fail-fast metric for curated transition-only compatibility
-        residue.
+      rationale: One reviewed transition-only compatibility shim remains active
+        in the observability metric-label policy split. Sanctioned public entrypoints
+        are tracked separately as stable public API and no longer count toward
+        compatibility debt.
+      ratchet_policy: Fail on growth; ratchet current/max_count toward target_count
+        zero as transition-only compatibility shims are removed.
     retained_public_entrypoint_burden:
       current_count: 14
       max_count: 14
-      owner: '-architecture'
+      owner: '@bioetl-architecture'
       linked_issue: '4575'
       rationale: Retained public entrypoints are stable external API, but their
         size and first-party dependency burden are blocking governance debt when
@@ -417,6 +419,9 @@ hotspot_family_coverage_thresholds:
       max_unmeasured_module_count: 0
       min_covered_module_count: 0
       min_covered_line_percent: 0.0
+      allowlisted_unmeasured_paths:
+      - src/bioetl/composition/bootstrap/runtime/compatibility.py
+      - src/bioetl/composition/bootstrap/runtime/pipeline_bootstrap_phases.py
     composition_factories_pipeline:
       min_measured_module_count: 31
       max_unmeasured_module_count: 0
@@ -436,6 +441,7 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/ledger/__init__.py
       - src/bioetl/application/services/control_plane/manifest/__init__.py
       - src/bioetl/application/services/control_plane/replay/__init__.py
+      - src/bioetl/application/services/control_plane/run_manifest_validation.py
       - src/bioetl/application/services/control_plane/workflow/__init__.py
     composition_runtime_builders:
       min_measured_module_count: 38

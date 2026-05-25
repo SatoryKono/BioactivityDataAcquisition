@@ -196,7 +196,7 @@ ______________________________________________________________________
 | Сущность             | `src/bioetl/domain/entities/chembl_activity.py`                |
 | Arrow schema         | `src/bioetl/infrastructure/schemas/silver_chembl_core.py`      |
 | Pandera schema       | `src/bioetl/domain/schemas/chembl/assay.py`                    |
-| Pipeline defs        | `src/bioetl/application/pipelines/chembl/_pipelines.py`        |
+| Pipeline defs        | `src/bioetl/application/pipelines/chembl/pipeline_types.py`    |
 | Gold contract export | `docs/04-reference/contracts/gold/chembl_assay_v1.0.json`      |
 
 ______________________________________________________________________

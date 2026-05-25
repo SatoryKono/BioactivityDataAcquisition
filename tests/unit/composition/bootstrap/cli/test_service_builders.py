@@ -34,17 +34,14 @@ def test_service_builders_public_surface_prefers_runtime_service_vocabulary() ->
 
 
 @pytest.mark.unit
-def test_build_cli_config_service_owns_registration_and_dq_wiring() -> None:
+def test_build_cli_config_service_requires_explicit_registry_and_wires_dq() -> None:
     registry = PipelineRegistry()
-    register_pipelines = MagicMock()
     effective_config_service = MagicMock()
     dq_config_loader = MagicMock()
 
     service = build_cli_config_service(
-        registry=None,
+        registry=registry,
         logger_factory=NoOpLogger,
-        register_pipelines=register_pipelines,
-        default_registry_accessor=lambda: registry,
         settings_loader=MagicMock(),
         pipeline_config_loader=MagicMock(),
         domain_config_mapper=MagicMock(),
@@ -53,10 +50,24 @@ def test_build_cli_config_service_owns_registration_and_dq_wiring() -> None:
         effective_config_service_factory=lambda: effective_config_service,
     )
 
-    register_pipelines.assert_called_once_with()
     assert service._registry_accessor() is registry
     assert service._dq_service._dq_config_loader is dq_config_loader
     assert service._dq_service._effective_config_service is effective_config_service
+
+
+@pytest.mark.unit
+def test_build_cli_config_service_rejects_missing_registry() -> None:
+    with pytest.raises(ValueError, match="explicit pipeline registry"):
+        build_cli_config_service(
+            registry=None,
+            logger_factory=NoOpLogger,
+            settings_loader=MagicMock(),
+            pipeline_config_loader=MagicMock(),
+            domain_config_mapper=MagicMock(),
+            pipeline_yaml_getter=MagicMock(),
+            dq_config_loader=MagicMock(),
+            effective_config_service_factory=MagicMock(),
+        )
 
 
 @pytest.mark.unit

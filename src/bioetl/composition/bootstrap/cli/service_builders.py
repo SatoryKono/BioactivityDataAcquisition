@@ -49,7 +49,6 @@ if TYPE_CHECKING:
         PipelineConfigLoaderPort,
         PipelineRegistryPort,
         QuarantinePort,
-        RegistryAccessorPort,
         SettingsLoaderPort,
         TracingPort,
     )
@@ -70,8 +69,6 @@ def build_cli_config_service(
     *,
     registry: PipelineRegistryPort | None,
     logger_factory: Callable[[], LoggerPort],
-    register_pipelines: Callable[[], object],
-    default_registry_accessor: RegistryAccessorPort,
     settings_loader: SettingsLoaderPort,
     pipeline_config_loader: PipelineConfigLoaderPort,
     domain_config_mapper: DomainConfigMapperPort,
@@ -83,8 +80,10 @@ def build_cli_config_service(
     logger = logger_factory()
     effective_registry = registry
     if effective_registry is None:
-        register_pipelines()
-        effective_registry = default_registry_accessor()
+        raise ValueError(
+            "build_cli_config_service requires an explicit pipeline registry; "
+            "construct it in the Composition Root before service assembly."
+        )
 
     def _registry_accessor() -> PipelineRegistryPort:
         return effective_registry
