@@ -2896,7 +2896,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity",
+          "title": "Monitor: GLOBAL Control-Plane Read Failure Ratio",
           "type": "stat"
         },
         {

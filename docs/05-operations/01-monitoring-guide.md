@@ -340,11 +340,9 @@ tracing-backed log hygiene живёт в collapsed row
   as `WARN` or `UNKNOWN`, not as unconditional green.
 - **Current-context row below the answer row**: `Monitor: Data Quality Score
   (Volume-weighted)`, `Monitor: Worst-Entity DQ Score`,
-  `Monitor: Worst Data Freshness Lag (seconds)`, `Review: Latest Successful Data Timestamp`,
-  `Track: Records Quarantined in Range`, `Track: Soft Threshold Exceeded in Range`
-  и `Track: Silver Filter Rejects in Range` дают compact supporting context до
-  перехода к full-width historical evidence. Latest timestamp остаётся
-  supporting freshness anchor и не должен визуально маскироваться под verdict card.
+  `Monitor: Worst Data Freshness Lag (seconds)`, `Track: Records Quarantined in Range`,
+  `Track: Soft Threshold Exceeded in Range` и `Track: Silver Filter Rejects in Range`
+  дают compact supporting context до перехода к full-width historical evidence.
 - **Track Range Evidence: Bronze -> Silver -> Gold**: полноширинный
   selected-range flow panel ниже current-context row.
 - **Monitor: Silver Validation Failures / Gold Strict Validation Failures / DQ Impact on Deliverability**:
@@ -352,16 +350,15 @@ tracing-backed log hygiene живёт в collapsed row
 - **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы. `Worst Data
   Freshness Lag (seconds)` теперь показывает самый stale entity в выбранном
   scope через `max(time() - bioetl_data_freshness_seconds)`, а
-  `Review: Latest Successful Data Timestamp` остаётся latest-success anchor
-  внутри compact current-context band. Это intentionally разные сигналы:
-  latest success не должен маскировать worst freshness lag.
+  `Review: Latest Successful Data Timestamp` остаётся отдельным latest-success anchor
+  на первом экране. Это intentionally разные сигналы: latest success не должен
+  маскировать worst freshness lag.
 - **Drilldown**: navigation bus `0. Control Plane`, `1. Overview`,
   `2. Runtime`, `3. Provider Health`, `5. Workflow`, `Silver Reject Explorer`,
   `Explore Logs`, `Explore Traces`. Panel-level dashboard handoffs запрещены:
   replay/checkpoint traceability открывается через `0. Control Plane` в
   top-level шине.
-  Tempo handoff intentionally ships only bounded `$pipeline` scope; `$run_type`
-  не передаётся в TraceQL, чтобы `All` selector не схлопывался в пустой trace-search.
+  Tempo handoff uses bounded `$pipeline/$run_type` TraceQL scope.
 
 #### Silver Reject Explorer
 
