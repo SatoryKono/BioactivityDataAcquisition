@@ -304,15 +304,7 @@ class FilterConfigLoader(
         Returns:
             Merged list with unique values, base items first.
         """
-        seen: set[str] = set()
-        result: list[str] = []
-
-        for item in base + override:
-            if item not in seen:
-                seen.add(item)
-                result.append(item)
-
-        return result
+        return list(dict.fromkeys(base + override))
 
 
 __all__ = ["FilterConfigLoader"]

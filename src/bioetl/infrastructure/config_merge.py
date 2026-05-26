@@ -35,14 +35,8 @@ def _default_concat_list_merger(
     if all(isinstance(item, str) for item in base) and all(
         isinstance(item, str) for item in override
     ):
-        seen: set[str] = set()
-        merged: list[Any] = []  # Any: YAML config values are heterogeneous
-        for item in base + override:
-            item_str = str(item)
-            if item_str not in seen:
-                seen.add(item_str)
-                merged.append(item)
-        return merged
+        # Items are already strings, so list(dict.fromkeys(...)) is safe and preserves order.
+        return list(dict.fromkeys(base + override))
 
     return [*base, *override]
 
