@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from bioetl.domain.value_objects.academic_ids import (
     ISSN,
     ORCID,

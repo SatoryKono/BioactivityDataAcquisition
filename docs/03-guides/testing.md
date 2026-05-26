@@ -265,7 +265,38 @@ Supported policy slice for issue `#2598`:
   относятся к `tests/unit/`; их canonical path теперь `tests/smoke/` или
   integration lanes.
 
-#### 2.1.1. Source-to-Test Ownership
+#### 2.1.1. Repo-backed Path Naming and Reclassification
+
+Путь `tests/unit/` в BioETL обозначает прежде всего layer ownership, а не
+абсолютный запрет на чтение checked-in repository artifacts.
+
+Repo-backed contract tests могут оставаться под `tests/unit/` только если:
+
+- checked-in artifact сам является contract surface под тестом;
+- выполнение остаётся local-only и deterministic;
+- тест изолирован в lane `repo-backed-unit`, а не в `unit-fast`;
+- файл явно перечислен в `configs/quality/test_governance_audit.yaml` и помечен
+  `pytest.mark.repo_backed`.
+
+Surface должен быть перенесён из `tests/unit/`, если тест в первую очередь
+проверяет не модульный контракт, а более широкую integration behavior:
+
+- subprocess / CLI process orchestration;
+- dashboard, workflow-tree, repo-layout, memory-backend, или service startup
+  integration semantics;
+- network, VCR, detached backend, или multi-component runtime behavior.
+
+Canonical keep-vs-move inventory живёт в
+`configs/quality/test_governance_audit.yaml`:
+
+- `repo_backed_unit_test_exceptions` — retained repo-backed tests, которые
+  intentionally остаются под `tests/unit/`;
+- `file_backed_domain_contract_tests` — domain/file-backed contract surfaces,
+  которые routed в `contracts` lane;
+- `mixed_scope_unit_path_policy` — explicit naming/reclassification policy и
+  moved examples.
+
+#### 2.1.2. Source-to-Test Ownership
 
 Для тонких пакетов (`package/__init__.py` + один содержательный `.py`-модуль) проект
 держит явную source-to-test ownership symmetry:
@@ -307,7 +338,7 @@ test для модуля.
 compatibility facades, где mirror-path `test_<module>.py` был бы ложным сигналом,
 а реальный owner живёт в contract или architecture suite.
 
-#### 2.1.2. Pure Transformation Logic Baseline
+#### 2.1.3. Pure Transformation Logic Baseline
 
 Pure transformation logic считается отдельным high-signal unit-test surface для:
 

@@ -27,6 +27,11 @@ TARGETS = (
     "tests/e2e/test_pipeline_with_schema_drift_e2e.py",
 )
 
+ADVANCED_HARNESS_CONTEXT_TARGETS = (
+    "tests/e2e/test_advanced_scenarios_e2e.py",
+    "tests/e2e/test_advanced_scenarios_harness_contracts.py",
+)
+
 
 @pytest.mark.architecture
 def test_high_signal_test_surfaces_use_deterministic_identity_helpers() -> None:
@@ -39,3 +44,24 @@ def test_high_signal_test_surfaces_use_deterministic_identity_helpers() -> None:
             f"{relative_path} must avoid incidental uuid4() identities in replay- or "
             "golden-sensitive test scaffolding"
         )
+
+
+@pytest.mark.architecture
+def test_advanced_harness_e2e_uses_replay_stable_contexts() -> None:
+    for relative_path in ADVANCED_HARNESS_CONTEXT_TARGETS:
+        text = (ROOT / relative_path).read_text(encoding="utf-8")
+        assert "create_test_context(" not in text, (
+            f"{relative_path} must not call occurrence-safe create_test_context() "
+            "for harness-mode replay-sensitive runs"
+        )
+        assert "create_test_context," not in text, (
+            f"{relative_path} must not import occurrence-safe create_test_context() "
+            "for harness-mode replay-sensitive runs"
+        )
+
+    advanced_text = (ROOT / "tests/e2e/test_advanced_scenarios_e2e.py").read_text(
+        encoding="utf-8"
+    )
+    assert "build_e2e_run_context" in advanced_text
+    assert "deterministic_uuid_from_callsite" in advanced_text
+    assert "create_deterministic_test_context" not in advanced_text

@@ -69,7 +69,7 @@ class TestSafeInt:
     def test_none_returns_default(self) -> None:
         assert safe_int(None) is None
 
-    def test_bool_returns_default(self) -> None:
+    def test_bool_returns_default__test_safe_int_domain_transformations_test_coercion_72(self) -> None:
         assert safe_int(True) is None
         assert safe_int(False) is None
 

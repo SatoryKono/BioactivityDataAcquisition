@@ -17,9 +17,11 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import os
 import re
 import subprocess
 import sys
+import tempfile
 from collections import defaultdict
 from datetime import date
 from pathlib import Path
@@ -67,6 +69,8 @@ _RUNTIME_EXCLUDE_PARTS = (
     "src/bioetl/domain",
 )
 _TEXT_SUFFIXES = {".py", ".md", ".json", ".yml", ".yaml"}
+_TEXT_FILE_DISCOVERY_CACHE: dict[str, tuple[Path, ...]] = {}
+_METRIC_INVENTORY_CACHE: dict[str, dict[str, object]] = {}
 _TEXT_DISCOVERY_TIMEOUT_SECONDS: Final[float] = 20.0
 _METRIC_MENTION_GREP_TIMEOUT_SECONDS: Final[float] = 20.0
 _METRIC_MENTION_GREP_CHUNK_SIZE: Final[int] = 128
@@ -202,18 +206,35 @@ _EXPORTED_PROMETHEUS_METRIC_NAME_BINDINGS: Final[dict[str, str]] = {
 
 
 def _iter_text_files(root: Path) -> list[Path]:
+    cache_key = root.as_posix()
+    cached = _TEXT_FILE_DISCOVERY_CACHE.get(cache_key)
+    if cached is not None:
+        return list(cached)
+    discovered = _iter_text_files_with_git_ls_files(root)
+    if discovered is not None:
+        _TEXT_FILE_DISCOVERY_CACHE[cache_key] = tuple(discovered)
+        return discovered
     if not root.exists():
+        _TEXT_FILE_DISCOVERY_CACHE[cache_key] = ()
         return []
     if root.is_file():
-        return [root] if root.suffix in _TEXT_SUFFIXES else []
+        paths = [root] if root.suffix in _TEXT_SUFFIXES else []
+        _TEXT_FILE_DISCOVERY_CACHE[cache_key] = tuple(paths)
+        return paths
     discovered = _iter_text_files_with_rg(root)
     if discovered:
+        _TEXT_FILE_DISCOVERY_CACHE[cache_key] = tuple(discovered)
         return discovered
-    return sorted(
-        path
-        for path in root.rglob("*")
-        if path.is_file() and path.suffix in _TEXT_SUFFIXES
-    )
+    fallback_paths: list[Path] = []
+    for dirpath, _, filenames in os.walk(root):
+        base = Path(dirpath)
+        for filename in filenames:
+            path = base / filename
+            if path.suffix in _TEXT_SUFFIXES:
+                fallback_paths.append(path)
+    fallback_paths = sorted(fallback_paths)
+    _TEXT_FILE_DISCOVERY_CACHE[cache_key] = tuple(fallback_paths)
+    return fallback_paths
 
 
 def _iter_text_files_with_rg(root: Path) -> list[Path]:
@@ -221,13 +242,8 @@ def _iter_text_files_with_rg(root: Path) -> list[Path]:
         pattern for suffix in sorted(_TEXT_SUFFIXES) for pattern in ("-g", f"*{suffix}")
     ]
     try:
-        result = subprocess.run(
+        result, stdout = _run_text_discovery_command(
             ["rg", "--files", root.as_posix(), *globs],
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            check=False,
             timeout=_TEXT_DISCOVERY_TIMEOUT_SECONDS,
         )
     except (OSError, subprocess.TimeoutExpired):
@@ -236,9 +252,92 @@ def _iter_text_files_with_rg(root: Path) -> list[Path]:
         return []
     return sorted(
         Path(line)
-        for line in result.stdout.splitlines()
+        for line in stdout.splitlines()
         if line and Path(line).suffix in _TEXT_SUFFIXES
     )
+
+
+def _iter_text_files_with_git_ls_files(root: Path) -> list[Path] | None:
+    pathspec = _repo_relative_pathspec(root)
+    if pathspec is None:
+        return None
+    try:
+        result, stdout = _run_text_discovery_command(
+            [
+                "git",
+                "-C",
+                _REPO_ROOT.as_posix(),
+                "ls-files",
+                "--",
+                pathspec,
+            ],
+            timeout=_TEXT_DISCOVERY_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if result.returncode != 0:
+        return None
+    return sorted(
+        _REPO_ROOT / line
+        for line in stdout.splitlines()
+        if line and Path(line).suffix in _TEXT_SUFFIXES
+    )
+
+
+def _run_text_discovery_command(
+    command: list[str],
+    *,
+    timeout: float,
+) -> tuple[subprocess.CompletedProcess[str], str]:
+    """Capture small discovery output without Windows pipe reader threads."""
+    output_path = _temporary_text_discovery_output_path()
+    try:
+        with output_path.open("w", encoding="utf-8", errors="replace") as stdout_file:
+            result = subprocess.run(
+                command,
+                stdout=stdout_file,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                check=False,
+                timeout=timeout,
+            )
+        stdout = output_path.read_text(encoding="utf-8", errors="replace")
+    finally:
+        output_path.unlink(missing_ok=True)
+    return result, stdout
+
+
+def _temporary_text_discovery_output_path() -> Path:
+    handle = tempfile.NamedTemporaryFile(
+        prefix="observability_metric_inventory_",
+        suffix=".txt",
+        delete=False,
+    )
+    handle.close()
+    return Path(handle.name)
+
+
+def _repo_relative_pathspec(path: Path) -> str | None:
+    try:
+        common_path = os.path.commonpath(
+            [
+                os.path.abspath(os.fspath(_REPO_ROOT)),
+                os.path.abspath(os.fspath(path)),
+            ]
+        )
+    except ValueError:
+        return None
+    if os.path.normcase(common_path) != os.path.normcase(
+        os.path.abspath(os.fspath(_REPO_ROOT))
+    ):
+        return None
+    relative = os.path.relpath(
+        os.path.abspath(os.fspath(path)),
+        os.path.abspath(os.fspath(_REPO_ROOT)),
+    )
+    return "." if relative == "." else relative.replace(os.sep, "/")
 
 
 def _as_repo_relative(path: Path, repo_root: Path) -> str:
@@ -1253,6 +1352,10 @@ def _runtime_cardinality_threshold_violations(
 def collect_metric_inventory(
     repo_root: Path,
 ) -> dict[str, list[str] | dict[str, list[str]]]:
+    cache_key = repo_root.as_posix()
+    cached = _METRIC_INVENTORY_CACHE.get(cache_key)
+    if cached is not None:
+        return cached  # type: ignore[return-value]
     declared_metric_definitions = _load_declared_metric_definitions(repo_root)
     declared_rule_metrics = declared_metric_definitions["recording_rule_metrics"]
     declared_label_contract_metrics = declared_metric_definitions[
@@ -1397,6 +1500,7 @@ def collect_metric_inventory(
         "rules_mentions": rules_mentions,
         "alias_emitters": alias_mentions,
     }
+    _METRIC_INVENTORY_CACHE[cache_key] = report
     return report
 
 

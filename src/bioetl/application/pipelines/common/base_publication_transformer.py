@@ -14,257 +14,41 @@ Reduces code duplication by extracting shared logic:
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from functools import partial
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import (
     BaseTransformer,
-    TransformerDependencyContext,
 )
-from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
 from bioetl.application.pipelines.common.publication_assembly import (
-    PreparedPublicationOutcome,
-    build_publication_silver_record,
     normalize_publication_business_data,
     prepare_publication_payload,
+)
+from bioetl.application.pipelines.common.publication_transformer_context import (
+    BasePublicationTransformerContext,
+    coerce_publication_transformer_init,
+)
+from bioetl.application.pipelines.common.publication_transformer_records import (
+    assemble_publication_silver_record,
+    build_pre_silver_publication_record,
+    classification_payload,
 )
 from bioetl.application.pipelines.common.publication_vocab_observability import (
     emit_unknown_publication_vocab_metrics,
 )
-from bioetl.domain.mapping.publication_type_classification import (
-    build_publication_type_classification_payload,
-)
 
 if TYPE_CHECKING:
-    from bioetl.domain.behavior import EntityIdentityGenerator
+    from bioetl.application.core.pre_silver_record import PreSilverRecord
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities.base import BaseEntity
-    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
         DataExtractorStrategy,
         IdentifierResolverStrategy,
-        MetricsPort,
-        PiiHasherPort,
         PublicationMetadataStrategy,
-        TracingPort,
     )
     from bioetl.domain.types import BronzeRecord, JsonDict, PrimaryId, SilverRecord
-
-
-@dataclass(frozen=True, slots=True)
-class BasePublicationTransformerContext:
-    """Typed constructor input for publication transformer wiring."""
-
-    provider: str
-    entity_type: str = "publication"
-    silver_filters: SilverFilterConfig | None = None
-    gold_filters: GoldFilterConfig | None = None
-    tracer: TracingPort | None = None
-    metrics: MetricsPort | None = None
-    identity_service: EntityIdentityGenerator | None = None
-    pii_hasher: PiiHasherPort | None = None
-    dependencies: TransformerDependencyContext | None = None
-    data_extractor: DataExtractorStrategy | None = None
-    identifier_resolver: IdentifierResolverStrategy | None = None
-    metadata_strategy: PublicationMetadataStrategy | None = None
-    record_normalizer: RecordNormalizationProcessor | None = None
-
-
-def _coerce_publication_transformer_init(
-    init: BasePublicationTransformerContext | str | None,
-    /,
-    **kwargs: object,
-) -> BasePublicationTransformerContext:
-    """Normalize compact and legacy constructor styles to one typed input."""
-    if isinstance(init, BasePublicationTransformerContext):
-        if kwargs:
-            unexpected = ", ".join(sorted(kwargs))
-            raise TypeError(
-                "BasePublicationTransformer received unexpected keyword arguments "
-                f"with init spec: {unexpected}"
-            )
-        return init
-
-    provider = init if isinstance(init, str) else kwargs.pop("provider", None)
-    if not isinstance(provider, str) or not provider:
-        raise TypeError(
-            "BasePublicationTransformer requires a provider string or "
-            "BasePublicationTransformerContext."
-        )
-
-    unexpected_keys = sorted(
-        kwargs.keys()
-        - {
-            "entity_type",
-            "silver_filters",
-            "gold_filters",
-            "tracer",
-            "metrics",
-            "identity_service",
-            "pii_hasher",
-            "dependencies",
-            "data_extractor",
-            "identifier_resolver",
-            "metadata_strategy",
-            "record_normalizer",
-        }
-    )
-    if unexpected_keys:
-        unexpected_args = ", ".join(unexpected_keys)
-        raise TypeError(
-            "BasePublicationTransformer received unexpected keyword arguments: "
-            f"{unexpected_args}"
-        )
-
-    return BasePublicationTransformerContext(
-        provider=provider,
-        entity_type=cast(str, kwargs.pop("entity_type", "publication")),
-        silver_filters=cast(
-            "SilverFilterConfig | None", kwargs.pop("silver_filters", None)
-        ),
-        gold_filters=cast("GoldFilterConfig | None", kwargs.pop("gold_filters", None)),
-        tracer=cast("TracingPort | None", kwargs.pop("tracer", None)),
-        metrics=cast("MetricsPort | None", kwargs.pop("metrics", None)),
-        identity_service=cast(
-            "EntityIdentityGenerator | None",
-            kwargs.pop("identity_service", None),
-        ),
-        pii_hasher=cast("PiiHasherPort | None", kwargs.pop("pii_hasher", None)),
-        dependencies=cast(
-            "TransformerDependencyContext | None",
-            kwargs.pop("dependencies", None),
-        ),
-        data_extractor=cast(
-            "DataExtractorStrategy | None",
-            kwargs.pop("data_extractor", None),
-        ),
-        identifier_resolver=cast(
-            "IdentifierResolverStrategy | None",
-            kwargs.pop("identifier_resolver", None),
-        ),
-        metadata_strategy=cast(
-            "PublicationMetadataStrategy | None",
-            kwargs.pop("metadata_strategy", None),
-        ),
-        record_normalizer=cast(
-            "RecordNormalizationProcessor | None",
-            kwargs.pop("record_normalizer", None),
-        ),
-    )
-
-
-def _classification_payload(
-    provider: str,
-    raw_type: str | None,
-    raw_types_list: list[str] | None,
-) -> dict[str, str | None]:
-    """Build the normalized publication-type classification payload."""
-    return build_publication_type_classification_payload(
-        provider,
-        raw_type=raw_type,
-        raw_types_list=raw_types_list,
-        raw_field_name="publication_type",
-    )
-
-
-def _resolve_publication_entity_id(
-    transformer: BasePublicationTransformer,
-    primary_id_field: str,
-    primary_id: PrimaryId,
-) -> str:
-    """Resolve the stable entity identifier from the validated primary ID."""
-    return cast(
-        str,
-        transformer.compute_entity_id(
-            source_id=primary_id,
-            record={primary_id_field: primary_id},
-        ),
-    )
-
-
-def _prepare_content_hash_payload(business_data: JsonDict) -> JsonDict:
-    """Prepare the hash-ready business payload without orchestration metadata."""
-    return {
-        key: value for key, value in business_data.items() if not key.startswith("_")
-    }
-
-
-def _compute_identifiers(
-    transformer: BasePublicationTransformer,
-    primary_id_field: str,
-    primary_id: PrimaryId,
-    business_data: JsonDict,
-) -> tuple[str, str]:
-    """Compute the stable entity id plus content digest."""
-    entity_id = _resolve_publication_entity_id(
-        transformer,
-        primary_id_field,
-        primary_id,
-    )
-    content_hash = transformer.compute_content_hash(
-        _prepare_content_hash_payload(business_data),
-        exclude_none=True,
-    )
-    return entity_id, content_hash
-
-
-def _build_pre_silver_publication_record(
-    transformer: BasePublicationTransformer,
-    prepared: PreparedPublicationOutcome,
-) -> PreSilverRecord:
-    """Build the staged pre-silver publication payload for downstream finalization."""
-    entity_id = _resolve_publication_entity_id(
-        transformer,
-        prepared.primary_id_field,
-        prepared.primary_id,
-    )
-    return PreSilverRecord(
-        entity_id=entity_id,
-        business_data=prepared.business_data,
-        build_silver_record=partial(
-            build_publication_silver_record,
-            transformer,
-        ),
-        apply_structural_policy=transformer._apply_structural_policy,
-        apply_silver_filter=transformer._apply_silver_filter,
-    )
-
-
-def _assemble_publication_silver_record(
-    transformer: BasePublicationTransformer,
-    context: PipelineContext,
-    *,
-    index: int,
-    prepared: PreparedPublicationOutcome,
-    normalized_business_data: JsonDict,
-) -> SilverRecord:
-    """Assemble the final Silver record from normalized publication business data."""
-    entity_id, content_hash = _compute_identifiers(
-        transformer,
-        prepared.primary_id_field,
-        prepared.primary_id,
-        normalized_business_data,
-    )
-    silver_record = build_publication_silver_record(
-        transformer,
-        context,
-        entity_id,
-        content_hash,
-        index,
-        normalized_business_data,
-    )
-    return cast(
-        "SilverRecord",
-        transformer._record_normalizer.project_normalization_findings(
-            cast("JsonDict", silver_record),
-            context=context,
-            index=index,
-        ),
-    )
 
 
 class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
@@ -277,7 +61,7 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
         **kwargs: object,
     ) -> None:
         """Initialize publication transformer with explicit DI seams."""
-        resolved = _coerce_publication_transformer_init(init, **kwargs)
+        resolved = coerce_publication_transformer_init(init, **kwargs)
         super().__init__(
             provider=resolved.provider,
             entity_type=resolved.entity_type,
@@ -451,7 +235,7 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
     ) -> PreSilverRecord | None:
         """Build an intermediate publication payload for application finalization."""
         prepared = prepare_publication_payload(self, context, record, index)
-        return _build_pre_silver_publication_record(self, prepared)
+        return build_pre_silver_publication_record(self, prepared)
 
     async def _transform_impl(
         self,
@@ -468,7 +252,7 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
             context,
             normalized_business_data,
         )
-        return _assemble_publication_silver_record(
+        return assemble_publication_silver_record(
             self,
             context,
             index=index,
@@ -497,4 +281,4 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
         raw_types_list: list[str] | None = None,
     ) -> dict[str, str | None]:
         """Classify publication type using the unified 3-level hierarchy."""
-        return _classification_payload(provider, raw_type, raw_types_list)
+        return classification_payload(provider, raw_type, raw_types_list)

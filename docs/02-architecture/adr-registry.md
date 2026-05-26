@@ -3,19 +3,19 @@
 This registry provides a comprehensive index of all Architecture Decision Records
 with metadata, status, and relationships.
 
-**Total ADRs**: 47
-**Last Updated**: 2026-05-21
+**Total ADRs**: 48
+**Last Updated**: 2026-05-26
 
 ## 📊 Status Summary
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 45 | 95.7% |
-| `superseded` | 2 | 4.3% |
+| `accepted` | 46 | 95.8% |
+| `superseded` | 2 | 4.2% |
 
 ## 🟢 Accepted ADRs
 
-### 45 decisions
+### 46 decisions
 
 ### ADR-001: Delta Lake vs Parquet
 
@@ -553,6 +553,19 @@ they do not serve the same role.
 execution, but safe operator recovery still needed explicit workflow-level...
 
 [📄 View Full ADR](decisions/ADR-047-workflow-control-plane.md)
+
+---
+
+### ADR-048: Domain Schema Boundary and Runtime Pandera Compatibility
+
+**Status**: `accepted` | **Category**: `Architecture` | **Owner**: `BioETL Team`
+
+**Relationships**: Related: ADR-004, ADR-018, ADR-033, ADR-037
+
+**Context**: BioETL intentionally keeps Pandera-backed schemas in the domain layer because
+they are data contracts for Silver and Gold records, not infrastructure ...
+
+[📄 View Full ADR](decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md)
 
 ---
 

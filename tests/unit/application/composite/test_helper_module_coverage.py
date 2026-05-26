@@ -8,6 +8,8 @@ from unittest.mock import MagicMock
 import polars as pl
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from bioetl.application.composite import dependency_join_support
 from bioetl.application.composite._preflight_orchestration import (
     PreflightSchemaOrchestrationMixin,
@@ -43,10 +45,6 @@ class _DummyPreflight(PreflightSchemaOrchestrationMixin):
     _logger = MagicMock()
 
 
-class _SchemaFromAll:
-    __all__ = ["ExportedSchema"]
-
-
 class ExportedSchema:
     @staticmethod
     def to_schema() -> object:
@@ -58,6 +56,9 @@ class _SchemaFromVars:
         @staticmethod
         def to_schema() -> object:
             return object()
+
+
+_SchemaFromAll = SimpleNamespace(__all__=["ExportedSchema"], ExportedSchema=ExportedSchema)
 
 
 def test_dependency_join_support_exports_stay_bound_to_canonical_helpers() -> None:

@@ -50,7 +50,7 @@ def test_clear_specific_table_dry_run(noop_logger, tmp_path: Path) -> None:
     assert table_path.exists()
 
 
-def test_clear_all_tables(noop_logger, tmp_path: Path) -> None:
+def test_clear_all_tables__infrastructure_storage_test_silver_writer_filesystem_53(noop_logger, tmp_path: Path) -> None:
     """Clear should remove every Delta-style table rooted at base_path."""
     for name in ["table1", "table2", "table3"]:
         (tmp_path / name / "_delta_log").mkdir(parents=True)

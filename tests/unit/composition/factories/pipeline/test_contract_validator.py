@@ -122,6 +122,8 @@ class TestValidateContractPolicy:
         # Should not raise
         _validate_contract_policy(config)
 
+        mock_load_policy.assert_called_once_with("test", "entity")
+
     @patch(
         "bioetl.composition.factories.pipeline.contract_validator.load_pipeline_contract_policy"
     )

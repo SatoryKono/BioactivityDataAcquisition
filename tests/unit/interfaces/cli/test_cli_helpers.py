@@ -261,7 +261,7 @@ class TestCliCommands:
         assert result.exit_code == 0
         assert "Manage quarantine" in result.output
 
-    def test_checkpoint_help(self, cli_runner):
+    def test_checkpoint_help__test_cli_commands_interfaces_cli_test_cli_helpers_264(self, cli_runner):
         """Test that checkpoint --help works."""
         result = cli_runner.invoke(cli, ["checkpoint", "--help"])
         assert result.exit_code == 0

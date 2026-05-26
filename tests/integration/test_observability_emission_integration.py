@@ -259,6 +259,61 @@ def test_pipeline_observer_emits_tracing_spans_through_recording_port() -> None:
 
 
 @pytest.mark.integration
+def test_pipeline_observer_emits_failure_signals_through_recording_ports() -> None:
+    metrics = RecordingMetrics()
+    logger = RecordingLogger()
+    tracer = RecordingTracing()
+    observer = PipelineObserver(
+        pipeline_name="chembl_activity",
+        run_id=deterministic_uuid("observability.integration.failure.run"),
+        run_type=RunType.INCREMENTAL,
+        metrics=metrics,
+        logger=logger,  # type: ignore[arg-type]
+        clock=FixedClock(FIXED_TEST_TIME),
+        tracer=tracer,  # type: ignore[arg-type]
+        manifest_id="manifest-observability-failure",
+        contract_ref="chembl/activity/gold",
+        contract_version="1.0.0",
+    )
+
+    expected = RuntimeError("forced failure for observability contract")
+    with pytest.raises(RuntimeError, match="forced failure"):
+        with observer:
+            raise expected
+
+    assert any(
+        name == "bioetl_pipeline_runs_total"
+        and labels
+        == {
+            "pipeline": "chembl_activity",
+            "run_type": RunType.INCREMENTAL.value,
+            "status": "failed",
+        }
+        for name, _value, labels in metrics.counters
+    )
+    assert any(
+        name == "bioetl_observability_events_total"
+        and labels["event"] == PipelineEvent.FAILED
+        and labels["severity"] == "error"
+        and labels["error_type"] == "runtimeerror"
+        for name, _value, labels in metrics.counters
+    )
+    assert any(
+        level == "error"
+        and event == PipelineEvent.FAILED
+        and context["manifest_id"] == "manifest-observability-failure"
+        and context["error_type"] == "RuntimeError"
+        for level, event, context in logger.entries
+    )
+    assert len(tracer.spans) == 1
+    span = tracer.spans[0]
+    assert span.exited is True
+    assert expected in span.exceptions
+    assert span.attributes["bioetl.status"] == "failed"
+    assert span.attributes["error"] is True
+
+
+@pytest.mark.integration
 def test_pipeline_observer_records_failure_span_and_error_metrics() -> None:
     metrics = RecordingMetrics()
     logger = RecordingLogger()

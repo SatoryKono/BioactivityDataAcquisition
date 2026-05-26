@@ -138,7 +138,7 @@ class TestPostrunMetadataVersionResolverSuccess:
 class TestPostrunMetadataVersionResolverAllowlistedErrors:
     """Tests for warning_allowlist-based error handling."""
 
-    def test_allowlisted_error_returns_none_in_warning_mode(
+    def test_allowlisted_error_returns_none_in_warning_mode__test_postrun_metadata_version_resolver_allowlisted_errors_application_core_test_postrun_metadata_version_resolver_141(
         self,
         mock_logger: MagicMock,
         mock_runtime: MagicMock,
@@ -205,7 +205,7 @@ class TestPostrunMetadataVersionResolverAllowlistedErrors:
         assert call_kwargs.get("layer") == "silver"
         assert call_kwargs.get("table_path") == "/silver/path"
 
-    def test_allowlisted_error_raises_in_strict_mode(
+    def test_allowlisted_error_raises_in_strict_mode__test_postrun_metadata_version_resolver_allowlisted_errors_application_core_test_postrun_metadata_version_resolver_208(
         self,
         strict_resolver: PostrunMetadataVersionResolver,
         mock_storage: MagicMock,

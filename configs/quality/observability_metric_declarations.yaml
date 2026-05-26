@@ -1,6 +1,7 @@
 version: 1
 policy_scope: observability_metric_declarations
 recording_rule_metrics:
+  - bioetl_checkpoint_age_seconds
   - bioetl_processed_records_bronze_current
   - bioetl_processed_records_gold_deduplicated_current
   - bioetl_processed_records_gold_excluded_by_contract_current

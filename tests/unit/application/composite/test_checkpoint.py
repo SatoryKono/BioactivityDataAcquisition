@@ -128,7 +128,7 @@ class TestWithSeedCompleted:
 class TestWithEnricherCompleted:
     """Tests for with_enricher_completed method."""
 
-    def test_adds_enricher_to_completed_set(self):
+    def test_adds_enricher_to_completed_set__test_with_enricher_completed_application_composite_test_checkpoint_131(self):
         """with_enricher_completed should add enricher to completed_enrichers."""
         initial = CompositeCheckpointState(
             composite_name="test_composite",
@@ -171,7 +171,7 @@ class TestWithEnricherCompleted:
         )
         assert updated.state == CompositePipelineState.ENRICHING
 
-    def test_accumulates_multiple_enrichers(self):
+    def test_accumulates_multiple_enrichers__test_with_enricher_completed_application_composite_test_checkpoint_174(self):
         """Multiple with_enricher_completed calls should accumulate."""
         initial = CompositeCheckpointState(
             composite_name="test_composite",

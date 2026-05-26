@@ -90,7 +90,7 @@ class TestPubChemCompoundFactory:
 
     @patch("bioetl.composition.factories.services.factory.BaseServicesFactory")
     @patch("bioetl.composition.factories.services.bundle.load_pipeline_config")
-    def test_build_services_creates_data_source(
+    def test_build_services_creates_data_source__test_pub_chem_compound_factory_interfaces_factories_test_pipeline_factories_93(
         self,
         mock_load_config,
         mock_base_services,
@@ -124,7 +124,7 @@ class TestPubChemCompoundFactory:
 
     @patch("bioetl.composition.factories.services.factory.BaseServicesFactory")
     @patch("bioetl.composition.factories.services.bundle.load_pipeline_config")
-    def test_build_services_calls_base_services_factory(
+    def test_build_services_calls_base_services_factory__test_pub_chem_compound_factory_interfaces_factories_test_pipeline_factories_127(
         self,
         mock_load_config,
         mock_base_services,
@@ -156,7 +156,7 @@ class TestPubChemCompoundFactory:
 
     @patch("bioetl.composition.factories.services.factory.BaseServicesFactory")
     @patch("bioetl.composition.factories.services.bundle.load_pipeline_config")
-    def test_build_services_uses_provided_config(
+    def test_build_services_uses_provided_config__test_pub_chem_compound_factory_interfaces_factories_test_pipeline_factories_159(
         self,
         mock_load_config,
         mock_base_services,

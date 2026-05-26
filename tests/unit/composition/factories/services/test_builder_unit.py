@@ -100,7 +100,7 @@ class TestServicesBuilderCreateBatchProcessingComponents:
     @patch(
         "bioetl.composition.factories.services.builder.create_batch_processing_components"
     )
-    def test_delegates_to_module_function(self, mock_create: MagicMock) -> None:
+    def test_delegates_to_module_function__test_services_builder_create_batch_processing_components_factories_services_test_builder_unit_103(self, mock_create: MagicMock) -> None:
         """Static method delegates to create_batch_processing_components."""
         expected = MagicMock()
         mock_create.return_value = expected

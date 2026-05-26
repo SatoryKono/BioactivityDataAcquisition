@@ -458,7 +458,7 @@ class TestAdapterErrorHandler:
 class TestAdapterErrorContext:
     """Tests for AdapterErrorContext dataclass."""
 
-    def test_context_creation(self) -> None:
+    def test_context_creation__test_adapter_error_context_infrastructure_adapters_test_error_handling_461(self) -> None:
         """AdapterErrorContext should store all error context."""
         context = AdapterErrorContext(
             provider="chembl",

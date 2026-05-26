@@ -108,6 +108,74 @@ def _enrich_filtered_stats_with_bronze_denominator(
     return enriched
 
 
+def _reject_ratio(reject_count: object, bronze_records: int) -> float:
+    """Calculate a bounded reject ratio for positive integer reject counts."""
+    if isinstance(reject_count, int) and reject_count > 0:
+        return float(reject_count / bronze_records)
+    return 0.0
+
+
+def _filtered_timeseries_run_ids(row: JsonDict) -> list[str]:
+    """Remove and normalize run ids carried by the storage aggregation layer."""
+    return [
+        candidate
+        for candidate in row.pop("run_ids", [])
+        if isinstance(candidate, str) and candidate.strip()
+    ]
+
+
+def _enrich_filtered_timeseries_row(
+    item: JsonDict,
+    *,
+    run_manifest_service: object,
+) -> JsonDict:
+    """Attach Bronze denominator evidence to one timeseries row when available."""
+    enriched_row = dict(item)
+    run_ids = _filtered_timeseries_run_ids(enriched_row)
+    if run_manifest_service is None or not run_ids:
+        return enriched_row
+
+    bronze_records = _sum_bronze_records_for_runs(
+        run_ids=run_ids,
+        run_manifest_service=run_manifest_service,
+    )
+    if bronze_records <= 0:
+        return enriched_row
+
+    enriched_row["bronze_records"] = bronze_records
+    enriched_row["reject_ratio"] = _reject_ratio(
+        enriched_row.get("reject_count", 0),
+        bronze_records,
+    )
+    return enriched_row
+
+
+def _enrich_filtered_timeseries_with_bronze_denominators(
+    payload: JsonDict,
+    *,
+    run_manifest_service: object,
+) -> JsonDict:
+    """Attach per-bucket Bronze denominators when manifest evidence is available."""
+    rows = payload.get("rows")
+    if not isinstance(rows, list):
+        return payload
+
+    enriched_payload = dict(payload)
+    enriched_rows: list[JsonDict] = []
+    for item in rows:
+        if not isinstance(item, dict):
+            continue
+        enriched_rows.append(
+            _enrich_filtered_timeseries_row(
+                item,
+                run_manifest_service=run_manifest_service,
+            )
+        )
+
+    enriched_payload["rows"] = enriched_rows
+    return enriched_payload
+
+
 class QuarantineServiceFilteredMixin:
     """Filtered-record explorer operations for QuarantineService."""
 
@@ -340,3 +408,68 @@ class QuarantineServiceFilteredMixin:
             duration_seconds=perf_counter() - start_time,
         )
         return options
+
+    async def get_filtered_timeseries(
+        self: _FilteredQuarantineHost,
+        *,
+        pipeline: str | None = None,
+        run_type: str | None = None,
+        reason_code: str | None = None,
+        field: str | None = None,
+        run_id: str | None = None,
+        payload_hash: str | None = None,
+        from_ts: str | None = None,
+        to_ts: str | None = None,
+        bucket: str = "1h",
+    ) -> JsonDict:
+        """Get time-bucketed stats for filtered Silver records."""
+        start_time = perf_counter()
+        self.logger.debug(
+            "Getting filtered quarantine timeseries",
+            pipeline=pipeline,
+            run_type=run_type,
+            reason_code=reason_code,
+            field=field,
+            run_id=run_id,
+            payload_hash=payload_hash,
+            from_ts=from_ts,
+            to_ts=to_ts,
+            bucket=bucket,
+        )
+        try:
+            payload = await self.quarantine_port.get_filtered_timeseries(
+                pipeline=pipeline,
+                run_type=run_type,
+                reason_code=reason_code,
+                field=field,
+                run_id=run_id,
+                payload_hash=payload_hash,
+                from_ts=from_ts,
+                to_ts=to_ts,
+                bucket=bucket,
+            )
+        except _QUARANTINE_OPERATOR_ERRORS:
+            self._record_operator_metrics(
+                operation="filtered_timeseries",
+                status="failed",
+                duration_seconds=perf_counter() - start_time,
+            )
+            raise
+        payload = _enrich_filtered_timeseries_with_bronze_denominators(
+            payload,
+            run_manifest_service=getattr(self, "run_manifest_service", None),
+        )
+        self.logger.info(
+            "Got filtered quarantine timeseries",
+            pipeline=pipeline,
+            rows=len(payload.get("rows", []))
+            if isinstance(payload.get("rows"), list)
+            else 0,
+            bucket=payload.get("bucket", bucket),
+        )
+        self._record_operator_metrics(
+            operation="filtered_timeseries",
+            status="success",
+            duration_seconds=perf_counter() - start_time,
+        )
+        return payload

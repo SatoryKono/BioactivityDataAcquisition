@@ -169,7 +169,7 @@ secondary mirrors только как локальный контекст. Mirro
 | Provider | `1. Overview` | `3. Provider Health` |
 | Workflow | `1. Overview` | `5. Workflow` |
 | Replay Safety State | `0. Control Plane` | `1. Overview`, `2. Runtime` |
-| Checkpoint Freshness Proxy | `0. Control Plane` | `2. Runtime` |
+| Checkpoint Freshness Lag | `0. Control Plane` | `2. Runtime` |
 | Ledger/Manifest Consistency | `0. Control Plane` | `2. Runtime` |
 | Provider Health (aggregated) | `3. Provider Health` | `1. Overview`, `2. Runtime` |
 | DQ Status (Silver Reject / quality posture) | `4. Data Quality` | `1. Overview`, `2. Runtime` |

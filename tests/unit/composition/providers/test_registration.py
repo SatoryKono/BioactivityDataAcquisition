@@ -164,6 +164,8 @@ class TestRegisterAllProviders:
         register_all_providers(registry=registry)
         register_all_providers(registry=registry)
 
+        assert registry.is_registered("chembl")
+
     @patch("bioetl.composition.providers.registration._get_bio_provider_configs")
     @patch("bioetl.composition.providers.registration._get_biblio_provider_configs")
     def test_injected_registry_isolated_from_default_singleton(

@@ -102,6 +102,9 @@ async def dispatch_quarantine_request(
         if path == "/ops/quarantine/filtered-stats":
             await handle_filtered_stats(host, writer, query)
             return
+        if path == "/ops/quarantine/filtered-timeseries":
+            await handle_filtered_timeseries(host, writer, query)
+            return
         if path == "/ops/quarantine/filter-options":
             await handle_filter_options(host, writer, query)
             return
@@ -249,6 +252,28 @@ async def handle_filter_options(
         run_id=host._read_optional_param(query, "run_id"),
         from_ts=host._read_optional_param(query, "from"),
         to_ts=host._read_optional_param(query, "to"),
+    )
+    await host._send_payload_response(writer, 200, payload)
+
+
+async def handle_filtered_timeseries(
+    host: _HealthRoutingHost,
+    writer: asyncio.StreamWriter,
+    query: dict[str, str],
+) -> None:
+    """Handle time-bucketed trend endpoint for filtered Silver records."""
+    assert host._quarantine_service is not None
+    pipeline = host._read_required_param(query, "pipeline")
+    payload = await host._quarantine_service.get_filtered_timeseries(
+        pipeline=pipeline,
+        run_type=host._read_optional_param(query, "run_type"),
+        reason_code=host._read_optional_param(query, "reason_code"),
+        field=host._read_optional_param(query, "field"),
+        run_id=host._read_optional_param(query, "run_id"),
+        payload_hash=host._read_optional_param(query, "payload_hash"),
+        from_ts=host._read_optional_param(query, "from"),
+        to_ts=host._read_optional_param(query, "to"),
+        bucket=host._read_optional_param(query, "bucket") or "1h",
     )
     await host._send_payload_response(writer, 200, payload)
 

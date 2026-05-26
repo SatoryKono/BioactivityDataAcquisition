@@ -175,7 +175,7 @@ class TestLockCheckCommand:
         assert "--pipeline" in result.output
         assert "--run-id" in result.output
 
-    def test_check_lock_held(
+    def test_check_lock_held__test_lock_check_command_cli_commands_test_lock_178(
         self, cli_runner: CliRunner, mock_lock_service: MagicMock
     ) -> None:
         """Test check reports lock IS held."""
@@ -200,7 +200,7 @@ class TestLockCheckCommand:
         assert result.exit_code == 0
         assert "IS held" in result.output or "held" in result.output
 
-    def test_check_lock_not_held(
+    def test_check_lock_not_held__test_lock_check_command_cli_commands_test_lock_203(
         self, cli_runner: CliRunner, mock_lock_service: MagicMock
     ) -> None:
         """Test check reports lock is NOT held."""

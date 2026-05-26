@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.helpers.git_index_scan import git_tracked_files
+
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src" / "bioetl"
 CLI_ROOT = SRC_ROOT / "interfaces" / "cli"
@@ -36,7 +38,13 @@ PUBLIC_COMMAND_MODULES = {
 
 
 def _iter_python_files(root: Path) -> list[Path]:
-    return sorted(path for path in root.rglob("*.py") if path.is_file())
+    return list(
+        git_tracked_files(
+            root=ROOT,
+            paths=(root.relative_to(ROOT).as_posix(),),
+            suffixes=(".py",),
+        )
+    )
 
 
 def _imported_modules(path: Path) -> set[str]:

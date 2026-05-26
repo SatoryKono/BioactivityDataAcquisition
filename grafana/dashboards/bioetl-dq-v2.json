@@ -1958,7 +1958,7 @@
       ],
       "title": "Track: Silver Filter Rejects in Range",
       "type": "stat",
-      "description": "Selected-range Silver reject count from the filtered_out path only. A zero here does not refute current CRIT because quarantine and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation panels before assuming the incident is filter-driven."
+      "description": "Selected-range Silver reject count from the filtered_out path only. A zero here does not refute current CRIT because quarantine and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation panels before assuming the incident is filter-driven. The Explorer handoff preserves pipeline/run_type and time range so the operator can validate scoped totals before narrowing by reason_code or field."
     },
     {
       "collapsed": true,
@@ -2104,6 +2104,14 @@
           },
           "id": 118,
           "options": {
+            "dataLinks": [
+              {
+                "targetBlank": false,
+                "title": "Open Silver Reject Explorer for this reason",
+                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&var-reason_code=${__series.name}&${__url_time_range}",
+                "includeVars": false
+              }
+            ],
             "displayMode": "gradient",
             "orientation": "horizontal",
             "reduceOptions": {
@@ -2178,6 +2186,14 @@
           },
           "id": 121,
           "options": {
+            "dataLinks": [
+              {
+                "targetBlank": false,
+                "title": "Open Silver Reject Explorer for this reason",
+                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&var-reason_code=${__series.name}&${__url_time_range}",
+                "includeVars": false
+              }
+            ],
             "displayMode": "gradient",
             "orientation": "horizontal",
             "reduceOptions": {
@@ -2199,14 +2215,13 @@
           ],
           "title": "Inspect: Top Silver Reject Reasons (Pareto)",
           "type": "bargauge",
-          "description": "Pareto ranking of bounded Silver reject reasons across the selected range. Use the top-level Silver Reject Explorer handoff to investigate the selected pipeline/run_type in record-level detail and then narrow by reason_code inside the explorer."
+          "description": "Pareto ranking of bounded Silver reject reasons across the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/reason_code and then validate representative payload_hash rows."
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Bounded schema-field summary for the selected range. Use the top-level Silver Reject Explorer handoff to investigate the selected pipeline/run_type in record-level detail and then narrow by field inside the explorer.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2254,6 +2269,14 @@
           },
           "id": 122,
           "options": {
+            "dataLinks": [
+              {
+                "targetBlank": false,
+                "title": "Open Silver Reject Explorer for this field",
+                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&var-field=${__series.name}&${__url_time_range}",
+                "includeVars": false
+              }
+            ],
             "displayMode": "gradient",
             "orientation": "horizontal",
             "reduceOptions": {
@@ -2274,7 +2297,8 @@
             }
           ],
           "title": "Inspect: Top Silver Reject Fields",
-          "type": "bargauge"
+          "type": "bargauge",
+          "description": "Bounded schema-field summary for the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/field and then compare top reason signatures inside the explorer."
         }
       ],
       "title": "Reject / Pareto / Fields (collapsed)",

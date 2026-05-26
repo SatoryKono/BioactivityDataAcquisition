@@ -137,12 +137,12 @@ class TestNoOpMetrics:
         with pytest.raises(TypeError):
             metrics.set_gauge("memory_usage", 75.5, tags={"unit": "percent"})
 
-    def test_close_no_error(self) -> None:
+    def test_close_no_error__test_no_op_metrics_domain_ports_test_noop_140(self) -> None:
         """Test close is a no-op."""
         metrics = NoOpMetrics()
         metrics.close()  # Should not raise
 
-    def test_close_idempotent(self) -> None:
+    def test_close_idempotent__test_no_op_metrics_domain_ports_test_noop_145(self) -> None:
         """Test close can be called multiple times."""
         metrics = NoOpMetrics()
         metrics.close()

@@ -42,6 +42,8 @@ class TestCreateNoopLogger:
         # Should not raise
         logger.info("test message")
 
+        assert isinstance(logger, NoOpLogger)
+
     def test_logger_accepts_log_calls(self) -> None:
         """Returned logger should accept structured log calls without raising."""
         logger = create_noop_logger()
@@ -51,6 +53,8 @@ class TestCreateNoopLogger:
         logger.warning("warning msg")
         logger.error("error msg", code=42)
         logger.debug("debug msg")
+
+        assert isinstance(logger, NoOpLogger)
 
 
 @pytest.mark.unit
@@ -84,6 +88,8 @@ class TestCreateNoopMetrics:
 
         # Should not raise
         metrics.increment_counter("test_counter", 1, {"label": "value"})
+
+        assert isinstance(metrics, MetricsPort)
 
 
 @pytest.mark.unit

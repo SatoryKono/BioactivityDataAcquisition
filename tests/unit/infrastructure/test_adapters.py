@@ -129,7 +129,7 @@ class TestPubChemAdapter:
         """Use an explicit strategy collaborator in direct adapter construction."""
         return MagicMock(name="fetch_strategies")
 
-    def test_adapter_creation(
+    def test_adapter_creation__test_pub_chem_adapter_unit_infrastructure_test_adapters_132(
         self,
         mock_logger,
         rate_limiter,

@@ -137,7 +137,7 @@ class TestCrossRefDateBuilding:
             (None, None, None),
         ],
     )
-    def test_compute_publication_date(
+    def test_compute_publication_date__test_cross_ref_date_building_application_pipelines_test_date_parsing_140(
         self,
         transformer: CrossRefPublicationTransformer,
         published_print: str | None,

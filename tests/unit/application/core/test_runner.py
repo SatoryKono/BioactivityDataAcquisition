@@ -17,7 +17,6 @@ from bioetl.application.core.lifecycle.lock_runtime_service import (
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.postrun.service import PostrunService
 from bioetl.application.core.preflight.service import PreflightService
-from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.core.lifecycle.shutdown import (
     PipelineShutdownError,
     ShutdownSignal,
@@ -34,6 +33,7 @@ from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAM
 from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunID, RunType
+from tests.unit.application.core.runner_test_support import build_test_pipeline_runner
 
 _MOCK_TOKEN = FencingToken(
     sequence=1,
@@ -338,7 +338,7 @@ def runner(
     mock_observer,
 ):
     """Create a PipelineRunner instance with directly injected services (DI pattern)."""
-    return PipelineRunner(
+    return build_test_pipeline_runner(
         config=pipeline_config,
         runtime=runtime_config,
         services=mock_services,
@@ -377,7 +377,7 @@ class TestPipelineRunnerInit:
         mock_observer,
     ):
         """Test runner initializes correctly with directly injected services."""
-        runner = PipelineRunner(
+        runner = build_test_pipeline_runner(
             config=pipeline_config,
             runtime=runtime_config,
             services=mock_services,
@@ -422,7 +422,7 @@ class TestPipelineRunnerInit:
         mock_observer,
     ):
         """Test services are injected via DI, not created internally."""
-        runner = PipelineRunner(
+        runner = build_test_pipeline_runner(
             config=pipeline_config,
             runtime=runtime_config,
             services=mock_services,
@@ -463,7 +463,7 @@ class TestPipelineRunnerInit:
         mock_observer,
     ):
         """Test runner exposes a strict public metrics view from executor counters."""
-        runner = PipelineRunner(
+        runner = build_test_pipeline_runner(
             config=pipeline_config,
             runtime=runtime_config,
             services=mock_services,
@@ -721,7 +721,7 @@ class TestPipelineRunnerRun:
             run_type=RunType.INCREMENTAL,
             limit=500,
         )
-        runner = PipelineRunner(
+        runner = build_test_pipeline_runner(
             config=pipeline_config,
             runtime=runtime_with_limit,
             services=mock_services,
@@ -766,7 +766,7 @@ class TestPipelineRunnerRun:
             limit=None,
             start_offset=250,
         )
-        runner = PipelineRunner(
+        runner = build_test_pipeline_runner(
             config=pipeline_config,
             runtime=runtime_with_offset,
             services=mock_services,
@@ -832,7 +832,7 @@ class TestPipelineRunnerRun:
             limit=None,
             start_offset=75,
         )
-        runner = PipelineRunner(
+        runner = build_test_pipeline_runner(
             config=pipeline_config,
             runtime=runtime_with_offset,
             services=mock_services,
@@ -920,7 +920,7 @@ class TestPipelineRunnerClearViaLifecycle:
         mock_observer.__enter__ = MagicMock(return_value=mock_observer)
         mock_observer.__exit__ = MagicMock(return_value=None)
 
-        runner = PipelineRunner(
+        runner = build_test_pipeline_runner(
             config=pipeline_config,
             runtime=runtime_config,
             services=services,
@@ -983,7 +983,7 @@ class TestPipelineRunnerClearViaLifecycle:
         mock_observer.__enter__ = MagicMock(return_value=mock_observer)
         mock_observer.__exit__ = MagicMock(return_value=None)
 
-        runner = PipelineRunner(
+        runner = build_test_pipeline_runner(
             config=pipeline_config,
             runtime=runtime_config,
             services=services,
@@ -1068,7 +1068,7 @@ class TestPipelineRunnerCheckDataQuality:
         mock_observer.__enter__ = MagicMock(return_value=mock_observer)
         mock_observer.__exit__ = MagicMock(return_value=None)
 
-        runner = PipelineRunner(
+        runner = build_test_pipeline_runner(
             config=pipeline_config,
             runtime=runtime_config,
             services=services,
@@ -1142,7 +1142,7 @@ class TestPipelineRunnerCheckDataQuality:
         mock_observer.__enter__ = MagicMock(return_value=mock_observer)
         mock_observer.__exit__ = MagicMock(return_value=None)
 
-        runner = PipelineRunner(
+        runner = build_test_pipeline_runner(
             config=pipeline_config,
             runtime=runtime_config,
             services=services,

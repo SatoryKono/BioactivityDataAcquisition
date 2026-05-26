@@ -71,6 +71,20 @@ def _observe_checkpoint_save_duration(
     )
 
 
+def _set_checkpoint_saved_at(
+    host: _CompositeRunnerSupportHostProtocol,
+    checkpoint_saved_at_epoch_seconds: float,
+) -> None:
+    metrics = getattr(host, "_metrics", None)
+    if metrics is None:
+        return
+    metrics.set_gauge(
+        "bioetl_checkpoint_saved_at_seconds",
+        checkpoint_saved_at_epoch_seconds,
+        {"pipeline": host._config.name},
+    )
+
+
 def _start_checkpoint_save_span(
     host: _CompositeRunnerSupportHostProtocol,
     *,
@@ -131,6 +145,7 @@ async def save_checkpoint_safe(
             operation=operation,
             status="succeeded",
         )
+        _set_checkpoint_saved_at(host, time.time())
         _observe_checkpoint_save_duration(
             host,
             operation=operation,

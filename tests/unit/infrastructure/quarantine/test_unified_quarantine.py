@@ -1035,6 +1035,60 @@ class TestUnifiedQuarantineFilteredExplorer:
         ):
             await quarantine.get_filtered_filter_options(pipeline=None)
 
+    @pytest.mark.asyncio
+    async def test_get_filtered_timeseries(self, quarantine, mock_delta_table):
+        """Timeseries endpoint should bucket reject rows by ingestion timestamp."""
+        mock_table = MagicMock()
+        mock_arrow_table = MagicMock()
+        mock_arrow_table.to_pylist.return_value = [
+            {
+                "ingestion_ts": "2026-04-05T10:15:00Z",
+                "pipeline": "test",
+                "error_code": "FILTERED_OUT_SILVER",
+                "payload": '{"id": 1}',
+                "payload_hash": "sha256:1",
+                "error_details": (
+                    '{"reason_code":"missing_required_field",'
+                    '"field":"canonical_smiles",'
+                    '"run_type":"incremental"}'
+                ),
+                "dq_status": "new",
+                "run_id": "run-1",
+            },
+            {
+                "ingestion_ts": "2026-04-05T10:45:00Z",
+                "pipeline": "test",
+                "error_code": "FILTERED_OUT_SILVER",
+                "payload": '{"id": 2}',
+                "payload_hash": "sha256:2",
+                "error_details": (
+                    '{"reason_code":"missing_required_field",'
+                    '"field":"canonical_smiles",'
+                    '"run_type":"incremental"}'
+                ),
+                "dq_status": "new",
+                "run_id": "run-2",
+            },
+        ]
+        mock_table.to_pyarrow_table.return_value = mock_arrow_table
+        mock_delta_table.return_value = mock_table
+
+        result = await quarantine.get_filtered_timeseries(
+            pipeline="test",
+            bucket="1h",
+        )
+
+        assert result["bucket"] == "1h"
+        assert result["rows"] == [
+            {
+                "bucket_start": "2026-04-05T10:00:00+00:00",
+                "reject_count": 2,
+                "bronze_records": 0,
+                "reject_ratio": 0.0,
+                "run_ids": ["run-1", "run-2"],
+            }
+        ]
+
 
 @pytest.mark.unit
 class TestUnifiedQuarantineAclose:

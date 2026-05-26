@@ -329,6 +329,7 @@
         "tests/unit/application/composite/test_dependency_progress_tracker.py",
         "tests/unit/application/composite/test_dependency_result_mapper.py",
         "tests/unit/application/composite/test_enricher_join_execution.py",
+        "tests/unit/application/composite/test_helper_module_coverage.py",
         "tests/unit/application/composite/test_join_planner.py",
         "tests/unit/application/composite/test_merger.py",
         "tests/unit/application/composite/test_merger_golden_snapshots.py",
@@ -349,7 +350,7 @@
         "tests/unit/infrastructure/schemas/test_composite_config_invariants_source_of_truth.py"
       ],
       "src_importer_count": 80,
-      "test_importer_count": 33
+      "test_importer_count": 34
     },
     {
       "path": "src/bioetl/domain/value_objects/activity_values.py",

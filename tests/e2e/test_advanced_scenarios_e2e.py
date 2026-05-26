@@ -11,26 +11,31 @@ Part of architecture review refactoring plan (R2).
 
 from __future__ import annotations
 
-import asyncio
 import json
-from datetime import UTC
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pyarrow as pa
 import pytest
 from deltalake import DeltaTable, write_deltalake
 from bioetl.domain.context import PipelineRunContext
-from bioetl.domain.types import BatchID, RunID, RunType
-from tests.helpers.deterministic_ids import deterministic_uuid
+from bioetl.domain.types import RunID, RunType
+from tests.helpers.deterministic_ids import (
+    deterministic_uuid,
+    deterministic_uuid_from_callsite,
+)
 from .conftest import (
     _resolve_silver_table_path,
     assert_bronze_files_exist,
     assert_silver_table_has_records,
-    create_test_context,
+    build_e2e_run_context,
     get_silver_records,
     is_strict_persistence_snapshot_gap,
     run_pipeline_or_skip_transient,
 )
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.quarantine.unified import UnifiedQuarantineAdapter
 
 pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
 
@@ -46,6 +51,30 @@ async def _run_pipeline_or_skip_policy_envelope(ctx: PipelineRunContext) -> None
                 f"envelope: {exc}"
             )
         raise
+
+
+def _create_advanced_harness_context(
+    pipeline_name: str,
+    limit: int | None = 10,
+    run_type: RunType | None = None,
+    resume: bool = False,
+    query: str | None = None,
+    filter_ids: tuple[str, ...] | None = None,
+    filter_field: str | None = None,
+) -> PipelineRunContext:
+    """Build replay-stable IDs for advanced harness-mode E2E scenarios."""
+    return build_e2e_run_context(
+        pipeline_name,
+        limit=limit,
+        run_type=run_type,
+        resume=resume,
+        query=query,
+        filter_ids=filter_ids,
+        filter_field=filter_field,
+        run_id_seed=str(
+            deterministic_uuid_from_callsite("advanced.e2e.harness.context")
+        ),
+    )
 
 
 def _load_bronze_payload_rows(payload_path: Path) -> list[dict[str, object]]:
@@ -141,7 +170,7 @@ async def _seed_chembl_activity_silver(data_dir: Path, *, limit: int = 3) -> int
     # Keep the helper pinned to that canonical seed request to avoid VCR
     # mismatches under --vcr-record=none across scenario-specific cassettes.
     for candidate_limit in dict.fromkeys((3, limit)):
-        ctx = create_test_context("chembl_activity", limit=candidate_limit)
+        ctx = _create_advanced_harness_context("chembl_activity", limit=candidate_limit)
         await _run_pipeline_or_skip_policy_envelope(ctx)
         try:
             return assert_silver_table_has_records(
@@ -252,7 +281,7 @@ async def test_vacuum_respects_retention_days(
     await _seed_chembl_activity_silver(e2e_data_dir)
 
     # Advanced-scenario playback cassettes capture the follow-up run at limit=3.
-    ctx = create_test_context("chembl_activity", limit=3)
+    ctx = _create_advanced_harness_context("chembl_activity", limit=3)
     await _run_pipeline_or_skip_policy_envelope(ctx)
 
     # Verify table has records
@@ -285,7 +314,9 @@ def _make_threadless_quarantine_harness_adapter(
     async def _write_many_without_thread(records: list[dict[str, object]]) -> None:
         if not records:
             return
-        normalized_records = [quarantine._normalize_record(record) for record in records]
+        normalized_records = [
+            quarantine._normalize_record(record) for record in records
+        ]
         stored_records.extend(normalized_records)
         (Path(quarantine.base_path) / "_delta_log").mkdir(parents=True, exist_ok=True)
 
@@ -305,7 +336,10 @@ def _make_threadless_quarantine_harness_adapter(
                 continue
             if run_id is not None and record.get("run_id") != run_id:
                 continue
-            if expected_status is not None and record.get("dq_status") != expected_status:
+            if (
+                expected_status is not None
+                and record.get("dq_status") != expected_status
+            ):
                 continue
             matched.append(record)
         return matched[:limit]
@@ -313,10 +347,6 @@ def _make_threadless_quarantine_harness_adapter(
     quarantine.write_many = _write_many_without_thread  # type: ignore[method-assign]
     quarantine.inspect = _inspect_without_delta  # type: ignore[method-assign]
     return quarantine
-
-
-
-
 
 
 # ============================================================================
@@ -335,7 +365,7 @@ async def test_chembl_and_uniprot_sequential_run(e2e_data_dir: Path):
     where you need data from multiple sources.
     """
     # Step 1: Run ChEMBL Target pipeline
-    chembl_ctx = create_test_context("chembl_target", limit=3)
+    chembl_ctx = _create_advanced_harness_context("chembl_target", limit=3)
     await _run_pipeline_or_skip_policy_envelope(chembl_ctx)
 
     chembl_count = assert_silver_table_has_records(
@@ -343,7 +373,7 @@ async def test_chembl_and_uniprot_sequential_run(e2e_data_dir: Path):
     )
 
     # Step 2: Run UniProt Protein pipeline
-    uniprot_ctx = create_test_context("uniprot_protein", limit=3)
+    uniprot_ctx = _create_advanced_harness_context("uniprot_protein", limit=3)
     await _run_pipeline_or_skip_policy_envelope(uniprot_ctx)
 
     uniprot_count = assert_silver_table_has_records(
@@ -376,7 +406,7 @@ async def test_multiple_chembl_entities_parallel_safe(e2e_data_dir: Path):
     pipelines = ["chembl_target", "chembl_molecule", "chembl_activity"]
 
     for pipeline_name in pipelines:
-        ctx = create_test_context(pipeline_name, limit=2)
+        ctx = _create_advanced_harness_context(pipeline_name, limit=2)
         await _run_pipeline_or_skip_policy_envelope(ctx)
 
     # Verify all tables exist with data
@@ -436,7 +466,9 @@ async def test_pipeline_resumes_from_checkpoint(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.timeout(120)  # Two pipeline runs need more time
+@pytest.mark.timeout(
+    300
+)  # Two pipeline runs plus cold observability imports need more time
 async def test_failed_run_preserves_partial_data(
     e2e_data_dir: Path,
 ):
@@ -447,7 +479,7 @@ async def test_failed_run_preserves_partial_data(
     initial_count = await _seed_chembl_activity_silver(e2e_data_dir)
 
     # Seed fixture already provides the first run; execute the follow-up run only.
-    ctx2 = create_test_context("chembl_activity", limit=3)
+    ctx2 = _create_advanced_harness_context("chembl_activity", limit=3)
     await _run_pipeline_or_skip_policy_envelope(ctx2)
 
     # Data should be preserved/incremented
@@ -479,7 +511,7 @@ async def test_rebuild_clears_existing_data(
     await _seed_chembl_activity_silver(e2e_data_dir)
 
     # Rebuild run - should clear and recreate
-    ctx2 = create_test_context(
+    ctx2 = _create_advanced_harness_context(
         "chembl_activity",
         limit=2,
         run_type=RunType.REBUILD,
@@ -509,10 +541,10 @@ async def test_backfill_clears_silver_only(
     - BACKFILL should clear Silver
     - Gold is not cleared during backfill
     """
-    initial_count = await _seed_chembl_activity_silver(e2e_data_dir)
+    await _seed_chembl_activity_silver(e2e_data_dir)
 
     # Backfill run
-    ctx2 = create_test_context(
+    ctx2 = _create_advanced_harness_context(
         "chembl_activity",
         limit=3,
         run_type=RunType.BACKFILL,

@@ -32,6 +32,7 @@ from bioetl.domain.ports.noop import (
     NoOpTracing,
 )
 from bioetl.domain.types import RunID, RunType
+from tests.unit.application.core.runner_test_support import build_test_pipeline_runner
 
 
 # ---------------------------------------------------------------------------
@@ -207,7 +208,7 @@ class TestPipelineRunnerSpan:
         observer.__enter__ = MagicMock(return_value=observer)
         observer.__exit__ = MagicMock(return_value=None)
 
-        return PipelineRunner(
+        return build_test_pipeline_runner(
             config=config,
             runtime=runtime,
             services=services,

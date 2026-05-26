@@ -246,9 +246,22 @@ def git_grep_fixed(
     Architecture tests should prefer this over ``Path.rglob`` for repo-wide
     source scans, especially on Windows/WSL mounted worktrees.
     """
+    pathspecs = _git_grep_pathspecs(paths=paths, suffixes=suffixes)
+    if os.name == "nt" and len(pathspecs) > 8:
+        batched_matches = _git_grep_fixed_in_batches(
+            root=root,
+            patterns=patterns,
+            paths=paths,
+            excluded_prefixes=excluded_prefixes,
+            suffixes=suffixes,
+            timeout=timeout,
+        )
+        if batched_matches is not None:
+            return batched_matches
+
     command = _build_git_grep_command(
         patterns=patterns,
-        pathspecs=_git_grep_pathspecs(paths=paths, suffixes=suffixes),
+        pathspecs=pathspecs,
         excluded_prefixes=excluded_prefixes,
     )
     result = _run_git_grep(root=root, command=command, timeout=timeout)
@@ -315,11 +328,9 @@ def git_tracked_files(
             f"{result.returncode}: {result.stderr}"
         )
     files = tuple(
-        path
+        root / rel_path
         for rel_path in result.stdout.splitlines()
-        if (not suffixes or rel_path.endswith(suffixes))
-        for path in (root / rel_path,)
-        if path.exists()
+        if not suffixes or rel_path.endswith(suffixes)
     )
     return files
 

@@ -558,7 +558,7 @@ class TestUniProtProteinPipelineTransform:
 class TestUniProtProteinPipelineCreate:
     """Тесты создания UniProt пайплайна."""
 
-    def test_create_pipeline(
+    def test_create_pipeline__test_uni_prot_protein_pipeline_create_tests_integration_test_uniprot_pipeline_561(
         self,
         uniprot_config,
         uniprot_runtime,

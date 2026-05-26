@@ -219,6 +219,15 @@ required_panel_links_by_uid:
     - panel_id: 9102
       target_uid: bioetl-silver-reject-explorer
       link_titles: [Open Silver Reject Explorer]
+    - panel_id: 117
+      target_uid: bioetl-silver-reject-explorer
+      link_titles: [Open Silver Reject Explorer]
+    - panel_id: 121
+      target_uid: bioetl-silver-reject-explorer
+      link_titles: [Open Silver Reject Explorer for this reason]
+    - panel_id: 122
+      target_uid: bioetl-silver-reject-explorer
+      link_titles: [Open Silver Reject Explorer for this field]
   bioetl-workflow-overview:
     - panel_id: 9
       target_uid: bioetl-runtime

@@ -1,28 +1,28 @@
 ---
 id: test-stabilization-20260525
-title: Project test stabilization cycle
+title: Stabilize project tests
 task_id: test-stabilization-20260525
-created_at: '2026-05-25T06:42:49Z'
+created_at: '2026-05-25T22:13:00Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - tests
-summary: 'Stabilized pytest runner and suite: fixed scripts inventory startup hang
-  by excluding generated docs/site, converted two architecture guard tests to explicit
-  asserts for static governance, compacted runner_builder below hotspot LOC ratchet,
-  regenerated module coverage inventory and architecture dependency map from current
-  source, and verified final sharded suite green.'
+summary: Ran iterative BioETL sharded test stabilization until full sharded suite
+  passed. Fixed compatibility census/generated artifact drift, architecture metric
+  regressions, checkpoint timestamp ownership, quarantine timeseries complexity, and
+  governance ratchets. Final run run-20260526T004517 exit_code=0 with 19715 passed,
+  93 skipped.
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Project test stabilization cycle
+- Title: Stabilize project tests
 
 ## Outcome
 
-- Stabilized pytest runner and suite: fixed scripts inventory startup hang by excluding generated docs/site, converted two architecture guard tests to explicit asserts for static governance, compacted runner_builder below hotspot LOC ratchet, regenerated module coverage inventory and architecture dependency map from current source, and verified final sharded suite green.
+- Ran iterative BioETL sharded test stabilization until full sharded suite passed. Fixed compatibility census/generated artifact drift, architecture metric regressions, checkpoint timestamp ownership, quarantine timeseries complexity, and governance ratchets. Final run run-20260526T004517 exit_code=0 with 19715 passed, 93 skipped.
 
 ## Lessons learned
 

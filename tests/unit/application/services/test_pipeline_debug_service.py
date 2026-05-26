@@ -190,6 +190,6 @@ class TestStageBreakpoint:
 class TestDebugAction:
     """Tests for DebugAction enum."""
 
-    def test_all_values(self) -> None:
+    def test_all_values__test_debug_action_application_services_test_pipeline_debug_service_193(self) -> None:
         expected = {"continue", "skip_stage", "inspect", "abort", "dump_state"}
         assert {a.value for a in DebugAction} == expected

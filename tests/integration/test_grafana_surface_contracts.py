@@ -195,6 +195,7 @@ def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> Non
     required_metrics = [
         "bioetl_control_plane_reads_total",
         "bioetl_control_plane_read_duration_seconds",
+        "bioetl_checkpoint_age_seconds",
         "bioetl_checkpoint_load_events_total",
         "bioetl_checkpoint_save_events_total",
         "bioetl_checkpoint_operator_operations_total",

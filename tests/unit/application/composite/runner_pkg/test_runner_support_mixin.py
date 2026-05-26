@@ -328,6 +328,7 @@ async def test_save_checkpoint_safe_when_success_then_returns_true() -> None:
             "status": "succeeded",
         },
     )
+    harness._metrics.set_gauge.assert_called_once()
     harness._metrics.observe_histogram.assert_called_once()
     harness._tracing.get_tracer.assert_called_once_with("bioetl.checkpoint")
     harness._checkpoint_span.set_attribute.assert_called_with(

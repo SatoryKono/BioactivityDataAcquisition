@@ -53,6 +53,13 @@ def _extract_manifest_id(metadata: JsonDict) -> str | None:
     return text or None
 
 
+def _normalize_saved_metadata(metadata: JsonDict | None) -> JsonDict:
+    """Return persisted metadata enriched with a checkpoint save timestamp."""
+    normalized = dict(metadata or {})
+    normalized.setdefault("checkpoint_saved_at_epoch_seconds", float(time.time()))
+    return normalized
+
+
 def _read_json_file(path: Path) -> JsonDict:
     with open(path, encoding="utf-8") as f:
         payload = f.read()
@@ -137,11 +144,12 @@ class LocalCheckpointAdapter:
         key = self._get_key(pipeline)
         full_path = self.base_path / key
         full_path.parent.mkdir(parents=True, exist_ok=True)
+        saved_metadata = _normalize_saved_metadata(metadata)
 
         checkpoint_data = {
             "pipeline": pipeline,
             "run_id": str(run_id),
-            "metadata": metadata or {},
+            "metadata": saved_metadata,
             "version": "2.0",
         }
         checkpoint_json = serialize_to_json(checkpoint_data, ensure_ascii=False)
@@ -149,7 +157,7 @@ class LocalCheckpointAdapter:
         history_path = _build_history_entry_path(self.base_path, pipeline, run_id)
         history_path.parent.mkdir(parents=True, exist_ok=True)
         _atomic_write_text(history_path, checkpoint_json)
-        manifest_id = _extract_manifest_id(metadata or {})
+        manifest_id = _extract_manifest_id(saved_metadata)
         if manifest_id is not None:
             manifest_index = {
                 "manifest_id": manifest_id,

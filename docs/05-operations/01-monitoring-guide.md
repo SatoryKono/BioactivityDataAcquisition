@@ -366,6 +366,9 @@ Record-level dashboard для `FILTERED_OUT_SILVER` записей (quarantine-b
 
 - **Filtered Records Table**: полный список отфильтрованных записей с server-side filtering/pagination.
 - **Selected Record Details**: exact reject context по выбранному `payload_hash`.
+- **Filtered Rejects Over Time / Reject Ratio vs Bronze Over Time**: temporal
+  trend panels over the same scoped quarantine backend, useful to separate
+  one-off spikes from sustained reject pressure.
 - **Top Reject Reasons / Fields / Signatures**: агрегаты в том же scoped контексте.
 - **Review: First Action / No-Data Semantics**: поясняет, когда `0` rejects является OK,
   а когда `No data`, `unknown` pipeline, unsupported filter chain,
@@ -383,6 +386,8 @@ Record-level dashboard для `FILTERED_OUT_SILVER` записей (quarantine-b
   `payload_hash` остаются Explorer-only forensic filters.
 - **Drilldown**: navigation bus `0. Control Plane`, `1. Overview`,
   `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`;
+  DQ panels can now open scoped Explorer views directly for
+  `reason_code`/`field` narrowing;
   row-level link в CLI-команду остаётся для action handoff.
 
 #### 5. Workflow

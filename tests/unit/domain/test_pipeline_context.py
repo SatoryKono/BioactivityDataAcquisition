@@ -55,7 +55,7 @@ class TestPipelineContext:
         assert context.logger is not None
         assert context.replay_timestamp_anchor is None
 
-    def test_context_is_frozen(self, context: PipelineContext) -> None:
+    def test_context_is_frozen__test_pipeline_context_unit_domain_test_pipeline_context_58(self, context: PipelineContext) -> None:
         """Context should be immutable (frozen dataclass)."""
         from dataclasses import FrozenInstanceError
 

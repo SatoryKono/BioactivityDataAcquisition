@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 from tests.unit.application.services.test_run_manifest_inspection_service import *  # noqa: F401,F403
+from tests.unit.application.services.test_run_manifest_inspection_service import _InMemoryEffectiveConfigArtifactStore, _InMemoryRunLedgerStore, _InMemoryRunManifestStore, _VALID_EFFECTIVE_CONFIG_HASH, _make_manifest
 
 def test_verify_confirms_cross_store_effective_config_replay_evidence() -> None:
     manifest_store = _InMemoryRunManifestStore()

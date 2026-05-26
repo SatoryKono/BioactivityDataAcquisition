@@ -262,7 +262,7 @@ class TestMolecularWeightConstants:
         """Test MAX_MOLECULAR_WEIGHT is set to 100000.0."""
         assert MAX_MOLECULAR_WEIGHT == pytest.approx(100000.0)
 
-    def test_constants_are_valid_range(self) -> None:
+    def test_constants_are_valid_range__test_molecular_weight_constants_unit_domain_test_validation_265(self) -> None:
         """Test that min < max for valid range."""
         assert MIN_MOLECULAR_WEIGHT < MAX_MOLECULAR_WEIGHT
 
@@ -349,7 +349,7 @@ class TestValidateMolecularWeight:
             342.3
         )  # Whitespace handled
 
-    def test_boundary_values(self) -> None:
+    def test_boundary_values__test_validate_molecular_weight_unit_domain_test_validation_352(self) -> None:
         """Test boundary values for molecular weight validation."""
         # Just above 0 (valid)
         assert validate_molecular_weight(0.0000000001) is not None

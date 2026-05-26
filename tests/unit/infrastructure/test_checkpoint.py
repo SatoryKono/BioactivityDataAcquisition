@@ -86,7 +86,7 @@ class TestLocalCheckpoint:
         assert loaded_run_id == run_id
         assert loaded_metadata == metadata
 
-    async def test_delete_removes_file(self, tmp_path):
+    async def test_delete_removes_file__test_local_checkpoint_unit_infrastructure_test_checkpoint_89(self, tmp_path):
         """Test delete removes checkpoint file.
 
         Flat structure: {base_path}/{pipeline}.json

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import time
+
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
 )
@@ -28,6 +30,26 @@ from bioetl.domain.types.checkpoint_compatibility_result import (
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 _OPERATION_ERRORS = _RF005_OPERATION_ERRORS
+
+
+def _set_checkpoint_saved_at(
+    metrics: MetricsPort | None,
+    *,
+    pipeline_name: str,
+    checkpoint_saved_at_epoch_seconds: float | int | str | None,
+) -> None:
+    """Publish the latest persisted checkpoint timestamp when available."""
+    if metrics is None or checkpoint_saved_at_epoch_seconds is None:
+        return
+    try:
+        value = float(checkpoint_saved_at_epoch_seconds)
+    except (TypeError, ValueError):
+        return
+    metrics.set_gauge(
+        "bioetl_checkpoint_saved_at_seconds",
+        value,
+        {"pipeline": pipeline_name},
+    )
 
 
 class CheckpointRuntimeService:
@@ -277,6 +299,14 @@ class CheckpointRuntimeService:
             self._emit_checkpoint_load_status("missing")
             return None
 
+        _, raw_metadata = checkpoint_data
+        _set_checkpoint_saved_at(
+            self._metrics,
+            pipeline_name=self._pipeline_name,
+            checkpoint_saved_at_epoch_seconds=raw_metadata.get(
+                "checkpoint_saved_at_epoch_seconds"
+            ),
+        )
         checkpoint_metadata = self._resolve_checkpoint_metadata(checkpoint_data)
         compatible_checkpoint, status_already_emitted = (
             self._validate_loaded_checkpoint(
@@ -306,6 +336,11 @@ class CheckpointRuntimeService:
             pipeline=self._pipeline_name,
             run_id=self._run_id,
             metadata=metadata.to_dict(),
+        )
+        _set_checkpoint_saved_at(
+            self._metrics,
+            pipeline_name=self._pipeline_name,
+            checkpoint_saved_at_epoch_seconds=time.time(),
         )
 
     async def delete_checkpoint(self) -> None:

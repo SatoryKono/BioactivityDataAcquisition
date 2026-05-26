@@ -133,7 +133,7 @@ class TestPubMedDateNormalization:
         )
 
     @pytest.mark.asyncio
-    async def test_all_date_fields_format(
+    async def test_all_date_fields_format__test_pub_med_date_normalization_integration_pipelines_test_pubmed_date_normalization_136(
         self,
         transformer: PubMedPublicationTransformer,
         pipeline_context: PipelineContext,

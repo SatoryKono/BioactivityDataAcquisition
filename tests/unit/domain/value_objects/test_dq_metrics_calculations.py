@@ -308,7 +308,7 @@ class TestCollectAllColumns:
 class TestComputeColumnStats:
     """Tests for compute_column_stats function."""
 
-    def test_basic_stats(self) -> None:
+    def test_basic_stats__test_compute_column_stats_domain_value_objects_test_dq_metrics_calculations_311(self) -> None:
         """Test basic column stats for simple records."""
         records = [
             {"value": 1.0, "name": "a"},
@@ -333,7 +333,7 @@ class TestComputeColumnStats:
         result = compute_column_stats([])
         assert result == {}
 
-    def test_all_null_column(self) -> None:
+    def test_all_null_column__test_compute_column_stats_domain_value_objects_test_dq_metrics_calculations_336(self) -> None:
         """Test column with all None values has null_rate=1.0."""
         records = [{"col": None}, {"col": None}]
         result = compute_column_stats(records)

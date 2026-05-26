@@ -679,7 +679,7 @@ class TestInChIKey:
         key = InChIKey("  BSYNRYMUTXBXSQ-UHFFFAOYSA-N  ")
         assert key.value == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
 
-    def test_connectivity_layer(self) -> None:
+    def test_connectivity_layer__test_in_ch_i_key_domain_value_objects_test_identifiers_682(self) -> None:
         """Test connectivity layer property."""
         key = InChIKey("BSYNRYMUTXBXSQ-UHFFFAOYSA-N")
         assert key.connectivity_layer == "BSYNRYMUTXBXSQ"
@@ -1060,7 +1060,7 @@ class TestMolecularWeight:
         # Should round to 10 decimal places
         assert mw.value == pytest.approx(180.1234567890)
 
-    def test_below_minimum_raises(self) -> None:
+    def test_below_minimum_raises__test_molecular_weight_domain_value_objects_test_identifiers_1063(self) -> None:
         """Test that MW below minimum raises ValueError."""
         with pytest.raises(ValueError, match="outside range"):
             MolecularWeight(5.0)  # Below default min of 10.0

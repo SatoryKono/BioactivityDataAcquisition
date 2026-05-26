@@ -55,3 +55,49 @@ def test_first_party_runtime_uses_typed_pipeline_runner_dependencies() -> None:
         "Production PipelineRunner construction must use PipelineRunnerDependencies "
         "or a composition factory, not legacy direct kwargs:\n" + "\n".join(violations)
     )
+
+
+@pytest.mark.architecture
+def test_pipeline_runner_constructor_accepts_only_dependency_object() -> None:
+    """The application runner constructor must not expose legacy DI kwargs."""
+    runner_path = ROOT / "src" / "bioetl" / "application" / "core" / "runner.py"
+    tree = ast.parse(runner_path.read_text(encoding="utf-8"))
+
+    init_node: ast.FunctionDef | None = None
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef) and node.name == "PipelineRunner":
+            init_node = next(
+                (
+                    child
+                    for child in node.body
+                    if isinstance(child, ast.FunctionDef) and child.name == "__init__"
+                ),
+                None,
+            )
+            break
+
+    assert init_node is not None
+    kwonly_args = {arg.arg for arg in init_node.args.kwonlyargs}
+    positional_args = {arg.arg for arg in init_node.args.args}
+
+    assert "dependencies" in positional_args
+    assert not (kwonly_args | positional_args) & LEGACY_RUNNER_KWARGS
+
+
+@pytest.mark.architecture
+def test_pipeline_runner_legacy_dependency_resolver_is_removed() -> None:
+    """Legacy constructor kwargs must not survive as a private shim."""
+    support_path = (
+        ROOT
+        / "src"
+        / "bioetl"
+        / "application"
+        / "core"
+        / "_runner_dependency_support.py"
+    )
+    tree = ast.parse(support_path.read_text(encoding="utf-8"))
+
+    function_names = {
+        node.name for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)
+    }
+    assert "resolve_runner_dependencies" not in function_names

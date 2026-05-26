@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core._runner_dependency_support import (
     PipelineRunnerDependencies,
-    resolve_runner_dependencies,
 )
 from bioetl.application.core._runner_support import PipelineRunnerSupportMixin
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
@@ -27,25 +26,12 @@ if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
     from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.batch_executor import BatchExecutor
-    from bioetl.application.core.lifecycle.checkpoint_manager import (
-        CheckpointRuntimeService,
-    )
-    from bioetl.application.core.lifecycle.lock_runtime_service import (
-        LockRuntimeService,
-    )
     from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
     from bioetl.application.core.pipeline_observability_service_protocols import (
         PipelineRunnerServicesProtocol,
     )
-    from bioetl.application.core.postrun.service import PostrunService
-    from bioetl.application.core.preflight.service import PreflightService
-    from bioetl.application.observability.observer import PipelineObserver
     from bioetl.application.services.control_plane.run_ledger_service import (
         RunLedgerService,
-    )
-    from bioetl.application.services.medallion_lifecycle import (
-        MedallionLifecycleService,
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
@@ -74,47 +60,17 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         runtime: RuntimeConfig,
         services: PipelineRunnerServicesProtocol,
         context: PipelineContext,
-        dependencies: PipelineRunnerDependencies | None = None,
+        dependencies: PipelineRunnerDependencies,
         *,
         pipeline: BasePipeline | None = None,
         tracer: TracingPort | None = None,
         logger: LoggerPort | None = None,
-        executor: object | None = None,
-        checkpoint_manager: object | None = None,
-        shutdown_signal: object | None = None,
-        lock_runtime_service: object | None = None,
-        lock_manager: object | None = None,
-        preflight: object | None = None,
-        postrun: object | None = None,
-        lifecycle_service: object | None = None,
-        observer: object | None = None,
     ) -> None:
         """Initialize runner collaborators and enforce explicit tracer injection."""
         self._config = config
         self._runtime = runtime
         self._services = services
         self._context = context
-        if dependencies is None:
-            dependencies = resolve_runner_dependencies(
-                executor=cast("BatchExecutor | None", executor),
-                checkpoint_manager=cast(
-                    "CheckpointRuntimeService | None",
-                    checkpoint_manager,
-                ),
-                shutdown_signal=cast("ShutdownSignal | None", shutdown_signal),
-                lock_runtime_service=cast(
-                    "LockRuntimeService | None",
-                    lock_runtime_service,
-                ),
-                lock_manager=cast("LockRuntimeService | None", lock_manager),
-                preflight=cast("PreflightService | None", preflight),
-                postrun=cast("PostrunService | None", postrun),
-                lifecycle_service=cast(
-                    "MedallionLifecycleService | None",
-                    lifecycle_service,
-                ),
-                observer=cast("PipelineObserver | None", observer),
-            )
         self._executor = dependencies.executor
         self._checkpoint_manager = dependencies.checkpoint_manager
         self._shutdown_signal = dependencies.shutdown_signal

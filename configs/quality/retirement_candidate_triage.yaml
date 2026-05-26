@@ -39,13 +39,6 @@ repo_wide_zero_import_classification:
       review_by: "2026-08-20"
       linked_issue: "#4541"
       rationale: Module entrypoint for `python -m bioetl`; static import scans stay at zero because the interpreter dispatches the module directly.
-    - module_path: src/bioetl/application/composite/dependency_join_support.py
-      module_name: bioetl.application.composite.dependency_join_support
-      disposition: retain_public_facade
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Public dependency-join facade retained as the sanctioned import seam over split helper modules.
     - module_path: src/bioetl/application/core/batch_execution_lifecycle.py
       module_name: bioetl.application.core.batch_execution_lifecycle
       disposition: retain_public_facade

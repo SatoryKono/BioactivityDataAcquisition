@@ -135,7 +135,7 @@ class AdapterMetricsRecorder:
         self.metrics.observe_histogram(
             "bioetl_adapter_batch_size",
             float(size),
-            labels,
+            {"provider": labels["provider"], "endpoint": labels["endpoint"]},
         )
 
     def record_dropped_duplicates(self, entity_type: str, count: int = 1) -> None:

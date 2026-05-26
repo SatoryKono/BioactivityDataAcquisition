@@ -1,6 +1,6 @@
 # Сводка evidence: project-package-topology
 
-Дата: 2026-05-21
+Дата: 2026-05-25
 Статус: refreshed
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
@@ -15,8 +15,12 @@ latest package-count baseline.
 
 Current-baseline note (2026-05-25): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
-counts. Raw files dated before `2026-05-21` are retained only as historical
-evidence and must be refreshed before they are used as line-item topology
+counts. The current baseline is reconciled with
+`reports/quality/module-coverage-inventory.json` snapshot `2026-05-25`
+(`source_module_count=1936`,
+`source_tree_sha256=87d54e890b365bc3659f90c5e672c02608b1e323b9b372ce6a7f2d5694af961e`).
+Raw files dated before `2026-05-25` are retained only as historical detailed
+inputs and must be refreshed before they are used as line-item topology
 evidence.
 
 > Это summary — repo-only evidence layer для package-topology
@@ -45,8 +49,8 @@ Collected: `6`
 
 - The repository is not flat at the top level; it is split into clear zones for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct first-order package groups.
-- Current Python file count under `src/bioetl` is `1903`.
-- Current layer file counts are: `domain=543`, `application=539`, `infrastructure=466`, `composition=239`, `interfaces=114`.
+- Current Python file count under `src/bioetl` is `1936`.
+- Current layer file counts are: `domain=547`, `application=560`, `infrastructure=468`, `composition=244`, `interfaces=115`.
 - Current first-order package counts are: `domain=22`, `application=6`, `infrastructure=20`, `composition=6`, `interfaces=2`.
 - `domain` and `application` are now the broadest package surfaces by Python file count; `infrastructure` remains the broadest adapter and external-system implementation boundary.
 
@@ -54,6 +58,6 @@ Collected: `6`
 
 - This package-topology evidence confirms structure, not health, ownership, or API quality.
 - The evidence does not yet inspect deeper module contents within each package beyond structural partitioning.
-- Historical raw evidence files under this evidence pack still carry `2026-03-20`
+- Historical raw evidence files under this evidence pack still carry older
   snapshots; refresh those raw files before using them for line-item topology
   decisions.

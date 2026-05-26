@@ -2,13 +2,13 @@
 id: test-stabilization-20260525
 title: Stabilize project tests
 task_id: test-stabilization-20260525
-created_at: '2026-05-25T13:00:41Z'
+created_at: '2026-05-25T18:37:31Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- <add-source-ref>
+- tests
 summary: Active task session context.
-query: pytest sharded bootstrap pipeline failures
+query: Stabilize project tests
 ---
 
 # Session note
@@ -16,7 +16,7 @@ query: pytest sharded bootstrap pipeline failures
 ## Task
 
 - Title: Stabilize project tests
-- Retrieval query: pytest sharded bootstrap pipeline failures
+- Retrieval query: Stabilize project tests
 
 ## Retrieved context
 

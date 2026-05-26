@@ -358,6 +358,192 @@
     },
     {
       "datasource": "Quarantine Explorer",
+      "description": "Selected-range reject_count per time bucket from /ops/quarantine/filtered-timeseries for the current pipeline/run_type/reason_code/field/quarantine_run_id filters. Use this compact trend to distinguish one-off spikes from sustained reject pressure before drilling into top reason/field tables.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Rejects",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "noValue": "No reject trend returned for current filters.",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "rows",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/quarantine/filtered-timeseries?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${quarantine_run_id}&from=${__from:date:iso}&to=${__to:date:iso}&bucket=1h",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Track Filtered Rejects Over Time",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "bronze_records": true,
+              "reject_ratio": true
+            },
+            "renameByName": {
+              "bucket_start": "Time",
+              "reject_count": "Filtered Rejects"
+            }
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Quarantine Explorer",
+      "description": "Selected-range reject_ratio trend versus Bronze denominator from /ops/quarantine/filtered-timeseries. A flat zero with bronze_records=0 means denominator evidence is missing, not that the scope is healthy. Use it to spot sustained reject pressure versus isolated spikes.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Reject Ratio",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "noValue": "No reject-ratio trend returned for current filters.",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "rows",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/quarantine/filtered-timeseries?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${quarantine_run_id}&from=${__from:date:iso}&to=${__to:date:iso}&bucket=1h",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Track Reject Ratio vs Bronze Over Time",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "bronze_records": true,
+              "reject_count": true
+            },
+            "renameByName": {
+              "bucket_start": "Time",
+              "reject_ratio": "Reject Ratio"
+            }
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Quarantine Explorer",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -371,7 +557,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 18
+        "y": 26
       },
       "id": 5,
       "options": {
@@ -419,7 +605,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 18
+        "y": 26
       },
       "id": 6,
       "options": {
@@ -467,7 +653,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 18
+        "y": 26
       },
       "id": 7,
       "options": {
@@ -533,7 +719,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 34
       },
       "id": 8,
       "options": {
@@ -580,7 +766,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 46
       },
       "id": 9,
       "options": {

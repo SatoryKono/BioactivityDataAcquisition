@@ -492,7 +492,7 @@ class TestStorageBundleAdditionalPaths:
         gold_exporter.clear.assert_called_once_with("chembl.activity")
 
     @pytest.mark.asyncio
-    async def test_clear_delta_with_table_name(
+    async def test_clear_delta_with_table_name__test_storage_bundle_additional_paths_infrastructure_factories_test_storage_adapter_495(
         self,
         storage_adapter: StorageBundle,
         mock_silver_writer: MagicMock,
@@ -633,7 +633,7 @@ class TestStorageBundleAdditionalPaths:
         assert not gold_src.exists()
 
     @pytest.mark.asyncio
-    async def test_cleanup_bronze_delegates(
+    async def test_cleanup_bronze_delegates__test_storage_bundle_additional_paths_infrastructure_factories_test_storage_adapter_636(
         self, storage_adapter: StorageBundle, mock_bronze_writer: MagicMock
     ) -> None:
         """cleanup_bronze should delegate to Bronze writer."""

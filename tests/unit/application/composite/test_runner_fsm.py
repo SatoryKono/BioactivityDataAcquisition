@@ -1178,7 +1178,7 @@ class TestFSMCheckpointDeletion:
         )
 
     @pytest.mark.asyncio
-    async def test_checkpoint_delete_error_is_non_fatal(
+    async def test_checkpoint_delete_error_is_non_fatal__test_f_s_m_checkpoint_deletion_application_composite_test_runner_fsm_1181(
         self,
         mock_config: MagicMock,
         mock_logger: MagicMock,

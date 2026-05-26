@@ -161,7 +161,7 @@ class TestRetryingDataSourceDecoratorBasics:
         assert decorator.provider_name == "test_provider"
 
     @pytest.mark.asyncio
-    async def test_context_manager_delegated(
+    async def test_context_manager_delegated__test_retrying_data_source_decorator_basics_adapters_decorators_test_retry_decorator_164(
         self, mock_data_source: MockDataSource, retry_config: RetryConfig
     ) -> None:
         """Test that context manager methods are delegated."""
@@ -173,7 +173,7 @@ class TestRetryingDataSourceDecoratorBasics:
             assert ds is decorator
 
     @pytest.mark.asyncio
-    async def test_aclose_delegated(
+    async def test_aclose_delegated__test_retrying_data_source_decorator_basics_adapters_decorators_test_retry_decorator_176(
         self, mock_data_source: MockDataSource, retry_config: RetryConfig
     ) -> None:
         """Test that aclose is delegated."""

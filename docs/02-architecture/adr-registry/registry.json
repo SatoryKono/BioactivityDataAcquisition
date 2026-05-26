@@ -1,6 +1,6 @@
 {
-  "generated": "2026-05-21T12:51:45.525689",
-  "total_adrs": 47,
+  "generated": "2026-05-26T06:46:11.207508",
+  "total_adrs": 48,
   "adrs": [
     {
       "adr_number": "001",
@@ -904,16 +904,39 @@
         "ADR-046"
       ],
       "tags": []
+    },
+    {
+      "adr_number": "048",
+      "title": "Domain Schema Boundary and Runtime Pandera Compatibility",
+      "file_path": "ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md",
+      "status": "accepted",
+      "source_status": "Accepted",
+      "category": "Architecture",
+      "owner": "BioETL Team",
+      "decision_date": "2026-05-26",
+      "last_reviewed": "2026-05-26",
+      "context": "BioETL intentionally keeps Pandera-backed schemas in the domain layer because\nthey are data contracts for Silver and Gold records, not infrastructure adapters.\nThat policy was documented in several...",
+      "decision": "### Domain schema boundary\nDomain packages may use Pandera/Pandas only as schema-contract representation\ninside:\n- `src/bioetl/domain/schemas/`\n- `src/bioetl/domain/contracts/`\nThose classes are va...",
+      "consequences": "### Positive\n1. Domain schema contracts remain explicit without weakening the no-I/O domain rule.\n1. Pandera/Pandas imports cannot spread into domain behavior or application logic.\n1. Runtime impor...",
+      "supersedes": [],
+      "superseded_by": [],
+      "related": [
+        "ADR-004",
+        "ADR-018",
+        "ADR-033",
+        "ADR-037"
+      ],
+      "tags": []
     }
   ],
   "stats": {
     "by_status": {
-      "accepted": 45,
+      "accepted": 46,
       "superseded": 2
     },
     "by_category": {
       "Storage": 3,
-      "Architecture": 7,
+      "Architecture": 8,
       "Locking": 1,
       "Data Modeling": 3,
       "Observability": 5,

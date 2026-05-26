@@ -44,6 +44,7 @@ def mock_metrics():
     """Create mock MetricsPort."""
     metrics = MagicMock()
     metrics.increment_counter = MagicMock()
+    metrics.set_gauge = MagicMock()
     return metrics
 
 
@@ -338,6 +339,29 @@ class TestCheckpointManagerSaveCheckpoint:
         call_kwargs = mock_checkpoint_port.save.call_args.kwargs
         assert call_kwargs["pipeline"] == "test_pipeline"
         assert call_kwargs["metadata"] == {"records_processed": 500}
+
+    async def test_save_checkpoint_sets_checkpoint_saved_at_gauge(
+        self, mock_checkpoint_port, mock_logger, mock_metrics
+    ) -> None:
+        run_id = deterministic_uuid_from_callsite("replay-sensitive")
+        manager = CheckpointRuntimeService(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="test_pipeline",
+            run_id=run_id,
+            resume=True,
+            metrics=mock_metrics,
+        )
+
+        await manager.save_checkpoint(CheckpointMetadata(records_processed=500))
+
+        mock_metrics.set_gauge.assert_called_once()
+        assert mock_metrics.set_gauge.call_args.args[0] == (
+            "bioetl_checkpoint_saved_at_seconds"
+        )
+        assert mock_metrics.set_gauge.call_args.args[2] == {
+            "pipeline": "test_pipeline"
+        }
 
 
 @pytest.mark.unit

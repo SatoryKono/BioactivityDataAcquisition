@@ -23,7 +23,7 @@ class TestGetBioProviderConfigs:
     """Tests for bio ProviderConfig registry entries."""
 
     @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")
-    def test_contains_expected_provider_keys(
+    def test_contains_expected_provider_keys__test_get_bio_provider_configs_composition_providers_test_registration_bio_provider_configs_26(
         self,
         mock_get_rate_limits: MagicMock,
     ) -> None:
