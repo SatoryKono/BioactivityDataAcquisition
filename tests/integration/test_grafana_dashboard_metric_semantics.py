@@ -178,7 +178,7 @@ def _assert_lineage_control_plane_ownership_handoff() -> None:
         for panel in get_dashboard_panels(control_plane_dashboard)
         if panel.get("title")
     }
-    dq_handoff = dq_panels["Review: Control-plane lineage handoff"]
+    dq_handoff = dq_panels["Review: Lineage Handoff to Control Plane"]
     control_plane_lineage = control_plane_panels["Monitor: Lineage Refs Missing"]
     assert dq_handoff.get("type") == "text"
     dq_content = str(dq_handoff.get("options", {}).get("content", "")).lower()

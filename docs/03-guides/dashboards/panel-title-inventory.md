@@ -81,12 +81,12 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 9402 | ID |
 | bioetl-dq-v2.json | 9403 | Processed Records |
 | bioetl-dq-v2.json | 101 | Latest Successful Data Timestamp |
-| bioetl-dq-v2.json | 116 | Review: Control-plane lineage handoff |
+| bioetl-dq-v2.json | 116 | Review: Lineage Handoff to Control Plane |
 | bioetl-dq-v2.json | 117 | Silver Filter Rejects |
 | bioetl-dq-v2.json | 118 | Silver Filter Rejects by Pipeline |
 | bioetl-dq-v2.json | 121 | Top Silver Reject Reasons (Pareto) |
 | bioetl-dq-v2.json | 122 | Top Silver Reject Fields |
-| bioetl-dq-v2.json | 150 | Control-plane aggregates note |
+| bioetl-dq-v2.json | 150 | Review: Aggregate Control-plane Handoff |
 | bioetl-dq-v2.json | 151 | Gold Strict Validation Failures |
 | bioetl-dq-v2.json | 152 | Silver Filter Reject Accounting Mismatch |
 | bioetl-dq-v2.json | 153 | Data Quality Score Trend (Volume-weighted) |
