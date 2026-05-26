@@ -102,9 +102,11 @@ def _candidate_python_paths_via_rg(root: Path) -> tuple[Path, ...] | None:
 
     command = [
         "rg",
-        "--files-with-matches",
-        "-F",
-        PACKAGE_ROOT_MODULE,
+        "-n",
+        "-e",
+        _PACKAGE_ROOT_IMPORT_SOURCE_PATTERN_TEXTS[0],
+        "-e",
+        _PACKAGE_ROOT_IMPORT_SOURCE_PATTERN_TEXTS[1],
         "-g",
         "*.py",
         pathspec,
@@ -119,7 +121,7 @@ def _candidate_python_paths_via_rg(root: Path) -> tuple[Path, ...] | None:
 
     if completed.returncode not in {0, 1}:
         return None
-    return _paths_from_file_output(stdout)
+    return _paths_from_matching_line_output(stdout)
 
 
 def _candidate_python_paths_via_git_grep(root: Path) -> tuple[Path, ...] | None:

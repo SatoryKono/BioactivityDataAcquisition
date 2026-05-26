@@ -109,6 +109,21 @@ def test_hidden_windows_subprocess_kwargs_prevent_console_popups() -> None:
     assert startupinfo.wShowWindow == 0
 
 
+def test_git_repo_root_uses_packaged_root_for_repo_memory_paths(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo_root = Path(notes_module.__file__).parents[2]
+    note_path = repo_root / "src" / "memory" / "episodic" / "sessions" / "3552.md"
+
+    def unexpected_subprocess_run(*args: object, **kwargs: object) -> object:
+        _ = (args, kwargs)
+        raise AssertionError("packaged memory path should not shell out to rev-parse")
+
+    monkeypatch.setattr(notes_module.subprocess, "run", unexpected_subprocess_run)
+
+    assert notes_module._git_repo_root(note_path) == repo_root
+
+
 def test_parse_markdown_note_timeout_does_not_wait_for_blocked_reader(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
