@@ -250,6 +250,9 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     env["GRAFANA_PASSWORD"] = config.password
     env["GRAFANA_SCREENSHOT_OUTPUT_DIR"] = str(config.output_dir)
     env["GRAFANA_SCREENSHOT_TIMEOUT_MS"] = str(int(config.timeout_seconds * 1000))
+    env["GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS"] = str(
+        max(int(config.timeout_seconds * 1000), 180000)
+    )
     if config.selected_uids:
         env["GRAFANA_SCREENSHOT_UIDS"] = ",".join(config.selected_uids)
     return env

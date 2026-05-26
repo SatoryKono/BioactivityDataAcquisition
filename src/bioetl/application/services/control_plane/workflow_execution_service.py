@@ -1,4 +1,4 @@
-"""Compatibility wrapper for workflow execution service."""
+"""Facade for workflow execution service."""
 
 from __future__ import annotations
 

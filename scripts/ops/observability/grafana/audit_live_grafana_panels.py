@@ -24,6 +24,7 @@ DEFAULT_OUTPUT_PATH = Path("reports/observability/grafana/live-panel-audit.json"
 DEFAULT_PIPELINE = "chembl_target"
 DEFAULT_RUN_TYPE = "incremental"
 DEFAULT_RANGE_HOURS = 24
+_HEALTH_PROBE_PATHS: tuple[str, ...] = ("/health/live", "/health")
 _DASHBOARD_DIR = Path("grafana/dashboards")
 
 
@@ -290,19 +291,30 @@ def _candidate_app_base_urls(config: AuditConfig) -> tuple[str, ...]:
     return tuple(deduped)
 
 
+def _probe_app_health(candidate_base_url: str) -> tuple[str, object] | None:
+    for path in _HEALTH_PROBE_PATHS:
+        try:
+            payload = _fetch_json(f"{candidate_base_url}{path}")
+        except (HTTPError, URLError, OSError, json.JSONDecodeError):
+            continue
+        return (path, payload)
+    return None
+
+
 def _resolve_app_base_url(config: AuditConfig) -> str:
     attempted: list[str] = []
     for candidate in _candidate_app_base_urls(config):
-        attempted.append(candidate)
-        try:
-            payload = _fetch_json(f"{candidate}/health")
-        except (HTTPError, URLError, OSError, json.JSONDecodeError):
+        probe = _probe_app_health(candidate)
+        if probe is None:
+            attempted.extend(f"{candidate}{path}" for path in _HEALTH_PROBE_PATHS)
             continue
+        path, payload = probe
+        attempted.append(f"{candidate}{path}")
         if isinstance(payload, dict):
             return candidate
     attempted_urls = ", ".join(attempted)
     raise OSError(
-        "Could not reach Quarantine Explorer backend via /health using candidates: "
+        "Could not reach Quarantine Explorer backend via canonical health probes using candidates: "
         f"{attempted_urls}"
     )
 

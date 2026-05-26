@@ -1,4 +1,4 @@
-"""Compatibility wrapper for the replay certification ownership package."""
+"""Facade for the replay certification ownership package."""
 
 from __future__ import annotations
 

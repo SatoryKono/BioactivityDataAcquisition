@@ -1,4 +1,4 @@
-"""Compatibility wrapper for the run-manifest ownership package."""
+"""Facade for the run-manifest ownership package."""
 
 from __future__ import annotations
 

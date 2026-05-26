@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import subprocess
 from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import date
@@ -21,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 POLICY_YAML = ROOT / "configs" / "quality" / "determinism_identity_policy.yaml"
 POLICY_REVIEW_DATE = date(2026, 5, 15)
 SCAN_ROOTS = (ROOT / "src" / "bioetl",)
+UUID4_SCAN_TIMEOUT_SECONDS = 120.0
 REQUIRED_ENTRY_FIELDS = frozenset(
     {
         "path",
@@ -99,10 +101,44 @@ def _is_uuid4_call(node: ast.AST) -> bool:
     return isinstance(node.func, ast.Attribute) and node.func.attr == "uuid4"
 
 
+def _iter_uuid4_candidate_paths(root: Path) -> tuple[Path, ...]:
+    """Use git's index scan to avoid parsing every source file on slow mounts."""
+    try:
+        result = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(ROOT),
+                "grep",
+                "-l",
+                "-F",
+                "uuid4",
+                "--",
+                root.relative_to(ROOT).as_posix(),
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=UUID4_SCAN_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return tuple(root.rglob("*.py"))
+
+    if result.returncode == 1:
+        return ()
+    if result.returncode != 0:
+        return tuple(root.rglob("*.py"))
+    return tuple(
+        ROOT / line
+        for line in result.stdout.splitlines()
+        if line.endswith(".py")
+    )
+
+
 def _iter_uuid4_call_sites() -> set[Uuid4CallSite]:
     discovered: set[Uuid4CallSite] = set()
     for root in SCAN_ROOTS:
-        for path in root.rglob("*.py"):
+        for path in _iter_uuid4_candidate_paths(root):
             tree = ast.parse(path.read_text(encoding="utf-8"))
             parents = _build_parent_map(tree)
             relative_path = path.relative_to(ROOT).as_posix()

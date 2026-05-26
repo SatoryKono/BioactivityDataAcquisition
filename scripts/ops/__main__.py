@@ -11,6 +11,8 @@ Stable commands:
                        Compare published observability endpoints with container health
     rerender-grafana   Rerender Grafana dashboard screenshots
     audit-live-grafana Run reviewed live Grafana datasource/frame audit
+    check-grafana-audit-preflight
+                       Check local stack readiness for a full Grafana dashboard audit
     wsl-proxy          Start WSL proxy helper
     codex              Launch Codex via repo-local bootstrap adapter (shell)
     codex-exec         Launch Codex full-auto via repo-local bootstrap adapter (shell)
@@ -39,6 +41,9 @@ COMMAND_SPECS = {
     "check-observability-ports": "observability/check_published_observability_endpoints.py",
     "rerender-grafana": "observability/grafana/rerender_grafana_screenshots.py",
     "audit-live-grafana": "observability/grafana/audit_live_grafana_panels.py",
+    "check-grafana-audit-preflight": (
+        "observability/grafana/check_grafana_dashboard_audit_preflight.py"
+    ),
     "wsl-proxy": "runtime/wsl/wsl_proxy.py",
 }
 COMMAND_SPECS = {name: python_command(script) for name, script in COMMAND_SPECS.items()}
