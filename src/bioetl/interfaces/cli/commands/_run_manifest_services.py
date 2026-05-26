@@ -8,6 +8,9 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.forensic_diff_service import (
         ForensicRunDiffService,
     )
+    from bioetl.application.services.control_plane.manifest.inspection_service import (
+        RunManifestInspectionService,
+    )
     from bioetl.application.services.control_plane.replay.historical_closure_service import (
         HistoricalReplayClosureService,
     )
@@ -16,9 +19,6 @@ if TYPE_CHECKING:
     )
     from bioetl.application.services.control_plane.replay.historical_universe_service import (
         HistoricalReplayUniverseService,
-    )
-    from bioetl.application.services.control_plane.manifest.inspection_service import (
-        RunManifestInspectionService,
     )
 
 

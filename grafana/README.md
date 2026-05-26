@@ -74,8 +74,17 @@ ______________________________________________________________________
 > toolchain when `node` is not present in the current PowerShell `PATH`.
 > The Playwright screenshot renderer expands collapsed dashboard rows before
 > capture so batch evidence reflects the fully opened operator surface.
+> Full-page capture now uses a separate screenshot budget
+> (`GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS`, default `max(page_timeout, 180000)`),
+> because long dashboards such as `0. Control Plane` may finish loading well
+> before Playwright finishes writing the final PNG.
 > `python -m scripts.ops audit-live-grafana` remains the reviewed live
 > datasource/frame audit for semantically sensitive panels.
+> `python -m scripts.ops check-grafana-audit-preflight` is the fast readiness
+> gate for full dashboard audits: it verifies Grafana, Prometheus, canonical
+> Quarantine Explorer health probes (`/health/live` before `/health`), and
+> whether local screenshot artifacts are missing or stale relative to shipped
+> dashboard JSON.
 
 ## 1. Архитектура мониторинга
 
@@ -1041,6 +1050,7 @@ ______________________________________________________________________
 | Название                                          | Тип   | Источник                                                   |
 | ------------------------------------------------- | ----- | ---------------------------------------------------------- |
 | Inspect Explorer Scope                            | Text  | Pipeline banner / forensic scope note                      |
+| Monitor Explorer Backend Health                   | Table | `/health/live`                                             |
 | Review: First Action / No-Data Semantics          | Text  | Operator CTA / interpretation                              |
 | Monitor Filtered Records Total                    | Table | `/ops/quarantine/filtered-stats`                           |
 | Track Reject Rate vs Bronze                       | Table | `/ops/quarantine/filtered-stats`                           |
@@ -1085,6 +1095,9 @@ Prometheus labels, summary dashboards или cross-dashboard handoffs.
 matching rows remain an empty-result state; plugin/query errors, unsupported
 filter chains, unknown pipeline, or `bronze_records=0` are treated as
 UNKNOWN/error until the backend is checked.
+`Monitor Explorer Backend Health` is the first-screen transport trust marker:
+if it does not return a healthy backend response, treat empty explorer tables as
+UNKNOWN/backend-unavailable rather than proof of zero rejects.
 
 **Drilldown:** canonical navigation bus `0. Control Plane`, `1. Overview`,
 `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`; DQ

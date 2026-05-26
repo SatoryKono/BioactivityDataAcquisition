@@ -10,10 +10,10 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 from uuid import UUID, uuid4
 
-import polars as pl
 import pytest
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
 from bioetl.application.services.control_plane.effective_config.service import (
     EffectiveConfigService,
 )
@@ -59,7 +59,6 @@ from bioetl.domain.control_plane import (
 from bioetl.domain.control_plane.reproducibility_profiles import (
     published_production_reproducibility_families,
     published_supported_boundary_families,
-    published_reproducibility_family_inventory,
     published_supported_reproducibility_families,
 )
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
@@ -82,9 +81,6 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.control_plane import FileArtifactByteComparisonAdapter
-from bioetl.infrastructure.storage.silver.validation_operations import (
-    _deduplicate_by_primary_keys_impl,
-)
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
@@ -96,7 +92,6 @@ from tests.integration.ci.reproducibility_contract_support import (
     ManifestIdentity as _ManifestIdentity,
     build_replay_matrix_composite_config as _build_replay_matrix_composite_config,
     load_manifest_payload as _load_manifest_payload,
-    make_merge_metrics_mixin as _make_merge_metrics_mixin,
     write_composite_snapshot_envelope as _write_composite_snapshot_envelope,
 )
 from tests.unit.infrastructure.storage.test_metadata_writer_control_plane import (
@@ -120,6 +115,14 @@ _PUBLISHED_PRODUCTION_FAMILIES = tuple(published_production_reproducibility_fami
 
 
 _InMemoryRunManifestStore = InMemoryRunManifestStore
+
+
+class _MergeMetricsMixinHarness(MergeMetricsRecorderMixin):
+    """Concrete harness exposing MergeMetricsRecorderMixin contract methods."""
+
+
+def _make_merge_metrics_mixin() -> MergeMetricsRecorderMixin:
+    return _MergeMetricsMixinHarness()
 
 
 def _make_manifest(
