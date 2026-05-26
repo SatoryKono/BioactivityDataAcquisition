@@ -18,6 +18,28 @@ the operational compatibility registry. The canonical operational policy and
 curated ledgers now live in
 [`../07-compatibility-facade-inventory.md`](../07-compatibility-facade-inventory.md).
 
+## ADR-048 Alignment (2026-05-26)
+
+Completed in this cycle:
+
+- Promoted ADR-048 as the explicit boundary owner for domain schema contracts:
+  Pandera/Pandas imports are sanctioned only inside
+  `src/bioetl/domain/schemas/` and `src/bioetl/domain/contracts/`.
+- Locked runtime compatibility ownership to the explicit composition seam
+  `bioetl.composition.bootstrap.runtime.compatibility.apply_runtime_compatibility_patches`,
+  with implementation delegated to
+  `bioetl.infrastructure.compat.pandera_compat.apply_pandera_typing_compat_if_needed`.
+- Reworded requirements/glossary surfaces to remove ambiguity between domain
+  contracts and infrastructure mapping responsibilities.
+
+Operational implication:
+
+- Domain schema contracts remain part of domain semantics and MUST NOT drift
+  into infrastructure adapter ownership language.
+- Import-time compatibility side effects in package `__init__` remain forbidden;
+  compatibility activation is explicit and testable at composition runtime
+  bootstrap only.
+
 ## Public Entrypoint Review Wave (2026-05-20)
 
 Completed in this cycle:
