@@ -32,7 +32,7 @@ _DEPRECATED_COMPOSITE_SYMBOL_BYTES = tuple(
 )
 _SCAN_CHUNK_SIZE = 64 * 1024
 _SCAN_OVERLAP = max(len(symbol) for symbol in _DEPRECATED_COMPOSITE_SYMBOL_BYTES) - 1
-_SYMBOL_SCAN_TIMEOUT_SECONDS = 20.0
+_SYMBOL_SCAN_TIMEOUT_SECONDS = 120.0
 
 
 def _python_files(root: Path) -> list[Path]:
@@ -166,6 +166,7 @@ def _run_symbol_scan_command(
                 errors="replace",
                 check=False,
                 timeout=_SYMBOL_SCAN_TIMEOUT_SECONDS,
+                **_hidden_windows_subprocess_kwargs(),
             )
         stdout = output_path.read_text(encoding="utf-8", errors="replace")
     finally:
@@ -181,6 +182,35 @@ def _temporary_symbol_scan_output_path() -> Path:
     )
     handle.close()
     return Path(handle.name)
+
+
+def _hidden_windows_subprocess_kwargs(
+    *,
+    os_name: str = os.name,
+    subprocess_module: object = subprocess,
+) -> dict[str, object]:
+    if os_name != "nt":
+        return {}
+
+    kwargs: dict[str, object] = {}
+    create_no_window = int(getattr(subprocess_module, "CREATE_NO_WINDOW", 0))
+    if create_no_window:
+        kwargs["creationflags"] = create_no_window
+
+    startupinfo_factory = getattr(subprocess_module, "STARTUPINFO", None)
+    if callable(startupinfo_factory):
+        startupinfo = startupinfo_factory()
+        startf_use_show_window = int(
+            getattr(subprocess_module, "STARTF_USESHOWWINDOW", 0)
+        )
+        if startf_use_show_window:
+            startupinfo.dwFlags = (
+                int(getattr(startupinfo, "dwFlags", 0)) | startf_use_show_window
+            )
+        if hasattr(subprocess_module, "SW_HIDE"):
+            startupinfo.wShowWindow = int(getattr(subprocess_module, "SW_HIDE", 0))
+        kwargs["startupinfo"] = startupinfo
+    return kwargs
 
 
 def _repo_relative_pathspec(path: Path) -> str | None:

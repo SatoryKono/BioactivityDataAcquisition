@@ -8,8 +8,11 @@ without loading this legacy all-in-one public module.
 
 from __future__ import annotations
 
+from memory.graph import sync_pkg as _sync_pkg
 from memory.graph.sync_pkg import *  # noqa: F403
-from memory.graph.sync_pkg import __all__, main
+
+main = _sync_pkg.main
+__all__ = list(_sync_pkg.__all__)
 
 
 if __name__ == "__main__":

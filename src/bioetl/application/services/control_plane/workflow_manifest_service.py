@@ -1,4 +1,4 @@
-"""Compatibility wrapper for workflow manifest service."""
+"""Wrapper for workflow manifest service."""
 
 from __future__ import annotations
 

@@ -9,6 +9,7 @@ from uuid import uuid4
 
 import pytest
 
+import bioetl.infrastructure.control_plane.file_run_ledger_store as run_ledger_store_module
 from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.domain.types import RunID
@@ -149,6 +150,7 @@ def test_prepare_runner_inputs_applies_tracing_override_before_bundle_build() ->
 @pytest.mark.unit
 def test_prepare_runner_inputs_auto_resolves_cached_bronze_for_exact_replay_parent(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     logger = SimpleNamespace(info=lambda *_, **__: None)
     bronze_root = tmp_path / "output" / "bronze"
@@ -178,6 +180,9 @@ def test_prepare_runner_inputs_auto_resolves_cached_bronze_for_exact_replay_pare
         run_id=parent_manifest.run_id,
         _entry_id_factory=lambda: "entry-input-snapshot",
     )
+    # This resolver test needs ledger contents, not durable flush semantics.
+    # Avoid WSL /mnt fsync latency causing sharded timeout noise.
+    monkeypatch.setattr(run_ledger_store_module.os, "fsync", lambda _fd: None)
     ledger_service.record_input_snapshot_published(
         provider="chembl",
         entity="activity",

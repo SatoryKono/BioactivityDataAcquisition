@@ -39,12 +39,32 @@ def latest_checkpoint_filename(
     return matches[0] if matches else None
 
 
+def _emit_checkpoint_saved_at_from_state(
+    *,
+    metrics: MetricsPort | None,
+    composite_name: str,
+    state: CompositeCheckpointState,
+) -> None:
+    """Publish the latest persisted checkpoint timestamp when the state carries one."""
+    if metrics is None:
+        return
+    saved_at = state.updated_at or state.created_at
+    if saved_at is None:
+        return
+    metrics.set_gauge(
+        "bioetl_checkpoint_saved_at_seconds",
+        saved_at.timestamp(),
+        {"pipeline": composite_name},
+    )
+
+
 def warn_if_checkpoint_exists_with_progress(
     *,
     storage: CompositeCheckpointPort,
     logger: LoggerPort,
     composite_name: str,
     glob_pattern: str,
+    metrics: MetricsPort | None = None,
 ) -> None:
     """Warn when an existing resumable checkpoint would be overwritten."""
     latest = latest_checkpoint_filename(storage=storage, glob_pattern=glob_pattern)
@@ -56,6 +76,11 @@ def warn_if_checkpoint_exists_with_progress(
         if content is None:
             return
         state = CompositeCheckpointState.from_dict(json.loads(content))
+        _emit_checkpoint_saved_at_from_state(
+            metrics=metrics,
+            composite_name=composite_name,
+            state=state,
+        )
         if state.is_resumable:
             logger.warning(
                 "Existing checkpoint with progress will be overwritten",
@@ -169,6 +194,11 @@ def load_checkpoint_state(
                 if state.last_event_occurred_at is not None
                 else None
             ),
+        )
+        _emit_checkpoint_saved_at_from_state(
+            metrics=metrics,
+            composite_name=composite_name,
+            state=state,
         )
         if metrics is not None:
             metrics.increment_counter(

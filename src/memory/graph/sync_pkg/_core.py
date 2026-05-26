@@ -5777,9 +5777,7 @@ def _link_source_backed_node_structure(
     if _is_excluded_file_structure_path(source_path_value, config):
         return
 
-    path_kind = _source_backed_path_kind(
-        snapshot, source_path_value, path_kind_cache
-    )
+    path_kind = _source_backed_path_kind(snapshot, source_path_value, path_kind_cache)
     if path_kind == "directory":
         _link_source_backed_directory_structure(
             snapshot,
@@ -9909,7 +9907,10 @@ def _docs_drift_sources(
             continue
         if _is_excluded_file_structure_path(normalized_source_path, config):
             continue
-        if Path(normalized_source_path).suffix.lower() not in _DOCS_DRIFT_TEXT_EXTENSIONS:
+        if (
+            Path(normalized_source_path).suffix.lower()
+            not in _DOCS_DRIFT_TEXT_EXTENSIONS
+        ):
             continue
         doc_path = root / normalized_source_path
         text = cached_text.get(normalized_source_path)

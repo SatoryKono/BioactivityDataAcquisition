@@ -50,6 +50,16 @@ def patch_observability_backend_ensure() -> None:
         yield
 
 
+@pytest.fixture(autouse=True)
+def patch_composite_metrics_gateway() -> None:
+    """Keep run-composite unit tests from bootstrapping real observability."""
+    with patch(
+        "bioetl.interfaces.cli.commands.domains.composite.support.push_metrics_to_gateway",
+        return_value=True,
+    ):
+        yield
+
+
 @pytest.fixture
 def mock_composite_result_success() -> CompositeResult:
     """Create a successful CompositeResult for testing."""
@@ -316,6 +326,10 @@ class TestRunCompositeAsync:
             patch(
                 "bioetl.interfaces.cli.commands.run_composite.health_server_context"
             ) as mock_context,
+            patch(
+                "bioetl.interfaces.cli.commands.run_composite.ensure_metrics_server_started",
+                return_value=True,
+            ) as mock_metrics_starter,
         ):
             # Make context manager work
             mock_context.return_value.__aenter__ = AsyncMock()
@@ -331,6 +345,7 @@ class TestRunCompositeAsync:
         assert success is True
         assert error is None
         mock_context.assert_called_once_with(enabled=True, port=8081)
+        mock_metrics_starter.assert_called_once_with()
 
     @pytest.mark.asyncio
     async def test_with_health_server_disabled(self) -> None:
@@ -344,6 +359,10 @@ class TestRunCompositeAsync:
             patch(
                 "bioetl.interfaces.cli.commands.run_composite.health_server_context"
             ) as mock_context,
+            patch(
+                "bioetl.interfaces.cli.commands.run_composite.ensure_metrics_server_started",
+                return_value=True,
+            ) as mock_metrics_starter,
         ):
             mock_context.return_value.__aenter__ = AsyncMock()
             mock_context.return_value.__aexit__ = AsyncMock()
@@ -357,6 +376,7 @@ class TestRunCompositeAsync:
 
         assert success is True
         mock_context.assert_called_once_with(enabled=False, port=9090)
+        mock_metrics_starter.assert_called_once_with()
 
 
 class TestRunCompositeCommand:
@@ -491,7 +511,9 @@ class TestRunCompositeCommand:
 class TestRunCompositeRuntimeConfig:
     """Test CompositeRuntimeConfig creation from CLI options."""
 
-    def test_default_config__test_run_composite_runtime_config_cli_commands_test_run_composite_494(self, cli_runner: CliRunner) -> None:
+    def test_default_config__test_run_composite_runtime_config_cli_commands_test_run_composite_494(
+        self, cli_runner: CliRunner
+    ) -> None:
         """Test default runtime config values."""
         with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(

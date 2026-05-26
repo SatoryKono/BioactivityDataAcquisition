@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.application.services.control_plane.manifest.diagnostics import (
+    build_diagnostics_summary,
+)
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationResult,
     HistoricalReplayCertificationService,
@@ -20,9 +23,6 @@ from bioetl.application.services.control_plane.replay.historical_corpus_policy i
     certification_scope_for_context,
     classify_certification_status,
     resolve_execution_context,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics import (
-    build_diagnostics_summary,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_profiles import (

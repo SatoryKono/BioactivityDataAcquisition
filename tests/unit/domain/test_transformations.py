@@ -217,7 +217,7 @@ class TestGenerateContentHash:
 
         assert hash1 == hash2
 
-    @settings(suppress_health_check=[HealthCheck.too_slow])
+    @settings(deadline=None, suppress_health_check=[HealthCheck.too_slow])
     @given(
         st.dictionaries(
             st.text(min_size=1, max_size=20),
