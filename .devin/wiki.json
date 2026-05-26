@@ -1,7 +1,7 @@
 {
   "repo_notes": [
     {
-      "content": ""
+      "content": "Treat canonical docs, ADRs, configs, tests, and runtime source as source of truth. DeepWiki is a derived navigation surface only and must not contradict AGENTS.md, docs/00-project/ai/memory/README.md, or docs/00-project/ai/memory/agent-memory.md."
     }
   ],
   "pages": [
@@ -31,6 +31,19 @@
       "page_notes": [
         {
           "content": ""
+        }
+      ]
+    },
+    {
+      "title": "AI Runtime, Memory, and MCP Governance",
+      "purpose": "Explains how AI runtime surfaces stay source-first: AGENTS.md, runtime sources in .codex and .gemini, the canonical memory workflow, MCP governance, and DeepWiki as a derived navigation layer. Links to the authoritative memory and validation docs.",
+      "parent": "Project Governance and Rules",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: AGENTS.md, docs/00-project/ai/memory/README.md, docs/00-project/ai/memory/agent-memory.md, docs/00-project/ai/agents/guides/MEMORY_USAGE.md, src/memory/DAILY_WORKFLOW.md, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md, docs/00-project/ai/mcp-governance.md, .codex/settings.json, .gemini/settings.json."
+        },
+        {
+          "content": "DeepWiki is derived navigation only; canonical truth remains in docs, configs, code, tests, and accepted ADRs."
         }
       ]
     },
@@ -294,6 +307,316 @@
       "page_notes": [
         {
           "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Repository Layout and Source Surfaces",
+      "purpose": "Maps the main repository surface families: src, docs, configs, tests, scripts, reports, grafana, and memory. Explains where to look first for runtime truth versus derived navigation.",
+      "parent": "BioETL Overview",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/reports/evidence/project-file-structure/SUMMARY.md, docs/reports/evidence/project-package-topology/SUMMARY.md, docs/00-project/RULES.md."
+        }
+      ]
+    },
+    {
+      "title": "Supported Providers and Pipelines",
+      "purpose": "Summarises the provider catalog, the entity pipeline families, and where provider-specific configs and tests live. Orients readers around how provider coverage maps to runtime and validation surfaces.",
+      "parent": "BioETL Overview",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: configs/entities/, configs/composites/, src/bioetl/infrastructure/adapters/, tests/fixtures/vcr/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "ADR Catalogue and Decision Flow",
+      "purpose": "Explains how ADRs are indexed, how superseded decisions are handled, and how to trace an architectural claim back to a maintained decision record.",
+      "parent": "Project Governance and Rules",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/, docs/00-project/RULES.md, docs/00-project/REQUIREMENTS.md."
+        }
+      ]
+    },
+    {
+      "title": "Documentation Governance and Drift",
+      "purpose": "Describes doc claim surfaces, freshness expectations, and the validation checks used to prevent documentation drift from accumulating.",
+      "parent": "Project Governance and Rules",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md, docs/00-project/ai/memory/README.md, docs/00-project/ai/memory/agent-memory.md."
+        }
+      ]
+    },
+    {
+      "title": "File Policy and Protected Surfaces",
+      "purpose": "Describes protected paths, machine-local surfaces, and file-policy rules that AI assistants must respect when editing the repository.",
+      "parent": "Project Governance and Rules",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: AGENTS.md, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md, docs/00-project/ai/agents/guides/MEMORY_USAGE.md."
+        }
+      ]
+    },
+    {
+      "title": "Memory Workflow",
+      "purpose": "Explains the canonical pre-task and post-task memory loop, retrieval order, promotion rules, and how episodic versus curated memory should be used.",
+      "parent": "AI Runtime, Memory, and MCP Governance",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/ai/agents/guides/MEMORY_USAGE.md, src/memory/DAILY_WORKFLOW.md, docs/00-project/ai/memory/README.md."
+        }
+      ]
+    },
+    {
+      "title": "MCP Surfaces",
+      "purpose": "Lists the configured MCP clients and distinguishes local wrapper-based servers from remote HTTP MCP endpoints.",
+      "parent": "AI Runtime, Memory, and MCP Governance",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: .codex/settings.json, .gemini/settings.json, .mcp.json, scripts/ai/.mcp.json, scripts/ai/codex/setup_mcp.py."
+        }
+      ]
+    },
+    {
+      "title": "DeepWiki Navigation Strategy",
+      "purpose": "Describes how DeepWiki is used as a derived navigation layer for discovery, while canonical truth remains in docs, code, configs, tests, and accepted ADRs.",
+      "parent": "AI Runtime, Memory, and MCP Governance",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: .devin/wiki.json, docs/00-project/ai/memory/README.md, docs/00-project/ai/memory/agent-memory.md."
+        }
+      ]
+    },
+    {
+      "title": "Layer Boundaries and Import Rules",
+      "purpose": "Explains the layer separation rules and import boundaries that protect the domain from infrastructure leakage.",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, tests/architecture/test_import_graph_invariants.py, tests/architecture/test_layer_dependencies.py."
+        }
+      ]
+    },
+    {
+      "title": "Ports and Facades",
+      "purpose": "Shows how the domain port facade and adapter-facing APIs keep the public surface narrow and explicit.",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/ports/, src/bioetl/domain/context.py, docs/02-architecture/decisions/."
+        }
+      ]
+    },
+    {
+      "title": "Dependency Injection and Wiring Rules",
+      "purpose": "Describes how composition wires interfaces, adapters, and application services without moving policy into runtime glue.",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/composition/, tests/architecture/test_di_compliance.py, docs/02-architecture/decisions/ADR-005-composition-layer-separation.md."
+        }
+      ]
+    },
+    {
+      "title": "Domain Ports",
+      "purpose": "Documents the Protocol and ABC interfaces that define the domain contract boundaries.",
+      "parent": "Domain Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/ports/, tests/architecture/test_domain_ports.py, docs/02-architecture/decisions/ADR-021*.md."
+        }
+      ]
+    },
+    {
+      "title": "Aggregates and Value Objects",
+      "purpose": "Explains the aggregate and value-object model, deterministic identity rules, and immutability expectations in the domain layer.",
+      "parent": "Domain Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/, tests/architecture/test_determinism_identity_policy.py, docs/02-architecture/decisions/ADR-021*.md."
+        }
+      ]
+    },
+    {
+      "title": "Schemas and Exceptions",
+      "purpose": "Covers domain schemas, schema contracts, and the exception hierarchy used to signal invariant violations.",
+      "parent": "Domain Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schema/, src/bioetl/domain/exceptions/, tests/architecture/test_domain_schema_contracts.py."
+        }
+      ]
+    },
+    {
+      "title": "Runner and Batch Flow",
+      "purpose": "Walks through pipeline execution from runner to batch executor and where orchestration stops before adapter logic begins.",
+      "parent": "Application Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/core/, src/bioetl/application/pipelines/, tests/unit/application/."
+        }
+      ]
+    },
+    {
+      "title": "Record Processing",
+      "purpose": "Describes record-level processing, enrichment coordination, and how per-record policy stays separate from adapter implementations.",
+      "parent": "Application Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/services/, src/bioetl/application/core/, tests/unit/application/services/."
+        }
+      ]
+    },
+    {
+      "title": "Data Quality and Error Services",
+      "purpose": "Covers the data-quality service, validation hooks, and the error taxonomy used by application orchestration.",
+      "parent": "Application Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/services/data_quality/, src/bioetl/infrastructure/errors/, tests/unit/application/services/."
+        }
+      ]
+    },
+    {
+      "title": "Storage Writers and Checkpointing",
+      "purpose": "Explains Bronze/Silver/Gold writers, checkpoint persistence, and the storage boundary between application policy and infrastructure I/O.",
+      "parent": "Infrastructure Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/storage/, src/bioetl/infrastructure/checkpoint/, tests/unit/infrastructure/."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Client Resilience",
+      "purpose": "Documents retry, circuit breaker, rate limiting, and unified HTTP client behavior for adapters.",
+      "parent": "Infrastructure Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/http/, src/bioetl/infrastructure/adapters/, tests/unit/infrastructure/adapters/."
+        }
+      ]
+    },
+    {
+      "title": "Quarantine and Validation",
+      "purpose": "Covers quarantine persistence, validation guards, and how failed records are isolated without mutating the domain model.",
+      "parent": "Infrastructure Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/quarantine/, src/bioetl/infrastructure/validation/, tests/unit/infrastructure/."
+        }
+      ]
+    },
+    {
+      "title": "Bootstrap and Factory Wiring",
+      "purpose": "Describes the bootstrap assembly and factory entry points that turn canonical config into runnable services.",
+      "parent": "Composition Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/composition/bootstrap/, src/bioetl/composition/bootstrap/runtime/, tests/unit/composition/bootstrap/."
+        }
+      ]
+    },
+    {
+      "title": "Provider Registry and Runtime Builders",
+      "purpose": "Explains provider registry, runtime builders, and the way composition resolves provider-specific implementations.",
+      "parent": "Composition Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/composition/registry/, src/bioetl/composition/runtime_builders/, tests/unit/composition/."
+        }
+      ]
+    },
+    {
+      "title": "Runtime Diagnostics Entry Points",
+      "purpose": "Covers CLI diagnostics and maintenance commands that are not part of the pipeline runtime but are still governed surfaces.",
+      "parent": "Interfaces Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/interfaces/cli/commands/diagnostics/, src/bioetl/interfaces/cli/commands/maintenance/, tests/unit/interfaces/cli/commands/."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Health and Observability Surfaces",
+      "purpose": "Describes the health server, observability endpoints, and the contract between interface surfaces and monitoring tooling.",
+      "parent": "Interfaces Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/interfaces/http/, src/bioetl/interfaces/cli/commands/domains/health/, tests/unit/interfaces/http/."
+        }
+      ]
+    },
+    {
+      "title": "Bronze Write Lifecycle",
+      "purpose": "Details the Bronze ingestion lifecycle, append-only guarantees, sidecar metadata, and atomic write semantics.",
+      "parent": "Bronze Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/storage/bronze/, tests/unit/infrastructure/storage/, docs/03-guides/"
+        }
+      ]
+    },
+    {
+      "title": "Silver Merge and Upsert Lifecycle",
+      "purpose": "Explains Silver table normalization, merge/upsert behavior, drift checks, and row-level DQ signals.",
+      "parent": "Silver Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/storage/silver/, tests/unit/infrastructure/storage/, configs/entities/"
+        }
+      ]
+    },
+    {
+      "title": "Gold Contracts and Rollout Strategy",
+      "purpose": "Covers Gold validation contracts, rollout modes, and the strict publishing rules for analysis-ready tables.",
+      "parent": "Gold Layer",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/storage/gold/, tests/unit/infrastructure/storage/, docs/02-architecture/decisions/"
+        }
+      ]
+    },
+    {
+      "title": "Composite Seed and Dependency Phases",
+      "purpose": "Describes the seed and dependency phases of the composite pipeline pattern, including provider ordering and prerequisites.",
+      "parent": "Composite Pipeline Pattern",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/pipelines/composite/, docs/02-architecture/decisions/ADR-026*.md."
+        }
+      ]
+    },
+    {
+      "title": "Composite Enricher and Merge Phases",
+      "purpose": "Explains the enricher and merge phases, conflict handling, and how composite state transitions preserve resumability.",
+      "parent": "Composite Pipeline Pattern",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/application/pipelines/composite/, tests/unit/application/pipelines/"
+        }
+      ]
+    },
+    {
+      "title": "Schema Hierarchy and Contracts",
+      "purpose": "Shows how the schema hierarchy maps to provider-specific validation contracts and shared base schemas.",
+      "parent": "Data Schemas and Normalization",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schema/, src/bioetl/domain/schemas/, tests/unit/domain/schema/"
+        }
+      ]
+    },
+    {
+      "title": "Monitoring and Dashboards",
+      "purpose": "Covers dashboards, alerting surfaces, and the monitoring inventory used by operators.",
+      "parent": "Observability and Operations",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: grafana/dashboards/, docs/05-operations/, tests/integration/test_grafana_dashboard_first_screen_contract.py."
         }
       ]
     }
