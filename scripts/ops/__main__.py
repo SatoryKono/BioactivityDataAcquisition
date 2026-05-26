@@ -13,6 +13,8 @@ Stable commands:
     audit-live-grafana Run reviewed live Grafana datasource/frame audit
     check-grafana-audit-preflight
                        Check local stack readiness for a full Grafana dashboard audit
+    run-grafana-audit-cycle
+                       Run preflight, screenshot refresh, and live Grafana audit
     wsl-proxy          Start WSL proxy helper
     codex              Launch Codex via repo-local bootstrap adapter (shell)
     codex-exec         Launch Codex full-auto via repo-local bootstrap adapter (shell)
@@ -43,6 +45,9 @@ COMMAND_SPECS = {
     "audit-live-grafana": "observability/grafana/audit_live_grafana_panels.py",
     "check-grafana-audit-preflight": (
         "observability/grafana/check_grafana_dashboard_audit_preflight.py"
+    ),
+    "run-grafana-audit-cycle": (
+        "observability/grafana/run_grafana_dashboard_audit_cycle.py"
     ),
     "wsl-proxy": "runtime/wsl/wsl_proxy.py",
 }

@@ -12,6 +12,9 @@ from scripts.ops.observability.grafana import (
     check_grafana_dashboard_audit_preflight as preflight_subject,
 )
 from scripts.ops.observability.grafana import (
+    run_grafana_dashboard_audit_cycle as cycle_subject,
+)
+from scripts.ops.observability.grafana import (
     rerender_grafana_screenshots as rerender_subject,
 )
 from tests.helpers import assert_router_python_command
@@ -305,12 +308,15 @@ def test_grafana_audit_preflight_parser_uses_grafana_env_defaults(
     monkeypatch.setenv("GRAFANA_PASSWORD", "secret")
 
     parser = preflight_subject._build_parser()
-    args = parser.parse_args(["--screenshot-dir", str(tmp_path), "--json"])
+    args = parser.parse_args(
+        ["--screenshot-dir", str(tmp_path), "--json", "--skip-screenshot-check"]
+    )
 
     assert args.grafana_username == "viewer"
     assert args.grafana_password == "secret"
     assert args.screenshot_dir == tmp_path
     assert args.json is True
+    assert args.skip_screenshot_check is True
 
 
 def test_grafana_audit_preflight_detects_stale_screenshot(tmp_path: Path) -> None:
@@ -377,6 +383,137 @@ def test_grafana_audit_preflight_run_checks_collects_ok_results(
         "screenshots",
     ]
     assert all(check.status == "ok" for check in checks)
+
+
+def test_grafana_audit_preflight_can_skip_screenshot_check(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_http_json",
+        lambda **kwargs: preflight_subject.PreflightCheck(
+            name=str(kwargs["name"]),
+            status="ok",
+            detail="ok",
+        ),
+    )
+    monkeypatch.setattr(
+        audit_subject,
+        "_resolve_app_base_url",
+        lambda *_args, **_kwargs: "http://localhost:8081",
+    )
+    called = False
+
+    def fake_screenshot_check(_path: Path) -> preflight_subject.PreflightCheck:
+        nonlocal called
+        called = True
+        return preflight_subject.PreflightCheck(
+            name="screenshots",
+            status="ok",
+            detail="screens current",
+        )
+
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_screenshot_artifacts",
+        fake_screenshot_check,
+    )
+
+    checks = preflight_subject.run_checks(
+        grafana_base_url="http://localhost:3000",
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        grafana_username="admin",
+        grafana_password="changeme",
+        timeout_seconds=5.0,
+        screenshot_dir=tmp_path,
+        include_screenshot_check=False,
+    )
+
+    assert [check.name for check in checks] == [
+        "grafana",
+        "prometheus",
+        "quarantine-explorer",
+    ]
+    assert called is False
+
+
+def test_grafana_audit_cycle_router_exposes_command() -> None:
+    assert_router_python_command(
+        ops_router,
+        "run-grafana-audit-cycle",
+        expected_target="observability/grafana/run_grafana_dashboard_audit_cycle.py",
+    )
+
+
+def test_grafana_audit_cycle_runs_preflight_rerender_and_live_audit(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    calls: list[tuple[str, list[str]]] = []
+
+    monkeypatch.setattr(
+        cycle_subject.preflight,
+        "main",
+        lambda argv: calls.append(("preflight", list(argv))) or 0,
+    )
+    monkeypatch.setattr(
+        cycle_subject.rerender,
+        "main",
+        lambda argv: calls.append(("rerender", list(argv))) or 0,
+    )
+    monkeypatch.setattr(
+        cycle_subject.live_audit,
+        "main",
+        lambda argv: calls.append(("audit", list(argv))) or 0,
+    )
+
+    result = cycle_subject.main(
+        [
+            "--screenshot-dir",
+            str(tmp_path),
+            "--grafana-username",
+            "admin",
+            "--grafana-password",
+            "changeme",
+        ]
+    )
+
+    assert result == 0
+    assert [name for name, _argv in calls] == [
+        "preflight",
+        "rerender",
+        "preflight",
+        "audit",
+    ]
+    assert "--skip-screenshot-check" in calls[0][1]
+    assert "--skip-screenshot-check" not in calls[2][1]
+
+
+def test_grafana_audit_cycle_stops_on_service_preflight_failure(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    calls: list[str] = []
+
+    monkeypatch.setattr(
+        cycle_subject.preflight,
+        "main",
+        lambda argv: calls.append("preflight") or 1,
+    )
+    monkeypatch.setattr(
+        cycle_subject.rerender,
+        "main",
+        lambda argv: calls.append("rerender") or 0,
+    )
+    monkeypatch.setattr(
+        cycle_subject.live_audit,
+        "main",
+        lambda argv: calls.append("audit") or 0,
+    )
+
+    result = cycle_subject.main(["--screenshot-dir", str(tmp_path)])
+
+    assert result == 1
+    assert calls == ["preflight"]
 
 
 def test_live_audit_writes_report(monkeypatch: Any, tmp_path: Path) -> None:

@@ -85,6 +85,9 @@ ______________________________________________________________________
 > Quarantine Explorer health probes (`/health/live` before `/health`), and
 > whether local screenshot artifacts are missing or stale relative to shipped
 > dashboard JSON.
+> `python -m scripts.ops run-grafana-audit-cycle` is the canonical full audit
+> workflow: service preflight, screenshot refresh, screenshot freshness
+> re-check, then reviewed live panel audit.
 
 ## 1. Архитектура мониторинга
 
