@@ -118,7 +118,7 @@ fi
 
 printf "=== MCP server list ===\n%s\n\n" "$list_out"
 
-for server in memory filesystem fetch github docker context7 ast-grep mcp-code-interpreter prometheus grafana brave-search sonarqube neo4j-cypher neo4j-memory chembl pubchem pubmed mermaid; do
+for server in memory filesystem fetch github docker context7 ast-grep mcp-code-interpreter prometheus grafana brave-search sonarqube neo4j-cypher neo4j-memory chembl pubchem pubmed mermaid biomoltechDocs mintlify deepwiki; do
   if grep -Eq "^${server}[[:space:]]" <<<"$list_out"; then
     ok "Server '${server}' is registered"
   else
@@ -141,6 +141,7 @@ brave_out="$(codex mcp get brave-search 2>&1 || true)"
 sonarqube_out="$(codex mcp get sonarqube 2>&1 || true)"
 neo4j_cypher_out="$(codex mcp get neo4j-cypher 2>&1 || true)"
 neo4j_memory_out="$(codex mcp get neo4j-memory 2>&1 || true)"
+deepwiki_out="$(codex mcp get deepwiki 2>&1 || true)"
 
 require_contains "$memory_out" "@modelcontextprotocol/server-memory@2026.1.26" "memory is pinned to @2026.1.26" || status=1
 require_contains "$filesystem_out" "@modelcontextprotocol/server-filesystem@2026.1.14" "filesystem is pinned to @2026.1.14" || status=1
@@ -156,6 +157,11 @@ require_wrapper_path "$brave_out" "$EXPECTED_BRAVE_WRAPPER_PATH" "brave-search i
 require_wrapper_path "$sonarqube_out" "$EXPECTED_SONARQUBE_WRAPPER_PATH" "sonarqube is routed through the project wrapper" || status=1
 require_wrapper_path "$neo4j_cypher_out" "$EXPECTED_NEO4J_CYPHER_WRAPPER_PATH" "neo4j-cypher is routed through the project wrapper" || status=1
 require_wrapper_path "$neo4j_memory_out" "$EXPECTED_NEO4J_MEMORY_WRAPPER_PATH" "neo4j-memory is routed through the project wrapper" || status=1
+biomoltech_out="$(codex mcp get biomoltechDocs 2>&1 || true)"
+mintlify_out="$(codex mcp get mintlify 2>&1 || true)"
+require_contains "$biomoltech_out" "https://biomoltech.mintlify.app/mcp" "biomoltechDocs is registered as a remote Mintlify MCP" || status=1
+require_contains "$mintlify_out" "https://mcp.mintlify.com" "mintlify is registered as the OAuth-enabled Mintlify MCP" || status=1
+require_contains "$deepwiki_out" "https://mcp.deepwiki.com/mcp" "deepwiki is registered as the official DeepWiki MCP" || status=1
 
 if grep -Fq -- "${EXPECTED_FILESYSTEM_SCOPE}" <<<"$filesystem_out"; then
   ok "filesystem scope is restricted to repo root"

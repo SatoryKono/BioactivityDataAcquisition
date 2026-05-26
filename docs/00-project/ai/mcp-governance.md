@@ -13,7 +13,8 @@ MCP используются как tooling-layer для AI-ассистенто
 memory, filesystem, fetch, github, context7, ast-grep, mcp-code-interpreter,
 prometheus, grafana, sonarqube, mermaid,
 brave-search, chembl, pubchem, pubmed,
-docker, neo4j-cypher, neo4j-memory
+docker, neo4j-cypher, neo4j-memory,
+biomoltechDocs, mintlify, deepwiki
 
 ## Удалённые MCP
 sequential-thinking  

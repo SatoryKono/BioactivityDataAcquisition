@@ -18,14 +18,22 @@ pytestmark = pytest.mark.architecture
 
 
 def _tracked_python_files() -> list[Path]:
-    result = subprocess.run(
-        ["git", "ls-files", *SCAN_ROOTS],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    return [ROOT / line for line in result.stdout.splitlines() if line.endswith(".py")]
+    import shutil
+    git_cmd = shutil.which("git") or "git"
+    try:
+        result = subprocess.run(
+            [git_cmd, "ls-files", *SCAN_ROOTS],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return [ROOT / line for line in result.stdout.splitlines() if line.endswith(".py")]
+    except (OSError, subprocess.CalledProcessError):
+        files: list[Path] = []
+        for scan_root in SCAN_ROOTS:
+            files.extend((ROOT / scan_root).rglob("*.py"))
+        return sorted(path for path in files if path.is_file())
 
 
 def _uuid4_seams() -> set[tuple[str, int, str]]:

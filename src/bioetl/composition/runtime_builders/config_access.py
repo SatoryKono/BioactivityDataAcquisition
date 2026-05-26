@@ -14,6 +14,7 @@ __all__ = [
     "get_settings",
     "load_pipeline_config",
     "load_source_config",
+    "resolve_configs_root",
 ]
 
 

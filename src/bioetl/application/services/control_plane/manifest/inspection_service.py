@@ -5,10 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol, cast
 
-from bioetl.application.services.control_plane._run_manifest_inspection_mixins import (
-    RunManifestInspectionDiffClassificationMixin,
-    RunManifestInspectionIdentityGraphMixin,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
 )
@@ -21,6 +17,10 @@ from bioetl.application.services.control_plane.manifest.inspection_models import
 )
 from bioetl.application.services.control_plane.run_manifest_inspection_helpers import (
     build_authoritative_replay_dossier,
+)
+from bioetl.application.services.control_plane.run_manifest_inspection_mixins import (
+    RunManifestInspectionDiffClassificationMixin,
+    RunManifestInspectionIdentityGraphMixin,
 )
 from bioetl.application.services.control_plane.run_manifest_inspection_verification import (
     build_cross_surface_replay_diff,

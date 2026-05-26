@@ -2000,6 +2000,14 @@
                   {
                     "color": "gray",
                     "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
                   }
                 ]
               },
@@ -2011,12 +2019,12 @@
           "gridPos": {
             "h": 8,
             "w": 8,
-            "x": 16,
+            "x": 0,
             "y": 32
           },
           "id": 152,
           "options": {
-            "colorMode": "value",
+            "colorMode": "backgroundSolid",
             "dataLinks": [
               {
                 "targetBlank": false,
@@ -2056,7 +2064,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range pipeline breakdown of Silver filter rejects. Use it to see which selected pipeline values dominate filtered_out volume before drilling into reason_code or field breakdowns.",
+          "description": "Selected-range pipeline breakdown of Silver filter rejects from the filtered_out stage-total counter. This is a scope/distribution panel, not a reason_code summary. No data means no filtered_out samples were observed in the active window; the panel must not invent a synthetic pipeline row.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2082,6 +2090,7 @@
                 }
               },
               "mappings": [],
+              "noValue": "No filtered-out samples in range",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -2099,16 +2108,16 @@
           "gridPos": {
             "h": 8,
             "w": 8,
-            "x": 8,
-            "y": 32
+            "x": 0,
+            "y": 40
           },
           "id": 118,
           "options": {
             "dataLinks": [
               {
                 "targetBlank": false,
-                "title": "Open Silver Reject Explorer for this reason",
-                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&var-reason_code=${__series.name}&${__url_time_range}",
+                "title": "Open Silver Reject Explorer for this pipeline scope",
+                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${__series.name}&var-run_type=${run_type:queryparam}&${__url_time_range}",
                 "includeVars": false
               }
             ],
@@ -2125,7 +2134,7 @@
           },
           "targets": [
             {
-              "expr": "sum by (pipeline) (max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or label_replace(vector(0), \"pipeline\", \"no_events\", \"\", \"\")",
+              "expr": "sum by (pipeline) (max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))",
               "instant": true,
               "legendFormat": "{{pipeline}}",
               "refId": "A"
@@ -2164,6 +2173,7 @@
                 }
               },
               "mappings": [],
+              "noValue": "No reject reason samples in range",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -2180,9 +2190,9 @@
           },
           "gridPos": {
             "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 40
+            "w": 8,
+            "x": 8,
+            "y": 32
           },
           "id": 121,
           "options": {
@@ -2207,7 +2217,7 @@
           },
           "targets": [
             {
-              "expr": "topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))) or label_replace(vector(0), \"reason_code\", \"none\", \"\", \"\")",
+              "expr": "topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))",
               "instant": true,
               "legendFormat": "{{reason_code}}",
               "refId": "A"
@@ -2215,7 +2225,7 @@
           ],
           "title": "Inspect: Top Silver Reject Reasons (Pareto)",
           "type": "bargauge",
-          "description": "Pareto ranking of bounded Silver reject reasons across the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/reason_code and then validate representative payload_hash rows."
+          "description": "Pareto ranking of bounded Silver reject reasons across the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/reason_code and then validate representative payload_hash rows. No data means no bounded reject breakdown samples were observed in range; the panel must not invent a synthetic reason bucket."
         },
         {
           "datasource": {
@@ -2247,6 +2257,7 @@
                 }
               },
               "mappings": [],
+              "noValue": "No reject field samples in range",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -2263,9 +2274,9 @@
           },
           "gridPos": {
             "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 40
+            "w": 8,
+            "x": 16,
+            "y": 32
           },
           "id": 122,
           "options": {
@@ -2290,7 +2301,7 @@
           },
           "targets": [
             {
-              "expr": "topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))) or label_replace(vector(0), \"field\", \"none\", \"\", \"\")",
+              "expr": "topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))",
               "instant": true,
               "legendFormat": "{{field}}",
               "refId": "A"
@@ -2298,7 +2309,7 @@
           ],
           "title": "Inspect: Top Silver Reject Fields",
           "type": "bargauge",
-          "description": "Bounded schema-field summary for the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/field and then compare top reason signatures inside the explorer."
+          "description": "Bounded schema-field summary for the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/field and then compare top reason signatures inside the explorer. No data means no bounded reject field samples were observed in range; the panel must not invent a synthetic field bucket."
         }
       ],
       "title": "Reject / Pareto / Fields (collapsed)",
@@ -2319,34 +2330,47 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range quarantine distribution by error type. 0/none means no quarantined records were observed in the active window; use this to decide whether triage belongs in quarantine, schema validation, or provider drift.",
+          "description": "Selected-range quarantine breakdown by error_type. Use it to determine whether current DQ pressure is dominated by a specific quarantine signature before moving to logs, traces, or downstream validation surfaces. Horizontal bars are intentional here because category comparison matters more than composition percentage. No data means no quarantined records were observed in the active window; the panel must not invent a synthetic error_type bucket.",
           "fieldConfig": {
             "defaults": {
               "color": {
                 "mode": "palette-classic"
               },
+              "custom": {
+                "axisLabel": "Quarantined records",
+                "axisPlacement": "auto",
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
               "mappings": [],
+              "noValue": "No quarantined records in range",
               "unit": "short"
             },
             "overrides": []
           },
           "gridPos": {
             "h": 8,
-            "w": 10,
+            "w": 12,
             "x": 0,
             "y": 48
           },
           "id": 9,
           "options": {
-            "displayLabels": [
-              "name",
-              "percent"
-            ],
-            "legend": {
-              "displayMode": "table",
-              "placement": "bottom"
-            },
-            "pieType": "pie",
+            "displayMode": "gradient",
+            "orientation": "horizontal",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -2354,26 +2378,24 @@
               "fields": "",
               "values": false
             },
-            "tooltip": {
-              "mode": "single"
-            }
+            "showUnfilled": true
           },
           "targets": [
             {
-              "expr": "sum by (error_type) (max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or label_replace(vector(0), \"error_type\", \"none\", \"\", \"\")",
+              "expr": "sum by (error_type) (max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
               "legendFormat": "{{error_type}}",
               "refId": "A"
             }
           ],
           "title": "Inspect: Quarantine by Error Type",
-          "type": "piechart"
+          "type": "bargauge"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range anomaly counts by severity and anomaly type. WARN-only anomalies indicate drift; CRIT anomalies are blocking and should be correlated with current DQ reasons before replay or promotion.",
+          "description": "Selected-range anomaly counts by severity and anomaly type. WARN-only anomalies indicate drift; CRIT anomalies are blocking and should be correlated with current DQ reasons before replay or promotion. No data means no anomaly events were observed in the current window; the panel must not invent a synthetic severity/type series.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2399,6 +2421,7 @@
                 }
               },
               "mappings": [],
+              "noValue": "No anomaly events in range",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -2414,9 +2437,9 @@
           },
           "gridPos": {
             "h": 9,
-            "w": 14,
-            "x": 10,
-            "y": 48
+            "w": 12,
+            "x": 0,
+            "y": 56
           },
           "id": 10,
           "options": {
@@ -2435,7 +2458,7 @@
           },
           "targets": [
             {
-              "expr": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\"}[$__interval])) or label_replace(label_replace(vector(0), \"severity\", \"none\", \"\", \"\"), \"anomaly_type\", \"none\", \"\", \"\")",
+              "expr": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\"}[$__interval]))",
               "legendFormat": "{{severity}} / {{anomaly_type}}",
               "refId": "A"
             }
@@ -2491,8 +2514,8 @@
           "gridPos": {
             "h": 9,
             "w": 12,
-            "x": 0,
-            "y": 57
+            "x": 12,
+            "y": 56
           },
           "id": 11,
           "options": {
@@ -2549,6 +2572,14 @@
                   {
                     "color": "gray",
                     "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
                   }
                 ]
               },
@@ -2560,11 +2591,11 @@
             "h": 8,
             "w": 6,
             "x": 12,
-            "y": 57
+            "y": 48
           },
           "id": 12,
           "options": {
-            "colorMode": "value",
+            "colorMode": "backgroundSolid",
             "dataLinks": [
               {
                 "targetBlank": true,
@@ -2605,9 +2636,9 @@
           },
           "gridPos": {
             "h": 8,
-            "w": 6,
-            "x": 18,
-            "y": 57
+            "w": 8,
+            "x": 16,
+            "y": 65
           },
           "id": 116,
           "links": [
@@ -2621,6 +2652,15 @@
           ],
           "options": {
             "content": "### Lineage trust now lives in Control Plane\n- Use **0. Control Plane** for the canonical `Monitor: Lineage Refs Missing` signal.\n- Review lineage gaps together with replay blockers, manifest / ledger integrity, and artifact identity anchors.\n- This DQ surface keeps reject, quarantine, validation, and freshness evidence local instead of re-stating control-plane trust counters.\n",
+            "dataLinks": [
+              {
+                "includeVars": false,
+                "targetBlank": false,
+                "title": "Open Control Plane lineage diagnostics",
+                "tooltip": "Canonical lineage/replay trust surface. Opens the Control Plane dashboard focused on its lineage diagnostics row.",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=904&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id"
+              }
+            ],
             "mode": "markdown"
           },
           "title": "Review: Control-plane lineage handoff",
@@ -2676,8 +2716,8 @@
           "gridPos": {
             "h": 8,
             "w": 8,
-            "x": 16,
-            "y": 66
+            "x": 8,
+            "y": 65
           },
           "id": 153,
           "options": {
@@ -2757,8 +2797,8 @@
           "gridPos": {
             "h": 8,
             "w": 8,
-            "x": 8,
-            "y": 66
+            "x": 0,
+            "y": 65
           },
           "id": 155,
           "options": {
@@ -2804,7 +2844,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 76
+            "y": 73
           },
           "id": 150,
           "description": "Operator note that redirects aggregate control-plane symptoms to the Control Plane dashboard and runbook surfaces; no datasource query is expected.",
@@ -2845,6 +2885,14 @@
                   {
                     "color": "gray",
                     "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
                   }
                 ]
               },
@@ -2854,13 +2902,13 @@
           },
           "gridPos": {
             "h": 8,
-            "w": 8,
-            "x": 0,
-            "y": 80
+            "w": 6,
+            "x": 18,
+            "y": 48
           },
           "id": 151,
           "options": {
-            "colorMode": "value",
+            "colorMode": "backgroundSolid",
             "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",

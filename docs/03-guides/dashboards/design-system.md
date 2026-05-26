@@ -320,6 +320,12 @@ datasource/query failure по роли панели.
 - `or vector(0)` запрещён.
 - Missing telemetry MUST оставаться fail-closed, а не превращаться в synthetic
   healthy state.
+- First-screen current-status panels generally SHOULD NOT use Grafana-selected
+  range as their primary semantics.
+- Provider Health MAY use `$__range` for sparse provider-current telemetry when
+  the operator explicitly needs the selected time window to recover the last
+  observed provider state/cause inside that range instead of a fixed 15m
+  snapshot.
 
 ### 4.5.2 Zero-valid event counters
 

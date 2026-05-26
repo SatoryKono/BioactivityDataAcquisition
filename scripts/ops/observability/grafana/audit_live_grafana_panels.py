@@ -34,7 +34,7 @@ class PanelAuditSpec:
     panel_id: int
     title: str
     source_kind: Literal["prometheus", "http"]
-    semantic_kind: Literal["derived_status", "freshness", "http_summary"]
+    semantic_kind: Literal["derived_status", "freshness", "http_summary", "http_table"]
 
 
 @dataclass(frozen=True)
@@ -64,6 +64,13 @@ class AuditResult:
 
 
 REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
+    PanelAuditSpec(
+        dashboard_uid="bioetl-overview-v2",
+        panel_id=9301,
+        title="Processed Records",
+        source_kind="http",
+        semantic_kind="http_table",
+    ),
     PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
         panel_id=132,
@@ -105,6 +112,27 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
         title="Track Reject Rate vs Bronze",
         source_kind="http",
         semantic_kind="http_summary",
+    ),
+    PanelAuditSpec(
+        dashboard_uid="bioetl-runtime",
+        panel_id=9403,
+        title="Processed Records",
+        source_kind="http",
+        semantic_kind="http_table",
+    ),
+    PanelAuditSpec(
+        dashboard_uid="bioetl-provider-health-v2",
+        panel_id=9403,
+        title="Processed Records",
+        source_kind="http",
+        semantic_kind="http_table",
+    ),
+    PanelAuditSpec(
+        dashboard_uid="bioetl-workflow-overview",
+        panel_id=9403,
+        title="Processed Records",
+        source_kind="http",
+        semantic_kind="http_table",
     ),
 )
 
@@ -392,6 +420,17 @@ def _classify_http_payload(payload: object) -> tuple[str, str]:
     return ("nonzero_result", "Explorer summary returned non-zero rejects")
 
 
+def _classify_http_table_payload(payload: object) -> tuple[str, str]:
+    if not isinstance(payload, dict):
+        return ("invalid_shape", "HTTP table payload is not a JSON object")
+    rows = payload.get("rows")
+    if not isinstance(rows, list):
+        return ("invalid_shape", "HTTP table payload missing rows list")
+    if not rows:
+        return ("empty_result", "HTTP table payload returned no rows")
+    return ("nonempty_table", "HTTP table payload returned rows")
+
+
 def _classify_http_freshness_payload(payload: object) -> tuple[str, str]:
     if not isinstance(payload, dict):
         return ("invalid_shape", "HTTP payload is not a JSON object")
@@ -399,6 +438,11 @@ def _classify_http_freshness_payload(payload: object) -> tuple[str, str]:
         return ("invalid_shape", "HTTP freshness payload missing age_seconds")
     age_seconds = payload.get("age_seconds")
     if age_seconds is None:
+        if str(payload.get("status", "")).upper() == "UNKNOWN":
+            return (
+                "unknown_result",
+                "Checkpoint freshness payload returned UNKNOWN due to missing persisted checkpoint evidence",
+            )
         return ("empty_result", "Checkpoint freshness payload returned null age_seconds")
     if not isinstance(age_seconds, (int, float)):
         return ("invalid_shape", "HTTP age_seconds must be numeric or null")
@@ -489,6 +533,9 @@ def _audit_http_panel(
     payload = _fetch_json(f"{app_base_url}{rendered_url}")
     if spec.semantic_kind == "freshness":
         classification, detail = _classify_http_freshness_payload(payload)
+        status = "error" if classification in {"invalid_shape", "empty_result"} else "ok"
+    elif spec.semantic_kind == "http_table":
+        classification, detail = _classify_http_table_payload(payload)
         status = "error" if classification in {"invalid_shape", "empty_result"} else "ok"
     else:
         classification, detail = _classify_http_payload(payload)

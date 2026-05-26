@@ -451,7 +451,8 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 ### Специфические требования
 - Provider-first dashboard
 - Panel `id=114` остаётся raw source enum (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже first screen как evidence
-- Panel `id=9104` остаётся first-screen trust marker for `bioetl_provider_current_status` freshness; missing 15m samples mean telemetry gap, not healthy provider state
+- Panel `id=9104` остаётся first-screen trust marker for `bioetl_provider_current_status` freshness; missing samples inside the active Grafana time range mean telemetry gap, not healthy provider state
+- `Status`, `GLOBAL Provider Severity Matrix`, `Inspect Critical Providers`, and `Inspect Provider Top Causes` MAY use the active Grafana time selector for sparse provider-current telemetry instead of a fixed 15m snapshot
 - `Inspect Provider Top Causes` может быть непустой даже при `GLOBAL severity = OK` (early-warning provider signals независимо от current-status projection)
 - Если status остаётся non-OK, а canonical cause projection пуста, `Inspect Provider Top Causes` остаётся empty table (explainability gap, не healthy state)
 - Переходы из pipeline-scoped dashboards сохраняют `pipeline_context=$pipeline` и fail-close к `provider=unknown`

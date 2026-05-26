@@ -86,11 +86,25 @@ ______________________________________________________________________
 > whether local screenshot artifacts are missing or stale relative to shipped
 > dashboard JSON.
 > `python -m scripts.ops run-grafana-audit-cycle` is the canonical full audit
-> workflow: service preflight, screenshot refresh, screenshot freshness
-> re-check, then reviewed live panel audit. By default it also reuses or
-> auto-starts the detached `bioetl quarantine serve` backend on port `8081`
-> before the first preflight, so `Quarantine Explorer`-backed panels can be
-> validated without a separate manual backend bootstrap step.
+> workflow: service preflight, reviewed live discovery of filled dashboards,
+> screenshot refresh for that filled-dashboard subset, screenshot freshness
+> re-check for the same subset, then the reviewed live panel audit. If the
+> discovery pass times out, the cycle falls back to the last successful
+> `reports/observability/grafana/live-panel-audit.json` subset before failing
+> hard. By default the cycle also force-refreshes the detached Quarantine
+> Explorer backend before audit so stale route handlers from an older process
+> are not silently reused; `--no-refresh-observability-backend` keeps the
+> previous reuse-first behavior. If the backend on `8081` cannot be refreshed
+> in place, the cycle can retry on a free localhost fallback port and use that
+> port for preflight and live audit. If that fresh fallback backend also fails
+> to become ready, the cycle degrades to the existing health-reachable backend
+> on `8081` instead of aborting before screenshot refresh. Detached backend
+> readiness now waits for both `/health` and required audit capability routes,
+> with a longer startup budget for slower Windows hosts. By default it also
+> reuses or auto-starts the detached
+> `bioetl quarantine serve` backend on port `8081` before the first preflight,
+> so `Quarantine Explorer`-backed panels can be validated without a separate
+> manual backend bootstrap step.
 
 ## 1. Архитектура мониторинга
 
@@ -834,7 +848,10 @@ tries `http://localhost:9090`, then the Docker-local fallbacks
   Prometheus labels. `Monitor: Checkpoint Freshness Lag (seconds)` is also now
   HTTP-backed through `/ops/control-plane/checkpoint-freshness`, so it reads
   persisted checkpoint metadata instead of relying on short-lived scrape
-  presence. GLOBAL
+  presence. When that endpoint returns `status=UNKNOWN` with `age_seconds=null`,
+  the panel is behaving as designed: the stack has no persisted checkpoint
+  evidence for the selected scope yet, which is a no-evidence state rather than
+  a broken datasource. GLOBAL
   read-path и checkpoint-operator panels не несут pipeline/run_type labels,
   поэтому не фильтруются по этим переменным.
 
@@ -1007,9 +1024,9 @@ not use it as a Prometheus label.
 | 6   | Track: Records Quarantined in Range          | Stat       | `round(sum(max_over_time(bioetl_dq_records_quarantined_total{...}[$__range])) or vector(0))`                                           | Selected-range quarantine evidence; non-zero here can explain current DQ pressure even when Silver filter rejects remain zero.                                               |
 | 7   | Track: Silver Validation Failures in Range   | Stat       | `round(sum(max_over_time(bioetl_silver_validation_failures_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range])) or vector(0))` | Visible selected-range validation blocker count; non-zero can drive current `CRIT` even when `filtered_out=0`.                                                               |
 | 117 | Track: Silver Filter Rejects in Range        | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`                             | Отдельный счётчик Silver filter rejects внутри выбранного временного окна; не заменяет `Track: Records Quarantined in Range`.                                              |
-| 118 | Inspect: Silver Filter Rejects by Pipeline   | Bar gauge  | `sum by (pipeline) (max_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))`                                  | Breakdown intentional Silver exclusions по выбранным pipeline values через selected-range pushed-counter evidence.                                                         |
-| 121 | Inspect: Top Silver Reject Reasons (Pareto) | Bar gauge  | `topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                      | Bounded top-10 summary по `reason_code`; each bar now opens `Silver Reject Explorer` already scoped by `pipeline`/`run_type`/`reason_code`.                                  |
-| 122 | Inspect: Top Silver Reject Fields            | Bar gauge  | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                            | Bounded top-10 summary по `field`; each bar now opens `Silver Reject Explorer` already scoped by `pipeline`/`run_type`/`field`.                                              |
+| 118 | Inspect: Silver Filter Rejects by Pipeline   | Bar gauge  | `sum by (pipeline) (max_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))`                                  | Scope/distribution panel over the stage-total `filtered_out` counter. Explorer handoff preserves only `pipeline`/`run_type`; it does not synthesize a `reason_code`. No data remains an honest empty-state, not a fake `pipeline=no_events` row. |
+| 121 | Inspect: Top Silver Reject Reasons (Pareto) | Bar gauge  | `topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                      | Bounded top-10 summary по `reason_code`; each bar opens `Silver Reject Explorer` already scoped by `pipeline`/`run_type`/`reason_code`. No data remains empty-state instead of a synthetic `reason_code=none` bucket. |
+| 122 | Inspect: Top Silver Reject Fields            | Bar gauge  | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                            | Bounded top-10 summary по `field`; each bar opens `Silver Reject Explorer` already scoped by `pipeline`/`run_type`/`field`. No data remains empty-state instead of a synthetic `field=none` bucket. |
 | 152 | Monitor: Silver Filter Reject Accounting Mismatch | Stat  | `round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{...}[$__range])))`                                              | Reconciliation guard между stage-total `filtered_out` surface и bounded breakdown metric. `0` = healthy, non-zero = расследовать drift, `No data` = recording rule не публикуется. |
 | 101 | Review: Latest Successful Data Timestamp     | Stat       | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})`                                                                            | Последний observed ingestion timestamp внутри выбранного pipeline scope; остаётся в first-screen current-context band после переноса CTA из answer row.                  |
 

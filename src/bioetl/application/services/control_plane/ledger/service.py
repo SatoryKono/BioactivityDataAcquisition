@@ -8,10 +8,10 @@ from datetime import datetime
 from uuid import uuid4
 
 from bioetl.application.services.control_plane import (
-    _run_ledger_core_events,
-    _run_ledger_rich_events,
+    run_ledger_core_events,
+    run_ledger_rich_events,
 )
-from bioetl.application.services.control_plane._run_ledger_entry_support import (
+from bioetl.application.services.control_plane.run_ledger_entry_support import (
     RunLedgerEntryRequest,
     append_run_ledger_entry,
     append_run_outcome,
@@ -61,7 +61,7 @@ class RunLedgerService:
 
     def record_manifest_created(self, manifest: RunManifest) -> RunLedgerEntry:
         """Record manifest creation as the first control-plane event."""
-        return _run_ledger_core_events.record_manifest_created(self, manifest)
+        return run_ledger_core_events.record_manifest_created(self, manifest)
 
     def record_run_started(self) -> RunLedgerEntry:
         """Record the transition into active execution."""
@@ -171,7 +171,7 @@ class RunLedgerService:
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record a published layer artifact tied to this manifest."""
-        return _run_ledger_core_events.record_artifact_published(
+        return run_ledger_core_events.record_artifact_published(
             self,
             layer=layer,
             artifact_path=artifact_path,
@@ -191,7 +191,7 @@ class RunLedgerService:
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record a DQ policy outcome with stable trace anchors."""
-        return _run_ledger_core_events.record_dq_policy_applied(
+        return run_ledger_core_events.record_dq_policy_applied(
             self,
             stage=stage,
             status=status,
@@ -208,7 +208,7 @@ class RunLedgerService:
         result: Mapping[str, object],
     ) -> RunLedgerEntry:
         """Record bounded dependency result evidence for rich composite replay."""
-        return _run_ledger_rich_events.record_composite_dependency_completed(
+        return run_ledger_rich_events.record_composite_dependency_completed(
             self,
             dependency_name=dependency_name,
             result=result,
@@ -221,7 +221,7 @@ class RunLedgerService:
         result: Mapping[str, object],
     ) -> RunLedgerEntry:
         """Record bounded enricher result evidence for rich composite replay."""
-        return _run_ledger_rich_events.record_composite_enricher_completed(
+        return run_ledger_rich_events.record_composite_enricher_completed(
             self,
             enricher_name=enricher_name,
             result=result,
@@ -233,7 +233,7 @@ class RunLedgerService:
         result: Mapping[str, object],
     ) -> RunLedgerEntry:
         """Record bounded merge result evidence for rich composite replay."""
-        return _run_ledger_rich_events.record_composite_merge_completed(
+        return run_ledger_rich_events.record_composite_merge_completed(
             self,
             result=result,
         )
@@ -252,7 +252,7 @@ class RunLedgerService:
         details: Mapping[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record immutable input snapshot evidence published after Bronze write."""
-        return _run_ledger_rich_events.record_input_snapshot_published(
+        return run_ledger_rich_events.record_input_snapshot_published(
             self,
             provider=provider,
             entity=entity,

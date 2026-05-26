@@ -8,23 +8,27 @@ Implements DeltaReaderPort for export utilities.
 
 from __future__ import annotations
 
-__all__ = ["DeltaReader"]
-
-_FULL_READ_HEAD_LIMIT = 2147483647
-
-
 import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pyarrow as pa
 from deltalake import DeltaTable
-from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
+from deltalake.exceptions import (
+    DeltaError,
+)
+from deltalake.exceptions import (
+    TableNotFoundError as DeltaTableNotFoundError,
+)
 
 from bioetl.infrastructure.storage.versioned_table_resolver import (
     resolve_read_candidates,
     resolve_versioned_table_name,
 )
+
+__all__ = ["DeltaReader"]
+
+_FULL_READ_HEAD_LIMIT = 2147483647
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -54,7 +58,7 @@ def _try_native_delta_row_count(dt: DeltaTable) -> int | None:
         return int(native_count())
     except (KeyboardInterrupt, SystemExit):
         raise
-    except Exception:
+    except (DeltaError, OSError, RuntimeError, TypeError, ValueError):
         return None
 
 

@@ -220,9 +220,19 @@ async function renderDashboard(page, dashboard, index, total) {
   console.log(`[${index}/${total}] goto ${dashboard.uid} -> ${target}`);
   await page.goto(target, {
     timeout: CONFIG.timeoutMs,
-    waitUntil: "domcontentloaded",
+    waitUntil: "commit",
   });
-  console.log(`[${index}/${total}] domcontentloaded ${dashboard.uid}`);
+  console.log(`[${index}/${total}] navigation committed ${dashboard.uid}`);
+  await page
+    .waitForLoadState("domcontentloaded", { timeout: CONFIG.timeoutMs })
+    .then(() => {
+      console.log(`[${index}/${total}] domcontentloaded ${dashboard.uid}`);
+    })
+    .catch(() => {
+      console.warn(
+        `[${index}/${total}] domcontentloaded timeout for ${dashboard.uid}; continuing with settled page wait`,
+      );
+    });
   console.log(`[${index}/${total}] waiting for networkidle ${dashboard.uid} ...`);
   await page.waitForLoadState("networkidle", { timeout: CONFIG.timeoutMs }).catch(() => {
     console.warn(

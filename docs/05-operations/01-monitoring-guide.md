@@ -292,12 +292,12 @@ tracing-backed log hygiene живёт в collapsed row
   replay or escalation.
 - **Monitor Provider Telemetry Freshness**: first-screen trust marker for
   `bioetl_provider_current_status`; `0=OK`, `1=WARN`, `null=UNKNOWN`.
-  WARN here means no current-status samples in the last 15m, so an empty
+  WARN here means no current-status samples in the active Grafana time range, so an empty
   severity matrix is a telemetry gap, not proof that providers are healthy.
 - **Monitor Current Provider Health Status**: table panel по
   `bioetl_provider_health_status{provider}` с fail-closed fallback через
-  provider universe и явным mapping: `0=UNHEALTHY`, `1=DEGRADED`,
-  `2=HEALTHY`, `null/NaN=UNKNOWN`.
+  provider universe and selected-range lookup и явным mapping:
+  `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`, `null/NaN=UNKNOWN`.
 - **Track Health Check Latency by Provider (p95)**: selected-range тренд латентности провайдеров.
 - **Monitor Healthy Checks (Selected Range) / Monitor Degraded Checks (Selected Range) / Track Health Checks Total (Selected Range)**: selected-range evidence по completed probes; эти панели не являются current-health source.
 - **Track Provider Failure Rate (Selected Range)**: selected-range failure ratio
@@ -353,6 +353,18 @@ tracing-backed log hygiene живёт в collapsed row
   `Review: Latest Successful Data Timestamp` остаётся отдельным latest-success anchor
   на первом экране. Это intentionally разные сигналы: latest success не должен
   маскировать worst freshness lag.
+- **Reject / Pareto / Fields** и **Validation Diagnostics** breakdown-панели
+  сохраняют honest empty-state semantics: если в выбранном окне нет reject,
+  quarantine или anomaly observations, панель остаётся пустой/`No data` и не
+  синтезирует fake buckets вроде `pipeline=no_events`, `reason_code=none`,
+  `field=none`, `error_type=none` или synthetic anomaly categories.
+- **Reject / Pareto / Fields** теперь intentionally идёт в порядке
+  `trust guard -> top reasons -> top fields -> pipeline distribution`, чтобы
+  оператор сначала подтверждал корректность breakdown surface, а уже потом
+  смотрел scope-distribution по `filtered_out`.
+- **Inspect: Quarantine by Error Type** intentionally shipped как horizontal
+  bar comparison surface, а не `piechart`: для quarantine triage сравнение
+  категорий по объёму важнее процентной композиции.
 - **Drilldown**: navigation bus `0. Control Plane`, `1. Overview`,
   `2. Runtime`, `3. Provider Health`, `5. Workflow`, `Silver Reject Explorer`,
   `Explore Logs`, `Explore Traces`. Panel-level dashboard handoffs запрещены:
@@ -438,6 +450,8 @@ operator-facing checkpoint store latency outside ordinary runtime resume paths.
 - Используйте `1. Overview` или `2. Runtime` как summary surface, чтобы
   подтвердить spike по `Track: Silver Filter Rejects in Range` в активном Grafana time range.
 - После подтверждения переходите в `4. Data Quality`, где
+  `Inspect: Silver Filter Rejects by Pipeline` показывает scope/distribution по
+  stage-total `filtered_out`, а
   `Inspect: Top Silver Reject Reasons (Pareto)` и `Inspect: Top Silver Reject Fields` дают bounded cause
   summary без raw quarantine text.
 - Для row-level browsing переходите в `Silver Reject Explorer`.

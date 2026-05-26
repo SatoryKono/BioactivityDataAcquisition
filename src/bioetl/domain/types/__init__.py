@@ -7,7 +7,6 @@ forcing eager import of all type submodules during package initialization.
 from __future__ import annotations
 
 from importlib import import_module
-from typing import Any
 
 _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     "bioetl.domain.types.enums": (

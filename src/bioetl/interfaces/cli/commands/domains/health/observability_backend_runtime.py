@@ -7,16 +7,24 @@ start ``bioetl quarantine serve`` in detached mode when needed.
 
 from __future__ import annotations
 
-import os
 import subprocess
-import sys
 import time
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TYPE_CHECKING
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_process import (
+    _build_detached_backend_env as _build_detached_backend_env,
+)
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_process import (
+    _build_detached_backend_popen_kwargs as _build_detached_backend_popen_kwargs,
+)
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_process import (
+    drop_listening_backend_on_port,
+    python_executable_to_tuple,
+    start_detached_quarantine_backend,
+)
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
 )
@@ -27,7 +35,7 @@ if TYPE_CHECKING:
 
 DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST = "127.0.0.1"
 DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST = "0.0.0.0"
-DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS = 8.0
+DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS = 20.0
 DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS = 0.25
 
 _DETACHED_STATUS = frozenset({"reused", "started"})
@@ -84,85 +92,33 @@ def probe_observability_backend(
     return False
 
 
-def _build_detached_backend_popen_kwargs(
+def _build_backend_base_url(health_url: str) -> str:
+    if health_url.endswith("/health"):
+        return health_url[: -len("/health")]
+    return health_url.rstrip("/")
+
+
+def probe_observability_backend_required_paths(
+    health_url: str,
     *,
-    os_name: str = os.name,
-    subprocess_module: object = subprocess,
-) -> dict[str, object]:
-    """Build platform-specific detached subprocess kwargs for the backend."""
-    kwargs: dict[str, object] = {
-        "stdin": subprocess.DEVNULL,
-        "stdout": subprocess.DEVNULL,
-        "stderr": subprocess.DEVNULL,
-    }
-    if os_name == "nt":
-        detached_process = int(getattr(subprocess_module, "DETACHED_PROCESS", 0))
-        new_process_group = int(
-            getattr(subprocess_module, "CREATE_NEW_PROCESS_GROUP", 0)
-        )
-        create_no_window = int(getattr(subprocess_module, "CREATE_NO_WINDOW", 0))
-        kwargs["creationflags"] = (
-            detached_process | new_process_group | create_no_window
-        )
-
-        startupinfo_factory = getattr(subprocess_module, "STARTUPINFO", None)
-        if callable(startupinfo_factory):
-            startupinfo = startupinfo_factory()
-            startf_use_show_window = int(
-                getattr(subprocess_module, "STARTF_USESHOWWINDOW", 0)
-            )
-            has_sw_hide = hasattr(subprocess_module, "SW_HIDE")
-            sw_hide = int(getattr(subprocess_module, "SW_HIDE", 0))
-            if startf_use_show_window:
-                startupinfo.dwFlags = (
-                    int(getattr(startupinfo, "dwFlags", 0)) | startf_use_show_window
-                )
-            if has_sw_hide:
-                startupinfo.wShowWindow = sw_hide
-            kwargs["startupinfo"] = startupinfo
-    else:
-        kwargs["start_new_session"] = True
-    return kwargs
-
-
-def _build_detached_backend_env(
-    *,
-    current_env: dict[str, str] | None = None,
-) -> dict[str, str]:
-    """Ensure detached backend subprocess can import the src-layout package."""
-    env = dict(os.environ if current_env is None else current_env)
-    src_root = Path(__file__).resolve().parents[6]
-    existing_pythonpath = env.get("PYTHONPATH", "").strip()
-    pythonpath_parts = [str(src_root)]
-    if existing_pythonpath:
-        pythonpath_parts.append(existing_pythonpath)
-    env["PYTHONPATH"] = os.pathsep.join(pythonpath_parts)
-    return env
-
-
-def start_detached_quarantine_backend(
-    *,
-    bind_host: str = DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST,
-    port: int = DEFAULT_HEALTH_SERVER_PORT,
-    python_executable: str | None = None,
-    popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
-) -> subprocess.Popen[bytes]:
-    """Launch ``bioetl quarantine serve`` as a detached background process."""
-    command = [
-        python_executable or sys.executable,
-        "-m",
-        "bioetl",
-        "quarantine",
-        "serve",
-        "--host",
-        bind_host,
-        "--port",
-        str(port),
-    ]
-    kwargs = _build_detached_backend_popen_kwargs()
-    kwargs["cwd"] = str(Path(__file__).resolve().parents[7])
-    kwargs["env"] = _build_detached_backend_env()
-    return popen_factory(command, **kwargs)
+    required_probe_paths: tuple[str, ...],
+    timeout_seconds: float = 1.0,
+    urlopen_fn: Callable[..., object] = urlopen,
+) -> bool:
+    """Return True when the backend exposes all required HTTP capability paths."""
+    if not required_probe_paths:
+        return True
+    base_url = _build_backend_base_url(health_url)
+    for raw_path in required_probe_paths:
+        path = raw_path if raw_path.startswith("/") else f"/{raw_path}"
+        try:
+            with urlopen_fn(f"{base_url}{path}", timeout=timeout_seconds) as response:
+                status = getattr(response, "status", 200)
+                if int(status) >= 400:
+                    return False
+        except (HTTPError, URLError, OSError, ValueError):
+            return False
+    return True
 
 
 def wait_for_observability_backend_ready(
@@ -182,6 +138,68 @@ def wait_for_observability_backend_ready(
     return probe_fn(health_url)
 
 
+def wait_for_observability_backend_required_paths_ready(
+    health_url: str,
+    *,
+    required_probe_paths: tuple[str, ...],
+    timeout_seconds: float = DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS,
+    poll_seconds: float = DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS,
+    required_probe_fn: Callable[..., bool] = probe_observability_backend_required_paths,
+    sleep_fn: Callable[[float], None] = time.sleep,
+) -> bool:
+    """Poll backend capability routes until they respond or timeout expires."""
+    if not required_probe_paths:
+        return True
+    deadline = time.monotonic() + timeout_seconds
+    while time.monotonic() < deadline:
+        if required_probe_fn(
+            health_url,
+            required_probe_paths=required_probe_paths,
+        ):
+            return True
+        sleep_fn(poll_seconds)
+    return required_probe_fn(
+        health_url,
+        required_probe_paths=required_probe_paths,
+    )
+
+
+def _reuse_observability_backend_if_ready(
+    *,
+    health_url: str,
+    port: int,
+    required_probe_paths: tuple[str, ...],
+    probe_fn: Callable[..., bool],
+    required_probe_fn: Callable[..., bool],
+    drop_stale_backend_fn: Callable[[int], bool],
+    info_printer: Callable[[str], None],
+    warning_printer: Callable[[str], None],
+) -> ObservabilityBackendEnsureResult | None:
+    if not probe_fn(health_url):
+        return None
+    if required_probe_fn(health_url, required_probe_paths=required_probe_paths):
+        info_printer(f"Observability backend: reusing {health_url}")
+        return ObservabilityBackendEnsureResult(
+            status="reused",
+            health_url=health_url,
+            message=f"Observability backend already ready at {health_url}.",
+        )
+    warning_printer(
+        "Observability backend: existing listener is reachable but missing "
+        "required audit capabilities; restarting detached Quarantine Explorer backend."
+    )
+    if drop_stale_backend_fn(port):
+        return None
+    return ObservabilityBackendEnsureResult(
+        status="failed",
+        health_url=health_url,
+        message=(
+            "Existing backend is missing required audit capabilities and "
+            f"could not be restarted on port {port}."
+        ),
+    )
+
+
 def ensure_observability_backend_started(
     *,
     enabled: bool,
@@ -190,11 +208,17 @@ def ensure_observability_backend_started(
     bind_host: str = DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST,
     ready_timeout_seconds: float = DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS,
     poll_seconds: float = DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS,
+    required_probe_paths: tuple[str, ...] = (),
     probe_fn: Callable[..., bool] = probe_observability_backend,
+    required_probe_fn: Callable[..., bool] = probe_observability_backend_required_paths,
     start_fn: Callable[
         ..., subprocess.Popen[bytes]
     ] = start_detached_quarantine_backend,
     wait_fn: Callable[..., bool] = wait_for_observability_backend_ready,
+    wait_required_paths_fn: Callable[
+        ..., bool
+    ] = wait_for_observability_backend_required_paths_ready,
+    drop_stale_backend_fn: Callable[[int], bool] = drop_listening_backend_on_port,
     info_printer: Callable[[str], None] = echo_info,
     warning_printer: Callable[[str], None] = echo_warning,
 ) -> ObservabilityBackendEnsureResult:
@@ -207,13 +231,18 @@ def ensure_observability_backend_started(
             message="Observability backend auto-start disabled by CLI flag.",
         )
 
-    if probe_fn(health_url):
-        info_printer(f"Observability backend: reusing {health_url}")
-        return ObservabilityBackendEnsureResult(
-            status="reused",
-            health_url=health_url,
-            message=f"Observability backend already ready at {health_url}.",
-        )
+    reuse_result = _reuse_observability_backend_if_ready(
+        health_url=health_url,
+        port=port,
+        required_probe_paths=required_probe_paths,
+        probe_fn=probe_fn,
+        required_probe_fn=required_probe_fn,
+        drop_stale_backend_fn=drop_stale_backend_fn,
+        info_printer=info_printer,
+        warning_printer=warning_printer,
+    )
+    if reuse_result is not None:
+        return reuse_result
 
     try:
         process = start_fn(bind_host=bind_host, port=port)
@@ -234,10 +263,14 @@ def ensure_observability_backend_started(
         poll_seconds=poll_seconds,
         probe_fn=probe_fn,
     )
-    command = (
-        python_executable_to_tuple(process.args) if hasattr(process, "args") else ()
-    )
-    if ready:
+    command = python_executable_to_tuple(process.args) if hasattr(process, "args") else ()
+    if ready and wait_required_paths_fn(
+        health_url,
+        required_probe_paths=required_probe_paths,
+        timeout_seconds=ready_timeout_seconds,
+        poll_seconds=poll_seconds,
+        required_probe_fn=required_probe_fn,
+    ):
         info_printer(f"Observability backend: started {health_url}")
         return ObservabilityBackendEnsureResult(
             status="started",
@@ -249,16 +282,19 @@ def ensure_observability_backend_started(
 
     warning_printer(
         "Observability backend: detached Quarantine Explorer process did not "
-        f"become ready at {health_url}. Grafana ID panels may remain empty."
+        "become ready with required audit capabilities at "
+        f"{health_url}. Grafana ID panels may remain empty."
     )
     return ObservabilityBackendEnsureResult(
         status="failed",
         health_url=health_url,
         pid=getattr(process, "pid", None),
         command=command,
-        message=f"Detached backend did not become ready at {health_url}.",
+        message=(
+            "Detached backend did not become ready with required audit "
+            f"capabilities at {health_url}."
+        ),
     )
-
 
 def should_disable_transient_health_server(
     *,
@@ -275,25 +311,24 @@ def should_disable_transient_health_server(
     )
 
 
-def python_executable_to_tuple(args: object) -> tuple[str, ...]:
-    """Normalize subprocess ``args`` into a tuple for stable reporting/tests."""
-    if isinstance(args, (list, tuple)):
-        return tuple(str(item) for item in args)
-    return (str(args),)
-
-
-__all__ = [
-    "DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST",
-    "DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS",
-    "DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST",
-    "DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS",
-    "_build_observability_backend_probe_urls",
-    "ObservabilityBackendEnsureResult",
-    "build_observability_backend_health_url",
-    "ensure_observability_backend_started",
-    "probe_observability_backend",
-    "python_executable_to_tuple",
-    "should_disable_transient_health_server",
-    "start_detached_quarantine_backend",
-    "wait_for_observability_backend_ready",
-]
+__all__ = sorted(
+    [
+        "DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST",
+        "DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS",
+        "DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST",
+        "DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS",
+        "ObservabilityBackendEnsureResult",
+        "_build_detached_backend_env",
+        "_build_detached_backend_popen_kwargs",
+        "_build_observability_backend_probe_urls",
+        "build_observability_backend_health_url",
+        "ensure_observability_backend_started",
+        "probe_observability_backend",
+        "probe_observability_backend_required_paths",
+        "python_executable_to_tuple",
+        "should_disable_transient_health_server",
+        "start_detached_quarantine_backend",
+        "wait_for_observability_backend_required_paths_ready",
+        "wait_for_observability_backend_ready",
+    ]
+)

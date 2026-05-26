@@ -76,6 +76,8 @@ def _check_http_json(
 
 def _expected_dashboard_screenshot_pairs(
     screenshot_dir: Path,
+    *,
+    selected_uids: tuple[str, ...] = (),
 ) -> list[tuple[Path, Path, str]]:
     pairs: list[tuple[Path, Path, str]] = []
     for dashboard_path in sorted(_DASHBOARD_DIR.glob("*.json")):
@@ -83,12 +85,18 @@ def _expected_dashboard_screenshot_pairs(
         uid = payload.get("uid")
         if not isinstance(uid, str) or not uid.strip():
             continue
+        if selected_uids and uid not in selected_uids:
+            continue
         screenshot_path = screenshot_dir / f"{uid}.png"
         pairs.append((dashboard_path, screenshot_path, uid))
     return pairs
 
 
-def _check_screenshot_artifacts(screenshot_dir: Path) -> PreflightCheck:
+def _check_screenshot_artifacts(
+    screenshot_dir: Path,
+    *,
+    selected_uids: tuple[str, ...] = (),
+) -> PreflightCheck:
     manifest_path = screenshot_dir / "render-manifest.json"
     if not manifest_path.exists():
         return PreflightCheck(
@@ -100,7 +108,8 @@ def _check_screenshot_artifacts(screenshot_dir: Path) -> PreflightCheck:
     stale: list[str] = []
     missing: list[str] = []
     for dashboard_path, screenshot_path, uid in _expected_dashboard_screenshot_pairs(
-        screenshot_dir
+        screenshot_dir,
+        selected_uids=selected_uids,
     ):
         if not screenshot_path.exists():
             missing.append(uid)
@@ -137,6 +146,7 @@ def run_checks(
     timeout_seconds: float,
     screenshot_dir: Path,
     include_screenshot_check: bool = True,
+    screenshot_uids: tuple[str, ...] = (),
 ) -> list[PreflightCheck]:
     checks = [
         _check_http_json(
@@ -185,7 +195,12 @@ def run_checks(
         )
 
     if include_screenshot_check:
-        checks.append(_check_screenshot_artifacts(screenshot_dir))
+        checks.append(
+            _check_screenshot_artifacts(
+                screenshot_dir,
+                selected_uids=screenshot_uids,
+            )
+        )
     return checks
 
 
@@ -243,6 +258,12 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Skip local PNG/manifest freshness validation.",
     )
+    parser.add_argument(
+        "--screenshot-uids",
+        nargs="*",
+        default=(),
+        help="Optional whitelist of dashboard UIDs whose screenshots must be current.",
+    )
     return parser
 
 
@@ -264,6 +285,7 @@ def main(argv: list[str] | None = None) -> int:
         timeout_seconds=args.timeout_seconds,
         screenshot_dir=args.screenshot_dir,
         include_screenshot_check=not args.skip_screenshot_check,
+        screenshot_uids=tuple(str(uid) for uid in args.screenshot_uids),
     )
 
     if args.json:

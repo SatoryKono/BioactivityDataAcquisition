@@ -300,11 +300,13 @@ Compact evidence ниже первого экрана:
 - Для current-state narrowing используйте `Inspect DQ Current Reasons`; для
   bounded cause summary используйте `Inspect: Top Silver Reject Reasons (Pareto)` и
   `Inspect: Top Silver Reject Fields` в collapsed rows `bioetl-dq-v2`.
+  `Inspect: Silver Filter Rejects by Pipeline` остаётся scope/distribution panel
+  по stage-total `filtered_out`, а не reason drilldown.
 - Маршрут triage: **L1 summary -> L2 explorer**.
   1. **L1 summary:** начните с `4. Data Quality` (first-screen current status,
      threshold state, reasons, invalid-record-policy note), чтобы определить
      severity и первое действие.
-  1. **L1 cause narrowing:** раскройте collapsed rows `Reject / Pareto / Fields` и `Validation Diagnostics`, проверьте `Inspect: Top Silver Reject Reasons (Pareto)` / `Inspect: Top Silver Reject Fields` и связанные diagnostics.
+  1. **L1 cause narrowing:** раскройте collapsed rows `Reject / Pareto / Fields` и `Validation Diagnostics`. В reject row сначала проверьте trust guard `Monitor: Silver Filter Reject Accounting Mismatch`, затем `Inspect: Top Silver Reject Reasons (Pareto)` / `Inspect: Top Silver Reject Fields`, и только после этого переходите к pipeline distribution через `Inspect: Silver Filter Rejects by Pipeline`.
   1. **L2 explorer:** откройте `Silver Reject Explorer` через top-level link в `4. Data Quality` для record-level списка, выбора `reason_code/field/quarantine_run_id` и detail по `payload_hash`.
   1. **L2 no-data gate:** считайте `0` rejects нормой только когда `Review: First Action / No-Data Semantics` подтверждает конкретный pipeline, доступный Quarantine Explorer и ненулевой Bronze denominator; zero-reject workflow run is a valid empty explorer state only after those checks pass. Zero matching rows остаются empty-result состоянием, а plugin errors, unsupported filter chains, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN/error.
   1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и финального подтверждения remediation.
@@ -444,7 +446,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   evidence, while canonical first-screen severity remains `Status` plus
   `Monitor GLOBAL Provider Severity Matrix`. Panel `id=9104`
   (`Monitor Provider Telemetry Freshness`) is the first-screen trust marker:
-  missing `bioetl_provider_current_status` samples in the last 15m mean telemetry
+  missing `bioetl_provider_current_status` samples in the active Grafana time range mean telemetry
   gap, not proof that providers are healthy. Raw status stays fail-closed
   `UNKNOWN`, если provider universe существует, а raw status sample отсутствует.
   
@@ -477,6 +479,14 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - `Inspect: Top Silver Reject Reasons (Pareto)` и `Inspect: Top Silver Reject Fields` intentionally не
   дублируют второй dashboard-to-dashboard handoff: оператор использует их как
   bounded cause summary, затем переходит в top-level `Silver Reject Explorer`.
+- `Inspect: Silver Filter Rejects by Pipeline`, `Inspect: Top Silver Reject Reasons (Pareto)`,
+  `Inspect: Top Silver Reject Fields`, `Inspect: Quarantine by Error Type` и
+  `Track: Anomalies Detected` теперь сохраняют honest empty-state semantics:
+  при отсутствии событий в выбранном окне они остаются пустыми и не создают
+  synthetic buckets вроде `no_events` / `none`.
+- `Inspect: Quarantine by Error Type` intentionally shipped as horizontal
+  `bargauge`, not `piechart`: для quarantine/error family triage важнее
+  сравнение категорий, чем композиционная доля slices.
 - Оператор SHOULD сначала подтвердить, что текущий spike/аномалия видны в
   summary-панелях DQ (`Top Silver Reject Reasons/Fields`) и только затем делать
   record-level drilldown в Explorer.

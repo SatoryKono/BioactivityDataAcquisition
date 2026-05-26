@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from uuid import uuid4
 
-from bioetl.application.services.control_plane._ledger_identity_support import (
+from bioetl.application.services.control_plane.ledger_identity_support import (
     build_ledger_idempotency_key,
 )
 from bioetl.domain.context import current_utc_time

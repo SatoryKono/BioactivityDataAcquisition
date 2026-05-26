@@ -27,12 +27,6 @@ from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config_from_root,
 )
 
-__all__ = [
-    "bootstrap_config_service",
-    "create_pipeline_config_loader",
-    "create_registered_pipeline_registry",
-]
-
 
 def create_pipeline_config_loader(configs_root: Path) -> Callable[[str], object]:
     return lambda pipeline_name: load_pipeline_config_from_root(

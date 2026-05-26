@@ -47,14 +47,14 @@ class TestBootstrapPipelineRunner:
                 return_value=configs_root,
             ) as mock_resolve_configs_root,
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.initialize_runtime_policy_sources"
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.initialize_runtime_policy_sources"
             ) as mock_initialize_policy_sources,
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.build_bootstrap_runner_factory_wiring",
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.build_bootstrap_runner_factory_wiring",
                 return_value=factory_wiring,
             ) as mock_build_factory_wiring,
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.build_bootstrap_runner_input_wiring",
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.build_bootstrap_runner_input_wiring",
                 return_value=input_wiring,
             ) as mock_build_input_wiring,
             patch(
@@ -97,13 +97,13 @@ class TestBootstrapPipelineRunner:
                 return_value=Path("/tmp/bioetl-configs"),
             ),
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.initialize_runtime_policy_sources"
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.initialize_runtime_policy_sources"
             ),
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.build_bootstrap_runner_factory_wiring"
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.build_bootstrap_runner_factory_wiring"
             ),
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.build_bootstrap_runner_input_wiring"
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.build_bootstrap_runner_input_wiring"
             ),
             patch(
                 "bioetl.composition.bootstrap.runtime.pipeline._build_pipeline_runner"
@@ -135,13 +135,13 @@ class TestBootstrapPipelineRunner:
                 return_value=configs_root,
             ),
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.initialize_runtime_policy_sources"
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.initialize_runtime_policy_sources"
             ),
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.build_bootstrap_runner_factory_wiring"
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.build_bootstrap_runner_factory_wiring"
             ),
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.build_bootstrap_runner_input_wiring"
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.build_bootstrap_runner_input_wiring"
             ) as mock_build_input_wiring,
             patch(
                 "bioetl.composition.bootstrap.runtime.pipeline._build_pipeline_runner"
@@ -183,14 +183,14 @@ def test_build_runtime_bootstrap_phases_returns_typed_payload() -> None:
             return_value=configs_root,
         ),
         patch(
-            "bioetl.composition.bootstrap.runtime.pipeline.initialize_runtime_policy_sources"
+            "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.initialize_runtime_policy_sources"
         ) as mock_initialize_policy_sources,
         patch(
-            "bioetl.composition.bootstrap.runtime.pipeline.build_bootstrap_runner_factory_wiring",
+            "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.build_bootstrap_runner_factory_wiring",
             return_value=factory_wiring,
         ),
         patch(
-            "bioetl.composition.bootstrap.runtime.pipeline.build_bootstrap_runner_input_wiring",
+            "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.build_bootstrap_runner_input_wiring",
             return_value=input_wiring,
         ) as mock_build_input_wiring,
     ):

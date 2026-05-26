@@ -5,11 +5,11 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane._run_manifest_replay_taxonomy import (
-    resolve_replay_taxonomy_projection,
-)
 from bioetl.application.services.control_plane.manifest.inspection_models import (
     RunManifestInspectionResult,
+)
+from bioetl.application.services.control_plane.run_manifest_replay_taxonomy import (
+    resolve_replay_taxonomy_projection,
 )
 
 __all__ = [

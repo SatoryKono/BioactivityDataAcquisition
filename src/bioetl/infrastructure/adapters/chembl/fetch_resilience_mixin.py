@@ -14,6 +14,9 @@ from bioetl.domain.exceptions import (
     RetryExhaustedError,
 )
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.chembl._fetch_resilience_error import (
+    handle_fetch_error,
+)
 from bioetl.infrastructure.adapters.chembl._fetch_resilience_fallback import (
     _ChemblFallbackHost,
     fetch_single_record_direct,
@@ -77,22 +80,7 @@ class ChemblFetchResilienceMixin:
         error: Exception,
         context: str = "fetch",
     ) -> None:
-        """Handle errors with unified classification."""
-        failure_count = self._http_client.circuit_breaker.get_failure_count()
-        health_status = self._get_health_status()
-
-        error_context = {
-            "circuit_breaker_state": self._http_client.circuit_breaker.get_state().value,
-            "circuit_breaker_failures": failure_count,
-            "health_status": health_status.value,
-        }
-        wrapped = self._error_handler.handle_error(
-            error=error,
-            provider=self.provider_name,
-            operation=context,
-            context=error_context,
-        )
-        raise wrapped from error
+        handle_fetch_error(self, error, context)
 
     def _is_retry_exhausted_error(
         self,

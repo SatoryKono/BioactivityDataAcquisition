@@ -115,21 +115,17 @@ def test_memory_scaffold_validation_skips_episodic_body_reads(
         body="# Session\n\n- Current context\n",
     )
 
-    original_parse = validate_memory_scaffold.__globals__["parse_markdown_note"]
-    include_body_flags: list[bool] = []
-
-    def recording_parse(path: Path, *, include_body: bool = True) -> Any:
-        include_body_flags.append(include_body)
-        return original_parse(path, include_body=include_body)
+    def unexpected_parse(*args: Any, **kwargs: Any) -> Any:
+        _ = (args, kwargs)
+        raise AssertionError("episodic validation should not load note bodies")
 
     monkeypatch.setitem(
         validate_memory_scaffold.__globals__,
         "parse_markdown_note",
-        recording_parse,
+        unexpected_parse,
     )
 
     assert validate_memory_scaffold(memory_root) == []
-    assert False in include_body_flags
 
 
 def test_memory_scaffold_validation_bounds_default_episodic_scan(

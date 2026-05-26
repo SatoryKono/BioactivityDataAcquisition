@@ -32,6 +32,10 @@ def _wrapper_command(script_name: str, workspace_root: Path) -> dict[str, Any]:
     return {"command": shell, "args": [wrapper_arg]}
 
 
+def _http_server(url: str) -> dict[str, Any]:
+    return {"url": url}
+
+
 def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
     memory_file_path = workspace_root / "docs/00-project/ai/memory/mcp-memory.json"
     cache_root = workspace_root / CACHE_DIR_NAME
@@ -78,6 +82,9 @@ def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
         "pubchem": _wrapper_command("mcp_pubchem_wrapper", workspace_root),
         "pubmed": _wrapper_command("mcp_pubmed_wrapper", workspace_root),
         "mermaid": _wrapper_command("mcp_mermaid_wrapper", workspace_root),
+        "biomoltechDocs": _http_server("https://biomoltech.mintlify.app/mcp"),
+        "mintlify": _http_server("https://mcp.mintlify.com"),
+        "deepwiki": _http_server("https://mcp.deepwiki.com/mcp"),
     }
 
     # Preserve the committed config shape where the GitHub wrapper receives npm cache.

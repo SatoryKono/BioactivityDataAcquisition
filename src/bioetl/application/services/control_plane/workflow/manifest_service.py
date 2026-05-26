@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from uuid import uuid4
 
-from bioetl.application.services.control_plane._manifest_time_support import (
+from bioetl.application.services.control_plane.manifest_time_support import (
     ManifestClockProtocol,
     resolve_manifest_created_at,
 )

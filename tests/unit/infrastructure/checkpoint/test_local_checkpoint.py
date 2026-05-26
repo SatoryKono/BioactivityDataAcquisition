@@ -11,6 +11,7 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 
@@ -101,7 +102,8 @@ class TestLocalCheckpointSaveLoad:
         result = await checkpoint.load("test_pipeline")
         assert result is not None
         _, loaded_metadata = result
-        assert loaded_metadata == {}
+        assert isinstance(loaded_metadata["checkpoint_saved_at_epoch_seconds"], float)
+        assert len(loaded_metadata) == 1
 
     @pytest.mark.asyncio
     async def test_save_with_none_metadata(
@@ -112,7 +114,8 @@ class TestLocalCheckpointSaveLoad:
         result = await checkpoint.load("test_pipeline")
         assert result is not None
         _, loaded_metadata = result
-        assert loaded_metadata == {}
+        assert isinstance(loaded_metadata["checkpoint_saved_at_epoch_seconds"], float)
+        assert len(loaded_metadata) == 1
 
     @pytest.mark.asyncio
     async def test_load_nonexistent_returns_none(
@@ -205,6 +208,51 @@ class TestLocalCheckpointSaveLoad:
         loaded_run_id, loaded_metadata = result
         assert loaded_run_id == run_id
         assert loaded_metadata["offset"] == 3
+
+    @pytest.mark.asyncio
+    async def test_load_latest_for_pipeline_reads_latest_history_across_runs(
+        self, checkpoint: LocalCheckpointAdapter
+    ) -> None:
+        """Pipeline-wide history fallback should return the newest immutable entry."""
+        run_id_1 = RunID(uuid4())
+        run_id_2 = RunID(uuid4())
+
+        await checkpoint.save("chembl_target", run_id_1, {"offset": 1})
+        await checkpoint.save("chembl_target", run_id_2, {"offset": 2})
+
+        result = await checkpoint.load_latest_for_pipeline("chembl_target")
+
+        assert result is not None
+        loaded_run_id, loaded_metadata = result
+        assert loaded_run_id == run_id_2
+        assert loaded_metadata["offset"] == 2
+
+    @pytest.mark.asyncio
+    async def test_load_injects_saved_at_from_file_mtime_for_legacy_checkpoint(
+        self, checkpoint_dir: Path
+    ) -> None:
+        """Legacy checkpoint files without saved_at should still expose freshness."""
+        legacy_path = checkpoint_dir / "legacy_pipeline.json"
+        legacy_path.write_text(
+            serialize_to_json(
+                {
+                    "pipeline": "legacy_pipeline",
+                    "run_id": str(uuid4()),
+                    "metadata": {"offset": 10},
+                    "version": "2.0",
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        checkpoint = LocalCheckpointAdapter(base_path=checkpoint_dir)
+
+        result = await checkpoint.load("legacy_pipeline")
+
+        assert result is not None
+        _, loaded_metadata = result
+        assert loaded_metadata["offset"] == 10
+        assert isinstance(loaded_metadata["checkpoint_saved_at_epoch_seconds"], float)
 
 
 class TestLocalCheckpointDelete:
