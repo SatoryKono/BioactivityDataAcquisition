@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.ports.noop import NoOpMetrics
-from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
@@ -21,6 +20,13 @@ __all__ = [
     "maybe_start_metrics_server",
     "resolve_metrics_fail_fast",
 ]
+
+
+def _default_metrics_factory() -> MetricsPort:
+    """Create the Prometheus metrics adapter only when metrics are enabled."""
+    from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+
+    return PrometheusMetrics()
 
 
 def _metrics_enabled(settings: object) -> bool:
@@ -82,7 +88,7 @@ def bootstrap_metrics(
     if not _metrics_enabled(settings):
         return NoOpMetrics(warn_on_use=False)
 
-    factory = metrics_factory or PrometheusMetrics
+    factory = metrics_factory or _default_metrics_factory
     return factory()
 
 

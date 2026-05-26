@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from importlib import import_module
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, Any, Protocol, cast
 from uuid import UUID
 
 from bioetl.composition.observability import ObservabilityBundle
@@ -15,11 +15,6 @@ from bioetl.domain.ports import (
     MetricsPort,
     TracingPort,
 )
-from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
-from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
-from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
 from .dq_bootstrap import bootstrap_dq_monitor as _bootstrap_dq_monitor_impl
 from .logger_bootstrap import bootstrap_logger as _bootstrap_logger_impl
@@ -65,6 +60,39 @@ class _ObservabilityApiModule(Protocol):
     ) -> bool:
         """Start the public metrics server."""
         ...
+
+
+class OpenTelemetryTracer:
+    """Lazy compatibility patch point for legacy tests and monkeypatches."""
+
+    def __new__(cls, *args: object, **kwargs: object) -> Any:
+        from bioetl.infrastructure.observability.tracing import (
+            OpenTelemetryTracer as _OpenTelemetryTracer,
+        )
+
+        return _OpenTelemetryTracer(*args, **kwargs)
+
+
+class PrometheusMetrics:
+    """Lazy compatibility patch point for legacy tests and monkeypatches."""
+
+    def __new__(cls, *args: object, **kwargs: object) -> Any:
+        from bioetl.infrastructure.observability.prometheus_metrics import (
+            PrometheusMetrics as _PrometheusMetrics,
+        )
+
+        return _PrometheusMetrics(*args, **kwargs)
+
+
+class UnifiedLogger:
+    """Lazy compatibility patch point for legacy tests and monkeypatches."""
+
+    def __new__(cls, *args: object, **kwargs: object) -> Any:
+        from bioetl.infrastructure.observability.unified_logger import (
+            UnifiedLogger as _UnifiedLogger,
+        )
+
+        return _UnifiedLogger(*args, **kwargs)
 
 
 def _create_runtime_audit_port(
@@ -256,8 +284,6 @@ def bootstrap_dq_monitor(
     return _bootstrap_dq_monitor_impl(
         settings=settings,
         logger=logger,
-        monitor_factory=DataQualityMonitor,
-        noop_logger_factory=NoOpLogger,
     )
 
 
