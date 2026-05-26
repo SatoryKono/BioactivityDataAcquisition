@@ -107,7 +107,21 @@ Domain business paths не должны создавать текущее вре
 - operational/reporting structures получают `checked_at` / `execution_timestamp` из application/runtime seam
 - replay-critical application/composition surfaces (runtime timing helper, composite checkpoint state transitions, manifest creation, and composition entrypoints) MUST принимать `ClockPort` или explicit timestamp/reference time, а не читать локальный wall-clock внутри helper'ов
 
-### 4. Архитектурные Тесты
+### 4. Deterministic Domain Identities
+
+Replay-sensitive domain aggregates and domain events MUST NOT create hidden UUID4
+values. Aggregate IDs and default domain event IDs are derived from explicit
+canonical inputs:
+
+- `Batch.create(...)` derives `BatchID` from `run_id`, `start_index`,
+  `created_at`, and metadata.
+- `QuarantineEntry.create(...)` derives `entry_id` from pipeline, error,
+  payload hash, run/batch IDs, explicit timestamp, and metadata.
+- `DomainEvent` derives a default `event_id` from the concrete event type and
+  event payload; callers may still pass an explicit `event_id` when replaying a
+  persisted event.
+
+### 5. Архитектурные Тесты
 
 | Тест                                          | Цель                                                                                                                |
 | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -116,8 +130,9 @@ Domain business paths не должны создавать текущее вре
 | `test-no-datetime-now-in-domain`              | Блокирует `datetime.now()` в `domain/` вне `domain/context.py`                                                      |
 | `test-replay-critical-time-seams`             | Блокирует `datetime.now()` в replay-critical `application/` и `composition/` runtime/checkpoint/control-plane seams |
 | `test-no-structlog-in-application-interfaces` | Блокирует прямой импорт `structlog` в `application/` и `interfaces/`                                                |
+| `test_domain_aggregate_identity_surfaces_do_not_call_uuid4` | Блокирует hidden UUID4 в replay-sensitive aggregate/event identity surfaces |
 
-### 5. Изоляция логирования
+### 6. Изоляция логирования
 
 Application и interfaces слои **MUST NOT** импортировать `structlog` напрямую — использовать абстракцию `LoggerPort` из `domain.ports`. Это обеспечивает:
 

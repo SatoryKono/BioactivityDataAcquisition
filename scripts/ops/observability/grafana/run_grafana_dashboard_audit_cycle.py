@@ -4,8 +4,15 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from dataclasses import dataclass
 from pathlib import Path
+
+if __package__ in {None, ""}:
+    repo_root = Path(__file__).resolve().parents[4]
+    repo_root_str = str(repo_root)
+    if repo_root_str not in sys.path:
+        sys.path.insert(0, repo_root_str)
 
 from scripts.ops.observability.grafana import audit_live_grafana_panels as live_audit
 from scripts.ops.observability.grafana import (

@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from contextlib import redirect_stderr, redirect_stdout
+import io
 from pathlib import Path
-import subprocess
+import runpy
 import sys
 
 
@@ -71,23 +73,33 @@ def test_nightly_workflow_regenerates_dependency_map() -> None:
     assert "architecture-dependency-map-nightly" in workflow
 
 
-def test_dependency_map_drift_check_passes_current_repo() -> None:
-    result = subprocess.run(
+def test_dependency_map_drift_check_passes_current_repo(
+    monkeypatch,
+) -> None:
+    script_globals = runpy.run_path(
+        "scripts/engineering/qa/generate_architecture_dependency_map.py",
+        run_name="bioetl_architecture_dependency_map_test",
+    )
+    main = script_globals["main"]
+    stdout = io.StringIO()
+    stderr = io.StringIO()
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
         [
-            sys.executable,
-            "scripts/engineering/qa/generate_architecture_dependency_map.py",
+            "generate_architecture_dependency_map.py",
             "--check",
         ],
-        check=False,
-        capture_output=True,
-        text=True,
     )
-    assert result.returncode == 0, (
-        "Dependency-map artifact drift check failed.\n"
-        f"stdout:\n{result.stdout}\n"
-        f"stderr:\n{result.stderr}\n"
-    )
+    with redirect_stdout(stdout), redirect_stderr(stderr):
+        result = main()
 
+    assert result == 0, (
+        "Dependency-map artifact drift check failed.\n"
+        f"stdout:\n{stdout.getvalue()}\n"
+        f"stderr:\n{stderr.getvalue()}\n"
+    )
 
 def test_dependency_map_generated_markdown_uses_canonical_generator_path() -> None:
     markdown = Path(

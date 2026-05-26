@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
+import bioetl.infrastructure.control_plane.file_run_ledger_store as ledger_store_module
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import (
     RUN_FAILED_EVENT,
@@ -27,6 +28,30 @@ _FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
 
 def _raise_index_write_error(*_args: object, **_kwargs: object) -> None:
     raise OSError("index write failed")
+
+
+def test_should_fsync_control_plane_writes_by_default(monkeypatch) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv(
+        "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE",
+        raising=False,
+    )
+    monkeypatch.setattr(ledger_store_module.os, "name", "nt", raising=False)
+
+    assert ledger_store_module._should_fsync_control_plane_writes() is True
+
+
+def test_should_skip_fsync_for_windows_e2e_degraded_observable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("BIOETL_TEST_MODE", "true")
+    monkeypatch.setenv(
+        "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE",
+        "degraded_observable",
+    )
+    monkeypatch.setattr(ledger_store_module.os, "name", "nt", raising=False)
+
+    assert ledger_store_module._should_fsync_control_plane_writes() is False
 
 
 def test_file_store_round_trips_entries_by_manifest_and_run_id(tmp_path) -> None:

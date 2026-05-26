@@ -6,10 +6,17 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable
 from urllib import error, request
+
+if __package__ in {None, ""}:
+    repo_root = Path(__file__).resolve().parents[4]
+    repo_root_str = str(repo_root)
+    if repo_root_str not in sys.path:
+        sys.path.insert(0, repo_root_str)
 
 from scripts.ops.observability.grafana import audit_live_grafana_panels as live_audit
 

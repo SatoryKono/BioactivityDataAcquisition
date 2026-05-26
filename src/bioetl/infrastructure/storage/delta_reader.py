@@ -45,6 +45,19 @@ def _count_delta_rows(dt: DeltaTable, resolved_path: Path) -> int:
     return int(dt_fresh.to_pyarrow_table(columns=[]).num_rows)
 
 
+def _try_native_delta_row_count(dt: DeltaTable) -> int | None:
+    """Return DeltaTable.count() when available without scan-based fallbacks."""
+    native_count = getattr(dt, "count", None)
+    if not callable(native_count):
+        return None
+    try:
+        return int(native_count())
+    except (KeyboardInterrupt, SystemExit):
+        raise
+    except Exception:
+        return None
+
+
 class DeltaReader:
     """Read-only accessor for Delta Lake tables.
 
@@ -116,16 +129,14 @@ class DeltaReader:
                     f"Delta table not found: {resolved_path}"
                 ) from e
 
-            # Use scanner.head for both limited and full reads. For full reads we
-            # intentionally pass a very large sentinel instead of pre-counting
-            # rows, because the row-count path can block on Windows-mounted
-            # Delta tables while scanner.head(n) already returns "all available
-            # rows up to n" semantics.
             scanner = dt.to_pyarrow_dataset().scanner(columns=columns)
             if limit is not None:
                 return scanner.head(limit)
 
-            return scanner.head(_FULL_READ_HEAD_LIMIT)
+            row_count = _try_native_delta_row_count(dt)
+            return scanner.head(
+                row_count if row_count is not None else _FULL_READ_HEAD_LIMIT
+            )
 
         self._logger.debug(
             "Reading Delta table",

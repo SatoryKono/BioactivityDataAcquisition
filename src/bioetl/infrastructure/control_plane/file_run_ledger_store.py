@@ -39,6 +39,32 @@ class _RunLedgerCorruptionError(ValueError):
     """Raised when persisted JSONL ledger contents are structurally corrupted."""
 
 
+def _is_truthy_env(value: str | None) -> bool:
+    """Return whether one environment variable value enables a feature."""
+    if value is None:
+        return False
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _should_fsync_control_plane_writes() -> bool:
+    """Keep durable flushes unless Windows E2E explicitly relaxes them."""
+    if os.name != "nt":
+        return True
+    if not _is_truthy_env(os.environ.get("BIOETL_TEST_MODE")):
+        return True
+    required_profile = os.environ.get(
+        "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE"
+    )
+    return (required_profile or "").strip().lower() != "degraded_observable"
+
+
+def _flush_file_descriptor(file_descriptor: int) -> None:
+    """Flush one control-plane file descriptor when durable writes are required."""
+    if not _should_fsync_control_plane_writes():
+        return
+    os.fsync(file_descriptor)
+
+
 def _resolve_ledger_pipeline(entry: RunLedgerEntry) -> str:
     """Resolve the canonical pipeline label from diagnostic entry details."""
     if entry.details is None:
@@ -141,7 +167,7 @@ def _truncate_ledger_to_offset(path: Path, *, offset: int) -> None:
     file_descriptor = os.open(path, os.O_RDWR)
     try:
         os.ftruncate(file_descriptor, offset)
-        os.fsync(file_descriptor)
+        _flush_file_descriptor(file_descriptor)
     finally:
         os.close(file_descriptor)
 
@@ -159,13 +185,13 @@ def _append_jsonl_payload(path: Path, payload: bytes) -> int:
             if written <= 0:
                 raise OSError("Ledger append produced an empty write")
             bytes_written += written
-        os.fsync(file_descriptor)
+        _flush_file_descriptor(file_descriptor)
         return checkpoint_size
     except OSError:
         if bytes_written > 0:
             try:
                 os.ftruncate(file_descriptor, checkpoint_size)
-                os.fsync(file_descriptor)
+                _flush_file_descriptor(file_descriptor)
             except OSError:
                 pass
         raise
