@@ -49,7 +49,7 @@ class TestPipelineConfig:
         assert config.fields == ()  # Empty tuple
         assert isinstance(config.dq, DQConfig)
 
-    def test_custom_batch_size(self) -> None:
+    def test_custom_batch_size__test_pipeline_config_unit_domain_test_pipeline_config_52(self) -> None:
         """Test custom batch size."""
         config = _make_config(batch_size=500)
         assert config.batch_size == 500

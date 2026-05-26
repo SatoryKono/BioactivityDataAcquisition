@@ -186,7 +186,7 @@ class TestSchemaColumnOrder:
         )
 
     @pytest.mark.parametrize("schema_name,schema", get_all_pyarrow_schemas())
-    def test_business_fields_sorted(self, schema_name: str, schema: Any) -> None:
+    def test_business_fields_sorted__test_schema_column_order_tests_architecture_test_column_order_189(self, schema_name: str, schema: Any) -> None:
         """Business fields SHOULD be sorted alphabetically.
 
         Custom-ordered schemas use PUBLICATION_METADATA_FIELDS and

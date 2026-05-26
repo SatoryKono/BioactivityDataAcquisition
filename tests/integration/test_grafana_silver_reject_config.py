@@ -490,9 +490,13 @@ def test_silver_reject_summary_panels_tie_zero_state_to_datasource_response() ->
 
 
 def test_dq_reject_panels_link_to_silver_reject_explorer() -> None:
-    """DQ reject count panel should hand off directly; breakdown panels should guide the same handoff."""
+    """DQ reject panels should hand off directly into the Silver Reject Explorer."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    for panel_title in ("Track: Silver Filter Rejects in Range",):
+    for panel_title in (
+        "Track: Silver Filter Rejects in Range",
+        "Inspect: Top Silver Reject Reasons (Pareto)",
+        "Inspect: Top Silver Reject Fields",
+    ):
         panel = next(
             (
                 item
@@ -522,19 +526,34 @@ def test_dq_reject_panels_link_to_silver_reject_explorer() -> None:
         assert explorer_link.get("keepTime") is True or "${__url_time_range}" in str(
             explorer_link.get("url", "")
         )
+        url = str(explorer_link.get("url", ""))
+        assert "var-pipeline=" in url
+        assert "var-run_type=" in url
+
+        if panel_title == "Inspect: Top Silver Reject Reasons (Pareto)":
+            assert "var-reason_code=" in url
+        if panel_title == "Inspect: Top Silver Reject Fields":
+            assert "var-field=" in url
 
 
 @pytest.mark.parametrize(
-    "panel_title",
+    ("panel_title", "required_phrase"),
     [
-        "Inspect: Top Silver Reject Reasons (Pareto)",
-        "Inspect: Top Silver Reject Fields",
+        (
+            "Inspect: Top Silver Reject Reasons (Pareto)",
+            "drilldown",
+        ),
+        (
+            "Inspect: Top Silver Reject Fields",
+            "drilldown",
+        ),
     ],
 )
-def test_dq_breakdown_panels_reference_top_level_explorer_handoff(
+def test_dq_breakdown_panels_describe_direct_explorer_drilldowns(
     panel_title: str,
+    required_phrase: str,
 ) -> None:
-    """Breakdown panels should direct operators to the top-level Explorer handoff."""
+    """Breakdown panels should describe the scoped Explorer drilldown behavior."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     panel = next(
         (
@@ -547,4 +566,30 @@ def test_dq_breakdown_panels_reference_top_level_explorer_handoff(
     assert panel is not None
     description = str(panel.get("description", ""))
     assert "Silver Reject Explorer" in description
-    assert "top-level" in description
+    assert required_phrase in description
+
+
+def test_silver_reject_trend_panels_use_filtered_timeseries_endpoint() -> None:
+    """Trend panels must use the dedicated filtered-timeseries backend path."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+    )
+    expected_titles = {
+        "Track Filtered Rejects Over Time",
+        "Track Reject Ratio vs Bronze Over Time",
+    }
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title") in expected_titles
+    }
+    assert set(panels) == expected_titles
+
+    for title, panel in panels.items():
+        assert panel.get("datasource") == "Quarantine Explorer"
+        assert panel.get("type") == "timeseries"
+        targets = panel.get("targets", [])
+        assert targets, f"{title} must define a query target"
+        url = str(targets[0].get("url", ""))
+        assert "/ops/quarantine/filtered-timeseries" in url
+        assert "bucket=1h" in url

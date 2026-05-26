@@ -1210,7 +1210,7 @@ def test_write_artifacts_is_deterministic(tmp_path: Path) -> None:
     )
 
 
-def test_check_artifacts_detects_drift(tmp_path: Path) -> None:
+def test_check_artifacts_detects_drift__unit_scripts_test_generate_pipeline_normalization_field_matrix_1213(tmp_path: Path) -> None:
     assert_check_artifacts_detects_drift(
         tmp_path,
         build_artifacts=build_artifacts,
@@ -1220,7 +1220,7 @@ def test_check_artifacts_detects_drift(tmp_path: Path) -> None:
     )
 
 
-def test_check_artifacts_returns_zero_for_fresh_outputs(tmp_path: Path) -> None:
+def test_check_artifacts_returns_zero_for_fresh_outputs__unit_scripts_test_generate_pipeline_normalization_field_matrix_1223(tmp_path: Path) -> None:
     assert_check_artifacts_passes_for_fresh_outputs(
         tmp_path,
         write_artifacts=write_artifacts,
@@ -1285,5 +1285,5 @@ def test_csv_columns_include_non_chembl_inventory_evidence_fields() -> None:
     assert "observed_source" in CSV_COLUMNS
 
 
-def test_committed_artifacts_match_generator_output() -> None:
+def test_committed_artifacts_match_generator_output__unit_scripts_test_generate_pipeline_normalization_field_matrix_1288() -> None:
     assert check_artifacts(DEFAULT_OUT_DIR.resolve()) == 0

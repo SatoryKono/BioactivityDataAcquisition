@@ -82,5 +82,8 @@ groups:
             2
           )
 
+      - record: bioetl_checkpoint_age_seconds
+        expr: clamp_min(time() - max by (pipeline) (bioetl_checkpoint_saved_at_seconds), 0)
+
       - record: bioetl_terminal_events_15m
         expr: sum by (pipeline) (increase(bioetl_control_plane_terminal_events_total[15m]))

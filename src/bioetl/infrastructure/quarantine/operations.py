@@ -9,6 +9,7 @@ __all__ = [
     "get_filtered_filter_options",
     "get_filtered_record",
     "get_filtered_stats",
+    "get_filtered_timeseries",
     "get_statistics",
     "inspect_records",
     "list_filtered_records",
@@ -17,7 +18,7 @@ __all__ = [
 ]
 
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Protocol, cast
 
 try:
@@ -29,6 +30,7 @@ from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.serialization import deserialize_from_json
 from bioetl.domain.types import JsonDict, QuarantineRecordStatus
+from bioetl.infrastructure.quarantine.filtered_read_support import _normalize_timestamp
 from bioetl.infrastructure.quarantine.filtered_reads import (
     _increment_counter,
     _load_filtered_rows,
@@ -190,6 +192,94 @@ def get_filtered_stats(
         "bronze_records": 0,
         "reject_ratio": 0.0,
         "run_ids": scoped_run_ids,
+    }
+
+
+def _resolve_bucket_seconds(bucket: str) -> int:
+    normalized = bucket.strip().lower()
+    mapping = {
+        "1h": 3600,
+        "6h": 21600,
+        "1d": 86400,
+    }
+    if normalized not in mapping:
+        raise ValueError(
+            "Unsupported filtered-timeseries bucket. Allowed values: 1h, 6h, 1d"
+        )
+    return mapping[normalized]
+
+
+def _bucket_start_iso(value: object, *, bucket_seconds: int) -> str | None:
+    _, parsed = _normalize_timestamp(value)
+    if parsed is None:
+        return None
+    parsed_utc = parsed.astimezone(UTC)
+    epoch_seconds = int(parsed_utc.timestamp())
+    bucket_epoch_seconds = epoch_seconds - (epoch_seconds % bucket_seconds)
+    return datetime.fromtimestamp(bucket_epoch_seconds, tz=UTC).isoformat()
+
+
+def get_filtered_timeseries(
+    base_path: str,
+    storage_options: dict[str, str] | None,
+    *,
+    pipeline: str | None = None,
+    run_type: str | None = None,
+    reason_code: str | None = None,
+    field: str | None = None,
+    run_id: str | None = None,
+    payload_hash: str | None = None,
+    from_ts: str | None = None,
+    to_ts: str | None = None,
+    bucket: str = "1h",
+) -> JsonDict:
+    """Return time-bucketed Silver-filter aggregates for explorer trend panels."""
+    rows = _load_filtered_rows(
+        base_path,
+        storage_options,
+        pipeline=pipeline,
+        run_type=run_type,
+        reason_code=reason_code,
+        field=field,
+        run_id=run_id,
+        payload_hash=payload_hash,
+        from_ts=from_ts,
+        to_ts=to_ts,
+        include_payload=False,
+        include_payload_preview=False,
+    )
+    bucket_seconds = _resolve_bucket_seconds(bucket)
+    buckets: dict[str, JsonDict] = {}
+    for row in rows:
+        bucket_start = _bucket_start_iso(
+            row.get("ingestion_ts"),
+            bucket_seconds=bucket_seconds,
+        )
+        if bucket_start is None:
+            continue
+        bucket_row = buckets.setdefault(
+            bucket_start,
+            {
+                "bucket_start": bucket_start,
+                "reject_count": 0,
+                "bronze_records": 0,
+                "reject_ratio": 0.0,
+                "run_ids": set(),
+            },
+        )
+        bucket_row["reject_count"] = int(bucket_row["reject_count"]) + 1
+        run_id_value = row.get("run_id")
+        if isinstance(run_id_value, str) and run_id_value.strip():
+            cast(set[str], bucket_row["run_ids"]).add(run_id_value.strip())
+
+    ordered_rows: list[JsonDict] = []
+    for bucket_start in sorted(buckets):
+        bucket_row = buckets[bucket_start]
+        bucket_row["run_ids"] = sorted(cast(set[str], bucket_row["run_ids"]))
+        ordered_rows.append(bucket_row)
+    return {
+        "bucket": bucket.strip().lower(),
+        "rows": ordered_rows,
     }
 
 

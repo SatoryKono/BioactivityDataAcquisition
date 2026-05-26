@@ -33,6 +33,7 @@ def metrics() -> MagicMock:
     mock = MagicMock()
     mock.increment_counter = MagicMock()
     mock.observe_histogram = MagicMock()
+    mock.set_gauge = MagicMock()
     return mock
 
 
@@ -177,3 +178,18 @@ async def test_save_checkpoint_persists_memory_decision_trace(
     assert payload.memory_decision_trace[0]["reason"] == "config_budget_exceeded"
     assert payload.memory_decision_trace[0]["pressure_state"] is True
     assert payload.memory_decision_trace[0]["monitor_mode"] == "config_budget"
+
+
+@pytest.mark.asyncio
+async def test_save_checkpoint_now_leaves_checkpoint_saved_at_gauge_to_manager(
+    service: BatchCheckpointRecoveryService,
+    checkpoint_manager: AsyncMock,
+    metrics: MagicMock,
+) -> None:
+    await service.save_checkpoint_now(
+        records_fetched=1,
+        resume_offset=0,
+    )
+
+    checkpoint_manager.save_checkpoint.assert_awaited_once_with(1)
+    metrics.set_gauge.assert_not_called()

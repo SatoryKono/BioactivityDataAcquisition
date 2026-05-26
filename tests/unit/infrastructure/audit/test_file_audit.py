@@ -121,7 +121,7 @@ def sample_entry(run_id: RunID) -> AuditEntry:
 class TestAuditEntry:
     """Tests for AuditEntry dataclass."""
 
-    def test_audit_entry_creation(self, run_id: RunID) -> None:
+    def test_audit_entry_creation__test_audit_entry_infrastructure_audit_test_file_audit_124(self, run_id: RunID) -> None:
         """Test AuditEntry can be created with required fields."""
         entry = AuditEntry(
             run_id=run_id,
@@ -136,7 +136,7 @@ class TestAuditEntry:
         assert entry.records_count == 50
         assert entry.metadata == {}
 
-    def test_audit_entry_to_dict(self, sample_entry: AuditEntry) -> None:
+    def test_audit_entry_to_dict__test_audit_entry_infrastructure_audit_test_file_audit_139(self, sample_entry: AuditEntry) -> None:
         """Test AuditEntry serialization to dict."""
         result = sample_entry.to_dict()
         assert result["layer"] == "bronze"

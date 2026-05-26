@@ -14,6 +14,9 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunResult,
 )
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    ObservabilityBackendEnsureResult,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
 
@@ -41,6 +44,11 @@ class TestCliExitCodeMatrix:
             "chembl_assay",
             "pubchem_compound",
         ]
+        backend_result = ObservabilityBackendEnsureResult(
+            status="disabled",
+            health_url="http://127.0.0.1:8000/health",
+            message="CLI exit-code matrix disables detached backend startup.",
+        )
         with (
             patch("bioetl.interfaces.cli.main.register_all_pipelines"),
             patch(
@@ -50,6 +58,10 @@ class TestCliExitCodeMatrix:
             patch(
                 "bioetl.interfaces.cli.commands.run_all.build_cli_registry",
                 return_value=registry,
+            ),
+            patch(
+                "bioetl.interfaces.cli.commands.run.ensure_observability_backend_started",
+                return_value=backend_result,
             ),
         ):
             yield registry

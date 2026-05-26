@@ -1,141 +1,145 @@
 schema_version: 1
-audit_date: "2026-05-22"
+audit_date: '2026-05-26'
 source: configs/quality/test_governance_audit.yaml
 issues:
-  - id: "4159"
-    priority: P0
-    title: "main-branch test audit reproducibility with git-lfs"
-    evidence_paths:
-      - scripts/engineering/qa/check_test_audit_preflight.py
-      - docs/05-engineering/test-telemetry-baseline.md
-  - id: "4161"
-    priority: P1
-    title: "assert-less / no-effect tests triage"
-    evidence_paths:
-      - scripts/engineering/qa/report_test_governance_audit.py
-      - tests/architecture/test_test_governance_audit.py
-  - id: "4163"
-    priority: P1
-    title: "pytest lane contract and marker/path drift"
-    evidence_paths:
-      - configs/quality/test_matrix.yaml
-      - tests/architecture/test_test_matrix_lane_policy.py
-      - docs/03-guides/testing.md
-  - id: "4165"
-    priority: P1
-    title: "Gold DQ golden bundles coverage"
-    evidence_paths:
-      - tests/fixtures/golden/gold/schema_registry.v1.json
-      - tests/fixtures/golden/gold/pubchem_compound_dq_bundle_v1.json
-      - tests/contract/test_gold_dq_golden_snapshots.py
-  - id: "4167"
-    priority: P1
-    title: "deterministic uuid4 / date.today cleanup"
-    evidence_paths:
-      - scripts/engineering/qa/report_test_governance_audit.py
-      - tests/architecture/test_test_governance_audit.py
-  - id: "4169"
-    priority: P1
-    title: "slow architecture governance vs fast boundary split"
-    evidence_paths:
-      - configs/quality/test_matrix.yaml
-      - docs/03-guides/testing.md
-  - id: "4172"
-    priority: P2
-    title: "duplicate test names and fixture builder consolidation"
-    evidence_paths:
-      - scripts/engineering/qa/report_test_governance_audit.py
-      - tests/architecture/test_test_governance_audit.py
-  - id: "4174"
-    priority: P1
-    title: "tracing emission-level observability tests"
-    evidence_paths:
-      - tests/integration/test_observability_emission_integration.py
-  - id: "4176"
-    priority: P2
-    title: "compatibility / legacy test surface retirement budget"
-    evidence_paths:
-      - scripts/engineering/qa/report_test_governance_audit.py
-      - tests/architecture/test_test_governance_audit.py
+- id: '4159'
+  priority: P0
+  title: main-branch test audit reproducibility with git-lfs
+  evidence_paths:
+  - scripts/engineering/qa/check_test_audit_preflight.py
+  - docs/05-engineering/test-telemetry-baseline.md
+- id: '4161'
+  priority: P1
+  title: assert-less / no-effect tests triage
+  evidence_paths:
+  - scripts/engineering/qa/report_test_governance_audit.py
+  - tests/architecture/test_test_governance_audit.py
+- id: '4163'
+  priority: P1
+  title: pytest lane contract and marker/path drift
+  evidence_paths:
+  - configs/quality/test_matrix.yaml
+  - tests/architecture/test_test_matrix_lane_policy.py
+  - docs/03-guides/testing.md
+- id: '4165'
+  priority: P1
+  title: Gold DQ golden bundles coverage
+  evidence_paths:
+  - tests/fixtures/golden/gold/schema_registry.v1.json
+  - tests/fixtures/golden/gold/pubchem_compound_dq_bundle_v1.json
+  - tests/contract/test_gold_dq_golden_snapshots.py
+- id: '4167'
+  priority: P1
+  title: deterministic uuid4 / date.today cleanup
+  evidence_paths:
+  - scripts/engineering/qa/report_test_governance_audit.py
+  - tests/architecture/test_test_governance_audit.py
+- id: '4169'
+  priority: P1
+  title: slow architecture governance vs fast boundary split
+  evidence_paths:
+  - configs/quality/test_matrix.yaml
+  - docs/03-guides/testing.md
+- id: '4172'
+  priority: P2
+  title: duplicate test names and fixture builder consolidation
+  evidence_paths:
+  - scripts/engineering/qa/report_test_governance_audit.py
+  - tests/architecture/test_test_governance_audit.py
+- id: '4174'
+  priority: P1
+  title: tracing emission-level observability tests
+  evidence_paths:
+  - tests/integration/test_observability_emission_integration.py
+- id: '4176'
+  priority: P2
+  title: compatibility / legacy test surface retirement budget
+  evidence_paths:
+  - scripts/engineering/qa/report_test_governance_audit.py
+  - tests/architecture/test_test_governance_audit.py
 budgets:
-  refined_assertless_max: 540
-  duplicate_test_names_max: 875
-  duplicate_test_name_occurrences_max: 2726
+  refined_assertless_max: 497
+  duplicate_test_names_max: 787
+  duplicate_test_name_occurrences_max: 2550
   compatibility_test_file_max: 56
-  markerless_test_functions_max: 6928
+  markerless_test_functions_max: 6891
   uuid4_call_sites_max: 400
   date_today_call_sites_max: 0
 budget_ratchet:
-  linked_issue: "#4549"
+  linked_issue: '#4685'
   mode: fail-fast-no-growth
   expected_direction: downward
-  refreshed_on: "2026-05-22"
-  touch_policy: >-
-    Refactors touching test families must reduce the applicable budget or keep
-    it flat with an explicit owner rationale; increasing a debt budget requires
-    a separate governance review.
+  refreshed_on: '2026-05-26'
+  touch_policy: Refactors touching test families must reduce the applicable budget or keep it flat with an explicit owner rationale; increasing a debt budget requires a separate governance review.
   ratcheted_fields:
-    - refined_assertless_max
-    - duplicate_test_names_max
-    - duplicate_test_name_occurrences_max
-    - compatibility_test_file_max
-    - markerless_test_functions_max
-    - uuid4_call_sites_max
-    - date_today_call_sites_max
+  - refined_assertless_max
+  - duplicate_test_names_max
+  - duplicate_test_name_occurrences_max
+  - compatibility_test_file_max
+  - markerless_test_functions_max
+  - uuid4_call_sites_max
+  - date_today_call_sites_max
 current_issue_closeout:
   issue_set:
-    - "#4483"
-    - "#4484"
-    - "#4485"
-    - "#4486"
-    - "#4488"
-    - "#4490"
-    - "#4492"
-    - "#4494"
-    - "#4496"
-    - "#4498"
-    - "#4455"
-    - "#4457"
-    - "#4459"
-    - "#4461"
-    - "#4462"
-    - "#4463"
-    - "#4465"
-    - "#4466"
-    - "#4468"
-    - "#4469"
-    - "#4470"
-    - "#4506"
-    - "#4507"
-    - "#4508"
-    - "#4509"
-    - "#4536"
+  - '#4483'
+  - '#4484'
+  - '#4485'
+  - '#4486'
+  - '#4488'
+  - '#4490'
+  - '#4492'
+  - '#4494'
+  - '#4496'
+  - '#4498'
+  - '#4455'
+  - '#4457'
+  - '#4459'
+  - '#4461'
+  - '#4462'
+  - '#4463'
+  - '#4465'
+  - '#4466'
+  - '#4468'
+  - '#4469'
+  - '#4470'
+  - '#4506'
+  - '#4507'
+  - '#4508'
+  - '#4509'
+  - '#4536'
+  - '#4685'
   decision: closeable
   evidence:
-    - reports/quality/module-coverage-inventory.json
-    - scripts/engineering/qa/report_test_governance_audit.py
-    - configs/quality/test_governance_audit.yaml
-    - reports/quality/vcr-metadata-catalog.json
-    - scripts/engineering/qa/report_vcr_metadata_catalog.py
-    - tests/smoke/test_smoke.py
-    - tests/security/test_security.py
-    - tests/unit/domain/value_objects/test_identifiers.py
-    - tests/unit/application/pipelines/openalex/test_extractors.py
-    - tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
-    - tests/unit/application/services/test_run_manifest_inspection_dq_traceability.py
-    - tests/integration/pipelines/observability.py
-    - tests/integration/test_observability_emission_integration.py
-    - tests/architecture/test_test_governance_audit.py
+  - reports/quality/module-coverage-inventory.json
+  - scripts/engineering/qa/report_test_governance_audit.py
+  - configs/quality/test_governance_audit.yaml
+  - reports/quality/vcr-metadata-catalog.json
+  - scripts/engineering/qa/report_vcr_metadata_catalog.py
+  - tests/smoke/test_smoke.py
+  - tests/security/test_security.py
+  - tests/unit/domain/value_objects/test_identifiers.py
+  - tests/unit/application/pipelines/openalex/test_extractors.py
+  - tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
+  - tests/unit/application/services/test_run_manifest_inspection_dq_traceability.py
+  - tests/integration/pipelines/observability.py
+  - tests/integration/test_observability_emission_integration.py
+  - tests/architecture/test_test_governance_audit.py
+  - tests/unit/application/services/test_metadata_coordinator.py
+  - tests/unit/application/services/test_metadata_coordinator_run_context.py
+  - tests/unit/composition/test_bootstrap_logger.py
+  - tests/unit/composition/bootstrap/cli/test_noop.py
+  - tests/unit/composition/factories/pipeline/test_contract_validator.py
+  - tests/unit/composition/providers/test_registration.py
 preflight:
   script: scripts/engineering/qa/check_test_audit_preflight.py
   telemetry_baseline: docs/05-engineering/test-telemetry-baseline.md
   strict_blockers:
-    - missing_git_lfs
-    - git_lfs_unhealthy
-    - git_status_failed
-    - lfs_pointer_files_present
-    - missing_telemetry_baseline
-    - telemetry_baseline_without_coverage
+  - missing_git_lfs
+  - git_lfs_unhealthy
+  - git_status_failed
+  - lfs_pointer_files_present
+  - missing_telemetry_baseline
+  - telemetry_baseline_without_coverage
 lane_policy:
   canonical_source: configs/quality/test_matrix.yaml
   docs: docs/03-guides/testing.md
@@ -143,527 +147,569 @@ lane_policy:
 gold_dq:
   min_dq_sensitive_outputs: 6
   required_bundles:
-    - chembl_activity_dq_bundle
-    - chembl_assay_dq_bundle
-    - composite_molecule_dq_bundle
-    - composite_publication_dq_bundle
-    - pubchem_compound_dq_bundle
-    - pubmed_publication_dq_bundle
+  - chembl_activity_dq_bundle
+  - chembl_assay_dq_bundle
+  - composite_molecule_dq_bundle
+  - composite_publication_dq_bundle
+  - pubchem_compound_dq_bundle
+  - pubmed_publication_dq_bundle
 tracing:
   runtime_emission_test: tests/integration/test_observability_emission_integration.py
   required_test_names:
-    - test_pipeline_observer_emits_tracing_spans_through_recording_port
+  - test_pipeline_observer_emits_tracing_spans_through_recording_port
+  - test_pipeline_observer_records_failure_span_and_error_metrics
 assertless_triage:
   categories:
     architecture_helper_guard:
-      count: 29
+      count: 14
       decision: retained
-      rationale: "Architecture policy tests delegate assertions to shared guard helpers or pytest.fail paths."
-      next_review: "2026-09-30"
+      rationale: Architecture policy tests delegate assertions to shared guard helpers or pytest.fail paths.
+      next_review: '2026-09-30'
     benchmark_or_performance:
-      count: 5
+      count: 0
       decision: retained
-      rationale: "Performance/benchmark tests use measurement infrastructure as the assertion surface."
-      next_review: "2026-09-30"
+      rationale: Performance/benchmark tests use measurement infrastructure as the assertion surface.
+      next_review: '2026-09-30'
     helper_asserted:
-      count: 7
+      count: 0
       decision: retained
-      rationale: "Verification is delegated to explicit check/validate/verify helper calls."
-      next_review: "2026-09-30"
+      rationale: Verification is delegated to explicit check/validate/verify helper calls.
+      next_review: '2026-09-30'
     intentional_no_exception_contract:
       count: 61
       decision: retained-with-rationale
-      rationale: "No-op, close/aclose, smoke, or does-not-raise behavior is the contract under test."
-      next_review: "2026-09-30"
+      rationale: No-op, close/aclose, smoke, or does-not-raise behavior is the contract under test.
+      next_review: '2026-09-30'
     weak_no_value:
-      count: 438
+      count: 422
       decision: burn-down
-      rationale: "Candidates require assertion strengthening, merge, or removal when the owning module is edited."
-      next_review: "2026-09-30"
+      rationale: Candidates require assertion strengthening, merge, or removal when the owning module is edited.
+      next_review: '2026-09-30'
   policy:
-    new_no_effect_tests: "must reduce refined_assertless_max or document an intentional contract category"
+    new_no_effect_tests: must reduce refined_assertless_max or document an intentional contract category
     highest_priority_paths:
-      - tests/integration/
-      - tests/e2e/
-      - tests/unit/application/core/
-      - tests/unit/infrastructure/control_plane/
+    - tests/integration/
+    - tests/e2e/
+    - tests/unit/application/core/
+    - tests/unit/infrastructure/control_plane/
 duplicate_name_triage:
-  total_duplicate_names: 875
-  duplicate_occurrences: 2726
+  total_duplicate_names: 787
+  duplicate_occurrences: 2550
   top_generic_names:
-    - name: test_default_values
-      count: 38
-      decision: rename-on-touch
-      preferred_pattern: "test_<subject>_default_values"
-    - name: test_immutability
-      count: 40
-      decision: rename-on-touch
-      preferred_pattern: "test_<value_object>_is_immutable"
-    - name: test_custom_values
-      count: 20
-      decision: rename-on-touch
-      preferred_pattern: "test_<subject>_accepts_custom_values"
-    - name: test_hash_consistency
-      count: 22
-      decision: rename-on-touch
-      preferred_pattern: "test_<value_object>_hash_matches_equality_contract"
-    - name: test_strips_whitespace
-      count: 22
-      decision: rename-on-touch
-      preferred_pattern: "test_<parser>_strips_surrounding_whitespace"
+  - name: test_default_values
+    count: 38
+    decision: rename-on-touch
+    preferred_pattern: test_<subject>_default_values
+  - name: test_immutability
+    count: 40
+    decision: rename-on-touch
+    preferred_pattern: test_<value_object>_is_immutable
+  - name: test_custom_values
+    count: 20
+    decision: rename-on-touch
+    preferred_pattern: test_<subject>_accepts_custom_values
+  - name: test_hash_consistency
+    count: 22
+    decision: rename-on-touch
+    preferred_pattern: test_<value_object>_hash_matches_equality_contract
+  - name: test_strips_whitespace
+    count: 22
+    decision: rename-on-touch
+    preferred_pattern: test_<parser>_strips_surrounding_whitespace
   fixture_builder_policy:
-    consolidate_when: "RunID, BatchID, PipelineRunContext, Bronze/Silver/Gold metadata, or checkpoint setup repeats across three or more tests in one module family."
-    do_not_consolidate_when: "Inline setup is shorter and clearer than an indirection."
+    consolidate_when: RunID, BatchID, PipelineRunContext, Bronze/Silver/Gold metadata, or checkpoint setup repeats across three or more tests in one module family.
+    do_not_consolidate_when: Inline setup is shorter and clearer than an indirection.
 slow_governance_scanner_cache:
   decision: retained_cached_scanner
-  issue_ref: "#4462"
+  issue_ref: '#4462'
   cached_entrypoints:
-    - scripts.engineering.qa.report_test_governance_audit.collect_test_governance_report
-    - tests.architecture.conftest.cached_subprocess_run
-    - tests.architecture.test_antipatterns.test_no_hardcoded_secrets
+  - scripts.engineering.qa.report_test_governance_audit.collect_test_governance_report
+  - tests.architecture.conftest.cached_subprocess_run
+  - tests.architecture.test_antipatterns.test_no_hardcoded_secrets
   isolated_lanes:
-    - architecture-fast-boundary
-    - architecture-slow-governance
+  - architecture-fast-boundary
+  - architecture-slow-governance
 oversized_test_module_inventory:
-  issue_ref: "#4470"
+  issue_ref: '#4470'
   max_tracked_lines: 2200
   split_on_touch: true
   top_modules:
-    - path: tests/integration/ci/test_reproducibility_contract_suite.py
-      lines: 2171
-      owner: reproducibility-contracts
-      target_split: integration/ci reproducibility phases
-    - path: tests/unit/application/services/test_metadata_coordinator.py
-      lines: 2001
-      owner: application-services
-      target_split: metadata coordinator command/query families
-    - path: tests/unit/application/services/test_run_manifest_inspection_service.py
-      lines: 1989
-      owner: application-services
-      target_split: run manifest inspection scenario families
-    - path: tests/unit/application/pipelines/pubmed/test_pubmed_transformer.py
-      lines: 1936
-      owner: application-pipelines
-      target_split: PubMed transformer classification and normalization scenarios
+  - path: tests/unit/application/pipelines/pubmed/test_pubmed_transformer.py
+    lines: 1936
+    owner: application-pipelines
+    target_split: PubMed transformer classification and normalization scenarios
+  - path: tests/unit/interfaces/cli/test_cli_commands.py
+    lines: 1930
+    owner: interfaces-cli
+    target_split: CLI command-family scenarios
+  - path: tests/integration/ci/test_reproducibility_contract_suite.py
+    lines: 1891
+    owner: reproducibility-contracts
+    target_split: integration/ci reproducibility phases
+  - path: tests/integration/test_grafana_dashboard_metric_semantics.py
+    lines: 1833
+    owner: observability-dashboards
+    target_split: dashboard metric semantics scenarios
   completed_splits:
-    - issue_ref: "#4505"
-      source: tests/integration/test_grafana_config.py
-      source_lines_after_split: 1361
-      extracted_surface: tests/integration/test_grafana_surface_contracts.py
-      extracted_surface_lines: 717
-      owner: observability-dashboards
-    - issue_ref: "#4506"
-      source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
-      source_lines_after_split: 1109
-      extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
-      extracted_surface_lines: 175
-      owner: composition-runtime
-    - issue_ref: "#4506"
-      source: tests/unit/application/services/test_run_manifest_inspection_service.py
-      source_lines_after_split: 1989
-      extracted_surface: tests/unit/application/services/test_run_manifest_inspection_dq_traceability.py
-      extracted_surface_lines: 164
-      owner: application-services
+  - issue_ref: '#4505'
+    source: tests/integration/test_grafana_config.py
+    source_lines_after_split: 1362
+    extracted_surface: tests/integration/test_grafana_surface_contracts.py
+    extracted_surface_lines: 718
+    owner: observability-dashboards
+  - issue_ref: '#4506'
+    source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
+    source_lines_after_split: 1109
+    extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
+    extracted_surface_lines: 175
+    owner: composition-runtime
+  - issue_ref: '#4506'
+    source: tests/unit/application/services/test_run_manifest_inspection_service.py
+    source_lines_after_split: 1488
+    extracted_surface: tests/unit/application/services/test_run_manifest_inspection_dq_traceability.py
+    extracted_surface_lines: 164
+    owner: application-services
+  - issue_ref: '#4660'
+    source: tests/unit/application/services/test_metadata_coordinator.py
+    source_lines_after_split: 598
+    extracted_surface: tests/unit/application/services/test_metadata_coordinator_runtime_profiles.py
+    extracted_surface_lines: 796
+    owner: application-services
+  - issue_ref: '#4660'
+    source: tests/unit/application/services/test_metadata_coordinator.py
+    source_lines_after_split: 598
+    extracted_surface: tests/unit/application/services/test_metadata_coordinator_lineage.py
+    extracted_surface_lines: 566
+    owner: application-services
+  - issue_ref: '#4660'
+    source: tests/unit/application/services/test_run_manifest_inspection_service.py
+    source_lines_after_split: 1488
+    extracted_surface: tests/unit/application/services/test_run_manifest_inspection_diff.py
+    extracted_surface_lines: 170
+    owner: application-services
+  - issue_ref: '#4660'
+    source: tests/unit/application/services/test_run_manifest_inspection_service.py
+    source_lines_after_split: 1488
+    extracted_surface: tests/unit/application/services/test_run_manifest_inspection_verify.py
+    extracted_surface_lines: 359
+    owner: application-services
+  - issue_ref: '#4660'
+    source: tests/integration/ci/test_reproducibility_contract_suite.py
+    source_lines_after_split: 1891
+    extracted_surface: tests/integration/ci/test_reproducibility_contract_manifest_diff.py
+    extracted_surface_lines: 191
+    owner: reproducibility-contracts
+  - issue_ref: '#4660'
+    source: tests/integration/ci/test_reproducibility_contract_suite.py
+    source_lines_after_split: 1891
+    extracted_surface: tests/integration/ci/test_reproducibility_contract_inventory.py
+    extracted_surface_lines: 164
+    owner: reproducibility-contracts
+  - issue_ref: '#4685'
+    source: tests/unit/application/services/test_metadata_coordinator.py
+    source_lines_after_split: 598
+    extracted_surface: tests/unit/application/services/test_metadata_coordinator_run_context.py
+    extracted_surface_lines: 89
+    owner: application-services
 compatibility_test_inventory:
   review_cadence: quarterly
   total_files: 56
-  default_review_date: "2026-09-30"
+  default_review_date: '2026-09-30'
   entries:
-    - path: tests/architecture/test_application_composite_compat_surface_usage.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/application composite compat surface usage"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_application_core_lifecycle_shim_usage.py
-      decision: retained_governance_guard
-      owner: architecture-governance
-      protected_surface: "architecture/application core lifecycle shim usage"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_application_services_facade_usage.py
-      decision: retained_public_facade_contract
-      owner: architecture-governance
-      protected_surface: "architecture/application services facade usage"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_application_services_lazy_facade_governance.py
-      decision: retained_public_facade_contract
-      owner: architecture-governance
-      protected_surface: "architecture/application services lazy facade governance"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_batch_transformer_helpers_shim_usage.py
-      decision: retained_governance_guard
-      owner: architecture-governance
-      protected_surface: "architecture/batch transformer helpers shim usage"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_checkpoint_compatibility_policy_surface.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/checkpoint compatibility policy surface"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
-      decision: retained_public_facade_contract
-      owner: architecture-governance
-      protected_surface: "architecture/checkpoint compatibility runtime facade usage"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_compatibility_facade_inventory.py
-      decision: retained_public_facade_contract
-      owner: architecture-governance
-      protected_surface: "architecture/compatibility facade inventory"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_compatibility_freeze_guards.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/compatibility freeze guards"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_compatibility_freeze_guards_config_pipeline.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/compatibility freeze guards config pipeline"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_compatibility_freeze_guards_provider_datasource.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/compatibility freeze guards provider datasource"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_compatibility_importer_census_governance.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/compatibility importer census governance"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_compatibility_telemetry_reporting.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/compatibility telemetry reporting"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_composite_checkpoint_facade_usage.py
-      decision: retained_public_facade_contract
-      owner: architecture-governance
-      protected_surface: "architecture/composite checkpoint facade usage"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_composition_entrypoints_deprecated_imports.py
-      decision: retained_governance_guard
-      owner: architecture-governance
-      protected_surface: "architecture/composition entrypoints deprecated imports"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_config_compatibility_assertion_quality.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/config compatibility assertion quality"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_config_compatibility_registry.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/config compatibility registry"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_config_schema_legacy_status.py
-      decision: retained_governance_guard
-      owner: architecture-governance
-      protected_surface: "architecture/config schema legacy status"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_degraded_runtime_anchor_legacy_boundary.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/degraded runtime anchor legacy boundary"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_docs_compat_shim_governance.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/docs compat shim governance"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_domain_normalization_compat_usage.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/domain normalization compat usage"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_lazy_export_facade_inventory.py
-      decision: retained_public_facade_contract
-      owner: architecture-governance
-      protected_surface: "architecture/lazy export facade inventory"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility-sensitive lazy export facade inventory; retained while public and compatibility facade surfaces remain supported."
-    - path: tests/architecture/test_domain_service_normalization_compat_usage.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/domain service normalization compat usage"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_infrastructure_adapter_compat_shim_usage.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/infrastructure adapter compat shim usage"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_metadata_service_shim_usage.py
-      decision: retained_governance_guard
-      owner: architecture-governance
-      protected_surface: "architecture/metadata service shim usage"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_pipeline_storage_compat_shim_usage.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/pipeline storage compat shim usage"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_ports_facade_size.py
-      decision: retained_public_facade_contract
-      owner: architecture-governance
-      protected_surface: "architecture/ports facade size"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_project_legacy_compatibility_remediation_evidence_surface.py
-      decision: retained_governance_guard
-      owner: architecture-governance
-      protected_surface: "architecture/project legacy compatibility remediation evidence surface"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_root_script_compatibility_surfaces.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/root script compatibility surfaces"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_run_execution_context_compat_shim_usage.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/run execution context compat shim usage"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_silver_filter_compatibility_surface.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/silver filter compatibility surface"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_silver_writer_compatibility_retirement.py
-      decision: retained_compatibility_contract
-      owner: architecture-governance
-      protected_surface: "architecture/silver writer compatibility retirement"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_source_test_facade_ownership.py
-      decision: retained_public_facade_contract
-      owner: architecture-governance
-      protected_surface: "architecture/source test facade ownership"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/architecture/test_wave3_adapter_facade_closeout.py
-      decision: retained_public_facade_contract
-      owner: architecture-governance
-      protected_surface: "architecture/wave3 adapter facade closeout"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/integration/composite/test_composite_config_backward_compatibility.py
-      decision: retained_compatibility_contract
-      owner: integration-governance
-      protected_surface: "integration/composite/composite config backward compatibility"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/integration/config/test_deprecated_gold_contract_registry_inventory.py
-      decision: retained_governance_guard
-      owner: integration-governance
-      protected_surface: "integration/config/deprecated gold contract registry inventory"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/integration/config/test_gold_nullable_numeric_compatibility.py
-      decision: retained_compatibility_contract
-      owner: integration-governance
-      protected_surface: "integration/config/gold nullable numeric compatibility"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/application/composite/checkpoint/test_checkpoint_public_facade.py
-      decision: retained_public_facade_contract
-      owner: test-governance
-      protected_surface: "unit/application/composite/checkpoint/checkpoint public facade"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/application/composite/test_runtime_models_facade.py
-      decision: retained_public_facade_contract
-      owner: test-governance
-      protected_surface: "unit/application/composite/runtime models facade"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/application/core/test_public_runtime_facades.py
-      decision: retained_public_facade_contract
-      owner: test-governance
-      protected_surface: "unit/application/core/public runtime facades"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/application/services/test_checkpoint_compatibility_service.py
-      decision: retained_compatibility_contract
-      owner: test-governance
-      protected_surface: "unit/application/services/checkpoint compatibility service"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/composition/bootstrap/runtime/test_runtime_facade_compatibility.py
-      decision: retained_public_facade_contract
-      owner: test-governance
-      protected_surface: "unit/composition/bootstrap/runtime/runtime facade compatibility"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/composition/factories/pipeline/test_runner_request_compat.py
-      decision: retained_compatibility_contract
-      owner: test-governance
-      protected_surface: "unit/composition/factories/pipeline/runner request compat"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/composition/test_entrypoints_compatibility.py
-      decision: retained_compatibility_contract
-      owner: test-governance
-      protected_surface: "unit/composition/entrypoints compatibility"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/composition/test_public_facades_runtime.py
-      decision: retained_public_facade_contract
-      owner: test-governance
-      protected_surface: "unit/composition/public facades runtime"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/domain/composite/test_composite_config_facade.py
-      decision: retained_public_facade_contract
-      owner: test-governance
-      protected_surface: "unit/domain/composite/composite config facade"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/domain/value_objects/test_value_object_facade_reexports.py
-      decision: retained_public_facade_contract
-      owner: test-governance
-      protected_surface: "unit/domain/value objects/value object facade reexports"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/infrastructure/adapters/crossref/test_compatibility.py
-      decision: retained_compatibility_contract
-      owner: test-governance
-      protected_surface: "unit/infrastructure/adapters/crossref/compatibility"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/infrastructure/adapters/pubchem/test_fetch_strategies_compat.py
-      decision: retained_compatibility_contract
-      owner: test-governance
-      protected_surface: "unit/infrastructure/adapters/pubchem/fetch strategies compat"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/infrastructure/adapters/pubmed/test_models_compat.py
-      decision: retained_compatibility_contract
-      owner: test-governance
-      protected_surface: "unit/infrastructure/adapters/pubmed/models compat"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/infrastructure/config/test_pipeline_config_legacy_normalization.py
-      decision: retained_compatibility_contract
-      owner: test-governance
-      protected_surface: "unit/infrastructure/config/pipeline config legacy normalization"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/infrastructure/config/test_source_config_legacy_normalization.py
-      decision: retained_compatibility_contract
-      owner: test-governance
-      protected_surface: "unit/infrastructure/config/source config legacy normalization"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/infrastructure/test_pandera_compat.py
-      decision: retained_compatibility_contract
-      owner: test-governance
-      protected_surface: "unit/infrastructure/pandera compat"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/interfaces/cli/commands/test_runtime_compat_aliases.py
-      decision: retained_compatibility_contract
-      owner: test-governance
-      protected_surface: "unit/interfaces/cli/commands/runtime compat aliases"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/memory/test_query_facade.py
-      decision: retained_public_facade_contract
-      owner: test-governance
-      protected_surface: "unit/memory/query facade"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-    - path: tests/unit/scripts/ops/test_memory_legacy_aliases.py
-      decision: retained_public_facade_contract
-      owner: test-governance
-      protected_surface: "unit/scripts/ops/memory legacy aliases"
-      policy_ref: "#4209"
-      review_date: "2026-09-30"
-      rationale: "Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported."
-
+  - path: tests/architecture/test_application_composite_compat_surface_usage.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/application composite compat surface usage
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_application_core_lifecycle_shim_usage.py
+    decision: retained_governance_guard
+    owner: architecture-governance
+    protected_surface: architecture/application core lifecycle shim usage
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_application_services_facade_usage.py
+    decision: retained_public_facade_contract
+    owner: architecture-governance
+    protected_surface: architecture/application services facade usage
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_application_services_lazy_facade_governance.py
+    decision: retained_public_facade_contract
+    owner: architecture-governance
+    protected_surface: architecture/application services lazy facade governance
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_batch_transformer_helpers_shim_usage.py
+    decision: retained_governance_guard
+    owner: architecture-governance
+    protected_surface: architecture/batch transformer helpers shim usage
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_checkpoint_compatibility_policy_surface.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/checkpoint compatibility policy surface
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+    decision: retained_public_facade_contract
+    owner: architecture-governance
+    protected_surface: architecture/checkpoint compatibility runtime facade usage
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_compatibility_facade_inventory.py
+    decision: retained_public_facade_contract
+    owner: architecture-governance
+    protected_surface: architecture/compatibility facade inventory
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_compatibility_freeze_guards.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/compatibility freeze guards
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_compatibility_freeze_guards_config_pipeline.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/compatibility freeze guards config pipeline
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_compatibility_freeze_guards_provider_datasource.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/compatibility freeze guards provider datasource
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_compatibility_importer_census_governance.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/compatibility importer census governance
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_compatibility_telemetry_reporting.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/compatibility telemetry reporting
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_composite_checkpoint_facade_usage.py
+    decision: retained_public_facade_contract
+    owner: architecture-governance
+    protected_surface: architecture/composite checkpoint facade usage
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_composition_entrypoints_deprecated_imports.py
+    decision: retained_governance_guard
+    owner: architecture-governance
+    protected_surface: architecture/composition entrypoints deprecated imports
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_config_compatibility_assertion_quality.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/config compatibility assertion quality
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_config_compatibility_registry.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/config compatibility registry
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_config_schema_legacy_status.py
+    decision: retained_governance_guard
+    owner: architecture-governance
+    protected_surface: architecture/config schema legacy status
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_degraded_runtime_anchor_legacy_boundary.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/degraded runtime anchor legacy boundary
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_docs_compat_shim_governance.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/docs compat shim governance
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_domain_normalization_compat_usage.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/domain normalization compat usage
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_lazy_export_facade_inventory.py
+    decision: retained_public_facade_contract
+    owner: architecture-governance
+    protected_surface: architecture/lazy export facade inventory
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility-sensitive lazy export facade inventory; retained while public and compatibility facade surfaces remain supported.
+  - path: tests/architecture/test_domain_service_normalization_compat_usage.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/domain service normalization compat usage
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_infrastructure_adapter_compat_shim_usage.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/infrastructure adapter compat shim usage
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_metadata_service_shim_usage.py
+    decision: retained_governance_guard
+    owner: architecture-governance
+    protected_surface: architecture/metadata service shim usage
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_pipeline_storage_compat_shim_usage.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/pipeline storage compat shim usage
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_ports_facade_size.py
+    decision: retained_public_facade_contract
+    owner: architecture-governance
+    protected_surface: architecture/ports facade size
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_project_legacy_compatibility_remediation_evidence_surface.py
+    decision: retained_governance_guard
+    owner: architecture-governance
+    protected_surface: architecture/project legacy compatibility remediation evidence surface
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_root_script_compatibility_surfaces.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/root script compatibility surfaces
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_run_execution_context_compat_shim_usage.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/run execution context compat shim usage
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_silver_filter_compatibility_surface.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/silver filter compatibility surface
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_silver_writer_compatibility_retirement.py
+    decision: retained_compatibility_contract
+    owner: architecture-governance
+    protected_surface: architecture/silver writer compatibility retirement
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_source_test_facade_ownership.py
+    decision: retained_public_facade_contract
+    owner: architecture-governance
+    protected_surface: architecture/source test facade ownership
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/architecture/test_wave3_adapter_facade_closeout.py
+    decision: retained_public_facade_contract
+    owner: architecture-governance
+    protected_surface: architecture/wave3 adapter facade closeout
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/integration/composite/test_composite_config_backward_compatibility.py
+    decision: retained_compatibility_contract
+    owner: integration-governance
+    protected_surface: integration/composite/composite config backward compatibility
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/integration/config/test_deprecated_gold_contract_registry_inventory.py
+    decision: retained_governance_guard
+    owner: integration-governance
+    protected_surface: integration/config/deprecated gold contract registry inventory
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/integration/config/test_gold_nullable_numeric_compatibility.py
+    decision: retained_compatibility_contract
+    owner: integration-governance
+    protected_surface: integration/config/gold nullable numeric compatibility
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/application/composite/checkpoint/test_checkpoint_public_facade.py
+    decision: retained_public_facade_contract
+    owner: test-governance
+    protected_surface: unit/application/composite/checkpoint/checkpoint public facade
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/application/composite/test_runtime_models_facade.py
+    decision: retained_public_facade_contract
+    owner: test-governance
+    protected_surface: unit/application/composite/runtime models facade
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/application/core/test_public_runtime_facades.py
+    decision: retained_public_facade_contract
+    owner: test-governance
+    protected_surface: unit/application/core/public runtime facades
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/application/services/test_checkpoint_compatibility_service.py
+    decision: retained_compatibility_contract
+    owner: test-governance
+    protected_surface: unit/application/services/checkpoint compatibility service
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/composition/bootstrap/runtime/test_runtime_facade_compatibility.py
+    decision: retained_public_facade_contract
+    owner: test-governance
+    protected_surface: unit/composition/bootstrap/runtime/runtime facade compatibility
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/composition/factories/pipeline/test_runner_request_compat.py
+    decision: retained_compatibility_contract
+    owner: test-governance
+    protected_surface: unit/composition/factories/pipeline/runner request compat
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/composition/test_entrypoints_compatibility.py
+    decision: retained_compatibility_contract
+    owner: test-governance
+    protected_surface: unit/composition/entrypoints compatibility
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/composition/test_public_facades_runtime.py
+    decision: retained_public_facade_contract
+    owner: test-governance
+    protected_surface: unit/composition/public facades runtime
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/domain/composite/test_composite_config_facade.py
+    decision: retained_public_facade_contract
+    owner: test-governance
+    protected_surface: unit/domain/composite/composite config facade
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/domain/value_objects/test_value_object_facade_reexports.py
+    decision: retained_public_facade_contract
+    owner: test-governance
+    protected_surface: unit/domain/value objects/value object facade reexports
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/infrastructure/adapters/crossref/test_compatibility.py
+    decision: retained_compatibility_contract
+    owner: test-governance
+    protected_surface: unit/infrastructure/adapters/crossref/compatibility
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/infrastructure/adapters/pubchem/test_fetch_strategies_compat.py
+    decision: retained_compatibility_contract
+    owner: test-governance
+    protected_surface: unit/infrastructure/adapters/pubchem/fetch strategies compat
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/infrastructure/adapters/pubmed/test_models_compat.py
+    decision: retained_compatibility_contract
+    owner: test-governance
+    protected_surface: unit/infrastructure/adapters/pubmed/models compat
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/infrastructure/config/test_pipeline_config_legacy_normalization.py
+    decision: retained_compatibility_contract
+    owner: test-governance
+    protected_surface: unit/infrastructure/config/pipeline config legacy normalization
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/infrastructure/config/test_source_config_legacy_normalization.py
+    decision: retained_compatibility_contract
+    owner: test-governance
+    protected_surface: unit/infrastructure/config/source config legacy normalization
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/infrastructure/test_pandera_compat.py
+    decision: retained_compatibility_contract
+    owner: test-governance
+    protected_surface: unit/infrastructure/pandera compat
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/interfaces/cli/commands/test_runtime_compat_aliases.py
+    decision: retained_compatibility_contract
+    owner: test-governance
+    protected_surface: unit/interfaces/cli/commands/runtime compat aliases
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/memory/test_query_facade.py
+    decision: retained_public_facade_contract
+    owner: test-governance
+    protected_surface: unit/memory/query facade
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
+  - path: tests/unit/scripts/ops/test_memory_legacy_aliases.py
+    decision: retained_public_facade_contract
+    owner: test-governance
+    protected_surface: unit/scripts/ops/memory legacy aliases
+    policy_ref: '#4209'
+    review_date: '2026-09-30'
+    rationale: Tracked compatibility test surface; retained only while the referenced public or migration contract remains supported.
 remediation_closeout:
-  parent_issue: "#4200"
+  parent_issue: '#4200'
   audit_snapshot:
     branch: main
     commit_observed: 4d880ebc0
@@ -671,141 +717,171 @@ remediation_closeout:
     total_test_functions: 18621
     coverage_baseline_percent: 92.81
   issues:
-    - issue: "#4201"
-      decision: closeable
-      evidence:
-        - scripts/engineering/qa/check_test_audit_preflight.py
-        - tests/architecture/test_test_governance_audit.py::test_preflight_reports_lfs_pointer_files_as_strict_reproducibility_blocker
-      closeout: "Strict preflight now treats unresolved VCR git-lfs pointer files as reproducibility blockers."
-    - issue: "#4202"
-      decision: closeable
-      evidence:
-        - configs/quality/test_matrix.yaml
-        - configs/quality/pytest_shards.yaml
-        - tests/architecture/test_test_matrix_lane_policy.py
-      closeout: "Canonical lanes now expose architecture-fast-boundary and architecture-slow-governance wrappers over the maintained shard aliases."
-    - issue: "#4203"
-      decision: closeable
-      evidence:
-        - scripts/engineering/qa/report_test_governance_audit.py
-        - tests/integration/config/test_chembl_enum_parity.py
-        - tests/integration/config/test_dq_config_loading.py
-        - tests/integration/config/test_semantic_field_unification_contract.py
-        - tests/integration/infrastructure/storage/test_silver_writer.py
-        - tests/integration/test_prometheus_rules_config.py
-      closeout: "All integration/e2e weak_no_value candidates were eliminated and the refined assertless budget was ratcheted from 606 to 597."
-    - issue: "#4204"
-      decision: closeable
-      evidence:
-        - tests/helpers/deterministic_ids.py
-        - tests/architecture/test_deterministic_test_identity_builders.py
-        - tests/architecture/test_determinism_identity_policy.py
-      closeout: "Replay-sensitive deterministic identity policy remains guarded; date.today budget is zero and uuid4 call sites were reduced from 419 to 413, with remaining non-closed surfaces guarded by policy."
-    - issue: "#4205"
-      decision: closeable
-      evidence:
-        - tests/architecture/test_observability_metric_governance.py
-        - reports/observability/runtime_cardinality_inventory.json
-      closeout: "Observability cardinality evidence has an explicit freshness test and regeneration command."
-    - issue: "#4206"
-      decision: closeable
-      evidence:
-        - configs/quality/test_governance_audit.yaml
-        - tests/architecture/test_test_governance_audit.py
-      closeout: "File-backed unit-domain checks are classified as contract-backed exceptions rather than pure in-memory unit surfaces."
-    - issue: "#4207"
-      decision: closeable
-      evidence:
-        - tests/fixtures/golden/gold/schema_registry.v1.json
-        - tests/fixtures/golden/gold/chembl_assay_dq_bundle_v1.json
-        - tests/contract/test_gold_dq_golden_snapshots.py
-      closeout: "Gold DQ bundle coverage was expanded from 5 to 6 registered bundles with a bounded ChEMBL assay DQ-sensitive snapshot."
-    - issue: "#4208"
-      decision: closeable
-      evidence:
-        - configs/quality/test_governance_audit.yaml
-        - scripts/engineering/qa/report_test_governance_audit.py
-      closeout: "Duplicate-name triage records the top generic names, duplicate occurrences were reduced from 2783 to 2771, and rename-on-touch policy with builder consolidation rules is enforced."
-    - issue: "#4209"
-      decision: closeable
-      evidence:
-        - configs/quality/test_governance_audit.yaml
-        - tests/architecture/test_test_governance_audit.py::test_compatibility_inventory_covers_every_detected_compatibility_test_file
-      closeout: "All 54 compatibility/legacy test files have owner, decision, protected surface, review date, and rationale inventory."
-    - issue: "#4536"
-      decision: closeable
-      evidence:
-        - configs/quality/test_governance_audit.yaml
-        - scripts/engineering/qa/report_test_governance_audit.py
-        - tests/smoke/test_smoke.py
-        - tests/security/test_security.py
-        - tests/unit/domain/value_objects/test_identifiers.py
-        - tests/unit/domain/value_objects/test_publications.py
-        - tests/unit/application/pipelines/crossref/test_extractors.py
-        - tests/unit/application/pipelines/openalex/test_extractors.py
-        - tests/unit/application/pipelines/semanticscholar/test_extractors.py
-      closeout: "Focused weak-test cleanup plus module-level unit marks ratcheted refined assertless debt from 561 to 547, duplicate-name debt from 877/2730 to 876/2728, and markerless test functions from 7776 to 7137."
+  - issue: '#4201'
+    decision: closeable
+    evidence:
+    - scripts/engineering/qa/check_test_audit_preflight.py
+    - tests/architecture/test_test_governance_audit.py::test_preflight_reports_lfs_pointer_files_as_strict_reproducibility_blocker
+    closeout: Strict preflight now treats unresolved VCR git-lfs pointer files as reproducibility blockers.
+  - issue: '#4202'
+    decision: closeable
+    evidence:
+    - configs/quality/test_matrix.yaml
+    - configs/quality/pytest_shards.yaml
+    - tests/architecture/test_test_matrix_lane_policy.py
+    closeout: Canonical lanes now expose architecture-fast-boundary and architecture-slow-governance wrappers over the maintained shard aliases.
+  - issue: '#4203'
+    decision: closeable
+    evidence:
+    - scripts/engineering/qa/report_test_governance_audit.py
+    - tests/integration/config/test_chembl_enum_parity.py
+    - tests/integration/config/test_dq_config_loading.py
+    - tests/integration/config/test_semantic_field_unification_contract.py
+    - tests/integration/infrastructure/storage/test_silver_writer.py
+    - tests/integration/test_prometheus_rules_config.py
+    closeout: All integration/e2e weak_no_value candidates were eliminated and the refined assertless budget was ratcheted from 606 to 597.
+  - issue: '#4204'
+    decision: closeable
+    evidence:
+    - tests/helpers/deterministic_ids.py
+    - tests/architecture/test_deterministic_test_identity_builders.py
+    - tests/architecture/test_determinism_identity_policy.py
+    closeout: Replay-sensitive deterministic identity policy remains guarded; date.today budget is zero and uuid4 call sites were reduced from 419 to 413, with remaining non-closed surfaces guarded by policy.
+  - issue: '#4205'
+    decision: closeable
+    evidence:
+    - tests/architecture/test_observability_metric_governance.py
+    - reports/observability/runtime_cardinality_inventory.json
+    closeout: Observability cardinality evidence has an explicit freshness test and regeneration command.
+  - issue: '#4206'
+    decision: closeable
+    evidence:
+    - configs/quality/test_governance_audit.yaml
+    - tests/architecture/test_test_governance_audit.py
+    closeout: File-backed unit-domain checks are classified as contract-backed exceptions rather than pure in-memory unit surfaces.
+  - issue: '#4207'
+    decision: closeable
+    evidence:
+    - tests/fixtures/golden/gold/schema_registry.v1.json
+    - tests/fixtures/golden/gold/chembl_assay_dq_bundle_v1.json
+    - tests/contract/test_gold_dq_golden_snapshots.py
+    closeout: Gold DQ bundle coverage was expanded from 5 to 6 registered bundles with a bounded ChEMBL assay DQ-sensitive snapshot.
+  - issue: '#4208'
+    decision: closeable
+    evidence:
+    - configs/quality/test_governance_audit.yaml
+    - scripts/engineering/qa/report_test_governance_audit.py
+    closeout: Duplicate-name triage records the top generic names, duplicate occurrences were reduced from 2783 to 2771, and rename-on-touch policy with builder consolidation rules is enforced.
+  - issue: '#4209'
+    decision: closeable
+    evidence:
+    - configs/quality/test_governance_audit.yaml
+    - tests/architecture/test_test_governance_audit.py::test_compatibility_inventory_covers_every_detected_compatibility_test_file
+    closeout: All 54 compatibility/legacy test files have owner, decision, protected surface, review date, and rationale inventory.
+  - issue: '#4536'
+    decision: closeable
+    evidence:
+    - configs/quality/test_governance_audit.yaml
+    - scripts/engineering/qa/report_test_governance_audit.py
+    - tests/smoke/test_smoke.py
+    - tests/security/test_security.py
+    - tests/unit/domain/value_objects/test_identifiers.py
+    - tests/unit/domain/value_objects/test_publications.py
+    - tests/unit/application/pipelines/crossref/test_extractors.py
+    - tests/unit/application/pipelines/openalex/test_extractors.py
+    - tests/unit/application/pipelines/semanticscholar/test_extractors.py
+    closeout: Focused weak-test cleanup plus module-level unit marks ratcheted refined assertless debt from 561 to 547, duplicate-name debt from 877/2730 to 876/2728, and markerless test functions from 7776 to 7137.
 file_backed_domain_contract_tests:
   decision: retained_contract_lane_exception
-  rationale: "These tests intentionally validate config/fixture contracts against domain constants or hash-policy snapshots; they are not pure in-memory unit tests."
-  review_date: "2026-09-30"
+  rationale: These tests intentionally validate config/fixture contracts against domain constants or hash-policy snapshots; they are not pure in-memory unit tests.
+  review_date: '2026-09-30'
   entries:
-    - path: tests/unit/domain/schemas/test_constants_yaml.py
-      target_lane: contracts
-      contract_surface: configs/enums/{chembl,uniprot,pubchem}.yaml
-    - path: tests/unit/domain/normalization/test_pubchem_constants_yaml.py
-      target_lane: contracts
-      contract_surface: configs/enums/pubchem.yaml
-    - path: tests/unit/domain/hash_policy/test_hash_policy_stability.py
-      target_lane: contracts
-      contract_surface: tests/fixtures/hash_policy/**
+  - path: tests/unit/domain/schemas/test_constants_yaml.py
+    target_lane: contracts
+    contract_surface: configs/enums/{chembl,uniprot,pubchem}.yaml
+  - path: tests/unit/domain/normalization/test_pubchem_constants_yaml.py
+    target_lane: contracts
+    contract_surface: configs/enums/pubchem.yaml
+  - path: tests/unit/domain/hash_policy/test_hash_policy_stability.py
+    target_lane: contracts
+    contract_surface: tests/fixtures/hash_policy/**
 repo_backed_unit_test_exceptions:
   decision: retained_repo_backed_contract_exception
-  rationale: "Checked-in source/config/dashboard/fixture reads may stay under tests/unit only when the repository artifact itself is the contract under test; they run in the repo-backed-unit lane, not unit-fast."
-  review_date: "2026-09-30"
+  rationale: Checked-in source/config/dashboard/fixture reads may stay under tests/unit only when the repository artifact itself is the contract under test; they run in the repo-backed-unit lane, not unit-fast.
+  review_date: '2026-09-30'
   entries:
-    - path: tests/unit/application/composite/test_non_chembl_join_key_normalization.py
-      target_lane: repo-backed-unit
-      protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml + configs/composites/{molecule,target}.yaml
-    - path: tests/unit/application/pipelines/test_chembl_transformers.py
-      target_lane: repo-backed-unit
-      protected_surface: configs/** publication-type bootstrap inputs used by transformer initialization
-    - path: tests/unit/application/pipelines/test_transformer_snapshots.py
-      target_lane: repo-backed-unit
-      protected_surface: configs/** publication-type bootstrap inputs used by snapshot transformer initialization
-    - path: tests/unit/application/services/test_config_dq_service.py
-      target_lane: repo-backed-unit
-      protected_surface: src/bioetl/application/services/config_dq_service.py
-    - path: tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py
-      target_lane: repo-backed-unit
-      protected_surface: src/bioetl/composition/bootstrap/runtime/pipeline.py
-    - path: tests/unit/composition/factories/test_factory_decoupling_contracts.py
-      target_lane: repo-backed-unit
-      protected_surface: src/bioetl/composition/factories/services/bundle.py
-    - path: tests/unit/composition/test_observability_contract.py
-      target_lane: repo-backed-unit
-      protected_surface: src/bioetl/application/** and src/bioetl/composition/** logging contract scan
-    - path: tests/unit/contracts/test_generate_schema_artifacts.py
-      target_lane: repo-backed-unit
-      protected_surface: scripts/schema/generate_schema_artifacts.py
-    - path: tests/unit/domain/normalization/profiles/test_publication_identifier_profiles.py
-      target_lane: repo-backed-unit
-      protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml
-    - path: tests/unit/memory/test_tooling.py
-      target_lane: repo-backed-unit
-      protected_surface: memory.tooling workflow module CLI entrypoint from repo root
-    - path: tests/unit/scripts/diagrams/test_write_path_security.py
-      target_lane: repo-backed-unit
-      protected_surface: scripts/diagrams/{fix_pagebreaks_in_bundles,uniform_diagram_sizes}.py
-    - path: tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py
-      target_lane: repo-backed-unit
-      protected_surface: scripts/ai/mcp/{neo4j_memory_mcp_adapter.py,mcp_neo4j_memory_wrapper.sh}
-    - path: tests/unit/scripts/test_apply_entity_naming_rename_plan.py
-      target_lane: repo-backed-unit
-      protected_surface: src/tools/apply_entity_naming_rename_plan.py
-    - path: tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py
-      target_lane: repo-backed-unit
-      protected_surface: scripts/docs/generate_pipeline_normalization_field_matrix.py + docs/05-engineering/normalization_plan_P0_P6.md
-    - path: tests/unit/tools/test_differentiate_linkstyle_security.py
-      target_lane: repo-backed-unit
-      protected_surface: src/tools/differentiate_linkstyle.py
+  - path: tests/unit/application/composite/test_non_chembl_join_key_normalization.py
+    target_lane: repo-backed-unit
+    protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml + configs/composites/{molecule,target}.yaml
+  - path: tests/unit/application/pipelines/test_chembl_transformers.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/** publication-type bootstrap inputs used by transformer initialization
+  - path: tests/unit/application/pipelines/test_transformer_snapshots.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/** publication-type bootstrap inputs used by snapshot transformer initialization
+  - path: tests/unit/application/services/test_config_dq_service.py
+    target_lane: repo-backed-unit
+    protected_surface: src/bioetl/application/services/config_dq_service.py
+  - path: tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py
+    target_lane: repo-backed-unit
+    protected_surface: src/bioetl/composition/bootstrap/runtime/pipeline.py
+  - path: tests/unit/composition/factories/test_factory_decoupling_contracts.py
+    target_lane: repo-backed-unit
+    protected_surface: src/bioetl/composition/factories/services/bundle.py
+  - path: tests/unit/composition/test_observability_contract.py
+    target_lane: repo-backed-unit
+    protected_surface: unit/composition observability contract repo-backed runtime surface
+  - path: tests/unit/contracts/test_generate_schema_artifacts.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/schema/generate_schema_artifacts.py
+  - path: tests/unit/domain/normalization/profiles/test_publication_identifier_profiles.py
+    target_lane: repo-backed-unit
+    protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml
+  - path: tests/unit/memory/test_tooling.py
+    target_lane: repo-backed-unit
+    protected_surface: memory.tooling workflow module CLI entrypoint from repo root
+  - path: tests/unit/scripts/diagrams/test_write_path_security.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/diagrams/{fix_pagebreaks_in_bundles,uniform_diagram_sizes}.py
+  - path: tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ai/mcp/{neo4j_memory_mcp_adapter.py,mcp_neo4j_memory_wrapper.sh}
+  - path: tests/unit/scripts/test_apply_entity_naming_rename_plan.py
+    target_lane: repo-backed-unit
+    protected_surface: src/tools/apply_entity_naming_rename_plan.py
+  - path: tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/docs/generate_pipeline_normalization_field_matrix.py + docs/05-engineering/normalization_plan_P0_P6.md
+  - path: tests/unit/tools/test_differentiate_linkstyle_security.py
+    target_lane: repo-backed-unit
+    protected_surface: src/tools/differentiate_linkstyle.py
+
+mixed_scope_unit_path_policy:
+  issue_ref: '#4665'
+  decision: retained_logical_unit_ownership_with_curated_repo_backed_exceptions
+  rationale: tests/unit path communicates layer ownership, not a universal ban on checked-in repo reads; retained repo-backed tests stay under tests/unit only when they validate one module family's deterministic local contract and are isolated to repo-backed-unit or contracts.
+  docs_ref: docs/03-guides/testing.md#211-repo-backed-path-naming-and-reclassification
+  review_date: '2026-09-30'
+  retained_policy_refs:
+  - repo_backed_unit_test_exceptions
+  - file_backed_domain_contract_tests
+  keep_under_tests_unit_when:
+  - checked-in repository artifact itself is the contract under test
+  - execution stays local-only and deterministic without network/VCR/service startup
+  - file is explicitly listed in governance inventory and marked pytest.mark.repo_backed when routed to repo-backed-unit
+  move_out_of_tests_unit_when:
+  - test primarily exercises subprocess or CLI process orchestration rather than one module contract
+  - test validates dashboard, workflow-tree, repo-layout, memory-backend, or broader integration behavior
+  - test needs network, VCR, detached backend, or multi-component runtime semantics
+  moved_examples:
+  - old_path: tests/unit/memory/test_workflow_tooling.py
+    new_path: tests/integration/memory/test_workflow_tooling.py
+  - old_path: tests/unit/memory/test_timeline_ingest.py
+    new_path: tests/integration/memory/test_timeline_ingest.py
+  - old_path: tests/unit/scripts/test_validate_pipeline_configs.py
+    new_path: tests/integration/config/test_validate_pipeline_configs.py
+  - old_path: tests/unit/grafana/test_workflow_dashboard_json_valid.py
+    new_path: tests/integration/grafana/test_workflow_dashboard_json_valid.py
+  - old_path: tests/unit/grafana/test_silver_reject_explorer_copy.py
+    new_path: tests/integration/grafana/test_silver_reject_explorer_copy.py
+

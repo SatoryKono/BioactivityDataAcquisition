@@ -151,7 +151,7 @@ class TestSemanticScholarTitleFallbackHandler:
         # Test whitespace normalization
         assert handler._escape_title_for_search("Test   title") == "Test title"
 
-    def test_build_headers_without_api_key(self, mock_logger, mock_http_client):
+    def test_build_headers_without_api_key__test_semantic_scholar_title_fallback_handler_adapters_semanticscholar_test_fallback_154(self, mock_logger, mock_http_client):
         """Test header building without API key."""
         handler = SemanticScholarTitleFallbackHandler(
             http_client=mock_http_client,
@@ -163,7 +163,7 @@ class TestSemanticScholarTitleFallbackHandler:
         assert headers["Accept"] == "application/json"
         assert "x-api-key" not in headers
 
-    def test_build_headers_with_api_key(self, mock_logger, mock_http_client):
+    def test_build_headers_with_api_key__test_semantic_scholar_title_fallback_handler_adapters_semanticscholar_test_fallback_166(self, mock_logger, mock_http_client):
         """Test header building with API key."""
         handler = SemanticScholarTitleFallbackHandler(
             http_client=mock_http_client,

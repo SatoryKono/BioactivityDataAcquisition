@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 import subprocess
 
+import pytest
+
 from scripts.engineering.qa import report_observability_metric_inventory as inventory
 
 
@@ -162,6 +164,65 @@ def test_scan_canonical_metric_mentions_prefers_bounded_git_grep(
     assert inventory._scan_canonical_metric_mentions([metric_doc], tmp_path) == {
         "bioetl_git_grep_total": ["docs/03-guides/metrics.md"]
     }
+
+
+def test_iter_text_files_prefers_git_discovery_before_path_stat(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    inventory._TEXT_FILE_DISCOVERY_CACHE.clear()
+    scan_root = inventory._REPO_ROOT / "src" / "bioetl"
+    discovered = [scan_root / "example.py"]
+
+    monkeypatch.setattr(
+        inventory,
+        "_iter_text_files_with_git_ls_files",
+        lambda root: discovered if root == scan_root else None,
+    )
+
+    def fail_exists(self: Path) -> bool:
+        raise AssertionError(f"unexpected stat-backed exists call: {self}")
+
+    monkeypatch.setattr(Path, "exists", fail_exists)
+    try:
+        assert inventory._iter_text_files(scan_root) == discovered
+    finally:
+        inventory._TEXT_FILE_DISCOVERY_CACHE.clear()
+
+
+def test_iter_text_files_with_git_ls_files_filters_text_suffixes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    scan_root = inventory._REPO_ROOT / "src" / "bioetl"
+
+    def fake_run_text_discovery_command(
+        command: list[str],
+        *,
+        timeout: float,
+    ) -> tuple[subprocess.CompletedProcess[str], str]:
+        assert command == [
+            "git",
+            "-C",
+            inventory._REPO_ROOT.as_posix(),
+            "ls-files",
+            "--",
+            "src/bioetl",
+        ]
+        assert timeout == inventory._TEXT_DISCOVERY_TIMEOUT_SECONDS
+        return (
+            subprocess.CompletedProcess(args=command, returncode=0),
+            "src/bioetl/example.py\nsrc/bioetl/notes.txt\nsrc/bioetl/config.yaml\n",
+        )
+
+    monkeypatch.setattr(
+        inventory,
+        "_run_text_discovery_command",
+        fake_run_text_discovery_command,
+    )
+
+    assert inventory._iter_text_files_with_git_ls_files(scan_root) == [
+        inventory._REPO_ROOT / "src/bioetl/config.yaml",
+        inventory._REPO_ROOT / "src/bioetl/example.py",
+    ]
 
 
 def test_collect_metric_inventory_detects_keyword_metric_name_emitters(

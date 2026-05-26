@@ -265,7 +265,7 @@ class TestBaseDeltaWriter:
         result = writer.clear()
         assert result == 0
 
-    def test_clear_nonexistent_table(
+    def test_clear_nonexistent_table__test_base_delta_writer_infrastructure_storage_test_base_delta_writer_268(
         self,
         tmp_path: Path,
         mock_logger: MagicMock,

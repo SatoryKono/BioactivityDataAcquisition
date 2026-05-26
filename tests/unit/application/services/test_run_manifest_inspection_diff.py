@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 from tests.unit.application.services.test_run_manifest_inspection_service import *  # noqa: F401,F403
+from tests.unit.application.services.test_run_manifest_inspection_service import _InMemoryRunManifestStore, _make_manifest, _run_id
 
 def test_diff_reports_changed_top_level_fields() -> None:
     manifest_store = _InMemoryRunManifestStore()

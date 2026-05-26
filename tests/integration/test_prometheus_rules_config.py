@@ -819,6 +819,7 @@ def test_control_plane_current_status_recording_rules_exist_and_reference_source
         "bioetl_replay_safety_blockers_15m": "bioetl_replay_drift_events_total",
         "bioetl_manifest_ledger_failures_15m": "bioetl_control_plane_ledger_appends_total",
         "bioetl_control_plane_telemetry_missing_5m": "bioetl_control_plane_manifest_writes_total",
+        "bioetl_checkpoint_age_seconds": "bioetl_checkpoint_saved_at_seconds",
         "bioetl_terminal_events_15m": "bioetl_control_plane_terminal_events_total",
     }
 
@@ -1101,6 +1102,7 @@ def test_control_plane_current_status_rules_project_pipeline_signals_to_run_type
     telemetry_expr = record_map["bioetl_control_plane_telemetry_missing_5m"].get(
         "expr", ""
     )
+    checkpoint_age_expr = record_map["bioetl_checkpoint_age_seconds"].get("expr", "")
 
     assert "bioetl_control_plane_run_type_universe" in replay_expr
     assert "* on (pipeline) group_left()" in replay_expr
@@ -1108,6 +1110,8 @@ def test_control_plane_current_status_rules_project_pipeline_signals_to_run_type
     assert "* on (pipeline) group_left()" in failures_expr
     assert "bioetl_control_plane_run_type_universe" in telemetry_expr
     assert "* on (pipeline) group_left()" in telemetry_expr
+    assert "time()" in checkpoint_age_expr
+    assert "max by (pipeline) (bioetl_checkpoint_saved_at_seconds)" in checkpoint_age_expr
 
 
 def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None:

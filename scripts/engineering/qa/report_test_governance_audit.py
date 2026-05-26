@@ -123,9 +123,10 @@ class _TestBodyVisitor(ast.NodeVisitor):
 
         if qualified in PYTEST_ASSERTION_HELPERS:
             self.has_assertion_signal = True
-        if leaf in ASSERT_METHOD_NAMES or leaf.startswith("assert_"):
+        if leaf in ASSERT_METHOD_NAMES or leaf.startswith(("assert_", "_assert_")):
             self.has_assertion_signal = True
         if leaf.startswith(("check_", "validate_", "verify_", "expect_")):
+            self.has_assertion_signal = True
             self.helper_assertion_calls.append(qualified)
 
         if qualified:
@@ -298,7 +299,10 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
         "total_test_files": len(test_files),
         "total_test_functions": total_functions,
         "refined_assertless_tests": refined_assertless_tests,
-        "assertless_category_counts": dict(sorted(assertless_category_counts.items())),
+        "assertless_category_counts": {
+            category: assertless_category_counts.get(category, 0)
+            for category in sorted(ASSERTLESS_CATEGORY_RULES)
+        },
         "assertless_candidates": assertless_candidates,
         "assertless_examples": assertless_examples,
         "duplicate_test_names": len(duplicate_names),

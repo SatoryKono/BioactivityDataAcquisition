@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
+import shutil
 import subprocess
 
 import pytest
@@ -106,19 +107,23 @@ def _has_module_level_getattr(path: Path) -> bool:
 
 
 def _module_level_lazy_export_paths() -> set[str]:
-    result = subprocess.run(
-        ["rg", "--files-with-matches", "def __getattr__", "src/bioetl", "--glob", "*.py"],
-        cwd=ROOT,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode in {0, 1}, result.stderr
-    candidate_paths = (
-        ROOT / line.strip()
-        for line in result.stdout.splitlines()
-        if line.strip()
-    )
+    rg_path = shutil.which("rg")
+    if rg_path:
+        result = subprocess.run(
+            [rg_path, "--files-with-matches", "def __getattr__", "src/bioetl", "--glob", "*.py"],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode in {0, 1}, result.stderr
+        candidate_paths = (
+            ROOT / line.strip()
+            for line in result.stdout.splitlines()
+            if line.strip()
+        )
+    else:
+        candidate_paths = SRC_ROOT.rglob("*.py")
     return {
         path.relative_to(ROOT).as_posix()
         for path in candidate_paths

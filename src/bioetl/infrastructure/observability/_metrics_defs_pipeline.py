@@ -301,6 +301,12 @@ CHECKPOINT_SAVE_EVENTS_TOTAL = Counter(
     ["pipeline", "operation", "status"],
 )
 
+CHECKPOINT_SAVED_AT_SECONDS = Gauge(
+    "bioetl_checkpoint_saved_at_seconds",
+    "Unix timestamp of the latest persisted checkpoint per pipeline",
+    ["pipeline"],
+)
+
 CHECKPOINT_SAVE_DURATION_SECONDS = Histogram(
     "bioetl_checkpoint_save_duration_seconds",
     "Duration of checkpoint save operations in seconds",

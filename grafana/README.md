@@ -49,6 +49,27 @@ ______________________________________________________________________
 > `docs/03-guides/dashboards/monitoring-index.md`,
 > `docs/03-guides/dashboards/dashboard-v2-usage.md` и
 > `docs/05-operations/01-monitoring-guide.md`.
+>
+> Для reproducible dashboard evidence shipped ops-tooling now exposes:
+> `python -m scripts.ops rerender-grafana` for screenshots. It tries the
+> Grafana render API first and automatically falls back to the repo-local
+> Playwright renderer when the render API fails or times out.
+> Playwright mode additionally requires the local `playwright` npm dependency,
+> downloaded browser runtime, and the usual headless Chromium shared libraries
+> (`libnspr4`, `libnss3`, `libasound2`, etc.) on the host.
+> To bootstrap that runtime on a fresh host, use
+> `bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh`.
+> On Windows PowerShell use
+> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1`.
+> The PowerShell bootstrap now downloads a portable Node.js LTS toolchain
+> from the official Node.js distribution site when `node`/`npm` are not on
+> `PATH`, so a global Node installation is no longer required on Windows.
+> It also uses the active `python` command or the repo-local
+> `.venv-win\Scripts\python.exe`, so a global `uv` install is not required.
+> For the local screenshot smoke it defaults to the common local Grafana creds
+> `admin/changeme` unless `GRAFANA_USERNAME` and `GRAFANA_PASSWORD` are already set.
+> `python -m scripts.ops audit-live-grafana` remains the reviewed live
+> datasource/frame audit for semantically sensitive panels.
 
 ## 1. Архитектура мониторинга
 
@@ -963,8 +984,8 @@ not use it as a Prometheus label.
 | 7   | Track: Silver Validation Failures in Range   | Stat       | `round(sum(max_over_time(bioetl_silver_validation_failures_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range])) or vector(0))` | Visible selected-range validation blocker count; non-zero can drive current `CRIT` even when `filtered_out=0`.                                                               |
 | 117 | Track: Silver Filter Rejects in Range        | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`                             | Отдельный счётчик Silver filter rejects внутри выбранного временного окна; не заменяет `Track: Records Quarantined in Range`.                                              |
 | 118 | Inspect: Silver Filter Rejects by Pipeline   | Bar gauge  | `sum by (pipeline) (max_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))`                                  | Breakdown intentional Silver exclusions по выбранным pipeline values через selected-range pushed-counter evidence.                                                         |
-| 121 | Inspect: Top Silver Reject Reasons (Pareto) | Bar gauge  | `topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                      | Bounded top-10 summary по `reason_code`; use the top-level `Silver Reject Explorer` handoff for record-level narrowing inside the explorer.                                  |
-| 122 | Inspect: Top Silver Reject Fields            | Bar gauge  | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                            | Bounded top-10 summary по `field`; use the top-level `Silver Reject Explorer` handoff for record-level narrowing inside the explorer.                                        |
+| 121 | Inspect: Top Silver Reject Reasons (Pareto) | Bar gauge  | `topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                      | Bounded top-10 summary по `reason_code`; each bar now opens `Silver Reject Explorer` already scoped by `pipeline`/`run_type`/`reason_code`.                                  |
+| 122 | Inspect: Top Silver Reject Fields            | Bar gauge  | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                            | Bounded top-10 summary по `field`; each bar now opens `Silver Reject Explorer` already scoped by `pipeline`/`run_type`/`field`.                                              |
 | 152 | Monitor: Silver Filter Reject Accounting Mismatch | Stat  | `round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{...}[$__range])))`                                              | Reconciliation guard между stage-total `filtered_out` surface и bounded breakdown metric. `0` = healthy, non-zero = расследовать drift, `No data` = recording rule не публикуется. |
 | 101 | Review: Latest Successful Data Timestamp     | Stat       | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})`                                                                            | Последний observed ingestion timestamp внутри выбранного pipeline scope; остаётся в first-screen current-context band после переноса CTA из answer row.                  |
 
@@ -1018,6 +1039,8 @@ ______________________________________________________________________
 | Monitor Filtered Records Total                    | Table | `/ops/quarantine/filtered-stats`                           |
 | Track Reject Rate vs Bronze                       | Table | `/ops/quarantine/filtered-stats`                           |
 | Inspect Run Scope Summary                         | Table | `/ops/quarantine/filtered-stats`                           |
+| Track Filtered Rejects Over Time                  | Timeseries | `/ops/quarantine/filtered-timeseries`                  |
+| Track Reject Ratio vs Bronze Over Time            | Timeseries | `/ops/quarantine/filtered-timeseries`                  |
 | Inspect Top Reject Reasons / Fields / Signatures  | Table | `/ops/quarantine/filtered-stats`                           |
 | Inspect Filtered Records Table                    | Table | `/ops/quarantine/filtered-records`                         |
 | Inspect Selected Record Details                   | Table | `/ops/quarantine/filtered-records?...&payload_hash=<hash>` |
@@ -1058,9 +1081,11 @@ filter chains, unknown pipeline, or `bronze_records=0` are treated as
 UNKNOWN/error until the backend is checked.
 
 **Drilldown:** canonical navigation bus `0. Control Plane`, `1. Overview`,
-`2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`;
-table row links дают self-drilldown по `payload_hash` в same tab и CLI
-handoff в новой вкладке.
+`2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`; DQ
+panels `Track: Silver Filter Rejects in Range`, `Inspect: Top Silver Reject
+Reasons (Pareto)`, and `Inspect: Top Silver Reject Fields` now hand off
+directly into scoped Explorer views. Table row links внутри Explorer дают
+self-drilldown по `payload_hash` в same tab и CLI handoff в новой вкладке.
 
 ______________________________________________________________________
 

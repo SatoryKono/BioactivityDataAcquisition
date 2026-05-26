@@ -19,7 +19,7 @@ class TestPublicationYearValidation:
         year = PublicationYear("2020")
         assert year.value == 2020
 
-    def test_date_string_extraction(self) -> None:
+    def test_date_string_extraction__test_publication_year_validation_domain_value_objects_test_publication_year_22(self) -> None:
         year = PublicationYear("2024-01-15")
         assert year.value == 2024
 

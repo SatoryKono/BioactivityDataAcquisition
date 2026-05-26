@@ -576,6 +576,12 @@ class TestHealthServerQuarantineExplorer:
                 "reject_ratio": 0.0,
             }
         )
+        service.get_filtered_timeseries = AsyncMock(
+            return_value={
+                "bucket": "1h",
+                "rows": [],
+            }
+        )
         service.get_filtered_filter_options = AsyncMock(
             return_value={
                 "pipelines": ["chembl_activity"],
@@ -785,6 +791,51 @@ class TestHealthServerQuarantineExplorer:
         assert status_text == "Missing required query parameter: pipeline"
         assert "Missing required query parameter: pipeline" in body
         service.get_filtered_filter_options.assert_not_awaited()
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_filtered_timeseries_endpoint_delegates_to_quarantine_service(
+        self,
+        running_server_with_quarantine: tuple[HealthServer, MagicMock],
+    ) -> None:
+        """Timeseries endpoint should expose temporal reject rows for Grafana."""
+        server, service = running_server_with_quarantine
+        service.get_filtered_timeseries.return_value = {
+            "bucket": "1h",
+            "rows": [
+                {
+                    "bucket_start": "2026-04-01T00:00:00+00:00",
+                    "reject_count": 2,
+                    "bronze_records": 10,
+                    "reject_ratio": 0.2,
+                }
+            ],
+        }
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/quarantine/filtered-timeseries?"
+            "pipeline=chembl_activity&run_type=incremental&reason_code=missing_required_field&"
+            "field=canonical_smiles&run_id=run-1&from=2026-04-01T00%3A00%3A00Z&"
+            "to=2026-04-02T00%3A00%3A00Z&bucket=1h",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data["bucket"] == "1h"
+        assert data["rows"][0]["reject_count"] == 2
+        service.get_filtered_timeseries.assert_awaited_once_with(
+            pipeline="chembl_activity",
+            run_type="incremental",
+            reason_code="missing_required_field",
+            field="canonical_smiles",
+            run_id="run-1",
+            payload_hash=None,
+            from_ts="2026-04-01T00:00:00Z",
+            to_ts="2026-04-02T00:00:00Z",
+            bucket="1h",
+        )
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_record_detail_endpoint_returns_404(

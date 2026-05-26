@@ -491,7 +491,7 @@ class TestRunCompositeCommand:
 class TestRunCompositeRuntimeConfig:
     """Test CompositeRuntimeConfig creation from CLI options."""
 
-    def test_default_config(self, cli_runner: CliRunner) -> None:
+    def test_default_config__test_run_composite_runtime_config_cli_commands_test_run_composite_494(self, cli_runner: CliRunner) -> None:
         """Test default runtime config values."""
         with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(

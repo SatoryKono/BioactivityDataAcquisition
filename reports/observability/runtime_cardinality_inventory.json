@@ -4,6 +4,7 @@
     "bioetl_checkpoint_load_events_total",
     "bioetl_checkpoint_operator_operations_total",
     "bioetl_checkpoint_save_events_total",
+    "bioetl_checkpoint_saved_at_seconds",
     "bioetl_circuit_breaker_state",
     "bioetl_control_plane_ledger_appends_total",
     "bioetl_control_plane_manifest_writes_total",
@@ -49,8 +50,14 @@
   ],
   "alerted_without_declaration": [],
   "alerted_without_emission": [],
-  "alias_emitters": {},
-  "compatibility_alias_candidates": [],
+  "alias_emitters": {
+    "checkpoint_saved_at_epoch_seconds": [
+      "src/bioetl/application/core/lifecycle/checkpoint_manager.py"
+    ]
+  },
+  "compatibility_alias_candidates": [
+    "checkpoint_saved_at_epoch_seconds"
+  ],
   "dashboarded_metrics": [
     "bioetl_adapter_batch_size",
     "bioetl_adapter_dropped_duplicates_total",
@@ -66,12 +73,14 @@
     "bioetl_bronze_bytes_written_total",
     "bioetl_bronze_records_written_total",
     "bioetl_bronze_write_duration_seconds",
+    "bioetl_checkpoint_age_seconds",
     "bioetl_checkpoint_compatibility_events_total",
     "bioetl_checkpoint_load_events_total",
     "bioetl_checkpoint_operator_duration_seconds",
     "bioetl_checkpoint_operator_operations_total",
     "bioetl_checkpoint_save_duration_seconds",
     "bioetl_checkpoint_save_events_total",
+    "bioetl_checkpoint_saved_at_seconds",
     "bioetl_circuit_breaker_failure_total",
     "bioetl_circuit_breaker_state",
     "bioetl_circuit_breaker_success_total",
@@ -255,12 +264,14 @@
     "bioetl_bronze_write_attempts_total",
     "bioetl_bronze_write_duration_seconds",
     "bioetl_bronze_write_total_duration_seconds",
+    "bioetl_checkpoint_age_seconds",
     "bioetl_checkpoint_compatibility_events_total",
     "bioetl_checkpoint_load_events_total",
     "bioetl_checkpoint_operator_duration_seconds",
     "bioetl_checkpoint_operator_operations_total",
     "bioetl_checkpoint_save_duration_seconds",
     "bioetl_checkpoint_save_events_total",
+    "bioetl_checkpoint_saved_at_seconds",
     "bioetl_circuit_breaker_failure_total",
     "bioetl_circuit_breaker_open_total",
     "bioetl_circuit_breaker_state",
@@ -481,6 +492,7 @@
     "bioetl_checkpoint_operator_operations_total",
     "bioetl_checkpoint_save_duration_seconds",
     "bioetl_checkpoint_save_events_total",
+    "bioetl_checkpoint_saved_at_seconds",
     "bioetl_composite_phase_errors_total",
     "bioetl_composite_phase_loss_total",
     "bioetl_composite_phase_records_total",
@@ -663,6 +675,9 @@
       "docs/03-guides/metrics-monitoring.md",
       "grafana/README.md"
     ],
+    "bioetl_checkpoint_age_seconds": [
+      "grafana/dashboards/bioetl-control-plane-v1.json"
+    ],
     "bioetl_checkpoint_compatibility_events_total": [
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
@@ -699,6 +714,9 @@
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/05-operations/runbooks/observability-checklist.md",
+      "grafana/dashboards/bioetl-control-plane-v1.json"
+    ],
+    "bioetl_checkpoint_saved_at_seconds": [
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_circuit_breaker_failure_total": [
@@ -1304,6 +1322,7 @@
     "bioetl_checkpoint_operator_operations_total",
     "bioetl_checkpoint_save_duration_seconds",
     "bioetl_checkpoint_save_events_total",
+    "bioetl_checkpoint_saved_at_seconds",
     "bioetl_circuit_breaker_failure_total",
     "bioetl_circuit_breaker_open_total",
     "bioetl_circuit_breaker_state",
@@ -1545,6 +1564,7 @@
     "bioetl_checkpoint_operator_operations_total",
     "bioetl_checkpoint_save_duration_seconds",
     "bioetl_checkpoint_save_events_total",
+    "bioetl_checkpoint_saved_at_seconds",
     "bioetl_circuit_breaker_failure_total",
     "bioetl_circuit_breaker_open_total",
     "bioetl_circuit_breaker_state",
@@ -1703,12 +1723,14 @@
     "bioetl_bronze_write_attempts_total",
     "bioetl_bronze_write_duration_seconds",
     "bioetl_bronze_write_total_duration_seconds",
+    "bioetl_checkpoint_age_seconds",
     "bioetl_checkpoint_compatibility_events_total",
     "bioetl_checkpoint_load_events_total",
     "bioetl_checkpoint_operator_duration_seconds",
     "bioetl_checkpoint_operator_operations_total",
     "bioetl_checkpoint_save_duration_seconds",
     "bioetl_checkpoint_save_events_total",
+    "bioetl_checkpoint_saved_at_seconds",
     "bioetl_circuit_breaker_failure_total",
     "bioetl_circuit_breaker_open_total",
     "bioetl_circuit_breaker_state",
@@ -1873,6 +1895,9 @@
     ],
     "bioetl_checkpoint_save_events_total": [
       "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_checkpoint_saved_at_seconds": [
+      "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
     ],
     "bioetl_circuit_breaker_state": [
       "grafana/prometheus-rules/bioetl_observability.yml"
@@ -2110,6 +2135,9 @@
       "observed_series_count=0"
     ],
     "bioetl_checkpoint_save_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_checkpoint_saved_at_seconds": [
       "observed_series_count=0"
     ],
     "bioetl_circuit_breaker_failure_total": [
@@ -2582,6 +2610,10 @@
     "bioetl_checkpoint_save_events_total": [
       "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py",
       "src/bioetl/application/core/batch_checkpoint_recovery_service.py"
+    ],
+    "bioetl_checkpoint_saved_at_seconds": [
+      "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py",
+      "src/bioetl/application/core/lifecycle/checkpoint_manager.py"
     ],
     "bioetl_composite_phase_errors_total": [
       "src/bioetl/application/observability/pipeline_metrics.py"

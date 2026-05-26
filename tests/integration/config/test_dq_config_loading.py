@@ -69,11 +69,11 @@ class TestDQConfigIntegration:
 
     def test_provider_threshold_override(self, dq_loader: DQConfigLoader) -> None:
         """Provider config should override default thresholds."""
-        # Load ChEMBL which has stricter hard_fail (0.15)
+        # Load ChEMBL provider defaults; current provider contract keeps hard_fail at 0.25.
         config = dq_loader.load("chembl", "unknown_entity")
 
-        # ChEMBL provider has hard_fail: 0.15 (stricter than default 0.20)
-        assert config.hard_fail_threshold == pytest.approx(0.15)
+        # ChEMBL provider currently inherits the canonical hard_fail threshold of 0.25.
+        assert config.hard_fail_threshold == pytest.approx(0.25)
 
     def test_load_defaults_for_unknown(self, dq_loader: DQConfigLoader) -> None:
         """Unknown provider/entity should get defaults."""
@@ -81,7 +81,7 @@ class TestDQConfigIntegration:
 
         # Should use defaults
         assert config.soft_fail_threshold == pytest.approx(0.05)
-        assert config.hard_fail_threshold == pytest.approx(0.20)
+        assert config.hard_fail_threshold == pytest.approx(0.25)
 
     def test_uniprot_protein_enum_vocabulary_validations(
         self, dq_loader: DQConfigLoader
@@ -449,7 +449,7 @@ class TestRealConfigValidation:
 
         # Defaults should be set
         assert config.soft_fail_threshold == pytest.approx(0.05)
-        assert config.hard_fail_threshold == pytest.approx(0.20)
+        assert config.hard_fail_threshold == pytest.approx(0.25)
         assert config.strict_validation is False
 
     def test_contract_dq_configs_use_explicit_dq_strict_flag_name(self) -> None:

@@ -215,6 +215,25 @@ def test_grafana_screenshot_defaults_route_under_reports() -> None:
     assert 'Path("output/playwright")' not in script
 
 
+def test_grafana_live_audit_report_routes_under_reports() -> None:
+    """Grafana live datasource audits must write under reports/observability."""
+    script = (
+        ROOT
+        / "scripts"
+        / "ops"
+        / "observability"
+        / "grafana"
+        / "audit_live_grafana_panels.py"
+    ).read_text(encoding="utf-8")
+    routing = _load_routing()
+    routed_outputs = {
+        output for route in routing["routes"] for output in route.get("outputs", [])
+    }
+
+    assert 'Path("reports/observability/grafana/live-panel-audit.json")' in script
+    assert "reports/observability/grafana/live-panel-audit.json" in routed_outputs
+
+
 def test_runtime_log_default_routes_under_reports_logs() -> None:
     """Default local log files must avoid root logs/."""
     script = (

@@ -99,7 +99,7 @@ class TestInputFilterConfigValidation:
                 batch_size=0,
             )
 
-    def test_batch_size_too_large_raises(self):
+    def test_batch_size_too_large_raises__test_input_filter_config_validation_unit_domain_test_filter_config_102(self):
         """Test that batch_size > 1000 raises ValueError."""
         with pytest.raises(ValueError, match="batch_size must be between 1 and 1000"):
             InputFilterConfig(
