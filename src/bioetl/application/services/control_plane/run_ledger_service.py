@@ -1,4 +1,4 @@
-"""Compatibility wrapper for the run-ledger ownership package."""
+"""Facade for the run-ledger ownership package."""
 
 from __future__ import annotations
 

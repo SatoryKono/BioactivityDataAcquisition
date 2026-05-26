@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 from urllib.error import URLError
 
 from scripts.ops import __main__ as ops_router
 from scripts.ops.observability.grafana import audit_live_grafana_panels as audit_subject
+from scripts.ops.observability.grafana import (
+    check_grafana_dashboard_audit_preflight as preflight_subject,
+)
 from scripts.ops.observability.grafana import (
     rerender_grafana_screenshots as rerender_subject,
 )
@@ -109,6 +113,7 @@ def test_rerender_builds_playwright_env(tmp_path: Path) -> None:
     assert env["GRAFANA_PASSWORD"] == "changeme"
     assert env["GRAFANA_SCREENSHOT_OUTPUT_DIR"] == str(tmp_path)
     assert env["GRAFANA_SCREENSHOT_TIMEOUT_MS"] == "45000"
+    assert env["GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS"] == "180000"
     assert env["GRAFANA_SCREENSHOT_UIDS"] == "bioetl-control-plane-v1"
 
 
@@ -276,13 +281,102 @@ def test_live_audit_resolves_http_backend_from_datasource_candidates(
     )
 
     def fake_fetch_json(url: str) -> object:
-        if url == "http://localhost:8081/health":
+        if url == "http://localhost:8081/health/live":
             return {"status": "ok"}
         raise OSError(url)
 
     monkeypatch.setattr(audit_subject, "_fetch_json", fake_fetch_json)
 
     assert audit_subject._resolve_app_base_url(config) == "http://localhost:8081"
+
+
+def test_grafana_audit_preflight_router_exposes_command() -> None:
+    assert_router_python_command(
+        ops_router,
+        "check-grafana-audit-preflight",
+        expected_target="observability/grafana/check_grafana_dashboard_audit_preflight.py",
+    )
+
+
+def test_grafana_audit_preflight_parser_uses_grafana_env_defaults(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    monkeypatch.setenv("GRAFANA_USERNAME", "viewer")
+    monkeypatch.setenv("GRAFANA_PASSWORD", "secret")
+
+    parser = preflight_subject._build_parser()
+    args = parser.parse_args(["--screenshot-dir", str(tmp_path), "--json"])
+
+    assert args.grafana_username == "viewer"
+    assert args.grafana_password == "secret"
+    assert args.screenshot_dir == tmp_path
+    assert args.json is True
+
+
+def test_grafana_audit_preflight_detects_stale_screenshot(tmp_path: Path) -> None:
+    dashboard_path = tmp_path / "bioetl-control-plane-v1.json"
+    screenshot_dir = tmp_path / "screens"
+    screenshot_dir.mkdir()
+    screenshot_path = screenshot_dir / "bioetl-control-plane-v1.png"
+    manifest_path = screenshot_dir / "render-manifest.json"
+    dashboard_path.write_text('{"uid":"bioetl-control-plane-v1"}\n', encoding="utf-8")
+    screenshot_path.write_bytes(b"png")
+    manifest_path.write_text("{}\n", encoding="utf-8")
+    os.utime(screenshot_path, (1, 1))
+    os.utime(dashboard_path, (2, 2))
+
+    result = preflight_subject._check_screenshot_artifacts(
+        screenshot_dir
+    )
+
+    assert result.status == "error"
+    assert "stale dashboard screenshots" in result.detail
+
+
+def test_grafana_audit_preflight_run_checks_collects_ok_results(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_http_json",
+        lambda **kwargs: preflight_subject.PreflightCheck(
+            name=str(kwargs["name"]),
+            status="ok",
+            detail=f"{kwargs['url']} reachable",
+        ),
+    )
+    monkeypatch.setattr(
+        audit_subject,
+        "_resolve_app_base_url",
+        lambda *_args, **_kwargs: "http://localhost:8081",
+    )
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_screenshot_artifacts",
+        lambda _path: preflight_subject.PreflightCheck(
+            name="screenshots",
+            status="ok",
+            detail="screens current",
+        ),
+    )
+
+    checks = preflight_subject.run_checks(
+        grafana_base_url="http://localhost:3000",
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        grafana_username="admin",
+        grafana_password="changeme",
+        timeout_seconds=5.0,
+        screenshot_dir=tmp_path,
+    )
+
+    assert [check.name for check in checks] == [
+        "grafana",
+        "prometheus",
+        "quarantine-explorer",
+        "screenshots",
+    ]
+    assert all(check.status == "ok" for check in checks)
 
 
 def test_live_audit_writes_report(monkeypatch: Any, tmp_path: Path) -> None:

@@ -1,4 +1,4 @@
-"""Compatibility wrapper for the effective-config ownership package."""
+"""Facade for the effective-config ownership package."""
 
 from __future__ import annotations
 

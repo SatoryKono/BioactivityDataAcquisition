@@ -37,8 +37,10 @@ class ParsedModule:
     exact_import_usage: tuple[tuple[str, tuple[str, ...]], ...]
 
 
-def _read_worker_count(total_files: int) -> int:
+def _read_worker_count(total_files: int, *, os_name: str = os.name) -> int:
     """Return a conservative worker count for mounted-worktree file reads."""
+    if os_name == "nt":
+        return 1
     if total_files < _MIN_PARALLEL_READ_FILES:
         return 1
     cpu_count = os.cpu_count() or _DEFAULT_READ_WORKERS
@@ -49,7 +51,7 @@ def _read_module_source(item: tuple[str, Path]) -> tuple[str, Path, str | None]:
     """Read one Python module source payload for import-graph parsing."""
     module_name, py_file = item
     try:
-        return module_name, py_file, py_file.read_text(encoding="utf-8")
+        return module_name, py_file, py_file.read_text(encoding="utf-8", errors="replace")
     except (OSError, UnicodeDecodeError):
         return module_name, py_file, None
 

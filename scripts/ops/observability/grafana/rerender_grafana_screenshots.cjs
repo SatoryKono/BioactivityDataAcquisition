@@ -17,6 +17,10 @@ function parseArgs(argv) {
       process.env.GRAFANA_SCREENSHOT_TIMEOUT_MS || "90000",
       10,
     ),
+    captureTimeoutMs: Number.parseInt(
+      process.env.GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS || "0",
+      10,
+    ),
     settleMs: Number.parseInt(
       process.env.GRAFANA_SCREENSHOT_SETTLE_MS || "5000",
       10,
@@ -46,12 +50,18 @@ function parseArgs(argv) {
     } else if (arg === "--timeout-ms" && next) {
       config.timeoutMs = Number.parseInt(next, 10);
       index += 1;
+    } else if (arg === "--capture-timeout-ms" && next) {
+      config.captureTimeoutMs = Number.parseInt(next, 10);
+      index += 1;
     } else if (arg === "--uids" && next) {
       config.selectedUids = new Set(
         next.split(",").map((item) => item.trim()).filter(Boolean),
       );
       index += 1;
     }
+  }
+  if (!Number.isFinite(config.captureTimeoutMs) || config.captureTimeoutMs <= 0) {
+    config.captureTimeoutMs = Math.max(config.timeoutMs, 180000);
   }
   return config;
 }
@@ -231,10 +241,15 @@ async function renderDashboard(page, dashboard, index, total) {
   }
 
   const filePath = path.join(CONFIG.outputDir, dashboard.file);
-  console.log(`[${index}/${total}] capturing screenshot ${dashboard.uid} ...`);
+  console.log(
+    `[${index}/${total}] capturing screenshot ${dashboard.uid} with timeout ${CONFIG.captureTimeoutMs}ms ...`,
+  );
   await page.screenshot({
     path: filePath,
     fullPage: true,
+    timeout: CONFIG.captureTimeoutMs,
+    animations: "disabled",
+    caret: "hide",
   });
   console.log(`rendered ${dashboard.uid} -> ${dashboard.file}`);
 }
@@ -245,6 +260,7 @@ async function writeManifest(dashboards) {
     engine: "playwright",
     base_url: CONFIG.baseUrl,
     timeout_ms: CONFIG.timeoutMs,
+    capture_timeout_ms: CONFIG.captureTimeoutMs,
     dashboards,
   };
   await fs.promises.writeFile(

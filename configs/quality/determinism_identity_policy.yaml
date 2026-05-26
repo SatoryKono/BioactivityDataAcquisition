@@ -68,7 +68,7 @@ allowed_occurrence_identity_generators:
     replay and content semantics remain anchored by manifest fingerprints and
     input snapshot fingerprints.
   issue: '#4472'
-- path: src/bioetl/application/services/control_plane/run_manifest_service.py
+- path: src/bioetl/application/services/control_plane/manifest/service.py
   symbol: RunManifestService._manifest_id_factory
   generator: uuid4
   identity_field: manifest_id
@@ -77,7 +77,7 @@ allowed_occurrence_identity_generators:
   rationale: Run manifest IDs identify persisted control-plane occurrences;
     execution_fingerprint and effective-config hashes carry semantic replay identity.
   issue: '#4472'
-- path: src/bioetl/application/services/control_plane/run_ledger_service.py
+- path: src/bioetl/application/services/control_plane/ledger/service.py
   symbol: RunLedgerService._entry_id_factory
   generator: uuid4
   identity_field: ledger_entry_id
@@ -86,7 +86,7 @@ allowed_occurrence_identity_generators:
   rationale: Run ledger entry IDs are append-only event occurrence identifiers;
     ledger idempotency and semantic event payloads remain separate.
   issue: '#4472'
-- path: src/bioetl/application/services/control_plane/workflow_manifest_service.py
+- path: src/bioetl/application/services/control_plane/workflow/manifest_service.py
   symbol: WorkflowManifestService._manifest_id_factory
   generator: uuid4
   identity_field: workflow_manifest_id
@@ -95,7 +95,7 @@ allowed_occurrence_identity_generators:
   rationale: Workflow manifest IDs identify persisted workflow occurrences while
     compute_execution_fingerprint carries the semantic workflow identity.
   issue: '#4472'
-- path: src/bioetl/application/services/control_plane/workflow_ledger_service.py
+- path: src/bioetl/application/services/control_plane/workflow/ledger_service.py
   symbol: WorkflowLedgerService._entry_id_factory
   generator: uuid4
   identity_field: workflow_ledger_entry_id
@@ -104,7 +104,7 @@ allowed_occurrence_identity_generators:
   rationale: Workflow ledger entry IDs are append-only event occurrence identifiers
     and must not participate in semantic workflow replay identity.
   issue: '#4472'
-- path: src/bioetl/application/services/control_plane/workflow_execution_service.py
+- path: src/bioetl/application/services/control_plane/workflow/execution_service.py
   symbol: WorkflowExecutionService.run_id_factory
   generator: uuid4
   identity_field: workflow_run_id
