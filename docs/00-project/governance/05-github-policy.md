@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.0.1
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-29'
+  Last verified: '2026-05-26'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md v6.1.3 | Last updated: 2026-04-29*
+*Synced with RULES.md v6.1.3 and ADR-047 | Last updated: 2026-05-26*
 
 ______________________________________________________________________
 
@@ -51,7 +51,7 @@ ______________________________________________________________________
 
 ## 2. CI/CD Workflows
 
-BioETL uses **19 GitHub Actions workflows** organized by purpose.
+BioETL uses **33 GitHub Actions workflows** (including reusable/deprecated helper workflows) organized by purpose.
 
 ### 2.1 Core Quality Gates (run on every PR)
 
@@ -95,7 +95,7 @@ BioETL uses **19 GitHub Actions workflows** organized by purpose.
 | **Contract Tests**     | `contract-tests.yml`         | Monthly (1st, 02:00 UTC)    | Live API contract tests, creates GitHub issue on failure                      |
 | **Weekly VACUUM**      | `vacuum.yml`                 | Weekly (Sun 02:00 UTC)      | Delta Lake VACUUM on all layers                                               |
 | **Release**            | `release.yml`                | On release publish          | Build, test on 3 Python versions, publish to TestPyPI+PyPI                    |
-| ~~Project Automation~~ | ~~`project-automation.yml`~~ | ~~Push + PR~~               | Removed: was a duplicate of `tests.yml` + `import-linter.yml`                 |
+| `quality-debt-weekly.yml` | Weekly + manual dispatch | Debt scorecard and exemption-registry drift visibility |
 
 ______________________________________________________________________
 
@@ -128,6 +128,43 @@ without pulling the full heavy test matrix into documentation-only changesets.
 | `contracts-status` | port-contracts.yml           | Port contract compliance      |
 | `no-pyc-check`     | compiled-artifacts-block.yml | No compiled artifacts         |
 | `docker-build`     | docker.yml                   | Container builds successfully |
+
+### Unified quality gates (canonical names)
+
+To remove drift between workflow-specific job names and governance language, BioETL uses these canonical gate names:
+
+| Canonical Gate | Required check job(s) | Fail/Warn rule |
+| --- | --- | --- |
+| `gate.lint-arch` | `checks-complete` | **FAIL** on any lint/C901/architecture/import-linter failure |
+| `gate.tests-coverage` | `coverage-verify` | **FAIL** when combined coverage threshold is not met |
+| `gate.types` | `type-check` | **FAIL** on mypy strict errors |
+| `gate.schema-contracts` | `schema-governance-status` | **FAIL** on schema parity/contract export drift |
+| `gate.security-secrets` | `detect-secrets` | **FAIL** on secret findings |
+| `gate.commit-policy` | `commit-lint` | **FAIL** on non-Conventional Commit messages |
+| `gate.repo-hygiene` | `root-hygiene` | **FAIL** on root policy violations |
+| `gate.docs-governance` | `docs-governance` (docs-only changesets) | **WARN→FAIL escalation**: warn for non-blocking drift, fail for contract/governance breakage |
+
+### Escalation policy for fail/warn
+
+- **FAIL**: merge is blocked for PRs; if direct merge is used (ruleset disabled), maintainer MUST either fix or explicitly record a risk acceptance in PR/commit discussion.
+- **WARN**: merge MAY proceed only with documented justification and a follow-up issue with owner and due date.
+- **WARN→FAIL**: repeated warning in 2 consecutive runs for the same surface, or warning on governance-contract surfaces (`RULES.md`, ADR-linked checks, schema parity, secrets) escalates to FAIL.
+
+### Workflow → Gate → Source of truth
+
+| Workflow file | Gate(s) surfaced | Source of truth |
+| --- | --- | --- |
+| `import-linter.yml` | `gate.lint-arch` via `checks-complete` | `.github/workflows/import-linter.yml` (job IDs) + this policy section |
+| `tests.yml` | `gate.tests-coverage` via `coverage-verify` | `.github/workflows/tests.yml` + this policy section |
+| `type-checking.yml` | `gate.types` via `type-check` | `.github/workflows/type-checking.yml` + this policy section |
+| `schema-governance.yml` | `gate.schema-contracts` via `schema-governance-status` | `.github/workflows/schema-governance.yml` + this policy section |
+| `security.yml` | `gate.security-secrets` via `detect-secrets` | `.github/workflows/security.yml` + this policy section |
+| `commit-lint.yml` | `gate.commit-policy` via `commit-lint` | `.github/workflows/commit-lint.yml` + this policy section |
+| `root-hygiene.yml` | `gate.repo-hygiene` via `root-hygiene` | `.github/workflows/root-hygiene.yml` + active GitHub ruleset state |
+| `docs.yml` | `gate.docs-governance` via `docs-governance` | `.github/workflows/docs.yml` + docs governance policy surfaces |
+| `port-contracts.yml` | Supporting gate: `contracts-status` | `.github/workflows/port-contracts.yml` |
+| `compiled-artifacts-block.yml` | Supporting gate: `no-pyc-check` | `.github/workflows/compiled-artifacts-block.yml` |
+| `docker.yml` | Supporting gate: `docker-build` | `.github/workflows/docker.yml` |
 
 ### Branch Protection Verification
 
