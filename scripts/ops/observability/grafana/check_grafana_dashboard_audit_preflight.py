@@ -129,6 +129,7 @@ def run_checks(
     grafana_password: str,
     timeout_seconds: float,
     screenshot_dir: Path,
+    include_screenshot_check: bool = True,
 ) -> list[PreflightCheck]:
     checks = [
         _check_http_json(
@@ -176,7 +177,8 @@ def run_checks(
             )
         )
 
-    checks.append(_check_screenshot_artifacts(screenshot_dir))
+    if include_screenshot_check:
+        checks.append(_check_screenshot_artifacts(screenshot_dir))
     return checks
 
 
@@ -229,6 +231,11 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print the full result as JSON.",
     )
+    parser.add_argument(
+        "--skip-screenshot-check",
+        action="store_true",
+        help="Skip local PNG/manifest freshness validation.",
+    )
     return parser
 
 
@@ -249,6 +256,7 @@ def main(argv: list[str] | None = None) -> int:
         grafana_password=args.grafana_password,
         timeout_seconds=args.timeout_seconds,
         screenshot_dir=args.screenshot_dir,
+        include_screenshot_check=not args.skip_screenshot_check,
     )
 
     if args.json:
