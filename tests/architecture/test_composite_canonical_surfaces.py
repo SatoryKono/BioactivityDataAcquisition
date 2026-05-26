@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
+import subprocess
+import tempfile
 
 import pytest
 
@@ -29,6 +32,7 @@ _DEPRECATED_COMPOSITE_SYMBOL_BYTES = tuple(
 )
 _SCAN_CHUNK_SIZE = 64 * 1024
 _SCAN_OVERLAP = max(len(symbol) for symbol in _DEPRECATED_COMPOSITE_SYMBOL_BYTES) - 1
+_SYMBOL_SCAN_TIMEOUT_SECONDS = 20.0
 
 
 def _python_files(root: Path) -> list[Path]:
@@ -70,6 +74,10 @@ def _symbol_hits(root: Path, allowlist: frozenset[Path]) -> list[str]:
 
 
 def _doc_symbol_hits() -> list[str]:
+    grep_hits = _repo_symbol_hits_with_git_grep(DOC_ROOTS, skip_legacy=True)
+    if grep_hits is not None:
+        return grep_hits
+
     hits: list[str] = []
     for root in DOC_ROOTS:
         for doc_file in _text_files(root):
@@ -83,6 +91,113 @@ def _doc_symbol_hits() -> list[str]:
                 if _file_contains_symbol(doc_file, symbol_bytes):
                     hits.append(f"{doc_file.relative_to(ROOT)} -> {symbol}")
     return hits
+
+
+def _repo_symbol_hits_with_git_grep(
+    roots: tuple[Path, ...],
+    *,
+    skip_legacy: bool,
+) -> list[str] | None:
+    pathspecs: list[str] = []
+    for root in roots:
+        pathspec = _repo_relative_pathspec(root)
+        if pathspec is None:
+            return None
+        pathspecs.append(pathspec)
+
+    command = [
+        "git",
+        "-C",
+        ROOT.as_posix(),
+        "grep",
+        "-I",
+        "-n",
+        "-F",
+        "--no-color",
+        *(
+            option
+            for symbol in DEPRECATED_COMPOSITE_SYMBOLS
+            for option in ("-e", symbol)
+        ),
+        "--",
+        *pathspecs,
+    ]
+    try:
+        completed, stdout = _run_symbol_scan_command(command)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+    if completed.returncode == 1:
+        return []
+    if completed.returncode != 0:
+        return None
+
+    hits: set[str] = set()
+    for line in stdout.splitlines():
+        path_text, separator, remainder = line.partition(":")
+        if not separator:
+            continue
+        _line_number, separator, text = remainder.partition(":")
+        if not separator:
+            continue
+        path = Path(path_text.replace("\\", "/"))
+        if skip_legacy and "legacy" in path.parts:
+            continue
+        if path.suffix not in {".py", ".mmd", ".mermaid", ".md", ".json", ".svg"}:
+            continue
+        for symbol in DEPRECATED_COMPOSITE_SYMBOLS:
+            if symbol in text:
+                hits.add(f"{path.as_posix()} -> {symbol}")
+    return sorted(hits)
+
+
+def _run_symbol_scan_command(
+    command: list[str],
+) -> tuple[subprocess.CompletedProcess[str], str]:
+    output_path = _temporary_symbol_scan_output_path()
+    try:
+        with output_path.open("w", encoding="utf-8", errors="replace") as stdout_file:
+            completed = subprocess.run(
+                command,
+                stdout=stdout_file,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                check=False,
+                timeout=_SYMBOL_SCAN_TIMEOUT_SECONDS,
+            )
+        stdout = output_path.read_text(encoding="utf-8", errors="replace")
+    finally:
+        output_path.unlink(missing_ok=True)
+    return completed, stdout
+
+
+def _temporary_symbol_scan_output_path() -> Path:
+    handle = tempfile.NamedTemporaryFile(
+        prefix="composite_canonical_surface_scan_",
+        suffix=".txt",
+        delete=False,
+    )
+    handle.close()
+    return Path(handle.name)
+
+
+def _repo_relative_pathspec(path: Path) -> str | None:
+    try:
+        common_path = os.path.commonpath(
+            [
+                os.path.abspath(os.fspath(ROOT)),
+                os.path.abspath(os.fspath(path)),
+            ]
+        )
+    except ValueError:
+        return None
+    repo_root = os.path.abspath(os.fspath(ROOT))
+    if os.path.normcase(common_path) != os.path.normcase(repo_root):
+        return None
+    relative = os.path.relpath(os.path.abspath(os.fspath(path)), repo_root)
+    return "." if relative == "." else relative.replace(os.sep, "/")
 
 
 @pytest.mark.architecture

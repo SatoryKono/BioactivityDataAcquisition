@@ -325,7 +325,8 @@ Run: `uv run python -m scripts.engineering.qa report-dashboard-query-duplicates`
 
 ### 10.3 Audited Exact-Duplicate Reuse
 - [ ] `Monitor: Data Quality Score (Volume-weighted)` and `Track: Data Quality Score Trend (Volume-weighted)` in `bioetl-dq-v2` share expression intentionally (different UI roles)
-- [ ] `Monitor: Lineage Refs Missing` reused between `bioetl-control-plane-v1` and `bioetl-dq-v2` intentionally (different operator questions)
+- [ ] `Monitor: Lineage Refs Missing` remains canonical in `bioetl-control-plane-v1`
+- [ ] `bioetl-dq-v2` uses a handoff note/link instead of duplicating the metric
 - [ ] Justified exact duplicates audited in `tests/integration/test_grafana_dashboard_metric_semantics.py`
 
 ---

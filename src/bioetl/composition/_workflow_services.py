@@ -10,13 +10,13 @@ from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import get_settings
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.workflow_execution_service import (
+    from bioetl.application.services.control_plane.workflow.execution_service import (
         WorkflowExecutionService,
     )
-    from bioetl.application.services.control_plane.workflow_inspection_service import (
+    from bioetl.application.services.control_plane.workflow.inspection_service import (
         WorkflowInspectionService,
     )
-    from bioetl.application.services.control_plane.workflow_ledger_service import (
+    from bioetl.application.services.control_plane.workflow.ledger_service import (
         WorkflowLedgerService,
     )
     from bioetl.application.services.execution.pipeline_runner_service import (
@@ -127,7 +127,7 @@ def _create_workflow_ledger_service(
     ledger_port: WorkflowLedgerPort,
     manifest: WorkflowManifest,
 ) -> WorkflowLedgerService:
-    from bioetl.application.services.control_plane.workflow_ledger_service import (
+    from bioetl.application.services.control_plane.workflow.ledger_service import (
         WorkflowLedgerService,
     )
 
@@ -144,10 +144,10 @@ def get_workflow_execution_service(
     workflow_lock_port: LockPort | None = None,
 ) -> WorkflowExecutionService:
     """Build workflow execution orchestration with durable control-plane seams."""
-    from bioetl.application.services.control_plane.workflow_execution_service import (
+    from bioetl.application.services.control_plane.workflow.execution_service import (
         WorkflowExecutionService,
     )
-    from bioetl.application.services.control_plane.workflow_manifest_service import (
+    from bioetl.application.services.control_plane.workflow.manifest_service import (
         WorkflowManifestService,
     )
     from bioetl.composition.factories.services.port_factories import create_metrics
@@ -190,7 +190,7 @@ def get_workflow_execution_service(
 
 def get_workflow_inspection_service() -> WorkflowInspectionService:
     """Get workflow inspection service for operator diagnostics."""
-    from bioetl.application.services.control_plane.workflow_inspection_service import (
+    from bioetl.application.services.control_plane.workflow.inspection_service import (
         WorkflowInspectionService,
     )
     from bioetl.composition.factories.services.port_factories import create_metrics

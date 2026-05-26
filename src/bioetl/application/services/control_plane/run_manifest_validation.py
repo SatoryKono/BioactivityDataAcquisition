@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.run_manifest_models import (
+from bioetl.application.services.control_plane.manifest.models import (
     RunManifestCreateSpec,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunCodeProvenance

@@ -60,6 +60,7 @@ def pytest_configure(config):
     _reset_last_failed_collection_state(config)
     _auto_enable_benchmark_selection_for_explicit_benchmark_runs(config)
     _configure_windows_asyncio(config)
+    _configure_windows_pycharm_traceback_style(config)
     if _selected_paths_need_hypothesis(config):
         _configure_hypothesis_profiles()
 
@@ -98,6 +99,26 @@ def _configure_windows_asyncio(config: pytest.Config) -> None:
     # async tests can exhaust socket buffers during socketpair() setup.
     config.inicfg["asyncio_default_test_loop_scope"] = "module"
     config.inicfg["asyncio_default_fixture_loop_scope"] = "module"
+
+
+def _configure_windows_pycharm_traceback_style(config: pytest.Config) -> None:
+    """Avoid Windows/PyCharm hangs while pytest formats failing tracebacks."""
+    if not sys.platform.startswith("win") or not _is_pycharm_pytest_runner():
+        return
+
+    option_namespace = getattr(config, "option", None)
+    if option_namespace is None:
+        return
+
+    tbstyle = getattr(option_namespace, "tbstyle", None)
+    if tbstyle not in {"line", "no"}:
+        option_namespace.tbstyle = "line"
+
+
+def _is_pycharm_pytest_runner() -> bool:
+    if os.environ.get("PYCHARM_HOSTED") == "1":
+        return True
+    return any("_jb_pytest_runner.py" in arg.replace("\\", "/") for arg in sys.argv)
 
 
 def _should_treat_last_failed_empty_suite_as_success(

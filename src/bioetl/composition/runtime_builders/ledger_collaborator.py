@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.run_ledger_service import (
+    from bioetl.application.services.control_plane.ledger.service import (
         RunLedgerService,
     )
 
