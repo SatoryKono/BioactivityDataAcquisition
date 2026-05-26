@@ -2,10 +2,39 @@
 
 from __future__ import annotations
 
+import importlib
+import sys
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 import pytest
+
+
+def test_runtime_observability_import_does_not_load_heavy_adapters() -> None:
+    """Importing the runtime entrypoint must keep optional adapters lazy."""
+    module_name = "bioetl.composition.bootstrap.runtime.observability"
+    heavy_modules = {
+        "bioetl.infrastructure.observability.anomaly",
+        "bioetl.infrastructure.observability.prometheus_metrics",
+        "bioetl.infrastructure.observability.tracing",
+        "bioetl.infrastructure.observability.unified_logger",
+    }
+    saved_modules = {
+        name: sys.modules.pop(name, None) for name in (module_name, *heavy_modules)
+    }
+
+    try:
+        importlib.import_module(module_name)
+
+        loaded_heavy_modules = sorted(
+            name for name in heavy_modules if name in sys.modules
+        )
+        assert loaded_heavy_modules == []
+    finally:
+        sys.modules.pop(module_name, None)
+        for name, module in saved_modules.items():
+            if module is not None:
+                sys.modules[name] = module
 
 
 @pytest.mark.unit

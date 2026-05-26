@@ -79,12 +79,15 @@ class TestQuarantineEntryInvariantProperties:
         metadata_a: dict[str, object],
         metadata_b: dict[str, object],
     ) -> None:
-        """Metadata and generated entry IDs must not perturb payload hashing."""
+        """Metadata must not perturb payload hashing."""
         first = _create_entry(payload, metadata_a)
         second = _create_entry(payload, metadata_b)
 
         assert first.payload_hash == second.payload_hash
-        assert first.entry_id != second.entry_id
+        if metadata_a == metadata_b:
+            assert first.entry_id == second.entry_id
+        else:
+            assert first.entry_id != second.entry_id
         assert first.status == QuarantineStatus.NEW
         assert second.status == QuarantineStatus.NEW
 

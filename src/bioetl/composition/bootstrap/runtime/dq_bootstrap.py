@@ -5,8 +5,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.domain.ports import DQMonitorPort, LoggerPort
-from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -39,11 +37,25 @@ __all__ = [
 ]
 
 
+def _default_monitor_factory(*args: object, **kwargs: object) -> DQMonitorPort:
+    """Create the DQ monitor adapter only when DQ monitoring is enabled."""
+    from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
+
+    return DataQualityMonitor(*args, **kwargs)
+
+
+def _default_noop_logger_factory() -> LoggerPort:
+    """Create the infrastructure no-op logger only when needed."""
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+    return NoOpLogger()
+
+
 def bootstrap_dq_monitor(
     settings: Settings,
     logger: LoggerPort | None = None,
-    monitor_factory: Callable[..., DQMonitorPort] = DataQualityMonitor,
-    noop_logger_factory: Callable[[], LoggerPort] = NoOpLogger,
+    monitor_factory: Callable[..., DQMonitorPort] | None = None,
+    noop_logger_factory: Callable[[], LoggerPort] | None = None,
 ) -> DQMonitorPort | None:
     """Create a data quality monitor port implementation.
 
@@ -63,10 +75,12 @@ def bootstrap_dq_monitor(
     if not obs_settings.dq_monitor_enabled:
         return None
 
-    effective_logger = logger if logger is not None else noop_logger_factory()
+    effective_noop_logger_factory = noop_logger_factory or _default_noop_logger_factory
+    effective_monitor_factory = monitor_factory or _default_monitor_factory
+    effective_logger = logger if logger is not None else effective_noop_logger_factory()
     monitor = cast(
         _ConfigurableDQMonitor,
-        monitor_factory(
+        effective_monitor_factory(
             logger=effective_logger,
             baseline_window=obs_settings.dq_baseline_window,
             z_score_threshold=obs_settings.dq_z_score_threshold,
