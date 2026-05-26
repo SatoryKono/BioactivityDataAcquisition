@@ -100,10 +100,10 @@
         "x": 0,
         "y": 3
       },
-      "description": "Unified context/provenance banner for 3. Provider Health. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only.",
+      "description": "Unified context/provenance banner for 3. Provider Health. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only. Provider health is owned by provider-status telemetry, while ID and Processed Records below are bounded pipeline-context evidence only.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Which provider is degraded or failing, and why?</div></div>"
+        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Which provider is degraded or failing, and why?</div><div style=\"margin-top:6px;font-size:12px;opacity:0.85;\">Provider health verdict comes from provider-status telemetry. The shared ID and Processed Records cards below stay bounded to pipeline context and do not prove current provider health.</div></div>"
       }
     },
     {
@@ -120,7 +120,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range provider-first severity for the selected provider. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. This panel now uses the active Grafana time selector to find the most severe observed provider status inside the chosen window; if no provider-current-status samples exist in that window, the verdict remains UNKNOWN. Pipeline/run_type/workflow are secondary context only; run_id is local control-plane identity context and does not filter Prometheus.",
+      "description": "Selected-range provider-first severity for the selected provider. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. This panel now uses the active Grafana time selector to find the most severe observed provider status inside the chosen window; if no provider-current-status samples exist in that window, the verdict remains UNKNOWN. UNKNOWN here usually means a provider telemetry gap in the selected range, not proof that the provider is healthy or failing; inspect Monitor Provider Telemetry Freshness and Review Raw Provider Health Enum before inferring provider state. Pipeline/run_type/workflow are secondary context only; ID and Processed Records are bounded pipeline-context evidence, and run_id is local control-plane identity context that does not filter Prometheus.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -186,6 +186,18 @@
         "colorMode": "background",
         "dataLinks": [
           {
+            "title": "Inspect Provider Telemetry Freshness",
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?viewPanel=9104&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Review Raw Provider Health Enum",
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?viewPanel=114&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
             "title": "Inspect Severity Matrix",
             "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?viewPanel=9101&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type",
             "targetBlank": false,
@@ -228,7 +240,7 @@
         "y": 7
       },
       "datasource": "Quarantine Explorer",
-      "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels.",
+      "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -296,7 +308,7 @@
         "y": 7
       },
       "datasource": "Quarantine Explorer",
-      "description": "Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage.",
+      "description": "Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1157,7 +1169,7 @@
       "id": 9002,
       "type": "text",
       "title": "First Action",
-      "description": "First operator CTA for global provider incidents and early-warning provider causes. Start with the current severity matrix, then inspect critical providers and top causes. Use this after the current answer row; selected-range latency/error evidence stays below and downstream Runtime or Control Plane follow-up depends on the diagnosed cause.",
+      "description": "First operator CTA for global provider incidents and early-warning provider causes. Start with the current severity matrix, then inspect critical providers and top causes. If Status is UNKNOWN, treat that as missing provider-current-status evidence until telemetry freshness and raw enum evidence say otherwise. Use this after the current answer row; selected-range latency/error evidence stays below and downstream Runtime or Control Plane follow-up depends on the diagnosed cause.",
       "gridPos": {
         "h": 10,
         "w": 8,
@@ -1165,7 +1177,7 @@
         "y": 7
       },
       "options": {
-        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> start with the GLOBAL severity matrix, then inspect critical providers and top causes. If top causes are visible while GLOBAL severity still reads OK, treat that as an early-warning provider lead rather than proof of a current degraded/failing provider: confirm raw provider status first, then inspect selected-range latency/error evidence before escalating. If the top-cause table stays empty while severity is non-OK, treat that as a provider explainability gap: confirm raw provider status, then inspect optional rate-limit/circuit-breaker panels before leaving the page. If cause is retry/rate-limit/circuit-breaker, inspect control-plane safety before replay. If cause is latency/errors, correlate with Runtime impact, then logs/traces from the runtime or DQ dashboards.</div>",
+        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> start with the GLOBAL severity matrix, then inspect critical providers and top causes. If <strong>Status = UNKNOWN</strong>, treat that as a telemetry-gap hypothesis first: inspect <strong>Monitor Provider Telemetry Freshness</strong>, then <strong>Review Raw Provider Health Enum</strong>, before assuming the provider is healthy or degraded. The shared <strong>ID</strong> and <strong>Processed Records</strong> cards stay bounded to pipeline context and do not prove current provider health. If top causes are visible while GLOBAL severity still reads OK, treat that as an early-warning provider lead rather than proof of a current degraded/failing provider: confirm raw provider status first, then inspect selected-range latency/error evidence before escalating. If the top-cause table stays empty while severity is non-OK, treat that as a provider explainability gap: confirm raw provider status, then inspect optional rate-limit/circuit-breaker panels before leaving the page. If cause is retry/rate-limit/circuit-breaker, inspect control-plane safety before replay. If cause is latency/errors, correlate with Runtime impact, then logs/traces from the runtime or DQ dashboards.</div>",
         "mode": "html"
       },
       "links": [
@@ -1255,6 +1267,7 @@
           "sort": "desc"
         }
       },
+      "description": "First-screen trust marker for canonical provider severity. 0=OK, 1=WARN, null=UNKNOWN. WARN means no bioetl_provider_current_status samples were observed in the active Grafana time range, so Status=UNKNOWN should be treated as a telemetry gap until raw provider status or selected-range check evidence proves otherwise; it is not proof that providers are healthy.",
       "targets": [
         {
           "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
@@ -1374,9 +1387,9 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Current Provider Health Status",
+      "title": "Review Raw Provider Health Enum",
       "type": "table",
-      "description": "Raw provider health enum evidence over the active Grafana time range, not the canonical first-screen verdict. Values are source enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null/NaN=UNKNOWN when the provider exists in the selected-range provider universe but raw status is absent. First-screen severity uses bioetl_provider_current_status in the Status and GLOBAL Provider Severity Matrix panels to avoid inverting raw enum colors."
+      "description": "Raw provider health enum evidence over the active Grafana time range, not the canonical first-screen verdict. Values are source enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null/NaN=UNKNOWN when the provider exists in the selected-range provider universe but raw status is absent. Use this as supporting evidence when Status is UNKNOWN or when top causes and severity disagree. First-screen severity uses bioetl_provider_current_status in the Status and GLOBAL Provider Severity Matrix panels to avoid inverting raw enum colors."
     },
     {
       "datasource": {

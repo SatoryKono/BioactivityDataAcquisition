@@ -22,6 +22,53 @@ class ForeignKeyReconciliationRequest:
     reference_key: str
     primary_keys: tuple[str, ...]
     action: Literal["delete_orphans"] = "delete_orphans"
+    source_keys: tuple[str, ...] | None = None
+    reference_keys: tuple[str, ...] | None = None
+    nulls_equal: bool = False
+
+    def __post_init__(self) -> None:
+        if not self.source_table.strip():
+            raise ValueError("source_table cannot be empty")
+        if not self.reference_table.strip():
+            raise ValueError("reference_table cannot be empty")
+        if not self.source_key.strip():
+            raise ValueError("source_key cannot be empty")
+        if not self.reference_key.strip():
+            raise ValueError("reference_key cannot be empty")
+        if not self.primary_keys:
+            raise ValueError("primary_keys cannot be empty")
+        if self.source_keys is None and self.reference_keys is None:
+            return
+        if self.source_keys is None or self.reference_keys is None:
+            raise ValueError(
+                "source_keys and reference_keys must be provided together"
+            )
+        if not self.source_keys or not self.reference_keys:
+            raise ValueError("source_keys and reference_keys cannot be empty")
+        if len(self.source_keys) != len(self.reference_keys):
+            raise ValueError(
+                "source_keys and reference_keys must have the same length"
+            )
+        if self.source_keys[0].strip() != self.source_key.strip():
+            raise ValueError("source_key must match the first source_keys entry")
+        if self.reference_keys[0].strip() != self.reference_key.strip():
+            raise ValueError(
+                "reference_key must match the first reference_keys entry"
+            )
+
+    @property
+    def effective_source_keys(self) -> tuple[str, ...]:
+        """Return the canonical source key sequence for the request."""
+        return self.source_keys if self.source_keys is not None else (self.source_key,)
+
+    @property
+    def effective_reference_keys(self) -> tuple[str, ...]:
+        """Return the canonical reference key sequence for the request."""
+        return (
+            self.reference_keys
+            if self.reference_keys is not None
+            else (self.reference_key,)
+        )
 
 
 @dataclass(frozen=True, slots=True)

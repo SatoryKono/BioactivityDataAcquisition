@@ -175,10 +175,13 @@ dashboard-specific `Status` or `First Action` route.
    `Inspect Critical Providers`, `Inspect Provider Top Causes`,
    `Monitor Provider Telemetry Freshness` и `First Action`
    отвечают на вопрос «какой provider degraded/failing и почему». Panel `id=114`
-   остаётся raw source enum (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже
-   first screen как evidence. `Monitor Provider Telemetry Freshness` отделяет
-   empty severity matrix от telemetry gap: если current-status samples нет за
-   15m, это не healthy state. `Inspect Provider Top Causes` может оставаться
+   (`Review Raw Provider Health Enum`) остаётся raw source enum
+   (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже first screen как evidence.
+   `Monitor Provider Telemetry Freshness` отделяет empty severity matrix от
+   telemetry gap: если current-status samples нет в активном Grafana range, это
+   не healthy state. Shared `ID` и `Processed Records` cards на том же first
+   screen остаются bounded pipeline-context evidence и не доказывают current
+   provider health. `Inspect Provider Top Causes` может оставаться
    непустой даже при `GLOBAL severity = OK`, потому что canonical cause
    projection включает early-warning provider signals независимо от
    current-status projection; это diagnostic lead, а не самостоятельное
@@ -441,7 +444,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - `bioetl-provider-health-v2`: dashboard links `0. Control Plane`,
   `1. Overview`, `2. Runtime`, `4. Data Quality`, `5. Workflow` дают быстрый
   переход из provider health surface без дублирования Runtime variants.
-  Panel `id=114` (`Monitor Current Provider Health Status`) показывает явный enum
+  Panel `id=114` (`Review Raw Provider Health Enum`) показывает явный enum
   raw-source mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY` as below-fold
   evidence, while canonical first-screen severity remains `Status` plus
   `Monitor GLOBAL Provider Severity Matrix`. Panel `id=9104`

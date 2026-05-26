@@ -294,10 +294,12 @@ tracing-backed log hygiene живёт в collapsed row
   `bioetl_provider_current_status`; `0=OK`, `1=WARN`, `null=UNKNOWN`.
   WARN here means no current-status samples in the active Grafana time range, so an empty
   severity matrix is a telemetry gap, not proof that providers are healthy.
-- **Monitor Current Provider Health Status**: table panel по
+- **Review Raw Provider Health Enum**: table panel по
   `bioetl_provider_health_status{provider}` с fail-closed fallback через
   provider universe and selected-range lookup и явным mapping:
-  `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`, `null/NaN=UNKNOWN`.
+  `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`, `null/NaN=UNKNOWN`. Use it as
+  supporting evidence when `Status=UNKNOWN` or when top causes and first-screen
+  severity disagree.
 - **Track Health Check Latency by Provider (p95)**: selected-range тренд латентности провайдеров.
 - **Monitor Healthy Checks (Selected Range) / Monitor Degraded Checks (Selected Range) / Track Health Checks Total (Selected Range)**: selected-range evidence по completed probes; эти панели не являются current-health source.
 - **Track Provider Failure Rate (Selected Range)**: selected-range failure ratio

@@ -9,6 +9,9 @@ recording_rule_metrics:
   - bioetl_processed_records_gold_skipped_current
   - bioetl_processed_records_gold_written_current
   - bioetl_processed_records_reconciliation_status
+  - bioetl_workflow_reconciliation_rows_deleted_total
+  - bioetl_workflow_reconciliation_rows_retained_total
+  - bioetl_workflow_reconciliation_rows_scanned_total
   - bioetl_processed_records_silver_deduplicated_current
   - bioetl_processed_records_silver_filtered_out_current
   - bioetl_processed_records_silver_quarantined_current

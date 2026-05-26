@@ -882,7 +882,7 @@
     },
     {
       "title": "Silver Merge",
-      "purpose": "Explains silver merge behavior, conflict handling, and idempotency guards during replay.",
+      "purpose": "Explains silver merge behavior, conflict handling, and the replay-safe guards that keep writes idempotent.",
       "parent": "Silver Layer",
       "page_notes": [
         {
@@ -892,7 +892,7 @@
     },
     {
       "title": "Gold Rollout",
-      "purpose": "Covers Gold rollout gates, validation, and the safe backfill strategy.",
+      "purpose": "Covers Gold rollout gates, validation checks, and the safe backfill strategy.",
       "parent": "Gold Layer",
       "page_notes": [
         {
@@ -932,7 +932,7 @@
     },
     {
       "title": "Monitoring",
-      "purpose": "Covers dashboards, alerting surfaces, and the monitoring inventory used by operators.",
+      "purpose": "Covers the dashboard, alerting, and metric inventory that operators use to monitor BioETL.",
       "parent": "Observability and Operations",
       "page_notes": [
         {
@@ -1183,7 +1183,7 @@
     {
       "title": "Entity Linking",
       "parent": "Transformer Families",
-      "purpose": "Describes the child transformers that link ChEMBL records to bio-entity outputs.",
+      "purpose": "Describes the child transformers that link ChEMBL records to normalized bio-entity outputs.",
       "page_notes": [
         {
           "content": "Canonical anchors: src/bioetl/application/pipelines/, tests/unit/application/, tests/fixtures/vcr/."
@@ -1203,7 +1203,7 @@
     {
       "title": "Retry Budget",
       "parent": "Retry Policy",
-      "purpose": "Describes how retry budgets are computed so retries stay bounded and deterministic.",
+      "purpose": "Describes how retry budgets are computed so retries stay bounded, deterministic, and observable.",
       "page_notes": [
         {
           "content": "Coverage: retry budgeting, bounded backoff, and deterministic request pacing. Canonical anchors: src/bioetl/infrastructure/http/, tests/unit/infrastructure/, docs/01-requirements/REQUIREMENTS.md."
@@ -1213,7 +1213,7 @@
     {
       "title": "PubMed Search",
       "parent": "PubMed/OpenAlex Flows",
-      "purpose": "Covers the PubMed search path and the adapter contract boundaries it must preserve.",
+      "purpose": "Covers the PubMed search path, query shaping, and adapter contract boundaries it must preserve.",
       "page_notes": [
         {
           "content": "Canonical anchors: src/bioetl/infrastructure/adapters/, tests/fixtures/vcr/, tests/unit/infrastructure/."
@@ -1243,7 +1243,7 @@
     {
       "title": "Protein Lookup",
       "parent": "UniProt Flow",
-      "purpose": "Explains the protein lookup path and how UniProt responses are normalized and validated.",
+      "purpose": "Explains the UniProt protein lookup path, including ID mapping, pagination, and normalized record output.",
       "page_notes": [
         {
           "content": "Canonical anchors: src/bioetl/infrastructure/adapters/, tests/fixtures/vcr/, tests/unit/infrastructure/."
@@ -1253,7 +1253,7 @@
     {
       "title": "Health Probes",
       "parent": "HTTP Health",
-      "purpose": "Describes the health probes shipped by the interfaces layer and the contract they expose.",
+      "purpose": "Describes the health probes exposed to operators and smoke tests, including the response contract they return.",
       "page_notes": [
         {
           "content": "Canonical anchors: src/bioetl/interfaces/http/, tests/integration/, docs/05-operations/."
@@ -1463,7 +1463,7 @@
     {
       "title": "Retry Accounting",
       "parent": "Retry Policy",
-      "purpose": "Explains how retry attempts are counted so the policy stays bounded and observable.",
+      "purpose": "Explains how retry attempts are counted and reported so the retry policy stays bounded and observable.",
       "page_notes": [
         {
           "content": "Coverage: retry counters, observability hooks, and policy enforcement for request retries. Canonical anchors: src/bioetl/infrastructure/http/, tests/unit/infrastructure/, docs/01-requirements/REQUIREMENTS.md."
@@ -1563,7 +1563,7 @@
     {
       "title": "Gold Validation",
       "parent": "Gold Rollout",
-      "purpose": "Documents the validation matrix used to decide whether a gold rollout can proceed.",
+      "purpose": "Documents the validation matrix used to decide whether a Gold rollout can proceed.",
       "page_notes": [
         {
           "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, configs/composites/, tests/architecture/."

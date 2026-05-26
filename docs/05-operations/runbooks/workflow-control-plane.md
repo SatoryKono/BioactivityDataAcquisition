@@ -154,6 +154,11 @@ names only:
 - `source_key=publication_id`
 - `reference_key=publication_id`
 
+The reconciliation transform also accepts composite keys via paired
+`source_keys` / `reference_keys` lists. Keep both lists aligned and set
+`nulls_equal` explicitly when a workflow should treat null-key rows as valid
+matches rather than orphans.
+
 ## Direct Artifact Checks
 
 Canonical workflow control-plane paths:
