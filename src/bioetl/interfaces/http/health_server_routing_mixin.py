@@ -72,6 +72,7 @@ class HealthServerRoutingMixin:
 
     _health_monitor: HealthMonitorPort | None
     _quarantine_service: QuarantineService | None
+    _checkpoint_port: object | None
     _run_manifest_port: RunManifestPort | None
     _run_ledger_port: RunLedgerPort | None
     _clock: ClockPort | None

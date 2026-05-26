@@ -15,7 +15,12 @@ from bioetl.composition.bootstrap.cli.health import (
     bootstrap_health_server_dependencies,
     bootstrap_health_service,
 )
-from bioetl.domain.ports import MetricsPort, RunLedgerPort, RunManifestPort
+from bioetl.domain.ports import (
+    CheckpointPort,
+    MetricsPort,
+    RunLedgerPort,
+    RunManifestPort,
+)
 from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
@@ -31,12 +36,14 @@ class TestHealthServerDependencies:
         """Test that HealthServerDependencies is immutable."""
         metrics = PrometheusMetrics()
         monitor = ProviderHealthMonitor(metrics=metrics)
+        checkpoint_port = MagicMock()
         manifest_store = InMemoryRunManifestStore()
         ledger_store = InMemoryRunLedgerStore()
 
         deps = HealthServerDependencies(
             health_monitor=monitor,
             metrics=metrics,
+            checkpoint_port=checkpoint_port,
             run_manifest_port=manifest_store,
             run_ledger_port=ledger_store,
         )
@@ -52,18 +59,21 @@ class TestHealthServerDependencies:
         """Test that HealthServerDependencies stores components correctly."""
         metrics = PrometheusMetrics()
         monitor = ProviderHealthMonitor(metrics=metrics)
+        checkpoint_port = MagicMock()
         manifest_store = InMemoryRunManifestStore()
         ledger_store = InMemoryRunLedgerStore()
 
         deps = HealthServerDependencies(
             health_monitor=monitor,
             metrics=metrics,
+            checkpoint_port=checkpoint_port,
             run_manifest_port=manifest_store,
             run_ledger_port=ledger_store,
         )
 
         assert deps.health_monitor is monitor
         assert deps.metrics is metrics
+        assert deps.checkpoint_port is checkpoint_port
         assert deps.run_manifest_port is manifest_store
         assert deps.run_ledger_port is ledger_store
 
@@ -144,6 +154,12 @@ class TestBootstrapHealthServerDependencies:
 
         assert isinstance(result.run_manifest_port, RunManifestPort)
 
+    def test_bootstrap_wires_checkpoint_port(self):
+        """Test that bootstrap_health_server_dependencies exposes checkpoint reads."""
+        result = bootstrap_health_server_dependencies()
+
+        assert isinstance(result.checkpoint_port, CheckpointPort)
+
     def test_bootstrap_wires_run_ledger_port(self):
         """Test that bootstrap_health_server_dependencies exposes a run ledger."""
         result = bootstrap_health_server_dependencies()
@@ -165,6 +181,7 @@ class TestBootstrapHealthServerDependencies:
         assert result1 is not result2
         assert result1.metrics is not result2.metrics
         assert result1.health_monitor is not result2.health_monitor
+        assert result1.checkpoint_port is not result2.checkpoint_port
         assert result1.run_manifest_port is not result2.run_manifest_port
         assert result1.run_ledger_port is not result2.run_ledger_port
 

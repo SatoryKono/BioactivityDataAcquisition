@@ -73,14 +73,12 @@
     "bioetl_bronze_bytes_written_total",
     "bioetl_bronze_records_written_total",
     "bioetl_bronze_write_duration_seconds",
-    "bioetl_checkpoint_age_seconds",
     "bioetl_checkpoint_compatibility_events_total",
     "bioetl_checkpoint_load_events_total",
     "bioetl_checkpoint_operator_duration_seconds",
     "bioetl_checkpoint_operator_operations_total",
     "bioetl_checkpoint_save_duration_seconds",
     "bioetl_checkpoint_save_events_total",
-    "bioetl_checkpoint_saved_at_seconds",
     "bioetl_circuit_breaker_failure_total",
     "bioetl_circuit_breaker_state",
     "bioetl_circuit_breaker_success_total",
@@ -675,9 +673,6 @@
       "docs/03-guides/metrics-monitoring.md",
       "grafana/README.md"
     ],
-    "bioetl_checkpoint_age_seconds": [
-      "grafana/dashboards/bioetl-control-plane-v1.json"
-    ],
     "bioetl_checkpoint_compatibility_events_total": [
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
@@ -714,9 +709,6 @@
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/05-operations/runbooks/observability-checklist.md",
-      "grafana/dashboards/bioetl-control-plane-v1.json"
-    ],
-    "bioetl_checkpoint_saved_at_seconds": [
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_circuit_breaker_failure_total": [
@@ -1034,8 +1026,7 @@
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/05-operations/sli-slo-baseline.md",
-      "grafana/dashboards/bioetl-control-plane-v1.json",
-      "grafana/dashboards/bioetl-dq-v2.json"
+      "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_memory_batch_resize_events_total": [
       "docs/04-reference/contracts/observability.md"
@@ -2039,6 +2030,12 @@
       "runtime_emitter_count=3",
       "label_keys=pipeline,status"
     ],
+    "bioetl_checkpoint_saved_at_seconds": [
+      "observed_series_count=0",
+      "approved_max_series=500",
+      "runtime_emitter_count=4",
+      "label_keys=pipeline"
+    ],
     "bioetl_health_check_latency_seconds": [
       "observed_series_count=0",
       "approved_max_series=500",
@@ -2512,12 +2509,14 @@
   },
   "runtime_cardinality_review_candidates": [
     "bioetl_checkpoint_load_events_total",
+    "bioetl_checkpoint_saved_at_seconds",
     "bioetl_health_check_latency_seconds",
     "bioetl_pipeline_runs_total"
   ],
   "runtime_cardinality_review_required": [],
   "runtime_cardinality_reviewed": [
     "bioetl_checkpoint_load_events_total",
+    "bioetl_checkpoint_saved_at_seconds",
     "bioetl_health_check_latency_seconds",
     "bioetl_pipeline_runs_total"
   ],
@@ -2612,6 +2611,8 @@
       "src/bioetl/application/core/batch_checkpoint_recovery_service.py"
     ],
     "bioetl_checkpoint_saved_at_seconds": [
+      "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py",
+      "src/bioetl/application/composite/checkpoint/persistence_service.py",
       "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py",
       "src/bioetl/application/core/lifecycle/checkpoint_manager.py"
     ],
@@ -2671,16 +2672,16 @@
     ],
     "bioetl_dq_anomaly_detected": [
       "src/bioetl/application/observability/observer_postrun_mixin.py",
-      "src/bioetl/application/services/data_quality_service.py"
+      "src/bioetl/application/services/data_quality_anomalies.py"
     ],
     "bioetl_dq_baseline_samples": [
-      "src/bioetl/application/services/data_quality_service.py"
+      "src/bioetl/application/services/data_quality_anomalies.py"
     ],
     "bioetl_dq_baseline_updated": [
-      "src/bioetl/application/services/data_quality_service.py"
+      "src/bioetl/application/services/data_quality_anomalies.py"
     ],
     "bioetl_dq_check_duration_ms": [
-      "src/bioetl/application/services/data_quality_service.py"
+      "src/bioetl/application/services/data_quality_anomalies.py"
     ],
     "bioetl_dq_check_failures_total": [
       "src/bioetl/application/services/dq_report_generation_mixin.py"
@@ -2692,7 +2693,7 @@
       "src/bioetl/application/observability/pipeline_metrics.py"
     ],
     "bioetl_dq_monitor_disabled_total": [
-      "src/bioetl/application/services/data_quality_service.py"
+      "src/bioetl/application/services/data_quality_anomalies.py"
     ],
     "bioetl_dq_monitor_enabled": [
       "src/bioetl/application/services/data_quality_service.py"
@@ -2708,7 +2709,7 @@
       "src/bioetl/application/services/dq_report_generation_mixin.py"
     ],
     "bioetl_dq_soft_threshold_exceeded": [
-      "src/bioetl/application/services/data_quality_service.py"
+      "src/bioetl/application/services/data_quality_thresholds.py"
     ],
     "bioetl_dq_validation_failures_total": [
       "src/bioetl/application/observability/pipeline_metrics.py"

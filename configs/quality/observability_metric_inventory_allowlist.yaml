@@ -12,6 +12,11 @@ allowed:
       reason: "Checkpoint load outcomes are emitted by ordinary and composite checkpoint runtime paths."
       review_date: "2026-09-30"
       approved_max_series: 500
+    - metric: bioetl_checkpoint_saved_at_seconds
+      owner: "@bioetl-observability"
+      reason: "Checkpoint freshness is emitted by ordinary and composite checkpoint save/load paths with a bounded pipeline label contract."
+      review_date: "2026-09-30"
+      approved_max_series: 500
     - metric: bioetl_health_check_latency_seconds
       owner: "@bioetl-observability"
       reason: "Health-check latency has provider, observer, and HTTP monitor emitters by design."

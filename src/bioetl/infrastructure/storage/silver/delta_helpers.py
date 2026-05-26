@@ -120,6 +120,11 @@ def _build_merge_condition(primary_keys: list[str]) -> str:
 
 def _delta_table_has_parquet_data(table_path: str) -> bool:
     """Return whether a local Delta table path already contains parquet data files."""
+    if "://" in table_path or not os.path.exists(table_path):
+        # Remote/object-store tables and injected test doubles cannot be inspected
+        # with os.walk; let DeltaTable.merge handle their storage semantics.
+        return True
+
     for dirpath, _dirnames, filenames in os.walk(table_path):
         if dirpath.endswith("_delta_log"):
             continue

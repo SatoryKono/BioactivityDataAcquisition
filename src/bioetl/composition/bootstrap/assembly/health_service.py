@@ -12,7 +12,12 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 from bioetl.composition.providers.registration import (
     resolve_provider_assembly_support,
 )
-from bioetl.domain.ports import MetricsPort, RunLedgerPort, RunManifestPort
+from bioetl.domain.ports import (
+    CheckpointPort,
+    MetricsPort,
+    RunLedgerPort,
+    RunManifestPort,
+)
 from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.time import SystemClock
@@ -30,6 +35,7 @@ class HealthServerDependencies:
 
     health_monitor: ProviderHealthMonitor
     metrics: MetricsPort
+    checkpoint_port: CheckpointPort
     run_manifest_port: RunManifestPort
     run_ledger_port: RunLedgerPort
 
@@ -84,6 +90,7 @@ def create_health_service(
 def create_health_server_dependencies(
     *,
     metrics: MetricsPort | None = None,
+    checkpoint_port_factory: Callable[[str], CheckpointPort],
     run_manifest_service_factory: Callable[[], object],
 ) -> HealthServerDependencies:
     """Build health-listener dependencies through one canonical assembly path."""
@@ -94,6 +101,7 @@ def create_health_server_dependencies(
     return HealthServerDependencies(
         health_monitor=health_monitor,
         metrics=resolved_metrics,
+        checkpoint_port=checkpoint_port_factory(""),
         run_manifest_port=run_manifest_service.manifest_port,
         run_ledger_port=run_manifest_service.ledger_port,
     )

@@ -818,11 +818,8 @@
       "type": "stat"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Latest persisted checkpoint age in seconds for the selected pipeline. This is bounded freshness evidence derived from bioetl_checkpoint_saved_at_seconds and projected through the current pipeline selector. Lower is fresher. Null/No data means freshness telemetry is missing or the pipeline has not yet persisted a checkpoint in the current monitoring history, so treat the result as UNKNOWN and inspect checkpoint artifacts/runbook before replay or resume decisions.",
+      "datasource": "Quarantine Explorer",
+      "description": "Latest persisted checkpoint age in seconds for the selected pipeline. This is bounded freshness evidence derived from persisted checkpoint metadata via /ops/control-plane/checkpoint-freshness, not from short-lived Prometheus scrape history. Lower is fresher. Null/No data means no persisted checkpoint evidence or missing checkpoint_saved_at_epoch_seconds for the current scope, so treat the result as UNKNOWN and inspect checkpoint artifacts/runbook before replay or resume decisions.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -894,9 +891,45 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "max((bioetl_checkpoint_age_seconds) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))",
-          "legendFormat": "Checkpoint Age",
-          "refId": "A"
+          "format": "table",
+          "json_options": {
+            "root_is_not_array": true
+          },
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "$",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/control-plane/checkpoint-freshness?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "checkpoint_present": true,
+              "checkpoint_run_id": true,
+              "detail": true,
+              "evidence_source": true,
+              "manifest_id": true,
+              "pipeline": true,
+              "resolved_via": true,
+              "saved_at_epoch_seconds": true,
+              "status": true
+            },
+            "indexByName": {
+              "age_seconds": 0
+            },
+            "renameByName": {
+              "age_seconds": "checkpoint_age_seconds"
+            }
+          }
         }
       ],
       "title": "Monitor: Checkpoint Freshness Lag (seconds)",

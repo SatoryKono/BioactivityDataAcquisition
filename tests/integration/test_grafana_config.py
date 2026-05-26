@@ -915,9 +915,21 @@ def test_control_plane_latency_panels_have_p50_p95_p99() -> None:
 def test_control_plane_no_missing_metric_promql() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     expressions = "\n".join(get_panel_expressions(dashboard))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
 
-    assert "bioetl_checkpoint_age_seconds" in expressions
     assert "bioetl_replay_duplicate_records_total" not in expressions
+    checkpoint_panel = panels["Monitor: Checkpoint Freshness Lag (seconds)"]
+    assert checkpoint_panel.get("datasource") == "Quarantine Explorer"
+    target = checkpoint_panel.get("targets", [])[0]
+    assert target.get("parser") == "backend"
+    assert (
+        str(target.get("url", ""))
+        == "/ops/control-plane/checkpoint-freshness?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+    )
 
 
 def test_control_plane_identity_evidence_panels_exist() -> None:
