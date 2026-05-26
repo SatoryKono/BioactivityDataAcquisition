@@ -35,12 +35,13 @@ standard runbook path.
 | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | [Monitoring Guide](01-monitoring-guide.md)            | Dashboard interpretation, alert-backed signals, and monitoring workflow                         |
 | [SLI/SLO Baseline](sli-slo-baseline.md)               | Operational service-level indicators and target baselines for the local runtime                 |
-| [Runbooks](runbooks/index.md)                         | Operational playbooks for incident response                                                     |
+| [Runbooks](runbooks/index.md)                         | Operational playbooks for incident response (canonical execution path)                          |
 | [Performance Baselines](performance-baselines.md)     | Expected performance metrics                                                                    |
 | [VACUUM Retention](vacuum-retention.md)               | Delta Lake vacuum retention policies                                                            |
 | [Control-Plane Lifecycle](control-plane-lifecycle.md) | Dry-run/apply cleanup for manifests, ledgers, checkpoints, lineage, and cached Bronze snapshots |
 | [Retention-Sensitive Cleanup](runbooks/retention-sensitive-cleanup.md) | Bounded cleanup gate for protected data, fixtures, reports, archives, and control-plane artifacts |
 | [Operations Archive Index](archive-index.md)          | Archive-only operational material, including historical release and verification evidence       |
+| [Operations Doc Inventory](operations-doc-inventory.md) | Canonical/duplicate/experimental/obsolete classification + ownership cadence                    |
 | [Deployment & Tooling Extras](deployment/README.md)   | Internal / Extended material for experimental Kubernetes and auxiliary Neo4j/MCP setup notes    |
 
 ## Quick Links
@@ -78,3 +79,13 @@ standard runbook path.
 - [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) — Graceful shutdown (**Superseded**, historical context)
 - [Pipeline Lifecycle](../03-guides/pipeline-lifecycle.md) — Current lifecycle and shutdown behavior
 - [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md) — Local deployment
+
+## Doc Ownership + Review Cadence
+
+- Section owner: **BioETL Team**.
+- Canonical navigation surfaces: `README.md`, `runbooks/index.md`, `archive-index.md`, `operations-doc-inventory.md`.
+- Review cadence:
+  - Monthly: link and routing drift review for canonical paths.
+  - Quarterly: full category revalidation (`canonical`, `duplicate`, `experimental`, `obsolete`).
+  - Post-incident: targeted updates for touched runbooks before closeout.
+- New-doc gate: each new operations document must be added to `operations-doc-inventory.md` with an explicit category.
