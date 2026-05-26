@@ -5,9 +5,11 @@ from __future__ import annotations
 import asyncio
 import math
 from typing import Protocol, cast
-from urllib.parse import unquote
 
 from bioetl.domain.context import current_utc_time
+from bioetl.interfaces.http._health_server_checkpoint_lookup import (
+    load_checkpoint_freshness_evidence,
+)
 from bioetl.interfaces.http._health_server_control_plane_scope import (
     read_selected_run_id,
     resolve_control_plane_identity_scope,
@@ -18,13 +20,16 @@ from bioetl.interfaces.http._health_server_identity_evidence import (
 from bioetl.interfaces.http._health_server_identity_support import (
     build_control_plane_identity_payload,
 )
+from bioetl.interfaces.http._health_server_observability_routing import (
+    dispatch_observability_request,
+)
+from bioetl.interfaces.http._health_server_quarantine_routing import (
+    dispatch_quarantine_request,
+)
 from bioetl.interfaces.http.control_plane_selector_context import (
     RUN_ID_NO_SELECTION,
     build_selector_context_payload,
     build_selector_filter_options_payload,
-)
-from bioetl.interfaces.http.processed_records_table import (
-    build_processed_records_table_payload_from_prometheus,
 )
 
 _NOT_FOUND_MESSAGE = "Not Found"
@@ -53,11 +58,9 @@ class _HealthResponseSupport(Protocol):
 
 
 class _HealthRoutingHost(_HealthResponseSupport, Protocol):
-    _quarantine_service: object | None
     _checkpoint_port: object | None
     _run_manifest_port: object | None
     _run_ledger_port: object | None
-    _prometheus_base_url: str
 
     def _read_required_param(self, query: dict[str, str], name: str) -> str: ...
 
@@ -82,47 +85,6 @@ class _HealthRoutingHost(_HealthResponseSupport, Protocol):
         query: dict[str, str],
         name: str,
     ) -> tuple[str, ...]: ...
-
-
-async def dispatch_quarantine_request(
-    host: _HealthRoutingHost,
-    *,
-    writer: asyncio.StreamWriter,
-    path: str,
-    query: dict[str, str],
-) -> None:
-    """Route record-level quarantine explorer requests."""
-    response_support = cast(_HealthResponseSupport, host)
-    if host._quarantine_service is None:
-        await response_support._send_response(
-            writer,
-            503,
-            "Quarantine explorer unavailable",
-        )
-        return
-
-    try:
-        if path == "/ops/quarantine/filtered-records":
-            await handle_filtered_records(host, writer, query)
-            return
-        if path == "/ops/quarantine/filtered-stats":
-            await handle_filtered_stats(host, writer, query)
-            return
-        if path == "/ops/quarantine/filtered-timeseries":
-            await handle_filtered_timeseries(host, writer, query)
-            return
-        if path == "/ops/quarantine/filter-options":
-            await handle_filter_options(host, writer, query)
-            return
-        if path.startswith("/ops/quarantine/filtered-record/"):
-            payload_hash = unquote(path.rsplit("/", maxsplit=1)[-1]).strip()
-            if not payload_hash:
-                raise ValueError("Missing payload_hash in path")
-            await handle_filtered_record_detail(host, writer, query, payload_hash)
-            return
-        await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
-    except ValueError as exc:
-        await response_support._send_response(writer, 400, str(exc))
 
 
 async def dispatch_control_plane_request(
@@ -161,130 +123,6 @@ async def dispatch_control_plane_request(
         await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
     except ValueError as exc:
         await response_support._send_response(writer, 400, str(exc))
-
-
-async def dispatch_observability_request(
-    host: _HealthRoutingHost,
-    *,
-    writer: asyncio.StreamWriter,
-    path: str,
-    query: dict[str, str],
-) -> None:
-    """Route dashboard observability helper endpoints."""
-    response_support = cast(_HealthResponseSupport, host)
-    try:
-        if path == "/ops/observability/processed-records":
-            await handle_processed_records_table(host, writer, query)
-            return
-        await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
-    except ValueError as exc:
-        await response_support._send_response(writer, 400, str(exc))
-    except RuntimeError as exc:
-        await response_support._send_response(writer, 502, str(exc))
-
-
-async def handle_processed_records_table(
-    host: _HealthRoutingHost,
-    writer: asyncio.StreamWriter,
-    query: dict[str, str],
-) -> None:
-    """Handle formatted Processed Records table rows for Grafana."""
-    pipeline = host._read_required_param(query, "pipeline")
-    run_type = host._read_optional_param(query, "run_type")
-    payload = await asyncio.to_thread(
-        build_processed_records_table_payload_from_prometheus,
-        prometheus_base_url=host._prometheus_base_url,
-        pipeline=pipeline,
-        run_type=run_type,
-    )
-    await host._send_payload_response(writer, 200, payload)
-
-
-async def handle_filtered_records(
-    host: _HealthRoutingHost,
-    writer: asyncio.StreamWriter,
-    query: dict[str, str],
-) -> None:
-    """Handle paginated list endpoint for filtered Silver records."""
-    assert host._quarantine_service is not None
-    pipeline = host._read_required_param(query, "pipeline")
-    payload = await host._quarantine_service.list_filtered_records(
-        pipeline=pipeline,
-        run_type=host._read_optional_param(query, "run_type"),
-        reason_code=host._read_optional_param(query, "reason_code"),
-        field=host._read_optional_param(query, "field"),
-        run_id=host._read_optional_param(query, "run_id"),
-        payload_hash=host._read_optional_param(query, "payload_hash"),
-        from_ts=host._read_optional_param(query, "from"),
-        to_ts=host._read_optional_param(query, "to"),
-        limit=host._read_int_param(query, "limit", default=50, minimum=1),
-        offset=host._read_int_param(query, "offset", default=0, minimum=0),
-        sort=host._read_optional_param(query, "sort") or "ingestion_ts_desc",
-    )
-    await host._send_payload_response(writer, 200, payload)
-
-
-async def handle_filtered_stats(
-    host: _HealthRoutingHost,
-    writer: asyncio.StreamWriter,
-    query: dict[str, str],
-) -> None:
-    """Handle aggregate stats endpoint for filtered Silver records."""
-    assert host._quarantine_service is not None
-    pipeline = host._read_required_param(query, "pipeline")
-    payload = await host._quarantine_service.get_filtered_stats(
-        pipeline=pipeline,
-        run_type=host._read_optional_param(query, "run_type"),
-        reason_code=host._read_optional_param(query, "reason_code"),
-        field=host._read_optional_param(query, "field"),
-        run_id=host._read_optional_param(query, "run_id"),
-        payload_hash=host._read_optional_param(query, "payload_hash"),
-        from_ts=host._read_optional_param(query, "from"),
-        to_ts=host._read_optional_param(query, "to"),
-    )
-    await host._send_payload_response(writer, 200, payload)
-
-
-async def handle_filter_options(
-    host: _HealthRoutingHost,
-    writer: asyncio.StreamWriter,
-    query: dict[str, str],
-) -> None:
-    """Handle variable-options endpoint for filtered Silver records."""
-    assert host._quarantine_service is not None
-    pipeline = host._read_required_param(query, "pipeline")
-    payload = await host._quarantine_service.get_filtered_filter_options(
-        pipeline=pipeline,
-        run_type=host._read_optional_param(query, "run_type"),
-        reason_code=host._read_optional_param(query, "reason_code"),
-        field=host._read_optional_param(query, "field"),
-        run_id=host._read_optional_param(query, "run_id"),
-        from_ts=host._read_optional_param(query, "from"),
-        to_ts=host._read_optional_param(query, "to"),
-    )
-    await host._send_payload_response(writer, 200, payload)
-
-
-async def handle_filtered_timeseries(
-    host: _HealthRoutingHost,
-    writer: asyncio.StreamWriter,
-    query: dict[str, str],
-) -> None:
-    """Handle time-bucketed trend endpoint for filtered Silver records."""
-    assert host._quarantine_service is not None
-    pipeline = host._read_required_param(query, "pipeline")
-    payload = await host._quarantine_service.get_filtered_timeseries(
-        pipeline=pipeline,
-        run_type=host._read_optional_param(query, "run_type"),
-        reason_code=host._read_optional_param(query, "reason_code"),
-        field=host._read_optional_param(query, "field"),
-        run_id=host._read_optional_param(query, "run_id"),
-        payload_hash=host._read_optional_param(query, "payload_hash"),
-        from_ts=host._read_optional_param(query, "from"),
-        to_ts=host._read_optional_param(query, "to"),
-        bucket=host._read_optional_param(query, "bucket") or "1h",
-    )
-    await host._send_payload_response(writer, 200, payload)
 
 
 async def handle_control_plane_filter_options(
@@ -439,6 +277,37 @@ def _build_checkpoint_freshness_unknown_payload(
     }
 
 
+def _build_checkpoint_freshness_ok_payload(
+    *,
+    pipeline: str,
+    resolved_via: str,
+    manifest_id: str | None,
+    checkpoint_run_id: object,
+    evidence_source: str,
+    saved_at_epoch_seconds: float,
+    metadata: dict[str, object],
+) -> dict[str, object]:
+    payload_manifest_id = manifest_id
+    raw_manifest_id = _optional_text(metadata.get("manifest_id"))
+    if payload_manifest_id is None and raw_manifest_id is not None:
+        payload_manifest_id = raw_manifest_id
+    return {
+        "pipeline": pipeline,
+        "resolved_via": resolved_via,
+        "manifest_id": payload_manifest_id,
+        "checkpoint_run_id": str(checkpoint_run_id),
+        "evidence_source": evidence_source,
+        "checkpoint_present": True,
+        "saved_at_epoch_seconds": saved_at_epoch_seconds,
+        "age_seconds": max(
+            current_utc_time().timestamp() - saved_at_epoch_seconds,
+            0.0,
+        ),
+        "status": "OK",
+        "detail": "Persisted checkpoint freshness derived from checkpoint metadata.",
+    }
+
+
 async def handle_control_plane_checkpoint_freshness(
     host: _HealthRoutingHost,
     writer: asyncio.StreamWriter,
@@ -466,26 +335,14 @@ async def handle_control_plane_checkpoint_freshness(
         else scope.requested_pipeline
     )
 
-    checkpoint_tuple: tuple[object, dict[str, object]] | None = None
-    evidence_source = "mutable_latest_pointer"
-    manifest_id: str | None = None
-
-    if scope.selected_run_id is not None and scope.resolved_manifest is not None:
-        manifest_id = scope.resolved_manifest.manifest_id
-        checkpoint_tuple = await host._checkpoint_port.load_for_manifest_id(manifest_id)
-        evidence_source = "immutable_manifest_history"
-        if checkpoint_tuple is None:
-            checkpoint_tuple = await host._checkpoint_port.load_for_run(
-                scope.resolved_manifest.pipeline_name,
-                scope.resolved_manifest.run_id,
-            )
-            evidence_source = "immutable_run_history"
-    elif (
-        scope.selected_pipelines
-        or not host._is_all_scope_token(scope.requested_pipeline)
-    ):
-        checkpoint_tuple = await host._checkpoint_port.load(target_pipeline)
-    else:
+    checkpoint_tuple, evidence_source, manifest_id, aggregate_scope_unknown = (
+        await load_checkpoint_freshness_evidence(
+            host,
+            scope=scope,
+            target_pipeline=target_pipeline,
+        )
+    )
+    if aggregate_scope_unknown:
         await host._send_payload_response(
             writer,
             200,
@@ -535,42 +392,23 @@ async def handle_control_plane_checkpoint_freshness(
         )
         return
 
-    payload_manifest_id = manifest_id
-    raw_manifest_id = _optional_text(metadata.get("manifest_id"))
-    if payload_manifest_id is None and raw_manifest_id is not None:
-        payload_manifest_id = raw_manifest_id
-    age_seconds = max(current_utc_time().timestamp() - saved_at_epoch_seconds, 0.0)
     await host._send_payload_response(
         writer,
         200,
-        {
-            "pipeline": target_pipeline,
-            "resolved_via": scope.resolved_via,
-            "manifest_id": payload_manifest_id,
-            "checkpoint_run_id": str(checkpoint_run_id),
-            "evidence_source": evidence_source,
-            "checkpoint_present": True,
-            "saved_at_epoch_seconds": saved_at_epoch_seconds,
-            "age_seconds": age_seconds,
-            "status": "OK",
-            "detail": "Persisted checkpoint freshness derived from checkpoint metadata.",
-        },
+        _build_checkpoint_freshness_ok_payload(
+            pipeline=target_pipeline,
+            resolved_via=scope.resolved_via,
+            manifest_id=manifest_id,
+            checkpoint_run_id=checkpoint_run_id,
+            evidence_source=evidence_source,
+            saved_at_epoch_seconds=saved_at_epoch_seconds,
+            metadata=metadata,
+        ),
     )
 
 
-async def handle_filtered_record_detail(
-    host: _HealthRoutingHost,
-    writer: asyncio.StreamWriter,
-    query: dict[str, str],
-    payload_hash: str,
-) -> None:
-    """Handle detail endpoint for one filtered Silver record."""
-    assert host._quarantine_service is not None
-    payload = await host._quarantine_service.get_filtered_record(
-        payload_hash=payload_hash,
-        pipeline=host._read_required_param(query, "pipeline"),
-    )
-    if payload is None:
-        await host._send_response(writer, 404, _NOT_FOUND_MESSAGE)
-        return
-    await host._send_payload_response(writer, 200, payload)
+__all__ = [
+    "dispatch_control_plane_request",
+    "dispatch_observability_request",
+    "dispatch_quarantine_request",
+]

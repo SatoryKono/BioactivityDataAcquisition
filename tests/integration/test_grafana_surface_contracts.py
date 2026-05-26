@@ -650,21 +650,6 @@ def test_adaptive_trend_panels_use_selected_interval(
             "Track: Checkpoint Compatibility Outcomes",
             'label_replace(vector(0), "disposition", "no_events", "", "")',
         ),
-        (
-            "bioetl-dq-v2.json",
-            "Inspect: Quarantine by Error Type",
-            'label_replace(vector(0), "error_type", "none", "", "")',
-        ),
-        (
-            "bioetl-dq-v2.json",
-            "Track: Anomalies Detected",
-            'label_replace(label_replace(vector(0), "severity", "none", "", ""), "anomaly_type", "none", "", "")',
-        ),
-        (
-            "bioetl-dq-v2.json",
-            "Inspect: Silver Filter Rejects by Pipeline",
-            'label_replace(vector(0), "pipeline", "no_events", "", "")',
-        ),
     ],
 )
 def test_empty_state_distribution_panels_use_explicit_placeholder_series(

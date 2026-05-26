@@ -1467,6 +1467,44 @@ class TestHealthServerControlPlaneSelector:
         assert 0 <= float(data["age_seconds"]) < 900
 
     @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_checkpoint_freshness_falls_back_to_latest_pipeline_history(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Missing mutable pointer should fall back to latest immutable pipeline history."""
+        server, _manifest_store = running_server_with_run_catalog
+        assert server._checkpoint_port is not None
+        port = self._get_server_port(server)
+        pipeline = "chembl_target"
+        run_id = RunID(uuid4())
+        await server._checkpoint_port.save(
+            pipeline,
+            run_id,
+            {
+                "offset": 42,
+                "checkpoint_saved_at_epoch_seconds": (
+                    fixed_test_clock().now() - timedelta(minutes=3)
+                ).timestamp(),
+            },
+        )
+        await server._checkpoint_port.delete(pipeline)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            f"/ops/control-plane/checkpoint-freshness?pipeline={pipeline}&run_type=incremental&run_id=-",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data["pipeline"] == pipeline
+        assert data["status"] == "OK"
+        assert data["checkpoint_present"] is True
+        assert data["checkpoint_run_id"] == str(run_id)
+        assert data["evidence_source"] == "immutable_pipeline_history_latest"
+        assert data["age_seconds"] is not None
+
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_checkpoint_freshness_prefers_exact_run_scope(
         self,
         running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],

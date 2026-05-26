@@ -13,6 +13,7 @@ ALLOWED_BROAD_EXCEPTION_POLICIES: dict[str, frozenset[str]] = {
     # "CLI fallback handler that must carry reason_code markers".
     "src/bioetl/application/services/error_handler.py": frozenset(),
     "src/bioetl/infrastructure/storage/silver_writer.py": frozenset(),
+    "src/bioetl/infrastructure/storage/delta_reader.py": frozenset(),
     "src/bioetl/infrastructure/storage/silver/support.py": frozenset(),
     "src/bioetl/infrastructure/storage/silver/operations/maintenance_operations.py": frozenset(),
     # HTTP server network boundary handlers need broad exception handling to return

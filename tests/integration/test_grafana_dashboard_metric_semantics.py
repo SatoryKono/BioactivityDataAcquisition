@@ -1181,10 +1181,13 @@ def test_provider_telemetry_freshness_marks_missing_current_status_as_warn() -> 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert len(expressions) == 1
     expression = expressions[0]
-    assert "count_over_time(bioetl_provider_current_status[15m])" in expression
-    assert "absent(count_over_time(bioetl_provider_current_status[15m]))" in expression
+    assert "count_over_time(bioetl_provider_current_status[${__range_s}s])" in expression
+    assert (
+        "absent(count_over_time(bioetl_provider_current_status[${__range_s}s]))"
+        in expression
+    )
     assert "or vector(0)" not in expression
-    assert "$__range" not in expression
+    assert "${__range_s}s" in expression
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("unit") == "none"
@@ -1230,7 +1233,7 @@ def test_provider_critical_table_keeps_severity_only_scope() -> None:
     assert panel is not None, "Panel 'Inspect Critical Providers' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert expressions == ["bioetl_provider_current_status >= 1"]
+    assert expressions == ["max_over_time(bioetl_provider_current_status[${__range_s}s]) >= 1"]
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("thresholds", {}).get("steps") == [
@@ -1265,6 +1268,7 @@ def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
         "bioetl_provider_health_check_provider_universe_15m" in expr
         for expr in expressions
     )
+    assert any("${__range_s}s" in expr for expr in expressions)
     assert all("or vector(0)" not in expr for expr in expressions), (
         "Provider raw status panel must fail closed to UNKNOWN, not synthetic OK"
     )
@@ -1302,6 +1306,7 @@ def test_provider_top_causes_panel_preserves_canonical_cause_only_semantics() ->
     assert all(
         "bioetl_provider_current_status >= 1" not in expr for expr in expressions
     )
+    assert any("${__range_s}s" in expr for expr in expressions)
     assert all("status_without_projected_cause" not in expr for expr in expressions)
     assert all("unless on (provider)" not in expr for expr in expressions)
 

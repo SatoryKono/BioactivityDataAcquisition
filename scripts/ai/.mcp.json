@@ -160,6 +160,18 @@
         "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_mermaid_wrapper.sh"
       ]
     },
+    "biomoltechDocs": {
+      "type": "http",
+      "url": "https://biomoltech.mintlify.app/mcp"
+    },
+    "mintlify": {
+      "type": "http",
+      "url": "https://mcp.mintlify.com"
+    },
+    "deepwiki": {
+      "type": "http",
+      "url": "https://mcp.deepwiki.com/mcp"
+    },
     "openaiDeveloperDocs": {
       "type": "http",
       "url": "https://developers.openai.com/mcp"

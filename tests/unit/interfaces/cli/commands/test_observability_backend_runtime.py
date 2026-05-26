@@ -12,10 +12,12 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
     _build_detached_backend_env,
     _build_observability_backend_probe_urls,
     build_observability_backend_health_url,
+    probe_observability_backend_required_paths,
     ensure_observability_backend_started,
     probe_observability_backend,
     start_detached_quarantine_backend,
     should_disable_transient_health_server,
+    wait_for_observability_backend_required_paths_ready,
     wait_for_observability_backend_ready,
 )
 
@@ -66,6 +68,36 @@ def test_probe_observability_backend_uses_liveness_then_fallback() -> None:
     ]
 
 
+def test_probe_observability_backend_required_paths_uses_backend_base_url() -> None:
+    calls: list[str] = []
+
+    class _Response:
+        status = 200
+
+        def __enter__(self) -> _Response:
+            return self
+
+        def __exit__(self, exc_type: object, exc: object, tb: object) -> bool:
+            return False
+
+    def fake_urlopen(url: str, timeout: float) -> _Response:
+        calls.append(url)
+        return _Response()
+
+    assert (
+        probe_observability_backend_required_paths(
+            "http://127.0.0.1:8081/health",
+            required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
+            timeout_seconds=1.0,
+            urlopen_fn=fake_urlopen,
+        )
+        is True
+    )
+    assert calls == [
+        "http://127.0.0.1:8081/ops/control-plane/checkpoint-freshness?pipeline=x"
+    ]
+
+
 def test_ensure_backend_returns_disabled_when_flag_is_off() -> None:
     probe = MagicMock()
     start = MagicMock()
@@ -106,6 +138,7 @@ def test_ensure_backend_starts_detached_process_when_probe_fails() -> None:
     process = MagicMock(pid=321, args=["python", "-m", "bioetl"])
     start = MagicMock(return_value=process)
     wait = MagicMock(return_value=True)
+    wait_required = MagicMock(return_value=True)
     info = MagicMock()
 
     result = ensure_observability_backend_started(
@@ -114,6 +147,7 @@ def test_ensure_backend_starts_detached_process_when_probe_fails() -> None:
         probe_fn=probe,
         start_fn=start,
         wait_fn=wait,
+        wait_required_paths_fn=wait_required,
         info_printer=info,
     )
 
@@ -123,7 +157,55 @@ def test_ensure_backend_starts_detached_process_when_probe_fails() -> None:
     assert result.command == ("python", "-m", "bioetl")
     start.assert_called_once_with(bind_host="0.0.0.0", port=8082)
     wait.assert_called_once()
+    wait_required.assert_called_once()
     info.assert_called_once()
+
+
+def test_ensure_backend_restarts_stale_backend_missing_required_paths() -> None:
+    probe = MagicMock(return_value=True)
+    required_probe = MagicMock(return_value=False)
+    drop = MagicMock(return_value=True)
+    process = MagicMock(pid=777, args=["python", "-m", "bioetl"])
+    start = MagicMock(return_value=process)
+    wait = MagicMock(return_value=True)
+    wait_required = MagicMock(return_value=True)
+    warning = MagicMock()
+    info = MagicMock()
+
+    result = ensure_observability_backend_started(
+        enabled=True,
+        probe_fn=probe,
+        required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
+        required_probe_fn=required_probe,
+        drop_stale_backend_fn=drop,
+        start_fn=start,
+        wait_fn=wait,
+        wait_required_paths_fn=wait_required,
+        warning_printer=warning,
+        info_printer=info,
+    )
+
+    assert result.status == "started"
+    required_probe.assert_called_once()
+    drop.assert_called_once_with(8081)
+    start.assert_called_once()
+    wait.assert_called_once()
+    wait_required.assert_called_once()
+    warning.assert_called_once()
+
+
+def test_ensure_backend_fails_when_stale_backend_cannot_be_dropped() -> None:
+    result = ensure_observability_backend_started(
+        enabled=True,
+        probe_fn=MagicMock(return_value=True),
+        required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
+        required_probe_fn=MagicMock(return_value=False),
+        drop_stale_backend_fn=MagicMock(return_value=False),
+        start_fn=MagicMock(),
+    )
+
+    assert result.status == "failed"
+    assert "missing required audit capabilities" in (result.message or "")
 
 
 def test_ensure_backend_warns_when_detached_process_does_not_become_ready() -> None:
@@ -143,6 +225,56 @@ def test_ensure_backend_warns_when_detached_process_does_not_become_ready() -> N
 
     assert result.status == "failed"
     assert result.backend_available is False
+
+
+def test_wait_for_observability_backend_required_paths_ready_retries_until_success() -> None:
+    checks = {"count": 0}
+
+    def fake_required_probe(
+        _health_url: str,
+        *,
+        required_probe_paths: tuple[str, ...],
+    ) -> bool:
+        checks["count"] += 1
+        return checks["count"] >= 3 and bool(required_probe_paths)
+
+    sleeps: list[float] = []
+
+    result = wait_for_observability_backend_required_paths_ready(
+        "http://127.0.0.1:8081/health",
+        required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
+        timeout_seconds=0.05,
+        poll_seconds=0.0,
+        required_probe_fn=fake_required_probe,
+        sleep_fn=sleeps.append,
+    )
+
+    assert result is True
+    assert checks["count"] >= 3
+
+
+def test_ensure_backend_fails_when_required_paths_never_become_ready() -> None:
+    probe = MagicMock(return_value=False)
+    process = MagicMock(pid=654, args=["python", "-m", "bioetl"])
+    start = MagicMock(return_value=process)
+    wait = MagicMock(return_value=True)
+    wait_required = MagicMock(return_value=False)
+    warning = MagicMock()
+
+    result = ensure_observability_backend_started(
+        enabled=True,
+        probe_fn=probe,
+        required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
+        start_fn=start,
+        wait_fn=wait,
+        wait_required_paths_fn=wait_required,
+        warning_printer=warning,
+    )
+
+    assert result.status == "failed"
+    assert "required audit capabilities" in (result.message or "")
+    wait.assert_called_once()
+    wait_required.assert_called_once()
     warning.assert_called_once()
 
 

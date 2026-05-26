@@ -51,3 +51,6 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
             workspace_root / f"scripts/ai/mcp/mcp_mermaid_wrapper{wrapper_suffix}"
         ).resolve()
     )
+    assert servers["biomoltechDocs"]["url"] == "https://biomoltech.mintlify.app/mcp"
+    assert servers["mintlify"]["url"] == "https://mcp.mintlify.com"
+    assert servers["deepwiki"]["url"] == "https://mcp.deepwiki.com/mcp"

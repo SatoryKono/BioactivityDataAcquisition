@@ -19,7 +19,7 @@ from bioetl.domain.control_plane.run_ledger import (
 )
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID
-from bioetl.infrastructure.config._base import get_settings
+from bioetl.infrastructure.config.settings_api import get_settings
 from bioetl.infrastructure.control_plane._read_metrics import (
     emit_control_plane_read_metrics,
 )

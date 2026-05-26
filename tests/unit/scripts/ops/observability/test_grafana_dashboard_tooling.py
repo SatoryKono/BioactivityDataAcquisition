@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock
 from urllib.error import URLError
@@ -19,6 +20,21 @@ from scripts.ops.observability.grafana import (
     rerender_grafana_screenshots as rerender_subject,
 )
 from tests.helpers import assert_router_python_command
+
+
+def _backend_result(
+    *,
+    backend_available: bool,
+    health_url: str = "http://127.0.0.1:8081/health",
+    message: str = "ok",
+    status: str = "started",
+) -> SimpleNamespace:
+    return SimpleNamespace(
+        backend_available=backend_available,
+        health_url=health_url,
+        message=message,
+        status=status,
+    )
 
 
 def test_rerender_config_uses_env_defaults(monkeypatch: Any, tmp_path: Path) -> None:
@@ -218,6 +234,10 @@ def test_live_audit_reviewed_specs_cover_semantically_sensitive_panels() -> None
     assert (
         covered[("bioetl-silver-reject-explorer", 3)] == "Track Reject Rate vs Bronze"
     )
+    assert covered[("bioetl-overview-v2", 9301)] == "Processed Records"
+    assert covered[("bioetl-runtime", 9403)] == "Processed Records"
+    assert covered[("bioetl-provider-health-v2", 9403)] == "Processed Records"
+    assert covered[("bioetl-workflow-overview", 9403)] == "Processed Records"
 
 
 def test_live_audit_classifies_prometheus_zero_and_nonzero_results() -> None:
@@ -237,7 +257,9 @@ def test_live_audit_classifies_prometheus_zero_and_nonzero_results() -> None:
     )
 
 
-def test_live_audit_marks_freshness_empty_result_as_error(monkeypatch: Any) -> None:
+def test_live_audit_treats_checkpoint_freshness_unknown_as_valid_unknown_state(
+    monkeypatch: Any,
+) -> None:
     spec = audit_subject.PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
         panel_id=892,
@@ -277,8 +299,8 @@ def test_live_audit_marks_freshness_empty_result_as_error(monkeypatch: Any) -> N
         app_base_url="http://localhost:8081",
     )
 
-    assert result.classification == "empty_result"
-    assert result.status == "error"
+    assert result.classification == "unknown_result"
+    assert result.status == "ok"
 
 
 def test_live_audit_classifies_http_zero_state_and_nonzero() -> None:
@@ -302,7 +324,7 @@ def test_live_audit_classifies_http_freshness_zero_and_empty() -> None:
     )
     assert (
         audit_subject._classify_http_freshness_payload(empty_payload)[0]
-        == "empty_result"
+        == "unknown_result"
     )
 
 
@@ -389,10 +411,20 @@ def test_grafana_audit_cycle_parser_exposes_backend_boolean_flag() -> None:
     parser = cycle_subject._build_parser()
 
     default_args = parser.parse_args([])
-    disabled_args = parser.parse_args(["--no-ensure-observability-backend"])
+    disabled_args = parser.parse_args(
+        [
+            "--no-ensure-observability-backend",
+            "--no-refresh-observability-backend",
+            "--no-render-filled-only",
+        ]
+    )
 
     assert default_args.ensure_observability_backend is True
+    assert default_args.refresh_observability_backend is True
+    assert default_args.render_filled_only is True
     assert disabled_args.ensure_observability_backend is False
+    assert disabled_args.refresh_observability_backend is False
+    assert disabled_args.render_filled_only is False
 
 
 def test_grafana_audit_preflight_detects_stale_screenshot(tmp_path: Path) -> None:
@@ -435,7 +467,7 @@ def test_grafana_audit_preflight_run_checks_collects_ok_results(
     monkeypatch.setattr(
         preflight_subject,
         "_check_screenshot_artifacts",
-        lambda _path: preflight_subject.PreflightCheck(
+        lambda *args, **kwargs: preflight_subject.PreflightCheck(
             name="screenshots",
             status="ok",
             detail="screens current",
@@ -480,7 +512,9 @@ def test_grafana_audit_preflight_can_skip_screenshot_check(
     )
     called = False
 
-    def fake_screenshot_check(_path: Path) -> preflight_subject.PreflightCheck:
+    def fake_screenshot_check(
+        _path: Path, *args, **kwargs
+    ) -> preflight_subject.PreflightCheck:
         nonlocal called
         called = True
         return preflight_subject.PreflightCheck(
@@ -530,12 +564,22 @@ def test_grafana_audit_cycle_runs_preflight_rerender_and_live_audit(
     monkeypatch.setattr(
         cycle_subject,
         "ensure_observability_backend_started",
-        lambda **_kwargs: MagicMock(backend_available=True, message="ok"),
+        lambda **_kwargs: _backend_result(backend_available=True),
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "drop_listening_backend_on_port",
+        lambda _port: True,
     )
     monkeypatch.setattr(
         cycle_subject.preflight,
         "main",
         lambda argv: calls.append(("preflight", list(argv))) or 0,
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "_discover_filled_dashboard_uids",
+        lambda _config, *, app_base_url: ("bioetl-dq-v2", "bioetl-runtime"),
     )
     monkeypatch.setattr(
         cycle_subject.rerender,
@@ -568,6 +612,8 @@ def test_grafana_audit_cycle_runs_preflight_rerender_and_live_audit(
     ]
     assert "--skip-screenshot-check" in calls[0][1]
     assert "--skip-screenshot-check" not in calls[2][1]
+    assert "--uids" in calls[1][1]
+    assert "--screenshot-uids" in calls[2][1]
     assert "http://127.0.0.1:8081" in calls[0][1]
     assert "http://127.0.0.1:8081" in calls[3][1]
 
@@ -580,7 +626,12 @@ def test_grafana_audit_cycle_stops_on_service_preflight_failure(
     monkeypatch.setattr(
         cycle_subject,
         "ensure_observability_backend_started",
-        lambda **_kwargs: MagicMock(backend_available=True, message="ok"),
+        lambda **_kwargs: _backend_result(backend_available=True),
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "drop_listening_backend_on_port",
+        lambda _port: True,
     )
     monkeypatch.setattr(
         cycle_subject.preflight,
@@ -598,7 +649,9 @@ def test_grafana_audit_cycle_stops_on_service_preflight_failure(
         lambda argv: calls.append("audit") or 0,
     )
 
-    result = cycle_subject.main(["--screenshot-dir", str(tmp_path)])
+    result = cycle_subject.main(
+        ["--screenshot-dir", str(tmp_path), "--no-refresh-observability-backend"]
+    )
 
     assert result == 1
     assert calls == ["preflight"]
@@ -613,7 +666,16 @@ def test_grafana_audit_cycle_stops_when_backend_cannot_be_ensured(
         cycle_subject,
         "ensure_observability_backend_started",
         lambda **_kwargs: calls.append("ensure")
-        or MagicMock(backend_available=False, message="bind failed"),
+        or _backend_result(
+            backend_available=False,
+            message="bind failed",
+            status="failed",
+        ),
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "drop_listening_backend_on_port",
+        lambda _port: True,
     )
     monkeypatch.setattr(
         cycle_subject.preflight,
@@ -621,10 +683,319 @@ def test_grafana_audit_cycle_stops_when_backend_cannot_be_ensured(
         lambda argv: calls.append("preflight") or 0,
     )
 
-    result = cycle_subject.main(["--screenshot-dir", str(tmp_path)])
+    result = cycle_subject.main(
+        ["--screenshot-dir", str(tmp_path), "--no-refresh-observability-backend"]
+    )
 
     assert result == 1
     assert calls == ["ensure"]
+
+
+def test_grafana_audit_cycle_stops_when_filled_dashboard_discovery_fails(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    calls: list[str] = []
+
+    monkeypatch.setattr(
+        cycle_subject,
+        "ensure_observability_backend_started",
+        lambda **_kwargs: _backend_result(backend_available=True),
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "drop_listening_backend_on_port",
+        lambda _port: True,
+    )
+    monkeypatch.setattr(
+        cycle_subject.preflight,
+        "main",
+        lambda argv: calls.append("preflight") or 0,
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "_discover_filled_dashboard_uids",
+        lambda _config, *, app_base_url: (_ for _ in ()).throw(
+            OSError("audit backend unavailable")
+        ),
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "_load_cached_filled_dashboard_uids",
+        lambda _config: (_ for _ in ()).throw(FileNotFoundError("no cache")),
+    )
+    monkeypatch.setattr(
+        cycle_subject.rerender,
+        "main",
+        lambda argv: calls.append("rerender") or 0,
+    )
+
+    result = cycle_subject.main(
+        ["--screenshot-dir", str(tmp_path), "--no-refresh-observability-backend"]
+    )
+
+    assert result == 1
+    assert calls == ["preflight"]
+
+
+def test_grafana_audit_cycle_uses_cached_filled_dashboards_after_timeout(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    calls: list[tuple[str, list[str]]] = []
+
+    monkeypatch.setattr(
+        cycle_subject,
+        "ensure_observability_backend_started",
+        lambda **_kwargs: _backend_result(backend_available=True),
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "drop_listening_backend_on_port",
+        lambda _port: True,
+    )
+    monkeypatch.setattr(
+        cycle_subject.preflight,
+        "main",
+        lambda argv: calls.append(("preflight", list(argv))) or 0,
+    )
+    monkeypatch.setattr(
+        cycle_subject.live_audit,
+        "main",
+        lambda argv: calls.append(("audit", list(argv))) or 0,
+    )
+    monkeypatch.setattr(
+        cycle_subject.rerender,
+        "main",
+        lambda argv: calls.append(("rerender", list(argv))) or 0,
+    )
+    monkeypatch.setattr(
+        cycle_subject.live_audit,
+        "run_audit",
+        lambda _config: (_ for _ in ()).throw(OSError("timed out")),
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "_load_cached_filled_dashboard_uids",
+        lambda _config: ("bioetl-control-plane-v1", "bioetl-dq-v2"),
+    )
+
+    result = cycle_subject.main(
+        ["--screenshot-dir", str(tmp_path), "--no-refresh-observability-backend"]
+    )
+
+    assert result == 0
+    assert [name for name, _argv in calls] == [
+        "preflight",
+        "rerender",
+        "preflight",
+        "audit",
+    ]
+    assert "--uids" in calls[1][1]
+    assert "bioetl-control-plane-v1" in calls[1][1]
+    assert "bioetl-dq-v2" in calls[1][1]
+
+
+def test_grafana_audit_cycle_can_disable_filled_dashboard_filtering(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    rerender_argv: list[str] = []
+
+    monkeypatch.setattr(
+        cycle_subject,
+        "ensure_observability_backend_started",
+        lambda **_kwargs: _backend_result(backend_available=True),
+    )
+    monkeypatch.setattr(cycle_subject.preflight, "main", lambda argv: 0)
+    monkeypatch.setattr(cycle_subject.live_audit, "main", lambda argv: 0)
+    monkeypatch.setattr(
+        cycle_subject.rerender,
+        "main",
+        lambda argv: rerender_argv.extend(list(argv)) or 0,
+    )
+
+    result = cycle_subject.main(
+        [
+            "--screenshot-dir",
+            str(tmp_path),
+            "--no-render-filled-only",
+        ]
+    )
+
+    assert result == 0
+    assert "--uids" not in rerender_argv
+
+
+def test_grafana_audit_cycle_retries_backend_on_fallback_port(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    ensured_ports: list[int] = []
+    calls: list[tuple[str, list[str]]] = []
+
+    def fake_ensure(**kwargs: Any) -> SimpleNamespace:
+        port = int(kwargs["port"])
+        ensured_ports.append(port)
+        if len(ensured_ports) == 1:
+            return _backend_result(
+                backend_available=False,
+                health_url=f"http://127.0.0.1:{port}/health",
+                message=(
+                    "Existing backend is missing required audit capabilities and "
+                    f"could not be restarted on port {port}."
+                ),
+                status="failed",
+            )
+        return _backend_result(
+            backend_available=True,
+            health_url=f"http://127.0.0.1:{port}/health",
+            message="ok",
+            status="started",
+        )
+
+    monkeypatch.setattr(cycle_subject, "ensure_observability_backend_started", fake_ensure)
+    monkeypatch.setattr(cycle_subject, "drop_listening_backend_on_port", lambda _port: False)
+    monkeypatch.setattr(
+        cycle_subject,
+        "probe_observability_backend_required_paths",
+        lambda *_args, **_kwargs: False,
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "probe_observability_backend",
+        lambda *_args, **_kwargs: False,
+    )
+    monkeypatch.setattr(cycle_subject, "_find_available_local_port", lambda: 18081)
+    monkeypatch.setattr(
+        cycle_subject.preflight,
+        "main",
+        lambda argv: calls.append(("preflight", list(argv))) or 0,
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "_discover_filled_dashboard_uids",
+        lambda _config, *, app_base_url: ("bioetl-dq-v2",),
+    )
+    monkeypatch.setattr(
+        cycle_subject.rerender,
+        "main",
+        lambda argv: calls.append(("rerender", list(argv))) or 0,
+    )
+    monkeypatch.setattr(
+        cycle_subject.live_audit,
+        "main",
+        lambda argv: calls.append(("audit", list(argv))) or 0,
+    )
+
+    result = cycle_subject.main(
+        ["--screenshot-dir", str(tmp_path), "--no-refresh-observability-backend"]
+    )
+
+    assert result == 0
+    assert ensured_ports == [8081, 18081]
+    assert "http://127.0.0.1:18081" in calls[0][1]
+    assert "http://127.0.0.1:18081" in calls[2][1]
+    assert "http://127.0.0.1:18081" in calls[3][1]
+
+
+def test_grafana_audit_cycle_reuses_existing_backend_when_fallback_start_fails(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    calls: list[tuple[str, list[str]]] = []
+
+    monkeypatch.setattr(cycle_subject, "drop_listening_backend_on_port", lambda _port: False)
+    monkeypatch.setattr(
+        cycle_subject,
+        "probe_observability_backend_required_paths",
+        lambda *_args, **_kwargs: False,
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "probe_observability_backend",
+        lambda *_args, **_kwargs: True,
+    )
+    monkeypatch.setattr(cycle_subject, "_find_available_local_port", lambda: 18081)
+    monkeypatch.setattr(
+        cycle_subject,
+        "ensure_observability_backend_started",
+        lambda **_kwargs: _backend_result(
+            backend_available=False,
+            health_url="http://127.0.0.1:18081/health",
+            message="Detached backend did not become ready at http://127.0.0.1:18081/health.",
+            status="failed",
+        ),
+    )
+    monkeypatch.setattr(
+        cycle_subject.preflight,
+        "main",
+        lambda argv: calls.append(("preflight", list(argv))) or 0,
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "_discover_filled_dashboard_uids",
+        lambda _config, *, app_base_url: ("bioetl-dq-v2",),
+    )
+    monkeypatch.setattr(
+        cycle_subject.rerender,
+        "main",
+        lambda argv: calls.append(("rerender", list(argv))) or 0,
+    )
+    monkeypatch.setattr(
+        cycle_subject.live_audit,
+        "main",
+        lambda argv: calls.append(("audit", list(argv))) or 0,
+    )
+
+    result = cycle_subject.main(["--screenshot-dir", str(tmp_path)])
+
+    assert result == 0
+    assert [name for name, _argv in calls] == [
+        "preflight",
+        "rerender",
+        "preflight",
+        "audit",
+    ]
+    assert "http://127.0.0.1:8081" in calls[0][1]
+    assert "http://127.0.0.1:8081" in calls[2][1]
+    assert "http://127.0.0.1:8081" in calls[3][1]
+
+
+def test_grafana_audit_cycle_can_disable_backend_refresh(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    dropped: list[int] = []
+
+    monkeypatch.setattr(
+        cycle_subject,
+        "ensure_observability_backend_started",
+        lambda **_kwargs: _backend_result(
+            backend_available=True,
+            health_url="http://127.0.0.1:8081/health",
+            message="ok",
+            status="reused",
+        ),
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "drop_listening_backend_on_port",
+        lambda port: dropped.append(int(port)) or True,
+    )
+    monkeypatch.setattr(cycle_subject.preflight, "main", lambda argv: 0)
+    monkeypatch.setattr(
+        cycle_subject,
+        "_discover_filled_dashboard_uids",
+        lambda _config, *, app_base_url: (),
+    )
+    monkeypatch.setattr(cycle_subject.rerender, "main", lambda argv: 0)
+    monkeypatch.setattr(cycle_subject.live_audit, "main", lambda argv: 0)
+
+    result = cycle_subject.main(
+        [
+            "--screenshot-dir",
+            str(tmp_path),
+            "--no-refresh-observability-backend",
+        ]
+    )
+
+    assert result == 0
+    assert dropped == []
 
 
 def test_live_audit_writes_report(monkeypatch: Any, tmp_path: Path) -> None:

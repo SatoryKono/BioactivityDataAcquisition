@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane._historical_replay_certification import (
+from bioetl.application.services.control_plane.historical_replay_certification import (
     HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
 )
-from bioetl.application.services.control_plane._historical_replay_certification_support import (
+from bioetl.application.services.control_plane.historical_replay_certification_support import (
     HistoricalReplayCertificationResult,
     HistoricalReplayCertificationResultAssembler,
     HistoricalReplayCertificationValidator,

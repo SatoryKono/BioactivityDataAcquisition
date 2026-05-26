@@ -89,7 +89,7 @@ def test_design_system_defines_first_screen_decision_matrix() -> None:
         "`bioetl_provider_current_status`",
         "`bioetl_dq_current_status`",
         "Selected-range count/rate/trend",
-        "First-screen current-status panels MUST NOT use `$__range`",
+        "Provider Health MAY use `$__range` for sparse provider-current telemetry",
         "Layout grammar by dashboard role",
         "Visibility tiers and collapse policy",
         "L0 answer-first hub",

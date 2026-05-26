@@ -5,35 +5,35 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import cast
 
-from bioetl.application.services.control_plane._run_manifest_diagnostics_artifact_support import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_artifact_support import (
     apply_artifact_publication_closure_policy,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_base import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_base import (
     _build_base_summary_payload,
     _resolve_base_summary_replay_context,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_base_helpers import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_base_helpers import (
     _resolve_snapshot_status,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_finalization import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_finalization import (
     attach_base_summary_runtime_views as _attach_base_summary_runtime_views,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_finalization import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_finalization import (
     attach_summary_reproducibility_views as _attach_summary_reproducibility_views,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_finalization import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_finalization import (
     build_final_diagnostics_summary as _build_final_diagnostics_summary,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_replay import (
     _build_resume_contract,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_replay_projection import (
     _build_replay_projection_bundle,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_snapshot_support import (
     resolve_post_manifest_input_snapshot_materialization_mode,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_source_refs import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_source_refs import (
     _build_effective_source_refs,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunLedgerEntry, RunManifest

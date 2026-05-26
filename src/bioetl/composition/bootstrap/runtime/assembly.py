@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.composition.builders import FilterConfigBuilder
@@ -14,6 +16,11 @@ from bioetl.infrastructure.config.silver_filter_migration import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.composition.registry_api import PipelineRegistry
+    from bioetl.composition.runtime_builders.runner_builder_wiring import (
+        RunnerFactoryWiring,
+        RunnerInputWiring,
+    )
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.context import VacuumSettings as CliVacuumSettings
     from bioetl.domain.filtering import InputFilterConfig
@@ -26,11 +33,39 @@ if TYPE_CHECKING:
 
 __all__ = [
     "ResolvedVacuumSettings",
+    "RuntimeBootstrapPhases",
     "assemble_cached_bronze_context",
     "assemble_filter_config",
+    "assemble_runtime_bootstrap_phases",
     "assemble_runtime_config",
     "assemble_vacuum_settings",
 ]
+
+
+@dataclass(frozen=True, slots=True)
+class RuntimeBootstrapPhases:
+    """Resolved runtime bootstrap phase outputs passed into runner construction."""
+
+    registry: PipelineRegistry
+    configs_root: Path
+    factory_wiring: RunnerFactoryWiring
+    input_wiring: RunnerInputWiring
+
+
+def assemble_runtime_bootstrap_phases(
+    *,
+    registry: PipelineRegistry,
+    configs_root: Path,
+    factory_wiring: RunnerFactoryWiring,
+    input_wiring: RunnerInputWiring,
+) -> RuntimeBootstrapPhases:
+    """Build the typed payload shared by runtime pipeline bootstrap seams."""
+    return RuntimeBootstrapPhases(
+        registry=registry,
+        configs_root=configs_root,
+        factory_wiring=factory_wiring,
+        input_wiring=input_wiring,
+    )
 
 
 def assemble_vacuum_settings(

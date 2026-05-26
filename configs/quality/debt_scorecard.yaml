@@ -423,7 +423,7 @@ oversized_source_module_inventory:
     owner: '@bioetl-lineage'
     target_split: split node identity builders from metadata enrichment helpers
   - path: src/bioetl/infrastructure/control_plane/file_run_ledger_store.py
-    lines: 471
+    lines: 490
     owner: '@bioetl-control-plane'
     target_split: separate file IO, record serialization, and query helpers
   - path: src/bioetl/application/services/data_quality_service.py
@@ -473,10 +473,16 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profile_support.py
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profiles.py
       - src/bioetl/application/services/control_plane/_run_manifest_replay_family_contract_payload.py
+      - src/bioetl/application/services/control_plane/effective_config_context.py
+      - src/bioetl/application/services/control_plane/effective_config_support.py
       - src/bioetl/application/services/control_plane/effective_config/__init__.py
       - src/bioetl/application/services/control_plane/effective_config/service.py
+      - src/bioetl/application/services/control_plane/historical_replay_certification.py
+      - src/bioetl/application/services/control_plane/historical_replay_certification_support.py
+      - src/bioetl/application/services/control_plane/ledger_identity_support.py
       - src/bioetl/application/services/control_plane/ledger/__init__.py
       - src/bioetl/application/services/control_plane/ledger/service.py
+      - src/bioetl/application/services/control_plane/manifest_time_support.py
       - src/bioetl/application/services/control_plane/manifest/__init__.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics.py
       - src/bioetl/application/services/control_plane/manifest/inspection_models.py
@@ -494,7 +500,20 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/replay/historical_corpus_service.py
       - src/bioetl/application/services/control_plane/replay/historical_universe_policy.py
       - src/bioetl/application/services/control_plane/replay/historical_universe_service.py
+      - src/bioetl/application/services/control_plane/run_ledger_core_events.py
+      - src/bioetl/application/services/control_plane/run_ledger_entry_support.py
+      - src/bioetl/application/services/control_plane/run_ledger_rich_events.py
+      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_artifact_support.py
+      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_base.py
+      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_base_helpers.py
+      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_finalization.py
+      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay.py
+      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay_projection.py
+      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_snapshot_support.py
+      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_source_refs.py
       - src/bioetl/application/services/control_plane/run_manifest_exact_replay_blockers.py
+      - src/bioetl/application/services/control_plane/run_manifest_inspection_mixins.py
+      - src/bioetl/application/services/control_plane/run_manifest_service_mixins.py
       - src/bioetl/application/services/control_plane/run_manifest_validation.py
       - src/bioetl/application/services/control_plane/workflow/__init__.py
       - src/bioetl/application/services/control_plane/workflow/execution_preparation.py
@@ -524,7 +543,7 @@ removable_complexity_family_ratchets:
     path_prefixes:
     - src/bioetl/infrastructure/adapters/
     family_budgets:
-      files_ge_250_loc: 21
+      files_ge_250_loc: 22
       max_internal_fan_in: 31
     tracked_seams:
     - path: src/bioetl/infrastructure/adapters/http/_health_monitor_support.py

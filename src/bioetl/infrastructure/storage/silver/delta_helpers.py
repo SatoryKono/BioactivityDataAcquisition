@@ -6,6 +6,7 @@ import asyncio
 import os
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, replace
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, NoReturn, cast
 
 import pyarrow as pa
@@ -120,7 +121,8 @@ def _build_merge_condition(primary_keys: list[str]) -> str:
 
 def _delta_table_has_parquet_data(table_path: str) -> bool:
     """Return whether a local Delta table path already contains parquet data files."""
-    if "://" in table_path or not os.path.exists(table_path):
+    table_path_obj = Path(table_path)
+    if "://" in table_path or not table_path_obj.exists():
         # Remote/object-store tables and injected test doubles cannot be inspected
         # with os.walk; let DeltaTable.merge handle their storage semantics.
         return True

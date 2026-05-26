@@ -120,7 +120,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current provider-first severity for the selected provider. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Pipeline/run_type/workflow are secondary context only; run_id is local control-plane identity context and does not filter Prometheus.",
+      "description": "Selected-range provider-first severity for the selected provider. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. This panel now uses the active Grafana time selector to find the most severe observed provider status inside the chosen window; if no provider-current-status samples exist in that window, the verdict remains UNKNOWN. Pipeline/run_type/workflow are secondary context only; run_id is local control-plane identity context and does not filter Prometheus.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -212,7 +212,7 @@
       },
       "targets": [
         {
-          "expr": "max(bioetl_provider_current_status{provider=~\"$provider\"})",
+          "expr": "max(max_over_time(bioetl_provider_current_status{provider=~\"$provider\"}[${__range_s}s]))",
           "refId": "A"
         }
       ]
@@ -734,7 +734,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Provider severity mapping: 0=OK, 1=DEGRADED, 2=FAILING; null/NaN=UNKNOWN. Raw provider health status remains panel id=114 with 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY. This matrix intentionally stays GLOBAL and does not filter by pipeline.",
+      "description": "Provider severity mapping: 0=OK, 1=DEGRADED, 2=FAILING; null/NaN=UNKNOWN. This matrix now uses the active Grafana time selector and shows the most severe observed provider-current-status sample for each provider inside that window. Raw provider health status remains panel id=114 with 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY. This matrix intentionally stays GLOBAL and does not filter by pipeline.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -819,7 +819,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "bioetl_provider_current_status",
+          "expr": "max_over_time(bioetl_provider_current_status[${__range_s}s])",
           "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
@@ -855,7 +855,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Only providers currently DEGRADED or FAILING. Empty table means no provider currently above OK; providers with missing current-status telemetry remain visible as UNKNOWN in the GLOBAL severity matrix.",
+      "description": "Only providers observed as DEGRADED or FAILING inside the active Grafana time range. Empty table means no provider exceeded OK in the selected window; providers with missing current-status telemetry remain visible as UNKNOWN in the GLOBAL severity matrix.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -930,7 +930,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "bioetl_provider_current_status >= 1",
+          "expr": "max_over_time(bioetl_provider_current_status[${__range_s}s]) >= 1",
           "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
@@ -945,7 +945,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current top provider causes from canonical cause recording rules: raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. This panel can surface early-warning provider causes even while the GLOBAL severity matrix still reads OK, because the cause projection is evaluated independently from the current-status projection. Empty table means no canonical provider cause is currently above zero for any provider. If the GLOBAL severity matrix is non-OK while this table stays empty, treat that as a provider explainability gap and inspect the raw status matrix plus optional rate-limit/circuit-breaker evidence before leaving the dashboard.",
+      "description": "Top provider causes from canonical cause recording rules over the active Grafana time range: raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. This panel can surface early-warning provider causes even while the GLOBAL severity matrix still reads OK, because the cause projection is evaluated independently from the current-status projection. Empty table means no canonical provider cause rose above zero for any provider in the selected window. If the GLOBAL severity matrix is non-OK while this table stays empty, treat that as a provider explainability gap and inspect the raw status matrix plus optional rate-limit/circuit-breaker evidence before leaving the dashboard.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1021,7 +1021,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(5, bioetl_provider_current_cause > 0)",
+          "expr": "topk(5, max_over_time(bioetl_provider_current_cause[${__range_s}s]) > 0)",
           "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
@@ -1059,7 +1059,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current provider telemetry freshness marker for the first screen. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. If no bioetl_provider_current_status samples exist in the last 15m, this panel returns WARN so the empty severity matrix is treated as a telemetry gap, not as proof that providers are healthy.",
+      "description": "Selected-range provider telemetry freshness marker for the first screen. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. If no bioetl_provider_current_status samples exist inside the active Grafana time range, this panel returns WARN so the empty severity matrix is treated as a telemetry gap, not as proof that providers are healthy.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1143,7 +1143,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "((count(count_over_time(bioetl_provider_current_status[15m])) > bool 0) * 0) or (absent(count_over_time(bioetl_provider_current_status[15m])) * 1)",
+          "expr": "((count(count_over_time(bioetl_provider_current_status[${__range_s}s])) > bool 0) * 0) or (absent(count_over_time(bioetl_provider_current_status[${__range_s}s])) * 1)",
           "format": "time_series",
           "instant": true,
           "legendFormat": "Provider current-status freshness",
@@ -1367,7 +1367,7 @@
       },
       "targets": [
         {
-          "expr": "max by (provider) (bioetl_provider_health_status{provider=~\"$provider\"}) or ((bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"} * 0) / (bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"} * 0))",
+          "expr": "max by (provider) (max_over_time(bioetl_provider_health_status{provider=~\"$provider\"}[${__range_s}s])) or ((max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s]) * 0) / (max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s]) * 0))",
           "format": "table",
           "instant": true,
           "legendFormat": "{{ provider }}",
@@ -1376,7 +1376,7 @@
       ],
       "title": "Monitor Current Provider Health Status",
       "type": "table",
-      "description": "Raw provider health enum evidence, not the canonical first-screen verdict. Values are source enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null/NaN=UNKNOWN when the provider exists but raw status is absent. First-screen severity uses bioetl_provider_current_status in the Status and GLOBAL Provider Severity Matrix panels to avoid inverting raw enum colors."
+      "description": "Raw provider health enum evidence over the active Grafana time range, not the canonical first-screen verdict. Values are source enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null/NaN=UNKNOWN when the provider exists in the selected-range provider universe but raw status is absent. First-screen severity uses bioetl_provider_current_status in the Status and GLOBAL Provider Severity Matrix panels to avoid inverting raw enum colors."
     },
     {
       "datasource": {

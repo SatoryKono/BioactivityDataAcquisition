@@ -83,6 +83,71 @@ def _read_text_from_git_object(path: Path) -> str | None:
     return completed.stdout
 
 
+def _read_frontmatter_metadata_from_text(text: str, path: Path) -> dict[str, Any]:
+    """Parse note metadata from raw markdown text without loading the body."""
+    handle = io.StringIO(text)
+    with handle:
+        first_line = handle.readline()
+        if not first_line:
+            raise ValueError(f"note is missing YAML frontmatter: {path}")
+        first_line = first_line.strip()
+        if (
+            first_line != FRONTMATTER_DELIMITER
+            and not LEGACY_FRONTMATTER_DELIMITER_PATTERN.match(first_line)
+        ):
+            raise ValueError(f"note is missing YAML frontmatter: {path}")
+        delimiter = first_line
+        metadata = _read_frontmatter_metadata_only(handle, delimiter, path)
+        if not isinstance(metadata, dict):
+            raise ValueError(f"note frontmatter must be a mapping: {path}")
+        return metadata
+
+
+def _read_markdown_metadata_with_timeout(path: Path, timeout: float) -> dict[str, Any]:
+    """Read only note frontmatter metadata with a timeout."""
+    metadata: dict[str, Any] | None = None
+    exception = None
+
+    def _target() -> None:
+        nonlocal metadata, exception
+        try:
+            with path.open(encoding="utf-8") as handle:
+                first_line = handle.readline()
+                if not first_line:
+                    raise ValueError(f"note is missing YAML frontmatter: {path}")
+                first_line = first_line.strip()
+                if (
+                    first_line != FRONTMATTER_DELIMITER
+                    and not LEGACY_FRONTMATTER_DELIMITER_PATTERN.match(first_line)
+                ):
+                    raise ValueError(f"note is missing YAML frontmatter: {path}")
+                delimiter = first_line
+                parsed = _read_frontmatter_metadata_only(handle, delimiter, path)
+                if not isinstance(parsed, dict):
+                    raise ValueError(
+                        f"note frontmatter must be a mapping: {path}"
+                    )
+                metadata = parsed
+        except Exception as e:
+            exception = e
+
+    thread = threading.Thread(target=_target, daemon=True)
+    thread.start()
+    thread.join(timeout=timeout)
+
+    if thread.is_alive():
+        fallback_text = _read_text_from_git_object(path)
+        if fallback_text is None:
+            raise TimeoutError(
+                f"File metadata read did not complete within {timeout} seconds: {path}"
+            )
+        return _read_frontmatter_metadata_from_text(fallback_text, path)
+
+    if exception is not None:
+        raise exception
+    return metadata or {}
+
+
 def _git_repo_root(path: Path) -> Path | None:
     packaged_root = _packaged_repo_root_for(path)
     if packaged_root is not None:
@@ -172,10 +237,22 @@ def normalize_text_key(value: str) -> str:
     return " ".join(value.strip().lower().split())
 
 
-def parse_markdown_note(path: Path, *, include_body: bool = True) -> MemoryNote:
+def _resolve_read_timeout(read_timeout_seconds: float | None) -> float:
+    return NOTE_READ_TIMEOUT_SECONDS if read_timeout_seconds is None else read_timeout_seconds
+
+
+def parse_markdown_note(
+    path: Path,
+    *,
+    include_body: bool = True,
+    read_timeout_seconds: float | None = None,
+) -> MemoryNote:
     """Parse a markdown note with YAML frontmatter."""
     try:
-        text = _read_text_with_timeout(path, timeout=NOTE_READ_TIMEOUT_SECONDS)
+        text = _read_text_with_timeout(
+            path,
+            timeout=_resolve_read_timeout(read_timeout_seconds),
+        )
     except (OSError, TimeoutError) as exc:
         raise ValueError(f"failed to open note file: {exc}") from exc
     handle = io.StringIO(text)
@@ -206,6 +283,22 @@ def parse_markdown_note(path: Path, *, include_body: bool = True) -> MemoryNote:
             metadata_lines.append(line)
 
     raise ValueError(f"note frontmatter is not terminated: {path}")
+
+
+def parse_markdown_note_metadata(
+    path: Path,
+    *,
+    read_timeout_seconds: float | None = None,
+) -> MemoryNote:
+    """Parse note metadata without loading the body."""
+    try:
+        metadata = _read_markdown_metadata_with_timeout(
+            path,
+            timeout=_resolve_read_timeout(read_timeout_seconds),
+        )
+    except (OSError, TimeoutError) as exc:
+        raise ValueError(f"failed to open note file: {exc}") from exc
+    return MemoryNote(metadata=metadata, body="")
 
 
 def _read_frontmatter_metadata_only(

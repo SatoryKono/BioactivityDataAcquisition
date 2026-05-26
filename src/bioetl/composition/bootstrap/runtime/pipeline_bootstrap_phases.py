@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from bioetl.composition.bootstrap.runtime.assembly import RuntimeBootstrapPhases
     from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.composition.runtime_builders.runner_builder_wiring import (
         RunnerFactoryWiring,
@@ -17,6 +18,7 @@ if TYPE_CHECKING:
 __all__ = [
     "build_bootstrap_runner_factory_wiring",
     "build_bootstrap_runner_input_wiring",
+    "build_runtime_bootstrap_phases_with_registry",
     "initialize_runtime_policy_sources",
     "prepare_runtime_registry",
 ]
@@ -138,6 +140,30 @@ def initialize_runtime_policy_sources(configs_root: Path) -> None:
     initialize_chembl_policy_registry(configs_root)
     initialize_publication_type_classification(configs_root)
     initialize_publication_controlled_vocabulary(configs_root)
+
+
+def build_runtime_bootstrap_phases_with_registry(
+    *,
+    registry: PipelineRegistry,
+    load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] | None,
+    resolve_configs_root_fn: Callable[[], Path],
+) -> RuntimeBootstrapPhases:
+    """Assemble runtime phases after the registry phase has completed."""
+    from bioetl.composition.bootstrap.runtime.assembly import (
+        assemble_runtime_bootstrap_phases,
+    )
+
+    configs_root = resolve_configs_root_fn()
+    initialize_runtime_policy_sources(configs_root)
+    return assemble_runtime_bootstrap_phases(
+        registry=registry,
+        configs_root=configs_root,
+        factory_wiring=build_bootstrap_runner_factory_wiring(),
+        input_wiring=build_bootstrap_runner_input_wiring(
+            configs_root=configs_root,
+            load_pipeline_config_fn=load_pipeline_config_fn,
+        ),
+    )
 
 
 def build_bootstrap_runner_factory_wiring() -> RunnerFactoryWiring:

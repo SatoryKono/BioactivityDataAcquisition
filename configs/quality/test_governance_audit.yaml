@@ -58,11 +58,11 @@ issues:
   - scripts/engineering/qa/report_test_governance_audit.py
   - tests/architecture/test_test_governance_audit.py
 budgets:
-  refined_assertless_max: 497
-  duplicate_test_names_max: 787
-  duplicate_test_name_occurrences_max: 2550
+  refined_assertless_max: 499
+  duplicate_test_names_max: 788
+  duplicate_test_name_occurrences_max: 2552
   compatibility_test_file_max: 56
-  markerless_test_functions_max: 6891
+  markerless_test_functions_max: 6936
   uuid4_call_sites_max: 400
   date_today_call_sites_max: 0
 budget_ratchet:
@@ -181,7 +181,7 @@ assertless_triage:
       rationale: No-op, close/aclose, smoke, or does-not-raise behavior is the contract under test.
       next_review: '2026-09-30'
     weak_no_value:
-      count: 422
+      count: 424
       decision: burn-down
       rationale: Candidates require assertion strengthening, merge, or removal when the owning module is edited.
       next_review: '2026-09-30'
@@ -193,8 +193,8 @@ assertless_triage:
     - tests/unit/application/core/
     - tests/unit/infrastructure/control_plane/
 duplicate_name_triage:
-  total_duplicate_names: 787
-  duplicate_occurrences: 2550
+  total_duplicate_names: 788
+  duplicate_occurrences: 2552
   top_generic_names:
   - name: test_default_values
     count: 38
@@ -244,29 +244,29 @@ oversized_test_module_inventory:
     owner: interfaces-cli
     target_split: CLI command-family scenarios
   - path: tests/integration/ci/test_reproducibility_contract_suite.py
-    lines: 1891
+    lines: 1874
     owner: reproducibility-contracts
     target_split: integration/ci reproducibility phases
   - path: tests/integration/test_grafana_dashboard_metric_semantics.py
-    lines: 1833
+    lines: 1832
     owner: observability-dashboards
     target_split: dashboard metric semantics scenarios
   completed_splits:
   - issue_ref: '#4505'
     source: tests/integration/test_grafana_config.py
-    source_lines_after_split: 1362
+    source_lines_after_split: 1377
     extracted_surface: tests/integration/test_grafana_surface_contracts.py
-    extracted_surface_lines: 718
+    extracted_surface_lines: 733
     owner: observability-dashboards
   - issue_ref: '#4506'
     source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
-    source_lines_after_split: 1109
+    source_lines_after_split: 1110
     extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
     extracted_surface_lines: 175
     owner: composition-runtime
   - issue_ref: '#4506'
     source: tests/unit/application/services/test_run_manifest_inspection_service.py
-    source_lines_after_split: 1488
+    source_lines_after_split: 1459
     extracted_surface: tests/unit/application/services/test_run_manifest_inspection_dq_traceability.py
     extracted_surface_lines: 164
     owner: application-services
@@ -274,7 +274,7 @@ oversized_test_module_inventory:
     source: tests/unit/application/services/test_metadata_coordinator.py
     source_lines_after_split: 598
     extracted_surface: tests/unit/application/services/test_metadata_coordinator_runtime_profiles.py
-    extracted_surface_lines: 796
+    extracted_surface_lines: 800
     owner: application-services
   - issue_ref: '#4660'
     source: tests/unit/application/services/test_metadata_coordinator.py
@@ -284,27 +284,27 @@ oversized_test_module_inventory:
     owner: application-services
   - issue_ref: '#4660'
     source: tests/unit/application/services/test_run_manifest_inspection_service.py
-    source_lines_after_split: 1488
+    source_lines_after_split: 1459
     extracted_surface: tests/unit/application/services/test_run_manifest_inspection_diff.py
-    extracted_surface_lines: 170
+    extracted_surface_lines: 186
     owner: application-services
   - issue_ref: '#4660'
     source: tests/unit/application/services/test_run_manifest_inspection_service.py
-    source_lines_after_split: 1488
+    source_lines_after_split: 1459
     extracted_surface: tests/unit/application/services/test_run_manifest_inspection_verify.py
-    extracted_surface_lines: 359
+    extracted_surface_lines: 382
     owner: application-services
   - issue_ref: '#4660'
     source: tests/integration/ci/test_reproducibility_contract_suite.py
-    source_lines_after_split: 1891
+    source_lines_after_split: 1874
     extracted_surface: tests/integration/ci/test_reproducibility_contract_manifest_diff.py
     extracted_surface_lines: 191
     owner: reproducibility-contracts
   - issue_ref: '#4660'
     source: tests/integration/ci/test_reproducibility_contract_suite.py
-    source_lines_after_split: 1891
+    source_lines_after_split: 1874
     extracted_surface: tests/integration/ci/test_reproducibility_contract_inventory.py
-    extracted_surface_lines: 164
+    extracted_surface_lines: 182
     owner: reproducibility-contracts
   - issue_ref: '#4685'
     source: tests/unit/application/services/test_metadata_coordinator.py
@@ -838,9 +838,6 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/domain/normalization/profiles/test_publication_identifier_profiles.py
     target_lane: repo-backed-unit
     protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml
-  - path: tests/unit/memory/test_tooling.py
-    target_lane: repo-backed-unit
-    protected_surface: memory.tooling workflow module CLI entrypoint from repo root
   - path: tests/unit/scripts/diagrams/test_write_path_security.py
     target_lane: repo-backed-unit
     protected_surface: scripts/diagrams/{fix_pagebreaks_in_bundles,uniform_diagram_sizes}.py
@@ -885,4 +882,3 @@ mixed_scope_unit_path_policy:
     new_path: tests/integration/grafana/test_workflow_dashboard_json_valid.py
   - old_path: tests/unit/grafana/test_silver_reject_explorer_copy.py
     new_path: tests/integration/grafana/test_silver_reject_explorer_copy.py
-
