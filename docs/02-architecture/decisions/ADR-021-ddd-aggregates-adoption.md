@@ -181,6 +181,12 @@ class ActivityValue:
 | `RunCompleted`      | PipelineRun | После `run.complete(...)`          |
 | `RunFailed`         | PipelineRun | После `run.fail(...)`              |
 
+Domain event `event_id` values are deterministic by default: when callers do
+not pass an explicit `event_id`, `DomainEvent` derives it from the concrete
+event type and canonical event payload. Aggregate factories that create
+replay-sensitive identities must derive them from explicit inputs rather than
+calling UUID4 inside `domain`. See ADR-014.
+
 ### 4. Структура domain слоя после рефакторинга
 
 ```

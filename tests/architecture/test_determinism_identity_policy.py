@@ -102,19 +102,15 @@ def _is_uuid4_call(node: ast.AST) -> bool:
 
 
 def _iter_uuid4_candidate_paths(root: Path) -> tuple[Path, ...]:
-    """Use git's index scan to avoid parsing every source file on slow mounts."""
+    """Use a text prefilter to avoid parsing every source file on slow mounts."""
     try:
         result = subprocess.run(
             [
-                "git",
-                "-C",
-                str(ROOT),
-                "grep",
-                "-l",
+                "rg",
+                "--files-with-matches",
                 "-F",
                 "uuid4",
-                "--",
-                root.relative_to(ROOT).as_posix(),
+                str(root),
             ],
             check=False,
             capture_output=True,
