@@ -37,7 +37,7 @@ _PACKAGE_ROOT_IMPORT_SOURCE_PATTERNS = tuple(
     re.compile(pattern, re.MULTILINE)
     for pattern in _PACKAGE_ROOT_IMPORT_SOURCE_PATTERN_TEXTS
 )
-_SEARCH_TIMEOUT_SECONDS = 20.0
+_SEARCH_TIMEOUT_SECONDS = 120.0
 _READ_TIMEOUT_SECONDS = 15.0
 _TEMPFILE_UNLINK_ATTEMPTS = 3
 _TEMPFILE_UNLINK_RETRY_SECONDS = 0.05
@@ -102,13 +102,12 @@ def _candidate_python_paths_via_rg(root: Path) -> tuple[Path, ...] | None:
 
     command = [
         "rg",
-        "-n",
+        "--files-with-matches",
         "-F",
-        "-e",
         PACKAGE_ROOT_MODULE,
-        pathspec,
         "-g",
         "*.py",
+        pathspec,
     ]
     try:
         completed, stdout = _run_command_with_stdout_file(
@@ -120,7 +119,7 @@ def _candidate_python_paths_via_rg(root: Path) -> tuple[Path, ...] | None:
 
     if completed.returncode not in {0, 1}:
         return None
-    return _paths_from_matching_line_output(stdout)
+    return _paths_from_file_output(stdout)
 
 
 def _candidate_python_paths_via_git_grep(root: Path) -> tuple[Path, ...] | None:
@@ -260,6 +259,21 @@ def _paths_from_matching_line_output(output: str) -> tuple[Path, ...]:
         if not _source_has_package_root_import_marker(source_line):
             continue
         relative_path = relative_path.replace("\\", "/")
+        if not relative_path:
+            continue
+        path = Path(relative_path)
+        if path.suffix != ".py":
+            continue
+        paths.append(path if path.is_absolute() else ROOT / relative_path)
+    return tuple(sorted(set(paths)))
+
+
+def _paths_from_file_output(output: str) -> tuple[Path, ...]:
+    if not output.strip():
+        return ()
+    paths: list[Path] = []
+    for line in output.splitlines():
+        relative_path = line.strip().replace("\\", "/")
         if not relative_path:
             continue
         path = Path(relative_path)

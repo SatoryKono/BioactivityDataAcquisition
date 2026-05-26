@@ -57,6 +57,14 @@ def build_observability_backend_health_url(
     return f"http://{host}:{port}/health"
 
 
+def _build_observability_backend_probe_urls(health_url: str) -> tuple[str, ...]:
+    """Return canonical readiness probe URLs for one backend base health URL."""
+    if health_url.endswith("/health"):
+        live_url = f"{health_url}/live"
+        return (live_url, health_url)
+    return (health_url,)
+
+
 def probe_observability_backend(
     health_url: str,
     *,
@@ -64,12 +72,15 @@ def probe_observability_backend(
     urlopen_fn: Callable[..., object] = urlopen,
 ) -> bool:
     """Return True when the observability backend responds successfully."""
-    try:
-        with urlopen_fn(health_url, timeout=timeout_seconds) as response:
-            status = getattr(response, "status", 200)
-            return int(status) < 400
-    except (HTTPError, URLError, OSError, ValueError):
-        return False
+    for probe_url in _build_observability_backend_probe_urls(health_url):
+        try:
+            with urlopen_fn(probe_url, timeout=timeout_seconds) as response:
+                status = getattr(response, "status", 200)
+                if int(status) < 400:
+                    return True
+        except (HTTPError, URLError, OSError, ValueError):
+            continue
+    return False
 
 
 def _build_detached_backend_popen_kwargs(
@@ -258,6 +269,7 @@ __all__ = [
     "DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS",
     "DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST",
     "DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS",
+    "_build_observability_backend_probe_urls",
     "ObservabilityBackendEnsureResult",
     "build_observability_backend_health_url",
     "ensure_observability_backend_started",

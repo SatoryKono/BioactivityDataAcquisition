@@ -752,7 +752,7 @@
       "private_src_importers": [
         "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_projection.py",
         "src/bioetl/application/services/control_plane/_run_manifest_identity_graph_builder.py",
-        "src/bioetl/application/services/control_plane/replay_bundle_descriptor_service.py",
+        "src/bioetl/application/services/control_plane/replay/bundle_descriptor_service.py",
         "src/bioetl/application/services/control_plane/run_manifest_replay_taxonomy.py"
       ]
     },

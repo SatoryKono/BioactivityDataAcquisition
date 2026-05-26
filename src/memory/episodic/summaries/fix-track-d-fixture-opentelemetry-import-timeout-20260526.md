@@ -2,7 +2,7 @@
 id: fix-track-d-fixture-opentelemetry-import-timeout-20260526
 title: Fix Track D fixture OpenTelemetry import timeout
 task_id: fix-track-d-fixture-opentelemetry-import-timeout-20260526
-created_at: '2026-05-26T08:19:26Z'
+created_at: '2026-05-26T08:21:16Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
