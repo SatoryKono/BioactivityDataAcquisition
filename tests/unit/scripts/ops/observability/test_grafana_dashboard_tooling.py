@@ -231,6 +231,8 @@ def test_live_audit_reviewed_specs_cover_semantically_sensitive_panels() -> None
     )
     assert covered[("bioetl-dq-v2", 101)] == "Review: Latest Successful Data Timestamp"
     assert covered[("bioetl-dq-v2", 8)] == "Monitor: Worst Data Freshness Lag (seconds)"
+    assert covered[("bioetl-dq-v2", 9402)] == "ID"
+    assert covered[("bioetl-dq-v2", 9403)] == "Processed Records"
     assert (
         covered[("bioetl-silver-reject-explorer", 3)] == "Track Reject Rate vs Bronze"
     )
