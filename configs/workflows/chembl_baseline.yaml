@@ -1,0 +1,49 @@
+schema_version: "1.0.0"
+workflow:
+  name: chembl_baseline
+  version: "1.0.0"
+  defaults:
+    run_options:
+      run_type: backfill
+      dry_run: false
+      log_level: INFO
+  steps:
+    - kind: pipeline
+      step_id: run_chembl_assay
+      pipeline_name: chembl_assay
+    - kind: pipeline
+      step_id: run_chembl_target
+      pipeline_name: chembl_target
+      depends_on:
+        - run_chembl_assay
+    - kind: pipeline
+      step_id: run_chembl_publication
+      pipeline_name: chembl_publication
+      depends_on:
+        - run_chembl_target
+    - kind: transform
+      step_id: reconcile_assay_target_orphans
+      transform_name: reconcile_foreign_keys
+      depends_on:
+        - run_chembl_publication
+      config:
+        source_table: chembl_assay
+        reference_table: chembl_target
+        source_key: target_id
+        reference_key: target_id
+        primary_keys:
+          - assay_id
+        action: delete_orphans
+    - kind: transform
+      step_id: reconcile_assay_publication_orphans
+      transform_name: reconcile_foreign_keys
+      depends_on:
+        - reconcile_assay_target_orphans
+      config:
+        source_table: chembl_assay
+        reference_table: chembl_publication
+        source_key: publication_id
+        reference_key: publication_id
+        primary_keys:
+          - assay_id
+        action: delete_orphans

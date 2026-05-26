@@ -100,6 +100,20 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
         semantic_kind="freshness",
     ),
     PanelAuditSpec(
+        dashboard_uid="bioetl-dq-v2",
+        panel_id=9402,
+        title="ID",
+        source_kind="http",
+        semantic_kind="http_table",
+    ),
+    PanelAuditSpec(
+        dashboard_uid="bioetl-dq-v2",
+        panel_id=9403,
+        title="Processed Records",
+        source_kind="http",
+        semantic_kind="http_table",
+    ),
+    PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
         panel_id=892,
         title="Monitor: Checkpoint Freshness Lag (seconds)",

@@ -353,7 +353,8 @@ tracing-backed log hygiene живёт в collapsed row
   `Review: Latest Successful Data Timestamp` остаётся отдельным latest-success anchor
   на первом экране. Это intentionally разные сигналы: latest success не должен
   маскировать worst freshness lag.
-- **Reject / Pareto / Fields** и **Validation Diagnostics** breakdown-панели
+- **Reject / Pareto / Fields** и
+  **Validation Failures / Runtime Diagnostics / Trends** breakdown-панели
   сохраняют honest empty-state semantics: если в выбранном окне нет reject,
   quarantine или anomaly observations, панель остаётся пустой/`No data` и не
   синтезирует fake buckets вроде `pipeline=no_events`, `reason_code=none`,
