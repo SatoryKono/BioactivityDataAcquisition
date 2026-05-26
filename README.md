@@ -1,6 +1,6 @@
 # BioETL: Bioactivity Data Acquisition Pipeline
 
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
@@ -120,7 +120,7 @@ repo-wide reorganization wave.
 
 ### Prerequisites
 
-- **Python**: Version 3.11 or higher.
+- **Python**: Version 3.12 (baseline).
 - **Make**: For running automation commands.
 - **uv**: Recommended package manager ([install](https://docs.astral.sh/uv/getting-started/installation/)).
 - **Docker**: Optional, only for `docker-compose` extras such as Neo4j and monitoring; not required for the Local-Only runtime.
@@ -128,6 +128,12 @@ repo-wide reorganization wave.
 
 The supported dependency/bootstrap path is uv-first. `pip` remains a manual
 fallback when `uv` is unavailable.
+
+### Runtime compatibility policy
+
+- **Python runtime baseline: 3.12** for local development, onboarding, and CI defaults.
+- The **source of truth** for Python runtime compatibility is `pyproject.toml` (`requires-python` and classifiers).
+- Any docs or scripts mentioning older Python versions (3.10/3.11) should be treated as deprecated and updated before use.
 
 ### Installation
 
@@ -204,7 +210,7 @@ uv sync --extra dev --extra tracing
    uv sync --extra dev --extra tracing --extra docs
 
    # Fallback without uv
-   python3 -m venv .venv
+   python3.12 -m venv .venv
    . .venv/bin/activate
    pip install -e ".[dev,tracing,docs]"
 ```
