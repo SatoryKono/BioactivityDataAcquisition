@@ -53,7 +53,7 @@ ______________________________________________________________________
 | ------------------------------------------------------- | -------------------------------------------------- | -------- |
 | [Data Recovery](data-recovery.md)                       | Steps to recover from data corruption or loss (DR) | P0/P1    |
 | [Quarantine Management](quarantine-management.md)       | Managing quarantined records                       | P2       |
-| [DQ Failure Investigation](dq-failure-investigation.md) | Investigating data quality failures                | P1       |
+| [DQ Failure Investigation](dq-failure-investigation.md) | Compatibility pointer to canonical DQ failure runbook | P1       |
 | [Backfill/Rebuild](backfill-rebuild.md)                 | Data backfill and rebuild procedures               | P2       |
 | [Schema Evolution](schema-evolution.md)                 | Handling schema changes                            | P2       |
 | [Retention-Sensitive Cleanup](retention-sensitive-cleanup.md) | Bounded cleanup gate for protected data, fixtures, reports, archives, and control-plane artifacts | P1 |
@@ -64,7 +64,7 @@ ______________________________________________________________________
 | --------------------------------------------------------------------------- | -------------------------------------------------------------------- | -------- |
 | [Checkpoint Debugging](checkpoint-debugging.md)                             | Debugging checkpoint issues                                          | P2       |
 | [Neo4j Backend Recovery Quick Start](neo4j-backend-recovery-quick-start.md) | Short recovery checklist for local Neo4j backend incidents           | P2       |
-| [Neo4j Complete Recovery Guide](neo4j-complete-recovery-guide.md)           | Recovery path for local Neo4j memory backend and audit instance      | P2       |
+| [Neo4j Complete Recovery Guide](neo4j-complete-recovery-guide.md)           | Compatibility pointer to canonical Neo4j quick-start runbook         | P2       |
 | [Stale Lock](stale-lock.md)                                                 | Handling stale lock situations                                       | P1       |
 | [Vacuum Procedures](vacuum-procedures.md)                                   | Delta Lake vacuum maintenance                                        | P2       |
 | [Scaling and Performance Tuning](scaling.md)                                | Local-only performance tuning (vertical scaling + Delta maintenance) | P3       |
@@ -131,3 +131,6 @@ ______________________________________________________________________
 
 - Record timeline, commands executed, evidence reviewed, and follow-up owners.
 - Update related alerts, dashboards, or runbooks when operator gaps or ambiguous steps are discovered.
+
+
+- Duplicate notices MUST be treated as routing pointers only; execute procedures from the linked canonical runbook.
