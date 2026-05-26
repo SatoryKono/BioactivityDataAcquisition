@@ -12,7 +12,7 @@ See RULES.md §8.2 for JSON response modeling guidelines.
 from __future__ import annotations
 
 import importlib
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -244,6 +244,10 @@ _response_models = importlib.import_module(
 CrossRefMessage = _response_models.CrossRefMessage
 CrossRefPublicationResponse = _response_models.CrossRefPublicationResponse
 CrossRefPublicationsResponse = _response_models.CrossRefPublicationsResponse
-_record_namespace = {"CrossRefPublicationRecord": CrossRefPublicationRecord}
+_record_namespace = {
+    "Any": Any,
+    "CrossRefPublicationRecord": CrossRefPublicationRecord,
+    "JsonDict": JsonDict,
+}
 CrossRefMessage.model_rebuild(_types_namespace=_record_namespace)
 CrossRefPublicationResponse.model_rebuild(_types_namespace=_record_namespace)

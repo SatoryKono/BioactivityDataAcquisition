@@ -67,7 +67,6 @@ if TYPE_CHECKING:
 _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE = "bioetl.composition.bootstrap.cli.checkpoint"
 _BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE = "bioetl.composition.bootstrap.cli.run_manifest"
 _BOOTSTRAP_STORAGE_EXPORT_MODULE = "bioetl.composition.bootstrap.cli.storage"
-
 _BOOTSTRAP_EXPORT_MODULES: dict[str, str] = {
     "bootstrap_adr_service": "bioetl.composition.bootstrap.cli.adr",
     "bootstrap_audit_inspection_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,

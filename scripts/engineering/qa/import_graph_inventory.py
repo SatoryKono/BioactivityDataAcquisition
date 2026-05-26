@@ -16,6 +16,7 @@ from scripts.engineering.qa.file_discovery import discover_files
 _MIN_PARALLEL_READ_FILES = 64
 _DEFAULT_READ_WORKERS = 8
 _MAX_READ_WORKERS = 16
+_MAX_SOURCE_BYTES = 512_000
 
 
 @dataclass(frozen=True)
@@ -51,7 +52,13 @@ def _read_module_source(item: tuple[str, Path]) -> tuple[str, Path, str | None]:
     """Read one Python module source payload for import-graph parsing."""
     module_name, py_file = item
     try:
-        return module_name, py_file, py_file.read_text(encoding="utf-8", errors="replace")
+        if py_file.stat().st_size > _MAX_SOURCE_BYTES:
+            return module_name, py_file, None
+        with py_file.open("rb") as stream:
+            source_bytes = stream.read(_MAX_SOURCE_BYTES + 1)
+        if len(source_bytes) > _MAX_SOURCE_BYTES:
+            return module_name, py_file, None
+        return module_name, py_file, source_bytes.decode("utf-8", errors="replace")
     except (OSError, UnicodeDecodeError):
         return module_name, py_file, None
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
 )
@@ -68,6 +70,43 @@ def _metadata_with_checkpoint_saved_at(
     if checkpoint_saved_at is not None:
         payload.setdefault("checkpoint_saved_at_epoch_seconds", checkpoint_saved_at)
     return payload
+
+
+def _handle_missing_compatibility_context_result(
+    *,
+    logger: LoggerPort,
+    pipeline_name: str,
+    compatibility_policy: CheckpointCompatibilityPolicy,
+    checkpoint_metadata: CheckpointMetadata,
+    current_metadata: CheckpointMetadata | None,
+    service_available: bool,
+    emit_checkpoint_load_status: Callable[[str], None],
+) -> CheckpointMetadata | None:
+    """Apply the configured disposition when resume validation is unavailable."""
+    disposition = resolve_missing_compatibility_context_disposition(
+        compatibility_policy=compatibility_policy,
+    )
+    try:
+        result = handle_missing_compatibility_context(
+            logger=logger,
+            pipeline_name=pipeline_name,
+            compatibility_policy=compatibility_policy,
+            current_metadata=current_metadata,
+            checkpoint_metadata=checkpoint_metadata,
+            service_available=service_available,
+        )
+    except _OPERATION_ERRORS:
+        emit_checkpoint_load_status(
+            "missing_compatibility_context_hard_fail"
+            if disposition == "missing_context_hard_fail_raised"
+            else "missing_compatibility_context"
+        )
+        raise
+    if result is None:
+        emit_checkpoint_load_status("missing_compatibility_context")
+        return None
+    emit_checkpoint_load_status("loaded")
+    return result
 
 
 class CheckpointRuntimeService:
@@ -173,10 +212,14 @@ class CheckpointRuntimeService:
             missing_context.append("checkpoint_compatibility_service")
         if missing_context:
             return (
-                self._handle_missing_compatibility_context_result(
+                _handle_missing_compatibility_context_result(
+                    logger=self._logger,
+                    pipeline_name=self._pipeline_name,
+                    compatibility_policy=self._compatibility_policy,
                     checkpoint_metadata=checkpoint_metadata,
                     current_metadata=effective_current_metadata,
                     service_available=self._compatibility_service is not None,
+                    emit_checkpoint_load_status=self._emit_checkpoint_load_status,
                 ),
                 True,
             )
@@ -257,39 +300,6 @@ class CheckpointRuntimeService:
             if disposition == "observe_loaded_degraded"
             else "loaded"
         )
-        return result
-
-    def _handle_missing_compatibility_context_result(
-        self,
-        *,
-        checkpoint_metadata: CheckpointMetadata,
-        current_metadata: CheckpointMetadata | None,
-        service_available: bool,
-    ) -> CheckpointMetadata | None:
-        """Apply the configured disposition when resume validation is unavailable."""
-        disposition = resolve_missing_compatibility_context_disposition(
-            compatibility_policy=self._compatibility_policy,
-        )
-        try:
-            result = handle_missing_compatibility_context(
-                logger=self._logger,
-                pipeline_name=self._pipeline_name,
-                compatibility_policy=self._compatibility_policy,
-                current_metadata=current_metadata,
-                checkpoint_metadata=checkpoint_metadata,
-                service_available=service_available,
-            )
-        except _OPERATION_ERRORS:
-            self._emit_checkpoint_load_status(
-                "missing_compatibility_context_hard_fail"
-                if disposition == "missing_context_hard_fail_raised"
-                else "missing_compatibility_context"
-            )
-            raise
-        if result is None:
-            self._emit_checkpoint_load_status("missing_compatibility_context")
-            return None
-        self._emit_checkpoint_load_status("loaded")
         return result
 
     async def load_checkpoint(

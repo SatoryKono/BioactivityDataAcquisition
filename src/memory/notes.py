@@ -84,6 +84,10 @@ def _read_text_from_git_object(path: Path) -> str | None:
 
 
 def _git_repo_root(path: Path) -> Path | None:
+    packaged_root = _packaged_repo_root_for(path)
+    if packaged_root is not None:
+        return packaged_root
+
     try:
         completed = subprocess.run(
             ["git", "-C", str(path.parent), "rev-parse", "--show-toplevel"],
@@ -101,6 +105,17 @@ def _git_repo_root(path: Path) -> Path | None:
         return None
     repo_root = completed.stdout.strip()
     return Path(repo_root) if repo_root else None
+
+
+def _packaged_repo_root_for(path: Path) -> Path | None:
+    """Return this checkout root for paths inside the packaged memory tree."""
+    repo_root = Path(__file__).parents[2]
+    target = path if path.is_absolute() else Path.cwd() / path
+    try:
+        target.relative_to(repo_root)
+    except ValueError:
+        return None
+    return repo_root
 
 
 def _hidden_windows_subprocess_kwargs(

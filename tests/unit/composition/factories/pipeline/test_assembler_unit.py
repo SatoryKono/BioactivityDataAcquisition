@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from typing import cast
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
 import pytest
 
@@ -327,6 +327,7 @@ class TestGenericPipelineFactory:
             gold_schema=factory.gold_schema,
             strict_gold_validation=False,
             yaml_config=yaml_config,
+            dq_configs_extractor=ANY,
         )
 
     @patch(
@@ -392,6 +393,7 @@ class TestGenericPipelineFactory:
             gold_schema=factory.gold_schema,
             strict_gold_validation=False,
             yaml_config=config,
+            dq_configs_extractor=ANY,
         )
 
     @patch(
@@ -440,6 +442,7 @@ class TestGenericPipelineFactory:
             gold_schema=factory.gold_schema,
             strict_gold_validation=True,
             yaml_config=yaml_config,
+            dq_configs_extractor=ANY,
         )
 
 
