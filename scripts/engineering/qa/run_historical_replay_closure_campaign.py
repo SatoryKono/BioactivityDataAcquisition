@@ -9,6 +9,9 @@ import json
 from pathlib import Path
 from typing import Any
 
+from bioetl.application.services.control_plane.manifest.diagnostics import (
+    build_diagnostics_summary,
+)
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationService,
     HistoricalReplaySnapshotCertification,
@@ -22,9 +25,6 @@ from bioetl.application.services.control_plane.replay.historical_corpus_service 
     HistoricalReplayBulkCertificationSpec,
     HistoricalReplayCertifiabilityInventory,
     HistoricalReplayCorpusService,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics import (
-    build_diagnostics_summary,
 )
 from bioetl.composition.factories.services.port_factories import create_metrics
 from bioetl.domain.control_plane import RunManifest

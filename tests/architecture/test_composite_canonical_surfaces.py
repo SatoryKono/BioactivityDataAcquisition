@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import os
+from functools import cache
 from pathlib import Path
+import shutil
 import subprocess
 import tempfile
 from types import SimpleNamespace
@@ -36,16 +38,29 @@ _SCAN_OVERLAP = max(len(symbol) for symbol in _DEPRECATED_COMPOSITE_SYMBOL_BYTES
 _SYMBOL_SCAN_TIMEOUT_SECONDS = 120.0
 
 
-def _python_files(root: Path) -> list[Path]:
-    return sorted(root.rglob("*.py"))
+_TEXT_SUFFIXES = frozenset({".py", ".mmd", ".mermaid", ".md", ".json", ".svg"})
 
 
-def _text_files(root: Path) -> list[Path]:
-    patterns = ("*.py", "*.mmd", "*.mermaid", "*.md", "*.json", "*.svg")
-    files: set[Path] = set()
-    for pattern in patterns:
-        files.update(root.rglob(pattern))
-    return sorted(files)
+@cache
+def _python_files(root: Path) -> tuple[Path, ...]:
+    files: list[Path] = []
+    for dirpath, _dirnames, filenames in os.walk(root):
+        base = Path(dirpath)
+        for filename in filenames:
+            if filename.endswith(".py"):
+                files.append(base / filename)
+    return tuple(sorted(files))
+
+
+@cache
+def _text_files(root: Path) -> tuple[Path, ...]:
+    files: list[Path] = []
+    for dirpath, _dirnames, filenames in os.walk(root):
+        base = Path(dirpath)
+        for filename in filenames:
+            if Path(filename).suffix in _TEXT_SUFFIXES:
+                files.append(base / filename)
+    return tuple(sorted(files))
 
 
 def _file_contains_symbol(path: Path, symbol: bytes) -> bool:
@@ -74,10 +89,15 @@ def _symbol_hits(root: Path, allowlist: frozenset[Path]) -> list[str]:
     return hits
 
 
+@cache
 def _doc_symbol_hits() -> list[str]:
     grep_hits = _repo_symbol_hits_with_git_grep(DOC_ROOTS, skip_legacy=True)
     if grep_hits is not None:
         return grep_hits
+
+    rg_hits = _repo_symbol_hits_with_ripgrep(DOC_ROOTS, skip_legacy=True)
+    if rg_hits is not None:
+        return rg_hits
 
     hits: list[str] = []
     for root in DOC_ROOTS:
@@ -99,6 +119,10 @@ def _repo_symbol_hits_with_git_grep(
     *,
     skip_legacy: bool,
 ) -> list[str] | None:
+    git_executable = _git_executable()
+    if git_executable is None:
+        return None
+
     pathspecs: list[str] = []
     for root in roots:
         pathspec = _repo_relative_pathspec(root)
@@ -107,7 +131,7 @@ def _repo_symbol_hits_with_git_grep(
         pathspecs.append(pathspec)
 
     command = [
-        "git",
+        git_executable,
         "-C",
         ROOT.as_posix(),
         "grep",
@@ -152,6 +176,73 @@ def _repo_symbol_hits_with_git_grep(
     return sorted(hits)
 
 
+def _repo_symbol_hits_with_ripgrep(
+    roots: tuple[Path, ...],
+    *,
+    skip_legacy: bool,
+) -> list[str] | None:
+    rg_executable = _rg_executable()
+    if rg_executable is None:
+        return None
+
+    pathspecs: list[str] = []
+    for root in roots:
+        pathspec = _repo_relative_pathspec(root)
+        if pathspec is None:
+            return None
+        pathspecs.append(pathspec)
+
+    command = [
+        rg_executable,
+        "-n",
+        "-F",
+        "--no-heading",
+        *(
+            option
+            for symbol in DEPRECATED_COMPOSITE_SYMBOLS
+            for option in ("-e", symbol)
+        ),
+        *pathspecs,
+    ]
+    try:
+        completed, stdout = _run_symbol_scan_command(command)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+    if completed.returncode == 1:
+        return []
+    if completed.returncode != 0:
+        return None
+
+    hits: set[str] = set()
+    for line in stdout.splitlines():
+        path_text, separator, remainder = line.partition(":")
+        if not separator:
+            continue
+        _line_number, separator, text = remainder.partition(":")
+        if not separator:
+            continue
+        path = Path(path_text.replace("\\", "/"))
+        if skip_legacy and "legacy" in path.parts:
+            continue
+        if path.suffix not in _TEXT_SUFFIXES:
+            continue
+        for symbol in DEPRECATED_COMPOSITE_SYMBOLS:
+            if symbol in text:
+                hits.add(f"{path.as_posix()} -> {symbol}")
+    return sorted(hits)
+
+
+@cache
+def _git_executable() -> str | None:
+    return shutil.which("git")
+
+
+@cache
+def _rg_executable() -> str | None:
+    return shutil.which("rg")
+
+
 def _run_symbol_scan_command(
     command: list[str],
 ) -> tuple[subprocess.CompletedProcess[str], str]:
@@ -166,6 +257,7 @@ def _run_symbol_scan_command(
                 encoding="utf-8",
                 errors="replace",
                 check=False,
+                cwd=ROOT,
                 timeout=_SYMBOL_SCAN_TIMEOUT_SECONDS,
                 **_hidden_windows_subprocess_kwargs(),
             )

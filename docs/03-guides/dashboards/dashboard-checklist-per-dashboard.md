@@ -479,12 +479,13 @@
 
 ### First Action Contract (panel `10`)
 - [ ] Panel `10` (Review: First Action / No-Data Semantics) существует
+- [ ] Panel `13` (Monitor Explorer Backend Health) существует
 - [ ] Min CTA: 2, Max CTA: 2
 - [ ] CTA: Review total rejects
 - [ ] CTA: Review scoped summary
 
 ### First-screen структура
-- [ ] Tier 1 включает: Inspect Explorer Scope, Review: First Action / No-Data Semantics, Monitor Filtered Records Total, Track Reject Rate vs Bronze, Inspect Run Scope Summary
+- [ ] Tier 1 включает: Inspect Explorer Scope, Monitor Explorer Backend Health, Review: First Action / No-Data Semantics, Monitor Filtered Records Total, Track Reject Rate vs Bronze, Inspect Run Scope Summary
 - [ ] Tier 2 включает: Inspect Top Reject Reasons, Inspect Top Reject Fields, Inspect Top Reason Signatures
 - [ ] Tier 3 включает: Inspect Filtered Records Table, Inspect Selected Record Details
 - [ ] Tier 4: forensic details
@@ -500,6 +501,7 @@
 - [ ] Self-drilldown stays same-tab
 - [ ] Requires single-select `$pipeline` потому что quarantine API fail-closed требует явный `pipeline` параметр
 - [ ] `Review: First Action / No-Data Semantics` carries bounded CTA row links
+- [ ] `Monitor Explorer Backend Health` читает `/health/live` через datasource `Quarantine Explorer`
 
 ### No-data semantics
 - [ ] Valid empty result → empty result / no matching rows

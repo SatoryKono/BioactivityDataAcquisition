@@ -582,7 +582,7 @@ Record-level explorer для `filtered_out`/`FILTERED_OUT_SILVER` записей
 - **CTAs**: Review total rejects, Review scoped summary
 
 ### First-screen структура
-- **Tier 1**: `Inspect Explorer Scope`, `Review: First Action / No-Data Semantics`, `Monitor Filtered Records Total`, `Track Reject Rate vs Bronze`, `Inspect Run Scope Summary`
+- **Tier 1**: `Inspect Explorer Scope`, `Monitor Explorer Backend Health`, `Review: First Action / No-Data Semantics`, `Monitor Filtered Records Total`, `Track Reject Rate vs Bronze`, `Inspect Run Scope Summary`
 - **Tier 2**: `Inspect Top Reject Reasons`, `Inspect Top Reject Fields`, `Inspect Top Reason Signatures`
 - **Tier 3**: `Inspect Filtered Records Table`, `Inspect Selected Record Details`
 - **Tier 4**: forensic details
@@ -592,6 +592,7 @@ Record-level explorer для `filtered_out`/`FILTERED_OUT_SILVER` записей
 - Forensic selectors (`quarantine_run_id`, `payload_hash`) НЕ leak в Prometheus dashboards или dashboard-to-dashboard links
 - Default 24h forensic window (explicit explanatory banner)
 - HTTP-backed surface MUST различать: valid empty result vs invalid filter chain vs backend failure
+- `Monitor Explorer Backend Health` MUST read `/health/live` through `Quarantine Explorer` and act as first-screen backend trust marker before empty tables are treated as evidence
 - First-screen CTA includes bounded row links: `Review total rejects`, `Review scoped summary`, `Open Data Quality`
 - Main table поддерживает dataLinks для self-drilldown по `payload_hash` и CLI handoff
 - CLI handoff links открываются в новой tab (`data:text/plain`)

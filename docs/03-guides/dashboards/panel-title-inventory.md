@@ -176,6 +176,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 9403 | Processed Records |
 | bioetl-runtime.json | 9991 | First Action |
 | bioetl-silver-reject-explorer.json | 1 | Inspect Explorer Scope |
+| bioetl-silver-reject-explorer.json | 13 | Monitor Explorer Backend Health |
 | bioetl-silver-reject-explorer.json | 10 | Review: First Action / No-Data Semantics |
 | bioetl-silver-reject-explorer.json | 2 | Monitor Filtered Records Total |
 | bioetl-silver-reject-explorer.json | 3 | Track Reject Rate vs Bronze |

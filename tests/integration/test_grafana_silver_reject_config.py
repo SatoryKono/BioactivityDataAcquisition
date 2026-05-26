@@ -287,6 +287,44 @@ def test_silver_reject_explorer_payload_link_preserves_time_scope() -> None:
         )
 
 
+def test_silver_reject_explorer_backend_health_marker_uses_live_health_probe() -> (
+    None
+):
+    """Explorer must expose a first-screen backend trust marker via /health/live."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+    )
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Monitor Explorer Backend Health"
+        ),
+        None,
+    )
+    assert panel is not None, (
+        "Silver Reject Explorer must define a backend health marker panel"
+    )
+    assert panel.get("datasource") == "Quarantine Explorer"
+    assert panel.get("type") == "table"
+    assert panel.get("id") == 13
+    assert panel.get("gridPos", {}).get("y", 999) <= 11
+
+    targets = panel.get("targets", [])
+    assert targets, "Explorer backend health marker must define a query target"
+    target = targets[0]
+    assert target.get("url") == "/health/live"
+    assert target.get("root_selector") == "$.checks.server"
+
+    no_value = str(
+        panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
+    )
+    assert "UNKNOWN" in no_value
+    description = str(panel.get("description", ""))
+    assert "reachable" in description
+    assert "zero matching rows" in description
+
+
 def test_silver_reject_explorer_first_action_documents_no_data_semantics() -> None:
     """Explorer must make 0-vs-no-data interpretation visible on first screen."""
     dashboard = load_dashboard(
@@ -301,7 +339,7 @@ def test_silver_reject_explorer_first_action_documents_no_data_semantics() -> No
         None,
     )
     assert panel is not None
-    assert panel.get("gridPos", {}).get("y", 999) <= 7
+    assert panel.get("gridPos", {}).get("y", 999) <= 11
     content = str(panel.get("options", {}).get("content", ""))
     assert "First action:" in content
     assert "zero-reject workflow run is an intentional empty explorer state" in content

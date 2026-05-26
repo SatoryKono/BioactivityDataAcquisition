@@ -149,7 +149,7 @@ def _read_delta_records(table_path: Path) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
     for uri in dt.file_uris():
         parquet_path = _delta_file_path_from_uri(uri)
-        records.extend(pq.read_table(parquet_path).to_pylist())
+        records.extend(pq.ParquetFile(parquet_path).read().to_pylist())
     return records
 
 
