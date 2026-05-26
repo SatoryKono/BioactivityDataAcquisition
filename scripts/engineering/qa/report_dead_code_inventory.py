@@ -219,7 +219,10 @@ def build_dead_code_inventory(
                 f"{module_path}: {module_name!r} != {row['module_name']!r}"
             )
         disposition = classification.get("disposition")
-        assert isinstance(disposition, str) and disposition in allowed_repo_wide_dispositions
+        assert (
+            isinstance(disposition, str)
+            and disposition in allowed_repo_wide_dispositions
+        )
         repo_wide_disposition_counts[disposition] = (
             repo_wide_disposition_counts.get(disposition, 0) + 1
         )

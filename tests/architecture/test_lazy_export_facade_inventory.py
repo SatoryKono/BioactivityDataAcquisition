@@ -23,21 +23,15 @@ EXPECTED_LAZY_EXPORT_FACADES = {
     ),
     "src/bioetl/composition/bootstrap/__init__.py": "public_package_facade",
     "src/bioetl/composition/bootstrap/cli/__init__.py": "public_package_facade",
-    "src/bioetl/composition/bootstrap/runtime/__init__.py": (
-        "public_package_facade"
-    ),
+    "src/bioetl/composition/bootstrap/runtime/__init__.py": ("public_package_facade"),
     "src/bioetl/composition/bootstrap/runtime/composite.py": "compatibility_facade",
     "src/bioetl/composition/control_plane_api.py": "public_facade",
     "src/bioetl/composition/entrypoints.py": "public_facade",
     "src/bioetl/composition/execution_api.py": "public_facade",
     "src/bioetl/composition/factories/__init__.py": "public_package_facade",
     "src/bioetl/composition/factories/dq/__init__.py": "public_package_facade",
-    "src/bioetl/composition/factories/pipeline/__init__.py": (
-        "public_package_facade"
-    ),
-    "src/bioetl/composition/factories/services/__init__.py": (
-        "public_package_facade"
-    ),
+    "src/bioetl/composition/factories/pipeline/__init__.py": ("public_package_facade"),
+    "src/bioetl/composition/factories/services/__init__.py": ("public_package_facade"),
     "src/bioetl/composition/health_api.py": "public_facade",
     "src/bioetl/composition/maintenance_api.py": "public_facade",
     "src/bioetl/composition/providers/__init__.py": "public_package_facade",
@@ -51,9 +45,7 @@ EXPECTED_LAZY_EXPORT_FACADES = {
     "src/bioetl/domain/config/__init__.py": "public_package_facade",
     "src/bioetl/domain/exceptions/__init__.py": "public_package_facade",
     "src/bioetl/domain/filtering/__init__.py": "public_package_facade",
-    "src/bioetl/domain/normalization/profiles/__init__.py": (
-        "public_package_facade"
-    ),
+    "src/bioetl/domain/normalization/profiles/__init__.py": ("public_package_facade"),
     "src/bioetl/domain/ports/__init__.py": "public_package_facade",
     "src/bioetl/domain/types/__init__.py": "public_package_facade",
     "src/bioetl/domain/value_objects/__init__.py": "public_package_facade",
@@ -110,7 +102,14 @@ def _module_level_lazy_export_paths() -> set[str]:
     rg_path = shutil.which("rg")
     if rg_path:
         result = subprocess.run(
-            [rg_path, "--files-with-matches", "def __getattr__", "src/bioetl", "--glob", "*.py"],
+            [
+                rg_path,
+                "--files-with-matches",
+                "def __getattr__",
+                "src/bioetl",
+                "--glob",
+                "*.py",
+            ],
             cwd=ROOT,
             check=False,
             capture_output=True,
@@ -118,9 +117,7 @@ def _module_level_lazy_export_paths() -> set[str]:
         )
         assert result.returncode in {0, 1}, result.stderr
         candidate_paths = (
-            ROOT / line.strip()
-            for line in result.stdout.splitlines()
-            if line.strip()
+            ROOT / line.strip() for line in result.stdout.splitlines() if line.strip()
         )
     else:
         candidate_paths = SRC_ROOT.rglob("*.py")

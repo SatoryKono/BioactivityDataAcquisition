@@ -207,14 +207,18 @@ class TestSilverMetadataService:
 
 @pytest.mark.unit
 class TestGoldMetadataService:
-    def test_constructor_dependencies_use_builder_field_names__test_gold_metadata_service_application_services_test_metadata_assemblers_210(self) -> None:
+    def test_constructor_dependencies_use_builder_field_names__test_gold_metadata_service_application_services_test_metadata_assemblers_210(
+        self,
+    ) -> None:
         field_names = {field.name for field in fields(GoldMetadataService)}
 
         assert "runtime_metadata_builder" in field_names
         assert "pipeline_metadata_builder" in field_names
         assert all(not field_name.endswith("_factory") for field_name in field_names)
 
-    def test_assemble_rejects_empty_payload_without_total_records__test_gold_metadata_service_application_services_test_metadata_assemblers_217(self) -> None:
+    def test_assemble_rejects_empty_payload_without_total_records__test_gold_metadata_service_application_services_test_metadata_assemblers_217(
+        self,
+    ) -> None:
         run_context = _make_run_context()
         runtime_builder, _calls = _make_runtime_builder(run_context)
         service = GoldMetadataService(

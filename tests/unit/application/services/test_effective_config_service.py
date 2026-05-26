@@ -11,7 +11,7 @@ import pytest
 from bioetl.application.services.control_plane._effective_config_support import (
     stable_hash,
 )
-from bioetl.application.services.control_plane.effective_config_service import (
+from bioetl.application.services.control_plane.effective_config.service import (
     EffectiveConfigService,
     create_effective_config_service,
 )

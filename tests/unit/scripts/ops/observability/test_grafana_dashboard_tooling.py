@@ -13,9 +13,7 @@ from scripts.ops.observability.grafana import (
 from tests.helpers import assert_router_python_command
 
 
-def test_rerender_config_uses_env_defaults(
-    monkeypatch: Any, tmp_path: Path
-) -> None:
+def test_rerender_config_uses_env_defaults(monkeypatch: Any, tmp_path: Path) -> None:
     monkeypatch.setenv("GRAFANA_BASE_URL", "http://grafana.local:3000")
     monkeypatch.setenv("GRAFANA_USERNAME", "viewer")
     monkeypatch.setenv("GRAFANA_PASSWORD", "secret")
@@ -151,12 +149,23 @@ def test_live_audit_reviewed_specs_cover_semantically_sensitive_panels() -> None
         for spec in audit_subject.REVIEWED_PANEL_SPECS
     }
 
-    assert covered[("bioetl-control-plane-v1", 132)] == "Monitor: Manifest Write Failure Ratio"
-    assert covered[("bioetl-control-plane-v1", 133)] == "Monitor: Ledger Append Failure Ratio"
-    assert covered[("bioetl-control-plane-v1", 892)] == "Monitor: Checkpoint Freshness Lag (seconds)"
+    assert (
+        covered[("bioetl-control-plane-v1", 132)]
+        == "Monitor: Manifest Write Failure Ratio"
+    )
+    assert (
+        covered[("bioetl-control-plane-v1", 133)]
+        == "Monitor: Ledger Append Failure Ratio"
+    )
+    assert (
+        covered[("bioetl-control-plane-v1", 892)]
+        == "Monitor: Checkpoint Freshness Lag (seconds)"
+    )
     assert covered[("bioetl-dq-v2", 101)] == "Review: Latest Successful Data Timestamp"
     assert covered[("bioetl-dq-v2", 8)] == "Monitor: Worst Data Freshness Lag (seconds)"
-    assert covered[("bioetl-silver-reject-explorer", 3)] == "Track Reject Rate vs Bronze"
+    assert (
+        covered[("bioetl-silver-reject-explorer", 3)] == "Track Reject Rate vs Bronze"
+    )
 
 
 def test_live_audit_classifies_prometheus_zero_and_nonzero_results() -> None:

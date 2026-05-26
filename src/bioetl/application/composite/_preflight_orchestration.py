@@ -18,7 +18,9 @@ from bioetl.domain.ports import LoggerPort
 def _find_schema_class(module: object) -> type | None:
     """Return the first exported generated schema class from a module."""
     for exported in getattr(module, "__all__", ()):
-        candidate = getattr(module, exported, None) if isinstance(exported, str) else exported
+        candidate = (
+            getattr(module, exported, None) if isinstance(exported, str) else exported
+        )
         if isinstance(candidate, type) and hasattr(candidate, "to_schema"):
             return candidate
 

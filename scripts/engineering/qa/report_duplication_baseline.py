@@ -448,8 +448,7 @@ def _markdown_summary_lines(
         lines.extend(
             [
                 f"- previous_snapshot_date: {trend_summary.get('previous_snapshot_date')}",
-                "- total_duplicate_cluster_delta_vs_previous: "
-                f"{delta_text}",
+                f"- total_duplicate_cluster_delta_vs_previous: {delta_text}",
             ]
         )
     lines.extend(

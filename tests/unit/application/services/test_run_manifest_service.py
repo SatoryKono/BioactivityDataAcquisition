@@ -10,7 +10,7 @@ from uuid import UUID
 import pytest
 
 import bioetl.infrastructure.control_plane.file_run_manifest_store as manifest_store_module
-from bioetl.application.services.control_plane.run_manifest_service import (
+from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec as RunManifestCreateRequest,
     RunManifestService,
 )

@@ -58,7 +58,10 @@ def test_run_pytest_wrapper_escalates_to_full_capabilities_for_optional_surfaces
     content = RUN_PYTEST_SH.read_text(encoding="utf-8")
 
     assert "_needs_full_test_capabilities_for_selection()" in content
-    assert 'export BIOETL_REQUIRE_TEST_CAPABILITIES="$REQUIRE_FULL_TEST_CAPABILITIES"' in content
+    assert (
+        'export BIOETL_REQUIRE_TEST_CAPABILITIES="$REQUIRE_FULL_TEST_CAPABILITIES"'
+        in content
+    )
     for expected_path in (
         "tests/architecture",
         "tests/benchmarks",

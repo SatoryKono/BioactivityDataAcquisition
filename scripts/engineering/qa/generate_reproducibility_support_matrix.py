@@ -9,11 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_OUTPUT = (
-    ROOT
-    / "docs"
-    / "02-architecture"
-    / "policies"
-    / "reproducibility-support-matrix.md"
+    ROOT / "docs" / "02-architecture" / "policies" / "reproducibility-support-matrix.md"
 )
 
 if str(ROOT / "src") not in sys.path:
@@ -164,7 +160,10 @@ def _resolve_output(raw_output: str) -> Path:
         output = ROOT / output
     resolved_root = ROOT.resolve()
     resolved_output = output.resolve()
-    if resolved_output != resolved_root and resolved_root not in resolved_output.parents:
+    if (
+        resolved_output != resolved_root
+        and resolved_root not in resolved_output.parents
+    ):
         raise ValueError(f"refusing to write outside repository: {resolved_output}")
     return resolved_output
 

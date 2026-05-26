@@ -399,7 +399,9 @@ def test_repo_backed_unit_test_exceptions_are_explicitly_classified() -> None:
 
 
 @pytest.mark.architecture
-def test_mixed_scope_unit_path_policy_is_explicit_and_matches_reclassified_examples() -> None:
+def test_mixed_scope_unit_path_policy_is_explicit_and_matches_reclassified_examples() -> (
+    None
+):
     payload = _load_yaml(CONFIG_PATH)
     policy = cast(YamlMap, payload["mixed_scope_unit_path_policy"])
     retained_policy_refs = cast(list[str], policy["retained_policy_refs"])

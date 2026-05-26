@@ -241,7 +241,9 @@ def _normalize_host_access_url(url: str) -> str:
         return url.rstrip("/")
     port = f":{parts.port}" if parts.port is not None else ""
     host = f"localhost{port}"
-    return urlunsplit((parts.scheme, host, parts.path, parts.query, parts.fragment)).rstrip("/")
+    return urlunsplit(
+        (parts.scheme, host, parts.path, parts.query, parts.fragment)
+    ).rstrip("/")
 
 
 def _discover_http_datasource_url(
@@ -330,7 +332,10 @@ def _classify_prometheus_payload(payload: object) -> tuple[str, str]:
             try:
                 values.append(float(sample[1]))
             except (TypeError, ValueError):
-                return ("invalid_shape", "Prometheus vector sample value is not numeric")
+                return (
+                    "invalid_shape",
+                    "Prometheus vector sample value is not numeric",
+                )
         if all(value == 0.0 for value in values):
             return ("zero_result", "Prometheus vector returned only zero values")
         return ("nonzero_result", "Prometheus vector returned non-zero values")
@@ -352,7 +357,10 @@ def _classify_http_payload(payload: object) -> tuple[str, str]:
         return ("invalid_shape", "HTTP payload is not a JSON object")
     required_keys = {"total", "bronze_records", "reject_ratio"}
     if not required_keys.issubset(payload):
-        return ("invalid_shape", f"HTTP payload missing keys: {sorted(required_keys - set(payload))}")
+        return (
+            "invalid_shape",
+            f"HTTP payload missing keys: {sorted(required_keys - set(payload))}",
+        )
     total = payload.get("total")
     bronze_records = payload.get("bronze_records")
     reject_ratio = payload.get("reject_ratio")
@@ -363,7 +371,10 @@ def _classify_http_payload(payload: object) -> tuple[str, str]:
     if not isinstance(reject_ratio, (int, float)):
         return ("invalid_shape", "HTTP reject_ratio must be numeric")
     if total == 0 and bronze_records == 0:
-        return ("zero_state_unknown_denominator", "Explorer summary returned zero with missing denominator")
+        return (
+            "zero_state_unknown_denominator",
+            "Explorer summary returned zero with missing denominator",
+        )
     if total == 0:
         return ("zero_result", "Explorer summary returned zero rejects")
     return ("nonzero_result", "Explorer summary returned non-zero rejects")
@@ -396,9 +407,8 @@ def _audit_prometheus_panel(
             query_preview="",
         )
     rendered_expr = _substitute_dashboard_tokens(expr, config)
-    query_url = (
-        f"{config.prometheus_base_url}/api/v1/query?"
-        + urlencode({"query": rendered_expr})
+    query_url = f"{config.prometheus_base_url}/api/v1/query?" + urlencode(
+        {"query": rendered_expr}
     )
     payload = _fetch_json(query_url)
     classification, detail = _classify_prometheus_payload(payload)

@@ -291,13 +291,10 @@ def _rglob_file_targets(
     excluded_parts_set = set(excluded_parts)
     for pattern in patterns:
         for matched_path in root.rglob(pattern):
-            if (
-                not matched_path.is_file()
-                or _is_excluded_cleanup_path(
-                    root,
-                    matched_path,
-                    blocked_cleanup_paths=blocked_cleanup_paths,
-                )
+            if not matched_path.is_file() or _is_excluded_cleanup_path(
+                root,
+                matched_path,
+                blocked_cleanup_paths=blocked_cleanup_paths,
             ):
                 continue
             if excluded_parts_set.intersection(matched_path.parts):
@@ -322,13 +319,10 @@ def _find_cache_dirs(
     targets: list[CleanupTarget] = []
     for name in PYTHON_CACHE_DIRS:
         for cache_dir in root.rglob(name):
-            if (
-                not cache_dir.is_dir()
-                or _is_excluded_cleanup_path(
-                    root,
-                    cache_dir,
-                    blocked_cleanup_paths=blocked_cleanup_paths,
-                )
+            if not cache_dir.is_dir() or _is_excluded_cleanup_path(
+                root,
+                cache_dir,
+                blocked_cleanup_paths=blocked_cleanup_paths,
             ):
                 continue
             targets.append(_cache_dir_target(cache_dir))
@@ -357,13 +351,10 @@ def _find_build_dirs(
 
     # Egg-info directories
     for egg_dir in root.glob(EGGINFO_PATTERN):
-        if (
-            egg_dir.is_dir()
-            and not _is_excluded_cleanup_path(
-                root,
-                egg_dir,
-                blocked_cleanup_paths=blocked_cleanup_paths,
-            )
+        if egg_dir.is_dir() and not _is_excluded_cleanup_path(
+            root,
+            egg_dir,
+            blocked_cleanup_paths=blocked_cleanup_paths,
         ):
             targets.append(_dir_target(egg_dir, "build_artifact"))
 
@@ -408,13 +399,10 @@ def _find_coverage_files(
     targets: list[CleanupTarget] = []
     for pattern in COVERAGE_FILES:
         for cov_file in root.glob(pattern):
-            if (
-                cov_file.is_file()
-                and not _is_excluded_cleanup_path(
-                    root,
-                    cov_file,
-                    blocked_cleanup_paths=blocked_cleanup_paths,
-                )
+            if cov_file.is_file() and not _is_excluded_cleanup_path(
+                root,
+                cov_file,
+                blocked_cleanup_paths=blocked_cleanup_paths,
             ):
                 targets.append(_file_target(cov_file, "coverage"))
     return targets
@@ -723,7 +711,9 @@ def delete_targets(
             if target.is_dir:
                 shutil.rmtree(target.path, ignore_errors=True)
                 if target.path.exists():
-                    raise OSError(f"directory still exists after cleanup: {target.path}")
+                    raise OSError(
+                        f"directory still exists after cleanup: {target.path}"
+                    )
             else:
                 target.path.unlink()
             deleted.append(target)

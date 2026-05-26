@@ -85,7 +85,9 @@ class TestTableConfig:
         assert config.silver_table is None
         assert config.gold_table is None
 
-    def test_custom_primary_keys__test_table_config_unit_domain_test_config_88(self) -> None:
+    def test_custom_primary_keys__test_table_config_unit_domain_test_config_88(
+        self,
+    ) -> None:
         """Test custom primary keys."""
         config = TableConfig(primary_keys=["id", "version"])
 

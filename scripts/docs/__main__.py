@@ -54,7 +54,9 @@ COMMANDS = {
     "audit-sentence": "scripts.docs.fixers.sentence_audit",
     "sync-repo-identity": "scripts.docs.fixers.repo_identity",
 }
-COMMAND_SPECS = {name: module_command(module_name) for name, module_name in COMMANDS.items()}
+COMMAND_SPECS = {
+    name: module_command(module_name) for name, module_name in COMMANDS.items()
+}
 _DIR = Path(__file__).parent
 
 

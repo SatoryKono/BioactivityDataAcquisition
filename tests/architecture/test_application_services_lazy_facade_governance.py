@@ -15,6 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 from pathlib import Path
 import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -385,6 +386,26 @@ def test_temp_output_cleanup_does_not_mask_windows_file_lock(
     _unlink_output_path(Path("locked.txt"), retry_seconds=0.0)
 
     assert calls == _TEMPFILE_UNLINK_ATTEMPTS
+
+
+def test_windows_subprocess_kwargs_hide_command_windows() -> None:
+    startupinfo = SimpleNamespace(dwFlags=0, wShowWindow=5)
+    fake_subprocess = SimpleNamespace(
+        CREATE_NO_WINDOW=0x08000000,
+        STARTF_USESHOWWINDOW=0x00000001,
+        SW_HIDE=0,
+        STARTUPINFO=lambda: startupinfo,
+    )
+
+    kwargs = _hidden_windows_subprocess_kwargs(
+        os_name="nt",
+        subprocess_module=fake_subprocess,
+    )
+
+    assert kwargs["creationflags"] == 0x08000000
+    assert kwargs["startupinfo"] is startupinfo
+    assert startupinfo.dwFlags == 0x00000001
+    assert startupinfo.wShowWindow == 0
 
 
 def test_application_services_package_root_has_zero_first_party_src_callers() -> None:

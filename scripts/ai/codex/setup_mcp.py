@@ -65,7 +65,9 @@ def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
         "docker": _wrapper_command("mcp_docker_wrapper", workspace_root),
         "context7": _wrapper_command("mcp_context7_wrapper", workspace_root),
         "ast-grep": _wrapper_command("mcp_ast_grep_wrapper", workspace_root),
-        "mcp-code-interpreter": _wrapper_command("mcp_code_interpreter_wrapper", workspace_root),
+        "mcp-code-interpreter": _wrapper_command(
+            "mcp_code_interpreter_wrapper", workspace_root
+        ),
         "prometheus": _wrapper_command("mcp_prometheus_wrapper", workspace_root),
         "grafana": _wrapper_command("mcp_grafana_wrapper", workspace_root),
         "brave-search": _wrapper_command("mcp_brave_search_wrapper", workspace_root),

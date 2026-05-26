@@ -269,9 +269,7 @@ def validate_backlog(
     backlog = load_backlog(backlog_path)
     rule_index = _build_rule_index(backlog)
     actual_index = _counter_index(findings)
-    expected_index = {
-        key: Counter(rule.fields) for key, rule in rule_index.items()
-    }
+    expected_index = {key: Counter(rule.fields) for key, rule in rule_index.items()}
 
     errors: list[str] = []
     for key in sorted(actual_index.keys() - expected_index.keys()):
@@ -282,7 +280,9 @@ def validate_backlog(
     for key in sorted(expected_index.keys() - actual_index.keys()):
         path, marker = key
         fields = ", ".join(sorted(expected_index[key]))
-        errors.append(f"Backlog rule no longer matches any {marker} in {path}: {fields}")
+        errors.append(
+            f"Backlog rule no longer matches any {marker} in {path}: {fields}"
+        )
 
     for key in sorted(actual_index.keys() & expected_index.keys()):
         actual = actual_index[key]
@@ -304,7 +304,9 @@ def validate_backlog(
 
     return BacklogValidation(
         findings=findings,
-        rules=tuple(sorted(rule_index.values(), key=lambda rule: (rule.path, rule.marker))),
+        rules=tuple(
+            sorted(rule_index.values(), key=lambda rule: (rule.path, rule.marker))
+        ),
         errors=tuple(errors),
     )
 
@@ -431,7 +433,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.json_out is not None:
         _write_text(args.json_out, json.dumps(payload, indent=2, sort_keys=True) + "\n")
     if args.markdown_out is not None:
-        _write_text(args.markdown_out, _render_markdown(payload, limit=args.limit) + "\n")
+        _write_text(
+            args.markdown_out, _render_markdown(payload, limit=args.limit) + "\n"
+        )
 
     if validation.ok:
         print(

@@ -93,10 +93,15 @@ def normalize_sonar_token(token: str | None) -> str | None:
     if token is None:
         return None
     normalized = token.strip()
-    if len(normalized) >= 2 and normalized[0] == normalized[-1] and normalized[0] in {
-        '"',
-        "'",
-    }:
+    if (
+        len(normalized) >= 2
+        and normalized[0] == normalized[-1]
+        and normalized[0]
+        in {
+            '"',
+            "'",
+        }
+    ):
         normalized = normalized[1:-1].strip()
     return normalized or None
 

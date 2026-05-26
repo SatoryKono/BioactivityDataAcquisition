@@ -99,9 +99,7 @@ def build_provider_contract_drift_report() -> dict[str, Any]:
         "report_kind": "provider_contract_drift",
         "source_kind": "vcr_replay",
         "source_posture": (
-            "vcr_replay_with_lfs_pointer_skips"
-            if skipped_probe_count
-            else "vcr_replay"
+            "vcr_replay_with_lfs_pointer_skips" if skipped_probe_count else "vcr_replay"
         ),
         "totals": {
             "provider_count": len(provider_summary),

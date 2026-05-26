@@ -6,7 +6,10 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.composite.runner_pkg import CompositePipelineRunner, CompositeRuntimeConfig
+from bioetl.application.composite.runner_pkg import (
+    CompositePipelineRunner,
+    CompositeRuntimeConfig,
+)
 from tests.unit.application.composite import runner_test_support as support
 
 pytestmark = pytest.mark.unit

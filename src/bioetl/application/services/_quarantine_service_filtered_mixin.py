@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+    from bioetl.application.services.control_plane.manifest.inspection_service import (
         RunManifestInspectionService,
     )
     from bioetl.domain.ports import LoggerPort, QuarantinePort

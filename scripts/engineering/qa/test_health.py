@@ -786,14 +786,10 @@ def _append_baseline_section(
     threshold_percent = coverage.get("threshold_percent")
     total_cases = duration.get("total_cases")
     coverage_display = (
-        "pending"
-        if actual_percent is None
-        else f"{float(actual_percent):.2f}%"
+        "pending" if actual_percent is None else f"{float(actual_percent):.2f}%"
     )
     threshold_display = (
-        "pending"
-        if threshold_percent is None
-        else f"{float(threshold_percent):.1f}%"
+        "pending" if threshold_percent is None else f"{float(threshold_percent):.1f}%"
     )
     total_cases_display = "pending" if total_cases is None else str(total_cases)
     lines.extend(

@@ -190,9 +190,7 @@ def extract_publication_nested_vocab(
 ) -> dict[str, dict[str, list[str]]]:
     return {
         "openalex": extract_openalex_nested_vocab(openalex_paths),
-        "semanticscholar": extract_semanticscholar_nested_vocab(
-            semanticscholar_paths
-        ),
+        "semanticscholar": extract_semanticscholar_nested_vocab(semanticscholar_paths),
         "pubmed": extract_pubmed_nested_vocab(pubmed_paths),
     }
 

@@ -154,7 +154,9 @@ class TestSubcellularFractionDataSourceContextManager:
         assert wrapper._seen_fractions == set()
 
     @pytest.mark.asyncio
-    async def test_aexit_delegates__test_subcellular_fraction_data_source_context_manager_application_core_test_subcellular_fraction_data_source_157(self) -> None:
+    async def test_aexit_delegates__test_subcellular_fraction_data_source_context_manager_application_core_test_subcellular_fraction_data_source_157(
+        self,
+    ) -> None:
         source = MockDataSource()
         wrapper = SubcellularFractionDataSource(data_source=source)
 

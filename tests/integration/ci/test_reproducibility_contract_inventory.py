@@ -12,7 +12,7 @@ from uuid import UUID
 
 import polars as pl
 
-from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionService,
 )
 from bioetl.domain.control_plane import RunLedgerEntry

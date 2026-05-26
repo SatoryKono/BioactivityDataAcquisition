@@ -306,7 +306,9 @@ def main(argv: list[str] | None = None) -> int:
         _render_via_api(config)
     except HTTPError as exc:
         if exc.code == 500:
-            print(f"HTTP error: {exc.code} {exc.reason}. {_render_failure_hint(config)}")
+            print(
+                f"HTTP error: {exc.code} {exc.reason}. {_render_failure_hint(config)}"
+            )
         else:
             print(f"HTTP error: {exc.code} {exc.reason}")
         if config.fallback == "auto":

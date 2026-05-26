@@ -174,7 +174,9 @@ class TestDelegationMethods:
         assert result == {"optimized": 5}
 
     @pytest.mark.asyncio
-    async def test_deduplicate_silver_delegates__test_delegation_methods_infrastructure_storage_test_silver_writer_maintenance_boost_177(self, tmp_path: Path) -> None:
+    async def test_deduplicate_silver_delegates__test_delegation_methods_infrastructure_storage_test_silver_writer_maintenance_boost_177(
+        self, tmp_path: Path
+    ) -> None:
         """deduplicate_silver delegates to _retention_manager."""
         mixin = _ConcreteMaintMixin(tmp_path)
         mixin._retention_manager.deduplicate_silver = AsyncMock(return_value=5)

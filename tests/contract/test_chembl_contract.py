@@ -15,7 +15,9 @@ import os
 import httpx
 import pytest
 
-from tests.contract._provider_contract_drift import assert_provider_probe_matches_snapshot
+from tests.contract._provider_contract_drift import (
+    assert_provider_probe_matches_snapshot,
+)
 from tests.contract.conftest import (
     CHEMBL_ACTIVITY_REQUIRED_FIELDS,
     CHEMBL_MOLECULE_REQUIRED_FIELDS,
@@ -25,12 +27,20 @@ from tests.contract.conftest import (
 CHEMBL_API_BASE = "https://www.ebi.ac.uk/chembl/api/data"
 CHEMBL_TARGET_CONTRACT_PARAMS = {"target_chembl_id": "CHEMBL1824", "limit": 1}
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
-REPLAY_SNAPSHOT_PROBES = ("activity_endpoint_schema", "molecule_endpoint_schema", "target_endpoint_schema")
+REPLAY_SNAPSHOT_PROBES = (
+    "activity_endpoint_schema",
+    "molecule_endpoint_schema",
+    "target_endpoint_schema",
+)
 
 
 def _replay_snapshot_update_contract() -> tuple[bool, object, tuple[str, ...]]:
     """Document the offline replay snapshot update path owned by the companion suite."""
-    return UPDATE_SNAPSHOTS, assert_provider_probe_matches_snapshot, REPLAY_SNAPSHOT_PROBES
+    return (
+        UPDATE_SNAPSHOTS,
+        assert_provider_probe_matches_snapshot,
+        REPLAY_SNAPSHOT_PROBES,
+    )
 
 
 def _document_replay_snapshot_probe_bindings() -> None:
@@ -39,10 +49,14 @@ def _document_replay_snapshot_probe_bindings() -> None:
         assert_provider_probe_matches_snapshot("chembl", "activity_endpoint_schema", {})
         assert_provider_probe_matches_snapshot("chembl", "molecule_endpoint_schema", {})
         assert_provider_probe_matches_snapshot("chembl", "target_endpoint_schema", {})
+
+
 _CHEMBL_TRANSIENT_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
 _CHEMBL_REQUEST_RETRY_ATTEMPTS = 3
 _CHEMBL_REQUEST_RETRY_DELAY_SECONDS = 2.0
-_CHEMBL_RESPONSE_CACHE: dict[tuple[str, str, tuple[tuple[str, str], ...]], httpx.Response] = {}
+_CHEMBL_RESPONSE_CACHE: dict[
+    tuple[str, str, tuple[tuple[str, str], ...]], httpx.Response
+] = {}
 pytestmark = pytest.mark.network
 
 
@@ -160,7 +174,6 @@ class TestChemblContract:
         missing_fields = CHEMBL_ACTIVITY_REQUIRED_FIELDS - set(activity.keys())
         assert not missing_fields, f"Missing required fields: {missing_fields}"
 
-
     @pytest.mark.asyncio
     async def test_molecule_endpoint_schema(self) -> None:
         """Verify molecule endpoint returns expected schema."""
@@ -183,7 +196,6 @@ class TestChemblContract:
         missing_fields = CHEMBL_MOLECULE_REQUIRED_FIELDS - set(molecule.keys())
         assert not missing_fields, f"Missing required fields: {missing_fields}"
 
-
     @pytest.mark.asyncio
     async def test_target_endpoint_schema(self) -> None:
         """Verify target endpoint returns expected schema."""
@@ -205,7 +217,6 @@ class TestChemblContract:
         target = targets[0]
         missing_fields = CHEMBL_TARGET_REQUIRED_FIELDS - set(target.keys())
         assert not missing_fields, f"Missing required fields: {missing_fields}"
-
 
     @pytest.mark.asyncio
     async def test_assay_endpoint_schema(self) -> None:

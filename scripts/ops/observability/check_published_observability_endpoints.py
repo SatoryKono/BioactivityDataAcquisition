@@ -145,7 +145,9 @@ def run_checks(
     timeout_seconds: float = 3.0,
     include_container_checks: bool = True,
     http_probe: Callable[[str, float], ProbeResult] = _fetch_http,
-    container_probe: Callable[[str, str, float], ProbeResult] = _probe_container_internal,
+    container_probe: Callable[
+        [str, str, float], ProbeResult
+    ] = _probe_container_internal,
 ) -> list[EndpointCheck]:
     checks: list[EndpointCheck] = []
     for endpoint in endpoints:

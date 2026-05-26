@@ -670,7 +670,9 @@ class TestAdapterPortCompliance:
         tree = _parse_cached_python_file(source_content_cache, py_file)
         implemented_markers = _class_contract_markers(tree, class_name)
 
-        assert implemented_markers, f"{module_path}.{class_name} class definition not found"
+        assert implemented_markers, (
+            f"{module_path}.{class_name} class definition not found"
+        )
         assert implemented_markers & contract_markers, (
             f"{module_path}.{class_name} must expose filterable contract markers "
             f"{sorted(contract_markers)}"

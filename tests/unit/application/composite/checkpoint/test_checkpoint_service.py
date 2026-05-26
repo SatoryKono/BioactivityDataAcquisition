@@ -1320,7 +1320,9 @@ class TestSave:
         assert any("Saved checkpoint" in c for c in debug_calls)
 
     @pytest.mark.asyncio
-    async def test_save_sets_checkpoint_saved_at_gauge_from_state_timestamp(self) -> None:
+    async def test_save_sets_checkpoint_saved_at_gauge_from_state_timestamp(
+        self,
+    ) -> None:
         """save() publishes checkpoint freshness from persisted state timestamps."""
         metrics = MagicMock()
         svc, _, _ = _make_service(metrics=metrics)

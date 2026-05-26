@@ -43,7 +43,9 @@ class TestResolveRegistryPath:
         # Should end with the default filename
         assert result.name == "architecture_metric_exemptions.yaml"
 
-    def test_absolute_path_returned_as_is__test_resolve_registry_path_infrastructure_quality_test_exemptions_registry_paths_46(self) -> None:
+    def test_absolute_path_returned_as_is__test_resolve_registry_path_infrastructure_quality_test_exemptions_registry_paths_46(
+        self,
+    ) -> None:
         """Absolute path should be returned unchanged (resolved for platform)."""
         abs_path = Path(tempfile.gettempdir(), "test.yaml").resolve()
         result = resolve_registry_path(abs_path)
@@ -75,7 +77,9 @@ class TestNormalizePathText:
         result = normalize_path_text("./src/bioetl/module.py")
         assert result == "src/bioetl/module.py"
 
-    def test_already_normalized__test_normalize_path_text_infrastructure_quality_test_exemptions_registry_paths_78(self) -> None:
+    def test_already_normalized__test_normalize_path_text_infrastructure_quality_test_exemptions_registry_paths_78(
+        self,
+    ) -> None:
         """Already normalized path should be unchanged."""
         result = normalize_path_text("src/bioetl/module.py")
         assert result == "src/bioetl/module.py"

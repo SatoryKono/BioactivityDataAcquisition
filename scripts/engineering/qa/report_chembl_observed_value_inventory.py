@@ -80,7 +80,9 @@ def _tracked_fixture_paths(fixture_key: str, entry: dict[str, Any]) -> tuple[str
     tracked_paths = [fixture_path_raw]
 
     edge_fixtures = entry.get("edge_fixtures", [])
-    assert isinstance(edge_fixtures, list), f"{fixture_key}: edge_fixtures must be a list"
+    assert isinstance(edge_fixtures, list), (
+        f"{fixture_key}: edge_fixtures must be a list"
+    )
     for edge_entry in edge_fixtures:
         if not isinstance(edge_entry, dict):
             continue
@@ -139,7 +141,9 @@ def _summarize_fixture(
 
     pipeline_name = _pipeline_name_from_fixture_key(fixture_key)
     summaries: list[FixtureSummaryRow] = []
-    for field_name in sorted(set(non_null_counts) | set(null_counts) | set(field_values)):
+    for field_name in sorted(
+        set(non_null_counts) | set(null_counts) | set(field_values)
+    ):
         examples = tuple(sorted(field_values.get(field_name, set()))[:max_examples])
         summaries.append(
             FixtureSummaryRow(
@@ -167,8 +171,12 @@ def build_inventory_payload(*, max_examples: int = 5) -> dict[str, object]:
                 "fixture_key": fixture_key,
                 "pipeline_name": _pipeline_name_from_fixture_key(fixture_key),
                 "fixture_path": entry["fixture_path"],
-                "tracked_fixture_paths": list(_tracked_fixture_paths(fixture_key, entry)),
-                "tracked_fixture_count": len(_tracked_fixture_paths(fixture_key, entry)),
+                "tracked_fixture_paths": list(
+                    _tracked_fixture_paths(fixture_key, entry)
+                ),
+                "tracked_fixture_count": len(
+                    _tracked_fixture_paths(fixture_key, entry)
+                ),
                 "records": entry["records"],
                 "field_count": len(summaries),
             }
@@ -231,7 +239,10 @@ def _render_markdown(payload: dict[str, object], *, limit: int) -> str:
 
 def _write_json(path: Path, payload: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
 
 def _render_csv(rows: list[dict[str, object]]) -> str:
     buffer = StringIO(newline="")
@@ -299,13 +310,28 @@ def main(argv: list[str] | None = None) -> int:
     rendered_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
 
     if args.check:
-        current_json = args.json_out.read_text(encoding="utf-8") if args.json_out.exists() else ""
-        current_md = args.markdown_out.read_text(encoding="utf-8") if args.markdown_out.exists() else ""
-        current_csv = args.csv_out.read_text(encoding="utf-8") if args.csv_out.exists() else ""
+        current_json = (
+            args.json_out.read_text(encoding="utf-8") if args.json_out.exists() else ""
+        )
+        current_md = (
+            args.markdown_out.read_text(encoding="utf-8")
+            if args.markdown_out.exists()
+            else ""
+        )
+        current_csv = (
+            args.csv_out.read_text(encoding="utf-8") if args.csv_out.exists() else ""
+        )
         rendered_csv = _render_csv(csv_rows)
 
-        if current_json != rendered_json or current_md != markdown or current_csv != rendered_csv:
-            print("ChEMBL observed value inventory is stale. Re-run the report generator.", file=sys.stderr)
+        if (
+            current_json != rendered_json
+            or current_md != markdown
+            or current_csv != rendered_csv
+        ):
+            print(
+                "ChEMBL observed value inventory is stale. Re-run the report generator.",
+                file=sys.stderr,
+            )
             return 1
         return 0
 

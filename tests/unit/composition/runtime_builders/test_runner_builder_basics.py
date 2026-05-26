@@ -9,6 +9,7 @@ from bioetl.composition.runtime_builders.runner_builder_wiring import (
 
 from tests.unit.composition.runtime_builders.runner_builder_test_support import *  # noqa: F403,F405
 
+
 def test_handle_control_plane_setup_returns_effective_manifest_profile(
     monkeypatch,
 ) -> None:

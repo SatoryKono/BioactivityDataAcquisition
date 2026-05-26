@@ -32,7 +32,7 @@ if TYPE_CHECKING:
         FSMStateHelperService,
         PipelineRunner,
     )
-    from bioetl.application.services.control_plane.run_ledger_service import (
+    from bioetl.application.services.control_plane.ledger.service import (
         RunLedgerService,
     )
     from bioetl.application.services.dq_report_service import DQReportService

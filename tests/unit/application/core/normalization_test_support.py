@@ -26,8 +26,6 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.unit
-
-
 def build_normalization_processor(**kwargs):
     return RecordNormalizationProcessor(**kwargs)
 

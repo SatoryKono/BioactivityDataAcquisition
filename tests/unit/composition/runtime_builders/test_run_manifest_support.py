@@ -12,7 +12,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.services.control_plane.run_manifest_service import (
+from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec,
 )
 from bioetl.composition.runtime_builders._run_manifest_creation_support import (

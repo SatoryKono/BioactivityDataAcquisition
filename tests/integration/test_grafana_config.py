@@ -973,7 +973,10 @@ def test_control_plane_remaining_replay_safety_text_is_not_stale() -> None:
     assert "/ops/control-plane/identity-evidence" in content
     assert "manifest/run identity" in content
     assert "execution/config/contract/input anchors" in content
-    assert "checkpoint freshness lag panel now provides bounded checkpoint-age evidence" in content
+    assert (
+        "checkpoint freshness lag panel now provides bounded checkpoint-age evidence"
+        in content
+    )
     assert "checkpoint_age <= recovery window / RPO" not in content
     assert "manifest_id/run_id identity table in Grafana" not in content
     assert "execution_fingerprint, config_hash, contract_ref" not in content

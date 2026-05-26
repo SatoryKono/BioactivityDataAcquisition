@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -86,6 +87,26 @@ def test_parse_markdown_note_metadata_only_preserves_quoted_numeric_strings(
     assert note.metadata["id"] == "3467"
     assert note.metadata["task_id"] == "3507"
     assert note.metadata["ttl_days"] == 14
+
+
+def test_hidden_windows_subprocess_kwargs_prevent_console_popups() -> None:
+    startupinfo = SimpleNamespace(dwFlags=0, wShowWindow=5)
+    fake_subprocess = SimpleNamespace(
+        CREATE_NO_WINDOW=0x08000000,
+        STARTF_USESHOWWINDOW=0x00000001,
+        SW_HIDE=0,
+        STARTUPINFO=lambda: startupinfo,
+    )
+
+    kwargs = notes_module._hidden_windows_subprocess_kwargs(
+        os_name="nt",
+        subprocess_module=fake_subprocess,
+    )
+
+    assert kwargs["creationflags"] == 0x08000000
+    assert kwargs["startupinfo"] is startupinfo
+    assert startupinfo.dwFlags == 0x00000001
+    assert startupinfo.wShowWindow == 0
 
 
 def test_parse_markdown_note_timeout_does_not_wait_for_blocked_reader(

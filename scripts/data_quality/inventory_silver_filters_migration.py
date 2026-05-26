@@ -131,7 +131,10 @@ def _normalize_value(value: Any) -> str:
     if isinstance(value, (list, tuple)):
         # Stable sort for set-like comparison via canonical form.
         try:
-            return json.dumps(sorted(value, key=lambda v: (str(type(v).__name__), str(v))), ensure_ascii=False)
+            return json.dumps(
+                sorted(value, key=lambda v: (str(type(v).__name__), str(v))),
+                ensure_ascii=False,
+            )
         except TypeError:
             return json.dumps(list(value), ensure_ascii=False)
     if isinstance(value, dict):
@@ -148,8 +151,12 @@ def _compare_values(silver_value: Any, gold_value: Any) -> str:
         return ACTION_MOVE
 
     if isinstance(silver_value, list) and isinstance(gold_value, list):
-        silver_set = {json.dumps(v, sort_keys=True, ensure_ascii=False) for v in silver_value}
-        gold_set = {json.dumps(v, sort_keys=True, ensure_ascii=False) for v in gold_value}
+        silver_set = {
+            json.dumps(v, sort_keys=True, ensure_ascii=False) for v in silver_value
+        }
+        gold_set = {
+            json.dumps(v, sort_keys=True, ensure_ascii=False) for v in gold_value
+        }
         if silver_set == gold_set:
             return ACTION_DUPLICATE
         return ACTION_CONFLICT
@@ -347,9 +354,7 @@ def write_json(plans: list[EntityPlan], path: Path) -> None:
             }
         )
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def _aggregate_totals(plans: list[EntityPlan]) -> dict[str, int]:
@@ -385,12 +390,8 @@ def _render_md_entity_section(plan: EntityPlan) -> str:
         f"duplicate: **{counts[ACTION_DUPLICATE]}**, "
         f"conflict: **{counts[ACTION_CONFLICT]}**\n\n"
     )
-    buf.write(
-        "| Rule type | Field | Silver value | Gold value | Action | Notes |\n"
-    )
-    buf.write(
-        "| --- | --- | --- | --- | --- | --- |\n"
-    )
+    buf.write("| Rule type | Field | Silver value | Gold value | Action | Notes |\n")
+    buf.write("| --- | --- | --- | --- | --- | --- |\n")
     for rule in plan.rules:
         # truncate long values for readability
         silver_repr = (rule.silver_value or "").replace("|", "\\|")
@@ -423,8 +424,7 @@ def write_markdown(plans: list[EntityPlan], path: Path) -> None:
         f"{totals['entities_with_silver_filters']}\n"
     )
     buf.write(
-        f"- **Entities with `gold_filters`**: "
-        f"{totals['entities_with_gold_filters']}\n"
+        f"- **Entities with `gold_filters`**: {totals['entities_with_gold_filters']}\n"
     )
     buf.write(f"- **Total rules planned**: {totals['rules_total']}\n")
     buf.write(f"  - keep_in_silver: **{totals[ACTION_KEEP]}**\n")

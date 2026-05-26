@@ -141,7 +141,10 @@ def _schema_summary(rows: list[dict[str, str]]) -> str:
     silver_present = sum("silver_arrow:present" in value for value in schema_values)
     domain_missing = sum("domain_schema:missing" in value for value in schema_values)
     domain_present = len(schema_values) - domain_missing
-    constrained = sum("checks=" in value and not value.endswith("checks=none)") for value in schema_values)
+    constrained = sum(
+        "checks=" in value and not value.endswith("checks=none)")
+        for value in schema_values
+    )
     return (
         f"silver {silver_present}/{len(schema_values)}; "
         f"domain {domain_present}/{len(schema_values)}; "
@@ -187,13 +190,20 @@ def _validation_summary(validations: list[dict[str, Any]]) -> str:
     return ", ".join(f"{name}×{count}" for name, count in sorted(counter.items()))
 
 
-def _threshold_summary(config: dict[str, Any], dq_config: dict[str, Any] | None = None) -> str:
+def _threshold_summary(
+    config: dict[str, Any], dq_config: dict[str, Any] | None = None
+) -> str:
     quality = config.get("quality", {})
     dq_overrides = quality if "soft_fail_threshold" in quality else {}
     if dq_config:
         dq_overrides = dq_config.get("dq_overrides", {}) or {}
     parts: list[str] = []
-    for key in ("soft_fail_threshold", "hard_fail_threshold", "warning_threshold", "quarantine_threshold"):
+    for key in (
+        "soft_fail_threshold",
+        "hard_fail_threshold",
+        "warning_threshold",
+        "quarantine_threshold",
+    ):
         value = dq_overrides.get(key)
         if value is not None:
             parts.append(f"{key}={value}")
@@ -239,8 +249,14 @@ def build_rows() -> list[dict[str, str]]:
         rows = grouped[pipeline_name]
         sample = rows[0]
         business_rows = _business_rows(rows)
-        normalizers = Counter(row["normalizer"] for row in business_rows if row["normalizer"])
-        semantic_categories = Counter(row["semantic_category"] for row in business_rows if row["semantic_category"])
+        normalizers = Counter(
+            row["normalizer"] for row in business_rows if row["normalizer"]
+        )
+        semantic_categories = Counter(
+            row["semantic_category"]
+            for row in business_rows
+            if row["semantic_category"]
+        )
         identifier_ontology = Counter(
             row["semantic_category"]
             for row in business_rows
@@ -255,7 +271,8 @@ def build_rows() -> list[dict[str, str]]:
         structured_payloads = Counter(
             row["normalizer"]
             for row in business_rows
-            if "json" in row["normalizer"] or row["semantic_category"] in {"structured_json", "canonical_json"}
+            if "json" in row["normalizer"]
+            or row["semantic_category"] in {"structured_json", "canonical_json"}
         )
 
         if sample["pipeline_kind"] == "entity":
@@ -270,9 +287,13 @@ def build_rows() -> list[dict[str, str]]:
             config = config_entry["config"]
             quality = {}
             source_refs = _source_refs(
-                config_entry["config_path"], config_entry.get("dq_config_path"), MATRIX_CSV
+                config_entry["config_path"],
+                config_entry.get("dq_config_path"),
+                MATRIX_CSV,
             )
-            threshold_summary = _threshold_summary(config, config_entry.get("dq_config"))
+            threshold_summary = _threshold_summary(
+                config, config_entry.get("dq_config")
+            )
             composite_join_summary = _composite_join_summary(config)
 
         output.append(
@@ -284,7 +305,9 @@ def build_rows() -> list[dict[str, str]]:
                 "business_field_count": str(len(business_rows)),
                 "normalization_summary": _top_semantics(semantic_categories),
                 "top_normalizers": _top_terms(normalizers, limit=6),
-                "identifier_ontology_summary": _top_semantics(identifier_ontology, limit=4),
+                "identifier_ontology_summary": _top_semantics(
+                    identifier_ontology, limit=4
+                ),
                 "structured_payload_summary": _top_terms(structured_payloads, limit=4),
                 "schema_validation_summary": _schema_summary(rows),
                 "dq_matrix_summary": _dq_matrix_summary(rows),
@@ -297,7 +320,9 @@ def build_rows() -> list[dict[str, str]]:
                 "conditional_validation_count": str(
                     len(quality.get("entity_conditional_validations", []) or [])
                 ),
-                "key_nullability_count": str(len(quality.get("key_nullability", []) or [])),
+                "key_nullability_count": str(
+                    len(quality.get("key_nullability", []) or [])
+                ),
                 "threshold_summary": threshold_summary,
                 "composite_join_summary": composite_join_summary,
                 "source_refs": source_refs,

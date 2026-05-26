@@ -470,10 +470,15 @@ def _subprocess_cache_dependency_paths(
     ]
     dependency_paths.extend(path for path in static_files if path.exists())
 
-    if cwd is not None and cwd.exists() and cwd not in {
-        repo_root,
-        repo_root / "src" / "bioetl",
-    }:
+    if (
+        cwd is not None
+        and cwd.exists()
+        and cwd
+        not in {
+            repo_root,
+            repo_root / "src" / "bioetl",
+        }
+    ):
         dependency_paths.append(cwd)
 
     return dependency_paths

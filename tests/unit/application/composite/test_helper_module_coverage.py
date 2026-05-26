@@ -58,114 +58,159 @@ class _SchemaFromVars:
             return object()
 
 
-_SchemaFromAll = SimpleNamespace(__all__=["ExportedSchema"], ExportedSchema=ExportedSchema)
+_SchemaFromAll = SimpleNamespace(
+    __all__=["ExportedSchema"], ExportedSchema=ExportedSchema
+)
 
 
 def test_dependency_join_support_exports_stay_bound_to_canonical_helpers() -> None:
-    assert 'execute_dependency_join' in dependency_join_support.__all__
+    assert "execute_dependency_join" in dependency_join_support.__all__
     assert dependency_join_support.resolve_left_pipeline is not None
     assert dependency_join_support.CompositeJoinContext is not None
 
 
 def test_column_priority_helpers_cover_seed_scan_and_fallback_paths() -> None:
-    assert resolve_seed_column(field='title', seed_provider='chembl', seed_entity='activity') == 'chembl.activity.title'
-    assert resolve_seed_column(field='title', seed_provider=None, seed_entity='activity') is None
-    assert resolve_by_column_scan(
-        provider='crossref',
-        field='title',
-        columns_set={'crossref.publication.title', 'pubmed.publication.title'},
-    ) == 'crossref.publication.title'
+    assert (
+        resolve_seed_column(
+            field="title", seed_provider="chembl", seed_entity="activity"
+        )
+        == "chembl.activity.title"
+    )
+    assert (
+        resolve_seed_column(field="title", seed_provider=None, seed_entity="activity")
+        is None
+    )
+    assert (
+        resolve_by_column_scan(
+            provider="crossref",
+            field="title",
+            columns_set={"crossref.publication.title", "pubmed.publication.title"},
+        )
+        == "crossref.publication.title"
+    )
 
     enrichers = (
-        EnricherConfig(pipeline='crossref_publication', join_keys=('doi',)),
-        EnricherConfig(pipeline='legacycrossref', join_keys=('doi',)),
+        EnricherConfig(pipeline="crossref_publication", join_keys=("doi",)),
+        EnricherConfig(pipeline="legacycrossref", join_keys=("doi",)),
     )
     columns, used_fallback = collect_priority_field_columns(
-        field='title',
+        field="title",
         enrichers=enrichers,
         available_columns={
-            'chembl.activity.title',
-            'crossref.publication.title',
-            'legacycrossref_title',
+            "chembl.activity.title",
+            "crossref.publication.title",
+            "legacycrossref_title",
         },
-        seed_pipeline='invalid-seed',
+        seed_pipeline="invalid-seed",
     )
 
-    assert columns == ['crossref.publication.title', 'legacycrossref_title']
+    assert columns == ["crossref.publication.title", "legacycrossref_title"]
     assert used_fallback is True
 
     ordered, parse_fallback = order_priority_columns(
-        field='title',
-        columns=['crossref.publication.title', 'chembl.activity.title'],
-        priorities=('seed', 'crossref'),
-        seed_pipeline='chembl_activity',
+        field="title",
+        columns=["crossref.publication.title", "chembl.activity.title"],
+        priorities=("seed", "crossref"),
+        seed_pipeline="chembl_activity",
     )
-    assert ordered == ['chembl.activity.title', 'crossref.publication.title']
+    assert ordered == ["chembl.activity.title", "crossref.publication.title"]
     assert parse_fallback is False
 
 
-def test_preflight_orchestration_helpers_cover_schema_lookup_aliases_and_annotations() -> None:
+def test_preflight_orchestration_helpers_cover_schema_lookup_aliases_and_annotations() -> (
+    None
+):
     helper = _DummyPreflight()
     result: dict[str, dict[str, object]] = {}
-    fields = {'doi': SimpleNamespace(name='doi', dtype='str', nullable=True, source='chembl.activity')}
+    fields = {
+        "doi": SimpleNamespace(
+            name="doi", dtype="str", nullable=True, source="chembl.activity"
+        )
+    }
 
     helper._register_source_aliases(  # type: ignore[arg-type]
         result,
-        pipeline_name='chembl_activity',
+        pipeline_name="chembl_activity",
         fields=fields,
         is_seed=True,
     )
-    assert helper._parse_pipeline_identity('chembl_activity') == ('chembl', 'activity')
-    assert helper._parse_pipeline_identity('broken') is None
-    assert result['seed'] is fields
-    assert result['chembl'] is fields
-    assert result['chembl_activity'] is fields
-    assert result['chembl.activity'] is fields
+    assert helper._parse_pipeline_identity("chembl_activity") == ("chembl", "activity")
+    assert helper._parse_pipeline_identity("broken") is None
+    assert result["seed"] is fields
+    assert result["chembl"] is fields
+    assert result["chembl_activity"] is fields
+    assert result["chembl.activity"] is fields
 
     class SchemaWithAnnotations:
-        __annotations__ = {'title': 'Series[String]', '_dq_warn': 'Series[boolean]'}
+        __annotations__ = {"title": "Series[String]", "_dq_warn": "Series[boolean]"}
 
-    extracted = helper._extract_fields_from_annotations(SchemaWithAnnotations, 'chembl.activity')
-    assert extracted['title'].dtype == 'str'
-    assert extracted['_dq_warn'].dtype == 'bool'
-    assert helper._extract_dtype_from_annotation('Series[Int64]') == 'int'
-    assert helper._simplify_dtype('datetime64[ns]') == 'datetime'
+    extracted = helper._extract_fields_from_annotations(
+        SchemaWithAnnotations, "chembl.activity"
+    )
+    assert extracted["title"].dtype == "str"
+    assert extracted["_dq_warn"].dtype == "bool"
+    assert helper._extract_dtype_from_annotation("Series[Int64]") == "int"
+    assert helper._simplify_dtype("datetime64[ns]") == "datetime"
 
     assert _find_schema_class(_SchemaFromAll) is ExportedSchema
     found = _find_schema_class(_SchemaFromVars)
     assert found is _SchemaFromVars.LocalSchema
 
 
-def test_cross_validator_helper_functions_cover_details_and_numeric_comparison() -> None:
+def test_cross_validator_helper_functions_cover_details_and_numeric_comparison() -> (
+    None
+):
     logger = MagicMock()
     pairing = EnricherFieldPairing(
-        enricher_pipeline='crossref_publication',
+        enricher_pipeline="crossref_publication",
         fields=(
-            FieldComparisonSpec(field_name='title', method=ComparisonMethod.EXACT),
-            FieldComparisonSpec(field_name='score', method=ComparisonMethod.NUMERIC_TOLERANCE, threshold=0.1),
-            FieldComparisonSpec(field_name='skip_me', method=ComparisonMethod.SKIP),
+            FieldComparisonSpec(field_name="title", method=ComparisonMethod.EXACT),
+            FieldComparisonSpec(
+                field_name="score",
+                method=ComparisonMethod.NUMERIC_TOLERANCE,
+                threshold=0.1,
+            ),
+            FieldComparisonSpec(field_name="skip_me", method=ComparisonMethod.SKIP),
         ),
     )
-    df = pl.DataFrame({
-        'chembl.publication.title': ['same', 'left'],
-        'crossref.publication.title': ['same', 'right'],
-        'chembl.publication.score': [100.0, 100.0],
-        'crossref.publication.score': [105.0, 130.0],
-    })
+    df = pl.DataFrame(
+        {
+            "chembl.publication.title": ["same", "left"],
+            "crossref.publication.title": ["same", "right"],
+            "chembl.publication.score": [100.0, 100.0],
+            "crossref.publication.score": [105.0, 130.0],
+        }
+    )
 
-    mismatch_total, compared_total, mismatch_counts, mismatch_bools = _count_mismatches_vectorized(
-        df, pairing, 'chembl', 'publication', 'crossref', 'publication', logger=logger
+    mismatch_total, compared_total, mismatch_counts, mismatch_bools = (
+        _count_mismatches_vectorized(
+            df,
+            pairing,
+            "chembl",
+            "publication",
+            "crossref",
+            "publication",
+            logger=logger,
+        )
     )
 
     assert mismatch_total.to_list() == [0, 2]
     assert compared_total.to_list() == [2, 2]
-    assert mismatch_counts['title'] == 1
-    assert mismatch_counts['score'] == 1
-    detail = _build_enricher_detail('crossref_publication', mismatch_bools, mismatch_total)
+    assert mismatch_counts["title"] == 1
+    assert mismatch_counts["score"] == 1
+    detail = _build_enricher_detail(
+        "crossref_publication", mismatch_bools, mismatch_total
+    )
     combined = _combine_cv_details([detail], len(df))
     assert combined.to_list()[0] is None
-    assert 'crossref_publication' in combined.to_list()[1]
-    numeric = _compare_field(df, 'chembl.publication.score', 'crossref.publication.score', ComparisonMethod.NUMERIC_TOLERANCE, 0.1)
+    assert "crossref_publication" in combined.to_list()[1]
+    numeric = _compare_field(
+        df,
+        "chembl.publication.score",
+        "crossref.publication.score",
+        ComparisonMethod.NUMERIC_TOLERANCE,
+        0.1,
+    )
     assert numeric.to_list() == [True, False]
 
 
@@ -173,21 +218,34 @@ def test_aggregator_helpers_cover_sort_resolution_and_filter_parsing() -> None:
     logger = MagicMock()
     aggregator = EnricherAggregator(logger)
     config = AggregationConfig(
-        group_by='doc_id',
+        group_by="doc_id",
         fields=(
-            AggregationFieldSpec(source_field='ranked_term', agg_function=AggregationFunction.COLLECT_LIST),
-            AggregationFieldSpec(source_field='status', agg_function=AggregationFunction.CONCAT_STR, filter_condition='status IS NOT NULL'),
+            AggregationFieldSpec(
+                source_field="ranked_term",
+                agg_function=AggregationFunction.COLLECT_LIST,
+            ),
+            AggregationFieldSpec(
+                source_field="status",
+                agg_function=AggregationFunction.CONCAT_STR,
+                filter_condition="status IS NOT NULL",
+            ),
         ),
     )
-    assert aggregator._resolve_sort_columns(config) == ['doc_id', 'ranked_term', 'status']
-    assert aggregator._parse_filter_condition('status IS NOT NULL') is not None
-    assert aggregator._parse_filter_condition('status IS NULL') is not None
+    assert aggregator._resolve_sort_columns(config) == [
+        "doc_id",
+        "ranked_term",
+        "status",
+    ]
+    assert aggregator._parse_filter_condition("status IS NOT NULL") is not None
+    assert aggregator._parse_filter_condition("status IS NULL") is not None
     assert aggregator._parse_filter_condition("status == 'ok'") is not None
     assert aggregator._parse_filter_condition("status != 'bad'") is not None
-    assert aggregator._parse_filter_condition('unparseable condition') is None
+    assert aggregator._parse_filter_condition("unparseable condition") is None
     logger.warning.assert_called_once()
 
-    df = pl.DataFrame({'doc_id': ['D1', 'D1'], 'ranked_term': ['b', 'a'], 'status': ['ok', None]})
-    result = aggregator.aggregate(df, config, 'crossref_publication')
-    assert result['ranked_term'].to_list()[0] == ['a', 'b']
-    assert result['status'].to_list()[0] == 'ok'
+    df = pl.DataFrame(
+        {"doc_id": ["D1", "D1"], "ranked_term": ["b", "a"], "status": ["ok", None]}
+    )
+    result = aggregator.aggregate(df, config, "crossref_publication")
+    assert result["ranked_term"].to_list()[0] == ["a", "b"]
+    assert result["status"].to_list()[0] == "ok"

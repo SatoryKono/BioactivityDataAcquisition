@@ -27,7 +27,7 @@ from bioetl.application.composite.runner_pkg.runner_control_plane_support import
 
 if TYPE_CHECKING:
     from bioetl.application.composite.runtime_models import CompositeExecutionContext
-    from bioetl.application.services.control_plane.run_ledger_service import (
+    from bioetl.application.services.control_plane.ledger.service import (
         RunLedgerService,
     )
     from bioetl.domain.composite.result import (
