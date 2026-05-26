@@ -482,7 +482,6 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
         ("bioetl-dq-v2.json", "Track: Silver Validation Failures in Range"),
         ("bioetl-dq-v2.json", "Inspect: Quarantine by Error Type"),
         ("bioetl-dq-v2.json", "Monitor: Silver Validation Failures"),
-        ("bioetl-dq-v2.json", "Monitor: Lineage Refs Missing"),
         ("bioetl-runtime.json", "Track Records by Stage / Run Type / Range"),
     ],
 )

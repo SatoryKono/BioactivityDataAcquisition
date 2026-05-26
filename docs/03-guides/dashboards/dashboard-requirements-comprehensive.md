@@ -236,7 +236,8 @@
 
 **Audited exact-duplicate reuse:**
 - `Monitor: Data Quality Score (Volume-weighted)` и `Track: Data Quality Score Trend (Volume-weighted)` в `bioetl-dq-v2` share expression intentionally
-- `Monitor: Lineage Refs Missing` reused между `bioetl-control-plane-v1` и `bioetl-dq-v2` intentionally
+- `Monitor: Lineage Refs Missing` canonically belongs to `bioetl-control-plane-v1`
+- `bioetl-dq-v2` uses a textual handoff instead of duplicating the same counter
 
 **Источник:** `design-system.md`, `dashboard-audit-checklist.md`
 
@@ -504,7 +505,8 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 - First-screen использует canonical current-status recording rules (`bioetl_dq_current_status`, `bioetl_dq_current_reason`)
 - Range evidence, raw tables, Silver reject breakdowns, logs, traces ниже first-screen
 - `Monitor: Data Quality Score (Volume-weighted)` и `Track: Data Quality Score Trend (Volume-weighted)` share expression intentionally (different UI roles)
-- `Monitor: Lineage Refs Missing` reused между `bioetl-control-plane-v1` и `bioetl-dq-v2` intentionally (different operator questions)
+- `Monitor: Lineage Refs Missing` canonically belongs to `bioetl-control-plane-v1`
+- `bioetl-dq-v2` uses a textual handoff instead of duplicating the same counter
 - Critical panels SHOULD иметь actionable CTA
 - Pipeline-wide 15m snapshot; `$run_type` и stage filters ниже управляют только selected-range evidence
 

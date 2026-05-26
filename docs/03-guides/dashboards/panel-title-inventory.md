@@ -81,7 +81,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 9402 | ID |
 | bioetl-dq-v2.json | 9403 | Processed Records |
 | bioetl-dq-v2.json | 101 | Latest Successful Data Timestamp |
-| bioetl-dq-v2.json | 116 | Lineage Refs Missing |
+| bioetl-dq-v2.json | 116 | Review: Control-plane lineage handoff |
 | bioetl-dq-v2.json | 117 | Silver Filter Rejects |
 | bioetl-dq-v2.json | 118 | Silver Filter Rejects by Pipeline |
 | bioetl-dq-v2.json | 121 | Top Silver Reject Reasons (Pareto) |

@@ -4,17 +4,17 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services.control_plane.historical_replay_closure_models import (
+from bioetl.application.services.control_plane.replay.historical_closure_models import (
     HistoricalReplayResidualDispositionRecord,
 )
-from bioetl.application.services.control_plane.historical_replay_closure_policy import (
+from bioetl.application.services.control_plane.replay.historical_closure_policy import (
     build_retained_corpus_claim,
     build_suggested_resolution,
     narrowed_scope_blockers,
     resolve_closure_verdict,
     validate_residual_dispositions,
 )
-from bioetl.application.services.control_plane.historical_replay_corpus_models import (
+from bioetl.application.services.control_plane.replay.historical_corpus_models import (
     HistoricalReplayCertifiabilityInventory,
     HistoricalReplayCertifiabilityRecord,
 )

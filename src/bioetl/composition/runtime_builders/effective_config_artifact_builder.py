@@ -6,7 +6,7 @@ import json
 from typing import TYPE_CHECKING
 
 import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
-from bioetl.application.services.control_plane.effective_config_service import (
+from bioetl.application.services.control_plane.effective_config.service import (
     create_effective_config_service,
 )
 from bioetl.composition.runtime_builders._effective_config_artifact_builder_support import (

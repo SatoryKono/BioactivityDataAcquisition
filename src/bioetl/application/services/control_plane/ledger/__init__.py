@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.run_ledger_service import (
+from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
 )
 

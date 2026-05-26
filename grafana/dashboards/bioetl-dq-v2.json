@@ -2595,38 +2595,10 @@
           "type": "stat"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "Selected-range lineage/control-plane correlation signal. Non-zero means traceability metadata was incomplete and replay/readiness may need Control Plane follow-up; this panel does not replace Control Plane diagnostics.",
+          "description": "Lineage-reference gaps remain a replay/control-plane trust signal owned by `0. Control Plane`. This DQ dashboard now uses an explicit handoff instead of mirroring the same counter again. Open the canonical control-plane panels when missing lineage must be reviewed together with replay blockers, manifest / ledger evidence, and artifact identity anchors.",
           "fieldConfig": {
             "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  }
-                ]
-              },
+              "mappings": [],
               "unit": "short"
             },
             "overrides": []
@@ -2638,37 +2610,21 @@
             "y": 57
           },
           "id": 116,
-          "options": {
-            "colorMode": "value",
-            "dataLinks": [
-              {
-                "targetBlank": false,
-                "title": "Open Silver Reject Explorer",
-                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
-                "includeVars": false
-              }
-            ],
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "targets": [
+          "links": [
             {
-              "expr": "round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
-              "legendFormat": "Missing Refs",
-              "refId": "A"
+              "includeVars": false,
+              "targetBlank": false,
+              "title": "Open Control Plane lineage diagnostics",
+              "tooltip": "Canonical lineage/replay trust surface. Opens the Control Plane dashboard focused on its lineage diagnostics row.",
+              "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=904&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id"
             }
           ],
-          "title": "Monitor: Lineage Refs Missing",
-          "type": "stat"
+          "options": {
+            "content": "### Lineage trust now lives in Control Plane\n- Use **0. Control Plane** for the canonical `Monitor: Lineage Refs Missing` signal.\n- Review lineage gaps together with replay blockers, manifest / ledger integrity, and artifact identity anchors.\n- This DQ surface keeps reject, quarantine, validation, and freshness evidence local instead of re-stating control-plane trust counters.\n",
+            "mode": "markdown"
+          },
+          "title": "Review: Control-plane lineage handoff",
+          "type": "text"
         },
         {
           "datasource": {

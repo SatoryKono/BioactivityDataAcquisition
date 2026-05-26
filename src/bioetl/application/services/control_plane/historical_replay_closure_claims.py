@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol, cast
 
-from bioetl.application.services.control_plane.historical_replay_closure_models import (
+from bioetl.application.services.control_plane.replay.historical_closure_models import (
     HistoricalReplayResidualDispositionRecord,
 )
 

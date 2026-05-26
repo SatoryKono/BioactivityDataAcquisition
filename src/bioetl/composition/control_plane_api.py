@@ -16,24 +16,24 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.forensic_diff_service import (
         ForensicRunDiffService,
     )
-    from bioetl.application.services.control_plane.historical_replay_closure_service import (
+    from bioetl.application.services.control_plane.replay.historical_closure_service import (
         HistoricalReplayClosureReport,
         HistoricalReplayClosureService,
     )
-    from bioetl.application.services.control_plane.historical_replay_corpus_service import (
+    from bioetl.application.services.control_plane.replay.historical_corpus_service import (
         HistoricalReplayCorpusService,
     )
-    from bioetl.application.services.control_plane.historical_replay_universe_service import (
+    from bioetl.application.services.control_plane.replay.historical_universe_service import (
         HistoricalReplayUniverseClosureReport,
         HistoricalReplayUniverseService,
     )
-    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+    from bioetl.application.services.control_plane.manifest.inspection_service import (
         RunManifestInspectionService,
     )
-    from bioetl.application.services.control_plane.workflow_execution_service import (
+    from bioetl.application.services.control_plane.workflow.execution_service import (
         WorkflowExecutionService,
     )
-    from bioetl.application.services.control_plane.workflow_inspection_service import (
+    from bioetl.application.services.control_plane.workflow.inspection_service import (
         WorkflowInspectionService,
     )
     from bioetl.application.services.export_service import ExportService

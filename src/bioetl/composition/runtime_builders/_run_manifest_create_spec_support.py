@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
-from bioetl.application.services.control_plane.run_manifest_service import (
+from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec,
 )
 from bioetl.composition.runtime_builders._run_manifest_attr_support import (

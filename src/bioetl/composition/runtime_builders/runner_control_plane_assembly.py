@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, is_dataclass, replace
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.run_ledger_service import (
+from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
 )
 from bioetl.composition.runtime_builders._runner_builder_support import (

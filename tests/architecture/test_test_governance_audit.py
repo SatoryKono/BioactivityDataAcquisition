@@ -187,10 +187,12 @@ def test_static_test_governance_report_reuses_cached_inventory_scan() -> None:
     second = collect_test_governance_report(ROOT)
 
     assert cache_policy["decision"] == "retained_cached_scanner"
+    assert cache_policy["issue_ref"] == "#4663"
     assert first is second
     assert cache_policy["cached_entrypoints"] == [
         "scripts.engineering.qa.report_test_governance_audit.collect_test_governance_report",
         "tests.architecture.conftest.cached_subprocess_run",
+        "tests.architecture.conftest._run_cached_subprocess",
         "tests.architecture.test_antipatterns.test_no_hardcoded_secrets",
     ]
     assert cache_policy["isolated_lanes"] == [

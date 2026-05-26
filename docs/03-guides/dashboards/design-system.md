@@ -416,10 +416,10 @@ Current audited exact-duplicate reuse:
   `Track: Data Quality Score Trend (Volume-weighted)` in `bioetl-dq-v2` share
   one weighted-score expression intentionally because they answer different UI
   roles: current gauge verdict vs trend review.
-- `Monitor: Lineage Refs Missing` is intentionally reused between
-  `bioetl-control-plane-v1` and `bioetl-dq-v2` because the same counter
-  supports two different operator questions: replay/control-plane trust and DQ
-  completeness risk.
+- `Monitor: Lineage Refs Missing` now has a single canonical owner:
+  `bioetl-control-plane-v1`.
+- `bioetl-dq-v2` MUST hand off to Control Plane with an explicit note/link
+  instead of mirroring the same counter a second time.
 
 Implementation guardrails:
 

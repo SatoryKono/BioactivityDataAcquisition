@@ -24,7 +24,7 @@ from bioetl.domain.normalization import normalize_runtime_anchor_payload
 if TYPE_CHECKING:
     from _typeshed import DataclassInstance
 
-    from bioetl.application.services.control_plane.run_ledger_service import (
+    from bioetl.application.services.control_plane.ledger.service import (
         RunLedgerService,
     )
     from bioetl.composition.runtime_builders.inputs_resolver import (

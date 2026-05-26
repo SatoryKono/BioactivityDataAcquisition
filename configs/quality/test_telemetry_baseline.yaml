@@ -96,3 +96,24 @@ duration_telemetry:
   - source: junit_parallel.xml
     test: tests.unit.infrastructure.validation.test_pandera_validator.TestPanderaValidatorPropertyBased::test_strict_mode_without_schema_always_fails
     duration_s: 2.127
+
+slow_governance_cache_probe:
+  issue_ref: '#4663'
+  refreshed_at_utc: 2026-05-26T04:32:00+00:00
+  source: local_direct_probe
+  probes:
+  - name: collect_test_governance_report
+    scope: architecture-slow-governance
+    cache_mode: in_process_cache
+    first_duration_s: 28.676
+    second_duration_s: 0.001
+    improvement_factor: 34900.14
+  lane_isolation:
+    fast_boundary_suite_name: architecture-fast-boundary
+    slow_governance_suite_name: architecture-slow-governance
+    isolated: true
+  subprocess_cache:
+    entrypoints:
+    - tests.architecture.conftest.cached_subprocess_run
+    - tests.architecture.conftest._run_cached_subprocess
+    note: Disk-backed subprocess reuse now backs repo-wide scanner calls for detect-secrets, ruff, and mypy-style architecture governance checks.

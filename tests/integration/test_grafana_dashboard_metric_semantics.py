@@ -123,11 +123,6 @@ def _expected_duplicate_uses() -> dict[str, set[tuple[str, str]]]:
                 "Track: Data Quality Score Trend (Volume-weighted)",
             ),
         },
-        'round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~"$pipeline"}'
-        "[$__range])) or vector(0))": {
-            ("bioetl-control-plane-v1.json", "Monitor: Lineage Refs Missing"),
-            ("bioetl-dq-v2.json", "Monitor: Lineage Refs Missing"),
-        },
         'max((bioetl_replay_safety_blockers_15m{run_type=~"$run_type"}) and '
         'on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
         '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))': {
@@ -168,7 +163,7 @@ def _assert_dq_duplicate_reuse_semantics() -> None:
     )
 
 
-def _assert_lineage_duplicate_reuse_semantics() -> None:
+def _assert_lineage_control_plane_ownership_handoff() -> None:
     dq_dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     control_plane_dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-control-plane-v1.json")
@@ -183,14 +178,19 @@ def _assert_lineage_duplicate_reuse_semantics() -> None:
         for panel in get_dashboard_panels(control_plane_dashboard)
         if panel.get("title")
     }
-    dq_lineage = dq_panels["Monitor: Lineage Refs Missing"]
+    dq_handoff = dq_panels["Review: Control-plane lineage handoff"]
     control_plane_lineage = control_plane_panels["Monitor: Lineage Refs Missing"]
-    assert dq_lineage.get("options", {}).get("graphMode") == "none"
-    assert control_plane_lineage.get("options", {}).get("graphMode") == "area"
-    assert (
-        "does not replace control plane diagnostics"
-        in str(dq_lineage.get("description", "")).lower()
+    assert dq_handoff.get("type") == "text"
+    dq_content = str(dq_handoff.get("options", {}).get("content", "")).lower()
+    assert "control plane" in dq_content
+    assert "canonical" in dq_content
+    dq_links = list(dq_handoff.get("links") or [])
+    assert any(
+        "bioetl-control-plane-v1" in str(link.get("url", ""))
+        and "viewPanel=904" in str(link.get("url", ""))
+        for link in dq_links
     )
+    assert control_plane_lineage.get("options", {}).get("graphMode") == "area"
     assert (
         "missing lineage can make replay evidence incomplete"
         in str(control_plane_lineage.get("description", "")).lower()
@@ -734,7 +734,6 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             "Track: Silver Filter Rejects in Range": "round(",
             "Track: Silver Validation Failures in Range": "round(",
             "Monitor: Silver Validation Failures": "round(",
-            "Monitor: Lineage Refs Missing": "round(",
         },
         "bioetl-runtime.json": {
             "Monitor Pipeline Alert Conditions": "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
@@ -1830,4 +1829,4 @@ def test_exact_duplicate_promql_groups_are_only_explicitly_justified_reuse() -> 
         f"{duplicate_uses_by_expr}"
     )
     _assert_dq_duplicate_reuse_semantics()
-    _assert_lineage_duplicate_reuse_semantics()
+    _assert_lineage_control_plane_ownership_handoff()

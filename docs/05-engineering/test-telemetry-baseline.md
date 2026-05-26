@@ -58,6 +58,19 @@ trend evidence only.
 | 9 | `3.948` | `tests.architecture.test_scripts_inventory_manifest::test_scripts_inventory_manifest_drift_check_passes` | `junit_parallel.xml` |
 | 10 | `3.757` | `tests.architecture.test_antipatterns::test_no_blocking_io_in_async` | `junit_parallel.xml` |
 
+## Slow Governance Cache Probe
+
+- Issue ref: `#4663`
+- Probe source: `local_direct_probe`
+- Cached governance-report probe for `architecture-slow-governance`:
+  - first call: `28.676s`
+  - second call: `0.001s`
+  - improvement factor: `34900.14x`
+- Lane isolation remains explicit:
+  - fast lane: `architecture-fast-boundary`
+  - slow lane: `architecture-slow-governance`
+- Repo-wide subprocess scanners now use disk-backed reuse in `tests/architecture/conftest.py` via `cached_subprocess_run` and `_run_cached_subprocess`.
+
 ## Refresh Procedure
 
 1. Preferred path: download `reports/coverage/coverage.xml` and `reports/test-telemetry/slowest-tests.json` from a main-branch CI run.

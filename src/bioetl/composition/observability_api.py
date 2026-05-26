@@ -23,7 +23,7 @@ if TYPE_CHECKING:
         AuditInspectionService,
     )
     from bioetl.application.services.checkpoint_service import CheckpointService
-    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+    from bioetl.application.services.control_plane.manifest.inspection_service import (
         RunManifestInspectionService,
     )
     from bioetl.application.services.health_service import HealthService

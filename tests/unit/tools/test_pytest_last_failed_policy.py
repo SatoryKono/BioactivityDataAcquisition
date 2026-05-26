@@ -14,6 +14,7 @@ pytestmark = pytest.mark.unit
 @dataclass
 class _FakeOptionNamespace:
     lf: bool = False
+    tbstyle: str | None = None
 
 
 @dataclass
@@ -94,3 +95,57 @@ def test_pytest_itemcollected_tracks_pre_deselection_count() -> None:
     root_conftest.pytest_itemcollected(item)
 
     assert root_conftest._last_failed_collected_count(config) == 2
+
+
+def test_windows_pycharm_traceback_policy_uses_line_style(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = _FakeConfig(option=_FakeOptionNamespace(tbstyle="short"))
+    monkeypatch.setattr(root_conftest.sys, "platform", "win32")
+    monkeypatch.setenv("PYCHARM_HOSTED", "1")
+
+    root_conftest._configure_windows_pycharm_traceback_style(config)
+
+    assert config.option.tbstyle == "line"
+
+
+def test_windows_pycharm_traceback_policy_preserves_safe_style(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = _FakeConfig(option=_FakeOptionNamespace(tbstyle="no"))
+    monkeypatch.setattr(root_conftest.sys, "platform", "win32")
+    monkeypatch.setenv("PYCHARM_HOSTED", "1")
+
+    root_conftest._configure_windows_pycharm_traceback_style(config)
+
+    assert config.option.tbstyle == "no"
+
+
+def test_windows_traceback_policy_skips_non_pycharm_run(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = _FakeConfig(option=_FakeOptionNamespace(tbstyle="short"))
+    monkeypatch.setattr(root_conftest.sys, "platform", "win32")
+    monkeypatch.delenv("PYCHARM_HOSTED", raising=False)
+    monkeypatch.setattr(root_conftest.sys, "argv", ["pytest"])
+
+    root_conftest._configure_windows_pycharm_traceback_style(config)
+
+    assert config.option.tbstyle == "short"
+
+
+def test_windows_pycharm_traceback_policy_detects_jetbrains_runner_path(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = _FakeConfig(option=_FakeOptionNamespace(tbstyle="long"))
+    monkeypatch.setattr(root_conftest.sys, "platform", "win32")
+    monkeypatch.delenv("PYCHARM_HOSTED", raising=False)
+    monkeypatch.setattr(
+        root_conftest.sys,
+        "argv",
+        ["C:/Program Files/JetBrains/PyCharm/helpers/pycharm/_jb_pytest_runner.py"],
+    )
+
+    root_conftest._configure_windows_pycharm_traceback_style(config)
+
+    assert config.option.tbstyle == "line"
