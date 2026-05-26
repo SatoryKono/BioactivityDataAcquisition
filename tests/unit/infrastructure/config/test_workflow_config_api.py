@@ -124,6 +124,46 @@ def test_load_workflow_config_loads_defaults_and_steps(tmp_path: Path) -> None:
 
 
 @pytest.mark.unit
+def test_chembl_baseline_workflow_config_is_sequential_and_uses_logical_tables() -> (
+    None
+):
+    config = load_workflow_config("chembl_baseline", config_dir=WORKFLOW_CONFIG_DIR)
+
+    assert config.name == "chembl_baseline"
+    assert config.topological_step_ids == (
+        "run_chembl_assay",
+        "run_chembl_target",
+        "run_chembl_publication",
+        "reconcile_assay_target_orphans",
+        "reconcile_assay_publication_orphans",
+    )
+
+    reconcile_target = config.get_step("reconcile_assay_target_orphans")
+    assert isinstance(reconcile_target, TransformStepConfig)
+    assert reconcile_target.depends_on == ("run_chembl_publication",)
+    assert reconcile_target.config == {
+        "source_table": "chembl_assay",
+        "reference_table": "chembl_target",
+        "source_key": "target_id",
+        "reference_key": "target_id",
+        "primary_keys": ["assay_id"],
+        "action": "delete_orphans",
+    }
+
+    reconcile_publication = config.get_step("reconcile_assay_publication_orphans")
+    assert isinstance(reconcile_publication, TransformStepConfig)
+    assert reconcile_publication.depends_on == ("reconcile_assay_target_orphans",)
+    assert reconcile_publication.config == {
+        "source_table": "chembl_assay",
+        "reference_table": "chembl_publication",
+        "source_key": "publication_id",
+        "reference_key": "publication_id",
+        "primary_keys": ["assay_id"],
+        "action": "delete_orphans",
+    }
+
+
+@pytest.mark.unit
 def test_load_workflow_config_rejects_unknown_run_options(tmp_path: Path) -> None:
     workflows_dir = tmp_path / "configs" / "workflows"
     payload = _build_workflow_payload("example_activity_refresh")

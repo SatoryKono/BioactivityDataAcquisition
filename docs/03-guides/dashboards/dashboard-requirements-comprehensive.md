@@ -496,7 +496,7 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 - `Monitor DQ Current Status` is an expanded mirror of compact shared-shell `Status`, not an independent second current-status signal.
 - **Tier 2**: compact current-context band: `Monitor: Data Quality Score (Volume-weighted)`, `Monitor: Worst-Entity DQ Score`, `Monitor: Worst Data Freshness Lag (seconds)`, `Track: Records Quarantined in Range`, `Track: Soft Threshold Exceeded in Range`, `Track: Silver Filter Rejects in Range`
 - **Tier 3**: полноширинный `Track Range Evidence: Bronze -> Silver -> Gold`
-- **Tier 4**: collapsed rows: `Reject / Pareto / Fields`, `Validation Diagnostics`
+- **Tier 4**: collapsed rows: `Reject / Pareto / Fields`, `Validation Failures / Runtime Diagnostics / Trends`
 
 ### KPI ownership (canonical)
 - DQ Status (Silver Reject / quality posture) → canonical for `bioetl-dq-v2`, mirrors: `1. Overview`, `2. Runtime`

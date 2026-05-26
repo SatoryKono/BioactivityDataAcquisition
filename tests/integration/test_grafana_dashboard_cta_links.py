@@ -492,12 +492,12 @@ def test_data_quality_lineage_handoff_panel_points_to_canonical_control_plane_ro
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Review: Control-plane lineage handoff"
+            if item.get("title") == "Review: Lineage Handoff to Control Plane"
         ),
         None,
     )
     assert panel is not None, (
-        "Panel 'Review: Control-plane lineage handoff' not found in bioetl-dq-v2.json"
+        "Panel 'Review: Lineage Handoff to Control Plane' not found in bioetl-dq-v2.json"
     )
     links = list(panel.get("links") or [])
     matching_links = [

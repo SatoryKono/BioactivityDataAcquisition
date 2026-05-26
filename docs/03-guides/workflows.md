@@ -367,7 +367,8 @@ Present in the current tree:
   dashboard evidence survives short-lived CLI process exit;
 - workflow inspection by workflow name or explicit `--run-id`;
 - local single-runtime workflow locking through `MemoryLock`;
-- canonical example workflow config in `configs/workflows/chembl_core.yaml`;
+- canonical baseline workflow config in `configs/workflows/chembl_baseline.yaml`;
+- richer multi-step example workflow config in `configs/workflows/chembl_core.yaml`;
 - baseline built-in transform `summarize_upstream_outputs` for local workflow
   transform-step coverage;
 - built-in `reconcile_foreign_keys` for idempotent ChEMBL orphan cleanup;
@@ -381,7 +382,9 @@ operator-facing families:
 
 1. single-pipeline workflow wrappers for every non-composite pipeline;
 2. optional provider-pack workflows that bundle multiple related pipelines;
-3. richer multi-step examples such as `chembl_core` that mix pipeline and
+3. canonical baseline workflow `chembl_baseline` that runs the core ChEMBL
+   assay/target/publication pipelines before sequential orphan reconciliation;
+4. richer multi-step examples such as `chembl_core` that mix pipeline and
    transform steps.
 
 ### 1. Single-Pipeline Workflow Wrappers
@@ -428,7 +431,21 @@ These packs are:
   operator order, but they do not become the only supported entrypoint for the
   child pipelines.
 
-### 3. Richer Multi-Step Example
+### 3. Canonical ChemblBaseline Workflow
+
+`configs/workflows/chembl_baseline.yaml` is the canonical baseline example for a
+workflow that runs:
+
+- `run_chembl_assay`
+- `run_chembl_target`
+- `run_chembl_publication`
+- `reconcile_assay_target_orphans`
+- `reconcile_assay_publication_orphans`
+
+It keeps the destructive reconciliation phase after the core pipeline phase and
+uses logical table names only.
+
+### 4. Richer Multi-Step Example
 
 `configs/workflows/chembl_core.yaml` remains the canonical richer example for a
 workflow that mixes:
