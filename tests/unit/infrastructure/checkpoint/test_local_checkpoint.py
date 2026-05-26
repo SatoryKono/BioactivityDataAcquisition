@@ -77,7 +77,11 @@ class TestLocalCheckpointSaveLoad:
         self, checkpoint: LocalCheckpointAdapter, run_id: RunID
     ) -> None:
         """Should be able to load a saved checkpoint."""
-        metadata = {"offset": 100, "batch": 5}
+        metadata = {
+            "offset": 100,
+            "batch": 5,
+            "checkpoint_saved_at_epoch_seconds": 1770000000.0,
+        }
         await checkpoint.save("chembl_activity", run_id, metadata)
 
         result = await checkpoint.load("chembl_activity")
@@ -86,7 +90,7 @@ class TestLocalCheckpointSaveLoad:
         assert loaded_run_id == run_id
         assert loaded_metadata["offset"] == 100
         assert loaded_metadata["batch"] == 5
-        assert isinstance(loaded_metadata["checkpoint_saved_at_epoch_seconds"], float)
+        assert loaded_metadata["checkpoint_saved_at_epoch_seconds"] == 1770000000.0
 
     @pytest.mark.asyncio
     async def test_save_without_metadata(
@@ -97,7 +101,7 @@ class TestLocalCheckpointSaveLoad:
         result = await checkpoint.load("test_pipeline")
         assert result is not None
         _, loaded_metadata = result
-        assert set(loaded_metadata) == {"checkpoint_saved_at_epoch_seconds"}
+        assert loaded_metadata == {}
 
     @pytest.mark.asyncio
     async def test_save_with_none_metadata(

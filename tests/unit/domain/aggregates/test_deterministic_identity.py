@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
+from pathlib import Path
 
 from bioetl.domain.aggregates.batch import Batch
 from bioetl.domain.aggregates.events import BatchCreated
@@ -74,3 +76,35 @@ def test_quarantine_entry_create_derives_same_entry_id_from_same_inputs() -> Non
     assert first.entry_id == second.entry_id
     assert first.payload_hash == second.payload_hash
     assert len(first.entry_id) == 36
+
+
+def test_deterministic_identity_golden_contract_is_stable() -> None:
+    """Pinned values catch accidental namespace or canonicalization drift."""
+    fixture_path = (
+        Path(__file__).resolve().parents[3]
+        / "fixtures/golden/domain/deterministic_identity_v1.json"
+    )
+    golden = json.loads(fixture_path.read_text(encoding="utf-8"))
+    expected = golden["expected"]
+
+    batch = Batch.create(run_id=_run_id(), start_index=10, created_at=_ts())
+    event = BatchCreated(
+        occurred_at=_ts(),
+        run_id=_run_id(),
+        batch_id=_batch_id(),
+        record_count=3,
+    )
+    quarantine = QuarantineEntry.create(
+        pipeline_name="test_pipeline",
+        error_code="SCHEMA_VIOLATION",
+        payload={"id": "bad-record", "nested": {"b": 2, "a": 1}},
+        run_id=_run_id(),
+        batch_id=_batch_id(),
+        created_at=_ts(),
+        metadata={"source": "unit"},
+    )
+
+    assert str(batch.batch_id) == expected["batch_create_batch_id"]
+    assert str(event.event_id) == expected["batch_created_event_id"]
+    assert quarantine.entry_id == expected["quarantine_entry_id"]
+    assert quarantine.payload_hash == expected["quarantine_payload_hash"]

@@ -13,6 +13,9 @@ if __package__ in {None, ""}:
     repo_root_str = str(repo_root)
     if repo_root_str not in sys.path:
         sys.path.insert(0, repo_root_str)
+    src_root_str = str(repo_root / "src")
+    if src_root_str not in sys.path:
+        sys.path.insert(0, src_root_str)
 
 from scripts.ops.observability.grafana import audit_live_grafana_panels as live_audit
 from scripts.ops.observability.grafana import (
@@ -20,6 +23,10 @@ from scripts.ops.observability.grafana import (
 )
 from scripts.ops.observability.grafana import (
     rerender_grafana_screenshots as rerender,
+)
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    DEFAULT_HEALTH_SERVER_PORT,
+    ensure_observability_backend_started,
 )
 
 DEFAULT_GRAFANA_BASE_URL = "http://localhost:3000"
@@ -43,6 +50,8 @@ class AuditCycleConfig:
     screenshot_dir: Path
     preflight_timeout_seconds: float
     render_timeout_seconds: float
+    ensure_observability_backend: bool
+    observability_backend_port: int
     pipeline: str
     run_type: str
     range_hours: int
@@ -77,6 +86,17 @@ def _build_parser() -> argparse.ArgumentParser:
         type=float,
         default=DEFAULT_RENDER_TIMEOUT_SECONDS,
     )
+    parser.add_argument(
+        "--ensure-observability-backend/--no-ensure-observability-backend",
+        default=True,
+        help="Auto-start or reuse a detached Quarantine Explorer backend before audit.",
+    )
+    parser.add_argument(
+        "--observability-backend-port",
+        type=int,
+        default=DEFAULT_HEALTH_SERVER_PORT,
+        help="Port for the detached Quarantine Explorer backend.",
+    )
     parser.add_argument("--pipeline", default=DEFAULT_PIPELINE)
     parser.add_argument("--run-type", default=DEFAULT_RUN_TYPE)
     parser.add_argument("--range-hours", type=int, default=DEFAULT_RANGE_HOURS)
@@ -94,6 +114,8 @@ def _parse_args(argv: list[str] | None) -> AuditCycleConfig:
         screenshot_dir=args.screenshot_dir,
         preflight_timeout_seconds=args.preflight_timeout_seconds,
         render_timeout_seconds=args.render_timeout_seconds,
+        ensure_observability_backend=args.ensure_observability_backend,
+        observability_backend_port=args.observability_backend_port,
         pipeline=args.pipeline,
         run_type=args.run_type,
         range_hours=args.range_hours,
@@ -111,7 +133,7 @@ def _run_preflight(config: AuditCycleConfig, *, include_screenshot_check: bool) 
         "--prometheus-base-url",
         config.prometheus_base_url,
         "--app-base-url",
-        config.app_base_url,
+        f"http://127.0.0.1:{config.observability_backend_port}",
         "--timeout-seconds",
         str(config.preflight_timeout_seconds),
         "--screenshot-dir",
@@ -141,13 +163,27 @@ def _run_rerender(config: AuditCycleConfig) -> int:
     )
 
 
+def _ensure_backend(config: AuditCycleConfig) -> int:
+    result = ensure_observability_backend_started(
+        enabled=config.ensure_observability_backend,
+        port=config.observability_backend_port,
+    )
+    if config.ensure_observability_backend and not result.backend_available:
+        print(
+            "grafana-audit-cycle: observability backend is not ready "
+            f"({result.message or result.status})"
+        )
+        return 1
+    return 0
+
+
 def _run_live_audit(config: AuditCycleConfig) -> int:
     return live_audit.main(
         [
             "--prometheus-base-url",
             config.prometheus_base_url,
             "--app-base-url",
-            config.app_base_url,
+            f"http://127.0.0.1:{config.observability_backend_port}",
             "--grafana-base-url",
             config.grafana_base_url,
             "--grafana-username",
@@ -166,6 +202,11 @@ def _run_live_audit(config: AuditCycleConfig) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     config = _parse_args(argv)
+
+    print("grafana-audit-cycle: ensure observability backend")
+    backend_status = _ensure_backend(config)
+    if backend_status != 0:
+        return backend_status
 
     print("grafana-audit-cycle: preflight (services only)")
     preflight_status = _run_preflight(config, include_screenshot_check=False)

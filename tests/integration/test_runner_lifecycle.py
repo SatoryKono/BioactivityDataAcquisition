@@ -21,6 +21,9 @@ import pytest
 from bioetl.application.core.postrun import CompactionResult
 from bioetl.application.core.postrun.service import PostrunService
 from bioetl.application.core.preflight.service import PreflightService
+from bioetl.application.core._runner_dependency_support import (
+    PipelineRunnerDependencies,
+)
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.application.services.medallion_lifecycle import (
@@ -37,6 +40,48 @@ from bioetl.domain.types import RunType
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 _NOOP_TRACER = NoOpTracing()
+
+
+def _build_runner(
+    *,
+    config,
+    runtime,
+    services,
+    context,
+    executor,
+    checkpoint_manager,
+    shutdown_signal,
+    lock_manager,
+    preflight,
+    postrun,
+    lifecycle_service,
+    observer,
+    tracer,
+    logger=None,
+    pipeline=None,
+) -> PipelineRunner:
+    """Build PipelineRunner using the current grouped dependency seam."""
+    dependencies = PipelineRunnerDependencies(
+        executor=executor,
+        checkpoint_manager=checkpoint_manager,
+        lock_runtime_service=lock_manager,
+        preflight=preflight,
+        postrun=postrun,
+        lifecycle_service=lifecycle_service,
+        observer=observer,
+        shutdown_signal=shutdown_signal,
+    )
+    return PipelineRunner(
+        config=config,
+        runtime=runtime,
+        services=services,
+        context=context,
+        dependencies=dependencies,
+        pipeline=pipeline,
+        tracer=tracer,
+        logger=logger,
+    )
+
 
 
 @dataclass
@@ -378,7 +423,7 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
         lock_manager.__aexit__ = AsyncMock()
 
-        runner = PipelineRunner(
+        runner = _build_runner(
             config=config,
             runtime=runtime,
             services=mock_services_with_recorder,
@@ -500,7 +545,7 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = lm_aenter
         lock_manager.__aexit__ = lm_aexit
 
-        runner = PipelineRunner(
+        runner = _build_runner(
             config=config,
             runtime=runtime,
             services=mock_services_with_recorder,
@@ -591,7 +636,7 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
         lock_manager.__aexit__ = AsyncMock()
 
-        runner = PipelineRunner(
+        runner = _build_runner(
             config=config,
             runtime=runtime,
             services=mock_services_with_recorder,
@@ -669,7 +714,7 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = lm_aenter
         lock_manager.__aexit__ = lm_aexit
 
-        runner = PipelineRunner(
+        runner = _build_runner(
             config=config,
             runtime=runtime,
             services=mock_services_with_recorder,
@@ -751,7 +796,7 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
         lock_manager.__aexit__ = AsyncMock()
 
-        runner = PipelineRunner(
+        runner = _build_runner(
             config=config,
             runtime=runtime,
             services=mock_services_with_recorder,
@@ -831,7 +876,7 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = lm_aenter
         lock_manager.__aexit__ = lm_aexit
 
-        runner = PipelineRunner(
+        runner = _build_runner(
             config=config,
             runtime=runtime,
             services=mock_services_with_recorder,
@@ -921,7 +966,7 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
         lock_manager.__aexit__ = AsyncMock()
 
-        runner = PipelineRunner(
+        runner = _build_runner(
             config=config,
             runtime=runtime,
             services=mock_services_with_recorder,
@@ -1063,7 +1108,7 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
         lock_manager.__aexit__ = AsyncMock()
 
-        runner = PipelineRunner(
+        runner = _build_runner(
             config=config,
             runtime=runtime,
             services=services_with_dq,
@@ -1155,7 +1200,7 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
         lock_manager.__aexit__ = AsyncMock()
 
-        runner = PipelineRunner(
+        runner = _build_runner(
             config=config,
             runtime=runtime,
             services=mock_services_with_recorder,

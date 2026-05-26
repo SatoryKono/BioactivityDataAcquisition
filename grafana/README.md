@@ -87,7 +87,10 @@ ______________________________________________________________________
 > dashboard JSON.
 > `python -m scripts.ops run-grafana-audit-cycle` is the canonical full audit
 > workflow: service preflight, screenshot refresh, screenshot freshness
-> re-check, then reviewed live panel audit.
+> re-check, then reviewed live panel audit. By default it also reuses or
+> auto-starts the detached `bioetl quarantine serve` backend on port `8081`
+> before the first preflight, so `Quarantine Explorer`-backed panels can be
+> validated without a separate manual backend bootstrap step.
 
 ## 1. Архитектура мониторинга
 

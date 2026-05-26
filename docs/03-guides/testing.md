@@ -83,7 +83,11 @@ Local architecture runs should prefer the explicit
 `architecture-slow-governance` lane for full audit/governance checks. The shard
 aliases behind those lanes are `S7-architecture-fast-boundary` and
 `S7-architecture-slow-governance`; prefer them over older implicit shard names
-when calling the sharded runner directly.
+when calling the sharded runner directly. On mixed Windows + WSL mounted
+checkouts, do not treat root-wide filesystem scans as the first diagnostic path:
+use the named lanes or targeted files, prefer git-index-backed governance helpers
+for architecture inventories, and report WSL startup/filesystem timeouts as
+environment-limited validation rather than weakening assertions.
 
 Marker-only commands such as `pytest -m unit` are not canonical lanes and must
 not be compared as if they were `unit-fast`, `unit-parallel-safe`, or

@@ -15,7 +15,7 @@ from bioetl.domain.ports import ExportFileFingerprint
 if TYPE_CHECKING:
     import pyarrow as pa
 
-    from bioetl.domain.ports import ExportWriterPort
+    from bioetl.domain.ports import ClockPort, ExportWriterPort
 
 __all__ = [
     "ExportSidecarPayloads",
@@ -151,6 +151,7 @@ def build_export_sidecar_payloads(
     data_fingerprint: ExportFileFingerprint,
     generated_at: str | None = None,
     allow_nondeterministic_generated_at: bool = False,
+    clock: ClockPort | None = None,
     run_ids: tuple[str, ...] = (),
     code_revision: str | None = None,
     strict: bool = False,
@@ -172,6 +173,7 @@ def build_export_sidecar_payloads(
     timestamp = _resolve_generated_at(
         generated_at,
         allow_nondeterministic=allow_nondeterministic_generated_at,
+        clock=clock,
     )
     exported_data_file = _fingerprint_payload(data_fingerprint)
 
@@ -247,11 +249,13 @@ def build_export_checksum_manifest(
     generated_at: str | None,
     fingerprints: tuple[ExportFileFingerprint, ...],
     allow_nondeterministic_generated_at: bool = False,
+    clock: ClockPort | None = None,
 ) -> dict[str, object]:
     """Build a deterministic checksum manifest for data and sidecar files."""
     timestamp = _resolve_generated_at(
         generated_at,
         allow_nondeterministic=allow_nondeterministic_generated_at,
+        clock=clock,
     )
     return {
         "schema_version": MANIFEST_SCHEMA_VERSION,
@@ -274,6 +278,7 @@ def write_export_sidecar_manifests(
     row_count: int,
     generated_at: str | None = None,
     allow_nondeterministic_generated_at: bool = False,
+    clock: ClockPort | None = None,
     run_ids: tuple[str, ...] = (),
     code_revision: str | None = None,
     strict: bool = False,
@@ -289,6 +294,7 @@ def write_export_sidecar_manifests(
         data_fingerprint=data_fingerprint,
         generated_at=generated_at,
         allow_nondeterministic_generated_at=allow_nondeterministic_generated_at,
+        clock=clock,
         run_ids=run_ids,
         code_revision=code_revision,
         strict=strict,
@@ -405,6 +411,7 @@ def _resolve_generated_at(
     generated_at: str | None,
     *,
     allow_nondeterministic: bool,
+    clock: ClockPort | None,
 ) -> str:
     """Resolve export manifest timestamp without implicit replay-time wall clock drift."""
     if generated_at is not None:
@@ -412,6 +419,8 @@ def _resolve_generated_at(
         if timestamp:
             return timestamp
     if allow_nondeterministic:
+        if clock is not None:
+            return _format_utc(clock.now())
         return _utc_now()
     raise ValueError(
         "generated_at must be provided for deterministic export manifests; "
@@ -420,4 +429,10 @@ def _resolve_generated_at(
 
 
 def _utc_now() -> str:
-    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return _format_utc(datetime.now(UTC))
+
+
+def _format_utc(value: datetime) -> str:
+    return (
+        value.astimezone(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    )

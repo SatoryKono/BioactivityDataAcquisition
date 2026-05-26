@@ -135,6 +135,7 @@ def build_cli_checkpoint_runtime_service(
         pipeline_name=pipeline_name,
         run_id=run_id,
         resume=False,
+        clock=SystemClock(),
         checkpoint_compatibility_service=compatibility_service_factory(logger),
     )
 

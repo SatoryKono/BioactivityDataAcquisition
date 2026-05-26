@@ -44,6 +44,7 @@ from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.ports import (
     CheckpointPort,
+    ClockPort,
     GoldValidatorPort,
     LoggerPort,
     MetricsPort,
@@ -91,6 +92,7 @@ def create_checkpoint_manager(
     *,
     loading_strategy: LoadingStrategy | None = None,
     metrics: MetricsPort | None = None,
+    clock: ClockPort | None = None,
     checkpoint_compatibility_service: CheckpointCompatibilityService | None = None,
     current_metadata: CheckpointMetadata | None = None,
     compatibility_policy: Literal["observe", "soft_fail", "hard_fail"] = "soft_fail",
@@ -103,6 +105,7 @@ def create_checkpoint_manager(
         resume=resume,
         loading_strategy=loading_strategy,
         metrics=metrics,
+        clock=clock,
         checkpoint_compatibility_service=checkpoint_compatibility_service,
         current_metadata=current_metadata,
         compatibility_policy=compatibility_policy,

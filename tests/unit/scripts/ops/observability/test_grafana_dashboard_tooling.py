@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 from typing import Any
+from unittest.mock import MagicMock
 from urllib.error import URLError
 
 from scripts.ops import __main__ as ops_router
@@ -452,6 +453,11 @@ def test_grafana_audit_cycle_runs_preflight_rerender_and_live_audit(
     calls: list[tuple[str, list[str]]] = []
 
     monkeypatch.setattr(
+        cycle_subject,
+        "ensure_observability_backend_started",
+        lambda **_kwargs: MagicMock(backend_available=True, message="ok"),
+    )
+    monkeypatch.setattr(
         cycle_subject.preflight,
         "main",
         lambda argv: calls.append(("preflight", list(argv))) or 0,
@@ -487,6 +493,8 @@ def test_grafana_audit_cycle_runs_preflight_rerender_and_live_audit(
     ]
     assert "--skip-screenshot-check" in calls[0][1]
     assert "--skip-screenshot-check" not in calls[2][1]
+    assert "http://127.0.0.1:8081" in calls[0][1]
+    assert "http://127.0.0.1:8081" in calls[3][1]
 
 
 def test_grafana_audit_cycle_stops_on_service_preflight_failure(
@@ -494,6 +502,11 @@ def test_grafana_audit_cycle_stops_on_service_preflight_failure(
 ) -> None:
     calls: list[str] = []
 
+    monkeypatch.setattr(
+        cycle_subject,
+        "ensure_observability_backend_started",
+        lambda **_kwargs: MagicMock(backend_available=True, message="ok"),
+    )
     monkeypatch.setattr(
         cycle_subject.preflight,
         "main",
@@ -514,6 +527,29 @@ def test_grafana_audit_cycle_stops_on_service_preflight_failure(
 
     assert result == 1
     assert calls == ["preflight"]
+
+
+def test_grafana_audit_cycle_stops_when_backend_cannot_be_ensured(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    calls: list[str] = []
+
+    monkeypatch.setattr(
+        cycle_subject,
+        "ensure_observability_backend_started",
+        lambda **_kwargs: calls.append("ensure")
+        or MagicMock(backend_available=False, message="bind failed"),
+    )
+    monkeypatch.setattr(
+        cycle_subject.preflight,
+        "main",
+        lambda argv: calls.append("preflight") or 0,
+    )
+
+    result = cycle_subject.main(["--screenshot-dir", str(tmp_path)])
+
+    assert result == 1
+    assert calls == ["ensure"]
 
 
 def test_live_audit_writes_report(monkeypatch: Any, tmp_path: Path) -> None:
