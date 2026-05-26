@@ -120,6 +120,16 @@ canonical inputs:
 - `DomainEvent` derives a default `event_id` from the concrete event type and
   event payload; callers may still pass an explicit `event_id` when replaying a
   persisted event.
+- `tests/fixtures/golden/domain/deterministic_identity_v1.json` pins the
+  namespace/canonicalization contract for these IDs. Any change to the golden
+  values is a compatibility event and requires an ADR update.
+- Runtime `uuid4` defaults in `application/` and `composition/` are not domain
+  identities. They must stay classified in
+  `configs/quality/runtime_uuid_seams.yaml`; replay-critical identity must be
+  explicit or derived via deterministic domain identity.
+- Replay-critical checkpoint/manifest timestamps must be caller-owned:
+  application services use `ClockPort` or explicit timestamp parameters, while
+  storage adapters must not add hidden wall-clock metadata.
 
 ### 5. Архитектурные Тесты
 
@@ -131,6 +141,9 @@ canonical inputs:
 | `test-replay-critical-time-seams`             | Блокирует `datetime.now()` в replay-critical `application/` и `composition/` runtime/checkpoint/control-plane seams |
 | `test-no-structlog-in-application-interfaces` | Блокирует прямой импорт `structlog` в `application/` и `interfaces/`                                                |
 | `test_domain_aggregate_identity_surfaces_do_not_call_uuid4` | Блокирует hidden UUID4 в replay-sensitive aggregate/event identity surfaces |
+| `test_runtime_uuid4_generation_seams_are_classified` | Блокирует новые не классифицированные `uuid4` seams в `application/` и `composition/` |
+| `test_deterministic_identity_golden_contract_is_stable` | Фиксирует golden values для domain identity namespace/canonicalization |
+| `test_replay_critical_checkpoint_surfaces_do_not_call_wall_clock_directly` | Блокирует прямой wall-clock в checkpoint persistence surfaces |
 
 ### 6. Изоляция логирования
 

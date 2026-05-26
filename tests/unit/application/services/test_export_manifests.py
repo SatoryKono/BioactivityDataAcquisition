@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -11,6 +12,11 @@ from bioetl.application.services.export_manifests import (
     build_export_sidecar_payloads,
 )
 from bioetl.domain.ports import ExportFileFingerprint
+
+
+class _FixedClock:
+    def now(self) -> datetime:
+        return datetime(2026, 5, 1, 2, 3, 4, 987654, tzinfo=UTC)
 
 
 def _fingerprint(
@@ -155,3 +161,31 @@ def test_build_export_checksum_manifest_requires_generated_at_by_default() -> No
             generated_at=None,
             fingerprints=(_fingerprint("exports/data.csv"),),
         )
+
+
+def test_operator_timestamp_opt_in_can_use_clock_port() -> None:
+    sidecars = build_export_sidecar_payloads(
+        table_name="chembl.activity",
+        layer="silver",
+        export_format="csv",
+        row_count=2,
+        columns=("activity_id",),
+        data_fingerprint=_fingerprint(),
+        allow_nondeterministic_generated_at=True,
+        clock=_FixedClock(),
+    )
+
+    assert sidecars.provenance_manifest["generated_at"] == "2026-05-01T02:03:04Z"
+    assert sidecars.licensing_manifest["generated_at"] == "2026-05-01T02:03:04Z"
+
+
+def test_checksum_manifest_operator_timestamp_opt_in_can_use_clock_port() -> None:
+    payload = build_export_checksum_manifest(
+        dataset_bundle_id="bundle-1",
+        generated_at=None,
+        fingerprints=(_fingerprint("exports/data.csv"),),
+        allow_nondeterministic_generated_at=True,
+        clock=_FixedClock(),
+    )
+
+    assert payload["generated_at"] == "2026-05-01T02:03:04Z"

@@ -54,10 +54,8 @@ def _extract_manifest_id(metadata: JsonDict) -> str | None:
 
 
 def _normalize_saved_metadata(metadata: JsonDict | None) -> JsonDict:
-    """Return persisted metadata enriched with a checkpoint save timestamp."""
-    normalized = dict(metadata or {})
-    normalized.setdefault("checkpoint_saved_at_epoch_seconds", float(time.time()))
-    return normalized
+    """Return caller-owned checkpoint metadata without adding wall-clock state."""
+    return dict(metadata or {})
 
 
 def _read_json_file(path: Path) -> JsonDict:

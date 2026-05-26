@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -18,6 +19,11 @@ from bioetl.domain.types.checkpoint_metadata import (
     CheckpointMetadata,
 )
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
+
+
+class _FixedClock:
+    def now(self) -> datetime:
+        return datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC)
 
 
 @pytest.fixture
@@ -202,6 +208,7 @@ class TestCheckpointManagerLoadCheckpoint:
             run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             metrics=mock_metrics,
+            clock=_FixedClock(),
             checkpoint_compatibility_service=(
                 compatible_checkpoint_compatibility_service
             ),
@@ -253,6 +260,7 @@ class TestCheckpointManagerLoadCheckpoint:
             run_id=deterministic_uuid_from_callsite("replay-sensitive"),
             resume=True,
             metrics=mock_metrics,
+            clock=_FixedClock(),
         )
 
         result = await manager.load_checkpoint()
@@ -351,6 +359,7 @@ class TestCheckpointManagerSaveCheckpoint:
             run_id=run_id,
             resume=True,
             metrics=mock_metrics,
+            clock=_FixedClock(),
         )
 
         await manager.save_checkpoint(CheckpointMetadata(records_processed=500))
@@ -359,7 +368,12 @@ class TestCheckpointManagerSaveCheckpoint:
         assert mock_metrics.set_gauge.call_args.args[0] == (
             "bioetl_checkpoint_saved_at_seconds"
         )
+        assert mock_metrics.set_gauge.call_args.args[1] == 1767323045.0
         assert mock_metrics.set_gauge.call_args.args[2] == {"pipeline": "test_pipeline"}
+        call_kwargs = mock_checkpoint_port.save.call_args.kwargs
+        assert (
+            call_kwargs["metadata"]["checkpoint_saved_at_epoch_seconds"] == 1767323045.0
+        )
 
 
 @pytest.mark.unit

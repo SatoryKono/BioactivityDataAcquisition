@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from datetime import datetime
 from enum import Enum
+from typing import cast
 from uuid import UUID, uuid5
 
 from bioetl.domain.normalization.json import serialize_json_canonical
@@ -28,21 +29,54 @@ def deterministic_id(scope: str, payload: Mapping[str, object]) -> str:
     return str(deterministic_uuid(scope, payload))
 
 
+def _canonical_datetime(value: object) -> str:
+    return cast(datetime, value).isoformat()
+
+
+def _canonical_uuid(value: object) -> str:
+    return str(cast(UUID, value))
+
+
+def _canonical_enum(value: object) -> object:
+    return cast(Enum, value).value
+
+
+def _canonical_mapping(value: object) -> dict[str, object]:
+    mapping = cast(Mapping[object, object], value)
+    return {
+        str(key): _canonical_identity_value(nested)
+        for key, nested in sorted(mapping.items(), key=lambda item: str(item[0]))
+    }
+
+
+def _is_non_string_sequence(value: object) -> bool:
+    return isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray))
+
+
+def _canonical_sequence(value: object) -> list[object]:
+    return [
+        _canonical_identity_value(nested)
+        for nested in cast(Sequence[object], value)
+    ]
+
+
+_CANONICAL_CONVERTERS: tuple[
+    tuple[Callable[[object], bool], Callable[[object], object]],
+    ...,
+] = (
+    (lambda value: isinstance(value, datetime), _canonical_datetime),
+    (lambda value: isinstance(value, UUID), _canonical_uuid),
+    (lambda value: isinstance(value, Enum), _canonical_enum),
+    (lambda value: isinstance(value, Mapping), _canonical_mapping),
+    (_is_non_string_sequence, _canonical_sequence),
+)
+
+
 def _canonical_identity_value(value: object) -> object:
     """Convert common domain values into canonical JSON-compatible values."""
-    if isinstance(value, datetime):
-        return value.isoformat()
-    if isinstance(value, UUID):
-        return str(value)
-    if isinstance(value, Enum):
-        return value.value
-    if isinstance(value, Mapping):
-        return {
-            str(key): _canonical_identity_value(nested)
-            for key, nested in sorted(value.items(), key=lambda item: str(item[0]))
-        }
-    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
-        return [_canonical_identity_value(nested) for nested in value]
+    for predicate, converter in _CANONICAL_CONVERTERS:
+        if predicate(value):
+            return converter(value)
     return value
 
 

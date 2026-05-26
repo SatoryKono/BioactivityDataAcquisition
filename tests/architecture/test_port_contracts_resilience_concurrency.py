@@ -487,7 +487,7 @@ class TestCheckpointPortConcurrentAccess:
 
         checkpoint = LocalCheckpointAdapter(base_path=tmp_path)
         run_id = uuid4()
-        metadata = {"key": "value"}
+        metadata = {"key": "value", "checkpoint_saved_at_epoch_seconds": 1770000000.0}
 
         try:
             await checkpoint.save("test_pipeline", run_id, metadata)

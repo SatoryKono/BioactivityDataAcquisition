@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import time
-
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
 )
@@ -22,7 +20,7 @@ from bioetl.application.core.lifecycle.checkpoint_runtime import (
     validate_compatibility_policy,
 )
 from bioetl.domain.medallion import LoadingStrategy
-from bioetl.domain.ports import CheckpointPort, LoggerPort, MetricsPort
+from bioetl.domain.ports import CheckpointPort, ClockPort, LoggerPort, MetricsPort
 from bioetl.domain.types import JsonDict, RunID
 from bioetl.domain.types.checkpoint_compatibility_result import (
     CheckpointCompatibilityResult,
@@ -52,6 +50,26 @@ def _set_checkpoint_saved_at(
     )
 
 
+def _checkpoint_saved_at_epoch_seconds(clock: ClockPort | None) -> float | None:
+    """Return checkpoint persistence time from the runtime clock when provided."""
+    if clock is None:
+        return None
+    return float(clock.now().timestamp())
+
+
+def _metadata_with_checkpoint_saved_at(
+    metadata: CheckpointMetadata,
+    *,
+    clock: ClockPort | None,
+) -> JsonDict:
+    """Convert checkpoint metadata and attach deterministic clock-owned save time."""
+    payload = metadata.to_dict()
+    checkpoint_saved_at = _checkpoint_saved_at_epoch_seconds(clock)
+    if checkpoint_saved_at is not None:
+        payload.setdefault("checkpoint_saved_at_epoch_seconds", checkpoint_saved_at)
+    return payload
+
+
 class CheckpointRuntimeService:
     """Framework-agnostic checkpoint persistence and resume management."""
 
@@ -67,6 +85,7 @@ class CheckpointRuntimeService:
         *,
         loading_strategy: LoadingStrategy | None = None,
         metrics: MetricsPort | None = None,
+        clock: ClockPort | None = None,
         checkpoint_compatibility_service: CheckpointCompatibilityService | None = None,
         current_metadata: CheckpointMetadata | None = None,
         compatibility_policy: CheckpointCompatibilityPolicy = "soft_fail",
@@ -81,6 +100,7 @@ class CheckpointRuntimeService:
         self._resume_manifest_id = resume_manifest_id
         self._loading_strategy = loading_strategy
         self._metrics = metrics
+        self._clock = clock
         self._compatibility_service = checkpoint_compatibility_service
         self._current_metadata = current_metadata
         self._compatibility_policy = validate_compatibility_policy(compatibility_policy)
@@ -332,15 +352,20 @@ class CheckpointRuntimeService:
         metadata = enrich_metadata_with_execution_identity(
             metadata, identity=self._current_metadata
         )
+        metadata_payload = _metadata_with_checkpoint_saved_at(
+            metadata, clock=self._clock
+        )
         await self._checkpoint.save(
             pipeline=self._pipeline_name,
             run_id=self._run_id,
-            metadata=metadata.to_dict(),
+            metadata=metadata_payload,
         )
         _set_checkpoint_saved_at(
             self._metrics,
             pipeline_name=self._pipeline_name,
-            checkpoint_saved_at_epoch_seconds=time.time(),
+            checkpoint_saved_at_epoch_seconds=metadata_payload.get(
+                "checkpoint_saved_at_epoch_seconds"
+            ),
         )
 
     async def delete_checkpoint(self) -> None:
