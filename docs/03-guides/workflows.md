@@ -29,6 +29,41 @@ It connects:
 Use this guide when you need one stable explanation of what a workflow is, what
 it is not, and which fields/identities are already shipped versus still planned.
 
+
+## Target Control-Plane Model (ADR-047)
+
+The target and shipped workflow control plane is the **manifest + ledger + execution-state** split defined by ADR-047.
+
+### Component roles and responsibility boundaries
+
+- **WorkflowManifest (immutable intent)**: one immutable intent snapshot per workflow run; never mutated after creation.
+- **WorkflowLedger (append-only history)**: durable event history for lifecycle and operator intent (`repair`/`force`), but not a mutable status owner.
+- **WorkflowExecutionState (mutable owner)**: current workflow/step status, error projection, `repair_required`, and ambiguity markers.
+- **Workflow lock (local-only safety)**: one `MemoryLock` key per workflow name under ADR-010 local-only boundary.
+
+### Commands and operator flows
+
+- Start: `bioetl workflow run <name>`
+- Safe resume: `bioetl workflow run <name> --resume-last`
+- Ambiguous destructive recovery: `--repair-steps ...` or `--force-steps ...` (explicit operator intent)
+- Inspection: `bioetl workflow status <name> [--run-id <workflow_run_id>]`
+
+### Ownership boundary (what each seam MUST NOT do)
+
+- Manifest MUST NOT be reused as mutable status.
+- Ledger MUST NOT be treated as the sole mutable resume source.
+- Execution state MUST NOT silently infer destructive replay without explicit operator flags when ambiguity is present.
+- Local lock semantics MUST NOT be replaced with external orchestrators in standard runtime.
+
+### Canonical operation sources
+
+- ADR decision: [ADR-047](../02-architecture/decisions/ADR-047-workflow-control-plane.md)
+- Recovery procedure and triage: [Workflow Control-Plane Recovery Runbook](../05-operations/runbooks/workflow-control-plane.md)
+- Runtime validation policy linkage: [POST_CHANGE_VALIDATION.md](../00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md)
+- Runtime precedence and orchestration policy: repository paths `AGENTS.md` and `.codex/agents/CODEX-RUNTIME.md`
+
+> Deprecated wording: any older docs/text that describe workflow resume as ledger-only or name-only are deprecated. Use ADR-047 + this guide + the workflow runbook as the canonical set.
+
 ## Backlog Scope
 
 The workflow control-plane rollout centered on these issues:

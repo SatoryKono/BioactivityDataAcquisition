@@ -56,6 +56,10 @@ ______________________________________________________________________
 | Review identifier family policy    | [reference-identifiers.md](../04-reference/normalization/reference-identifiers.md)     |
 | Run control-plane triage           | [run-manifest-inspection.md](../05-operations/runbooks/run-manifest-inspection.md)     |
 | Understand control-plane decision  | [ADR-044](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)   |
+| Understand workflow control-plane decision | [ADR-047](../02-architecture/decisions/ADR-047-workflow-control-plane.md) |
+| Workflow orchestration & recovery runbook | [workflow-control-plane.md](../05-operations/runbooks/workflow-control-plane.md) |
+| Execution control commands (`run/status/resume/repair/force`) | [workflows.md](../03-guides/workflows.md) |
+| Quality gates for docs/runtime drift | [docs-verification.md](../03-guides/docs-verification.md) |
 | Understand rollout / DQ decision   | [ADR-045](../02-architecture/decisions/ADR-045-dq-contract-system.md)                  |
 | Handle a prod error                | [runbooks/index.md](../05-operations/runbooks/index.md)                                |
 | Browse historical ops material     | [archive-index.md](../05-operations/archive-index.md)                                  |
@@ -133,6 +137,15 @@ docs/
 ```
 
 ______________________________________________________________________
+
+
+## Control Plane Navigation (ADR-047)
+
+- **Orchestration model**: [Workflow Object](../03-guides/workflows.md)
+- **Execution control surface**: `bioetl workflow run`, `--resume-last`, `--repair-steps`, `--force-steps`, and `bioetl workflow status` in [CLI Reference](../04-reference/cli.md) and [Workflow Control-Plane Recovery](../05-operations/runbooks/workflow-control-plane.md)
+- **Quality gates**: [Docs Verification](../03-guides/docs-verification.md), plus runtime mirror freshness checks from `scripts.docs check-drift --runtime-mirrors --freshness`
+- **Policy chain**: [ADR-047](../02-architecture/decisions/ADR-047-workflow-control-plane.md) ↔ [POST_CHANGE_VALIDATION](ai/agents/policy/POST_CHANGE_VALIDATION.md) ↔ [workflow-control-plane runbook](../05-operations/runbooks/workflow-control-plane.md)
+- **Deprecated**: references that frame workflow resume as ledger-only or workflow-name-only without execution fingerprint. Canonical source is ADR-047.
 
 ## By Topic
 

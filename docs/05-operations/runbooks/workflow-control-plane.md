@@ -196,4 +196,5 @@ Look for:
 - [Workflow Object Guide](../../03-guides/workflows.md)
 - [ADR-046](../../02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md)
 - [ADR-047](../../02-architecture/decisions/ADR-047-workflow-control-plane.md)
+- [POST_CHANGE_VALIDATION policy](../../00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md)
 - [Stale Lock](stale-lock.md)
