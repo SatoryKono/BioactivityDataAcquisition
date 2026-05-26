@@ -39,11 +39,7 @@ def extract_uniprot_semantic_payload_vocab(paths: list[Path]) -> dict[str, list[
                 keyword_category = keyword.get("category")
                 if keyword_category is not None:
                     observed["keyword_categories"].add(str(keyword_category))
-    return {
-        key: sorted(values)
-        for key, values in observed.items()
-        if values
-    }
+    return {key: sorted(values) for key, values in observed.items() if values}
 
 
 def main(argv: list[str] | None = None) -> int:

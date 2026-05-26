@@ -135,7 +135,9 @@ class ADRRegistryGenerator:
                 continue
             normalized = stripped.replace("**", "").strip()
             for label in labels:
-                pattern = re.compile(rf"^{re.escape(label)}:\s*(.+)$", flags=re.IGNORECASE)
+                pattern = re.compile(
+                    rf"^{re.escape(label)}:\s*(.+)$", flags=re.IGNORECASE
+                )
                 match = pattern.match(normalized)
                 if match is not None:
                     value = match.group(1).strip()
@@ -170,7 +172,9 @@ class ADRRegistryGenerator:
             return None
         return normalized
 
-    def _extract_decision_date(self, content: str, front_matter: dict, index_metadata: dict) -> str | None:
+    def _extract_decision_date(
+        self, content: str, front_matter: dict, index_metadata: dict
+    ) -> str | None:
         candidates = (
             front_matter.get("date"),
             self._extract_inline_metadata_value(content, labels=("Date",)),
@@ -352,11 +356,13 @@ class ADRRegistryGenerator:
             relationships = self.extract_adr_relationships(content)
 
             # Determine status
-            source_status = self._normalize_metadata_value(
-                front_matter.get("status")
-            ) or self._normalize_metadata_value(
-                self._extract_inline_metadata_value(content, labels=("Status",))
-            ) or self._normalize_metadata_value(index_metadata.get("status"))
+            source_status = (
+                self._normalize_metadata_value(front_matter.get("status"))
+                or self._normalize_metadata_value(
+                    self._extract_inline_metadata_value(content, labels=("Status",))
+                )
+                or self._normalize_metadata_value(index_metadata.get("status"))
+            )
             status = self.determine_adr_status(
                 content,
                 {
@@ -545,7 +551,9 @@ class ADRRegistryGenerator:
     def _append_registry_footer(lines: list[str]) -> None:
         lines.append("## 🎯 Using the ADR Registry")
         lines.append("")
-        lines.append("- **Accepted ADRs**: Currently applicable architectural decisions")
+        lines.append(
+            "- **Accepted ADRs**: Currently applicable architectural decisions"
+        )
         lines.append("- **Draft ADRs**: Proposed decisions under review")
         lines.append(
             "- **Deprecated ADRs**: No longer recommended but may still be in use"

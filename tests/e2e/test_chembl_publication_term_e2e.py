@@ -185,7 +185,9 @@ def _materialize_publication_term_silver_harness_fallback(
     expected_min: int = 1,
 ) -> int:
     try:
-        payload_files = assert_bronze_files_exist(data_dir, "chembl", "publication_term")
+        payload_files = assert_bronze_files_exist(
+            data_dir, "chembl", "publication_term"
+        )
     except AssertionError:
         return 0
 

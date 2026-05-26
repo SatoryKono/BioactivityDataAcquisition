@@ -95,12 +95,16 @@ def mock_registry_main():
 class TestBatchRunResult:
     """Tests for BatchRunResult dataclass."""
 
-    def test_all_succeeded_true_when_no_failures__test_batch_run_result_interfaces_cli_test_run_all_command_98(self):
+    def test_all_succeeded_true_when_no_failures__test_batch_run_result_interfaces_cli_test_run_all_command_98(
+        self,
+    ):
         """Test all_succeeded is True when no failures."""
         result = BatchRunResult(total=3, succeeded=3, failed=0)
         assert result.all_succeeded is True
 
-    def test_all_succeeded_false_when_failures__test_batch_run_result_interfaces_cli_test_run_all_command_103(self):
+    def test_all_succeeded_false_when_failures__test_batch_run_result_interfaces_cli_test_run_all_command_103(
+        self,
+    ):
         """Test all_succeeded is False when there are failures."""
         result = BatchRunResult(total=3, succeeded=2, failed=1)
         assert result.all_succeeded is False

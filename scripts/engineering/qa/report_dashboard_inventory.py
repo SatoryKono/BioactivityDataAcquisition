@@ -37,7 +37,11 @@ MANDATORY_LINK_UIDS: dict[str, set[str]] = {
     "bioetl-runtime": {"bioetl-overview-v2", "bioetl-dq-v2", "bioetl-control-plane-v1"},
     "bioetl-provider-health-v2": {"bioetl-overview-v2", "bioetl-runtime"},
     "bioetl-dq-v2": {"bioetl-overview-v2", "bioetl-silver-reject-explorer"},
-    "bioetl-workflow-overview": {"bioetl-overview-v2", "bioetl-runtime", "bioetl-control-plane-v1"},
+    "bioetl-workflow-overview": {
+        "bioetl-overview-v2",
+        "bioetl-runtime",
+        "bioetl-control-plane-v1",
+    },
 }
 
 
@@ -228,7 +232,9 @@ def _check_parity(
             visible = registry_entry.get("visible_selectors", [])
             hidden = registry_entry.get("hidden_context_selectors", [])
             detail = registry_entry.get("hidden_detail_selectors", [])
-            if not all(isinstance(section, list) for section in (visible, hidden, detail)):
+            if not all(
+                isinstance(section, list) for section in (visible, hidden, detail)
+            ):
                 _register_issue(
                     errors=errors,
                     per_dashboard=per_dashboard,
@@ -289,11 +295,15 @@ def _check_provisioning_contract() -> tuple[list[str], dict[str, object]]:
     path_basename = Path(str(path)).name if path else None
 
     if folder_uid != "bioetl":
-        errors.append(f"provisioning: BioETL folderUid must be 'bioetl', got {folder_uid!r}")
+        errors.append(
+            f"provisioning: BioETL folderUid must be 'bioetl', got {folder_uid!r}"
+        )
     if allow_ui_updates is not False:
         errors.append("provisioning: BioETL allowUiUpdates must be false")
     if provider_type != "file":
-        errors.append(f"provisioning: BioETL provider type must be 'file', got {provider_type!r}")
+        errors.append(
+            f"provisioning: BioETL provider type must be 'file', got {provider_type!r}"
+        )
     if not isinstance(update_interval, int) or update_interval <= 0:
         errors.append(
             "provisioning: BioETL updateIntervalSeconds must be a positive integer"
@@ -331,9 +341,7 @@ def _load_deployed_dashboards(
             errors.append(f"deployed-dir: {path} missing dashboard uid")
             continue
         if uid in by_uid:
-            errors.append(
-                f"deployed-dir: duplicate dashboard uid {uid!r} in {path}"
-            )
+            errors.append(f"deployed-dir: duplicate dashboard uid {uid!r} in {path}")
             continue
         by_uid[uid] = _normalize_dashboard_payload(payload)
     return by_uid, errors
@@ -419,14 +427,11 @@ def _build_health_summary(
         if item.get("editable") is not True:
             issues.append(f"editable must be true, got {item.get('editable')!r}")
         if item.get("graphTooltip") != 1:
-            issues.append(
-                f"graphTooltip must be 1, got {item.get('graphTooltip')!r}"
-            )
+            issues.append(f"graphTooltip must be 1, got {item.get('graphTooltip')!r}")
         hide_controls = item.get("hideControls")
         if hide_controls != "<missing>" and hide_controls is not False:
             issues.append(
-                "hideControls, when exported, must be false, got "
-                f"{hide_controls!r}"
+                f"hideControls, when exported, must be false, got {hide_controls!r}"
             )
         issues.extend(parity_issues.get(uid, []))
         issues.extend(deployed_issues.get(uid, []))
@@ -443,7 +448,9 @@ def _build_health_summary(
             }
         )
 
-    overall_status = "healthy" if not provisioning_issues and degraded == 0 else "degraded"
+    overall_status = (
+        "healthy" if not provisioning_issues and degraded == 0 else "degraded"
+    )
     return {
         "overall_status": overall_status,
         "summary": {
@@ -488,8 +495,12 @@ def _render_health_summary(summary: dict[str, object]) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
-    parser.add_argument("--check", action="store_true", help="Fail on canonical parity mismatches")
+    parser.add_argument(
+        "--json", action="store_true", help="Emit machine-readable JSON"
+    )
+    parser.add_argument(
+        "--check", action="store_true", help="Fail on canonical parity mismatches"
+    )
     parser.add_argument(
         "--deployed-dir",
         type=Path,

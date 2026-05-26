@@ -12,7 +12,7 @@ import pytest
 from bioetl.application.services.checkpoint_compatibility_service import (
     CheckpointCompatibilityService,
 )
-from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionService,
 )
 from bioetl.domain.types import RunID

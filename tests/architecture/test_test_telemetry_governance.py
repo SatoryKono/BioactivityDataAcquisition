@@ -40,6 +40,7 @@ def test_testing_docs_distinguish_authoritative_baseline_from_historical_rollup(
     assert "historical `test-health` rollups remain non-blocking" in baseline_doc
     assert "historical lane history" in qa_readme
 
+
 def test_slow_governance_cache_probe_is_captured_and_isolated() -> None:
     payload = yaml.safe_load(
         Path("configs/quality/test_telemetry_baseline.yaml").read_text(encoding="utf-8")
@@ -50,7 +51,9 @@ def test_slow_governance_cache_probe_is_captured_and_isolated() -> None:
     assert probe["issue_ref"] == "#4663"
     assert probe["source"] == "local_direct_probe"
     assert report_probe["name"] == "collect_test_governance_report"
-    assert float(report_probe["first_duration_s"]) > float(report_probe["second_duration_s"])
+    assert float(report_probe["first_duration_s"]) > float(
+        report_probe["second_duration_s"]
+    )
     assert float(report_probe["improvement_factor"]) > 1.0
     assert probe["lane_isolation"] == {
         "fast_boundary_suite_name": "architecture-fast-boundary",
@@ -61,4 +64,3 @@ def test_slow_governance_cache_probe_is_captured_and_isolated() -> None:
         "tests.architecture.conftest.cached_subprocess_run",
         "tests.architecture.conftest._run_cached_subprocess",
     ]
-

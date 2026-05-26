@@ -47,7 +47,9 @@ class TestCreateSilverWriter:
 
         writer_cls.assert_not_called()
 
-    def test_creates_metadata_writer_when_save_metadata__test_create_silver_writer_factories_storage_test_silver_factory_50(self) -> None:
+    def test_creates_metadata_writer_when_save_metadata__test_create_silver_writer_factories_storage_test_silver_factory_50(
+        self,
+    ) -> None:
         """Creates real MetadataWriter when config.save_metadata is True."""
         writer_cls = MagicMock()
         config = SimpleNamespace(save_metadata=True)

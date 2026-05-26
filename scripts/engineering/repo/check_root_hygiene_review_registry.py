@@ -110,7 +110,9 @@ def _validate_review_lane_object(
 
     classification = lane.get("classification")
     if classification not in ALLOWED_CLASSIFICATIONS:
-        issues.append(f"Lane {lane_id} has unsupported classification: {classification}")
+        issues.append(
+            f"Lane {lane_id} has unsupported classification: {classification}"
+        )
 
     verification = lane.get("verification")
     if not isinstance(verification, list) or not verification:
@@ -167,8 +169,12 @@ def _validate_review_lane_candidate(
         issues.append(f"{path}: unsupported current_live_state {live_state}")
         return
 
-    _validate_candidate_live_state(path, live_state=live_state, repo_root=repo_root, issues=issues)
-    _validate_candidate_canonical_path(path, candidate, repo_root=repo_root, issues=issues)
+    _validate_candidate_live_state(
+        path, live_state=live_state, repo_root=repo_root, issues=issues
+    )
+    _validate_candidate_canonical_path(
+        path, candidate, repo_root=repo_root, issues=issues
+    )
 
 
 def _validate_candidate_live_state(

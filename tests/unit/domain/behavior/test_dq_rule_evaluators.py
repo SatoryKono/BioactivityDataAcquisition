@@ -88,11 +88,7 @@ def test_target_cross_references_json_vocab_custom_rule_accepts_cgd_source() -> 
 
     assert (
         _field_rule_violated(
-            {
-                "cross_references": (
-                    '[{"xref_id":"CAL0000189182","xref_src_db":"CGD"}]'
-                )
-            },
+            {"cross_references": ('[{"xref_id":"CAL0000189182","xref_src_db":"CGD"}]')},
             rule,
         )
         is False

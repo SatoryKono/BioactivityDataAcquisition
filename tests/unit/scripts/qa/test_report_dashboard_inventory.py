@@ -245,7 +245,9 @@ def test_build_health_summary_marks_noncanonical_root_config(
     assert "non-canonical style='light'" in dashboard_summary["issues"]
 
 
-def test_scripts_engineering_qa_router_exposes_report_dashboard_inventory_command() -> None:
+def test_scripts_engineering_qa_router_exposes_report_dashboard_inventory_command() -> (
+    None
+):
     spec = qa_router.COMMAND_SPECS["report-dashboard-inventory"]
     assert spec.runner == "module"
     assert spec.target == "scripts.engineering.qa.report_dashboard_inventory"

@@ -12,7 +12,7 @@ from uuid import uuid4
 import pytest
 from click.testing import CliRunner
 
-from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestDiffEntry,
     RunManifestDiffResult,
     RunManifestInspectionCorruptionError,
@@ -711,9 +711,7 @@ class _FakeHistoricalReplayUniverseReport:
         return {
             "report_id": self.report_id,
             "universal_claim": self.universal_claim,
-            "durable_evidence_coverage_claim": (
-                self.durable_evidence_coverage_claim
-            ),
+            "durable_evidence_coverage_claim": (self.durable_evidence_coverage_claim),
             "governed_full_corpus_gate": self.governed_full_corpus_gate,
         }
 

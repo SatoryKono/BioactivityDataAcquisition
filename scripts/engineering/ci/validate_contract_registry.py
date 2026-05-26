@@ -182,7 +182,9 @@ def _active_gold_surface_issues(
 ) -> list[RegistryValidationIssue]:
     """Validate that active Gold entity configs point to active registry refs."""
     issues: list[RegistryValidationIssue] = []
-    for contract_ref, config_path in sorted(_active_standard_contract_refs(repo_root).items()):
+    for contract_ref, config_path in sorted(
+        _active_standard_contract_refs(repo_root).items()
+    ):
         issues.extend(_active_entity_config_identity_issues(contract_ref, config_path))
         entry = registry.entries.get(contract_ref)
         if entry is None:

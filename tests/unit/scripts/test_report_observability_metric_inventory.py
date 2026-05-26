@@ -4,10 +4,31 @@ from __future__ import annotations
 
 from pathlib import Path
 import subprocess
+from types import SimpleNamespace
 
 import pytest
 
 from scripts.engineering.qa import report_observability_metric_inventory as inventory
+
+
+def test_hidden_windows_subprocess_kwargs_hide_console() -> None:
+    startupinfo = SimpleNamespace(dwFlags=0, wShowWindow=5)
+    fake_subprocess = SimpleNamespace(
+        CREATE_NO_WINDOW=0x08000000,
+        STARTF_USESHOWWINDOW=0x00000001,
+        SW_HIDE=0,
+        STARTUPINFO=lambda: startupinfo,
+    )
+
+    kwargs = inventory._hidden_windows_subprocess_kwargs(
+        os_name="nt",
+        subprocess_module=fake_subprocess,
+    )
+
+    assert kwargs["creationflags"] == 0x08000000
+    assert kwargs["startupinfo"] is startupinfo
+    assert startupinfo.dwFlags == 0x00000001
+    assert startupinfo.wShowWindow == 0
 
 
 def test_collect_metric_inventory_classifies_registry_runtime_and_docs(

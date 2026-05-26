@@ -5,16 +5,16 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from bioetl.application.services.control_plane.historical_replay_certification_service import (
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplaySnapshotCertification,
 )
-from bioetl.application.services.control_plane.historical_replay_closure_service import (
+from bioetl.application.services.control_plane.replay.historical_closure_service import (
     HistoricalReplayResidualDisposition,
 )
-from bioetl.application.services.control_plane.historical_replay_corpus_service import (
+from bioetl.application.services.control_plane.replay.historical_corpus_service import (
     HistoricalReplayBulkCertificationSpec,
 )
-from bioetl.application.services.control_plane.historical_replay_universe_service import (
+from bioetl.application.services.control_plane.replay.historical_universe_service import (
     HistoricalReplayUniverseExternalRecord,
 )
 

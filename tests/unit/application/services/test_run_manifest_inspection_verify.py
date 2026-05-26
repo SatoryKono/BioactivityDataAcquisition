@@ -7,7 +7,14 @@ import pytest
 pytestmark = pytest.mark.unit
 
 from tests.unit.application.services.test_run_manifest_inspection_service import *  # noqa: F401,F403
-from tests.unit.application.services.test_run_manifest_inspection_service import _InMemoryEffectiveConfigArtifactStore, _InMemoryRunLedgerStore, _InMemoryRunManifestStore, _VALID_EFFECTIVE_CONFIG_HASH, _make_manifest
+from tests.unit.application.services.test_run_manifest_inspection_service import (
+    _InMemoryEffectiveConfigArtifactStore,
+    _InMemoryRunLedgerStore,
+    _InMemoryRunManifestStore,
+    _VALID_EFFECTIVE_CONFIG_HASH,
+    _make_manifest,
+)
+
 
 def test_verify_confirms_cross_store_effective_config_replay_evidence() -> None:
     manifest_store = _InMemoryRunManifestStore()
@@ -76,6 +83,7 @@ def test_verify_confirms_cross_store_effective_config_replay_evidence() -> None:
         "manifest-right"
     )
 
+
 def test_verify_reports_missing_effective_config_evidence() -> None:
     manifest_store = _InMemoryRunManifestStore()
     effective_config_store = _InMemoryEffectiveConfigArtifactStore()
@@ -107,6 +115,7 @@ def test_verify_reports_missing_effective_config_evidence() -> None:
         "left_effective_config_occurrence_missing",
         "right_effective_config_occurrence_missing",
     )
+
 
 def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> None:
     manifest_store = _InMemoryRunManifestStore()
@@ -243,6 +252,7 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
     assert result.diagnostics["dq_report_paths"] == [
         "data/output/silver/chembl/activity/_dq.json"
     ]
+
 
 def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
     manifest_store = _InMemoryRunManifestStore()

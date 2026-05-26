@@ -20,7 +20,7 @@ from bioetl.domain.types import RunID
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from bioetl.application.services.control_plane.run_ledger_service import (
+    from bioetl.application.services.control_plane.ledger.service import (
         RunLedgerService,
     )
 

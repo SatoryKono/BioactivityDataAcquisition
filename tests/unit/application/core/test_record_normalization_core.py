@@ -5,6 +5,7 @@ from __future__ import annotations
 # ruff: noqa: F403,F405
 from tests.unit.application.core.normalization_test_support import *  # noqa: F403,F405
 
+
 def test_normalize_record_applies_identifier_date_json_and_hash_rules() -> None:
     processor = build_normalization_processor(provider="crossref")
     record = {
@@ -35,6 +36,7 @@ def test_normalize_record_applies_identifier_date_json_and_hash_rules() -> None:
             exclude_fields={"entity_id", "content_hash"},
         )
     )
+
 
 def test_compute_content_hash_is_idempotent_for_normalized_payload() -> None:
     processor = build_normalization_processor(provider="crossref")

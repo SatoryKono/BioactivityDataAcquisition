@@ -138,7 +138,10 @@ def get_checkpoint_service() -> CheckpointService:
 def get_audit_service() -> AuditInspectionService:
     """Get an audit inspection service for operator diagnostics operations."""
     _ensure_provider_registrations()
-    return cast("AuditInspectionService", _invoke_bootstrap("bootstrap_audit_inspection_service"))
+    return cast(
+        "AuditInspectionService",
+        _invoke_bootstrap("bootstrap_audit_inspection_service"),
+    )
 
 
 def get_quarantine_service() -> QuarantineService:
@@ -153,7 +156,9 @@ def get_quarantine_service() -> QuarantineService:
 def get_bronze_cleanup_service() -> BronzeCleanupService:
     """Get Bronze cleanup service."""
     _ensure_provider_registrations()
-    return cast("BronzeCleanupService", _invoke_bootstrap("bootstrap_bronze_cleanup_service"))
+    return cast(
+        "BronzeCleanupService", _invoke_bootstrap("bootstrap_bronze_cleanup_service")
+    )
 
 
 def get_vacuum_service() -> VacuumService:
@@ -191,7 +196,10 @@ def get_pipeline_runner_service(
 ) -> PipelineRunnerService:
     """Get universal pipeline runner service."""
     _ensure_pipeline_registrations(registry=registry)
-    return cast("PipelineRunnerService", _invoke_bootstrap("bootstrap_pipeline_runner_service", registry=registry))
+    return cast(
+        "PipelineRunnerService",
+        _invoke_bootstrap("bootstrap_pipeline_runner_service", registry=registry),
+    )
 
 
 def get_workflow_runner_service(
@@ -245,37 +253,54 @@ def get_contract_migration_service() -> object:
 def get_run_manifest_service() -> RunManifestInspectionService:
     """Get a run-manifest inspection service for control-plane operations."""
     _ensure_provider_registrations()
-    return cast("RunManifestInspectionService", _invoke_bootstrap("bootstrap_run_manifest_service"))
+    return cast(
+        "RunManifestInspectionService",
+        _invoke_bootstrap("bootstrap_run_manifest_service"),
+    )
 
 
 def get_forensic_run_diff_service() -> ForensicRunDiffService:
     """Get a unified forensic run-diff service for control-plane diagnostics."""
     _ensure_provider_registrations()
-    return cast("ForensicRunDiffService", _invoke_bootstrap("bootstrap_forensic_run_diff_service"))
+    return cast(
+        "ForensicRunDiffService",
+        _invoke_bootstrap("bootstrap_forensic_run_diff_service"),
+    )
 
 
 def get_historical_replay_corpus_service() -> HistoricalReplayCorpusService:
     """Get retained-corpus historical replay workflows for CLI operations."""
     _ensure_provider_registrations()
-    return cast("HistoricalReplayCorpusService", _invoke_bootstrap("bootstrap_historical_replay_corpus_service"))
+    return cast(
+        "HistoricalReplayCorpusService",
+        _invoke_bootstrap("bootstrap_historical_replay_corpus_service"),
+    )
 
 
 def get_historical_replay_closure_service() -> HistoricalReplayClosureService:
     """Get retained-corpus closure reporting workflows for CLI operations."""
     _ensure_provider_registrations()
-    return cast("HistoricalReplayClosureService", _invoke_bootstrap("bootstrap_historical_replay_closure_service"))
+    return cast(
+        "HistoricalReplayClosureService",
+        _invoke_bootstrap("bootstrap_historical_replay_closure_service"),
+    )
 
 
 def get_historical_replay_universe_service() -> HistoricalReplayUniverseService:
     """Get full-universe historical replay workflows for CLI operations."""
     _ensure_provider_registrations()
-    return cast("HistoricalReplayUniverseService", _invoke_bootstrap("bootstrap_historical_replay_universe_service"))
+    return cast(
+        "HistoricalReplayUniverseService",
+        _invoke_bootstrap("bootstrap_historical_replay_universe_service"),
+    )
 
 
 def get_lineage_service() -> LineageInspectionService:
     """Get a lineage inspection service for traceability operations."""
     _ensure_provider_registrations()
-    return cast("LineageInspectionService", _invoke_bootstrap("bootstrap_lineage_service"))
+    return cast(
+        "LineageInspectionService", _invoke_bootstrap("bootstrap_lineage_service")
+    )
 
 
 def get_health_service() -> HealthService:
@@ -287,7 +312,10 @@ def get_health_service() -> HealthService:
 def get_observability_workflow_service() -> ObservabilityWorkflowService:
     """Get workflow-level observability diagnostics helpers."""
     _ensure_provider_registrations()
-    return cast("ObservabilityWorkflowService", _invoke_bootstrap("bootstrap_observability_workflow_service"))
+    return cast(
+        "ObservabilityWorkflowService",
+        _invoke_bootstrap("bootstrap_observability_workflow_service"),
+    )
 
 
 def get_health_server_dependencies() -> HealthServerDependenciesProtocol:

@@ -225,9 +225,7 @@ def render_baseline_markdown(payload: dict[str, object]) -> str:
     source_run_id = payload.get("source_run_id") or "pending"
     coverage_actual = coverage["actual_percent"]
     coverage_display = (
-        "pending"
-        if coverage_actual is None
-        else f"{float(coverage_actual):.2f}%"
+        "pending" if coverage_actual is None else f"{float(coverage_actual):.2f}%"
     )
     total_cases = duration["total_cases"]
     total_cases_display = "pending" if total_cases is None else str(total_cases)
@@ -296,9 +294,7 @@ def render_baseline_markdown(payload: dict[str, object]) -> str:
             test_name = row.get("test", "unknown")
             source = row.get("source", "unknown")
             duration_s = row.get("duration_s", "unknown")
-            lines.append(
-                f"| {index} | `{duration_s}` | `{test_name}` | `{source}` |"
-            )
+            lines.append(f"| {index} | `{duration_s}` | `{test_name}` | `{source}` |")
     else:
         lines.append(
             "No committed slow-test baseline is present yet. Refresh from a main-branch "

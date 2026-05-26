@@ -107,7 +107,10 @@ def test_main_returns_zero_when_published_probe_is_healthy(
 
     captured = capsys.readouterr()
     assert exit_code == 0
-    assert "prometheus: diagnosis=published_healthy published=ok container=skipped" in captured.out
+    assert (
+        "prometheus: diagnosis=published_healthy published=ok container=skipped"
+        in captured.out
+    )
 
 
 def test_scripts_ops_router_exposes_check_observability_ports_command() -> None:

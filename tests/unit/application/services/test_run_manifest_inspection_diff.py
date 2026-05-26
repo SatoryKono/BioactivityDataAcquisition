@@ -7,7 +7,12 @@ import pytest
 pytestmark = pytest.mark.unit
 
 from tests.unit.application.services.test_run_manifest_inspection_service import *  # noqa: F401,F403
-from tests.unit.application.services.test_run_manifest_inspection_service import _InMemoryRunManifestStore, _make_manifest, _run_id
+from tests.unit.application.services.test_run_manifest_inspection_service import (
+    _InMemoryRunManifestStore,
+    _make_manifest,
+    _run_id,
+)
+
 
 def test_diff_reports_changed_top_level_fields() -> None:
     manifest_store = _InMemoryRunManifestStore()
@@ -56,6 +61,7 @@ def test_diff_reports_changed_top_level_fields() -> None:
         in result.cross_surface_replay_diff["checkpoint_anchors"]["mismatched_fields"]
     )
 
+
 def test_diff_classifies_occurrence_only_replay_runs() -> None:
     manifest_store = _InMemoryRunManifestStore()
     created_at = datetime(2025, 1, 1, tzinfo=UTC)
@@ -85,6 +91,7 @@ def test_diff_classifies_occurrence_only_replay_runs() -> None:
     assert result.noncanonical_difference_fields == ()
     assert result.cross_surface_replay_diff["verdict"] == "occurrence_only_replay"
     assert result.cross_surface_replay_diff["checkpoint_anchors"]["compatible"] is True
+
 
 def test_diff_keeps_legacy_config_hash_outside_semantic_replay_identity() -> None:
     manifest_store = _InMemoryRunManifestStore()
@@ -122,6 +129,7 @@ def test_diff_keeps_legacy_config_hash_outside_semantic_replay_identity() -> Non
         is True
     )
     assert result.cross_surface_replay_diff["checkpoint_anchors"]["compatible"] is True
+
 
 def test_diff_classifies_semantic_equivalent_noncanonical_differences() -> None:
     manifest_store = _InMemoryRunManifestStore()

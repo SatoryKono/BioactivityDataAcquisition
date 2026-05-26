@@ -278,7 +278,8 @@ def test_repo_wide_zero_import_classification_exactly_covers_candidates() -> Non
     """Every repo-wide zero-import candidate must have one explicit classification."""
     triage = _load_triage()
     classified = {
-        str(entry["module_path"]): entry for entry in _iter_repo_wide_zero_import_entries(triage)
+        str(entry["module_path"]): entry
+        for entry in _iter_repo_wide_zero_import_entries(triage)
     }
 
     inventory = build_dead_code_inventory(PROJECT_ROOT)

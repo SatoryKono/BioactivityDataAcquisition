@@ -75,7 +75,9 @@ SKIP_FILE_EXTENSIONS: Final[set[str]] = {
     ".zip",
 }
 MAX_SEARCH_FILE_BYTES: Final[int] = 512 * 1024
-DEFAULT_OUTPUT: Final[str] = "docs/plans/scripts-cli-wrapper-caller-matrix-2026-04-28.md"
+DEFAULT_OUTPUT: Final[str] = (
+    "docs/plans/scripts-cli-wrapper-caller-matrix-2026-04-28.md"
+)
 SELF_GENERATOR_REL: Final[str] = (
     "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py"
 )
@@ -232,12 +234,9 @@ def _collect_callers_for_file(
     for candidate in CANDIDATES:
         if rel == candidate.path:
             continue
-        if (
-            candidate.path in normalized_text
-            or (
-                candidate.allow_basename_match
-                and basename_patterns[candidate.path].search(normalized_text)
-            )
+        if candidate.path in normalized_text or (
+            candidate.allow_basename_match
+            and basename_patterns[candidate.path].search(normalized_text)
         ):
             callers[candidate.path].add((source_group, rel))
 
@@ -279,7 +278,10 @@ def _is_governance_evidence_path(rel_path: str) -> bool:
         return True
     if rel_path.startswith("docs/plans/"):
         return True
-    if rel_path == "tests/unit/scripts/repo/test_generate_scripts_wrapper_caller_matrix.py":
+    if (
+        rel_path
+        == "tests/unit/scripts/repo/test_generate_scripts_wrapper_caller_matrix.py"
+    ):
         return True
     if rel_path in {
         "tests/architecture/test_codex_launcher_bootstrap.py",

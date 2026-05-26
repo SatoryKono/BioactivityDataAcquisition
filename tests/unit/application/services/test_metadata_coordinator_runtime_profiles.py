@@ -267,6 +267,7 @@ class TestSilverMetadata:
             == "overwrite"
         )
 
+
 class TestGoldMetadata:
     """Tests for Gold metadata creation."""
 
@@ -474,6 +475,7 @@ class TestGoldMetadata:
             "chembl.activity": 30,
         }
 
+
 class TestTransformVersionTracking:
     """Tests for transform version and steps tracking in metadata."""
 
@@ -642,6 +644,7 @@ class TestTransformVersionTracking:
         assert metadata.lineage.transform_version == "2.0.0"
         assert metadata.lineage.transform_steps == ["input_step1", "input_step2"]
 
+
 class TestRunTypeMappings:
     """Tests for RunType to RunTypeEnum mapping."""
 
@@ -679,6 +682,7 @@ class TestRunTypeMappings:
 
         metadata = coordinator.create_bronze_metadata(input_data)
         assert metadata.runtime.run_type == expected_enum
+
 
 class TestConsistencyAcrossLayers:
     """Tests for metadata consistency across layers."""

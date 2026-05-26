@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from bioetl.application.services.control_plane.workflow_inspection_service import (
+from bioetl.application.services.control_plane.workflow.inspection_service import (
     WorkflowInspectionResult,
 )
 from bioetl.application.services.workflow_runner_service import (

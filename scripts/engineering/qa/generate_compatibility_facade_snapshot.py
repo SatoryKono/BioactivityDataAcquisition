@@ -449,7 +449,9 @@ def _print_validation_issues(
             print(f"  - {module}: {joined}")
     if internal_callers_zero_import_violations:
         print(f"[{level}] first-party src imports internal-callers-zero rows:")
-        for module, importers in sorted(internal_callers_zero_import_violations.items()):
+        for module, importers in sorted(
+            internal_callers_zero_import_violations.items()
+        ):
             joined = ", ".join(importers)
             print(f"  - {module}: {joined}")
     if ratchet_violations:

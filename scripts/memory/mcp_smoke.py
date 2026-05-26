@@ -26,10 +26,9 @@ def _impl() -> Any:
 
 def __getattr__(name: str) -> object:
     if name not in _EXPORTS:
-        raise AttributeError(
-            f"module {__name__!r} has no attribute {name!r}"
-        )
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
     return getattr(_impl(), name)
+
 
 __all__ = [
     "SmokeResult",

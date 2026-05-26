@@ -29,7 +29,13 @@ def _file_contains_bytes(path: Path, needle: bytes, *, chunk_size: int = 65536) 
 
 def test_first_party_src_does_not_reference_removed_dependency_group_alias() -> None:
     """Composite application code should use only the canonical dependency name."""
-    root = Path(__file__).resolve().parents[4] / "src" / "bioetl" / "application" / "composite"
+    root = (
+        Path(__file__).resolve().parents[4]
+        / "src"
+        / "bioetl"
+        / "application"
+        / "composite"
+    )
     needle = b"CompositeRunnerDependencyGroup"
     offenders: list[str] = []
     for dirpath, _, filenames in os.walk(root):

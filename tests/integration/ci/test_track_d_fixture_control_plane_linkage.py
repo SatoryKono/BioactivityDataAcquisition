@@ -34,6 +34,23 @@ _PIPELINE_KEY = "chembl/activity"
 _PIPELINE_NAME = "chembl_activity"
 
 
+@pytest.fixture(autouse=True)
+def _stub_quarantine_delta_writes_for_cached_fixture_replay(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Keep cached-fixture replay tests focused on control-plane persistence, not Delta-backed quarantine I/O."""
+
+    async def _write_many_without_delta(self, records):
+        stored = getattr(self, "_test_quarantine_records", [])
+        stored.extend([self._normalize_record(record) for record in records])
+        self._test_quarantine_records = stored
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.quarantine.unified.UnifiedQuarantineAdapter.write_many",
+        _write_many_without_delta,
+    )
+
+
 @pytest.mark.integration
 @pytest.mark.no_api
 @pytest.mark.asyncio

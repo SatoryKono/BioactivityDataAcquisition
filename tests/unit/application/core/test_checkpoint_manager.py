@@ -359,9 +359,7 @@ class TestCheckpointManagerSaveCheckpoint:
         assert mock_metrics.set_gauge.call_args.args[0] == (
             "bioetl_checkpoint_saved_at_seconds"
         )
-        assert mock_metrics.set_gauge.call_args.args[2] == {
-            "pipeline": "test_pipeline"
-        }
+        assert mock_metrics.set_gauge.call_args.args[2] == {"pipeline": "test_pipeline"}
 
 
 @pytest.mark.unit

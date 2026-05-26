@@ -881,7 +881,9 @@ class TestImmutability:
     def test_with_enricher_completed_does_not_change_original(self) -> None:
         """Original state is unchanged after with_enricher_completed."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
-        _ = initial.with_enricher_completed("e1", _make_enrichment_result(), clock=_FIXED_CLOCK)
+        _ = initial.with_enricher_completed(
+            "e1", _make_enrichment_result(), clock=_FIXED_CLOCK
+        )
         assert initial.completed_enrichers == frozenset()
 
     def test_with_state_does_not_change_original(self) -> None:

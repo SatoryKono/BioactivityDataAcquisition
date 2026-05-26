@@ -40,7 +40,7 @@ from bioetl.application.services._quarantine_service_sync_mixin import (
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
-    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+    from bioetl.application.services.control_plane.manifest.inspection_service import (
         RunManifestInspectionService,
     )
     from bioetl.domain.ports import (

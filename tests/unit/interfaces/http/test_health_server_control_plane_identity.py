@@ -106,7 +106,9 @@ def test_control_plane_identity_evidence_static_contract_is_frozen() -> None:
     assert set(SOURCE_MODEL_BY_NAME) == anchor_names
     assert set(DRILLDOWN_TARGET_BY_NAME) == anchor_names
     assert SPEC_BY_NAME["resolved_config_hash"].priority == "P1"
-    assert SOURCE_MODEL_BY_NAME["resolved_config_hash"].source_quality == "authoritative"
+    assert (
+        SOURCE_MODEL_BY_NAME["resolved_config_hash"].source_quality == "authoritative"
+    )
     assert SPEC_BY_NAME["config_hash"].priority == "P2"
     assert SOURCE_MODEL_BY_NAME["config_hash"].source_quality == "compatibility_alias"
 

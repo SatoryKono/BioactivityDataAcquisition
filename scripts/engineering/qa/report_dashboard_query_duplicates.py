@@ -108,9 +108,7 @@ def _sorted_uses(uses: list[QueryUse] | set[QueryUse]) -> tuple[QueryUse, ...]:
 
 def _panel_refs(uses: tuple[QueryUse, ...]) -> tuple[str, ...]:
     """Return stable dashboard/panel references for human-facing summaries."""
-    return tuple(
-        sorted({f"{use.dashboard} :: {use.panel_title}" for use in uses})
-    )
+    return tuple(sorted({f"{use.dashboard} :: {use.panel_title}" for use in uses}))
 
 
 def collect_panel_query_uses(
@@ -191,9 +189,7 @@ def build_near_duplicate_groups(
 
     groups: list[NearDuplicateGroup] = []
     for signature, grouped_uses in uses_by_signature.items():
-        distinct_expressions = tuple(
-            sorted({use.expression for use in grouped_uses})
-        )
+        distinct_expressions = tuple(sorted({use.expression for use in grouped_uses}))
         if len(grouped_uses) < 2 or len(distinct_expressions) < 2:
             continue
 

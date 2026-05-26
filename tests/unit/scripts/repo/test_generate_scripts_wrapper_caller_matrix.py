@@ -7,7 +7,9 @@ from pathlib import Path
 from scripts.engineering.repo import generate_scripts_wrapper_caller_matrix as module
 
 
-def test_render_report_lists_known_wrapper_candidates(tmp_path: Path, monkeypatch) -> None:
+def test_render_report_lists_known_wrapper_candidates(
+    tmp_path: Path, monkeypatch
+) -> None:
     # Mock file iteration to return minimal test files
     test_file = tmp_path / "docs" / "test.md"
     test_file.parent.mkdir(parents=True)

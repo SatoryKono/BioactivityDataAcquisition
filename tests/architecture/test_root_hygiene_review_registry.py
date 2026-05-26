@@ -210,7 +210,8 @@ def test_root_hygiene_review_registry_classifies_qodo_as_local_vendor_surface() 
     vendor_lane = next(
         lane
         for lane in lanes
-        if isinstance(lane, dict) and lane.get("lane_id") == "local_vendor_tooling_roots"
+        if isinstance(lane, dict)
+        and lane.get("lane_id") == "local_vendor_tooling_roots"
     )
     candidates = vendor_lane["candidates"]
     assert isinstance(candidates, list)
@@ -239,7 +240,9 @@ def test_root_hygiene_review_registry_tracks_absent_root_logs_and_test_print() -
         for candidate in transient_lane["candidates"]
         if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
     }
-    assert transient_by_path["logs"]["current_live_state"] == "absent_from_root_baseline"
+    assert (
+        transient_by_path["logs"]["current_live_state"] == "absent_from_root_baseline"
+    )
     assert transient_by_path["logs"]["canonical_path"] == "reports/logs"
 
     ad_hoc_lane = next(

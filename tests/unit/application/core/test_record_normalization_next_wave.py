@@ -5,8 +5,11 @@ from __future__ import annotations
 # ruff: noqa: F403,F405
 from tests.unit.application.core.normalization_test_support import *  # noqa: F403,F405
 
+
 def test_pubchem_compound_profile_stabilizes_numeric_and_smiles_equivalence() -> None:
-    processor = build_normalization_processor(provider="pubchem", entity_type="compound")
+    processor = build_normalization_processor(
+        provider="pubchem", entity_type="compound"
+    )
 
     normalized = processor.normalize_business_data(
         {
@@ -422,7 +425,9 @@ def test_next_wave_profiles_have_deterministic_content_hash_regressions(
     expected_fields: dict[str, object],
     changed_record: dict[str, object],
 ) -> None:
-    processor = build_normalization_processor(provider="chembl", entity_type=entity_type)
+    processor = build_normalization_processor(
+        provider="chembl", entity_type=entity_type
+    )
 
     normalized_a = processor.normalize_record(record_a)
     normalized_b = processor.normalize_record(record_b)

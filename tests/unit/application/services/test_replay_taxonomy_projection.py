@@ -11,10 +11,10 @@ from bioetl.application.services.control_plane._run_manifest_identity_graph_buil
 from bioetl.application.services.control_plane._run_manifest_replay_taxonomy import (
     resolve_replay_resume_rebuild_verdict,
 )
-from bioetl.application.services.control_plane.replay_bundle_descriptor_service import (
+from bioetl.application.services.control_plane.replay.bundle_descriptor_service import (
     build_run_replay_bundle_descriptor,
 )
-from bioetl.application.services.control_plane.run_manifest_inspection_models import (
+from bioetl.application.services.control_plane.manifest.inspection_models import (
     RunManifestInspectionResult,
 )
 from bioetl.domain.control_plane import ReplayCapability

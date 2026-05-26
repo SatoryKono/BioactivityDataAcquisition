@@ -17,7 +17,11 @@ from tests.contract._provider_contract_drift import (
     [
         (
             "chembl",
-            {"activity_endpoint_schema", "molecule_endpoint_schema", "target_endpoint_schema"},
+            {
+                "activity_endpoint_schema",
+                "molecule_endpoint_schema",
+                "target_endpoint_schema",
+            },
         ),
         (
             "semanticscholar",
@@ -25,7 +29,9 @@ from tests.contract._provider_contract_drift import (
         ),
     ],
 )
-def test_provider_snapshot_registry_shape_replay_lane(provider: str, expected_probes: set[str]) -> None:
+def test_provider_snapshot_registry_shape_replay_lane(
+    provider: str, expected_probes: set[str]
+) -> None:
     snapshot = load_provider_contract_snapshot(provider)
     assert_provider_snapshot_registry_shape(snapshot)
     assert set(snapshot["probes"]) == expected_probes

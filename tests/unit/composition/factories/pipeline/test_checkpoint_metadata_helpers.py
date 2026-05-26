@@ -12,7 +12,7 @@ import pytest
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
 
-from bioetl.application.services.control_plane.run_manifest_service import (
+from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec as RunManifestCreateRequest,
     RunManifestService,
 )

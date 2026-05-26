@@ -302,6 +302,7 @@ def _run_text_discovery_command(
                 errors="replace",
                 check=False,
                 timeout=timeout,
+                **_hidden_windows_subprocess_kwargs(),
             )
         stdout = output_path.read_text(encoding="utf-8", errors="replace")
     finally:
@@ -317,6 +318,35 @@ def _temporary_text_discovery_output_path() -> Path:
     )
     handle.close()
     return Path(handle.name)
+
+
+def _hidden_windows_subprocess_kwargs(
+    *,
+    os_name: str = os.name,
+    subprocess_module: object = subprocess,
+) -> dict[str, object]:
+    if os_name != "nt":
+        return {}
+
+    kwargs: dict[str, object] = {}
+    create_no_window = int(getattr(subprocess_module, "CREATE_NO_WINDOW", 0))
+    if create_no_window:
+        kwargs["creationflags"] = create_no_window
+
+    startupinfo_factory = getattr(subprocess_module, "STARTUPINFO", None)
+    if callable(startupinfo_factory):
+        startupinfo = startupinfo_factory()
+        startf_use_show_window = int(
+            getattr(subprocess_module, "STARTF_USESHOWWINDOW", 0)
+        )
+        if startf_use_show_window:
+            startupinfo.dwFlags = (
+                int(getattr(startupinfo, "dwFlags", 0)) | startf_use_show_window
+            )
+        if hasattr(subprocess_module, "SW_HIDE"):
+            startupinfo.wShowWindow = int(getattr(subprocess_module, "SW_HIDE", 0))
+        kwargs["startupinfo"] = startupinfo
+    return kwargs
 
 
 def _repo_relative_pathspec(path: Path) -> str | None:
@@ -411,6 +441,7 @@ def _scan_canonical_metric_mentions_with_git_grep(
                 errors="replace",
                 check=False,
                 timeout=_METRIC_MENTION_GREP_TIMEOUT_SECONDS,
+                **_hidden_windows_subprocess_kwargs(),
             )
         except OSError:
             return None

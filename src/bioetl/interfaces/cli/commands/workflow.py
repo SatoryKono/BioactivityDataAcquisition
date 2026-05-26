@@ -39,10 +39,10 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.workflow_execution_service import (
+    from bioetl.application.services.control_plane.workflow.execution_service import (
         WorkflowExecutionService,
     )
-    from bioetl.application.services.control_plane.workflow_inspection_service import (
+    from bioetl.application.services.control_plane.workflow.inspection_service import (
         WorkflowInspectionService,
     )
     from bioetl.composition.registry_api import PipelineRegistry

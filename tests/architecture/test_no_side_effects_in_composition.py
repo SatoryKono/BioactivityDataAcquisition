@@ -107,9 +107,7 @@ def test_bootstrap_uses_explicit_registration():
     """
     bootstrap_func = _get_bootstrap_pipeline_runner_function()
     prepare_registry_func = _get_prepare_runtime_registry_function()
-    calls_register = _function_calls_name(
-        bootstrap_func, "register_all_pipelines"
-    ) or (
+    calls_register = _function_calls_name(bootstrap_func, "register_all_pipelines") or (
         _function_calls_name(bootstrap_func, "prepare_runtime_registry")
         and _function_calls_name(prepare_registry_func, "register_all_pipelines")
     )

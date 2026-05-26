@@ -72,8 +72,10 @@ def test_git_last_commit_age_days_bulk_batches_history_lookup(monkeypatch) -> No
             "__TS__1712448000\nsrc/a.py\nsrc/b.py\n\n__TS__1712361600\nsrc/c.py\n",
         )
 
-    monkeypatch.setattr("scripts.memory.sync.subprocess.run", _run)
-    monkeypatch.setattr("scripts.memory.sync._resolve_git_executable", lambda: "git")
+    monkeypatch.setattr(f"{SYNC_CORE_MODULE_PATH}.subprocess.run", _run)
+    monkeypatch.setattr(
+        f"{SYNC_CORE_MODULE_PATH}._resolve_git_executable", lambda: "git"
+    )
 
     cache: dict[str, int | None] = {}
     result = _git_last_commit_age_days_bulk(
@@ -115,8 +117,10 @@ def test_git_last_commit_age_days_bulk_skips_untracked_paths(monkeypatch) -> Non
             "__TS__1712448000\nsrc/a.py\n\n__TS__1712361600\nsrc/c.py\n",
         )
 
-    monkeypatch.setattr("scripts.memory.sync.subprocess.run", _run)
-    monkeypatch.setattr("scripts.memory.sync._resolve_git_executable", lambda: "git")
+    monkeypatch.setattr(f"{SYNC_CORE_MODULE_PATH}.subprocess.run", _run)
+    monkeypatch.setattr(
+        f"{SYNC_CORE_MODULE_PATH}._resolve_git_executable", lambda: "git"
+    )
 
     cache: dict[str, int | None] = {}
     result = _git_last_commit_age_days_bulk(
@@ -203,7 +207,7 @@ def test_build_fast_analysis_audit_report_uses_bulk_count_queries(monkeypatch) -
 
     monkeypatch.setattr(NEO4J_HTTP_CLIENT_PATH, StubClient)
     monkeypatch.setattr(
-        "scripts.memory.sync.resolve_neo4j_connection",
+        f"{SYNC_CORE_MODULE_PATH}.resolve_neo4j_connection",
         lambda _root, _http_uri: (
             LOCALHOST_HTTP_URI,
             "neo4j",
@@ -292,7 +296,7 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
 
     monkeypatch.setattr(NEO4J_HTTP_CLIENT_PATH, StubClient)
     monkeypatch.setattr(
-        "scripts.memory.sync.resolve_neo4j_connection",
+        f"{SYNC_CORE_MODULE_PATH}.resolve_neo4j_connection",
         lambda _root, _http_uri: (
             LOCALHOST_HTTP_URI,
             "neo4j",
@@ -376,7 +380,7 @@ def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(
             return []
 
     monkeypatch.setattr(
-        "scripts.memory.sync.resolve_neo4j_connection",
+        f"{SYNC_CORE_MODULE_PATH}.resolve_neo4j_connection",
         lambda _root, _http_uri: (
             LOCALHOST_HTTP_URI,
             "neo4j",
@@ -385,7 +389,7 @@ def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(
         ),
     )
     monkeypatch.setattr(NEO4J_HTTP_CLIENT_PATH, lambda *_args, **_kwargs: StubClient())
-    monkeypatch.setattr("scripts.memory.sync._sync_run_id", lambda: "run-123")
+    monkeypatch.setattr(f"{SYNC_CORE_MODULE_PATH}._sync_run_id", lambda: "run-123")
 
     def _retry(*_args, **kwargs) -> None:
         captured_retry_sync_runs.append(kwargs.get("sync_run"))
@@ -393,8 +397,12 @@ def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(
     def _verify(*_args, **kwargs) -> None:
         captured_verify_sync_runs.append(kwargs.get("sync_run"))
 
-    monkeypatch.setattr("scripts.memory.sync._retry_critical_analysis_groups", _retry)
-    monkeypatch.setattr("scripts.memory.sync._verify_expected_group_counts", _verify)
+    monkeypatch.setattr(
+        f"{SYNC_CORE_MODULE_PATH}._retry_critical_analysis_groups", _retry
+    )
+    monkeypatch.setattr(
+        f"{SYNC_CORE_MODULE_PATH}._verify_expected_group_counts", _verify
+    )
 
     sync_snapshot(
         snapshot,
@@ -415,9 +423,11 @@ def test_main_skips_global_post_apply_fast_audit_for_targeted_sync(
     snapshot.add_node("retirement_candidate", "retire-me.py")
     called: dict[str, int] = {"sync_snapshot": 0, "build_fast_analysis_audit_report": 0}
 
-    monkeypatch.setattr("scripts.memory.sync.build_snapshot", lambda _root: snapshot)
     monkeypatch.setattr(
-        "scripts.memory.sync._filtered_snapshot",
+        f"{SYNC_CORE_MODULE_PATH}.build_snapshot", lambda _root: snapshot
+    )
+    monkeypatch.setattr(
+        f"{SYNC_CORE_MODULE_PATH}._filtered_snapshot",
         lambda current, **_kwargs: current,
     )
 
@@ -428,9 +438,9 @@ def test_main_skips_global_post_apply_fast_audit_for_targeted_sync(
         called["build_fast_analysis_audit_report"] += 1
         return {}
 
-    monkeypatch.setattr("scripts.memory.sync.sync_snapshot", _sync_snapshot)
+    monkeypatch.setattr(f"{SYNC_CORE_MODULE_PATH}.sync_snapshot", _sync_snapshot)
     monkeypatch.setattr(
-        "scripts.memory.sync.build_fast_analysis_audit_report",
+        f"{SYNC_CORE_MODULE_PATH}.build_fast_analysis_audit_report",
         _build_fast_analysis_audit_report,
     )
 
@@ -482,7 +492,7 @@ def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing
     snapshot.add_relation(method_surface, "DEPENDS_ON", pipeline)
 
     monkeypatch.setattr(
-        "scripts.memory.sync._read_text",
+        f"{SYNC_CORE_MODULE_PATH}._read_text",
         lambda _path: "merge helper compat policy",
     )
 
@@ -491,7 +501,7 @@ def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing
             f"AST parsing should not be used for complexity aggregation: {path}"
         )
 
-    monkeypatch.setattr("scripts.memory.sync._parse_python_ast", _fail_parse)
+    monkeypatch.setattr(f"{SYNC_CORE_MODULE_PATH}._parse_python_ast", _fail_parse)
 
     _add_complexity_analysis_surfaces(
         snapshot,
@@ -541,7 +551,7 @@ def test_neo4j_http_client_distinguishes_query_runtime_http_errors(monkeypatch) 
             fp=io.BytesIO(b'{"errors":[{"message":"Cypher failed"}]}'),
         )
 
-    monkeypatch.setattr("scripts.memory.sync.request.urlopen", _raise_http_error)
+    monkeypatch.setattr(f"{SYNC_CORE_MODULE_PATH}.request.urlopen", _raise_http_error)
     client = Neo4jHttpClient(LOCALHOST_HTTP_URI, "neo4j", "password", "neo4j")
 
     try:
@@ -565,7 +575,9 @@ def test_neo4j_http_client_reports_all_transport_attempts(monkeypatch) -> None:
     def _raise_transport_error(_req: object, _timeout: int = 60) -> object:
         raise responses.pop(0)
 
-    monkeypatch.setattr("scripts.memory.sync.request.urlopen", _raise_transport_error)
+    monkeypatch.setattr(
+        f"{SYNC_CORE_MODULE_PATH}.request.urlopen", _raise_transport_error
+    )
     client = Neo4jHttpClient(
         HOST_DOCKER_INTERNAL_HTTP_URI, "neo4j", "password", "neo4j"
     )

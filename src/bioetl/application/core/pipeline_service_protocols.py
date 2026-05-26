@@ -34,6 +34,7 @@ class PipelineServicesProtocol(
 ):
     """Full aggregate surface retained as a compatibility facade."""
 
+
 __all__ = [
     "PipelineDQServicesProtocol",
     "PipelineDataSourceServicesProtocol",

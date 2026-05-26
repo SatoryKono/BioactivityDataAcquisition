@@ -660,8 +660,7 @@ def run_smoke_command(
             ready_seen=ready_seen,
             handshake_sent=handshake_sent,
             message=(
-                "sonarqube MCP smoke received invalid stdout transport output: "
-                f"{exc}"
+                f"sonarqube MCP smoke received invalid stdout transport output: {exc}"
             ),
         )
     finally:
@@ -683,8 +682,7 @@ def run_smoke_command(
             ready_seen=ready_seen,
             handshake_sent=handshake_sent,
             message=(
-                "sonarqube MCP smoke received invalid stdout transport output: "
-                f"{exc}"
+                f"sonarqube MCP smoke received invalid stdout transport output: {exc}"
             ),
         )
 

@@ -351,7 +351,9 @@ def strict_checkpoint_resume_required(
     required_profiles = {
         str(profile or "").strip().lower()
         for profile in (
-            None if current_metadata is None else current_metadata.required_persistence_profile,
+            None
+            if current_metadata is None
+            else current_metadata.required_persistence_profile,
             checkpoint_metadata.required_persistence_profile,
         )
         if str(profile or "").strip()

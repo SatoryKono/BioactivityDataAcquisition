@@ -6,7 +6,7 @@ from datetime import UTC, datetime, timedelta
 from urllib.parse import urlencode
 
 from bioetl.application.services.audit_inspection_service import AuditInspectionResult
-from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionResult,
 )
 

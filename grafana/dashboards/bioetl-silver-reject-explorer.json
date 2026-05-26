@@ -107,11 +107,69 @@
       "description": "Scope banner for the selected-range Silver reject explorer. This dashboard covers only Silver FILTERED_OUT_SILVER quarantine-backed rows; DQ quarantine, skipped records, warning/nullification, and Gold validation failures belong in Data Quality. A zero-reject workflow run can legitimately produce 0 totals and empty record tables, but only after one concrete pipeline, a responding Quarantine Explorer, and a valid Bronze denominator are confirmed."
     },
     {
+      "datasource": "Quarantine Explorer",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "noValue": "No backend health payload returned. Treat all empty explorer tables as UNKNOWN until Quarantine Explorer responds."
+        },
+        "overrides": []
+      },
       "gridPos": {
         "h": 4,
         "w": 24,
         "x": 0,
         "y": 7
+      },
+      "id": 13,
+      "options": {
+        "showHeader": true
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "status": 0,
+              "uptime_seconds": 1
+            },
+            "renameByName": {
+              "status": "backend_status",
+              "uptime_seconds": "backend_uptime_seconds"
+            }
+          }
+        }
+      ],
+      "targets": [
+        {
+          "format": "table",
+          "json_options": {
+            "root_is_not_array": true
+          },
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "$.checks.server",
+          "source": "url",
+          "type": "json",
+          "url": "/health/live",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Monitor Explorer Backend Health",
+      "type": "table",
+      "description": "Transport trust marker for the Quarantine Explorer backend. A healthy response here proves the HTTP backend is reachable, so empty forensic tables can be interpreted as valid empty scope or zero matching rows. No data, datasource errors, or plugin failures here mean backend availability is UNKNOWN and downstream explorer panels must not be treated as evidence of zero rejects."
+    },
+    {
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 11
       },
       "id": 10,
       "options": {
@@ -151,7 +209,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 11
+        "y": 15
       },
       "id": 2,
       "options": {
@@ -239,7 +297,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 11
+        "y": 15
       },
       "id": 3,
       "options": {
@@ -320,7 +378,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 11
+        "y": 15
       },
       "id": 4,
       "options": {
@@ -402,7 +460,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 18
+        "y": 22
       },
       "id": 11,
       "options": {
@@ -495,7 +553,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 18
+        "y": 22
       },
       "id": 12,
       "options": {
@@ -557,7 +615,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 26
+        "y": 30
       },
       "id": 5,
       "options": {
@@ -605,7 +663,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 26
+        "y": 30
       },
       "id": 6,
       "options": {
@@ -653,7 +711,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 26
+        "y": 30
       },
       "id": 7,
       "options": {
@@ -719,7 +777,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 34
+        "y": 38
       },
       "id": 8,
       "options": {
@@ -766,7 +824,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 46
+        "y": 50
       },
       "id": 9,
       "options": {

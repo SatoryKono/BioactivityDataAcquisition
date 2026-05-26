@@ -103,7 +103,9 @@ def build_field_matrix_rows() -> list[dict[str, str]]:
     """Build one deterministic field matrix from the canonical schema + profile."""
     schema_fields = tuple(CHEMBL_ACTIVITY_SCHEMA.names)
     canonical_schema_fields = tuple(
-        sorted(_canonical_activity_field_name(field_name) for field_name in schema_fields)
+        sorted(
+            _canonical_activity_field_name(field_name) for field_name in schema_fields
+        )
     )
     profile_fields = tuple(sorted(CHEMBL_ACTIVITY_SCHEMA_FIELDS))
     if canonical_schema_fields != profile_fields:

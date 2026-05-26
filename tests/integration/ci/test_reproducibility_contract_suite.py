@@ -14,7 +14,7 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.application.services.control_plane.effective_config_service import (
+from bioetl.application.services.control_plane.effective_config.service import (
     EffectiveConfigService,
 )
 from bioetl.application.services.checkpoint_compatibility_service import (
@@ -23,22 +23,22 @@ from bioetl.application.services.checkpoint_compatibility_service import (
 from bioetl.application.services.control_plane.forensic_diff_service import (
     ForensicRunDiffService,
 )
-from bioetl.application.services.control_plane.historical_replay_certification_service import (
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationService,
     HistoricalReplaySnapshotCertification,
 )
-from bioetl.application.services.control_plane.historical_replay_corpus_service import (
+from bioetl.application.services.control_plane.replay.historical_corpus_service import (
     HistoricalReplayBulkCertificationSpec,
     HistoricalReplayCorpusService,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics import (
+from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
 )
-from bioetl.application.services.control_plane.run_ledger_service import (
+from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
 )
 from bioetl.application.services.lineage import MetadataCoordinator
-from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionService,
 )
 from bioetl.composition.bootstrap.runtime.composite_control_plane_builder import (
@@ -508,16 +508,6 @@ def test_reproducibility_contract_historical_composite_certification_requires_ce
 def _family_context(family: str) -> tuple[str, str, str]:
     provider, entity = family.split(".", maxsplit=1)
     return provider, entity, f"{provider}_{entity}"
-
-
-
-
-
-
-
-
-
-
 
 
 def test_reproducibility_contract_live_capture_materialized_snapshot_parent_state() -> (
@@ -1865,14 +1855,6 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
     assert "lineage_completeness" in threshold_failures
 
 
-
-
-
-
-
-
-
-
 @pytest.mark.asyncio
 async def test_reproducibility_contract_composite_quarantine_replay_anchor_is_deterministic() -> (
     None
@@ -1887,5 +1869,3 @@ async def test_reproducibility_contract_composite_quarantine_replay_anchor_is_de
     assert write_kwargs["ingestion_ts"] == datetime(2025, 2, 3, 0, 0, tzinfo=UTC)
     assert write_kwargs["metadata"]["artifact_policy"] == "occurrence_only_diagnostic"
     assert write_kwargs["metadata"]["replay_contract"] == "excluded_from_exact_replay"
-
-

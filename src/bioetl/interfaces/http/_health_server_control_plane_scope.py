@@ -109,7 +109,7 @@ def _is_unknown_pipeline_scope(
     requested_pipeline: str,
     selected_pipelines: tuple[str, ...],
 ) -> bool:
-    return (
-        requested_pipeline.strip() == UNKNOWN_SCOPE
-        and selected_pipelines in {(UNKNOWN_SCOPE,), ()}
-    )
+    return requested_pipeline.strip() == UNKNOWN_SCOPE and selected_pipelines in {
+        (UNKNOWN_SCOPE,),
+        (),
+    }

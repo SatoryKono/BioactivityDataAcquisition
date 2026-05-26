@@ -8,15 +8,15 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.services.control_plane.effective_config_service import (
+from bioetl.application.services.control_plane.effective_config.service import (
     EffectiveConfigService,
 )
-from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionCorruptionError,
     RunManifestInspectionService,
 )
 from bioetl.application.services.control_plane import RunLedgerService
-from bioetl.application.services.control_plane.run_manifest_service import (
+from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec as RunManifestCreateRequest,
     RunManifestService,
 )
@@ -1470,19 +1470,3 @@ def test_show_collects_dq_trace_anchors() -> None:
         "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",
     ]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

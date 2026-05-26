@@ -69,7 +69,11 @@ class DocumentationParityChecker:
 
     def _provider_entity_config_files(self, provider_dir: Path) -> list[Path]:
         """Return visible entity config files for one provider directory."""
-        return list(filter(self._is_visible_config_file, self._provider_yaml_files(provider_dir)))
+        return list(
+            filter(
+                self._is_visible_config_file, self._provider_yaml_files(provider_dir)
+            )
+        )
 
     def _provider_yaml_files(self, provider_dir: Path) -> list[Path]:
         """Return provider YAML files before visibility filtering."""

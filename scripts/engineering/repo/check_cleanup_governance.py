@@ -109,7 +109,9 @@ def _load_allowed_examples(repo_root: Path) -> dict[str, tuple[str, ...]]:
 
 def _is_skipped_dir(relative_path: Path) -> bool:
     text = relative_path.as_posix()
-    return any(text == skipped or text.startswith(f"{skipped}/") for skipped in SKIPPED_DIRS)
+    return any(
+        text == skipped or text.startswith(f"{skipped}/") for skipped in SKIPPED_DIRS
+    )
 
 
 def _is_scanned_file(candidate: Path, *, repo_root: Path) -> bool:
@@ -153,7 +155,9 @@ def _allowed_on_line(
 
 
 def _line_literal_violation(line: str) -> str | None:
-    return next((pattern for pattern in FORBIDDEN_LITERAL_PATTERNS if pattern in line), None)
+    return next(
+        (pattern for pattern in FORBIDDEN_LITERAL_PATTERNS if pattern in line), None
+    )
 
 
 def _line_regex_violation(line: str) -> str | None:

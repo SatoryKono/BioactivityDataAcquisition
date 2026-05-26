@@ -9,13 +9,13 @@ from bioetl.application.services.control_plane import (
 from bioetl.application.services.control_plane import (
     RunManifestService as RunManifestServicePackage,
 )
-from bioetl.application.services.control_plane.run_manifest_service import (
+from bioetl.application.services.control_plane.manifest.service import (
     RunManifestService,
 )
-from bioetl.application.services.control_plane.run_ledger_service import (
+from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
 )
-from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionService,
 )
 from bioetl.application.services.execution import (

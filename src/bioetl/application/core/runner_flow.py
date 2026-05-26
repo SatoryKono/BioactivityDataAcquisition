@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.pipeline_observability_service_protocols import (
         PipelineRunnerServicesProtocol,
     )
-    from bioetl.application.services.control_plane.run_ledger_service import (
+    from bioetl.application.services.control_plane.ledger.service import (
         RunLedgerService,
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig

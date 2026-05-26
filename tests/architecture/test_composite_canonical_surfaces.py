@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+from types import SimpleNamespace
 
 import pytest
 
@@ -262,6 +263,27 @@ def test_active_composite_docs_and_generated_graphs_use_canonical_names() -> Non
         "Active composite docs and generated knowledge graphs must use canonical "
         "composite names:\n" + "\n".join(f"  - {hit}" for hit in hits)
     )
+
+
+@pytest.mark.architecture
+def test_symbol_scan_subprocess_kwargs_hide_windows_console() -> None:
+    startupinfo = SimpleNamespace(dwFlags=0, wShowWindow=5)
+    fake_subprocess = SimpleNamespace(
+        CREATE_NO_WINDOW=0x08000000,
+        STARTF_USESHOWWINDOW=0x00000001,
+        SW_HIDE=0,
+        STARTUPINFO=lambda: startupinfo,
+    )
+
+    kwargs = _hidden_windows_subprocess_kwargs(
+        os_name="nt",
+        subprocess_module=fake_subprocess,
+    )
+
+    assert kwargs["creationflags"] == 0x08000000
+    assert kwargs["startupinfo"] is startupinfo
+    assert startupinfo.dwFlags == 0x00000001
+    assert startupinfo.wShowWindow == 0
 
 
 @pytest.mark.architecture

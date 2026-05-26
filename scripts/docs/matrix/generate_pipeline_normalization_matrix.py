@@ -3101,9 +3101,7 @@ def render_markdown(
         build_surface_coverage_kpis(rows) if surface_kpis is None else surface_kpis
     )
     effective_semantic_kpis = (
-        build_profile_semantic_invariants()
-        if semantic_kpis is None
-        else semantic_kpis
+        build_profile_semantic_invariants() if semantic_kpis is None else semantic_kpis
     )
     lines = _markdown_intro_lines()
     lines.extend(_surface_kpi_lines(effective_surface_kpis))
@@ -3208,9 +3206,7 @@ def build_artifacts(
         else surface_kpis
     )
     effective_semantic_kpis = (
-        build_profile_semantic_invariants()
-        if semantic_kpis is None
-        else semantic_kpis
+        build_profile_semantic_invariants() if semantic_kpis is None else semantic_kpis
     )
     non_chembl_rows = [
         row

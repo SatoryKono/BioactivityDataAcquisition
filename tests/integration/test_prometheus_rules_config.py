@@ -1111,7 +1111,9 @@ def test_control_plane_current_status_rules_project_pipeline_signals_to_run_type
     assert "bioetl_control_plane_run_type_universe" in telemetry_expr
     assert "* on (pipeline) group_left()" in telemetry_expr
     assert "time()" in checkpoint_age_expr
-    assert "max by (pipeline) (bioetl_checkpoint_saved_at_seconds)" in checkpoint_age_expr
+    assert (
+        "max by (pipeline) (bioetl_checkpoint_saved_at_seconds)" in checkpoint_age_expr
+    )
 
 
 def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None:

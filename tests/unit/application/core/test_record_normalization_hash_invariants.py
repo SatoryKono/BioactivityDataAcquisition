@@ -5,6 +5,7 @@ from __future__ import annotations
 # ruff: noqa: F403,F405
 from tests.unit.application.core.normalization_test_support import *  # noqa: F403,F405
 
+
 def test_profile_auto_resolves_for_chembl_publication_similarity() -> None:
     processor = build_normalization_processor(
         provider="chembl",
@@ -29,6 +30,8 @@ def test_profile_auto_resolves_for_chembl_publication_similarity() -> None:
     assert normalized["pubmed_id1"] == "12345"
     assert normalized["pubmed_id2"] == "67890"
     assert normalized["avg_tani"] == pytest.approx(0.75)
+
+
 def test_openalex_publication_profile_makes_content_hash_invariant_for_set_like_lists() -> (
     None
 ):
@@ -79,6 +82,8 @@ def test_openalex_publication_profile_makes_content_hash_invariant_for_set_like_
 
     assert normalized_a["content_hash"] == normalized_b["content_hash"]
     assert normalized_changed["content_hash"] != normalized_a["content_hash"]
+
+
 def test_uniprot_protein_profile_makes_content_hash_invariant_for_gene_synonym_order() -> (
     None
 ):
@@ -125,6 +130,8 @@ def test_uniprot_protein_profile_makes_content_hash_invariant_for_gene_synonym_o
     assert normalized_a["taxonomy_id"] == 9606
     assert normalized_a["content_hash"] == normalized_b["content_hash"]
     assert normalized_changed["content_hash"] != normalized_a["content_hash"]
+
+
 def test_chembl_activity_profile_makes_content_hash_invariant_for_set_like_json_arrays() -> (
     None
 ):

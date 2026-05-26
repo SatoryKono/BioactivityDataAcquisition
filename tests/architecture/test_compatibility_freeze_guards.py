@@ -322,7 +322,9 @@ REMOVED_COMPAT_MODULES: dict[str, Path] = {
 }
 
 
-def _find_candidate_importer_files(root: Path, module_name: str, leaf_name: str) -> list[Path]:
+def _find_candidate_importer_files(
+    root: Path, module_name: str, leaf_name: str
+) -> list[Path]:
     try:
         root_spec = root.relative_to(ROOT).as_posix()
     except ValueError:
@@ -1638,7 +1640,9 @@ def test_checkpoint_compatibility_v2_surface_stays_removed_and_unimportable() ->
     with pytest.raises(ModuleNotFoundError):
         import_module(REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE)
     assert not _find_importers(ROOT / "src", REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE)
-    assert not _find_importers(ROOT / "tests", REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE)
+    assert not _find_importers(
+        ROOT / "tests", REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE
+    )
 
 
 @pytest.mark.architecture

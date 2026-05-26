@@ -205,12 +205,10 @@ class TestProcessedRecordsTable:
             processed_records_module, "fetch_processed_record_values", fail_fetch
         )
 
-        payload = (
-            processed_records_module.build_processed_records_table_payload_from_prometheus(
-                prometheus_base_url="http://prometheus.example",
-                pipeline="unknown",
-                run_type="__all",
-            )
+        payload = processed_records_module.build_processed_records_table_payload_from_prometheus(
+            prometheus_base_url="http://prometheus.example",
+            pipeline="unknown",
+            run_type="__all",
         )
 
         assert payload["pipeline"] == "unknown"

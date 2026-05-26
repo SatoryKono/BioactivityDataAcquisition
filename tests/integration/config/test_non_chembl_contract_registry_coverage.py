@@ -75,7 +75,9 @@ def test_non_chembl_contract_registry_normalization_profiles_stay_in_sync() -> N
             entry.identity.normalization_profile_version
             == profile_identity.profile_version
         )
-        assert entry.identity.normalization_profile_hash == profile_identity.profile_hash
+        assert (
+            entry.identity.normalization_profile_hash == profile_identity.profile_hash
+        )
         assert entry.dq_policy_ref == expected["dq_policy_ref"]
         assert entry.rule_bundle_version == "dq-rules.v1.0"
         assert entry.normalization_profile_ref == profile_identity.profile_name

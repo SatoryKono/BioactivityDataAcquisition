@@ -1671,7 +1671,7 @@ def test_docs_drift_sources_skips_unreadable_doc_artifacts(
             raise OSError("Invalid argument")
         return path.read_text(encoding="utf-8")
 
-    monkeypatch.setattr("scripts.memory.sync._read_text", _raise_read_error)
+    monkeypatch.setattr(f"{SYNC_CORE_MODULE_PATH}._read_text", _raise_read_error)
 
     assert list(_docs_drift_sources(snapshot, tmp_path, {})) == []
     assert doc_key in snapshot.nodes
@@ -1695,7 +1695,7 @@ def test_docs_drift_sources_skips_windows_style_excluded_report_paths(
     def _fail_if_read(_path: Path) -> str:
         raise AssertionError("excluded report paths must not be read")
 
-    monkeypatch.setattr("scripts.memory.sync._read_text", _fail_if_read)
+    monkeypatch.setattr(f"{SYNC_CORE_MODULE_PATH}._read_text", _fail_if_read)
 
     assert list(_docs_drift_sources(snapshot, tmp_path, {})) == []
 
@@ -1721,6 +1721,6 @@ def test_docs_drift_sources_skips_absolute_windows_excluded_report_paths(
     def _fail_if_read(_path: Path) -> str:
         raise AssertionError("absolute excluded report paths must not be read")
 
-    monkeypatch.setattr("scripts.memory.sync._read_text", _fail_if_read)
+    monkeypatch.setattr(f"{SYNC_CORE_MODULE_PATH}._read_text", _fail_if_read)
 
     assert list(_docs_drift_sources(snapshot, root, {})) == []

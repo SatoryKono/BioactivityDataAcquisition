@@ -184,9 +184,7 @@ class TestBootstrapPipeline:
             bootstrap_pipeline_runner,
         )
 
-        mock_prepare_runtime_registry.side_effect = ValueError(
-            "Unknown pipeline name"
-        )
+        mock_prepare_runtime_registry.side_effect = ValueError("Unknown pipeline name")
 
         # Runner bootstrap now resolves the factory through the registry first.
         ctx = _create_pipeline_context(pipeline_name="unknown_pipeline")
@@ -197,7 +195,9 @@ class TestBootstrapPipeline:
             pipeline_name="unknown_pipeline",
         )
 
-    @patch("bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.create_registry")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.create_registry"
+    )
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.assemble_filter_config"
     )
@@ -210,7 +210,9 @@ class TestBootstrapPipeline:
     @patch(
         "bioetl.composition.runtime_builders.runner_control_plane_assembly.create_run_manifest_with_effective_config"
     )
-    @patch("bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.get_settings")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.get_settings"
+    )
     def test_bootstrap_pipeline_creates_runner_without_starting_server(
         self,
         mock_get_settings: MagicMock,
@@ -277,8 +279,12 @@ class TestBootstrapPipeline:
         # Verify observability was bootstrapped (creates MetricsPort, but doesn't start server)
         mock_bootstrap_observability_bundle.assert_called_once()
 
-    @patch("bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.get_settings")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.create_registry")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.get_settings"
+    )
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.create_registry"
+    )
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.bootstrap_observability_bundle"
     )
@@ -359,7 +365,9 @@ class TestBootstrapPipeline:
 class TestBootstrapVacuumConfig:
     """Tests for bootstrap_pipeline_runner vacuum configuration merging."""
 
-    @patch("bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.create_registry")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.create_registry"
+    )
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.assemble_filter_config"
     )
@@ -369,7 +377,9 @@ class TestBootstrapVacuumConfig:
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.bootstrap_observability_bundle"
     )
-    @patch("bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.get_settings")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.get_settings"
+    )
     def test_bootstrap_uses_yaml_vacuum_config_when_cli_not_set(
         self,
         mock_get_settings: MagicMock,
@@ -441,7 +451,9 @@ class TestBootstrapVacuumConfig:
         assert runtime.vacuum_after_run is True
         assert runtime.vacuum_retention_days == 14
 
-    @patch("bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.create_registry")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.create_registry"
+    )
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.assemble_filter_config"
     )
@@ -451,7 +463,9 @@ class TestBootstrapVacuumConfig:
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.bootstrap_observability_bundle"
     )
-    @patch("bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.get_settings")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.get_settings"
+    )
     def test_bootstrap_cli_vacuum_overrides_yaml_config(
         self,
         mock_get_settings: MagicMock,

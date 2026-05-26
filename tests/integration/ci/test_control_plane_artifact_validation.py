@@ -138,9 +138,7 @@ def test_control_plane_validator_bounds_committed_run_manifest_examples(
     violations = validate_control_plane_artifacts(tmp_path)
 
     assert violations == []
-    assert (
-        len(validated_paths) == validator._RUN_MANIFEST_VALIDATION_MAX_FILES
-    )
+    assert len(validated_paths) == validator._RUN_MANIFEST_VALIDATION_MAX_FILES
     assert validated_paths == sorted(validated_paths)
     assert validated_paths[:3] == tracked_paths[:3]
     assert validated_paths[-3:] == tracked_paths[-3:]
