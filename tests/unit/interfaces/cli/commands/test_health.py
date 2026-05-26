@@ -640,6 +640,7 @@ class TestHealthServerAsyncExecution:
     ) -> None:
         """Test health server starts and stops correctly."""
         mock_deps = MagicMock()
+        mock_deps.checkpoint_port.aclose = AsyncMock()
         mock_get_deps.return_value = mock_deps
         mock_get_quarantine_service.return_value = None
 
@@ -664,6 +665,7 @@ class TestHealthServerAsyncExecution:
         mock_start_observability.assert_called_once_with()
         mock_server.start.assert_called_once()
         mock_server.stop.assert_called_once()
+        mock_deps.checkpoint_port.aclose.assert_awaited_once()
         assert "Health server stopped." in result.output
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
@@ -678,6 +680,7 @@ class TestHealthServerAsyncExecution:
     ) -> None:
         """Test health server passes custom host/port to HealthServer."""
         mock_deps = MagicMock()
+        mock_deps.checkpoint_port.aclose = AsyncMock()
         mock_get_deps.return_value = mock_deps
         mock_get_quarantine_service.return_value = None
 
@@ -707,6 +710,7 @@ class TestHealthServerAsyncExecution:
             port=9000,
             health_monitor=mock_deps.health_monitor,
             quarantine_service=None,
+            checkpoint_port=mock_deps.checkpoint_port,
             run_manifest_port=mock_deps.run_manifest_port,
             run_ledger_port=mock_deps.run_ledger_port,
         )
@@ -723,6 +727,7 @@ class TestHealthServerAsyncExecution:
     ) -> None:
         """Test health server uses composition entrypoint for DI."""
         mock_deps = MagicMock()
+        mock_deps.checkpoint_port.aclose = AsyncMock()
         mock_get_deps.return_value = mock_deps
         mock_get_quarantine_service.return_value = None
 
@@ -751,6 +756,7 @@ class TestHealthServerAsyncExecution:
             port=8081,
             health_monitor=mock_deps.health_monitor,
             quarantine_service=None,
+            checkpoint_port=mock_deps.checkpoint_port,
             run_manifest_port=mock_deps.run_manifest_port,
             run_ledger_port=mock_deps.run_ledger_port,
         )

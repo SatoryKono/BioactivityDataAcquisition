@@ -10,6 +10,7 @@ import time
 
 from bioetl.application.services.quarantine_service import QuarantineService
 from bioetl.domain.ports import (
+    CheckpointPort,
     HealthMonitorPort,
     LoggerPort,
     RunLedgerPort,
@@ -39,6 +40,7 @@ class HealthServer(
         port: int = 8081,
         health_monitor: HealthMonitorPort | None = None,
         quarantine_service: QuarantineService | None = None,
+        checkpoint_port: CheckpointPort | None = None,
         run_manifest_port: RunManifestPort | None = None,
         run_ledger_port: RunLedgerPort | None = None,
         prometheus_base_url: str | None = None,
@@ -54,6 +56,8 @@ class HealthServer(
                 healthy with no provider data when None.
             quarantine_service: Optional read-only service for
                 /ops/quarantine/* explorer endpoints.
+            checkpoint_port: Optional read-only checkpoint storage used by
+                /ops/control-plane/checkpoint-freshness.
             run_manifest_port: Optional read-only control-plane manifest catalog
                 used by /ops/control-plane/* selector endpoints.
             run_ledger_port: Optional read-only control-plane run ledger used
@@ -69,6 +73,7 @@ class HealthServer(
         self.port = port
         self._health_monitor = health_monitor
         self._quarantine_service = quarantine_service
+        self._checkpoint_port = checkpoint_port
         self._run_manifest_port = run_manifest_port
         self._run_ledger_port = run_ledger_port
         self._prometheus_base_url = (
@@ -143,6 +148,7 @@ async def run_health_server(
     port: int = 8081,
     health_monitor: HealthMonitorPort | None = None,
     quarantine_service: QuarantineService | None = None,
+    checkpoint_port: CheckpointPort | None = None,
     run_manifest_port: RunManifestPort | None = None,
     run_ledger_port: RunLedgerPort | None = None,
     prometheus_base_url: str | None = None,
@@ -159,6 +165,7 @@ async def run_health_server(
         health_monitor: Optional monitor providing provider health states.
             Health endpoints report no provider data when None.
         quarantine_service: Optional read-only quarantine explorer service.
+        checkpoint_port: Optional read-only checkpoint storage.
         run_manifest_port: Optional read-only control-plane manifest catalog.
         run_ledger_port: Optional read-only control-plane run ledger.
         prometheus_base_url: Optional Prometheus HTTP API base URL.
@@ -169,6 +176,7 @@ async def run_health_server(
         port=port,
         health_monitor=health_monitor,
         quarantine_service=quarantine_service,
+        checkpoint_port=checkpoint_port,
         run_manifest_port=run_manifest_port,
         run_ledger_port=run_ledger_port,
         prometheus_base_url=prometheus_base_url,

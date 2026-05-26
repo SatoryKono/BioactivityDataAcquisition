@@ -6,6 +6,7 @@ import asyncio
 import json
 from collections.abc import AsyncGenerator
 from datetime import UTC, datetime, timedelta
+from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
@@ -26,7 +27,9 @@ from bioetl.domain.control_plane.run_ledger import (
 )
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from bioetl.domain.types import RunID, RunType
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.interfaces.http import _health_server_identity_evidence
+from bioetl.interfaces.http import _health_server_routing_support
 from bioetl.interfaces.http.control_plane_selector_context import (
     build_selector_filter_options_payload,
 )
@@ -50,6 +53,7 @@ from bioetl.interfaces.http.control_plane_identity.specs import (
 )
 from bioetl.interfaces.http.health_server import HealthServer
 from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
+from tests.helpers.clock import fixed_test_clock
 
 
 def test_control_plane_identity_evidence_static_contract_is_frozen() -> None:
@@ -395,10 +399,14 @@ class TestHealthServerControlPlaneSelector:
     @pytest_asyncio.fixture(loop_scope="module")
     async def running_server_with_run_catalog(
         self,
+        tmp_path_factory: pytest.TempPathFactory,
     ) -> AsyncGenerator[tuple[HealthServer, InMemoryRunManifestStore], None]:
         """Start server with an in-memory control-plane run catalog."""
         manifest_store = InMemoryRunManifestStore()
         ledger_store = InMemoryRunLedgerStore()
+        checkpoint_port = LocalCheckpointAdapter(
+            base_path=tmp_path_factory.mktemp("control-plane-checkpoints")
+        )
         created_at = datetime(2026, 5, 12, 8, 21, tzinfo=UTC)
         run_id_1 = RunID(uuid4())
         run_id_2 = RunID(uuid4())
@@ -613,16 +621,45 @@ class TestHealthServerControlPlaneSelector:
                 status="success",
             )
         )
-
-        server = HealthServer(
-            host="127.0.0.1",
-            port=0,
-            run_manifest_port=manifest_store,
-            run_ledger_port=ledger_store,
+        test_clock = fixed_test_clock()
+        now = test_clock.now()
+        await checkpoint_port.save(
+            "chembl_activity",
+            run_id_1,
+            {
+                "manifest_id": "manifest-1",
+                "checkpoint_saved_at_epoch_seconds": (
+                    now - timedelta(hours=1)
+                ).timestamp(),
+            },
         )
-        await server.start()
-        yield server, manifest_store
-        await server.stop()
+        await checkpoint_port.save(
+            "chembl_activity",
+            run_id_2,
+            {
+                "manifest_id": "manifest-2",
+                "checkpoint_saved_at_epoch_seconds": (
+                    now - timedelta(minutes=2)
+                ).timestamp(),
+            },
+        )
+
+        with patch.object(
+            _health_server_routing_support,
+            "current_utc_time",
+            test_clock.now,
+        ):
+            server = HealthServer(
+                host="127.0.0.1",
+                port=0,
+                checkpoint_port=checkpoint_port,
+                run_manifest_port=manifest_store,
+                run_ledger_port=ledger_store,
+            )
+            await server.start()
+            yield server, manifest_store
+            await server.stop()
+            await checkpoint_port.aclose()
 
     @staticmethod
     def _get_server_port(server: HealthServer) -> int:
@@ -1404,6 +1441,80 @@ class TestHealthServerControlPlaneSelector:
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         )
         assert rows["contract_ref"]["copy_value"] == "chembl.activity"
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_checkpoint_freshness_returns_latest_pointer(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Checkpoint freshness without run_id should use the mutable latest pointer."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/checkpoint-freshness?pipeline=chembl_activity",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data["status"] == "OK"
+        assert data["evidence_source"] == "mutable_latest_pointer"
+        assert data["manifest_id"] == "manifest-2"
+        assert data["checkpoint_present"] is True
+        assert data["age_seconds"] is not None
+        assert 0 <= float(data["age_seconds"]) < 900
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_checkpoint_freshness_prefers_exact_run_scope(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Exact run_id scope must use immutable checkpoint evidence, not latest pointer."""
+        server, manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        manifest = next(
+            item for item in manifest_store.list_all() if item.manifest_id == "manifest-1"
+        )
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/checkpoint-freshness?"
+            f"pipeline=chembl_activity&run_id={manifest.run_id}",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data["status"] == "OK"
+        assert data["evidence_source"] == "immutable_manifest_history"
+        assert data["manifest_id"] == "manifest-1"
+        assert data["checkpoint_run_id"] == str(manifest.run_id)
+        assert data["age_seconds"] is not None
+        assert float(data["age_seconds"]) >= 3600
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_checkpoint_freshness_fail_closes_aggregate_scope(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Aggregate pipeline scope must not guess one checkpoint age."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/checkpoint-freshness?"
+            "pipeline=$__all&run_type=incremental",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data["status"] == "UNKNOWN"
+        assert data["age_seconds"] is None
+        assert data["evidence_source"] == "aggregate_scope_requires_exact_pipeline"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_endpoint_rejects_unknown_dimension(

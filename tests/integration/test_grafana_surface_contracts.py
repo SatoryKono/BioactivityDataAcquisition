@@ -195,7 +195,6 @@ def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> Non
     required_metrics = [
         "bioetl_control_plane_reads_total",
         "bioetl_control_plane_read_duration_seconds",
-        "bioetl_checkpoint_age_seconds",
         "bioetl_checkpoint_load_events_total",
         "bioetl_checkpoint_save_events_total",
         "bioetl_checkpoint_operator_operations_total",
@@ -212,6 +211,23 @@ def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> Non
     ]
     missing = [metric for metric in required_metrics if metric not in all_expressions]
     assert not missing, f"Control-plane dashboard missing metrics: {missing}"
+
+    checkpoint_panel = next(
+        (
+            panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("id") == 892
+        ),
+        None,
+    )
+    assert checkpoint_panel is not None
+    assert checkpoint_panel.get("datasource") == "Quarantine Explorer"
+    target = checkpoint_panel.get("targets", [])[0]
+    assert target.get("parser") == "backend"
+    assert (
+        str(target.get("url", ""))
+        == "/ops/control-plane/checkpoint-freshness?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+    )
 
 
 def test_provider_dashboard_contains_operator_surface_metrics() -> None:

@@ -831,7 +831,10 @@ tries `http://localhost:9090`, then the Docker-local fallbacks
   `manifest_id`, config/contract hashes, artifact refs, replay parentage,
   composite identity, and checkpoint anchor compare are surfaced by
   `/ops/control-plane/identity-evidence` plus run-manifest inspection, not
-  Prometheus labels. GLOBAL
+  Prometheus labels. `Monitor: Checkpoint Freshness Lag (seconds)` is also now
+  HTTP-backed through `/ops/control-plane/checkpoint-freshness`, so it reads
+  persisted checkpoint metadata instead of relying on short-lived scrape
+  presence. GLOBAL
   read-path и checkpoint-operator panels не несут pipeline/run_type labels,
   поэтому не фильтруются по этим переменным.
 

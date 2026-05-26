@@ -50,6 +50,7 @@ class TestHealthServerContext:
         # Setup mocks
         mock_deps = MagicMock()
         mock_deps.health_monitor = MagicMock()
+        mock_deps.checkpoint_port.aclose = AsyncMock()
         mock_get_deps.return_value = mock_deps
         mock_get_quarantine_service.return_value = None
 
@@ -63,6 +64,7 @@ class TestHealthServerContext:
             mock_server.start.assert_called_once()
 
         mock_server.stop.assert_called_once()
+        mock_deps.checkpoint_port.aclose.assert_awaited_once()
 
     @pytest.mark.asyncio
     @patch("bioetl.composition.health_api.get_quarantine_service")
@@ -76,6 +78,7 @@ class TestHealthServerContext:
     ) -> None:
         """Test that server is stopped even when exception occurs."""
         mock_deps = MagicMock()
+        mock_deps.checkpoint_port.aclose = AsyncMock()
         mock_get_deps.return_value = mock_deps
         mock_get_quarantine_service.return_value = None
 
@@ -89,6 +92,7 @@ class TestHealthServerContext:
                 raise RuntimeError("Test error")
 
         mock_server.stop.assert_called_once()
+        mock_deps.checkpoint_port.aclose.assert_awaited_once()
 
     @pytest.mark.asyncio
     @patch("bioetl.composition.health_api.get_quarantine_service")
@@ -103,6 +107,7 @@ class TestHealthServerContext:
         """Test that custom host and port are passed to server."""
         mock_deps = MagicMock()
         mock_deps.health_monitor = MagicMock()
+        mock_deps.checkpoint_port.aclose = AsyncMock()
         mock_get_deps.return_value = mock_deps
         mock_get_quarantine_service.return_value = None
 
@@ -119,6 +124,7 @@ class TestHealthServerContext:
             assert call_kwargs["port"] == 9090
             assert call_kwargs["health_monitor"] is mock_deps.health_monitor
             assert call_kwargs["quarantine_service"] is None
+            assert call_kwargs["checkpoint_port"] is mock_deps.checkpoint_port
 
     @pytest.mark.asyncio
     @patch("bioetl.composition.health_api.get_quarantine_service")
@@ -135,6 +141,7 @@ class TestHealthServerContext:
         """OSError during start should yield None and continue pipeline."""
         mock_deps = MagicMock()
         mock_deps.health_monitor = MagicMock()
+        mock_deps.checkpoint_port.aclose = AsyncMock()
         mock_get_deps.return_value = mock_deps
         mock_get_quarantine_service.return_value = None
 
@@ -150,6 +157,7 @@ class TestHealthServerContext:
 
         mock_echo.assert_called_once()
         mock_server.stop.assert_not_called()
+        mock_deps.checkpoint_port.aclose.assert_awaited_once()
 
 
 class TestEchoHealthServerInfo:

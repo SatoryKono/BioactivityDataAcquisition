@@ -187,6 +187,7 @@ async def _run_health_server(host: str, port: int) -> None:
         port=port,
         health_monitor=deps.health_monitor,
         quarantine_service=quarantine_service,
+        checkpoint_port=deps.checkpoint_port,
         run_manifest_port=deps.run_manifest_port,
         run_ledger_port=deps.run_ledger_port,
     )
@@ -196,6 +197,7 @@ async def _run_health_server(host: str, port: int) -> None:
             await asyncio.sleep(1)
     finally:
         await server.stop()
+        await deps.checkpoint_port.aclose()
         if quarantine_service is not None:
             await quarantine_service.aclose()
         click.echo("\nHealth server stopped.")

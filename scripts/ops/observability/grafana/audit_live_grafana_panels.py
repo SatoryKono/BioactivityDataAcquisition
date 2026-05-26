@@ -96,7 +96,7 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
         dashboard_uid="bioetl-control-plane-v1",
         panel_id=892,
         title="Monitor: Checkpoint Freshness Lag (seconds)",
-        source_kind="prometheus",
+        source_kind="http",
         semantic_kind="freshness",
     ),
     PanelAuditSpec(
@@ -392,6 +392,21 @@ def _classify_http_payload(payload: object) -> tuple[str, str]:
     return ("nonzero_result", "Explorer summary returned non-zero rejects")
 
 
+def _classify_http_freshness_payload(payload: object) -> tuple[str, str]:
+    if not isinstance(payload, dict):
+        return ("invalid_shape", "HTTP payload is not a JSON object")
+    if "age_seconds" not in payload:
+        return ("invalid_shape", "HTTP freshness payload missing age_seconds")
+    age_seconds = payload.get("age_seconds")
+    if age_seconds is None:
+        return ("empty_result", "Checkpoint freshness payload returned null age_seconds")
+    if not isinstance(age_seconds, (int, float)):
+        return ("invalid_shape", "HTTP age_seconds must be numeric or null")
+    if age_seconds == 0:
+        return ("zero_result", "Checkpoint freshness payload returned zero age")
+    return ("nonzero_result", "Checkpoint freshness payload returned non-zero age")
+
+
 def _audit_prometheus_panel(
     spec: PanelAuditSpec,
     panel: dict[str, Any],
@@ -472,8 +487,12 @@ def _audit_http_panel(
         )
     rendered_url = _substitute_dashboard_tokens(url_template, config)
     payload = _fetch_json(f"{app_base_url}{rendered_url}")
-    classification, detail = _classify_http_payload(payload)
-    status = "ok" if classification != "invalid_shape" else "error"
+    if spec.semantic_kind == "freshness":
+        classification, detail = _classify_http_freshness_payload(payload)
+        status = "error" if classification in {"invalid_shape", "empty_result"} else "ok"
+    else:
+        classification, detail = _classify_http_payload(payload)
+        status = "ok" if classification != "invalid_shape" else "error"
     return AuditResult(
         dashboard_uid=spec.dashboard_uid,
         panel_id=spec.panel_id,

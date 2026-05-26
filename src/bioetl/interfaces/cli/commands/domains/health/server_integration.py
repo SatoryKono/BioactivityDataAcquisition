@@ -64,12 +64,12 @@ async def health_server_context(
         # Why: keep health probes available during pipeline runs even if
         # quarantine explorer dependencies are temporarily unavailable.
         quarantine_service = None
-
     server = HealthServer(
         host=host,
         port=port,
         health_monitor=deps.health_monitor,
         quarantine_service=quarantine_service,
+        checkpoint_port=deps.checkpoint_port,
         run_manifest_port=deps.run_manifest_port,
         run_ledger_port=deps.run_ledger_port,
     )
@@ -77,6 +77,7 @@ async def health_server_context(
     try:
         await server.start()
     except OSError:
+        await deps.checkpoint_port.aclose()
         if quarantine_service is not None:
             await quarantine_service.aclose()
         click.echo(
@@ -91,6 +92,7 @@ async def health_server_context(
         yield server
     finally:
         await server.stop()
+        await deps.checkpoint_port.aclose()
         if quarantine_service is not None:
             await quarantine_service.aclose()
 

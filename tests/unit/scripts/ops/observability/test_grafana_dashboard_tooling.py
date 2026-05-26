@@ -242,10 +242,16 @@ def test_live_audit_marks_freshness_empty_result_as_error(monkeypatch: Any) -> N
         dashboard_uid="bioetl-control-plane-v1",
         panel_id=892,
         title="Monitor: Checkpoint Freshness Lag (seconds)",
-        source_kind="prometheus",
+        source_kind="http",
         semantic_kind="freshness",
     )
-    panel = {"targets": [{"expr": "max(bioetl_checkpoint_age_seconds)"}]}
+    panel = {
+        "targets": [
+            {
+                "url": "/ops/control-plane/checkpoint-freshness?pipeline=${pipeline}"
+            }
+        ]
+    }
     config = audit_subject.AuditConfig(
         prometheus_base_url="http://localhost:9090",
         app_base_url="http://localhost:8081",
@@ -261,13 +267,15 @@ def test_live_audit_marks_freshness_empty_result_as_error(monkeypatch: Any) -> N
     monkeypatch.setattr(
         audit_subject,
         "_fetch_json",
-        lambda *_args, **_kwargs: {
-            "status": "success",
-            "data": {"resultType": "vector", "result": []},
-        },
+        lambda *_args, **_kwargs: {"status": "UNKNOWN", "age_seconds": None},
     )
 
-    result = audit_subject._audit_prometheus_panel(spec, panel, config)
+    result = audit_subject._audit_http_panel(
+        spec,
+        panel,
+        config,
+        app_base_url="http://localhost:8081",
+    )
 
     assert result.classification == "empty_result"
     assert result.status == "error"
@@ -282,6 +290,20 @@ def test_live_audit_classifies_http_zero_state_and_nonzero() -> None:
         == "zero_state_unknown_denominator"
     )
     assert audit_subject._classify_http_payload(nonzero_payload)[0] == "nonzero_result"
+
+
+def test_live_audit_classifies_http_freshness_zero_and_empty() -> None:
+    zero_payload = {"status": "OK", "age_seconds": 0.0}
+    empty_payload = {"status": "UNKNOWN", "age_seconds": None}
+
+    assert (
+        audit_subject._classify_http_freshness_payload(zero_payload)[0]
+        == "zero_result"
+    )
+    assert (
+        audit_subject._classify_http_freshness_payload(empty_payload)[0]
+        == "empty_result"
+    )
 
 
 def test_live_audit_parse_args_uses_grafana_env_defaults(
