@@ -7,7 +7,7 @@
   "pages": [
     {
       "title": "BioETL Overview",
-      "purpose": "High-level introduction to BioETL: what it does, who it's for, key features, supported providers, and how the major sections of this wiki relate to each other. Links to child pages for setup and project governance.",
+      "purpose": "Index of the project scope, supported providers, setup guidance, and the wiki sections that matter most for onboarding.",
       "page_notes": [
         {
           "content": ""
@@ -49,7 +49,7 @@
     },
     {
       "title": "Architecture",
-      "purpose": "Overview of BioETL's Hexagonal Architecture (Ports & Adapters) and Medallion data layers. Introduces the five layers (Domain, Application, Infrastructure, Composition, Interfaces) and links to child pages for each. Summarises key ADRs.",
+      "purpose": "Index of the layer model, import rules, ports, facades, and wiring guidance for the core BioETL architecture.",
       "page_notes": [
         {
           "content": ""
@@ -108,7 +108,7 @@
     },
     {
       "title": "Medallion Data Pipeline",
-      "purpose": "Overview of the Bronze → Silver → Gold data flow, the write lifecycle for each layer, and how data quality is enforced at each stage. Links to child pages for each layer and for the Composite Pipeline pattern.",
+      "purpose": "Index of the Bronze → Silver → Gold lifecycle, layer-specific write rules, and the Composite Pipeline pattern.",
       "page_notes": [
         {
           "content": ""
@@ -157,7 +157,7 @@
     },
     {
       "title": "Data Schemas and Normalization",
-      "purpose": "Overview of the schema hierarchy (ETLRecordSchema → PublicationBaseSchema → provider schemas) and the normalization profile system. Links to child pages for Silver schemas, Gold contracts, and normalization profiles.",
+      "purpose": "Index of the schema hierarchy, normalization profiles, Silver schemas, and Gold contract pages.",
       "page_notes": [
         {
           "content": ""
@@ -196,7 +196,7 @@
     },
     {
       "title": "Provider Adapters",
-      "purpose": "Overview of the adapter infrastructure: BaseHttpAdapter, BaseSyncAdapter, health/resilience patterns, and the list of supported providers. Links to child pages for each provider group.",
+      "purpose": "Index of the adapter layer, HTTP resilience patterns, and the child pages for provider-specific integrations.",
       "page_notes": [
         {
           "content": ""
@@ -245,7 +245,7 @@
     },
     {
       "title": "Pipeline Transformers",
-      "purpose": "Overview of the transformer architecture: BaseTransformer, extraction blocks/bundles pattern, entity inflation, Silver conversion, and the transformer dependency context. Links to child pages for publication and ChEMBL/bio-entity transformers.",
+      "purpose": "Index of the transformer families, dependency context, and the child pages for publication and ChEMBL/bio-entity processing.",
       "page_notes": [
         {
           "content": ""
@@ -274,7 +274,7 @@
     },
     {
       "title": "Configuration System",
-      "purpose": "Overview of the YAML-based configuration system: hierarchy (base → provider → entity), Pydantic validation, unified entity config format (ADR-039), and runtime resolution. Links to child pages for entity configs and pipeline config schema.",
+      "purpose": "Index of the YAML config hierarchy, validation rules, runtime resolution, and the child pages for entity and pipeline config surfaces.",
       "page_notes": [
         {
           "content": ""
@@ -303,7 +303,7 @@
     },
     {
       "title": "Observability and Operations",
-      "purpose": "Overview of the observability stack (Prometheus metrics, OpenTelemetry tracing, structlog logging) and operational tooling. Links to child pages for metrics/Grafana, the Run Control Plane, and the Quarantine subsystem.",
+      "purpose": "Index of the metrics, tracing, logging, dashboard, and operational surfaces that keep BioETL observable and safe to run.",
       "page_notes": [
         {
           "content": ""
