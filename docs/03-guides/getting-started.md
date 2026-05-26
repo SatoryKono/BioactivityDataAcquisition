@@ -28,7 +28,7 @@ and be able to execute data pipelines.
 
 Ensure you have the following tools installed on your machine:
 
-- **Python 3.11** or higher: [Download](https://www.python.org/downloads/)
+- **Python 3.12** (baseline): [Download](https://www.python.org/downloads/)
 - **uv** (recommended): Python package/environment manager used by the maintained install path.
 - **Git**: Version control.
 - **Make** (optional): Build automation tool. On Windows, use Chocolatey or WSL, or run commands manually.
@@ -37,6 +37,12 @@ Ensure you have the following tools installed on your machine:
 
 - Docker Desktop
 - Redis, MinIO, Postgres
+
+## Runtime compatibility policy
+
+- **Python runtime baseline: 3.12** for onboarding and local execution.
+- **Source of truth**: `pyproject.toml` (`requires-python`, Trove classifiers).
+- Any references to Python 3.10/3.11 are deprecated documentation drift and should be ignored.
 
 ## 1. Clone the Repository
 
@@ -107,7 +113,7 @@ uv sync --extra dev --extra tracing --extra docs
 On Windows without `make` or `uv`:
 
 ```powershell
-python -m venv .venv
+python3.12 -m venv .venv
 .venv\Scripts\activate
 pip install -e .[dev,tracing,docs]
 ```

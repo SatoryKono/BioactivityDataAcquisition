@@ -22,6 +22,12 @@ TL;DR for setting up and running BioETL locally.
 > onboarding walkthrough, environment/config details, and broader first-time
 > troubleshooting, use [Getting Started](getting-started.md).
 
+## Runtime compatibility policy
+
+- **Python runtime baseline: 3.12**.
+- **Source of truth**: `pyproject.toml` (`requires-python`, classifiers).
+- Treat any Python 3.10/3.11 snippets as deprecated and update to 3.12 commands.
+
 ## Setup (3 minutes)
 
 ### Option A: Supported Local Bootstrap (Recommended)
@@ -78,7 +84,7 @@ cd BioactivityDataAcquisition
 uv sync --extra dev --extra tracing
 
 # Fallback without uv
-python3 -m venv .venv
+python3.12 -m venv .venv
 . .venv/bin/activate
 pip install -e ".[dev,tracing]"
 ```
