@@ -480,6 +480,11 @@ workflow that runs:
 It keeps the destructive reconciliation phase after the core pipeline phase and
 uses logical table names only.
 
+The built-in reconciliation transform accepts either single keys or composite
+key tuples through `source_keys` / `reference_keys`. Null handling is explicit
+via `nulls_equal`; the default remains `false`, so null-key rows are treated as
+non-matching unless the workflow config states otherwise.
+
 ### 4. Richer Multi-Step Example
 
 `configs/workflows/chembl_core.yaml` remains the canonical richer example for a
@@ -489,6 +494,10 @@ workflow that mixes:
 - built-in transform steps;
 - explicit dependency edges;
 - destructive repair semantics through the workflow control plane.
+
+If a future workflow needs composite reconciliation keys, keep the paired
+`source_keys` / `reference_keys` lists aligned and prefer logical table names
+only.
 
 Not yet fully shipped from the open backlog:
 

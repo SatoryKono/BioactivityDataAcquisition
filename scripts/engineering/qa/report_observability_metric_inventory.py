@@ -1383,6 +1383,7 @@ def _runtime_cardinality_threshold_violations(
 def collect_metric_inventory(
     repo_root: Path,
 ) -> dict[str, list[str] | dict[str, list[str]]]:
+    repo_root = repo_root.resolve()
     cache_key = repo_root.as_posix()
     cached = _METRIC_INVENTORY_CACHE.get(cache_key)
     if cached is not None:

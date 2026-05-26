@@ -419,8 +419,14 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         assert "current" in status_description
     assert "0=ok" in status_description
     assert "null=unknown" in status_description
+    if dashboard_name == "bioetl-provider-health-v2.json":
+        assert "telemetry gap" in status_description
+        assert "monitor provider telemetry freshness" in status_description
+        assert "review raw provider health enum" in status_description
+        assert "pipeline-context evidence" in status_description
 
     identity = panels["ID"]
+    identity_description = str(identity.get("description", "")).lower()
     assert identity.get("datasource") == "Quarantine Explorer"
     identity_target = identity.get("targets", [])[0]
     assert identity_target.get("format") == "table"
@@ -432,6 +438,9 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         "/ops/control-plane/identity-table?"
         "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
     )
+    if dashboard_name == "bioetl-provider-health-v2.json":
+        assert "pipeline/run context evidence only" in identity_description
+        assert "does not prove current provider health" in identity_description
 
     processed = panels["Processed Records"]
     processed_expressions = get_panel_expressions({"panels": [processed]})
@@ -453,6 +462,9 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
     assert "missing" in processed_description
     assert "not ok" in processed_description
     assert "not displayed" in processed_description
+    if dashboard_name == "bioetl-provider-health-v2.json":
+        assert "does not prove current provider health" in processed_description
+        assert "monitor provider telemetry freshness" in processed_description
 
     dashboard_promql = "\n".join(get_panel_expressions(dashboard))
     assert "$run_id" not in dashboard_promql
@@ -1214,7 +1226,7 @@ def test_provider_telemetry_freshness_marks_missing_current_status_as_warn() -> 
 
     description = str(panel.get("description", "")).lower()
     assert "telemetry gap" in description
-    assert "not as proof that providers are healthy" in description
+    assert "not proof that providers are healthy" in description
 
 
 def test_provider_critical_table_keeps_severity_only_scope() -> None:
@@ -1256,11 +1268,11 @@ def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Current Provider Health Status"
+            if item.get("title") == "Review Raw Provider Health Enum"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Monitor Current Provider Health Status' not found"
+    assert panel is not None, "Panel 'Review Raw Provider Health Enum' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any("bioetl_provider_health_status" in expr for expr in expressions)
@@ -1283,6 +1295,7 @@ def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
     assert {"null", "nan"} <= matches
     description = str(panel.get("description", "")).lower()
     assert "raw provider health enum evidence" in description
+    assert "status is unknown" in description
     assert "not the canonical first-screen verdict" in description
 
 

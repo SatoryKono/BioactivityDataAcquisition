@@ -78,6 +78,9 @@ def get_workflow_runner_service(
     from bioetl.application.workflow.transforms.builtins import (
         register_builtin_workflow_transforms,
     )
+    from bioetl.composition.bootstrap.runtime.observability import (
+        bootstrap_logger,
+    )
     from bioetl.composition.bootstrap.cli.noop import create_noop_logger
     from bioetl.composition.factories.services.port_factories import create_metrics
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -93,10 +96,16 @@ def get_workflow_runner_service(
         metrics=metrics,
         pipeline_name="workflow_transforms",
     )
+    reconciliation_logger = bootstrap_logger("workflow_reconciliation").bind(
+        component="workflow_reconciliation",
+        adapter="SilverForeignKeyReconciliationAdapter",
+    )
     transform_registry = register_builtin_workflow_transforms(
         WorkflowTransformRegistry(),
         foreign_key_reconciliation_port=SilverForeignKeyReconciliationAdapter(
-            silver_writer=transform_storage
+            silver_writer=transform_storage,
+            logger=reconciliation_logger,
+            metrics=metrics,
         ),
     )
     pipeline_runner_factory = (

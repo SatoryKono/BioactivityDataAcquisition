@@ -1066,12 +1066,12 @@ def test_provider_dashboard_surfaces_current_health_status_panel() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Current Provider Health Status"
+            if item.get("title") == "Review Raw Provider Health Enum"
         ),
         None,
     )
     assert panel is not None, (
-        "Provider Health dashboard must expose current provider health status"
+        "Provider Health dashboard must expose raw provider health enum evidence"
     )
     expressions = [
         target.get("expr", "")

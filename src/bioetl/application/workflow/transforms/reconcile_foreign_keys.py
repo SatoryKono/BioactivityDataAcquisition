@@ -34,7 +34,12 @@ def build_reconcile_foreign_keys_executor(
             "reference_table": result.reference_table,
             "source_key": result.source_key,
             "reference_key": result.reference_key,
+            "source_keys": list(request.source_keys or (request.source_key,)),
+            "reference_keys": list(
+                request.reference_keys or (request.reference_key,)
+            ),
             "action": result.action,
+            "nulls_equal": request.nulls_equal,
             "scanned_rows": result.scanned_rows,
             "retained_rows": result.retained_rows,
             "orphan_rows_deleted": result.orphan_rows_deleted,
@@ -56,8 +61,6 @@ def _build_request(spec: WorkflowTransformSpec) -> ForeignKeyReconciliationReque
     config = spec.config or {}
     source_table = _required_str(config, "source_table")
     reference_table = _required_str(config, "reference_table")
-    source_key = _required_str(config, "source_key")
-    reference_key = _required_str(config, "reference_key")
     action = _required_str(config, "action")
     if action != "delete_orphans":
         raise ValueError("reconcile_foreign_keys supports only action=delete_orphans")
@@ -73,6 +76,24 @@ def _build_request(spec: WorkflowTransformSpec) -> ForeignKeyReconciliationReque
         raise ValueError(
             "reconcile_foreign_keys requires at least one non-empty primary key"
         )
+    source_keys = _optional_key_tuple(config, "source_keys")
+    reference_keys = _optional_key_tuple(config, "reference_keys")
+    if source_keys is None and reference_keys is None:
+        source_key = _required_str(config, "source_key")
+        reference_key = _required_str(config, "reference_key")
+    else:
+        if source_keys is None or reference_keys is None:
+            raise ValueError(
+                "reconcile_foreign_keys requires source_keys and reference_keys "
+                "together"
+            )
+        if len(source_keys) != len(reference_keys):
+            raise ValueError(
+                "reconcile_foreign_keys requires source_keys and reference_keys "
+                "to have the same length"
+            )
+        source_key = source_keys[0]
+        reference_key = reference_keys[0]
     return ForeignKeyReconciliationRequest(
         source_table=source_table,
         reference_table=reference_table,
@@ -80,6 +101,9 @@ def _build_request(spec: WorkflowTransformSpec) -> ForeignKeyReconciliationReque
         reference_key=reference_key,
         primary_keys=primary_keys,
         action="delete_orphans",
+        source_keys=source_keys,
+        reference_keys=reference_keys,
+        nulls_equal=bool(config.get("nulls_equal", False)),
     )
 
 
@@ -88,3 +112,23 @@ def _required_str(config: Mapping[str, object], key: str) -> str:
     if value is None or not str(value).strip():
         raise ValueError(f"reconcile_foreign_keys requires config.{key}")
     return str(value).strip()
+
+
+def _optional_key_tuple(
+    config: Mapping[str, object],
+    key: str,
+) -> tuple[str, ...] | None:
+    value = config.get(key)
+    if value is None:
+        return None
+    if not isinstance(value, list) or not value:
+        raise ValueError(
+            f"reconcile_foreign_keys requires config.{key} as a non-empty list"
+        )
+    keys = tuple(str(item).strip() for item in value if str(item).strip())
+    if not keys:
+        raise ValueError(
+            f"reconcile_foreign_keys requires at least one non-empty entry in "
+            f"config.{key}"
+        )
+    return keys

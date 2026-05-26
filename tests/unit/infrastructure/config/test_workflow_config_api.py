@@ -124,6 +124,47 @@ def test_load_workflow_config_loads_defaults_and_steps(tmp_path: Path) -> None:
 
 
 @pytest.mark.unit
+def test_load_workflow_config_preserves_composite_reconciliation_keys(
+    tmp_path: Path,
+) -> None:
+    workflows_dir = tmp_path / "configs" / "workflows"
+    payload = _build_workflow_payload("example_activity_refresh")
+    workflow_payload = payload["workflow"]
+    assert isinstance(workflow_payload, dict)
+    steps = workflow_payload["steps"]
+    assert isinstance(steps, list)
+    transform_step = steps[1]
+    assert isinstance(transform_step, dict)
+    transform_step["config"] = {
+        "source_table": "chembl_assay",
+        "reference_table": "chembl_target",
+        "source_keys": ["target_id", "target_type"],
+        "reference_keys": ["target_id", "target_type"],
+        "primary_keys": ["assay_id"],
+        "action": "delete_orphans",
+        "nulls_equal": True,
+    }
+    _write_yaml(workflows_dir / "example_activity_refresh.yaml", payload)
+
+    config = load_workflow_config(
+        "example_activity_refresh",
+        config_dir=workflows_dir,
+    )
+
+    step = config.steps[1]
+    assert isinstance(step, TransformStepConfig)
+    assert step.config == {
+        "source_table": "chembl_assay",
+        "reference_table": "chembl_target",
+        "source_keys": ["target_id", "target_type"],
+        "reference_keys": ["target_id", "target_type"],
+        "primary_keys": ["assay_id"],
+        "action": "delete_orphans",
+        "nulls_equal": True,
+    }
+
+
+@pytest.mark.unit
 def test_chembl_baseline_workflow_config_is_sequential_and_uses_logical_tables() -> (
     None
 ):
