@@ -2626,7 +2626,7 @@
           "type": "stat"
         },
         {
-          "description": "Lineage-reference gaps remain a replay/control-plane trust signal owned by `0. Control Plane`. This DQ dashboard now uses an explicit handoff instead of mirroring the same counter again. Open the canonical control-plane panels when missing lineage must be reviewed together with replay blockers, manifest / ledger evidence, and artifact identity anchors.",
+          "description": "Lineage-reference gaps remain a replay/control-plane trust signal owned by `0. Control Plane`. This DQ surface keeps only a compact handoff so the trends row can stay focused on local DQ evidence. Open the canonical control-plane panels when missing lineage must be reviewed together with replay blockers, manifest / ledger evidence, and artifact identity anchors.",
           "fieldConfig": {
             "defaults": {
               "mappings": [],
@@ -2651,7 +2651,7 @@
             }
           ],
           "options": {
-            "content": "### Lineage trust now lives in Control Plane\n- Use **0. Control Plane** for the canonical `Monitor: Lineage Refs Missing` signal.\n- Review lineage gaps together with replay blockers, manifest / ledger integrity, and artifact identity anchors.\n- This DQ surface keeps reject, quarantine, validation, and freshness evidence local instead of re-stating control-plane trust counters.\n",
+            "content": "### Open Control Plane for lineage trust\n- Use **0. Control Plane** for the canonical `Monitor: Lineage Refs Missing` signal.\n- Review lineage gaps together with replay blockers, manifest / ledger integrity, and artifact identity anchors.\n- This DQ row keeps local reject, quarantine, validation, and trend evidence separate from control-plane trust ownership.\n",
             "dataLinks": [
               {
                 "includeVars": false,
@@ -2663,7 +2663,7 @@
             ],
             "mode": "markdown"
           },
-          "title": "Review: Control-plane lineage handoff",
+          "title": "Review: Lineage Handoff to Control Plane",
           "type": "text"
         },
         {
@@ -2847,12 +2847,12 @@
             "y": 73
           },
           "id": 150,
-          "description": "Operator note that redirects aggregate control-plane symptoms to the Control Plane dashboard and runbook surfaces; no datasource query is expected.",
+          "description": "Compact handoff note for aggregate control-plane symptoms. Keep this as footer guidance only; operational evidence still lives in `0. Control Plane` and its runbook surfaces.",
           "options": {
-            "content": "### Control-plane aggregates available\n- Open `0. Control Plane` for aggregated manifest writes, ledger appends, checkpoint compatibility outcomes, and control-plane read failures.\n- Use the `Observability Checklist (runbook)` dashboard link when `BioETLControlPlaneReadFailureRate` or related aggregate signals require operator follow-up.\n",
+            "content": "### Use Control Plane for aggregate failures\n- Open `0. Control Plane` for aggregated manifest writes, ledger appends, checkpoint compatibility outcomes, and control-plane read failures.\n- Use the `Observability Checklist (runbook)` link when `BioETLControlPlaneReadFailureRate` or related aggregate signals require operator follow-up.\n",
             "mode": "markdown"
           },
-          "title": "Review: Control-plane aggregates note",
+          "title": "Review: Aggregate Control-plane Handoff",
           "type": "text"
         },
         {
@@ -2938,7 +2938,7 @@
           "type": "stat"
         }
       ],
-      "title": "Validation Diagnostics (collapsed)",
+      "title": "Validation Failures / Runtime Diagnostics / Trends (collapsed)",
       "type": "row"
     }
   ],

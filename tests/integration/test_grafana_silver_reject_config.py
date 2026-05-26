@@ -159,7 +159,8 @@ def test_dq_validation_diagnostics_groups_failures_then_runtime_then_trends() ->
             item
             for item in dashboard.get("panels", [])
             if item.get("type") == "row"
-            and item.get("title") == "Validation Diagnostics (collapsed)"
+            and item.get("title")
+            == "Validation Failures / Runtime Diagnostics / Trends (collapsed)"
         ),
         None,
     )
@@ -176,8 +177,8 @@ def test_dq_validation_diagnostics_groups_failures_then_runtime_then_trends() ->
     assert nested["Track: Data Quality Score Trend (Volume-weighted)"].get(
         "gridPos", {}
     ).get("y") == 65
-    assert nested["Review: Control-plane lineage handoff"].get("gridPos", {}).get("y") == 65
-    assert nested["Review: Control-plane aggregates note"].get("gridPos", {}).get("y") == 73
+    assert nested["Review: Lineage Handoff to Control Plane"].get("gridPos", {}).get("y") == 65
+    assert nested["Review: Aggregate Control-plane Handoff"].get("gridPos", {}).get("y") == 73
 
 
 def test_dq_quarantine_breakdown_prefers_bar_comparison_over_pie_share() -> None:
