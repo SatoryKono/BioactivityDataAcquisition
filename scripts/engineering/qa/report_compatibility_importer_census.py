@@ -626,7 +626,7 @@ def _render_markdown(payload: dict[str, object]) -> str:
 
 def main() -> int:
     args = _parse_args()
-    repo_root = Path(args.repo_root)
+    repo_root = Path(args.repo_root).resolve()
     payload = build_compatibility_importer_census(
         repo_root, snapshot_date=str(args.snapshot_date)
     )

@@ -99,6 +99,12 @@ def _doc_symbol_hits() -> list[str]:
     if rg_hits is not None:
         return rg_hits
 
+    if os.name == "nt":
+        pytest.skip(
+            "Active composite doc symbol scan requires git grep or ripgrep on Windows; "
+            "filesystem fallback is intentionally disabled to avoid PyCharm timeout hangs."
+        )
+
     hits: list[str] = []
     for root in DOC_ROOTS:
         for doc_file in _text_files(root):

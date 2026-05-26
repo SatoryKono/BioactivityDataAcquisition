@@ -113,6 +113,45 @@ def test_build_compatibility_importer_census_counts_retained_entrypoints_and_twi
     assert twin["private_src_importer_count"] == 1
 
 
+def test_build_compatibility_importer_census_supports_relative_repo_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write(
+        tmp_path / "configs/quality/compatibility_facade_inventory.yaml",
+        "\n".join(
+            [
+                "version: 1",
+                "policy_scope: compatibility_facades",
+                "transition_debt: []",
+                "retained_entrypoints:",
+                "  - path: src/bioetl/application/core/helper.py",
+                "    status: public-entrypoint",
+                "    canonical_target: bioetl.application.core.helper",
+                "    owner: bioetl.application.core",
+            ]
+        )
+        + "\n",
+    )
+    _write(tmp_path / "src/bioetl/application/core/__init__.py", "")
+    _write(tmp_path / "src/bioetl/application/core/_helper.py", "VALUE = 1\n")
+    _write(
+        tmp_path / "src/bioetl/application/core/helper.py",
+        "from bioetl.application.core._helper import VALUE\n",
+    )
+    _write(
+        tmp_path / "src/bioetl/application/services/use_helper.py",
+        "from bioetl.application.core import helper\n",
+    )
+
+    monkeypatch.chdir(tmp_path)
+
+    payload = build_compatibility_importer_census(Path("."))
+
+    assert payload["summary"]["twin_pair_count"] == 1
+    assert payload["twin_pairs"][0]["private_module"] == "bioetl.application.core._helper"
+    assert payload["twin_pairs"][0]["public_module"] == "bioetl.application.core.helper"
+
+
 def test_build_dead_code_inventory_flags_zero_import_candidates(tmp_path: Path) -> None:
     _write(
         tmp_path / "configs/quality/compatibility_facade_inventory.yaml",

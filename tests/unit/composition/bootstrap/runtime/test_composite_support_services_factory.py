@@ -210,6 +210,7 @@ def test_build_uses_canonical_composite_checkpoint_port(
     assert checkpoint_context.run_ledger_port is (
         mock_build_control_plane_bundle.return_value.run_ledger_service.ledger_port
     )
+    assert checkpoint_context.metrics is factory._infra.metrics
     assert result.manifest_id == "manifest-123"
     assert (
         result.run_ledger_service

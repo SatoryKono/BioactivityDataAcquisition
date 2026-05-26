@@ -289,6 +289,7 @@ def collect_exact_module_import_usage(
 
 def find_public_private_twin_modules(repo_root: Path) -> list[dict[str, str]]:
     """Return sibling ``_private.py``/``public.py`` first-party module pairs."""
+    repo_root = repo_root.resolve()
     src_root = repo_root / "src" / "bioetl"
     src_scan = PackageScan("src", src_root, "bioetl")
     module_name_by_path = {

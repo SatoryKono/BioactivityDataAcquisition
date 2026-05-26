@@ -69,6 +69,7 @@ def build_runtime_management_services(
         run_id=run_id,
         checkpoint_storage=checkpoint_storage,
         checkpoint_manager_cls=checkpoint_manager_cls,
+        metrics=infra_context.metrics,
         checkpoint_clock=infra_context.clock,
     )
     quarantine_port = (
@@ -100,6 +101,7 @@ def _create_checkpoint_manager(
     run_id: str,
     checkpoint_storage: CompositeCheckpointPort,
     checkpoint_manager_cls: type[CompositeCheckpointService],
+    metrics: MetricsPort | None,
     checkpoint_clock: ClockPort | None,
 ) -> CompositeCheckpointService:
     expected_manifest_id = (
@@ -156,6 +158,7 @@ def _create_checkpoint_manager(
         expected_effective_config_artifact_id=expected_effective_config_artifact_id,
         expected_input_snapshot_fingerprint=expected_input_snapshot_fingerprint,
         run_ledger_port=run_ledger_port,
+        metrics=metrics,
         clock=checkpoint_clock,
     )
     return checkpoint_manager_cls(checkpoint_context)

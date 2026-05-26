@@ -8,8 +8,10 @@ from unittest.mock import MagicMock
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     ObservabilityBackendEnsureResult,
     _build_detached_backend_popen_kwargs,
+    _build_observability_backend_probe_urls,
     build_observability_backend_health_url,
     ensure_observability_backend_started,
+    probe_observability_backend,
     should_disable_transient_health_server,
     wait_for_observability_backend_ready,
 )
@@ -20,6 +22,45 @@ def test_build_observability_backend_health_url_uses_host_and_port() -> None:
         build_observability_backend_health_url(host="127.0.0.1", port=8081)
         == "http://127.0.0.1:8081/health"
     )
+
+
+def test_build_observability_backend_probe_urls_prefers_liveness_first() -> None:
+    assert _build_observability_backend_probe_urls("http://127.0.0.1:8081/health") == (
+        "http://127.0.0.1:8081/health/live",
+        "http://127.0.0.1:8081/health",
+    )
+
+
+def test_probe_observability_backend_uses_liveness_then_fallback() -> None:
+    calls: list[str] = []
+
+    class _Response:
+        status = 200
+
+        def __enter__(self) -> _Response:
+            return self
+
+        def __exit__(self, exc_type: object, exc: object, tb: object) -> bool:
+            return False
+
+    def fake_urlopen(url: str, timeout: float) -> _Response:
+        calls.append(url)
+        if url.endswith("/health/live"):
+            raise OSError("liveness not ready")
+        return _Response()
+
+    assert (
+        probe_observability_backend(
+            "http://127.0.0.1:8081/health",
+            timeout_seconds=1.0,
+            urlopen_fn=fake_urlopen,
+        )
+        is True
+    )
+    assert calls == [
+        "http://127.0.0.1:8081/health/live",
+        "http://127.0.0.1:8081/health",
+    ]
 
 
 def test_ensure_backend_returns_disabled_when_flag_is_off() -> None:
