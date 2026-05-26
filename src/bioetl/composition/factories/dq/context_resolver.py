@@ -70,11 +70,16 @@ def extract_single_dq_config(
 # ---- Multi-layer DQ config extraction ----
 
 
-def extract_dq_configs(yaml_config: PipelineYamlConfig | None) -> DQConfigsContext:
+def extract_dq_configs(
+    yaml_config: PipelineYamlConfig | None,
+    *,
+    relaxed_dq: bool = False,
+) -> DQConfigsContext:
     """Extract bronze/silver/gold DQ configs from YAML."""
     return extract_dq_configs_impl(
         yaml_config,
         extract_single_dq_config_fn=extract_single_dq_config,
+        relaxed_dq=relaxed_dq,
     )
 
 

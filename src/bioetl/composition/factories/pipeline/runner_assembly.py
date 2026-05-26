@@ -46,6 +46,7 @@ from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
+from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -94,6 +95,7 @@ def _build_checkpoint_manager(
         resume=pipeline.runtime.resume,
         loading_strategy=cast(LoadingStrategy | None, pipeline.config.loading_strategy),
         metrics=pipeline.services.metrics,
+        clock=SystemClock(),
         checkpoint_compatibility_service=compatibility_service,
         current_metadata=current_metadata,
         compatibility_policy=compatibility_policy,

@@ -311,7 +311,7 @@ def _assert_schema_and_relation_surfaces(snapshot: GraphSnapshot) -> None:
 
     docs_drift_relation = snapshot.relations[
         (
-            NodeKey("doc_artifact", RUN_MANIFEST_LEDGER_DOC_PATH),
+            NodeKey("doc_source_surface", RUN_MANIFEST_LEDGER_DOC_PATH),
             "DESCRIBES",
             NodeKey("module_surface", RUN_MANIFEST_MODULE_PATH),
         )

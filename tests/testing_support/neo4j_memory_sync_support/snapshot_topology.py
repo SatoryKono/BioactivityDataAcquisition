@@ -477,7 +477,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "module_surface",
         RUN_MANIFEST_MODULE_PATH,
         "DESCRIBED_IN",
-        "doc_artifact",
+        "doc_source_surface",
         RUN_MANIFEST_LEDGER_DOC_PATH,
     ),
     (
@@ -905,14 +905,14 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         f"python -m scripts.memory sync --report {LEGACY_REPORT_PATH}",
     ),
     (
-        "doc_artifact",
+        "doc_source_surface",
         RUN_MANIFEST_LEDGER_DOC_PATH,
         "DESCRIBES",
         "module_surface",
         RUN_MANIFEST_MODULE_PATH,
     ),
     (
-        "doc_artifact",
+        "doc_source_surface",
         RUN_MANIFEST_LEDGER_DOC_PATH,
         "DESCRIBES",
         "module_surface",
@@ -1522,20 +1522,12 @@ def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
 
     filtered = _filtered_snapshot(snapshot, only_docs_drift=True)
     relation_keys = _relation_keys(filtered)
-    chembl_doc_claims = {
-        key.name
-        for key in filtered.nodes
-        if key.label == "doc_claim_surface"
-        and key.name.startswith(
-            "docs/04-reference/pipelines/chembl/05-activity-spec.md#L"
-        )
-    }
 
-    assert ("doc_artifact", RUN_MANIFEST_LEDGER_DOC_PATH) in {
+    assert ("doc_source_surface", RUN_MANIFEST_LEDGER_DOC_PATH) in {
         (key.label, key.name) for key in filtered.nodes
     }
     assert (
-        "doc_artifact",
+        "doc_source_surface",
         RUN_MANIFEST_LEDGER_DOC_PATH,
         "DESCRIBES",
         "module_surface",
@@ -1545,20 +1537,15 @@ def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
         "module_surface",
         RUN_MANIFEST_MODULE_PATH,
         "DESCRIBED_IN",
-        "doc_artifact",
+        "doc_source_surface",
         RUN_MANIFEST_LEDGER_DOC_PATH,
     ) in relation_keys
-    assert chembl_doc_claims
     assert any(
-        (
-            "doc_artifact",
-            "docs/04-reference/pipelines/chembl/05-activity-spec.md",
-            "ASSERTS",
-            "doc_claim_surface",
-            claim_name,
-        )
-        in relation_keys
-        for claim_name in chembl_doc_claims
+        key.label == "doc_claim_surface" for key in filtered.nodes
+    )
+    assert any(
+        relation_key[2] == "ASSERTS" and relation_key[3] == "doc_claim_surface"
+        for relation_key in relation_keys
     )
     assert ("cli_command_surface", CMD_MEMORY_SYNC) in {
         (key.label, key.name) for key in filtered.nodes

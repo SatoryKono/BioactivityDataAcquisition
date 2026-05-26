@@ -108,17 +108,17 @@ def _check_screenshot_artifacts(screenshot_dir: Path) -> PreflightCheck:
         if screenshot_path.stat().st_mtime < dashboard_path.stat().st_mtime:
             stale.append(uid)
 
-    if missing:
-        return PreflightCheck(
-            name="screenshots",
-            status="error",
-            detail=f"missing dashboard screenshots for: {', '.join(missing)}",
-        )
     if stale:
         return PreflightCheck(
             name="screenshots",
             status="error",
             detail=f"stale dashboard screenshots for: {', '.join(stale)}",
+        )
+    if missing:
+        return PreflightCheck(
+            name="screenshots",
+            status="error",
+            detail=f"missing dashboard screenshots for: {', '.join(missing)}",
         )
     return PreflightCheck(
         name="screenshots",

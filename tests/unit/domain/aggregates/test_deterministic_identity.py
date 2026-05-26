@@ -2,15 +2,22 @@
 
 from __future__ import annotations
 
-import json
 from datetime import UTC, datetime
-from pathlib import Path
 
 from bioetl.domain.aggregates.batch import Batch
 from bioetl.domain.aggregates.events import BatchCreated
 from bioetl.domain.aggregates.quarantine_entry import QuarantineEntry
 from bioetl.domain.types import BatchID, RunID
 from tests.helpers.deterministic_ids import deterministic_uuid_value
+
+_EXPECTED_GOLDEN = {
+    "batch_create_batch_id": "3f700e91-4464-5a8d-95c0-379bce6e1a5d",
+    "batch_created_event_id": "bee1d5c9-eed4-5029-b1b9-0a1d06bba186",
+    "quarantine_entry_id": "930956c0-4a9c-53ad-8fdf-9a150c1ab9d1",
+    "quarantine_payload_hash": (
+        "73b5df1d5d2cd480a7fcb5935b2a9429f1889a10d877d1b05d29158369cf4cce"
+    ),
+}
 
 
 def _ts() -> datetime:
@@ -80,13 +87,6 @@ def test_quarantine_entry_create_derives_same_entry_id_from_same_inputs() -> Non
 
 def test_deterministic_identity_golden_contract_is_stable() -> None:
     """Pinned values catch accidental namespace or canonicalization drift."""
-    fixture_path = (
-        Path(__file__).resolve().parents[3]
-        / "fixtures/golden/domain/deterministic_identity_v1.json"
-    )
-    golden = json.loads(fixture_path.read_text(encoding="utf-8"))
-    expected = golden["expected"]
-
     batch = Batch.create(run_id=_run_id(), start_index=10, created_at=_ts())
     event = BatchCreated(
         occurred_at=_ts(),
@@ -104,7 +104,7 @@ def test_deterministic_identity_golden_contract_is_stable() -> None:
         metadata={"source": "unit"},
     )
 
-    assert str(batch.batch_id) == expected["batch_create_batch_id"]
-    assert str(event.event_id) == expected["batch_created_event_id"]
-    assert quarantine.entry_id == expected["quarantine_entry_id"]
-    assert quarantine.payload_hash == expected["quarantine_payload_hash"]
+    assert str(batch.batch_id) == _EXPECTED_GOLDEN["batch_create_batch_id"]
+    assert str(event.event_id) == _EXPECTED_GOLDEN["batch_created_event_id"]
+    assert quarantine.entry_id == _EXPECTED_GOLDEN["quarantine_entry_id"]
+    assert quarantine.payload_hash == _EXPECTED_GOLDEN["quarantine_payload_hash"]

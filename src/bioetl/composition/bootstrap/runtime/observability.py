@@ -65,7 +65,7 @@ class _ObservabilityApiModule(Protocol):
 class OpenTelemetryTracer:
     """Lazy compatibility patch point for legacy tests and monkeypatches."""
 
-    def __new__(cls, *args: object, **kwargs: object) -> Any:
+    def __new__(cls, *args: object, **kwargs: object) -> TracingPort:
         from bioetl.infrastructure.observability.tracing import (
             OpenTelemetryTracer as _OpenTelemetryTracer,
         )
@@ -76,7 +76,7 @@ class OpenTelemetryTracer:
 class PrometheusMetrics:
     """Lazy compatibility patch point for legacy tests and monkeypatches."""
 
-    def __new__(cls, *args: object, **kwargs: object) -> Any:
+    def __new__(cls, *args: object, **kwargs: object) -> MetricsPort:
         from bioetl.infrastructure.observability.prometheus_metrics import (
             PrometheusMetrics as _PrometheusMetrics,
         )
@@ -87,7 +87,7 @@ class PrometheusMetrics:
 class UnifiedLogger:
     """Lazy compatibility patch point for legacy tests and monkeypatches."""
 
-    def __new__(cls, *args: object, **kwargs: object) -> Any:
+    def __new__(cls, *args: object, **kwargs: object) -> LoggerPort:
         from bioetl.infrastructure.observability.unified_logger import (
             UnifiedLogger as _UnifiedLogger,
         )

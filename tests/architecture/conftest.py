@@ -32,6 +32,7 @@ _ARCHITECTURE_CACHE_DIR = Path(
         str(Path(tempfile.gettempdir()) / "bioetl-architecture-cache"),
     )
 )
+_TEXT_CACHE_NAMES_WITHOUT_DISK = frozenset({"docs-text"})
 
 
 def _list_python_files(root: Path) -> list[Path]:
@@ -270,8 +271,12 @@ def _build_text_cache(
     paths: list[Path] | None = None,
 ) -> dict[Path, str]:
     """Read each file once and share the in-memory cache across the session."""
-    use_disk_cache = isinstance(cache_name_or_paths, str)
-    if use_disk_cache:
+    explicit_cache_name = isinstance(cache_name_or_paths, str)
+    use_disk_cache = (
+        explicit_cache_name
+        and cache_name_or_paths not in _TEXT_CACHE_NAMES_WITHOUT_DISK
+    )
+    if explicit_cache_name:
         cache_name, cache_paths = _resolve_disk_text_cache_request(
             cache_name_or_paths,
             paths,
@@ -280,7 +285,9 @@ def _build_text_cache(
         cache_name, cache_paths = _resolve_memory_text_cache_request(
             cache_name_or_paths
         )
-    cached_payload = _load_disk_cached_payload(cache_name, cache_paths)
+    cached_payload = (
+        _load_disk_cached_payload(cache_name, cache_paths) if use_disk_cache else None
+    )
     if cached_payload is not None:
         return cached_payload
 

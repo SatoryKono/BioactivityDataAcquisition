@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import yaml
 
@@ -72,9 +71,7 @@ class ChemblPolicyRegistryLoader:
 
     @staticmethod
     def _load_ontology_families(
-        payload: dict[
-            str, Any
-        ],  # Any: YAML scalar/sequence leaf types remain heterogeneous
+        payload: dict[str, object],  # Any: YAML scalar/sequence leaf types remain heterogeneous
     ) -> tuple[ChemblOntologyPolicyFamily, ...]:
         families = payload.get("families", {})
         if not isinstance(families, dict):
@@ -127,9 +124,7 @@ class ChemblPolicyRegistryLoader:
 
     @staticmethod
     def _merge_unit_companion_policies(
-        families: dict[
-            str, dict[str, Any]
-        ],  # Any: YAML scalar/sequence leaf types remain heterogeneous
+        families: dict[str, dict[str, object]],  # Any: YAML scalar/sequence leaf types remain heterogeneous
         unit_companion_policies: object,
     ) -> None:
         if not isinstance(unit_companion_policies, dict):
@@ -161,9 +156,7 @@ class ChemblPolicyRegistryLoader:
     @staticmethod
     def _merge_unit_companion_family(
         *,
-        family_payload: dict[
-            str, Any
-        ],  # Any: YAML scalar/sequence leaf types remain heterogeneous
+        family_payload: dict[str, object],  # Any: YAML scalar/sequence leaf types remain heterogeneous
         family_name: str,
         policy_fields: tuple[str, ...],
     ) -> None:
@@ -234,7 +227,7 @@ class ChemblPolicyRegistryLoader:
     @staticmethod
     def _load_yaml(
         path: Path,
-    ) -> dict[str, Any]:  # Any: YAML scalar/sequence leaf types remain heterogeneous
+    ) -> dict[str, object]:
         if not path.exists():
             if path.name == "chembl_reference_identifiers.yaml":
                 return {"reference_identifier_families": {}}

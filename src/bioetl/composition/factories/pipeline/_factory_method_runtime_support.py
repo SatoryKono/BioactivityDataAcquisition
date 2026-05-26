@@ -79,6 +79,8 @@ def create_factory_runner_from_request(
     cached_bronze: CachedBronzeContext | None,
 ) -> PipelineRunner:
     """Create a pipeline and assemble a runner from resolved runtime inputs."""
+    from bioetl.composition.factories.dq.context_resolver import extract_dq_configs
+
     artifacts = control_plane_artifacts
     pipeline_request = _CreatePipelineWithServicesRequest(
         run_id=run_id,
@@ -125,4 +127,8 @@ def create_factory_runner_from_request(
             settings=settings,
         ),
         yaml_config=yaml_config,
+        dq_configs_extractor=lambda config: extract_dq_configs(
+            config,
+            relaxed_dq=bool(settings.pipeline.relaxed_dq),
+        ),
     )

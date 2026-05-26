@@ -15,7 +15,6 @@ from bioetl.composition.factories.pipeline._creation_wiring import (
     _create_pipeline_with_services_impl,
     _create_silver_validator,
 )
-
 _STARTED_AT = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
 
 
