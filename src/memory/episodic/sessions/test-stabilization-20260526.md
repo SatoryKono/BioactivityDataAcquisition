@@ -1,22 +1,22 @@
 ---
 id: test-stabilization-20260526
-title: Stabilize project tests
+title: Continue project test stabilization
 task_id: test-stabilization-20260526
-created_at: '2026-05-26T03:06:36Z'
+created_at: '2026-05-26T09:48:58Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - tests
 summary: Active task session context.
-query: test stabilization pytest sharded runner
+query: Continue project test stabilization
 ---
 
 # Session note
 
 ## Task
 
-- Title: Stabilize project tests
-- Retrieval query: test stabilization pytest sharded runner
+- Title: Continue project test stabilization
+- Retrieval query: Continue project test stabilization
 
 ## Retrieved context
 

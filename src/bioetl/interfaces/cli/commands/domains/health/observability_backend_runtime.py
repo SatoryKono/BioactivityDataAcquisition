@@ -12,6 +12,7 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
@@ -124,6 +125,21 @@ def _build_detached_backend_popen_kwargs(
     return kwargs
 
 
+def _build_detached_backend_env(
+    *,
+    current_env: dict[str, str] | None = None,
+) -> dict[str, str]:
+    """Ensure detached backend subprocess can import the src-layout package."""
+    env = dict(os.environ if current_env is None else current_env)
+    src_root = Path(__file__).resolve().parents[6]
+    existing_pythonpath = env.get("PYTHONPATH", "").strip()
+    pythonpath_parts = [str(src_root)]
+    if existing_pythonpath:
+        pythonpath_parts.append(existing_pythonpath)
+    env["PYTHONPATH"] = os.pathsep.join(pythonpath_parts)
+    return env
+
+
 def start_detached_quarantine_backend(
     *,
     bind_host: str = DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST,
@@ -144,6 +160,8 @@ def start_detached_quarantine_backend(
         str(port),
     ]
     kwargs = _build_detached_backend_popen_kwargs()
+    kwargs["cwd"] = str(Path(__file__).resolve().parents[7])
+    kwargs["env"] = _build_detached_backend_env()
     return popen_factory(command, **kwargs)
 
 

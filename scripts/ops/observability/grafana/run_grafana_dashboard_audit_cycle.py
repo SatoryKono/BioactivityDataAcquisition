@@ -87,7 +87,8 @@ def _build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_RENDER_TIMEOUT_SECONDS,
     )
     parser.add_argument(
-        "--ensure-observability-backend/--no-ensure-observability-backend",
+        "--ensure-observability-backend",
+        action=argparse.BooleanOptionalAction,
         default=True,
         help="Auto-start or reuse a detached Quarantine Explorer backend before audit.",
     )

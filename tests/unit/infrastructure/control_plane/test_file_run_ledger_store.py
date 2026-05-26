@@ -37,6 +37,7 @@ def test_should_fsync_control_plane_writes_by_default(monkeypatch) -> None:
         raising=False,
     )
     monkeypatch.setattr(ledger_store_module.os, "name", "nt", raising=False)
+    ledger_store_module.get_settings.cache_clear()
 
     assert ledger_store_module._should_fsync_control_plane_writes() is True
 
@@ -50,6 +51,7 @@ def test_should_skip_fsync_for_windows_e2e_degraded_observable(
         "degraded_observable",
     )
     monkeypatch.setattr(ledger_store_module.os, "name", "nt", raising=False)
+    ledger_store_module.get_settings.cache_clear()
 
     assert ledger_store_module._should_fsync_control_plane_writes() is False
 

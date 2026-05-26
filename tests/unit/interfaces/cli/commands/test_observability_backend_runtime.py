@@ -2,16 +2,19 @@
 
 from __future__ import annotations
 
+import os
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     ObservabilityBackendEnsureResult,
     _build_detached_backend_popen_kwargs,
+    _build_detached_backend_env,
     _build_observability_backend_probe_urls,
     build_observability_backend_health_url,
     ensure_observability_backend_started,
     probe_observability_backend,
+    start_detached_quarantine_backend,
     should_disable_transient_health_server,
     wait_for_observability_backend_ready,
 )
@@ -203,6 +206,53 @@ def test_build_detached_backend_popen_kwargs_hides_windows_console() -> None:
     assert kwargs["startupinfo"] is startupinfo
     assert startupinfo.dwFlags == 0x00000001
     assert startupinfo.wShowWindow == 0
+
+
+def test_build_detached_backend_env_prefixes_src_pythonpath() -> None:
+    env = _build_detached_backend_env(current_env={"PYTHONPATH": "existing-path"})
+
+    assert "PYTHONPATH" in env
+    pythonpath = env["PYTHONPATH"].split(os.pathsep)
+    assert pythonpath[0].endswith("/src") or pythonpath[0].endswith("\\src")
+    assert pythonpath[1] == "existing-path"
+
+
+def test_start_detached_quarantine_backend_sets_repo_cwd_and_env() -> None:
+    captured: dict[str, object] = {}
+
+    class _Process:
+        args = ["python", "-m", "bioetl"]
+
+    def fake_popen(command: list[str], **kwargs: object) -> _Process:
+        captured["command"] = command
+        captured["kwargs"] = kwargs
+        return _Process()
+
+    start_detached_quarantine_backend(
+        bind_host="0.0.0.0",
+        port=8081,
+        python_executable="python",
+        popen_factory=fake_popen,
+    )
+
+    kwargs = captured["kwargs"]
+    assert captured["command"] == [
+        "python",
+        "-m",
+        "bioetl",
+        "quarantine",
+        "serve",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8081",
+    ]
+    assert isinstance(kwargs, dict)
+    assert str(kwargs["cwd"]).endswith("BioactivityDataAcquisition2")
+    assert "env" in kwargs
+    env = kwargs["env"]
+    assert isinstance(env, dict)
+    assert "PYTHONPATH" in env
 
 
 def test_should_disable_transient_health_server_only_on_matching_live_backend() -> None:

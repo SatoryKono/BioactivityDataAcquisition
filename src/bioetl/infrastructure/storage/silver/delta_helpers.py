@@ -136,14 +136,14 @@ def _build_merge_execute_callable(
     records: pa.Table | pa.RecordBatchReader,
     merge_condition: str,
     merge_schema: bool,
-) -> Callable[[], Any]:  # Any: Delta merge returns heterogeneous result
+) -> Callable[[], object]:
     """Build the blocking Delta merge callable for ``run_in_executor``."""
 
-    def _execute() -> Any:  # Any: Delta merge returns heterogeneous result
+    def _execute() -> object:
         if not _delta_table_has_parquet_data(table_path):
             from deltalake import write_deltalake
 
-            write_kwargs: dict[str, Any] = {
+            write_kwargs: dict[str, object] = {
                 "table_or_uri": table_path,
                 "data": records,
                 "mode": "append",

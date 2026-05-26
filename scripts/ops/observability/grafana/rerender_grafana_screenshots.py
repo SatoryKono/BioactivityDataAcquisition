@@ -243,6 +243,10 @@ def _playwright_script_path() -> Path:
     return Path(__file__).with_suffix(".cjs")
 
 
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[4]
+
+
 def _playwright_env(config: RenderConfig) -> dict[str, str]:
     env = os.environ.copy()
     env["GRAFANA_BASE_URL"] = config.base_url
@@ -272,17 +276,12 @@ def _run_playwright_fallback(config: RenderConfig) -> int:
         result = subprocess.run(
             node_command,
             check=False,
-            capture_output=True,
-            text=True,
+            cwd=str(_repo_root()),
             env=_playwright_env(config),
         )
     except OSError as exc:
         print(f"Playwright fallback failed to launch: {exc}")
         return 1
-    if result.stdout.strip():
-        print(result.stdout.strip())
-    if result.stderr.strip():
-        print(result.stderr.strip())
     return result.returncode
 
 

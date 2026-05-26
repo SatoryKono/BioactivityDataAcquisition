@@ -562,7 +562,7 @@ DOCS_DRIFT_FILTER: ShardFilterSpec = (
         (
             "DESCRIBED_IN",
             frozenset({"module_surface"}),
-            frozenset({"doc_artifact"}),
+            frozenset({"doc_source_surface", "doc_artifact"}),
         ),
         (
             "ASSERTS_ABOUT",
@@ -652,6 +652,11 @@ CURATED_DOC_SOURCES: tuple[dict[str, str], ...] = (
         "name": "docs verification guide",
         "path": DOCS_VERIFICATION_GUIDE_PATH,
         "summary": "Published workflow for docs verification and drift control.",
+    },
+    {
+        "name": RUN_MANIFEST_LEDGER_DOC_PATH,
+        "path": RUN_MANIFEST_LEDGER_DOC_PATH,
+        "summary": "Published control-plane contract for immutable run manifests, append-only run ledgers, and replay inspection surfaces.",
     },
     {
         "name": "package topology evidence summary",
@@ -9572,6 +9577,20 @@ _DOCS_DRIFT_EXCLUDED_PREFIXES = (
 )
 
 
+def _is_docs_drift_source_candidate(node: GraphNode) -> bool:
+    """Return whether a doc-like node should be parsed for docs-code drift.
+
+    File-structure ingestion creates one ``doc_artifact`` per tracked document.
+    Parsing all of them turns snapshot invariants into a root-wide filesystem
+    scan on mounted Windows/WSL checkouts. Curated docs and policy surfaces are
+    the supported drift sources; file-structure artifacts remain represented in
+    the graph through ``HAS_DOC_ARTIFACT``/``BACKED_BY`` edges.
+    """
+    if node.key.label != "doc_artifact":
+        return True
+    return "repo_zone" not in node.properties
+
+
 def _trim_docs_reference_candidate(raw_ref: str) -> str:
     return raw_ref.strip().strip("`").rstrip(".,:;)]}")
 
@@ -9715,7 +9734,11 @@ def _add_reverse_module_doc_edges(snapshot: GraphSnapshot) -> None:
     for relation in tuple(snapshot.relations.values()):
         if relation.relation_type != "DESCRIBES":
             continue
-        if relation.source.label != "doc_artifact":
+        if relation.source.label not in {
+            "doc_source_surface",
+            "doc_artifact",
+            "policy_surface",
+        }:
             continue
         if relation.target.label != "module_surface":
             continue
@@ -9726,6 +9749,32 @@ def _add_reverse_module_doc_edges(snapshot: GraphSnapshot) -> None:
             provenance="docs_code_drift_reverse",
             confidence=relation.properties.get("confidence"),
         )
+
+    artifact_sources: dict[NodeKey, list[NodeKey]] = {}
+    for relation in tuple(snapshot.relations.values()):
+        if relation.relation_type != "BACKED_BY":
+            continue
+        if relation.source.label != "doc_source_surface":
+            continue
+        if relation.target.label != "doc_artifact":
+            continue
+        artifact_sources.setdefault(relation.target, []).append(relation.source)
+
+    for relation in tuple(snapshot.relations.values()):
+        if relation.relation_type != "DESCRIBED_IN":
+            continue
+        if relation.source.label != "module_surface":
+            continue
+        if relation.target.label != "doc_artifact":
+            continue
+        for source_surface in artifact_sources.get(relation.target, ()):
+            snapshot.add_relation(
+                relation.source,
+                "DESCRIBED_IN",
+                source_surface,
+                provenance="docs_code_drift_curated_source",
+                confidence=relation.properties.get("confidence"),
+            )
 
 
 def _add_pipeline_doc_edges(snapshot: GraphSnapshot) -> None:
@@ -9892,6 +9941,8 @@ def _docs_drift_sources(
     cached_text: dict[str, str] = {}
     for node in tuple(snapshot.nodes.values()):
         if node.key.label not in _DOC_LIKE_LABELS:
+            continue
+        if not _is_docs_drift_source_candidate(node):
             continue
         source_path = node.properties.get("source_path")
         if not isinstance(source_path, str):

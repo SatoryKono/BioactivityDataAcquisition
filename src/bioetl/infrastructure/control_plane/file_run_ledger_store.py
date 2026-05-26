@@ -19,6 +19,7 @@ from bioetl.domain.control_plane.run_ledger import (
 )
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID
+from bioetl.infrastructure.config._base import get_settings
 from bioetl.infrastructure.control_plane._read_metrics import (
     emit_control_plane_read_metrics,
 )
@@ -39,23 +40,15 @@ class _RunLedgerCorruptionError(ValueError):
     """Raised when persisted JSONL ledger contents are structurally corrupted."""
 
 
-def _is_truthy_env(value: str | None) -> bool:
-    """Return whether one environment variable value enables a feature."""
-    if value is None:
-        return False
-    return value.strip().lower() in {"1", "true", "yes", "on"}
-
-
 def _should_fsync_control_plane_writes() -> bool:
     """Keep durable flushes unless Windows E2E explicitly relaxes them."""
     if os.name != "nt":
         return True
-    if not _is_truthy_env(os.environ.get("BIOETL_TEST_MODE")):
+    settings = get_settings()
+    if not settings.test_mode:
         return True
-    required_profile = os.environ.get(
-        "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE"
-    )
-    return (required_profile or "").strip().lower() != "degraded_observable"
+    required_profile = settings.pipeline.control_plane.required_persistence_profile
+    return required_profile != "degraded_observable"
 
 
 def _flush_file_descriptor(file_descriptor: int) -> None:

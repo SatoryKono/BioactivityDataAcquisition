@@ -62,7 +62,7 @@ type GoldRecord = JsonDict  # heterogeneous scalar types before Pandera coercion
 type MetaDict = JsonDict  # freeform metadata (str|int|float|datetime|None)
 """Freeform metadata bag used in aggregates, audit entries, events."""
 
-type GoldSchemaType = type[Any]
+type GoldSchemaType = type[object]
 """Gold schema class accepted by validation wiring.
 
 Concrete Pandera model imports belong in domain schema/contract packages, not in

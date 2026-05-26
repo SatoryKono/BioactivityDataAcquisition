@@ -20,6 +20,8 @@ from bioetl.composition.factories.services.bundle import (
     build_pipeline_services,
 )
 from bioetl.composition.factories.services.factory import BaseServicesFactory
+from bioetl.domain.value_objects.dq_report import SilverDQCheckType
+from bioetl.infrastructure.schemas.dq_report_config import SilverSinkConfig
 
 TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-pipeline-factory-"))
 CUSTOM_BRONZE_PATH = str(TEST_ROOT / "custom-bronze")
@@ -281,6 +283,21 @@ def test_extract_dq_configs_returns_empty_context_for_missing_sink() -> None:
     assert dq_configs.bronze is None
     assert dq_configs.silver is None
     assert dq_configs.gold is None
+
+
+@pytest.mark.unit
+def test_extract_dq_configs_trims_value_distribution_for_relaxed_dq() -> None:
+    silver_sink = SilverSinkConfig(path="data/output/silver")
+    yaml_config = SimpleNamespace(sink={"silver": silver_sink})
+
+    dq_configs = extract_dq_configs(yaml_config, relaxed_dq=True)
+
+    assert dq_configs.silver is not None
+    assert (
+        SilverDQCheckType.VALUE_DISTRIBUTION
+        not in dq_configs.silver.get_checks_enums()
+    )
+    assert SilverDQCheckType.VALUE_DISTRIBUTION.value in silver_sink.dq_report.checks
 
 
 @pytest.mark.unit

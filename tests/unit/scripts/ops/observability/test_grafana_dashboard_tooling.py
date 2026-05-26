@@ -121,6 +121,49 @@ def test_rerender_builds_playwright_env(tmp_path: Path) -> None:
     assert env["GRAFANA_SCREENSHOT_UIDS"] == "bioetl-control-plane-v1"
 
 
+def test_rerender_playwright_fallback_streams_output_from_repo_root(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    script_path = tmp_path / "rerender_grafana_screenshots.cjs"
+    script_path.write_text("// noop\n", encoding="utf-8")
+    captured: dict[str, object] = {}
+
+    class _Result:
+        returncode = 0
+
+    monkeypatch.setattr(rerender_subject, "_playwright_script_path", lambda: script_path)
+    monkeypatch.setattr(rerender_subject.shutil, "which", lambda _name: "/usr/bin/node")
+    monkeypatch.setattr(rerender_subject, "_repo_root", lambda: tmp_path)
+
+    def fake_run(command: list[str], **kwargs: object) -> _Result:
+        captured["command"] = command
+        captured["kwargs"] = kwargs
+        return _Result()
+
+    monkeypatch.setattr(rerender_subject.subprocess, "run", fake_run)
+
+    config = rerender_subject.RenderConfig(
+        base_url="http://localhost:3000",
+        username="admin",
+        password="changeme",
+        output_dir=tmp_path,
+        width=1600,
+        height=2200,
+        timeout_seconds=45.0,
+        selected_uids=(),
+        fallback="auto",
+    )
+
+    result = rerender_subject._run_playwright_fallback(config)
+
+    assert result == 0
+    assert captured["command"] == ["node", str(script_path)]
+    assert captured["kwargs"]["check"] is False
+    assert captured["kwargs"]["cwd"] == str(tmp_path)
+    assert "capture_output" not in captured["kwargs"]
+    assert captured["kwargs"]["env"]["GRAFANA_BASE_URL"] == "http://localhost:3000"
+
+
 def test_rerender_falls_back_to_playwright_on_render_failure(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
@@ -318,6 +361,16 @@ def test_grafana_audit_preflight_parser_uses_grafana_env_defaults(
     assert args.screenshot_dir == tmp_path
     assert args.json is True
     assert args.skip_screenshot_check is True
+
+
+def test_grafana_audit_cycle_parser_exposes_backend_boolean_flag() -> None:
+    parser = cycle_subject._build_parser()
+
+    default_args = parser.parse_args([])
+    disabled_args = parser.parse_args(["--no-ensure-observability-backend"])
+
+    assert default_args.ensure_observability_backend is True
+    assert disabled_args.ensure_observability_backend is False
 
 
 def test_grafana_audit_preflight_detects_stale_screenshot(tmp_path: Path) -> None:
