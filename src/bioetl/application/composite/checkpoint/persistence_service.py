@@ -12,7 +12,7 @@ from bioetl.application.composite.checkpoint.state import CompositeCheckpointSta
 from bioetl.domain.exceptions import BioETLError, CheckpointConflictError
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort
+    from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort, MetricsPort
 
 
 class CompositeCheckpointPersistenceService:
@@ -26,12 +26,30 @@ class CompositeCheckpointPersistenceService:
         glob_pattern: str,
         storage: CompositeCheckpointPort,
         logger: LoggerPort,
+        metrics: MetricsPort | None = None,
     ) -> None:
         self._composite_name = composite_name
         self._checkpoint_filename = checkpoint_filename
         self._glob_pattern = glob_pattern
         self._storage = storage
         self._logger = logger
+        self._metrics = metrics
+
+    def _emit_checkpoint_saved_at_from_state(
+        self,
+        state: CompositeCheckpointState,
+    ) -> None:
+        """Publish persisted checkpoint freshness from state timestamps."""
+        if self._metrics is None:
+            return
+        saved_at = state.updated_at or state.created_at
+        if saved_at is None:
+            return
+        self._metrics.set_gauge(
+            "bioetl_checkpoint_saved_at_seconds",
+            saved_at.timestamp(),
+            {"pipeline": self._composite_name},
+        )
 
     def save(self, state: CompositeCheckpointState) -> None:
         """Save checkpoint state to JSON atomically."""
@@ -47,6 +65,7 @@ class CompositeCheckpointPersistenceService:
                 state=state.state.value,
                 completed_enrichers=len(state.completed_enrichers),
             )
+            self._emit_checkpoint_saved_at_from_state(state)
         except CHECKPOINT_WRITE_ERRORS as error:
             self._logger.error(
                 "Failed to save checkpoint",

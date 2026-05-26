@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import io
+import os
 import re
+import subprocess
 import threading
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -12,6 +15,8 @@ from typing import Any
 import yaml
 
 FRONTMATTER_DELIMITER = "---"
+NOTE_READ_TIMEOUT_SECONDS = 5.0
+GIT_FALLBACK_TIMEOUT_SECONDS = 5.0
 LEGACY_FRONTMATTER_DELIMITER_PATTERN = re.compile(r"^_{3,}$")
 LEGACY_INDENTED_TOP_LEVEL_KEY_PATTERN = re.compile(
     r"^\s{2,}(confidence|last_verified|summary|query|kind):"
@@ -20,29 +25,112 @@ SLUG_PATTERN = re.compile(r"[^a-z0-9]+")
 HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 
 
-def _open_with_timeout(path: Path, timeout: float):
-    """Open a file with a timeout to prevent hangs on network drives."""
-    handle = None
+def _read_text_with_timeout(path: Path, timeout: float) -> str:
+    """Read a file with a timeout to prevent hangs on network drives."""
+    text = None
     exception = None
 
     def _target():
-        nonlocal handle, exception
+        nonlocal text, exception
         try:
-            handle = path.open("r", encoding="utf-8")
+            text = path.read_text(encoding="utf-8")
         except Exception as e:
             exception = e
 
-    thread = threading.Thread(target=_target)
+    thread = threading.Thread(target=_target, daemon=True)
     thread.start()
     thread.join(timeout=timeout)
 
     if thread.is_alive():
-        raise TimeoutError(f"File open did not complete within {timeout} seconds: {path}")
+        fallback_text = _read_text_from_git_object(path)
+        if fallback_text is not None:
+            return fallback_text
+        raise TimeoutError(
+            f"File read did not complete within {timeout} seconds: {path}"
+        )
 
     if exception is not None:
         raise exception
 
-    return handle
+    return text or ""
+
+
+def _read_text_from_git_object(path: Path) -> str | None:
+    """Read a tracked file from Git when the working-tree file is unavailable."""
+    try:
+        repo_root = _git_repo_root(path)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if repo_root is None:
+        return None
+
+    relative_path = os.path.relpath(path, repo_root).replace(os.sep, "/")
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(repo_root), "show", f"HEAD:{relative_path}"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=GIT_FALLBACK_TIMEOUT_SECONDS,
+            **_hidden_windows_subprocess_kwargs(),
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if completed.returncode != 0:
+        return None
+    return completed.stdout
+
+
+def _git_repo_root(path: Path) -> Path | None:
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(path.parent), "rev-parse", "--show-toplevel"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=GIT_FALLBACK_TIMEOUT_SECONDS,
+            **_hidden_windows_subprocess_kwargs(),
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if completed.returncode != 0:
+        return None
+    repo_root = completed.stdout.strip()
+    return Path(repo_root) if repo_root else None
+
+
+def _hidden_windows_subprocess_kwargs(
+    *,
+    os_name: str = os.name,
+    subprocess_module: object = subprocess,
+) -> dict[str, object]:
+    """Build subprocess kwargs that prevent Windows console popups."""
+    if os_name != "nt":
+        return {}
+
+    kwargs: dict[str, object] = {}
+    create_no_window = int(getattr(subprocess_module, "CREATE_NO_WINDOW", 0))
+    if create_no_window:
+        kwargs["creationflags"] = create_no_window
+
+    startupinfo_factory = getattr(subprocess_module, "STARTUPINFO", None)
+    if callable(startupinfo_factory):
+        startupinfo = startupinfo_factory()
+        startf_use_show_window = int(
+            getattr(subprocess_module, "STARTF_USESHOWWINDOW", 0)
+        )
+        if startf_use_show_window:
+            startupinfo.dwFlags = (
+                int(getattr(startupinfo, "dwFlags", 0)) | startf_use_show_window
+            )
+        if hasattr(subprocess_module, "SW_HIDE"):
+            startupinfo.wShowWindow = int(getattr(subprocess_module, "SW_HIDE", 0))
+        kwargs["startupinfo"] = startupinfo
+    return kwargs
 
 
 @dataclass(frozen=True, slots=True)
@@ -72,9 +160,10 @@ def normalize_text_key(value: str) -> str:
 def parse_markdown_note(path: Path, *, include_body: bool = True) -> MemoryNote:
     """Parse a markdown note with YAML frontmatter."""
     try:
-        handle = _open_with_timeout(path, timeout=30.0)
+        text = _read_text_with_timeout(path, timeout=NOTE_READ_TIMEOUT_SECONDS)
     except (OSError, TimeoutError) as exc:
         raise ValueError(f"failed to open note file: {exc}") from exc
+    handle = io.StringIO(text)
     with handle:
         first_line = handle.readline()
         if not first_line:

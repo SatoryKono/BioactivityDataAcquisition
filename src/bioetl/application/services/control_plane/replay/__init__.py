@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from bioetl.application.services.control_plane.replay.bundle_descriptor_service import (
+    RunReplayBundleDescriptorRecord,
+    build_run_replay_bundle_descriptor,
+)
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationResult,
     HistoricalReplayCertificationService,
@@ -30,10 +34,6 @@ from bioetl.application.services.control_plane.replay.historical_universe_servic
     HistoricalReplayUniverseInventorySnapshot,
     HistoricalReplayUniverseRecord,
     HistoricalReplayUniverseService,
-)
-from bioetl.application.services.control_plane.replay.bundle_descriptor_service import (
-    RunReplayBundleDescriptorRecord,
-    build_run_replay_bundle_descriptor,
 )
 
 __all__ = [

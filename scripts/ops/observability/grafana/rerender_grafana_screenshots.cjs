@@ -17,6 +17,10 @@ function parseArgs(argv) {
       process.env.GRAFANA_SCREENSHOT_TIMEOUT_MS || "90000",
       10,
     ),
+    settleMs: Number.parseInt(
+      process.env.GRAFANA_SCREENSHOT_SETTLE_MS || "5000",
+      10,
+    ),
     selectedUids: new Set(
       (process.env.GRAFANA_SCREENSHOT_UIDS || "")
         .split(",")
@@ -96,6 +100,7 @@ async function listDashboards() {
         title: typeof item.title === "string" ? item.title : item.uid,
         url: item.url,
         file: `${item.uid}.png`,
+        collapsedRowTitles: [],
       }))
       .sort((left, right) => left.uid.localeCompare(right.uid));
   } finally {
@@ -103,14 +108,122 @@ async function listDashboards() {
   }
 }
 
-async function renderDashboard(page, dashboard) {
+async function loadCollapsedRowTitles(dashboard) {
+  const api = await request.newContext({ baseURL: CONFIG.baseUrl });
+  try {
+    const response = await api.get(`/api/dashboards/uid/${encodeURIComponent(dashboard.uid)}`, {
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${CONFIG.username}:${CONFIG.password}`).toString("base64")}`,
+      },
+    });
+    if (!response.ok()) {
+      console.warn(
+        `warning: dashboard definition lookup failed for ${dashboard.uid}: ${response.status()} ${response.statusText()}`,
+      );
+      return [];
+    }
+    const payload = await response.json();
+    const panels = Array.isArray(payload?.dashboard?.panels) ? payload.dashboard.panels : [];
+    return panels
+      .filter((panel) => panel && panel.type === "row" && panel.collapsed === true)
+      .map((panel) => (typeof panel.title === "string" ? panel.title.trim() : ""))
+      .filter(Boolean);
+  } finally {
+    await api.dispose();
+  }
+}
+
+async function enrichDashboardsWithCollapsedRows(dashboards) {
+  for (const dashboard of dashboards) {
+    dashboard.collapsedRowTitles = await loadCollapsedRowTitles(dashboard);
+  }
+  return dashboards;
+}
+
+async function tryExpandCollapsedRow(page, title, index, total, uid) {
+  const escapedTitle = JSON.stringify(title);
+  const candidates = [
+    page.locator(`button:has-text(${escapedTitle})`).first(),
+    page.locator(`[role="button"]:has-text(${escapedTitle})`).first(),
+    page.getByText(title, { exact: true }).first(),
+  ];
+
+  for (const candidate of candidates) {
+    if ((await candidate.count()) === 0) {
+      continue;
+    }
+    const visible = await candidate.isVisible().catch(() => false);
+    if (!visible) {
+      continue;
+    }
+    try {
+      await candidate.scrollIntoViewIfNeeded().catch(() => {});
+      await candidate.click({ timeout: 5000 });
+      console.log(`[${index}/${total}] expanded row '${title}' in ${uid}`);
+      return true;
+    } catch {
+      continue;
+    }
+  }
+
+  console.warn(`[${index}/${total}] could not expand collapsed row '${title}' in ${uid}`);
+  return false;
+}
+
+async function expandCollapsedRows(page, dashboard, index, total) {
+  const titles = Array.isArray(dashboard.collapsedRowTitles)
+    ? dashboard.collapsedRowTitles
+    : [];
+  if (titles.length === 0) {
+    return;
+  }
+
+  console.log(
+    `[${index}/${total}] expanding ${titles.length} collapsed row(s) for ${dashboard.uid} ...`,
+  );
+  let expanded = 0;
+  for (const title of titles) {
+    if (await tryExpandCollapsedRow(page, title, index, total, dashboard.uid)) {
+      expanded += 1;
+    }
+  }
+  console.log(
+    `[${index}/${total}] expanded ${expanded}/${titles.length} collapsed row(s) for ${dashboard.uid}`,
+  );
+  if (expanded === 0) {
+    return;
+  }
+  await page.waitForLoadState("networkidle", { timeout: CONFIG.timeoutMs }).catch(() => {
+    console.warn(
+      `[${index}/${total}] networkidle timeout after row expansion for ${dashboard.uid}; continuing`,
+    );
+  });
+  console.log(
+    `[${index}/${total}] settling expanded rows for ${dashboard.uid} for ${CONFIG.settleMs}ms ...`,
+  );
+  await page.waitForTimeout(CONFIG.settleMs);
+}
+
+async function renderDashboard(page, dashboard, index, total) {
   const target = `${CONFIG.baseUrl}${dashboard.url}?orgId=1`;
+  console.log(`[${index}/${total}] loading ${dashboard.uid} ...`);
+  console.log(`[${index}/${total}] goto ${dashboard.uid} -> ${target}`);
   await page.goto(target, {
     timeout: CONFIG.timeoutMs,
     waitUntil: "domcontentloaded",
   });
-  await page.waitForLoadState("networkidle", { timeout: CONFIG.timeoutMs }).catch(() => {});
-  await page.waitForTimeout(10_000);
+  console.log(`[${index}/${total}] domcontentloaded ${dashboard.uid}`);
+  console.log(`[${index}/${total}] waiting for networkidle ${dashboard.uid} ...`);
+  await page.waitForLoadState("networkidle", { timeout: CONFIG.timeoutMs }).catch(() => {
+    console.warn(
+      `[${index}/${total}] networkidle timeout for ${dashboard.uid}; continuing with settled page wait`,
+    );
+  });
+  console.log(
+    `[${index}/${total}] settling ${dashboard.uid} for ${CONFIG.settleMs}ms ...`,
+  );
+  await page.waitForTimeout(CONFIG.settleMs);
+  await expandCollapsedRows(page, dashboard, index, total);
 
   const panels = page.locator("[data-testid=\"data-testid Panel header\"]");
   if ((await panels.count()) === 0) {
@@ -118,6 +231,7 @@ async function renderDashboard(page, dashboard) {
   }
 
   const filePath = path.join(CONFIG.outputDir, dashboard.file);
+  console.log(`[${index}/${total}] capturing screenshot ${dashboard.uid} ...`);
   await page.screenshot({
     path: filePath,
     fullPage: true,
@@ -142,13 +256,13 @@ async function writeManifest(dashboards) {
 
 async function main() {
   await ensureOutputDir();
-  const dashboards = await listDashboards();
+  const dashboards = await enrichDashboardsWithCollapsedRows(await listDashboards());
   const browser = await chromium.launch({ headless: true });
   const context = await createAuthenticatedContext(browser);
   const page = await context.newPage();
   try {
-    for (const dashboard of dashboards) {
-      await renderDashboard(page, dashboard);
+    for (const [index, dashboard] of dashboards.entries()) {
+      await renderDashboard(page, dashboard, index + 1, dashboards.length);
     }
     await writeManifest(dashboards);
   } finally {

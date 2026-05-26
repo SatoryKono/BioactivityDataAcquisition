@@ -10,6 +10,8 @@ from __future__ import annotations
 
 __all__ = ["DeltaReader"]
 
+_FULL_READ_HEAD_LIMIT = 2147483647
+
 
 import asyncio
 from pathlib import Path
@@ -37,7 +39,7 @@ def _count_delta_rows(dt: DeltaTable, resolved_path: Path) -> int:
         except (KeyboardInterrupt, SystemExit):
             raise
         except BaseException:
-            pass  # Why: delta-rs may panic on empty tables; fall through.
+            pass
 
     dt_fresh = DeltaTable(str(resolved_path))
     return int(dt_fresh.to_pyarrow_table(columns=[]).num_rows)
@@ -114,16 +116,16 @@ class DeltaReader:
                     f"Delta table not found: {resolved_path}"
                 ) from e
 
-            # Use scanner.head for both limited and full reads. On Windows/Python
-            # 3.13 delta-rs full-table to_pyarrow_table can hang inside the
-            # native dataset scan; scanner.head(row_count) follows the same
-            # stable path used by limited reads while preserving full-read
-            # semantics.
+            # Use scanner.head for both limited and full reads. For full reads we
+            # intentionally pass a very large sentinel instead of pre-counting
+            # rows, because the row-count path can block on Windows-mounted
+            # Delta tables while scanner.head(n) already returns "all available
+            # rows up to n" semantics.
             scanner = dt.to_pyarrow_dataset().scanner(columns=columns)
             if limit is not None:
                 return scanner.head(limit)
 
-            return scanner.head(_count_delta_rows(dt, resolved_path))
+            return scanner.head(_FULL_READ_HEAD_LIMIT)
 
         self._logger.debug(
             "Reading Delta table",

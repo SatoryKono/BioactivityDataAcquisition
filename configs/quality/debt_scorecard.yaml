@@ -474,12 +474,36 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profiles.py
       - src/bioetl/application/services/control_plane/_run_manifest_replay_family_contract_payload.py
       - src/bioetl/application/services/control_plane/effective_config/__init__.py
+      - src/bioetl/application/services/control_plane/effective_config/service.py
       - src/bioetl/application/services/control_plane/ledger/__init__.py
+      - src/bioetl/application/services/control_plane/ledger/service.py
       - src/bioetl/application/services/control_plane/manifest/__init__.py
+      - src/bioetl/application/services/control_plane/manifest/diagnostics.py
+      - src/bioetl/application/services/control_plane/manifest/inspection_models.py
+      - src/bioetl/application/services/control_plane/manifest/inspection_service.py
+      - src/bioetl/application/services/control_plane/manifest/models.py
+      - src/bioetl/application/services/control_plane/manifest/service.py
       - src/bioetl/application/services/control_plane/replay/__init__.py
+      - src/bioetl/application/services/control_plane/replay/bundle_descriptor_service.py
+      - src/bioetl/application/services/control_plane/replay/historical_certification_service.py
+      - src/bioetl/application/services/control_plane/replay/historical_closure_models.py
+      - src/bioetl/application/services/control_plane/replay/historical_closure_policy.py
+      - src/bioetl/application/services/control_plane/replay/historical_closure_service.py
+      - src/bioetl/application/services/control_plane/replay/historical_corpus_models.py
+      - src/bioetl/application/services/control_plane/replay/historical_corpus_policy.py
+      - src/bioetl/application/services/control_plane/replay/historical_corpus_service.py
+      - src/bioetl/application/services/control_plane/replay/historical_universe_policy.py
+      - src/bioetl/application/services/control_plane/replay/historical_universe_service.py
       - src/bioetl/application/services/control_plane/run_manifest_exact_replay_blockers.py
       - src/bioetl/application/services/control_plane/run_manifest_validation.py
       - src/bioetl/application/services/control_plane/workflow/__init__.py
+      - src/bioetl/application/services/control_plane/workflow/execution_preparation.py
+      - src/bioetl/application/services/control_plane/workflow/execution_recording.py
+      - src/bioetl/application/services/control_plane/workflow/execution_service.py
+      - src/bioetl/application/services/control_plane/workflow/inspection_service.py
+      - src/bioetl/application/services/control_plane/workflow/ledger_service.py
+      - src/bioetl/application/services/control_plane/workflow/manifest_models.py
+      - src/bioetl/application/services/control_plane/workflow/manifest_service.py
     composition_runtime_builders:
       min_measured_module_count: 38
       max_unmeasured_module_count: 0

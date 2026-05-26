@@ -221,7 +221,7 @@ duplicate_name_triage:
     do_not_consolidate_when: Inline setup is shorter and clearer than an indirection.
 slow_governance_scanner_cache:
   decision: retained_cached_scanner
-  issue_ref: '#4462'
+  issue_ref: '#4663'
   cached_entrypoints:
   - scripts.engineering.qa.report_test_governance_audit.collect_test_governance_report
   - tests.architecture.conftest.cached_subprocess_run

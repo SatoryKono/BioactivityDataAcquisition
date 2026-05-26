@@ -408,6 +408,11 @@ class TestLoadResume:
             1,
             {"pipeline": "my_composite", "status": "loaded"},
         )
+        metrics.set_gauge.assert_called_once_with(
+            "bioetl_checkpoint_saved_at_seconds",
+            datetime(2024, 6, 1, 9, 0, tzinfo=UTC).timestamp(),
+            {"pipeline": "my_composite"},
+        )
 
     @pytest.mark.asyncio
     async def test_resume_preserves_replay_watermark(self) -> None:
@@ -1143,7 +1148,8 @@ class TestLoadWarnOnOverwrite:
     @pytest.mark.asyncio
     async def test_warns_when_existing_checkpoint_has_progress(self) -> None:
         """load(resume=False) warns if an existing checkpoint is resumable."""
-        svc, storage, logger = _make_service(resume=False)
+        metrics = MagicMock()
+        svc, storage, logger = _make_service(resume=False, metrics=metrics)
         latest_filename = "composite_my_composite_run-old.json"
         storage.list_glob.return_value = [latest_filename]
         storage.exists.return_value = True
@@ -1155,6 +1161,11 @@ class TestLoadWarnOnOverwrite:
         assert any(
             "Existing checkpoint with progress will be overwritten" in c
             for c in warning_calls
+        )
+        metrics.set_gauge.assert_called_once_with(
+            "bioetl_checkpoint_saved_at_seconds",
+            datetime(2024, 6, 1, 9, 0, tzinfo=UTC).timestamp(),
+            {"pipeline": "my_composite"},
         )
 
     @pytest.mark.asyncio
@@ -1307,6 +1318,25 @@ class TestSave:
 
         debug_calls = [str(c) for c in logger.debug.call_args_list]
         assert any("Saved checkpoint" in c for c in debug_calls)
+
+    @pytest.mark.asyncio
+    async def test_save_sets_checkpoint_saved_at_gauge_from_state_timestamp(self) -> None:
+        """save() publishes checkpoint freshness from persisted state timestamps."""
+        metrics = MagicMock()
+        svc, _, _ = _make_service(metrics=metrics)
+        checkpoint = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-001",
+            created_at=FIXED_CHECKPOINT_TIME,
+        )
+
+        await svc.save(checkpoint)
+
+        metrics.set_gauge.assert_called_once_with(
+            "bioetl_checkpoint_saved_at_seconds",
+            FIXED_CHECKPOINT_TIME.timestamp(),
+            {"pipeline": "my_composite"},
+        )
 
     @pytest.mark.asyncio
     async def test_save_raises_checkpoint_conflict_on_os_error(self) -> None:

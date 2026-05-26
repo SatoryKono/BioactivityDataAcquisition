@@ -68,6 +68,12 @@ ______________________________________________________________________
 > `.venv-win\Scripts\python.exe`, so a global `uv` install is not required.
 > For the local screenshot smoke it defaults to the common local Grafana creds
 > `admin/changeme` unless `GRAFANA_USERNAME` and `GRAFANA_PASSWORD` are already set.
+> To render every shipped dashboard after bootstrap on Windows, use
+> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`.
+> That helper also reuses or auto-downloads the same portable Node.js LTS
+> toolchain when `node` is not present in the current PowerShell `PATH`.
+> The Playwright screenshot renderer expands collapsed dashboard rows before
+> capture so batch evidence reflects the fully opened operator surface.
 > `python -m scripts.ops audit-live-grafana` remains the reviewed live
 > datasource/frame audit for semantically sensitive panels.
 
