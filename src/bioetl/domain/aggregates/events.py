@@ -18,10 +18,10 @@ Usage:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from datetime import datetime
-from uuid import uuid4
 
+from bioetl.domain.deterministic_identity import deterministic_id
 from bioetl.domain.types import BatchID, ContentHash, MetaDict, RunID
 
 __all__ = [
@@ -52,7 +52,22 @@ class DomainEvent:
     """
 
     occurred_at: datetime
-    event_id: str = field(default_factory=lambda: str(uuid4()), kw_only=True)
+    event_id: str = field(default="", kw_only=True)
+
+    def __post_init__(self) -> None:
+        """Derive event identity from event contents when not explicitly supplied."""
+        if self.event_id:
+            return
+        payload = {
+            item.name: getattr(self, item.name)
+            for item in fields(self)
+            if item.name != "event_id"
+        }
+        object.__setattr__(
+            self,
+            "event_id",
+            deterministic_id(type(self).__name__, payload),
+        )
 
 
 # ──────────────────────────────────────────────────────────────────────────────

@@ -15,6 +15,7 @@ from bioetl.domain.aggregates._batch_status import BatchStatus
 
 if TYPE_CHECKING:
     from bioetl.domain.aggregates.events import DomainEvent
+from bioetl.domain.deterministic_identity import deterministic_uuid
 from bioetl.domain.types import (
     BatchID,
     MetaDict,
@@ -64,7 +65,7 @@ class Batch(_BatchMutationMixin, _BatchLifecycleMixin):
         created_at: datetime,
         metadata: MetaDict | None = None,
     ) -> Batch:
-        """Create a new batch with a generated ID.
+        """Create a new batch with a deterministic ID.
 
         Args:
             run_id: Pipeline run identifier that owns this batch.
@@ -73,11 +74,19 @@ class Batch(_BatchMutationMixin, _BatchLifecycleMixin):
             metadata: Optional key-value metadata to attach to the batch.
 
         Returns:
-            New Batch instance with generated BatchID and OPEN status.
+            New Batch instance with deterministic BatchID and OPEN status.
         """
-        from uuid import uuid4
-
-        batch_id = BatchID(uuid4())
+        batch_id = BatchID(
+            deterministic_uuid(
+                "batch",
+                {
+                    "created_at": created_at,
+                    "metadata": metadata or {},
+                    "run_id": run_id,
+                    "start_index": start_index,
+                },
+            )
+        )
         batch = cls(
             batch_id=batch_id,
             run_id=run_id,
