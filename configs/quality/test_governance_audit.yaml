@@ -62,7 +62,7 @@ budgets:
   duplicate_test_names_max: 788
   duplicate_test_name_occurrences_max: 2552
   compatibility_test_file_max: 56
-  markerless_test_functions_max: 6936
+  markerless_test_functions_max: 6954
   uuid4_call_sites_max: 400
   date_today_call_sites_max: 0
 budget_ratchet:
@@ -248,7 +248,7 @@ oversized_test_module_inventory:
     owner: reproducibility-contracts
     target_split: integration/ci reproducibility phases
   - path: tests/integration/test_grafana_dashboard_metric_semantics.py
-    lines: 1832
+    lines: 1850
     owner: observability-dashboards
     target_split: dashboard metric semantics scenarios
   completed_splits:
@@ -256,7 +256,7 @@ oversized_test_module_inventory:
     source: tests/integration/test_grafana_config.py
     source_lines_after_split: 1377
     extracted_surface: tests/integration/test_grafana_surface_contracts.py
-    extracted_surface_lines: 733
+    extracted_surface_lines: 718
     owner: observability-dashboards
   - issue_ref: '#4506'
     source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py

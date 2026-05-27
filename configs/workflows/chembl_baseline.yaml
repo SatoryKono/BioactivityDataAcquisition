@@ -34,6 +34,7 @@ workflow:
         primary_keys:
           - assay_id
         action: delete_orphans
+        nulls_equal: false
     - kind: transform
       step_id: reconcile_assay_publication_orphans
       transform_name: reconcile_foreign_keys
@@ -47,3 +48,4 @@ workflow:
         primary_keys:
           - assay_id
         action: delete_orphans
+        nulls_equal: false

@@ -6,10 +6,13 @@ import asyncio
 import pytest
 
 from bioetl.application.core._data_source_mixins import (
+    _WrappedDataSourceDelegationMixin,
     _SourceMetadataDelegationMixin,
     _yield_plain_wrapped_fetch_records,
     _yield_wrapped_fetch_records,
 )
+from bioetl.domain.ports.health_check import HealthCheckResult
+from bioetl.domain.types import HealthStatus
 
 
 class _WrappedAdapter:
@@ -22,6 +25,11 @@ class _WrappedAdapter:
 
 
 class _DelegatingWrapper(_SourceMetadataDelegationMixin):
+    def __init__(self, data_source: object) -> None:
+        self._data_source = data_source
+
+
+class _WrappedDelegatingWrapper(_WrappedDataSourceDelegationMixin):
     def __init__(self, data_source: object) -> None:
         self._data_source = data_source
 
@@ -122,3 +130,50 @@ async def test_yield_plain_wrapped_fetch_records_omits_filter_kwargs() -> None:
             "offset": 7,
         }
     ]
+
+
+@pytest.mark.asyncio
+async def test_check_health_delegates_to_wrapped_enhanced_method() -> None:
+    class _EnhancedWrappedAdapter:
+        provider_name = "chembl"
+
+        async def check_health(self) -> HealthCheckResult:
+            await asyncio.sleep(0)
+            return HealthCheckResult(
+                status=HealthStatus.HEALTHY,
+                latency_ms=12.5,
+                provider="chembl",
+                endpoint="/status",
+            )
+
+        async def health_check(self) -> HealthStatus:
+            await asyncio.sleep(0)
+            return HealthStatus.HEALTHY
+
+    wrapper = _WrappedDelegatingWrapper(_EnhancedWrappedAdapter())
+
+    result = await wrapper.check_health()
+
+    assert result.provider == "chembl"
+    assert result.status == HealthStatus.HEALTHY
+    assert result.latency_ms == 12.5
+    assert result.endpoint == "/status"
+
+
+@pytest.mark.asyncio
+async def test_check_health_synthesizes_result_from_legacy_health_check() -> None:
+    class _LegacyWrappedAdapter:
+        provider_name = "pubchem"
+
+        async def health_check(self) -> HealthStatus:
+            await asyncio.sleep(0)
+            return HealthStatus.DEGRADED
+
+    wrapper = _WrappedDelegatingWrapper(_LegacyWrappedAdapter())
+
+    result = await wrapper.check_health()
+
+    assert result.provider == "pubchem"
+    assert result.status == HealthStatus.DEGRADED
+    assert result.latency_ms == 0.0
+    assert result.endpoint == ""

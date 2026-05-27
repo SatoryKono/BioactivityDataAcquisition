@@ -47,47 +47,25 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
                 "SilverForeignKeyReconciliationAdapter supports only delete_orphans"
             )
 
-        source_keys = request.effective_source_keys
-        reference_keys = request.effective_reference_keys
         self._log(
             "info",
             "workflow foreign-key reconciliation started",
             source_table=request.source_table,
             reference_table=request.reference_table,
-            source_keys=list(source_keys),
-            reference_keys=list(reference_keys),
+            source_keys=list(request.effective_source_keys),
+            reference_keys=list(request.effective_reference_keys),
             nulls_equal=request.nulls_equal,
         )
 
-        try:
-            source_rows = await self.silver_writer.read_silver(request.source_table)
-        except FileNotFoundError:
-            self._record_metrics(scanned=0, retained=0, deleted=0)
-            self._log(
-                "warning",
-                "workflow foreign-key reconciliation skipped missing source table",
-                source_table=request.source_table,
-                reference_table=request.reference_table,
-            )
-            return ForeignKeyReconciliationResult(
-                source_table=request.source_table,
-                reference_table=request.reference_table,
-                source_key=request.source_key,
-                reference_key=request.reference_key,
-                action=request.action,
+        source_rows = await self._read_source_rows(request)
+        if source_rows is None:
+            return self._build_reconciliation_result(
+                request,
                 scanned_rows=0,
                 retained_rows=0,
                 orphan_rows_deleted=0,
                 mutated=False,
             )
-
-        try:
-            reference_rows = await self.silver_writer.read_silver(
-                request.reference_table,
-                columns=list(reference_keys),
-            )
-        except FileNotFoundError:
-            reference_rows = []
 
         if not source_rows:
             self._record_metrics(scanned=0, retained=0, deleted=0)
@@ -97,24 +75,86 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
                 source_table=request.source_table,
                 reference_table=request.reference_table,
             )
-            return ForeignKeyReconciliationResult(
-                source_table=request.source_table,
-                reference_table=request.reference_table,
-                source_key=request.source_key,
-                reference_key=request.reference_key,
-                action=request.action,
+            return self._build_reconciliation_result(
+                request,
                 scanned_rows=0,
                 retained_rows=0,
                 orphan_rows_deleted=0,
                 mutated=False,
             )
 
+        reference_rows = await self._read_reference_rows(request)
+        return await self._reconcile_loaded_rows(
+            request,
+            source_rows=source_rows,
+            reference_rows=reference_rows,
+        )
+
+    def _record_metrics(self, *, scanned: int, retained: int, deleted: int) -> None:
+        if self.metrics is None:
+            return
+        self.metrics.increment_counter(
+            _RECONCILIATION_ROWS_SCANNED_TOTAL,
+            scanned,
+            {},
+        )
+        self.metrics.increment_counter(
+            _RECONCILIATION_ROWS_RETAINED_TOTAL,
+            retained,
+            {},
+        )
+        self.metrics.increment_counter(
+            _RECONCILIATION_ROWS_DELETED_TOTAL,
+            deleted,
+            {},
+        )
+
+    def _log(self, level: str, message: str, **context: object) -> None:
+        log_method = getattr(self.logger, level, None)
+        if callable(log_method):
+            log_method(message, **context)
+
+    async def _read_source_rows(
+        self,
+        request: ForeignKeyReconciliationRequest,
+    ) -> list[dict[str, object]] | None:
+        try:
+            return await self.silver_writer.read_silver(request.source_table)
+        except FileNotFoundError:
+            self._record_metrics(scanned=0, retained=0, deleted=0)
+            self._log(
+                "warning",
+                "workflow foreign-key reconciliation skipped missing source table",
+                source_table=request.source_table,
+                reference_table=request.reference_table,
+            )
+            return None
+
+    async def _read_reference_rows(
+        self,
+        request: ForeignKeyReconciliationRequest,
+    ) -> list[dict[str, object]]:
+        try:
+            return await self.silver_writer.read_silver(
+                request.reference_table,
+                columns=list(request.effective_reference_keys),
+            )
+        except FileNotFoundError:
+            return []
+
+    async def _reconcile_loaded_rows(
+        self,
+        request: ForeignKeyReconciliationRequest,
+        *,
+        source_rows: list[dict[str, object]],
+        reference_rows: list[dict[str, object]],
+    ) -> ForeignKeyReconciliationResult:
         reference_values = {
             key
             for row in reference_rows
             if (key := _normalize_row_key(
                 row,
-                reference_keys,
+                request.effective_reference_keys,
                 nulls_equal=request.nulls_equal,
             ))
             is not None
@@ -124,7 +164,7 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         for row in source_rows:
             source_key = _normalize_row_key(
                 row,
-                source_keys,
+                request.effective_source_keys,
                 nulls_equal=request.nulls_equal,
             )
             if source_key is not None and source_key in reference_values:
@@ -150,12 +190,8 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
                 retained_rows=retained_rows_count,
                 orphan_rows_deleted=orphan_rows_deleted,
             )
-            return ForeignKeyReconciliationResult(
-                source_table=request.source_table,
-                reference_table=request.reference_table,
-                source_key=request.source_key,
-                reference_key=request.reference_key,
-                action=request.action,
+            return self._build_reconciliation_result(
+                request,
                 scanned_rows=scanned_rows,
                 retained_rows=retained_rows_count,
                 orphan_rows_deleted=0,
@@ -182,6 +218,23 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             retained_rows=retained_rows_count,
             orphan_rows_deleted=orphan_rows_deleted,
         )
+        return self._build_reconciliation_result(
+            request,
+            scanned_rows=scanned_rows,
+            retained_rows=retained_rows_count,
+            orphan_rows_deleted=orphan_rows_deleted,
+            mutated=True,
+        )
+
+    def _build_reconciliation_result(
+        self,
+        request: ForeignKeyReconciliationRequest,
+        *,
+        scanned_rows: int,
+        retained_rows: int,
+        orphan_rows_deleted: int,
+        mutated: bool,
+    ) -> ForeignKeyReconciliationResult:
         return ForeignKeyReconciliationResult(
             source_table=request.source_table,
             reference_table=request.reference_table,
@@ -189,34 +242,10 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             reference_key=request.reference_key,
             action=request.action,
             scanned_rows=scanned_rows,
-            retained_rows=retained_rows_count,
+            retained_rows=retained_rows,
             orphan_rows_deleted=orphan_rows_deleted,
-            mutated=True,
+            mutated=mutated,
         )
-
-    def _record_metrics(self, *, scanned: int, retained: int, deleted: int) -> None:
-        if self.metrics is None:
-            return
-        self.metrics.increment_counter(
-            _RECONCILIATION_ROWS_SCANNED_TOTAL,
-            scanned,
-            {},
-        )
-        self.metrics.increment_counter(
-            _RECONCILIATION_ROWS_RETAINED_TOTAL,
-            retained,
-            {},
-        )
-        self.metrics.increment_counter(
-            _RECONCILIATION_ROWS_DELETED_TOTAL,
-            deleted,
-            {},
-        )
-
-    def _log(self, level: str, message: str, **context: object) -> None:
-        log_method = getattr(self.logger, level, None)
-        if callable(log_method):
-            log_method(message, **context)
 
 
 def _normalize_row_key(

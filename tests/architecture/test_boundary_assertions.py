@@ -15,6 +15,7 @@ from pathlib import Path
 import pytest
 
 SRC_ROOT = Path("src/bioetl/composition")
+pytestmark = pytest.mark.architecture
 
 # Factory methods that MUST contain isinstance() boundary assertions.
 # Format: (module_path_relative_to_src, function_or_method_name)

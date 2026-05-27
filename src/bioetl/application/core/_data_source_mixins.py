@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from types import TracebackType
 
     from bioetl.domain.ports import DataSourcePort
+    from bioetl.domain.ports.health_check import HealthCheckResult
     from bioetl.domain.types import HealthStatus
 
 WrappedDataSourceT = TypeVar("WrappedDataSourceT", bound="_HasWrappedDataSource")
@@ -88,6 +89,19 @@ class _WrappedDataSourceDelegationMixin:
     async def health_check(self: _HasWrappedDataSource) -> HealthStatus:
         """Delegate health checks to the wrapped data source."""
         return await self._data_source.health_check()
+
+    async def check_health(self: _HasWrappedDataSource) -> HealthCheckResult:
+        """Delegate enhanced health checks when available, else synthesize one."""
+        from bioetl.domain.ports.health_check import HealthCheckResult
+
+        check_health = getattr(self._data_source, "check_health", None)
+        if check_health is not None and callable(check_health):
+            return await check_health()
+        return HealthCheckResult(
+            status=await self._data_source.health_check(),
+            latency_ms=0.0,
+            provider=self.provider_name,
+        )
 
     async def aclose(self: _HasWrappedDataSource) -> None:
         """Delegate resource shutdown to the wrapped data source."""

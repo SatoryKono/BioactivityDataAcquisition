@@ -108,5 +108,5 @@ Docker-backed MCP servers require Docker Desktop or a working Docker CLI. If Doc
 
 - `.env.gemini` is local and git-ignored. Do not copy real keys into docs, logs, reports, or PRs.
 - `.wsl_proxy_env.sh` is sourced automatically when present before network/API operations.
-- PowerShell does not duplicate setup logic; it resolves the repository WSL path and delegates to `run-gemini.sh`.
+- PowerShell does not duplicate setup logic; it resolves the repository WSL path and delegates to `run-gemini.sh`. PowerShell launchers use `BIOETL_WSL_DISTRO` when it is set and otherwise use the default WSL distro.
 - `headless.sh` / `headless.ps1` set `GEMINI_SKIP_MCP_SETUP=1` for one launch and then delegate back to the canonical launcher.

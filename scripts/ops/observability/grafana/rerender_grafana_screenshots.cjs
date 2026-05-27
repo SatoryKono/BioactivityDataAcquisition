@@ -72,82 +72,93 @@ async function ensureOutputDir() {
   await fs.promises.mkdir(CONFIG.outputDir, { recursive: true });
 }
 
-async function createAuthenticatedContext(browser) {
+function repoRoot() {
+  return path.resolve(__dirname, "..", "..", "..", "..");
+}
+
+function dashboardDir() {
+  return path.join(repoRoot(), "grafana", "dashboards");
+}
+
+function grafanaSlugify(title) {
+  return String(title || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+async function createAuthenticatedApiContext() {
   const api = await request.newContext({ baseURL: CONFIG.baseUrl });
   const response = await api.post("/login", {
     data: { user: CONFIG.username, password: CONFIG.password },
   });
   if (!response.ok()) {
+    await api.dispose();
     throw new Error(`Grafana login failed: ${response.status()} ${response.statusText()}`);
   }
+  return api;
+}
+
+async function createBrowserContext(browser) {
+  let api = null;
+  try {
+    api = await createAuthenticatedApiContext();
+  } catch (error) {
+    console.warn(
+      `warning: Grafana login failed for Playwright fallback; continuing anonymously (${String(error && error.message ? error.message : error)})`,
+    );
+    return {
+      context: await browser.newContext({ viewport: CONFIG.viewport }),
+      api: null,
+    };
+  }
   const storageState = await api.storageState();
-  await api.dispose();
-  return browser.newContext({
-    storageState,
-    viewport: CONFIG.viewport,
-  });
+  return {
+    context: await browser.newContext({
+      storageState,
+      viewport: CONFIG.viewport,
+    }),
+    api,
+  };
 }
 
-async function listDashboards() {
-  const api = await request.newContext({ baseURL: CONFIG.baseUrl });
-  try {
-    const response = await api.get("/api/search?type=dash-db", {
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${CONFIG.username}:${CONFIG.password}`).toString("base64")}`,
-      },
-    });
-    if (!response.ok()) {
-      throw new Error(`Grafana search failed: ${response.status()} ${response.statusText()}`);
+function listDashboardsFromRepo() {
+  const dir = dashboardDir();
+  const files = fs
+    .readdirSync(dir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+    .map((entry) => path.join(dir, entry.name))
+    .sort((left, right) => left.localeCompare(right));
+
+  const dashboards = [];
+  for (const filePath of files) {
+    const payload = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    const uid = typeof payload.uid === "string" ? payload.uid : "";
+    const title = typeof payload.title === "string" ? payload.title : uid;
+    if (!uid) {
+      continue;
     }
-    const payload = await response.json();
-    return payload
-      .filter((item) => item && typeof item.uid === "string" && typeof item.url === "string")
-      .filter(
-        (item) => CONFIG.selectedUids.size === 0 || CONFIG.selectedUids.has(item.uid),
-      )
-      .map((item) => ({
-        uid: item.uid,
-        title: typeof item.title === "string" ? item.title : item.uid,
-        url: item.url,
-        file: `${item.uid}.png`,
-        collapsedRowTitles: [],
-      }))
-      .sort((left, right) => left.uid.localeCompare(right.uid));
-  } finally {
-    await api.dispose();
-  }
-}
-
-async function loadCollapsedRowTitles(dashboard) {
-  const api = await request.newContext({ baseURL: CONFIG.baseUrl });
-  try {
-    const response = await api.get(`/api/dashboards/uid/${encodeURIComponent(dashboard.uid)}`, {
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${CONFIG.username}:${CONFIG.password}`).toString("base64")}`,
-      },
-    });
-    if (!response.ok()) {
-      console.warn(
-        `warning: dashboard definition lookup failed for ${dashboard.uid}: ${response.status()} ${response.statusText()}`,
-      );
-      return [];
+    if (CONFIG.selectedUids.size > 0 && !CONFIG.selectedUids.has(uid)) {
+      continue;
     }
-    const payload = await response.json();
-    const panels = Array.isArray(payload?.dashboard?.panels) ? payload.dashboard.panels : [];
-    return panels
-      .filter((panel) => panel && panel.type === "row" && panel.collapsed === true)
-      .map((panel) => (typeof panel.title === "string" ? panel.title.trim() : ""))
-      .filter(Boolean);
-  } finally {
-    await api.dispose();
+    const slug = grafanaSlugify(title) || uid;
+    const panels = Array.isArray(payload.panels) ? payload.panels : [];
+    dashboards.push({
+      uid,
+      title,
+      url: `/d/${uid}/${slug}`,
+      file: `${uid}.png`,
+      collapsedRowTitles: panels
+        .filter((panel) => panel && panel.type === "row" && panel.collapsed === true)
+        .map((panel) => (typeof panel.title === "string" ? panel.title.trim() : ""))
+        .filter(Boolean),
+    });
   }
-}
-
-async function enrichDashboardsWithCollapsedRows(dashboards) {
-  for (const dashboard of dashboards) {
-    dashboard.collapsedRowTitles = await loadCollapsedRowTitles(dashboard);
+  if (dashboards.length === 0) {
+    throw new Error("No local dashboard JSON files matched the current render selection");
   }
-  return dashboards;
+  return dashboards.sort((left, right) => left.uid.localeCompare(right.uid));
 }
 
 async function tryExpandCollapsedRow(page, title, index, total, uid) {
@@ -282,9 +293,10 @@ async function writeManifest(dashboards) {
 
 async function main() {
   await ensureOutputDir();
-  const dashboards = await enrichDashboardsWithCollapsedRows(await listDashboards());
+  const dashboards = listDashboardsFromRepo();
   const browser = await chromium.launch({ headless: true });
-  const context = await createAuthenticatedContext(browser);
+  const contextBundle = await createBrowserContext(browser);
+  const context = contextBundle.context || contextBundle;
   const page = await context.newPage();
   try {
     for (const [index, dashboard] of dashboards.entries()) {
@@ -292,6 +304,9 @@ async function main() {
     }
     await writeManifest(dashboards);
   } finally {
+    if (contextBundle.api) {
+      await contextBundle.api.dispose();
+    }
     await context.close();
     await browser.close();
   }

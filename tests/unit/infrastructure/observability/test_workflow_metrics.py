@@ -18,6 +18,9 @@ def test_workflow_metrics_are_registered() -> None:
     assert "bioetl_workflow_current_status" in GAUGES
     assert "bioetl_workflow_runs_total" in COUNTERS
     assert "bioetl_workflow_step_events_total" in COUNTERS
+    assert "bioetl_workflow_reconciliation_rows_scanned_total" in COUNTERS
+    assert "bioetl_workflow_reconciliation_rows_retained_total" in COUNTERS
+    assert "bioetl_workflow_reconciliation_rows_deleted_total" in COUNTERS
     assert "bioetl_workflow_step_duration_seconds" in HISTOGRAMS
 
 
@@ -65,6 +68,45 @@ def test_workflow_step_metrics_use_bounded_label_surface() -> None:
         HISTOGRAMS[
             "bioetl_workflow_step_duration_seconds"
         ].labels.assert_called_once_with(**labels)
+
+
+def test_workflow_reconciliation_metrics_support_no_label_dispatch() -> None:
+    metrics = PrometheusMetrics()
+    counter = MagicMock()
+    counter._labelnames = ()
+
+    with patch.dict(
+        COUNTERS,
+        {"bioetl_workflow_reconciliation_rows_scanned_total": counter},
+    ):
+        metrics.increment_counter(
+            "bioetl_workflow_reconciliation_rows_scanned_total",
+            3,
+            {},
+        )
+
+    counter.inc.assert_called_once_with(3)
+    counter.labels.assert_not_called()
+
+
+def test_workflow_reconciliation_metrics_reject_unexpected_labels() -> None:
+    metrics = PrometheusMetrics()
+    counter = MagicMock()
+    counter._labelnames = ()
+
+    with patch.dict(
+        COUNTERS,
+        {"bioetl_workflow_reconciliation_rows_scanned_total": counter},
+    ):
+        with pytest.raises(ValueError, match="does not accept labels: workflow"):
+            metrics.increment_counter(
+                "bioetl_workflow_reconciliation_rows_scanned_total",
+                3,
+                {"workflow": "chembl_baseline"},
+            )
+
+    counter.inc.assert_not_called()
+    counter.labels.assert_not_called()
 
 
 def test_workflow_metrics_reject_run_id_label() -> None:

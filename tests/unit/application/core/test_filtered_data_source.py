@@ -9,6 +9,7 @@ import pytest
 
 from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.domain.filtering import FilterLoadResult, InputFilterConfig
+from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.ports import FilterableDataSourcePort
 from bioetl.domain.types import HealthStatus
 
@@ -25,6 +26,14 @@ class MockDataSource:
         self.__aenter__ = AsyncMock(return_value=self)
         self.__aexit__ = AsyncMock(return_value=None)
         self.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
+        self.check_health = AsyncMock(
+            return_value=HealthCheckResult(
+                status=HealthStatus.HEALTHY,
+                latency_ms=25.0,
+                provider=self.provider_name,
+                endpoint="/health",
+            )
+        )
         self.aclose = AsyncMock()
         self.fetch_calls: list[dict[str, object]] = []
 
@@ -47,6 +56,14 @@ class MockFilterableDataSource:
         self.__aenter__ = AsyncMock(return_value=self)
         self.__aexit__ = AsyncMock(return_value=None)
         self.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
+        self.check_health = AsyncMock(
+            return_value=HealthCheckResult(
+                status=HealthStatus.HEALTHY,
+                latency_ms=30.0,
+                provider=self.provider_name,
+                endpoint="/health",
+            )
+        )
         self.aclose = AsyncMock()
         self.fetch_calls: list[dict[str, object]] = []
         self.fetch_filtered_calls: list[dict[str, object]] = []
@@ -444,6 +461,24 @@ class TestFilteredDataSourceDelegation:
 
         assert result == HealthStatus.HEALTHY
         mock_data_source.health_check.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_check_health_delegates_and_preserves_provider(
+        self, mock_data_source, disabled_filter_config
+    ):
+        """Test enhanced check_health delegates with provider-preserving payload."""
+        filtered = FilteredDataSource(
+            data_source=mock_data_source,
+            filter_reader=None,
+            filter_config=disabled_filter_config,
+        )
+
+        result = await filtered.check_health()
+
+        assert result.provider == "chembl"
+        assert result.status == HealthStatus.HEALTHY
+        assert result.latency_ms == 25.0
+        mock_data_source.check_health.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_aclose_delegates(self, mock_data_source, disabled_filter_config):

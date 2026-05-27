@@ -189,6 +189,7 @@ def test_chembl_baseline_workflow_config_is_sequential_and_uses_logical_tables()
         "reference_key": "target_id",
         "primary_keys": ["assay_id"],
         "action": "delete_orphans",
+        "nulls_equal": False,
     }
 
     reconcile_publication = config.get_step("reconcile_assay_publication_orphans")
@@ -201,6 +202,7 @@ def test_chembl_baseline_workflow_config_is_sequential_and_uses_logical_tables()
         "reference_key": "publication_id",
         "primary_keys": ["assay_id"],
         "action": "delete_orphans",
+        "nulls_equal": False,
     }
 
 
