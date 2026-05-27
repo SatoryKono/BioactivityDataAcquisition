@@ -121,7 +121,7 @@ def _build_detached_backend_popen_kwargs(
             sw_hide = int(getattr(subprocess_module, "SW_HIDE", 0))
             if startf_use_show_window:
                 startupinfo.dwFlags = (
-                    int(getattr(startupinfo, "dwFlags", 0)) | startf_use_show_window
+                    int(startupinfo.dwFlags) if hasattr(startupinfo, "dwFlags") else 0 | startf_use_show_window
                 )
             if has_sw_hide:
                 startupinfo.wShowWindow = sw_hide
@@ -136,7 +136,7 @@ def _build_detached_backend_env(
     current_env: dict[str, str] | None = None,
 ) -> dict[str, str]:
     """Ensure detached backend subprocess can import the src-layout package."""
-    env = dict(current_env if current_env is not None else getattr(os, "environ"))
+    env = dict(current_env if current_env is not None else os.environ)
     src_root = Path(__file__).resolve().parents[6]
     existing_pythonpath = env.get("PYTHONPATH", "").strip()
     pythonpath_parts = [str(src_root)]
