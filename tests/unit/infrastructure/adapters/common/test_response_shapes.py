@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections import OrderedDict
+
 from bioetl.infrastructure.adapters.common.response_shapes import (
     extract_response_items,
     extract_response_mapping,
@@ -40,3 +42,11 @@ def test_extract_response_text_returns_only_string_values() -> None:
     assert extract_response_text({"nextCursor": "cursor-1"}, "nextCursor") == "cursor-1"
     assert extract_response_text({"nextCursor": 10}, "nextCursor") is None
     assert extract_response_text({}, "nextCursor") is None
+
+
+def test_extract_response_mapping_handles_various_edge_cases() -> None:
+    assert extract_response_mapping({"meta": None}, "meta") is None
+    assert extract_response_mapping({"meta": "string_not_mapping"}, "meta") is None
+
+    ordered_map = OrderedDict([("a", 1), ("b", 2)])
+    assert extract_response_mapping({"meta": ordered_map}, "meta") == ordered_map
