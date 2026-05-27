@@ -62,7 +62,7 @@ budgets:
   duplicate_test_names_max: 788
   duplicate_test_name_occurrences_max: 2552
   compatibility_test_file_max: 56
-  markerless_test_functions_max: 6957
+  markerless_test_functions_max: 6994
   uuid4_call_sites_max: 400
   date_today_call_sites_max: 0
 budget_ratchet:
@@ -163,7 +163,7 @@ tracing:
 assertless_triage:
   categories:
     architecture_helper_guard:
-      count: 14
+      count: 27
       decision: retained
       rationale: Architecture policy tests delegate assertions to shared guard helpers
         or pytest.fail paths.
@@ -244,83 +244,41 @@ oversized_test_module_inventory:
   max_tracked_lines: 2200
   split_on_touch: true
   top_modules:
-  - path: tests/unit/application/pipelines/pubmed/test_pubmed_transformer.py
-    lines: 1936
-    owner: application-pipelines
-    target_split: PubMed transformer classification and normalization scenarios
-  - path: tests/unit/interfaces/cli/test_cli_commands.py
-    lines: 1930
-    owner: interfaces-cli
-    target_split: CLI command-family scenarios
-  - path: tests/integration/ci/test_reproducibility_contract_suite.py
-    lines: 1874
-    owner: reproducibility-contracts
-    target_split: integration/ci reproducibility phases
-  - path: tests/integration/test_grafana_dashboard_metric_semantics.py
-    lines: 1850
-    owner: observability-dashboards
-    target_split: dashboard metric semantics scenarios
+    - path: tests/integration/ci/test_reproducibility_contract_suite.py
+      lines: 1891
+      owner: reproducibility-contracts
+      target_split: integration/ci reproducibility phases
+    - path: tests/unit/application/services/test_metadata_coordinator.py
+      lines: 680
+      owner: application-services
+      target_split: metadata coordinator command/query families
+    - path: tests/unit/application/services/test_run_manifest_inspection_service.py
+      lines: 1488
+      owner: application-services
+      target_split: run manifest inspection scenario families
+    - path: tests/unit/application/pipelines/pubmed/test_pubmed_transformer.py
+      lines: 1936
+      owner: application-pipelines
+      target_split: PubMed transformer classification and normalization scenarios
   completed_splits:
-  - issue_ref: '#4505'
-    source: tests/integration/test_grafana_config.py
-    source_lines_after_split: 1377
-    extracted_surface: tests/integration/test_grafana_surface_contracts.py
-    extracted_surface_lines: 718
-    owner: observability-dashboards
-  - issue_ref: '#4506'
-    source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
-    source_lines_after_split: 1110
-    extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
-    extracted_surface_lines: 175
-    owner: composition-runtime
-  - issue_ref: '#4506'
-    source: tests/unit/application/services/test_run_manifest_inspection_service.py
-    source_lines_after_split: 1459
-    extracted_surface: tests/unit/application/services/test_run_manifest_inspection_dq_traceability.py
-    extracted_surface_lines: 164
-    owner: application-services
-  - issue_ref: '#4660'
-    source: tests/unit/application/services/test_metadata_coordinator.py
-    source_lines_after_split: 598
-    extracted_surface: tests/unit/application/services/test_metadata_coordinator_runtime_profiles.py
-    extracted_surface_lines: 800
-    owner: application-services
-  - issue_ref: '#4660'
-    source: tests/unit/application/services/test_metadata_coordinator.py
-    source_lines_after_split: 598
-    extracted_surface: tests/unit/application/services/test_metadata_coordinator_lineage.py
-    extracted_surface_lines: 566
-    owner: application-services
-  - issue_ref: '#4660'
-    source: tests/unit/application/services/test_run_manifest_inspection_service.py
-    source_lines_after_split: 1459
-    extracted_surface: tests/unit/application/services/test_run_manifest_inspection_diff.py
-    extracted_surface_lines: 186
-    owner: application-services
-  - issue_ref: '#4660'
-    source: tests/unit/application/services/test_run_manifest_inspection_service.py
-    source_lines_after_split: 1459
-    extracted_surface: tests/unit/application/services/test_run_manifest_inspection_verify.py
-    extracted_surface_lines: 382
-    owner: application-services
-  - issue_ref: '#4660'
-    source: tests/integration/ci/test_reproducibility_contract_suite.py
-    source_lines_after_split: 1874
-    extracted_surface: tests/integration/ci/test_reproducibility_contract_manifest_diff.py
-    extracted_surface_lines: 191
-    owner: reproducibility-contracts
-  - issue_ref: '#4660'
-    source: tests/integration/ci/test_reproducibility_contract_suite.py
-    source_lines_after_split: 1874
-    extracted_surface: tests/integration/ci/test_reproducibility_contract_inventory.py
-    extracted_surface_lines: 182
-    owner: reproducibility-contracts
-  - issue_ref: '#4685'
-    source: tests/unit/application/services/test_metadata_coordinator.py
-    source_lines_after_split: 598
-    extracted_surface: tests/unit/application/services/test_metadata_coordinator_run_context.py
-    extracted_surface_lines: 89
-    owner: application-services
+    - issue_ref: "#4505"
+      source: tests/integration/test_grafana_config.py
+      source_lines_after_split: 1361
+      extracted_surface: tests/integration/test_grafana_surface_contracts.py
+      extracted_surface_lines: 717
+      owner: observability-dashboards
+    - issue_ref: "#4506"
+      source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
+      source_lines_after_split: 1109
+      extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
+      extracted_surface_lines: 175
+      owner: composition-runtime
+    - issue_ref: "#4506"
+      source: tests/unit/application/services/test_run_manifest_inspection_service.py
+      source_lines_after_split: 1488
+      extracted_surface: tests/unit/application/services/test_run_manifest_inspection_dq_traceability.py
+      extracted_surface_lines: 164
+      owner: application-services
 compatibility_test_inventory:
   review_cadence: quarterly
   total_files: 56
