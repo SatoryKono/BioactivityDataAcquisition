@@ -66,6 +66,7 @@ export PATH="${GEMINI_PREFIX}/bin:/usr/local/bin:${PATH}"
 mkdir -p "${GEMINI_CLI_HOME}"
 
 if [[ "${GEMINI_SKIP_MCP_SETUP:-0}" != "1" ]]; then
+    echo "[INFO] Synchronizing Gemini MCP config (timeout: 60s)"
     if [[ ! -x "${ENSURE_MCP_SCRIPT}" ]]; then
         echo "[ERROR] Gemini MCP setup helper not found: ${ENSURE_MCP_SCRIPT}" >&2
         exit 1

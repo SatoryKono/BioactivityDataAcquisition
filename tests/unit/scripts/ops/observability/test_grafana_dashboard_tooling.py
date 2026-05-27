@@ -976,6 +976,73 @@ def test_grafana_audit_cycle_reuses_existing_backend_when_fallback_start_fails(
     assert "http://127.0.0.1:8081" in calls[3][1]
 
 
+def test_grafana_audit_cycle_uses_managed_backend_when_detached_backend_fails(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    calls: list[tuple[str, list[str]]] = []
+
+    monkeypatch.setattr(cycle_subject, "drop_listening_backend_on_port", lambda _port: True)
+    monkeypatch.setattr(
+        cycle_subject,
+        "ensure_observability_backend_started",
+        lambda **_kwargs: _backend_result(
+            backend_available=False,
+            health_url="http://127.0.0.1:8081/health",
+            message="Detached backend did not become ready",
+            status="failed",
+        ),
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "_reuse_existing_backend_if_healthy",
+        lambda *_args, **_kwargs: None,
+    )
+    monkeypatch.setattr(cycle_subject, "_find_available_local_port", lambda: 18081)
+    monkeypatch.setattr(
+        cycle_subject,
+        "_start_managed_observability_backend",
+        lambda **_kwargs: cycle_subject.BackendEnsureOutcome(
+            result=cycle_subject.ObservabilityBackendEnsureResult(
+                status="started",
+                health_url="http://127.0.0.1:8081/health",
+                message="Managed backend started.",
+            ),
+            managed_process=MagicMock(poll=lambda: 0),
+        ),
+    )
+    monkeypatch.setattr(
+        cycle_subject.preflight,
+        "main",
+        lambda argv: calls.append(("preflight", list(argv))) or 0,
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "_discover_filled_dashboard_uids",
+        lambda _config, *, app_base_url: ("bioetl-dq-v2",),
+    )
+    monkeypatch.setattr(
+        cycle_subject.rerender,
+        "main",
+        lambda argv: calls.append(("rerender", list(argv))) or 0,
+    )
+    monkeypatch.setattr(
+        cycle_subject.live_audit,
+        "main",
+        lambda argv: calls.append(("audit", list(argv))) or 0,
+    )
+
+    result = cycle_subject.main(["--screenshot-dir", str(tmp_path)])
+
+    assert result == 0
+    assert [name for name, _argv in calls] == [
+        "preflight",
+        "rerender",
+        "preflight",
+        "audit",
+    ]
+    assert "http://127.0.0.1:8081" in calls[0][1]
+
+
 def test_grafana_audit_cycle_can_disable_backend_refresh(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
