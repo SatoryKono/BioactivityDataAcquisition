@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import socket
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -29,11 +30,15 @@ from scripts.ops.observability.grafana import (
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     DEFAULT_HEALTH_SERVER_PORT,
     ObservabilityBackendEnsureResult,
+    _build_detached_backend_env,
+    build_detached_backend_log_path,
     build_observability_backend_health_url,
     drop_listening_backend_on_port,
     ensure_observability_backend_started,
     probe_observability_backend,
     probe_observability_backend_required_paths,
+    wait_for_observability_backend_ready,
+    wait_for_observability_backend_required_paths_ready,
 )
 
 DEFAULT_GRAFANA_BASE_URL = "http://localhost:3000"
@@ -64,6 +69,12 @@ class AuditCycleConfig:
     pipeline: str
     run_type: str
     range_hours: int
+
+
+@dataclass(frozen=True)
+class BackendEnsureOutcome:
+    result: ObservabilityBackendEnsureResult
+    managed_process: subprocess.Popen[bytes] | None = None
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -257,7 +268,79 @@ def _reuse_existing_backend_if_healthy(
     )
 
 
-def _ensure_backend(config: AuditCycleConfig) -> ObservabilityBackendEnsureResult:
+def _start_managed_observability_backend(
+    *,
+    port: int,
+    required_probe_paths: tuple[str, ...],
+) -> BackendEnsureOutcome:
+    health_url = build_observability_backend_health_url(host="127.0.0.1", port=port)
+    repo_root = Path(__file__).resolve().parents[4]
+    log_path = build_detached_backend_log_path(port)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    log_path.write_text("", encoding="utf-8")
+    kwargs: dict[str, object] = {
+        "cwd": str(repo_root),
+        "env": _build_detached_backend_env(),
+        "stdin": subprocess.DEVNULL,
+    }
+    if sys.platform == "win32":
+        kwargs["creationflags"] = int(getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    with log_path.open("ab") as log_handle:
+        process = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "bioetl",
+                "quarantine",
+                "serve",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                str(port),
+            ],
+            stdout=log_handle,
+            stderr=subprocess.STDOUT,
+            **kwargs,
+        )
+    ready = wait_for_observability_backend_ready(health_url)
+    required_ready = ready and wait_for_observability_backend_required_paths_ready(
+        health_url,
+        required_probe_paths=required_probe_paths,
+    )
+    if required_ready:
+        print(
+            "grafana-audit-cycle: managed observability backend is ready at "
+            f"{health_url}"
+        )
+        return BackendEnsureOutcome(
+            result=ObservabilityBackendEnsureResult(
+                status="started",
+                health_url=health_url,
+                pid=getattr(process, "pid", None),
+                command=(sys.executable, "-m", "bioetl", "quarantine", "serve"),
+                message=f"Managed observability backend started at {health_url}.",
+            ),
+            managed_process=process,
+        )
+    process.terminate()
+    try:
+        process.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait(timeout=5)
+    return BackendEnsureOutcome(
+        result=ObservabilityBackendEnsureResult(
+            status="failed",
+            health_url=health_url,
+            pid=getattr(process, "pid", None),
+            command=(sys.executable, "-m", "bioetl", "quarantine", "serve"),
+            message=f"Managed observability backend did not become ready at {health_url}.",
+        ),
+        managed_process=None,
+    )
+
+
+def _ensure_backend(config: AuditCycleConfig) -> BackendEnsureOutcome:
     required_probe_paths = (
         "/ops/control-plane/checkpoint-freshness?"
         f"pipeline={config.pipeline}&run_type={config.run_type}&run_id=-",
@@ -270,7 +353,7 @@ def _ensure_backend(config: AuditCycleConfig) -> ObservabilityBackendEnsureResul
                 required_probe_paths=required_probe_paths,
             )
             if reused_existing is not None:
-                return reused_existing
+                return BackendEnsureOutcome(result=reused_existing)
             fallback_port = _find_available_local_port()
             print(
                 "grafana-audit-cycle: could not refresh observability backend in place; "
@@ -286,28 +369,38 @@ def _ensure_backend(config: AuditCycleConfig) -> ObservabilityBackendEnsureResul
                     "grafana-audit-cycle: observability backend fallback is ready at "
                     f"{fallback_result.health_url}"
                 )
-                return fallback_result
+                return BackendEnsureOutcome(result=fallback_result)
             reused_existing = _reuse_existing_backend_if_healthy(
                 config,
                 required_probe_paths=required_probe_paths,
             )
             if reused_existing is not None:
-                return reused_existing
-            return fallback_result
+                return BackendEnsureOutcome(result=reused_existing)
+            managed = _start_managed_observability_backend(
+                port=config.observability_backend_port,
+                required_probe_paths=required_probe_paths,
+            )
+            if managed.result.backend_available:
+                return managed
+            managed = _start_managed_observability_backend(
+                port=fallback_port,
+                required_probe_paths=required_probe_paths,
+            )
+            return managed
     result = ensure_observability_backend_started(
         enabled=config.ensure_observability_backend,
         port=config.observability_backend_port,
         required_probe_paths=required_probe_paths,
     )
     if result.backend_available or not config.ensure_observability_backend:
-        return result
+        return BackendEnsureOutcome(result=result)
 
     reused_existing = _reuse_existing_backend_if_healthy(
         config,
         required_probe_paths=required_probe_paths,
     )
     if reused_existing is not None:
-        return reused_existing
+        return BackendEnsureOutcome(result=reused_existing)
 
     fallback_port = _find_available_local_port()
     print(
@@ -327,14 +420,24 @@ def _ensure_backend(config: AuditCycleConfig) -> ObservabilityBackendEnsureResul
             "grafana-audit-cycle: observability backend fallback is ready at "
             f"{fallback_result.health_url}"
         )
-        return fallback_result
+        return BackendEnsureOutcome(result=fallback_result)
     reused_existing = _reuse_existing_backend_if_healthy(
         config,
         required_probe_paths=required_probe_paths,
     )
     if reused_existing is not None:
-        return reused_existing
-    return fallback_result
+        return BackendEnsureOutcome(result=reused_existing)
+    managed = _start_managed_observability_backend(
+        port=config.observability_backend_port,
+        required_probe_paths=required_probe_paths,
+    )
+    if managed.result.backend_available:
+        return managed
+    managed = _start_managed_observability_backend(
+        port=fallback_port,
+        required_probe_paths=required_probe_paths,
+    )
+    return managed
 
 
 def _run_live_audit(config: AuditCycleConfig, *, app_base_url: str) -> int:
@@ -430,53 +533,72 @@ def _discover_filled_dashboard_uids(
 
 def main(argv: list[str] | None = None) -> int:
     config = _parse_args(argv)
+    managed_backend_process: subprocess.Popen[bytes] | None = None
 
-    print("grafana-audit-cycle: ensure observability backend")
-    backend_result = _ensure_backend(config)
-    if config.ensure_observability_backend and not backend_result.backend_available:
-        print(
-            "grafana-audit-cycle: observability backend is not ready "
-            f"({backend_result.message or backend_result.status})"
-        )
-        return 1
-    app_base_url = _app_base_url_from_health_url(backend_result.health_url)
-
-    print("grafana-audit-cycle: preflight (services only)")
-    preflight_status = _run_preflight(
-        config,
-        app_base_url=app_base_url,
-        include_screenshot_check=False,
-    )
-    if preflight_status != 0:
-        return preflight_status
-
-    print("grafana-audit-cycle: discover filled dashboards")
     try:
-        screenshot_uids = _discover_filled_dashboard_uids(
+        print("grafana-audit-cycle: ensure observability backend")
+        backend_outcome = _ensure_backend(config)
+        backend_result = backend_outcome.result
+        managed_backend_process = backend_outcome.managed_process
+        if config.ensure_observability_backend and not backend_result.backend_available:
+            print(
+                "grafana-audit-cycle: observability backend is not ready "
+                f"({backend_result.message or backend_result.status})"
+            )
+            return 1
+        app_base_url = _app_base_url_from_health_url(backend_result.health_url)
+
+        print("grafana-audit-cycle: preflight (services only)")
+        preflight_status = _run_preflight(
             config,
             app_base_url=app_base_url,
+            include_screenshot_check=False,
         )
-    except (FileNotFoundError, LookupError, OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
-        print(f"grafana-audit-cycle: filled-dashboard discovery failed ({exc})")
-        return 1
+        if preflight_status != 0:
+            return preflight_status
 
-    print("grafana-audit-cycle: rerender screenshots")
-    rerender_status = _run_rerender(config, screenshot_uids=screenshot_uids)
-    if rerender_status != 0:
-        return rerender_status
+        print("grafana-audit-cycle: discover filled dashboards")
+        try:
+            screenshot_uids = _discover_filled_dashboard_uids(
+                config,
+                app_base_url=app_base_url,
+            )
+        except (
+            FileNotFoundError,
+            LookupError,
+            OSError,
+            TypeError,
+            ValueError,
+            json.JSONDecodeError,
+        ) as exc:
+            print(f"grafana-audit-cycle: filled-dashboard discovery failed ({exc})")
+            return 1
 
-    print("grafana-audit-cycle: preflight (services + screenshot freshness)")
-    screenshot_preflight_status = _run_preflight(
-        config,
-        app_base_url=app_base_url,
-        include_screenshot_check=True,
-        screenshot_uids=screenshot_uids,
-    )
-    if screenshot_preflight_status != 0:
-        return screenshot_preflight_status
+        print("grafana-audit-cycle: rerender screenshots")
+        rerender_status = _run_rerender(config, screenshot_uids=screenshot_uids)
+        if rerender_status != 0:
+            return rerender_status
 
-    print("grafana-audit-cycle: live panel audit")
-    return _run_live_audit(config, app_base_url=app_base_url)
+        print("grafana-audit-cycle: preflight (services + screenshot freshness)")
+        screenshot_preflight_status = _run_preflight(
+            config,
+            app_base_url=app_base_url,
+            include_screenshot_check=True,
+            screenshot_uids=screenshot_uids,
+        )
+        if screenshot_preflight_status != 0:
+            return screenshot_preflight_status
+
+        print("grafana-audit-cycle: live panel audit")
+        return _run_live_audit(config, app_base_url=app_base_url)
+    finally:
+        if managed_backend_process is not None and managed_backend_process.poll() is None:
+            managed_backend_process.terminate()
+            try:
+                managed_backend_process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                managed_backend_process.kill()
+                managed_backend_process.wait(timeout=5)
 
 
 if __name__ == "__main__":
