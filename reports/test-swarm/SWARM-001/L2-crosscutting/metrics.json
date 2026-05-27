@@ -30,13 +30,16 @@
     "flaky_fixed": 0,
     "flaky_quarantined": 0
   },
-  "top_failures": [],
+  "top_failures": [
+    {
+      "test_id": "tests/architecture/test_adapter_contracts.py::TestAdapterHealthCheck::test_adapters_have_health_check",
+      "error_type": "AssertionError",
+      "category": "State",
+      "failure_frequency": 0.2
+    }
+  ],
   "files_changed": [
-    "src/bioetl/infrastructure/adapters/chembl/fetch_resilience_mixin.py",
-    "src/bioetl/composition/entrypoints.py",
-    "src/bioetl/application/composite/runner_pkg/runner_stage_enrichment_mixin.py",
-    "src/bioetl/application/core/runtime_wiring_api.py",
-    "src/bioetl/application/core/postrun/compact_orchestrator.py"
+    "tests/architecture/test_adapter_contracts.py"
   ],
   "recommendations": [
     "Improve test coverage"

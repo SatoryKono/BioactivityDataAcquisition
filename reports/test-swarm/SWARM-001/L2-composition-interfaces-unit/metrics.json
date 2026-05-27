@@ -30,13 +30,16 @@
     "flaky_fixed": 0,
     "flaky_quarantined": 0
   },
-  "top_failures": [],
+  "top_failures": [
+    {
+      "test_id": "tests/unit/composition/bootstrap/cli/test_config.py::TestBootstrapConfigService::test_returns_config_service",
+      "error_type": "AssertionError",
+      "category": "State",
+      "failure_frequency": 0.2
+    }
+  ],
   "files_changed": [
-    "src/bioetl/application/core/base_transformer/_structural_policy_types.py",
-    "src/bioetl/interfaces/cli/commands/domains/run_all/__init__.py",
-    "src/bioetl/domain/normalization/profiles/base.py",
-    "src/bioetl/application/composite/runner_pkg/runner_helpers.py",
-    "src/bioetl/interfaces/cli/commands/domains/health/__init__.py"
+    "tests/unit/composition/bootstrap/cli/test_config.py"
   ],
   "recommendations": [
     "Improve test coverage"

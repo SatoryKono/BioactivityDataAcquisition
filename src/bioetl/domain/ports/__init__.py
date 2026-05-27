@@ -7,6 +7,33 @@ without eagerly importing every port submodule during package initialization.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from bioetl.domain.ports.adr import AdrDocument, AdrInfo, AdrServicePort, AdrValidationIssue, AdrValidationReport
+    from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation, AuditPort
+    from bioetl.domain.ports.config import DomainConfigMapperPort, PipelineConfigLoaderPort, PipelineSettingsPort, PipelineYamlConfigPort, PublicationVocabularyPort, SettingsLoaderPort, SettingsPort
+    from bioetl.domain.ports.control_plane import ArtifactByteComparisonPort, EffectiveConfigArtifactStorePort, LineageStorePort, RunLedgerPort, RunManifestPort, WorkflowExecutionStatePort, WorkflowLedgerPort, WorkflowManifestPort
+    from bioetl.domain.ports.data_normalization import DataNormalizationPort
+    from bioetl.domain.ports.data_source import DataSourceFactoryPort, DataSourcePort, FilterableDataSourcePort
+    from bioetl.domain.ports.delta_reader import DeltaReaderPort
+    from bioetl.domain.ports.export import ExportCatalogPort, ExportFileFingerprint, ExportWriterPort
+    from bioetl.domain.ports.filtering import InputFilterPort
+    from bioetl.domain.ports.health_check import HealthCheckPort, HealthCheckResult, HealthMonitorPort, HealthStatePort, HealthStatusLiteral
+    from bioetl.domain.ports.idmapping import IDMappingPort, IDMappingSourceReaderPort
+    from bioetl.domain.ports.metadata import BronzeMetadataInput, GoldMetadataInput, MetadataCoordinatorPort, MetadataWriterPort, SilverMetadataInput, SilverRef
+    from bioetl.domain.ports.observability import DQMonitorPort, ExecutorMetricsPort, LoggerPort, MetricLabels, MetricsPort, MetricsPublisherPort, MetricsServerPort, MetricsServerRuntimeStatus, TracingPort, resolve_metric_labels
+    from bioetl.domain.ports.pii import PiiHasherPort
+    from bioetl.domain.ports.publication_strategy import DataExtractorStrategy, IdentifierResolverStrategy, PublicationMetadataStrategy
+    from bioetl.domain.ports.quality import BronzeDQAnalyzerPort, BronzeDQConfigPort, ContractPolicyProtocol, DQReportWriterPort, ErrorClassifierPort, ErrorHandlerPort, FallbackPolicyPort, GoldDQAnalyzerPort, GoldDQConfigPort, GoldValidatorPort, QuarantinePort, QuarantineWriteRequest, SilverDQAnalyzeRequest, SilverDQAnalyzerPort, SilverDQConfigPort, SilverValidatorPort, coerce_silver_dq_analyze_request
+    from bioetl.domain.ports.resilience import CircuitBreakerPort, RateLimiterPort
+    from bioetl.domain.ports.runtime import BatchIdGeneratorPort, BreakpointHit, CheckpointPort, ClockPort, CompositeCheckpointPort, DebugAction, ExecutionMetricsReadablePort, ExecutionMetricsRunnerPort, ExecutionObservabilityPort, LockPort, MemoryMonitorPort, MemoryStats, MetricsExtractorPort, PipelineDebugPort, PipelineFactoryPort, PipelineRegistryPort, PipelineSnapshot, RegistryAccessorPort, RunnablePort, RunnerFactoryPort, ShutdownPort, StageBreakpoint
+    from bioetl.domain.ports.runtime.memory import MemoryDecisionTraceEntry
+    from bioetl.domain.ports.runtime.runner import PipelineControlPlaneArtifacts, PipelineCreateRunnerRequest, PipelineCreateWithServicesRequest
+    from bioetl.domain.ports.serialization import JsonEncoderPort
+    from bioetl.domain.ports.storage import BronzeStoragePort, GoldStoragePort, MergedStoragePort, SilverStoragePort, SilverWriteRequest, StorageLifecyclePort, StorageMaintenancePort, coerce_silver_write_request
+    from bioetl.domain.ports.workflow_foreign_key_reconciliation import ForeignKeyReconciliationPort, ForeignKeyReconciliationRequest, ForeignKeyReconciliationResult
+
+
 from importlib import import_module
 
 _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {

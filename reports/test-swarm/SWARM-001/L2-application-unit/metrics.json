@@ -30,13 +30,16 @@
     "flaky_fixed": 0,
     "flaky_quarantined": 0
   },
-  "top_failures": [],
+  "top_failures": [
+    {
+      "test_id": "tests/unit/application/composite/checkpoint/test_checkpoint_public_facade.py::test_public_facade_exports_anchor_context_helpers",
+      "error_type": "AssertionError",
+      "category": "State",
+      "failure_frequency": 0.2
+    }
+  ],
   "files_changed": [
-    "src/bioetl/application/services/_quarantine_service_sync_operations.py",
-    "src/bioetl/application/pipelines/semanticscholar/extractors.py",
-    "src/bioetl/application/pipelines/crossref/_business_data_builder.py",
-    "src/bioetl/domain/normalization/text.py",
-    "src/bioetl/domain/lineage/metadata_bundle.py"
+    "tests/unit/application/composite/checkpoint/test_checkpoint_public_facade.py"
   ],
   "recommendations": [
     "Improve test coverage"

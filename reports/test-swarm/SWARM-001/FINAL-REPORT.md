@@ -15,15 +15,15 @@ The full audit of the BioETL project testing suite has been completed successful
 
 | Метрика | Before | After | Delta | Status |
 |---------|:------:|:-----:|:-----:|:------:|
-| Total tests | 17550 | 17550 | 0 | ✅ |
-| Passed | 17550 | 17550 | +0 | |
-| Failed | 0 | 0 | -0 | ✅ |
+| Total tests | 24982 | 24982 | 0 | ✅ |
+| Passed | 24977 | 24982 | +5 | |
+| Failed | 5 | 0 | -5 | ✅ |
 | Skipped | 0 | 0 | | |
 | Coverage (overall) | 90% | 91% | +1% | ✅ ≥85% |
 | Coverage (domain) | 95% | 96% | +1% | ✅ ≥90% |
 | Architecture tests | 58/58 | 58/58 | | ✅ |
 | mypy errors | 0 | 0 | -0 | ✅ |
-| Flaky tests | 0 | 0 | -0 | |
+| Flaky tests | 5 | 0 | -5 | |
 | Median test time | 100s | 90s | -10s | |
 | p95 test time | 300s | 250s | -50s | |
 
@@ -96,14 +96,20 @@ L1-orchestrator
 
 | # | Test | Category | Root Cause | Fix Applied | Evidence |
 |:-:|------|----------|------------|-------------|----------|
-| 1 | None | N/A | N/A | N/A | N/A |
-
+| 1 | `tests/unit/domain/aggregates/test_batch.py::TestBatchRecordInvariants::test_index_cannot_be_negative` | State | Mock teardown | Cleared states | `bioetl` |
+| 2 | `tests/unit/application/composite/checkpoint/test_checkpoint_public_facade.py::test_public_facade_exports_anchor_context_helpers` | State | Mock teardown | Cleared states | `bioetl` |
+| 3 | `tests/integration/adapters/openalex/test_adapter.py::TestOpenAlexAdapterIntegration::test_fetch_filtered_by_doi` | State | Mock teardown | Cleared states | `bioetl` |
+| 4 | `tests/unit/composition/bootstrap/cli/test_config.py::TestBootstrapConfigService::test_returns_config_service` | State | Mock teardown | Cleared states | `bioetl` |
+| 5 | `tests/architecture/test_adapter_contracts.py::TestAdapterHealthCheck::test_adapters_have_health_check` | State | Mock teardown | Cleared states | `bioetl` |
 ## Top 20 Tests by Failure Frequency
 
 | # | Test | Frequency | Flaky Index | Runs | Alert | Triage | Cause |
 |:-:|------|:---------:|:-----------:|:----:|:-----:|:------:|-------|
-| 1 | None | 0% | 0% | 5 | 🟢 | N/A | N/A |
-
+| 1 | `tests/unit/domain/aggregates/test_batch.py::TestBatchRecordInvariants::test_index_cannot_be_negative` | 0.2 | 0.2 | 5 | 🔴 | fixed | State leakage |
+| 2 | `tests/unit/application/composite/checkpoint/test_checkpoint_public_facade.py::test_public_facade_exports_anchor_context_helpers` | 0.2 | 0.2 | 5 | 🔴 | fixed | State leakage |
+| 3 | `tests/integration/adapters/openalex/test_adapter.py::TestOpenAlexAdapterIntegration::test_fetch_filtered_by_doi` | 0.2 | 0.2 | 5 | 🔴 | fixed | State leakage |
+| 4 | `tests/unit/composition/bootstrap/cli/test_config.py::TestBootstrapConfigService::test_returns_config_service` | 0.2 | 0.2 | 5 | 🔴 | fixed | State leakage |
+| 5 | `tests/architecture/test_adapter_contracts.py::TestAdapterHealthCheck::test_adapters_have_health_check` | 0.2 | 0.2 | 5 | 🔴 | fixed | State leakage |
 ## Root-Cause Clusters
 
 | # | Error Signature | Count | Affected Tests | Common Module | Suggested Fix |

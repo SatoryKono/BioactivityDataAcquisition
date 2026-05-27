@@ -30,13 +30,16 @@
     "flaky_fixed": 0,
     "flaky_quarantined": 0
   },
-  "top_failures": [],
+  "top_failures": [
+    {
+      "test_id": "tests/unit/domain/aggregates/test_batch.py::TestBatchRecordInvariants::test_index_cannot_be_negative",
+      "error_type": "AssertionError",
+      "category": "State",
+      "failure_frequency": 0.2
+    }
+  ],
   "files_changed": [
-    "src/bioetl/infrastructure/storage/silver/maintenance_mixin.py",
-    "src/bioetl/application/pipelines/chembl/_pipelines.py",
-    "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py",
-    "src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py",
-    "src/bioetl/application/pipelines/crossref/_business_data_builder.py"
+    "tests/unit/domain/aggregates/test_batch.py"
   ],
   "recommendations": [
     "Improve test coverage"

@@ -30,13 +30,16 @@
     "flaky_fixed": 0,
     "flaky_quarantined": 0
   },
-  "top_failures": [],
+  "top_failures": [
+    {
+      "test_id": "tests/integration/adapters/openalex/test_adapter.py::TestOpenAlexAdapterIntegration::test_fetch_filtered_by_doi",
+      "error_type": "AssertionError",
+      "category": "State",
+      "failure_frequency": 0.2
+    }
+  ],
   "files_changed": [
-    "src/bioetl/infrastructure/compat/__init__.py",
-    "src/bioetl/application/observability/observer_event_mixin.py",
-    "src/bioetl/interfaces/cli/commands/inspection_output.py",
-    "src/bioetl/application/composite/column_renamer.py",
-    "src/bioetl/domain/types/_execution_phase_transition_builders.py"
+    "tests/integration/adapters/openalex/test_adapter.py"
   ],
   "recommendations": [
     "Improve test coverage"
