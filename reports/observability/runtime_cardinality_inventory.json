@@ -2505,6 +2505,15 @@
     "bioetl_workflow_current_status": [
       "observed_series_count=0"
     ],
+    "bioetl_workflow_reconciliation_rows_deleted_total": [
+      "observed_series_count=1"
+    ],
+    "bioetl_workflow_reconciliation_rows_retained_total": [
+      "observed_series_count=1"
+    ],
+    "bioetl_workflow_reconciliation_rows_scanned_total": [
+      "observed_series_count=1"
+    ],
     "bioetl_workflow_runs_total": [
       "observed_series_count=0"
     ],

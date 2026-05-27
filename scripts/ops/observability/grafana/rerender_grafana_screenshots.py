@@ -247,6 +247,25 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[4]
 
 
+def _resolve_node_executable() -> str | None:
+    direct = shutil.which("node")
+    if direct:
+        return direct
+
+    repo_root = _repo_root()
+    candidates = [
+        repo_root / "node_modules" / ".bin" / "node",
+        repo_root / "node_modules" / ".bin" / "node.cmd",
+        repo_root / "node_modules" / ".bin" / "node.exe",
+        Path("C:/Program Files/nodejs/node.exe"),
+        Path("C:/Program Files (x86)/nodejs/node.exe"),
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return str(candidate)
+    return None
+
+
 def _playwright_env(config: RenderConfig) -> dict[str, str]:
     env = os.environ.copy()
     env["GRAFANA_BASE_URL"] = config.base_url
@@ -267,11 +286,14 @@ def _run_playwright_fallback(config: RenderConfig) -> int:
     if not script_path.exists():
         print(f"Playwright fallback script not found: {script_path}")
         return 1
-    node_path = shutil.which("node")
+    node_path = _resolve_node_executable()
     if node_path is None:
-        print("Playwright fallback requires 'node' on PATH.")
+        print(
+            "Playwright fallback requires Node.js. Checked PATH, "
+            "repo-local node_modules/.bin, and standard Windows nodejs install paths."
+        )
         return 1
-    node_command = ["node", str(script_path)]
+    node_command = [node_path, str(script_path)]
     try:
         result = subprocess.run(
             node_command,

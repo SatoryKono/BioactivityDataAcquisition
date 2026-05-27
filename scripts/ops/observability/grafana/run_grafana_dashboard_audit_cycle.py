@@ -302,8 +302,12 @@ def _ensure_backend(config: AuditCycleConfig) -> ObservabilityBackendEnsureResul
     if result.backend_available or not config.ensure_observability_backend:
         return result
 
-    if "could not be restarted on port" not in (result.message or ""):
-        return result
+    reused_existing = _reuse_existing_backend_if_healthy(
+        config,
+        required_probe_paths=required_probe_paths,
+    )
+    if reused_existing is not None:
+        return reused_existing
 
     fallback_port = _find_available_local_port()
     print(
@@ -323,6 +327,13 @@ def _ensure_backend(config: AuditCycleConfig) -> ObservabilityBackendEnsureResul
             "grafana-audit-cycle: observability backend fallback is ready at "
             f"{fallback_result.health_url}"
         )
+        return fallback_result
+    reused_existing = _reuse_existing_backend_if_healthy(
+        config,
+        required_probe_paths=required_probe_paths,
+    )
+    if reused_existing is not None:
+        return reused_existing
     return fallback_result
 
 

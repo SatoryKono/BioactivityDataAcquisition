@@ -87,7 +87,7 @@ def _latest_history_checkpoint_path(base_path: Path, pipeline: str) -> Path | No
     if not history_root.exists():
         return None
     latest_path: Path | None = None
-    latest_mtime_ns = -1
+    latest_mtime_ns: int | None = None
     for run_dir in history_root.iterdir():
         if not run_dir.is_dir():
             continue
@@ -95,7 +95,7 @@ def _latest_history_checkpoint_path(base_path: Path, pipeline: str) -> Path | No
             if not candidate.is_file() or candidate.suffix != ".json":
                 continue
             candidate_mtime_ns = candidate.stat().st_mtime_ns
-            if candidate_mtime_ns > latest_mtime_ns:
+            if latest_mtime_ns is None or candidate_mtime_ns > latest_mtime_ns:
                 latest_path = candidate
                 latest_mtime_ns = candidate_mtime_ns
     return latest_path

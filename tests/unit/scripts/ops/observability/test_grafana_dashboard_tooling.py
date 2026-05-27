@@ -148,7 +148,9 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
         returncode = 0
 
     monkeypatch.setattr(rerender_subject, "_playwright_script_path", lambda: script_path)
-    monkeypatch.setattr(rerender_subject.shutil, "which", lambda _name: "/usr/bin/node")
+    monkeypatch.setattr(
+        rerender_subject, "_resolve_node_executable", lambda: "/usr/bin/node"
+    )
     monkeypatch.setattr(rerender_subject, "_repo_root", lambda: tmp_path)
 
     def fake_run(command: list[str], **kwargs: object) -> _Result:
@@ -173,11 +175,26 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
     result = rerender_subject._run_playwright_fallback(config)
 
     assert result == 0
-    assert captured["command"] == ["node", str(script_path)]
+    assert captured["command"] == ["/usr/bin/node", str(script_path)]
     assert captured["kwargs"]["check"] is False
     assert captured["kwargs"]["cwd"] == str(tmp_path)
     assert "capture_output" not in captured["kwargs"]
     assert captured["kwargs"]["env"]["GRAFANA_BASE_URL"] == "http://localhost:3000"
+
+
+def test_rerender_resolves_node_from_repo_local_bin(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    node_path = tmp_path / "node_modules" / ".bin" / "node.exe"
+    node_path.parent.mkdir(parents=True, exist_ok=True)
+    node_path.write_text("", encoding="utf-8")
+
+    monkeypatch.setattr(rerender_subject.shutil, "which", lambda _name: None)
+    monkeypatch.setattr(rerender_subject, "_repo_root", lambda: tmp_path)
+
+    resolved = rerender_subject._resolve_node_executable()
+
+    assert resolved == str(node_path)
 
 
 def test_rerender_falls_back_to_playwright_on_render_failure(

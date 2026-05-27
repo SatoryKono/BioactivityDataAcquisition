@@ -2,13 +2,14 @@
 id: fix-uuid-seam-test
 title: Fix runtime UUID seam inventory git ls-files fallback
 task_id: fix-uuid-seam-test
-created_at: '2026-05-26T12:06:52Z'
+created_at: '2026-05-27T05:51:13Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- tests/architecture/test_runtime_uuid_seam_inventory.py
-summary: Added resilient fallback in runtime UUID seam inventory test when git ls-files
-  fails in mixed Windows/WSL environments; validated targeted architecture tests.
+- tests/architecture/test_boundary_assertions.py
+summary: Resolved subsequent architecture governance regression by adding explicit
+  architecture marker to tests/architecture/test_boundary_assertions.py, restoring
+  markerless budget compliance while keeping oversized module inventory checks green.
 ---
 
 # Episodic summary
@@ -19,7 +20,7 @@ summary: Added resilient fallback in runtime UUID seam inventory test when git l
 
 ## Outcome
 
-- Added resilient fallback in runtime UUID seam inventory test when git ls-files fails in mixed Windows/WSL environments; validated targeted architecture tests.
+- Resolved subsequent architecture governance regression by adding explicit architecture marker to tests/architecture/test_boundary_assertions.py, restoring markerless budget compliance while keeping oversized module inventory checks green.
 
 ## Lessons learned
 

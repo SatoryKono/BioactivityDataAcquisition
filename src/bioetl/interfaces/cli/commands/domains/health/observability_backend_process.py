@@ -6,6 +6,7 @@ import os
 import signal
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -135,7 +136,7 @@ def _build_detached_backend_env(
     current_env: dict[str, str] | None = None,
 ) -> dict[str, str]:
     """Ensure detached backend subprocess can import the src-layout package."""
-    env = dict(os.environ if current_env is None else current_env)
+    env = dict(current_env if current_env is not None else getattr(os, "environ"))
     src_root = Path(__file__).resolve().parents[6]
     existing_pythonpath = env.get("PYTHONPATH", "").strip()
     pythonpath_parts = [str(src_root)]
@@ -143,6 +144,11 @@ def _build_detached_backend_env(
         pythonpath_parts.append(existing_pythonpath)
     env["PYTHONPATH"] = os.pathsep.join(pythonpath_parts)
     return env
+
+
+def build_detached_backend_log_path(port: int) -> Path:
+    """Return the deterministic detached backend startup log path for one port."""
+    return Path(tempfile.gettempdir()) / f"bioetl-quarantine-backend-{port}.log"
 
 
 def start_detached_quarantine_backend(
@@ -165,9 +171,20 @@ def start_detached_quarantine_backend(
         str(port),
     ]
     kwargs = _build_detached_backend_popen_kwargs()
+    kwargs.pop("stdout", None)
+    kwargs.pop("stderr", None)
     kwargs["cwd"] = str(Path(__file__).resolve().parents[7])
     kwargs["env"] = _build_detached_backend_env()
-    return popen_factory(command, **kwargs)
+    log_path = build_detached_backend_log_path(port)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    log_path.write_text("", encoding="utf-8")
+    with log_path.open("ab") as log_handle:
+        return popen_factory(
+            command,
+            stdout=log_handle,
+            stderr=subprocess.STDOUT,
+            **kwargs,
+        )
 
 
 def python_executable_to_tuple(args: object) -> tuple[str, ...]:

@@ -74,6 +74,15 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         ),
         "bioetl_workflow_runs_total": _metrics.WORKFLOW_RUNS_TOTAL,
         "bioetl_workflow_step_events_total": _metrics.WORKFLOW_STEP_EVENTS_TOTAL,
+        "bioetl_workflow_reconciliation_rows_scanned_total": (
+            _metrics.WORKFLOW_RECONCILIATION_ROWS_SCANNED_TOTAL
+        ),
+        "bioetl_workflow_reconciliation_rows_retained_total": (
+            _metrics.WORKFLOW_RECONCILIATION_ROWS_RETAINED_TOTAL
+        ),
+        "bioetl_workflow_reconciliation_rows_deleted_total": (
+            _metrics.WORKFLOW_RECONCILIATION_ROWS_DELETED_TOTAL
+        ),
     },
     gauges={
         "bioetl_memory_pressure_state": _metrics.MEMORY_PRESSURE_STATE,
