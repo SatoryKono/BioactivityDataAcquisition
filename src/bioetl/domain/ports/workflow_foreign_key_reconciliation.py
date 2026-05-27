@@ -27,6 +27,10 @@ class ForeignKeyReconciliationRequest:
     nulls_equal: bool = False
 
     def __post_init__(self) -> None:
+        self._validate_required_fields()
+        self._validate_composite_keys()
+
+    def _validate_required_fields(self) -> None:
         if not self.source_table.strip():
             raise ValueError("source_table cannot be empty")
         if not self.reference_table.strip():
@@ -37,24 +41,20 @@ class ForeignKeyReconciliationRequest:
             raise ValueError("reference_key cannot be empty")
         if not self.primary_keys:
             raise ValueError("primary_keys cannot be empty")
+
+    def _validate_composite_keys(self) -> None:
         if self.source_keys is None and self.reference_keys is None:
             return
         if self.source_keys is None or self.reference_keys is None:
-            raise ValueError(
-                "source_keys and reference_keys must be provided together"
-            )
+            raise ValueError("source_keys and reference_keys must be provided together")
         if not self.source_keys or not self.reference_keys:
             raise ValueError("source_keys and reference_keys cannot be empty")
         if len(self.source_keys) != len(self.reference_keys):
-            raise ValueError(
-                "source_keys and reference_keys must have the same length"
-            )
+            raise ValueError("source_keys and reference_keys must have the same length")
         if self.source_keys[0].strip() != self.source_key.strip():
             raise ValueError("source_key must match the first source_keys entry")
         if self.reference_keys[0].strip() != self.reference_key.strip():
-            raise ValueError(
-                "reference_key must match the first reference_keys entry"
-            )
+            raise ValueError("reference_key must match the first reference_keys entry")
 
     @property
     def effective_source_keys(self) -> tuple[str, ...]:
