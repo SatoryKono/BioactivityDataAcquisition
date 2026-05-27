@@ -182,22 +182,6 @@ class ChemblEntityMapper:
         return has_entity_composite_key(entity_type)
 
     @staticmethod
-    def get_resource_name(entity_type: str) -> str | None:
-        """Get the ChEMBL resource name for entity type.
-
-        Args:
-            entity_type: Entity type (e.g., 'activity', 'publication').
-
-        Returns:
-            Resource name or None if unknown.
-
-        Example:
-            >>> ChemblEntityMapper.get_resource_name("publication")
-            'document'
-        """
-        return resolve_resource_name(entity_type)
-
-    @staticmethod
     def is_known_entity(entity_type: str) -> bool:
         """Check if entity type is known (publication or non-publication).
 
