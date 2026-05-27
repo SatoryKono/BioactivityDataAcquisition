@@ -53,6 +53,11 @@ def _extract_manifest_id(metadata: JsonDict) -> str | None:
     return text or None
 
 
+def _normalize_saved_metadata(metadata: JsonDict | None) -> JsonDict:
+    """Return caller-owned checkpoint metadata without adding wall-clock state."""
+    return dict(metadata or {})
+
+
 def _read_json_file(path: Path) -> JsonDict:
     with open(path, encoding="utf-8") as f:
         payload = f.read()
@@ -62,11 +67,38 @@ def _read_json_file(path: Path) -> JsonDict:
     return data
 
 
+def _normalize_loaded_metadata(path: Path, metadata: object) -> JsonDict:
+    if not isinstance(metadata, dict):
+        return {}
+    normalized = dict(metadata)
+    normalized.setdefault("checkpoint_saved_at_epoch_seconds", path.stat().st_mtime)
+    return normalized
+
+
 def _load_checkpoint_tuple(path: Path) -> tuple[RunID, JsonDict]:
     checkpoint_data = _read_json_file(path)
     run_id = RunID(UUID(checkpoint_data["run_id"]))
-    metadata = checkpoint_data.get("metadata", {})
+    metadata = _normalize_loaded_metadata(path, checkpoint_data.get("metadata", {}))
     return (run_id, metadata)
+
+
+def _latest_history_checkpoint_path(base_path: Path, pipeline: str) -> Path | None:
+    history_root = base_path / ".history" / "by_pipeline" / pipeline
+    if not history_root.exists():
+        return None
+    latest_path: Path | None = None
+    latest_mtime_ns: int | None = None
+    for run_dir in history_root.iterdir():
+        if not run_dir.is_dir():
+            continue
+        for candidate in run_dir.iterdir():
+            if not candidate.is_file() or candidate.suffix != ".json":
+                continue
+            candidate_mtime_ns = candidate.stat().st_mtime_ns
+            if latest_mtime_ns is None or candidate_mtime_ns > latest_mtime_ns:
+                latest_path = candidate
+                latest_mtime_ns = candidate_mtime_ns
+    return latest_path
 
 
 def _atomic_write_text(path: Path, payload: str) -> None:
@@ -137,11 +169,12 @@ class LocalCheckpointAdapter:
         key = self._get_key(pipeline)
         full_path = self.base_path / key
         full_path.parent.mkdir(parents=True, exist_ok=True)
+        saved_metadata = _normalize_saved_metadata(metadata)
 
         checkpoint_data = {
             "pipeline": pipeline,
             "run_id": str(run_id),
-            "metadata": metadata or {},
+            "metadata": saved_metadata,
             "version": "2.0",
         }
         checkpoint_json = serialize_to_json(checkpoint_data, ensure_ascii=False)
@@ -149,7 +182,7 @@ class LocalCheckpointAdapter:
         history_path = _build_history_entry_path(self.base_path, pipeline, run_id)
         history_path.parent.mkdir(parents=True, exist_ok=True)
         _atomic_write_text(history_path, checkpoint_json)
-        manifest_id = _extract_manifest_id(metadata or {})
+        manifest_id = _extract_manifest_id(saved_metadata)
         if manifest_id is not None:
             manifest_index = {
                 "manifest_id": manifest_id,
@@ -342,6 +375,27 @@ class LocalCheckpointAdapter:
         if not full_history_path.exists():
             return None
         return _load_checkpoint_tuple(full_history_path)
+
+    async def load_latest_for_pipeline(
+        self,
+        pipeline: str,
+    ) -> tuple[RunID, JsonDict] | None:
+        """Load latest immutable checkpoint evidence across all runs for one pipeline."""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            None,
+            self._load_latest_for_pipeline_sync,
+            pipeline,
+        )
+
+    def _load_latest_for_pipeline_sync(
+        self,
+        pipeline: str,
+    ) -> tuple[RunID, JsonDict] | None:
+        latest_path = _latest_history_checkpoint_path(self.base_path, pipeline)
+        if latest_path is None:
+            return None
+        return _load_checkpoint_tuple(latest_path)
 
     async def aclose(self) -> None:
         """Close checkpoint storage (no-op for local filesystem)."""

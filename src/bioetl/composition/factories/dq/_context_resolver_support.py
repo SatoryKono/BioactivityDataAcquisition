@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
+from bioetl.domain.value_objects.dq_report import SilverDQCheckType
 
 if TYPE_CHECKING:
     from pydantic import BaseModel
@@ -64,6 +65,7 @@ def extract_dq_configs_impl(
     yaml_config: PipelineYamlConfig | None,
     *,
     extract_single_dq_config_fn: Callable[..., object],
+    relaxed_dq: bool = False,
 ) -> DQConfigsContext:
     from bioetl.infrastructure.schemas.dq_report_config import (
         BronzeSinkConfig,
@@ -79,18 +81,42 @@ def extract_dq_configs_impl(
         return DQConfigsContext(bronze=None, silver=None, gold=None)
 
     sink_mapping = cast(Mapping[str, object], sink)
+    silver_config = cast(
+        "SilverDQConfigPort | None",
+        extract_single_dq_config_fn(sink_mapping, "silver", SilverSinkConfig),
+    )
+    if silver_config is not None and relaxed_dq:
+        silver_config = _trim_relaxed_silver_checks(silver_config)
+
     return DQConfigsContext(
         bronze=cast(
             "BronzeDQConfigPort | None",
             extract_single_dq_config_fn(sink_mapping, "bronze", BronzeSinkConfig),
         ),
-        silver=cast(
-            "SilverDQConfigPort | None",
-            extract_single_dq_config_fn(sink_mapping, "silver", SilverSinkConfig),
-        ),
+        silver=silver_config,
         gold=cast(
             "GoldDQConfigPort | None",
             extract_single_dq_config_fn(sink_mapping, "gold", GoldSinkConfig),
+        ),
+    )
+
+
+def _trim_relaxed_silver_checks(
+    silver_config: SilverDQConfigPort,
+) -> SilverDQConfigPort:
+    """Remove expensive Silver profiling checks for relaxed-DQ flows."""
+    checks = getattr(silver_config, "checks", None)
+    if not isinstance(checks, list):
+        return silver_config
+
+    expensive_check = SilverDQCheckType.VALUE_DISTRIBUTION.value
+    if expensive_check not in checks:
+        return silver_config
+
+    return cast(
+        "SilverDQConfigPort",
+        silver_config.model_copy(
+            update={"checks": [check for check in checks if check != expensive_check]}
         ),
     )
 

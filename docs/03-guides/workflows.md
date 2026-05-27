@@ -29,6 +29,41 @@ It connects:
 Use this guide when you need one stable explanation of what a workflow is, what
 it is not, and which fields/identities are already shipped versus still planned.
 
+
+## Target Control-Plane Model (ADR-047)
+
+The target and shipped workflow control plane is the **manifest + ledger + execution-state** split defined by ADR-047.
+
+### Component roles and responsibility boundaries
+
+- **WorkflowManifest (immutable intent)**: one immutable intent snapshot per workflow run; never mutated after creation.
+- **WorkflowLedger (append-only history)**: durable event history for lifecycle and operator intent (`repair`/`force`), but not a mutable status owner.
+- **WorkflowExecutionState (mutable owner)**: current workflow/step status, error projection, `repair_required`, and ambiguity markers.
+- **Workflow lock (local-only safety)**: one `MemoryLock` key per workflow name under ADR-010 local-only boundary.
+
+### Commands and operator flows
+
+- Start: `bioetl workflow run <name>`
+- Safe resume: `bioetl workflow run <name> --resume-last`
+- Ambiguous destructive recovery: `--repair-steps ...` or `--force-steps ...` (explicit operator intent)
+- Inspection: `bioetl workflow status <name> [--run-id <workflow_run_id>]`
+
+### Ownership boundary (what each seam MUST NOT do)
+
+- Manifest MUST NOT be reused as mutable status.
+- Ledger MUST NOT be treated as the sole mutable resume source.
+- Execution state MUST NOT silently infer destructive replay without explicit operator flags when ambiguity is present.
+- Local lock semantics MUST NOT be replaced with external orchestrators in standard runtime.
+
+### Canonical operation sources
+
+- ADR decision: [ADR-047](../02-architecture/decisions/ADR-047-workflow-control-plane.md)
+- Recovery procedure and triage: [Workflow Control-Plane Recovery Runbook](../05-operations/runbooks/workflow-control-plane.md)
+- Runtime validation policy linkage: [POST_CHANGE_VALIDATION.md](../00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md)
+- Runtime precedence and orchestration policy: repository paths `AGENTS.md` and `.codex/agents/CODEX-RUNTIME.md`
+
+> Deprecated wording: any older docs/text that describe workflow resume as ledger-only or name-only are deprecated. Use ADR-047 + this guide + the workflow runbook as the canonical set.
+
 ## Backlog Scope
 
 The workflow control-plane rollout centered on these issues:
@@ -367,7 +402,8 @@ Present in the current tree:
   dashboard evidence survives short-lived CLI process exit;
 - workflow inspection by workflow name or explicit `--run-id`;
 - local single-runtime workflow locking through `MemoryLock`;
-- canonical example workflow config in `configs/workflows/chembl_core.yaml`;
+- canonical baseline workflow config in `configs/workflows/chembl_baseline.yaml`;
+- richer multi-step example workflow config in `configs/workflows/chembl_core.yaml`;
 - baseline built-in transform `summarize_upstream_outputs` for local workflow
   transform-step coverage;
 - built-in `reconcile_foreign_keys` for idempotent ChEMBL orphan cleanup;
@@ -381,7 +417,9 @@ operator-facing families:
 
 1. single-pipeline workflow wrappers for every non-composite pipeline;
 2. optional provider-pack workflows that bundle multiple related pipelines;
-3. richer multi-step examples such as `chembl_core` that mix pipeline and
+3. canonical baseline workflow `chembl_baseline` that runs the core ChEMBL
+   assay/target/publication pipelines before sequential orphan reconciliation;
+4. richer multi-step examples such as `chembl_core` that mix pipeline and
    transform steps.
 
 ### 1. Single-Pipeline Workflow Wrappers
@@ -428,7 +466,26 @@ These packs are:
   operator order, but they do not become the only supported entrypoint for the
   child pipelines.
 
-### 3. Richer Multi-Step Example
+### 3. Canonical ChemblBaseline Workflow
+
+`configs/workflows/chembl_baseline.yaml` is the canonical baseline example for a
+workflow that runs:
+
+- `run_chembl_assay`
+- `run_chembl_target`
+- `run_chembl_publication`
+- `reconcile_assay_target_orphans`
+- `reconcile_assay_publication_orphans`
+
+It keeps the destructive reconciliation phase after the core pipeline phase and
+uses logical table names only.
+
+The built-in reconciliation transform accepts either single keys or composite
+key tuples through `source_keys` / `reference_keys`. Null handling is explicit
+via `nulls_equal`; the default remains `false`, so null-key rows are treated as
+non-matching unless the workflow config states otherwise.
+
+### 4. Richer Multi-Step Example
 
 `configs/workflows/chembl_core.yaml` remains the canonical richer example for a
 workflow that mixes:
@@ -437,6 +494,10 @@ workflow that mixes:
 - built-in transform steps;
 - explicit dependency edges;
 - destructive repair semantics through the workflow control plane.
+
+If a future workflow needs composite reconciliation keys, keep the paired
+`source_keys` / `reference_keys` lists aligned and prefer logical table names
+only.
 
 Not yet fully shipped from the open backlog:
 

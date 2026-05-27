@@ -6,6 +6,8 @@ verifying feature-flag gating and DI factory wiring.
 
 from __future__ import annotations
 
+import importlib
+import sys
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -28,6 +30,24 @@ def _make_settings(*, tracing_enabled: bool = False) -> SimpleNamespace:
 @pytest.mark.unit
 class TestBootstrapTracerPort:
     """Tests for bootstrap_tracer."""
+
+    def test_module_import_does_not_load_opentelemetry_adapter(self) -> None:
+        """Disabled/default import path must not touch the heavy OTel adapter."""
+        module_name = "bioetl.composition.bootstrap.runtime.tracing_bootstrap"
+        adapter_name = "bioetl.infrastructure.observability.tracing"
+        previous_module = sys.modules.pop(module_name, None)
+        previous_adapter = sys.modules.pop(adapter_name, None)
+
+        try:
+            importlib.import_module(module_name)
+
+            assert adapter_name not in sys.modules
+        finally:
+            sys.modules.pop(module_name, None)
+            if previous_module is not None:
+                sys.modules[module_name] = previous_module
+            if previous_adapter is not None:
+                sys.modules[adapter_name] = previous_adapter
 
     def test_returns_noop_when_tracing_disabled(self) -> None:
         """Should return NoOpTracing when tracing_enabled is False."""

@@ -146,6 +146,7 @@ bioetl workflow run chembl_activity --input-csv data/filter-ids.csv --filter-col
 bioetl workflow run chembl_activity --use-cached-bronze --exact-replay --replay-of-run-id parent-run-1 --replay-of-manifest-id manifest-parent-1
 bioetl workflow status chembl_activity
 bioetl workflow run publication_provider_pack --dry-run
+bioetl workflow run chembl_baseline --dry-run
 bioetl workflow run chembl_core --dry-run
 bioetl workflow run chembl_core --only-steps summarize_core_extracts
 bioetl workflow run chembl_core --resume-last

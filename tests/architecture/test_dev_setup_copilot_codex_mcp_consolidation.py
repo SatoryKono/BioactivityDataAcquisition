@@ -26,6 +26,9 @@ EXPECTED_MCP_SERVERS = {
     "pubchem",
     "pubmed",
     "mermaid",
+    "biomoltechDocs",
+    "mintlify",
+    "deepwiki",
     "ast-grep",
     "mcp-code-interpreter",
 }
@@ -130,6 +133,9 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         "mcp-server-fetch",
     ]
     _assert_platform_wrappers(servers)
+    assert servers["biomoltechDocs"]["url"] == "https://biomoltech.mintlify.app/mcp"
+    assert servers["mintlify"]["url"] == "https://mcp.mintlify.com"
+    assert servers["deepwiki"]["url"] == "https://mcp.deepwiki.com/mcp"
 
 
 def test_setup_router_is_the_supported_public_entrypoint() -> None:

@@ -9,7 +9,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.services.control_plane.effective_config_service import (
+from bioetl.application.services.control_plane.effective_config.service import (
     create_effective_config_service,
 )
 from bioetl.composition.observability import ObservabilityBundle

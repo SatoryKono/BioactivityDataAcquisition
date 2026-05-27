@@ -7,21 +7,21 @@ from pathlib import Path
 from bioetl.application.services.control_plane.forensic_diff_service import (
     ForensicRunDiffService,
 )
-from bioetl.application.services.control_plane.historical_replay_certification_service import (
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationService,
 )
-from bioetl.application.services.control_plane.historical_replay_closure_service import (
+from bioetl.application.services.control_plane.replay.historical_closure_service import (
     HistoricalReplayClosureReport,
     HistoricalReplayClosureService,
 )
-from bioetl.application.services.control_plane.historical_replay_corpus_service import (
+from bioetl.application.services.control_plane.replay.historical_corpus_service import (
     HistoricalReplayCorpusService,
 )
-from bioetl.application.services.control_plane.historical_replay_universe_service import (
+from bioetl.application.services.control_plane.replay.historical_universe_service import (
     HistoricalReplayUniverseClosureReport,
     HistoricalReplayUniverseService,
 )
-from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionService,
 )
 from bioetl.composition.factories.services.port_factories import create_metrics

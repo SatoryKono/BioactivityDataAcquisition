@@ -388,7 +388,7 @@
 - [ ] `Monitor DQ Current Status` описан как mirror of shared-shell `Status`, not independent second signal
 - [ ] Tier 2 compact current-context band: Monitor: Data Quality Score (Volume-weighted), Monitor: Worst-Entity DQ Score, Monitor: Worst Data Freshness Lag (seconds), Track: Records Quarantined in Range, Track: Soft Threshold Exceeded in Range, Track: Silver Filter Rejects in Range
 - [ ] Tier 3: полноширинный Track Range Evidence: Bronze -> Silver -> Gold
-- [ ] Tier 4 collapsed rows: Reject / Pareto / Fields, Validation Diagnostics
+- [ ] Tier 4 collapsed rows: Reject / Pareto / Fields, Validation Failures / Runtime Diagnostics / Trends
 
 ### KPI ownership
 - [ ] DQ Status (Silver Reject / quality posture) canonical для `bioetl-dq-v2`
@@ -398,7 +398,8 @@
 - [ ] First-screen использует canonical current-status recording rules (`bioetl_dq_current_status`, `bioetl_dq_current_reason`)
 - [ ] Range evidence, raw tables, Silver reject breakdowns, logs, traces ниже first-screen
 - [ ] `Monitor: Data Quality Score (Volume-weighted)` и `Track: Data Quality Score Trend (Volume-weighted)` share expression intentionally
-- [ ] `Monitor: Lineage Refs Missing` reused между `bioetl-control-plane-v1` и `bioetl-dq-v2` intentionally
+- [ ] `Monitor: Lineage Refs Missing` stays canonical in `bioetl-control-plane-v1`
+- [ ] `bioetl-dq-v2` uses a handoff note/link instead of duplicating the metric
 - [ ] Critical panels имеют actionable CTA
 - [ ] Pipeline-wide 15m snapshot; `$run_type` и stage filters ниже управляют только selected-range evidence
 
@@ -478,12 +479,13 @@
 
 ### First Action Contract (panel `10`)
 - [ ] Panel `10` (Review: First Action / No-Data Semantics) существует
+- [ ] Panel `13` (Monitor Explorer Backend Health) существует
 - [ ] Min CTA: 2, Max CTA: 2
 - [ ] CTA: Review total rejects
 - [ ] CTA: Review scoped summary
 
 ### First-screen структура
-- [ ] Tier 1 включает: Inspect Explorer Scope, Review: First Action / No-Data Semantics, Monitor Filtered Records Total, Track Reject Rate vs Bronze, Inspect Run Scope Summary
+- [ ] Tier 1 включает: Inspect Explorer Scope, Monitor Explorer Backend Health, Review: First Action / No-Data Semantics, Monitor Filtered Records Total, Track Reject Rate vs Bronze, Inspect Run Scope Summary
 - [ ] Tier 2 включает: Inspect Top Reject Reasons, Inspect Top Reject Fields, Inspect Top Reason Signatures
 - [ ] Tier 3 включает: Inspect Filtered Records Table, Inspect Selected Record Details
 - [ ] Tier 4: forensic details
@@ -499,6 +501,7 @@
 - [ ] Self-drilldown stays same-tab
 - [ ] Requires single-select `$pipeline` потому что quarantine API fail-closed требует явный `pipeline` параметр
 - [ ] `Review: First Action / No-Data Semantics` carries bounded CTA row links
+- [ ] `Monitor Explorer Backend Health` читает `/health/live` через datasource `Quarantine Explorer`
 
 ### No-data semantics
 - [ ] Valid empty result → empty result / no matching rows

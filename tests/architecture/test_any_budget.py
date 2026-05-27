@@ -122,6 +122,5 @@ def test_any_budget_no_regression(source_content_cache: dict[Path, str]) -> None
     # Informational — printed even when passing.
     print(f"\n[Any Budget] Unjustified: {count} / Threshold: {MAX_UNJUSTIFIED}")
     assert count <= MAX_UNJUSTIFIED, (
-        f"TYPE-002: unjustified Any budget regressed "
-        f"({count} > {MAX_UNJUSTIFIED})"
+        f"TYPE-002: unjustified Any budget regressed ({count} > {MAX_UNJUSTIFIED})"
     )

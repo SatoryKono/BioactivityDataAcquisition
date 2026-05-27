@@ -10,7 +10,6 @@ Verifies that:
 
 from __future__ import annotations
 
-import os
 from dataclasses import FrozenInstanceError
 from pathlib import Path
 from types import SimpleNamespace
@@ -25,6 +24,7 @@ from bioetl.composition.observability import (
 )
 from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 from tests.helpers.deterministic_ids import deterministic_uuid
+from tests.helpers.git_index_scan import git_tracked_files
 
 pytestmark = pytest.mark.repo_backed
 
@@ -276,27 +276,20 @@ class TestBootstrapObservability:
     ) -> None:
         """Application and composition code should use flat LoggerPort kwargs."""
         repo_root = Path(__file__).resolve().parents[3]
-        source_roots = (
-            repo_root / "src" / "bioetl" / "application",
-            repo_root / "src" / "bioetl" / "composition",
+        source_paths = (
+            "src/bioetl/application",
+            "src/bioetl/composition",
         )
 
         offenders: list[str] = []
-        for source_root in source_roots:
-            for current_root, dirnames, filenames in os.walk(source_root):
-                dirnames[:] = [
-                    dirname for dirname in dirnames if dirname != "__pycache__"
-                ]
-                current_path = Path(current_root)
-                for filename in filenames:
-                    if not filename.endswith(".py"):
-                        continue
-                    path = current_path / filename
-                    if "tests" in path.parts:
-                        continue
-                    text = path.read_text(encoding="utf-8")
-                    if "extra=" in text:
-                        offenders.append(str(path.relative_to(repo_root)))
+        for path in git_tracked_files(
+            root=repo_root,
+            paths=source_paths,
+            suffixes=(".py",),
+        ):
+            text = path.read_text(encoding="utf-8")
+            if "extra=" in text:
+                offenders.append(str(path.relative_to(repo_root)))
 
         assert offenders == [], (
             "Nested LoggerPort extra payloads are forbidden in application/"

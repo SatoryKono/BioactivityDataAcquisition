@@ -50,6 +50,9 @@ __all__ = [
     "TRANSFORM_DURATION_SECONDS",
     "TRANSFORM_ERRORS_TOTAL",
     "WORKFLOW_CURRENT_STATUS",
+    "WORKFLOW_RECONCILIATION_ROWS_DELETED_TOTAL",
+    "WORKFLOW_RECONCILIATION_ROWS_RETAINED_TOTAL",
+    "WORKFLOW_RECONCILIATION_ROWS_SCANNED_TOTAL",
     "WORKFLOW_RUNS_TOTAL",
     "WORKFLOW_STEP_DURATION_SECONDS",
     "WORKFLOW_STEP_EVENTS_TOTAL",
@@ -301,6 +304,12 @@ CHECKPOINT_SAVE_EVENTS_TOTAL = Counter(
     ["pipeline", "operation", "status"],
 )
 
+CHECKPOINT_SAVED_AT_SECONDS = Gauge(
+    "bioetl_checkpoint_saved_at_seconds",
+    "Unix timestamp of the latest persisted checkpoint per pipeline",
+    ["pipeline"],
+)
+
 CHECKPOINT_SAVE_DURATION_SECONDS = Histogram(
     "bioetl_checkpoint_save_duration_seconds",
     "Duration of checkpoint save operations in seconds",
@@ -336,6 +345,21 @@ WORKFLOW_CURRENT_STATUS = Gauge(
     "bioetl_workflow_current_status",
     "Current terminal workflow status by bounded workflow context: 0=OK, 1=WARN, 2=CRIT",
     ["workflow", "pipeline_context", "run_type_context", "provider_context"],
+)
+
+WORKFLOW_RECONCILIATION_ROWS_SCANNED_TOTAL = Counter(
+    "bioetl_workflow_reconciliation_rows_scanned_total",
+    "Total workflow reconciliation rows scanned",
+)
+
+WORKFLOW_RECONCILIATION_ROWS_RETAINED_TOTAL = Counter(
+    "bioetl_workflow_reconciliation_rows_retained_total",
+    "Total workflow reconciliation rows retained",
+)
+
+WORKFLOW_RECONCILIATION_ROWS_DELETED_TOTAL = Counter(
+    "bioetl_workflow_reconciliation_rows_deleted_total",
+    "Total workflow reconciliation rows deleted",
 )
 
 WORKFLOW_STEP_EVENTS_TOTAL = Counter(

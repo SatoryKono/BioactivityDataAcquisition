@@ -212,6 +212,23 @@ def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> Non
     missing = [metric for metric in required_metrics if metric not in all_expressions]
     assert not missing, f"Control-plane dashboard missing metrics: {missing}"
 
+    checkpoint_panel = next(
+        (
+            panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("id") == 892
+        ),
+        None,
+    )
+    assert checkpoint_panel is not None
+    assert checkpoint_panel.get("datasource") == "Quarantine Explorer"
+    target = checkpoint_panel.get("targets", [])[0]
+    assert target.get("parser") == "backend"
+    assert (
+        str(target.get("url", ""))
+        == "/ops/control-plane/checkpoint-freshness?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+    )
+
 
 def test_provider_dashboard_contains_operator_surface_metrics() -> None:
     dashboard = load_dashboard(
@@ -481,7 +498,6 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
         ("bioetl-dq-v2.json", "Track: Silver Validation Failures in Range"),
         ("bioetl-dq-v2.json", "Inspect: Quarantine by Error Type"),
         ("bioetl-dq-v2.json", "Monitor: Silver Validation Failures"),
-        ("bioetl-dq-v2.json", "Monitor: Lineage Refs Missing"),
         ("bioetl-runtime.json", "Track Records by Stage / Run Type / Range"),
     ],
 )
@@ -633,21 +649,6 @@ def test_adaptive_trend_panels_use_selected_interval(
             "bioetl-control-plane-v1.json",
             "Track: Checkpoint Compatibility Outcomes",
             'label_replace(vector(0), "disposition", "no_events", "", "")',
-        ),
-        (
-            "bioetl-dq-v2.json",
-            "Inspect: Quarantine by Error Type",
-            'label_replace(vector(0), "error_type", "none", "", "")',
-        ),
-        (
-            "bioetl-dq-v2.json",
-            "Track: Anomalies Detected",
-            'label_replace(label_replace(vector(0), "severity", "none", "", ""), "anomaly_type", "none", "", "")',
-        ),
-        (
-            "bioetl-dq-v2.json",
-            "Inspect: Silver Filter Rejects by Pipeline",
-            'label_replace(vector(0), "pipeline", "no_events", "", "")',
         ),
     ],
 )

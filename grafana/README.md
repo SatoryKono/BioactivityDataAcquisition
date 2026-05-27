@@ -49,6 +49,62 @@ ______________________________________________________________________
 > `docs/03-guides/dashboards/monitoring-index.md`,
 > `docs/03-guides/dashboards/dashboard-v2-usage.md` и
 > `docs/05-operations/01-monitoring-guide.md`.
+>
+> Для reproducible dashboard evidence shipped ops-tooling now exposes:
+> `python -m scripts.ops rerender-grafana` for screenshots. It tries the
+> Grafana render API first and automatically falls back to the repo-local
+> Playwright renderer when the render API fails or times out.
+> Playwright mode additionally requires the local `playwright` npm dependency,
+> downloaded browser runtime, and the usual headless Chromium shared libraries
+> (`libnspr4`, `libnss3`, `libasound2`, etc.) on the host.
+> To bootstrap that runtime on a fresh host, use
+> `bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh`.
+> On Windows PowerShell use
+> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1`.
+> The PowerShell bootstrap now downloads a portable Node.js LTS toolchain
+> from the official Node.js distribution site when `node`/`npm` are not on
+> `PATH`, so a global Node installation is no longer required on Windows.
+> It also uses the active `python` command or the repo-local
+> `.venv-win\Scripts\python.exe`, so a global `uv` install is not required.
+> For the local screenshot smoke it defaults to the common local Grafana creds
+> `admin/changeme` unless `GRAFANA_USERNAME` and `GRAFANA_PASSWORD` are already set.
+> To render every shipped dashboard after bootstrap on Windows, use
+> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`.
+> That helper also reuses or auto-downloads the same portable Node.js LTS
+> toolchain when `node` is not present in the current PowerShell `PATH`.
+> The Playwright screenshot renderer expands collapsed dashboard rows before
+> capture so batch evidence reflects the fully opened operator surface.
+> Full-page capture now uses a separate screenshot budget
+> (`GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS`, default `max(page_timeout, 180000)`),
+> because long dashboards such as `0. Control Plane` may finish loading well
+> before Playwright finishes writing the final PNG.
+> `python -m scripts.ops audit-live-grafana` remains the reviewed live
+> datasource/frame audit for semantically sensitive panels.
+> `python -m scripts.ops check-grafana-audit-preflight` is the fast readiness
+> gate for full dashboard audits: it verifies Grafana, Prometheus, canonical
+> Quarantine Explorer health probes (`/health/live` before `/health`), and
+> whether local screenshot artifacts are missing or stale relative to shipped
+> dashboard JSON.
+> `python -m scripts.ops run-grafana-audit-cycle` is the canonical full audit
+> workflow: service preflight, reviewed live discovery of filled dashboards,
+> screenshot refresh for that filled-dashboard subset, screenshot freshness
+> re-check for the same subset, then the reviewed live panel audit. If the
+> discovery pass times out, the cycle falls back to the last successful
+> `reports/observability/grafana/live-panel-audit.json` subset before failing
+> hard. By default the cycle also force-refreshes the detached Quarantine
+> Explorer backend before audit so stale route handlers from an older process
+> are not silently reused; `--no-refresh-observability-backend` keeps the
+> previous reuse-first behavior. If the backend on `8081` cannot be refreshed
+> in place, the cycle can retry on a free localhost fallback port and use that
+> port for preflight and live audit. If that fresh fallback backend also fails
+> to become ready, the cycle degrades to the existing health-reachable backend
+> on `8081` instead of aborting before screenshot refresh. Detached backend
+> readiness now waits for both `/health` and required audit capability routes,
+> with a longer startup budget for slower Windows hosts. By default it also
+> reuses or auto-starts the detached
+> `bioetl quarantine serve` backend on port `8081` before the first preflight,
+> so `Quarantine Explorer`-backed panels can be validated without a separate
+> manual backend bootstrap step.
 
 ## 1. Архитектура мониторинга
 
@@ -789,7 +845,13 @@ tries `http://localhost:9090`, then the Docker-local fallbacks
   `manifest_id`, config/contract hashes, artifact refs, replay parentage,
   composite identity, and checkpoint anchor compare are surfaced by
   `/ops/control-plane/identity-evidence` plus run-manifest inspection, not
-  Prometheus labels. GLOBAL
+  Prometheus labels. `Monitor: Checkpoint Freshness Lag (seconds)` is also now
+  HTTP-backed through `/ops/control-plane/checkpoint-freshness`, so it reads
+  persisted checkpoint metadata instead of relying on short-lived scrape
+  presence. When that endpoint returns `status=UNKNOWN` with `age_seconds=null`,
+  the panel is behaving as designed: the stack has no persisted checkpoint
+  evidence for the selected scope yet, which is a no-evidence state rather than
+  a broken datasource. GLOBAL
   read-path и checkpoint-operator panels не несут pipeline/run_type labels,
   поэтому не фильтруются по этим переменным.
 
@@ -962,10 +1024,11 @@ not use it as a Prometheus label.
 | 6   | Track: Records Quarantined in Range          | Stat       | `round(sum(max_over_time(bioetl_dq_records_quarantined_total{...}[$__range])) or vector(0))`                                           | Selected-range quarantine evidence; non-zero here can explain current DQ pressure even when Silver filter rejects remain zero.                                               |
 | 7   | Track: Silver Validation Failures in Range   | Stat       | `round(sum(max_over_time(bioetl_silver_validation_failures_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range])) or vector(0))` | Visible selected-range validation blocker count; non-zero can drive current `CRIT` even when `filtered_out=0`.                                                               |
 | 117 | Track: Silver Filter Rejects in Range        | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`                             | Отдельный счётчик Silver filter rejects внутри выбранного временного окна; не заменяет `Track: Records Quarantined in Range`.                                              |
-| 118 | Inspect: Silver Filter Rejects by Pipeline   | Bar gauge  | `sum by (pipeline) (max_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))`                                  | Breakdown intentional Silver exclusions по выбранным pipeline values через selected-range pushed-counter evidence.                                                         |
-| 121 | Inspect: Top Silver Reject Reasons (Pareto) | Bar gauge  | `topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                      | Bounded top-10 summary по `reason_code`; use the top-level `Silver Reject Explorer` handoff for record-level narrowing inside the explorer.                                  |
-| 122 | Inspect: Top Silver Reject Fields            | Bar gauge  | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                            | Bounded top-10 summary по `field`; use the top-level `Silver Reject Explorer` handoff for record-level narrowing inside the explorer.                                        |
+| 118 | Inspect: Silver Filter Rejects by Pipeline   | Bar gauge  | `sum by (pipeline) (max_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))`                                  | Scope/distribution panel over the stage-total `filtered_out` counter. Explorer handoff preserves only `pipeline`/`run_type`; it does not synthesize a `reason_code`. No data remains an honest empty-state, not a fake `pipeline=no_events` row. |
+| 121 | Inspect: Top Silver Reject Reasons (Pareto) | Bar gauge  | `topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                      | Bounded top-10 summary по `reason_code`; each bar opens `Silver Reject Explorer` already scoped by `pipeline`/`run_type`/`reason_code`. No data remains empty-state instead of a synthetic `reason_code=none` bucket. |
+| 122 | Inspect: Top Silver Reject Fields            | Bar gauge  | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                            | Bounded top-10 summary по `field`; each bar opens `Silver Reject Explorer` already scoped by `pipeline`/`run_type`/`field`. No data remains empty-state instead of a synthetic `field=none` bucket. |
 | 152 | Monitor: Silver Filter Reject Accounting Mismatch | Stat  | `round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{...}[$__range])))`                                              | Reconciliation guard между stage-total `filtered_out` surface и bounded breakdown metric. `0` = healthy, non-zero = расследовать drift, `No data` = recording rule не публикуется. |
+| 9   | Inspect: Quarantine by Error Type            | Bar gauge  | `sum by (error_type) (max_over_time(bioetl_dq_records_quarantined_total{...}[$__range]))`                                              | Horizontal category-comparison surface for quarantine triage. Shipped as `bargauge`, not `piechart`, because operator comparison of error families matters more than slice composition. No data remains an honest empty-state instead of synthetic `error_type=none`. |
 | 101 | Review: Latest Successful Data Timestamp     | Stat       | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})`                                                                            | Последний observed ingestion timestamp внутри выбранного pipeline scope; остаётся в first-screen current-context band после переноса CTA из answer row.                  |
 
 **Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
@@ -1014,10 +1077,13 @@ ______________________________________________________________________
 | Название                                          | Тип   | Источник                                                   |
 | ------------------------------------------------- | ----- | ---------------------------------------------------------- |
 | Inspect Explorer Scope                            | Text  | Pipeline banner / forensic scope note                      |
+| Monitor Explorer Backend Health                   | Table | `/health/live`                                             |
 | Review: First Action / No-Data Semantics          | Text  | Operator CTA / interpretation                              |
 | Monitor Filtered Records Total                    | Table | `/ops/quarantine/filtered-stats`                           |
 | Track Reject Rate vs Bronze                       | Table | `/ops/quarantine/filtered-stats`                           |
 | Inspect Run Scope Summary                         | Table | `/ops/quarantine/filtered-stats`                           |
+| Track Filtered Rejects Over Time                  | Timeseries | `/ops/quarantine/filtered-timeseries`                  |
+| Track Reject Ratio vs Bronze Over Time            | Timeseries | `/ops/quarantine/filtered-timeseries`                  |
 | Inspect Top Reject Reasons / Fields / Signatures  | Table | `/ops/quarantine/filtered-stats`                           |
 | Inspect Filtered Records Table                    | Table | `/ops/quarantine/filtered-records`                         |
 | Inspect Selected Record Details                   | Table | `/ops/quarantine/filtered-records?...&payload_hash=<hash>` |
@@ -1056,11 +1122,16 @@ Prometheus labels, summary dashboards или cross-dashboard handoffs.
 matching rows remain an empty-result state; plugin/query errors, unsupported
 filter chains, unknown pipeline, or `bronze_records=0` are treated as
 UNKNOWN/error until the backend is checked.
+`Monitor Explorer Backend Health` is the first-screen transport trust marker:
+if it does not return a healthy backend response, treat empty explorer tables as
+UNKNOWN/backend-unavailable rather than proof of zero rejects.
 
 **Drilldown:** canonical navigation bus `0. Control Plane`, `1. Overview`,
-`2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`;
-table row links дают self-drilldown по `payload_hash` в same tab и CLI
-handoff в новой вкладке.
+`2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`; DQ
+panels `Track: Silver Filter Rejects in Range`, `Inspect: Top Silver Reject
+Reasons (Pareto)`, and `Inspect: Top Silver Reject Fields` now hand off
+directly into scoped Explorer views. Table row links внутри Explorer дают
+self-drilldown по `payload_hash` в same tab и CLI handoff в новой вкладке.
 
 ______________________________________________________________________
 
@@ -1082,10 +1153,10 @@ first screen.
 | 9101 | Monitor GLOBAL Provider Severity Matrix        | Table          | `bioetl_provider_current_status`                                                                                     | Current provider severity: `0=OK`, `1=DEGRADED`, `2=FAILING`, `null=UNKNOWN`; derived summary semantics, не фильтруется по pipeline. Raw `bioetl_provider_health_status` uses a different contract: `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`. |
 | 9102 | Inspect Critical Providers                     | Table          | `bioetl_provider_current_status >= 1`                                                                                | Только providers с current `DEGRADED`/`FAILING`; missing current-status telemetry остаётся в `Monitor GLOBAL Provider Severity Matrix` как `UNKNOWN`. Panel exposes direct provider incident runbook handoff. |
 | 9103 | Inspect Provider Top Causes                    | Table          | `topk(5, bioetl_provider_current_cause > 0)`                                                                         | Current cause chips: raw health status, failure rate, retry exhaustion, latency, HTTP errors, rate-limit pressure. This panel can stay non-empty while `Monitor GLOBAL Provider Severity Matrix` still reads `0 (OK)` because cause projection includes early-warning provider signals independent of current-status projection. Empty table means no active provider causes are currently above zero; if severity is still non-OK, treat that as an explainability gap. Panel exposes direct provider incident runbook handoff. |
-| 9104 | Monitor Provider Telemetry Freshness           | Stat           | `((count(count_over_time(bioetl_provider_current_status[15m])) > bool 0) * 0) or absent(...) * 1`                    | First-screen trust marker: `0=OK`, `1=WARN`, `null=UNKNOWN`. Missing current-status samples in the last 15m mean telemetry gap, not proof that providers are healthy. |
-| 9002 | First Action                                   | Text           | n/a                                                                                                                  | CTA block sits on the same first-screen row as `ID` and `Processed Records`, using the rightmost shared-shell slot (`w=8`, `h=6`). Review the GLOBAL severity matrix, inspect critical providers, or inspect provider top causes before leaving the dashboard. |
+| 9104 | Monitor Provider Telemetry Freshness           | Stat           | `((count(count_over_time(bioetl_provider_current_status[15m])) > bool 0) * 0) or absent(...) * 1`                    | First-screen trust marker: `0=OK`, `1=WARN`, `null=UNKNOWN`. Missing current-status samples in the active Grafana range mean telemetry gap, not proof that providers are healthy; treat `Status=UNKNOWN` as missing provider telemetry until raw enum or selected-range evidence proves otherwise. |
+| 9002 | First Action                                   | Text           | n/a                                                                                                                  | CTA block sits on the same first-screen row as `ID` and `Processed Records`, using the rightmost shared-shell slot (`w=8`, `h=6`). Review the GLOBAL severity matrix, inspect critical providers, or inspect provider top causes before leaving the dashboard. Shared `ID` and `Processed Records` stay bounded pipeline-context evidence and do not prove current provider health. |
 | 1   | Track Health Check Latency by Provider (p95)    | Timeseries     | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__interval])))`                                       | Selected-range evidence: p95 latency trend по выбранным providers; `No data` сохраняется как diagnostic gap, не маскируется в `0s`. |
-| 114 | Monitor Current Provider Health Status          | Table          | `max by (provider) (bioetl_provider_health_status{provider=~"$provider"}) or ((bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0) / (bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0))` | Текущий raw status по provider с mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`; если provider universe существует без raw status sample, panel остаётся `UNKNOWN`. |
+| 114 | Review Raw Provider Health Enum                | Table          | `max by (provider) (bioetl_provider_health_status{provider=~"$provider"}) or ((bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0) / (bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0))` | Текущий raw status по provider с mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`; если provider universe существует без raw status sample, panel остаётся `UNKNOWN`. Use it as supporting evidence when `Status=UNKNOWN` or when first-screen severity and top causes disagree. |
 | 2   | Monitor Healthy Checks (Selected Range)         | Stat           | `round(sum(increase(bioetl_health_check_success_total{provider=~"$provider"}[$__range])) or vector(0))`              | Selected-range evidence: completed probes со статусом `HEALTHY` в выбранном окне.  |
 | 105 | Monitor Degraded Checks (Selected Range)        | Stat           | `round(sum(increase(bioetl_health_check_degraded_total{provider=~"$provider"}[$__range])) or vector(0))`             | Selected-range evidence: completed probes со статусом `DEGRADED` в выбранном окне; non-zero counts are neutral evidence, not current WARN/CRIT by themselves. |
 | 104 | Track Provider Failure Rate (Selected Range)    | Gauge          | `failures_increase / clamp_min(total_increase, 1)`                                                                   | Selected-range evidence: failure-rate за выбранный range. |
@@ -1776,8 +1847,11 @@ sum(rate(bioetl_circuit_breaker_success_total{adapter="chembl"}[5m]))
   currently above zero; if severity is still non-OK, treat that as an
   explainability gap and continue triage from the severity matrix.
 - `Monitor Provider Telemetry Freshness` — first-screen trust marker for
-  `bioetl_provider_current_status`; missing 15m samples mean telemetry gap, not
-  healthy provider state.
+  `bioetl_provider_current_status`; missing samples in the active Grafana range
+  mean telemetry gap, not healthy provider state.
+- `Review Raw Provider Health Enum` stays below the first screen as supporting
+  raw-source evidence. Use it when `Status=UNKNOWN` or when top causes and
+  first-screen severity disagree.
 - Ниже первого экрана идут только selected-range evidence panels:
   health-check counters, failure/degraded trends, retry exhaustion, repeated
   per-provider p95 gauge, adapter endpoint latency, HTTP error volume,

@@ -141,7 +141,7 @@ def test_metric_definition_exports_remain_stable() -> None:
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
     # This ratchet intentionally changes only when we add/remove public metrics.
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 151
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 155
 
 
 @pytest.mark.unit
@@ -208,6 +208,7 @@ def test_control_plane_and_lineage_metrics_are_registered() -> None:
     assert "bioetl_checkpoint_compatibility_events_total" in COUNTERS
     assert "bioetl_checkpoint_load_events_total" in COUNTERS
     assert "bioetl_checkpoint_operator_operations_total" in COUNTERS
+    assert "bioetl_checkpoint_saved_at_seconds" in GAUGES
     assert "bioetl_structural_policy_events_total" in COUNTERS
     assert "bioetl_structural_policy_shadow_comparisons_total" in COUNTERS
     assert "bioetl_control_plane_read_duration_seconds" in HISTOGRAMS

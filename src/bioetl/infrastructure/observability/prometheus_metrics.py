@@ -38,14 +38,34 @@ class _GaugeObserver(Protocol):
 class _HistogramMetric(Protocol):
     def labels(self, **labels: str) -> _HistogramObserver: ...
 
+    def observe(self, _amount: float) -> None: ...
+
 
 class _CounterMetric(Protocol):
     def labels(self, **labels: str) -> _CounterObserver: ...
+
+    def inc(self, _amount: float = 1) -> None: ...
 
 
 class _GaugeMetric(Protocol):
     def labels(self, **labels: str) -> _GaugeObserver: ...
 
+    def set(self, value: float) -> None: ...
+
+
+def _has_declared_labels(metric: object) -> bool | None:
+    labelnames = getattr(metric, "_labelnames", None)
+    if isinstance(labelnames, tuple | list):
+        return bool(labelnames)
+    return None
+
+
+def _reject_unexpected_labels(name: str, labels: MetricLabels) -> None:
+    if labels:
+        formatted = ", ".join(sorted(labels))
+        raise ValueError(
+            f"Prometheus metric {name} does not accept labels: {formatted}"
+        )
 
 def _require_registered_metric[_MetricT](
     *,
@@ -96,6 +116,10 @@ class PrometheusMetrics(MetricsPort):
             registry=HISTOGRAMS,
             metric_kind="histogram",
         )
+        if _has_declared_labels(histogram) is False:
+            _reject_unexpected_labels(name, resolved_labels)
+            histogram.observe(value)
+            return
         histogram.labels(
             **normalize_metric_dispatch_labels(name, resolved_labels)
         ).observe(value)
@@ -119,6 +143,10 @@ class PrometheusMetrics(MetricsPort):
             registry=COUNTERS,
             metric_kind="counter",
         )
+        if _has_declared_labels(counter) is False:
+            _reject_unexpected_labels(name, resolved_labels)
+            counter.inc(value)
+            return
         counter.labels(**normalize_metric_dispatch_labels(name, resolved_labels)).inc(
             value
         )
@@ -142,6 +170,10 @@ class PrometheusMetrics(MetricsPort):
             registry=GAUGES,
             metric_kind="gauge",
         )
+        if _has_declared_labels(gauge) is False:
+            _reject_unexpected_labels(name, resolved_labels)
+            gauge.set(value)
+            return
         gauge.labels(**normalize_metric_dispatch_labels(name, resolved_labels)).set(
             value
         )

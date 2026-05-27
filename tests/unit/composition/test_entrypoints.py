@@ -264,7 +264,9 @@ class TestBuildPipelineContext:
 
         assert ctx.required_persistence_profile == "degraded_observable"
 
-    def test_context_with_input_filter(self):
+    def test_context_with_input_filter__test_build_pipeline_context_unit_composition_test_entrypoints_267(
+        self,
+    ):
         """Test building context with input filter."""
         options = RunOptions(
             input_csv="/path/to/ids.csv",
@@ -282,7 +284,9 @@ class TestBuildPipelineContext:
         assert ctx.input_filter.column_name == "chembl_id"
         assert ctx.input_filter.filter_field == "molecule_id"
 
-    def test_context_without_input_filter(self):
+    def test_context_without_input_filter__test_build_pipeline_context_unit_composition_test_entrypoints_285(
+        self,
+    ):
         """Test building context without input filter."""
         options = RunOptions()
         ctx = build_pipeline_context(
@@ -293,7 +297,9 @@ class TestBuildPipelineContext:
 
         assert ctx.input_filter.enabled is False
 
-    def test_context_with_vacuum_config(self):
+    def test_context_with_vacuum_config__test_build_pipeline_context_unit_composition_test_entrypoints_296(
+        self,
+    ):
         """Test building context with vacuum configuration."""
         options = RunOptions(vacuum_after_run=True, vacuum_retention_days=14)
         ctx = build_pipeline_context(

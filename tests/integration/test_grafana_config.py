@@ -751,7 +751,7 @@ def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None
     panels = get_dashboard_panels(dashboard)
     kpi_titles = {
         "Monitor: Replay Safety State",
-        "Inspect: Checkpoint Freshness Gap",
+        "Monitor: Checkpoint Freshness Lag (seconds)",
         "Monitor: Manifest / Ledger Integrity",
         "Inspect: Telemetry Missing",
     }
@@ -915,9 +915,21 @@ def test_control_plane_latency_panels_have_p50_p95_p99() -> None:
 def test_control_plane_no_missing_metric_promql() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     expressions = "\n".join(get_panel_expressions(dashboard))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
 
-    assert "bioetl_checkpoint_age_seconds" not in expressions
     assert "bioetl_replay_duplicate_records_total" not in expressions
+    checkpoint_panel = panels["Monitor: Checkpoint Freshness Lag (seconds)"]
+    assert checkpoint_panel.get("datasource") == "Quarantine Explorer"
+    target = checkpoint_panel.get("targets", [])[0]
+    assert target.get("parser") == "backend"
+    assert (
+        str(target.get("url", ""))
+        == "/ops/control-plane/checkpoint-freshness?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+    )
 
 
 def test_control_plane_identity_evidence_panels_exist() -> None:
@@ -973,7 +985,11 @@ def test_control_plane_remaining_replay_safety_text_is_not_stale() -> None:
     assert "/ops/control-plane/identity-evidence" in content
     assert "manifest/run identity" in content
     assert "execution/config/contract/input anchors" in content
-    assert "checkpoint_age <= recovery window / RPO" in content
+    assert (
+        "checkpoint freshness lag panel now provides bounded checkpoint-age evidence"
+        in content
+    )
+    assert "checkpoint_age <= recovery window / RPO" not in content
     assert "manifest_id/run_id identity table in Grafana" not in content
     assert "execution_fingerprint, config_hash, contract_ref" not in content
     assert "replay duplicate-record evidence metric" in content
@@ -1050,12 +1066,12 @@ def test_provider_dashboard_surfaces_current_health_status_panel() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Current Provider Health Status"
+            if item.get("title") == "Review Raw Provider Health Enum"
         ),
         None,
     )
     assert panel is not None, (
-        "Provider Health dashboard must expose current provider health status"
+        "Provider Health dashboard must expose raw provider health enum evidence"
     )
     expressions = [
         target.get("expr", "")

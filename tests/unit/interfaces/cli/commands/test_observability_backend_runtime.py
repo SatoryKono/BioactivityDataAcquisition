@@ -2,15 +2,26 @@
 
 from __future__ import annotations
 
+import os
+from io import BytesIO
 from types import SimpleNamespace
 from unittest.mock import MagicMock
+from urllib.error import HTTPError
 
+import bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime as runtime_subject
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     ObservabilityBackendEnsureResult,
     _build_detached_backend_popen_kwargs,
+    _build_detached_backend_env,
+    _build_observability_backend_probe_urls,
+    build_detached_backend_log_path,
     build_observability_backend_health_url,
+    probe_observability_backend_required_paths,
     ensure_observability_backend_started,
+    probe_observability_backend,
+    start_detached_quarantine_backend,
     should_disable_transient_health_server,
+    wait_for_observability_backend_required_paths_ready,
     wait_for_observability_backend_ready,
 )
 
@@ -20,6 +31,96 @@ def test_build_observability_backend_health_url_uses_host_and_port() -> None:
         build_observability_backend_health_url(host="127.0.0.1", port=8081)
         == "http://127.0.0.1:8081/health"
     )
+
+
+def test_build_observability_backend_probe_urls_prefers_liveness_first() -> None:
+    assert _build_observability_backend_probe_urls("http://127.0.0.1:8081/health") == (
+        "http://127.0.0.1:8081/health/live",
+        "http://127.0.0.1:8081/health",
+    )
+
+
+def test_probe_observability_backend_uses_liveness_then_fallback() -> None:
+    calls: list[str] = []
+
+    class _Response:
+        status = 200
+
+        def __enter__(self) -> _Response:
+            return self
+
+        def __exit__(self, exc_type: object, exc: object, tb: object) -> bool:
+            return False
+
+    def fake_urlopen(url: str, timeout: float) -> _Response:
+        calls.append(url)
+        if url.endswith("/health/live"):
+            raise OSError("liveness not ready")
+        return _Response()
+
+    assert (
+        probe_observability_backend(
+            "http://127.0.0.1:8081/health",
+            timeout_seconds=1.0,
+            urlopen_fn=fake_urlopen,
+        )
+        is True
+    )
+    assert calls == [
+        "http://127.0.0.1:8081/health/live",
+        "http://127.0.0.1:8081/health",
+    ]
+
+
+def test_probe_observability_backend_required_paths_uses_backend_base_url() -> None:
+    calls: list[str] = []
+
+    class _Response:
+        status = 200
+
+        def __enter__(self) -> _Response:
+            return self
+
+        def __exit__(self, exc_type: object, exc: object, tb: object) -> bool:
+            return False
+
+    def fake_urlopen(url: str, timeout: float) -> _Response:
+        calls.append(url)
+        return _Response()
+
+    assert (
+        probe_observability_backend_required_paths(
+            "http://127.0.0.1:8081/health",
+            required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
+            timeout_seconds=1.0,
+            urlopen_fn=fake_urlopen,
+        )
+        is True
+    )
+    assert calls == [
+        "http://127.0.0.1:8081/ops/control-plane/checkpoint-freshness?pipeline=x"
+    ]
+
+
+def test_describe_required_probe_failure_includes_http_status_and_body() -> None:
+    def fake_urlopen(_url: str, timeout: float) -> object:
+        raise HTTPError(
+            url="http://127.0.0.1:8081/ops/control-plane/checkpoint-freshness?pipeline=x",
+            code=503,
+            msg="Service Unavailable",
+            hdrs=None,
+            fp=BytesIO(b"Control-plane selector catalog unavailable"),
+        )
+
+    detail = runtime_subject._describe_required_probe_failure(
+        "http://127.0.0.1:8081/health",
+        required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
+        urlopen_fn=fake_urlopen,
+    )
+
+    assert detail is not None
+    assert "HTTP 503 Service Unavailable" in detail
+    assert "Control-plane selector catalog unavailable" in detail
 
 
 def test_ensure_backend_returns_disabled_when_flag_is_off() -> None:
@@ -62,6 +163,7 @@ def test_ensure_backend_starts_detached_process_when_probe_fails() -> None:
     process = MagicMock(pid=321, args=["python", "-m", "bioetl"])
     start = MagicMock(return_value=process)
     wait = MagicMock(return_value=True)
+    wait_required = MagicMock(return_value=True)
     info = MagicMock()
 
     result = ensure_observability_backend_started(
@@ -70,6 +172,7 @@ def test_ensure_backend_starts_detached_process_when_probe_fails() -> None:
         probe_fn=probe,
         start_fn=start,
         wait_fn=wait,
+        wait_required_paths_fn=wait_required,
         info_printer=info,
     )
 
@@ -79,7 +182,55 @@ def test_ensure_backend_starts_detached_process_when_probe_fails() -> None:
     assert result.command == ("python", "-m", "bioetl")
     start.assert_called_once_with(bind_host="0.0.0.0", port=8082)
     wait.assert_called_once()
+    wait_required.assert_called_once()
     info.assert_called_once()
+
+
+def test_ensure_backend_restarts_stale_backend_missing_required_paths() -> None:
+    probe = MagicMock(return_value=True)
+    required_probe = MagicMock(return_value=False)
+    drop = MagicMock(return_value=True)
+    process = MagicMock(pid=777, args=["python", "-m", "bioetl"])
+    start = MagicMock(return_value=process)
+    wait = MagicMock(return_value=True)
+    wait_required = MagicMock(return_value=True)
+    warning = MagicMock()
+    info = MagicMock()
+
+    result = ensure_observability_backend_started(
+        enabled=True,
+        probe_fn=probe,
+        required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
+        required_probe_fn=required_probe,
+        drop_stale_backend_fn=drop,
+        start_fn=start,
+        wait_fn=wait,
+        wait_required_paths_fn=wait_required,
+        warning_printer=warning,
+        info_printer=info,
+    )
+
+    assert result.status == "started"
+    required_probe.assert_called_once()
+    drop.assert_called_once_with(8081)
+    start.assert_called_once()
+    wait.assert_called_once()
+    wait_required.assert_called_once()
+    warning.assert_called_once()
+
+
+def test_ensure_backend_fails_when_stale_backend_cannot_be_dropped() -> None:
+    result = ensure_observability_backend_started(
+        enabled=True,
+        probe_fn=MagicMock(return_value=True),
+        required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
+        required_probe_fn=MagicMock(return_value=False),
+        drop_stale_backend_fn=MagicMock(return_value=False),
+        start_fn=MagicMock(),
+    )
+
+    assert result.status == "failed"
+    assert "missing required audit capabilities" in (result.message or "")
 
 
 def test_ensure_backend_warns_when_detached_process_does_not_become_ready() -> None:
@@ -99,6 +250,106 @@ def test_ensure_backend_warns_when_detached_process_does_not_become_ready() -> N
 
     assert result.status == "failed"
     assert result.backend_available is False
+    assert "startup log:" in (result.message or "").lower()
+
+
+def test_ensure_backend_failure_message_includes_exit_code_and_log_tail() -> None:
+    port = 18081
+    log_path = build_detached_backend_log_path(port)
+    log_path.write_text("Traceback line\nRuntimeError: boom\n", encoding="utf-8")
+    try:
+        probe = MagicMock(return_value=False)
+        process = MagicMock(pid=654, args=["python", "-m", "bioetl"])
+        process.poll.return_value = 7
+        start = MagicMock(return_value=process)
+        wait = MagicMock(return_value=False)
+
+        result = ensure_observability_backend_started(
+            enabled=True,
+            port=port,
+            probe_fn=probe,
+            start_fn=start,
+            wait_fn=wait,
+        )
+
+        assert result.status == "failed"
+        assert "exit code: 7" in (result.message or "").lower()
+        assert "RuntimeError: boom" in (result.message or "")
+    finally:
+        log_path.unlink(missing_ok=True)
+
+
+def test_wait_for_observability_backend_required_paths_ready_retries_until_success() -> None:
+    checks = {"count": 0}
+
+    def fake_required_probe(
+        _health_url: str,
+        *,
+        required_probe_paths: tuple[str, ...],
+        timeout_seconds: float,
+    ) -> bool:
+        checks["count"] += 1
+        assert timeout_seconds == 5.0
+        return checks["count"] >= 3 and bool(required_probe_paths)
+
+    sleeps: list[float] = []
+
+    result = wait_for_observability_backend_required_paths_ready(
+        "http://127.0.0.1:8081/health",
+        required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
+        timeout_seconds=0.05,
+        poll_seconds=0.0,
+        required_probe_fn=fake_required_probe,
+        sleep_fn=sleeps.append,
+    )
+
+    assert result is True
+    assert checks["count"] >= 3
+
+
+def test_ensure_backend_reuse_uses_required_probe_timeout() -> None:
+    probe = MagicMock(return_value=True)
+    required_probe = MagicMock(return_value=True)
+
+    result = ensure_observability_backend_started(
+        enabled=True,
+        probe_fn=probe,
+        required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
+        required_probe_fn=required_probe,
+        required_probe_timeout_seconds=9.0,
+        start_fn=MagicMock(),
+    )
+
+    assert result.status == "reused"
+    required_probe.assert_called_once_with(
+        "http://127.0.0.1:8081/health",
+        required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
+        timeout_seconds=9.0,
+    )
+
+
+def test_ensure_backend_fails_when_required_paths_never_become_ready() -> None:
+    probe = MagicMock(return_value=False)
+    process = MagicMock(pid=654, args=["python", "-m", "bioetl"])
+    start = MagicMock(return_value=process)
+    wait = MagicMock(return_value=True)
+    wait_required = MagicMock(return_value=False)
+    warning = MagicMock()
+
+    result = ensure_observability_backend_started(
+        enabled=True,
+        probe_fn=probe,
+        required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
+        start_fn=start,
+        wait_fn=wait,
+        wait_required_paths_fn=wait_required,
+        warning_printer=warning,
+    )
+
+    assert result.status == "failed"
+    assert "required audit capabilities" in (result.message or "")
+    wait.assert_called_once()
+    wait_required.assert_called_once()
     warning.assert_called_once()
 
 
@@ -162,6 +413,62 @@ def test_build_detached_backend_popen_kwargs_hides_windows_console() -> None:
     assert kwargs["startupinfo"] is startupinfo
     assert startupinfo.dwFlags == 0x00000001
     assert startupinfo.wShowWindow == 0
+
+
+def test_build_detached_backend_env_prefixes_src_pythonpath() -> None:
+    env = _build_detached_backend_env(current_env={"PYTHONPATH": "existing-path"})
+
+    assert "PYTHONPATH" in env
+    pythonpath = env["PYTHONPATH"].split(os.pathsep)
+    assert pythonpath[0].endswith("/src") or pythonpath[0].endswith("\\src")
+    assert pythonpath[1] == "existing-path"
+
+
+def test_start_detached_quarantine_backend_sets_repo_cwd_and_env() -> None:
+    captured: dict[str, object] = {}
+
+    class _Process:
+        args = ["python", "-m", "bioetl"]
+
+    def fake_popen(command: list[str], **kwargs: object) -> _Process:
+        captured["command"] = command
+        captured["kwargs"] = kwargs
+        return _Process()
+
+    start_detached_quarantine_backend(
+        bind_host="0.0.0.0",
+        port=8081,
+        python_executable="python",
+        popen_factory=fake_popen,
+    )
+
+    kwargs = captured["kwargs"]
+    assert captured["command"] == [
+        "python",
+        "-m",
+        "bioetl",
+        "quarantine",
+        "serve",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8081",
+    ]
+    assert isinstance(kwargs, dict)
+    assert str(kwargs["cwd"]).endswith("BioactivityDataAcquisition2")
+    assert "env" in kwargs
+    assert "stdout" in kwargs
+    assert "stderr" in kwargs
+    env = kwargs["env"]
+    assert isinstance(env, dict)
+    assert "PYTHONPATH" in env
+
+
+def test_build_detached_backend_log_path_uses_tempdir_and_port() -> None:
+    path = build_detached_backend_log_path(8081)
+
+    assert path.name == "bioetl-quarantine-backend-8081.log"
+    assert path.parent.exists()
 
 
 def test_should_disable_transient_health_server_only_on_matching_live_backend() -> None:

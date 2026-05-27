@@ -11,13 +11,13 @@ from uuid import UUID
 import pytest
 
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
-from bioetl.application.services.control_plane.effective_config_service import (
+from bioetl.application.services.control_plane.effective_config.service import (
     EffectiveConfigService,
 )
-from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionService,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics import (
+from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
 )
 from bioetl.application.services.lineage import MetadataCoordinator

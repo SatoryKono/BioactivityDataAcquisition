@@ -1305,7 +1305,9 @@ class TestDeduplicateEnricher:
         assert len(result) == 1
         assert result["pub_date"][0] == "2024-01-01|2024-06-15"
 
-    def test_composite_key(self, deduplicator):
+    def test_composite_key__test_deduplicate_enricher_application_composite_test_merger_1308(
+        self, deduplicator
+    ):
         """Test deduplication with composite key."""
         import polars as pl
 

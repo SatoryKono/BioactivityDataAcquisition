@@ -9,22 +9,22 @@ import json
 from pathlib import Path
 from typing import Any
 
-from bioetl.application.services.control_plane.historical_replay_certification_service import (
+from bioetl.application.services.control_plane.manifest.diagnostics import (
+    build_diagnostics_summary,
+)
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationService,
     HistoricalReplaySnapshotCertification,
 )
-from bioetl.application.services.control_plane.historical_replay_closure_service import (
+from bioetl.application.services.control_plane.replay.historical_closure_service import (
     HistoricalReplayClaimScopeMode,
     HistoricalReplayClosureService,
     HistoricalReplayResidualDisposition,
 )
-from bioetl.application.services.control_plane.historical_replay_corpus_service import (
+from bioetl.application.services.control_plane.replay.historical_corpus_service import (
     HistoricalReplayBulkCertificationSpec,
     HistoricalReplayCertifiabilityInventory,
     HistoricalReplayCorpusService,
-)
-from bioetl.application.services.control_plane.run_manifest_diagnostics import (
-    build_diagnostics_summary,
 )
 from bioetl.composition.factories.services.port_factories import create_metrics
 from bioetl.domain.control_plane import RunManifest
@@ -172,7 +172,9 @@ def _build_auto_dispositions(
                 evidence_refs=(),
             )
         )
-    return tuple(sorted(dispositions, key=lambda item: (item.manifest_id, item.disposition)))
+    return tuple(
+        sorted(dispositions, key=lambda item: (item.manifest_id, item.disposition))
+    )
 
 
 def _load_dispositions(path: Path) -> tuple[HistoricalReplayResidualDisposition, ...]:
@@ -231,7 +233,9 @@ def _load_ledger_rows(path: Path) -> list[dict[str, object]]:
     return rows
 
 
-def _build_bronze_meta_index(bronze_root: Path) -> dict[str, list[tuple[Path, dict[str, object]]]]:
+def _build_bronze_meta_index(
+    bronze_root: Path,
+) -> dict[str, list[tuple[Path, dict[str, object]]]]:
     index: dict[str, list[tuple[Path, dict[str, object]]]] = {}
     for meta_path in bronze_root.rglob("*.meta.json"):
         try:
@@ -360,7 +364,9 @@ def _choose_upstream_candidate(
     composite_manifest: RunManifest,
 ) -> tuple[RunManifest, dict[str, Any]] | None:
     earlier_or_equal = [
-        item for item in candidates if item[0].created_at <= composite_manifest.created_at
+        item
+        for item in candidates
+        if item[0].created_at <= composite_manifest.created_at
     ]
     if earlier_or_equal:
         return earlier_or_equal[-1]
@@ -588,9 +594,7 @@ def main() -> int:
             "residual_dispositions": (
                 str(written_dispositions_path)
                 if written_dispositions_path is not None
-                else (
-                    str(dispositions_path) if dispositions_path is not None else None
-                )
+                else (str(dispositions_path) if dispositions_path is not None else None)
             ),
         },
     }

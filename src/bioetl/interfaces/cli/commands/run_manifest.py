@@ -7,11 +7,11 @@ from pathlib import Path
 
 import click
 
-from bioetl.application.services.control_plane.replay_bundle_descriptor_service import (
-    build_run_replay_bundle_descriptor,
-)
-from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionCorruptionError,
+)
+from bioetl.application.services.control_plane.replay.bundle_descriptor_service import (
+    build_run_replay_bundle_descriptor,
 )
 from bioetl.interfaces.cli.commands._run_manifest_historical_support import (
     _coerce_bulk_certification_specs,

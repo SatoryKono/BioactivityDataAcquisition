@@ -74,7 +74,7 @@ class TestCircuitBreakerState:
 class TestErrorType:
     """Tests for ErrorType enum."""
 
-    def test_critical_errors(self) -> None:
+    def test_critical_errors__test_error_type_domain_types_test_enums_77(self) -> None:
         assert ErrorType.AUTH_FAILURE.is_critical() is True
         assert ErrorType.SCHEMA_MISMATCH_GOLD.is_critical() is True
         assert ErrorType.DB_UNAVAILABLE.is_critical() is True
@@ -86,7 +86,9 @@ class TestErrorType:
         assert ErrorType.TIMEOUT.is_recoverable() is True
         assert ErrorType.NETWORK_ERROR.is_recoverable() is True
 
-    def test_data_quality_errors(self) -> None:
+    def test_data_quality_errors__test_error_type_domain_types_test_enums_89(
+        self,
+    ) -> None:
         assert ErrorType.SCHEMA_VIOLATION.is_data_quality() is True
         assert ErrorType.INVALID_DATA.is_data_quality() is True
         assert ErrorType.MISSING_REQUIRED_FIELD.is_data_quality() is True

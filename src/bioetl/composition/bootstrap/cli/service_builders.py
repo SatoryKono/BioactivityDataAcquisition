@@ -31,10 +31,10 @@ from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAda
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.effective_config_service import (
+    from bioetl.application.services.control_plane.effective_config.service import (
         EffectiveConfigService,
     )
-    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+    from bioetl.application.services.control_plane.manifest.inspection_service import (
         RunManifestInspectionService,
     )
     from bioetl.application.services.lineage.lineage_inspection_service import (
@@ -135,6 +135,7 @@ def build_cli_checkpoint_runtime_service(
         pipeline_name=pipeline_name,
         run_id=run_id,
         resume=False,
+        clock=SystemClock(),
         checkpoint_compatibility_service=compatibility_service_factory(logger),
     )
 

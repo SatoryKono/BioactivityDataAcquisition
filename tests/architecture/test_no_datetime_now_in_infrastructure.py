@@ -91,7 +91,7 @@ class TestNoDatetimeNowInInfrastructure:
             "See ADR-014."
         )
 
-    def test_allowed_paths_still_exist_and_are_unambiguous(
+    def test_allowed_paths_still_exist_and_are_unambiguous__test_no_datetime_now_in_infrastructure_tests_architecture_test_no_datetime_now_in_infrastructure_94(
         self, infrastructure_python_files: list[Path]
     ) -> None:
         """Verify that path-based exceptions still exist and avoid basename drift.

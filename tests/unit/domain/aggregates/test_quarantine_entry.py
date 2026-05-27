@@ -395,7 +395,7 @@ class TestQuarantineEntryDomainEvents:
         assert events[0].resolution == "ignored"
         assert events[0].occurred_at == _ts(10)
 
-    def test_collect_events_clears_event_list(
+    def test_collect_events_clears_event_list__test_quarantine_entry_domain_events_domain_aggregates_test_quarantine_entry_398(
         self, quarantine_entry: QuarantineEntry
     ) -> None:
         """collect_events() should clear internal list."""

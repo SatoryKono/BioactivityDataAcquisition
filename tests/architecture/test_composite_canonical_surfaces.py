@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
+import os
+from functools import cache
 from pathlib import Path
+import shutil
+import subprocess
+import tempfile
+from types import SimpleNamespace
 
 import pytest
 
@@ -29,18 +35,32 @@ _DEPRECATED_COMPOSITE_SYMBOL_BYTES = tuple(
 )
 _SCAN_CHUNK_SIZE = 64 * 1024
 _SCAN_OVERLAP = max(len(symbol) for symbol in _DEPRECATED_COMPOSITE_SYMBOL_BYTES) - 1
+_SYMBOL_SCAN_TIMEOUT_SECONDS = 120.0
 
 
-def _python_files(root: Path) -> list[Path]:
-    return sorted(root.rglob("*.py"))
+_TEXT_SUFFIXES = frozenset({".py", ".mmd", ".mermaid", ".md", ".json", ".svg"})
 
 
-def _text_files(root: Path) -> list[Path]:
-    patterns = ("*.py", "*.mmd", "*.mermaid", "*.md", "*.json", "*.svg")
-    files: set[Path] = set()
-    for pattern in patterns:
-        files.update(root.rglob(pattern))
-    return sorted(files)
+@cache
+def _python_files(root: Path) -> tuple[Path, ...]:
+    files: list[Path] = []
+    for dirpath, _dirnames, filenames in os.walk(root):
+        base = Path(dirpath)
+        for filename in filenames:
+            if filename.endswith(".py"):
+                files.append(base / filename)
+    return tuple(sorted(files))
+
+
+@cache
+def _text_files(root: Path) -> tuple[Path, ...]:
+    files: list[Path] = []
+    for dirpath, _dirnames, filenames in os.walk(root):
+        base = Path(dirpath)
+        for filename in filenames:
+            if Path(filename).suffix in _TEXT_SUFFIXES:
+                files.append(base / filename)
+    return tuple(sorted(files))
 
 
 def _file_contains_symbol(path: Path, symbol: bytes) -> bool:
@@ -69,7 +89,22 @@ def _symbol_hits(root: Path, allowlist: frozenset[Path]) -> list[str]:
     return hits
 
 
+@cache
 def _doc_symbol_hits() -> list[str]:
+    grep_hits = _repo_symbol_hits_with_git_grep(DOC_ROOTS, skip_legacy=True)
+    if grep_hits is not None:
+        return grep_hits
+
+    rg_hits = _repo_symbol_hits_with_ripgrep(DOC_ROOTS, skip_legacy=True)
+    if rg_hits is not None:
+        return rg_hits
+
+    if os.name == "nt":
+        pytest.skip(
+            "Active composite doc symbol scan requires git grep or ripgrep on Windows; "
+            "filesystem fallback is intentionally disabled to avoid PyCharm timeout hangs."
+        )
+
     hits: list[str] = []
     for root in DOC_ROOTS:
         for doc_file in _text_files(root):
@@ -83,6 +118,215 @@ def _doc_symbol_hits() -> list[str]:
                 if _file_contains_symbol(doc_file, symbol_bytes):
                     hits.append(f"{doc_file.relative_to(ROOT)} -> {symbol}")
     return hits
+
+
+def _repo_symbol_hits_with_git_grep(
+    roots: tuple[Path, ...],
+    *,
+    skip_legacy: bool,
+) -> list[str] | None:
+    git_executable = _git_executable()
+    if git_executable is None:
+        return None
+
+    pathspecs: list[str] = []
+    for root in roots:
+        pathspec = _repo_relative_pathspec(root)
+        if pathspec is None:
+            return None
+        pathspecs.append(pathspec)
+
+    command = [
+        git_executable,
+        "-C",
+        ROOT.as_posix(),
+        "grep",
+        "-I",
+        "-n",
+        "-F",
+        "--no-color",
+        *(
+            option
+            for symbol in DEPRECATED_COMPOSITE_SYMBOLS
+            for option in ("-e", symbol)
+        ),
+        "--",
+        *pathspecs,
+    ]
+    try:
+        completed, stdout = _run_symbol_scan_command(command)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+    if completed.returncode == 1:
+        return []
+    if completed.returncode != 0:
+        return None
+
+    hits: set[str] = set()
+    for line in stdout.splitlines():
+        path_text, separator, remainder = line.partition(":")
+        if not separator:
+            continue
+        _line_number, separator, text = remainder.partition(":")
+        if not separator:
+            continue
+        path = Path(path_text.replace("\\", "/"))
+        if skip_legacy and "legacy" in path.parts:
+            continue
+        if path.suffix not in {".py", ".mmd", ".mermaid", ".md", ".json", ".svg"}:
+            continue
+        for symbol in DEPRECATED_COMPOSITE_SYMBOLS:
+            if symbol in text:
+                hits.add(f"{path.as_posix()} -> {symbol}")
+    return sorted(hits)
+
+
+def _repo_symbol_hits_with_ripgrep(
+    roots: tuple[Path, ...],
+    *,
+    skip_legacy: bool,
+) -> list[str] | None:
+    rg_executable = _rg_executable()
+    if rg_executable is None:
+        return None
+
+    pathspecs: list[str] = []
+    for root in roots:
+        pathspec = _repo_relative_pathspec(root)
+        if pathspec is None:
+            return None
+        pathspecs.append(pathspec)
+
+    command = [
+        rg_executable,
+        "-n",
+        "-F",
+        "--no-heading",
+        *(
+            option
+            for symbol in DEPRECATED_COMPOSITE_SYMBOLS
+            for option in ("-e", symbol)
+        ),
+        *pathspecs,
+    ]
+    try:
+        completed, stdout = _run_symbol_scan_command(command)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+    if completed.returncode == 1:
+        return []
+    if completed.returncode != 0:
+        return None
+
+    hits: set[str] = set()
+    for line in stdout.splitlines():
+        path_text, separator, remainder = line.partition(":")
+        if not separator:
+            continue
+        _line_number, separator, text = remainder.partition(":")
+        if not separator:
+            continue
+        path = Path(path_text.replace("\\", "/"))
+        if skip_legacy and "legacy" in path.parts:
+            continue
+        if path.suffix not in _TEXT_SUFFIXES:
+            continue
+        for symbol in DEPRECATED_COMPOSITE_SYMBOLS:
+            if symbol in text:
+                hits.add(f"{path.as_posix()} -> {symbol}")
+    return sorted(hits)
+
+
+@cache
+def _git_executable() -> str | None:
+    return shutil.which("git")
+
+
+@cache
+def _rg_executable() -> str | None:
+    return shutil.which("rg")
+
+
+def _run_symbol_scan_command(
+    command: list[str],
+) -> tuple[subprocess.CompletedProcess[str], str]:
+    output_path = _temporary_symbol_scan_output_path()
+    try:
+        with output_path.open("w", encoding="utf-8", errors="replace") as stdout_file:
+            completed = subprocess.run(
+                command,
+                stdout=stdout_file,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                check=False,
+                cwd=ROOT,
+                timeout=_SYMBOL_SCAN_TIMEOUT_SECONDS,
+                **_hidden_windows_subprocess_kwargs(),
+            )
+        stdout = output_path.read_text(encoding="utf-8", errors="replace")
+    finally:
+        output_path.unlink(missing_ok=True)
+    return completed, stdout
+
+
+def _temporary_symbol_scan_output_path() -> Path:
+    handle = tempfile.NamedTemporaryFile(
+        prefix="composite_canonical_surface_scan_",
+        suffix=".txt",
+        delete=False,
+    )
+    handle.close()
+    return Path(handle.name)
+
+
+def _hidden_windows_subprocess_kwargs(
+    *,
+    os_name: str = os.name,
+    subprocess_module: object = subprocess,
+) -> dict[str, object]:
+    if os_name != "nt":
+        return {}
+
+    kwargs: dict[str, object] = {}
+    create_no_window = int(getattr(subprocess_module, "CREATE_NO_WINDOW", 0))
+    if create_no_window:
+        kwargs["creationflags"] = create_no_window
+
+    startupinfo_factory = getattr(subprocess_module, "STARTUPINFO", None)
+    if callable(startupinfo_factory):
+        startupinfo = startupinfo_factory()
+        startf_use_show_window = int(
+            getattr(subprocess_module, "STARTF_USESHOWWINDOW", 0)
+        )
+        if startf_use_show_window:
+            startupinfo.dwFlags = (
+                int(getattr(startupinfo, "dwFlags", 0)) | startf_use_show_window
+            )
+        if hasattr(subprocess_module, "SW_HIDE"):
+            startupinfo.wShowWindow = int(getattr(subprocess_module, "SW_HIDE", 0))
+        kwargs["startupinfo"] = startupinfo
+    return kwargs
+
+
+def _repo_relative_pathspec(path: Path) -> str | None:
+    try:
+        common_path = os.path.commonpath(
+            [
+                os.path.abspath(os.fspath(ROOT)),
+                os.path.abspath(os.fspath(path)),
+            ]
+        )
+    except ValueError:
+        return None
+    repo_root = os.path.abspath(os.fspath(ROOT))
+    if os.path.normcase(common_path) != os.path.normcase(repo_root):
+        return None
+    relative = os.path.relpath(os.path.abspath(os.fspath(path)), repo_root)
+    return "." if relative == "." else relative.replace(os.sep, "/")
 
 
 @pytest.mark.architecture
@@ -117,6 +361,27 @@ def test_active_composite_docs_and_generated_graphs_use_canonical_names() -> Non
         "Active composite docs and generated knowledge graphs must use canonical "
         "composite names:\n" + "\n".join(f"  - {hit}" for hit in hits)
     )
+
+
+@pytest.mark.architecture
+def test_symbol_scan_subprocess_kwargs_hide_windows_console() -> None:
+    startupinfo = SimpleNamespace(dwFlags=0, wShowWindow=5)
+    fake_subprocess = SimpleNamespace(
+        CREATE_NO_WINDOW=0x08000000,
+        STARTF_USESHOWWINDOW=0x00000001,
+        SW_HIDE=0,
+        STARTUPINFO=lambda: startupinfo,
+    )
+
+    kwargs = _hidden_windows_subprocess_kwargs(
+        os_name="nt",
+        subprocess_module=fake_subprocess,
+    )
+
+    assert kwargs["creationflags"] == 0x08000000
+    assert kwargs["startupinfo"] is startupinfo
+    assert startupinfo.dwFlags == 0x00000001
+    assert startupinfo.wShowWindow == 0
 
 
 @pytest.mark.architecture

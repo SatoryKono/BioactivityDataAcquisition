@@ -1,20 +1,5 @@
-"""Shared models for workflow-manifest service helpers."""
+"""Wrapper for workflow manifest models."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
-from bioetl.domain.types import RunID
-from bioetl.domain.workflow import WorkflowConfig
-
-__all__ = ["WorkflowManifestCreateSpec"]
-
-
-@dataclass(frozen=True, slots=True)
-class WorkflowManifestCreateSpec:
-    """Normalized inputs required to build an immutable workflow manifest."""
-
-    workflow_run_id: RunID
-    config: WorkflowConfig
-    launch_context: dict[str, object]
-    resumed_from_manifest_id: str | None = None
+from bioetl.application.services.control_plane.workflow.manifest_models import *  # noqa: F403

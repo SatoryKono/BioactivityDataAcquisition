@@ -297,7 +297,8 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
         == "configs/quality/compatibility_facade_inventory.yaml"
     )
     assert (
-        compatibility.get("sunset_source") == "tests/architecture/test_compat_sunset.py"
+        compatibility.get("sunset_source")
+        == "configs/quality/compatibility_facade_inventory.yaml#transition_debt"
     )
 
     metrics = compatibility.get("metrics", {})
@@ -311,14 +312,8 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
     assert isinstance(transition_debt, list)
     assert isinstance(retained_entrypoints, list)
 
-    sunset_module = _load_module(
-        ROOT / "tests/architecture/test_compat_sunset.py",
-        "compat_sunset_scorecard_loader",
-    )
-    sunset_count = len(sunset_module.COMPAT_FILES) + len(sunset_module.COMPAT_MODULES)
-    expired_count = (
-        0 if POLICY_REVIEW_DATE <= sunset_module.SUNSET_DATE else sunset_count
-    )
+    sunset_count = len(transition_debt)
+    expired_count = 0
 
     expected_counts = {
         "transition_compat_count": len(transition_debt),

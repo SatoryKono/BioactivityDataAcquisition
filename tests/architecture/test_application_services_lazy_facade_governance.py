@@ -7,20 +7,45 @@ from __future__ import annotations
 
 import ast
 import os
-import shutil
+import re
 import subprocess
-import threading
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
+import tempfile
+import time
+from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 from pathlib import Path
+import sys
+from types import SimpleNamespace
+
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE_ROOT_MODULE = "bioetl.application.services"
 _DIRECT_MODULE_IMPORT_SENTINEL = "<module>"
-_PACKAGE_ROOT_IMPORT_MARKERS = (
-    f"from {PACKAGE_ROOT_MODULE} import",
-    f"import {PACKAGE_ROOT_MODULE}",
+_PACKAGE_ROOT_MODULE_REGEX = re.escape(PACKAGE_ROOT_MODULE)
+_IMPORT_NAME_REGEX = r"[A-Za-z_][A-Za-z0-9_]*"
+_IMPORT_MODULE_REGEX = r"[A-Za-z_][A-Za-z0-9_.]*"
+_PACKAGE_ROOT_IMPORT_SOURCE_PATTERN_TEXTS = (
+    rf"^\s*from\s+{_PACKAGE_ROOT_MODULE_REGEX}\s+import\b",
+    rf"^\s*import\s+"
+    rf"(?:{_IMPORT_MODULE_REGEX}(?:\s+as\s+{_IMPORT_NAME_REGEX})?\s*,\s*)*"
+    rf"{_PACKAGE_ROOT_MODULE_REGEX}(?:\s+as\s+{_IMPORT_NAME_REGEX})?"
+    r"\s*(?:,|#|$)",
+)
+_PACKAGE_ROOT_IMPORT_SOURCE_PATTERNS = tuple(
+    re.compile(pattern, re.MULTILINE)
+    for pattern in _PACKAGE_ROOT_IMPORT_SOURCE_PATTERN_TEXTS
+)
+_SEARCH_TIMEOUT_SECONDS = 120.0
+_READ_TIMEOUT_SECONDS = 15.0
+_TEMPFILE_UNLINK_ATTEMPTS = 3
+_TEMPFILE_UNLINK_RETRY_SECONDS = 0.05
+_WINDOWS_GIT_CANDIDATES = (
+    Path("C:/Program Files/Git/cmd/git.exe"),
+    Path("C:/Program Files/Git/bin/git.exe"),
+    Path("C:/Program Files (x86)/Git/cmd/git.exe"),
+    Path("C:/Program Files (x86)/Git/bin/git.exe"),
 )
 
 EXPECTED_TEST_IMPORTS: dict[str, frozenset[str]] = {}
@@ -64,129 +89,252 @@ def _candidate_python_paths(root: Path) -> tuple[Path, ...]:
     if git_paths is not None:
         return git_paths
 
-    return tuple(
-        path for path in sorted(root.rglob("*.py")) if _read_candidate_source(path) is not None
+    raise AssertionError(
+        "Unable to scan application services facade callers without bounded "
+        "rg or git grep. Refusing to fall back to unbounded Python file reads."
     )
 
 
 def _candidate_python_paths_via_rg(root: Path) -> tuple[Path, ...] | None:
-    rg_binary = shutil.which("rg")
-    if rg_binary is None:
+    pathspec = _repo_relative_pathspec(root)
+    if pathspec is None:
         return None
 
     command = [
-        rg_binary,
-        "-l",
-        "-F",
+        "rg",
+        "-n",
         "-e",
-        _PACKAGE_ROOT_IMPORT_MARKERS[0],
+        _PACKAGE_ROOT_IMPORT_SOURCE_PATTERN_TEXTS[0],
         "-e",
-        _PACKAGE_ROOT_IMPORT_MARKERS[1],
-        str(root),
+        _PACKAGE_ROOT_IMPORT_SOURCE_PATTERN_TEXTS[1],
         "-g",
         "*.py",
+        pathspec,
     ]
     try:
-        completed = subprocess.run(
+        completed, stdout = _run_command_with_stdout_file(
             command,
-            cwd=ROOT,
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
+            timeout=_SEARCH_TIMEOUT_SECONDS,
         )
-    except OSError:
+    except (OSError, subprocess.TimeoutExpired):
         return None
 
     if completed.returncode not in {0, 1}:
         return None
-    return _paths_from_search_output(completed.stdout)
+    return _paths_from_matching_line_output(stdout)
 
 
 def _candidate_python_paths_via_git_grep(root: Path) -> tuple[Path, ...] | None:
-    git_binary = shutil.which("git")
-    if git_binary is None:
+    pathspec = _repo_relative_pathspec(root)
+    if pathspec is None:
         return None
 
-    command = [
-        git_binary,
-        "grep",
-        "-l",
-        "-e",
-        _PACKAGE_ROOT_IMPORT_MARKERS[0],
-        "-e",
-        _PACKAGE_ROOT_IMPORT_MARKERS[1],
-        "--",
-        root.as_posix(),
-    ]
+    for git_command in _git_commands():
+        command = [
+            git_command,
+            "grep",
+            "-n",
+            "-F",
+            "-e",
+            PACKAGE_ROOT_MODULE,
+            "--",
+            pathspec,
+        ]
+        try:
+            completed, stdout = _run_command_with_stdout_file(
+                command,
+                timeout=_SEARCH_TIMEOUT_SECONDS,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            continue
+
+        if completed.returncode in {0, 1}:
+            return _paths_from_matching_line_output(stdout)
+    return None
+
+
+def _run_command_with_stdout_file(
+    command: list[str],
+    *,
+    timeout: float,
+) -> tuple[subprocess.CompletedProcess[str], str]:
+    """Run a child process without Windows pipe reader threads."""
+    output_path = _temporary_output_path()
     try:
-        completed = subprocess.run(
-            command,
-            cwd=ROOT,
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
+        with output_path.open("w", encoding="utf-8", errors="replace") as stdout_file:
+            completed = subprocess.run(
+                command,
+                cwd=ROOT,
+                check=False,
+                stdout=stdout_file,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=timeout,
+                **_hidden_windows_subprocess_kwargs(),
+            )
+        output = output_path.read_text(encoding="utf-8", errors="replace")
+    finally:
+        _unlink_output_path(output_path)
+    return completed, output
+
+
+def _unlink_output_path(
+    path: Path,
+    *,
+    retry_seconds: float = _TEMPFILE_UNLINK_RETRY_SECONDS,
+) -> None:
+    for attempt in range(_TEMPFILE_UNLINK_ATTEMPTS):
+        try:
+            path.unlink(missing_ok=True)
+            return
+        except PermissionError:
+            if attempt == _TEMPFILE_UNLINK_ATTEMPTS - 1:
+                return
+            time.sleep(retry_seconds)
+
+
+def _temporary_output_path() -> Path:
+    handle = tempfile.NamedTemporaryFile(
+        prefix="application_services_facade_scan_",
+        suffix=".txt",
+        delete=False,
+    )
+    handle.close()
+    return Path(handle.name)
+
+
+def _hidden_windows_subprocess_kwargs(
+    *,
+    os_name: str = os.name,
+    subprocess_module: object = subprocess,
+) -> dict[str, object]:
+    if os_name != "nt":
+        return {}
+
+    kwargs: dict[str, object] = {}
+    create_no_window = int(getattr(subprocess_module, "CREATE_NO_WINDOW", 0))
+    if create_no_window:
+        kwargs["creationflags"] = create_no_window
+
+    startupinfo_factory = getattr(subprocess_module, "STARTUPINFO", None)
+    if callable(startupinfo_factory):
+        startupinfo = startupinfo_factory()
+        startf_use_show_window = int(
+            getattr(subprocess_module, "STARTF_USESHOWWINDOW", 0)
         )
-    except OSError:
+        if startf_use_show_window:
+            startupinfo.dwFlags = (
+                int(getattr(startupinfo, "dwFlags", 0)) | startf_use_show_window
+            )
+        if hasattr(subprocess_module, "SW_HIDE"):
+            startupinfo.wShowWindow = int(getattr(subprocess_module, "SW_HIDE", 0))
+        kwargs["startupinfo"] = startupinfo
+    return kwargs
+
+
+def _git_commands() -> tuple[str, ...]:
+    commands = ["git"]
+    if os.name == "nt":
+        commands.extend(str(path) for path in _WINDOWS_GIT_CANDIDATES if path.exists())
+    return tuple(dict.fromkeys(commands))
+
+
+def _repo_relative_pathspec(root: Path) -> str | None:
+    try:
+        relative = root.resolve().relative_to(ROOT.resolve())
+    except ValueError:
         return None
-
-    if completed.returncode not in {0, 1}:
-        return None
-    return _paths_from_search_output(completed.stdout)
+    return relative.as_posix() or "."
 
 
-def _paths_from_search_output(output: str) -> tuple[Path, ...]:
+def _paths_from_matching_line_output(output: str) -> tuple[Path, ...]:
     if not output.strip():
         return ()
-    return tuple(
-        sorted(
-            ROOT / relative_path
-            for relative_path in output.splitlines()
-            if relative_path.strip()
-        )
+    paths: list[Path] = []
+    for line in output.splitlines():
+        matched = _matched_search_line(line)
+        if matched is None:
+            continue
+        relative_path, source_line = matched
+        if not _source_has_package_root_import_marker(source_line):
+            continue
+        relative_path = relative_path.replace("\\", "/")
+        if not relative_path:
+            continue
+        path = Path(relative_path)
+        if path.suffix != ".py":
+            continue
+        paths.append(path if path.is_absolute() else ROOT / relative_path)
+    return tuple(sorted(set(paths)))
+
+
+def _paths_from_file_output(output: str) -> tuple[Path, ...]:
+    if not output.strip():
+        return ()
+    paths: list[Path] = []
+    for line in output.splitlines():
+        relative_path = line.strip().replace("\\", "/")
+        if not relative_path:
+            continue
+        path = Path(relative_path)
+        if path.suffix != ".py":
+            continue
+        paths.append(path if path.is_absolute() else ROOT / relative_path)
+    return tuple(sorted(set(paths)))
+
+
+def _matched_search_line(line: str) -> tuple[str, str] | None:
+    parts = line.split(":", 2)
+    if len(parts) != 3:
+        return None
+    relative_path, _line_number, source_line = parts
+    return relative_path.strip(), source_line
+
+
+def _source_has_package_root_import_marker(source: str) -> bool:
+    return any(
+        pattern.search(source) for pattern in _PACKAGE_ROOT_IMPORT_SOURCE_PATTERNS
     )
 
 
 def _read_candidate_source(path: Path) -> str | None:
-    def _read_with_timeout() -> str:
-        return path.read_text(encoding="utf-8")
-
     try:
-        source = _run_with_timeout(_read_with_timeout, timeout=30.0)
+        source = _read_text_with_subprocess_timeout(path)
     except TimeoutError:  # pragma: no cover - architecture scan safety
         raise AssertionError(f"Timeout reading {path}") from None
     except UnicodeDecodeError as exc:  # pragma: no cover - architecture scan safety
         raise AssertionError(f"Unable to decode {path}: {exc}") from exc
 
-    if not any(marker in source for marker in _PACKAGE_ROOT_IMPORT_MARKERS):
+    if not _source_has_package_root_import_marker(source):
         return None
     return source
 
 
-def _run_with_timeout(func, timeout: float):
-    """Run a function with a timeout to prevent hangs on locked files."""
-    result = None
-    exception = None
+def _read_text_with_subprocess_timeout(path: Path) -> str:
+    command = [
+        sys.executable,
+        "-c",
+        (
+            "from pathlib import Path; "
+            "import sys; "
+            "sys.stdout.write(Path(sys.argv[1]).read_text(encoding='utf-8'))"
+        ),
+        str(path),
+    ]
+    try:
+        completed, stdout = _run_command_with_stdout_file(
+            command,
+            timeout=_READ_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise TimeoutError(str(exc)) from exc
 
-    def _target():
-        nonlocal result, exception
-        try:
-            result = func()
-        except Exception as e:
-            exception = e
+    if completed.returncode != 0:
+        raise AssertionError(f"Unable to read {path}")
 
-    thread = threading.Thread(target=_target)
-    thread.start()
-    thread.join(timeout=timeout)
-
-    if thread.is_alive():
-        raise TimeoutError(f"Function did not complete within {timeout} seconds")
-
-    if exception is not None:
-        raise exception
-
-    return result
+    return stdout
 
 
 def _parse_import_tree(path: Path, source: str) -> ast.Module:
@@ -218,6 +366,62 @@ def _collect_imports_from_tree(tree: ast.Module) -> set[str]:
         elif isinstance(node, ast.ImportFrom):
             imported_names.update(_imported_names_from_import_from(node))
     return imported_names
+
+
+def test_package_root_import_prefilter_accepts_exact_root_imports() -> None:
+    assert _source_has_package_root_import_marker(
+        "from bioetl.application.services import WorkflowService\n"
+    )
+    assert _source_has_package_root_import_marker(
+        "import bioetl.application.services as application_services\n"
+    )
+
+
+def test_package_root_import_prefilter_ignores_submodule_imports() -> None:
+    assert not _source_has_package_root_import_marker(
+        "import bioetl.application.services.execution.cli_run_orchestration_models\n"
+    )
+    assert not _source_has_package_root_import_marker(
+        "from bioetl.application.services.execution import RunExecutionRequest\n"
+    )
+
+
+def test_temp_output_cleanup_does_not_mask_windows_file_lock(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = 0
+
+    def fake_unlink(_self: Path, *, missing_ok: bool = False) -> None:
+        nonlocal calls
+        _ = missing_ok
+        calls += 1
+        raise PermissionError("locked")
+
+    monkeypatch.setattr(Path, "unlink", fake_unlink)
+
+    _unlink_output_path(Path("locked.txt"), retry_seconds=0.0)
+
+    assert calls == _TEMPFILE_UNLINK_ATTEMPTS
+
+
+def test_windows_subprocess_kwargs_hide_command_windows() -> None:
+    startupinfo = SimpleNamespace(dwFlags=0, wShowWindow=5)
+    fake_subprocess = SimpleNamespace(
+        CREATE_NO_WINDOW=0x08000000,
+        STARTF_USESHOWWINDOW=0x00000001,
+        SW_HIDE=0,
+        STARTUPINFO=lambda: startupinfo,
+    )
+
+    kwargs = _hidden_windows_subprocess_kwargs(
+        os_name="nt",
+        subprocess_module=fake_subprocess,
+    )
+
+    assert kwargs["creationflags"] == 0x08000000
+    assert kwargs["startupinfo"] is startupinfo
+    assert startupinfo.dwFlags == 0x00000001
+    assert startupinfo.wShowWindow == 0
 
 
 def test_application_services_package_root_has_zero_first_party_src_callers() -> None:

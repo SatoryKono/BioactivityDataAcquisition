@@ -2,20 +2,20 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.workflow_execution_service import (
+from bioetl.application.services.control_plane.workflow.execution_service import (
     WorkflowExecutionService,
 )
-from bioetl.application.services.control_plane.workflow_inspection_service import (
+from bioetl.application.services.control_plane.workflow.inspection_service import (
     WorkflowInspectionResult,
     WorkflowInspectionService,
 )
-from bioetl.application.services.control_plane.workflow_ledger_service import (
+from bioetl.application.services.control_plane.workflow.ledger_service import (
     WorkflowLedgerService,
 )
-from bioetl.application.services.control_plane.workflow_manifest_models import (
+from bioetl.application.services.control_plane.workflow.manifest_models import (
     WorkflowManifestCreateSpec,
 )
-from bioetl.application.services.control_plane.workflow_manifest_service import (
+from bioetl.application.services.control_plane.workflow.manifest_service import (
     WorkflowManifestService,
 )
 

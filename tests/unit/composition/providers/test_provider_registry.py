@@ -510,7 +510,9 @@ class TestRegisterProviderDecorator:
         ProviderRegistry._providers.clear()
         ProviderRegistry._providers.update(original_providers)
 
-    def test_decorator_registers_class(self):
+    def test_decorator_registers_class__test_register_provider_decorator_composition_providers_test_provider_registry_513(
+        self,
+    ):
         """Verify decorator registers the class."""
 
         @register_provider("decorator_test", http_rate=5.0)
@@ -556,7 +558,9 @@ class TestRegisterProviderDecorator:
         assert config.requires_http_client is False
         assert config.http_config is None
 
-    def test_decorator_with_rate_overrides(self):
+    def test_decorator_with_rate_overrides__test_register_provider_decorator_composition_providers_test_provider_registry_559(
+        self,
+    ):
         """Verify decorator with rate overrides."""
 
         @register_provider(

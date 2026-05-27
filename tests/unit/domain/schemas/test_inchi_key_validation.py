@@ -175,7 +175,9 @@ class TestInchiKeySchemaIntegration:
         assert hasattr(compound, "INCHI_KEY_REGEX_PATTERN")
         assert compound.INCHI_KEY_REGEX_PATTERN == INCHI_KEY_REGEX_PATTERN
 
-    def test_all_schemas_use_consistent_pattern(self) -> None:
+    def test_all_schemas_use_consistent_pattern__test_inchi_key_schema_integration_domain_schemas_test_inchi_key_validation_178(
+        self,
+    ) -> None:
         """Test all molecule schemas use the same InChI Key pattern value."""
         from bioetl.domain.schemas.chembl import molecule as chembl_mol
         from bioetl.domain.schemas.pubchem import compound as pubchem_mol

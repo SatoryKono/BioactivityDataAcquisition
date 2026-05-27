@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+import pytest
+
+pytestmark = pytest.mark.integration
+
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import UUID
 
 import polars as pl
 
-from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionService,
 )
 from bioetl.domain.control_plane import RunLedgerEntry
@@ -20,10 +24,28 @@ from tests.integration.ci.test_reproducibility_contract_suite import (
     _InMemoryRunLedgerStore,
     _InMemoryRunManifestStore,
     _PUBLISHED_PRODUCTION_FAMILIES,
-    _deduplicate_by_primary_keys_impl,
     _make_manifest,
     _make_merge_metrics_mixin,
 )
+
+
+def _deduplicate_by_primary_keys_impl(
+    records: list[dict[str, object]],
+    primary_keys: list[str],
+) -> list[dict[str, object]]:
+    """Return one deterministic winner per primary-key tuple."""
+    winner_by_key: dict[tuple[object, ...], dict[str, object]] = {}
+    for record in records:
+        key = tuple(record.get(field) for field in primary_keys)
+        incumbent = winner_by_key.get(key)
+        if incumbent is None:
+            winner_by_key[key] = record
+            continue
+        incumbent_hash = str(incumbent.get("content_hash", ""))
+        candidate_hash = str(record.get("content_hash", ""))
+        if candidate_hash < incumbent_hash:
+            winner_by_key[key] = record
+    return [winner_by_key[key] for key in sorted(winner_by_key)]
 
 
 def test_reproducibility_contract_inventory_covers_all_production_families() -> None:

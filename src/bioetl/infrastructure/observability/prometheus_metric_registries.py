@@ -74,6 +74,15 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         ),
         "bioetl_workflow_runs_total": _metrics.WORKFLOW_RUNS_TOTAL,
         "bioetl_workflow_step_events_total": _metrics.WORKFLOW_STEP_EVENTS_TOTAL,
+        "bioetl_workflow_reconciliation_rows_scanned_total": (
+            _metrics.WORKFLOW_RECONCILIATION_ROWS_SCANNED_TOTAL
+        ),
+        "bioetl_workflow_reconciliation_rows_retained_total": (
+            _metrics.WORKFLOW_RECONCILIATION_ROWS_RETAINED_TOTAL
+        ),
+        "bioetl_workflow_reconciliation_rows_deleted_total": (
+            _metrics.WORKFLOW_RECONCILIATION_ROWS_DELETED_TOTAL
+        ),
     },
     gauges={
         "bioetl_memory_pressure_state": _metrics.MEMORY_PRESSURE_STATE,
@@ -82,6 +91,7 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_pipeline_stage_expected": _metrics.PIPELINE_STAGE_EXPECTED,
         "bioetl_stage_backlog_records": _metrics.STAGE_BACKLOG_RECORDS,
         "bioetl_stage_lag_seconds": _metrics.STAGE_LAG_SECONDS,
+        "bioetl_checkpoint_saved_at_seconds": _metrics.CHECKPOINT_SAVED_AT_SECONDS,
         "bioetl_replay_lag_seconds": _metrics.REPLAY_LAG_SECONDS,
         "bioetl_workflow_current_status": _metrics.WORKFLOW_CURRENT_STATUS,
     },

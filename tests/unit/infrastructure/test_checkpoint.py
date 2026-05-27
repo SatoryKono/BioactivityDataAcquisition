@@ -60,7 +60,8 @@ class TestLocalCheckpoint:
         assert result is not None
         run_id, metadata = result
         assert run_id == UUID("12345678-1234-5678-1234-567812345678")
-        assert metadata == {"key": "value"}
+        assert metadata["key"] == "value"
+        assert isinstance(metadata["checkpoint_saved_at_epoch_seconds"], float)
 
     async def test_load_nonexistent_returns_none(self, tmp_path):
         """Test load returns None for nonexistent checkpoint."""
@@ -84,9 +85,12 @@ class TestLocalCheckpoint:
         assert result is not None
         loaded_run_id, loaded_metadata = result
         assert loaded_run_id == run_id
-        assert loaded_metadata == metadata
+        assert loaded_metadata["key"] == metadata["key"]
+        assert isinstance(loaded_metadata["checkpoint_saved_at_epoch_seconds"], float)
 
-    async def test_delete_removes_file(self, tmp_path):
+    async def test_delete_removes_file__test_local_checkpoint_unit_infrastructure_test_checkpoint_89(
+        self, tmp_path
+    ):
         """Test delete removes checkpoint file.
 
         Flat structure: {base_path}/{pipeline}.json
@@ -180,7 +184,8 @@ class TestLocalCheckpoint:
         result = await cp.load(pipeline)
         assert result is not None
         _, metadata = result
-        assert metadata == {"version": 2}
+        assert metadata["version"] == 2
+        assert isinstance(metadata["checkpoint_saved_at_epoch_seconds"], float)
 
         # No temp files should remain (in base_path since it's flat structure)
         temp_files = list(tmp_path.glob(".checkpoint_*.tmp"))

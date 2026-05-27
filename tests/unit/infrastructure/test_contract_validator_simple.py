@@ -89,7 +89,9 @@ class TestProvenanceInformationSimple:
 class TestDispositionResolutionSimple:
     """Smoke tests for default and mode-adjusted disposition resolution."""
 
-    def test_default_disposition_applied(self) -> None:
+    def test_default_disposition_applied__test_disposition_resolution_simple_unit_infrastructure_test_contract_validator_simple_92(
+        self,
+    ) -> None:
         """Default disposition should apply when no override exists."""
         validator = ContractAwareGoldValidator(
             schema=None,

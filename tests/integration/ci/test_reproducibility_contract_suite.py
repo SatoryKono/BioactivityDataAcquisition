@@ -10,11 +10,11 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 from uuid import UUID, uuid4
 
-import polars as pl
 import pytest
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.application.services.control_plane.effective_config_service import (
+from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
+from bioetl.application.services.control_plane.effective_config.service import (
     EffectiveConfigService,
 )
 from bioetl.application.services.checkpoint_compatibility_service import (
@@ -23,22 +23,22 @@ from bioetl.application.services.checkpoint_compatibility_service import (
 from bioetl.application.services.control_plane.forensic_diff_service import (
     ForensicRunDiffService,
 )
-from bioetl.application.services.control_plane.historical_replay_certification_service import (
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationService,
     HistoricalReplaySnapshotCertification,
 )
-from bioetl.application.services.control_plane.historical_replay_corpus_service import (
+from bioetl.application.services.control_plane.replay.historical_corpus_service import (
     HistoricalReplayBulkCertificationSpec,
     HistoricalReplayCorpusService,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics import (
+from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
 )
-from bioetl.application.services.control_plane.run_ledger_service import (
+from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
 )
 from bioetl.application.services.lineage import MetadataCoordinator
-from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionService,
 )
 from bioetl.composition.bootstrap.runtime.composite_control_plane_builder import (
@@ -59,7 +59,6 @@ from bioetl.domain.control_plane import (
 from bioetl.domain.control_plane.reproducibility_profiles import (
     published_production_reproducibility_families,
     published_supported_boundary_families,
-    published_reproducibility_family_inventory,
     published_supported_reproducibility_families,
 )
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
@@ -82,9 +81,6 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.control_plane import FileArtifactByteComparisonAdapter
-from bioetl.infrastructure.storage.silver.validation_operations import (
-    _deduplicate_by_primary_keys_impl,
-)
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
@@ -96,7 +92,6 @@ from tests.integration.ci.reproducibility_contract_support import (
     ManifestIdentity as _ManifestIdentity,
     build_replay_matrix_composite_config as _build_replay_matrix_composite_config,
     load_manifest_payload as _load_manifest_payload,
-    make_merge_metrics_mixin as _make_merge_metrics_mixin,
     write_composite_snapshot_envelope as _write_composite_snapshot_envelope,
 )
 from tests.unit.infrastructure.storage.test_metadata_writer_control_plane import (
@@ -120,6 +115,14 @@ _PUBLISHED_PRODUCTION_FAMILIES = tuple(published_production_reproducibility_fami
 
 
 _InMemoryRunManifestStore = InMemoryRunManifestStore
+
+
+class _MergeMetricsMixinHarness(MergeMetricsRecorderMixin):
+    """Concrete harness exposing MergeMetricsRecorderMixin contract methods."""
+
+
+def _make_merge_metrics_mixin() -> MergeMetricsRecorderMixin:
+    return _MergeMetricsMixinHarness()
 
 
 def _make_manifest(
@@ -508,16 +511,6 @@ def test_reproducibility_contract_historical_composite_certification_requires_ce
 def _family_context(family: str) -> tuple[str, str, str]:
     provider, entity = family.split(".", maxsplit=1)
     return provider, entity, f"{provider}_{entity}"
-
-
-
-
-
-
-
-
-
-
 
 
 def test_reproducibility_contract_live_capture_materialized_snapshot_parent_state() -> (
@@ -1865,14 +1858,6 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
     assert "lineage_completeness" in threshold_failures
 
 
-
-
-
-
-
-
-
-
 @pytest.mark.asyncio
 async def test_reproducibility_contract_composite_quarantine_replay_anchor_is_deterministic() -> (
     None
@@ -1887,5 +1872,3 @@ async def test_reproducibility_contract_composite_quarantine_replay_anchor_is_de
     assert write_kwargs["ingestion_ts"] == datetime(2025, 2, 3, 0, 0, tzinfo=UTC)
     assert write_kwargs["metadata"]["artifact_policy"] == "occurrence_only_diagnostic"
     assert write_kwargs["metadata"]["replay_contract"] == "excluded_from_exact_replay"
-
-

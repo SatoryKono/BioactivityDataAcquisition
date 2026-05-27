@@ -155,7 +155,9 @@ class TestOpenTelemetryTracerWithOTEL:
 class TestOpenTelemetryTracerClose:
     """Tests for OpenTelemetryTracer close behavior."""
 
-    def test_close_is_idempotent(self) -> None:
+    def test_close_is_idempotent__test_open_telemetry_tracer_close_infrastructure_observability_test_tracing_158(
+        self,
+    ) -> None:
         """close() can be called multiple times safely."""
         from bioetl.infrastructure.observability import tracing
 

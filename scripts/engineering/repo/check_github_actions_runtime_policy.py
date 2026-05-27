@@ -24,7 +24,10 @@ USES_PATTERN = re.compile(r"^\s*uses:\s*([^\s#]+)")
 
 
 def iter_yaml_files() -> list[Path]:
-    return [*sorted(WORKFLOWS_DIR.glob("*.yml")), *sorted(COMPOSITE_ACTIONS_DIR.rglob("action.yml"))]
+    return [
+        *sorted(WORKFLOWS_DIR.glob("*.yml")),
+        *sorted(COMPOSITE_ACTIONS_DIR.rglob("action.yml")),
+    ]
 
 
 def _parsed_uses_reference(line: str) -> tuple[str, str] | None:
@@ -48,7 +51,9 @@ def _validate_allowed_uses_ref(uses_ref: str, action: str) -> str | None:
 def _uses_violations_in_file(file_path: Path) -> list[str]:
     violations: list[str] = []
     rel_path = file_path.relative_to(ROOT)
-    for line_no, line in enumerate(file_path.read_text(encoding="utf-8").splitlines(), 1):
+    for line_no, line in enumerate(
+        file_path.read_text(encoding="utf-8").splitlines(), 1
+    ):
         parsed = _parsed_uses_reference(line)
         if parsed is None:
             continue

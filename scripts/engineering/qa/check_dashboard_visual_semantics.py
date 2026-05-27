@@ -178,7 +178,10 @@ def _stat_panel_visual_semantics_errors(dashboard_path: Path, panel: dict) -> li
             (mapping for mapping in mappings if mapping.get("type") == "value"),
             None,
         )
-        if value_mapping is None or value_mapping.get("options") != expected_value_mapping:
+        if (
+            value_mapping is None
+            or value_mapping.get("options") != expected_value_mapping
+        ):
             errors.append(
                 f"{dashboard_path}: panel '{title}' must use explicit canonical value mappings"
             )
@@ -308,9 +311,7 @@ def _stat_threshold_color_errors(dashboard_path: Path, panel: dict) -> list[str]
     )
     if color_mode == "thresholds":
         return []
-    return [
-        f"{dashboard_path}: stat panel '{title}' must use color.mode=thresholds"
-    ]
+    return [f"{dashboard_path}: stat panel '{title}' must use color.mode=thresholds"]
 
 
 def _status_panel_errors(dashboard_path: Path, panel: dict) -> list[str]:

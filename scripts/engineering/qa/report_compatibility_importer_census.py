@@ -134,7 +134,9 @@ def _string_literals_from_sequence(node: ast.AST) -> list[str]:
     return values
 
 
-def _top_level_string_sequence_assignment(tree: ast.Module, target_name: str) -> list[str]:
+def _top_level_string_sequence_assignment(
+    tree: ast.Module, target_name: str
+) -> list[str]:
     for node in tree.body:
         if not isinstance(node, ast.Assign):
             continue
@@ -356,7 +358,9 @@ def build_compatibility_importer_census(
 
     twin_rows: list[dict[str, object]] = []
     for pair in twin_pairs:
-        public_importers = importer_map.get(pair["public_module"], {"src": (), "tests": ()})
+        public_importers = importer_map.get(
+            pair["public_module"], {"src": (), "tests": ()}
+        )
         private_importers = importer_map.get(
             pair["private_module"], {"src": (), "tests": ()}
         )
@@ -525,7 +529,8 @@ def _render_markdown(payload: dict[str, object]) -> str:
     for row in public_export_rows:
         assert isinstance(row, dict)
         duplicate_exports = sorted(
-            set(row["duplicate_public_exports"]) | set(row["duplicate_lazy_export_keys"])
+            set(row["duplicate_public_exports"])
+            | set(row["duplicate_lazy_export_keys"])
         )
         conflicts = sorted(row["resolution_conflicts"])
         lines.append(
@@ -621,7 +626,7 @@ def _render_markdown(payload: dict[str, object]) -> str:
 
 def main() -> int:
     args = _parse_args()
-    repo_root = Path(args.repo_root)
+    repo_root = Path(args.repo_root).resolve()
     payload = build_compatibility_importer_census(
         repo_root, snapshot_date=str(args.snapshot_date)
     )

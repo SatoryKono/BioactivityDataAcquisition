@@ -31,7 +31,11 @@ DEFAULT_OUT_DIR = PROJECT_ROOT / "docs" / "reports" / "generated"
 DEFAULT_JSON_OUT = DEFAULT_OUT_DIR / "non_chembl_observed_value_inventory.json"
 DEFAULT_MD_OUT = DEFAULT_OUT_DIR / "non_chembl_observed_value_inventory.md"
 OBSERVED_FIXTURE_PATH = (
-    PROJECT_ROOT / "tests" / "fixtures" / "normalization" / "non_chembl_observed_values.yaml"
+    PROJECT_ROOT
+    / "tests"
+    / "fixtures"
+    / "normalization"
+    / "non_chembl_observed_values.yaml"
 )
 
 _OPENALEX_PATHS = [
@@ -130,7 +134,9 @@ def _render_markdown(payload: dict[str, object]) -> str:
         lines.append(f"### {section_name}")
         lines.append("")
         lines.append("```json")
-        lines.append(json.dumps(section_payload, ensure_ascii=False, sort_keys=True, indent=2))
+        lines.append(
+            json.dumps(section_payload, ensure_ascii=False, sort_keys=True, indent=2)
+        )
         lines.append("```")
         lines.append("")
     return "\n".join(lines)
@@ -138,7 +144,9 @@ def _render_markdown(payload: dict[str, object]) -> str:
 
 def _write_json(path: Path, payload: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
 
 def _write_text(path: Path, content: str) -> None:
@@ -168,9 +176,15 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.check:
         failures: list[str] = []
-        if not args.json_out.exists() or args.json_out.read_text(encoding="utf-8") != rendered_json:
+        if (
+            not args.json_out.exists()
+            or args.json_out.read_text(encoding="utf-8") != rendered_json
+        ):
             failures.append(str(args.json_out))
-        if not args.markdown_out.exists() or args.markdown_out.read_text(encoding="utf-8") != markdown:
+        if (
+            not args.markdown_out.exists()
+            or args.markdown_out.read_text(encoding="utf-8") != markdown
+        ):
             failures.append(str(args.markdown_out))
         if failures:
             print(

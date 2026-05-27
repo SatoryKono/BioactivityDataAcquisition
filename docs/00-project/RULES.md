@@ -66,7 +66,7 @@ ______________________________________________________________________
 
 - **Infrastructure (Инфраструктура/Адаптеры)**: Реализация взаимодействия с внешним миром (HTTP, БД, файловая система).
 - **Application (Приложение/Пайплайны)**: Оркестрация потоков данных. Определяет *когда* и *в каком порядке* вызываются порты.
-- **Domain (Домен/Чистая логика)**: Чистые функции и контракты (Protocols). Никакого ввода-вывода (I/O).
+- **Domain (Домен/Чистая логика)**: Чистые функции и контракты (Protocols). Никакого ввода-вывода (I/O). Pandera/Pandas imports are allowed only as schema-contract representation under `src/bioetl/domain/schemas/` and `src/bioetl/domain/contracts/`; runtime compatibility patching belongs to explicit composition bootstrap (`apply_runtime_compatibility_patches`), not package import side effects. См. [ADR-048](../02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md).
 
 ### 1.1.1. Обеспечение Контрактов (Enforcement)
 
@@ -1936,9 +1936,11 @@ fields:
 | [ADR-045](../02-architecture/decisions/ADR-045-dq-contract-system.md)                  | Data Quality Contract System               | Accepted                                | 2026-03-26 |
 | [ADR-046](../02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md)        | Checkpoint Versus Ledger-Based Resume      | Accepted                                | 2026-05-06 |
 | [ADR-047](../02-architecture/decisions/ADR-047-workflow-control-plane.md)             | Workflow Control Plane for Declarative Workflows | Accepted                           | 2026-05-08 |
+| [ADR-048](../02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md) | Domain Schema Boundary and Runtime Pandera Compatibility | Accepted | 2026-05-26 |
 
 ## История Изменений (Changelog)
 
+- **5.27** (2026-05-26): Domain Schema Boundary Sync. Добавлен ADR-048 и закреплено, что Pandera/Pandas допустимы в domain только как schema-contract representation под `domain/schemas` и `domain/contracts`; Pandera compatibility patching перенесено в явный runtime bootstrap seam без package import side effects.
 - **5.26** (2026-05-15): ADR Governance Sync. Приложение F синхронизировано с ADR-046/047 и теперь явно делегирует canonical live registry в `decisions/README.md` и `adr-registry.md`. Исправлен generated ADR registry status parsing для explicit `Status:` metadata; `mkdocs.yml` синхронизирован с активной `scripts.docs check-links` guardrail surface.
 - **5.25** (2026-04-29): Documentation Audit Stop-Loss. Исправлен published readiness endpoint (`/health/ready`), синхронизирован ADR registry с ADR-044/045, а Medallion write-mode terminology закреплена как policy-owned surface в §2.1.1-§2.1.2.
 - **5.24** (2026-03-13): Docs Governance Sync. В §6 явно закреплена active-docs модель: `docs/00-05` как source of truth, `docs/99-archive/` как non-normative historical context, и docs guardrails как обязательная проверка для active/generated docs.

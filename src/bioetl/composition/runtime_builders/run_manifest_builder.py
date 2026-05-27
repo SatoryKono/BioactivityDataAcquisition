@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
-from bioetl.application.services.control_plane.run_ledger_service import (
+from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
 )
 from bioetl.composition.runtime_builders._run_manifest_builder_policy import (

@@ -175,10 +175,13 @@ dashboard-specific `Status` or `First Action` route.
    `Inspect Critical Providers`, `Inspect Provider Top Causes`,
    `Monitor Provider Telemetry Freshness` и `First Action`
    отвечают на вопрос «какой provider degraded/failing и почему». Panel `id=114`
-   остаётся raw source enum (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже
-   first screen как evidence. `Monitor Provider Telemetry Freshness` отделяет
-   empty severity matrix от telemetry gap: если current-status samples нет за
-   15m, это не healthy state. `Inspect Provider Top Causes` может оставаться
+   (`Review Raw Provider Health Enum`) остаётся raw source enum
+   (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже first screen как evidence.
+   `Monitor Provider Telemetry Freshness` отделяет empty severity matrix от
+   telemetry gap: если current-status samples нет в активном Grafana range, это
+   не healthy state. Shared `ID` и `Processed Records` cards на том же first
+   screen остаются bounded pipeline-context evidence и не доказывают current
+   provider health. `Inspect Provider Top Causes` может оставаться
    непустой даже при `GLOBAL severity = OK`, потому что canonical cause
    projection включает early-warning provider signals независимо от
    current-status projection; это diagnostic lead, а не самостоятельное
@@ -300,11 +303,13 @@ Compact evidence ниже первого экрана:
 - Для current-state narrowing используйте `Inspect DQ Current Reasons`; для
   bounded cause summary используйте `Inspect: Top Silver Reject Reasons (Pareto)` и
   `Inspect: Top Silver Reject Fields` в collapsed rows `bioetl-dq-v2`.
+  `Inspect: Silver Filter Rejects by Pipeline` остаётся scope/distribution panel
+  по stage-total `filtered_out`, а не reason drilldown.
 - Маршрут triage: **L1 summary -> L2 explorer**.
   1. **L1 summary:** начните с `4. Data Quality` (first-screen current status,
      threshold state, reasons, invalid-record-policy note), чтобы определить
      severity и первое действие.
-  1. **L1 cause narrowing:** раскройте collapsed rows `Reject / Pareto / Fields` и `Validation Diagnostics`, проверьте `Inspect: Top Silver Reject Reasons (Pareto)` / `Inspect: Top Silver Reject Fields` и связанные diagnostics.
+  1. **L1 cause narrowing:** раскройте collapsed rows `Reject / Pareto / Fields` и `Validation Failures / Runtime Diagnostics / Trends`. В reject row сначала проверьте trust guard `Monitor: Silver Filter Reject Accounting Mismatch`, затем `Inspect: Top Silver Reject Reasons (Pareto)` / `Inspect: Top Silver Reject Fields`, и только после этого переходите к pipeline distribution через `Inspect: Silver Filter Rejects by Pipeline`.
   1. **L2 explorer:** откройте `Silver Reject Explorer` через top-level link в `4. Data Quality` для record-level списка, выбора `reason_code/field/quarantine_run_id` и detail по `payload_hash`.
   1. **L2 no-data gate:** считайте `0` rejects нормой только когда `Review: First Action / No-Data Semantics` подтверждает конкретный pipeline, доступный Quarantine Explorer и ненулевой Bronze denominator; zero-reject workflow run is a valid empty explorer state only after those checks pass. Zero matching rows остаются empty-result состоянием, а plugin errors, unsupported filter chains, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN/error.
   1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и финального подтверждения remediation.
@@ -439,12 +444,12 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - `bioetl-provider-health-v2`: dashboard links `0. Control Plane`,
   `1. Overview`, `2. Runtime`, `4. Data Quality`, `5. Workflow` дают быстрый
   переход из provider health surface без дублирования Runtime variants.
-  Panel `id=114` (`Monitor Current Provider Health Status`) показывает явный enum
+  Panel `id=114` (`Review Raw Provider Health Enum`) показывает явный enum
   raw-source mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY` as below-fold
   evidence, while canonical first-screen severity remains `Status` plus
   `Monitor GLOBAL Provider Severity Matrix`. Panel `id=9104`
   (`Monitor Provider Telemetry Freshness`) is the first-screen trust marker:
-  missing `bioetl_provider_current_status` samples in the last 15m mean telemetry
+  missing `bioetl_provider_current_status` samples in the active Grafana time range mean telemetry
   gap, not proof that providers are healthy. Raw status stays fail-closed
   `UNKNOWN`, если provider universe существует, а raw status sample отсутствует.
   
@@ -477,6 +482,14 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - `Inspect: Top Silver Reject Reasons (Pareto)` и `Inspect: Top Silver Reject Fields` intentionally не
   дублируют второй dashboard-to-dashboard handoff: оператор использует их как
   bounded cause summary, затем переходит в top-level `Silver Reject Explorer`.
+- `Inspect: Silver Filter Rejects by Pipeline`, `Inspect: Top Silver Reject Reasons (Pareto)`,
+  `Inspect: Top Silver Reject Fields`, `Inspect: Quarantine by Error Type` и
+  `Track: Anomalies Detected` теперь сохраняют honest empty-state semantics:
+  при отсутствии событий в выбранном окне они остаются пустыми и не создают
+  synthetic buckets вроде `no_events` / `none`.
+- `Inspect: Quarantine by Error Type` intentionally shipped as horizontal
+  `bargauge`, not `piechart`: для quarantine/error family triage важнее
+  сравнение категорий, чем композиционная доля slices.
 - Оператор SHOULD сначала подтвердить, что текущий spike/аномалия видны в
   summary-панелях DQ (`Top Silver Reject Reasons/Fields`) и только затем делать
   record-level drilldown в Explorer.

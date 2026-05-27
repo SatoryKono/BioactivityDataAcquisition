@@ -130,6 +130,35 @@ claims to already be running:
 - use the stale-lock runbook if the process died unexpectedly;
 - do not introduce external coordination as a workaround.
 
+### 7. ChemblBaseline workflow check
+
+The shipped `chembl_baseline` example lives in
+`configs/workflows/chembl_baseline.yaml` and runs the core ChEMBL entity
+pipelines before the reconciliation phase:
+
+- `run_chembl_assay`
+- `run_chembl_target`
+- `run_chembl_publication`
+- `reconcile_assay_target_orphans`
+- `reconcile_assay_publication_orphans`
+
+When reviewing this workflow, keep the reconciliation config on logical table
+names only:
+
+- `source_table=chembl_assay`
+- `reference_table=chembl_target`
+- `source_key=target_id`
+- `reference_key=target_id`
+- `source_table=chembl_assay`
+- `reference_table=chembl_publication`
+- `source_key=publication_id`
+- `reference_key=publication_id`
+
+The reconciliation transform also accepts composite keys via paired
+`source_keys` / `reference_keys` lists. Keep both lists aligned and set
+`nulls_equal` explicitly when a workflow should treat null-key rows as valid
+matches rather than orphans.
+
 ## Direct Artifact Checks
 
 Canonical workflow control-plane paths:
@@ -196,4 +225,5 @@ Look for:
 - [Workflow Object Guide](../../03-guides/workflows.md)
 - [ADR-046](../../02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md)
 - [ADR-047](../../02-architecture/decisions/ADR-047-workflow-control-plane.md)
+- [POST_CHANGE_VALIDATION policy](../../00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md)
 - [Stale Lock](stale-lock.md)

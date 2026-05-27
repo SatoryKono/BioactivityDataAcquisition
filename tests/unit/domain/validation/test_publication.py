@@ -113,6 +113,8 @@ class TestValidateYearRange:
     def test_max_boundary(self) -> None:
         assert validate_year_range(MAX_PUBLICATION_YEAR) is True
 
-    def test_custom_range(self) -> None:
+    def test_custom_range__test_validate_year_range_domain_validation_test_publication_116(
+        self,
+    ) -> None:
         assert validate_year_range(2000, min_year=1990, max_year=2010) is True
         assert validate_year_range(1989, min_year=1990, max_year=2010) is False

@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, Any, NewType, TypedDict
 from uuid import UUID
 
 if TYPE_CHECKING:
-    import pandera as _pa
     import pyarrow
 
 __all__ = [
@@ -63,8 +62,12 @@ type GoldRecord = JsonDict  # heterogeneous scalar types before Pandera coercion
 type MetaDict = JsonDict  # freeform metadata (str|int|float|datetime|None)
 """Freeform metadata bag used in aggregates, audit entries, events."""
 
-type GoldSchemaType = "type[_pa.DataFrameModel]"
-"""Pandera DataFrameModel class (not instance). TYPE_CHECKING-only at import time."""
+type GoldSchemaType = type[object]
+"""Gold schema class accepted by validation wiring.
+
+Concrete Pandera model imports belong in domain schema/contract packages, not in
+shared domain identifier aliases.
+"""
 
 type PrimaryId = str | int
 """Primary identifier extracted from a Bronze record (e.g., ChEMBL ID string or numeric ID)."""

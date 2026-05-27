@@ -818,16 +818,52 @@
       "type": "stat"
     },
     {
-      "description": "No checkpoint-age evidence metric is currently shipped. Treat this as an explicit known gap: the dashboard cannot prove checkpoint freshness against RPO. Next action: use checkpoint artifacts/runbook outside Grafana until bounded freshness evidence exists.",
+      "datasource": "Quarantine Explorer",
+      "description": "Latest persisted checkpoint age in seconds for the selected pipeline. This is bounded freshness evidence derived from persisted checkpoint metadata via /ops/control-plane/checkpoint-freshness, not from short-lived Prometheus scrape history. Lower is fresher. Null/No data means no persisted checkpoint evidence or missing checkpoint_saved_at_epoch_seconds for the current scope, so treat the result as UNKNOWN and inspect checkpoint artifacts/runbook before replay or resume decisions.",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
           "links": [
             {
               "targetBlank": true,
               "title": "Open Checkpoint Debugging Runbook",
               "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
             }
-          ]
+          ],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "noValue": "UNKNOWN",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 900
+              },
+              {
+                "color": "red",
+                "value": 3600
+              }
+            ]
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -839,12 +875,65 @@
       },
       "id": 892,
       "options": {
-        "content": "### Known gap\nCheckpoint age is not instrumented. Do not treat this card as freshness evidence; inspect checkpoint artifacts/runbook for RPO-sensitive replay decisions.",
-        "mode": "markdown"
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
       },
       "pluginVersion": "9.5.0",
-      "title": "Inspect: Checkpoint Freshness Gap",
-      "type": "text",
+      "targets": [
+        {
+          "format": "table",
+          "json_options": {
+            "root_is_not_array": true
+          },
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "$",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/control-plane/checkpoint-freshness?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "checkpoint_present": true,
+              "checkpoint_run_id": true,
+              "detail": true,
+              "evidence_source": true,
+              "manifest_id": true,
+              "pipeline": true,
+              "resolved_via": true,
+              "saved_at_epoch_seconds": true,
+              "status": true
+            },
+            "indexByName": {
+              "age_seconds": 0
+            },
+            "renameByName": {
+              "age_seconds": "checkpoint_age_seconds"
+            }
+          }
+        }
+      ],
+      "title": "Monitor: Checkpoint Freshness Lag (seconds)",
+      "type": "stat",
       "transparent": false
     },
     {
@@ -1093,12 +1182,12 @@
           },
           "id": 894,
           "options": {
-            "content": "### Known blind spots\n- Checkpoint freshness by expected schedule/RPO is not instrumented yet.\n- Replay duplicate/overwrite risk signal is not instrumented yet.\n- Manifest-to-ledger referential integrity ratio is not instrumented yet.",
+            "content": "### Known blind spots\n- Replay duplicate/overwrite risk signal is not instrumented yet.\n- Manifest-to-ledger referential integrity ratio is not instrumented yet.",
             "mode": "markdown"
           },
           "title": "Inspect: Known Blind Spots",
           "type": "text",
-          "description": "Compact replay-safety blind-spot summary for the selected pipeline/run_type/time range. This is a limitation note, not a healthy signal: the dashboard cannot prove these invariants from current Prometheus metrics. The later Replay-Safety Signal Gaps note is the detailed companion; keep both collapsed until physical merge/removal is scheduled.",
+          "description": "Compact replay-safety blind-spot summary for the selected pipeline/run_type/time range. This is a limitation note, not a healthy signal: the dashboard cannot prove these invariants from current Prometheus metrics. Checkpoint freshness is no longer a blind spot because the first-screen checkpoint-lag panel is now backed by bounded freshness telemetry. The later Replay-Safety Signal Gaps note is the detailed companion; keep both collapsed until physical merge/removal is scheduled.",
           "fieldConfig": {
             "defaults": {
               "links": [
@@ -3961,7 +4050,7 @@
           },
           "id": 139,
           "options": {
-            "content": "### Remaining replay-safety signals\n\nThe ID evidence endpoint now exposes manifest/run identity, execution/config/contract/input anchors, replay parentage, copy-friendly full values, and checkpoint anchor compare without adding high-cardinality Prometheus labels.\n\nSignals still intentionally outside this dashboard section:\n\n- checkpoint_age <= recovery window / RPO metric\n- replay duplicate-record evidence metric\n- occurrence-only vs semantic drift classification beyond bounded replay_drift labels\n\nDo not add PromQL panels for high-cardinality IDs. Use `/ops/control-plane/identity-evidence`, manifest inspection, ledger inspection, checkpoint diagnostics, and artifact/lineage drilldowns for full identity values.",
+            "content": "### Remaining replay-safety signals\n\nThe ID evidence endpoint now exposes manifest/run identity, execution/config/contract/input anchors, replay parentage, copy-friendly full values, and checkpoint anchor compare without adding high-cardinality Prometheus labels. The first-screen checkpoint freshness lag panel now provides bounded checkpoint-age evidence from Prometheus without exposing raw checkpoint identifiers.\n\nSignals still intentionally outside this dashboard section:\n\n- replay duplicate-record evidence metric\n- occurrence-only vs semantic drift classification beyond bounded replay_drift labels\n\nDo not add PromQL panels for high-cardinality IDs. Use `/ops/control-plane/identity-evidence`, manifest inspection, ledger inspection, checkpoint diagnostics, and artifact/lineage drilldowns for full identity values.",
             "mode": "markdown"
           },
           "title": "Review: Remaining Replay-Safety Signals",

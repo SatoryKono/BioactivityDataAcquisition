@@ -194,6 +194,7 @@ def test_build_runtime_management_services_enables_quarantine_when_configured(
     assert checkpoint_context.expected_effective_config_artifact_id is None
     assert checkpoint_context.expected_input_snapshot_fingerprint is None
     assert checkpoint_context.run_ledger_port is None
+    assert checkpoint_context.metrics is infra_context.metrics
     create_dq_report_service.assert_called_once_with(
         logger,
         settings,

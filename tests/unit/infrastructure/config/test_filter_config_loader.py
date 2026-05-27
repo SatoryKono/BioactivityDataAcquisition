@@ -19,7 +19,9 @@ from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 
 
 @pytest.fixture
-def test_configs_root(tmp_path: Path) -> Path:
+def test_configs_root__infrastructure_config_test_filter_config_loader_22(
+    tmp_path: Path,
+) -> Path:
     """Create test config structure with hierarchical filter configs."""
     base_root = tmp_path / "base"
     base_root.mkdir(parents=True)
@@ -91,6 +93,14 @@ filters:
     )
 
     return tmp_path
+
+
+@pytest.fixture
+def test_configs_root(
+    test_configs_root__infrastructure_config_test_filter_config_loader_22: Path,
+) -> Path:
+    """Expose the isolated config root under the fixture name used by this module."""
+    return test_configs_root__infrastructure_config_test_filter_config_loader_22
 
 
 @pytest.fixture
@@ -380,7 +390,9 @@ class TestFilterConfigLoaderInlineOverrides:
 class TestFilterConfigLoaderCaching:
     """Tests for caching behavior."""
 
-    def test_caching_same_config(self, loader: FilterConfigLoader) -> None:
+    def test_caching_same_config__test_filter_config_loader_caching_infrastructure_config_test_filter_config_loader_383(
+        self, loader: FilterConfigLoader
+    ) -> None:
         """Same config should be cached."""
         config1 = loader.load("test_provider", "test_entity")
         config2 = loader.load("test_provider", "test_entity")
@@ -400,7 +412,9 @@ class TestFilterConfigLoaderCaching:
         assert config1 != config2
         assert len(loader._cache) == 1
 
-    def test_clear_cache(self, loader: FilterConfigLoader) -> None:
+    def test_clear_cache__test_filter_config_loader_caching_infrastructure_config_test_filter_config_loader_403(
+        self, loader: FilterConfigLoader
+    ) -> None:
         """clear_cache() should invalidate cache."""
         config1 = loader.load("test_provider", "test_entity")
         loader.clear_cache()

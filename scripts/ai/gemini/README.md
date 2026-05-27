@@ -96,6 +96,8 @@ Gemini CLI reads MCP servers from Gemini settings, not from the repository `.mcp
 
 Environment switches:
 
+- `GEMINI_INTERACTIVE_MCP_SERVERS=memory,filesystem` controls the fast-start MCP allowlist used by interactive mode.
+- `GEMINI_INTERACTIVE_ALL_MCP=1` disables the fast-start allowlist and lets Gemini start every configured MCP server.
 - `GEMINI_SKIP_MCP_SETUP=1` launches without synchronizing MCP.
 - `GEMINI_RESPECT_MCP_DISABLES=1` keeps existing Gemini `/mcp disable` choices; by default, core servers such as `filesystem` are re-enabled for coding-agent use.
 - `GEMINI_VALIDATE_MCP_LIST=1` additionally runs `gemini mcp list`.
@@ -108,5 +110,5 @@ Docker-backed MCP servers require Docker Desktop or a working Docker CLI. If Doc
 
 - `.env.gemini` is local and git-ignored. Do not copy real keys into docs, logs, reports, or PRs.
 - `.wsl_proxy_env.sh` is sourced automatically when present before network/API operations.
-- PowerShell does not duplicate setup logic; it resolves the repository WSL path and delegates to `run-gemini.sh`.
+- PowerShell does not duplicate setup logic; it resolves the repository WSL path and delegates to `run-gemini.sh`. PowerShell launchers use `BIOETL_WSL_DISTRO` when it is set and otherwise use the default WSL distro.
 - `headless.sh` / `headless.ps1` set `GEMINI_SKIP_MCP_SETUP=1` for one launch and then delegate back to the canonical launcher.

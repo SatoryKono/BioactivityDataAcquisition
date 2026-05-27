@@ -13,8 +13,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from memory.graph import sync as graph_sync
+from memory.tooling import workflow as workflow_module
 from memory.tooling.prune import find_prunable_episodic_notes, prune_episodic_notes
 from memory.tooling.refresh_all import refresh_all
+from tests.helpers.cli_process import run_main_in_process
 
 import pytest
 
@@ -239,35 +241,8 @@ def test_memory_tooling_package_exports_submodules_lazily() -> None:
     assert callable(query_module.query_all)
 
 
-def test_memory_workflow_module_help_does_not_emit_runpy_warning(
-    memory_local_tmp_path: Path,
-) -> None:
-    repo_root = Path(__file__).resolve().parents[3]
-    memory_source_root = repo_root / "src" / "memory"
-    sandbox_src_root = memory_local_tmp_path / "src"
-    shutil.copytree(
-        memory_source_root,
-        sandbox_src_root / "memory",
-        ignore=_ignore_memory_package_runtime_payloads(memory_source_root),
-    )
-    env = os.environ.copy()
-    pythonpath_entries = [str(sandbox_src_root)]
-    if env.get("PYTHONPATH"):
-        pythonpath_entries.append(env["PYTHONPATH"])
-    env["PYTHONPATH"] = os.pathsep.join(pythonpath_entries)
-    env["PYTHONDONTWRITEBYTECODE"] = "1"
-    # Set MEMORY_ROOT to the sandbox to prevent discovery from hanging
-    env["MEMORY_ROOT"] = str(sandbox_src_root / "memory")
-
-    result = subprocess.run(
-        [sys.executable, "-m", "memory.tooling.workflow", "--help"],
-        cwd=memory_local_tmp_path,
-        env=env,
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=30,
-    )
+def test_memory_workflow_module_help_does_not_emit_runpy_warning() -> None:
+    result = run_main_in_process(workflow_module.main, "--help")
 
     assert result.returncode == 0
     assert "RuntimeWarning" not in result.stderr

@@ -2,7 +2,28 @@
 
 from __future__ import annotations
 
-from tests.integration.ci.test_reproducibility_contract_suite import *  # noqa: F401,F403
+from dataclasses import replace
+from datetime import UTC, datetime
+from unittest.mock import MagicMock
+from uuid import UUID
+
+import pytest
+
+from bioetl.application.services.checkpoint_compatibility_service import (
+    CheckpointCompatibilityService,
+)
+from bioetl.application.services.control_plane.manifest.inspection_service import (
+    RunManifestInspectionService,
+)
+from bioetl.domain.types import RunID
+from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
+from tests.integration.ci.test_reproducibility_contract_suite import (
+    _InMemoryRunManifestStore,
+    _make_manifest,
+)
+
+pytestmark = pytest.mark.integration
+
 
 def test_reproducibility_contract_manifest_diff_classifies_occurrence_only() -> None:
     store = _InMemoryRunManifestStore()
@@ -28,6 +49,7 @@ def test_reproducibility_contract_manifest_diff_classifies_occurrence_only() -> 
     assert result.semantic_equivalent is True
     assert result.occurrence_only is True
     assert result.occurrence_difference_fields == ("manifest_id", "run_id")
+
 
 def test_reproducibility_contract_manifest_diff_treats_created_at_as_occurrence_only() -> (
     None
@@ -61,6 +83,7 @@ def test_reproducibility_contract_manifest_diff_treats_created_at_as_occurrence_
         "run_id",
     )
 
+
 def test_reproducibility_contract_manifest_diff_classifies_semantic_drift() -> None:
     store = _InMemoryRunManifestStore()
     left = _make_manifest(
@@ -86,6 +109,7 @@ def test_reproducibility_contract_manifest_diff_classifies_semantic_drift() -> N
     assert result.classification == "semantic_drift"
     assert result.semantic_equivalent is False
     assert "code_provenance" in result.semantic_difference_fields
+
 
 def test_reproducibility_contract_strict_resume_rejects_incomplete_legacy_checkpoint_metadata() -> (
     None
@@ -132,6 +156,7 @@ def test_reproducibility_contract_strict_resume_rejects_incomplete_legacy_checkp
     assert any(
         "checkpoint_missing_snapshot_anchor" in message for message in result.messages
     )
+
 
 def test_reproducibility_contract_manifest_diff_exposes_exact_replay_parentage() -> (
     None

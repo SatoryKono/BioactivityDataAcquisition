@@ -10,13 +10,13 @@ from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import get_settings
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.workflow_execution_service import (
+    from bioetl.application.services.control_plane.workflow.execution_service import (
         WorkflowExecutionService,
     )
-    from bioetl.application.services.control_plane.workflow_inspection_service import (
+    from bioetl.application.services.control_plane.workflow.inspection_service import (
         WorkflowInspectionService,
     )
-    from bioetl.application.services.control_plane.workflow_ledger_service import (
+    from bioetl.application.services.control_plane.workflow.ledger_service import (
         WorkflowLedgerService,
     )
     from bioetl.application.services.execution.pipeline_runner_service import (
@@ -78,6 +78,9 @@ def get_workflow_runner_service(
     from bioetl.application.workflow.transforms.builtins import (
         register_builtin_workflow_transforms,
     )
+    from bioetl.composition.bootstrap.runtime.observability import (
+        bootstrap_logger,
+    )
     from bioetl.composition.bootstrap.cli.noop import create_noop_logger
     from bioetl.composition.factories.services.port_factories import create_metrics
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -93,10 +96,16 @@ def get_workflow_runner_service(
         metrics=metrics,
         pipeline_name="workflow_transforms",
     )
+    reconciliation_logger = bootstrap_logger("workflow_reconciliation").bind(
+        component="workflow_reconciliation",
+        adapter="SilverForeignKeyReconciliationAdapter",
+    )
     transform_registry = register_builtin_workflow_transforms(
         WorkflowTransformRegistry(),
         foreign_key_reconciliation_port=SilverForeignKeyReconciliationAdapter(
-            silver_writer=transform_storage
+            silver_writer=transform_storage,
+            logger=reconciliation_logger,
+            metrics=metrics,
         ),
     )
     pipeline_runner_factory = (
@@ -127,7 +136,7 @@ def _create_workflow_ledger_service(
     ledger_port: WorkflowLedgerPort,
     manifest: WorkflowManifest,
 ) -> WorkflowLedgerService:
-    from bioetl.application.services.control_plane.workflow_ledger_service import (
+    from bioetl.application.services.control_plane.workflow.ledger_service import (
         WorkflowLedgerService,
     )
 
@@ -144,10 +153,10 @@ def get_workflow_execution_service(
     workflow_lock_port: LockPort | None = None,
 ) -> WorkflowExecutionService:
     """Build workflow execution orchestration with durable control-plane seams."""
-    from bioetl.application.services.control_plane.workflow_execution_service import (
+    from bioetl.application.services.control_plane.workflow.execution_service import (
         WorkflowExecutionService,
     )
-    from bioetl.application.services.control_plane.workflow_manifest_service import (
+    from bioetl.application.services.control_plane.workflow.manifest_service import (
         WorkflowManifestService,
     )
     from bioetl.composition.factories.services.port_factories import create_metrics
@@ -190,7 +199,7 @@ def get_workflow_execution_service(
 
 def get_workflow_inspection_service() -> WorkflowInspectionService:
     """Get workflow inspection service for operator diagnostics."""
-    from bioetl.application.services.control_plane.workflow_inspection_service import (
+    from bioetl.application.services.control_plane.workflow.inspection_service import (
         WorkflowInspectionService,
     )
     from bioetl.composition.factories.services.port_factories import create_metrics

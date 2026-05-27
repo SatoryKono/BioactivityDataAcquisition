@@ -5,10 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol, cast
 
-from bioetl.application.services.control_plane.run_ledger_service import (
+from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics import (
+from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
 )
 from bioetl.domain.control_plane import RunManifest

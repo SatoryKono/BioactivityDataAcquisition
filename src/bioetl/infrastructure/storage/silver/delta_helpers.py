@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, replace
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, NoReturn, cast
 
 import pyarrow as pa
@@ -117,16 +119,46 @@ def _build_merge_condition(primary_keys: list[str]) -> str:
     return " AND ".join(f"target.{key} = source.{key}" for key in primary_keys)
 
 
+def _delta_table_has_parquet_data(table_path: str) -> bool:
+    """Return whether a local Delta table path already contains parquet data files."""
+    table_path_obj = Path(table_path)
+    if "://" in table_path or not table_path_obj.exists():
+        # Remote/object-store tables and injected test doubles cannot be inspected
+        # with os.walk; let DeltaTable.merge handle their storage semantics.
+        return True
+
+    for dirpath, _dirnames, filenames in os.walk(table_path):
+        if dirpath.endswith("_delta_log"):
+            continue
+        for filename in filenames:
+            if filename.endswith(".parquet"):
+                return True
+    return False
+
+
 def _build_merge_execute_callable(
     *,
     dt: DeltaTableType,
+    table_path: str,
     records: pa.Table | pa.RecordBatchReader,
     merge_condition: str,
     merge_schema: bool,
-) -> Callable[[], Any]:  # Any: Delta merge returns heterogeneous result
+) -> Callable[[], object]:
     """Build the blocking Delta merge callable for ``run_in_executor``."""
 
-    def _execute() -> Any:  # Any: Delta merge returns heterogeneous result
+    def _execute() -> object:
+        if not _delta_table_has_parquet_data(table_path):
+            from deltalake import write_deltalake
+
+            write_kwargs: dict[str, object] = {
+                "table_or_uri": table_path,
+                "data": records,
+                "mode": "append",
+            }
+            if merge_schema:
+                write_kwargs["schema_mode"] = "merge"
+            return write_deltalake(**write_kwargs)
+
         update_predicate = _build_merge_update_predicate(records)
         return (
             dt.merge(
@@ -320,6 +352,7 @@ async def _merge_records_with_timeout(
         None,
         _build_merge_execute_callable(
             dt=dt,
+            table_path=table_path,
             records=records,
             merge_condition=merge_condition,
             merge_schema=merge_schema,

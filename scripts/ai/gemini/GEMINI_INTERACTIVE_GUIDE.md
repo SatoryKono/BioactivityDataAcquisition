@@ -4,6 +4,9 @@
 
 ### From PowerShell (Windows):
 ```powershell
+# Optional: target a specific distro instead of the default WSL distro
+# :BIOETL_WSL_DISTRO="Ubuntu-22.04"
+
 # First time setup (one-time)
 .\scripts\ai\gemini\run-gemini.ps1 check
 .\scripts\ai\gemini\run-gemini.ps1 setup
@@ -65,6 +68,7 @@ Gemini CLI automatically loads MCP servers from `.gemini/settings.json` in the r
 
 ### Environment Variables
 
+- `BIOETL_WSL_DISTRO=<name>` — PowerShell launchers target a specific WSL distro; when unset they use the default WSL distro
 - `GEMINI_SKIP_MCP_SETUP=1` — Skip MCP sync
 - `GEMINI_RESPECT_MCP_DISABLES=1` — Keep existing `/mcp disable` choices
 - `GEMINI_VALIDATE_MCP_LIST=1` — Validate MCP list on startup

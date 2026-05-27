@@ -216,9 +216,21 @@ required_panel_links_by_uid:
       target_uid: bioetl-workflow-overview
       link_titles: [Open Workflow]
   bioetl-dq-v2:
+    - panel_id: 116
+      target_uid: bioetl-control-plane-v1
+      link_titles: [Open Control Plane lineage diagnostics]
     - panel_id: 9102
       target_uid: bioetl-silver-reject-explorer
       link_titles: [Open Silver Reject Explorer]
+    - panel_id: 117
+      target_uid: bioetl-silver-reject-explorer
+      link_titles: [Open Silver Reject Explorer]
+    - panel_id: 121
+      target_uid: bioetl-silver-reject-explorer
+      link_titles: [Open Silver Reject Explorer for this reason]
+    - panel_id: 122
+      target_uid: bioetl-silver-reject-explorer
+      link_titles: [Open Silver Reject Explorer for this field]
   bioetl-workflow-overview:
     - panel_id: 9
       target_uid: bioetl-runtime

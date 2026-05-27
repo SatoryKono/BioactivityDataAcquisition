@@ -31,10 +31,7 @@ class TestSemanticScholarPilotContract:
         paper = data[0]
         external_ids = paper.get("externalIds", {})
         assert isinstance(external_ids, dict)
-        assert (
-            external_ids.get("DOI", "").lower()
-            == STABLE_DOI.lower()
-        )
+        assert external_ids.get("DOI", "").lower() == STABLE_DOI.lower()
 
     @pytest.mark.asyncio
     async def test_health_probe_shape(

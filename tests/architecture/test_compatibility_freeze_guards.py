@@ -6,6 +6,7 @@ import ast
 from datetime import date
 from importlib import import_module
 from pathlib import Path
+import subprocess
 
 import pytest
 
@@ -321,11 +322,62 @@ REMOVED_COMPAT_MODULES: dict[str, Path] = {
 }
 
 
+def _find_candidate_importer_files(
+    root: Path, module_name: str, leaf_name: str
+) -> list[Path]:
+    try:
+        root_spec = root.relative_to(ROOT).as_posix()
+    except ValueError:
+        return []
+    command = [
+        "git",
+        "-C",
+        ROOT.as_posix(),
+        "grep",
+        "-I",
+        "-l",
+        "-F",
+        "--no-color",
+        "-e",
+        module_name,
+        "-e",
+        leaf_name,
+        "--",
+        root_spec,
+    ]
+    try:
+        completed = subprocess.run(
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=120,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return [
+            root / relative_path
+            for relative_path in discover_files(str(root.resolve()), ".py")
+        ]
+    if completed.returncode == 1:
+        return []
+    if completed.returncode != 0:
+        return [
+            root / relative_path
+            for relative_path in discover_files(str(root.resolve()), ".py")
+        ]
+    return [
+        ROOT / line
+        for line in completed.stdout.splitlines()
+        if line.strip() and Path(line).suffix == ".py"
+    ]
+
+
 def _find_importers(root: Path, module_name: str) -> list[str]:
     violations: list[str] = []
     parent_module, _, leaf_name = module_name.rpartition(".")
-    for relative_path in discover_files(str(root.resolve()), ".py"):
-        path = root / relative_path
+    for path in _find_candidate_importer_files(root, module_name, leaf_name):
         text = path.read_text(encoding="utf-8")
         if module_name not in text and leaf_name not in text:
             continue
@@ -1588,7 +1640,9 @@ def test_checkpoint_compatibility_v2_surface_stays_removed_and_unimportable() ->
     with pytest.raises(ModuleNotFoundError):
         import_module(REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE)
     assert not _find_importers(ROOT / "src", REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE)
-    assert not _find_importers(ROOT / "tests", REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE)
+    assert not _find_importers(
+        ROOT / "tests", REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE
+    )
 
 
 @pytest.mark.architecture

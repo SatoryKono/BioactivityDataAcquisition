@@ -11,7 +11,10 @@ from bioetl.infrastructure.quarantine.filtered_reads import (
     get_filtered_record,
     list_filtered_records,
 )
-from bioetl.infrastructure.quarantine.operations import get_filtered_stats
+from bioetl.infrastructure.quarantine.operations import (
+    get_filtered_stats,
+    get_filtered_timeseries,
+)
 
 
 class _UnifiedQuarantineFilteredHost(Protocol):
@@ -96,6 +99,35 @@ class UnifiedQuarantineFilteredMixin:
             payload_hash=payload_hash,
             from_ts=from_ts,
             to_ts=to_ts,
+        )
+
+    async def get_filtered_timeseries(
+        self: _UnifiedQuarantineFilteredHost,
+        *,
+        pipeline: str | None = None,
+        run_type: str | None = None,
+        reason_code: str | None = None,
+        field: str | None = None,
+        run_id: str | None = None,
+        payload_hash: str | None = None,
+        from_ts: str | None = None,
+        to_ts: str | None = None,
+        bucket: str = "1h",
+    ) -> JsonDict:
+        """Return time-bucketed Silver-filter explorer stats for current scope."""
+        await asyncio.sleep(0)
+        return get_filtered_timeseries(
+            self.base_path,
+            None,
+            pipeline=pipeline,
+            run_type=run_type,
+            reason_code=reason_code,
+            field=field,
+            run_id=run_id,
+            payload_hash=payload_hash,
+            from_ts=from_ts,
+            to_ts=to_ts,
+            bucket=bucket,
         )
 
     async def get_filtered_filter_options(

@@ -480,7 +480,9 @@ class TestFieldValidationConfig:
 class TestCrossFieldValidationConfig:
     """Tests for CrossFieldValidationConfig schema."""
 
-    def test_all_present_condition(self) -> None:
+    def test_all_present_condition__test_cross_field_validation_config_infrastructure_schemas_test_dq_config_483(
+        self,
+    ) -> None:
         """All present condition validation."""
         cfv = CrossFieldValidationConfig(
             name="all_fields",
@@ -490,7 +492,9 @@ class TestCrossFieldValidationConfig:
         assert cfv.condition == "all_present"
         assert len(cfv.fields) == 3
 
-    def test_conditional_required(self) -> None:
+    def test_conditional_required__test_cross_field_validation_config_infrastructure_schemas_test_dq_config_493(
+        self,
+    ) -> None:
         """Conditional required with trigger/required fields."""
         cfv = CrossFieldValidationConfig(
             name="cond_req",

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
 )
@@ -20,7 +22,7 @@ from bioetl.application.core.lifecycle.checkpoint_runtime import (
     validate_compatibility_policy,
 )
 from bioetl.domain.medallion import LoadingStrategy
-from bioetl.domain.ports import CheckpointPort, LoggerPort, MetricsPort
+from bioetl.domain.ports import CheckpointPort, ClockPort, LoggerPort, MetricsPort
 from bioetl.domain.types import JsonDict, RunID
 from bioetl.domain.types.checkpoint_compatibility_result import (
     CheckpointCompatibilityResult,
@@ -28,6 +30,83 @@ from bioetl.domain.types.checkpoint_compatibility_result import (
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 _OPERATION_ERRORS = _RF005_OPERATION_ERRORS
+
+
+def _set_checkpoint_saved_at(
+    metrics: MetricsPort | None,
+    *,
+    pipeline_name: str,
+    checkpoint_saved_at_epoch_seconds: float | int | str | None,
+) -> None:
+    """Publish the latest persisted checkpoint timestamp when available."""
+    if metrics is None or checkpoint_saved_at_epoch_seconds is None:
+        return
+    try:
+        value = float(checkpoint_saved_at_epoch_seconds)
+    except (TypeError, ValueError):
+        return
+    metrics.set_gauge(
+        "bioetl_checkpoint_saved_at_seconds",
+        value,
+        {"pipeline": pipeline_name},
+    )
+
+
+def _checkpoint_saved_at_epoch_seconds(clock: ClockPort | None) -> float | None:
+    """Return checkpoint persistence time from the runtime clock when provided."""
+    if clock is None:
+        return None
+    return float(clock.now().timestamp())
+
+
+def _metadata_with_checkpoint_saved_at(
+    metadata: CheckpointMetadata,
+    *,
+    clock: ClockPort | None,
+) -> JsonDict:
+    """Convert checkpoint metadata and attach deterministic clock-owned save time."""
+    payload = metadata.to_dict()
+    checkpoint_saved_at = _checkpoint_saved_at_epoch_seconds(clock)
+    if checkpoint_saved_at is not None:
+        payload.setdefault("checkpoint_saved_at_epoch_seconds", checkpoint_saved_at)
+    return payload
+
+
+def _handle_missing_compatibility_context_result(
+    *,
+    logger: LoggerPort,
+    pipeline_name: str,
+    compatibility_policy: CheckpointCompatibilityPolicy,
+    checkpoint_metadata: CheckpointMetadata,
+    current_metadata: CheckpointMetadata | None,
+    service_available: bool,
+    emit_checkpoint_load_status: Callable[[str], None],
+) -> CheckpointMetadata | None:
+    """Apply the configured disposition when resume validation is unavailable."""
+    disposition = resolve_missing_compatibility_context_disposition(
+        compatibility_policy=compatibility_policy,
+    )
+    try:
+        result = handle_missing_compatibility_context(
+            logger=logger,
+            pipeline_name=pipeline_name,
+            compatibility_policy=compatibility_policy,
+            current_metadata=current_metadata,
+            checkpoint_metadata=checkpoint_metadata,
+            service_available=service_available,
+        )
+    except _OPERATION_ERRORS:
+        emit_checkpoint_load_status(
+            "missing_compatibility_context_hard_fail"
+            if disposition == "missing_context_hard_fail_raised"
+            else "missing_compatibility_context"
+        )
+        raise
+    if result is None:
+        emit_checkpoint_load_status("missing_compatibility_context")
+        return None
+    emit_checkpoint_load_status("loaded")
+    return result
 
 
 class CheckpointRuntimeService:
@@ -45,6 +124,7 @@ class CheckpointRuntimeService:
         *,
         loading_strategy: LoadingStrategy | None = None,
         metrics: MetricsPort | None = None,
+        clock: ClockPort | None = None,
         checkpoint_compatibility_service: CheckpointCompatibilityService | None = None,
         current_metadata: CheckpointMetadata | None = None,
         compatibility_policy: CheckpointCompatibilityPolicy = "soft_fail",
@@ -59,6 +139,7 @@ class CheckpointRuntimeService:
         self._resume_manifest_id = resume_manifest_id
         self._loading_strategy = loading_strategy
         self._metrics = metrics
+        self._clock = clock
         self._compatibility_service = checkpoint_compatibility_service
         self._current_metadata = current_metadata
         self._compatibility_policy = validate_compatibility_policy(compatibility_policy)
@@ -131,10 +212,14 @@ class CheckpointRuntimeService:
             missing_context.append("checkpoint_compatibility_service")
         if missing_context:
             return (
-                self._handle_missing_compatibility_context_result(
+                _handle_missing_compatibility_context_result(
+                    logger=self._logger,
+                    pipeline_name=self._pipeline_name,
+                    compatibility_policy=self._compatibility_policy,
                     checkpoint_metadata=checkpoint_metadata,
                     current_metadata=effective_current_metadata,
                     service_available=self._compatibility_service is not None,
+                    emit_checkpoint_load_status=self._emit_checkpoint_load_status,
                 ),
                 True,
             )
@@ -217,39 +302,6 @@ class CheckpointRuntimeService:
         )
         return result
 
-    def _handle_missing_compatibility_context_result(
-        self,
-        *,
-        checkpoint_metadata: CheckpointMetadata,
-        current_metadata: CheckpointMetadata | None,
-        service_available: bool,
-    ) -> CheckpointMetadata | None:
-        """Apply the configured disposition when resume validation is unavailable."""
-        disposition = resolve_missing_compatibility_context_disposition(
-            compatibility_policy=self._compatibility_policy,
-        )
-        try:
-            result = handle_missing_compatibility_context(
-                logger=self._logger,
-                pipeline_name=self._pipeline_name,
-                compatibility_policy=self._compatibility_policy,
-                current_metadata=current_metadata,
-                checkpoint_metadata=checkpoint_metadata,
-                service_available=service_available,
-            )
-        except _OPERATION_ERRORS:
-            self._emit_checkpoint_load_status(
-                "missing_compatibility_context_hard_fail"
-                if disposition == "missing_context_hard_fail_raised"
-                else "missing_compatibility_context"
-            )
-            raise
-        if result is None:
-            self._emit_checkpoint_load_status("missing_compatibility_context")
-            return None
-        self._emit_checkpoint_load_status("loaded")
-        return result
-
     async def load_checkpoint(
         self,
         current_metadata: CheckpointMetadata | None = None,
@@ -277,6 +329,14 @@ class CheckpointRuntimeService:
             self._emit_checkpoint_load_status("missing")
             return None
 
+        _, raw_metadata = checkpoint_data
+        _set_checkpoint_saved_at(
+            self._metrics,
+            pipeline_name=self._pipeline_name,
+            checkpoint_saved_at_epoch_seconds=raw_metadata.get(
+                "checkpoint_saved_at_epoch_seconds"
+            ),
+        )
         checkpoint_metadata = self._resolve_checkpoint_metadata(checkpoint_data)
         compatible_checkpoint, status_already_emitted = (
             self._validate_loaded_checkpoint(
@@ -302,10 +362,20 @@ class CheckpointRuntimeService:
         metadata = enrich_metadata_with_execution_identity(
             metadata, identity=self._current_metadata
         )
+        metadata_payload = _metadata_with_checkpoint_saved_at(
+            metadata, clock=self._clock
+        )
         await self._checkpoint.save(
             pipeline=self._pipeline_name,
             run_id=self._run_id,
-            metadata=metadata.to_dict(),
+            metadata=metadata_payload,
+        )
+        _set_checkpoint_saved_at(
+            self._metrics,
+            pipeline_name=self._pipeline_name,
+            checkpoint_saved_at_epoch_seconds=metadata_payload.get(
+                "checkpoint_saved_at_epoch_seconds"
+            ),
         )
 
     async def delete_checkpoint(self) -> None:

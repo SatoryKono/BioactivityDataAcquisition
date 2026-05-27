@@ -32,6 +32,7 @@ _ARCHITECTURE_CACHE_DIR = Path(
         str(Path(tempfile.gettempdir()) / "bioetl-architecture-cache"),
     )
 )
+_TEXT_CACHE_NAMES_WITHOUT_DISK = frozenset({"docs-text"})
 
 
 def _list_python_files(root: Path) -> list[Path]:
@@ -270,8 +271,12 @@ def _build_text_cache(
     paths: list[Path] | None = None,
 ) -> dict[Path, str]:
     """Read each file once and share the in-memory cache across the session."""
-    use_disk_cache = isinstance(cache_name_or_paths, str)
-    if use_disk_cache:
+    explicit_cache_name = isinstance(cache_name_or_paths, str)
+    use_disk_cache = (
+        explicit_cache_name
+        and cache_name_or_paths not in _TEXT_CACHE_NAMES_WITHOUT_DISK
+    )
+    if explicit_cache_name:
         cache_name, cache_paths = _resolve_disk_text_cache_request(
             cache_name_or_paths,
             paths,
@@ -280,7 +285,9 @@ def _build_text_cache(
         cache_name, cache_paths = _resolve_memory_text_cache_request(
             cache_name_or_paths
         )
-    cached_payload = _load_disk_cached_payload(cache_name, cache_paths)
+    cached_payload = (
+        _load_disk_cached_payload(cache_name, cache_paths) if use_disk_cache else None
+    )
     if cached_payload is not None:
         return cached_payload
 
@@ -454,9 +461,147 @@ def config_yaml_cache(
     return _build_yaml_cache(config_text_cache)
 
 
+def _subprocess_cache_dependency_paths(
+    command: list[str],
+    cwd: Path | None,
+) -> list[Path]:
+    """Resolve conservative cache dependencies for repo-wide scanner subprocesses."""
+    repo_root = Path(__file__).resolve().parents[2]
+    dependency_paths = list(_list_python_files(repo_root / "src" / "bioetl"))
+
+    static_files = [
+        repo_root / "pyproject.toml",
+        repo_root / ".secrets.baseline",
+        repo_root / "scripts" / "engineering" / "dev" / "run_mypy.sh",
+        repo_root / "scripts" / "engineering" / "dev" / "run_mypy.ps1",
+    ]
+    dependency_paths.extend(path for path in static_files if path.exists())
+
+    if (
+        cwd is not None
+        and cwd.exists()
+        and cwd
+        not in {
+            repo_root,
+            repo_root / "src" / "bioetl",
+        }
+    ):
+        dependency_paths.append(cwd)
+
+    return dependency_paths
+
+
+def _subprocess_cache_path(
+    command: list[str],
+    *,
+    timeout: float | None,
+    cwd: Path | None,
+    cache_namespace: str,
+) -> Path:
+    dependency_paths = _subprocess_cache_dependency_paths(command, cwd)
+    digest = hashlib.sha256()
+    digest.update(_ARCHITECTURE_CACHE_VERSION.encode("utf-8"))
+    digest.update(cache_namespace.encode("utf-8"))
+    digest.update(repr(tuple(command)).encode("utf-8"))
+    digest.update(repr(timeout).encode("utf-8"))
+    digest.update(str(cwd.resolve() if cwd is not None else "").encode("utf-8"))
+    digest.update(_cache_signature(dependency_paths).encode("ascii"))
+    return _ARCHITECTURE_CACHE_DIR / f"subprocess-{digest.hexdigest()}.pkl"
+
+
+def _load_subprocess_disk_cache(
+    cache_path: Path,
+    command: list[str],
+) -> subprocess.CompletedProcess[str] | None:
+    try:
+        with cache_path.open("rb") as handle:
+            payload = pickle.load(handle)
+    except (
+        OSError,
+        EOFError,
+        pickle.PickleError,
+        AttributeError,
+        ImportError,
+        ModuleNotFoundError,
+        ValueError,
+    ):
+        return None
+
+    if not isinstance(payload, dict):
+        return None
+    if payload.get("command") != command:
+        return None
+
+    return subprocess.CompletedProcess(
+        args=command,
+        returncode=int(payload.get("returncode", 1)),
+        stdout=str(payload.get("stdout", "")),
+        stderr=str(payload.get("stderr", "")),
+    )
+
+
+def _store_subprocess_disk_cache(
+    cache_path: Path,
+    *,
+    command: list[str],
+    result: subprocess.CompletedProcess[str],
+) -> None:
+    temp_path = cache_path.with_name(
+        f"{cache_path.name}.{os.getpid()}.{uuid4().hex}.tmp"
+    )
+    payload = {
+        "command": command,
+        "returncode": result.returncode,
+        "stdout": result.stdout,
+        "stderr": result.stderr,
+    }
+
+    try:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        with temp_path.open("wb") as handle:
+            pickle.dump(payload, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        try:
+            temp_path.replace(cache_path)
+        except PermissionError:
+            if cache_path.exists():
+                return
+            raise
+    except OSError:
+        try:
+            temp_path.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
+def _run_cached_subprocess(
+    command: list[str],
+    *,
+    timeout: float | None = None,
+    cwd: Path | None = None,
+    cache_namespace: str = "architecture-subprocess",
+) -> subprocess.CompletedProcess[str]:
+    cache_path = _subprocess_cache_path(
+        command, timeout=timeout, cwd=cwd, cache_namespace=cache_namespace
+    )
+    cached = _load_subprocess_disk_cache(cache_path, command)
+    if cached is not None:
+        return cached
+
+    result = subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+        cwd=cwd,
+        check=False,
+    )
+    _store_subprocess_disk_cache(cache_path, command=command, result=result)
+    return result
+
+
 @pytest.fixture(scope="session")
 def cached_subprocess_run() -> Callable[..., subprocess.CompletedProcess[str]]:
-    """Run subprocess commands once per unique command/timeout/cwd in session."""
+    """Run repo-wide scanner subprocesses once per session with disk-backed reuse."""
     cache: dict[
         tuple[tuple[str, ...], float | None, str | None],
         subprocess.CompletedProcess[str],
@@ -474,13 +619,10 @@ def cached_subprocess_run() -> Callable[..., subprocess.CompletedProcess[str]]:
             str(cwd) if cwd is not None else None,
         )
         if key not in cache:
-            cache[key] = subprocess.run(
+            cache[key] = _run_cached_subprocess(
                 command,
-                capture_output=True,
-                text=True,
                 timeout=timeout,
                 cwd=cwd,
-                check=False,
             )
         return cache[key]
 

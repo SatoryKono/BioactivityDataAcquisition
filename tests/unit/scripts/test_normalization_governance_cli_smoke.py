@@ -6,13 +6,18 @@ from pathlib import Path
 
 import pytest
 
-from tests.helpers import assert_cli_succeeded, run_python_cli
+from scripts.docs import __main__ as docs_router
+from scripts.engineering.qa import __main__ as qa_router
+from tests.helpers import assert_cli_succeeded, run_main_in_process
 
 
 def test_docs_cli_generate_pipeline_normalization_matrix_help_smoke() -> None:
-    result = run_python_cli(
-        "-m",
-        "scripts.docs",
+    spec = docs_router.COMMAND_SPECS["generate-pipeline-normalization-matrix"]
+    assert spec.runner == "module"
+    assert spec.target == "scripts.docs.matrix.generate_pipeline_normalization_matrix"
+
+    result = run_main_in_process(
+        docs_router.main,
         "generate-pipeline-normalization-matrix",
         "--help",
     )
@@ -24,9 +29,14 @@ def test_docs_cli_generate_pipeline_normalization_matrix_help_smoke() -> None:
 
 
 def test_qa_cli_report_normalization_fallback_inventory_help_smoke() -> None:
-    result = run_python_cli(
-        "-m",
-        "scripts.engineering.qa",
+    spec = qa_router.COMMAND_SPECS["report-normalization-fallback-inventory"]
+    assert spec.runner == "module"
+    assert (
+        spec.target == "scripts.engineering.qa.report_normalization_fallback_inventory"
+    )
+
+    result = run_main_in_process(
+        qa_router.main,
         "report-normalization-fallback-inventory",
         "--help",
     )
@@ -39,9 +49,12 @@ def test_qa_cli_report_normalization_fallback_inventory_help_smoke() -> None:
 
 
 def test_qa_cli_check_xwalk_missing_backlog_help_smoke() -> None:
-    result = run_python_cli(
-        "-m",
-        "scripts.engineering.qa",
+    spec = qa_router.COMMAND_SPECS["check-xwalk-missing-backlog"]
+    assert spec.runner == "module"
+    assert spec.target == "scripts.engineering.qa.check_xwalk_missing_backlog"
+
+    result = run_main_in_process(
+        qa_router.main,
         "check-xwalk-missing-backlog",
         "--help",
     )
@@ -59,13 +72,11 @@ def test_docs_cli_generate_pipeline_normalization_matrix_execution_smoke(
 ) -> None:
     out_dir = tmp_path / "matrix"
 
-    generate = run_python_cli(
-        "-m",
-        "scripts.docs",
+    generate = run_main_in_process(
+        docs_router.main,
         "generate-pipeline-normalization-matrix",
         "--out-dir",
         str(out_dir),
-        timeout=180,
     )
 
     assert_cli_succeeded(generate)
@@ -73,14 +84,12 @@ def test_docs_cli_generate_pipeline_normalization_matrix_execution_smoke(
     assert (out_dir / "pipeline_normalization_field_matrix.md").exists()
     assert (out_dir / "non_chembl_normalization_field_matrix.md").exists()
 
-    check = run_python_cli(
-        "-m",
-        "scripts.docs",
+    check = run_main_in_process(
+        docs_router.main,
         "generate-pipeline-normalization-matrix",
         "--out-dir",
         str(out_dir),
         "--check",
-        timeout=180,
     )
 
     assert_cli_succeeded(check)
@@ -92,9 +101,8 @@ def test_qa_cli_report_normalization_fallback_inventory_execution_smoke(
     json_out = tmp_path / "fallback.json"
     markdown_out = tmp_path / "fallback.md"
 
-    result = run_python_cli(
-        "-m",
-        "scripts.engineering.qa",
+    result = run_main_in_process(
+        qa_router.main,
         "report-normalization-fallback-inventory",
         "--limit",
         "5",

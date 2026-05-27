@@ -5,11 +5,11 @@ from __future__ import annotations
 from dataclasses import replace
 from datetime import UTC, datetime
 
-from bioetl.application.services.control_plane.historical_replay_corpus_service import (
+from bioetl.application.services.control_plane.replay.historical_corpus_service import (
     HistoricalReplayBulkCertificationSpec,
     HistoricalReplayCorpusService,
 )
-from bioetl.application.services.control_plane.historical_replay_certification_service import (
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationService,
     HistoricalReplaySnapshotCertification,
 )

@@ -149,7 +149,7 @@ def _read_delta_records(table_path: Path) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
     for uri in dt.file_uris():
         parquet_path = _delta_file_path_from_uri(uri)
-        records.extend(pq.read_table(parquet_path).to_pylist())
+        records.extend(pq.ParquetFile(parquet_path).read().to_pylist())
     return records
 
 
@@ -757,10 +757,7 @@ def _skip_strict_persistence_snapshot_gap(
         build_e2e_skip_reason(
             "PERSISTENCE_SNAPSHOT_GAP",
             pipeline_name=context.pipeline_name,
-            detail=(
-                "strict snapshot policy blocked cassette-backed playback: "
-                f"{exc}"
-            ),
+            detail=(f"strict snapshot policy blocked cassette-backed playback: {exc}"),
         )
     )
 

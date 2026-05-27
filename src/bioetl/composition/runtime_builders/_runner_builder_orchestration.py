@@ -6,7 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.run_ledger_service import (
+from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
 )
 from bioetl.composition.providers import ensure_providers_loaded

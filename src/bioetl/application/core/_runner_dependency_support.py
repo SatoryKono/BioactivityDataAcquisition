@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, cast
-from warnings import warn
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
@@ -41,59 +40,6 @@ class PipelineRunnerDependencies:
     def lock_manager(self) -> LockRuntimeService:
         """Legacy alias retained while callers migrate to runtime-service naming."""
         return self.lock_runtime_service
-
-
-def resolve_runner_dependencies(
-    *,
-    executor: BatchExecutor | None,
-    checkpoint_manager: CheckpointRuntimeService | None,
-    shutdown_signal: ShutdownSignal | None,
-    lock_runtime_service: LockRuntimeService | None,
-    lock_manager: LockRuntimeService | None,
-    preflight: PreflightService | None,
-    postrun: PostrunService | None,
-    lifecycle_service: MedallionLifecycleService | None,
-    observer: PipelineObserver | None,
-) -> PipelineRunnerDependencies:
-    """Resolve transitional constructor parameters into structured dependencies.
-
-    Compatibility shim for legacy direct runner kwargs. Review for removal after
-    2026-09-30 once test-only callers migrate to ``PipelineRunnerDependencies``.
-    """
-    warn(
-        "PipelineRunner legacy direct dependency kwargs are deprecated and will be "
-        "removed after 2026-09-30; pass PipelineRunnerDependencies instead.",
-        DeprecationWarning,
-        stacklevel=3,
-    )
-    values = {
-        "executor": executor,
-        "checkpoint_manager": checkpoint_manager,
-        "shutdown_signal": shutdown_signal,
-        "lock_runtime_service": lock_runtime_service or lock_manager,
-        "preflight": preflight,
-        "postrun": postrun,
-        "lifecycle_service": lifecycle_service,
-        "observer": observer,
-    }
-    missing = [name for name, value in values.items() if value is None]
-    if missing:
-        raise AssertionError("PipelineRunner constructor requires all dependencies")
-    return PipelineRunnerDependencies(
-        executor=cast("BatchExecutor", values["executor"]),
-        checkpoint_manager=cast(
-            "CheckpointRuntimeService", values["checkpoint_manager"]
-        ),
-        lock_runtime_service=cast("LockRuntimeService", values["lock_runtime_service"]),
-        preflight=cast("PreflightService", values["preflight"]),
-        postrun=cast("PostrunService", values["postrun"]),
-        lifecycle_service=cast(
-            "MedallionLifecycleService",
-            values["lifecycle_service"],
-        ),
-        observer=cast("PipelineObserver", values["observer"]),
-        shutdown_signal=cast("ShutdownSignal", values["shutdown_signal"]),
-    )
 
 
 async def load_runner_checkpoint(

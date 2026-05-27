@@ -4,6 +4,8 @@
 
 **From Windows (PowerShell):**
 ```powershell
+# Optional when the default WSL distro is not the target distro:
+# :BIOETL_WSL_DISTRO="Ubuntu-22.04"
 .\scripts\ai\gemini\run-gemini.ps1
 ```
 
@@ -11,6 +13,8 @@
 ```bash
 bash scripts/ai/gemini/run-gemini.sh
 ```
+
+Interactive mode uses a fast MCP allowlist (`memory,filesystem`) by default. Use `GEMINI_INTERACTIVE_ALL_MCP=1` when you explicitly need every configured MCP server at startup.
 
 ## 📝 Send a Single Prompt (No Interactive Loop)
 
@@ -134,6 +138,7 @@ bash scripts/ai/gemini/run-gemini.sh "why is my Docker build failing?"
 |-------|----------|
 | "GEMINI_API_KEY not set" | Edit `.env.gemini` with your API key from https://aistudio.google.com/app/apikeys |
 | "WSL not found" | Install WSL: `wsl --install` on Windows 11 |
+| Wrong WSL distro | Set `BIOETL_WSL_DISTRO=<name>` before running the PowerShell launcher; unset it to use the default distro |
 | "Node.js not found" | Run: `bash scripts/ai/gemini/run-gemini.sh setup` |
 | "MCP servers disconnected" | Start Docker Desktop if using Docker MCP server |
 | "Permission denied on scripts" | Fix: `chmod +x scripts/ai/gemini/*.sh scripts/ai/gemini/helper/*.sh` |

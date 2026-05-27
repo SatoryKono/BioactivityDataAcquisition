@@ -113,8 +113,9 @@ def test_generated_artifact_routing_classifies_docs_helper_surfaces() -> None:
         if route.get("id") == "docs-export-merged-markdown"
     )
     assert docs_export_route["commit_policy"] == "ignored_local_export"
-    assert "docs/exports/full-documentation-no-plans-reports-skills.merged.md" in (
-        docs_export_route["outputs"]
+    assert (
+        "docs/exports/full-documentation-no-plans-reports-skills.merged.md"
+        in (docs_export_route["outputs"])
     )
 
 
@@ -213,6 +214,25 @@ def test_grafana_screenshot_defaults_route_under_reports() -> None:
 
     assert 'Path("reports/observability/grafana/screenshots")' in script
     assert 'Path("output/playwright")' not in script
+
+
+def test_grafana_live_audit_report_routes_under_reports() -> None:
+    """Grafana live datasource audits must write under reports/observability."""
+    script = (
+        ROOT
+        / "scripts"
+        / "ops"
+        / "observability"
+        / "grafana"
+        / "audit_live_grafana_panels.py"
+    ).read_text(encoding="utf-8")
+    routing = _load_routing()
+    routed_outputs = {
+        output for route in routing["routes"] for output in route.get("outputs", [])
+    }
+
+    assert 'Path("reports/observability/grafana/live-panel-audit.json")' in script
+    assert "reports/observability/grafana/live-panel-audit.json" in routed_outputs
 
 
 def test_runtime_log_default_routes_under_reports_logs() -> None:

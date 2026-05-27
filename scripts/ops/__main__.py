@@ -10,6 +10,11 @@ Stable commands:
     check-observability-ports
                        Compare published observability endpoints with container health
     rerender-grafana   Rerender Grafana dashboard screenshots
+    audit-live-grafana Run reviewed live Grafana datasource/frame audit
+    check-grafana-audit-preflight
+                       Check local stack readiness for a full Grafana dashboard audit
+    run-grafana-audit-cycle
+                       Run preflight, screenshot refresh, and live Grafana audit
     wsl-proxy          Start WSL proxy helper
     codex              Launch Codex via repo-local bootstrap adapter (shell)
     codex-exec         Launch Codex full-auto via repo-local bootstrap adapter (shell)
@@ -21,11 +26,6 @@ Stable commands:
     check-skills       Check AI skills layout (shell)
     check-mirror       Check skills mirror sync (shell)
     deploy             Deploy BioETL (shell)
-    delete-branches    Delete stale git branches (shell)
-
-Legacy maintenance commands:
-    update-issue       Update a GitHub issue title/body/comment/state (shell)
-    triage-issues      Triage cleanup/docs issue wave (shell)
 """
 
 from __future__ import annotations
@@ -42,13 +42,18 @@ COMMAND_SPECS = {
     "salt-rotate": "maintenance/security/salt_rotate.py",
     "check-observability-ports": "observability/check_published_observability_endpoints.py",
     "rerender-grafana": "observability/grafana/rerender_grafana_screenshots.py",
+    "audit-live-grafana": "observability/grafana/audit_live_grafana_panels.py",
+    "check-grafana-audit-preflight": (
+        "observability/grafana/check_grafana_dashboard_audit_preflight.py"
+    ),
+    "run-grafana-audit-cycle": (
+        "observability/grafana/run_grafana_dashboard_audit_cycle.py"
+    ),
     "wsl-proxy": "runtime/wsl/wsl_proxy.py",
 }
 COMMAND_SPECS = {name: python_command(script) for name, script in COMMAND_SPECS.items()}
 
 SHELL_COMMAND_SPECS = {
-    "update-issue": "maintenance/github/update_github_issue.sh",
-    "triage-issues": "maintenance/github/triage_cleanup_issue_wave.sh",
     "codex": "launchers/codex/codex.sh",
     "codex-exec": "launchers/codex/codex-exec.sh",
     "codex-headless": "../ai/codex/headless.sh",
@@ -59,7 +64,6 @@ SHELL_COMMAND_SPECS = {
     "check-skills": "support/skills/check_ai_skills_layout.sh",
     "check-mirror": "support/skills/check_skills_mirror.sh",
     "deploy": "runtime/deploy/deploy-bioetl.sh",
-    "delete-branches": "maintenance/git/delete-stale-branches.sh",
 }
 SHELL_COMMAND_SPECS = {
     name: shell_command(script) for name, script in SHELL_COMMAND_SPECS.items()

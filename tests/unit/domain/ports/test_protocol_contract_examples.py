@@ -344,6 +344,22 @@ class TestQuarantinePortProtocol:
             ) -> dict[str, Any]:
                 return {"total": 0}
 
+            async def get_filtered_timeseries(
+                self,
+                *,
+                pipeline: str | None = None,
+                run_type: str | None = None,
+                reason_code: str | None = None,
+                field: str | None = None,
+                run_id: str | None = None,
+                payload_hash: str | None = None,
+                from_ts: str | None = None,
+                to_ts: str | None = None,
+                bucket: str = "1h",
+            ) -> dict[str, Any]:
+                await _yield_once()
+                return {"bucket": bucket, "rows": []}
+
             def get_filtered_filter_options(
                 self,
                 *,

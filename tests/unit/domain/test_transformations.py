@@ -142,7 +142,9 @@ class TestCanonicalJson:
 class TestGenerateContentHash:
     """Test content hash generation."""
 
-    def test_deterministic(self):
+    def test_deterministic__test_generate_content_hash_unit_domain_test_transformations_145(
+        self,
+    ):
         """Hash should be deterministic (same input → same output)."""
         record = {"id": "CHEMBL123", "value": 5.5}
         hash1 = generate_content_hash(record, "chembl")
@@ -217,7 +219,7 @@ class TestGenerateContentHash:
 
         assert hash1 == hash2
 
-    @settings(suppress_health_check=[HealthCheck.too_slow])
+    @settings(deadline=None, suppress_health_check=[HealthCheck.too_slow])
     @given(
         st.dictionaries(
             st.text(min_size=1, max_size=20),

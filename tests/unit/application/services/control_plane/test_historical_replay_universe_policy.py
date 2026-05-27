@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.historical_replay_universe_policy import (
+from bioetl.application.services.control_plane.replay.historical_universe_policy import (
     build_authoritative_truth_surface,
     build_durable_coverage_claim,
     build_governed_full_corpus_gate,
     build_universal_claim,
 )
-from bioetl.application.services.control_plane.historical_replay_universe_service import (
+from bioetl.application.services.control_plane.replay.historical_universe_service import (
     HistoricalReplayUniverseInventorySnapshot,
     HistoricalReplayUniverseRecord,
 )

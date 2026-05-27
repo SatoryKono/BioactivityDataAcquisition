@@ -78,11 +78,11 @@ def test_apply_normalization_evidence_only_executes_batched_statements(
 
     monkeypatch.setattr(NEO4J_HTTP_CLIENT_PATH, StubClient)
     monkeypatch.setattr(
-        "scripts.memory.sync._normalization_evidence_statements",
+        f"{SYNC_CORE_MODULE_PATH}._normalization_evidence_statements",
         lambda: list(stub_statements),
     )
     monkeypatch.setattr(
-        "scripts.memory.sync.resolve_neo4j_connection",
+        f"{SYNC_CORE_MODULE_PATH}.resolve_neo4j_connection",
         lambda _root, _http_uri: (
             HOST_DOCKER_INTERNAL_HTTP_URI,
             "neo4j",

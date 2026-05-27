@@ -49,6 +49,7 @@ REPO_BACKED_ROOT_USE_TOKENS = (
     "cwd=repo_root",
     "cwd = repo_root",
     "source = repo_root /",
+    "git_tracked_files(",
     "module_path =",
     "script_path =",
     'repo_root / "configs"',
@@ -135,6 +136,7 @@ def test_current_test_audit_issue_closeout_tracks_live_evidence() -> None:
         "#4508",
         "#4509",
         "#4536",
+        "#4685",
     }
     for relative_path in cast(list[str], closeout["evidence"]):
         assert (ROOT / relative_path).exists(), (
@@ -169,7 +171,7 @@ def test_test_governance_budgets_are_explicit_no_growth_ratchets() -> None:
     budgets = cast(YamlMap, payload["budgets"])
     ratchet = cast(YamlMap, payload["budget_ratchet"])
 
-    assert ratchet["linked_issue"] in {"#4458", "#4488", "#4499", "#4549"}
+    assert ratchet["linked_issue"] in {"#4458", "#4488", "#4499", "#4549", "#4685"}
     assert ratchet["mode"] == "fail-fast-no-growth"
     assert ratchet["expected_direction"] == "downward"
     assert cast(str, ratchet["touch_policy"]).strip()
@@ -185,10 +187,12 @@ def test_static_test_governance_report_reuses_cached_inventory_scan() -> None:
     second = collect_test_governance_report(ROOT)
 
     assert cache_policy["decision"] == "retained_cached_scanner"
+    assert cache_policy["issue_ref"] == "#4663"
     assert first is second
     assert cache_policy["cached_entrypoints"] == [
         "scripts.engineering.qa.report_test_governance_audit.collect_test_governance_report",
         "tests.architecture.conftest.cached_subprocess_run",
+        "tests.architecture.conftest._run_cached_subprocess",
         "tests.architecture.test_antipatterns.test_no_hardcoded_secrets",
     ]
     assert cache_policy["isolated_lanes"] == [
@@ -392,6 +396,48 @@ def test_repo_backed_unit_test_exceptions_are_explicitly_classified() -> None:
             "memory; memory tests are excluded from the repo-backed-unit lane"
         )
         assert cast(str, entry["protected_surface"]).strip()
+
+
+@pytest.mark.architecture
+def test_mixed_scope_unit_path_policy_is_explicit_and_matches_reclassified_examples() -> (
+    None
+):
+    payload = _load_yaml(CONFIG_PATH)
+    policy = cast(YamlMap, payload["mixed_scope_unit_path_policy"])
+    retained_policy_refs = cast(list[str], policy["retained_policy_refs"])
+    moved_examples = cast(list[YamlMap], policy["moved_examples"])
+    docs_ref = cast(str, policy["docs_ref"])
+    docs_path = docs_ref.split("#", maxsplit=1)[0]
+
+    assert policy["issue_ref"] == "#4665"
+    assert (
+        policy["decision"]
+        == "retained_logical_unit_ownership_with_curated_repo_backed_exceptions"
+    )
+    assert cast(str, policy["rationale"]).strip()
+    assert cast(str, policy["review_date"]) >= "2026-09-30"
+    assert docs_ref.endswith("#211-repo-backed-path-naming-and-reclassification")
+    assert (ROOT / docs_path).exists()
+    assert retained_policy_refs == [
+        "repo_backed_unit_test_exceptions",
+        "file_backed_domain_contract_tests",
+    ]
+    assert len(cast(list[str], policy["keep_under_tests_unit_when"])) >= 3
+    assert len(cast(list[str], policy["move_out_of_tests_unit_when"])) >= 3
+    assert {
+        (cast(str, entry["old_path"]), cast(str, entry["new_path"]))
+        for entry in moved_examples
+    } == set(MOVED_FILE_BACKED_UNIT_TESTS.items())
+
+    for retained_policy_ref in retained_policy_refs:
+        retained_policy = cast(YamlMap, payload[retained_policy_ref])
+        assert cast(list[YamlMap], retained_policy["entries"])
+
+    for entry in moved_examples:
+        old_path = ROOT / cast(str, entry["old_path"])
+        new_path = ROOT / cast(str, entry["new_path"])
+        assert not old_path.exists(), f"Moved file still present: {old_path}"
+        assert new_path.exists(), f"Missing reclassified test: {new_path}"
 
 
 @pytest.mark.architecture

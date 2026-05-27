@@ -23,7 +23,7 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.run_manifest_service import (
+    from bioetl.application.services.control_plane.manifest.service import (
         RunManifestCreateSpec,
     )
     from bioetl.composition.runtime_builders.inputs_resolver import RunnerInputs

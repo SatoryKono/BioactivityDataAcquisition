@@ -848,7 +848,7 @@ class TestDataQualityServiceBaselineUpdates:
         ]
 
     @pytest.mark.asyncio
-    async def test_baseline_not_updated_on_critical_anomaly(
+    async def test_baseline_not_updated_on_critical_anomaly__test_data_quality_service_baseline_updates_application_services_test_data_quality_service_851(
         self, mock_logger, mock_metrics, dq_config
     ):
         """Test that baseline is not updated when critical anomaly detected."""

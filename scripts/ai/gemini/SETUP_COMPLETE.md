@@ -6,7 +6,7 @@ Your Gemini CLI is fully configured and ready for interactive use:
 
 | Component | Status | Details |
 |-----------|--------|---------|
-| **WSL** | ✅ Active | Running in Ubuntu on WSL |
+| **WSL** | ✅ Active | Uses the default WSL distro, or `BIOETL_WSL_DISTRO` when set |
 | **Node.js** | ✅ Installed | v18.19.1 |
 | **npm** | ✅ Installed | v9.2.0 |
 | **Gemini CLI** | ✅ Installed | v0.39.1 (managed in `.cache/tools/gemini-cli/`) |

@@ -81,6 +81,11 @@ class TestBootstrapLogger:
         logger.warning("test_event", key="value", provider="chembl")
         logger.error("test_event", key="value", provider="chembl")
 
+        assert callable(logger.debug)
+        assert callable(logger.info)
+        assert callable(logger.warning)
+        assert callable(logger.error)
+
     def test_bootstrap_logger_bound_context(self):
         """Test that bootstrap logger has run_id and stage bound."""
         from bioetl.composition.bootstrap_logger import (

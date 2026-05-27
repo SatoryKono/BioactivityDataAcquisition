@@ -4,24 +4,18 @@
 
 param(
     [string]$Command = "start",
+    [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$Prompt = @()
 )
 
+$ErrorActionPreference = "Stop"
+
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$WslSupport = Join-Path $ScriptDir "helper\wsl-support.ps1"
+. $WslSupport
+
 $RepoRootWin = [System.IO.Path]::GetFullPath((Join-Path $ScriptDir "..\..\.."))
-
-try {
-    $RepoWSL = (wsl -d Ubuntu -- wslpath -a ($RepoRootWin -replace "\\", "/") 2>$null | Out-String).Trim()
-} catch {
-    $RepoWSL = ""
-}
-
-if (-not $RepoWSL) {
-    $DriveLetter = $RepoRootWin.Substring(0, 1).ToLowerInvariant()
-    $DrivePath = $RepoRootWin.Substring(2) -replace "\\", "/"
-    $RepoWSL = "/mnt/$DriveLetter$DrivePath"
-}
-
+$RepoWSL = ConvertTo-GeminiWslPath $RepoRootWin
 $LauncherWSL = "$RepoWSL/scripts/ai/gemini/run-gemini.sh"
 $ArgsToPass = @()
 
@@ -30,5 +24,5 @@ if ($MyInvocation.BoundParameters.ContainsKey("Command")) {
     $ArgsToPass += $Prompt
 }
 
-wsl -d Ubuntu -e bash -- "$LauncherWSL" @ArgsToPass
-exit $LASTEXITCODE
+$exitCode = Invoke-GeminiWslBashScript -ScriptPath $LauncherWSL -Arguments $ArgsToPass
+exit $exitCode

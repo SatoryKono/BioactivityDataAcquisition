@@ -110,6 +110,7 @@ class CompositeCheckpointService:
             glob_pattern=self._glob_pattern_value,
             storage=params.storage,
             logger=params.logger,
+            metrics=params.metrics,
         )
 
     def _make_filename(self, run_id: str) -> str:

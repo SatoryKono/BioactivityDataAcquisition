@@ -47,6 +47,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
         CheckpointPort,
+        ClockPort,
         GoldValidatorPort,
         LoggerPort,
         MetricsPort,
@@ -104,6 +105,7 @@ class ServicesBuilder:
         *,
         loading_strategy: LoadingStrategy | None = None,
         metrics: MetricsPort | None = None,
+        clock: ClockPort | None = None,
         checkpoint_compatibility_service: CheckpointCompatibilityService | None = None,
         current_metadata: CheckpointMetadata | None = None,
         compatibility_policy: Literal[
@@ -118,6 +120,7 @@ class ServicesBuilder:
             resume=resume,
             loading_strategy=loading_strategy,
             metrics=metrics,
+            clock=clock,
             checkpoint_compatibility_service=checkpoint_compatibility_service,
             current_metadata=current_metadata,
             compatibility_policy=compatibility_policy,

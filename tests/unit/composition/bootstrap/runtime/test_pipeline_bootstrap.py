@@ -8,7 +8,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
+from bioetl.composition.bootstrap.runtime.pipeline import (
+    RuntimeBootstrapPhases,
+    bootstrap_pipeline_runner,
+    build_runtime_bootstrap_phases,
+)
 
 pytestmark = pytest.mark.repo_backed
 
@@ -43,18 +47,18 @@ class TestBootstrapPipelineRunner:
                 return_value=configs_root,
             ) as mock_resolve_configs_root,
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.initialize_runtime_policy_sources"
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.initialize_runtime_policy_sources"
             ) as mock_initialize_policy_sources,
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.build_bootstrap_runner_factory_wiring",
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.build_bootstrap_runner_factory_wiring",
                 return_value=factory_wiring,
             ) as mock_build_factory_wiring,
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.build_bootstrap_runner_input_wiring",
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.build_bootstrap_runner_input_wiring",
                 return_value=input_wiring,
             ) as mock_build_input_wiring,
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner",
+                "bioetl.composition.bootstrap.runtime.pipeline._build_pipeline_runner",
                 return_value=expected_runner,
             ) as mock_build_runner,
         ):
@@ -93,15 +97,17 @@ class TestBootstrapPipelineRunner:
                 return_value=Path("/tmp/bioetl-configs"),
             ),
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.initialize_runtime_policy_sources"
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.initialize_runtime_policy_sources"
             ),
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.build_bootstrap_runner_factory_wiring"
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.build_bootstrap_runner_factory_wiring"
             ),
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.build_bootstrap_runner_input_wiring"
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.build_bootstrap_runner_input_wiring"
             ),
-            patch("bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner"),
+            patch(
+                "bioetl.composition.bootstrap.runtime.pipeline._build_pipeline_runner"
+            ),
         ):
             bootstrap_pipeline_runner(ctx, registry=None)
 
@@ -129,15 +135,17 @@ class TestBootstrapPipelineRunner:
                 return_value=configs_root,
             ),
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.initialize_runtime_policy_sources"
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.initialize_runtime_policy_sources"
             ),
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.build_bootstrap_runner_factory_wiring"
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.build_bootstrap_runner_factory_wiring"
             ),
             patch(
-                "bioetl.composition.bootstrap.runtime.pipeline.build_bootstrap_runner_input_wiring"
+                "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.build_bootstrap_runner_input_wiring"
             ) as mock_build_input_wiring,
-            patch("bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner"),
+            patch(
+                "bioetl.composition.bootstrap.runtime.pipeline._build_pipeline_runner"
+            ),
         ):
             bootstrap_pipeline_runner(
                 ctx,
@@ -149,6 +157,64 @@ class TestBootstrapPipelineRunner:
             configs_root=configs_root,
             load_pipeline_config_fn=injected_loader,
         )
+
+
+def test_build_runtime_bootstrap_phases_returns_typed_payload() -> None:
+    """Runtime bootstrap phases must be explicit before runner construction."""
+    ctx = MagicMock()
+    ctx.pipeline_name = "chembl_activity"
+    registry = MagicMock(name="registry")
+    effective_registry = MagicMock(name="effective_registry")
+    configs_root = Path("/tmp/bioetl-configs")
+    factory_wiring = MagicMock(name="factory_wiring")
+    input_wiring = MagicMock(name="input_wiring")
+    injected_loader = MagicMock(name="injected_pipeline_loader")
+
+    with (
+        patch(
+            "bioetl.composition.bootstrap.runtime.pipeline.apply_runtime_compatibility_patches"
+        ) as mock_compatibility,
+        patch(
+            "bioetl.composition.bootstrap.runtime.pipeline.prepare_runtime_registry",
+            return_value=effective_registry,
+        ) as mock_prepare_registry,
+        patch(
+            "bioetl.composition.bootstrap.runtime.pipeline.resolve_configs_root",
+            return_value=configs_root,
+        ),
+        patch(
+            "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.initialize_runtime_policy_sources"
+        ) as mock_initialize_policy_sources,
+        patch(
+            "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.build_bootstrap_runner_factory_wiring",
+            return_value=factory_wiring,
+        ),
+        patch(
+            "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases.build_bootstrap_runner_input_wiring",
+            return_value=input_wiring,
+        ) as mock_build_input_wiring,
+    ):
+        phases = build_runtime_bootstrap_phases(
+            ctx=ctx,
+            registry=registry,
+            load_pipeline_config_fn=injected_loader,
+        )
+
+    assert isinstance(phases, RuntimeBootstrapPhases)
+    assert phases.registry is effective_registry
+    assert phases.configs_root == configs_root
+    assert phases.factory_wiring is factory_wiring
+    assert phases.input_wiring is input_wiring
+    mock_compatibility.assert_called_once_with()
+    mock_prepare_registry.assert_called_once_with(
+        registry=registry,
+        pipeline_name="chembl_activity",
+    )
+    mock_initialize_policy_sources.assert_called_once_with(configs_root)
+    mock_build_input_wiring.assert_called_once_with(
+        configs_root=configs_root,
+        load_pipeline_config_fn=injected_loader,
+    )
 
 
 def test_pipeline_bootstrap_uses_runtime_phase_helpers() -> None:

@@ -177,6 +177,22 @@ class QuarantinePort(Protocol):
         """Return scoped Silver-filter aggregate stats for explorer UIs."""
         ...
 
+    async def get_filtered_timeseries(
+        self,
+        *,
+        pipeline: str | None = None,
+        run_type: str | None = None,
+        reason_code: str | None = None,
+        field: str | None = None,
+        run_id: str | None = None,
+        payload_hash: str | None = None,
+        from_ts: str | None = None,
+        to_ts: str | None = None,
+        bucket: str = "1h",
+    ) -> MetaDict:
+        """Return scoped Silver-filter temporal aggregates for explorer UIs."""
+        ...
+
     async def get_filtered_filter_options(
         self,
         *,

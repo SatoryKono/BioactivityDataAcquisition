@@ -57,6 +57,7 @@ def mock_quarantine_port():
     port.list_filtered_records = AsyncMock(return_value={"items": [], "total": 0})
     port.get_filtered_record = AsyncMock(return_value=None)
     port.get_filtered_stats = AsyncMock(return_value={"total": 0})
+    port.get_filtered_timeseries = AsyncMock(return_value={"bucket": "1h", "rows": []})
     port.get_filtered_filter_options = AsyncMock(
         return_value={
             "pipelines": [],
@@ -433,6 +434,48 @@ class TestQuarantineServiceFilteredExplorer:
             run_id=None,
             from_ts="2026-04-01T00:00:00Z",
             to_ts="2026-04-02T00:00:00Z",
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_filtered_timeseries(
+        self, quarantine_service, mock_quarantine_port
+    ):
+        """Service should delegate filtered-timeseries queries to the port."""
+        mock_quarantine_port.get_filtered_timeseries.return_value = {
+            "bucket": "1h",
+            "rows": [
+                {
+                    "bucket_start": "2026-04-01T00:00:00+00:00",
+                    "reject_count": 2,
+                    "bronze_records": 10,
+                    "reject_ratio": 0.2,
+                }
+            ],
+        }
+
+        result = await quarantine_service.get_filtered_timeseries(
+            pipeline="pipeline1",
+            run_type="incremental",
+            reason_code="missing_required_field",
+            field="canonical_smiles",
+            run_id="run-1",
+            from_ts="2026-04-01T00:00:00Z",
+            to_ts="2026-04-02T00:00:00Z",
+            bucket="1h",
+        )
+
+        assert result["bucket"] == "1h"
+        assert result["rows"][0]["reject_count"] == 2
+        mock_quarantine_port.get_filtered_timeseries.assert_called_once_with(
+            pipeline="pipeline1",
+            run_type="incremental",
+            reason_code="missing_required_field",
+            field="canonical_smiles",
+            run_id="run-1",
+            payload_hash=None,
+            from_ts="2026-04-01T00:00:00Z",
+            to_ts="2026-04-02T00:00:00Z",
+            bucket="1h",
         )
 
     @pytest.mark.asyncio

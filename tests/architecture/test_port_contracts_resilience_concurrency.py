@@ -487,7 +487,7 @@ class TestCheckpointPortConcurrentAccess:
 
         checkpoint = LocalCheckpointAdapter(base_path=tmp_path)
         run_id = uuid4()
-        metadata = {"key": "value"}
+        metadata = {"key": "value", "checkpoint_saved_at_epoch_seconds": 1770000000.0}
 
         try:
             await checkpoint.save("test_pipeline", run_id, metadata)
@@ -499,11 +499,18 @@ class TestCheckpointPortConcurrentAccess:
             results = await asyncio.gather(*tasks)
 
             # All results should be identical
+            first_result = results[0]
+            assert first_result is not None
+            _, first_metadata = first_result
             for result in results:
                 assert result is not None
                 loaded_run_id, loaded_metadata = result
                 assert loaded_run_id == run_id
-                assert loaded_metadata == metadata
+                assert loaded_metadata == first_metadata
+                assert loaded_metadata["key"] == metadata["key"]
+                assert isinstance(
+                    loaded_metadata["checkpoint_saved_at_epoch_seconds"], float
+                )
         finally:
             await checkpoint.aclose()
 

@@ -529,7 +529,9 @@ class TestDefaultFieldGroupConfig:
         """Default config uses FIELD_TO_GROUP_MAPPING."""
         assert DEFAULT_FIELD_GROUP_CONFIG.field_groups == FIELD_TO_GROUP_MAPPING
 
-    def test_default_group_is_trash(self) -> None:
+    def test_default_group_is_trash__test_default_field_group_config_domain_value_objects_test_publication_field_groups_532(
+        self,
+    ) -> None:
         """Default config uses TRASH as default group."""
         assert DEFAULT_FIELD_GROUP_CONFIG.default_group == PublicationFieldGroup.TRASH
 

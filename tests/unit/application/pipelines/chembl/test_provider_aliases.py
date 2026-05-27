@@ -40,9 +40,7 @@ def test_chembl_alias_policy_versions_bronze_provider_aliases() -> None:
     assert get_bronze_provider_aliases("activity") == {
         "molecule_id": "molecule_chembl_id"
     }
-    assert get_bronze_provider_aliases("tissue") == {
-        "tissue_id": "tissue_chembl_id"
-    }
+    assert get_bronze_provider_aliases("tissue") == {"tissue_id": "tissue_chembl_id"}
     assert get_bronze_provider_aliases("unknown") == {}
     assert set(CHEMBL_BRONZE_PROVIDER_ALIASES) == {"activity", "tissue"}
 

@@ -123,11 +123,6 @@ def _expected_duplicate_uses() -> dict[str, set[tuple[str, str]]]:
                 "Track: Data Quality Score Trend (Volume-weighted)",
             ),
         },
-        'round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~"$pipeline"}'
-        "[$__range])) or vector(0))": {
-            ("bioetl-control-plane-v1.json", "Monitor: Lineage Refs Missing"),
-            ("bioetl-dq-v2.json", "Monitor: Lineage Refs Missing"),
-        },
         'max((bioetl_replay_safety_blockers_15m{run_type=~"$run_type"}) and '
         'on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
         '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))': {
@@ -168,7 +163,7 @@ def _assert_dq_duplicate_reuse_semantics() -> None:
     )
 
 
-def _assert_lineage_duplicate_reuse_semantics() -> None:
+def _assert_lineage_control_plane_ownership_handoff() -> None:
     dq_dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     control_plane_dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-control-plane-v1.json")
@@ -183,14 +178,19 @@ def _assert_lineage_duplicate_reuse_semantics() -> None:
         for panel in get_dashboard_panels(control_plane_dashboard)
         if panel.get("title")
     }
-    dq_lineage = dq_panels["Monitor: Lineage Refs Missing"]
+    dq_handoff = dq_panels["Review: Lineage Handoff to Control Plane"]
     control_plane_lineage = control_plane_panels["Monitor: Lineage Refs Missing"]
-    assert dq_lineage.get("options", {}).get("graphMode") == "none"
-    assert control_plane_lineage.get("options", {}).get("graphMode") == "area"
-    assert (
-        "does not replace control plane diagnostics"
-        in str(dq_lineage.get("description", "")).lower()
+    assert dq_handoff.get("type") == "text"
+    dq_content = str(dq_handoff.get("options", {}).get("content", "")).lower()
+    assert "control plane" in dq_content
+    assert "canonical" in dq_content
+    dq_links = list(dq_handoff.get("links") or [])
+    assert any(
+        "bioetl-control-plane-v1" in str(link.get("url", ""))
+        and "viewPanel=904" in str(link.get("url", ""))
+        for link in dq_links
     )
+    assert control_plane_lineage.get("options", {}).get("graphMode") == "area"
     assert (
         "missing lineage can make replay evidence incomplete"
         in str(control_plane_lineage.get("description", "")).lower()
@@ -419,8 +419,14 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         assert "current" in status_description
     assert "0=ok" in status_description
     assert "null=unknown" in status_description
+    if dashboard_name == "bioetl-provider-health-v2.json":
+        assert "telemetry gap" in status_description
+        assert "monitor provider telemetry freshness" in status_description
+        assert "review raw provider health enum" in status_description
+        assert "pipeline-context evidence" in status_description
 
     identity = panels["ID"]
+    identity_description = str(identity.get("description", "")).lower()
     assert identity.get("datasource") == "Quarantine Explorer"
     identity_target = identity.get("targets", [])[0]
     assert identity_target.get("format") == "table"
@@ -432,6 +438,9 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         "/ops/control-plane/identity-table?"
         "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
     )
+    if dashboard_name == "bioetl-provider-health-v2.json":
+        assert "pipeline/run context evidence only" in identity_description
+        assert "does not prove current provider health" in identity_description
 
     processed = panels["Processed Records"]
     processed_expressions = get_panel_expressions({"panels": [processed]})
@@ -453,6 +462,9 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
     assert "missing" in processed_description
     assert "not ok" in processed_description
     assert "not displayed" in processed_description
+    if dashboard_name == "bioetl-provider-health-v2.json":
+        assert "does not prove current provider health" in processed_description
+        assert "monitor provider telemetry freshness" in processed_description
 
     dashboard_promql = "\n".join(get_panel_expressions(dashboard))
     assert "$run_id" not in dashboard_promql
@@ -734,7 +746,6 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             "Track: Silver Filter Rejects in Range": "round(",
             "Track: Silver Validation Failures in Range": "round(",
             "Monitor: Silver Validation Failures": "round(",
-            "Monitor: Lineage Refs Missing": "round(",
         },
         "bioetl-runtime.json": {
             "Monitor Pipeline Alert Conditions": "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
@@ -1182,10 +1193,13 @@ def test_provider_telemetry_freshness_marks_missing_current_status_as_warn() -> 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert len(expressions) == 1
     expression = expressions[0]
-    assert "count_over_time(bioetl_provider_current_status[15m])" in expression
-    assert "absent(count_over_time(bioetl_provider_current_status[15m]))" in expression
+    assert "count_over_time(bioetl_provider_current_status[${__range_s}s])" in expression
+    assert (
+        "absent(count_over_time(bioetl_provider_current_status[${__range_s}s]))"
+        in expression
+    )
     assert "or vector(0)" not in expression
-    assert "$__range" not in expression
+    assert "${__range_s}s" in expression
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("unit") == "none"
@@ -1212,7 +1226,7 @@ def test_provider_telemetry_freshness_marks_missing_current_status_as_warn() -> 
 
     description = str(panel.get("description", "")).lower()
     assert "telemetry gap" in description
-    assert "not as proof that providers are healthy" in description
+    assert "not proof that providers are healthy" in description
 
 
 def test_provider_critical_table_keeps_severity_only_scope() -> None:
@@ -1231,7 +1245,7 @@ def test_provider_critical_table_keeps_severity_only_scope() -> None:
     assert panel is not None, "Panel 'Inspect Critical Providers' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert expressions == ["bioetl_provider_current_status >= 1"]
+    assert expressions == ["max_over_time(bioetl_provider_current_status[${__range_s}s]) >= 1"]
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("thresholds", {}).get("steps") == [
@@ -1254,11 +1268,11 @@ def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Current Provider Health Status"
+            if item.get("title") == "Review Raw Provider Health Enum"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Monitor Current Provider Health Status' not found"
+    assert panel is not None, "Panel 'Review Raw Provider Health Enum' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any("bioetl_provider_health_status" in expr for expr in expressions)
@@ -1266,6 +1280,7 @@ def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
         "bioetl_provider_health_check_provider_universe_15m" in expr
         for expr in expressions
     )
+    assert any("${__range_s}s" in expr for expr in expressions)
     assert all("or vector(0)" not in expr for expr in expressions), (
         "Provider raw status panel must fail closed to UNKNOWN, not synthetic OK"
     )
@@ -1280,6 +1295,7 @@ def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
     assert {"null", "nan"} <= matches
     description = str(panel.get("description", "")).lower()
     assert "raw provider health enum evidence" in description
+    assert "status is unknown" in description
     assert "not the canonical first-screen verdict" in description
 
 
@@ -1303,6 +1319,7 @@ def test_provider_top_causes_panel_preserves_canonical_cause_only_semantics() ->
     assert all(
         "bioetl_provider_current_status >= 1" not in expr for expr in expressions
     )
+    assert any("${__range_s}s" in expr for expr in expressions)
     assert all("status_without_projected_cause" not in expr for expr in expressions)
     assert all("unless on (provider)" not in expr for expr in expressions)
 
@@ -1830,4 +1847,4 @@ def test_exact_duplicate_promql_groups_are_only_explicitly_justified_reuse() -> 
         f"{duplicate_uses_by_expr}"
     )
     _assert_dq_duplicate_reuse_semantics()
-    _assert_lineage_duplicate_reuse_semantics()
+    _assert_lineage_control_plane_ownership_handoff()

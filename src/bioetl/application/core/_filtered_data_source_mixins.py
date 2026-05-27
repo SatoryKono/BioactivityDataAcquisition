@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from bioetl.application.core._filtered_data_source_support import (
         _FilteredDataSourceState as _FilteredDataSourceStateBase,
     )
+    from bioetl.domain.ports.health_check import HealthCheckResult
     from bioetl.domain.types import HealthStatus
 else:
 
@@ -135,6 +136,19 @@ class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
     async def health_check(self) -> HealthStatus:
         """Delegate health check to wrapped adapter."""
         return await self._data_source.health_check()
+
+    async def check_health(self) -> HealthCheckResult:
+        """Delegate enhanced health checks when available, else synthesize one."""
+        from bioetl.domain.ports.health_check import HealthCheckResult
+
+        check_health = getattr(self._data_source, "check_health", None)
+        if check_health is not None and callable(check_health):
+            return await check_health()
+        return HealthCheckResult(
+            status=await self._data_source.health_check(),
+            latency_ms=0.0,
+            provider=self.provider_name,
+        )
 
     async def aclose(self) -> None:
         """Delegate close to wrapped adapter."""

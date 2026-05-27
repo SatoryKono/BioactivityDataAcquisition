@@ -32,3 +32,21 @@ ______________________________________________________________________
 > **Примечание:** Ранее использовались файлы-алиасы (`01-domain-objects.md`,
 > `02-etl-layers.md` и т.д.) в `docs/00-project/`. Они удалены — используйте
 > канонические документы напрямую.
+
+## Workflow Control Plane (ADR-047)
+
+- Target model: immutable `WorkflowManifest`, append-only `WorkflowLedger`, and mutable `WorkflowExecutionState`.
+- Local runtime safety: one `MemoryLock` per workflow name (ADR-010 local-only boundary).
+- Operator command flow: `bioetl workflow run`, `--resume-last`, `--repair-steps`, `--force-steps`, `bioetl workflow status`.
+
+Canonical sources:
+
+- [ADR-047](../02-architecture/decisions/ADR-047-workflow-control-plane.md)
+- [Workflow Object](../03-guides/workflows.md)
+- [Workflow Control-Plane Recovery](../05-operations/runbooks/workflow-control-plane.md)
+- [POST_CHANGE_VALIDATION](ai/agents/policy/POST_CHANGE_VALIDATION.md)
+
+Deprecated framing (do not use):
+
+- resume logic as ledger-only mutable state;
+- resume keyed only by workflow name without execution fingerprint.

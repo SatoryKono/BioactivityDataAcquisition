@@ -30,6 +30,7 @@ from bioetl.domain.aggregates._quarantine_value_objects import (
     ResolutionInfo,
     _validate_quarantine_required_fields,
 )
+from bioetl.domain.deterministic_identity import deterministic_id
 
 if TYPE_CHECKING:
     from bioetl.domain.aggregates.events import DomainEvent
@@ -137,7 +138,7 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
     ) -> QuarantineEntry:
         """Factory method to create a new quarantine entry.
 
-        Generates entry_id and payload_hash automatically.
+        Derives entry_id and payload_hash deterministically from explicit inputs.
 
         Args:
             pipeline_name: Pipeline where error occurred.
@@ -152,17 +153,25 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
             New QuarantineEntry instance.
         """
         import hashlib
-        from uuid import uuid4
 
         from bioetl.domain.serialization import serialize_to_json_canonical
-
-        # Generate entry ID
-        entry_id = str(uuid4())
 
         # Compute payload hash
         canonical = serialize_to_json_canonical(payload)
         hash_value = hashlib.sha256(canonical.encode()).hexdigest()
         payload_hash = ContentHash(hash_value)
+        entry_id = deterministic_id(
+            "quarantine-entry",
+            {
+                "batch_id": batch_id,
+                "created_at": created_at,
+                "error_code": error_code,
+                "metadata": metadata or {},
+                "payload_hash": payload_hash,
+                "pipeline_name": pipeline_name,
+                "run_id": run_id,
+            },
+        )
 
         entry = cls(
             entry_id=entry_id,

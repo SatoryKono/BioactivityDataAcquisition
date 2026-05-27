@@ -129,4 +129,6 @@ def __getattr__(name: str) -> object:
 
 
 def __dir__() -> list[str]:
-    return sorted(set(globals()) | set(__all__) | set(_MODULE_EXPORTS) | set(_ATTRIBUTE_EXPORTS))
+    return sorted(
+        set(globals()) | set(__all__) | set(_MODULE_EXPORTS) | set(_ATTRIBUTE_EXPORTS)
+    )

@@ -43,3 +43,4 @@ package.json
 pyproject.toml
 sonar-project.properties
 uv.lock
+mint.json

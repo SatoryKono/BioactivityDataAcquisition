@@ -183,7 +183,14 @@ case "$COMMAND" in
     start|"")
         log_info "Launching Gemini..."
         echo ""
-        bash "${HELPER_DIR}/run-gemini-impl.sh" "$@"
+        if [[ "${GEMINI_INTERACTIVE_ALL_MCP:-0}" == "1" ]]; then
+            bash "${HELPER_DIR}/run-gemini-impl.sh" "$@"
+        else
+            GEMINI_INTERACTIVE_MCP_SERVERS="${GEMINI_INTERACTIVE_MCP_SERVERS:-memory,filesystem}"
+            log_info "Fast interactive MCP allowlist: ${GEMINI_INTERACTIVE_MCP_SERVERS}"
+            log_info "Set GEMINI_INTERACTIVE_ALL_MCP=1 to enable every configured MCP server."
+            bash "${HELPER_DIR}/run-gemini-impl.sh" --allowed-mcp-server-names "${GEMINI_INTERACTIVE_MCP_SERVERS}" "$@"
+        fi
         ;;
 
     prompt)

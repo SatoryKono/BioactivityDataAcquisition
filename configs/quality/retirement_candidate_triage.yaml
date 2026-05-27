@@ -1,597 +1,802 @@
 schema_version: 1
-snapshot_date: "2026-04-13"
+snapshot_date: '2026-04-13'
 source:
-  query: "python -m scripts.memory query dead-code-candidates all --json"
-  focus: "zero-anchor retirement tranche after the 2026-04-13 cleanup wave and post-refactor false-positive triage"
-  owner: "@bioetl-architecture"
+  query: python -m scripts.memory query dead-code-candidates all --json
+  focus: zero-anchor retirement tranche after the 2026-04-13 cleanup wave and post-refactor
+    false-positive triage
+  owner: '@bioetl-architecture'
 policy:
   dispositions:
-    - "removed"
-    - "retain_active"
+  - removed
+  - retain_active
   review_cycle_days: 90
 repo_wide_zero_import_review:
-  linked_issue: "#4541"
+  linked_issue: '#4541'
   mode: fail-fast-zero-untriaged
-  inventory_command: "python -m scripts.engineering.qa.report_dead_code_inventory --json-out reports/quality/dead-code-inventory.json --md-out reports/quality/dead-code-inventory.md"
-  check_command: "python -m scripts.engineering.qa.report_dead_code_inventory --check --json-out reports/quality/dead-code-inventory.json --md-out reports/quality/dead-code-inventory.md"
+  inventory_command: python -m scripts.engineering.qa.report_dead_code_inventory --json-out
+    reports/quality/dead-code-inventory.json --md-out reports/quality/dead-code-inventory.md
+  check_command: python -m scripts.engineering.qa.report_dead_code_inventory --check
+    --json-out reports/quality/dead-code-inventory.json --md-out reports/quality/dead-code-inventory.md
   max_untriaged_zero_import_candidates: 0
-  last_reviewed: "2026-05-22"
-  next_review_by: "2026-08-20"
-  rationale: >-
-    Zero static import count is a review signal, not automatic removal proof.
-    Keep repo-wide zero-import findings fully classified so dynamic entrypoints,
-    sanctioned facades, and compatibility shims do not remain as implicit
-    false positives in the dead-code budget.
+  last_reviewed: '2026-05-22'
+  next_review_by: '2026-08-20'
+  rationale: Zero static import count is a review signal, not automatic removal proof.
+    Keep repo-wide zero-import findings fully classified so dynamic entrypoints, sanctioned
+    facades, and compatibility shims do not remain as implicit false positives in
+    the dead-code budget.
 repo_wide_zero_import_classification:
-  linked_issue: "#4541"
-  review_date: "2026-05-22"
+  linked_issue: '#4541'
+  review_date: '2026-05-22'
   allowed_dispositions:
-    - retain_module_entrypoint
-    - retain_dynamic_entrypoint
-    - retain_public_facade
-    - retain_compat_shim
-    - retain_canonical_owner_module
+  - retain_module_entrypoint
+  - retain_dynamic_entrypoint
+  - retain_public_facade
+  - retain_compat_shim
+  - retain_canonical_owner_module
   entries:
-    - module_path: src/bioetl/__main__.py
-      module_name: bioetl.__main__
-      disposition: retain_module_entrypoint
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Module entrypoint for `python -m bioetl`; static import scans stay at zero because the interpreter dispatches the module directly.
-    - module_path: src/bioetl/application/composite/dependency_join_support.py
-      module_name: bioetl.application.composite.dependency_join_support
-      disposition: retain_public_facade
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Public dependency-join facade retained as the sanctioned import seam over split helper modules.
-    - module_path: src/bioetl/application/core/batch_execution_lifecycle.py
-      module_name: bioetl.application.core.batch_execution_lifecycle
-      disposition: retain_public_facade
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Public batch-execution lifecycle facade retained as the sanctioned import seam over split core helpers.
-    - module_path: src/bioetl/application/core/batch_execution_run_service.py
-      module_name: bioetl.application.core.batch_execution_run_service
-      disposition: retain_public_facade
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Public batch-execution run-policy facade retained as the sanctioned import seam over split core helpers.
-    - module_path: src/bioetl/application/core/batch_execution_state_service.py
-      module_name: bioetl.application.core.batch_execution_state_service
-      disposition: retain_public_facade
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Public batch-execution state facade retained as the sanctioned import seam over split core helpers.
-    - module_path: src/bioetl/application/core/pipeline_service_protocols.py
-      module_name: bioetl.application.core.pipeline_service_protocols
-      disposition: retain_public_facade
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Aggregate pipeline-service protocol facade retained as the sanctioned import seam over narrower runtime, observability, and auxiliary protocol modules.
-    - module_path: src/bioetl/application/pipelines/common/blocks.py
-      module_name: bioetl.application.pipelines.common.blocks
-      disposition: retain_dynamic_entrypoint
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Lazy publication-block export surface is resolved through runtime `__getattr__` access rather than static imports.
-    - module_path: src/bioetl/application/pipelines/common/publication_strategies.py
-      module_name: bioetl.application.pipelines.common.publication_strategies
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Canonical publication-strategy owner module stays selectable by runtime/provider wiring even when direct static imports are absent.
-    - module_path: src/bioetl/application/pipelines/pubmed/strategies.py
-      module_name: bioetl.application.pipelines.pubmed.strategies
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: PubMed strategy owner module remains part of runtime/provider strategy selection even when direct static imports are absent.
-    - module_path: src/bioetl/application/services/_checkpoint_compatibility_runtime_core.py
-      module_name: bioetl.application.services._checkpoint_compatibility_runtime_core
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-25"
-      review_by: "2026-08-20"
-      linked_issue: "#4628"
-      rationale: Runtime checkpoint compatibility verdict helpers remain active application-service logic; the module is a canonical helper owner, not an import-preserving shim.
-    - module_path: src/bioetl/application/services/control_plane/_run_manifest_diagnostics_identity.py
-      module_name: bioetl.application.services.control_plane._run_manifest_diagnostics_identity
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Manifest diagnostics identity helpers remain the canonical owner module behind control-plane diagnostics assembly.
-    - module_path: src/bioetl/composition/bootstrap/cli/adr.py
-      module_name: bioetl.composition.bootstrap.cli.adr
-      disposition: retain_dynamic_entrypoint
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: CLI ADR bootstrap wiring is loaded through command/bootstrap registration rather than direct static imports.
-    - module_path: src/bioetl/composition/bootstrap/cli/control_plane_lifecycle.py
-      module_name: bioetl.composition.bootstrap.cli.control_plane_lifecycle
-      disposition: retain_dynamic_entrypoint
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: CLI control-plane lifecycle bootstrap wiring is loaded through command/bootstrap registration rather than direct static imports.
-    - module_path: src/bioetl/composition/runtime_builders/cached_bronze_snapshot_support.py
-      module_name: bioetl.composition.runtime_builders.cached_bronze_snapshot_support
-      disposition: retain_public_facade
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Cached-Bronze snapshot support remains the sanctioned public seam over the internal provenance helper implementation.
-    - module_path: src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py
-      module_name: bioetl.domain.behavior._dq_serializer_html._renderers
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: HTML DQ renderers remain the canonical owner module for serializer section rendering behind package-level assembly.
-    - module_path: src/bioetl/domain/entities/bioactivity/_entity.py
-      module_name: bioetl.domain.entities.bioactivity._entity
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Bioactivity entity definitions remain the canonical owner module behind package-root exports and contract tests.
-    - module_path: src/bioetl/domain/normalization/_pubchem_standardization_catalog.py
-      module_name: bioetl.domain.normalization._pubchem_standardization_catalog
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: PubChem standardization catalog remains the canonical normalization vocabulary owner module for runtime/domain access.
-    - module_path: src/bioetl/domain/ports/data_normalization.py
-      module_name: bioetl.domain.ports.data_normalization
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-24"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Data-normalization port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
-    - module_path: src/bioetl/domain/ports/data_source.py
-      module_name: bioetl.domain.ports.data_source
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-24"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Data-source port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
-    - module_path: src/bioetl/domain/ports/delta_reader.py
-      module_name: bioetl.domain.ports.delta_reader
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-24"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Delta-reader port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
-    - module_path: src/bioetl/domain/ports/export.py
-      module_name: bioetl.domain.ports.export
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-24"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Export port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
-    - module_path: src/bioetl/domain/ports/filtering.py
-      module_name: bioetl.domain.ports.filtering
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-24"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Filtering port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
-    - module_path: src/bioetl/domain/ports/idmapping.py
-      module_name: bioetl.domain.ports.idmapping
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-24"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: ID-mapping port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
-    - module_path: src/bioetl/domain/ports/logger_port.py
-      module_name: bioetl.domain.ports.logger_port
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: LoggerPort remains the canonical domain protocol module even though consumers import it through package-root exports.
-    - module_path: src/bioetl/domain/ports/pii.py
-      module_name: bioetl.domain.ports.pii
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-24"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: PII port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
-    - module_path: src/bioetl/domain/ports/publication_strategy.py
-      module_name: bioetl.domain.ports.publication_strategy
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-24"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Publication-strategy port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
-    - module_path: src/bioetl/domain/ports/resilience.py
-      module_name: bioetl.domain.ports.resilience
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-24"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Resilience port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
-    - module_path: src/bioetl/domain/ports/serialization.py
-      module_name: bioetl.domain.ports.serialization
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-24"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Serialization port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
-    - module_path: src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py
-      module_name: bioetl.domain.ports.workflow_foreign_key_reconciliation
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-24"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Workflow foreign-key reconciliation port definitions remain canonical domain protocol owners even when consumers import them through package-root exports.
-    - module_path: src/bioetl/domain/transformations/drift.py
-      module_name: bioetl.domain.transformations.drift
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Schema-drift transformations remain a canonical domain owner module behind package-root exports and strategy selection.
-    - module_path: src/bioetl/domain/transformations/quality.py
-      module_name: bioetl.domain.transformations.quality
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Quality transformations remain a canonical domain owner module behind package-root exports and strategy selection.
-    - module_path: src/bioetl/domain/types/gold_contracts.py
-      module_name: bioetl.domain.types.gold_contracts
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-24"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Gold contract type definitions remain canonical domain owner modules even when imported through package-root type surfaces.
-    - module_path: src/bioetl/domain/types/gold_schema_policy.py
-      module_name: bioetl.domain.types.gold_schema_policy
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-24"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Gold schema policy type definitions remain canonical domain owner modules even when imported through package-root type surfaces.
-    - module_path: src/bioetl/infrastructure/export/export_catalog_adapter.py
-      module_name: bioetl.infrastructure.export.export_catalog_adapter
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Export catalog adapter remains the canonical infrastructure owner module behind package-root exports.
-    - module_path: src/bioetl/infrastructure/export/export_writer_adapter.py
-      module_name: bioetl.infrastructure.export.export_writer_adapter
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Export writer adapter remains the canonical infrastructure owner module behind package-root exports.
-    - module_path: src/bioetl/infrastructure/storage/bronze/metadata_builders.py
-      module_name: bioetl.infrastructure.storage.bronze.metadata_builders
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Bronze metadata builders remain the canonical pure-owner module behind writer/runtime assembly.
-    - module_path: src/bioetl/infrastructure/storage/silver/arrow_mixin.py
-      module_name: bioetl.infrastructure.storage.silver.arrow_mixin
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Silver arrow helpers remain the canonical owner mixin module behind Silver writer assembly.
-    - module_path: src/bioetl/infrastructure/storage/silver/dtos.py
-      module_name: bioetl.infrastructure.storage.silver.dtos
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Silver DTO definitions remain the canonical owner module behind Silver writer assembly and tests.
-    - module_path: src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py
-      module_name: bioetl.infrastructure.storage.silver.operations.metadata_finalization_support
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Silver metadata finalization helpers remain the canonical owner module behind composition-backed storage operations.
-    - module_path: src/bioetl/interfaces/cli/commands/archive.py
-      module_name: bioetl.interfaces.cli.commands.archive
-      disposition: retain_dynamic_entrypoint
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Top-level CLI command module is loaded lazily from the command registry rather than through direct static imports.
-    - module_path: src/bioetl/interfaces/cli/commands/cleanup.py
-      module_name: bioetl.interfaces.cli.commands.cleanup
-      disposition: retain_dynamic_entrypoint
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Top-level CLI command module is loaded lazily from the command registry rather than through direct static imports.
-    - module_path: src/bioetl/interfaces/cli/commands/config_dq.py
-      module_name: bioetl.interfaces.cli.commands.config_dq
-      disposition: retain_dynamic_entrypoint
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Top-level CLI command module is loaded lazily from the command registry rather than through direct static imports.
-    - module_path: src/bioetl/interfaces/cli/commands/debug.py
-      module_name: bioetl.interfaces.cli.commands.debug
-      disposition: retain_dynamic_entrypoint
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Top-level CLI command module is loaded lazily from the command registry rather than through direct static imports.
-    - module_path: src/bioetl/interfaces/cli/commands/lock.py
-      module_name: bioetl.interfaces.cli.commands.lock
-      disposition: retain_dynamic_entrypoint
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Top-level CLI command module is loaded lazily from the command registry rather than through direct static imports.
-    - module_path: src/bioetl/interfaces/cli/commands/vacuum.py
-      module_name: bioetl.interfaces.cli.commands.vacuum
-      disposition: retain_dynamic_entrypoint
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Top-level CLI command module is loaded lazily from the command registry rather than through direct static imports.
-    - module_path: src/bioetl/interfaces/cli/commands/domains/maintenance/control_plane_lifecycle.py
-      module_name: bioetl.interfaces.cli.commands.domains.maintenance.control_plane_lifecycle
-      disposition: retain_dynamic_entrypoint
-      reviewed_on: "2026-05-22"
-      review_by: "2026-08-20"
-      linked_issue: "#4541"
-      rationale: Maintenance control-plane lifecycle command remains reachable through lazy CLI domain registration rather than direct static imports.
+  - module_path: src/bioetl/__main__.py
+    module_name: bioetl.__main__
+    disposition: retain_module_entrypoint
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Module entrypoint for `python -m bioetl`; static import scans stay
+      at zero because the interpreter dispatches the module directly.
+  - module_path: src/bioetl/application/core/batch_execution_lifecycle.py
+    module_name: bioetl.application.core.batch_execution_lifecycle
+    disposition: retain_public_facade
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Public batch-execution lifecycle facade retained as the sanctioned
+      import seam over split core helpers.
+  - module_path: src/bioetl/application/core/batch_execution_run_service.py
+    module_name: bioetl.application.core.batch_execution_run_service
+    disposition: retain_public_facade
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Public batch-execution run-policy facade retained as the sanctioned
+      import seam over split core helpers.
+  - module_path: src/bioetl/application/core/batch_execution_state_service.py
+    module_name: bioetl.application.core.batch_execution_state_service
+    disposition: retain_public_facade
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Public batch-execution state facade retained as the sanctioned import
+      seam over split core helpers.
+  - module_path: src/bioetl/application/core/pipeline_service_protocols.py
+    module_name: bioetl.application.core.pipeline_service_protocols
+    disposition: retain_public_facade
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Aggregate pipeline-service protocol facade retained as the sanctioned
+      import seam over narrower runtime, observability, and auxiliary protocol modules.
+  - module_path: src/bioetl/application/pipelines/common/blocks.py
+    module_name: bioetl.application.pipelines.common.blocks
+    disposition: retain_dynamic_entrypoint
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Lazy publication-block export surface is resolved through runtime `__getattr__`
+      access rather than static imports.
+  - module_path: src/bioetl/application/pipelines/common/publication_strategies.py
+    module_name: bioetl.application.pipelines.common.publication_strategies
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Canonical publication-strategy owner module stays selectable by runtime/provider
+      wiring even when direct static imports are absent.
+  - module_path: src/bioetl/application/pipelines/pubmed/strategies.py
+    module_name: bioetl.application.pipelines.pubmed.strategies
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: PubMed strategy owner module remains part of runtime/provider strategy
+      selection even when direct static imports are absent.
+  - module_path: src/bioetl/application/services/_checkpoint_compatibility_runtime_core.py
+    module_name: bioetl.application.services._checkpoint_compatibility_runtime_core
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-25'
+    review_by: '2026-08-20'
+    linked_issue: '#4628'
+    rationale: Runtime checkpoint compatibility verdict helpers remain active application-service
+      logic; the module is a canonical helper owner, not an import-preserving shim.
+  - module_path: src/bioetl/application/services/control_plane/_run_manifest_diagnostics_identity.py
+    module_name: bioetl.application.services.control_plane._run_manifest_diagnostics_identity
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Manifest diagnostics identity helpers remain the canonical owner module
+      behind control-plane diagnostics assembly.
+  - module_path: src/bioetl/application/services/control_plane/historical_replay_certification_service.py
+    module_name: bioetl.application.services.control_plane.historical_replay_certification_service
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the replay
+      certification ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/historical_replay_closure_models.py
+    module_name: bioetl.application.services.control_plane.historical_replay_closure_models
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the historical
+      replay closure models ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/historical_replay_closure_policy.py
+    module_name: bioetl.application.services.control_plane.historical_replay_closure_policy
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the historical
+      replay closure policy ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/historical_replay_closure_service.py
+    module_name: bioetl.application.services.control_plane.historical_replay_closure_service
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the historical
+      replay closure service ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/historical_replay_corpus_models.py
+    module_name: bioetl.application.services.control_plane.historical_replay_corpus_models
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the historical
+      replay corpus models ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/historical_replay_corpus_policy.py
+    module_name: bioetl.application.services.control_plane.historical_replay_corpus_policy
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the historical
+      replay corpus policy ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/historical_replay_corpus_service.py
+    module_name: bioetl.application.services.control_plane.historical_replay_corpus_service
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the historical
+      replay corpus service ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/historical_replay_universe_policy.py
+    module_name: bioetl.application.services.control_plane.historical_replay_universe_policy
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the historical
+      replay universe policy ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/historical_replay_universe_service.py
+    module_name: bioetl.application.services.control_plane.historical_replay_universe_service
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the historical
+      replay universe service ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/replay_bundle_descriptor_service.py
+    module_name: bioetl.application.services.control_plane.replay_bundle_descriptor_service
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the replay
+      bundle descriptor ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/run_manifest_diagnostics.py
+    module_name: bioetl.application.services.control_plane.run_manifest_diagnostics
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the run-manifest
+      diagnostics ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/run_manifest_inspection_service.py
+    module_name: bioetl.application.services.control_plane.run_manifest_inspection_service
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the run-manifest
+      inspection ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/workflow_execution_preparation.py
+    module_name: bioetl.application.services.control_plane.workflow_execution_preparation
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the workflow
+      execution preparation ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/workflow_execution_recording.py
+    module_name: bioetl.application.services.control_plane.workflow_execution_recording
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the workflow
+      execution recording ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/workflow_execution_service.py
+    module_name: bioetl.application.services.control_plane.workflow_execution_service
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the workflow
+      execution ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/workflow_inspection_service.py
+    module_name: bioetl.application.services.control_plane.workflow_inspection_service
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the workflow
+      inspection ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/workflow_ledger_service.py
+    module_name: bioetl.application.services.control_plane.workflow_ledger_service
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the workflow
+      ledger ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/workflow_manifest_models.py
+    module_name: bioetl.application.services.control_plane.workflow_manifest_models
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the workflow
+      manifest models ownership package after the control-plane package split.
+  - module_path: src/bioetl/application/services/control_plane/workflow_manifest_service.py
+    module_name: bioetl.application.services.control_plane.workflow_manifest_service
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-26'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Flat control-plane module remains a compatibility shim over the workflow
+      manifest service ownership package after the control-plane package split.
+  - module_path: src/bioetl/composition/bootstrap/cli/adr.py
+    module_name: bioetl.composition.bootstrap.cli.adr
+    disposition: retain_dynamic_entrypoint
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: CLI ADR bootstrap wiring is loaded through command/bootstrap registration
+      rather than direct static imports.
+  - module_path: src/bioetl/composition/bootstrap/cli/control_plane_lifecycle.py
+    module_name: bioetl.composition.bootstrap.cli.control_plane_lifecycle
+    disposition: retain_dynamic_entrypoint
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: CLI control-plane lifecycle bootstrap wiring is loaded through command/bootstrap
+      registration rather than direct static imports.
+  - module_path: src/bioetl/composition/runtime_builders/cached_bronze_snapshot_support.py
+    module_name: bioetl.composition.runtime_builders.cached_bronze_snapshot_support
+    disposition: retain_public_facade
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Cached-Bronze snapshot support remains the sanctioned public seam over
+      the internal provenance helper implementation.
+  - module_path: src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py
+    module_name: bioetl.domain.behavior._dq_serializer_html._renderers
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: HTML DQ renderers remain the canonical owner module for serializer
+      section rendering behind package-level assembly.
+  - module_path: src/bioetl/domain/entities/bioactivity/_entity.py
+    module_name: bioetl.domain.entities.bioactivity._entity
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Bioactivity entity definitions remain the canonical owner module behind
+      package-root exports and contract tests.
+  - module_path: src/bioetl/domain/normalization/_pubchem_standardization_catalog.py
+    module_name: bioetl.domain.normalization._pubchem_standardization_catalog
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: PubChem standardization catalog remains the canonical normalization
+      vocabulary owner module for runtime/domain access.
+  - module_path: src/bioetl/domain/ports/data_normalization.py
+    module_name: bioetl.domain.ports.data_normalization
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-24'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Data-normalization port definitions remain canonical domain protocol
+      owners even when consumers import them through package-root exports.
+  - module_path: src/bioetl/domain/ports/data_source.py
+    module_name: bioetl.domain.ports.data_source
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-24'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Data-source port definitions remain canonical domain protocol owners
+      even when consumers import them through package-root exports.
+  - module_path: src/bioetl/domain/ports/delta_reader.py
+    module_name: bioetl.domain.ports.delta_reader
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-24'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Delta-reader port definitions remain canonical domain protocol owners
+      even when consumers import them through package-root exports.
+  - module_path: src/bioetl/domain/ports/export.py
+    module_name: bioetl.domain.ports.export
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-24'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Export port definitions remain canonical domain protocol owners even
+      when consumers import them through package-root exports.
+  - module_path: src/bioetl/domain/ports/filtering.py
+    module_name: bioetl.domain.ports.filtering
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-24'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Filtering port definitions remain canonical domain protocol owners
+      even when consumers import them through package-root exports.
+  - module_path: src/bioetl/domain/ports/idmapping.py
+    module_name: bioetl.domain.ports.idmapping
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-24'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: ID-mapping port definitions remain canonical domain protocol owners
+      even when consumers import them through package-root exports.
+  - module_path: src/bioetl/domain/ports/logger_port.py
+    module_name: bioetl.domain.ports.logger_port
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: LoggerPort remains the canonical domain protocol module even though
+      consumers import it through package-root exports.
+  - module_path: src/bioetl/domain/ports/pii.py
+    module_name: bioetl.domain.ports.pii
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-24'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: PII port definitions remain canonical domain protocol owners even when
+      consumers import them through package-root exports.
+  - module_path: src/bioetl/domain/ports/publication_strategy.py
+    module_name: bioetl.domain.ports.publication_strategy
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-24'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Publication-strategy port definitions remain canonical domain protocol
+      owners even when consumers import them through package-root exports.
+  - module_path: src/bioetl/domain/ports/resilience.py
+    module_name: bioetl.domain.ports.resilience
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-24'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Resilience port definitions remain canonical domain protocol owners
+      even when consumers import them through package-root exports.
+  - module_path: src/bioetl/domain/ports/serialization.py
+    module_name: bioetl.domain.ports.serialization
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-24'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Serialization port definitions remain canonical domain protocol owners
+      domain protocol owners even when consumers import them through package-root
+      exports.
+  - module_path: src/bioetl/domain/transformations/drift.py
+    module_name: bioetl.domain.transformations.drift
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Schema-drift transformations remain a canonical domain owner module
+      behind package-root exports and strategy selection.
+  - module_path: src/bioetl/domain/transformations/quality.py
+    module_name: bioetl.domain.transformations.quality
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Quality transformations remain a canonical domain owner module behind
+      package-root exports and strategy selection.
+  - module_path: src/bioetl/domain/types/gold_contracts.py
+    module_name: bioetl.domain.types.gold_contracts
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-24'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Gold contract type definitions remain canonical domain owner modules
+      even when imported through package-root type surfaces.
+  - module_path: src/bioetl/domain/types/gold_schema_policy.py
+    module_name: bioetl.domain.types.gold_schema_policy
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-24'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Gold schema policy type definitions remain canonical domain owner modules
+      even when imported through package-root type surfaces.
+  - module_path: src/bioetl/infrastructure/export/export_catalog_adapter.py
+    module_name: bioetl.infrastructure.export.export_catalog_adapter
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Export catalog adapter remains the canonical infrastructure owner module
+      behind package-root exports.
+  - module_path: src/bioetl/infrastructure/export/export_writer_adapter.py
+    module_name: bioetl.infrastructure.export.export_writer_adapter
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Export writer adapter remains the canonical infrastructure owner module
+      behind package-root exports.
+  - module_path: src/bioetl/infrastructure/storage/bronze/metadata_builders.py
+    module_name: bioetl.infrastructure.storage.bronze.metadata_builders
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Bronze metadata builders remain the canonical pure-owner module behind
+      writer/runtime assembly.
+  - module_path: src/bioetl/infrastructure/storage/silver/arrow_mixin.py
+    module_name: bioetl.infrastructure.storage.silver.arrow_mixin
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Silver arrow helpers remain the canonical owner mixin module behind
+      Silver writer assembly.
+  - module_path: src/bioetl/infrastructure/storage/silver/dtos.py
+    module_name: bioetl.infrastructure.storage.silver.dtos
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Silver DTO definitions remain the canonical owner module behind Silver
+      writer assembly and tests.
+  - module_path: src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py
+    module_name: bioetl.infrastructure.storage.silver.operations.metadata_finalization_support
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Silver metadata finalization helpers remain the canonical owner module
+      behind composition-backed storage operations.
+  - module_path: src/bioetl/interfaces/cli/commands/archive.py
+    module_name: bioetl.interfaces.cli.commands.archive
+    disposition: retain_dynamic_entrypoint
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Top-level CLI command module is loaded lazily from the command registry
+      rather than through direct static imports.
+  - module_path: src/bioetl/interfaces/cli/commands/cleanup.py
+    module_name: bioetl.interfaces.cli.commands.cleanup
+    disposition: retain_dynamic_entrypoint
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Top-level CLI command module is loaded lazily from the command registry
+      rather than through direct static imports.
+  - module_path: src/bioetl/interfaces/cli/commands/config_dq.py
+    module_name: bioetl.interfaces.cli.commands.config_dq
+    disposition: retain_dynamic_entrypoint
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Top-level CLI command module is loaded lazily from the command registry
+      rather than through direct static imports.
+  - module_path: src/bioetl/interfaces/cli/commands/debug.py
+    module_name: bioetl.interfaces.cli.commands.debug
+    disposition: retain_dynamic_entrypoint
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Top-level CLI command module is loaded lazily from the command registry
+      rather than through direct static imports.
+  - module_path: src/bioetl/interfaces/cli/commands/lock.py
+    module_name: bioetl.interfaces.cli.commands.lock
+    disposition: retain_dynamic_entrypoint
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Top-level CLI command module is loaded lazily from the command registry
+      rather than through direct static imports.
+  - module_path: src/bioetl/interfaces/cli/commands/vacuum.py
+    module_name: bioetl.interfaces.cli.commands.vacuum
+    disposition: retain_dynamic_entrypoint
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Top-level CLI command module is loaded lazily from the command registry
+      rather than through direct static imports.
+  - module_path: src/bioetl/interfaces/cli/commands/domains/maintenance/control_plane_lifecycle.py
+    module_name: bioetl.interfaces.cli.commands.domains.maintenance.control_plane_lifecycle
+    disposition: retain_dynamic_entrypoint
+    reviewed_on: '2026-05-22'
+    review_by: '2026-08-20'
+    linked_issue: '#4541'
+    rationale: Maintenance control-plane lifecycle command remains reachable through
+      lazy CLI domain registration rather than direct static imports.
 families:
-  - name: "adapter_layer"
-    owner: "@bioetl-platform"
-    linked_issue: "2941"
-    entries:
-      - id: "cached_bronze_support_active"
-        disposition: "retain_active"
-        rationale: "Cached Bronze helper still backs the cached bronze datasource facade and remains an intentional extracted IO seam."
-        reviewed_on: "2026-04-13"
-        review_by: "2026-07-12"
-        linked_issue: "2941"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/infrastructure/adapters/_cached_bronze_support.py"
-          module_path: "src/bioetl/infrastructure/adapters/_cached_bronze_support.py"
-          module_name: "bioetl.infrastructure.adapters._cached_bronze_support"
-        verification:
-          min_src_importers: 1
-      - id: "circuit_breaker_contract_active"
-        disposition: "retain_active"
-        rationale: "The typed circuit-breaker contract is still re-exported through the public adapter seam and should not be treated as dead code."
-        reviewed_on: "2026-04-13"
-        review_by: "2026-07-12"
-        linked_issue: "2941"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/infrastructure/adapters/_circuit_breaker_contract.py"
-          module_path: "src/bioetl/infrastructure/adapters/_circuit_breaker_contract.py"
-          module_name: "bioetl.infrastructure.adapters._circuit_breaker_contract"
-        verification:
-          min_src_importers: 1
-      - id: "error_handling_support_active"
-        disposition: "retain_active"
-        rationale: "Adapter error-handling support still holds the extracted context/telemetry helpers behind the public ErrorService facade."
-        reviewed_on: "2026-04-13"
-        review_by: "2026-07-12"
-        linked_issue: "2941"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/infrastructure/adapters/_error_handling_support.py"
-          module_path: "src/bioetl/infrastructure/adapters/_error_handling_support.py"
-          module_name: "bioetl.infrastructure.adapters._error_handling_support"
-        verification:
-          min_src_importers: 1
-      - id: "health_check_observability_active"
-        disposition: "retain_active"
-        rationale: "Health-check observability helpers remain the canonical extracted seam behind HealthCheckMixin."
-        reviewed_on: "2026-04-13"
-        review_by: "2026-07-12"
-        linked_issue: "2941"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/infrastructure/adapters/_health_check_observability.py"
-          module_path: "src/bioetl/infrastructure/adapters/_health_check_observability.py"
-          module_name: "bioetl.infrastructure.adapters._health_check_observability"
-        verification:
-          min_src_importers: 1
-      - id: "health_check_policy_active"
-        disposition: "retain_active"
-        rationale: "Health-check policy helpers still back the shared mixin and are a live extracted seam rather than removable dead code."
-        reviewed_on: "2026-04-13"
-        review_by: "2026-07-12"
-        linked_issue: "2941"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/infrastructure/adapters/_health_check_policy.py"
-          module_path: "src/bioetl/infrastructure/adapters/_health_check_policy.py"
-          module_name: "bioetl.infrastructure.adapters._health_check_policy"
-        verification:
-          min_src_importers: 1
-  - name: "composite_layer"
-    owner: "@bioetl-architecture"
-    linked_issue: "2940"
-    entries:
-      - id: "preflight_rules_removed"
-        disposition: "removed"
-        rationale: "Legacy compat mixin was folded into CompositePreflightValidationService."
-        reviewed_on: "2026-04-13"
-        linked_issue: "2903"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/application/composite/_preflight_rules.py"
-          module_path: "src/bioetl/application/composite/_preflight_rules.py"
-      - id: "checkpoint_service_support_removed"
-        disposition: "removed"
-        rationale: "Checkpoint support facade was replaced by direct imports from extracted canonical helper modules."
-        reviewed_on: "2026-04-13"
-        linked_issue: "2907"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/application/composite/checkpoint/_service_support.py"
-          module_path: "src/bioetl/application/composite/checkpoint/_service_support.py"
-      - id: "checkpoint_state_codec_removed"
-        disposition: "removed"
-        rationale: "Checkpoint state serialization was folded into CompositeCheckpointState after the codec stopped having independent first-party callers."
-        reviewed_on: "2026-04-13"
-        linked_issue: "2938"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/application/composite/checkpoint/_state_codec.py"
-          module_path: "src/bioetl/application/composite/checkpoint/_state_codec.py"
-          module_name: "bioetl.application.composite.checkpoint._state_codec"
-      - id: "fsm_helper_active"
-        disposition: "retain_active"
-        rationale: "FSM helper is still part of runtime wiring and resume handling; missing memory anchors reflect stale analysis rather than dead code."
-        reviewed_on: "2026-04-13"
-        review_by: "2026-07-12"
-        linked_issue: "2908"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/application/composite/fsm_helper.py"
-          module_path: "src/bioetl/application/composite/fsm_helper.py"
-          module_name: "bioetl.application.composite.fsm_helper"
-        verification:
-          min_src_importers: 5
-      - id: "runner_merge_stage_flow_removed"
-        disposition: "removed"
-        rationale: "The separate merge-stage flow hotspot was folded back into CompositeRunnerMergeStageMixin after the helper seam stopped carrying independent first-party value."
-        reviewed_on: "2026-04-13"
-        linked_issue: "2939"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/application/composite/runner_pkg/runner_merge_stage_flow.py"
-          module_path: "src/bioetl/application/composite/runner_pkg/runner_merge_stage_flow.py"
-      - id: "column_priority_orderer_active"
-        disposition: "retain_active"
-        rationale: "Column priority ordering remains an intentionally retained extracted seam, but first-party usage is now funneled through column_service instead of multiple direct importers. The zero-anchor signal was stale triage, not removable dead code."
-        reviewed_on: "2026-04-13"
-        review_by: "2026-07-12"
-        linked_issue: "2909"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/application/composite/column_priority_orderer.py"
-          module_path: "src/bioetl/application/composite/column_priority_orderer.py"
-          module_name: "bioetl.application.composite.column_priority_orderer"
-        verification:
-          min_src_importers: 1
-      - id: "merger_input_mixin_active"
-        disposition: "retain_active"
-        rationale: "Merge input loading still powers merger IO/orchestration paths and has active first-party imports."
-        reviewed_on: "2026-04-13"
-        review_by: "2026-07-12"
-        linked_issue: "2909"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/application/composite/merger_input_mixin.py"
-          module_path: "src/bioetl/application/composite/merger_input_mixin.py"
-          module_name: "bioetl.application.composite.merger_input_mixin"
-        verification:
-          min_src_importers: 2
-      - id: "runner_support_flow_active"
-        disposition: "retain_active"
-        rationale: "Runner support flow still centralizes correlation context and preflight orchestration behind the support mixin."
-        reviewed_on: "2026-04-13"
-        review_by: "2026-07-12"
-        linked_issue: "2940"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/application/composite/runner_pkg/runner_support_flow.py"
-          module_path: "src/bioetl/application/composite/runner_pkg/runner_support_flow.py"
-          module_name: "bioetl.application.composite.runner_pkg.runner_support_flow"
-        verification:
-          min_src_importers: 1
-      - id: "runner_support_mixin_active"
-        disposition: "retain_active"
-        rationale: "Runner support mixin remains a live façade layer for canonical support/runtime policies and should stay triaged as active."
-        reviewed_on: "2026-04-13"
-        review_by: "2026-07-12"
-        linked_issue: "2940"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py"
-          module_path: "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py"
-          module_name: "bioetl.application.composite.runner_pkg.runner_support_mixin"
-        verification:
-          min_src_importers: 1
-      - id: "runner_support_policy_active"
-        disposition: "retain_active"
-        rationale: "Runner support policy still supplies the canonical build/selection helpers behind the support façade."
-        reviewed_on: "2026-04-13"
-        review_by: "2026-07-12"
-        linked_issue: "2940"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/application/composite/runner_pkg/runner_support_policy.py"
-          module_path: "src/bioetl/application/composite/runner_pkg/runner_support_policy.py"
-          module_name: "bioetl.application.composite.runner_pkg.runner_support_policy"
-        verification:
-          min_src_importers: 1
-      - id: "runner_support_runtime_active"
-        disposition: "retain_active"
-        rationale: "Runner support runtime still contains canonical checkpoint/save/seed runtime logic for composite execution."
-        reviewed_on: "2026-04-13"
-        review_by: "2026-07-12"
-        linked_issue: "2940"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py"
-          module_path: "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py"
-          module_name: "bioetl.application.composite.runner_pkg.runner_support_runtime"
-        verification:
-          min_src_importers: 1
-      - id: "runner_support_types_active"
-        disposition: "retain_active"
-        rationale: "Runner support types remain the shared protocol surface binding support/runtime helpers together."
-        reviewed_on: "2026-04-13"
-        review_by: "2026-07-12"
-        linked_issue: "2940"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/application/composite/runner_pkg/runner_support_types.py"
-          module_path: "src/bioetl/application/composite/runner_pkg/runner_support_types.py"
-          module_name: "bioetl.application.composite.runner_pkg.runner_support_types"
-        verification:
-          min_src_importers: 1
-      - id: "runtime_models_active"
-        disposition: "retain_active"
-        rationale: "Runtime models remain a high-fan-in canonical contract surface across composition, CLI, and composite execution."
-        reviewed_on: "2026-04-13"
-        review_by: "2026-07-12"
-        linked_issue: "2940"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/application/composite/runtime_models.py"
-          module_path: "src/bioetl/application/composite/runtime_models.py"
-          module_name: "bioetl.application.composite.runtime_models"
-        verification:
-          min_src_importers: 3
-      - id: "runtime_wiring_api_active"
-        disposition: "retain_active"
-        rationale: "Runtime wiring API is still the sanctioned bootstrap/runtime seam and should be retained as an active extracted surface."
-        reviewed_on: "2026-04-13"
-        review_by: "2026-07-12"
-        linked_issue: "2940"
-        target:
-          label: "module_surface"
-          name: "src/bioetl/application/composite/runtime_wiring_api.py"
-          module_path: "src/bioetl/application/composite/runtime_wiring_api.py"
-          module_name: "bioetl.application.composite.runtime_wiring_api"
-        verification:
-          min_src_importers: 2
+- name: adapter_layer
+  owner: '@bioetl-platform'
+  linked_issue: '2941'
+  entries:
+  - id: cached_bronze_support_active
+    disposition: retain_active
+    rationale: Cached Bronze helper still backs the cached bronze datasource facade
+      and remains an intentional extracted IO seam.
+    reviewed_on: '2026-04-13'
+    review_by: '2026-07-12'
+    linked_issue: '2941'
+    target:
+      label: module_surface
+      name: src/bioetl/infrastructure/adapters/_cached_bronze_support.py
+      module_path: src/bioetl/infrastructure/adapters/_cached_bronze_support.py
+      module_name: bioetl.infrastructure.adapters._cached_bronze_support
+    verification:
+      min_src_importers: 1
+  - id: circuit_breaker_contract_active
+    disposition: retain_active
+    rationale: The typed circuit-breaker contract is still re-exported through the
+      public adapter seam and should not be treated as dead code.
+    reviewed_on: '2026-04-13'
+    review_by: '2026-07-12'
+    linked_issue: '2941'
+    target:
+      label: module_surface
+      name: src/bioetl/infrastructure/adapters/_circuit_breaker_contract.py
+      module_path: src/bioetl/infrastructure/adapters/_circuit_breaker_contract.py
+      module_name: bioetl.infrastructure.adapters._circuit_breaker_contract
+    verification:
+      min_src_importers: 1
+  - id: error_handling_support_active
+    disposition: retain_active
+    rationale: Adapter error-handling support still holds the extracted context/telemetry
+      helpers behind the public ErrorService facade.
+    reviewed_on: '2026-04-13'
+    review_by: '2026-07-12'
+    linked_issue: '2941'
+    target:
+      label: module_surface
+      name: src/bioetl/infrastructure/adapters/_error_handling_support.py
+      module_path: src/bioetl/infrastructure/adapters/_error_handling_support.py
+      module_name: bioetl.infrastructure.adapters._error_handling_support
+    verification:
+      min_src_importers: 1
+  - id: health_check_observability_active
+    disposition: retain_active
+    rationale: Health-check observability helpers remain the canonical extracted seam
+      behind HealthCheckMixin.
+    reviewed_on: '2026-04-13'
+    review_by: '2026-07-12'
+    linked_issue: '2941'
+    target:
+      label: module_surface
+      name: src/bioetl/infrastructure/adapters/_health_check_observability.py
+      module_path: src/bioetl/infrastructure/adapters/_health_check_observability.py
+      module_name: bioetl.infrastructure.adapters._health_check_observability
+    verification:
+      min_src_importers: 1
+  - id: health_check_policy_active
+    disposition: retain_active
+    rationale: Health-check policy helpers still back the shared mixin and are a live
+      extracted seam rather than removable dead code.
+    reviewed_on: '2026-04-13'
+    review_by: '2026-07-12'
+    linked_issue: '2941'
+    target:
+      label: module_surface
+      name: src/bioetl/infrastructure/adapters/_health_check_policy.py
+      module_path: src/bioetl/infrastructure/adapters/_health_check_policy.py
+      module_name: bioetl.infrastructure.adapters._health_check_policy
+    verification:
+      min_src_importers: 1
+- name: composite_layer
+  owner: '@bioetl-architecture'
+  linked_issue: '2940'
+  entries:
+  - id: preflight_rules_removed
+    disposition: removed
+    rationale: Legacy compat mixin was folded into CompositePreflightValidationService.
+    reviewed_on: '2026-04-13'
+    linked_issue: '2903'
+    target:
+      label: module_surface
+      name: src/bioetl/application/composite/_preflight_rules.py
+      module_path: src/bioetl/application/composite/_preflight_rules.py
+  - id: checkpoint_service_support_removed
+    disposition: removed
+    rationale: Checkpoint support facade was replaced by direct imports from extracted
+      canonical helper modules.
+    reviewed_on: '2026-04-13'
+    linked_issue: '2907'
+    target:
+      label: module_surface
+      name: src/bioetl/application/composite/checkpoint/_service_support.py
+      module_path: src/bioetl/application/composite/checkpoint/_service_support.py
+  - id: checkpoint_state_codec_removed
+    disposition: removed
+    rationale: Checkpoint state serialization was folded into CompositeCheckpointState
+      after the codec stopped having independent first-party callers.
+    reviewed_on: '2026-04-13'
+    linked_issue: '2938'
+    target:
+      label: module_surface
+      name: src/bioetl/application/composite/checkpoint/_state_codec.py
+      module_path: src/bioetl/application/composite/checkpoint/_state_codec.py
+      module_name: bioetl.application.composite.checkpoint._state_codec
+  - id: fsm_helper_active
+    disposition: retain_active
+    rationale: FSM helper is still part of runtime wiring and resume handling; missing
+      memory anchors reflect stale analysis rather than dead code.
+    reviewed_on: '2026-04-13'
+    review_by: '2026-07-12'
+    linked_issue: '2908'
+    target:
+      label: module_surface
+      name: src/bioetl/application/composite/fsm_helper.py
+      module_path: src/bioetl/application/composite/fsm_helper.py
+      module_name: bioetl.application.composite.fsm_helper
+    verification:
+      min_src_importers: 5
+  - id: runner_merge_stage_flow_removed
+    disposition: removed
+    rationale: The separate merge-stage flow hotspot was folded back into CompositeRunnerMergeStageMixin
+      after the helper seam stopped carrying independent first-party value.
+    reviewed_on: '2026-04-13'
+    linked_issue: '2939'
+    target:
+      label: module_surface
+      name: src/bioetl/application/composite/runner_pkg/runner_merge_stage_flow.py
+      module_path: src/bioetl/application/composite/runner_pkg/runner_merge_stage_flow.py
+  - id: column_priority_orderer_active
+    disposition: retain_active
+    rationale: Column priority ordering remains an intentionally retained extracted
+      seam, but first-party usage is now funneled through column_service instead of
+      multiple direct importers. The zero-anchor signal was stale triage, not removable
+      dead code.
+    reviewed_on: '2026-04-13'
+    review_by: '2026-07-12'
+    linked_issue: '2909'
+    target:
+      label: module_surface
+      name: src/bioetl/application/composite/column_priority_orderer.py
+      module_path: src/bioetl/application/composite/column_priority_orderer.py
+      module_name: bioetl.application.composite.column_priority_orderer
+    verification:
+      min_src_importers: 1
+  - id: merger_input_mixin_active
+    disposition: retain_active
+    rationale: Merge input loading still powers merger IO/orchestration paths and
+      has active first-party imports.
+    reviewed_on: '2026-04-13'
+    review_by: '2026-07-12'
+    linked_issue: '2909'
+    target:
+      label: module_surface
+      name: src/bioetl/application/composite/merger_input_mixin.py
+      module_path: src/bioetl/application/composite/merger_input_mixin.py
+      module_name: bioetl.application.composite.merger_input_mixin
+    verification:
+      min_src_importers: 2
+  - id: runner_support_flow_active
+    disposition: retain_active
+    rationale: Runner support flow still centralizes correlation context and preflight
+      orchestration behind the support mixin.
+    reviewed_on: '2026-04-13'
+    review_by: '2026-07-12'
+    linked_issue: '2940'
+    target:
+      label: module_surface
+      name: src/bioetl/application/composite/runner_pkg/runner_support_flow.py
+      module_path: src/bioetl/application/composite/runner_pkg/runner_support_flow.py
+      module_name: bioetl.application.composite.runner_pkg.runner_support_flow
+    verification:
+      min_src_importers: 1
+  - id: runner_support_mixin_active
+    disposition: retain_active
+    rationale: "Runner support mixin remains a live fa\xE7ade layer for canonical\
+      \ support/runtime policies and should stay triaged as active."
+    reviewed_on: '2026-04-13'
+    review_by: '2026-07-12'
+    linked_issue: '2940'
+    target:
+      label: module_surface
+      name: src/bioetl/application/composite/runner_pkg/runner_support_mixin.py
+      module_path: src/bioetl/application/composite/runner_pkg/runner_support_mixin.py
+      module_name: bioetl.application.composite.runner_pkg.runner_support_mixin
+    verification:
+      min_src_importers: 1
+  - id: runner_support_policy_active
+    disposition: retain_active
+    rationale: "Runner support policy still supplies the canonical build/selection\
+      \ helpers behind the support fa\xE7ade."
+    reviewed_on: '2026-04-13'
+    review_by: '2026-07-12'
+    linked_issue: '2940'
+    target:
+      label: module_surface
+      name: src/bioetl/application/composite/runner_pkg/runner_support_policy.py
+      module_path: src/bioetl/application/composite/runner_pkg/runner_support_policy.py
+      module_name: bioetl.application.composite.runner_pkg.runner_support_policy
+    verification:
+      min_src_importers: 1
+  - id: runner_support_runtime_active
+    disposition: retain_active
+    rationale: Runner support runtime still contains canonical checkpoint/save/seed
+      runtime logic for composite execution.
+    reviewed_on: '2026-04-13'
+    review_by: '2026-07-12'
+    linked_issue: '2940'
+    target:
+      label: module_surface
+      name: src/bioetl/application/composite/runner_pkg/runner_support_runtime.py
+      module_path: src/bioetl/application/composite/runner_pkg/runner_support_runtime.py
+      module_name: bioetl.application.composite.runner_pkg.runner_support_runtime
+    verification:
+      min_src_importers: 1
+  - id: runner_support_types_active
+    disposition: retain_active
+    rationale: Runner support types remain the shared protocol surface binding support/runtime
+      helpers together.
+    reviewed_on: '2026-04-13'
+    review_by: '2026-07-12'
+    linked_issue: '2940'
+    target:
+      label: module_surface
+      name: src/bioetl/application/composite/runner_pkg/runner_support_types.py
+      module_path: src/bioetl/application/composite/runner_pkg/runner_support_types.py
+      module_name: bioetl.application.composite.runner_pkg.runner_support_types
+    verification:
+      min_src_importers: 1
+  - id: runtime_models_active
+    disposition: retain_active
+    rationale: Runtime models remain a high-fan-in canonical contract surface across
+      composition, CLI, and composite execution.
+    reviewed_on: '2026-04-13'
+    review_by: '2026-07-12'
+    linked_issue: '2940'
+    target:
+      label: module_surface
+      name: src/bioetl/application/composite/runtime_models.py
+      module_path: src/bioetl/application/composite/runtime_models.py
+      module_name: bioetl.application.composite.runtime_models
+    verification:
+      min_src_importers: 3
+  - id: runtime_wiring_api_active
+    disposition: retain_active
+    rationale: Runtime wiring API is still the sanctioned bootstrap/runtime seam and
+      should be retained as an active extracted surface.
+    reviewed_on: '2026-04-13'
+    review_by: '2026-07-12'
+    linked_issue: '2940'
+    target:
+      label: module_surface
+      name: src/bioetl/application/composite/runtime_wiring_api.py
+      module_path: src/bioetl/application/composite/runtime_wiring_api.py
+      module_name: bioetl.application.composite.runtime_wiring_api
+    verification:
+      min_src_importers: 2

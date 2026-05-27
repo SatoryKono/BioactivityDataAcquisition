@@ -16,6 +16,7 @@ from scripts.engineering.qa.file_discovery import discover_files
 _MIN_PARALLEL_READ_FILES = 64
 _DEFAULT_READ_WORKERS = 8
 _MAX_READ_WORKERS = 16
+_MAX_SOURCE_BYTES = 512_000
 
 
 @dataclass(frozen=True)
@@ -37,8 +38,10 @@ class ParsedModule:
     exact_import_usage: tuple[tuple[str, tuple[str, ...]], ...]
 
 
-def _read_worker_count(total_files: int) -> int:
+def _read_worker_count(total_files: int, *, os_name: str = os.name) -> int:
     """Return a conservative worker count for mounted-worktree file reads."""
+    if os_name == "nt":
+        return 1
     if total_files < _MIN_PARALLEL_READ_FILES:
         return 1
     cpu_count = os.cpu_count() or _DEFAULT_READ_WORKERS
@@ -49,7 +52,13 @@ def _read_module_source(item: tuple[str, Path]) -> tuple[str, Path, str | None]:
     """Read one Python module source payload for import-graph parsing."""
     module_name, py_file = item
     try:
-        return module_name, py_file, py_file.read_text(encoding="utf-8")
+        if py_file.stat().st_size > _MAX_SOURCE_BYTES:
+            return module_name, py_file, None
+        with py_file.open("rb") as stream:
+            source_bytes = stream.read(_MAX_SOURCE_BYTES + 1)
+        if len(source_bytes) > _MAX_SOURCE_BYTES:
+            return module_name, py_file, None
+        return module_name, py_file, source_bytes.decode("utf-8", errors="replace")
     except (OSError, UnicodeDecodeError):
         return module_name, py_file, None
 
@@ -287,6 +296,7 @@ def collect_exact_module_import_usage(
 
 def find_public_private_twin_modules(repo_root: Path) -> list[dict[str, str]]:
     """Return sibling ``_private.py``/``public.py`` first-party module pairs."""
+    repo_root = repo_root.resolve()
     src_root = repo_root / "src" / "bioetl"
     src_scan = PackageScan("src", src_root, "bioetl")
     module_name_by_path = {

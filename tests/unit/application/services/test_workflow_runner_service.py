@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass, field
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
@@ -14,9 +15,11 @@ from bioetl.application.services.execution.pipeline_runner_models import (
 )
 from bioetl.application.services.workflow_runner_service import WorkflowRunnerService
 from bioetl.application.services.workflow_transform_service import (
+    WorkflowTransformExecutionResult,
     WorkflowTransformService,
 )
 from bioetl.application.workflow.transforms import WorkflowTransformRegistry
+from bioetl.infrastructure.config import load_workflow_config
 from bioetl.domain.workflow import (
     TransformStepConfig,
     WorkflowConfig,
@@ -96,6 +99,70 @@ class _FailingPipelineRunner:
         await asyncio.sleep(0)
         del pipeline_name, dry_run, run_id, options
         raise RuntimeError("pipeline boom")
+
+
+class _SelectiveFailingPipelineRunner:
+    def __init__(self, failing_pipeline_name: str) -> None:
+        self.calls: list[tuple[str, object]] = []
+        self.failing_pipeline_name = failing_pipeline_name
+
+    async def run(
+        self,
+        pipeline_name: str,
+        dry_run: bool = False,
+        run_id: object | None = None,
+        options: object | None = None,
+    ) -> RunResult:
+        await asyncio.sleep(0)
+        del dry_run, run_id
+        self.calls.append((pipeline_name, options))
+        if pipeline_name == self.failing_pipeline_name:
+            raise RuntimeError("pipeline boom")
+        return RunResult(
+            status=PipelineRunResult.SUCCESS,
+            pipeline_name=pipeline_name,
+            run_id=str(uuid4()),
+            run_type="incremental",
+            started_at=FIXED_TEST_TIME,
+            completed_at=FIXED_TEST_TIME,
+        )
+
+
+@dataclass
+class _RecordingTransformService:
+    calls: list[tuple[str, tuple[str, ...]]] = field(default_factory=list)
+
+    async def run_step(
+        self,
+        *,
+        workflow_name: str,
+        step: TransformStepConfig,
+        upstream_outputs: dict[str, object] | None = None,
+        context_labels: dict[str, str] | None = None,
+        completed_fingerprints: dict[str, str] | None = None,
+        destructive_commit_callback: object | None = None,
+    ) -> WorkflowTransformExecutionResult:
+        del workflow_name, context_labels, completed_fingerprints
+        del destructive_commit_callback
+        upstream_outputs = upstream_outputs or {}
+        self.calls.append((step.step_id, tuple(sorted(upstream_outputs))))
+        return WorkflowTransformExecutionResult(
+            step_id=step.step_id,
+            transform_name=step.transform_name,
+            status="success",
+            fingerprint=f"fingerprint-{step.step_id}",
+            output={
+                "step_id": step.step_id,
+                "upstream_step_ids": tuple(sorted(upstream_outputs)),
+            },
+        )
+
+
+def _build_chembl_baseline_config() -> WorkflowConfig:
+    return load_workflow_config(
+        "chembl_baseline",
+        config_dir=Path("configs/workflows"),
+    )
 
 
 @pytest.mark.asyncio
@@ -276,6 +343,103 @@ async def test_workflow_runner_marks_downstream_steps_skipped_after_failure() ->
             "provider_context": "chembl",
         },
     ) in metrics.counters
+
+
+@pytest.mark.asyncio
+async def test_workflow_runner_executes_chembl_baseline_in_dependency_order() -> (
+    None
+):
+    metrics = _RecordingMetrics()
+    pipeline_runner = _PipelineRunner()
+    transform_service = _RecordingTransformService()
+    service = WorkflowRunnerService(
+        pipeline_runner=pipeline_runner,  # type: ignore[arg-type]
+        transform_service=transform_service,  # type: ignore[arg-type]
+        metrics=metrics,
+    )
+    config = _build_chembl_baseline_config()
+    events: list[tuple[str, str, str | None, str | None]] = []
+
+    result = await service.run_workflow(
+        config,
+        step_started_callback=lambda step, fingerprint=None: events.append(
+            (
+                "started",
+                step.step_id,
+                getattr(step, "pipeline_name", getattr(step, "transform_name", None)),
+                fingerprint,
+            )
+        ),
+        step_completed_callback=lambda result: events.append(
+            ("completed", result.step_id, result.status, None)
+        ),
+    )
+
+    assert result.status == "success"
+    assert [step.step_id for step in result.steps] == list(
+        config.topological_step_ids
+    )
+    assert [pipeline_name for pipeline_name, _options in pipeline_runner.calls] == [
+        "chembl_assay",
+        "chembl_target",
+        "chembl_publication",
+    ]
+    assert transform_service.calls == [
+        ("reconcile_assay_target_orphans", ("run_chembl_publication",)),
+        ("reconcile_assay_publication_orphans", ("reconcile_assay_target_orphans",)),
+    ]
+    assert [event[:3] for event in events] == [
+        ("started", "run_chembl_assay", "chembl_assay"),
+        ("completed", "run_chembl_assay", "success"),
+        ("started", "run_chembl_target", "chembl_target"),
+        ("completed", "run_chembl_target", "success"),
+        ("started", "run_chembl_publication", "chembl_publication"),
+        ("completed", "run_chembl_publication", "success"),
+        (
+            "started",
+            "reconcile_assay_target_orphans",
+            "reconcile_foreign_keys",
+        ),
+        ("completed", "reconcile_assay_target_orphans", "success"),
+        (
+            "started",
+            "reconcile_assay_publication_orphans",
+            "reconcile_foreign_keys",
+        ),
+        ("completed", "reconcile_assay_publication_orphans", "success"),
+    ]
+    assert all(isinstance(events[index][3], str) for index in (6, 8))
+
+
+@pytest.mark.asyncio
+async def test_workflow_runner_skips_chembl_baseline_reconciliation_after_failure() -> (
+    None
+):
+    metrics = _RecordingMetrics()
+    pipeline_runner = _SelectiveFailingPipelineRunner("chembl_target")
+    transform_service = _RecordingTransformService()
+    service = WorkflowRunnerService(
+        pipeline_runner=pipeline_runner,  # type: ignore[arg-type]
+        transform_service=transform_service,  # type: ignore[arg-type]
+        metrics=metrics,
+    )
+    config = _build_chembl_baseline_config()
+
+    result = await service.run_workflow(config)
+
+    assert result.status == "failed"
+    assert [step.status for step in result.steps] == [
+        "success",
+        "failed",
+        "skipped",
+        "skipped",
+        "skipped",
+    ]
+    assert transform_service.calls == []
+    assert [pipeline_name for pipeline_name, _options in pipeline_runner.calls] == [
+        "chembl_assay",
+        "chembl_target",
+    ]
 
 
 @pytest.mark.asyncio

@@ -274,7 +274,9 @@ def build_inventory_payload() -> dict[str, object]:
         fixture_path_raw = fixture_source.fixture_path
         fixture_path = PROJECT_ROOT / fixture_path_raw
         if not fixture_path.exists():
-            raise FileNotFoundError(f"Missing declared fixture path: {fixture_path_raw}")
+            raise FileNotFoundError(
+                f"Missing declared fixture path: {fixture_path_raw}"
+            )
 
         pipeline_name = _pipeline_name_from_fixture_key(fixture_key)
         entity_type = fixture_key.split("/", maxsplit=1)[1]

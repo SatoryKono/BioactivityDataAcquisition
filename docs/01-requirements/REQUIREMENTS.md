@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # BioETL: Требования к Проекту
 
-*Синхронизировано с RULES.md v6.1.3 (2026-04-29); ADR registry verified through ADR-047 (2026-05-08).*
+*Синхронизировано с RULES.md v6.1.3 (2026-04-29); ADR registry verified through ADR-048 (2026-05-26).*
 
 ______________________________________________________________________
 
@@ -45,8 +45,8 @@ ______________________________________________________________________
 ### REQ-ARCH-003
 
 - **Уровень**: MUST
-- **Описание**: Доменный слой (Domain) не содержит операций ввода-вывода (I/O)
-- **Проверка**: Статический анализ импортов в `domain/` — отсутствие httpx, requests, sqlite3, psycopg2, boto3 и т.д.
+- **Описание**: Доменный слой (Domain) не содержит операций ввода-вывода (I/O). Исключение по [ADR-048](../02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md): импорты Pandera/Pandas разрешены только как schema-contract representation в `src/bioetl/domain/schemas/` и `src/bioetl/domain/contracts/`; это не infrastructure mapping и не runtime bootstrap ownership.
+- **Проверка**: Статический анализ импортов в `domain/` — отсутствие httpx, requests, sqlite3, psycopg2, boto3 и т.д.; отдельная архитектурная проверка, что Pandera/Pandas находятся только в `domain/schemas` и `domain/contracts`.
 
 ### REQ-ARCH-004
 
@@ -685,8 +685,8 @@ ______________________________________________________________________
 #### REQ-STACK-003
 
 - **Уровень**: MUST
-- **Описание**: Валидация — Pandera для DataFrames
-- **Проверка**: Проверить использование Pandera схем
+- **Описание**: Валидация DataFrame-контрактов выполняется через Pandera строго в boundary, определённой [ADR-048](../02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md): domain schema/contracts описываются в `src/bioetl/domain/schemas/` и `src/bioetl/domain/contracts/`, а runtime-совместимость Pandera активируется только через `bioetl.composition.bootstrap.runtime.compatibility.apply_runtime_compatibility_patches` (ownership: composition orchestration seam + infrastructure implementation).
+- **Проверка**: Проверить использование Pandera schema/contracts в разрешённых пакетах и отсутствие import-time patching в package `__init__` entrypoints.
 
 #### REQ-STACK-004
 
@@ -1094,6 +1094,7 @@ ______________________________________________________________________
 
 ## История Изменений
 
+- **1.9** (2026-05-26): ADR-048 alignment. Зафиксирована граница Domain schema boundary: Pandera/Pandas разрешены только в `domain/schemas` + `domain/contracts`; runtime Pandera compatibility patching закреплён только за seam `apply_runtime_compatibility_patches` в composition/bootstrap и implementation в infrastructure. Обновлены формулировки REQ-ARCH-003 и REQ-STACK-003, добавлены прямые cross-reference на ADR-048.
 - **1.8** (2026-03-13): Уточнён REQ-DOC-001: docs guardrails и generated-doc checks синхронизированы с текущей publication/navigation governance.
 - **1.7** (2026-03-02): Pre-v6.1 dependency policy update. Обновлена REQ-DEP-001: mixed strategy (`pyproject.toml` ranges + `uv.lock`) вместо требования глобального `==` pinning.
 - **1.6** (2026-02-27): Pre-v6.1 terminology cleanup. Исправлена терминология требований (`health_check`, `from __future__ import annotations`, формат env vars `BIOETL_{PROVIDER}_{KEY}`).

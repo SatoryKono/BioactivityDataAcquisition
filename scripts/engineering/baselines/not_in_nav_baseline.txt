@@ -103,6 +103,7 @@
 02-architecture/adr-registry/README.md
 02-architecture/adr-registry/index.md
 02-architecture/adr-registry/status-dashboard.md
+02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md
 02-architecture/decisions/notes/2026-04-07-ledger-based-resume-spike.md
 02-architecture/diagrams/governance/diagram-expansion-2026-05-12.md
 03-data-model/json-field-typing-inventory.md

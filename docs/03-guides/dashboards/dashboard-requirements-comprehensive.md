@@ -236,7 +236,8 @@
 
 **Audited exact-duplicate reuse:**
 - `Monitor: Data Quality Score (Volume-weighted)` и `Track: Data Quality Score Trend (Volume-weighted)` в `bioetl-dq-v2` share expression intentionally
-- `Monitor: Lineage Refs Missing` reused между `bioetl-control-plane-v1` и `bioetl-dq-v2` intentionally
+- `Monitor: Lineage Refs Missing` canonically belongs to `bioetl-control-plane-v1`
+- `bioetl-dq-v2` uses a textual handoff instead of duplicating the same counter
 
 **Источник:** `design-system.md`, `dashboard-audit-checklist.md`
 
@@ -450,7 +451,8 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 ### Специфические требования
 - Provider-first dashboard
 - Panel `id=114` остаётся raw source enum (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже first screen как evidence
-- Panel `id=9104` остаётся first-screen trust marker for `bioetl_provider_current_status` freshness; missing 15m samples mean telemetry gap, not healthy provider state
+- Panel `id=9104` остаётся first-screen trust marker for `bioetl_provider_current_status` freshness; missing samples inside the active Grafana time range mean telemetry gap, not healthy provider state
+- `Status`, `GLOBAL Provider Severity Matrix`, `Inspect Critical Providers`, and `Inspect Provider Top Causes` MAY use the active Grafana time selector for sparse provider-current telemetry instead of a fixed 15m snapshot
 - `Inspect Provider Top Causes` может быть непустой даже при `GLOBAL severity = OK` (early-warning provider signals независимо от current-status projection)
 - Если status остаётся non-OK, а canonical cause projection пуста, `Inspect Provider Top Causes` остаётся empty table (explainability gap, не healthy state)
 - Переходы из pipeline-scoped dashboards сохраняют `pipeline_context=$pipeline` и fail-close к `provider=unknown`
@@ -494,7 +496,7 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 - `Monitor DQ Current Status` is an expanded mirror of compact shared-shell `Status`, not an independent second current-status signal.
 - **Tier 2**: compact current-context band: `Monitor: Data Quality Score (Volume-weighted)`, `Monitor: Worst-Entity DQ Score`, `Monitor: Worst Data Freshness Lag (seconds)`, `Track: Records Quarantined in Range`, `Track: Soft Threshold Exceeded in Range`, `Track: Silver Filter Rejects in Range`
 - **Tier 3**: полноширинный `Track Range Evidence: Bronze -> Silver -> Gold`
-- **Tier 4**: collapsed rows: `Reject / Pareto / Fields`, `Validation Diagnostics`
+- **Tier 4**: collapsed rows: `Reject / Pareto / Fields`, `Validation Failures / Runtime Diagnostics / Trends`
 
 ### KPI ownership (canonical)
 - DQ Status (Silver Reject / quality posture) → canonical for `bioetl-dq-v2`, mirrors: `1. Overview`, `2. Runtime`
@@ -504,7 +506,8 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 - First-screen использует canonical current-status recording rules (`bioetl_dq_current_status`, `bioetl_dq_current_reason`)
 - Range evidence, raw tables, Silver reject breakdowns, logs, traces ниже first-screen
 - `Monitor: Data Quality Score (Volume-weighted)` и `Track: Data Quality Score Trend (Volume-weighted)` share expression intentionally (different UI roles)
-- `Monitor: Lineage Refs Missing` reused между `bioetl-control-plane-v1` и `bioetl-dq-v2` intentionally (different operator questions)
+- `Monitor: Lineage Refs Missing` canonically belongs to `bioetl-control-plane-v1`
+- `bioetl-dq-v2` uses a textual handoff instead of duplicating the same counter
 - Critical panels SHOULD иметь actionable CTA
 - Pipeline-wide 15m snapshot; `$run_type` и stage filters ниже управляют только selected-range evidence
 
@@ -580,7 +583,7 @@ Record-level explorer для `filtered_out`/`FILTERED_OUT_SILVER` записей
 - **CTAs**: Review total rejects, Review scoped summary
 
 ### First-screen структура
-- **Tier 1**: `Inspect Explorer Scope`, `Review: First Action / No-Data Semantics`, `Monitor Filtered Records Total`, `Track Reject Rate vs Bronze`, `Inspect Run Scope Summary`
+- **Tier 1**: `Inspect Explorer Scope`, `Monitor Explorer Backend Health`, `Review: First Action / No-Data Semantics`, `Monitor Filtered Records Total`, `Track Reject Rate vs Bronze`, `Inspect Run Scope Summary`
 - **Tier 2**: `Inspect Top Reject Reasons`, `Inspect Top Reject Fields`, `Inspect Top Reason Signatures`
 - **Tier 3**: `Inspect Filtered Records Table`, `Inspect Selected Record Details`
 - **Tier 4**: forensic details
@@ -590,6 +593,7 @@ Record-level explorer для `filtered_out`/`FILTERED_OUT_SILVER` записей
 - Forensic selectors (`quarantine_run_id`, `payload_hash`) НЕ leak в Prometheus dashboards или dashboard-to-dashboard links
 - Default 24h forensic window (explicit explanatory banner)
 - HTTP-backed surface MUST различать: valid empty result vs invalid filter chain vs backend failure
+- `Monitor Explorer Backend Health` MUST read `/health/live` through `Quarantine Explorer` and act as first-screen backend trust marker before empty tables are treated as evidence
 - First-screen CTA includes bounded row links: `Review total rejects`, `Review scoped summary`, `Open Data Quality`
 - Main table поддерживает dataLinks для self-drilldown по `payload_hash` и CLI handoff
 - CLI handoff links открываются в новой tab (`data:text/plain`)

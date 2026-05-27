@@ -8,8 +8,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 TESTS_DIR = ROOT / "tests"
 FORBIDDEN_MARKERS = (
-    "Network drive " "timeout",
-    "E:\\" "g-drive",
+    "Network drive timeout",
+    "E:\\g-drive",
 )
 
 

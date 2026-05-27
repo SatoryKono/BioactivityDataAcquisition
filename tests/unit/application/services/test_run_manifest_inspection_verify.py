@@ -2,7 +2,32 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+from uuid import UUID
+
+import pytest
+
+from bioetl.application.services.control_plane.effective_config_service import EffectiveConfigService
+from bioetl.application.services.control_plane.manifest.inspection_service import RunManifestInspectionService
+from bioetl.application.services.control_plane.manifest.models import RunManifestCreateSpec as RunManifestCreateRequest
+from bioetl.application.services.control_plane.run_ledger_service import RunLedgerService
+from bioetl.application.services.control_plane.run_manifest_service import RunManifestService
+from bioetl.domain.config.dq import DQConfig
+from bioetl.domain.control_plane import ConfigSourceRef, RunArtifactRef, RunSourceRef
+from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types.dq_contracts import DQDisposition
+
+pytestmark = pytest.mark.unit
+
 from tests.unit.application.services.test_run_manifest_inspection_service import *  # noqa: F401,F403
+from tests.unit.application.services.test_run_manifest_inspection_service import (
+    _InMemoryEffectiveConfigArtifactStore,
+    _InMemoryRunLedgerStore,
+    _InMemoryRunManifestStore,
+    _VALID_EFFECTIVE_CONFIG_HASH,
+    _make_manifest,
+)
+
 
 def test_verify_confirms_cross_store_effective_config_replay_evidence() -> None:
     manifest_store = _InMemoryRunManifestStore()
@@ -71,6 +96,7 @@ def test_verify_confirms_cross_store_effective_config_replay_evidence() -> None:
         "manifest-right"
     )
 
+
 def test_verify_reports_missing_effective_config_evidence() -> None:
     manifest_store = _InMemoryRunManifestStore()
     effective_config_store = _InMemoryEffectiveConfigArtifactStore()
@@ -102,6 +128,7 @@ def test_verify_reports_missing_effective_config_evidence() -> None:
         "left_effective_config_occurrence_missing",
         "right_effective_config_occurrence_missing",
     )
+
 
 def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> None:
     manifest_store = _InMemoryRunManifestStore()
@@ -238,6 +265,7 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
     assert result.diagnostics["dq_report_paths"] == [
         "data/output/silver/chembl/activity/_dq.json"
     ]
+
 
 def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
     manifest_store = _InMemoryRunManifestStore()

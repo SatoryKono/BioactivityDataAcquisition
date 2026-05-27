@@ -607,9 +607,7 @@ def _refresh_clusters(
             refreshed_cluster["review"] = _review_metadata(review)
         weak_decision = weak_decision_lookup.get(cluster_id)
         if semantic_status == "WEAK" and weak_decision is not None:
-            refreshed_cluster["weak_decision"] = _weak_decision_metadata(
-                weak_decision
-            )
+            refreshed_cluster["weak_decision"] = _weak_decision_metadata(weak_decision)
         refreshed_cluster["member_count"] = len(members)
         refreshed_cluster["pipeline_count"] = len(
             {member["pipeline"] for member in members}
@@ -1348,9 +1346,7 @@ def _render_report(
         for cluster in registry.get("clusters", [])
         if isinstance(cluster, dict)
         and cluster.get("semantic_status") == "WEAK"
-        and cast(dict[str, Any], cluster.get("weak_decision", {})).get(
-            "semantic_scope"
-        )
+        and cast(dict[str, Any], cluster.get("weak_decision", {})).get("semantic_scope")
         == "explicit_source_owned_assay_contract"
     )
     normalization_mismatches = normalization_counts.get(

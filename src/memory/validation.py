@@ -11,6 +11,8 @@ from memory.notes import (
     extract_markdown_headings,
     normalize_text_key,
     parse_markdown_note,
+    parse_markdown_note_metadata,
+    NOTE_READ_TIMEOUT_SECONDS,
 )
 from memory.resources import (
     CATALOG_DIR,
@@ -39,6 +41,7 @@ REBUILD_ONLY_DIRS = (
     "src/memory/timeline/events",
 )
 DEFAULT_EPISODIC_NOTE_SCAN_LIMIT = 200
+VALIDATION_NOTE_READ_TIMEOUT_SECONDS = max(NOTE_READ_TIMEOUT_SECONDS, 15.0)
 
 
 @dataclass(frozen=True, slots=True)
@@ -859,10 +862,17 @@ def _validate_note_files(
         include_all_episodic_notes=include_all_episodic_notes,
     ):
         try:
-            note = parse_markdown_note(
-                path,
-                include_body=artifact_class == "curated_note",
-            )
+            if artifact_class == "curated_note":
+                note = parse_markdown_note(
+                    path,
+                    include_body=True,
+                    read_timeout_seconds=VALIDATION_NOTE_READ_TIMEOUT_SECONDS,
+                )
+            else:
+                note = parse_markdown_note_metadata(
+                    path,
+                    read_timeout_seconds=VALIDATION_NOTE_READ_TIMEOUT_SECONDS,
+                )
         except Exception as exc:
             issues.append(
                 ValidationIssue(

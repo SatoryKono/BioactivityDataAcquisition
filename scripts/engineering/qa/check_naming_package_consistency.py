@@ -218,7 +218,9 @@ def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
                     details="\n".join(registry_errors[:30]),
                 )
             ]
-        module_trees = naming_audit._build_python_module_tree_cache(repo_root / SRC_ROOT)
+        module_trees = naming_audit._build_python_module_tree_cache(
+            repo_root / SRC_ROOT
+        )
         results = naming_audit.run_audit(
             repo_root / SRC_ROOT,
             docs_skip_path,
@@ -1072,7 +1074,11 @@ def _layer_aware_suffix_violations_for_files(
         violations.extend(
             _layer_aware_module_violations(relative_path=relative_path, policy=policy)
         )
-        tree = ast_cache.get(py_file) if ast_cache is not None else _parse_python_file(py_file)
+        tree = (
+            ast_cache.get(py_file)
+            if ast_cache is not None
+            else _parse_python_file(py_file)
+        )
         if tree is None:
             continue
         violations.extend(

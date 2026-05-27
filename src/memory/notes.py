@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import io
+import os
 import re
+import subprocess
 import threading
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -12,6 +15,8 @@ from typing import Any
 import yaml
 
 FRONTMATTER_DELIMITER = "---"
+NOTE_READ_TIMEOUT_SECONDS = 5.0
+GIT_FALLBACK_TIMEOUT_SECONDS = 5.0
 LEGACY_FRONTMATTER_DELIMITER_PATTERN = re.compile(r"^_{3,}$")
 LEGACY_INDENTED_TOP_LEVEL_KEY_PATTERN = re.compile(
     r"^\s{2,}(confidence|last_verified|summary|query|kind):"
@@ -20,29 +25,192 @@ SLUG_PATTERN = re.compile(r"[^a-z0-9]+")
 HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 
 
-def _open_with_timeout(path: Path, timeout: float):
-    """Open a file with a timeout to prevent hangs on network drives."""
-    handle = None
+def _read_text_with_timeout(path: Path, timeout: float) -> str:
+    """Read a file with a timeout to prevent hangs on network drives."""
+    text = None
     exception = None
 
     def _target():
-        nonlocal handle, exception
+        nonlocal text, exception
         try:
-            handle = path.open("r", encoding="utf-8")
+            text = path.read_text(encoding="utf-8")
         except Exception as e:
             exception = e
 
-    thread = threading.Thread(target=_target)
+    thread = threading.Thread(target=_target, daemon=True)
     thread.start()
     thread.join(timeout=timeout)
 
     if thread.is_alive():
-        raise TimeoutError(f"File open did not complete within {timeout} seconds: {path}")
+        fallback_text = _read_text_from_git_object(path)
+        if fallback_text is not None:
+            return fallback_text
+        raise TimeoutError(
+            f"File read did not complete within {timeout} seconds: {path}"
+        )
 
     if exception is not None:
         raise exception
 
-    return handle
+    return text or ""
+
+
+def _read_text_from_git_object(path: Path) -> str | None:
+    """Read a tracked file from Git when the working-tree file is unavailable."""
+    try:
+        repo_root = _git_repo_root(path)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if repo_root is None:
+        return None
+
+    relative_path = os.path.relpath(path, repo_root).replace(os.sep, "/")
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(repo_root), "show", f"HEAD:{relative_path}"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=GIT_FALLBACK_TIMEOUT_SECONDS,
+            **_hidden_windows_subprocess_kwargs(),
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if completed.returncode != 0:
+        return None
+    return completed.stdout
+
+
+def _read_frontmatter_metadata_from_text(text: str, path: Path) -> dict[str, Any]:
+    """Parse note metadata from raw markdown text without loading the body."""
+    handle = io.StringIO(text)
+    with handle:
+        first_line = handle.readline()
+        if not first_line:
+            raise ValueError(f"note is missing YAML frontmatter: {path}")
+        first_line = first_line.strip()
+        if (
+            first_line != FRONTMATTER_DELIMITER
+            and not LEGACY_FRONTMATTER_DELIMITER_PATTERN.match(first_line)
+        ):
+            raise ValueError(f"note is missing YAML frontmatter: {path}")
+        delimiter = first_line
+        metadata = _read_frontmatter_metadata_only(handle, delimiter, path)
+        if not isinstance(metadata, dict):
+            raise ValueError(f"note frontmatter must be a mapping: {path}")
+        return metadata
+
+
+def _read_markdown_metadata_with_timeout(path: Path, timeout: float) -> dict[str, Any]:
+    """Read only note frontmatter metadata with a timeout."""
+    metadata: dict[str, Any] | None = None
+    exception = None
+
+    def _target() -> None:
+        nonlocal metadata, exception
+        try:
+            with path.open(encoding="utf-8") as handle:
+                first_line = handle.readline()
+                if not first_line:
+                    raise ValueError(f"note is missing YAML frontmatter: {path}")
+                first_line = first_line.strip()
+                if (
+                    first_line != FRONTMATTER_DELIMITER
+                    and not LEGACY_FRONTMATTER_DELIMITER_PATTERN.match(first_line)
+                ):
+                    raise ValueError(f"note is missing YAML frontmatter: {path}")
+                delimiter = first_line
+                parsed = _read_frontmatter_metadata_only(handle, delimiter, path)
+                if not isinstance(parsed, dict):
+                    raise ValueError(
+                        f"note frontmatter must be a mapping: {path}"
+                    )
+                metadata = parsed
+        except Exception as e:
+            exception = e
+
+    thread = threading.Thread(target=_target, daemon=True)
+    thread.start()
+    thread.join(timeout=timeout)
+
+    if thread.is_alive():
+        fallback_text = _read_text_from_git_object(path)
+        if fallback_text is None:
+            raise TimeoutError(
+                f"File metadata read did not complete within {timeout} seconds: {path}"
+            )
+        return _read_frontmatter_metadata_from_text(fallback_text, path)
+
+    if exception is not None:
+        raise exception
+    return metadata or {}
+
+
+def _git_repo_root(path: Path) -> Path | None:
+    packaged_root = _packaged_repo_root_for(path)
+    if packaged_root is not None:
+        return packaged_root
+
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(path.parent), "rev-parse", "--show-toplevel"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=GIT_FALLBACK_TIMEOUT_SECONDS,
+            **_hidden_windows_subprocess_kwargs(),
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if completed.returncode != 0:
+        return None
+    repo_root = completed.stdout.strip()
+    return Path(repo_root) if repo_root else None
+
+
+def _packaged_repo_root_for(path: Path) -> Path | None:
+    """Return this checkout root for paths inside the packaged memory tree."""
+    repo_root = Path(__file__).parents[2]
+    target = path if path.is_absolute() else Path.cwd() / path
+    try:
+        target.relative_to(repo_root)
+    except ValueError:
+        return None
+    return repo_root
+
+
+def _hidden_windows_subprocess_kwargs(
+    *,
+    os_name: str = os.name,
+    subprocess_module: object = subprocess,
+) -> dict[str, object]:
+    """Build subprocess kwargs that prevent Windows console popups."""
+    if os_name != "nt":
+        return {}
+
+    kwargs: dict[str, object] = {}
+    create_no_window = int(getattr(subprocess_module, "CREATE_NO_WINDOW", 0))
+    if create_no_window:
+        kwargs["creationflags"] = create_no_window
+
+    startupinfo_factory = getattr(subprocess_module, "STARTUPINFO", None)
+    if callable(startupinfo_factory):
+        startupinfo = startupinfo_factory()
+        startf_use_show_window = int(
+            getattr(subprocess_module, "STARTF_USESHOWWINDOW", 0)
+        )
+        if startf_use_show_window:
+            startupinfo.dwFlags = (
+                int(getattr(startupinfo, "dwFlags", 0)) | startf_use_show_window
+            )
+        if hasattr(subprocess_module, "SW_HIDE"):
+            startupinfo.wShowWindow = int(getattr(subprocess_module, "SW_HIDE", 0))
+        kwargs["startupinfo"] = startupinfo
+    return kwargs
 
 
 @dataclass(frozen=True, slots=True)
@@ -69,12 +237,25 @@ def normalize_text_key(value: str) -> str:
     return " ".join(value.strip().lower().split())
 
 
-def parse_markdown_note(path: Path, *, include_body: bool = True) -> MemoryNote:
+def _resolve_read_timeout(read_timeout_seconds: float | None) -> float:
+    return NOTE_READ_TIMEOUT_SECONDS if read_timeout_seconds is None else read_timeout_seconds
+
+
+def parse_markdown_note(
+    path: Path,
+    *,
+    include_body: bool = True,
+    read_timeout_seconds: float | None = None,
+) -> MemoryNote:
     """Parse a markdown note with YAML frontmatter."""
     try:
-        handle = _open_with_timeout(path, timeout=30.0)
+        text = _read_text_with_timeout(
+            path,
+            timeout=_resolve_read_timeout(read_timeout_seconds),
+        )
     except (OSError, TimeoutError) as exc:
         raise ValueError(f"failed to open note file: {exc}") from exc
+    handle = io.StringIO(text)
     with handle:
         first_line = handle.readline()
         if not first_line:
@@ -102,6 +283,22 @@ def parse_markdown_note(path: Path, *, include_body: bool = True) -> MemoryNote:
             metadata_lines.append(line)
 
     raise ValueError(f"note frontmatter is not terminated: {path}")
+
+
+def parse_markdown_note_metadata(
+    path: Path,
+    *,
+    read_timeout_seconds: float | None = None,
+) -> MemoryNote:
+    """Parse note metadata without loading the body."""
+    try:
+        metadata = _read_markdown_metadata_with_timeout(
+            path,
+            timeout=_resolve_read_timeout(read_timeout_seconds),
+        )
+    except (OSError, TimeoutError) as exc:
+        raise ValueError(f"failed to open note file: {exc}") from exc
+    return MemoryNote(metadata=metadata, body="")
 
 
 def _read_frontmatter_metadata_only(

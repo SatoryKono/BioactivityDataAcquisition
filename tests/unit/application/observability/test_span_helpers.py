@@ -118,7 +118,9 @@ class TestTracedAsyncOperation:
     """Tests for async traced_async_operation context manager."""
 
     @pytest.mark.asyncio
-    async def test_creates_span_with_name_and_attributes(self, mock_tracer):
+    async def test_creates_span_with_name_and_attributes__test_traced_async_operation_application_observability_test_span_helpers_121(
+        self, mock_tracer
+    ):
         """Test span is created with correct name and attributes."""
         tracer, otel_tracer, _ = mock_tracer
 
@@ -166,7 +168,9 @@ class TestTracedAsyncOperation:
         span.record_exception.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_can_set_attributes_inside_context(self, mock_tracer):
+    async def test_can_set_attributes_inside_context__test_traced_async_operation_application_observability_test_span_helpers_169(
+        self, mock_tracer
+    ):
         """Test attributes can be set inside async context."""
         tracer, _, span = mock_tracer
 
@@ -176,7 +180,9 @@ class TestTracedAsyncOperation:
         span.set_attribute.assert_called_with("async_result", "done")
 
     @pytest.mark.asyncio
-    async def test_custom_tracer_name(self, mock_tracer):
+    async def test_custom_tracer_name__test_traced_async_operation_application_observability_test_span_helpers_179(
+        self, mock_tracer
+    ):
         """Test custom tracer name is used in async context."""
         tracer, _, _ = mock_tracer
 

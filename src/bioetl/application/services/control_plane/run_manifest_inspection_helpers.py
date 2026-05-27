@@ -275,9 +275,7 @@ def build_authoritative_replay_dossier(
         "effective_config_hash": code_provenance.effective_config_hash,
         "contract_ref": code_provenance.contract_ref,
         "contract_version": code_provenance.contract_version,
-        "required_persistence_profile": diagnostics.get(
-            "required_persistence_profile"
-        ),
+        "required_persistence_profile": diagnostics.get("required_persistence_profile"),
         "exact_replay_support_boundary": diagnostics.get(
             "exact_replay_support_boundary"
         ),

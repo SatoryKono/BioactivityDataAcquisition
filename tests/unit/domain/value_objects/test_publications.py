@@ -433,7 +433,9 @@ class TestORCID:
         orcid = ORCID("0000-0001-5109-370x")
         assert orcid.value == "0000-0001-5109-370X"
 
-    def test_compact_without_x(self) -> None:
+    def test_compact_without_x__test_o_r_c_i_d_domain_value_objects_test_publications_436(
+        self,
+    ) -> None:
         """Test compact format without hyphens."""
         orcid = ORCID("0000000151093700")
         assert orcid.value == "0000-0001-5109-3700"
@@ -473,7 +475,9 @@ class TestORCID:
         orcid = ORCID("0000-0002-1825-0097")
         assert orcid.compact == "0000000218250097"
 
-    def test_compact_property_with_x(self) -> None:
+    def test_compact_property_with_x__test_o_r_c_i_d_domain_value_objects_test_publications_476(
+        self,
+    ) -> None:
         """Test compact property with X check digit."""
         orcid = ORCID("0000-0001-5109-370X")
         assert orcid.compact == "000000015109370X"

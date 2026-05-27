@@ -271,6 +271,7 @@ class CompositeCheckpointLoadService:
             logger=self._logger,
             composite_name=self._composite_name,
             glob_pattern=self._glob_pattern,
+            metrics=self._metrics,
         )
 
     def _replay_checkpoint_suffix(

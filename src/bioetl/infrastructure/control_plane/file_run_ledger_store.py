@@ -19,6 +19,7 @@ from bioetl.domain.control_plane.run_ledger import (
 )
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID
+from bioetl.infrastructure.config.settings_api import get_settings
 from bioetl.infrastructure.control_plane._read_metrics import (
     emit_control_plane_read_metrics,
 )
@@ -37,6 +38,24 @@ _RUN_LEDGER_MESSAGE_PREFIX = "Run ledger"
 
 class _RunLedgerCorruptionError(ValueError):
     """Raised when persisted JSONL ledger contents are structurally corrupted."""
+
+
+def _should_fsync_control_plane_writes() -> bool:
+    """Keep durable flushes unless Windows E2E explicitly relaxes them."""
+    if os.name != "nt":
+        return True
+    settings = get_settings()
+    if not settings.test_mode:
+        return True
+    required_profile = settings.pipeline.control_plane.required_persistence_profile
+    return required_profile != "degraded_observable"
+
+
+def _flush_file_descriptor(file_descriptor: int) -> None:
+    """Flush one control-plane file descriptor when durable writes are required."""
+    if not _should_fsync_control_plane_writes():
+        return
+    os.fsync(file_descriptor)
 
 
 def _resolve_ledger_pipeline(entry: RunLedgerEntry) -> str:
@@ -141,7 +160,7 @@ def _truncate_ledger_to_offset(path: Path, *, offset: int) -> None:
     file_descriptor = os.open(path, os.O_RDWR)
     try:
         os.ftruncate(file_descriptor, offset)
-        os.fsync(file_descriptor)
+        _flush_file_descriptor(file_descriptor)
     finally:
         os.close(file_descriptor)
 
@@ -159,13 +178,13 @@ def _append_jsonl_payload(path: Path, payload: bytes) -> int:
             if written <= 0:
                 raise OSError("Ledger append produced an empty write")
             bytes_written += written
-        os.fsync(file_descriptor)
+        _flush_file_descriptor(file_descriptor)
         return checkpoint_size
     except OSError:
         if bytes_written > 0:
             try:
                 os.ftruncate(file_descriptor, checkpoint_size)
-                os.fsync(file_descriptor)
+                _flush_file_descriptor(file_descriptor)
             except OSError:
                 pass
         raise

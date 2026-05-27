@@ -483,39 +483,30 @@ def test_runtime_contextual_handoffs_do_not_duplicate_top_level_dq_provider_link
     )
 
 
-def test_data_quality_incident_panels_do_not_duplicate_control_plane_dashboard_link() -> (
+def test_data_quality_lineage_handoff_panel_points_to_canonical_control_plane_row() -> (
     None
 ):
-    """DQ panels must not duplicate the top-level Control Plane link."""
+    """DQ lineage ownership must hand off to the canonical Control Plane row."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    panel_titles = {
-        "Track Range Evidence: Bronze -> Silver -> Gold",
-        "Monitor: Lineage Refs Missing",
-        "Monitor: Gold Strict Validation Failures",
-    }
-
-    for panel_title in panel_titles:
-        panel = next(
-            (
-                item
-                for item in get_dashboard_panels(dashboard)
-                if item.get("title") == panel_title
-            ),
-            None,
-        )
-        assert panel is not None, (
-            f"Panel '{panel_title}' not found in bioetl-dq-v2.json"
-        )
-        data_links = panel.get("options", {}).get("dataLinks", [])
-        dashboard_links = [
-            link
-            for link in data_links
-            if _extract_dashboard_uid(str(link.get("url", "")))
-            == "bioetl-control-plane-v1"
-        ]
-        assert not dashboard_links, (
-            f"Panel '{panel_title}' must not duplicate dashboard handoff links"
-        )
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Review: Lineage Handoff to Control Plane"
+        ),
+        None,
+    )
+    assert panel is not None, (
+        "Panel 'Review: Lineage Handoff to Control Plane' not found in bioetl-dq-v2.json"
+    )
+    links = list(panel.get("links") or [])
+    matching_links = [
+        link
+        for link in links
+        if _extract_dashboard_uid(str(link.get("url", ""))) == "bioetl-control-plane-v1"
+    ]
+    assert matching_links, "DQ lineage handoff panel must link to Control Plane"
+    assert any("viewPanel=904" in str(link.get("url", "")) for link in matching_links)
 
 
 def test_silver_reject_explorer_record_level_panels_do_not_use_prometheus() -> None:

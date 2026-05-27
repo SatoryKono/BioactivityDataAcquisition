@@ -15,6 +15,7 @@ if TYPE_CHECKING:
         HealthServerDependencies as HealthServerDependencies,
     )
     from bioetl.domain.ports import (
+        CheckpointPort,
         HealthMonitorPort,
         MetricsPort,
         QuarantinePort,
@@ -75,6 +76,7 @@ class HealthServerDependenciesProtocol(Protocol):
 
     health_monitor: HealthMonitorPort
     metrics: MetricsPort
+    checkpoint_port: CheckpointPort
     run_manifest_port: RunManifestPort
     run_ledger_port: RunLedgerPort
 

@@ -8,6 +8,7 @@ error propagation through spans, and batch ID factory delegation.
 from __future__ import annotations
 
 import asyncio
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -55,7 +56,7 @@ def mock_context():
     ctx = MagicMock()
     ctx.run_id = uuid4()
     ctx.run_type = RunType.INCREMENTAL
-    ctx.started_at = MagicMock()
+    ctx.started_at = datetime(2026, 1, 1, tzinfo=UTC)
     ctx.logger = MagicMock()
     return ctx
 

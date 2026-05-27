@@ -12,7 +12,7 @@ from bioetl.application.composite.runner_pkg.runner_stage_payloads import (
 from bioetl.domain.control_plane.run_ledger import COMPOSITE_RUN_LEDGER_STAGE_NAMES
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.run_ledger_service import (
+    from bioetl.application.services.control_plane.ledger.service import (
         RunLedgerService,
     )
     from bioetl.domain.composite.config import CompositeConfig

@@ -12,7 +12,6 @@ from unittest.mock import MagicMock
 
 import pyarrow as pa
 import pytest
-from deltalake import write_deltalake
 
 import bioetl.infrastructure.storage.delta_reader as delta_reader_module
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
@@ -30,8 +29,77 @@ def reader(tmp_path: Path, mock_logger: MagicMock) -> DeltaReader:
     return DeltaReader(base_path=tmp_path, logger=mock_logger)
 
 
+class _FakeDeltaSchema:
+    def __init__(self, schema: pa.Schema) -> None:
+        self._schema = schema
+
+    def to_arrow(self) -> pa.Schema:
+        return self._schema
+
+
+class _FakeDeltaScanner:
+    def __init__(self, table: pa.Table) -> None:
+        self._table = table
+
+    def head(self, limit: int) -> pa.Table:
+        return self._table.slice(0, max(0, limit))
+
+
+class _FakeDeltaDataset:
+    def __init__(self, table: pa.Table) -> None:
+        self._table = table
+
+    def scanner(self, columns: list[str] | None = None) -> _FakeDeltaScanner:
+        table = self._table.select(columns) if columns is not None else self._table
+        return _FakeDeltaScanner(table)
+
+
+@pytest.fixture(autouse=True)
+def fake_delta_tables(monkeypatch: pytest.MonkeyPatch) -> dict[str, pa.Table]:
+    """Patch delta-rs table access with deterministic read-only fixtures.
+
+    These tests validate ``DeltaReader`` semantics, not delta-rs writer behavior.
+    Avoiding native writer/reader filesystem work keeps Windows setup deterministic
+    while still exercising ``DeltaReader`` path resolution and async wrappers.
+    """
+    registry: dict[str, pa.Table] = {}
+
+    class _FakeDeltaTable:
+        def __init__(self, table_uri: str) -> None:
+            self._table_uri = str(Path(table_uri))
+            try:
+                self._table = registry[self._table_uri]
+            except KeyError as exc:
+                raise delta_reader_module.DeltaTableNotFoundError(table_uri) from exc
+
+        def count(self) -> int:
+            return self._table.num_rows
+
+        def schema(self) -> _FakeDeltaSchema:
+            return _FakeDeltaSchema(self._table.schema)
+
+        def to_pyarrow_dataset(self) -> _FakeDeltaDataset:
+            return _FakeDeltaDataset(self._table)
+
+        def to_pyarrow_table(self, columns: list[str] | None = None) -> pa.Table:
+            if columns is None:
+                return self._table
+            return self._table.select(columns)
+
+    monkeypatch.setattr(delta_reader_module, "DeltaTable", _FakeDeltaTable)
+    return registry
+
+
+def _register_delta_table(
+    table_path: Path, table: pa.Table, registry: dict[str, pa.Table]
+) -> None:
+    table_path.mkdir(parents=True, exist_ok=True)
+    (table_path / "_delta_log").mkdir(exist_ok=True)
+    registry[str(table_path)] = table
+
+
 @pytest.fixture
-def sample_delta_table(tmp_path: Path) -> Path:
+def sample_delta_table(tmp_path: Path, fake_delta_tables: dict[str, pa.Table]) -> Path:
     """Create a sample Delta table for testing.
 
     Returns:
@@ -48,7 +116,7 @@ def sample_delta_table(tmp_path: Path) -> Path:
         }
     )
 
-    write_deltalake(str(table_path), table)
+    _register_delta_table(table_path, table, fake_delta_tables)
     return table_path
 
 
@@ -174,6 +242,48 @@ class TestReadTable:
         assert result == expected
         assert captured["columns"] == ["id"]
         assert captured["limit"] == expected.num_rows
+
+    async def test_read_table_full_read_falls_back_to_sentinel_when_count_fails(
+        self,
+        tmp_path: Path,
+        mock_logger: MagicMock,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Full reads should not fall back to scan-based count paths."""
+        expected = pa.table({"id": ["1", "2"]})
+        captured: dict[str, object] = {}
+
+        class _FakeScanner:
+            def head(self, limit: int) -> pa.Table:
+                captured["limit"] = limit
+                return expected
+
+        class _FakeDataset:
+            def scanner(self, columns: list[str] | None = None) -> _FakeScanner:
+                captured["columns"] = columns
+                return _FakeScanner()
+
+        class _FakeDeltaTable:
+            def __init__(self, table_uri: str) -> None:
+                captured["table_uri"] = table_uri
+
+            def count(self) -> int:
+                raise RuntimeError("native count unavailable")
+
+            def to_pyarrow_dataset(self) -> _FakeDataset:
+                return _FakeDataset()
+
+            def to_pyarrow_table(self, columns: list[str] | None = None) -> pa.Table:
+                raise AssertionError(f"unexpected full-table read: columns={columns}")
+
+        monkeypatch.setattr(delta_reader_module, "DeltaTable", _FakeDeltaTable)
+        reader = DeltaReader(base_path=tmp_path, logger=mock_logger)
+
+        result = await reader.read_table("provider/entity", columns=["id"])
+
+        assert result == expected
+        assert captured["columns"] == ["id"]
+        assert captured["limit"] == delta_reader_module._FULL_READ_HEAD_LIMIT
 
     async def test_read_table_with_limit(
         self,
@@ -478,13 +588,14 @@ class TestAbsolutePath:
         self,
         tmp_path: Path,
         mock_logger: MagicMock,
+        fake_delta_tables: dict[str, pa.Table],
     ) -> None:
         """Test reading table using absolute path."""
         # Create table at a specific location
         table_path = tmp_path / "absolute" / "table"
         table_path.mkdir(parents=True)
         table = pa.table({"id": ["1", "2"]})
-        write_deltalake(str(table_path), table)
+        _register_delta_table(table_path, table, fake_delta_tables)
 
         # Create reader with different base path
         reader = DeltaReader(base_path=tmp_path / "other", logger=mock_logger)
@@ -498,13 +609,14 @@ class TestAbsolutePath:
         self,
         tmp_path: Path,
         mock_logger: MagicMock,
+        fake_delta_tables: dict[str, pa.Table],
     ) -> None:
         """Test table_exists using absolute path."""
         # Create table at a specific location
         table_path = tmp_path / "absolute" / "table"
         table_path.mkdir(parents=True)
         table = pa.table({"id": ["1"]})
-        write_deltalake(str(table_path), table)
+        _register_delta_table(table_path, table, fake_delta_tables)
 
         # Create reader with different base path
         reader = DeltaReader(base_path=tmp_path / "other", logger=mock_logger)
@@ -523,6 +635,7 @@ class TestEmptyTable:
         self,
         tmp_path: Path,
         mock_logger: MagicMock,
+        fake_delta_tables: dict[str, pa.Table],
     ) -> None:
         """Test reading an empty Delta table."""
         table_path = tmp_path / "empty_table"
@@ -536,7 +649,7 @@ class TestEmptyTable:
             ]
         )
         empty_table = pa.table({"id": [], "value": []}, schema=schema)
-        write_deltalake(str(table_path), empty_table)
+        _register_delta_table(table_path, empty_table, fake_delta_tables)
 
         reader = DeltaReader(base_path=tmp_path, logger=mock_logger)
         result = await reader.read_table("empty_table")
@@ -548,6 +661,7 @@ class TestEmptyTable:
         self,
         tmp_path: Path,
         mock_logger: MagicMock,
+        fake_delta_tables: dict[str, pa.Table],
     ) -> None:
         """Test getting row count for empty table."""
         table_path = tmp_path / "empty_table"
@@ -555,7 +669,7 @@ class TestEmptyTable:
 
         schema = pa.schema([pa.field("id", pa.string())])
         empty_table = pa.table({"id": []}, schema=schema)
-        write_deltalake(str(table_path), empty_table)
+        _register_delta_table(table_path, empty_table, fake_delta_tables)
 
         reader = DeltaReader(base_path=tmp_path, logger=mock_logger)
         result = await reader.get_row_count("empty_table")

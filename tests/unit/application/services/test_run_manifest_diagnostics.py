@@ -9,7 +9,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.services.control_plane import RunLedgerService
-from bioetl.application.services.control_plane.run_manifest_diagnostics import (
+from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
 )
 from bioetl.domain.control_plane import (
