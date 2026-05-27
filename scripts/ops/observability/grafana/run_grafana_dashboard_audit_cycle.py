@@ -29,6 +29,7 @@ from scripts.ops.observability.grafana import (
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     DEFAULT_HEALTH_SERVER_PORT,
+    DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS,
     ObservabilityBackendEnsureResult,
     _build_detached_backend_env,
     build_detached_backend_log_path,
@@ -306,6 +307,7 @@ def _start_managed_observability_backend(
     required_ready = ready and wait_for_observability_backend_required_paths_ready(
         health_url,
         required_probe_paths=required_probe_paths,
+        timeout_seconds=DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS,
     )
     if required_ready:
         print(
