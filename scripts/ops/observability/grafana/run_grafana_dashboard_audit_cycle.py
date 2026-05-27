@@ -278,7 +278,8 @@ def _start_managed_observability_backend(
     repo_root = Path(__file__).resolve().parents[4]
     log_path = build_detached_backend_log_path(port)
     log_path.parent.mkdir(parents=True, exist_ok=True)
-    log_path.write_text("", encoding="utf-8")
+    with log_path.open("w", encoding="utf-8") as f:
+        f.write("")
     kwargs: dict[str, object] = {
         "cwd": str(repo_root),
         "env": _build_detached_backend_env(),
