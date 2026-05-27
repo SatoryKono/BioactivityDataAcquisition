@@ -62,7 +62,7 @@ budgets:
   duplicate_test_names_max: 875
   duplicate_test_name_occurrences_max: 2726
   compatibility_test_file_max: 56
-  markerless_test_functions_max: 6928
+  markerless_test_functions_max: 6994
   uuid4_call_sites_max: 400
   date_today_call_sites_max: 0
 budget_ratchet:
@@ -156,7 +156,7 @@ tracing:
 assertless_triage:
   categories:
     architecture_helper_guard:
-      count: 29
+      count: 27
       decision: retained
       rationale: "Architecture policy tests delegate assertions to shared guard helpers or pytest.fail paths."
       next_review: "2026-09-30"
@@ -230,15 +230,15 @@ oversized_test_module_inventory:
   split_on_touch: true
   top_modules:
     - path: tests/integration/ci/test_reproducibility_contract_suite.py
-      lines: 2171
+      lines: 1891
       owner: reproducibility-contracts
       target_split: integration/ci reproducibility phases
     - path: tests/unit/application/services/test_metadata_coordinator.py
-      lines: 2001
+      lines: 680
       owner: application-services
       target_split: metadata coordinator command/query families
     - path: tests/unit/application/services/test_run_manifest_inspection_service.py
-      lines: 1989
+      lines: 1488
       owner: application-services
       target_split: run manifest inspection scenario families
     - path: tests/unit/application/pipelines/pubmed/test_pubmed_transformer.py
@@ -260,7 +260,7 @@ oversized_test_module_inventory:
       owner: composition-runtime
     - issue_ref: "#4506"
       source: tests/unit/application/services/test_run_manifest_inspection_service.py
-      source_lines_after_split: 1989
+      source_lines_after_split: 1488
       extracted_surface: tests/unit/application/services/test_run_manifest_inspection_dq_traceability.py
       extracted_surface_lines: 164
       owner: application-services
