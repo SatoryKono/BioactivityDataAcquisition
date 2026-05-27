@@ -2,62 +2,17 @@
 
 from __future__ import annotations
 
-import io
 import tempfile
 from copy import deepcopy
-from datetime import date
 from functools import lru_cache
 from pathlib import Path
-from urllib import error
 
 import pytest
 from scripts.memory.sync import (
-    DEFAULT_INGEST_WAVE,
-    DEFAULT_LEGACY_PRUNE_LABELS,
-    DEFAULT_MANAGED_BY,
     GraphNode,
     GraphRelation,
     GraphSnapshot,
-    Neo4jHttpClient,
-    NodeKey,
-    _add_complexity_analysis_surfaces,
-    _build_diff_entries,
-    _critical_analysis_audit_issues,
-    _delete_managed_wave_nodes_statement,
-    _docs_drift_sources,
-    _duplication_analysis_config,
-    _ensure_targeted_apply_prerequisites,
-    _family_for_path,
-    _filtered_snapshot,
-    _git_last_commit_age_days_bulk,
-    _live_managed_node_counts,
-    _live_managed_relation_counts,
-    _load_memory_mapping,
-    _memory_mapping_path,
-    _merge_storage_layer_config,
-    _missing_managed_anchor_keys,
-    _node_statement,
-    _normalization_evidence_statements,
-    _normalize_docs_repo_reference,
-    _prune_legacy_unmanaged_nodes_statement,
-    _prune_stale_nodes_statement,
-    _prune_stale_relations_statement,
-    _relation_statement,
-    _reset_managed_relations_statement,
-    _storage_ref_from_output_path,
-    _targeted_apply_external_anchor_keys,
-    _targeted_apply_required_anchor_labels,
-    _verify_expected_group_counts,
-    _workflow_quality_gates,
-    apply_normalization_evidence_only,
-    build_audit_report,
-    build_fast_analysis_audit_report,
     build_snapshot,
-    derive_http_uri,
-    main,
-    resolve_neo4j_connection,
-    snapshot_invariant_issues,
-    sync_snapshot,
 )
 
 pytestmark = [pytest.mark.memory, pytest.mark.timeout(180)]

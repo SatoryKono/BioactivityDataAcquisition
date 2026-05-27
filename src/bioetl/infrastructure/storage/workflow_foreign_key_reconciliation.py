@@ -19,15 +19,11 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 __all__ = ["SilverForeignKeyReconciliationAdapter"]
 
 _NULL_TOKEN = object()
-_RECONCILIATION_ROWS_SCANNED_TOTAL = (
-    "bioetl_workflow_reconciliation_rows_scanned_total"
-)
+_RECONCILIATION_ROWS_SCANNED_TOTAL = "bioetl_workflow_reconciliation_rows_scanned_total"
 _RECONCILIATION_ROWS_RETAINED_TOTAL = (
     "bioetl_workflow_reconciliation_rows_retained_total"
 )
-_RECONCILIATION_ROWS_DELETED_TOTAL = (
-    "bioetl_workflow_reconciliation_rows_deleted_total"
-)
+_RECONCILIATION_ROWS_DELETED_TOTAL = "bioetl_workflow_reconciliation_rows_deleted_total"
 
 
 @dataclass(slots=True)
@@ -152,11 +148,13 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         reference_values = {
             key
             for row in reference_rows
-            if (key := _normalize_row_key(
-                row,
-                request.effective_reference_keys,
-                nulls_equal=request.nulls_equal,
-            ))
+            if (
+                key := _normalize_row_key(
+                    row,
+                    request.effective_reference_keys,
+                    nulls_equal=request.nulls_equal,
+                )
+            )
             is not None
         }
         retained_rows: list[dict[str, object]] = []

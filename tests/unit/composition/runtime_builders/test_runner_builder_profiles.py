@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 # ruff: noqa: F403,F405
-from tests.unit.composition.runtime_builders.runner_builder_test_support import *  # noqa: F403,F405
+from tests.unit.composition.runtime_builders.runner_builder_test_support import *
 
 
 def test_build_pipeline_runner_rejects_exact_replay_without_materialized_cached_bronze_batches(

@@ -213,11 +213,7 @@ def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> Non
     assert not missing, f"Control-plane dashboard missing metrics: {missing}"
 
     checkpoint_panel = next(
-        (
-            panel
-            for panel in get_dashboard_panels(dashboard)
-            if panel.get("id") == 892
-        ),
+        (panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 892),
         None,
     )
     assert checkpoint_panel is not None

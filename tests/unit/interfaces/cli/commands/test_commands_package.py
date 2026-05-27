@@ -47,7 +47,7 @@ def test_commands_package_rejects_export_support_after_command_module_import() -
     import bioetl.interfaces.cli.commands.export  # noqa: F401
 
     with pytest.raises(AttributeError, match="export_support"):
-        getattr(commands_package, "export_support")
+        commands_package.export_support
 
 
 def test_commands_package_rejects_inspection_output_after_command_module_import() -> (
@@ -57,4 +57,4 @@ def test_commands_package_rejects_inspection_output_after_command_module_import(
     import bioetl.interfaces.cli.commands.diagnostics  # noqa: F401
 
     with pytest.raises(AttributeError, match="inspection_output"):
-        getattr(commands_package, "inspection_output")
+        commands_package.inspection_output

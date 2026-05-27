@@ -8,11 +8,11 @@ from pathlib import Path
 from typing import Any
 
 from memory.notes import (
+    NOTE_READ_TIMEOUT_SECONDS,
     extract_markdown_headings,
     normalize_text_key,
     parse_markdown_note,
     parse_markdown_note_metadata,
-    NOTE_READ_TIMEOUT_SECONDS,
 )
 from memory.resources import (
     CATALOG_DIR,
@@ -409,7 +409,11 @@ def _iter_note_paths(
             if not directory.exists():
                 continue
             if artifact_class == "episodic_note":
-                limit = None if include_all_episodic_notes else DEFAULT_EPISODIC_NOTE_SCAN_LIMIT
+                limit = (
+                    None
+                    if include_all_episodic_notes
+                    else DEFAULT_EPISODIC_NOTE_SCAN_LIMIT
+                )
                 note_paths = _bounded_episodic_note_paths(directory, limit=limit)
             else:
                 note_paths = [
