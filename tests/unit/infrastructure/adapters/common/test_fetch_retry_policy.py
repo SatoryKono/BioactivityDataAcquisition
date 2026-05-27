@@ -314,3 +314,18 @@ async def test_run_fetch_with_fallback_policy_respects_limit() -> None:
 
     assert [str(item["id"]) for item in results] == ["p1"]
     assert fallback.calls == []
+
+
+def test_split_filter_ids_for_fallback_custom_marker() -> None:
+    primary, title_only = split_filter_ids_for_fallback(
+        ["10.1/a", "__custom_marker_0__", "10.2/b"],
+        title_only_marker_prefix="__custom_marker_",
+    )
+    assert primary == ["10.1/a", "10.2/b"]
+    assert title_only == ["__custom_marker_0__"]
+
+
+def test_split_filter_ids_for_fallback_empty_input() -> None:
+    primary, title_only = split_filter_ids_for_fallback([])
+    assert primary == []
+    assert title_only == []
