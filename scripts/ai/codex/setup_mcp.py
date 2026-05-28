@@ -29,6 +29,7 @@ def _wrapper_command(script_name: str, workspace_root: Path) -> dict[str, Any]:
     wrapper = (workspace_root / "scripts/ai/mcp" / script_name).with_suffix(suffix)
     resolved_wrapper = wrapper.resolve()
     wrapper_arg = str(resolved_wrapper)
+
     return {"command": shell, "args": [wrapper_arg]}
 
 
@@ -37,8 +38,12 @@ def _http_server(url: str) -> dict[str, Any]:
 
 
 def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
-    memory_file_path = workspace_root / "docs/00-project/ai/memory/mcp-memory.json"
-    cache_root = workspace_root / CACHE_DIR_NAME
+    workspace_root_str = str(workspace_root)
+    memory_file_path = str(
+        (workspace_root / "docs/00-project/ai/memory/mcp-memory.json").resolve()
+    )
+    cache_root = (workspace_root / CACHE_DIR_NAME).resolve()
+
     npm_cache_dir = str((cache_root / "npm-cache").resolve())
     uv_cache_dir = str((cache_root / "uv-cache").resolve())
     uv_tool_dir = str((cache_root / "uv-tools").resolve())
@@ -56,7 +61,7 @@ def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
             "args": [
                 "-y",
                 "@modelcontextprotocol/server-filesystem@2026.1.14",
-                str(workspace_root),
+                workspace_root_str,
             ],
             "env": {"NPM_CONFIG_CACHE": npm_cache_dir},
         },
@@ -314,8 +319,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     args = parser.parse_args(list(argv) if argv is not None else None)
 
-    output_root = args.root.resolve()
-    workspace_root = args.workspace_root.resolve()
+    output_root = args.root.absolute()
+    workspace_root = args.workspace_root.absolute()
     mcp_path, vscode_path, codex_settings_path = _write_configs(
         output_root, workspace_root
     )

@@ -120,9 +120,10 @@ def _build_detached_backend_popen_kwargs(
             has_sw_hide = hasattr(subprocess_module, "SW_HIDE")
             sw_hide = int(getattr(subprocess_module, "SW_HIDE", 0))
             if startf_use_show_window:
-                startupinfo.dwFlags = (
-                    int(startupinfo.dwFlags) if hasattr(startupinfo, "dwFlags") else 0 | startf_use_show_window
+                existing_dw_flags = (
+                    int(startupinfo.dwFlags) if hasattr(startupinfo, "dwFlags") else 0
                 )
+                startupinfo.dwFlags = existing_dw_flags | startf_use_show_window
             if has_sw_hide:
                 startupinfo.wShowWindow = sw_hide
             kwargs["startupinfo"] = startupinfo

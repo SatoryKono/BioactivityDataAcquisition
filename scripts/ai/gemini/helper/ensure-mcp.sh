@@ -5,7 +5,19 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../../.." && pwd))}"
+
+# Resolve REPO_ROOT with WSL path conversion
+if [[ -n "${REPO_ROOT:-}" ]]; then
+    if [[ "$REPO_ROOT" =~ ^[A-Za-z]: ]]; then
+        REPO_ROOT="$(echo "$REPO_ROOT" | sed 's/^\([A-Za-z]\):/\/mnt\/\L\1/' | sed 's/\\/\//g')"
+    fi
+else
+    REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../../.." && pwd))"
+    if [[ "$REPO_ROOT" =~ ^[A-Za-z]: ]]; then
+        REPO_ROOT="$(echo "$REPO_ROOT" | sed 's/^\([A-Za-z]\):/\/mnt\/\L\1/' | sed 's/\\/\//g')"
+    fi
+fi
+
 SETUP_MCP="${REPO_ROOT}/scripts/ai/codex/setup_mcp.py"
 ENSURE_GEMINI="${SCRIPT_DIR}/ensure-gemini-cli.sh"
 
