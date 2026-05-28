@@ -5,6 +5,7 @@ Measures JSONL + zstd compression throughput.
 
 import asyncio
 import json
+import sys
 from collections.abc import Iterator
 from datetime import UTC, datetime
 from typing import Any
@@ -82,6 +83,9 @@ def test_bronze_write_small(benchmark, small_payload, bronze_output_dir):
             ingestion_ts=now,
         )
 
+    if sys.platform.startswith("win"):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
     result = benchmark(lambda: asyncio.run(write_batch()))
 
     # Verify output exists
@@ -124,6 +128,9 @@ def test_bronze_write_medium(benchmark, medium_payload, bronze_output_dir):
             ingestion_ts=now,
         )
 
+    if sys.platform.startswith("win"):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
     result = benchmark(lambda: asyncio.run(write_batch()))
 
     assert result is not None
@@ -163,6 +170,9 @@ def test_bronze_write_large(benchmark, large_payload, bronze_output_dir):
             run_type=RunType.INCREMENTAL,
             ingestion_ts=now,
         )
+
+    if sys.platform.startswith("win"):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     result = benchmark(lambda: asyncio.run(write_batch()))
 

@@ -19,6 +19,7 @@ import asyncio
 import json
 import math
 import os
+import sys
 import time
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -429,6 +430,9 @@ def test_silver_write_append_budget(
             all_durations=durations,
         )
 
+    if sys.platform.startswith("win"):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
     result = asyncio.run(run())
     _assert_budget(
         benchmark_key="silver_write_append_600",
@@ -486,6 +490,9 @@ def test_silver_write_merge_budget(
             p95_latency_s=_percentile(durations, 0.95),
             all_durations=durations,
         )
+
+    if sys.platform.startswith("win"):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     result = asyncio.run(run())
     _assert_budget(

@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import sys
 import time
 from datetime import UTC, datetime
 from pathlib import Path
@@ -151,6 +152,9 @@ class TestBatchingPerformance:
         batch_id = BatchID(uuid4())
         now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
+        if sys.platform.startswith("win"):
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
         start = time.perf_counter()
         asyncio.run(
             bronze_writer.write_bronze(
@@ -194,6 +198,9 @@ class TestBatchingPerformance:
             record["_source_batch_id"] = batch_id
             record["_ingestion_ts"] = now
             records.append(record)
+
+        if sys.platform.startswith("win"):
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
         start = time.perf_counter()
         asyncio.run(
@@ -317,6 +324,9 @@ class TestBatchingPerformance:
         batch_id = BatchID(uuid4())
         now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
+        if sys.platform.startswith("win"):
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
         asyncio.run(
             bronze_writer.write_bronze(
                 records=iter(records),
@@ -366,6 +376,9 @@ class TestScalabilityPerformance:
         records_1k = [generate_bronze_record_bytes(i) for i in range(1000)]
         batch_id_1k = BatchID(uuid4())
 
+        if sys.platform.startswith("win"):
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
         start_1k = time.perf_counter()
         asyncio.run(
             bronze_writer.write_bronze(
@@ -384,6 +397,9 @@ class TestScalabilityPerformance:
         # Benchmark 5000 records
         records_5k = [generate_bronze_record_bytes(i) for i in range(5000)]
         batch_id_5k = BatchID(uuid4())
+
+        if sys.platform.startswith("win"):
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
         start_5k = time.perf_counter()
         asyncio.run(

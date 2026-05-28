@@ -176,64 +176,85 @@ def _iter_python_files_matching_any(
     if not existing_roots:
         return []
 
-    rg = shutil.which("rg")
-    if rg is not None:
-        command = [rg, "--files-with-matches", "--fixed-strings"]
-        for pattern in pattern_values:
-            command.extend(("--regexp", pattern))
-        command.extend(("--glob", "*.py"))
-        command.extend(str(root) for root in existing_roots)
-        result = subprocess.run(
-            command,
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-        if result.returncode in {0, 1}:
-            return sorted(Path(line) for line in result.stdout.splitlines() if line)
-
-    git = shutil.which("git")
-    if git is not None:
+    # Detect network drives on Windows and skip external tools to avoid timeouts
+    is_network_drive = False
+    import os
+    if os.name == "nt":
         try:
-            repo_root_result = subprocess.run(
-                [git, "rev-parse", "--show-toplevel"],
-                check=False,
-                capture_output=True,
-                text=True,
-                cwd=existing_roots[0],
-            )
-        except OSError:
-            repo_root_result = None
-        if (
-            repo_root_result is not None
-            and repo_root_result.returncode == 0
-            and repo_root_result.stdout.strip()
-        ):
-            repo_root = Path(repo_root_result.stdout.strip())
-            relative_roots = [
-                root.relative_to(repo_root)
-                for root in existing_roots
-                if root.is_relative_to(repo_root)
-            ]
-            if relative_roots:
-                command = [git, "grep", "-l", "-F"]
-                for pattern in pattern_values:
-                    command.extend(("-e", pattern))
-                command.append("--")
-                command.extend(str(root) for root in relative_roots)
+            import ctypes
+            drive = os.path.splitdrive(str(existing_roots[0]))[0] + "\\"
+            is_network_drive = ctypes.windll.kernel32.GetDriveTypeW(drive) == 4  # DRIVE_REMOTE
+        except Exception:
+            pass
+
+    if not is_network_drive:
+        rg = shutil.which("rg")
+        if rg is not None:
+            command = [rg, "--files-with-matches", "--fixed-strings"]
+            for pattern in pattern_values:
+                command.extend(("--regexp", pattern))
+            command.extend(("--glob", "*.py"))
+            command.extend(str(root) for root in existing_roots)
+            try:
                 result = subprocess.run(
                     command,
                     check=False,
                     capture_output=True,
                     text=True,
-                    cwd=repo_root,
+                    timeout=30.0,
                 )
                 if result.returncode in {0, 1}:
-                    return sorted(
-                        repo_root / line
-                        for line in result.stdout.splitlines()
-                        if line.endswith(".py")
-                    )
+                    return sorted(Path(line) for line in result.stdout.splitlines() if line)
+            except (subprocess.TimeoutExpired, OSError):
+                pass  # Fall back to filesystem scan
+
+        git = shutil.which("git")
+        if git is not None:
+            try:
+                repo_root_result = subprocess.run(
+                    [git, "rev-parse", "--show-toplevel"],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                    cwd=existing_roots[0],
+                    timeout=30.0,
+                )
+            except OSError:
+                repo_root_result = None
+            if (
+                repo_root_result is not None
+                and repo_root_result.returncode == 0
+                and repo_root_result.stdout.strip()
+            ):
+                repo_root = Path(repo_root_result.stdout.strip())
+                relative_roots = [
+                    root.relative_to(repo_root)
+                    for root in existing_roots
+                    if root.is_relative_to(repo_root)
+                ]
+                if relative_roots:
+                    command = [git, "grep", "-l", "-F"]
+                    for pattern in pattern_values:
+                        command.extend(("-e", pattern))
+                    command.append("--")
+                    command.extend(str(root) for root in relative_roots)
+                    try:
+                        result = subprocess.run(
+                            command,
+                            check=False,
+                            capture_output=True,
+                            text=True,
+                            cwd=repo_root,
+                            timeout=30.0,
+                        )
+                        if result.returncode in {0, 1}:
+                            return sorted(
+                                repo_root / line
+                                for line in result.stdout.splitlines()
+                                if line.endswith(".py")
+                            )
+                    except (subprocess.TimeoutExpired, OSError):
+                        pass  # Fall back to filesystem scan
 
     matched: list[Path] = []
     for search_root in existing_roots:

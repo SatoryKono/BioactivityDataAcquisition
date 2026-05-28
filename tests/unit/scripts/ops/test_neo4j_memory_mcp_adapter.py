@@ -13,7 +13,7 @@ pytestmark = pytest.mark.repo_backed
 def test_adapter_bridges_framed_client_to_line_delimited_server(tmp_path: Path) -> None:
     server = tmp_path / "line_mcp_server.py"
     server.write_text(
-        """
+        r"""
 from __future__ import annotations
 
 import json
@@ -40,12 +40,12 @@ for raw_line in sys.stdin:
                 "tools": [{"name": "search_nodes"}],
             },
         }
-        sys.stdout.write(json.dumps(response, separators=(",", ":"), sort_keys=True) + "\\n")
+        sys.stdout.write(json.dumps(response, separators=(",", ":"), sort_keys=True) + "\n")
         sys.stdout.flush()
         break
     else:
         continue
-    sys.stdout.write(json.dumps(response, separators=(",", ":"), sort_keys=True) + "\\n")
+    sys.stdout.write(json.dumps(response, separators=(",", ":"), sort_keys=True) + "\n")
     sys.stdout.flush()
 """.strip()
         + "\n",
