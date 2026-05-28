@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from .common import *  # noqa: F401,F403
+from .common import *  # noqa: F403
 
 RelationKey = tuple[str, str, str, str, str]
 

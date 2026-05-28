@@ -1,6 +1,5 @@
 """Integration tests for critical panel actionable links."""
 
-from pathlib import Path
 
 import pytest
 

@@ -10,7 +10,7 @@ import os
 import shutil
 import subprocess
 import threading
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
+from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 from pathlib import Path
 

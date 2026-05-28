@@ -1,6 +1,5 @@
 """Integration tests for Grafana dashboard panel-type visualization standards."""
 
-from pathlib import Path
 
 import pytest
 

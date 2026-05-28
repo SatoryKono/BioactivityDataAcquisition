@@ -6,7 +6,6 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-import pytest
 
 from memory.notes import write_markdown_note
 from memory.resources import (

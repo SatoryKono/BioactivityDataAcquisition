@@ -8,7 +8,7 @@ import os
 import subprocess
 import sys
 from types import ModuleType
-from typing import Callable
+from collections.abc import Callable
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]

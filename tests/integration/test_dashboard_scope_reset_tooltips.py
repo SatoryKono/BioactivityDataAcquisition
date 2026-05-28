@@ -1,6 +1,5 @@
 """Integration tests for Grafana dashboard scope reset tooltip format."""
 
-from pathlib import Path
 
 import pytest
 

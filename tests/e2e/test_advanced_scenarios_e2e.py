@@ -11,7 +11,6 @@ Part of architecture review refactoring plan (R2).
 
 from __future__ import annotations
 
-import asyncio
 from datetime import UTC
 from pathlib import Path
 from uuid import uuid4

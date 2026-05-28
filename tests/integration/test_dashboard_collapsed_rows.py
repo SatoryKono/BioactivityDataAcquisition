@@ -1,6 +1,5 @@
 """Integration tests for Grafana dashboard collapsed row policy."""
 
-from pathlib import Path
 
 import pytest
 
