@@ -503,8 +503,7 @@ compatibility_test_inventory:
   - path: tests/architecture/test_project_legacy_compatibility_remediation_evidence_surface.py
     decision: retained_governance_guard
     owner: architecture-governance
-    protected_surface: architecture/project legacy compatibility remediation evidence
-      surface
+    protected_surface: architecture/project legacy compatibility remediation evidence surface
     policy_ref: '#4209'
     review_date: '2026-09-30'
     rationale: Tracked compatibility test surface; retained only while the referenced
@@ -747,16 +746,14 @@ remediation_closeout:
     evidence:
     - scripts/engineering/qa/check_test_audit_preflight.py
     - tests/architecture/test_test_governance_audit.py::test_preflight_reports_lfs_pointer_files_as_strict_reproducibility_blocker
-    closeout: Strict preflight now treats unresolved VCR git-lfs pointer files as
-      reproducibility blockers.
+    closeout: Strict preflight now treats unresolved VCR git-lfs pointer files as reproducibility blockers.
   - issue: '#4202'
     decision: closeable
     evidence:
     - configs/quality/test_matrix.yaml
     - configs/quality/pytest_shards.yaml
     - tests/architecture/test_test_matrix_lane_policy.py
-    closeout: Canonical lanes now expose architecture-fast-boundary and architecture-slow-governance
-      wrappers over the maintained shard aliases.
+    closeout: Canonical lanes now expose architecture-fast-boundary and architecture-slow-governance wrappers over the maintained shard aliases.
   - issue: '#4203'
     decision: closeable
     evidence:
@@ -766,54 +763,45 @@ remediation_closeout:
     - tests/integration/config/test_semantic_field_unification_contract.py
     - tests/integration/infrastructure/storage/test_silver_writer.py
     - tests/integration/test_prometheus_rules_config.py
-    closeout: All integration/e2e weak_no_value candidates were eliminated and the
-      refined assertless budget was ratcheted from 606 to 597.
+    closeout: All integration/e2e weak_no_value candidates were eliminated and the refined assertless budget was ratcheted from 606 to 597.
   - issue: '#4204'
     decision: closeable
     evidence:
     - tests/helpers/deterministic_ids.py
     - tests/architecture/test_deterministic_test_identity_builders.py
     - tests/architecture/test_determinism_identity_policy.py
-    closeout: Replay-sensitive deterministic identity policy remains guarded; date.today
-      budget is zero and uuid4 call sites were reduced from 419 to 413, with remaining
-      non-closed surfaces guarded by policy.
+    closeout: Replay-sensitive deterministic identity policy remains guarded; date.today budget is zero and uuid4 call sites were reduced from 419 to 413, with remaining non-closed surfaces guarded by policy.
   - issue: '#4205'
     decision: closeable
     evidence:
     - tests/architecture/test_observability_metric_governance.py
     - reports/observability/runtime_cardinality_inventory.json
-    closeout: Observability cardinality evidence has an explicit freshness test and
-      regeneration command.
+    closeout: Observability cardinality evidence has an explicit freshness test and regeneration command.
   - issue: '#4206'
     decision: closeable
     evidence:
     - configs/quality/test_governance_audit.yaml
     - tests/architecture/test_test_governance_audit.py
-    closeout: File-backed unit-domain checks are classified as contract-backed exceptions
-      rather than pure in-memory unit surfaces.
+    closeout: File-backed unit-domain checks are classified as contract-backed exceptions rather than pure in-memory unit surfaces.
   - issue: '#4207'
     decision: closeable
     evidence:
     - tests/fixtures/golden/gold/schema_registry.v1.json
     - tests/fixtures/golden/gold/chembl_assay_dq_bundle_v1.json
     - tests/contract/test_gold_dq_golden_snapshots.py
-    closeout: Gold DQ bundle coverage was expanded from 5 to 6 registered bundles
-      with a bounded ChEMBL assay DQ-sensitive snapshot.
+    closeout: Gold DQ bundle coverage was expanded from 5 to 6 registered bundles with a bounded ChEMBL assay DQ-sensitive snapshot.
   - issue: '#4208'
     decision: closeable
     evidence:
     - configs/quality/test_governance_audit.yaml
     - scripts/engineering/qa/report_test_governance_audit.py
-    closeout: Duplicate-name triage records the top generic names, duplicate occurrences
-      were reduced from 2783 to 2771, and rename-on-touch policy with builder consolidation
-      rules is enforced.
+    closeout: Duplicate-name triage records the top generic names, duplicate occurrences were reduced from 2783 to 2771, and rename-on-touch policy with builder consolidation rules is enforced.
   - issue: '#4209'
     decision: closeable
     evidence:
     - configs/quality/test_governance_audit.yaml
     - tests/architecture/test_test_governance_audit.py::test_compatibility_inventory_covers_every_detected_compatibility_test_file
-    closeout: All 54 compatibility/legacy test files have owner, decision, protected
-      surface, review date, and rationale inventory.
+    closeout: All 54 compatibility/legacy test files have owner, decision, protected surface, review date, and rationale inventory.
   - issue: '#4536'
     decision: closeable
     evidence:
@@ -826,9 +814,7 @@ remediation_closeout:
     - tests/unit/application/pipelines/crossref/test_extractors.py
     - tests/unit/application/pipelines/openalex/test_extractors.py
     - tests/unit/application/pipelines/semanticscholar/test_extractors.py
-    closeout: Focused weak-test cleanup plus module-level unit marks ratcheted refined
-      assertless debt from 561 to 547, duplicate-name debt from 877/2730 to 876/2728,
-      and markerless test functions from 7776 to 7137.
+    closeout: Focused weak-test cleanup plus module-level unit marks ratcheted refined assertless debt from 561 to 547, duplicate-name debt from 877/2730 to 876/2728, and markerless test functions from 7776 to 7137.
 file_backed_domain_contract_tests:
   decision: retained_contract_lane_exception
   rationale: These tests intentionally validate config/fixture contracts against domain
@@ -853,16 +839,13 @@ repo_backed_unit_test_exceptions:
   entries:
   - path: tests/unit/application/composite/test_non_chembl_join_key_normalization.py
     target_lane: repo-backed-unit
-    protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml
-      + configs/composites/{molecule,target}.yaml
+    protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml + configs/composites/{molecule,target}.yaml
   - path: tests/unit/application/pipelines/test_chembl_transformers.py
     target_lane: repo-backed-unit
-    protected_surface: configs/** publication-type bootstrap inputs used by transformer
-      initialization
+    protected_surface: configs/** publication-type bootstrap inputs used by transformer initialization
   - path: tests/unit/application/pipelines/test_transformer_snapshots.py
     target_lane: repo-backed-unit
-    protected_surface: configs/** publication-type bootstrap inputs used by snapshot
-      transformer initialization
+    protected_surface: configs/** publication-type bootstrap inputs used by snapshot transformer initialization
   - path: tests/unit/application/services/test_config_dq_service.py
     target_lane: repo-backed-unit
     protected_surface: src/bioetl/application/services/config_dq_service.py
@@ -872,10 +855,6 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/composition/factories/test_factory_decoupling_contracts.py
     target_lane: repo-backed-unit
     protected_surface: src/bioetl/composition/factories/services/bundle.py
-  - path: tests/unit/composition/test_observability_contract.py
-    target_lane: repo-backed-unit
-    protected_surface: unit/composition observability contract repo-backed runtime
-      surface
   - path: tests/unit/contracts/test_generate_schema_artifacts.py
     target_lane: repo-backed-unit
     protected_surface: scripts/schema/generate_schema_artifacts.py
@@ -893,8 +872,7 @@ repo_backed_unit_test_exceptions:
     protected_surface: src/tools/apply_entity_naming_rename_plan.py
   - path: tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py
     target_lane: repo-backed-unit
-    protected_surface: scripts/docs/generate_pipeline_normalization_field_matrix.py
-      + docs/05-engineering/normalization_plan_P0_P6.md
+    protected_surface: scripts/docs/generate_pipeline_normalization_field_matrix.py + docs/05-engineering/normalization_plan_P0_P6.md
   - path: tests/unit/tools/test_differentiate_linkstyle_security.py
     target_lane: repo-backed-unit
     protected_surface: src/tools/differentiate_linkstyle.py
