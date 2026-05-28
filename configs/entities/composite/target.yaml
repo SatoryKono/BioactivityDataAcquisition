@@ -14,4 +14,10 @@ pipeline:
             idempotency_contract: merge_upsert
         gold:
             enabled: true
+quality:
+    version: 1.0.0
+    provider: composite
+    entity: target
+    entity_field_validations: []
+    cross_field_validations: []
 status: active

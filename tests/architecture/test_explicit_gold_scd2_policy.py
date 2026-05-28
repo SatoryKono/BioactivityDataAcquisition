@@ -123,7 +123,12 @@ class TestExplicitGoldScd2Policy:
             if not isinstance(payload, dict):
                 continue
             # SCD2 policy applies only to standalone pipeline entity configs.
-            if not isinstance(payload.get("pipeline"), dict):
+            pipeline_cfg = payload.get("pipeline")
+            if not isinstance(pipeline_cfg, dict):
+                continue
+            if payload.get("provider") == "composite":
+                continue
+            if pipeline_cfg.get("provider") == "composite":
                 continue
             found_publication_configs.append(
                 str(path.relative_to(PROJECT_ROOT)).replace("\\", "/")
