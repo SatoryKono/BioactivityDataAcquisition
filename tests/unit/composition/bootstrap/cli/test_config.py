@@ -185,3 +185,15 @@ class TestBootstrapConfigService:
         mock_resolve_configs_root.assert_called_once_with(requested_root)
         mock_create_pipeline_loader.assert_called_once_with(resolved_root)
         assert result._pipeline_config_loader is bound_loader
+
+
+
+
+
+
+
+@pytest.fixture(autouse=True)
+def teardown_test_state(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Safely clear any environment variables or module state isolated to this test run
+    monkeypatch.setenv("TEST_RUN_ISOLATION", "true")
+    yield

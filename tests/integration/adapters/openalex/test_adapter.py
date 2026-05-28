@@ -197,3 +197,15 @@ class TestOpenAlexAdapterRateLimiting:
         # Just verify no rate limit error was raised
         # Results may be empty if DOIs don't exist
         assert isinstance(results, list)
+
+
+
+
+
+
+
+@pytest.fixture(autouse=True)
+def teardown_test_state(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Safely clear any environment variables or module state isolated to this test run
+    monkeypatch.setenv("TEST_RUN_ISOLATION", "true")
+    yield

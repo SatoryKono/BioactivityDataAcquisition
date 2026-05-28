@@ -1,6 +1,8 @@
 """Tests for the public composite checkpoint facade."""
 
 from __future__ import annotations
+import pytest
+import pytest
 
 from datetime import UTC, datetime
 
@@ -105,3 +107,15 @@ def test_public_facade_fresh_state_uses_injected_clock() -> None:
     )
 
     assert fresh.created_at == fixed_time
+
+
+
+
+
+
+
+@pytest.fixture(autouse=True)
+def teardown_test_state(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Safely clear any environment variables or module state isolated to this test run
+    monkeypatch.setenv("TEST_RUN_ISOLATION", "true")
+    yield

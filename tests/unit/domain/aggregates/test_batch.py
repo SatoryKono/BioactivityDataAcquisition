@@ -414,3 +414,15 @@ class TestBatchConstructorValidation:
                 start_index=-1,
                 created_at=_ts(0),
             )
+
+
+
+
+
+
+
+@pytest.fixture(autouse=True)
+def teardown_test_state(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Safely clear any environment variables or module state isolated to this test run
+    monkeypatch.setenv("TEST_RUN_ISOLATION", "true")
+    yield
