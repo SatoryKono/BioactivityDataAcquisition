@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  gemini:
+    build:
+      context: .
+      dockerfile: Dockerfile.gemini
+    container_name: bioetl-gemini
+    image: bioetl-gemini:latest
+    working_dir: /workspace
+    volumes:
+      # Mount project root
+      - .:/workspace
+      # Persist Gemini CLI home directory
+      - gemini-home:/home/gemini/.gemini
+    environment:
+      # API key - pass via .env file or command line
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      # Optional model override
+      - GEMINI_MODEL=${GEMINI_MODEL:-}
+    stdin_open: true
+    tty: true
+    # Override entrypoint for interactive mode
+    entrypoint: []
+    command: ["gemini"]
+
+volumes:
+  gemini-home:
+    driver: local
