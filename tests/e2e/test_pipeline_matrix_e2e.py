@@ -402,9 +402,7 @@ def vcr_config() -> dict[str, object]:
 
 def test_pipeline_matrix_declares_all_entity_pipelines() -> None:
     configured = _iter_entity_pipelines()
-    declared = {
-        case.pipeline_name for case in PIPELINE_CASES if case.provider != "composite"
-    }
+    declared = {case.pipeline_name for case in PIPELINE_CASES}
     deferred_entities = {
         pipeline_name
         for pipeline_name in MATRIX_REPLAY_DEFERRED_PIPELINES

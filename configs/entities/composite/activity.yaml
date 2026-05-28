@@ -1,1 +1,17 @@
+version: 1.0.0
+provider: composite
+entity: activity
+pipeline:
+    pipeline_name: composite_activity
+    provider: composite
+    entity_type: activity
+    description: Composite activity entity merging data from multiple providers
+    business_primary_keys:
+        - entity_id
+    sink:
+        silver:
+            mode: merge
+            idempotency_contract: merge_upsert
+        gold:
+            enabled: true
 status: active
