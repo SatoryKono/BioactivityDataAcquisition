@@ -4,7 +4,7 @@
 
 ## 1. Обзор
 
-Команда из **9 активных субагентов** (7 core + 2 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Codex) выступает оркестратором, делегируя работу субагентам через native agent roles (`default` / `explorer` / `worker`) с привязкой к логическим профилям `py-*`. Production-код пишется напрямую оркестратором (без отдельного `py-code-bot`).
+Команда из **10 активных субагентов** (8 core + 2 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Codex) выступает оркестратором, делегируя работу субагентам через native agent roles (`default` / `explorer` / `worker`) с привязкой к логическим профилям `py-*`. Production-код пишется напрямую оркестратором (без отдельного `py-code-bot`).
 
 **Запуск логического профиля в Codex runtime:**
 
@@ -28,6 +28,7 @@ spawn_agent(
 | VII  | **py-doc-bot**               | sonnet | Документация, ADR, диаграммы (Mermaid)                                                 | `review_py-doc-bot_{YYYYMMDD}_{HHMM}.md`               |
 | VIII | **py-test-swarm**            | opus   | Иерархическое тестирование (L1→L2→L3)                                                  | test reports                                           |
 |  IX  | **py-review-orchestrator**   | opus   | Иерархический code review (S1-S8)                                                      | review reports                                         |
+|  X   | **py-file-structure-bot**    | opus   | Аудит и оптимизация файловой структуры: orphans, naming, depth, layout compliance      | `review_py-file-structure-bot_{YYYYMMDD}_{HHMM}.md`    |
 
 > **Note:** `py-code-bot` removed in v4.0 — production code is written directly by the orchestrator. `py-diagram-bot` merged into `py-doc-bot`. Repo-wide documentation audits now route through the `documentation-audit` / `documentation-cascade-audit` skills rather than a dedicated documentation-only subagent profile.
 
@@ -43,6 +44,7 @@ spawn_agent(
 | py-debug-bot             | `src/bioetl/`, `tests/` (fixes)                                       | `configs/`, `docs/`                   |
 | py-audit-bot             | — (read-only)                                                         | всё                                   |
 | py-plan-bot              | — (read-only)                                                         | всё                                   |
+| py-file-structure-bot    | `reports/` (audit artifacts only)                                     | всё                                   |
 
 ### Определения субагентов
 
@@ -318,6 +320,7 @@ ______________________________________________________________________
 | `DOC-`  | py-doc-bot    | `DOC-001`  | DOC-001  | Обновление документации |
 | `FAIL-` | py-test-bot   | `FAIL-001` | FAIL-001 | Упавший тест (в отчёте) |
 | `CFG-`  | py-config-bot | `CFG-001`  | CFG-001  | Изменение конфигурации  |
+| `FS-`   | py-file-structure-bot  | `FS-001`   | FS-001   | Аномалия файловой структуры  |
 
 Все ID уникальны в пределах `task_id`. Cross-references: `DBG-001 → RF-002`, `DOC-003 → RF-001`, `CFG-001 → RF-003`.
 
@@ -377,6 +380,16 @@ py-plan-bot (plan)
 ### 8.5. Composite pipeline
 
 ```
+
+### 8.6. File-structure audit
+
+```
+py-file-structure-bot (audit/inventory)
+  → py-plan-bot (plan реорганизации, если FS-* findings)
+  → orchestrator (restructuring)
+  → py-test-bot (final)
+  → py-audit-bot (final)
+```
 py-audit-bot (baseline, scope=seed + enricher pipelines)
   → py-plan-bot (composite plan)
   → py-config-bot (composite config: seed/enrichers/merge)
@@ -416,6 +429,7 @@ ______________________________________________________________________
 | IV  | py-config-bot | Data engineering, YAML configs   | REST API config                                 |
 |  V  | py-debug-bot  | Python debugging, RCA            | REST API debugging, Pandera issues              |
 | VI  | py-doc-bot    | Technical writing, ADR, diagrams | Bioinformatics terminology, Mermaid             |
+| VII | py-file-structure-bot    | File structure analysis, repo layout | Naming conventions, orphan detection, depth     |
 
 ### 9a.2 Rule References
 

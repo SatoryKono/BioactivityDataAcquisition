@@ -312,6 +312,7 @@ ______________________________________________________________________
 | IV  | `py-config-bot` | sonnet | `configs/`                      | Pipeline/DQ/filter YAML configs, composite, gap remediation        |
 |  V  | `py-debug-bot`  | opus   | `src/bioetl/`, `tests/` (fixes) | RCA падений, DBG-\* итерации (макс 5), mypy/import/runtime         |
 | VI  | `py-doc-bot`    | sonnet | `docs/`, docstrings             | ADR, CHANGELOG, docstrings, diagrams, doc-code sync                |
+| VII | `py-file-structure-bot` | opus | `reports/` (audit artifacts) | Аудит файловой структуры, orphans, naming, depth, layout compliance |
 
 > Production-код пишем напрямую через Edit/Write (без отдельного субагента).
 
@@ -327,6 +328,7 @@ ______________________________________________________________________
 .codex/agents/py-debug-bot.md    — методология отладки, классификация ошибок
 .codex/agents/py-doc-bot.md      — структура docs, ADR management, diagrams
 .codex/agents/ORCHESTRATION.md   — полный workflow, матрица взаимодействий
+.codex/agents/py-file-structure-bot.md — file structure audit modes, checklists, scoring
 ```
 
 **Специализированная память (фокус на области работы агента):**
@@ -341,6 +343,7 @@ docs/00-project/ai/memory/memory-py-doc-bot.md     — doc structure, ADR manage
 docs/00-project/ai/memory/memory-py-architecture-debt-bot.md — architecture debt waves, exemption governance, closure gates
 docs/00-project/ai/memory/memory-py-review-orchestrator.md   — sector review map, evidence rollup, severity calibration
 docs/00-project/ai/memory/memory-py-test-swarm.md            — swarm decomposition, failure telemetry, flakiness protocol
+docs/00-project/ai/memory/memory-py-file-structure-bot.md     — canonical layout, zone rules, depth limits, naming patterns
 ```
 
 ### 3.3 Входы субагентов (обязательные параметры)
@@ -355,6 +358,7 @@ docs/00-project/ai/memory/memory-py-test-swarm.md            — swarm decomposi
 | py-config-bot | `task_id`, `mode` (create/update/composite/validate/migrate), `provider`, `entity` |
 | py-debug-bot  | `task_id`, `failing_test_report`, `stack_traces`, `rf_ids`, `phase`                |
 | py-doc-bot    | `task_id`, `plan`, `refactoring_log`, `rf_ids`                                     |
+| py-file-structure-bot | `task_id`, `mode` (inventory/audit/naming/optimize/baseline), `scope`        |
 
 ### 3.4 Выходы (артефакты)
 
@@ -379,6 +383,7 @@ reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md
 | `DOC-`  | py-doc-bot    | DOC-001 — doc update           |
 | `FAIL-` | py-test-bot   | FAIL-001 — упавший тест        |
 | `CFG-`  | py-config-bot | CFG-001 — config change        |
+| `FS-`   | py-file-structure-bot  | FS-001 — file structure finding |
 
 ______________________________________________________________________
 
@@ -441,6 +446,7 @@ runtime-specific copies в других деревьях не переопред
 | `verify-architecture`    | `.codex/skills/verify-architecture/`          | Архитектурные проверки           |
 | `documentation-audit`    | `.codex/skills/documentation-audit/`          | Аудит документации               |
 | `architecture-guardian`  | `.codex/skills/public/architecture-guardian/` | Граничный архитектурный review   |
+| `py-file-structure-bot` | `.codex/skills/py-file-structure-bot/`        | Аудит файловой структуры         |
 
 ### 5.2 Runtime-specific conveniences
 
