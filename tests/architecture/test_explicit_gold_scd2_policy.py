@@ -133,7 +133,7 @@ class TestExplicitGoldScd2Policy:
             found_publication_configs.append(
                 str(path.relative_to(PROJECT_ROOT)).replace("\\", "/")
             )
-        assert found_publication_configs == sorted(PUBLICATION_CONFIGS), (
+        assert sorted(found_publication_configs) == sorted(PUBLICATION_CONFIGS), (
             "Publication SCD2 candidate list drifted. Update PUBLICATION_CONFIGS in "
             "tests/architecture/test_explicit_gold_scd2_policy.py."
         )

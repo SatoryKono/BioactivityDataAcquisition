@@ -25,6 +25,7 @@ import yaml
 _MIN_PARALLEL_CACHE_FILES = 128
 _DEFAULT_CACHE_WORKERS = 8
 _MAX_CACHE_WORKERS = 16
+_MAX_CACHE_WORKERS_NETWORK = 4
 _ARCHITECTURE_CACHE_VERSION = "v2"
 _ARCHITECTURE_CACHE_DIR = Path(
     os.environ.get(
@@ -65,6 +66,17 @@ def _list_markdown_files(root: Path) -> list[Path]:
 
 def _cache_worker_count(total_files: int) -> int:
     """Choose a conservative worker count for mounted-worktree file reads."""
+    # Detect network drives on Windows and disable threading entirely
+    if os.name == "nt":
+        try:
+            import ctypes
+            drive = os.path.splitdrive(os.getcwd())[0] + "\\"
+            is_network_drive = ctypes.windll.kernel32.GetDriveTypeW(drive) == 4  # DRIVE_REMOTE
+            if is_network_drive:
+                return 1  # Single-threaded for network drives
+        except Exception:
+            pass
+
     if total_files < _MIN_PARALLEL_CACHE_FILES:
         return 1
 
@@ -75,7 +87,8 @@ def _cache_worker_count(total_files: int) -> int:
 def _read_text_cache_entry(path: Path) -> tuple[Path, str | None]:
     """Read one UTF-8 text payload for the session cache."""
     try:
-        return path, path.read_text(encoding="utf-8")
+        with path.open(encoding="utf-8", errors="replace") as f:
+            return path, f.read()
     except (OSError, UnicodeDecodeError):
         return path, None
 

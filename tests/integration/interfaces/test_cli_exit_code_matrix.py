@@ -63,6 +63,10 @@ class TestCliExitCodeMatrix:
                 "bioetl.interfaces.cli.commands.run.ensure_observability_backend_started",
                 return_value=backend_result,
             ),
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.ensure_observability_backend_started",
+                return_value=backend_result,
+            ),
         ):
             yield registry
 
@@ -207,6 +211,11 @@ class TestCliExitCodeMatrix:
             assert result.exit_code == ExitCode.SIGINT
 
     def test_run_composite_exit_code_matrix(self, cli_runner) -> None:
+        backend_result = ObservabilityBackendEnsureResult(
+            status="disabled",
+            health_url="http://127.0.0.1:8000/health",
+            message="CLI exit-code matrix disables detached backend startup.",
+        )
         with (
             patch(
                 "bioetl.interfaces.cli.commands.domains.composite.support.asyncio.run"
@@ -214,6 +223,10 @@ class TestCliExitCodeMatrix:
             patch(
                 "bioetl.interfaces.cli.commands.domains.composite.support.push_metrics_to_gateway",
                 return_value=True,
+            ),
+            patch(
+                "bioetl.interfaces.cli.commands.run_composite.ensure_observability_backend_started",
+                return_value=backend_result,
             ),
         ):
             mock_run.return_value = (True, None)

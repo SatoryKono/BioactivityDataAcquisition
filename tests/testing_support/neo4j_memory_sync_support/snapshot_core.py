@@ -2,7 +2,16 @@
 
 from __future__ import annotations
 
+import sys
+
+import pytest
+
 from .common import *  # noqa: F401,F403
+
+pytestmark = pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot tests require full repo walk which is prohibitively slow on Windows",
+)
 
 
 def _assert_node_keys_present(

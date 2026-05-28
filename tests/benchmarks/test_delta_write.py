@@ -4,6 +4,7 @@ Measures Delta Lake write throughput with merge/append operations.
 """
 
 import asyncio
+import sys
 from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
@@ -135,6 +136,8 @@ def _run_append_round(
     schema: pa.Schema,
 ):
     """Execute one isolated Silver append write."""
+    if sys.platform.startswith("win"):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     async def write_batch():
         return await writer.write_silver(
@@ -161,6 +164,9 @@ def _merge_round_setup(
     schema = _create_activity_schema()
     table_name = "benchmark_table"
 
+    if sys.platform.startswith("win"):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
     async def initial_write():
         return await writer.write_silver(
             table_name=table_name,
@@ -181,6 +187,8 @@ def _run_merge_round(
     schema: pa.Schema,
 ):
     """Execute one isolated Silver merge write against a seeded table."""
+    if sys.platform.startswith("win"):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     async def merge_batch():
         return await writer.write_silver(

@@ -162,6 +162,8 @@ def test_inspect_run_dossier_delegates_to_workflow_service() -> None:
         "get_observability_workflow_service",
         return_value=workflow_service,
     ) as mock_get_workflow:
+        if sys.platform.startswith("win"):
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
         result = asyncio.run(
             observability_api.inspect_run_dossier("run-123", audit_limit=7)
         )

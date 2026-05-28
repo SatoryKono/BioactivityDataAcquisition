@@ -850,6 +850,11 @@ def guard_bootstrap_pipeline_runner_for_e2e(
         _run_manifest_support,
     )
 
+    # Register before monkeypatch so teardown runs after monkeypatch undo (LIFO).
+    request.addfinalizer(
+        lambda: bootstrap_package.__dict__.pop("bootstrap_pipeline_runner", None)
+    )
+
     guarded_bootstrap = wrap_bootstrap_pipeline_runner_for_e2e(
         runtime_pipeline.bootstrap_pipeline_runner
     )

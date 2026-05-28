@@ -509,6 +509,8 @@ async def _run_server(host: str, port: int) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
+    if sys.platform.startswith("win"):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     try:
         asyncio.run(_run_server(host=args.host, port=args.port))
     except OSError as exc:

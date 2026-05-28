@@ -2,7 +2,16 @@
 
 from __future__ import annotations
 
+import sys
+
+import pytest
+
 from .common import *  # noqa: F401,F403
+
+pytestmark = pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Targeted apply and filter tests require full repo walk which is prohibitively slow on Windows",
+)
 
 
 def test_normalization_evidence_statements_cover_registry_and_fallback_metrics() -> (

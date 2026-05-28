@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 from collections.abc import AsyncIterator
 
 import pytest
@@ -214,6 +215,9 @@ def test_run_fetch_with_fallback_policy_prefix_property(
             )
         )
         return [str(row["id"]) for row in rows]
+
+    if sys.platform.startswith("win"):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     assert asyncio.run(_collect_ids()) == expected_ids
 

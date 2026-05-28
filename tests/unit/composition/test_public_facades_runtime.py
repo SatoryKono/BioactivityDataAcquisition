@@ -31,7 +31,11 @@ def test_composite_api_reexports_bootstrap_entrypoints() -> None:
 @pytest.mark.unit
 def test_bootstrap_package_root_reexports_curated_lazy_helpers() -> None:
     """Package bootstrap root should expose only the curated bootstrap surface."""
+    sys.modules.pop("bioetl.composition.bootstrap", None)
+
     bootstrap_module = importlib.import_module("bioetl.composition.bootstrap")
+    # E2E autouse may leave a stale lazy-export cache on the package root.
+    bootstrap_module.__dict__.pop("bootstrap_pipeline_runner", None)
     runtime_pipeline_module = importlib.import_module(
         "bioetl.composition.bootstrap.runtime.pipeline"
     )

@@ -125,24 +125,25 @@ def test_importing_bioetl_version_does_not_trigger_compat(monkeypatch) -> None:
 
 
 def test_runtime_bootstrap_package_applies_compat_on_import(monkeypatch) -> None:
-    compat_module = importlib.reload(
-        importlib.import_module("bioetl.infrastructure.compat.pandera_compat")
-    )
-
+    """Runtime facade must not patch on import; it delegates via compatibility submodule."""
     calls: list[str] = []
 
     def apply_compat_and_record() -> bool:
         return _record_and_return_false(calls)
 
+    # Patch the compatibility submodule binding: it imports the helper once at
+    # module load, so patching pandera_compat alone is not enough when the
+    # submodule was already imported earlier in the pytest session.
     monkeypatch.setattr(
-        compat_module,
-        "apply_pandera_typing_compat_if_needed",
+        "bioetl.composition.bootstrap.runtime.compatibility.apply_pandera_typing_compat_if_needed",
         apply_compat_and_record,
     )
 
-    runtime_bootstrap = importlib.reload(
-        importlib.import_module("bioetl.composition.bootstrap.runtime")
-    )
+    sys.modules.pop("bioetl.composition.bootstrap.runtime", None)
+    runtime_bootstrap = importlib.import_module("bioetl.composition.bootstrap.runtime")
+
+    assert calls == []
+
     assert runtime_bootstrap.apply_runtime_compatibility_patches() is False
     assert calls == ["applied"]
 
