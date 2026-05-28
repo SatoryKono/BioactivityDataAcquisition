@@ -16,9 +16,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 PUBLICATION_CONFIGS = (
     "configs/entities/chembl/publication.yaml",
-    "configs/entities/pubmed/publication.yaml",
     "configs/entities/crossref/publication.yaml",
     "configs/entities/openalex/publication.yaml",
+    "configs/entities/pubmed/publication.yaml",
     "configs/entities/semanticscholar/publication.yaml",
 )
 
