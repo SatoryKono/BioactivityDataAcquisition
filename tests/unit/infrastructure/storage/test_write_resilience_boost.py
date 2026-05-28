@@ -193,7 +193,8 @@ class TestBuildDefaultAtomicReplaceRetryPolicy:
     ) -> None:
         """Line 133-134: on Windows (nt) returns WINDOWS policy."""
         monkeypatch.setattr(
-            "bioetl.infrastructure.storage.delta.resilience.os.name", "nt"
+            "bioetl.infrastructure.storage.delta.resilience._is_windows_platform",
+            lambda: True,
         )
         policy = build_default_atomic_replace_retry_policy()
         assert policy.max_retries == 20
@@ -204,7 +205,8 @@ class TestBuildDefaultAtomicReplaceRetryPolicy:
     ) -> None:
         """Line 135: on non-Windows returns NON_WINDOWS policy."""
         monkeypatch.setattr(
-            "bioetl.infrastructure.storage.delta.resilience.os.name", "posix"
+            "bioetl.infrastructure.storage.delta.resilience._is_windows_platform",
+            lambda: False,
         )
         policy = build_default_atomic_replace_retry_policy()
         assert policy.max_retries == 3
@@ -220,7 +222,8 @@ class TestBuildDefaultAtomicGroupReplaceRetryPolicy:
     ) -> None:
         """Windows group commits should use a tighter retry budget than single writes."""
         monkeypatch.setattr(
-            "bioetl.infrastructure.storage.delta.resilience.os.name", "nt"
+            "bioetl.infrastructure.storage.delta.resilience._is_windows_platform",
+            lambda: True,
         )
         policy = build_default_atomic_group_replace_retry_policy()
         assert policy.max_retries == 10
@@ -232,7 +235,8 @@ class TestBuildDefaultAtomicGroupReplaceRetryPolicy:
     ) -> None:
         """Non-Windows group commits should also keep the retry budget tight."""
         monkeypatch.setattr(
-            "bioetl.infrastructure.storage.delta.resilience.os.name", "posix"
+            "bioetl.infrastructure.storage.delta.resilience._is_windows_platform",
+            lambda: False,
         )
         policy = build_default_atomic_group_replace_retry_policy()
         assert policy.max_retries == 3

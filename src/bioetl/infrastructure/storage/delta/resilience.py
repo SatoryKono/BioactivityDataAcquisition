@@ -29,6 +29,11 @@ from dataclasses import dataclass
 JitterFn = Callable[[float, float], float]
 
 
+def _is_windows_platform() -> bool:
+    """Return True when running on Windows-like platform semantics."""
+    return os.name == "nt"
+
+
 def _deterministic_jitter_seconds(
     retry_count: int,
     max_jitter_seconds: float,
@@ -152,7 +157,7 @@ def build_default_atomic_replace_retry_policy() -> AdaptiveRetryPolicy:
     Returns:
         AdaptiveRetryPolicy configured for Windows (20 retries) or non-Windows (3 retries).
     """
-    if os.name == "nt":
+    if _is_windows_platform():
         return WINDOWS_ATOMIC_REPLACE_RETRY_POLICY
     return NON_WINDOWS_ATOMIC_REPLACE_RETRY_POLICY
 
@@ -167,7 +172,7 @@ def build_default_atomic_group_replace_retry_policy() -> AdaptiveRetryPolicy:
     Keep the policy resilient to transient sharing violations while using
     a much smaller per-file delay budget than single-file metadata writes.
     """
-    if os.name == "nt":
+    if _is_windows_platform():
         return WINDOWS_ATOMIC_GROUP_REPLACE_RETRY_POLICY
     return NON_WINDOWS_ATOMIC_GROUP_REPLACE_RETRY_POLICY
 
