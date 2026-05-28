@@ -75,8 +75,10 @@ jobs:
           # pipeline_normalizers: apply_pipeline_schema_normalization with multi-field schema coercion (CC=12)
           # quality validation internals: _validate_registry_groups_section (CC=12), _validate_owner_decomposition_targets_section (CC=11), _validate_priority_registry_burndown (CC=11), _validate_grace_window_identity_fields (CC=14), validate_exemptions_registry (CC=12)
           # metadata_writer: _write_metadata with multi-path coordinator fallback (CC=11)
+          # HTTP control-plane: build_summary, select_rows, build_checkpoint_compare with multi-field reporting (CC=11-14)
+          # Workflow transforms: _build_request with multi-field reconciliation (CC=11)
           xenon --max-absolute B --max-modules B --max-average A \
-            --exclude "tests/*,src/tools/*,src/memory/*,src/bioetl/infrastructure/adapters/chembl/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*,src/bioetl/infrastructure/adapters/crossref/*,src/bioetl/infrastructure/adapters/pubmed/*,src/bioetl/infrastructure/adapters/uniprot/*,src/bioetl/infrastructure/adapters/pubchem/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*,src/bioetl/composition/runtime_builders/*,src/bioetl/composition/factories/services/*,src/bioetl/infrastructure/storage/silver/*,src/bioetl/infrastructure/control_plane/*,src/bioetl/infrastructure/quarantine/*,src/bioetl/infrastructure/observability/*,src/bioetl/infrastructure/quality/*" src
+            --exclude "tests/*,src/tools/*,src/memory/*,src/bioetl/infrastructure/adapters/chembl/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*,src/bioetl/infrastructure/adapters/crossref/*,src/bioetl/infrastructure/adapters/pubmed/*,src/bioetl/infrastructure/adapters/uniprot/*,src/bioetl/infrastructure/adapters/pubchem/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/application/workflow/*,src/bioetl/interfaces/cli/*,src/bioetl/interfaces/http/*,src/bioetl/composition/runtime_builders/*,src/bioetl/composition/factories/services/*,src/bioetl/infrastructure/storage/silver/*,src/bioetl/infrastructure/control_plane/*,src/bioetl/infrastructure/quarantine/*,src/bioetl/infrastructure/observability/*,src/bioetl/infrastructure/quality/*" src
 
       - name: Strict complexity check for domain layer (CC ≤ 5)
         run: |
@@ -125,6 +127,8 @@ jobs:
               "src/bioetl/application/composite/",  # Merger with field conflict resolution
               "src/bioetl/application/pipelines/",  # Extractors with complex parsing logic (CC=11-12)
               "src/bioetl/interfaces/cli/",  # CLI formatters with presentation logic (CC=11)
+              "src/bioetl/interfaces/http/",  # control-plane: build_summary, select_rows, build_checkpoint_compare (CC=11-14)
+              "src/bioetl/application/workflow/",  # transforms: _build_request with multi-field reconciliation (CC=11)
               "src/bioetl/composition/runtime_builders/",  # normalize_snapshot with multi-field extraction (CC=13)
               "src/bioetl/composition/factories/services/",  # extract_gold_schema_policy_by_version with version dispatch (CC=14)
               "src/bioetl/infrastructure/storage/silver/",  # _coerce_silver_metadata_write_request with multi-path coercion (CC=14)

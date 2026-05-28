@@ -1,29 +1,10 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime sources:
-> - Codex: `.codex/agents/ORCHESTRATION.md`
-> - Gemini: `.gemini/agents/ORCHESTRATION.md`
-> Governance: [AI Runtime Mirror Ownership](../policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../guides/MEMORY_USAGE.md), [Post-Change Validation](../policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
-
-Version: 4.2.0
-Status: active
-Class: internal-published
-Owner: BioETL Team
-Reviewers:
-
-- BioETL Team
-  Last verified: '2026-04-04'
-
-______________________________________________________________________
-
 # ORCHESTRATION.md — Оркестрация команды subagent-ов BioETL
 
 *Версия: 4.2 | Дата: 2026-03-26 | Supersedes v4.1 | Платформа: Codex CLI*
 
 ## 1. Обзор
 
-Команда из **9 активных субагентов** (7 core + 2 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Codex) выступает оркестратором, делегируя работу субагентам через native agent roles (`default` / `explorer` / `worker`) с привязкой к логическим профилям `py-*`. Production-код пишется напрямую оркестратором (без отдельного `py-code-bot`).
+Команда из **10 активных субагентов** (8 core + 2 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Codex) выступает оркестратором, делегируя работу субагентам через native agent roles (`default` / `explorer` / `worker`) с привязкой к логическим профилям `py-*`. Production-код пишется напрямую оркестратором (без отдельного `py-code-bot`).
 
 **Запуск логического профиля в Codex runtime:**
 
@@ -47,6 +28,7 @@ spawn_agent(
 | VII  | **py-doc-bot**               | sonnet | Документация, ADR, диаграммы (Mermaid)                                                 | `review_py-doc-bot_{YYYYMMDD}_{HHMM}.md`               |
 | VIII | **py-test-swarm**            | opus   | Иерархическое тестирование (L1→L2→L3)                                                  | test reports                                           |
 |  IX  | **py-review-orchestrator**   | opus   | Иерархический code review (S1-S8)                                                      | review reports                                         |
+|  X   | **py-file-structure-bot**    | opus   | Аудит и оптимизация файловой структуры: orphans, naming, depth, layout compliance      | `review_py-file-structure-bot_{YYYYMMDD}_{HHMM}.md`    |
 
 > **Note:** `py-code-bot` removed in v4.0 — production code is written directly by the orchestrator. `py-diagram-bot` merged into `py-doc-bot`. Repo-wide documentation audits now route through the `documentation-audit` / `documentation-cascade-audit` skills rather than a dedicated documentation-only subagent profile.
 
@@ -62,6 +44,7 @@ spawn_agent(
 | py-debug-bot             | `src/bioetl/`, `tests/` (fixes)                                       | `configs/`, `docs/`                   |
 | py-audit-bot             | — (read-only)                                                         | всё                                   |
 | py-plan-bot              | — (read-only)                                                         | всё                                   |
+| py-file-structure-bot    | `reports/` (audit artifacts only)                                     | всё                                   |
 
 ### Определения субагентов
 
@@ -71,14 +54,14 @@ spawn_agent(
 
 Перед repo-wide structural выводами, hotspot-программами и package-reorg инициативами сверяйся с текущими evidence packs:
 
-- [Project File Structure Summary](../../../../reports/evidence/project-file-structure/SUMMARY.md)
-- [Project File Structure Decisions](../../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
-- [Project Package Topology Summary](../../../../reports/evidence/project-package-topology/SUMMARY.md)
-- [Project Package Topology Synthesis](../../../../reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md)
-- [Topology vs Governance Cross-Synthesis](../../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md)
-- [Project Package Topology Decisions](../../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
-- [Governance Signals Summary](../../../../reports/evidence/governance-signals/SUMMARY.md)
-- [Governance Signals Decisions](../../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md)
+- [Project File Structure Summary](../../docs/reports/evidence/project-file-structure/SUMMARY.md)
+- [Project File Structure Decisions](../../docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
+- [Project Package Topology Summary](../../docs/reports/evidence/project-package-topology/SUMMARY.md)
+- [Project Package Topology Synthesis](../../docs/reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md)
+- [Topology vs Governance Cross-Synthesis](../../docs/reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md)
+- [Project Package Topology Decisions](../../docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
+- [Governance Signals Summary](../../docs/reports/evidence/governance-signals/SUMMARY.md)
+- [Governance Signals Decisions](../../docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md)
 
 Operational defaults:
 
@@ -337,6 +320,7 @@ ______________________________________________________________________
 | `DOC-`  | py-doc-bot    | `DOC-001`  | DOC-001  | Обновление документации |
 | `FAIL-` | py-test-bot   | `FAIL-001` | FAIL-001 | Упавший тест (в отчёте) |
 | `CFG-`  | py-config-bot | `CFG-001`  | CFG-001  | Изменение конфигурации  |
+| `FS-`   | py-file-structure-bot  | `FS-001`   | FS-001   | Аномалия файловой структуры  |
 
 Все ID уникальны в пределах `task_id`. Cross-references: `DBG-001 → RF-002`, `DOC-003 → RF-001`, `CFG-001 → RF-003`.
 
@@ -396,6 +380,16 @@ py-plan-bot (plan)
 ### 8.5. Composite pipeline
 
 ```
+
+### 8.6. File-structure audit
+
+```
+py-file-structure-bot (audit/inventory)
+  → py-plan-bot (plan реорганизации, если FS-* findings)
+  → orchestrator (restructuring)
+  → py-test-bot (final)
+  → py-audit-bot (final)
+```
 py-audit-bot (baseline, scope=seed + enricher pipelines)
   → py-plan-bot (composite plan)
   → py-config-bot (composite config: seed/enrichers/merge)
@@ -412,7 +406,7 @@ ______________________________________________________________________
 | Документ                                               | Описание                                 |
 | ------------------------------------------------------ | ---------------------------------------- |
 | `.codex/agents/py-*.md`                                | Спецификации субагентов для Codex CLI    |
-| `.codex/agents/ORCHESTRATION.md`                       | Каноническая orchestration карта рантайма |
+| `docs/00-project/ai/rules/bioetl-ai-rules.md`          | Правила автоматической самопроверки кода |
 | `docs/00-project/RULES.md`                             | Архитектурные правила проекта            |
 | `docs/02-architecture/decisions/`                      | ADR-001..ADR-047                         |
 | `docs/00-project/glossary.md`                          | Терминология                             |
@@ -435,6 +429,7 @@ ______________________________________________________________________
 | IV  | py-config-bot | Data engineering, YAML configs   | REST API config                                 |
 |  V  | py-debug-bot  | Python debugging, RCA            | REST API debugging, Pandera issues              |
 | VI  | py-doc-bot    | Technical writing, ADR, diagrams | Bioinformatics terminology, Mermaid             |
+| VII | py-file-structure-bot    | File structure analysis, repo layout | Naming conventions, orphan detection, depth     |
 
 ### 9a.2 Rule References
 
@@ -536,7 +531,7 @@ ______________________________________________________________________
 - **PLATFORM**: Адаптация для Claude Code CLI (ранее Codex/Claude.ai)
 - **CHANGED**: Все субагенты переименованы: `pyXxxBot` → `py-xxx-bot` (для `subagent_type` в Task tool)
 - **CHANGED**: 8 старых Claude Code агентов заменены на 7 унифицированных: `py-audit-bot`, `py-plan-bot`, `py-test-bot`, `py-code-bot`, `py-config-bot`, `py-debug-bot`, `py-doc-bot`
-- **CHANGED**: Навыки из skills directory инлайнированы в файлы субагентов (секция `## Инлайнированные знания`)
+- **CHANGED**: Навыки из `/mnt/skills/` инлайнированы в файлы субагентов (секция `## Инлайнированные знания`)
 - **REMOVED**: `google_drive_search`, `message_compose`, `ask_user_input` (недоступны в CLI)
 - **CHANGED**: `web_search` / `web_fetch` → `WebSearch` / `WebFetch` (встроенные инструменты Claude Code)
 - **CHANGED**: MCP инструменты доступны через `ToolSearch` (deferred loading)

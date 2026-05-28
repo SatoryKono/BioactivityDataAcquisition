@@ -35,12 +35,16 @@ Dockerfile.mcp-fetch
 Dockerfile.mcp-filesystem
 Dockerfile.mcp-github
 Dockerfile.mcp-memory
+Dockerfile.gemini
 Dockerfile.warp
+conftest.py
+docker-compose.gemini.yml
 grafana-datasource.yml
 mkdocs.yml
 package-lock.json
 package.json
 pyproject.toml
+setup.ps1
 sonar-project.properties
 uv.lock
 mint.json

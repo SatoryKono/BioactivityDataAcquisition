@@ -36,6 +36,7 @@
 00-project/ai/memory/memory-py-config-bot.md
 00-project/ai/memory/memory-py-debug-bot.md
 00-project/ai/memory/memory-py-doc-bot.md
+00-project/ai/memory/memory-py-file-structure-bot.md
 00-project/ai/memory/memory-py-plan-bot.md
 00-project/ai/memory/memory-py-review-orchestrator.md
 00-project/ai/memory/memory-py-test-bot.md
