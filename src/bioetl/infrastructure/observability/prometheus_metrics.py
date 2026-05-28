@@ -67,7 +67,6 @@ def _reject_unexpected_labels(name: str, labels: MetricLabels) -> None:
             f"Prometheus metric {name} does not accept labels: {formatted}"
         )
 
-
 def _require_registered_metric[_MetricT](
     *,
     name: str,

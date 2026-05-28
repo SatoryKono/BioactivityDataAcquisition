@@ -486,6 +486,7 @@ class TestSilverWriterDQMetrics:
         """Finalize path should read Delta version once and pass it to metadata."""
         from datetime import UTC, datetime
 
+        from bioetl.domain.medallion import SilverWriteMode
         from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import scripts.memory.sync as memory_sync_module
 
-from .common import *  # noqa: F403
+from .common import *  # noqa: F401,F403
 
 
 def test_memory_mapping_path_prefers_canonical_graph_mapping(tmp_path: Path) -> None:

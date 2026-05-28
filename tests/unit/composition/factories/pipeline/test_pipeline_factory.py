@@ -300,7 +300,8 @@ def test_extract_dq_configs_trims_value_distribution_for_relaxed_dq() -> None:
 
     assert dq_configs.silver is not None
     assert (
-        SilverDQCheckType.VALUE_DISTRIBUTION not in dq_configs.silver.get_checks_enums()
+        SilverDQCheckType.VALUE_DISTRIBUTION
+        not in dq_configs.silver.get_checks_enums()
     )
     assert SilverDQCheckType.VALUE_DISTRIBUTION.value in silver_sink.dq_report.checks
 

@@ -1193,9 +1193,7 @@ def test_provider_telemetry_freshness_marks_missing_current_status_as_warn() -> 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert len(expressions) == 1
     expression = expressions[0]
-    assert (
-        "count_over_time(bioetl_provider_current_status[${__range_s}s])" in expression
-    )
+    assert "count_over_time(bioetl_provider_current_status[${__range_s}s])" in expression
     assert (
         "absent(count_over_time(bioetl_provider_current_status[${__range_s}s]))"
         in expression
@@ -1247,9 +1245,7 @@ def test_provider_critical_table_keeps_severity_only_scope() -> None:
     assert panel is not None, "Panel 'Inspect Critical Providers' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert expressions == [
-        "max_over_time(bioetl_provider_current_status[${__range_s}s]) >= 1"
-    ]
+    assert expressions == ["max_over_time(bioetl_provider_current_status[${__range_s}s]) >= 1"]
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("thresholds", {}).get("steps") == [

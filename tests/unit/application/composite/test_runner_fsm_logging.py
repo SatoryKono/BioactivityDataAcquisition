@@ -13,6 +13,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.application.composite.runner_pkg import (
+    CompositePipelineRunner,
     CompositeRuntimeConfig,
 )
 from bioetl.domain.composite.result import EnrichmentResult

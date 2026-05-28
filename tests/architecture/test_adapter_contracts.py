@@ -20,11 +20,13 @@ import re
 import shutil
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
+from importlib import import_module
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.domain.ports import FilterableDataSourcePort
 
 ADAPTER_MIXIN_CANONICAL_FILES = frozenset(
     {

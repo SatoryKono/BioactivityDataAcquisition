@@ -125,7 +125,9 @@ def _iter_uuid4_candidate_paths(root: Path) -> tuple[Path, ...]:
     if result.returncode != 0:
         return tuple(root.rglob("*.py"))
     return tuple(
-        ROOT / line for line in result.stdout.splitlines() if line.endswith(".py")
+        ROOT / line
+        for line in result.stdout.splitlines()
+        if line.endswith(".py")
     )
 
 

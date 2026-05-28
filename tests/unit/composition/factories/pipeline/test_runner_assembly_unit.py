@@ -159,10 +159,7 @@ def test_build_checkpoint_manager_uses_control_plane_policy() -> None:
 
     assert mock_create_manager.call_args.kwargs["compatibility_policy"] == "observe"
     assert mock_create_manager.call_args.kwargs["metrics"] is pipeline.services.metrics
-    assert (
-        mock_create_manager.call_args.kwargs["clock"].__class__.__name__
-        == "SystemClock"
-    )
+    assert mock_create_manager.call_args.kwargs["clock"].__class__.__name__ == "SystemClock"
 
 
 @pytest.mark.unit

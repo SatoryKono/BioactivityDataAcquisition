@@ -41,7 +41,7 @@ class InMemoryRunLedgerStore:
         self._items: dict[str, list[object]] = {}
 
     def append(self, entry: object) -> None:
-        manifest_id = entry.manifest_id
+        manifest_id = getattr(entry, "manifest_id")
         self._items.setdefault(manifest_id, []).append(entry)
 
     def list_entries(self, manifest_id: str) -> tuple[object, ...]:

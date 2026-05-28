@@ -1,5 +1,7 @@
 """Integration tests for critical panel actionable links."""
 
+from pathlib import Path
+
 import pytest
 
 from tests.integration._grafana_test_support import (

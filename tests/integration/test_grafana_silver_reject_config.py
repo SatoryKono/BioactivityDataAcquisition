@@ -167,35 +167,18 @@ def test_dq_validation_diagnostics_groups_failures_then_runtime_then_trends() ->
     assert row is not None
     nested = {panel.get("title"): panel for panel in row.get("panels", [])}
     assert nested["Inspect: Quarantine by Error Type"].get("gridPos", {}).get("y") == 48
-    assert (
-        nested["Monitor: Silver Validation Failures"].get("gridPos", {}).get("y") == 48
-    )
-    assert (
-        nested["Monitor: Gold Strict Validation Failures"].get("gridPos", {}).get("y")
-        == 48
-    )
+    assert nested["Monitor: Silver Validation Failures"].get("gridPos", {}).get("y") == 48
+    assert nested["Monitor: Gold Strict Validation Failures"].get("gridPos", {}).get("y") == 48
     assert nested["Track: Anomalies Detected"].get("gridPos", {}).get("y") == 56
     assert nested["Track: DQ Check Duration (p95)"].get("gridPos", {}).get("y") == 56
-    assert (
-        nested["Track: DQ Impact on Deliverability Trend (Blocked Share %)"]
-        .get("gridPos", {})
-        .get("y")
-        == 65
-    )
-    assert (
-        nested["Track: Data Quality Score Trend (Volume-weighted)"]
-        .get("gridPos", {})
-        .get("y")
-        == 65
-    )
-    assert (
-        nested["Review: Lineage Handoff to Control Plane"].get("gridPos", {}).get("y")
-        == 65
-    )
-    assert (
-        nested["Review: Aggregate Control-plane Handoff"].get("gridPos", {}).get("y")
-        == 73
-    )
+    assert nested["Track: DQ Impact on Deliverability Trend (Blocked Share %)"].get(
+        "gridPos", {}
+    ).get("y") == 65
+    assert nested["Track: Data Quality Score Trend (Volume-weighted)"].get(
+        "gridPos", {}
+    ).get("y") == 65
+    assert nested["Review: Lineage Handoff to Control Plane"].get("gridPos", {}).get("y") == 65
+    assert nested["Review: Aggregate Control-plane Handoff"].get("gridPos", {}).get("y") == 73
 
 
 def test_dq_quarantine_breakdown_prefers_bar_comparison_over_pie_share() -> None:
@@ -238,15 +221,10 @@ def test_dq_failure_monitors_use_background_severity_and_nonzero_red(
     )
     assert panel is not None
     assert panel.get("options", {}).get("colorMode") == "backgroundSolid"
-    steps = (
-        panel.get("fieldConfig", {})
-        .get("defaults", {})
-        .get("thresholds", {})
-        .get("steps", [])
+    steps = panel.get("fieldConfig", {}).get("defaults", {}).get("thresholds", {}).get(
+        "steps", []
     )
-    assert any(
-        step.get("value") == 0 and step.get("color") == "green" for step in steps
-    )
+    assert any(step.get("value") == 0 and step.get("color") == "green" for step in steps)
     assert any(step.get("value") == 1 and step.get("color") == "red" for step in steps)
 
 
@@ -424,7 +402,9 @@ def test_silver_reject_explorer_payload_link_preserves_time_scope() -> None:
         )
 
 
-def test_silver_reject_explorer_backend_health_marker_uses_live_health_probe() -> None:
+def test_silver_reject_explorer_backend_health_marker_uses_live_health_probe() -> (
+    None
+):
     """Explorer must expose a first-screen backend trust marker via /health/live."""
     dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
@@ -451,7 +431,9 @@ def test_silver_reject_explorer_backend_health_marker_uses_live_health_probe() -
     assert target.get("url") == "/health/live"
     assert target.get("root_selector") == "$.checks.server"
 
-    no_value = str(panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", ""))
+    no_value = str(
+        panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
+    )
     assert "UNKNOWN" in no_value
     description = str(panel.get("description", ""))
     assert "reachable" in description
@@ -780,26 +762,11 @@ def test_dq_breakdown_panels_describe_direct_explorer_drilldowns(
 @pytest.mark.parametrize(
     ("panel_title", "forbidden_snippet"),
     [
-        (
-            "Inspect: Silver Filter Rejects by Pipeline",
-            'label_replace(vector(0), "pipeline", "no_events"',
-        ),
-        (
-            "Inspect: Top Silver Reject Reasons (Pareto)",
-            'label_replace(vector(0), "reason_code", "none"',
-        ),
-        (
-            "Inspect: Top Silver Reject Fields",
-            'label_replace(vector(0), "field", "none"',
-        ),
-        (
-            "Inspect: Quarantine by Error Type",
-            'label_replace(vector(0), "error_type", "none"',
-        ),
-        (
-            "Track: Anomalies Detected",
-            'label_replace(label_replace(vector(0), "severity", "none"',
-        ),
+        ("Inspect: Silver Filter Rejects by Pipeline", 'label_replace(vector(0), "pipeline", "no_events"'),
+        ("Inspect: Top Silver Reject Reasons (Pareto)", 'label_replace(vector(0), "reason_code", "none"'),
+        ("Inspect: Top Silver Reject Fields", 'label_replace(vector(0), "field", "none"'),
+        ("Inspect: Quarantine by Error Type", 'label_replace(vector(0), "error_type", "none"'),
+        ("Track: Anomalies Detected", 'label_replace(label_replace(vector(0), "severity", "none"'),
     ],
 )
 def test_dq_breakdown_panels_do_not_invent_synthetic_placeholder_categories(
@@ -831,14 +798,8 @@ def test_dq_breakdown_panels_do_not_invent_synthetic_placeholder_categories(
 @pytest.mark.parametrize(
     ("panel_title", "expected_no_value"),
     [
-        (
-            "Inspect: Silver Filter Rejects by Pipeline",
-            "No filtered-out samples in range",
-        ),
-        (
-            "Inspect: Top Silver Reject Reasons (Pareto)",
-            "No reject reason samples in range",
-        ),
+        ("Inspect: Silver Filter Rejects by Pipeline", "No filtered-out samples in range"),
+        ("Inspect: Top Silver Reject Reasons (Pareto)", "No reject reason samples in range"),
         ("Inspect: Top Silver Reject Fields", "No reject field samples in range"),
         ("Inspect: Quarantine by Error Type", "No quarantined records in range"),
         ("Track: Anomalies Detected", "No anomaly events in range"),

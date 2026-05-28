@@ -14,7 +14,7 @@ from bioetl.domain.ports import GoldMetadataInput, SilverMetadataInput, SilverRe
 
 pytestmark = pytest.mark.unit
 
-from tests.unit.application.services.test_metadata_coordinator import *  # noqa: F403
+from tests.unit.application.services.test_metadata_coordinator import *  # noqa: F401,F403
 from tests.unit.application.services.test_metadata_coordinator import _FIXED_TIME
 
 

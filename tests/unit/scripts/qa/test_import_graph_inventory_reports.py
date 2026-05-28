@@ -148,9 +148,7 @@ def test_build_compatibility_importer_census_supports_relative_repo_root(
     payload = build_compatibility_importer_census(Path("."))
 
     assert payload["summary"]["twin_pair_count"] == 1
-    assert (
-        payload["twin_pairs"][0]["private_module"] == "bioetl.application.core._helper"
-    )
+    assert payload["twin_pairs"][0]["private_module"] == "bioetl.application.core._helper"
     assert payload["twin_pairs"][0]["public_module"] == "bioetl.application.core.helper"
 
 

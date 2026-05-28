@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 # ruff: noqa: F403,F405
-from tests.unit.composition.runtime_builders.runner_builder_test_support import *
+from tests.unit.composition.runtime_builders.runner_builder_test_support import *  # noqa: F403,F405
 
 
 def test_strict_runner_collaborator_attachment_requires_run_ledger_service() -> None:

@@ -346,7 +346,9 @@ async def test_workflow_runner_marks_downstream_steps_skipped_after_failure() ->
 
 
 @pytest.mark.asyncio
-async def test_workflow_runner_executes_chembl_baseline_in_dependency_order() -> None:
+async def test_workflow_runner_executes_chembl_baseline_in_dependency_order() -> (
+    None
+):
     metrics = _RecordingMetrics()
     pipeline_runner = _PipelineRunner()
     transform_service = _RecordingTransformService()
@@ -374,7 +376,9 @@ async def test_workflow_runner_executes_chembl_baseline_in_dependency_order() ->
     )
 
     assert result.status == "success"
-    assert [step.step_id for step in result.steps] == list(config.topological_step_ids)
+    assert [step.step_id for step in result.steps] == list(
+        config.topological_step_ids
+    )
     assert [pipeline_name for pipeline_name, _options in pipeline_runner.calls] == [
         "chembl_assay",
         "chembl_target",

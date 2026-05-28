@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# src/setup.sh —  скрипт настройки окружения BioETL
+# scripts/setup.sh —  скрипт настройки окружения BioETL
 #
 # Использование:
-#   ./src/setup.sh              # Полная настройка
-#   ./src/setup.sh --quick      # Быстрая установка (без линтеров/тестов)
-#   ./src/setup.sh --skip-tests # Запуск линтеров без тестов
-#   ./src/setup.sh --force      # Пересоздание .venv
+#   ./scripts/setup.sh              # Полная настройка
+#   ./scripts/setup.sh --quick      # Быстрая установка (без линтеров/тестов)
+#   ./scripts/setup.sh --skip-tests # Запуск линтеров без тестов
+#   ./scripts/setup.sh --force      # Пересоздание .venv
 # ==============================================================================
 
 set -e
@@ -40,6 +40,10 @@ fi
 
 echo "Установка зависимостей..."
 make install
+
+if [ -f ".venv/bin/activate" ]; then
+    source .venv/bin/activate
+fi
 
 if [ "$QUICK" -eq 1 ]; then
     echo "Установка завершена (quick mode)."

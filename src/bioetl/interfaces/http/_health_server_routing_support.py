@@ -335,15 +335,12 @@ async def handle_control_plane_checkpoint_freshness(
         else scope.requested_pipeline
     )
 
-    (
-        checkpoint_tuple,
-        evidence_source,
-        manifest_id,
-        aggregate_scope_unknown,
-    ) = await load_checkpoint_freshness_evidence(
-        host,
-        scope=scope,
-        target_pipeline=target_pipeline,
+    checkpoint_tuple, evidence_source, manifest_id, aggregate_scope_unknown = (
+        await load_checkpoint_freshness_evidence(
+            host,
+            scope=scope,
+            target_pipeline=target_pipeline,
+        )
     )
     if aggregate_scope_unknown:
         await host._send_payload_response(

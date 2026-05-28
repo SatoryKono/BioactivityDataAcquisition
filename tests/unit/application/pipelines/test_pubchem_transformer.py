@@ -8,6 +8,7 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,

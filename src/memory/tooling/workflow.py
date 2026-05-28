@@ -222,9 +222,7 @@ def _refresh_pre_task_surfaces(
         tempfile.mkdtemp(prefix="memory-pre-task-")
     )
     repo_root = (
-        refresh_repo_root
-        or _discover_repo_root()
-        or Path(__file__).resolve().parents[3]
+        refresh_repo_root or _discover_repo_root() or Path(__file__).resolve().parents[3]
     )
     refresh_report = refresh_all(
         repo_root.resolve(),
@@ -558,9 +556,7 @@ def _build_parser() -> argparse.ArgumentParser:
     pre_parser.add_argument("--skip-refresh-if-missing", action="store_true")
     pre_parser.add_argument("--limit", type=int, default=10)
     pre_parser.add_argument(
-        "--profile",
-        default=DEFAULT_PROFILE,
-        help="Task retrieval profile (validated at runtime).",
+        "--profile", default=DEFAULT_PROFILE, help="Task retrieval profile (validated at runtime)."
     )
     pre_parser.add_argument("--skip-session-note", action="store_true")
     pre_parser.add_argument("--json", action="store_true")

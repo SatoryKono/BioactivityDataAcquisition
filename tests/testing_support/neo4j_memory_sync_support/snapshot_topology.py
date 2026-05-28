@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from .common import *  # noqa: F403
+from .common import *  # noqa: F401,F403
 
 RelationKey = tuple[str, str, str, str, str]
 
@@ -1540,7 +1540,9 @@ def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
         "doc_source_surface",
         RUN_MANIFEST_LEDGER_DOC_PATH,
     ) in relation_keys
-    assert any(key.label == "doc_claim_surface" for key in filtered.nodes)
+    assert any(
+        key.label == "doc_claim_surface" for key in filtered.nodes
+    )
     assert any(
         relation_key[2] == "ASSERTS" and relation_key[3] == "doc_claim_surface"
         for relation_key in relation_keys

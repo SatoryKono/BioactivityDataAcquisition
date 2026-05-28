@@ -1,20 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-25T18:56:06.584983+00:00",
+  "generated_at": "2026-05-28T21:50:15.279353+00:00",
   "summary": {
-    "total_scripts": 397,
+    "total_scripts": 403,
     "status_counts": {
-      "active": 357,
+      "active": 360,
+      "orphan": 3,
       "supporting": 40
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 3,
       "ci": 58,
-      "docs": 149,
-      "scripts": 314,
+      "docs": 145,
+      "scripts": 317,
       "skills": 8,
-      "tests": 161
+      "tests": 164
     }
   },
   "scripts": [
@@ -293,7 +294,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 50,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"diagnose-codex-wsl\": \"../ai/codex/diagnose_wsl.sh\","
         },
@@ -1029,7 +1030,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 51,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"setup-agents\": \"../ai/codex/setup_agents.sh\","
         },
@@ -1095,7 +1096,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 53,
+          "line": 63,
           "source_group": "scripts",
           "text": "\"setup-skills\": \"../ai/codex/setup_skills.sh\","
         },
@@ -1128,7 +1129,7 @@
       "references": [
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 128,
+          "line": 132,
           "source_group": "scripts",
           "text": "├── gemini-interactive.ps1          # Thin compatibility launcher"
         },
@@ -1179,7 +1180,7 @@
       "references": [
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 129,
+          "line": 133,
           "source_group": "scripts",
           "text": "├── gemini-interactive.sh           # Thin compatibility launcher"
         },
@@ -1215,7 +1216,7 @@
         },
         {
           "path": "scripts/ai/gemini/gemini-interactive.ps1",
-          "line": 25,
+          "line": 19,
           "source_group": "scripts",
           "text": "$LauncherWSL = \"$RepoWSL/scripts/ai/gemini/gemini-interactive.sh\""
         },
@@ -1236,7 +1237,7 @@
       "references": [
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 126,
+          "line": 130,
           "source_group": "scripts",
           "text": "├── headless.ps1                    # PowerShell transport without MCP sync"
         },
@@ -1248,7 +1249,7 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 112,
+          "line": 114,
           "source_group": "scripts",
           "text": "- `headless.sh` / `headless.ps1` set `GEMINI_SKIP_MCP_SETUP=1` for one launch and then delegate back to the canonical launcher."
         }
@@ -1263,19 +1264,19 @@
       "references": [
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 106,
+          "line": 110,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini/headless.sh"
         },
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 127,
+          "line": 131,
           "source_group": "scripts",
           "text": "├── headless.sh                     # WSL launcher without MCP sync"
         },
         {
           "path": "scripts/ai/gemini/QUICK_REFERENCE.md",
-          "line": 57,
+          "line": 61,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini/headless.sh"
         },
@@ -1299,15 +1300,15 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 112,
+          "line": 114,
           "source_group": "scripts",
           "text": "- `headless.sh` / `headless.ps1` set `GEMINI_SKIP_MCP_SETUP=1` for one launch and then delegate back to the canonical launcher."
         },
         {
           "path": "scripts/ai/gemini/headless.ps1",
-          "line": 20,
+          "line": 15,
           "source_group": "scripts",
-          "text": "$LauncherWSL = ConvertTo-WslPath (Join-Path $ScriptDir \"headless.sh\")"
+          "text": "$LauncherWSL = ConvertTo-GeminiWslPath (Join-Path $ScriptDir \"headless.sh\")"
         }
       ]
     },
@@ -1335,7 +1336,7 @@
       "references": [
         {
           "path": "scripts/ai/gemini/helper/check-env.ps1",
-          "line": 19,
+          "line": 12,
           "source_group": "scripts",
           "text": "$CheckWSL = \"$RepoWSL/scripts/ai/gemini/helper/check-env.sh\""
         }
@@ -1350,7 +1351,7 @@
       "references": [
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 135,
+          "line": 139,
           "source_group": "scripts",
           "text": "│   ├── ensure-gemini-cli.sh        # Managed CLI bootstrap"
         },
@@ -1430,11 +1431,11 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 132,
+          "line": 136,
           "source_group": "scripts",
           "text": "│   ├── run-gemini-impl.sh          # Runtime launcher"
         },
@@ -1446,31 +1447,37 @@
         },
         {
           "path": "scripts/ai/gemini/run-gemini.sh",
-          "line": 186,
+          "line": 187,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" \"$@\""
         },
         {
           "path": "scripts/ai/gemini/run-gemini.sh",
-          "line": 196,
+          "line": 192,
+          "source_group": "scripts",
+          "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" --allowed-mcp-server-names \"${GEMINI_INTERACTIVE_MCP_SERVERS}\" \"$@\""
+        },
+        {
+          "path": "scripts/ai/gemini/run-gemini.sh",
+          "line": 203,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" --prompt \"$*\""
         },
         {
           "path": "scripts/ai/gemini/run-gemini.sh",
-          "line": 206,
+          "line": 213,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" --prompt \"$*\" --approval-mode yolo"
         },
         {
           "path": "scripts/ai/gemini/run-gemini.sh",
-          "line": 214,
+          "line": 221,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" --prompt \"${COMMAND} $*\""
         },
         {
           "path": "scripts/ai/gemini/run-gemini.sh",
-          "line": 216,
+          "line": 223,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" --prompt \"${COMMAND}\""
         }
@@ -1492,6 +1499,39 @@
       ]
     },
     {
+      "path": "scripts/ai/gemini/helper/wsl-support.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/ai/gemini/gemini-interactive.ps1",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "$WslSupport = Join-Path $ScriptDir \"helper\\wsl-support.ps1\""
+        },
+        {
+          "path": "scripts/ai/gemini/headless.ps1",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "$WslSupport = Join-Path $ScriptDir \"helper\\wsl-support.ps1\""
+        },
+        {
+          "path": "scripts/ai/gemini/helper/check-env.ps1",
+          "line": 7,
+          "source_group": "scripts",
+          "text": "$WslSupport = Join-Path $ScriptDir \"wsl-support.ps1\""
+        },
+        {
+          "path": "scripts/ai/gemini/run-gemini.ps1",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "$WslSupport = Join-Path $ScriptDir \"helper\\wsl-support.ps1\""
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/gemini/run-gemini.ps1",
       "type": "ps1",
       "status": "active",
@@ -1500,49 +1540,49 @@
       "references": [
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 8,
+          "line": 11,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1 check"
         },
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 9,
+          "line": 12,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1 setup"
         },
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 12,
+          "line": 15,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1"
         },
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 15,
+          "line": 18,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1 \"analyze this code\""
         },
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 111,
+          "line": 115,
           "source_group": "scripts",
           "text": "GEMINI_MODEL=gemini-2.0-flash .\\scripts\\ai\\gemini\\run-gemini.ps1"
         },
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 124,
+          "line": 128,
           "source_group": "scripts",
           "text": "├── run-gemini.ps1                  # PowerShell delegator"
         },
         {
           "path": "scripts/ai/gemini/QUICK_REFERENCE.md",
-          "line": 7,
+          "line": 9,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1"
         },
         {
           "path": "scripts/ai/gemini/QUICK_REFERENCE.md",
-          "line": 19,
+          "line": 23,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1 \"analyze the repository structure\""
         }
@@ -1557,49 +1597,49 @@
       "references": [
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 21,
+          "line": 24,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini/run-gemini.sh check"
         },
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 22,
+          "line": 25,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini/run-gemini.sh setup"
         },
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 25,
+          "line": 28,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini/run-gemini.sh"
         },
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 28,
+          "line": 31,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini/run-gemini.sh \"explain this repository\""
         },
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 46,
+          "line": 49,
           "source_group": "scripts",
           "text": "| `start` | `run-gemini.sh start` | Interactive CLI (default) |"
         },
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 47,
+          "line": 50,
           "source_group": "scripts",
           "text": "| `prompt` | `run-gemini.sh prompt \"task\"` | Headless prompt execution |"
         },
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 48,
+          "line": 51,
           "source_group": "scripts",
           "text": "| `exec` | `run-gemini.sh exec \"task\"` | Auto-approve all actions (YOLO mode) |"
         },
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
-          "line": 49,
+          "line": 52,
           "source_group": "scripts",
           "text": "| `check` | `run-gemini.sh check` | Verify environment setup |"
         }
@@ -1685,7 +1725,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 39,
+      "reference_count": 34,
       "references": [
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
@@ -1746,7 +1786,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 164,
+          "line": 170,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         }
@@ -1757,16 +1797,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 61,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/github-mcp-wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 61,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/github-mcp-wrapper.sh\""
@@ -1779,7 +1813,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 161,
+          "line": 167,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         }
@@ -1821,16 +1855,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 112,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 112,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
@@ -1856,16 +1884,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 142,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_chembl_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 142,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_chembl_wrapper.sh\""
@@ -1908,16 +1930,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 82,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_context7_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 82,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_context7_wrapper.sh\""
@@ -1943,7 +1959,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/CODEX_WSL_SETUP.md",
@@ -1953,12 +1969,6 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 70,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 70,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_wrapper.sh\""
@@ -1984,16 +1994,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 106,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 106,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
@@ -2019,16 +2023,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 160,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 160,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
@@ -2048,16 +2046,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 124,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 124,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
@@ -2083,7 +2075,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 22,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -2148,16 +2140,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 100,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 100,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
@@ -2183,16 +2169,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 148,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubchem_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 148,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubchem_wrapper.sh\""
@@ -2212,16 +2192,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 154,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubmed_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 154,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubmed_wrapper.sh\""
@@ -2241,16 +2215,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 118,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 118,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
@@ -4486,7 +4454,7 @@
         },
         {
           "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 96,
+          "line": 98,
           "source_group": "scripts",
           "text": "Candidate(\"scripts/docs/build_docs_site.sh\", \"shell transport adapter\"),"
         },
@@ -4498,13 +4466,13 @@
         },
         {
           "path": "tests/unit/scripts/repo/test_generate_scripts_wrapper_caller_matrix.py",
-          "line": 14,
+          "line": 16,
           "source_group": "tests",
           "text": "test_file.write_text(\"scripts/docs/build_docs_site.sh\\n\", encoding=\"utf-8\")"
         },
         {
           "path": "tests/unit/scripts/repo/test_generate_scripts_wrapper_caller_matrix.py",
-          "line": 25,
+          "line": 27,
           "source_group": "tests",
           "text": "assert \"`scripts/docs/build_docs_site.sh`\" in report"
         }
@@ -4707,7 +4675,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1942,
+          "line": 1944,
           "source_group": "docs",
           "text": "- **5.26** (2026-05-15): ADR Governance Sync. Приложение F синхронизировано с ADR-046/047 и теперь явно делегирует canonical live registry в `decisions/README.md` и `adr-registry.md`. Исправлен genera"
         },
@@ -5764,7 +5732,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 258,
+          "line": 259,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"apply_ci_fixes.py\""
         }
@@ -5911,7 +5879,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 159,
+          "line": 160,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"quality_integral_gate.py\""
         }
@@ -5995,7 +5963,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 153,
+          "line": 154,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\""
         }
@@ -6162,63 +6130,6 @@
       "references": []
     },
     {
-      "path": "scripts/engineering/dev/.setup_wsl_codex.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 12,
-      "references": [
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 68,
-          "source_group": "docs",
-          "text": "| `.setup_wsl_codex.sh`  | `scripts/engineering/dev/` | DNS resolver (dig + PowerShell fallback) |"
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 253,
-          "source_group": "docs",
-          "text": "**Layer 1: DNS** (`scripts/engineering/dev/.setup_wsl_codex.sh`)"
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 266,
-          "source_group": "docs",
-          "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\""
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 292,
-          "source_group": "docs",
-          "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\" 2>/dev/null"
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 348,
-          "source_group": "docs",
-          "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\""
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_QUICK_REF.md",
-          "line": 7,
-          "source_group": "docs",
-          "text": ".\\scripts\\engineering\\dev\\.setup_wsl_codex.sh"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_QUICK_REF.md",
-          "line": 71,
-          "source_group": "docs",
-          "text": "| `OpenAI timeout`    | Run setup: `.\\scripts\\engineering\\dev\\.setup_wsl_codex.sh`                               |"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
-          "line": 23,
-          "source_group": "docs",
-          "text": ".\\scripts\\engineering\\dev\\.setup_wsl_codex.sh"
-        }
-      ]
-    },
-    {
       "path": "scripts/engineering/dev/.wsl-vpn-fix.ps1",
       "type": "ps1",
       "status": "active",
@@ -6266,19 +6177,19 @@
         },
         {
           "path": "docs/03-guides/getting-started.md",
-          "line": 65,
+          "line": 71,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev setup-mcp"
         },
         {
           "path": "docs/03-guides/getting-started.md",
-          "line": 68,
+          "line": 74,
           "source_group": "docs",
           "text": "If you activated `.venv` instead of using `uv`, `python -m scripts.engineering.dev setup-mcp`"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 95,
+          "line": 99,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.dev run-tests`, and"
         },
@@ -6537,7 +6448,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 32,
+      "reference_count": 33,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -6596,7 +6507,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 32,
+      "reference_count": 33,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -6828,7 +6739,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 17,
       "references": [
         {
           "path": "Makefile",
@@ -6850,21 +6761,15 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 561,
+          "line": 596,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 652,
+          "line": 687,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
-        },
-        {
-          "path": "makefile",
-          "line": 95,
-          "source_group": "build",
-          "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -m \"not e2e and not benchmark and not memor"
         },
         {
           "path": "scripts/engineering/dev/README.md",
@@ -6877,6 +6782,12 @@
           "line": 51,
           "source_group": "scripts",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --stream"
+        },
+        {
+          "path": "scripts/engineering/dev/README.md",
+          "line": 52,
+          "source_group": "scripts",
+          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --tail"
         }
       ]
     },
@@ -6885,7 +6796,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
@@ -6901,7 +6812,13 @@
         },
         {
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
-          "line": 29,
+          "line": 11,
+          "source_group": "tests",
+          "text": "\"scripts/engineering/dev/run_tests.ps1\": 'Join-Path $PSScriptRoot \"../../..\"',"
+        },
+        {
+          "path": "tests/architecture/test_dev_run_tests_consolidation.py",
+          "line": 36,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/run_tests.ps1\").read_text("
         }
@@ -6912,11 +6829,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": "docs/03-guides/testing.md",
-          "line": 94,
+          "line": 98,
           "source_group": "docs",
           "text": "Developer wrappers such as `scripts/engineering/dev/run_tests.py`,"
         },
@@ -6969,11 +6886,11 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/03-guides/testing.md",
-          "line": 96,
+          "line": 100,
           "source_group": "docs",
           "text": "`scripts/engineering/dev/run_tests.sh` are convenience entry points for local"
         },
@@ -6991,7 +6908,13 @@
         },
         {
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
-          "line": 19,
+          "line": 9,
+          "source_group": "tests",
+          "text": "\"scripts/engineering/dev/run_tests.sh\": 'dirname \"$0\")/../../..',"
+        },
+        {
+          "path": "tests/architecture/test_dev_run_tests_consolidation.py",
+          "line": 26,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/run_tests.sh\").read_text("
         }
@@ -7048,7 +6971,7 @@
         },
         {
           "path": "docs/03-guides/getting-started.md",
-          "line": 79,
+          "line": 85,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
         }
@@ -7105,7 +7028,7 @@
         },
         {
           "path": "docs/03-guides/getting-started.md",
-          "line": 85,
+          "line": 91,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
         }
@@ -7116,11 +7039,17 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
-          "line": 39,
+          "line": 10,
+          "source_group": "tests",
+          "text": "\"scripts/engineering/dev/test_changed.sh\": 'dirname \"$0\")/../../..',"
+        },
+        {
+          "path": "tests/architecture/test_dev_run_tests_consolidation.py",
+          "line": 46,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/test_changed.sh\").read_text("
         }
@@ -8127,7 +8056,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 342,
+          "line": 343,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         }
@@ -8138,7 +8067,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 26,
+      "reference_count": 27,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -8377,13 +8306,13 @@
         },
         {
           "path": "docs/00-project/glossary.md",
-          "line": 546,
+          "line": 548,
           "source_group": "docs",
           "text": "A terminology linter is available at `scripts/engineering/qa/lint_terminology.py`:"
         },
         {
           "path": "docs/00-project/glossary.md",
-          "line": 550,
+          "line": 552,
           "source_group": "docs",
           "text": "python scripts/engineering/qa/lint_terminology.py src/bioetl/"
         },
@@ -8446,7 +8375,7 @@
         },
         {
           "path": "scripts/engineering/qa/check_naming_package_consistency.py",
-          "line": 244,
+          "line": 246,
           "source_group": "scripts",
           "text": "location=\"scripts/engineering/qa/naming_audit.py --check\","
         }
@@ -8493,7 +8422,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 345,
+          "line": 346,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         }
@@ -8682,7 +8611,7 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 215,
+          "line": 213,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }
@@ -8812,7 +8741,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 220,
+          "line": 224,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -9109,7 +9038,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 594,
+          "line": 629,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         },
@@ -9172,7 +9101,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 595,
+          "line": 630,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -9199,7 +9128,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 218,
+          "line": 222,
           "source_group": "docs",
           "text": "- `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`"
         },
@@ -9261,7 +9190,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 54,
+      "reference_count": 53,
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -9627,7 +9556,7 @@
         },
         {
           "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 98,
+          "line": 100,
           "source_group": "scripts",
           "text": "\"scripts/engineering/repo/cleanup_branch_candidates.sh\","
         },
@@ -9860,7 +9789,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 125,
+      "reference_count": 122,
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
@@ -9925,14 +9854,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
-          "line": 154,
-          "source_group": "docs",
-          "text": "| `scripts/memory/prompts/print_seed.sh`          | Maintained prompt seed helper for manual enrichment        |"
-        },
         {
           "path": "scripts/memory/README.md",
           "line": 19,
@@ -9946,14 +9869,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
-        {
-          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
-          "line": 153,
-          "source_group": "docs",
-          "text": "| `scripts/memory/query.py`                       | Operator-facing memory query entrypoint                    |"
-        },
         {
           "path": "scripts/memory/README.md",
           "line": 24,
@@ -9991,7 +9908,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -10051,16 +9968,16 @@
       "reference_count": 2,
       "references": [
         {
-          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
-          "line": 152,
-          "source_group": "docs",
-          "text": "| `scripts/memory/sync.py`                        | Deterministic repo graph sync entrypoint                   |"
-        },
-        {
           "path": "scripts/memory/README.md",
           "line": 23,
           "source_group": "scripts",
           "text": "- `sync.py` is now a compatibility module alias to `memory.graph.sync`."
+        },
+        {
+          "path": "tests/unit/memory/test_graph_entrypoints.py",
+          "line": 42,
+          "source_group": "tests",
+          "text": "assert sync_path.name == \"sync.py\""
         }
       ]
     },
@@ -10069,7 +9986,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
@@ -10079,13 +9996,13 @@
         },
         {
           "path": "docs/05-operations/01-monitoring-guide.md",
-          "line": 511,
+          "line": 528,
           "source_group": "docs",
           "text": "python -m scripts.ops check-observability-ports --json"
         },
         {
           "path": "docs/05-operations/01-monitoring-guide.md",
-          "line": 569,
+          "line": 586,
           "source_group": "docs",
           "text": "1. Запустите `python -m scripts.ops check-observability-ports --json`."
         },
@@ -10552,7 +10469,7 @@
         },
         {
           "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 106,
+          "line": 108,
           "source_group": "scripts",
           "text": "Candidate(\"scripts/ops/launchers/codex/codex-exec.bat\", WINDOWS_TRANSPORT_ROLE),"
         },
@@ -10803,7 +10720,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 15,
       "references": [
         {
           "path": "Makefile",
@@ -10819,21 +10736,9 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 175,
+          "line": 179,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
-        },
-        {
-          "path": "makefile",
-          "line": 33,
-          "source_group": "build",
-          "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only"
-        },
-        {
-          "path": "makefile",
-          "line": 36,
-          "source_group": "build",
-          "text": "bash scripts/ops/launchers/codex/setup_plugins.sh"
         },
         {
           "path": "scripts/engineering/dev/README.md",
@@ -10852,6 +10757,18 @@
           "line": 523,
           "source_group": "scripts",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only"
+        },
+        {
+          "path": "scripts/engineering/dev/run_pytest.sh",
+          "line": 527,
+          "source_group": "scripts",
+          "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
+        },
+        {
+          "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
+          "line": 109,
+          "source_group": "scripts",
+          "text": "Candidate(\"scripts/ops/launchers/codex/setup_plugins.sh\", BOOTSTRAP_HELPER_ROLE),"
         }
       ]
     },
@@ -10993,7 +10910,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 38,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"salt-rotate\": \"maintenance/security/salt_rotate.py\","
         }
@@ -11020,7 +10937,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 220,
+          "line": 224,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -11101,7 +11018,7 @@
         },
         {
           "path": "tests/architecture/test_test_structural_debt.py",
-          "line": 20,
+          "line": 18,
           "source_group": "tests",
           "text": "\"tests/testing_support/neo4j_memory_sync.py::test_snapshot_contains_core_repo_surfaces\": 295,"
         }
@@ -11116,13 +11033,13 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 39,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"check-observability-ports\": \"observability/check_published_observability_endpoints.py\","
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_check_published_observability_endpoints.py",
-          "line": 117,
+          "line": 120,
           "source_group": "tests",
           "text": "expected_target=\"observability/check_published_observability_endpoints.py\","
         }
@@ -11137,23 +11054,52 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 41,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"audit-live-grafana\": \"observability/grafana/audit_live_grafana_panels.py\","
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 226,
+          "line": 227,
           "source_group": "tests",
           "text": "/ \"audit_live_grafana_panels.py\""
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 65,
+          "line": 227,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/audit_live_grafana_panels.py\","
         }
       ]
+    },
+    {
+      "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 47,
+          "source_group": "scripts",
+          "text": "\"observability/grafana/check_grafana_dashboard_audit_preflight.py\""
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
+          "line": 407,
+          "source_group": "tests",
+          "text": "expected_target=\"observability/grafana/check_grafana_dashboard_audit_preflight.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
@@ -11164,17 +11110,61 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 40,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"rerender-grafana\": \"observability/grafana/rerender_grafana_screenshots.py\","
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 211,
+          "line": 212,
           "source_group": "tests",
           "text": "/ \"rerender_grafana_screenshots.py\""
         }
       ]
+    },
+    {
+      "path": "scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 50,
+          "source_group": "scripts",
+          "text": "\"observability/grafana/run_grafana_dashboard_audit_cycle.py\""
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
+          "line": 574,
+          "source_group": "tests",
+          "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1",
+          "line": 30,
+          "source_group": "scripts",
+          "text": "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ops/runtime/deploy/deploy-bioetl.sh",
@@ -11203,7 +11193,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 56,
+          "line": 66,
           "source_group": "scripts",
           "text": "\"deploy\": \"runtime/deploy/deploy-bioetl.sh\","
         }
@@ -11214,25 +11204,13 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
           "line": 127,
           "source_group": "docs",
           "text": "| Manual Docker restart | `scripts/ops/runtime/docker/restart-docker.ps1` |"
-        },
-        {
-          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
-          "line": 55,
-          "source_group": "docs",
-          "text": ".\\scripts\\ops\\runtime\\docker\\restart-docker.ps1"
-        },
-        {
-          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
-          "line": 155,
-          "source_group": "docs",
-          "text": "| `scripts/ops/runtime/docker/restart-docker.ps1` | Docker Desktop restart helper                              |"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
@@ -11641,7 +11619,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 54,
+          "line": 64,
           "source_group": "scripts",
           "text": "\"check-skills\": \"support/skills/check_ai_skills_layout.sh\","
         }
@@ -12222,6 +12200,14 @@
           "text": "\"validate-unified-configs\": \"scripts.schema.validate_unified_configs\","
         }
       ]
+    },
+    {
+      "path": "scripts/setup.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/shutdown.ps1",
