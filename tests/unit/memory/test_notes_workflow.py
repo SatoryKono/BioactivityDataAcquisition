@@ -138,6 +138,7 @@ def test_parse_markdown_note_timeout_does_not_wait_for_blocked_reader(
 
     monkeypatch.setattr(notes_module, "NOTE_READ_TIMEOUT_SECONDS", 0.01)
     monkeypatch.setattr(notes_module, "_read_text_from_git_object", lambda _: None)
+    monkeypatch.setattr(notes_module, "_is_likely_network_drive", lambda _: True)
     monkeypatch.setattr(Path, "read_text", blocked_read_text)
 
     started_at = time.monotonic()
@@ -176,6 +177,7 @@ def test_parse_markdown_note_uses_git_fallback_when_worktree_read_times_out(
             "# Session\n"
         ),
     )
+    monkeypatch.setattr(notes_module, "_is_likely_network_drive", lambda _: True)
     monkeypatch.setattr(Path, "read_text", blocked_read_text)
 
     note = parse_markdown_note(path, include_body=False)
