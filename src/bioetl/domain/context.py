@@ -39,9 +39,11 @@ __all__ = [
 MISSING_RUNTIME_TIMESTAMP = datetime(1970, 1, 1, tzinfo=UTC)
 """Deterministic sentinel for compatibility-only direct context construction."""
 
+
 def current_utc_time() -> datetime:
     """Return the sanctioned domain UTC timestamp source."""
     return datetime.now(UTC)
+
 
 def _normalize_correlation_value(value: object | None) -> str | None:
     """Normalize one optional correlation field to a non-empty string."""

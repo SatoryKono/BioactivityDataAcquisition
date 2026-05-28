@@ -1793,24 +1793,26 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
                 run_type="incremental"
             ),
             assemble_filter_config_fn=lambda **_: None,
-            assemble_cached_bronze_context_fn=lambda _: _ensure_default_cached_bronze_fixture(
-                settings=SimpleNamespace(
-                    data_dir=str(tmp_path),
-                    pipeline=SimpleNamespace(
-                        heartbeat_interval=30,
-                        control_plane=SimpleNamespace(
-                            required_persistence_profile="degraded_observable",
-                            checkpoint_compatibility_policy="hard_fail",
-                            run_manifest_enabled=True,
-                            run_ledger_enabled=True,
+            assemble_cached_bronze_context_fn=lambda _: (
+                _ensure_default_cached_bronze_fixture(
+                    settings=SimpleNamespace(
+                        data_dir=str(tmp_path),
+                        pipeline=SimpleNamespace(
+                            heartbeat_interval=30,
+                            control_plane=SimpleNamespace(
+                                required_persistence_profile="degraded_observable",
+                                checkpoint_compatibility_policy="hard_fail",
+                                run_manifest_enabled=True,
+                                run_ledger_enabled=True,
+                            ),
                         ),
+                        test_mode=False,
                     ),
-                    test_mode=False,
-                ),
-                pipeline_config=SimpleNamespace(
-                    provider="chembl",
-                    entity_type="activity",
-                ),
+                    pipeline_config=SimpleNamespace(
+                        provider="chembl",
+                        entity_type="activity",
+                    ),
+                )
             ),
         )
 

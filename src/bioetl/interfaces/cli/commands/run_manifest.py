@@ -376,7 +376,9 @@ def universe_report_command(
     except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
         echo_error("Historical replay universe report failed", str(exc))
         return
-    if require_universal_claim and not bool(report.universal_claim.get("claimed", False)):
+    if require_universal_claim and not bool(
+        report.universal_claim.get("claimed", False)
+    ):
         raise click.ClickException(
             "Authoritative historical replay universe claim is not satisfied."
         )
