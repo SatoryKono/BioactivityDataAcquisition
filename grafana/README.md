@@ -1248,20 +1248,26 @@ escalation.
 - `Inspect Errors by Stage / Error Code / Range`: bounded runtime error localization
 - `Track Records by Stage / Run Type / Range`: dropped/stalled stage localization
 
-### Handoff Row
+### Escalate Row (Handoffs & Process-level Signals)
 
-- `Monitor Pipeline Alert Conditions`: runtime failure family using shipped `15m/30m`
-  recording rules; links to `pipeline-failure-critical.md`
-- `Inspect DQ Alert Conditions`: compact DQ handoff only; detailed DQ debugging lives in
-  `4. Data Quality`
-- `Inspect Control-plane Alert Conditions`: manifest/checkpoint/replay/lineage handoff
-  into `0. Control Plane`
-- `Inspect GLOBAL Provider Alert Conditions`: compact provider handoff only; provider
-  deep-debug stays in `3. Provider Health`
-- `Inspect Freshness Alert Conditions`: stale-output handoff into DQ/source investigation
-- `Track GLOBAL Shutdown Initiated by Reason / Interval` and
-  `Track GLOBAL Shutdown Completed by Reason / Interval`: process-level graceful
-  shutdown visibility; source metrics are reason-only and not pipeline-scoped
+- **Condition Handoffs**:
+  - `Monitor Pipeline Alert Conditions`: runtime failure family using shipped `15m/30m`
+    recording rules; links to `pipeline-failure-critical.md`
+  - `Inspect DQ Alert Conditions`: compact DQ handoff only; detailed DQ debugging lives in
+    `4. Data Quality`
+  - `Inspect Control-plane Alert Conditions`: manifest/checkpoint/replay/lineage handoff
+    into `0. Control Plane`
+  - `Inspect Provider Alert Conditions`: selected-pipeline provider handoff scoped to
+    `$provider_hint` across all shipped provider recording-rule conditions
+  - `Inspect GLOBAL Provider Alert Conditions`: cluster-wide adapter-latency and
+    rate-limiter-wait addends only (not pipeline-localization); provider deep-debug
+    stays in `3. Provider Health`
+  - `Inspect Freshness Lagged Entities >24h`: raw stale-output freshness evidence
+    into DQ/source investigation; this is not a runtime alert-condition recording rule
+- **Process-level Signals (GLOBAL)**:
+  - `Track GLOBAL Shutdown Initiated by Reason / Interval` and
+    `Track GLOBAL Shutdown Completed by Reason / Interval`: process-level graceful
+    shutdown visibility; source metrics are reason-only and not pipeline-scoped
 
 Condition handoff cards keep their fixed-window `or vector(0)` event semantics
 inside a telemetry anchor: selected Runtime/DQ/Control Plane summaries require
@@ -1272,7 +1278,8 @@ requires `bioetl_provider_current_status`. Missing anchor telemetry renders
 ### Logs And Traces
 
 - `Inspect Warning Logs`, `Inspect GLOBAL Unstructured Logs`,
-  `Inspect Top Warning Events by Message / Range`, `Track GLOBAL Log Hygiene Trend`
+  `Inspect Top Warning Events by Event / Logger / Range`,
+  `Track GLOBAL Log Hygiene Trend`
   живут в collapsed tracing-only row и не ломают base runtime surface в
   окружениях без Loki/Tempo
 - Loki handoff стартует с безопасного `{job="bioetl"}` entrypoint; warning
@@ -1285,8 +1292,8 @@ requires `bioetl_provider_current_status`. Missing anchor telemetry renders
   wiring is disabled or when the runtime emitted no matching structured logs,
   but a fresh local BioETL run with shipped log files should be discoverable
   through this baseline query when Promtail/Loki wiring is healthy.
-- Tempo handoff остаётся bounded по `pipeline/run_type`; forensic IDs в runtime
-  dashboard не протаскиваются. Shipped trace links now open the explicit
+- Tempo handoff остаётся bounded по `pipeline`; forensic IDs и include-all
+  `run_type` selectors в runtime dashboard не протаскиваются. Shipped trace links now open the explicit
 search-first Explore Traces route with bounded initial window `now-150m..now`,
 `var-ds=tempo`, and safe `var-groupBy=resource.service.name`, so Tempo metrics
 queries stay under the local limit and missing trace data stays an empty Tempo
@@ -1301,8 +1308,8 @@ matching trace spans were exported.
   links route to other dashboards. Same-dashboard first-screen drilldowns are
   allowed for blocker inspection.
 - `Inspect Control-plane Alert Conditions` и `Monitor No-Records Runs` локализуют
-  symptoms; dashboard transition в control-plane идёт через `0. Control Plane`
-  в top-level bus.
+  symptoms. Переход в Control Plane (CP handoff) осуществляется строго через навигационную шину
+  (`0. Control Plane` panel 1000) для избежания дублирования ссылок (Вариант А). Панели 5 и 236 используют `dataLinks` только для runbooks и same-dashboard drilldowns.
 - action-first Runtime condition panels дополнительно ведут в canonical runbooks
 
 ### Instrumentation Debt

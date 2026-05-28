@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from bioetl.application.core._filtered_data_source_support import (
         _FilteredDataSourceState as _FilteredDataSourceStateBase,
     )
-    from bioetl.domain.ports.health_check import HealthCheckResult
+    from bioetl.domain.ports import HealthCheckResult
     from bioetl.domain.types import HealthStatus
 else:
 
@@ -139,7 +139,7 @@ class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
 
     async def check_health(self) -> HealthCheckResult:
         """Delegate enhanced health checks when available, else synthesize one."""
-        from bioetl.domain.ports.health_check import HealthCheckResult
+        from bioetl.domain.ports import HealthCheckResult
 
         check_health = getattr(self._data_source, "check_health", None)
         if check_health is not None and callable(check_health):

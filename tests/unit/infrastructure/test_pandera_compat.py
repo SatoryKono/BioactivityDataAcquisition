@@ -143,7 +143,7 @@ def test_runtime_bootstrap_package_applies_compat_on_import(monkeypatch) -> None
     runtime_bootstrap = importlib.reload(
         importlib.import_module("bioetl.composition.bootstrap.runtime")
     )
-    assert runtime_bootstrap.load_composite_config
+    assert runtime_bootstrap.apply_runtime_compatibility_patches() is False
     assert calls == ["applied"]
 
 

@@ -139,35 +139,40 @@ case "${COMMAND}" in
         ;;
 esac
 
-log_info "Checking environment setup..."
-echo ""
+if [[ "${COMMAND}" == "start" || "${COMMAND}" == "" ]]; then
+    log_info "Skipping full preflight for interactive startup; run ./run-gemini.sh check for diagnostics."
+    echo ""
+else
+    log_info "Checking environment setup..."
+    echo ""
 
-RETRY_COUNT=0
-MAX_RETRIES=2
+    RETRY_COUNT=0
+    MAX_RETRIES=2
 
-while [[ ${RETRY_COUNT} -lt ${MAX_RETRIES} ]]; do
-    if bash "${HELPER_DIR}/check-env.sh" 2>/dev/null; then
-        break
-    fi
-
-    RETRY_COUNT=$((RETRY_COUNT + 1))
-
-    if [[ ${RETRY_COUNT} -lt ${MAX_RETRIES} ]]; then
-        log_warn "Some components missing (attempt ${RETRY_COUNT}/${MAX_RETRIES})"
-        log_info "Running setup to install missing components..."
-        echo ""
-
-        if ! bash "${HELPER_DIR}/setup-env.sh"; then
-            log_error "Setup failed on attempt ${RETRY_COUNT}"
-            exit 1
+    while [[ ${RETRY_COUNT} -lt ${MAX_RETRIES} ]]; do
+        if bash "${HELPER_DIR}/check-env.sh" 2>/dev/null; then
+            break
         fi
-        echo ""
-    fi
-done
 
-if [[ ${RETRY_COUNT} -eq ${MAX_RETRIES} ]]; then
-    log_error "Environment check failed after ${MAX_RETRIES} attempts"
-    exit 1
+        RETRY_COUNT=$((RETRY_COUNT + 1))
+
+        if [[ ${RETRY_COUNT} -lt ${MAX_RETRIES} ]]; then
+            log_warn "Some components missing (attempt ${RETRY_COUNT}/${MAX_RETRIES})"
+            log_info "Running setup to install missing components..."
+            echo ""
+
+            if ! bash "${HELPER_DIR}/setup-env.sh"; then
+                log_error "Setup failed on attempt ${RETRY_COUNT}"
+                exit 1
+            fi
+            echo ""
+        fi
+    done
+
+    if [[ ${RETRY_COUNT} -eq ${MAX_RETRIES} ]]; then
+        log_error "Environment check failed after ${MAX_RETRIES} attempts"
+        exit 1
+    fi
 fi
 
 echo ""
@@ -183,14 +188,7 @@ case "$COMMAND" in
     start|"")
         log_info "Launching Gemini..."
         echo ""
-        if [[ "${GEMINI_INTERACTIVE_ALL_MCP:-0}" == "1" ]]; then
-            bash "${HELPER_DIR}/run-gemini-impl.sh" "$@"
-        else
-            GEMINI_INTERACTIVE_MCP_SERVERS="${GEMINI_INTERACTIVE_MCP_SERVERS:-memory,filesystem}"
-            log_info "Fast interactive MCP allowlist: ${GEMINI_INTERACTIVE_MCP_SERVERS}"
-            log_info "Set GEMINI_INTERACTIVE_ALL_MCP=1 to enable every configured MCP server."
-            bash "${HELPER_DIR}/run-gemini-impl.sh" --allowed-mcp-server-names "${GEMINI_INTERACTIVE_MCP_SERVERS}" "$@"
-        fi
+        bash "${HELPER_DIR}/run-gemini-impl.sh" "$@"
         ;;
 
     prompt)

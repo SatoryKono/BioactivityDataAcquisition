@@ -134,11 +134,15 @@ def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
             "Open Run Manifest Runbook",
             "docs/05-operations/runbooks/run-manifest-inspection.md",
         ),
+        "Inspect Provider Alert Conditions": (
+            "Open Provider Incident Runbook",
+            "docs/05-operations/runbooks/incident-response.md",
+        ),
         "Inspect GLOBAL Provider Alert Conditions": (
             "Open Provider Incident Runbook",
             "docs/05-operations/runbooks/incident-response.md",
         ),
-        "Inspect Freshness Alert Conditions": (
+        "Inspect Freshness Lagged Entities >24h": (
             "Open DQ Freshness Runbook",
             "docs/05-operations/runbooks/dq-failure-investigation.md",
         ),
@@ -174,6 +178,58 @@ def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
         assert url.endswith(expected_suffix), (
             f"Panel '{panel_title}' runbook link must target {expected_suffix}"
         )
+
+
+def test_runtime_alert_condition_panels_expose_dashboard_handoffs() -> None:
+    """Runtime condition-summary panels should route operators directly to target dashboards."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    expectations = {
+        "Monitor Pipeline Alert Conditions": (
+            "Inspect active runtime blocker",
+            "bioetl-runtime",
+        ),
+        "Inspect DQ Alert Conditions": (
+            "Open 4. Data Quality",
+            "bioetl-dq-v2",
+        ),
+        "Inspect Provider Alert Conditions": (
+            "Open 3. Provider Health",
+            "bioetl-provider-health-v2",
+        ),
+        "Inspect GLOBAL Provider Alert Conditions": (
+            "Open 3. Provider Health",
+            "bioetl-provider-health-v2",
+        ),
+        "Inspect Freshness Lagged Entities >24h": (
+            "Open 4. Data Quality",
+            "bioetl-dq-v2",
+        ),
+        "Monitor No-Records Runs": (
+            "Inspect stage expectedness",
+            "bioetl-runtime",
+        ),
+    }
+
+    for panel_title, (link_title, target_uid) in expectations.items():
+        panel = next(
+            (item for item in get_dashboard_panels(dashboard) if item.get("title") == panel_title),
+            None,
+        )
+        assert panel is not None, f"Panel '{panel_title}' not found in bioetl-runtime.json"
+        
+        data_links = panel.get("options", {}).get("dataLinks", [])
+        link = next((item for item in data_links if item.get("title") == link_title), None)
+        assert link is not None, f"Panel '{panel_title}' must expose dashboard handoff '{link_title}'"
+        
+        url = str(link.get("url", ""))
+        assert target_uid in url, f"Panel '{panel_title}' handoff must target {target_uid}"
+        assert "${__url_time_range}" in url, f"Panel '{panel_title}' handoff must preserve time range"
+        
+        required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID.get(target_uid)
+        if required_vars:
+            passed_vars = _extract_link_vars(url)
+            missing = required_vars - passed_vars
+            assert not missing, f"Missing required vars {missing} in URL {url}"
 
 
 def test_provider_health_critical_panels_expose_incident_runbook_links() -> None:

@@ -32,7 +32,7 @@ ______________________________________________________________________
 Текущий shipped Explore handoff:
 
 - Loki использует безопасный baseline `{job="bioetl"}`.
-- Tempo использует contextual TraceQL filters по текущему dashboard scope (`pipeline/run_type` или `provider`).
+- Tempo использует contextual TraceQL filters по текущему dashboard scope (`pipeline` или `provider`); runtime `run_type` не шиппится в TraceQL handoff из-за include-all selector semantics.
 - `bioetl-runtime` остаётся Prometheus-first в tracing-off режиме: Loki log-hygiene panels теперь живут в collapsed row `Tracing-only Log Hygiene`, а базовый triage path не требует Loki/Tempo datasource.
 - Runtime zero-count cards fail closed: selected pipeline/run_type cards anchor
   `0` to `bioetl_runtime_pipeline_run_type_universe`, GLOBAL provider handoff

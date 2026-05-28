@@ -693,6 +693,27 @@ def test_grafana_audit_cycle_stops_when_backend_cannot_be_ensured(
     )
     monkeypatch.setattr(
         cycle_subject,
+        "_reuse_existing_backend_if_healthy",
+        lambda *_args, **_kwargs: None,
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "_start_managed_observability_backend",
+        lambda **_kwargs: cycle_subject.BackendEnsureOutcome(
+            result=_backend_result(
+                backend_available=False,
+                message="managed failed",
+                status="failed",
+            ),
+        ),
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "_find_available_local_port",
+        lambda: 18081,
+    )
+    monkeypatch.setattr(
+        cycle_subject,
         "drop_listening_backend_on_port",
         lambda _port: True,
     )
@@ -707,7 +728,8 @@ def test_grafana_audit_cycle_stops_when_backend_cannot_be_ensured(
     )
 
     assert result == 1
-    assert calls == ["ensure"]
+    assert calls == ["ensure", "ensure"]
+    assert "preflight" not in calls
 
 
 def test_grafana_audit_cycle_stops_when_filled_dashboard_discovery_fails(

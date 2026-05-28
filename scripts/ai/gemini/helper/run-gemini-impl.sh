@@ -21,6 +21,10 @@ if [[ -f "${REPO_ROOT}/.wsl_proxy_env.sh" ]]; then
     source "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null || true
 fi
 
+# Windows IDE workspace paths contain drive-letter colons (for example E:\...),
+# which Gemini CLI under Linux treats as path separators and may resolve as ./E.
+unset GEMINI_CLI_IDE_WORKSPACE_PATH
+
 if [[ -z "${GEMINI_API_KEY:-}" ]] || [[ "${GEMINI_API_KEY}" == "your-api-key-here" ]]; then
     echo "[ERROR] GEMINI_API_KEY not set or invalid in ${ENV_FILE}" >&2
     echo "[INFO] Please edit .env.gemini and add your API key from: https://aistudio.google.com/app/apikeys" >&2
@@ -82,4 +86,18 @@ if [[ "${GEMINI_SKIP_MCP_SETUP:-0}" != "1" ]]; then
 fi
 
 cd "${REPO_ROOT}"
-exec "${GEMINI_BIN}" "$@"
+
+GEMINI_ARGS=("$@")
+HAS_INCLUDE_DIRECTORIES=0
+for arg in "${GEMINI_ARGS[@]}"; do
+    if [[ "${arg}" == "--include-directories" ]]; then
+        HAS_INCLUDE_DIRECTORIES=1
+        break
+    fi
+done
+
+if [[ "${HAS_INCLUDE_DIRECTORIES}" == "0" ]]; then
+    GEMINI_ARGS=("--include-directories=${REPO_ROOT}" "${GEMINI_ARGS[@]}")
+fi
+
+exec "${GEMINI_BIN}" "${GEMINI_ARGS[@]}"

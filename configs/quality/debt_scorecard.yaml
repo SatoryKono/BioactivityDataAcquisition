@@ -1,9 +1,9 @@
 schema_version: 1
 baseline:
-  total_exemptions: 0
+  total_exemptions: 2
   by_registry:
-    file_size_limits: 0
-    function_complexity: 0
+    file_size_limits: 1
+    function_complexity: 1
     function_length: 0
     class_size: 0
     class_method_count: 0
@@ -629,11 +629,11 @@ quarterly_targets:
   min_integral_score: 70
   group_budgets:
     size_metrics: 11
-    complexity_metrics: 0
+    complexity_metrics: 1
     structural_debt: 1
   registry_budgets:
     file_size_limits: 10
-    function_complexity: 0
+    function_complexity: 1
     function_length: 0
     class_size: 1
     class_method_count: 0

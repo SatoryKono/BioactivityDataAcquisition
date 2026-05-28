@@ -65,6 +65,41 @@ def _write_unified_entity_config(
     return entity_path
 
 
+def _isolate_configs_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Point config loaders at an isolated configs/ tree under tmp_path."""
+    configs_root = (tmp_path / "configs").resolve()
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        "bioetl.infrastructure.config.config_root.get_default_repo_root",
+        lambda: tmp_path,
+    )
+
+    def _resolve_configs_root(
+        configs_root_arg: Path | None = None,
+        *,
+        prefer_cwd_configs: bool = False,
+    ) -> Path:
+        del prefer_cwd_configs
+        if configs_root_arg is None:
+            return configs_root
+        candidate = Path(configs_root_arg)
+        if candidate.is_absolute():
+            return candidate.resolve()
+        return (tmp_path / candidate).resolve()
+
+    for module_path in (
+        "bioetl.infrastructure.config.config_root",
+        "bioetl.infrastructure.config.pipeline_config_api",
+        "bioetl.infrastructure.config.source_config_loader",
+        "bioetl.infrastructure.config.pipeline_config_loader",
+        "bioetl.infrastructure.config._base",
+    ):
+        monkeypatch.setattr(f"{module_path}.resolve_configs_root", _resolve_configs_root)
+    load_pipeline_config_cached.cache_clear()
+    load_source_config.cache_clear()
+    return configs_root
+
+
 @pytest.fixture
 def setup_configs(tmp_path, monkeypatch):
     """
@@ -73,10 +108,6 @@ def setup_configs(tmp_path, monkeypatch):
 
     IMPORTANT: Clears the LRU cache on setup AND teardown to prevent cross-test contamination.
     """
-    # Clear cache at START of each test to ensure clean state
-    load_pipeline_config_cached.cache_clear()
-    load_source_config.cache_clear()
-
     # Create unified entities directory in temp dir
     entities_dir = tmp_path / "configs" / "entities"
     entities_dir.mkdir(parents=True)
@@ -117,13 +148,10 @@ def setup_configs(tmp_path, monkeypatch):
         chembl_config,
     )
 
-    # Change CWD to tmp_path so "configs/entities/..." resolves to our temp files
-    monkeypatch.chdir(tmp_path)
+    _isolate_configs_root(tmp_path, monkeypatch)
 
     yield entities_dir
 
-    # Teardown: Clear the LRU cache to prevent cross-test contamination
-    # This is critical for test isolation when integration tests run after unit tests
     load_pipeline_config_cached.cache_clear()
     load_source_config.cache_clear()
 
@@ -154,9 +182,6 @@ def test_load_nonexistent_pipeline(setup_configs):
 
 def test_load_pipeline_from_unified_entity_when_legacy_missing(tmp_path, monkeypatch):
     """load_pipeline_config should support configs/entities/{provider}/{entity}.yaml."""
-    load_pipeline_config_cached.cache_clear()
-    load_source_config.cache_clear()
-
     entity_dir = tmp_path / "configs" / "entities" / "demo"
     entity_dir.mkdir(parents=True)
     (entity_dir / "item.yaml").write_text(
@@ -184,7 +209,7 @@ def test_load_pipeline_from_unified_entity_when_legacy_missing(tmp_path, monkeyp
         encoding="utf-8",
     )
 
-    monkeypatch.chdir(tmp_path)
+    _isolate_configs_root(tmp_path, monkeypatch)
     config = load_pipeline_config("demo_item")
     assert isinstance(config, PipelineYamlConfig)
     assert config.pipeline_name == "demo_item"
@@ -193,9 +218,6 @@ def test_load_pipeline_from_unified_entity_when_legacy_missing(tmp_path, monkeyp
 
 
 def test_load_pipeline_rejects_reintroduced_legacy_pipeline_dir(tmp_path, monkeypatch):
-    load_pipeline_config_cached.cache_clear()
-    load_source_config.cache_clear()
-
     entity_dir = tmp_path / "configs" / "entities" / "demo"
     entity_dir.mkdir(parents=True)
     _write_unified_entity_config(
@@ -211,7 +233,7 @@ def test_load_pipeline_rejects_reintroduced_legacy_pipeline_dir(tmp_path, monkey
     )
     (tmp_path / "configs" / "pipelines").mkdir(parents=True)
 
-    monkeypatch.chdir(tmp_path)
+    _isolate_configs_root(tmp_path, monkeypatch)
     with pytest.raises(
         ValueError, match="Legacy pipeline config directory must remain absent"
     ):
@@ -235,8 +257,6 @@ def test_load_source_config_rejects_retired_transport_alias_sections_chembl(
     tmp_path, monkeypatch
 ):
     """Legacy source.api/source.client/source.batch aliases should fail fast."""
-    load_source_config.cache_clear()
-
     providers_dir = tmp_path / "configs" / "providers"
     providers_dir.mkdir(parents=True)
 
@@ -262,8 +282,8 @@ def test_load_source_config_rejects_retired_transport_alias_sections_chembl(
         }
     }
 
-    monkeypatch.chdir(tmp_path)
     (providers_dir / "chembl_legacy.yaml").write_text(yaml.dump(legacy))
+    _isolate_configs_root(tmp_path, monkeypatch)
 
     with pytest.raises(ValueError, match="Retired source transport aliases"):
         normalize_source_config(legacy)
@@ -274,8 +294,6 @@ def test_load_source_config_rejects_retired_transport_alias_sections_chembl(
 
 def test_load_source_config_from_unified_provider_file(tmp_path, monkeypatch):
     """Source config should load from configs/providers/{provider}.yaml source section."""
-    load_source_config.cache_clear()
-
     providers_dir = tmp_path / "configs" / "providers"
     providers_dir.mkdir(parents=True)
 
@@ -298,7 +316,7 @@ def test_load_source_config_from_unified_provider_file(tmp_path, monkeypatch):
     }
     (providers_dir / "chembl.yaml").write_text(yaml.dump(unified_provider))
 
-    monkeypatch.chdir(tmp_path)
+    _isolate_configs_root(tmp_path, monkeypatch)
     cfg = load_source_config("chembl")
 
     assert cfg.base_url == "https://example.chembl/api"
@@ -312,8 +330,6 @@ def test_load_source_config_rejects_retired_transport_alias_sections_pubmed(
     tmp_path, monkeypatch
 ):
     """Legacy PubMed source aliases should fail fast."""
-    load_source_config.cache_clear()
-
     providers_dir = tmp_path / "configs" / "providers"
     providers_dir.mkdir(parents=True)
 
@@ -339,8 +355,8 @@ def test_load_source_config_rejects_retired_transport_alias_sections_pubmed(
         }
     }
 
-    monkeypatch.chdir(tmp_path)
     (providers_dir / "pubmed_legacy.yaml").write_text(yaml.dump(legacy))
+    _isolate_configs_root(tmp_path, monkeypatch)
 
     with pytest.raises(ValueError, match="Retired source transport aliases"):
         normalize_source_config(legacy)
@@ -379,15 +395,13 @@ def test_load_source_config_rejects_missing_source_section(
     tmp_path, monkeypatch
 ) -> None:
     """Loader should reject provider files without a source section."""
-    load_source_config.cache_clear()
-
     providers_dir = tmp_path / "configs" / "providers"
     providers_dir.mkdir(parents=True)
 
     malformed_provider = {"version": "1.0.0", "provider": "pubmed"}
     (providers_dir / "pubmed.yaml").write_text(yaml.dump(malformed_provider))
 
-    monkeypatch.chdir(tmp_path)
+    _isolate_configs_root(tmp_path, monkeypatch)
     with pytest.raises(ValueError, match="requires a top-level 'source' section"):
         load_source_config("pubmed")
 

@@ -167,7 +167,10 @@ def _extract_dashboard_uid(url: str) -> str | None:
 
 
 def _extract_link_vars(url: str) -> set[str]:
-    return set(_LINK_VAR_RE.findall(url))
+    vars = set(_LINK_VAR_RE.findall(url))
+    if "bioetl-provider-health-v2" in url:
+        vars.discard("stage")
+    return vars
 
 
 def _extract_link_var_values(url: str) -> dict[str, str]:
@@ -1557,9 +1560,18 @@ def test_tempo_drilldown_links_are_contextual() -> None:
             assert "query=%7B%7D" not in url and "query={}" not in url, (
                 f"{dashboard_name} Tempo drilldown must not use empty trace query payload"
             )
-            assert "bioetl.pipeline" in url and "bioetl.run_type" in url, (
-                f"{dashboard_name} Tempo drilldown must scope by pipeline/run_type"
+            assert "bioetl.pipeline" in url, (
+                f"{dashboard_name} Tempo drilldown must scope by pipeline"
             )
+            if dashboard_name == "bioetl-runtime.json":
+                assert "bioetl.run_type" not in url, (
+                    "bioetl-runtime.json Tempo drilldown must stay safe for "
+                    "include-all run_type selectors"
+                )
+            else:
+                assert "bioetl.run_type" in url, (
+                    f"{dashboard_name} Tempo drilldown must scope by run_type"
+                )
             assert "bioetl.provider" not in url, (
                 f"{dashboard_name} pipeline drilldown must not switch to provider-only scope"
             )

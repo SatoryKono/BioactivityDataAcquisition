@@ -527,23 +527,25 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - Loki drilldown использует безопасный low-cardinality entrypoint `{job="bioetl"}` без dashboard-variable interpolation внутри encoded Explore payload. Это сознательный baseline: Grafana надёжно не подставляет `$pipeline/$provider` в `left=...`, поэтому дополнительное сужение оператор делает уже в самом Explore. Tempo drilldown открывает trace search в том же временном окне; детальная correlation идёт через `trace_id` / `span_id`, а не через Prometheus labels.
 - Tempo drilldown теперь тоже открывается contextual: pipeline-scoped
   dashboards предварительно фильтруют TraceQL по `span."bioetl.pipeline"`, а
-  provider dashboard — по `span."bioetl.provider"`. Pipeline-scoped handoff
-  по-прежнему шиппит bounded `pipeline/run_type` TraceQL scope. Это не заменяет
+  provider dashboard — по `span."bioetl.provider"`. Runtime handoff does not
+  ship `run_type` in TraceQL because `$run_type` is include-all/multi-select.
+  Это не заменяет
   correlation по `trace_id` /
   `span_id`, но убирает пустой `{}` и делает handoff полезнее уже на первом
   клике.
 - `bioetl-runtime` row `Tracing-only Log Hygiene` содержит Loki-backed panels
   `Inspect Warning Logs`, `Inspect GLOBAL Unstructured Logs`,
-  `Inspect Top Warning Events by Message / Range` и
+  `Inspect Top Warning Events by Event / Logger / Range` и
   `Track GLOBAL Log Hygiene Trend`. Это optional tracing-profile evidence, а
   не first-screen status. Log panels используют активный Grafana time range;
   unstructured parser-error panel intentionally renders parsed `.__error__`;
   Prometheus condition-summary panels в runtime используют shipped fixed-window
-  recording rules и не зависят от `$__range`.
+  recording rules и не зависят от `$__range`; freshness handoff is explicitly
+  raw lagged-entity evidence, not a runtime alert-condition recording rule.
 
-- Runtime condition-summary triage path:
+- Runtime escalation triage path:
   `Monitor Pipeline Alert Conditions` -> `pipeline-failure-critical.md`,
-  `Inspect DQ Alert Conditions` / `Inspect Freshness Alert Conditions` -> `dq-failure-investigation.md`,
+  `Inspect DQ Alert Conditions` / `Inspect Freshness Lagged Entities >24h` -> `dq-failure-investigation.md`,
   `Inspect Control-plane Alert Conditions` -> `run-manifest-inspection.md`,
   `Inspect GLOBAL Provider Alert Conditions` -> `incident-response.md`,
   `Monitor No-Records Runs` -> `checkpoint-debugging.md`.

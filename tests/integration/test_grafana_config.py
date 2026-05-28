@@ -48,7 +48,7 @@ NAVIGATION_CONTRACT_PATH = Path(
 EXPECTED_VARS_BY_DASHBOARD = {
     "bioetl-overview-v2.json": {"workflow", "pipeline", "run_type", "run_id"},
     "bioetl-dq-v2.json": {"workflow", "pipeline", "run_type", "run_id", "stage"},
-    "bioetl-runtime.json": {"workflow", "pipeline", "run_type", "run_id", "stage"},
+    "bioetl-runtime.json": {"workflow", "pipeline", "run_type", "run_id", "stage", "provider_hint"},
     "bioetl-provider-health-v2.json": {
         "workflow",
         "pipeline",
@@ -1177,6 +1177,25 @@ def test_runtime_provider_alert_conditions_do_not_filter_on_missing_pipeline_lab
     assert all('{pipeline=~"$pipeline"}' not in expr for expr in expressions), (
         "Inspect GLOBAL Provider Alert Conditions must not filter provider-only recording rules by pipeline."
     )
+
+
+def test_runtime_provider_alert_conditions_local_panel_scopes_all_addends_to_provider_hint():
+    """Selected-pipeline provider handoff must not mix in unscoped global provider alert sums."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Inspect Provider Alert Conditions"
+        ),
+        None,
+    )
+    assert panel is not None
+    expr = panel["targets"][0]["expr"]
+    assert expr.count('provider=~"$provider_hint"') >= 6
+    assert "provider_adapter_latency_high_30m{provider=~\"$provider_hint\"}" in expr
+    assert "provider_rate_limiter_wait_high_30m{provider=~\"$provider_hint\"}" in expr
+    assert "unless on()" not in expr
 
 
 def test_workflow_step_panels_apply_status_variable() -> None:

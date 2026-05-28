@@ -28,6 +28,7 @@ SUMMARY_ZERO_FALLBACK_EXPECTATIONS = {
         "Monitor Pipeline Alert Conditions": "or vector(0)",
         "Inspect DQ Alert Conditions": "or vector(0)",
         "Inspect Control-plane Alert Conditions": "or vector(0)",
+        "Inspect Provider Alert Conditions": "or vector(0)",
         "Inspect GLOBAL Provider Alert Conditions": "or vector(0)",
         "Track GLOBAL Shutdown Initiated by Reason / Interval": "or vector(0)",
         "Track GLOBAL Shutdown Completed by Reason / Interval": "or vector(0)",

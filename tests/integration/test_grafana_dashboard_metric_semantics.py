@@ -573,6 +573,10 @@ def test_runtime_alert_condition_summaries_are_telemetry_anchored() -> None:
             "bioetl_runtime_pipeline_run_type_universe",
             'run_type=~"$run_type"',
         ),
+        "Inspect Provider Alert Conditions": (
+            "bioetl_provider_current_status",
+            'provider=~"$provider_hint"',
+        ),
         "Inspect GLOBAL Provider Alert Conditions": (
             "bioetl_provider_current_status",
             "count(bioetl_provider_current_status)",
@@ -751,7 +755,8 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             "Monitor Pipeline Alert Conditions": "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
             "Inspect DQ Alert Conditions": "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
             "Inspect Control-plane Alert Conditions": "bioetl_runtime_alert_condition_manifest_write_failed_15m",
-            "Inspect GLOBAL Provider Alert Conditions": "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
+            "Inspect Provider Alert Conditions": "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
+            "Inspect GLOBAL Provider Alert Conditions": "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m",
             "Track GLOBAL Shutdown Initiated by Reason / Interval": "round(",
             "Track GLOBAL Shutdown Completed by Reason / Interval": "round(",
         },
@@ -1089,11 +1094,13 @@ def test_runtime_freshness_handoff_preserves_missing_telemetry() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Inspect Freshness Alert Conditions"
+            if item.get("title") == "Inspect Freshness Lagged Entities >24h"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Inspect Freshness Alert Conditions' not found"
+    assert panel is not None, (
+        "Panel 'Inspect Freshness Lagged Entities >24h' not found"
+    )
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert expressions

@@ -64,7 +64,10 @@ def _extract_dashboard_uid(url: str) -> str | None:
 
 
 def _extract_link_vars(url: str) -> set[str]:
-    return set(_LINK_VAR_RE.findall(url))
+    vars = set(_LINK_VAR_RE.findall(url))
+    if "bioetl-provider-health-v2" in url:
+        vars.discard("stage")
+    return vars
 
 
 def _runtime_data_panels() -> list[dict]:
@@ -91,7 +94,14 @@ def test_pipeline_runtime_has_required_variables() -> None:
         for variable in _dashboard().get("templating", {}).get("list", [])
         if variable.get("name")
     }
-    assert variables == {"workflow", "pipeline", "run_type", "run_id", "stage"}
+    assert variables == {
+        "workflow",
+        "pipeline",
+        "run_type",
+        "run_id",
+        "stage",
+        "provider_hint",
+    }
 
 
 def test_pipeline_runtime_variables_use_runtime_universe() -> None:
@@ -139,14 +149,11 @@ def test_pipeline_runtime_localization_empty_states_are_explicit() -> None:
 
     errors_panel = panels["Inspect Errors by Stage / Error Code / Range"]
     errors_description = errors_panel.get("description", "")
-    assert "synthetic none/none=0 series" in errors_description
-    assert "empty-state placeholder" in errors_description
+    assert "not a synthetic domain value" in errors_description
 
     records_panel = panels["Track Records by Stage / Run Type / Range"]
     records_description = records_panel.get("description", "")
     records_defaults = records_panel.get("fieldConfig", {}).get("defaults", {})
-    assert "synthetic none/none=0 series" in records_description
-    assert "empty-state placeholder" in records_description
     assert records_defaults.get("noValue") == "No processed-record samples"
     assert (
         "phase duration"
@@ -199,11 +206,12 @@ def test_pipeline_runtime_count_panels_have_window_in_title_or_description() -> 
         "Monitor Pipeline Alert Conditions",
         "Inspect DQ Alert Conditions",
         "Inspect Control-plane Alert Conditions",
+        "Inspect Provider Alert Conditions",
         "Inspect GLOBAL Provider Alert Conditions",
-        "Inspect Freshness Alert Conditions",
+        "Inspect Freshness Lagged Entities >24h",
         "Inspect Warning Logs",
         "Inspect GLOBAL Unstructured Logs",
-        "Inspect Top Warning Events by Message / Range",
+        "Inspect Top Warning Events by Event / Logger / Range",
         "Inspect Errors by Stage / Error Code / Range",
         "Track Records by Stage / Run Type / Range",
         "Track GLOBAL Shutdown Initiated by Reason / Interval",

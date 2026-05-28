@@ -30,6 +30,10 @@ REMOVED_COMPATIBILITY_MODULES = {
     "bioetl.domain.normalization.legacy_fingerprints",
 }
 
+# Import graph census traverses the whole repository and can exceed the default
+# 60s timeout on Windows-backed filesystems.
+pytestmark = pytest.mark.timeout(300)
+
 
 def _load_yaml(path: Path) -> dict[str, Any]:
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))

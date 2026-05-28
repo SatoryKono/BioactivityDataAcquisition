@@ -112,7 +112,7 @@ def test_runtime_dashboard_keeps_loki_log_hygiene_in_collapsed_tracing_row() -> 
     assert nested_titles == {
         "Inspect Warning Logs",
         "Inspect GLOBAL Unstructured Logs",
-        "Inspect Top Warning Events by Message / Range",
+        "Inspect Top Warning Events by Event / Logger / Range",
         "Track GLOBAL Log Hygiene Trend",
     }
 
@@ -135,15 +135,16 @@ def test_runtime_warning_loki_queries_filter_parsed_fields_after_json() -> None:
     assert '| pipeline=~"$pipeline"' in warning_expr
     assert '| level="warning"' in warning_expr
 
-    top_warning_panel = panels["Inspect Top Warning Events by Message / Range"]
+    top_warning_panel = panels["Inspect Top Warning Events by Event / Logger / Range"]
     top_warning_expr = top_warning_panel["targets"][0]["expr"]
     assert '{job="bioetl"}' in top_warning_expr
     assert '{job="bioetl", level="warning"}' not in top_warning_expr
     assert '| pipeline=~"$pipeline"' in top_warning_expr
     assert "count_over_time(" in top_warning_expr
-    assert "sum by (message)" in top_warning_expr
+    assert "sum by (event, logger)" in top_warning_expr
+    assert "sum by (message)" not in top_warning_expr
     assert "topk(10" in top_warning_expr
-    assert top_warning_panel["type"] == "bargauge"
+    assert top_warning_panel["type"] == "table"
 
     unstructured_panel = panels["Inspect GLOBAL Unstructured Logs"]
     unstructured_expr = unstructured_panel["targets"][0]["expr"]
@@ -585,7 +586,7 @@ def test_runtime_tracing_row_orders_log_hygiene_panels() -> None:
     expected_sequence = [
         "Inspect Warning Logs",
         "Inspect GLOBAL Unstructured Logs",
-        "Inspect Top Warning Events by Message / Range",
+        "Inspect Top Warning Events by Event / Logger / Range",
         "Track GLOBAL Log Hygiene Trend",
     ]
     for title in expected_sequence:
@@ -635,16 +636,6 @@ def test_adaptive_trend_panels_use_selected_interval(
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title", "expected_snippet"),
     [
-        (
-            "bioetl-runtime.json",
-            "Inspect Errors by Stage / Error Code / Range",
-            'label_replace(label_replace(vector(0), "stage", "none", "", ""), "error_code", "none", "", "")',
-        ),
-        (
-            "bioetl-runtime.json",
-            "Track Records by Stage / Run Type / Range",
-            'label_replace(label_replace(vector(0), "stage", "none", "", ""), "run_type", "none", "", "")',
-        ),
         (
             "bioetl-control-plane-v1.json",
             "Track: Checkpoint Compatibility Outcomes",

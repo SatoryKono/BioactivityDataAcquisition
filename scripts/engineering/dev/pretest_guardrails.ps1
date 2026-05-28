@@ -7,8 +7,12 @@ Set-Location $RepoRoot
 
 $Bash = Get-Command bash -ErrorAction SilentlyContinue
 if (-not $Bash) {
-    Write-Error "[pretest_guardrails.ps1][error] bash is not available."
-    exit 1
+    if ($env:BIOETL_PREFLIGHT_REQUIRE_BASH -eq "1") {
+        Write-Error "[pretest_guardrails.ps1][error] bash is not available."
+        exit 1
+    }
+    Write-Warning "[pretest_guardrails.ps1][warn] bash is not available; skipping pretest guardrails."
+    exit 0
 }
 
 & $Bash.Source "scripts/engineering/dev/pretest_guardrails.sh" @args
