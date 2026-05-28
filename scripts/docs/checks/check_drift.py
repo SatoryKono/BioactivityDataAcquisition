@@ -143,6 +143,7 @@ GEMINI_PY_CONFIG_BOT_DOC_PATH = ".gemini/agents/py-config-bot.md"
 GEMINI_PY_AUDIT_BOT_DOC_PATH = ".gemini/agents/py-audit-bot.md"
 GEMINI_PY_REVIEW_ORCHESTRATOR_DOC_PATH = ".gemini/agents/py-review-orchestrator.md"
 CODEX_PY_AUDIT_BOT_DOC_PATH = ".codex/agents/py-audit-bot.md"
+CODEX_PY_CONFIG_BOT_DOC_PATH = ".codex/agents/py-config-bot.md"
 CODEX_PY_REVIEW_ORCHESTRATOR_DOC_PATH = ".codex/agents/py-review-orchestrator.md"
 CODEX_RUNTIME_DOC_TOKEN = CODEX_RUNTIME_DOC_PATH
 GEMINI_RUNTIME_DOC_TOKEN = GEMINI_RUNTIME_DOC_PATH
@@ -172,13 +173,13 @@ RUNTIME_MIRROR_RULES: tuple[RuntimeMirrorRule, ...] = (
     ),
     RuntimeMirrorRule(
         name="py-audit-bot",
-        canonical=Path(GEMINI_PY_AUDIT_BOT_DOC_PATH),
+        canonical=Path(CODEX_PY_AUDIT_BOT_DOC_PATH),
         mirror=Path("docs/00-project/ai/agents/agents/py-audit-bot.md"),
         sections=("## Выходы",),
     ),
     RuntimeMirrorRule(
         name="py-config-bot",
-        canonical=Path(GEMINI_PY_CONFIG_BOT_DOC_PATH),
+        canonical=Path(CODEX_PY_CONFIG_BOT_DOC_PATH),
         mirror=Path("docs/00-project/ai/agents/agents/py-config-bot.md"),
         sections=("## Выходы", "## Обязательные правила", "## Иерархия конфигураций"),
     ),

@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "generated_by": "scripts/data_quality/inventory_silver_filters_migration.py",
   "totals": {
-    "entities_total": 21,
+    "entities_total": 26,
     "entities_with_silver_filters": 21,
     "entities_with_gold_filters": 21,
     "rules_total": 102,
@@ -1111,6 +1111,76 @@
           "notes": "structural rule stays in silver_filters"
         }
       ]
+    },
+    {
+      "provider": "composite",
+      "entity": "activity",
+      "path": "configs/entities/composite/activity.yaml",
+      "has_silver_filters": false,
+      "has_gold_filters": false,
+      "counts_by_action": {
+        "keep_in_silver": 0,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": []
+    },
+    {
+      "provider": "composite",
+      "entity": "assay",
+      "path": "configs/entities/composite/assay.yaml",
+      "has_silver_filters": false,
+      "has_gold_filters": false,
+      "counts_by_action": {
+        "keep_in_silver": 0,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": []
+    },
+    {
+      "provider": "composite",
+      "entity": "molecule",
+      "path": "configs/entities/composite/molecule.yaml",
+      "has_silver_filters": false,
+      "has_gold_filters": false,
+      "counts_by_action": {
+        "keep_in_silver": 0,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": []
+    },
+    {
+      "provider": "composite",
+      "entity": "publication",
+      "path": "configs/entities/composite/publication.yaml",
+      "has_silver_filters": false,
+      "has_gold_filters": false,
+      "counts_by_action": {
+        "keep_in_silver": 0,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": []
+    },
+    {
+      "provider": "composite",
+      "entity": "target",
+      "path": "configs/entities/composite/target.yaml",
+      "has_silver_filters": false,
+      "has_gold_filters": false,
+      "counts_by_action": {
+        "keep_in_silver": 0,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": []
     },
     {
       "provider": "crossref",

@@ -95,10 +95,21 @@ def represented_golden_master_entities() -> dict[str, set[str]]:
 
     represented: dict[str, set[str]] = {}
     for provider, entity, config_path in iter_entity_configs():
-        lines = config_path.read_text(encoding="utf-8").splitlines()
-        pipeline_name = next(
-            line.split(":", 1)[1].strip() for line in lines if "pipeline_name:" in line
-        )
+        payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        pipeline_name: str | None = None
+        if isinstance(payload, dict):
+            pipeline_section = payload.get("pipeline")
+            if isinstance(pipeline_section, dict):
+                candidate = pipeline_section.get("pipeline_name")
+                if isinstance(candidate, str) and candidate.strip():
+                    pipeline_name = candidate.strip()
+            if pipeline_name is None:
+                # Backward-compatible fallback for older flattened config shapes.
+                candidate = payload.get("pipeline_name")
+                if isinstance(candidate, str) and candidate.strip():
+                    pipeline_name = candidate.strip()
+        if pipeline_name is None:
+            continue
         if pipeline_name in PIPELINES:
             represented.setdefault(provider, set()).add(entity)
     return represented
