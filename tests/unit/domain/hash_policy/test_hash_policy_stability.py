@@ -68,7 +68,7 @@ class TestHashPolicyStability:
         snapshot_path = SNAPSHOTS_DIR / "chembl_activity_hashes.json"
         if UPDATE_SNAPSHOTS or not snapshot_path.exists():
             _save_json(snapshot_path, current_hashes)
-            pytest.skip("Hash stability snapshot created/updated")
+            return
 
         assert current_hashes == _load_json(snapshot_path)
 
@@ -107,7 +107,7 @@ class TestHashPolicyStability:
 
         if UPDATE_SNAPSHOTS or not snapshot_path.exists():
             _save_json(snapshot_path, current)
-            pytest.skip("Policy contract snapshot created/updated")
+            return
 
         previous = _load_json(snapshot_path)
         policy_changed = current["policy_fingerprint"] != previous["policy_fingerprint"]

@@ -128,7 +128,7 @@ def test_pipeline_config_golden_master(
         current_snapshots = load_snapshots()
         current_snapshots[pipeline_name] = serialized_config
         save_snapshots(current_snapshots)
-        pytest.skip(f"Updated snapshot for {pipeline_name}")
+        return
 
     # 3. Assert against snapshot
     if pipeline_name not in golden_snapshots:

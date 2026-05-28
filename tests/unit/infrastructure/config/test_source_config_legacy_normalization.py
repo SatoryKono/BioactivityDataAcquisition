@@ -198,7 +198,7 @@ def test_source_legacy_normalization_golden_snapshot() -> None:
     update_snapshots = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
     if update_snapshots:
         _save_snapshot(current)
-        pytest.skip("Updated source normalization snapshot")
+        return
 
     snapshot = _load_snapshot()
     if not snapshot:

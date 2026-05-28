@@ -11,8 +11,6 @@ import pytest
 from bioetl.domain.transformations import detect_schema_drift, generate_content_hash
 from bioetl.domain.types import DriftLevel
 
-pytestmark = pytest.mark.network
-
 
 @pytest.mark.contracts
 @pytest.mark.no_api
