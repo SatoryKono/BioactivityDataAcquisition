@@ -5,7 +5,7 @@ from __future__ import annotations
 from importlib import import_module
 
 _PRIVATE_MODULE = "bioetl.composition.runtime_builders._run_manifest_support"
-__all__ = list(getattr(import_module(_PRIVATE_MODULE), "__all__"))
+__all__ = list(import_module(_PRIVATE_MODULE).__all__)
 
 
 def __getattr__(name: str) -> object:
