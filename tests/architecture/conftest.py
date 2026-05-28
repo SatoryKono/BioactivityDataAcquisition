@@ -87,7 +87,7 @@ def _cache_worker_count(total_files: int) -> int:
 def _read_text_cache_entry(path: Path) -> tuple[Path, str | None]:
     """Read one UTF-8 text payload for the session cache."""
     try:
-        with path.open(encoding="utf-8", errors="replace") as f:
+        with path.open(encoding="utf-8", errors="strict") as f:
             return path, f.read()
     except (OSError, UnicodeDecodeError):
         return path, None
