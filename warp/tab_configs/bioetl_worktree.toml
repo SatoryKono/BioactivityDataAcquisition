@@ -1,0 +1,41 @@
+name = "BioETL Consolidation"
+title = "{{branch_name}}"
+
+[[panes]]
+id = "root"
+split = "horizontal"
+children = ["worktree", "checks"]
+
+[[panes]]
+id = "worktree"
+type = "terminal"
+directory = "{{repo}}"
+commands = [
+  "git worktree add -b {{branch_name}} ../{{branch_name}} {{base_branch}}",
+  "cd ../{{branch_name}}",
+  "uv sync --locked --all-extras --dev"
+]
+is_focused = true
+
+[[panes]]
+id = "checks"
+type = "terminal"
+directory = "{{repo}}"
+commands = [
+  "cd ../{{branch_name}}",
+  "uv run ruff check . && uv run mypy src tests"
+]
+
+[params.repo]
+type = "repo"
+description = "Путь к репозиторию"
+
+[params.base_branch]
+type = "branch"
+description = "Базовая ветка"
+default = "main"
+
+[params.branch_name]
+type = "text"
+description = "Имя рабочей ветки"
+default = "consolidation-check"

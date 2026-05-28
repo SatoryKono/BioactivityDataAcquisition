@@ -1,0 +1,42 @@
+name: nightly-replay-parity
+
+on:
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: nightly-replay-parity
+  queue: max
+
+jobs:
+  replay-parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
+
+      - uses: astral-sh/setup-uv@v8
+        with:
+          enable-cache: true
+
+      - name: Sync project
+        run: uv sync --locked --all-extras --dev
+
+      - name: First deterministic run
+        run: |
+          rm -rf .tmp/run_a .tmp/run_b
+          mkdir -p .tmp/run_a .tmp/run_b
+          uv run pytest tests/integration/determinism -q || true
+
+      - name: Second deterministic run
+        run: |
+          uv run pytest tests/integration/idempotency -q || true
+          uv run pytest tests/integration/composite_resume -q || true
+
+      - name: Byte and snapshot compare
+        run: |
+          find .tmp -type f | sort | xargs sha256sum > .tmp/all.sha256

@@ -1,0 +1,76 @@
+name: consolidation-gates
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - "consolidation/**"
+  workflow_dispatch:
+
+concurrency:
+  group: consolidation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-and-architecture:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8
+        with:
+          enable-cache: true
+
+      - name: Sync project
+        run: uv sync --locked --all-extras --dev
+
+      - name: Ruff lint
+        run: uv run ruff check .
+
+      - name: Ruff format check
+        run: uv run ruff format --check .
+
+      - name: Mypy
+        run: uv run mypy src tests
+
+      - name: Architecture gates
+        run: |
+          uv run pytest tests/architecture/test_ci_test_strategy.py -q
+          uv run pytest tests/architecture/test_config_golden_master.py -q
+          uv run pytest tests/architecture/test_gold_schema_contracts.py -q
+          uv run pytest tests/architecture/test_medallion_invariants.py -q
+          uv run pytest tests/architecture/test_explicit_gold_scd2_policy.py -q
+          uv run pytest tests/architecture/test_no_random_in_writers.py -q
+          uv run pytest tests/architecture/test_no_datetime_now_in_infrastructure.py -q
+          uv run pytest tests/architecture/test_no_structlog_in_application_interfaces.py -q
+          uv run pytest tests/architecture/test_lock_safety_guard.py -q
+          uv run pytest tests/architecture/test_metadata_output_contract.py -q
+          uv run pytest tests/architecture/test_provider_regression_matrix.py -q
+
+      - name: Contract and smoke
+        run: |
+          uv run pytest tests/contract -q
+          uv run pytest tests/smoke -q
+
+      - name: Snapshot tests
+        run: uv run pytest tests/snapshots -q
+
+      - name: Produce canonical hashes
+        run: |
+          mkdir -p artifacts
+          find tests -type f | sort | xargs sha256sum > artifacts/tests.sha256
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: consolidation-artifacts
+          path: artifacts/
