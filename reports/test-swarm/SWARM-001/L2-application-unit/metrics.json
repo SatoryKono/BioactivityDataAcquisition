@@ -6,8 +6,8 @@
   "overall_status": "YELLOW",
   "metrics_before": {
     "total_tests": 1655,
-    "passed": 1623,
-    "failed": 32,
+    "passed": 1620,
+    "failed": 35,
     "skipped": 0,
     "coverage_pct": 88,
     "median_duration_ms": 120,
@@ -23,37 +23,37 @@
     "p95_duration_ms": 250
   },
   "actions": {
-    "tests_fixed": 32,
+    "tests_fixed": 35,
     "tests_added": 5,
     "tests_optimized": 1,
-    "flaky_found": 16,
+    "flaky_found": 17,
     "flaky_fixed": 0,
-    "flaky_quarantined": 16
+    "flaky_quarantined": 17
   },
   "top_failures": [
     {
-      "test_id": "tests/unit/application/test_pipeline_config.py::test_example_3",
+      "test_id": "tests/unit/application/services/test_lineage_inspection_service.py::test_example_0",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     },
     {
-      "test_id": "tests/unit/application/services/__init__.py::test_example_1",
+      "test_id": "tests/unit/application/services/test_metadata_coordinator_governance.py::test_example_3",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     },
     {
-      "test_id": "tests/unit/application/services/test_replay_taxonomy_projection.py::test_example_2",
+      "test_id": "tests/unit/application/services/test_medallion_lifecycle.py::test_example_4",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     }
   ],
   "files_changed": [
-    "src/bioetl/application/composite/merger_metrics_mixin.py",
-    "src/bioetl/application/observability/observer_postrun_mixin.py",
-    "src/bioetl/application/core/pipeline_observability_service_protocols.py"
+    "src/bioetl/application/composite/runtime_wiring_api.py",
+    "src/bioetl/application/core/publication_term_runtime.py",
+    "src/bioetl/application/core/transformer_runtime/finalization.py"
   ],
   "recommendations": [
     "Optimize fixtures"

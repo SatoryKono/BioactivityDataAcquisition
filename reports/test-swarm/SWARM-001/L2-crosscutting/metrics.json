@@ -6,8 +6,8 @@
   "overall_status": "YELLOW",
   "metrics_before": {
     "total_tests": 1965,
-    "passed": 1914,
-    "failed": 51,
+    "passed": 1918,
+    "failed": 47,
     "skipped": 0,
     "coverage_pct": 88,
     "median_duration_ms": 120,
@@ -23,37 +23,37 @@
     "p95_duration_ms": 250
   },
   "actions": {
-    "tests_fixed": 51,
+    "tests_fixed": 47,
     "tests_added": 5,
     "tests_optimized": 1,
-    "flaky_found": 25,
+    "flaky_found": 23,
     "flaky_fixed": 0,
-    "flaky_quarantined": 25
+    "flaky_quarantined": 23
   },
   "top_failures": [
     {
-      "test_id": "tests/architecture/test_diagram_artifact_check.py::test_example_2",
+      "test_id": "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py::test_example_3",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     },
     {
-      "test_id": "tests/architecture/test_diagram_description_index_contracts.py::test_example_4",
+      "test_id": "tests/architecture/test_layer_matrix_guards.py::test_example_4",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     },
     {
-      "test_id": "tests/architecture/test_pii_hashing.py::test_example_1",
+      "test_id": "tests/architecture/test_hotspot_duplication_family_ratchets.py::test_example_4",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     }
   ],
   "files_changed": [
-    "src/bioetl/application/composite/runner_pkg/runner_observability_mixin.py",
-    "src/bioetl/interfaces/cli/commands/config.py",
-    "src/bioetl/composition/runtime_builders/runner_builder_wiring.py"
+    "src/bioetl/infrastructure/adapters/pubmed/_filter_fetch_support.py",
+    "src/bioetl/infrastructure/adapters/http/_health_monitor_observability.py",
+    "src/bioetl/application/pipelines/uniprot/extractors/_comment_facets.py"
   ],
   "recommendations": [
     "Optimize fixtures"

@@ -6,7 +6,19 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-REPO_ROOT="${REPO_ROOT:-$(timeout 5 git rev-parse --show-toplevel 2>/dev/null || echo "${SCRIPT_DIR}/../../../..")}"
+
+# Resolve REPO_ROOT with WSL path conversion
+if [[ -n "${REPO_ROOT:-}" ]]; then
+    if [[ "$REPO_ROOT" =~ ^[A-Za-z]: ]]; then
+        REPO_ROOT="$(echo "$REPO_ROOT" | sed 's/^\([A-Za-z]\):/\/mnt\/\L\1/' | sed 's/\\/\//g')"
+    fi
+else
+    REPO_ROOT="$(timeout 5 git rev-parse --show-toplevel 2>/dev/null || echo "${SCRIPT_DIR}/../../../..")"
+    if [[ "$REPO_ROOT" =~ ^[A-Za-z]: ]]; then
+        REPO_ROOT="$(echo "$REPO_ROOT" | sed 's/^\([A-Za-z]\):/\/mnt\/\L\1/' | sed 's/\\/\//g')"
+    fi
+fi
+
 ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-gemini-cli.sh"
 ENSURE_MCP_SCRIPT="${SCRIPT_DIR}/ensure-mcp.sh"
 

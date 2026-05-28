@@ -16,7 +16,6 @@ from tests.contract.silver_schemas.conftest import (
 
 ENTITIES_DIR = Path("configs/entities")
 GOLD_CONTRACTS_DIR = Path("docs/04-reference/contracts/gold")
-pytestmark = pytest.mark.network
 
 
 @pytest.mark.contracts
@@ -32,8 +31,10 @@ class TestGoldPkConsistency:
         technical_pk = config.technical_primary_key
 
         contract_path = GOLD_CONTRACTS_DIR / f"{schema_name}_v1.0.json"
-        if not contract_path.exists():
-            pytest.skip(f"No Gold contract for {schema_name}")
+        assert contract_path.exists(), (
+            f"Missing Gold contract for {schema_name}: {contract_path}. "
+            "Add/update contract snapshot to keep schema contract coverage complete."
+        )
 
         contract = json.loads(contract_path.read_text(encoding="utf-8"))
         contract_props = set(contract.get("properties", {}).keys())

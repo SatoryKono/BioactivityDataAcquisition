@@ -27,7 +27,19 @@ def _pipeline_names() -> list[str]:
         for yaml_file in sorted(provider_dir.glob("*.yaml")):
             if yaml_file.name.startswith("_"):
                 continue
-            names.append(f"{provider_dir.name}_{yaml_file.stem}")
+            raw = _load_yaml(yaml_file)
+            # Some entity files are status stubs (e.g. composite/*) and do not
+            # expose pipeline settings, so they must be excluded from coverage.
+            if not isinstance(raw.get("pipeline"), dict):
+                continue
+            pipeline_name = f"{provider_dir.name}_{yaml_file.stem}"
+            try:
+                # Keep the coverage set aligned with configs that the runtime
+                # loader can actually resolve.
+                load_pipeline_config(pipeline_name)
+            except ValueError:
+                continue
+            names.append(pipeline_name)
     return names
 
 

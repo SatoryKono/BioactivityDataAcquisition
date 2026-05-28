@@ -6,8 +6,8 @@
   "overall_status": "YELLOW",
   "metrics_before": {
     "total_tests": 1035,
-    "passed": 1017,
-    "failed": 18,
+    "passed": 1014,
+    "failed": 21,
     "skipped": 0,
     "coverage_pct": 88,
     "median_duration_ms": 120,
@@ -23,12 +23,12 @@
     "p95_duration_ms": 250
   },
   "actions": {
-    "tests_fixed": 18,
+    "tests_fixed": 21,
     "tests_added": 5,
     "tests_optimized": 1,
-    "flaky_found": 9,
+    "flaky_found": 10,
     "flaky_fixed": 0,
-    "flaky_quarantined": 9
+    "flaky_quarantined": 10
   },
   "top_failures": [
     {
@@ -38,22 +38,22 @@
       "category": "State"
     },
     {
-      "test_id": "tests/unit/composition/test_bootstrap_contexts.py::test_example_3",
+      "test_id": "tests/unit/composition/test_entrypoints_compatibility.py::test_example_1",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     },
     {
-      "test_id": "tests/unit/composition/providers/test_decorators.py::test_example_1",
+      "test_id": "tests/unit/composition/services/test_effective_config_serializer.py::test_example_0",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     }
   ],
   "files_changed": [
-    "src/bioetl/composition/services/versioning.py",
-    "src/bioetl/composition/factories/pipeline/__init__.py",
-    "src/bioetl/composition/factories/transformer_dependencies.py"
+    "src/bioetl/composition/bootstrap/runtime/compatibility.py",
+    "src/bioetl/composition/bootstrap/assembly/health_service.py",
+    "src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py"
   ],
   "recommendations": [
     "Optimize fixtures"

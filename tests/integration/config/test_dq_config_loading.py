@@ -532,7 +532,14 @@ class TestDQConfigFileStructure:
 
             for entity_file in provider_dir.glob("*.yaml"):
                 with open(entity_file) as f:
-                    data = yaml.safe_load(f)
+                    data = yaml.safe_load(f) or {}
+
+                if not isinstance(data, dict):
+                    continue
+                # Skip status-only compatibility surfaces that are not standalone
+                # unified pipeline entity configs.
+                if not isinstance(data.get("pipeline"), dict):
+                    continue
 
                 # Should have provider and entity
                 assert "provider" in data, f"Missing provider in {entity_file}"

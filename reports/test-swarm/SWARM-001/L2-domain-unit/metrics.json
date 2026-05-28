@@ -6,8 +6,8 @@
   "overall_status": "YELLOW",
   "metrics_before": {
     "total_tests": 1260,
-    "passed": 1237,
-    "failed": 23,
+    "passed": 1235,
+    "failed": 25,
     "skipped": 0,
     "coverage_pct": 95,
     "median_duration_ms": 120,
@@ -23,37 +23,37 @@
     "p95_duration_ms": 250
   },
   "actions": {
-    "tests_fixed": 23,
+    "tests_fixed": 25,
     "tests_added": 5,
     "tests_optimized": 1,
-    "flaky_found": 11,
+    "flaky_found": 12,
     "flaky_fixed": 0,
-    "flaky_quarantined": 11
+    "flaky_quarantined": 12
   },
   "top_failures": [
     {
-      "test_id": "tests/unit/domain/test_observability_contract.py::test_example_0",
+      "test_id": "tests/unit/domain/test_entities.py::test_example_0",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     },
     {
-      "test_id": "tests/unit/domain/test_publication_fields_mapping.py::test_example_4",
+      "test_id": "tests/unit/domain/test_exceptions.py::test_example_1",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     },
     {
-      "test_id": "tests/unit/domain/entities/test_tissue.py::test_example_3",
+      "test_id": "tests/unit/domain/test_filter_config.py::test_example_1",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     }
   ],
   "files_changed": [
-    "src/bioetl/domain/aggregates/pipeline_run_state.py",
-    "src/bioetl/domain/lineage/graph.py",
-    "src/bioetl/domain/filtering/load_result.py"
+    "src/bioetl/domain/ports/quality/quarantine.py",
+    "src/bioetl/domain/contracts/gold/pubchem.py",
+    "src/bioetl/domain/control_plane/_reproducibility_policy_profiles.py"
   ],
   "recommendations": [
     "Optimize fixtures"

@@ -117,10 +117,22 @@ class TestExplicitGoldScd2Policy:
 
     def test_all_publication_configs_are_covered(self) -> None:
         configs_dir = PROJECT_ROOT / "configs" / "entities"
-        found_publication_configs = sorted(
-            str(path.relative_to(PROJECT_ROOT)).replace("\\", "/")
-            for path in configs_dir.glob("**/publication.yaml")
-        )
+        found_publication_configs: list[str] = []
+        for path in configs_dir.glob("**/publication.yaml"):
+            payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+            if not isinstance(payload, dict):
+                continue
+            # SCD2 policy applies only to standalone pipeline entity configs.
+            pipeline_cfg = payload.get("pipeline")
+            if not isinstance(pipeline_cfg, dict):
+                continue
+            if payload.get("provider") == "composite":
+                continue
+            if pipeline_cfg.get("provider") == "composite":
+                continue
+            found_publication_configs.append(
+                str(path.relative_to(PROJECT_ROOT)).replace("\\", "/")
+            )
         assert found_publication_configs == sorted(PUBLICATION_CONFIGS), (
             "Publication SCD2 candidate list drifted. Update PUBLICATION_CONFIGS in "
             "tests/architecture/test_explicit_gold_scd2_policy.py."

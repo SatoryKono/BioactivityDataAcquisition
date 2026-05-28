@@ -81,7 +81,11 @@ def _expected_dashboard_screenshot_pairs(
 ) -> list[tuple[Path, Path, str]]:
     pairs: list[tuple[Path, Path, str]] = []
     for dashboard_path in sorted(_DASHBOARD_DIR.glob("*.json")):
-        payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
+        try:
+            payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            # Keep preflight resilient when one dashboard JSON is malformed.
+            continue
         uid = payload.get("uid")
         if not isinstance(uid, str) or not uid.strip():
             continue

@@ -2930,7 +2930,12 @@ def _dashboard_metric_index(root: Path) -> dict[NodeKey, set[str]]:
         return {}
     metric_index: dict[NodeKey, set[str]] = {}
     for dashboard_path in sorted(dashboards_root.glob("*.json")):
-        payload = _read_json(dashboard_path)
+        try:
+            payload = _read_json(dashboard_path)
+        except Exception:
+            # Snapshot building should stay resilient to malformed or
+            # partially edited dashboard files.
+            payload = {}
         metrics = _dashboard_metrics_from_payload(payload)
         metric_index[NodeKey("dashboard_surface", dashboard_path.stem)] = metrics
     return metric_index
@@ -4778,7 +4783,10 @@ def _add_dashboard_surface(
     today: str,
 ) -> NodeKey:
     name = dashboard_path.stem
-    payload = _read_json(dashboard_path)
+    try:
+        payload = _read_json(dashboard_path)
+    except (OSError, json.JSONDecodeError):
+        payload = {}
     title = payload.get("title") if isinstance(payload.get("title"), str) else None
     return snapshot.add_node(
         "dashboard_surface",
@@ -6183,13 +6191,17 @@ def _storage_schema_properties(
         if isinstance(schema_payload.get(layer_name), dict)
         else {}
     )
-    column_groups = schema_payload.get("column_groups")
+    column_groups = (
+        schema_payload.get("column_groups")
+        if isinstance(schema_payload.get("column_groups"), list)
+        else []
+    )
     schema_column_groups = [
         name
         for item in column_groups
-        if isinstance(column_groups, list)
-        for name in [item.get("name")]
-        if isinstance(item, dict) and isinstance(item.get("name"), str)
+        if isinstance(item, dict)
+        for name in [_optional_text(item.get("name"))]
+        if name is not None
     ]
     return {
         "schema_present": bool(layer_schema),

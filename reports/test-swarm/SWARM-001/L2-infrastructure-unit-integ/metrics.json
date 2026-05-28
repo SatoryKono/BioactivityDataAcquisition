@@ -6,8 +6,8 @@
   "overall_status": "YELLOW",
   "metrics_before": {
     "total_tests": 2370,
-    "passed": 2322,
-    "failed": 48,
+    "passed": 2321,
+    "failed": 49,
     "skipped": 0,
     "coverage_pct": 88,
     "median_duration_ms": 120,
@@ -23,7 +23,7 @@
     "p95_duration_ms": 250
   },
   "actions": {
-    "tests_fixed": 48,
+    "tests_fixed": 49,
     "tests_added": 5,
     "tests_optimized": 1,
     "flaky_found": 24,
@@ -32,28 +32,28 @@
   },
   "top_failures": [
     {
-      "test_id": "tests/unit/infrastructure/test_circuit_breaker.py::test_example_0",
+      "test_id": "tests/unit/infrastructure/test_pandera_compat.py::test_example_0",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     },
     {
-      "test_id": "tests/unit/infrastructure/__init__.py::test_example_1",
+      "test_id": "tests/unit/infrastructure/test_circuit_breaker_degradation.py::test_example_4",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     },
     {
-      "test_id": "tests/unit/infrastructure/test_config_settings.py::test_example_2",
+      "test_id": "tests/unit/infrastructure/adapters/__init__.py::test_example_1",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     }
   ],
   "files_changed": [
-    "src/bioetl/infrastructure/schemas/pipeline_config_common.py",
-    "src/bioetl/infrastructure/storage/silver/writer_runtime_support.py",
-    "src/bioetl/infrastructure/observability/metrics.py"
+    "src/bioetl/infrastructure/adapters/semanticscholar/adapter.py",
+    "src/bioetl/infrastructure/quarantine/unified.py",
+    "src/bioetl/infrastructure/config/pipeline_dq_resolution.py"
   ],
   "recommendations": [
     "Optimize fixtures"

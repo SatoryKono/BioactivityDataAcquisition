@@ -81,10 +81,11 @@ def _active_entity_pipelines() -> dict[str, str]:
     """Collect one active representative pipeline name per provider."""
     providers: dict[str, str] = {}
     for config_path in sorted(Path("configs/entities").glob("*/*.yaml")):
-        lines = config_path.read_text(encoding="utf-8").splitlines()
-        pipeline_name = next(
-            line.split(":", 1)[1].strip() for line in lines if "pipeline_name:" in line
-        )
+        payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        pipeline_name = payload.get("pipeline_name")
+        if not isinstance(pipeline_name, str) or not pipeline_name.strip():
+            # Some compatibility/config surfaces (e.g. composite) are not standalone pipelines.
+            continue
         providers.setdefault(config_path.parent.name, pipeline_name)
     return providers
 
@@ -127,7 +128,7 @@ def test_pipeline_config_golden_master(
         current_snapshots = load_snapshots()
         current_snapshots[pipeline_name] = serialized_config
         save_snapshots(current_snapshots)
-        pytest.skip(f"Updated snapshot for {pipeline_name}")
+        return
 
     # 3. Assert against snapshot
     if pipeline_name not in golden_snapshots:

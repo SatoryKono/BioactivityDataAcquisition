@@ -1,7 +1,7 @@
 {
   "task_id": "SWARM-001",
-  "generated_at": "2026-05-28T11:33:07.890764+00:00Z",
-  "git_sha": "ead1653a56872e78624fbafb7c7839c88d3ae39f",
+  "generated_at": "2026-05-28T12:39:25.977328+00:00Z",
+  "git_sha": "e1576e075df379eba742a932b2ce244d62d66297",
   "total_runs_per_test": 5,
   "total_tests_analyzed": 8285,
   "alert_thresholds": {
@@ -11,8 +11,8 @@
   },
   "flaky_tests": [
     {
-      "test_id": "tests/unit/domain/test_observability_contract.py::test_example_0",
-      "module": "tests.unit.domain.test_observability_contract",
+      "test_id": "tests/unit/domain/test_entities.py::test_example_0",
+      "module": "tests.unit.domain.test_entities",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -42,8 +42,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/test_publication_fields_mapping.py::test_example_4",
-      "module": "tests.unit.domain.test_publication_fields_mapping",
+      "test_id": "tests/unit/domain/test_exceptions.py::test_example_1",
+      "module": "tests.unit.domain.test_exceptions",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -73,8 +73,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/entities/test_tissue.py::test_example_3",
-      "module": "tests.unit.domain.entities.test_tissue",
+      "test_id": "tests/unit/domain/test_filter_config.py::test_example_1",
+      "module": "tests.unit.domain.test_filter_config",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -104,38 +104,7 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/normalization/test_chembl_ontology_companions.py::test_example_3",
-      "module": "tests.unit.domain.normalization.test_chembl_ontology_companions",
-      "layer": "domain",
-      "provider": null,
-      "test_type": "unit",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/unit/domain/normalization/test_join_keys.py::test_example_3",
+      "test_id": "tests/unit/domain/normalization/test_join_keys.py::test_example_2",
       "module": "tests.unit.domain.normalization.test_join_keys",
       "layer": "domain",
       "provider": null,
@@ -166,8 +135,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/normalization/__init__.py::test_example_0",
-      "module": "tests.unit.domain.normalization.__init__",
+      "test_id": "tests/unit/domain/services/test_dq_serializer.py::test_example_3",
+      "module": "tests.unit.domain.services.test_dq_serializer",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -197,8 +166,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/normalization/__init__.py::test_example_3",
-      "module": "tests.unit.domain.normalization.__init__",
+      "test_id": "tests/unit/domain/services/test_author_normalization_service.py::test_example_0",
+      "module": "tests.unit.domain.services.test_author_normalization_service",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -228,8 +197,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/services/test_dq_serializer_extended.py::test_example_3",
-      "module": "tests.unit.domain.services.test_dq_serializer_extended",
+      "test_id": "tests/unit/domain/services/test_dq_metrics_calculator.py::test_example_2",
+      "module": "tests.unit.domain.services.test_dq_metrics_calculator",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -259,8 +228,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/services/test_preflight_governance.py::test_example_1",
-      "module": "tests.unit.domain.services.test_preflight_governance",
+      "test_id": "tests/unit/domain/mapping/test_publication_type_classification.py::test_example_4",
+      "module": "tests.unit.domain.mapping.test_publication_type_classification",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -290,8 +259,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/config/test_table.py::test_example_3",
-      "module": "tests.unit.domain.config.test_table",
+      "test_id": "tests/unit/domain/registry/test_field_aliases.py::test_example_1",
+      "module": "tests.unit.domain.registry.test_field_aliases",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -321,8 +290,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/value_objects/test_academic_ids.py::test_example_1",
-      "module": "tests.unit.domain.value_objects.test_academic_ids",
+      "test_id": "tests/unit/domain/composite/test_cross_validation.py::test_example_0",
+      "module": "tests.unit.domain.composite.test_cross_validation",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -352,8 +321,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/ports/__init__.py::test_example_4",
-      "module": "tests.unit.domain.ports.__init__",
+      "test_id": "tests/unit/domain/value_objects/test_compound_ids.py::test_example_2",
+      "module": "tests.unit.domain.value_objects.test_compound_ids",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -383,8 +352,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/aggregates/test_quarantine_entry_invariant_properties.py::test_example_4",
-      "module": "tests.unit.domain.aggregates.test_quarantine_entry_invariant_properties",
+      "test_id": "tests/unit/domain/value_objects/test_base.py::test_example_3",
+      "module": "tests.unit.domain.value_objects.test_base",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -414,8 +383,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/types/test_health.py::test_example_2",
-      "module": "tests.unit.domain.types.test_health",
+      "test_id": "tests/unit/domain/value_objects/test_inchi.py::test_example_1",
+      "module": "tests.unit.domain.value_objects.test_inchi",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -445,8 +414,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/filtering/test_load_result.py::test_example_0",
-      "module": "tests.unit.domain.filtering.test_load_result",
+      "test_id": "tests/unit/domain/control_plane/test_effective_config_artifact.py::test_example_4",
+      "module": "tests.unit.domain.control_plane.test_effective_config_artifact",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -476,8 +445,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/filtering/test_input_config.py::test_example_2",
-      "module": "tests.unit.domain.filtering.test_input_config",
+      "test_id": "tests/unit/domain/control_plane/test_run_ledger_replay.py::test_example_2",
+      "module": "tests.unit.domain.control_plane.test_run_ledger_replay",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -507,8 +476,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/filtering/test_range_filter.py::test_example_3",
-      "module": "tests.unit.domain.filtering.test_range_filter",
+      "test_id": "tests/unit/domain/ports/test_protocol_contract_examples.py::test_example_3",
+      "module": "tests.unit.domain.ports.test_protocol_contract_examples",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -538,8 +507,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/filtering/test_base_filter_config.py::test_example_3",
-      "module": "tests.unit.domain.filtering.test_base_filter_config",
+      "test_id": "tests/unit/domain/ports/test_noop.py::test_example_0",
+      "module": "tests.unit.domain.ports.test_noop",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -569,8 +538,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/schemas/pubmed/__init__.py::test_example_1",
-      "module": "tests.unit.domain.schemas.pubmed.__init__",
+      "test_id": "tests/unit/domain/ports/test_noop.py::test_example_3",
+      "module": "tests.unit.domain.ports.test_noop",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -600,8 +569,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/schemas/pubmed/__init__.py::test_example_4",
-      "module": "tests.unit.domain.schemas.pubmed.__init__",
+      "test_id": "tests/unit/domain/types/test_enums.py::test_example_4",
+      "module": "tests.unit.domain.types.test_enums",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -631,8 +600,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/schemas/uniprot/__init__.py::test_example_1",
-      "module": "tests.unit.domain.schemas.uniprot.__init__",
+      "test_id": "tests/unit/domain/schemas/test_json_validators.py::test_example_3",
+      "module": "tests.unit.domain.schemas.test_json_validators",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -662,7 +631,100 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/schemas/crossref/__init__.py::test_example_0",
+      "test_id": "tests/unit/domain/filtering/test_list_filters.py::test_example_1",
+      "module": "tests.unit.domain.filtering.test_list_filters",
+      "layer": "domain",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/domain/schemas/semanticscholar/test_semanticscholar_publication_validation.py::test_example_1",
+      "module": "tests.unit.domain.schemas.semanticscholar.test_semanticscholar_publication_validation",
+      "layer": "domain",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/domain/schemas/chembl/test_schemas.py::test_example_1",
+      "module": "tests.unit.domain.schemas.chembl.test_schemas",
+      "layer": "domain",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/domain/schemas/crossref/__init__.py::test_example_3",
       "module": "tests.unit.domain.schemas.crossref.__init__",
       "layer": "domain",
       "provider": null,
@@ -693,8 +755,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/domain/normalization/profiles/test_json_list_inventory.py::test_example_3",
-      "module": "tests.unit.domain.normalization.profiles.test_json_list_inventory",
+      "test_id": "tests/unit/domain/normalization/profiles/test_chembl_json_ordering_hash.py::test_example_4",
+      "module": "tests.unit.domain.normalization.profiles.test_chembl_json_ordering_hash",
       "layer": "domain",
       "provider": null,
       "test_type": "unit",
@@ -724,8 +786,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/test_pipeline_config.py::test_example_3",
-      "module": "tests.unit.application.test_pipeline_config",
+      "test_id": "tests/unit/application/services/test_lineage_inspection_service.py::test_example_0",
+      "module": "tests.unit.application.services.test_lineage_inspection_service",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -755,8 +817,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/services/__init__.py::test_example_1",
-      "module": "tests.unit.application.services.__init__",
+      "test_id": "tests/unit/application/services/test_metadata_coordinator_governance.py::test_example_3",
+      "module": "tests.unit.application.services.test_metadata_coordinator_governance",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -786,8 +848,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/services/test_replay_taxonomy_projection.py::test_example_2",
-      "module": "tests.unit.application.services.test_replay_taxonomy_projection",
+      "test_id": "tests/unit/application/services/test_medallion_lifecycle.py::test_example_4",
+      "module": "tests.unit.application.services.test_medallion_lifecycle",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -817,8 +879,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/services/test_run_manifest_inspection_service.py::test_example_3",
-      "module": "tests.unit.application.services.test_run_manifest_inspection_service",
+      "test_id": "tests/unit/application/services/test_observability_workflow_service.py::test_example_2",
+      "module": "tests.unit.application.services.test_observability_workflow_service",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -848,8 +910,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/services/test_dq_report_service_coverage.py::test_example_4",
-      "module": "tests.unit.application.services.test_dq_report_service_coverage",
+      "test_id": "tests/unit/application/services/test_family_normalization_seams.py::test_example_1",
+      "module": "tests.unit.application.services.test_family_normalization_seams",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -879,8 +941,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/services/test_metadata_lineage_node_builders.py::test_example_1",
-      "module": "tests.unit.application.services.test_metadata_lineage_node_builders",
+      "test_id": "tests/unit/application/services/test_reproducibility_golden_fixtures.py::test_example_3",
+      "module": "tests.unit.application.services.test_reproducibility_golden_fixtures",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -910,8 +972,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/services/test_pipeline_run_lifecycle_service.py::test_example_0",
-      "module": "tests.unit.application.services.test_pipeline_run_lifecycle_service",
+      "test_id": "tests/unit/application/services/test_export_service.py::test_example_3",
+      "module": "tests.unit.application.services.test_export_service",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -941,8 +1003,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/composite/test_conflict_resolver.py::test_example_1",
-      "module": "tests.unit.application.composite.test_conflict_resolver",
+      "test_id": "tests/unit/application/services/test_bronze_cleanup_service.py::test_example_2",
+      "module": "tests.unit.application.services.test_bronze_cleanup_service",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -972,8 +1034,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/composite/test_runner_fsm_logging.py::test_example_3",
-      "module": "tests.unit.application.composite.test_runner_fsm_logging",
+      "test_id": "tests/unit/application/composite/test_merger_collaborators.py::test_example_0",
+      "module": "tests.unit.application.composite.test_merger_collaborators",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1003,7 +1065,7 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/composite/test_merger_metrics_mixin.py::test_example_0",
+      "test_id": "tests/unit/application/composite/test_merger_metrics_mixin.py::test_example_1",
       "module": "tests.unit.application.composite.test_merger_metrics_mixin",
       "layer": "application",
       "provider": null,
@@ -1034,8 +1096,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/composite/test_preflight_modules.py::test_example_0",
-      "module": "tests.unit.application.composite.test_preflight_modules",
+      "test_id": "tests/unit/application/composite/test_coordinator_logging.py::test_example_0",
+      "module": "tests.unit.application.composite.test_coordinator_logging",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1065,8 +1127,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/composite/test_column_orderer_renames.py::test_example_0",
-      "module": "tests.unit.application.composite.test_column_orderer_renames",
+      "test_id": "tests/unit/application/composite/test_publication_schema_columns.py::test_example_3",
+      "module": "tests.unit.application.composite.test_publication_schema_columns",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1096,8 +1158,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/composite/test_aggregator.py::test_example_2",
-      "module": "tests.unit.application.composite.test_aggregator",
+      "test_id": "tests/unit/application/composite/test_runner_enrichment_fsm.py::test_example_3",
+      "module": "tests.unit.application.composite.test_runner_enrichment_fsm",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1127,8 +1189,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/pipelines/test_transformations.py::test_example_3",
-      "module": "tests.unit.application.pipelines.test_transformations",
+      "test_id": "tests/unit/application/composite/test_dependency_progress_tracker.py::test_example_3",
+      "module": "tests.unit.application.composite.test_dependency_progress_tracker",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1158,8 +1220,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/pipelines/test_chembl_pipelines.py::test_example_2",
-      "module": "tests.unit.application.pipelines.test_chembl_pipelines",
+      "test_id": "tests/unit/application/composite/test_dependency_progress_tracker.py::test_example_4",
+      "module": "tests.unit.application.composite.test_dependency_progress_tracker",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1189,8 +1251,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/core/test_postrun_dq_report_orchestrator.py::test_example_4",
-      "module": "tests.unit.application.core.test_postrun_dq_report_orchestrator",
+      "test_id": "tests/unit/application/composite/test_cross_validator.py::test_example_3",
+      "module": "tests.unit.application.composite.test_cross_validator",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1220,8 +1282,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/core/test_runner_flow.py::test_example_0",
-      "module": "tests.unit.application.core.test_runner_flow",
+      "test_id": "tests/unit/application/observability/test_span_helpers.py::test_example_0",
+      "module": "tests.unit.application.observability.test_span_helpers",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1251,8 +1313,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/core/test_batch_writer.py::test_example_4",
-      "module": "tests.unit.application.core.test_batch_writer",
+      "test_id": "tests/unit/application/observability/test_pipeline_metrics.py::test_example_1",
+      "module": "tests.unit.application.observability.test_pipeline_metrics",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1282,8 +1344,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/core/test_record_normalization_core.py::test_example_3",
-      "module": "tests.unit.application.core.test_record_normalization_core",
+      "test_id": "tests/unit/application/pipelines/test_date_parsing.py::test_example_3",
+      "module": "tests.unit.application.pipelines.test_date_parsing",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1313,8 +1375,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/pipelines/pubmed/test_author_extractor.py::test_example_1",
-      "module": "tests.unit.application.pipelines.pubmed.test_author_extractor",
+      "test_id": "tests/unit/application/pipelines/test_protein_class_transformer.py::test_example_4",
+      "module": "tests.unit.application.pipelines.test_protein_class_transformer",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1344,8 +1406,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/pipelines/pubmed/test_abstract_extractor.py::test_example_4",
-      "module": "tests.unit.application.pipelines.pubmed.test_abstract_extractor",
+      "test_id": "tests/unit/application/pipelines/test_chembl_assay_parameters.py::test_example_4",
+      "module": "tests.unit.application.pipelines.test_chembl_assay_parameters",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1375,8 +1437,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/pipelines/pubmed/test_extractor_edge_cases.py::test_example_1",
-      "module": "tests.unit.application.pipelines.pubmed.test_extractor_edge_cases",
+      "test_id": "tests/unit/application/core/test_shutdown.py::test_example_2",
+      "module": "tests.unit.application.core.test_shutdown",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1406,8 +1468,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/pipelines/pubmed/test_pubmed_transformer.py::test_example_3",
-      "module": "tests.unit.application.pipelines.pubmed.test_pubmed_transformer",
+      "test_id": "tests/unit/application/core/test_family_normalization_seams.py::test_example_1",
+      "module": "tests.unit.application.core.test_family_normalization_seams",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1437,8 +1499,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/pipelines/uniprot/__init__.py::test_example_4",
-      "module": "tests.unit.application.pipelines.uniprot.__init__",
+      "test_id": "tests/unit/application/core/test_postrun_metadata_write_service.py::test_example_1",
+      "module": "tests.unit.application.core.test_postrun_metadata_write_service",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1468,8 +1530,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/pipelines/chembl/__init__.py::test_example_0",
-      "module": "tests.unit.application.pipelines.chembl.__init__",
+      "test_id": "tests/unit/application/core/test_batch_progress_service.py::test_example_0",
+      "module": "tests.unit.application.core.test_batch_progress_service",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1499,8 +1561,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/pipelines/crossref/__init__.py::test_example_2",
-      "module": "tests.unit.application.pipelines.crossref.__init__",
+      "test_id": "tests/unit/application/core/postrun_test_support.py::test_example_3",
+      "module": "tests.unit.application.core.postrun_test_support",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1530,8 +1592,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/composite/runner_pkg/test_runner_key_flow.py::test_example_3",
-      "module": "tests.unit.application.composite.runner_pkg.test_runner_key_flow",
+      "test_id": "tests/unit/application/core/test_batch_executor_dq_mixin.py::test_example_3",
+      "module": "tests.unit.application.core.test_batch_executor_dq_mixin",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1561,7 +1623,193 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/services/control_plane/test_ledger_identity_support.py::test_example_0",
+      "test_id": "tests/unit/application/core/test_batch_fsm.py::test_example_4",
+      "module": "tests.unit.application.core.test_batch_fsm",
+      "layer": "application",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/application/core/test_postrun_service.py::test_example_4",
+      "module": "tests.unit.application.core.test_postrun_service",
+      "layer": "application",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/application/core/test_structural_policy.py::test_example_0",
+      "module": "tests.unit.application.core.test_structural_policy",
+      "layer": "application",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/application/composite/runner_pkg/runner_pkg_test_support.py::test_example_3",
+      "module": "tests.unit.application.composite.runner_pkg.runner_pkg_test_support",
+      "layer": "application",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py::test_example_1",
+      "module": "tests.unit.application.composite.runner_pkg.test_runner_stage_mixin",
+      "layer": "application",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/application/services/control_plane/test_historical_replay_closure_service.py::test_example_3",
+      "module": "tests.unit.application.services.control_plane.test_historical_replay_closure_service",
+      "layer": "application",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/application/services/control_plane/test_ledger_identity_support.py::test_example_1",
       "module": "tests.unit.application.services.control_plane.test_ledger_identity_support",
       "layer": "application",
       "provider": null,
@@ -1592,8 +1840,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/services/control_plane/test_run_manifest_diagnostics_checkpoint_projection.py::test_example_3",
-      "module": "tests.unit.application.services.control_plane.test_run_manifest_diagnostics_checkpoint_projection",
+      "test_id": "tests/unit/application/services/dq/test_bronze_analyzer.py::test_example_4",
+      "module": "tests.unit.application.services.dq.test_bronze_analyzer",
       "layer": "application",
       "provider": null,
       "test_type": "unit",
@@ -1623,101 +1871,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/application/services/control_plane/test_historical_replay_certification_service.py::test_example_1",
-      "module": "tests.unit.application.services.control_plane.test_historical_replay_certification_service",
-      "layer": "application",
-      "provider": null,
-      "test_type": "unit",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/unit/application/services/dq/__init__.py::test_example_3",
-      "module": "tests.unit.application.services.dq.__init__",
-      "layer": "application",
-      "provider": null,
-      "test_type": "unit",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/unit/application/services/dq/test_gold_analyzer.py::test_example_3",
-      "module": "tests.unit.application.services.dq.test_gold_analyzer",
-      "layer": "application",
-      "provider": null,
-      "test_type": "unit",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/unit/infrastructure/test_circuit_breaker.py::test_example_0",
-      "module": "tests.unit.infrastructure.test_circuit_breaker",
+      "test_id": "tests/unit/infrastructure/test_pandera_compat.py::test_example_0",
+      "module": "tests.unit.infrastructure.test_pandera_compat",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -1747,8 +1902,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/__init__.py::test_example_1",
-      "module": "tests.unit.infrastructure.__init__",
+      "test_id": "tests/unit/infrastructure/test_circuit_breaker_degradation.py::test_example_4",
+      "module": "tests.unit.infrastructure.test_circuit_breaker_degradation",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -1778,8 +1933,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/test_config_settings.py::test_example_2",
-      "module": "tests.unit.infrastructure.test_config_settings",
+      "test_id": "tests/unit/infrastructure/adapters/__init__.py::test_example_1",
+      "module": "tests.unit.infrastructure.adapters.__init__",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -1809,8 +1964,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/test_circuit_breaker_contract.py::test_example_2",
-      "module": "tests.unit.infrastructure.test_circuit_breaker_contract",
+      "test_id": "tests/unit/infrastructure/export/test_export_catalog_adapter.py::test_example_4",
+      "module": "tests.unit.infrastructure.export.test_export_catalog_adapter",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -1840,8 +1995,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/adapters/test_health_probe_policy.py::test_example_0",
-      "module": "tests.unit.infrastructure.adapters.test_health_probe_policy",
+      "test_id": "tests/unit/infrastructure/config/test_pipeline_normalizers.py::test_example_0",
+      "module": "tests.unit.infrastructure.config.test_pipeline_normalizers",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -1871,8 +2026,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/adapters/test_base_metrics.py::test_example_4",
-      "module": "tests.unit.infrastructure.adapters.test_base_metrics",
+      "test_id": "tests/unit/infrastructure/config/test_semantic_field_registry_loader.py::test_example_0",
+      "module": "tests.unit.infrastructure.config.test_semantic_field_registry_loader",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -1902,8 +2057,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/adapters/test_validation.py::test_example_4",
-      "module": "tests.unit.infrastructure.adapters.test_validation",
+      "test_id": "tests/unit/infrastructure/observability/test_metrics_server_adapter.py::test_example_0",
+      "module": "tests.unit.infrastructure.observability.test_metrics_server_adapter",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -1933,8 +2088,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/config/test_pipeline_config_legacy_normalization.py::test_example_2",
-      "module": "tests.unit.infrastructure.config.test_pipeline_config_legacy_normalization",
+      "test_id": "tests/unit/infrastructure/observability/test_debug_adapters_boost.py::test_example_3",
+      "module": "tests.unit.infrastructure.observability.test_debug_adapters_boost",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -1964,8 +2119,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/config/test_pipeline_config_loader.py::test_example_2",
-      "module": "tests.unit.infrastructure.config.test_pipeline_config_loader",
+      "test_id": "tests/unit/infrastructure/observability/test_logging.py::test_example_4",
+      "module": "tests.unit.infrastructure.observability.test_logging",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -1995,8 +2150,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/observability/test_debug_adapters.py::test_example_2",
-      "module": "tests.unit.infrastructure.observability.test_debug_adapters",
+      "test_id": "tests/unit/infrastructure/quality/test_exemptions_registry.py::test_example_4",
+      "module": "tests.unit.infrastructure.quality.test_exemptions_registry",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2026,8 +2181,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/observability/test_logging_config.py::test_example_4",
-      "module": "tests.unit.infrastructure.observability.test_logging_config",
+      "test_id": "tests/unit/infrastructure/quality/test_budget_evaluator.py::test_example_3",
+      "module": "tests.unit.infrastructure.quality.test_budget_evaluator",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2057,8 +2212,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/security/__init__.py::test_example_2",
-      "module": "tests.unit.infrastructure.security.__init__",
+      "test_id": "tests/unit/infrastructure/storage/test_silver_writer_validation_operations.py::test_example_2",
+      "module": "tests.unit.infrastructure.storage.test_silver_writer_validation_operations",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2088,8 +2243,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/quality/test_exemptions_registry_validation.py::test_example_4",
-      "module": "tests.unit.infrastructure.quality.test_exemptions_registry_validation",
+      "test_id": "tests/unit/infrastructure/storage/test_silver_writer_metadata_operations.py::test_example_0",
+      "module": "tests.unit.infrastructure.storage.test_silver_writer_metadata_operations",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2119,224 +2274,7 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/storage/test_silver_maintenance_operations.py::test_example_3",
-      "module": "tests.unit.infrastructure.storage.test_silver_maintenance_operations",
-      "layer": "infrastructure",
-      "provider": null,
-      "test_type": "unit + integration",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/unit/infrastructure/storage/test_write_resilience_boost.py::test_example_3",
-      "module": "tests.unit.infrastructure.storage.test_write_resilience_boost",
-      "layer": "infrastructure",
-      "provider": null,
-      "test_type": "unit + integration",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/unit/infrastructure/storage/test_bronze_write_result_helpers.py::test_example_1",
-      "module": "tests.unit.infrastructure.storage.test_bronze_write_result_helpers",
-      "layer": "infrastructure",
-      "provider": null,
-      "test_type": "unit + integration",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/unit/infrastructure/storage/test_bronze_writer_metrics_mixin.py::test_example_1",
-      "module": "tests.unit.infrastructure.storage.test_bronze_writer_metrics_mixin",
-      "layer": "infrastructure",
-      "provider": null,
-      "test_type": "unit + integration",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/unit/infrastructure/storage/test_bronze_writer_metrics_mixin.py::test_example_4",
-      "module": "tests.unit.infrastructure.storage.test_bronze_writer_metrics_mixin",
-      "layer": "infrastructure",
-      "provider": null,
-      "test_type": "unit + integration",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/unit/infrastructure/storage/test_silver_writer_key_nullability.py::test_example_0",
-      "module": "tests.unit.infrastructure.storage.test_silver_writer_key_nullability",
-      "layer": "infrastructure",
-      "provider": null,
-      "test_type": "unit + integration",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/unit/infrastructure/storage/test_gold_writer_metadata_operations.py::test_example_3",
-      "module": "tests.unit.infrastructure.storage.test_gold_writer_metadata_operations",
-      "layer": "infrastructure",
-      "provider": null,
-      "test_type": "unit + integration",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/unit/infrastructure/control_plane/test_control_plane_observability_metrics.py::test_example_3",
+      "test_id": "tests/unit/infrastructure/control_plane/test_control_plane_observability_metrics.py::test_example_1",
       "module": "tests.unit.infrastructure.control_plane.test_control_plane_observability_metrics",
       "layer": "infrastructure",
       "provider": null,
@@ -2367,8 +2305,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/adr/__init__.py::test_example_2",
-      "module": "tests.unit.infrastructure.adr.__init__",
+      "test_id": "tests/unit/infrastructure/adr/test_fs_adr_service.py::test_example_0",
+      "module": "tests.unit.infrastructure.adr.test_fs_adr_service",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2398,69 +2336,7 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/factories/test_storage_adapter.py::test_example_1",
-      "module": "tests.unit.infrastructure.factories.test_storage_adapter",
-      "layer": "infrastructure",
-      "provider": null,
-      "test_type": "unit + integration",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/unit/infrastructure/schemas/test_base_schemas.py::test_example_4",
-      "module": "tests.unit.infrastructure.schemas.test_base_schemas",
-      "layer": "infrastructure",
-      "provider": null,
-      "test_type": "unit + integration",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/unit/infrastructure/storage/bronze_writer/test_write_modes.py::test_example_1",
+      "test_id": "tests/unit/infrastructure/storage/bronze_writer/test_write_modes.py::test_example_3",
       "module": "tests.unit.infrastructure.storage.bronze_writer.test_write_modes",
       "layer": "infrastructure",
       "provider": null,
@@ -2491,8 +2367,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/adapters/common/test_response_shapes.py::test_example_3",
-      "module": "tests.unit.infrastructure.adapters.common.test_response_shapes",
+      "test_id": "tests/unit/infrastructure/config/source_normalizers/test_source.py::test_example_3",
+      "module": "tests.unit.infrastructure.config.source_normalizers.test_source",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2522,8 +2398,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/adapters/pubmed/test_adapter_fallback.py::test_example_0",
-      "module": "tests.unit.infrastructure.adapters.pubmed.test_adapter_fallback",
+      "test_id": "tests/unit/infrastructure/adapters/common/test_deduplication.py::test_example_0",
+      "module": "tests.unit.infrastructure.adapters.common.test_deduplication",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2553,8 +2429,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/adapters/pubmed/test_fallback.py::test_example_1",
-      "module": "tests.unit.infrastructure.adapters.pubmed.test_fallback",
+      "test_id": "tests/unit/infrastructure/adapters/common/test_fetch_resilience_template.py::test_example_1",
+      "module": "tests.unit.infrastructure.adapters.common.test_fetch_resilience_template",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2584,8 +2460,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/adapters/uniprot/test_request_metadata.py::test_example_1",
-      "module": "tests.unit.infrastructure.adapters.uniprot.test_request_metadata",
+      "test_id": "tests/unit/infrastructure/adapters/openalex/test_response_parser.py::test_example_2",
+      "module": "tests.unit.infrastructure.adapters.openalex.test_response_parser",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2615,8 +2491,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/adapters/openalex/test_fallback.py::test_example_0",
-      "module": "tests.unit.infrastructure.adapters.openalex.test_fallback",
+      "test_id": "tests/unit/infrastructure/adapters/chembl/test_models_common.py::test_example_4",
+      "module": "tests.unit.infrastructure.adapters.chembl.test_models_common",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2646,8 +2522,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/adapters/semanticscholar/test_health_metadata_protocols.py::test_example_0",
-      "module": "tests.unit.infrastructure.adapters.semanticscholar.test_health_metadata_protocols",
+      "test_id": "tests/unit/infrastructure/adapters/chembl/test_fetch_multi_filter_mixin.py::test_example_0",
+      "module": "tests.unit.infrastructure.adapters.chembl.test_fetch_multi_filter_mixin",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2677,8 +2553,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/adapters/chembl/test_deduplication.py::test_example_2",
-      "module": "tests.unit.infrastructure.adapters.chembl.test_deduplication",
+      "test_id": "tests/unit/infrastructure/adapters/http/test_retry_config.py::test_example_3",
+      "module": "tests.unit.infrastructure.adapters.http.test_retry_config",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2708,8 +2584,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/infrastructure/adapters/pubchem/test_adapter.py::test_example_0",
-      "module": "tests.unit.infrastructure.adapters.pubchem.test_adapter",
+      "test_id": "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py::test_example_3",
+      "module": "tests.unit.infrastructure.adapters.http.test_client_retry_mixin",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2739,8 +2615,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/integration/test_dashboard_cross_scope_titles.py::test_example_4",
-      "module": "tests.integration.test_dashboard_cross_scope_titles",
+      "test_id": "tests/unit/infrastructure/adapters/decorators/test_wrap_with_resilience.py::test_example_4",
+      "module": "tests.unit.infrastructure.adapters.decorators.test_wrap_with_resilience",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2770,8 +2646,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/integration/grafana_contract_specs.py::test_example_4",
-      "module": "tests.integration.grafana_contract_specs",
+      "test_id": "tests/unit/infrastructure/adapters/pubchem/test_query_builder.py::test_example_3",
+      "module": "tests.unit.infrastructure.adapters.pubchem.test_query_builder",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2801,8 +2677,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/integration/test_uniprot_idmapping_pipeline.py::test_example_0",
-      "module": "tests.integration.test_uniprot_idmapping_pipeline",
+      "test_id": "tests/integration/test_uniprot_pipeline.py::test_example_3",
+      "module": "tests.integration.test_uniprot_pipeline",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2832,8 +2708,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/integration/test_dashboard_critical_panels_have_actionable_links.py::test_example_3",
-      "module": "tests.integration.test_dashboard_critical_panels_have_actionable_links",
+      "test_id": "tests/integration/test_dashboard_no_data_policy.py::test_example_1",
+      "module": "tests.integration.test_dashboard_no_data_policy",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2863,8 +2739,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/integration/test_dq_report_integration.py::test_example_1",
-      "module": "tests.integration.test_dq_report_integration",
+      "test_id": "tests/integration/memory_storage.py::test_example_4",
+      "module": "tests.integration.memory_storage",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2894,8 +2770,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/integration/adapters/test_pubmed.py::test_example_4",
-      "module": "tests.integration.adapters.test_pubmed",
+      "test_id": "tests/integration/test_preflight_health_modes.py::test_example_3",
+      "module": "tests.integration.test_preflight_health_modes",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2925,8 +2801,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/integration/normalization/test_chembl_edge_observed_values.py::test_example_1",
-      "module": "tests.integration.normalization.test_chembl_edge_observed_values",
+      "test_id": "tests/integration/test_grafana_dashboard_metric_semantics.py::test_example_4",
+      "module": "tests.integration.test_grafana_dashboard_metric_semantics",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2956,8 +2832,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/integration/config/test_semantic_anchor_parity.py::test_example_4",
-      "module": "tests.integration.config.test_semantic_anchor_parity",
+      "test_id": "tests/integration/test_grafana_dashboard_first_screen_contract.py::test_example_4",
+      "module": "tests.integration.test_grafana_dashboard_first_screen_contract",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -2987,8 +2863,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/integration/config/test_non_chembl_identifier_dq_parity.py::test_example_3",
-      "module": "tests.integration.config.test_non_chembl_identifier_dq_parity",
+      "test_id": "tests/integration/adapters/test_pubmed_coverage.py::test_example_3",
+      "module": "tests.integration.adapters.test_pubmed_coverage",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -3018,8 +2894,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/integration/composite/test_column_naming_integration.py::test_example_1",
-      "module": "tests.integration.composite.test_column_naming_integration",
+      "test_id": "tests/integration/grafana/test_silver_reject_explorer_copy.py::test_example_4",
+      "module": "tests.integration.grafana.test_silver_reject_explorer_copy",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -3049,7 +2925,286 @@
       "fixed": false
     },
     {
-      "test_id": "tests/integration/pipelines/test_chembl_cell_line.py::test_example_3",
+      "test_id": "tests/integration/config/test_semantic_registry_drift.py::test_example_0",
+      "module": "tests.integration.config.test_semantic_registry_drift",
+      "layer": "infrastructure",
+      "provider": null,
+      "test_type": "unit + integration",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/integration/config/test_semantic_registry_drift.py::test_example_3",
+      "module": "tests.integration.config.test_semantic_registry_drift",
+      "layer": "infrastructure",
+      "provider": null,
+      "test_type": "unit + integration",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/integration/config/test_publication_nested_vocabulary_inventory.py::test_example_3",
+      "module": "tests.integration.config.test_publication_nested_vocabulary_inventory",
+      "layer": "infrastructure",
+      "provider": null,
+      "test_type": "unit + integration",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/integration/config/test_chembl_contract_registry_coverage.py::test_example_1",
+      "module": "tests.integration.config.test_chembl_contract_registry_coverage",
+      "layer": "infrastructure",
+      "provider": null,
+      "test_type": "unit + integration",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/integration/config/test_chembl_policy_surface_parity.py::test_example_4",
+      "module": "tests.integration.config.test_chembl_policy_surface_parity",
+      "layer": "infrastructure",
+      "provider": null,
+      "test_type": "unit + integration",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/integration/config/test_chembl_registry_fixture_contract_parity.py::test_example_3",
+      "module": "tests.integration.config.test_chembl_registry_fixture_contract_parity",
+      "layer": "infrastructure",
+      "provider": null,
+      "test_type": "unit + integration",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/integration/config/test_semantic_field_unification_contract.py::test_example_1",
+      "module": "tests.integration.config.test_semantic_field_unification_contract",
+      "layer": "infrastructure",
+      "provider": null,
+      "test_type": "unit + integration",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/integration/config/test_uniprot_structured_reference_dq.py::test_example_2",
+      "module": "tests.integration.config.test_uniprot_structured_reference_dq",
+      "layer": "infrastructure",
+      "provider": null,
+      "test_type": "unit + integration",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/integration/pipelines/test_crossref_date_normalization.py::test_example_3",
+      "module": "tests.integration.pipelines.test_crossref_date_normalization",
+      "layer": "infrastructure",
+      "provider": null,
+      "test_type": "unit + integration",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/integration/pipelines/test_chembl_cell_line.py::test_example_0",
       "module": "tests.integration.pipelines.test_chembl_cell_line",
       "layer": "infrastructure",
       "provider": null,
@@ -3080,8 +3235,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/integration/interfaces/test_cli_run_dry_run.py::test_example_2",
-      "module": "tests.integration.interfaces.test_cli_run_dry_run",
+      "test_id": "tests/integration/chembl/__init__.py::test_example_0",
+      "module": "tests.integration.chembl.__init__",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -3111,8 +3266,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/integration/infrastructure/storage/test_bronze_writer_io_mixin_boost.py::test_example_2",
-      "module": "tests.integration.infrastructure.storage.test_bronze_writer_io_mixin_boost",
+      "test_id": "tests/integration/interfaces/conftest.py::test_example_3",
+      "module": "tests.integration.interfaces.conftest",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -3142,7 +3297,38 @@
       "fixed": false
     },
     {
-      "test_id": "tests/integration/infrastructure/storage/test_storage_factory_audit.py::test_example_3",
+      "test_id": "tests/integration/ci/test_dashboard_active_docs_sync.py::test_example_1",
+      "module": "tests.integration.ci.test_dashboard_active_docs_sync",
+      "layer": "infrastructure",
+      "provider": null,
+      "test_type": "unit + integration",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/integration/infrastructure/storage/test_storage_factory_audit.py::test_example_4",
       "module": "tests.integration.infrastructure.storage.test_storage_factory_audit",
       "layer": "infrastructure",
       "provider": null,
@@ -3173,8 +3359,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/integration/infrastructure/storage/test_composite_checkpoint_writer.py::test_example_4",
-      "module": "tests.integration.infrastructure.storage.test_composite_checkpoint_writer",
+      "test_id": "tests/integration/infrastructure/storage/test_silver_writer.py::test_example_0",
+      "module": "tests.integration.infrastructure.storage.test_silver_writer",
       "layer": "infrastructure",
       "provider": null,
       "test_type": "unit + integration",
@@ -3235,8 +3421,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/composition/test_bootstrap_contexts.py::test_example_3",
-      "module": "tests.unit.composition.test_bootstrap_contexts",
+      "test_id": "tests/unit/composition/test_entrypoints_compatibility.py::test_example_1",
+      "module": "tests.unit.composition.test_entrypoints_compatibility",
       "layer": "composition",
       "provider": null,
       "test_type": "unit",
@@ -3266,8 +3452,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/composition/providers/test_decorators.py::test_example_1",
-      "module": "tests.unit.composition.providers.test_decorators",
+      "test_id": "tests/unit/composition/services/test_effective_config_serializer.py::test_example_0",
+      "module": "tests.unit.composition.services.test_effective_config_serializer",
       "layer": "composition",
       "provider": null,
       "test_type": "unit",
@@ -3297,8 +3483,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/composition/providers/test_decorators.py::test_example_3",
-      "module": "tests.unit.composition.providers.test_decorators",
+      "test_id": "tests/unit/composition/factories/test_observability_wiring.py::test_example_0",
+      "module": "tests.unit.composition.factories.test_observability_wiring",
       "layer": "composition",
       "provider": null,
       "test_type": "unit",
@@ -3328,8 +3514,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/composition/providers/__init__.py::test_example_0",
-      "module": "tests.unit.composition.providers.__init__",
+      "test_id": "tests/unit/composition/factories/test_observability_wiring.py::test_example_1",
+      "module": "tests.unit.composition.factories.test_observability_wiring",
       "layer": "composition",
       "provider": null,
       "test_type": "unit",
@@ -3359,8 +3545,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/composition/providers/test_registration_data_sources.py::test_example_0",
-      "module": "tests.unit.composition.providers.test_registration_data_sources",
+      "test_id": "tests/unit/composition/factories/services/test_pipeline_record_processor_builder.py::test_example_0",
+      "module": "tests.unit.composition.factories.services.test_pipeline_record_processor_builder",
       "layer": "composition",
       "provider": null,
       "test_type": "unit",
@@ -3390,69 +3576,7 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/composition/runtime_builders/test_effective_config_artifact_builder.py::test_example_0",
-      "module": "tests.unit.composition.runtime_builders.test_effective_config_artifact_builder",
-      "layer": "composition",
-      "provider": null,
-      "test_type": "unit",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/unit/composition/bootstrap/test_runtime_patch.py::test_example_3",
-      "module": "tests.unit.composition.bootstrap.test_runtime_patch",
-      "layer": "composition",
-      "provider": null,
-      "test_type": "unit",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/unit/composition/factories/pipeline/test_pipeline_factory.py::test_example_2",
+      "test_id": "tests/unit/composition/factories/pipeline/test_pipeline_factory.py::test_example_1",
       "module": "tests.unit.composition.factories.pipeline.test_pipeline_factory",
       "layer": "composition",
       "provider": null,
@@ -3483,8 +3607,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/composition/factories/datasource/test_http_client_factory.py::test_example_3",
-      "module": "tests.unit.composition.factories.datasource.test_http_client_factory",
+      "test_id": "tests/unit/composition/factories/datasource/test_pubchem_factory.py::test_example_0",
+      "module": "tests.unit.composition.factories.datasource.test_pubchem_factory",
       "layer": "composition",
       "provider": null,
       "test_type": "unit",
@@ -3514,8 +3638,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/composition/factories/datasource/test_crossref_factory.py::test_example_1",
-      "module": "tests.unit.composition.factories.datasource.test_crossref_factory",
+      "test_id": "tests/unit/composition/factories/storage/test_gold_factory.py::test_example_3",
+      "module": "tests.unit.composition.factories.storage.test_gold_factory",
       "layer": "composition",
       "provider": null,
       "test_type": "unit",
@@ -3545,8 +3669,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/composition/factories/storage/test_health_mixin.py::test_example_0",
-      "module": "tests.unit.composition.factories.storage.test_health_mixin",
+      "test_id": "tests/unit/composition/factories/storage/test_clear_mixin.py::test_example_4",
+      "module": "tests.unit.composition.factories.storage.test_clear_mixin",
       "layer": "composition",
       "provider": null,
       "test_type": "unit",
@@ -3576,8 +3700,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/interfaces/cli/test_run_all_command.py::test_example_2",
-      "module": "tests.unit.interfaces.cli.test_run_all_command",
+      "test_id": "tests/unit/composition/bootstrap/runtime/test_assembly.py::test_example_1",
+      "module": "tests.unit.composition.bootstrap.runtime.test_assembly",
       "layer": "composition",
       "provider": null,
       "test_type": "unit",
@@ -3607,8 +3731,70 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/interfaces/cli/test_wrapper_families.py::test_example_4",
-      "module": "tests.unit.interfaces.cli.test_wrapper_families",
+      "test_id": "tests/unit/composition/bootstrap/runtime/test_composite_helpers.py::test_example_2",
+      "module": "tests.unit.composition.bootstrap.runtime.test_composite_helpers",
+      "layer": "composition",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/interfaces/__init__.py::test_example_1",
+      "module": "tests.unit.interfaces.__init__",
+      "layer": "composition",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/interfaces/cli/test_workflow_cli.py::test_example_3",
+      "module": "tests.unit.interfaces.cli.test_workflow_cli",
       "layer": "composition",
       "provider": null,
       "test_type": "unit",
@@ -3669,8 +3855,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/interfaces/factories/test_pipeline_factories.py::test_example_3",
-      "module": "tests.unit.interfaces.factories.test_pipeline_factories",
+      "test_id": "tests/unit/interfaces/cli/commands/test_export_support.py::test_example_1",
+      "module": "tests.unit.interfaces.cli.commands.test_export_support",
       "layer": "composition",
       "provider": null,
       "test_type": "unit",
@@ -3700,8 +3886,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/interfaces/cli/commands/test_lock.py::test_example_1",
-      "module": "tests.unit.interfaces.cli.commands.test_lock",
+      "test_id": "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py::test_example_0",
+      "module": "tests.unit.interfaces.cli.commands.test_run_manifest_commands",
       "layer": "composition",
       "provider": null,
       "test_type": "unit",
@@ -3731,8 +3917,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/unit/interfaces/cli/commands/test_quarantine.py::test_example_3",
-      "module": "tests.unit.interfaces.cli.commands.test_quarantine",
+      "test_id": "tests/unit/interfaces/cli/commands/test_diagnostics_boundary.py::test_example_2",
+      "module": "tests.unit.interfaces.cli.commands.test_diagnostics_boundary",
       "layer": "composition",
       "provider": null,
       "test_type": "unit",
@@ -3762,8 +3948,101 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_diagram_artifact_check.py::test_example_2",
-      "module": "tests.architecture.test_diagram_artifact_check",
+      "test_id": "tests/unit/interfaces/cli/commands/test_boundary_families.py::test_example_2",
+      "module": "tests.unit.interfaces.cli.commands.test_boundary_families",
+      "layer": "composition",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/interfaces/cli/commands/test_quarantine_support.py::test_example_0",
+      "module": "tests.unit.interfaces.cli.commands.test_quarantine_support",
+      "layer": "composition",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/unit/interfaces/cli/commands/test_run_all_helpers.py::test_example_1",
+      "module": "tests.unit.interfaces.cli.commands.test_run_all_helpers",
+      "layer": "composition",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py::test_example_3",
+      "module": "tests.architecture.test_domain_ports_no_filesystem_or_engine_types",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -3793,8 +4072,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_diagram_description_index_contracts.py::test_example_4",
-      "module": "tests.architecture.test_diagram_description_index_contracts",
+      "test_id": "tests/architecture/test_layer_matrix_guards.py::test_example_4",
+      "module": "tests.architecture.test_layer_matrix_guards",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -3824,8 +4103,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_pii_hashing.py::test_example_1",
-      "module": "tests.architecture.test_pii_hashing",
+      "test_id": "tests/architecture/test_hotspot_duplication_family_ratchets.py::test_example_4",
+      "module": "tests.architecture.test_hotspot_duplication_family_ratchets",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -3855,8 +4134,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_port_contracts_resilience_concurrency.py::test_example_3",
-      "module": "tests.architecture.test_port_contracts_resilience_concurrency",
+      "test_id": "tests/architecture/test_no_random_in_writers.py::test_example_2",
+      "module": "tests.architecture.test_no_random_in_writers",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -3886,8 +4165,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_domain_service_canonical_imports.py::test_example_0",
-      "module": "tests.architecture.test_domain_service_canonical_imports",
+      "test_id": "tests/architecture/test_test_health_reporting_taxonomy.py::test_example_3",
+      "module": "tests.architecture.test_test_health_reporting_taxonomy",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -3917,8 +4196,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_domain_service_canonical_imports.py::test_example_3",
-      "module": "tests.architecture.test_domain_service_canonical_imports",
+      "test_id": "tests/architecture/test_diagram_bundle_generator_contracts.py::test_example_2",
+      "module": "tests.architecture.test_diagram_bundle_generator_contracts",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -3948,8 +4227,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_root_script_compatibility_surfaces.py::test_example_4",
-      "module": "tests.architecture.test_root_script_compatibility_surfaces",
+      "test_id": "tests/architecture/test_chembl_json_ordering_hash_migration.py::test_example_2",
+      "module": "tests.architecture.test_chembl_json_ordering_hash_migration",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -3979,8 +4258,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_batch_transformer_helpers_shim_usage.py::test_example_3",
-      "module": "tests.architecture.test_batch_transformer_helpers_shim_usage",
+      "test_id": "tests/architecture/test_hotspot_growth_family_ratchets.py::test_example_4",
+      "module": "tests.architecture.test_hotspot_growth_family_ratchets",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4010,8 +4289,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_diagram_nightly_workflow.py::test_example_4",
-      "module": "tests.architecture.test_diagram_nightly_workflow",
+      "test_id": "tests/architecture/test_contract_testing_governance.py::test_example_1",
+      "module": "tests.architecture.test_contract_testing_governance",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4041,8 +4320,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_domain_public_api.py::test_example_2",
-      "module": "tests.architecture.test_domain_public_api",
+      "test_id": "tests/architecture/test_test_capabilities_contract.py::test_example_3",
+      "module": "tests.architecture.test_test_capabilities_contract",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4072,8 +4351,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_silver_metadata_builder_guardrails.py::test_example_3",
-      "module": "tests.architecture.test_silver_metadata_builder_guardrails",
+      "test_id": "tests/architecture/test_historical_prompt_docs_stack.py::test_example_2",
+      "module": "tests.architecture.test_historical_prompt_docs_stack",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4103,8 +4382,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_fixture_governance_rollout.py::test_example_3",
-      "module": "tests.architecture.test_fixture_governance_rollout",
+      "test_id": "tests/architecture/test_pytest_benchmark_selection_policy.py::test_example_3",
+      "module": "tests.architecture.test_pytest_benchmark_selection_policy",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4134,8 +4413,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_env_example_reference_policy.py::test_example_4",
-      "module": "tests.architecture.test_env_example_reference_policy",
+      "test_id": "tests/architecture/test_runtime_import_scc.py::test_example_0",
+      "module": "tests.architecture.test_runtime_import_scc",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4165,8 +4444,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_strict_architecture_contracts.py::test_example_2",
-      "module": "tests.architecture.test_strict_architecture_contracts",
+      "test_id": "tests/architecture/test_config_topology_docs_drift.py::test_example_3",
+      "module": "tests.architecture.test_config_topology_docs_drift",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4196,8 +4475,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_di_infrastructure_adapters.py::test_example_0",
-      "module": "tests.architecture.test_di_infrastructure_adapters",
+      "test_id": "tests/architecture/test_code_formatting.py::test_example_1",
+      "module": "tests.architecture.test_code_formatting",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4227,8 +4506,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_future_annotations_policy.py::test_example_1",
-      "module": "tests.architecture.test_future_annotations_policy",
+      "test_id": "tests/architecture/test_forbidden_imports.py::test_example_2",
+      "module": "tests.architecture.test_forbidden_imports",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4258,7 +4537,100 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_quality_exemptions_registry.py::test_example_0",
+      "test_id": "tests/architecture/test_scripts_inventory_discovery.py::test_example_3",
+      "module": "tests.architecture.test_scripts_inventory_discovery",
+      "layer": "crosscutting",
+      "provider": null,
+      "test_type": "architecture + e2e + contract + bench",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/architecture/test_scripts_catalog_governance.py::test_example_3",
+      "module": "tests.architecture.test_scripts_catalog_governance",
+      "layer": "crosscutting",
+      "provider": null,
+      "test_type": "architecture + e2e + contract + bench",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/architecture/test_non_chembl_json_field_typing_policy.py::test_example_2",
+      "module": "tests.architecture.test_non_chembl_json_field_typing_policy",
+      "layer": "crosscutting",
+      "provider": null,
+      "test_type": "architecture + e2e + contract + bench",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/architecture/test_quality_exemptions_registry.py::test_example_3",
       "module": "tests.architecture.test_quality_exemptions_registry",
       "layer": "crosscutting",
       "provider": null,
@@ -4289,8 +4661,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_no_transformer_hidden_defaults.py::test_example_0",
-      "module": "tests.architecture.test_no_transformer_hidden_defaults",
+      "test_id": "tests/architecture/test_config_golden_master.py::test_example_4",
+      "module": "tests.architecture.test_config_golden_master",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4320,8 +4692,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_no_print_in_docstrings.py::test_example_4",
-      "module": "tests.architecture.test_no_print_in_docstrings",
+      "test_id": "tests/architecture/test_generated_data_location.py::test_example_0",
+      "module": "tests.architecture.test_generated_data_location",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4351,8 +4723,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_domain_aggregate_deterministic_identity.py::test_example_0",
-      "module": "tests.architecture.test_domain_aggregate_deterministic_identity",
+      "test_id": "tests/architecture/test_no_transformer_fallback.py::test_example_4",
+      "module": "tests.architecture.test_no_transformer_fallback",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4382,8 +4754,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_domain_purity.py::test_example_3",
-      "module": "tests.architecture.test_domain_purity",
+      "test_id": "tests/architecture/test_scripts_deprecation_backlog.py::test_example_1",
+      "module": "tests.architecture.test_scripts_deprecation_backlog",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4413,193 +4785,7 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_documentation_sync.py::test_example_0",
-      "module": "tests.architecture.test_documentation_sync",
-      "layer": "crosscutting",
-      "provider": null,
-      "test_type": "architecture + e2e + contract + bench",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/architecture/test_type_checking_density.py::test_example_2",
-      "module": "tests.architecture.test_type_checking_density",
-      "layer": "crosscutting",
-      "provider": null,
-      "test_type": "architecture + e2e + contract + bench",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/architecture/test_docs_compat_shim_governance.py::test_example_0",
-      "module": "tests.architecture.test_docs_compat_shim_governance",
-      "layer": "crosscutting",
-      "provider": null,
-      "test_type": "architecture + e2e + contract + bench",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/architecture/test_port_contracts_hypothesis.py::test_example_2",
-      "module": "tests.architecture.test_port_contracts_hypothesis",
-      "layer": "crosscutting",
-      "provider": null,
-      "test_type": "architecture + e2e + contract + bench",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/architecture/test_publication_type_sync.py::test_example_2",
-      "module": "tests.architecture.test_publication_type_sync",
-      "layer": "crosscutting",
-      "provider": null,
-      "test_type": "architecture + e2e + contract + bench",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/architecture/test_pretest_guardrails_memory_phase.py::test_example_3",
-      "module": "tests.architecture.test_pretest_guardrails_memory_phase",
-      "layer": "crosscutting",
-      "provider": null,
-      "test_type": "architecture + e2e + contract + bench",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/architecture/test_architecture_acceptance_baseline.py::test_example_2",
+      "test_id": "tests/architecture/test_architecture_acceptance_baseline.py::test_example_1",
       "module": "tests.architecture.test_architecture_acceptance_baseline",
       "layer": "crosscutting",
       "provider": null,
@@ -4630,8 +4816,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_e2e_health_mode_policy.py::test_example_1",
-      "module": "tests.architecture.test_e2e_health_mode_policy",
+      "test_id": "tests/architecture/test_lazy_export_facade_inventory.py::test_example_2",
+      "module": "tests.architecture.test_lazy_export_facade_inventory",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4661,7 +4847,38 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_narrow_port_migration.py::test_example_4",
+      "test_id": "tests/architecture/test_no_inline_construction_in_adapters.py::test_example_3",
+      "module": "tests.architecture.test_no_inline_construction_in_adapters",
+      "layer": "crosscutting",
+      "provider": null,
+      "test_type": "architecture + e2e + contract + bench",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_state_error",
+          "message": "failed randomly",
+          "traceback_head": "Traceback...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Shared fixture",
+      "recommended_fix": "Investigate isolation",
+      "severity": "P2",
+      "first_seen": "2026-05-28",
+      "fixed": false
+    },
+    {
+      "test_id": "tests/architecture/test_narrow_port_migration.py::test_example_3",
       "module": "tests.architecture.test_narrow_port_migration",
       "layer": "crosscutting",
       "provider": null,
@@ -4692,8 +4909,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_check_doc_links_guardrails.py::test_example_0",
-      "module": "tests.architecture.test_check_doc_links_guardrails",
+      "test_id": "tests/architecture/test_vcr_provider_balance.py::test_example_4",
+      "module": "tests.architecture.test_vcr_provider_balance",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4723,8 +4940,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_test_topology_canonical_paths.py::test_example_4",
-      "module": "tests.architecture.test_test_topology_canonical_paths",
+      "test_id": "tests/architecture/test_pytest_sharded_inventory.py::test_example_3",
+      "module": "tests.architecture.test_pytest_sharded_inventory",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4754,8 +4971,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_docs_version_sync.py::test_example_4",
-      "module": "tests.architecture.test_docs_version_sync",
+      "test_id": "tests/architecture/test_port_contracts.py::test_example_4",
+      "module": "tests.architecture.test_port_contracts",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4785,8 +5002,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_test_telemetry_baseline.py::test_example_1",
-      "module": "tests.architecture.test_test_telemetry_baseline",
+      "test_id": "tests/architecture/test_application_core_lifecycle_shim_usage.py::test_example_1",
+      "module": "tests.architecture.test_application_core_lifecycle_shim_usage",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4816,8 +5033,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_test_governance_audit.py::test_example_2",
-      "module": "tests.architecture.test_test_governance_audit",
+      "test_id": "tests/architecture/test_quality_governance_workflow.py::test_example_1",
+      "module": "tests.architecture.test_quality_governance_workflow",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4847,8 +5064,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_conftest_session_caches.py::test_example_2",
-      "module": "tests.architecture.test_conftest_session_caches",
+      "test_id": "tests/architecture/test_domain_factory_restrictions.py::test_example_4",
+      "module": "tests.architecture.test_domain_factory_restrictions",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4878,8 +5095,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_deterministic_sort_policy_coverage.py::test_example_4",
-      "module": "tests.architecture.test_deterministic_sort_policy_coverage",
+      "test_id": "tests/architecture/test_doc_crossref_integrity.py::test_example_1",
+      "module": "tests.architecture.test_doc_crossref_integrity",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4909,8 +5126,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_private_module_imports.py::test_example_1",
-      "module": "tests.architecture.test_private_module_imports",
+      "test_id": "tests/architecture/test_e2e_dq_fixture_policy.py::test_example_4",
+      "module": "tests.architecture.test_e2e_dq_fixture_policy",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4940,8 +5157,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_lint_terminology_script.py::test_example_1",
-      "module": "tests.architecture.test_lint_terminology_script",
+      "test_id": "tests/e2e/conftest.py::test_example_0",
+      "module": "tests.e2e.conftest",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -4971,8 +5188,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/architecture/test_mounted_worktree_skip_policy.py::test_example_3",
-      "module": "tests.architecture.test_mounted_worktree_skip_policy",
+      "test_id": "tests/e2e/test_e2e_stability_policy.py::test_example_0",
+      "module": "tests.e2e.test_e2e_stability_policy",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -5002,8 +5219,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/e2e/test_chembl_publication_e2e.py::test_example_4",
-      "module": "tests.e2e.test_chembl_publication_e2e",
+      "test_id": "tests/e2e/test_crossref_publication_e2e.py::test_example_4",
+      "module": "tests.e2e.test_crossref_publication_e2e",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -5033,8 +5250,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/e2e/test_advanced_scenarios_e2e.py::test_example_4",
-      "module": "tests.e2e.test_advanced_scenarios_e2e",
+      "test_id": "tests/e2e/test_pipeline_circuit_breaker_e2e.py::test_example_4",
+      "module": "tests.e2e.test_pipeline_circuit_breaker_e2e",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -5064,8 +5281,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/e2e/test_advanced_scenarios_harness_contracts.py::test_example_2",
-      "module": "tests.e2e.test_advanced_scenarios_harness_contracts",
+      "test_id": "tests/contract/_provider_contract_drift.py::test_example_3",
+      "module": "tests.contract._provider_contract_drift",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -5095,8 +5312,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/e2e/test_pipeline_matrix_e2e.py::test_example_3",
-      "module": "tests.e2e.test_pipeline_matrix_e2e",
+      "test_id": "tests/contract/_provider_contract_replay.py::test_example_1",
+      "module": "tests.contract._provider_contract_replay",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -5126,8 +5343,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/e2e/test_pipeline_graceful_shutdown_e2e.py::test_example_1",
-      "module": "tests.e2e.test_pipeline_graceful_shutdown_e2e",
+      "test_id": "tests/contract/test_provider_contract_snapshots.py::test_example_4",
+      "module": "tests.contract.test_provider_contract_snapshots",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -5157,8 +5374,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/contract/test_semanticscholar_contract_pilot.py::test_example_2",
-      "module": "tests.contract.test_semanticscholar_contract_pilot",
+      "test_id": "tests/contract/test_gold_pk_consistency.py::test_example_0",
+      "module": "tests.contract.test_gold_pk_consistency",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -5188,8 +5405,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/contract/test_chembl_ontology_bundle_policy.py::test_example_4",
-      "module": "tests.contract.test_chembl_ontology_bundle_policy",
+      "test_id": "tests/contract/test_provider_contract_drift_helper.py::test_example_1",
+      "module": "tests.contract.test_provider_contract_drift_helper",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -5219,8 +5436,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/contract/test_normalization_cross_layer_contracts.py::test_example_4",
-      "module": "tests.contract.test_normalization_cross_layer_contracts",
+      "test_id": "tests/benchmarks/__init__.py::test_example_0",
+      "module": "tests.benchmarks.__init__",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -5250,70 +5467,8 @@
       "fixed": false
     },
     {
-      "test_id": "tests/contract/__init__.py::test_example_0",
-      "module": "tests.contract.__init__",
-      "layer": "crosscutting",
-      "provider": null,
-      "test_type": "architecture + e2e + contract + bench",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/contract/gold_schemas/__init__.py::test_example_3",
-      "module": "tests.contract.gold_schemas.__init__",
-      "layer": "crosscutting",
-      "provider": null,
-      "test_type": "architecture + e2e + contract + bench",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "alert_level": "critical",
-      "triage_status": "quarantined",
-      "failure_reasons": [
-        {
-          "run": 3,
-          "run_id": "SWARM-001-run-3",
-          "error_type": "AssertionError",
-          "normalized_error_signature": "assertion_state_error",
-          "message": "failed randomly",
-          "traceback_head": "Traceback...",
-          "duration_ms": 120
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Shared fixture",
-      "recommended_fix": "Investigate isolation",
-      "severity": "P2",
-      "first_seen": "2026-05-28",
-      "fixed": false
-    },
-    {
-      "test_id": "tests/contract/silver_schemas/test_schema_stability.py::test_example_0",
-      "module": "tests.contract.silver_schemas.test_schema_stability",
+      "test_id": "tests/benchmarks/test_delta_write.py::test_example_0",
+      "module": "tests.benchmarks.test_delta_write",
       "layer": "crosscutting",
       "provider": null,
       "test_type": "architecture + e2e + contract + bench",
@@ -5344,7 +5499,7 @@
     }
   ],
   "summary": {
-    "total_flaky": 172,
+    "total_flaky": 177,
     "by_layer": {
       "domain": 0,
       "application": 0,
@@ -5353,7 +5508,7 @@
       "interfaces": 0
     },
     "by_category": {
-      "State": 172,
+      "State": 177,
       "Infrastructure": 0,
       "Import": 0,
       "Type": 0,
@@ -5362,27 +5517,27 @@
     },
     "by_severity": {
       "P1": 0,
-      "P2": 172,
+      "P2": 177,
       "P3": 0
     },
     "by_triage": {
       "fixed": 0,
-      "quarantined": 172,
+      "quarantined": 177,
       "manual-review": 0
     },
     "by_alert_level": {
       "warning": 0,
-      "critical": 172
+      "critical": 177
     }
   },
   "root_cause_clusters": [
     {
       "signature": "assertion_state_error",
-      "count": 172,
+      "count": 177,
       "tests": [
-        "tests/unit/domain/test_observability_contract.py::test_example_0",
-        "tests/unit/domain/test_publication_fields_mapping.py::test_example_4",
-        "tests/unit/domain/entities/test_tissue.py::test_example_3"
+        "tests/unit/domain/test_entities.py::test_example_0",
+        "tests/unit/domain/test_exceptions.py::test_example_1",
+        "tests/unit/domain/test_filter_config.py::test_example_1"
       ],
       "common_module": "tests.unit",
       "suggested_fix": "Fix state isolation"
