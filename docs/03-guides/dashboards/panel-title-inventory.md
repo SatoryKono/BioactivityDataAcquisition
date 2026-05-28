@@ -145,7 +145,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 4 | Inspect DQ Alert Conditions |
 | bioetl-runtime.json | 5 | Inspect Control-plane Alert Conditions |
 | bioetl-runtime.json | 6 | Inspect GLOBAL Provider Alert Conditions |
-| bioetl-runtime.json | 7 | Inspect Freshness Alert Conditions |
+| bioetl-runtime.json | 7 | Inspect Freshness Lagged Entities >24h |
 | bioetl-runtime.json | 16 | Monitor Runtime Blockers |
 | bioetl-runtime.json | 9100 | Runtime Status |
 | bioetl-runtime.json | 9101 | Runtime Blockers |
@@ -168,7 +168,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 250 | Inspect Warning Logs |
 | bioetl-runtime.json | 251 | Inspect GLOBAL Unstructured Logs |
 | bioetl-runtime.json | 256 | Inspect Errors by Stage / Error Code / Range |
-| bioetl-runtime.json | 257 | Inspect Top Warning Events by Message / Range |
+| bioetl-runtime.json | 257 | Inspect Top Warning Events by Event / Logger / Range |
 | bioetl-runtime.json | 258 | Track GLOBAL Log Hygiene Trend |
 | bioetl-runtime.json | 9400 | Provenance |
 | bioetl-runtime.json | 9401 | Status |

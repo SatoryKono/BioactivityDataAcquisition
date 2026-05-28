@@ -129,6 +129,46 @@ REQUIRED_TRUST_MARKER_PANELS = {
 }
 
 
+def _grid_pos(panel: dict) -> dict:
+    grid_pos = panel.get("gridPos", {})
+    return grid_pos if isinstance(grid_pos, dict) else {}
+
+
+def _grid_rectangles_overlap(left: dict, right: dict) -> bool:
+    left_grid = _grid_pos(left)
+    right_grid = _grid_pos(right)
+    left_x = int(left_grid.get("x", 0))
+    left_y = int(left_grid.get("y", 0))
+    left_w = int(left_grid.get("w", 0))
+    left_h = int(left_grid.get("h", 0))
+    right_x = int(right_grid.get("x", 0))
+    right_y = int(right_grid.get("y", 0))
+    right_w = int(right_grid.get("w", 0))
+    right_h = int(right_grid.get("h", 0))
+    x_overlap = left_x < right_x + right_w and right_x < left_x + left_w
+    y_overlap = left_y < right_y + right_h and right_y < left_y + left_h
+    return x_overlap and y_overlap
+
+
+def _collapsed_row_grid_overlap_errors(
+    dashboard_path: Path, row_panel: dict
+) -> list[str]:
+    nested_panels = [
+        panel for panel in row_panel.get("panels", []) if isinstance(panel, dict)
+    ]
+    errors: list[str] = []
+    for index, left in enumerate(nested_panels):
+        for right in nested_panels[index + 1 :]:
+            if _grid_rectangles_overlap(left, right):
+                errors.append(
+                    f"{dashboard_path}: collapsed row '{row_panel.get('title')}' "
+                    f"has overlapping nested panels "
+                    f"{left.get('id')}:{left.get('title')} and "
+                    f"{right.get('id')}:{right.get('title')}"
+                )
+    return errors
+
+
 def iter_panels(panels: list[dict]) -> list[dict]:
     collected: list[dict] = []
     for panel in panels:
@@ -381,6 +421,12 @@ def _dashboard_errors(dashboard_path: Path) -> list[str]:
         for panel in iter_panels(payload.get("panels", []))
         for error in _panel_errors(dashboard_path, panel)
     ]
+    errors.extend(
+        error
+        for panel in payload.get("panels", [])
+        if panel.get("type") == "row" and isinstance(panel.get("panels"), list)
+        for error in _collapsed_row_grid_overlap_errors(dashboard_path, panel)
+    )
     required_panels = REQUIRED_TRUST_MARKER_PANELS.get(dashboard_path.name, set())
     if required_panels:
         top_level_panels = {

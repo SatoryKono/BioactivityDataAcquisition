@@ -22,12 +22,12 @@ flowchart LR
     composition[composition]
     interfaces[interfaces]
     application -->|1355 OK| application
-    application -->|1154 OK| domain
+    application -->|1153 OK| domain
     composition -->|287 OK| application
     composition -->|693 OK| composition
     composition -->|445 OK| domain
     composition -->|341 OK| infrastructure
-    domain -->|1236 OK| domain
+    domain -->|1237 OK| domain
     infrastructure -->|793 OK| domain
     infrastructure -->|973 OK| infrastructure
     interfaces -->|76 OK| application
@@ -41,12 +41,12 @@ flowchart LR
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |    1355 | allowed |
-| `application`    | `domain`         |    1154 | allowed |
+| `application`    | `domain`         |    1153 | allowed |
 | `composition`    | `application`    |     287 | allowed |
 | `composition`    | `composition`    |     693 | allowed |
 | `composition`    | `domain`         |     445 | allowed |
 | `composition`    | `infrastructure` |     341 | allowed |
-| `domain`         | `domain`         |    1236 | allowed |
+| `domain`         | `domain`         |    1237 | allowed |
 | `infrastructure` | `domain`         |     793 | allowed |
 | `infrastructure` | `infrastructure` |     973 | allowed |
 | `interfaces`     | `application`    |      76 | allowed |
@@ -63,7 +63,7 @@ flowchart LR
 | `application.core`             | `domain.types`                  |     107 |
 | `infrastructure.adapters`      | `domain.ports`                  |      88 |
 | `application.pipelines`        | `domain.types`                  |      81 |
-| `application.core`             | `domain.ports`                  |      79 |
+| `application.core`             | `domain.ports`                  |      78 |
 | `application.services`         | `domain.control_plane`          |      75 |
 | `application.composite`        | `domain.ports`                  |      74 |
 | `application.services`         | `domain.ports`                  |      73 |

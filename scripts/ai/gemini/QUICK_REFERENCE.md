@@ -14,7 +14,6 @@
 bash scripts/ai/gemini/run-gemini.sh
 ```
 
-Interactive mode uses a fast MCP allowlist (`memory,filesystem`) by default. Use `GEMINI_INTERACTIVE_ALL_MCP=1` when you explicitly need every configured MCP server at startup.
 
 ## 📝 Send a Single Prompt (No Interactive Loop)
 

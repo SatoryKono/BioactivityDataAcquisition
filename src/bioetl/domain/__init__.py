@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     import bioetl.domain.context_filtering as context_filtering
     import bioetl.domain.contracts as contracts
     import bioetl.domain.control_plane as control_plane
+    import bioetl.domain.deterministic_identity as deterministic_identity
     import bioetl.domain.error_types as error_types
     import bioetl.domain.exceptions as exceptions
     import bioetl.domain.lineage as lineage
@@ -52,6 +53,7 @@ __all__ = [
     "context_filtering",
     "contracts",
     "control_plane",
+    "deterministic_identity",
     "error_types",
     "get_runtime_observability_publication_contract",
     "get_version",
@@ -75,6 +77,7 @@ _MODULE_EXPORTS = {
     "context_filtering": "bioetl.domain.context_filtering",
     "contracts": "bioetl.domain.contracts",
     "control_plane": "bioetl.domain.control_plane",
+    "deterministic_identity": "bioetl.domain.deterministic_identity",
     "error_types": "bioetl.domain.error_types",
     "exceptions": "bioetl.domain.exceptions",
     "lineage": "bioetl.domain.lineage",

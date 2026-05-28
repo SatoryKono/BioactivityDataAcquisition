@@ -1071,7 +1071,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range provider telemetry freshness marker for the first screen. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. If no bioetl_provider_current_status samples exist inside the active Grafana time range, this panel returns WARN so the empty severity matrix is treated as a telemetry gap, not as proof that providers are healthy.",
+      "description": "Selected-range provider telemetry freshness marker for the first screen. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. If no bioetl_provider_current_status samples exist inside the active Grafana time range, this panel returns WARN so the empty severity matrix is treated as a telemetry gap, not proof that providers are healthy.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1267,7 +1267,6 @@
           "sort": "desc"
         }
       },
-      "description": "First-screen trust marker for canonical provider severity. 0=OK, 1=WARN, null=UNKNOWN. WARN means no bioetl_provider_current_status samples were observed in the active Grafana time range, so Status=UNKNOWN should be treated as a telemetry gap until raw provider status or selected-range check evidence proves otherwise; it is not proof that providers are healthy.",
       "targets": [
         {
           "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__interval])))",

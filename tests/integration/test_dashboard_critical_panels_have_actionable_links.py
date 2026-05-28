@@ -100,8 +100,8 @@ def test_critical_panels_have_open_target_pattern():
                     # Check if it's a dashboard link
                     url = link.get("url", "")
                     if url.startswith("/d/"):
-                        # Allow both "Open " and "Inspect " patterns
-                        assert link_title.startswith(("Open ", "Inspect ")), (
+                        # Allow "Open ", "Inspect ", and "Review " patterns
+                        assert link_title.startswith(("Open ", "Inspect ", "Review ")), (
                             f"{dashboard_path.name}:{title} dashboard link title "
-                            f"must start with 'Open ' or 'Inspect ', got {link_title!r}"
+                            f"must start with 'Open ', 'Inspect ', or 'Review ', got {link_title!r}"
                         )

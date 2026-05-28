@@ -231,6 +231,22 @@ required_panel_links_by_uid:
     - panel_id: 122
       target_uid: bioetl-silver-reject-explorer
       link_titles: [Open Silver Reject Explorer for this field]
+  bioetl-runtime:
+    - panel_id: 230
+      target_uid: bioetl-runtime
+      link_titles: [Inspect active runtime blocker]
+    - panel_id: 4
+      target_uid: bioetl-dq-v2
+      link_titles: [Open 4. Data Quality]
+    - panel_id: 6
+      target_uid: bioetl-provider-health-v2
+      link_titles: [Open 3. Provider Health]
+    - panel_id: 7
+      target_uid: bioetl-dq-v2
+      link_titles: [Open 4. Data Quality]
+    - panel_id: 236
+      target_uid: bioetl-runtime
+      link_titles: [Inspect stage expectedness]
   bioetl-workflow-overview:
     - panel_id: 9
       target_uid: bioetl-runtime

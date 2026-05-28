@@ -17,7 +17,7 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 > `crossref/batch.py` больше не является крупным mixed-responsibility hotspot:
 > текущий файл — `24` LOC compatibility facade поверх split collaborators.
 > Дополнительно live architecture-metric exemption baseline сейчас содержит
-> `0` active file-size-limit exemptions и не содержит active class/god-object
+> `1` active file-size-limit exemptions и не содержит active class/god-object
 > exemptions. Поэтому текущий active debt posture лучше читать как
 > topology/ownership watchlist без active waiver inventory, а не как
 > open-ended exemption baseline.
@@ -31,7 +31,7 @@ Source of truth: `configs/quality/architecture_metric_exemptions.yaml` and
 
 | Path | Owner | Expires | Removal Step |
 | ---- | ----- | ------- | ------------ |
-| _No active file-size-limit exemptions_ | _n/a_ | _n/a_ | _n/a_ |
+| `src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py` | observability-dashboards | 2026-12-31 | Split module into smaller focused helpers once backend dashboard wiring is fully refactored. |
 
 ## Gate Status
 

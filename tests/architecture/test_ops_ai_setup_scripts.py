@@ -2,11 +2,20 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
+import pytest
 from tests.helpers import repo_root, run_repo_command
 
 
+_BASH_DRY_RUN_UNSUPPORTED_ON_WINDOWS = pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="bash-based dry-run scripts are not reliable on native Windows shells",
+)
+
+
+@_BASH_DRY_RUN_UNSUPPORTED_ON_WINDOWS
 def test_setup_agents_dry_run_lists_expected_agent_entries(tmp_path: Path) -> None:
     """Canonical setup_agents dry-run should enumerate the agent surface."""
     root = repo_root()
@@ -25,6 +34,7 @@ def test_setup_agents_dry_run_lists_expected_agent_entries(tmp_path: Path) -> No
     assert "subagents" in result.stdout
 
 
+@_BASH_DRY_RUN_UNSUPPORTED_ON_WINDOWS
 def test_setup_skills_dry_run_includes_paired_agent_sync_by_default(
     tmp_path: Path,
 ) -> None:

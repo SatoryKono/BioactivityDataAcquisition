@@ -26,12 +26,32 @@ def test_content_hash_normalization_contract() -> None:
     record_b = {
         "name": "Alpha",
         "score": 3.1415926536,
-        "measured_at": datetime(2025, 1, 1, 22, 15, 0),
+        "measured_at": datetime(2025, 1, 1, 10, 0, 0),
     }
 
     assert service.compute_content_hash(
         "chembl", record_a
     ) == service.compute_content_hash("chembl", record_b)
+
+
+def test_content_hash_v1_date_policy_collapses_same_calendar_day() -> None:
+    """Legacy v1_date policy MUST collapse datetimes to calendar day only."""
+    service = EntityIdentityGenerator()
+
+    record_a = {
+        "name": "Alpha",
+        "measured_at": datetime(2025, 1, 1, 10, 0, 0),
+    }
+    record_b = {
+        "name": "Alpha",
+        "measured_at": datetime(2025, 1, 1, 22, 15, 0),
+    }
+
+    assert service.compute_content_hash(
+        "chembl", record_a, datetime_policy="v1_date"
+    ) == service.compute_content_hash(
+        "chembl", record_b, datetime_policy="v1_date"
+    )
 
 
 def test_content_hash_excludes_meta_and_dq_prefix_contract() -> None:

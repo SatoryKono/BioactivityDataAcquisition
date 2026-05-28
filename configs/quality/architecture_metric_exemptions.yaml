@@ -14,8 +14,24 @@ policy:
     - expires_on
     - removal_step
 registries:
-  file_size_limits: {}
-  function_complexity: {}
+  file_size_limits:
+    src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py:
+      value: 480
+      owner: observability-dashboards
+      reason: One-shot Windows-friendly backend bootstrap script with structured logging.
+      classification: intentional_exception
+      linked_rf: RF-001
+      expires_on: '2026-12-31'
+      removal_step: Split module into smaller focused helpers once backend dashboard wiring is fully refactored.
+  function_complexity:
+    src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py::_build_request:
+      value: 13
+      owner: application-workflow
+      reason: Workflow transform config request builder has bounded branching for validation.
+      classification: intentional_exception
+      linked_rf: RF-002
+      expires_on: '2026-12-31'
+      removal_step: Refactor request building into smaller helpers to reduce cyclomatic complexity.
   function_length: {}
   class_size: {}
   class_method_count: {}

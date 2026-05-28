@@ -236,7 +236,8 @@ shipped_selector_registry:
       - run_type
       - run_id
       - stage
-    hidden_context_selectors: []
+    hidden_context_selectors:
+      - provider_hint
     hidden_detail_selectors: []
     top_bar_order:
       - workflow
@@ -250,6 +251,7 @@ shipped_selector_registry:
       run_type: prometheus_runtime_pipeline_run_type_universe
       run_id: control_plane_filter_options_api
       stage: prometheus_pipeline_stage_expected
+      provider_hint: prometheus_runtime_provider_hint_heuristic
   bioetl-provider-health-v2:
     family: provider_first
     visible_selectors:
@@ -430,6 +432,7 @@ hidden_handoff_contract:
     - pipeline_context
     - run_type_context
     - provider_context
+    - provider_hint
   detail_only_shipped_vars:
     - adapter
   reserved_future_vars:

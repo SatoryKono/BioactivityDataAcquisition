@@ -164,6 +164,7 @@
 05-operations/deployment/neo4j-audit-instance-guide.md
 05-operations/deployment/neo4j-audit-instance-implementation.md
 05-operations/deployment/neo4j-audit-instance-quick-start.md
+05-operations/operations-doc-inventory.md
 05-operations/runbooks/neo4j-backend-recovery-quick-start.md
 05-operations/runbooks/neo4j-complete-recovery-guide.md
 05-operations/runbooks/workflow-control-plane.md

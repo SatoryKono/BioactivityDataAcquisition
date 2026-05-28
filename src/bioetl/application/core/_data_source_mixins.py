@@ -30,8 +30,7 @@ from bioetl.application.core._target_data_source_mixins import (
 if TYPE_CHECKING:
     from types import TracebackType
 
-    from bioetl.domain.ports import DataSourcePort
-    from bioetl.domain.ports.health_check import HealthCheckResult
+    from bioetl.domain.ports import DataSourcePort, HealthCheckResult
     from bioetl.domain.types import HealthStatus
 
 WrappedDataSourceT = TypeVar("WrappedDataSourceT", bound="_HasWrappedDataSource")
@@ -92,7 +91,7 @@ class _WrappedDataSourceDelegationMixin:
 
     async def check_health(self: _HasWrappedDataSource) -> HealthCheckResult:
         """Delegate enhanced health checks when available, else synthesize one."""
-        from bioetl.domain.ports.health_check import HealthCheckResult
+        from bioetl.domain.ports import HealthCheckResult
 
         check_health = getattr(self._data_source, "check_health", None)
         if check_health is not None and callable(check_health):

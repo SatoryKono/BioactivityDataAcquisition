@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -12,6 +13,11 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_PATH = ROOT / "configs/quality/pytest_shards.yaml"
 RUNNER_PATH = ROOT / "scripts/engineering/dev/run_pytest_sharded.sh"
+
+_BASH_RUNNER_UNSUPPORTED_ON_WINDOWS = pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="bash-based sharded runner checks are not reliable on native Windows shells",
+)
 
 
 def _bash_runner_path(path: Path) -> str:
@@ -96,6 +102,7 @@ def test_sharded_runner_loads_declarative_inventory_and_documents_path() -> None
 
 
 @pytest.mark.architecture
+@_BASH_RUNNER_UNSUPPORTED_ON_WINDOWS
 def test_sharded_runner_list_matches_inventory_order() -> None:
     inventory = _load_inventory()
     expected_names = [entry["name"] for entry in inventory["shards"]]
@@ -116,6 +123,7 @@ def test_sharded_runner_list_matches_inventory_order() -> None:
 
 
 @pytest.mark.architecture
+@_BASH_RUNNER_UNSUPPORTED_ON_WINDOWS
 def test_sharded_runner_dry_run_expands_architecture_alias_from_inventory() -> None:
     result = subprocess.run(
         [
