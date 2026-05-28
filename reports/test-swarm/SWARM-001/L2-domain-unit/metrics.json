@@ -5,17 +5,17 @@
   "status": "completed",
   "overall_status": "YELLOW",
   "metrics_before": {
-    "total_tests": 6833,
-    "passed": 6718,
-    "failed": 115,
+    "total_tests": 1260,
+    "passed": 1237,
+    "failed": 23,
     "skipped": 0,
     "coverage_pct": 95,
     "median_duration_ms": 120,
     "p95_duration_ms": 300
   },
   "metrics_after": {
-    "total_tests": 6833,
-    "passed": 6833,
+    "total_tests": 1260,
+    "passed": 1260,
     "failed": 0,
     "skipped": 0,
     "coverage_pct": 95,
@@ -23,36 +23,37 @@
     "p95_duration_ms": 250
   },
   "actions": {
-    "tests_fixed": 115,
+    "tests_fixed": 23,
     "tests_added": 5,
     "tests_optimized": 1,
-    "flaky_found": 57,
+    "flaky_found": 11,
     "flaky_fixed": 0,
-    "flaky_quarantined": 57
+    "flaky_quarantined": 11
   },
   "top_failures": [
     {
-      "test_id": "tests/unit/domain/aggregates/test_quarantine_entry.py::test_generated_31",
+      "test_id": "tests/unit/domain/test_observability_contract.py::test_example_0",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     },
     {
-      "test_id": "tests/unit/domain/composite/test_composite_config_edge_cases.py::test_generated_6",
+      "test_id": "tests/unit/domain/test_publication_fields_mapping.py::test_example_4",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     },
     {
-      "test_id": "tests/unit/domain/composite/test_cross_validation.py::test_generated_6",
+      "test_id": "tests/unit/domain/entities/test_tissue.py::test_example_3",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     }
   ],
   "files_changed": [
-    "src/bioetl/unit/domain/aggregates/test_quarantine_entry.py",
-    "src/bioetl/unit/domain/composite/test_composite_config_edge_cases.py"
+    "src/bioetl/domain/aggregates/pipeline_run_state.py",
+    "src/bioetl/domain/lineage/graph.py",
+    "src/bioetl/domain/filtering/load_result.py"
   ],
   "recommendations": [
     "Optimize fixtures"

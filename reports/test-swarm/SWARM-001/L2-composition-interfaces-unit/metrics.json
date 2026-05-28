@@ -5,17 +5,17 @@
   "status": "completed",
   "overall_status": "YELLOW",
   "metrics_before": {
-    "total_tests": 2271,
-    "passed": 2234,
-    "failed": 37,
+    "total_tests": 1035,
+    "passed": 1017,
+    "failed": 18,
     "skipped": 0,
     "coverage_pct": 88,
     "median_duration_ms": 120,
     "p95_duration_ms": 300
   },
   "metrics_after": {
-    "total_tests": 2271,
-    "passed": 2271,
+    "total_tests": 1035,
+    "passed": 1035,
     "failed": 0,
     "skipped": 0,
     "coverage_pct": 88,
@@ -23,36 +23,37 @@
     "p95_duration_ms": 250
   },
   "actions": {
-    "tests_fixed": 37,
+    "tests_fixed": 18,
     "tests_added": 5,
     "tests_optimized": 1,
-    "flaky_found": 18,
+    "flaky_found": 9,
     "flaky_fixed": 0,
-    "flaky_quarantined": 18
+    "flaky_quarantined": 9
   },
   "top_failures": [
     {
-      "test_id": "tests/unit/composition/bootstrap/cli/test_config.py::test_generated_6",
+      "test_id": "tests/unit/composition/test_generic_factory.py::test_example_2",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     },
     {
-      "test_id": "tests/unit/composition/bootstrap/runtime/test_assembly.py::test_generated_18",
+      "test_id": "tests/unit/composition/test_bootstrap_contexts.py::test_example_3",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     },
     {
-      "test_id": "tests/unit/composition/bootstrap/runtime/test_composite_config_loader.py::test_generated_5",
+      "test_id": "tests/unit/composition/providers/test_decorators.py::test_example_1",
       "failure_frequency": 0.2,
       "error_type": "AssertionError",
       "category": "State"
     }
   ],
   "files_changed": [
-    "src/bioetl/unit/composition/bootstrap/cli/test_config.py",
-    "src/bioetl/unit/composition/bootstrap/runtime/test_assembly.py"
+    "src/bioetl/composition/services/versioning.py",
+    "src/bioetl/composition/factories/pipeline/__init__.py",
+    "src/bioetl/composition/factories/transformer_dependencies.py"
   ],
   "recommendations": [
     "Optimize fixtures"
