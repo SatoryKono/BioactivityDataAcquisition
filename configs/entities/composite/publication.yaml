@@ -1,1 +1,17 @@
+version: 1.0.0
+provider: composite
+entity: publication
+pipeline:
+    pipeline_name: composite_publication
+    provider: composite
+    entity_type: publication
+    description: Composite publication entity merging data from multiple providers
+    business_primary_keys:
+        - entity_id
+    sink:
+        silver:
+            mode: merge
+            idempotency_contract: merge_upsert
+        gold:
+            enabled: true
 status: active
