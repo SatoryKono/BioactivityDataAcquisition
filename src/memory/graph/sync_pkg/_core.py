@@ -2932,7 +2932,9 @@ def _dashboard_metric_index(root: Path) -> dict[NodeKey, set[str]]:
     for dashboard_path in sorted(dashboards_root.glob("*.json")):
         try:
             payload = _read_json(dashboard_path)
-        except (OSError, json.JSONDecodeError):
+        except Exception:
+            # Snapshot building should stay resilient to malformed or
+            # partially edited dashboard files.
             payload = {}
         metrics = _dashboard_metrics_from_payload(payload)
         metric_index[NodeKey("dashboard_surface", dashboard_path.stem)] = metrics
