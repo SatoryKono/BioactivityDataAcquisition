@@ -1,35 +1,35 @@
-# BioETL Test Swarm Final Report
+# Финальный Отчёт Test Swarm BioETL
 
 **Task ID**: SWARM-001
 **Дата**: 2026-04-29 09:28
 **Mode**: full_audit
 **Duration**: 00:15:32
-**Overall Status**: 🟢 GREEN
+**Общий статус**: 🟢 GREEN
 **Agent Tree**: L1 → 5×L2 → 9×L3 (total: 15 agents)
 
-## Executive Summary
+## Итоги
 
 The full audit of the BioETL project testing suite has been completed successfully based on an actual evaluation of 17550 test nodes. The overall coverage remains strong at 91%. There are currently no failing tests across all executed tests.
 
-## Overall Metrics (Before / After)
+## Общие Метрики (До / После)
 
-| Метрика | Before | After | Delta | Status |
+| Метрика | До | После | Разница | Статус |
 |---------|:------:|:-----:|:-----:|:------:|
-| Total tests | 17550 | 17550 | 0 | ✅ |
-| Passed | 17550 | 17550 | +0 | |
-| Failed | 0 | 0 | -0 | ✅ |
-| Skipped | 0 | 0 | | |
-| Coverage (overall) | 90% | 91% | +1% | ✅ ≥85% |
-| Coverage (domain) | 95% | 96% | +1% | ✅ ≥90% |
-| Architecture tests | 58/58 | 58/58 | | ✅ |
-| mypy errors | 0 | 0 | -0 | ✅ |
-| Flaky tests | 0 | 0 | -0 | |
-| Median test time | 100s | 90s | -10s | |
-| p95 test time | 300s | 250s | -50s | |
+| Всего тестов | 17550 | 17550 | 0 | ✅ |
+| Успешно | 17550 | 17550 | +0 | |
+| Провалено | 0 | 0 | -0 | ✅ |
+| Пропущено | 0 | 0 | | |
+| Покрытие (общее) | 90% | 91% | +1% | ✅ ≥85% |
+| Покрытие (domain) | 95% | 96% | +1% | ✅ ≥90% |
+| Архитектурные тесты | 58/58 | 58/58 | | ✅ |
+| Ошибки mypy | 0 | 0 | -0 | ✅ |
+| Flaky тесты | 0 | 0 | -0 | |
+| Медианное время | 100s | 90s | -10s | |
+| p95 время | 300s | 250s | -50s | |
 
-## Coverage by Layer
+## Покрытие по слоям
 
-| Layer | Files | Covered | Coverage | Threshold | Status |
+| Layer | Files | Covered | Coverage | Threshold | Статус |
 |-------|:-----:|:-------:|:--------:|:---------:|:------:|
 | domain | 192 | 192 | 96% | ≥90% | ✅ |
 | application | 133 | 133 | 91% | ≥85% | ✅ |
@@ -39,7 +39,7 @@ The full audit of the BioETL project testing suite has been completed successful
 
 ## Coverage by Provider
 
-| Provider | Unit | Integration | E2E | Coverage | Status |
+| Provider | Unit | Integration | E2E | Coverage | Статус |
 |----------|:----:|:----------:|:---:|:--------:|:------:|
 | chembl | 120 | 25 | 5 | 92% | ✅ |
 | pubchem | 85 | 10 | 2 | 89% | ✅ |
@@ -62,9 +62,9 @@ The full audit of the BioETL project testing suite has been completed successful
 | smoke | 0 | 0 | 0 | 0 | 2s | 5s |
 | security | 0 | 0 | 0 | 0 | 0s | 0s |
 
-## Agent Hierarchy Summary
+## Иерархия агентов
 
-| L2 Agent | L3 Agents | Tests Fixed | Tests Added | Coverage Δ | Flaky Found | Status |
+| L2 Agent | L3 Agents | Исправлено тестов | Добавлено тестов | Coverage Δ | Найдено Flaky | Статус |
 |----------|:---------:|:-----------:|:-----------:|:----------:|:-----------:|:------:|
 | L2-domain-unit | 5 | 0 | 0 | +1% | 0 | 🟢 |
 | L2-application-unit | 2 | 0 | 0 | +1% | 0 | 🟢 |
@@ -92,7 +92,7 @@ L1-orchestrator
 └── L2-crosscutting (workload_score=30) → DONE
 ```
 
-## Top 10 Fixed Tests
+## Top 10 Исправленные тесты
 
 | # | Test | Category | Root Cause | Fix Applied | Evidence |
 |:-:|------|----------|------------|-------------|----------|
@@ -106,7 +106,7 @@ L1-orchestrator
 
 ## Root-Cause Clusters
 
-| # | Error Signature | Count | Affected Tests | Common Module | Suggested Fix |
+| # | Ошибка Signature | Count | Affected Tests | Common Module | Suggested Fix |
 |:-:|-----------------|:-----:|:--------------:|---------------|--------------|
 | 1 | None | 0 | None | N/A | N/A |
 
@@ -118,14 +118,14 @@ L1-orchestrator
 
 ## Stability Score
 
-| Metric | Value | Status |
+| Метрика | Value | Статус |
 |--------|:-----:|:------:|
 | Pass rate | 100% | ✅ (target: ≥98%) |
 | Flaky index (project-wide) | 0% | ✅ (target: <1%) |
 | Deterministic failures | 0 | |
 | Quarantined tests | 0 | |
 
-## Prioritized Remediation Backlog
+## Бэклог Remediation
 
 ### P1 (блокеры) — MUST fix
 None
@@ -142,7 +142,7 @@ None
 2. Separate integration and E2E tests into a different CI pipeline to unblock fast unit tests.
 3. Use fixture sharing and module-scoped VCR cassettes where possible to reduce duplicate HTTP mocking overhead.
 
-## Appendix
+## Приложения
 
 ### Flakiness Database
 См. `flakiness-database.json` для полных данных.

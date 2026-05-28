@@ -1,14 +1,14 @@
-# Test Swarm Plan: SWARM-001
+# План Test Swarm: SWARM-001
 
 **Дата**: 2026-04-29 09:28
 **Mode**: full_audit
 **Scope**: full project
-**Overall Status**: 🟢 GREEN
+**Общий статус**: 🟢 GREEN
 
-## Baseline Snapshot
+## Базовый снимок (Baseline)
 | Метрика | Значение |
 |---------|----------|
-| Total tests | 18100 |
+| Всего тестов | 18100 |
 
 ## Декомпозиция на L2-агентов
 | # | L2 Agent ID | Scope | Тип тестирования | Est. files | workload_score | Приоритет |

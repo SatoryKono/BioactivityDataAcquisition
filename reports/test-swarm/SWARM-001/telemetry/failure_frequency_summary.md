@@ -1,3 +1,3 @@
-# Failure Frequency Summary
+# Сводка частоты падений тестов
 
 All tests passed successfully.
