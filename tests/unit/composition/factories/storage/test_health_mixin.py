@@ -265,3 +265,9 @@ def test_is_layer_preview_payload_wrong_types() -> None:
     """_is_layer_preview_payload returns False for wrong value types."""
     payload = {"path": 123, "file_count": "not int", "exists": "not bool"}
     assert StorageBundleHealthMixin._is_layer_preview_payload(payload) is False
+
+@pytest.mark.unit
+def test_get_explicit_writer_audit_type_error() -> None:
+    """_get_explicit_writer_audit returns None when vars() raises TypeError."""
+    result = StorageBundleHealthMixin._get_explicit_writer_audit(object())
+    assert result is None
