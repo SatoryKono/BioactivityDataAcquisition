@@ -1,6 +1,6 @@
 # Enforce no-growth facade rule for `bioetl.infrastructure.config`
 
-**Status**: active
+**Status**: completed_in_repo
 **Priority**: P1 (High)
 **Labels**: `architecture`, `tech-debt`, `compatibility`, `governance`
 **GitHub Issue**: [#4745](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4745)
@@ -9,8 +9,11 @@
 
 ## Problem
 
-`bioetl.infrastructure.config` package-root convenience seam остаётся критичным архитектурным узлом.
-Ключевая защита — не допускать growth first-party imports по пути через root-модуль без контролируемой миграции.
+`bioetl.infrastructure.config` package-root convenience seam остаётся
+санкционированным external-facing convenience surface, но на current `main`
+first-party growth уже удерживается на нуле. Residual action для этого issue
+сводился к синхронизации inventory metadata и regression checks с текущим
+follow-up issue.
 
 ## Execution Plan
 
@@ -31,5 +34,8 @@
 
 ## Acceptance
 
-- Нет unreviewed роста first-party import usage через `bioetl.infrastructure.config`.
-- Правила growth/reduction в тестах подтверждены и непротиворечат текущему canonical seam.
+- Нет first-party `src/` importer growth для `Settings`, `get_settings`,
+  `load_pipeline_contract_policy`.
+- Inventory metadata и regression checks ссылаются на `#4745`, а не на
+  исторический predecessor issue.
+- Canonical owner targets и zero-growth budgets остаются неизменными.

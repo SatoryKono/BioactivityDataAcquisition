@@ -123,7 +123,7 @@ Forensic boundary для xrefs остаётся прежней:
 - `target_component_synonyms` и `cross_references` сохраняют агрегированные raw JSON строки для аудита
 - xref-derived scalar-поля формируются только из whitelisted `xref_src_db` значений; всё остальное сохраняется только в `cross_references`
 - derived scalar-поля используются для аналитического Silver/Gold surface и hash-governed replay
-- `cross_references` fail-closed отклоняет неизвестные/нестандартные `xref_src_db` на DQ-уровне; канонический forensic payload допускает только governed source namespaces
+- `cross_references` не fail-closed на DQ-уровне; неизвестные/нестандартные `xref_src_db` логируются как warn и сохраняются в forensic `cross_references`
 
 Nested `cross_references[].xref_src_db` namespaces are runtime-governed via
 the shared registry `configs/vocab/chembl_reference_sources.yaml`; malformed JSON or unknown source namespaces are logged as warn by DQ validator and preserved for raw forensic payloads.

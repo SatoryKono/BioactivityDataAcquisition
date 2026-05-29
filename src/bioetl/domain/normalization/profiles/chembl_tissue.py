@@ -21,7 +21,7 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
 from bioetl.domain.schemas.chembl.tissue import TissueSchema
 from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
-from ._chembl_policy_registry import chembl_ontology_family_fields
+from .chembl_policy_registry import chembl_ontology_family_fields
 from ._chembl_reference_identifier_rules import chembl_reference_identifier_rules
 
 __all__ = [

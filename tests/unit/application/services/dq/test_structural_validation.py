@@ -109,6 +109,16 @@ class TestStructuralIntegrityChecks:
         assert flags["severity"] == "error"
         assert "orphan_records=" in str(flags["reason"])
 
+    def test_referential_integrity_ignores_unparseable_reference_keys(self) -> None:
+        df = pl.DataFrame({"cat_id": [1, 2]})
+        result = check_referential_integrity(
+            df,
+            {"bad key format": pl.DataFrame({"id": [1, 2]})},
+        )
+
+        assert result.foreign_keys == {}
+        assert result.status == DQCheckStatus.PASS
+
     def test_scd_overlap_sets_warn_with_reason(self) -> None:
         df = pl.DataFrame(
             {
@@ -136,6 +146,28 @@ class TestStructuralIntegrityChecks:
         assert flags["_dq_warn"] is True
         assert flags["severity"] == "warn"
         assert "overlapping_validity_periods=" in str(flags["reason"])
+
+    def test_scd_integrity_defaults_to_pass_when_business_key_missing(self) -> None:
+        df = pl.DataFrame(
+            {
+                "_valid_from": [datetime(2024, 1, 1), datetime(2024, 3, 1)],
+                "_valid_to": [datetime(2024, 6, 1), None],
+            }
+        )
+
+        result = check_scd_integrity(
+            df,
+            {
+                "type": 2,
+                "entity_key": "entity_id",
+                "valid_from_col": "_valid_from",
+                "valid_to_col": "_valid_to",
+            },
+        )
+
+        assert result.status == DQCheckStatus.PASS
+        assert result.total_entities == len(df)
+        assert result.overlapping_validity_periods == 0
 
 
 @pytest.mark.unit

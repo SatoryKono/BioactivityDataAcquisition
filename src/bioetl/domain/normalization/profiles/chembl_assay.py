@@ -29,7 +29,7 @@ from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 from ._chembl_bao_label_normalizers import (
     normalize_profile_bao_label_from_bao_format as normalize_bao_label_from_bao_format,
 )
-from ._chembl_policy_registry import (
+from .chembl_policy_registry import (
     chembl_controlled_family_fields,
     chembl_ontology_family_fields,
 )

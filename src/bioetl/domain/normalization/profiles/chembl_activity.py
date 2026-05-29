@@ -21,7 +21,7 @@ from ._chembl_activity_fields import (
     STANDARD_RELATIONS,
 )
 from ._chembl_bao_label_normalizers import normalize_profile_bao_label_from_bao_format
-from ._chembl_policy_registry import (
+from .chembl_policy_registry import (
     chembl_controlled_family_fields,
     chembl_flag_family_fields,
     chembl_ontology_family_fields,

@@ -28,7 +28,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
 from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
-from ._chembl_policy_registry import chembl_controlled_family_fields
+from .chembl_policy_registry import chembl_controlled_family_fields
 from ._chembl_vocab import chembl_enum
 
 __all__ = [

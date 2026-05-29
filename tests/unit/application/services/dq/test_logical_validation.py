@@ -188,6 +188,38 @@ class TestLogicalBusinessChecks:
         assert flags["severity"] == "warn"
         assert "publication_year > 2100 is suspicious" in str(flags["reason"])
 
+    def test_negative_citations_and_future_year_reports_error_priority(
+        self, logical_rules: list[dict[str, object]]
+    ) -> None:
+        df = pl.DataFrame(
+            {
+                "publication_year": [2201],
+                "citations_received": [-1],
+            }
+        )
+
+        result = check_business_rules(df, logical_rules)
+        failed_rules = [
+            {
+                "severity": str(rule.severity or "error"),
+                "reason": str(rule.description or rule.name or rule.rule_id),
+            }
+            for rule in result.rules
+            if not rule.passed
+        ]
+        flags = _derive_row_dq_flags(failed_rules=failed_rules)
+
+        assert result.status == DQCheckStatus.FAIL
+        assert flags["_dq_error"] is True
+        assert flags["_dq_warn"] is False
+        assert flags["severity"] == "error"
+        assert "citations_received must be >= 0" in str(flags["reason"])
+        assert any(
+            rule.description == "publication_year > 2100 is suspicious"
+            for rule in result.rules
+            if not rule.passed
+        )
+
 
 @pytest.mark.unit
 class TestLogicalAnalyzerIntegration:
@@ -261,3 +293,24 @@ class TestLogicalAnalyzerIntegration:
         assert flags["_dq_warn"] is True
         assert flags["severity"] == "warn"
         assert flags["reason"] == "error_rate_above_soft_threshold"
+
+    def test_business_rules_with_missing_column_are_treated_as_pass(self) -> None:
+        df = pl.DataFrame({"publication_year": [2024], "citations_received": [10]})
+        rules_with_missing_column = [
+            {
+                "rule_id": "extra_missing",
+                "name": "missing_column",
+                "description": "column does not exist in dataframe",
+                "column": "missing_column",
+                "condition": "range",
+                "min": 1,
+                "severity": "error",
+                "decision": "fail",
+            }
+        ]
+
+        result = check_business_rules(df, rules_with_missing_column)
+
+        assert result.status == DQCheckStatus.PASS
+        assert result.rules_evaluated == 1
+        assert result.rules_failed == 0

@@ -15,6 +15,7 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_text,
     normalize_profile_chembl_organism_name,
     normalize_profile_target_component_relationships,
     normalize_profile_target_component_types,
@@ -65,6 +66,27 @@ _ENUM_FIELDS = {
 }
 _SPECIAL_RULE_COMPONENTS = {
     **_REFERENCE_IDENTIFIER_RULES,
+    "target_xref_iuphar_ids": (
+        normalize_profile_text,
+        (
+            "Canonicalize derived IUPHAR target xref IDs as a "
+            "text field with json-list-like semantics."
+        ),
+    ),
+    "target_xref_pdb_ids": (
+        normalize_profile_text,
+        (
+            "Canonicalize derived PDB/PDBe target xref IDs as a "
+            "text field with json-list-like semantics."
+        ),
+    ),
+    "target_xref_reactome_ids": (
+        normalize_profile_text,
+        (
+            "Canonicalize derived Reactome target xref IDs as a "
+            "text field with json-list-like semantics."
+        ),
+    ),
     "organism": (
         normalize_profile_chembl_organism_name,
         "Normalize ChEMBL target organism display name using curated organism aliases.",

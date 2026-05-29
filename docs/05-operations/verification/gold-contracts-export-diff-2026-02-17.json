@@ -126,7 +126,14 @@
       "file": "docs/04-reference/contracts/gold/chembl_target_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [],
+        "added_properties": [
+          "target_xref_go_component",
+          "target_xref_go_function",
+          "target_xref_go_process",
+          "target_xref_iuphar_ids",
+          "target_xref_pdb_ids",
+          "target_xref_reactome_ids"
+        ],
         "removed_properties": [],
         "changed_properties": [],
         "required_changed": false
