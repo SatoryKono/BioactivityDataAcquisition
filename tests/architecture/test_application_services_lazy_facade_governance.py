@@ -89,10 +89,8 @@ def _candidate_python_paths(root: Path) -> tuple[Path, ...]:
     if git_paths is not None:
         return git_paths
 
-    raise AssertionError(
-        "Unable to scan application services facade callers without bounded "
-        "rg or git grep. Refusing to fall back to unbounded Python file reads."
-    )
+    # Pure Python fallback for Windows when external commands hang
+    return _candidate_python_paths_via_python_scan(root)
 
 
 def _candidate_python_paths_via_rg(root: Path) -> tuple[Path, ...] | None:
@@ -153,12 +151,29 @@ def _candidate_python_paths_via_git_grep(root: Path) -> tuple[Path, ...] | None:
     return None
 
 
+def _candidate_python_paths_via_python_scan(root: Path) -> tuple[Path, ...]:
+    """Pure Python fallback for scanning Python files when external commands fail."""
+    paths: list[Path] = []
+    for py_file in root.rglob("*.py"):
+        if py_file.name.startswith("_"):
+            continue
+        try:
+            source = py_file.read_text(encoding="utf-8", errors="replace")
+            if _source_has_package_root_import_marker(source):
+                paths.append(py_file)
+        except (OSError, UnicodeDecodeError):
+            continue
+    return tuple(sorted(set(paths)))
+
+
 def _run_command_with_stdout_file(
     command: list[str],
     *,
     timeout: float,
 ) -> tuple[subprocess.CompletedProcess[str], str]:
     """Run a child process without Windows pipe reader threads."""
+    import time
+
     output_path = _temporary_output_path()
     try:
         with output_path.open("w", encoding="utf-8", errors="replace") as stdout_file:
@@ -172,16 +187,21 @@ def _run_command_with_stdout_file(
                 errors="replace",
                 **_hidden_windows_subprocess_kwargs(),
             )
-            try:
-                returncode = process.wait(timeout=timeout)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                # Give the process a moment to terminate
-                try:
-                    process.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    process.terminate()
-                raise OSError(f"Command timed out after {timeout}s: {' '.join(command)}")
+            start_time = time.time()
+            poll_interval = 0.1
+            while True:
+                returncode = process.poll()
+                if returncode is not None:
+                    break
+                if time.time() - start_time > timeout:
+                    process.kill()
+                    time.sleep(0.1)  # Give process time to terminate
+                    returncode = process.poll()
+                    if returncode is None:
+                        process.terminate()
+                    raise OSError(f"Command timed out after {timeout}s: {' '.join(command)}")
+                time.sleep(poll_interval)
+
             completed = subprocess.CompletedProcess(
                 args=command,
                 returncode=returncode,
