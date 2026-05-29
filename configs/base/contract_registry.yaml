@@ -276,20 +276,20 @@ entries:
       rule_bundle_version: "dq-rules.v1.0"
       normalization_profile_ref: "chembl.target"
       normalization_profile_version: "1.0.0"
-      normalization_profile_hash: "10a4c616d4734fa021a10cc0f04f7de83010b5b29938a6c4c2bf9e1156398aa2"
+      normalization_profile_hash: "5b3e9556135901731f106f507c72f8e933f1b24f7689c65108ee17da2908cc56"
     status: "active"
     source_path: "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
     published_artifacts:
       - "../../docs/04-reference/contracts/gold/chembl_target_v1.0.json"
     supported_versions: ["1.0.0"]
     migration_guides: {}
-    last_updated: "2026-04-23T00:00:00Z"
+    last_updated: "2026-05-29T00:00:00Z"
     owners: ["chembl-team"]
     dq_policy_ref: "chembl.dq.v1"
     rule_bundle_version: "dq-rules.v1.0"
     normalization_profile_ref: "chembl.target"
     normalization_profile_version: "1.0.0"
-    normalization_profile_hash: "10a4c616d4734fa021a10cc0f04f7de83010b5b29938a6c4c2bf9e1156398aa2"
+    normalization_profile_hash: "5b3e9556135901731f106f507c72f8e933f1b24f7689c65108ee17da2908cc56"
 
   chembl.target_component:
     identity:

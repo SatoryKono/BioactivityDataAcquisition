@@ -854,7 +854,7 @@ def guard_bootstrap_pipeline_runner_for_e2e(
     import bioetl.composition.bootstrap as bootstrap_package
     from bioetl.composition.bootstrap.runtime import pipeline as runtime_pipeline
     from bioetl.composition.runtime_builders import (
-        _input_snapshot_resolution,
+        input_snapshot_resolution,
         _run_manifest_support,
     )
 
@@ -904,7 +904,7 @@ def guard_bootstrap_pipeline_runner_for_e2e(
         _resolve_pipeline_input_snapshot_refs_with_vcr_fallback,
     )
     monkeypatch.setattr(
-        _input_snapshot_resolution,
+        input_snapshot_resolution,
         "resolve_pipeline_input_snapshot_refs",
         _resolve_pipeline_input_snapshot_refs_with_vcr_fallback,
     )

@@ -90,15 +90,15 @@ _SPECIAL_RULE_COMPONENTS = {
     "target_xref_pdb_ids": (
         normalize_profile_text,
         (
-            "Canonicalize derived PDB/PDBe target xref IDs as a "
-            "text field with pipe-delimited list semantics."
+            "Canonicalize derived PDB/PDBe target xref IDs as a JSON "
+            "list-like text field with pipe-delimited list semantics (json)."
         ),
     ),
     "target_xref_reactome_ids": (
         normalize_profile_text,
         (
-            "Canonicalize derived Reactome target xref IDs as a "
-            "text field with pipe-delimited list semantics."
+            "Canonicalize derived Reactome target xref IDs as a JSON "
+            "list-like text field with pipe-delimited list semantics (json)."
         ),
     ),
     "organism": (

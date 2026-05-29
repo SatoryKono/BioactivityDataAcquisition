@@ -2283,7 +2283,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.batch_execution.contracts",
       "path": "src/bioetl/application/core/batch_execution/contracts.py",
-      "source_lines": 10
+      "source_lines": 19
     },
     {
       "coverage_percent": 100.0,
@@ -19728,7 +19728,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-05-29",
-  "source_tree_sha256": "15020f87faf6bb9de081f04c75556c6aff1c657b063f63bcefca10cde0b590fa",
+  "source_tree_sha256": "aa008f95dcca6368b81c286b3cd276f04b5e2f771b606fe4394c046bb3228be2",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

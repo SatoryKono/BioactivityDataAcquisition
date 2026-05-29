@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from bioetl.application.services.control_plane._manifest_time_support import (
+from bioetl.application.services.control_plane.manifest_time_support import (
     resolve_manifest_created_at,
 )
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP

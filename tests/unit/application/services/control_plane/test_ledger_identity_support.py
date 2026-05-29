@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services.control_plane._ledger_identity_support import (
+from bioetl.application.services.control_plane.ledger_identity_support import (
     build_ledger_idempotency_key,
 )
 

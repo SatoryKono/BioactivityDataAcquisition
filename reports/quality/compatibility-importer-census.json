@@ -9,9 +9,9 @@
     "removed_compatibility_surfaces_with_src_importers": 0,
     "removed_compatibility_surfaces_with_test_importers": 0,
     "removed_compatibility_surfaces_still_present": 0,
-    "twin_pair_count": 37,
-    "twin_pairs_with_private_src_importers": 36,
-    "twin_pairs_without_public_src_importers": 1,
+    "twin_pair_count": 31,
+    "twin_pairs_with_private_src_importers": 30,
+    "twin_pairs_without_public_src_importers": 0,
     "tracked_twin_family_count": 4,
     "config_root_symbol_count": 3,
     "config_root_src_importer_count": 0,
@@ -919,17 +919,17 @@
       "public_path": "src/bioetl/application/core/target_data_source_mixins.py",
       "private_module": "bioetl.application.core._target_data_source_mixins",
       "public_module": "bioetl.application.core.target_data_source_mixins",
-      "public_src_importer_count": 2,
+      "public_src_importer_count": 4,
       "public_test_importer_count": 0,
-      "private_src_importer_count": 3,
+      "private_src_importer_count": 1,
       "private_test_importer_count": 0,
       "public_src_importers": [
+        "src/bioetl/application/core/_data_source_mixins.py",
         "src/bioetl/application/core/data_sources/publication_term.py",
-        "src/bioetl/application/core/data_sources/subcellular_fraction.py"
+        "src/bioetl/application/core/data_sources/subcellular_fraction.py",
+        "src/bioetl/application/core/publication_term_filtering_mixin.py"
       ],
       "private_src_importers": [
-        "src/bioetl/application/core/_data_source_mixins.py",
-        "src/bioetl/application/core/publication_term_filtering_mixin.py",
         "src/bioetl/application/core/target_data_source_mixins.py"
       ]
     },
@@ -972,24 +972,6 @@
       ]
     },
     {
-      "private_path": "src/bioetl/application/services/control_plane/_historical_replay_certification.py",
-      "public_path": "src/bioetl/application/services/control_plane/historical_replay_certification.py",
-      "private_module": "bioetl.application.services.control_plane._historical_replay_certification",
-      "public_module": "bioetl.application.services.control_plane.historical_replay_certification",
-      "public_src_importer_count": 3,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 1,
-      "private_test_importer_count": 0,
-      "public_src_importers": [
-        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_helpers.py",
-        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_snapshot_support.py",
-        "src/bioetl/application/services/control_plane/replay/historical_certification_service.py"
-      ],
-      "private_src_importers": [
-        "src/bioetl/application/services/control_plane/historical_replay_certification.py"
-      ]
-    },
-    {
       "private_path": "src/bioetl/application/services/control_plane/_historical_replay_certification_support.py",
       "public_path": "src/bioetl/application/services/control_plane/historical_replay_certification_support.py",
       "private_module": "bioetl.application.services.control_plane._historical_replay_certification_support",
@@ -1003,40 +985,6 @@
       ],
       "private_src_importers": [
         "src/bioetl/application/services/control_plane/historical_replay_certification_support.py"
-      ]
-    },
-    {
-      "private_path": "src/bioetl/application/services/control_plane/_ledger_identity_support.py",
-      "public_path": "src/bioetl/application/services/control_plane/ledger_identity_support.py",
-      "private_module": "bioetl.application.services.control_plane._ledger_identity_support",
-      "public_module": "bioetl.application.services.control_plane.ledger_identity_support",
-      "public_src_importer_count": 2,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 1,
-      "private_test_importer_count": 1,
-      "public_src_importers": [
-        "src/bioetl/application/services/control_plane/_run_ledger_entry_support.py",
-        "src/bioetl/application/services/control_plane/workflow/ledger_service.py"
-      ],
-      "private_src_importers": [
-        "src/bioetl/application/services/control_plane/ledger_identity_support.py"
-      ]
-    },
-    {
-      "private_path": "src/bioetl/application/services/control_plane/_manifest_time_support.py",
-      "public_path": "src/bioetl/application/services/control_plane/manifest_time_support.py",
-      "private_module": "bioetl.application.services.control_plane._manifest_time_support",
-      "public_module": "bioetl.application.services.control_plane.manifest_time_support",
-      "public_src_importer_count": 2,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 1,
-      "private_test_importer_count": 1,
-      "public_src_importers": [
-        "src/bioetl/application/services/control_plane/manifest/service.py",
-        "src/bioetl/application/services/control_plane/workflow/manifest_service.py"
-      ],
-      "private_src_importers": [
-        "src/bioetl/application/services/control_plane/manifest_time_support.py"
       ]
     },
     {
@@ -1110,15 +1058,15 @@
       "public_path": "src/bioetl/application/services/control_plane/run_manifest_diagnostics_base.py",
       "private_module": "bioetl.application.services.control_plane._run_manifest_diagnostics_base",
       "public_module": "bioetl.application.services.control_plane.run_manifest_diagnostics_base",
-      "public_src_importer_count": 1,
+      "public_src_importer_count": 2,
       "public_test_importer_count": 0,
-      "private_src_importer_count": 2,
+      "private_src_importer_count": 1,
       "private_test_importer_count": 0,
       "public_src_importers": [
+        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_main_helpers.py",
         "src/bioetl/application/services/control_plane/manifest/diagnostics.py"
       ],
       "private_src_importers": [
-        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_main_helpers.py",
         "src/bioetl/application/services/control_plane/run_manifest_diagnostics_base.py"
       ]
     },
@@ -1127,17 +1075,17 @@
       "public_path": "src/bioetl/application/services/control_plane/run_manifest_diagnostics_base_helpers.py",
       "private_module": "bioetl.application.services.control_plane._run_manifest_diagnostics_base_helpers",
       "public_module": "bioetl.application.services.control_plane.run_manifest_diagnostics_base_helpers",
-      "public_src_importer_count": 1,
+      "public_src_importer_count": 4,
       "public_test_importer_count": 0,
-      "private_src_importer_count": 4,
+      "private_src_importer_count": 1,
       "private_test_importer_count": 0,
       "public_src_importers": [
-        "src/bioetl/application/services/control_plane/manifest/diagnostics.py"
-      ],
-      "private_src_importers": [
         "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_base.py",
         "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_projection.py",
         "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_state.py",
+        "src/bioetl/application/services/control_plane/manifest/diagnostics.py"
+      ],
+      "private_src_importers": [
         "src/bioetl/application/services/control_plane/run_manifest_diagnostics_base_helpers.py"
       ]
     },
@@ -1162,15 +1110,16 @@
       "public_path": "src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay.py",
       "private_module": "bioetl.application.services.control_plane._run_manifest_diagnostics_replay",
       "public_module": "bioetl.application.services.control_plane.run_manifest_diagnostics_replay",
-      "public_src_importer_count": 1,
+      "public_src_importer_count": 3,
       "public_test_importer_count": 0,
-      "private_src_importer_count": 3,
+      "private_src_importer_count": 2,
       "private_test_importer_count": 0,
       "public_src_importers": [
+        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_base.py",
+        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_projection.py",
         "src/bioetl/application/services/control_plane/manifest/diagnostics.py"
       ],
       "private_src_importers": [
-        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_base.py",
         "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_projection.py",
         "src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay.py"
       ]
@@ -1180,15 +1129,15 @@
       "public_path": "src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay_projection.py",
       "private_module": "bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection",
       "public_module": "bioetl.application.services.control_plane.run_manifest_diagnostics_replay_projection",
-      "public_src_importer_count": 1,
+      "public_src_importer_count": 2,
       "public_test_importer_count": 0,
-      "private_src_importer_count": 2,
+      "private_src_importer_count": 1,
       "private_test_importer_count": 0,
       "public_src_importers": [
+        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_base.py",
         "src/bioetl/application/services/control_plane/manifest/diagnostics.py"
       ],
       "private_src_importers": [
-        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_base.py",
         "src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay_projection.py"
       ]
     },
@@ -1197,17 +1146,17 @@
       "public_path": "src/bioetl/application/services/control_plane/run_manifest_diagnostics_snapshot_support.py",
       "private_module": "bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support",
       "public_module": "bioetl.application.services.control_plane.run_manifest_diagnostics_snapshot_support",
-      "public_src_importer_count": 3,
+      "public_src_importer_count": 4,
       "public_test_importer_count": 0,
-      "private_src_importer_count": 2,
+      "private_src_importer_count": 1,
       "private_test_importer_count": 0,
       "public_src_importers": [
+        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_base.py",
         "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_finalization.py",
         "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_helpers.py",
         "src/bioetl/application/services/control_plane/manifest/diagnostics.py"
       ],
       "private_src_importers": [
-        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_base.py",
         "src/bioetl/application/services/control_plane/run_manifest_diagnostics_snapshot_support.py"
       ]
     },
@@ -1216,15 +1165,15 @@
       "public_path": "src/bioetl/application/services/control_plane/run_manifest_diagnostics_source_refs.py",
       "private_module": "bioetl.application.services.control_plane._run_manifest_diagnostics_source_refs",
       "public_module": "bioetl.application.services.control_plane.run_manifest_diagnostics_source_refs",
-      "public_src_importer_count": 1,
+      "public_src_importer_count": 2,
       "public_test_importer_count": 0,
-      "private_src_importer_count": 2,
+      "private_src_importer_count": 1,
       "private_test_importer_count": 0,
       "public_src_importers": [
+        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_finalization.py",
         "src/bioetl/application/services/control_plane/manifest/diagnostics.py"
       ],
       "private_src_importers": [
-        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_finalization.py",
         "src/bioetl/application/services/control_plane/run_manifest_diagnostics_source_refs.py"
       ]
     },
@@ -1316,39 +1265,6 @@
       ]
     },
     {
-      "private_path": "src/bioetl/composition/runtime_builders/_cached_bronze_snapshot_support.py",
-      "public_path": "src/bioetl/composition/runtime_builders/cached_bronze_snapshot_support.py",
-      "private_module": "bioetl.composition.runtime_builders._cached_bronze_snapshot_support",
-      "public_module": "bioetl.composition.runtime_builders.cached_bronze_snapshot_support",
-      "public_src_importer_count": 0,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 2,
-      "private_test_importer_count": 2,
-      "public_src_importers": [],
-      "private_src_importers": [
-        "src/bioetl/composition/runtime_builders/_input_snapshot_resolution.py",
-        "src/bioetl/composition/runtime_builders/cached_bronze_snapshot_support.py"
-      ]
-    },
-    {
-      "private_path": "src/bioetl/composition/runtime_builders/_input_snapshot_resolution.py",
-      "public_path": "src/bioetl/composition/runtime_builders/input_snapshot_resolution.py",
-      "private_module": "bioetl.composition.runtime_builders._input_snapshot_resolution",
-      "public_module": "bioetl.composition.runtime_builders.input_snapshot_resolution",
-      "public_src_importer_count": 2,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 2,
-      "private_test_importer_count": 1,
-      "public_src_importers": [
-        "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py",
-        "src/bioetl/composition/factories/pipeline/checkpoint_metadata_helpers.py"
-      ],
-      "private_src_importers": [
-        "src/bioetl/composition/runtime_builders/_run_manifest_support.py",
-        "src/bioetl/composition/runtime_builders/input_snapshot_resolution.py"
-      ]
-    },
-    {
       "private_path": "src/bioetl/composition/runtime_builders/_run_manifest_support.py",
       "public_path": "src/bioetl/composition/runtime_builders/run_manifest_support.py",
       "private_module": "bioetl.composition.runtime_builders._run_manifest_support",
@@ -1356,7 +1272,7 @@
       "public_src_importer_count": 12,
       "public_test_importer_count": 5,
       "private_src_importer_count": 0,
-      "private_test_importer_count": 2,
+      "private_test_importer_count": 1,
       "public_src_importers": [
         "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py",
         "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py",
@@ -1372,24 +1288,6 @@
         "src/bioetl/composition/runtime_builders/run_manifest_builder.py"
       ],
       "private_src_importers": []
-    },
-    {
-      "private_path": "src/bioetl/composition/runtime_builders/_runner_builder_support.py",
-      "public_path": "src/bioetl/composition/runtime_builders/runner_builder_support.py",
-      "private_module": "bioetl.composition.runtime_builders._runner_builder_support",
-      "public_module": "bioetl.composition.runtime_builders.runner_builder_support",
-      "public_src_importer_count": 2,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 2,
-      "private_test_importer_count": 0,
-      "public_src_importers": [
-        "src/bioetl/composition/bootstrap/runtime/_observability_preflight_support.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py"
-      ],
-      "private_src_importers": [
-        "src/bioetl/composition/runtime_builders/runner_builder_support.py",
-        "src/bioetl/composition/runtime_builders/runner_control_plane_assembly.py"
-      ]
     },
     {
       "private_path": "src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py",
