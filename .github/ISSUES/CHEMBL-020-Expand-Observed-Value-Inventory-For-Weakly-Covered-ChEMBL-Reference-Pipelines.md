@@ -1,6 +1,9 @@
 # [testing] Expand observed-value inventory for weakly covered ChEMBL reference pipelines
 
 **Status**: active
+**GitHub Issue**: [#4316](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4316)
+**Issue State**: open
+**Synced**: 2026-05-29
 **Priority**: P2 (Medium)
 **Labels**: `provider:chembl`, `testing`, `governance`, `technical-debt`
 **Epic**: ChEMBL Normalization Residuals 2026Q2

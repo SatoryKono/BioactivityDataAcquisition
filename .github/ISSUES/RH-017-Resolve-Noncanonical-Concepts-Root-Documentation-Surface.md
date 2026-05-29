@@ -1,6 +1,9 @@
 # Resolve Noncanonical Root `concepts/` Documentation Surface
 
 **Status**: active
+**GitHub Issue**: [#4405](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4405)
+**Issue State**: open
+**Synced**: 2026-05-29
 **Priority**: P2
 **Labels**: `governance`, `documentation`, `cleanup`, `priority:medium`
 **Last audited**: 2026-05-21

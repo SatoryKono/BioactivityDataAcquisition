@@ -1,6 +1,9 @@
 # Rehome Observability Cardinality Evidence Out Of Forbidden Root `artifacts/`
 
-**Status**: active
+**Status**: completed_in_repo
+**GitHub Issue**: [#4347](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4347)
+**Issue State**: open
+**Synced**: 2026-05-29
 **Priority**: P1
 **Labels**: `governance`, `observability`, `infrastructure`, `documentation`, `priority:high`
 **Last audited**: 2026-05-19

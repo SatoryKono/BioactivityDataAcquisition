@@ -1,6 +1,9 @@
 # [dq] Align governed OA and identifier-array DQ with profile normalization
 
 **Status**: active
+**GitHub Issue**: [#4265](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4265)
+**Issue State**: open
+**Synced**: 2026-05-29
 **Priority**: P0 (Critical)
 **Labels**: `dq`, `normalization`, `contracts`, `publication`
 **Epic**: Non-ChEMBL Normalization Governance 2026Q2

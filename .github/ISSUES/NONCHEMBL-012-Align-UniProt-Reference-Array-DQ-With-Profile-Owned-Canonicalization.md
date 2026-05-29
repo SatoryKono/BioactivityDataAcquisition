@@ -1,6 +1,9 @@
 # [uniprot] Align reference-array DQ with profile-owned canonicalization
 
 **Status**: deferred_by_priority
+**GitHub Issue**: [#4295](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4295)
+**Issue State**: open
+**Synced**: 2026-05-29
 **Priority**: P1 (High)
 **Labels**: `provider:uniprot`, `data-quality`, `governance`, `quality`, `technical-debt`
 **Epic**: Non-ChEMBL Normalization Residuals 2026Q2

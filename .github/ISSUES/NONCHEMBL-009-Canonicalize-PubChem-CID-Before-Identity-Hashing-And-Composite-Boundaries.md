@@ -1,6 +1,9 @@
 # [normalization] Canonicalize PubChem CID before identity, hashing, and composite boundaries
 
 **Status**: active
+**GitHub Issue**: [#4292](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4292)
+**Issue State**: open
+**Synced**: 2026-05-29
 **Priority**: P0 (Critical)
 **Labels**: `provider:pubchem`, `governance`, `data-quality`, `schema-evolution`, `technical-debt`, `composite`
 **Epic**: Non-ChEMBL Normalization Residuals 2026Q2

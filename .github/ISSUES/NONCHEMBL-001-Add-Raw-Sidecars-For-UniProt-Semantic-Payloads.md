@@ -1,6 +1,9 @@
 # [normalization] Add raw sidecars for UniProt semantic payloads
 
 **Status**: active
+**GitHub Issue**: [#4276](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4276)
+**Issue State**: open
+**Synced**: 2026-05-29
 **Priority**: P0 (Critical)
 **Labels**: `normalization`, `contracts`, `replay`, `uniprot`
 **Epic**: Non-ChEMBL Normalization Governance 2026Q2
