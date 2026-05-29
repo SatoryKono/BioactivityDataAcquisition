@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane._run_manifest_diagnostics_base_helpers import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_base_helpers import (
     _build_code_provenance_state,
     _build_planned_artifact_refs,
     _resolve_operator_replay_mode,
@@ -22,7 +22,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_checkpo
 from bioetl.application.services.control_plane._run_manifest_diagnostics_checkpoint_projection import (
     resolve_resume_identity_maps as _resolve_resume_identity_maps,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_replay import (
     _assess_manifest_reproducibility_policy,
     _build_replay_parentage,
     _build_resume_contract,
@@ -32,20 +32,20 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
     _resolve_exact_replay_support_boundary,
     _resolve_replay_family_contract,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_projection import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_replay_projection import (
     _build_operator_replay_projection,
     _build_replay_projection_bundle,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_snapshot_support import (
     collect_input_snapshot_content_hashes as _collect_input_snapshot_content_hashes,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_snapshot_support import (
     collect_input_snapshot_ids as _collect_input_snapshot_ids,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_snapshot_support import (
     collect_input_snapshot_refs as _collect_input_snapshot_refs,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_snapshot_support import (
     compute_input_snapshot_identity_fingerprint as _compute_input_snapshot_identity_fingerprint,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_summary import (

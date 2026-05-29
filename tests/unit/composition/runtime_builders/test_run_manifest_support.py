@@ -20,7 +20,7 @@ from bioetl.composition.runtime_builders._run_manifest_creation_support import (
     build_manifest_create_request,
     emit_replay_reconstructability_metric,
 )
-from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import (
+from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
 )
 from bioetl.composition.runtime_builders._run_manifest_support import (

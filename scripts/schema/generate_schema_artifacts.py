@@ -26,6 +26,7 @@ import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CANONICAL_DIR = PROJECT_ROOT / "configs" / "entities"
+COMPOSITES_DIR = PROJECT_ROOT / "configs" / "composites"
 PANDERA_REGISTRY_PATH = (
     PROJECT_ROOT / "src" / "bioetl" / "domain" / "schemas" / "generated" / "registry.py"
 )
@@ -49,6 +50,10 @@ def _iter_canonical_schema_files() -> list[Path]:
         if yaml_path.name.startswith("_"):
             continue
         files.append(yaml_path)
+    for yaml_path in sorted(COMPOSITES_DIR.rglob("*.yaml")):
+        if yaml_path.name.startswith("_"):
+            continue
+        files.append(yaml_path)
     return files
 
 
@@ -56,11 +61,24 @@ def _load_entry(yaml_path: Path) -> CanonicalSchemaEntry:
     payload = yaml.safe_load(yaml_path.read_text(encoding="utf-8")) or {}
     schema = payload.get("schema", {}) if isinstance(payload, dict) else {}
     groups = schema.get("column_groups", []) if isinstance(schema, dict) else []
+
+    # Composite configs have column_groups under merge.column_groups
+    if not groups and isinstance(payload, dict):
+        merge = payload.get("merge", {}) if isinstance(payload, dict) else {}
+        groups = merge.get("column_groups", []) if isinstance(merge, dict) else []
+
     group_names: list[str] = []
     for group in groups:
         if isinstance(group, dict) and "name" in group:
             group_names.append(str(group["name"]))
-    rel = yaml_path.relative_to(CANONICAL_DIR)
+
+    # Determine base directory for relative path calculation
+    if COMPOSITES_DIR in yaml_path.parents:
+        base_dir = COMPOSITES_DIR
+    else:
+        base_dir = CANONICAL_DIR
+
+    rel = yaml_path.relative_to(base_dir)
     provider = rel.parts[0]
     entity = rel.stem
     return CanonicalSchemaEntry(

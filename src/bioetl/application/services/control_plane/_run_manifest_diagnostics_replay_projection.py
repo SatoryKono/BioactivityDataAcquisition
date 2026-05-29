@@ -4,16 +4,28 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane._run_manifest_diagnostics_base_helpers import (
-    _resolve_operator_replay_mode,
-    _resolve_source_posture,
+from bioetl.application.services.control_plane import (
+    _run_manifest_diagnostics_replay as _run_manifest_diagnostics_replay,
+)
+from bioetl.application.services.control_plane import (
+    run_manifest_diagnostics_replay as run_manifest_diagnostics_replay,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_persistence import (
     build_lineage_closure_boundary,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
-    _resolve_manifest_replay_readiness_verdict,
+from bioetl.application.services.control_plane.run_manifest_diagnostics_base_helpers import (
+    _resolve_operator_replay_mode,
+    _resolve_source_posture,
 )
+
+try:
+    _resolve_manifest_replay_readiness_verdict = (
+        _run_manifest_diagnostics_replay._resolve_manifest_replay_readiness_verdict
+    )
+except AttributeError:
+    _resolve_manifest_replay_readiness_verdict = (
+        run_manifest_diagnostics_replay._resolve_manifest_replay_readiness_verdict
+    )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
     _collect_append_mode_semantic_sinks,
     _resolve_exact_replay_support_boundary,

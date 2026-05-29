@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition.runtime_builders._input_snapshot_resolution import (
+from bioetl.composition.runtime_builders.input_snapshot_resolution import (
     resolve_pipeline_input_snapshot_refs,
 )
 from bioetl.composition.runtime_builders._run_manifest_refs import (

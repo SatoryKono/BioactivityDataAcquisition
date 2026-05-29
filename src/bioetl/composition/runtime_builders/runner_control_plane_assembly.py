@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
 )
-from bioetl.composition.runtime_builders._runner_builder_support import (
+from bioetl.composition.runtime_builders.runner_builder_support import (
     bind_manifest_logger_context as _bind_manifest_logger_context,
 )
 from bioetl.composition.runtime_builders._runner_control_plane_policy import (

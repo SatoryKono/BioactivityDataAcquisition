@@ -1,5 +1,28 @@
-"""Public owner module for historical replay certification constants."""
+"""Shared constants for bounded historical replay certification."""
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane._historical_replay_certification import *  # noqa: F403
+LIVE_CAPTURE_SNAPSHOT_MATERIALIZED = "live_capture_snapshot_materialized"
+HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED = "historical_source_snapshot_certified"
+HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED = (
+    "historical_composite_replay_envelope_certified"
+)
+MIXED_POST_MANIFEST_SNAPSHOT_MATERIALIZATION = (
+    "mixed_post_manifest_snapshot_materialization"
+)
+
+POST_MANIFEST_SNAPSHOT_MATERIALIZATION_MODES = frozenset(
+    {
+        LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
+        HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
+        HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
+    }
+)
+
+__all__ = [
+    "HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED",
+    "HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED",
+    "LIVE_CAPTURE_SNAPSHOT_MATERIALIZED",
+    "MIXED_POST_MANIFEST_SNAPSHOT_MATERIALIZATION",
+    "POST_MANIFEST_SNAPSHOT_MATERIALIZATION_MODES",
+]

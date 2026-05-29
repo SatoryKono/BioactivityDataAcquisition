@@ -16,7 +16,7 @@ from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec as RunManifestCreateRequest,
     RunManifestService,
 )
-from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import (
+from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
 )
 from bioetl.composition.factories.pipeline.checkpoint_metadata_helpers import (
