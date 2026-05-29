@@ -88,11 +88,15 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--grafana-base-url", default=DEFAULT_GRAFANA_BASE_URL)
     parser.add_argument(
         "--grafana-username",
-        default=preflight._read_env("GRAFANA_USERNAME", preflight.DEFAULT_GRAFANA_USERNAME),  # noqa: SLF001
+        default=preflight._read_env(
+            "GRAFANA_USERNAME", preflight.DEFAULT_GRAFANA_USERNAME
+        ),  # noqa: SLF001
     )
     parser.add_argument(
         "--grafana-password",
-        default=preflight._read_env("GRAFANA_PASSWORD", preflight.DEFAULT_GRAFANA_PASSWORD),  # noqa: SLF001
+        default=preflight._read_env(
+            "GRAFANA_PASSWORD", preflight.DEFAULT_GRAFANA_PASSWORD
+        ),  # noqa: SLF001
     )
     parser.add_argument("--prometheus-base-url", default=DEFAULT_PROMETHEUS_BASE_URL)
     parser.add_argument("--app-base-url", default=DEFAULT_APP_BASE_URL)
@@ -515,15 +519,23 @@ def _discover_filled_dashboard_uids(
                 grafana_base_url=config.grafana_base_url,
                 grafana_username=config.grafana_username,
                 grafana_password=config.grafana_password,
+                workflow=live_audit.DEFAULT_WORKFLOW,
                 pipeline=config.pipeline,
                 run_type=config.run_type,
+                run_id=live_audit.DEFAULT_RUN_ID,
                 range_hours=config.range_hours,
                 output_path=live_audit.DEFAULT_OUTPUT_PATH,
             )
         )
         filled = _filled_dashboard_uids_from_results(results)
         source = "live discovery"
-    except (FileNotFoundError, LookupError, OSError, ValueError, json.JSONDecodeError) as exc:
+    except (
+        FileNotFoundError,
+        LookupError,
+        OSError,
+        ValueError,
+        json.JSONDecodeError,
+    ) as exc:
         filled = _load_cached_filled_dashboard_uids(config)
         source = f"cached live-panel-audit.json after discovery failure ({exc})"
     print(
@@ -595,7 +607,10 @@ def main(argv: list[str] | None = None) -> int:
         print("grafana-audit-cycle: live panel audit")
         return _run_live_audit(config, app_base_url=app_base_url)
     finally:
-        if managed_backend_process is not None and managed_backend_process.poll() is None:
+        if (
+            managed_backend_process is not None
+            and managed_backend_process.poll() is None
+        ):
             managed_backend_process.terminate()
             try:
                 managed_backend_process.wait(timeout=5)

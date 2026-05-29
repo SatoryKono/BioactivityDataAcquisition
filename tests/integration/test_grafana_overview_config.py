@@ -277,6 +277,16 @@ def test_provider_and_workflow_scope_are_explicit() -> None:
 
     assert "bioetl_l1_workflow_global_status" in _panel_expr(workflow)
     assert 'pipeline!="test_pipe"' in _panel_expr(workflow)
+    assert 'pipeline=~"$pipeline"' in _panel_expr(workflow)
+    assert 'label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline"' in (
+        _panel_expr(workflow)
+    )
+    assert (
+        "selected workflow/pipeline scope"
+        in str(workflow.get("description", "")).lower()
+    )
+    assert "run_type" in str(workflow.get("description", "")).lower()
+    assert "run_id" in str(workflow.get("description", "")).lower()
     workflow_links = workflow.get("options", {}).get("dataLinks", [])
     assert {link.get("title") for link in workflow_links} == {"Open Workflow"}
 

@@ -1761,7 +1761,7 @@
       },
       "targets": [
         {
-          "expr": "max by (pipeline) (bioetl_l1_workflow_global_status{pipeline!=\"test_pipe\"})",
+          "expr": "max by (pipeline) (bioetl_l1_workflow_global_status{pipeline=~\"$pipeline\",pipeline!=\"test_pipe\"} or ((bioetl_l1_workflow_global_status{pipeline!=\"test_pipe\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -1802,7 +1802,7 @@
           }
         }
       ],
-      "description": "Compact GLOBAL workflow scope across pipelines, excluding the synthetic `test_pipe` surface from the first-screen overview. Each row keeps the worst current workflow status per pipeline so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Current workflow status is driven by the latest bounded terminal workflow signal, not by cumulative workflow-run counters."
+      "description": "Compact selected workflow/pipeline scope for the first-screen overview, excluding the synthetic `test_pipe` surface. Each row keeps the worst current workflow status per matching pipeline so the first screen stays readable without unrelated pipeline leakage. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Current workflow status is driven by the latest bounded terminal workflow signal, not by cumulative workflow-run counters. `run_type` and `run_id` remain handoff context only for this card."
     },
     {
       "id": 9014,

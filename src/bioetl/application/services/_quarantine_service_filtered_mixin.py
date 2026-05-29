@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from time import perf_counter
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.domain.control_plane.run_ledger import (
+    RUN_FAILED_EVENT,
+    RUN_FINISHED_EVENT,
+    RUN_SHUTDOWN_EVENT,
+)
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -15,6 +21,10 @@ if TYPE_CHECKING:
 
 
 _QUARANTINE_OPERATOR_ERRORS = (OSError, RuntimeError, TypeError, ValueError)
+_ALL_SCOPE_TOKENS = {"", "*", "all", "$__all", "__all"}
+_TERMINAL_EVENT_TYPES = frozenset(
+    {RUN_FINISHED_EVENT, RUN_FAILED_EVENT, RUN_SHUTDOWN_EVENT}
+)
 
 
 class _FilteredQuarantineHost(Protocol):
@@ -51,12 +61,111 @@ def _resolve_filtered_stats_run_ids(
     *,
     run_id: str | None,
     scoped_run_ids: object,
+    pipeline: str | None,
+    run_type: str | None,
+    run_manifest_service: object,
 ) -> list[str]:
     """Resolve unique run identifiers used to derive Bronze denominators."""
     if run_id is not None:
         return [run_id]
-    del scoped_run_ids
-    return []
+    if isinstance(scoped_run_ids, list) and scoped_run_ids:
+        return []
+
+    resolved_scope_run_id = _resolve_latest_scope_run_id(
+        pipeline=pipeline,
+        run_type=run_type,
+        run_manifest_service=run_manifest_service,
+    )
+    return [resolved_scope_run_id] if resolved_scope_run_id is not None else []
+
+
+def _parse_scope_tokens(value: str | None) -> tuple[str, ...]:
+    if value is None:
+        return ()
+    tokens = tuple(
+        token
+        for token in (
+            candidate.strip()
+            for candidate in str(value).replace("{", "").replace("}", "").split(",")
+        )
+        if token and token.lower() not in _ALL_SCOPE_TOKENS
+    )
+    return tokens
+
+
+def _latest_terminal_timestamp(
+    *, run_id: object, ledger_port: object
+) -> datetime | None:
+    list_entries_by_run_id = getattr(ledger_port, "list_entries_by_run_id", None)
+    if not callable(list_entries_by_run_id):
+        return None
+    entries = [
+        entry
+        for entry in list_entries_by_run_id(run_id)
+        if getattr(entry, "event_type", None) in _TERMINAL_EVENT_TYPES
+    ]
+    if not entries:
+        return None
+    latest_entry = max(
+        entries,
+        key=lambda entry: (
+            getattr(entry, "occurred_at", datetime.min),
+            getattr(entry, "entry_id", ""),
+        ),
+    )
+    occurred_at = getattr(latest_entry, "occurred_at", None)
+    return occurred_at if isinstance(occurred_at, datetime) else None
+
+
+def _resolve_latest_scope_run_id(
+    *,
+    pipeline: str | None,
+    run_type: str | None,
+    run_manifest_service: object,
+) -> str | None:
+    manifest_port = getattr(run_manifest_service, "manifest_port", None)
+    if manifest_port is None or not hasattr(manifest_port, "list_all"):
+        return None
+
+    selected_pipelines = _parse_scope_tokens(pipeline)
+    if len(selected_pipelines) != 1:
+        return None
+    selected_run_types = _parse_scope_tokens(run_type)
+
+    manifests = tuple(manifest_port.list_all())
+    candidates = tuple(
+        manifest
+        for manifest in manifests
+        if getattr(manifest, "pipeline_name", None) in selected_pipelines
+        and (
+            not selected_run_types
+            or str(
+                getattr(
+                    getattr(manifest, "run_type", None),
+                    "value",
+                    getattr(manifest, "run_type", None),
+                )
+            )
+            in selected_run_types
+        )
+    )
+    if not candidates:
+        return None
+
+    ledger_port = getattr(run_manifest_service, "ledger_port", None)
+    selected_manifest = max(
+        candidates,
+        key=lambda manifest: (
+            _latest_terminal_timestamp(
+                run_id=getattr(manifest, "run_id", None),
+                ledger_port=ledger_port,
+            )
+            or getattr(manifest, "created_at", datetime.min),
+            str(getattr(manifest, "run_id", "")),
+        ),
+    )
+    run_id_value = getattr(selected_manifest, "run_id", None)
+    return str(run_id_value) if run_id_value is not None else None
 
 
 def _sum_bronze_records_for_runs(
@@ -80,6 +189,8 @@ def _sum_bronze_records_for_runs(
 def _enrich_filtered_stats_with_bronze_denominator(
     stats: JsonDict,
     *,
+    pipeline: str | None,
+    run_type: str | None,
     run_id: str | None,
     run_manifest_service: object,
 ) -> JsonDict:
@@ -92,6 +203,9 @@ def _enrich_filtered_stats_with_bronze_denominator(
     resolved_run_ids = _resolve_filtered_stats_run_ids(
         run_id=run_id,
         scoped_run_ids=scoped_run_ids,
+        pipeline=pipeline,
+        run_type=run_type,
+        run_manifest_service=run_manifest_service,
     )
     bronze_records = _sum_bronze_records_for_runs(
         run_ids=resolved_run_ids,
@@ -345,6 +459,8 @@ class QuarantineServiceFilteredMixin:
         )
         stats = _enrich_filtered_stats_with_bronze_denominator(
             stats,
+            pipeline=pipeline,
+            run_type=run_type,
             run_id=run_id,
             run_manifest_service=getattr(self, "run_manifest_service", None),
         )

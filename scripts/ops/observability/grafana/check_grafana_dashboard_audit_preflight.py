@@ -173,8 +173,10 @@ def run_checks(
                 grafana_base_url=grafana_base_url.rstrip("/"),
                 grafana_username=grafana_username,
                 grafana_password=grafana_password,
+                workflow=live_audit.DEFAULT_WORKFLOW,
                 pipeline=live_audit.DEFAULT_PIPELINE,
                 run_type=live_audit.DEFAULT_RUN_TYPE,
+                run_id=live_audit.DEFAULT_RUN_ID,
                 range_hours=live_audit.DEFAULT_RANGE_HOURS,
                 output_path=live_audit.DEFAULT_OUTPUT_PATH,
             )
@@ -184,8 +186,7 @@ def run_checks(
                 name="quarantine-explorer",
                 status="ok",
                 detail=(
-                    "canonical health probe reachable via "
-                    f"{resolved_app_base_url}"
+                    f"canonical health probe reachable via {resolved_app_base_url}"
                 ),
             )
         )
@@ -302,6 +303,8 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
 def _read_env(name: str, default: str) -> str:
     value = os.getenv(name, "").strip()
     return value or default

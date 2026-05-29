@@ -21,8 +21,10 @@ DEFAULT_GRAFANA_USERNAME = "admin"
 DEFAULT_GRAFANA_PASSWORD = "admin"
 DEFAULT_HTTP_DATASOURCE_NAME = "Quarantine Explorer"
 DEFAULT_OUTPUT_PATH = Path("reports/observability/grafana/live-panel-audit.json")
+DEFAULT_WORKFLOW = "All"
 DEFAULT_PIPELINE = "chembl_target"
 DEFAULT_RUN_TYPE = "incremental"
+DEFAULT_RUN_ID = "-"
 DEFAULT_RANGE_HOURS = 24
 _HEALTH_PROBE_PATHS: tuple[str, ...] = ("/health/live", "/health")
 _DASHBOARD_DIR = Path("grafana/dashboards")
@@ -44,8 +46,10 @@ class AuditConfig:
     grafana_base_url: str
     grafana_username: str
     grafana_password: str
+    workflow: str
     pipeline: str
     run_type: str
+    run_id: str
     range_hours: int
     output_path: Path
 
@@ -64,6 +68,20 @@ class AuditResult:
 
 
 REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
+    PanelAuditSpec(
+        dashboard_uid="bioetl-control-plane-v1",
+        panel_id=9402,
+        title="ID",
+        source_kind="http",
+        semantic_kind="http_table",
+    ),
+    PanelAuditSpec(
+        dashboard_uid="bioetl-control-plane-v1",
+        panel_id=9403,
+        title="Processed Records",
+        source_kind="http",
+        semantic_kind="http_table",
+    ),
     PanelAuditSpec(
         dashboard_uid="bioetl-overview-v2",
         panel_id=9301,
@@ -193,8 +211,10 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
         default=_read_env("GRAFANA_PASSWORD", DEFAULT_GRAFANA_PASSWORD),
         help="Grafana password used for datasource discovery.",
     )
+    parser.add_argument("--workflow", default=DEFAULT_WORKFLOW)
     parser.add_argument("--pipeline", default=DEFAULT_PIPELINE)
     parser.add_argument("--run-type", default=DEFAULT_RUN_TYPE)
+    parser.add_argument("--run-id", default=DEFAULT_RUN_ID)
     parser.add_argument("--range-hours", type=int, default=DEFAULT_RANGE_HOURS)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH)
     args = parser.parse_args(argv)
@@ -204,8 +224,10 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
         grafana_base_url=args.grafana_base_url.rstrip("/"),
         grafana_username=args.grafana_username,
         grafana_password=args.grafana_password,
+        workflow=args.workflow,
         pipeline=args.pipeline,
         run_type=args.run_type,
+        run_id=args.run_id,
         range_hours=args.range_hours,
         output_path=args.output,
     )
@@ -246,12 +268,18 @@ def _time_window(config: AuditConfig) -> tuple[str, str]:
 def _substitute_dashboard_tokens(template: str, config: AuditConfig) -> str:
     start_iso, end_iso = _time_window(config)
     replacements = {
+        "$workflow": config.workflow,
         "$pipeline": config.pipeline,
         "$run_type": config.run_type,
+        "$run_id": config.run_id,
+        "${workflow}": config.workflow,
         "${pipeline}": config.pipeline,
         "${run_type}": config.run_type,
+        "${run_id}": config.run_id,
+        "${workflow:queryparam}": quote(config.workflow, safe=""),
         "${pipeline:queryparam}": quote(config.pipeline, safe=""),
         "${run_type:queryparam}": quote(config.run_type, safe=""),
+        "${run_id:queryparam}": quote(config.run_id, safe=""),
         "${pipeline:csv}": config.pipeline,
         "${run_type:csv}": config.run_type,
         "${reason_code:csv}": "",
@@ -457,7 +485,10 @@ def _classify_http_freshness_payload(payload: object) -> tuple[str, str]:
                 "unknown_result",
                 "Checkpoint freshness payload returned UNKNOWN due to missing persisted checkpoint evidence",
             )
-        return ("empty_result", "Checkpoint freshness payload returned null age_seconds")
+        return (
+            "empty_result",
+            "Checkpoint freshness payload returned null age_seconds",
+        )
     if not isinstance(age_seconds, (int, float)):
         return ("invalid_shape", "HTTP age_seconds must be numeric or null")
     if age_seconds == 0:
@@ -547,10 +578,14 @@ def _audit_http_panel(
     payload = _fetch_json(f"{app_base_url}{rendered_url}")
     if spec.semantic_kind == "freshness":
         classification, detail = _classify_http_freshness_payload(payload)
-        status = "error" if classification in {"invalid_shape", "empty_result"} else "ok"
+        status = (
+            "error" if classification in {"invalid_shape", "empty_result"} else "ok"
+        )
     elif spec.semantic_kind == "http_table":
         classification, detail = _classify_http_table_payload(payload)
-        status = "error" if classification in {"invalid_shape", "empty_result"} else "ok"
+        status = (
+            "error" if classification in {"invalid_shape", "empty_result"} else "ok"
+        )
     else:
         classification, detail = _classify_http_payload(payload)
         status = "ok" if classification != "invalid_shape" else "error"
@@ -596,8 +631,10 @@ def _write_report(config: AuditConfig, results: list[AuditResult]) -> None:
             "prometheus_base_url": config.prometheus_base_url,
             "app_base_url": config.app_base_url,
             "grafana_base_url": config.grafana_base_url,
+            "workflow": config.workflow,
             "pipeline": config.pipeline,
             "run_type": config.run_type,
+            "run_id": config.run_id,
             "range_hours": config.range_hours,
         },
         "panel_specs": [asdict(spec) for spec in REVIEWED_PANEL_SPECS],
