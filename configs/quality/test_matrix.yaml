@@ -138,6 +138,63 @@ test_lanes:
         junit_xml: true
         json_summary: true
 
+    integration-determinism:
+      suite_name: integration-determinism
+      description: "Determinism contract checks over deterministic replay envelopes."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/integration/determinism/
+      marker_expression: "integration and not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/integration/determinism/
+        - -m
+        - integration and not slow and not benchmark and not memory
+        - --maxfail=1
+      replay_mode: mixed
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    integration-idempotency:
+      suite_name: integration-idempotency
+      description: "Idempotency contract checks for manifest/control-plane contracts."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/integration/idempotency/
+      marker_expression: "integration and not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/integration/idempotency/
+        - -m
+        - integration and not slow and not benchmark and not memory
+        - --maxfail=1
+      replay_mode: mixed
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    integration-composite-resume:
+      suite_name: integration-composite-resume
+      description: "Composite resume/checkpoint safety contract checks."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/integration/composite_resume/
+      marker_expression: "integration and not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/integration/composite_resume/
+        - -m
+        - integration and not slow and not benchmark and not memory
+        - --maxfail=1
+      replay_mode: mixed
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
     security:
       suite_name: security
       description: "Dedicated security policy and secret-hygiene lane outside repo-wide coverage enforcement."

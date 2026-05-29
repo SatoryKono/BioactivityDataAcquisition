@@ -1,6 +1,6 @@
 # [normalization] Add profile-owned assay_parameters controlled-field normalization
 
-**Status**: Completed ✅
+**Status**: active
 **Priority**: P0 (Critical)
 **Labels**: `dq`, `configs`, `refactor`, `testing`
 **Epic**: ChEMBL Normalization and DQ Alignment 2026Q2

@@ -1,6 +1,6 @@
 # [normalization] Govern ChEMBL molecule provider-code surfaces `availability_type` and `chirality`
 
-**Status**: Draft
+**Status**: deferred_by_priority
 **Priority**: P1 (High)
 **Labels**: `provider:chembl`, `governance`, `data-quality`, `config`, `technical-debt`
 **Epic**: ChEMBL Normalization Residuals 2026Q2

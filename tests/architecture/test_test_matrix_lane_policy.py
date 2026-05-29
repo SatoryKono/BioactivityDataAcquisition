@@ -99,6 +99,9 @@ class TestCanonicalTestLanes:
         "e2e",
         "memory",
         "performance",
+        "integration-determinism",
+        "integration-idempotency",
+        "integration-composite-resume",
         "coverage-verify",
     }
 
@@ -209,6 +212,15 @@ class TestCanonicalTestLanes:
         assert (
             lanes["security"]["marker_expression"]
             == "security and not benchmark and not memory"
+        )
+        assert lanes["integration-determinism"]["marker_expression"] == (
+            "integration and not slow and not benchmark and not memory"
+        )
+        assert lanes["integration-idempotency"]["marker_expression"] == (
+            "integration and not slow and not benchmark and not memory"
+        )
+        assert lanes["integration-composite-resume"]["marker_expression"] == (
+            "integration and not slow and not benchmark and not memory"
         )
         assert lanes["architecture"]["runner_backend"] == "run_pytest_sharded"
         assert (

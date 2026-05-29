@@ -1,6 +1,6 @@
 # [testing] Expand publication identifier and vocabulary edge-fixture inventory
 
-**Status**: Draft
+**Status**: deferred_by_priority
 **Priority**: P2 (Medium)
 **Labels**: `provider:crossref`, `provider:openalex`, `provider:pubmed`, `provider:semantic-scholar`, `testing`, `governance`, `quality`
 **Epic**: Non-ChEMBL Normalization Residuals 2026Q2

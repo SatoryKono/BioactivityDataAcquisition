@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-05-25",
+  "snapshot_date": "2026-05-29",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -199,8 +199,10 @@
         "tests/contract/test_gold_pk_consistency.py",
         "tests/e2e/conftest.py",
         "tests/e2e/test_contract_rollout_runtime_e2e.py",
+        "tests/integration/_consolidation_suite_support.py",
         "tests/integration/ci/test_reproducibility_contract_suite.py",
         "tests/integration/ci/test_track_d_fixture_control_plane_linkage.py",
+        "tests/integration/composite_resume/test_reproducibility_composite_resume_gate.py",
         "tests/integration/conftest.py",
         "tests/integration/interfaces/conftest.py",
         "tests/integration/pipelines/base.py",
@@ -224,7 +226,7 @@
         "tests/unit/infrastructure/test_config_settings.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 33
+      "test_importer_count": 35
     },
     {
       "path": "src/bioetl/domain/composite/config.py",

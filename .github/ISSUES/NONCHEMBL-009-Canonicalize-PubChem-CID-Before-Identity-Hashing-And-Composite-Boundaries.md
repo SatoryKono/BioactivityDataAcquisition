@@ -1,6 +1,6 @@
 # [normalization] Canonicalize PubChem CID before identity, hashing, and composite boundaries
 
-**Status**: Draft
+**Status**: active
 **Priority**: P0 (Critical)
 **Labels**: `provider:pubchem`, `governance`, `data-quality`, `schema-evolution`, `technical-debt`, `composite`
 **Epic**: Non-ChEMBL Normalization Residuals 2026Q2

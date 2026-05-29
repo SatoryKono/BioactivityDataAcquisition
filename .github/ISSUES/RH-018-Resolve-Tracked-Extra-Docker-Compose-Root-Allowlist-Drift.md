@@ -1,6 +1,6 @@
 # Resolve Tracked Extra `docker-compose.*` Root Allowlist Drift
 
-**Status**: Draft
+**Status**: active
 **Priority**: P2
 **Labels**: `governance`, `infrastructure`, `cleanup`, `priority:medium`
 **Last audited**: 2026-05-21

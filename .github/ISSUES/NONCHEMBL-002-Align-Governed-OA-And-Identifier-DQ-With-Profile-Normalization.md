@@ -1,6 +1,6 @@
 # [dq] Align governed OA and identifier-array DQ with profile normalization
 
-**Status**: Draft
+**Status**: active
 **Priority**: P0 (Critical)
 **Labels**: `dq`, `normalization`, `contracts`, `publication`
 **Epic**: Non-ChEMBL Normalization Governance 2026Q2

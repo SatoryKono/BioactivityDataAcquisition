@@ -1,6 +1,6 @@
 # Remove Tracked Root Transient Helpers And Restore Root Allowlist Compliance
 
-**Status**: Draft
+**Status**: active
 **Priority**: P1
 **Labels**: `governance`, `cleanup`, `infrastructure`, `documentation`, `priority:high`
 **Last audited**: 2026-05-19

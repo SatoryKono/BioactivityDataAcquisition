@@ -1,6 +1,6 @@
 # [testing] Expand observed-value and fixture coverage for non-ChEMBL vocabularies
 
-**Status**: Draft
+**Status**: deferred_by_priority
 **Priority**: P2 (Medium)
 **Labels**: `testing`, `fixtures`, `governance`, `vcr`
 **Epic**: Non-ChEMBL Normalization Governance 2026Q2

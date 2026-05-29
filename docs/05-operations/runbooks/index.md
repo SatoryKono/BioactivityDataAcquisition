@@ -80,6 +80,7 @@ ______________________________________________________________________
 | [Traceability Tabletop Drills](traceability-tabletop-drills.md)          | Recurring drill catalog, cadence, and scoring model                                             | P2       |
 | [Traceability Adoption Checklist](traceability-adoption-checklist.md)    | Evidence log and exit-gate checklist for operator adoption                                      | P2       |
 | [Traceability Wave 5 Closeout Pack](traceability-wave5-closeout-pack.md) | Canonical one-time execution pack for the final Wave 5 closeout gate                            | P2       |
+| [Merge Campaign](merge-campaign.md)                                      | Consolidation/merge order and reproducibility gate playbook                                      | P2       |
 
 ### Control-Plane / Traceability Routing
 

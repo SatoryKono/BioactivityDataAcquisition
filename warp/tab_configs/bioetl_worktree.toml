@@ -1,0 +1,30 @@
+name = "BioETL Worktree"
+title = "{{branch_name}}"
+
+[[panes]]
+id = "root"
+split = "horizontal"
+children = ["worktree", "checks"]
+
+[[panes]]
+id = "worktree"
+type = "terminal"
+command = [
+  "git worktree add -b {{branch_name}} {{worktree_root}}/{{branch_name}} {{base_branch}}",
+  "cd {{worktree_root}}/{{branch_name}}",
+]
+is_focused = true
+
+[[panes]]
+id = "checks"
+type = "terminal"
+command = [
+  "cd {{worktree_root}}/{{branch_name}}",
+  "uv sync --frozen --all-extras --dev",
+  "uv run pytest tests/integration/determinism tests/integration/idempotency tests/integration/composite_resume -q",
+]
+
+[params]
+worktree_root = "/tmp"
+base_branch = "main"
+branch_name = "consolidation-worktree"

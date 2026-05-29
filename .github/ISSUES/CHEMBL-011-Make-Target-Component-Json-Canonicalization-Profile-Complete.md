@@ -1,6 +1,6 @@
 # [dq] Make target_component JSON canonicalization profile-complete
 
-**Status**: Completed ✅
+**Status**: deferred_by_priority
 **Priority**: P1 (High)
 **Labels**: `dq`, `testing`, `technical-debt`
 **Epic**: ChEMBL Normalization and DQ Alignment 2026Q2

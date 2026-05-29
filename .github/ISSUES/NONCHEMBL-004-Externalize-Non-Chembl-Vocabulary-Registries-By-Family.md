@@ -1,6 +1,6 @@
 # [configuration] Externalize non-ChEMBL vocabulary registries by family
 
-**Status**: Draft
+**Status**: deferred_by_priority
 **Priority**: P1 (High)
 **Labels**: `configuration`, `normalization`, `architecture`, `cross-pipeline`
 **Epic**: Non-ChEMBL Normalization Governance 2026Q2

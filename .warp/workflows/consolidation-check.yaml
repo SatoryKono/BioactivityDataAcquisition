@@ -1,0 +1,28 @@
+name: bioetl consolidation check
+command: >
+  uv sync --frozen --all-extras --dev &&
+  uv run ruff check . &&
+  uv run ruff format --check . &&
+  uv run mypy src tests &&
+  uv run pytest tests/architecture/test_ci_test_strategy.py -q &&
+  uv run pytest tests/architecture/test_config_golden_master.py -q &&
+  uv run pytest tests/architecture/test_gold_schema_contracts.py -q &&
+  uv run pytest tests/architecture/test_medallion_invariants.py -q &&
+  uv run pytest tests/architecture/test_explicit_gold_scd2_policy.py -q &&
+  uv run pytest tests/architecture/test_no_random_in_writers.py -q &&
+  uv run pytest tests/architecture/test_no_datetime_now_in_infrastructure.py -q &&
+  uv run pytest tests/architecture/test_no_structlog_in_application_interfaces.py -q &&
+  uv run pytest tests/architecture/test_lock_safety_guard.py -q &&
+  uv run pytest tests/architecture/test_metadata_output_contract.py -q &&
+  uv run pytest tests/architecture/test_provider_regression_matrix.py -q &&
+  uv run pytest tests/contract -q &&
+  uv run pytest tests/smoke -q &&
+  uv run pytest tests/snapshots -q &&
+  uv run pytest tests/integration/determinism tests/integration/idempotency tests/integration/composite_resume -q
+tags:
+  - bioetl
+  - consolidation
+  - ci
+description: Полный пред-merge gate-набор для merge-кампании консолидации и reproducibility-пакета.
+shells:
+  - bash

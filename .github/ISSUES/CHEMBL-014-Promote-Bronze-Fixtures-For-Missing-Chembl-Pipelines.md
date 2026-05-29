@@ -1,6 +1,6 @@
 # [testing] Promote Bronze fixtures for missing chembl pipelines
 
-**Status**: Completed ✅
+**Status**: deferred_by_priority
 **Priority**: P2 (Medium)
 **Labels**: `testing`, `governance`, `configs`
 **Epic**: ChEMBL Normalization and DQ Alignment 2026Q2

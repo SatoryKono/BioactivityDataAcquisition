@@ -1,6 +1,6 @@
 # Expand Root Hygiene Review Lanes For Observed Transient Root Families
 
-**Status**: Draft
+**Status**: active
 **Priority**: P2
 **Labels**: `governance`, `tooling`, `cleanup`, `priority:medium`
 **Last audited**: 2026-05-19

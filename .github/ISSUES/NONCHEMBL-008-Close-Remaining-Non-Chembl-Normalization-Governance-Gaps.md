@@ -1,6 +1,6 @@
 # [normalization] Close remaining non-ChEMBL normalization governance gaps
 
-**Status**: Draft
+**Status**: superseded
 **Priority**: P0/P1
 **Labels**: `normalization`, `dq`, `contracts`, `testing`, `governance`
 **Epic**: Non-ChEMBL Normalization Governance 2026Q2

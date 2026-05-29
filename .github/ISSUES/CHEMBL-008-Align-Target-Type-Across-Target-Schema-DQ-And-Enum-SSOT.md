@@ -1,6 +1,6 @@
 # [dq] Align target_type across target schema, DQ and enum SSOT
 
-**Status**: Completed ✅
+**Status**: active
 **Priority**: P0 (Critical)
 **Labels**: `dq`, `configs`, `testing`, `governance`
 **Epic**: ChEMBL Normalization and DQ Alignment 2026Q2

@@ -1,6 +1,6 @@
 # [normalization] Add raw sidecars for UniProt semantic payloads
 
-**Status**: Draft
+**Status**: active
 **Priority**: P0 (Critical)
 **Labels**: `normalization`, `contracts`, `replay`, `uniprot`
 **Epic**: Non-ChEMBL Normalization Governance 2026Q2

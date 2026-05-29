@@ -1,6 +1,6 @@
 # [composite] Harden composite boundaries against non-ChEMBL normalization drift
 
-**Status**: Draft
+**Status**: active
 **Priority**: P0 (Critical)
 **Labels**: `composite`, `normalization`, `testing`, `lineage`
 **Epic**: Non-ChEMBL Normalization Governance 2026Q2

@@ -259,6 +259,10 @@ tracked_suite_inventory:
     - tests/integration/interfaces/test_cli_shutdown_integration.py
     external_validation_surfaces:
     - tests/integration/validation/test_external_verification.py
+    reproducibility_surfaces:
+    - tests/integration/determinism/test_reproducibility_determinism_gate.py
+    - tests/integration/idempotency/test_reproducibility_idempotency_gate.py
+    - tests/integration/composite_resume/test_reproducibility_composite_resume_gate.py
   e2e:
     provider_runs:
       chembl_activity: tests/e2e/test_chembl_activity_e2e.py
