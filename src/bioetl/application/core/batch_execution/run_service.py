@@ -8,7 +8,7 @@ __all__ = ["BatchExecutionRunService"]
 from collections.abc import Awaitable
 from typing import Protocol
 
-from bioetl.application.core.batch_execution.contracts import (
+from bioetl.application.core.batch_execution._contracts import (
     BatchExecutionCountersSnapshot,
     BatchExecutionMemoryState,
 )

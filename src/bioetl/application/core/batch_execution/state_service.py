@@ -7,7 +7,7 @@ __all__ = ["BatchExecutionStateService"]
 
 from typing import TYPE_CHECKING, TypeVar, cast
 
-from bioetl.application.core.batch_execution.contracts import (
+from bioetl.application.core.batch_execution._contracts import (
     BatchExecutionStateProtocol,
     BatchExecutionStatisticsState,
     BatchResultBuilderProtocol,

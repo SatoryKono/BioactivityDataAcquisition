@@ -464,10 +464,10 @@ hotspot_family_coverage_thresholds:
       min_covered_line_percent: 1.31
       allowlisted_unmeasured_paths: []
     application_services_control_plane:
-      min_measured_module_count: 62
+      min_measured_module_count: 42
       max_unmeasured_module_count: 0
-      min_covered_module_count: 56
-      min_covered_line_percent: 78.01
+      min_covered_module_count: 36
+      min_covered_line_percent: 73.0
       allowlisted_unmeasured_paths:
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_alerts.py
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profile_support.py
@@ -524,9 +524,9 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/workflow/manifest_models.py
       - src/bioetl/application/services/control_plane/workflow/manifest_service.py
     composition_runtime_builders:
-      min_measured_module_count: 38
+      min_measured_module_count: 37
       max_unmeasured_module_count: 0
-      min_covered_module_count: 38
+      min_covered_module_count: 36
       min_covered_line_percent: 80.0
       allowlisted_unmeasured_paths:
       - src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py

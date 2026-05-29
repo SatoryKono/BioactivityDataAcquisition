@@ -69,7 +69,7 @@ def __getattr__(name: str) -> object:
 
 
 __all__ = [
+    "_input_snapshot_resolution",
     "build_pipeline_runner",
     "input_snapshot_resolution",
-    "_input_snapshot_resolution",
 ]

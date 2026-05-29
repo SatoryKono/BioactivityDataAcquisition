@@ -6,8 +6,8 @@ __all__ = [
     "_assess_manifest_reproducibility_policy",
     "_build_replay_parentage",
     "_build_resume_contract",
-    "_resolve_manifest_replay_readiness_verdict",
     "_resolve_exact_replay_support_boundary",
+    "_resolve_manifest_replay_readiness_verdict",
     "_resolve_replay_family_contract",
 ]
 

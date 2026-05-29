@@ -938,20 +938,20 @@
       "public_path": "src/bioetl/application/core/batch_execution/contracts.py",
       "private_module": "bioetl.application.core.batch_execution._contracts",
       "public_module": "bioetl.application.core.batch_execution.contracts",
-      "public_src_importer_count": 6,
+      "public_src_importer_count": 3,
       "public_test_importer_count": 0,
-      "private_src_importer_count": 1,
+      "private_src_importer_count": 4,
       "private_test_importer_count": 0,
       "public_src_importers": [
         "src/bioetl/application/core/batch_execution/__init__.py",
-        "src/bioetl/application/core/batch_execution/lifecycle.py",
-        "src/bioetl/application/core/batch_execution/run_service.py",
-        "src/bioetl/application/core/batch_execution/state_service.py",
         "src/bioetl/application/core/batch_executor_helpers.py",
         "src/bioetl/application/core/batch_executor_protocols.py"
       ],
       "private_src_importers": [
-        "src/bioetl/application/core/batch_execution/contracts.py"
+        "src/bioetl/application/core/batch_execution/contracts.py",
+        "src/bioetl/application/core/batch_execution/lifecycle.py",
+        "src/bioetl/application/core/batch_execution/run_service.py",
+        "src/bioetl/application/core/batch_execution/state_service.py"
       ]
     },
     {

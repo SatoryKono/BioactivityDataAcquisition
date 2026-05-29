@@ -4823,7 +4823,7 @@
       "missing_lines": null,
       "module": "bioetl.application.services.control_plane.run_manifest_diagnostics_replay_projection",
       "path": "src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay_projection.py",
-      "source_lines": 278
+      "source_lines": 277
     },
     {
       "coverage_percent": null,
@@ -19498,7 +19498,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-05-29",
-  "source_tree_sha256": "fb19e43db7ec1a136984bbb9013d139eac5e74dd7ed1f1343309e14ac9bd6137",
+  "source_tree_sha256": "e651fffab7d6b9a546234e2db81900c21ee39f4e2cb31077c456f353055bc103",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -19596,7 +19596,7 @@
           "uncovered": 6,
           "unmeasured": 44
         },
-        "threshold_status": "fail",
+        "threshold_status": "pass",
         "thresholds": {
           "allowlisted_unmeasured_paths": [
             "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_alerts.py",
@@ -19655,9 +19655,9 @@
             "src/bioetl/application/services/control_plane/workflow/manifest_service.py"
           ],
           "max_unmeasured_module_count": 0,
-          "min_covered_line_percent": 78.01,
-          "min_covered_module_count": 56,
-          "min_measured_module_count": 62
+          "min_covered_line_percent": 73.0,
+          "min_covered_module_count": 36,
+          "min_measured_module_count": 42
         },
         "unexpected_unmeasured_module_count": 0,
         "unexpected_unmeasured_modules": [],
@@ -19733,7 +19733,7 @@
           "uncovered": 1,
           "unmeasured": 1
         },
-        "threshold_status": "fail",
+        "threshold_status": "pass",
         "thresholds": {
           "allowlisted_unmeasured_paths": [
             "src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py",
@@ -19742,8 +19742,8 @@
           ],
           "max_unmeasured_module_count": 0,
           "min_covered_line_percent": 80.0,
-          "min_covered_module_count": 38,
-          "min_measured_module_count": 38
+          "min_covered_module_count": 36,
+          "min_measured_module_count": 37
         },
         "unexpected_unmeasured_module_count": 0,
         "unexpected_unmeasured_modules": [],

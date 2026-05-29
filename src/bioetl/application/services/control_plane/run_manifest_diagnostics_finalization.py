@@ -12,9 +12,6 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_ledger 
 from bioetl.application.services.control_plane._run_manifest_diagnostics_main_helpers import (
     _build_unified_reproducibility_diagnostics,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_source_refs import (
-    _attach_rich_composite_replay_support,
-)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_summary import (
     _build_final_summary,
     _build_runtime_views,
@@ -23,6 +20,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_summary
 )
 from bioetl.application.services.control_plane.run_manifest_diagnostics_snapshot_support import (
     merge_ledger_input_snapshots_into_summary,
+)
+from bioetl.application.services.control_plane.run_manifest_diagnostics_source_refs import (
+    _attach_rich_composite_replay_support,
 )
 from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring import (
     build_reproducibility_audit_scoring,
