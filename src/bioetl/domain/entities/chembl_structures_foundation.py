@@ -69,6 +69,15 @@ class Target(BaseEntity):
     pipeline_stages: str | None = None
     target_components: str | None = None
     target_component_synonyms: str | None = None
+    target_protein_synonyms: str | None = None
+    target_gene_synonyms: str | None = None
+    target_ec_numbers: str | None = None
+    target_xref_iuphar_ids: str | None = None
+    target_xref_pdb_ids: str | None = None
+    target_xref_go_component: str | None = None
+    target_xref_go_function: str | None = None
+    target_xref_go_process: str | None = None
+    target_xref_reactome_ids: str | None = None
     cross_references: str | None = None
     component_accessions: list[str] | None = None
     primary_component_id: int | None = None

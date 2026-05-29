@@ -93,6 +93,30 @@ Silver schema.
 - `description` из `target_description` или fallback `description`
 - `downgraded` как bool-нормализацию входного значения
 - `target_components`, `target_component_synonyms`, `cross_references`, `pipeline_stages` как JSON-строки
+- `target_protein_synonyms`, `target_gene_synonyms`, `target_ec_numbers` как pipe-delimited derived-поля с sentinel `unknown`
+
+### 3.4. Derived synonym projection
+
+Из nested `target_components[].target_component_synonyms[]` runtime дополнительно
+проецирует три scalar-поля:
+
+- `target_protein_synonyms` ← `syn_type = UNIPROT`
+- `target_gene_synonyms` ← `syn_type = GENE_SYMBOL` и `GENE_SYMBOL_*`
+- `target_ec_numbers` ← `syn_type = EC_NUMBER`
+
+Правила нормализации:
+
+- `syn_type` сравнивается после `str(value).strip().upper()`
+- `component_synonym` игнорируется, если `null` / пустой / whitespace-only
+- значения проходят `strip()` и сохраняют исходный internal case
+- символ `|` экранируется как `\|`
+- dedupe идёт по нормализованному значению с first-seen ordering, без сортировки
+- при отсутствии значений возвращается literal `unknown`
+
+Forensic boundary остаётся прежней:
+
+- `target_component_synonyms` сохраняет агрегированный raw JSON string для аудита
+- derived scalar-поля используются для аналитического Silver/Gold surface и hash-governed replay
 
 Nested `cross_references[].xref_src_db` namespaces are now runtime-governed via
 the shared registry `configs/vocab/chembl_reference_sources.yaml`; malformed
@@ -124,6 +148,8 @@ Silver Pandera schema определяется в
 `src/bioetl/domain/schemas/chembl/target.py` как `TargetSchema`.
 
 Обе схемы отражают строковый contract для component/xref/synonym payloads.
+Это включает forensic JSON field `target_component_synonyms` и три pipe-delimited
+derived synonym поля.
 
 ______________________________________________________________________
 

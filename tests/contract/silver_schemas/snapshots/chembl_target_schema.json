@@ -249,6 +249,24 @@
     "required": false,
     "unique": false
   },
+  "target_ec_numbers": {
+    "checks": [],
+    "coerce": false,
+    "description": "Pipe-delimited EC-number-derived target synonyms or unknown.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_gene_synonyms": {
+    "checks": [],
+    "coerce": false,
+    "description": "Pipe-delimited gene-symbol-derived target synonyms or unknown.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "target_id": {
     "checks": [
       {
@@ -261,6 +279,15 @@
     "dtype": "str",
     "nullable": false,
     "required": true,
+    "unique": false
+  },
+  "target_protein_synonyms": {
+    "checks": [],
+    "coerce": false,
+    "description": "Pipe-delimited UNIPROT-derived target synonyms or unknown.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
     "unique": false
   },
   "target_type": {

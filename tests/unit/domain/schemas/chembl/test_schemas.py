@@ -269,6 +269,25 @@ class TestChemblSchemas:
 
         TargetSchema.validate(pd.DataFrame([record]))
 
+    def test_target_schema_accepts_derived_synonym_fields(
+        self,
+        base_etl_fields: dict[str, object],
+    ) -> None:
+        """Target schema should include derived target synonym projections."""
+        record = {
+            **base_etl_fields,
+            "target_id": "CHEMBL1862",
+            "target_type": "SINGLE PROTEIN",
+            "pref_name": "Cyclooxygenase-2",
+            "organism": "Homo sapiens",
+            "species_group_flag": False,
+            "target_protein_synonyms": "PTGS2|COX-2",
+            "target_gene_synonyms": "PTGS2",
+            "target_ec_numbers": "1.14.99.1",
+        }
+
+        TargetSchema.validate(pd.DataFrame([record]))
+
     @pytest.mark.parametrize(
         ("field_name", "invalid_value"),
         [

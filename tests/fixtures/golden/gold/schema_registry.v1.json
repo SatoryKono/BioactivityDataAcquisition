@@ -1788,10 +1788,25 @@
           "dtype": "str",
           "nullable": true
         },
+        "target_ec_numbers": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_gene_synonyms": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "target_id": {
           "description": "",
           "dtype": "str",
           "nullable": false
+        },
+        "target_protein_synonyms": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
         },
         "target_type": {
           "description": "",

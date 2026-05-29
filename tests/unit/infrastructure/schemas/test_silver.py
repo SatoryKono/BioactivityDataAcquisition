@@ -288,6 +288,29 @@ class TestChemblTargetSchema:
                 f"{field_name} should be string (canonical JSON), got {field.type}"
             )
 
+    def test_has_derived_synonym_projection_fields(self):
+        """Verify derived target synonym fields are published as strings."""
+        for field_name in (
+            "target_protein_synonyms",
+            "target_gene_synonyms",
+            "target_ec_numbers",
+        ):
+            assert field_name in CHEMBL_TARGET_SCHEMA.names
+            assert CHEMBL_TARGET_SCHEMA.field(field_name).type == pa.string()
+
+    def test_has_derived_xref_projection_fields(self):
+        """Verify derived target xref projection fields are published as strings."""
+        for field_name in (
+            "target_xref_iuphar_ids",
+            "target_xref_pdb_ids",
+            "target_xref_go_component",
+            "target_xref_go_function",
+            "target_xref_go_process",
+            "target_xref_reactome_ids",
+        ):
+            assert field_name in CHEMBL_TARGET_SCHEMA.names
+            assert CHEMBL_TARGET_SCHEMA.field(field_name).type == pa.string()
+
 
 class TestChemblDocumentSchema:
     """Tests for CHEMBL_PUBLICATION_SCHEMA."""

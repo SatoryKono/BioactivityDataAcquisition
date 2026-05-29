@@ -1,8 +1,8 @@
 # [dq] Enforce shared publication taxonomy parity across profile, DQ, and Gold
 
-**Status**: active
+**Status**: completed_in_repo
 **GitHub Issue**: [#4293](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4293)
-**Issue State**: open
+**Issue State**: closed
 **Synced**: 2026-05-29
 **Priority**: P0 (Critical)
 **Labels**: `provider:crossref`, `provider:openalex`, `provider:pubmed`, `provider:semantic-scholar`, `data-quality`, `governance`, `quality`, `testing`

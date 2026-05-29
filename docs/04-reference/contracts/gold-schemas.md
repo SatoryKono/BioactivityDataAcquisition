@@ -349,7 +349,14 @@ ______________________________________________________________________
 | `target_type`          | str       | Yes      | Тип мишени         |
 | `organism`             | str       | Yes      | Организм           |
 | `taxonomy_id`          | float     | Yes      | NCBI Taxonomy ID   |
+| `target_protein_synonyms` | str    | Yes      | Pipe-delimited UNIPROT synonyms or `unknown` |
+| `target_gene_synonyms` | str       | Yes      | Pipe-delimited GENE_SYMBOL synonyms or `unknown` |
+| `target_ec_numbers`    | str       | Yes      | Pipe-delimited EC numbers or `unknown` |
 | `component_accessions` | list[str] | Yes      | UniProt accessions |
+
+`target_component_synonyms` remains a forensic JSON string, while the three
+derived synonym fields above expose normalized analytic projections with
+first-seen dedupe ordering and `\|` escaping for embedded pipe characters.
 
 ______________________________________________________________________
 

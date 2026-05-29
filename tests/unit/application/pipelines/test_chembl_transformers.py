@@ -721,6 +721,115 @@ class TestTargetTransformer:
         assert isinstance(xrefs, dict)
         assert xrefs["xref_id"] == "P12345"
         assert xrefs["xref_src_db"] == "UniProt"
+        assert result["target_protein_synonyms"] == "unknown"
+        assert result["target_gene_synonyms"] == "unknown"
+        assert result["target_ec_numbers"] == "unknown"
+
+    @pytest.mark.asyncio
+    async def test_transform_projects_derived_component_synonyms(
+        self, transformer, mock_context
+    ):
+        """Target synonym categories should project from raw nested component payloads."""
+        record = {
+            "target_id": "CHEMBL240",
+            "target_components": [
+                {
+                    "component_id": 1,
+                    "target_component_synonyms": [
+                        {
+                            "component_synonym": " Alpha protein ",
+                            "syn_type": "uniprot",
+                        },
+                        {
+                            "component_synonym": "A|B",
+                            "syn_type": "UNIPROT",
+                        },
+                        {
+                            "component_synonym": "GENE1",
+                            "syn_type": "GENE_SYMBOL",
+                        },
+                        {
+                            "component_synonym": "GENE1",
+                            "syn_type": "GENE_SYMBOL_OTHER",
+                        },
+                        {
+                            "component_synonym": " GENE2 ",
+                            "syn_type": "GENE_SYMBOL_OTHER",
+                        },
+                        {
+                            "component_synonym": "1.2.3.4",
+                            "syn_type": "EC_NUMBER",
+                        },
+                        {
+                            "component_synonym": "1.2.3.4",
+                            "syn_type": "EC_NUMBER",
+                        },
+                        {
+                            "component_synonym": "ignored",
+                            "syn_type": "OTHER",
+                        },
+                        {
+                            "component_synonym": " ",
+                            "syn_type": "UNIPROT",
+                        },
+                    ],
+                },
+                {
+                    "component_id": 2,
+                    "target_component_synonyms": [
+                        {
+                            "component_synonym": "Alpha protein",
+                            "syn_type": "UNIPROT",
+                        },
+                        {
+                            "component_synonym": "GENE3",
+                            "syn_type": "GENE_SYMBOL_ALIAS",
+                        },
+                    ],
+                },
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["target_protein_synonyms"] == "Alpha protein|A\\|B"
+        assert result["target_gene_synonyms"] == "GENE1|GENE2|GENE3"
+        assert result["target_ec_numbers"] == "1.2.3.4"
+        assert isinstance(result["target_component_synonyms"], str)
+        assert "Alpha protein" in result["target_component_synonyms"]
+        assert "GENE3" in result["target_component_synonyms"]
+
+    @pytest.mark.asyncio
+    async def test_transform_projects_unknown_when_component_synonyms_missing(
+        self, transformer, mock_context
+    ):
+        """Derived synonym fields should fall back to the missing sentinel."""
+        record = {
+            "target_id": "CHEMBL999",
+            "target_components": [
+                {
+                    "component_id": 1,
+                    "target_component_synonyms": [
+                        {
+                            "component_synonym": None,
+                            "syn_type": "UNIPROT",
+                        },
+                        {
+                            "component_synonym": "  ",
+                            "syn_type": "GENE_SYMBOL",
+                        },
+                    ],
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["target_protein_synonyms"] == "unknown"
+        assert result["target_gene_synonyms"] == "unknown"
+        assert result["target_ec_numbers"] == "unknown"
 
     @pytest.mark.asyncio
     async def test_transform_projects_description_to_target_description(

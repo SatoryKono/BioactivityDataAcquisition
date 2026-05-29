@@ -1,8 +1,8 @@
 # [crossref] Add raw sidecars for semantic-sensitive structured publication payloads
 
-**Status**: deferred_by_priority
+**Status**: completed_in_repo
 **GitHub Issue**: [#4294](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4294)
-**Issue State**: open
+**Issue State**: closed
 **Synced**: 2026-05-29
 **Priority**: P1 (High)
 **Labels**: `provider:crossref`, `governance`, `schema-evolution`, `technical-debt`, `data-lineage`, `quality`
