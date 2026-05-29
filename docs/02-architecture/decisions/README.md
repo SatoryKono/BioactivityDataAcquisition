@@ -105,7 +105,7 @@ This directory contains Architecture Decision Records documenting significant ar
 
 ### Lifecycle Management
 
-- [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy
+- [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy — superseded historical context; see ADR-015
 - [ADR-015](ADR-015-pipeline-services-lifecycle.md): Pipeline Services Lifecycle
 
 ### Data Quality

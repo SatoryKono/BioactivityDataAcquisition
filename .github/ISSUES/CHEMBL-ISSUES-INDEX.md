@@ -56,9 +56,9 @@ performed on `main` at `2026-05-19`.
 
 ## Notes
 
-- As of `2026-05-29`, P0 drafts `CHEMBL-001..010` are verified as
-  `completed_in_repo` on current `main`; active execution should move to
-  `CHEMBL-016`, `CHEMBL-021`, and the residual follow-up set in publish order.
+- As of `2026-05-29`, drafts `CHEMBL-001..021` are verified as
+  `completed_in_repo` on current `main`; no active ChEMBL execution remains in
+  this issue pack.
 - Repo-native verification for this closeout wave:
   - `uv run python -m pytest tests/integration/config/test_chembl_policy_surface_parity.py -q`
   - `uv run python -m pytest tests/integration/config/test_chembl_observed_value_fixtures.py -q`

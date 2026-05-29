@@ -145,7 +145,6 @@ quality:
             type: custom
             validator: validate_target_xref_src_db_json_vocab
             nullable: true
-            severity: warn
             error_message: cross_references must be canonical JSON with governed xref_src_db source namespaces when present
         -   field: target_xref_iuphar_ids
             type: not_null

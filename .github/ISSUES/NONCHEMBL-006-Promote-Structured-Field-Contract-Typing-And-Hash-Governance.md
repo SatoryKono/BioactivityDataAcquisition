@@ -1,6 +1,6 @@
 # [contracts] Promote structured-field contract typing and hash governance
 
-**Status**: active
+**Status**: completed_in_repo
 **Priority**: P1 (High)
 **Labels**: `contracts`, `normalization`, `hashing`, `governance`
 **Epic**: Non-ChEMBL Normalization Governance 2026Q2

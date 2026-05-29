@@ -95,7 +95,8 @@ observability:
 1. Lock освобождается
 1. Exit code 0
 
-См. [ADR-008: Graceful Shutdown Strategy](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)
+См. [ADR-015: Pipeline Services Lifecycle](../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md).
+`ADR-008` сохраняется только как historical/superseded context.
 
 ## Жизненный цикл Composite Pipeline
 

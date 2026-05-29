@@ -1,6 +1,6 @@
 # [dq] Enforce nested ChEMBL xref source vocabulary in target structured fields
 
-**Status**: deferred_by_priority
+**Status**: completed_in_repo
 **Priority**: P1 (High)
 **Labels**: `provider:chembl`, `governance`, `data-quality`, `config`, `composite`, `technical-debt`
 **Epic**: ChEMBL Normalization Residuals 2026Q2

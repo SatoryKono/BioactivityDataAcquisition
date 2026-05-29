@@ -98,7 +98,7 @@ checkout path uses `.venv-win` in PowerShell and an external WSL venv at
 | **Medallion Architecture** | Bronze → Silver → Gold data flow                     | [ADR-002](../02-architecture/decisions/ADR-002-medallion-architecture.md)         |
 | **Delta Lake Storage**     | ACID transactions, time travel, schema evolution     | [ADR-001](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)          |
 | **Local-Only Deployment**  | File-based storage, no Docker/Redis required         | [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)          |
-| **Graceful Shutdown**      | SIGTERM/SIGINT handling with checkpoint save         | [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)     |
+| **Graceful Shutdown**      | SIGTERM/SIGINT handling with checkpoint save         | [ADR-015](../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md)     |
 | **Circuit Breaker**        | Fault tolerance for API failures                     | [ADR-007](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) |
 | **Deterministic Writes**   | Reproducible SCD2 with ingestion-ts                  | [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md)           |
 | **Gold Validation**        | Pandera strict schema validation                     | [ADR-018](../02-architecture/decisions/ADR-018-gold-strict-validation.md)         |

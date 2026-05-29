@@ -131,7 +131,7 @@ ______________________________________________________________________
 
 | ADR                                                               | Тема                                |
 | ----------------------------------------------------------------- | ----------------------------------- |
-| [ADR-008](decisions/ADR-008-graceful-shutdown-strategy.md)        | Graceful Shutdown Strategy          |
+| [ADR-015](decisions/ADR-015-pipeline-services-lifecycle.md)       | Pipeline Services Lifecycle         |
 | [ADR-026](decisions/ADR-026-composite-pipeline-pattern.md)        | Composite Pipeline — расширения CLI |
 | [ADR-044](decisions/ADR-044-run-manifest-ledger-control-plane.md) | Control-plane inspection CLI        |
 

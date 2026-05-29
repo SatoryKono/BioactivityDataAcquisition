@@ -33,6 +33,9 @@ These files are publish-ready GitHub issue drafts created from the
 - The highest-risk issue is UniProt semantic payload replay/debug coverage,
   because the underlying normalization is deterministic but not yet uniformly
   forensically preserved.
+- As of `2026-05-29`, drafts `NONCHEMBL-004..006` are verified as
+  `completed_in_repo` on current `main` by repo-native vocabulary, identifier,
+  structured-payload, and hash-governance test anchors.
 
 ## Residual Follow-Up Drafts After First-Wave Closeout
 

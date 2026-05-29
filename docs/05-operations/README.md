@@ -76,7 +76,7 @@ standard runbook path.
 ## Related Documentation
 
 - [RULES.md](../00-project/RULES.md) §5 — Operations and DR policies
-- [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) — Graceful shutdown (**Superseded**, historical context)
+- [ADR-015](../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md) — Current pipeline lifecycle and shutdown coordination
 - [Pipeline Lifecycle](../03-guides/pipeline-lifecycle.md) — Current lifecycle and shutdown behavior
 - [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md) — Local deployment
 

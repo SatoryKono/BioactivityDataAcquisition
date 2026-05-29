@@ -53,18 +53,18 @@ architecture section focuses on structure, boundaries, and design rationale.
 
 See [decisions/README.md](decisions/README.md) for full index with categories.
 
-47 ADRs documenting key architectural decisions:
+48 ADRs documenting key architectural decisions:
 
 | ADR                                                                | Topic                                     | RULES.md Reference |
 | ------------------------------------------------------------------ | ----------------------------------------- | ------------------ |
 | [ADR-001](decisions/ADR-001-delta-lake-vs-parquet.md)              | Delta Lake vs Parquet                     | §2.1, §3           |
 | [ADR-002](decisions/ADR-002-medallion-architecture.md)             | Medallion Architecture                    | §1                 |
-| [ADR-003](decisions/ADR-003-in-memory-locking-strategy.md)         | In-Memory Locking                         | §6                 |
+| [ADR-003](decisions/ADR-003-in-memory-locking-strategy.md)         | In-Memory Locking *(Superseded; see ADR-010)* | §6             |
 | [ADR-004](decisions/ADR-004-pydantic-vs-dataclasses.md)            | Pydantic vs Dataclasses                   | -                  |
 | [ADR-005](decisions/ADR-005-composition-layer-separation.md)       | Composition Layer                         | §1.1               |
 | [ADR-006](decisions/ADR-006-logger-metrics-ports.md)               | Logger & Metrics Ports                    | -                  |
 | [ADR-007](decisions/ADR-007-circuit-breaker-implementation.md)     | Circuit Breaker                           | §3.1.4             |
-| [ADR-008](decisions/ADR-008-graceful-shutdown-strategy.md)         | Graceful Shutdown                         | §5.3               |
+| [ADR-008](decisions/ADR-008-graceful-shutdown-strategy.md)         | Graceful Shutdown *(Superseded; see ADR-015)* | §5.3           |
 | [ADR-009](decisions/ADR-009-paginated-fetcher-mixin.md)            | Paginated Fetcher                         | -                  |
 | [ADR-010](decisions/ADR-010-local-only-deployment.md)              | Local-Only Deployment                     | §5.6               |
 | [ADR-011](decisions/ADR-011-remove-watermark-mechanism.md)         | Remove Watermark                          | -                  |

@@ -166,12 +166,12 @@ ______________________________________________________________________
 | [05-composition-layer.md](../02-architecture/05-composition-layer.md)                                                           | Composition Root, DI, Factories                        | §1.1       |
 | [ADR-001: Delta Lake](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)                                            | Storage engine choice                                  | §2.1, §3   |
 | [ADR-002: Medallion](../02-architecture/decisions/ADR-002-medallion-architecture.md)                                            | Data layering pattern                                  | §1         |
-| [ADR-003: In-Memory Locking](../02-architecture/decisions/ADR-003-in-memory-locking-strategy.md)                                | MemoryLock strategy                                    | §6         |
+| [ADR-010: Local-Only Deployment](../02-architecture/decisions/ADR-010-local-only-deployment.md)                                | Current single-process locking posture; ADR-003 historical | §6      |
 | [ADR-004: Pydantic](../02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md)                                            | Validation approach                                    | -          |
 | [ADR-005: Composition Layer](../02-architecture/decisions/ADR-005-composition-layer-separation.md)                              | DI and layer separation                                | §1.1       |
 | [ADR-006: Logger/Metrics Ports](../02-architecture/decisions/ADR-006-logger-metrics-ports.md)                                   | Port abstractions                                      | §1.1       |
 | [ADR-007: Circuit Breaker](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md)                              | Failure handling pattern                               | §3.1.4     |
-| [ADR-008: Graceful Shutdown](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)                                | SIGTERM/SIGINT handling                                | §5.3       |
+| [ADR-015: Pipeline Services Lifecycle](../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md)                    | Current SIGTERM/SIGINT handling and shutdown coordination | §5.3    |
 | [ADR-009: Paginated Fetcher](../02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md)                                   | Pagination abstraction                                 | App D      |
 | [ADR-010: Local-Only Deploy](../02-architecture/decisions/ADR-010-local-only-deployment.md)                                     | File-based deployment (no Docker)                      | §5.6       |
 | [ADR-011: Watermark Removal](../02-architecture/decisions/ADR-011-remove-watermark-mechanism.md)                                | Simplified checkpoint model                            | §2.4       |
@@ -247,9 +247,9 @@ ______________________________________________________________________
 | ------------------------ | ---------------------------------------------------------------------------------- | ---------- |
 | Error Handling           | [ADR-016](../02-architecture/decisions/ADR-016-error-handling-strategy.md)         | §3.1       |
 | Circuit Breaker          | [ADR-007](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md)  | §3.1.4     |
-| Locking                  | [ADR-003](../02-architecture/decisions/ADR-003-in-memory-locking-strategy.md)      | §3.3       |
+| Locking                  | [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)            | §3.3       |
 | DQ Metrics               | [RULES.md](RULES.md)                                                               | §3.4       |
-| Graceful Shutdown        | [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)      | §5.3       |
+| Graceful Shutdown        | [ADR-015](../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md)      | §5.3       |
 | DR Procedures            | [runbooks/index.md](../05-operations/runbooks/index.md)                            | §5.5       |
 | Control-Plane Contract   | [run-manifest-ledger.md](../04-reference/contracts/run-manifest-ledger.md)         | §2.4, §5.5 |
 | Inspection CLI           | [cli.md](../04-reference/cli.md)                                                   | §5.5       |

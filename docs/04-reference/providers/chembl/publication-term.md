@@ -29,7 +29,6 @@ ______________________________________________________________________
 - `MESH_HEADING` — MeSH-дескрипторы
 - `MESH_QUALIFIER` — MeSH-квалификаторы/подзаголовки
 - `KEYWORD` — Ключевые слова, заданные авторами
-- `CONCEPT` — ChEMBL-derived concept terms
 
 ______________________________________________________________________
 
@@ -41,7 +40,7 @@ ______________________________________________________________________
 | ---------------- | ----- | ----------------------------------------------------------- |
 | `publication_id` | `str` | FK → ChEMBL ID родительской публикации                      |
 | `term`           | `str` | Текст термина (напр., "Aspirin", "kinase inhibitor")        |
-| `term_type`      | `str` | Тип термина: MESH_HEADING, MESH_QUALIFIER, KEYWORD, CONCEPT |
+| `term_type`      | `str` | Тип термина: MESH_HEADING, MESH_QUALIFIER, KEYWORD |
 
 ### MeSH-специфичные поля
 
@@ -99,14 +98,14 @@ ______________________________________________________________________
 
 1. **`publication_id`** — обязательное, формат `CHEMBL\d+`
 1. **`term`** — обязательное, минимум 1 символ
-1. **`term_type`** — обязательное, одно из: MESH_HEADING, MESH_QUALIFIER, KEYWORD, CONCEPT
+1. **`term_type`** — обязательное, одно из: MESH_HEADING, MESH_QUALIFIER, KEYWORD
 
 ### Gold-фильтры
 
 ```yaml
 gold_filters:
   columns:
-    term_type: [MESH_HEADING, MESH_QUALIFIER, KEYWORD, CONCEPT]
+    term_type: [MESH_HEADING, MESH_QUALIFIER, KEYWORD]
   required_fields:
     - publication_id
     - term

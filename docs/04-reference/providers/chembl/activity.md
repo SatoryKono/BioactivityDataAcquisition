@@ -44,8 +44,9 @@ pipeline:
     sink:
         silver:
             mode: merge
+            idempotency_contract: merge_upsert
         gold:
-            enabled: false
+            enabled: true
 
 schema:
     column_groups:
