@@ -143,25 +143,21 @@ class TargetSchema(ETLRecordSchema):
         nullable=True,
         description="Pipe-delimited EC-number-derived target synonyms or unknown.",
     )
-    target_xref_iuphar_ids: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Pipe-delimited IUPHAR/Guide to PHARMACOLOGY xref IDs or unknown.",
-    )
     target_xref_pdb_ids: Series[str] | None = pa.Field(
         nullable=True,
         description="Pipe-delimited PDB/PDBe xref IDs or unknown.",
     )
     target_xref_go_component: Series[str] | None = pa.Field(
         nullable=True,
-        description="Pipe-delimited GO component xref IDs or unknown.",
+        description="Pipe-delimited GO cellular component xref names or unknown.",
     )
     target_xref_go_function: Series[str] | None = pa.Field(
         nullable=True,
-        description="Pipe-delimited GO function xref IDs or unknown.",
+        description="Pipe-delimited GO molecular function xref names or unknown.",
     )
     target_xref_go_process: Series[str] | None = pa.Field(
         nullable=True,
-        description="Pipe-delimited GO process xref IDs or unknown.",
+        description="Pipe-delimited GO biological process xref names or unknown.",
     )
     target_xref_reactome_ids: Series[str] | None = pa.Field(
         nullable=True,

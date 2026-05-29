@@ -2,14 +2,14 @@
 id: architecture-dependency-map-drift-sync-2026-05-29
 title: Sync architecture dependency map artifacts
 task_id: architecture-dependency-map-drift-sync-2026-05-29
-created_at: '2026-05-29T15:39:07Z'
+created_at: '2026-05-29T16:33:51Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
 summary: Regenerated docs/02-architecture/generated/module-dependency-map.md and module-dependency-map.json
-  through the same runpy execution path used by the architecture drift guard so the
-  committed dependency-map artifacts match the current repository state again.
+  with the canonical dependency-map generator, then validated generator --check and
+  the architecture dependency docs drift test.
 ---
 
 # Episodic summary
@@ -20,7 +20,7 @@ summary: Regenerated docs/02-architecture/generated/module-dependency-map.md and
 
 ## Outcome
 
-- Regenerated docs/02-architecture/generated/module-dependency-map.md and module-dependency-map.json through the same runpy execution path used by the architecture drift guard so the committed dependency-map artifacts match the current repository state again.
+- Regenerated docs/02-architecture/generated/module-dependency-map.md and module-dependency-map.json with the canonical dependency-map generator, then validated generator --check and the architecture dependency docs drift test.
 
 ## Lessons learned
 

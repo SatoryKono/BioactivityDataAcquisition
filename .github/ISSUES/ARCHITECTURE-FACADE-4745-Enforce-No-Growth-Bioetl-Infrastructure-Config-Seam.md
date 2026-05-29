@@ -4,7 +4,7 @@
 **Priority**: P1 (High)
 **Labels**: `architecture`, `tech-debt`, `compatibility`, `governance`
 **GitHub Issue**: [#4745](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4745)
-**Issue State**: open
+**Issue State**: closed
 **Last synced**: 2026-05-29
 
 ## Problem

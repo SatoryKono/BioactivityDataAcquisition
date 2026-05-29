@@ -301,7 +301,6 @@ class TestChemblTargetSchema:
     def test_has_derived_xref_projection_fields(self):
         """Verify derived target xref projection fields are published as strings."""
         for field_name in (
-            "target_xref_iuphar_ids",
             "target_xref_pdb_ids",
             "target_xref_go_component",
             "target_xref_go_function",

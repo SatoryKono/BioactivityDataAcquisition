@@ -16,7 +16,7 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from bioetl.infrastructure.config import load_pipeline_config
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
 # Discover all unified entity configs (provider/entity.yaml → provider_entity)
 _ENTITIES_DIR = Path("configs/entities")

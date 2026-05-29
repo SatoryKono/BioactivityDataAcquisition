@@ -84,7 +84,7 @@ from bioetl.infrastructure.control_plane import FileArtifactByteComparisonAdapte
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
-from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.config._base import Settings
 from tests.integration.ci.reproducibility_contract_support import (
     CompositeReplayHost as _CompositeReplayHost,
     DEFAULT_MANIFEST_IDENTITY as _DEFAULT_MANIFEST_IDENTITY,

@@ -83,6 +83,14 @@ chembl,target,required_fields,target_id,"""target_id""",,keep_in_silver,structur
 chembl,target,required_fields,pref_name,"""pref_name""","""pref_name""",keep_in_silver,also present in gold_filters (informational)
 chembl,target,required_fields,organism,"""organism""","""organism""",keep_in_silver,also present in gold_filters (informational)
 chembl,target,required_fields,target_type,"""target_type""",,keep_in_silver,structural rule stays in silver_filters
+chembl,target,required_fields,target_protein_synonyms,"""target_protein_synonyms""",,keep_in_silver,structural rule stays in silver_filters
+chembl,target,required_fields,target_gene_synonyms,"""target_gene_synonyms""",,keep_in_silver,structural rule stays in silver_filters
+chembl,target,required_fields,target_ec_numbers,"""target_ec_numbers""",,keep_in_silver,structural rule stays in silver_filters
+chembl,target,required_fields,target_xref_pdb_ids,"""target_xref_pdb_ids""",,keep_in_silver,structural rule stays in silver_filters
+chembl,target,required_fields,target_xref_go_component,"""target_xref_go_component""",,keep_in_silver,structural rule stays in silver_filters
+chembl,target,required_fields,target_xref_go_function,"""target_xref_go_function""",,keep_in_silver,structural rule stays in silver_filters
+chembl,target,required_fields,target_xref_go_process,"""target_xref_go_process""",,keep_in_silver,structural rule stays in silver_filters
+chembl,target,required_fields,target_xref_reactome_ids,"""target_xref_reactome_ids""",,keep_in_silver,structural rule stays in silver_filters
 chembl,target,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
 chembl,target_component,required_fields,component_id,"""component_id""",,keep_in_silver,structural rule stays in silver_filters
 chembl,target_component,required_fields,organism,"""organism""",,keep_in_silver,structural rule stays in silver_filters

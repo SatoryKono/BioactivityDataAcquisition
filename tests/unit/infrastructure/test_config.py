@@ -6,7 +6,7 @@ import pytest
 
 from bioetl.domain.config import FieldPolicyConfig, PipelineConfig
 from bioetl.domain.medallion import SilverWriteMode
-from bioetl.infrastructure.config import yaml_config_to_domain
+from bioetl.infrastructure.config._base import yaml_config_to_domain
 from bioetl.infrastructure.schemas.pipeline_config import DQYamlConfig as YamlDQConfig
 from bioetl.infrastructure.schemas.pipeline_config import (
     FieldPolicyConfigSchema,

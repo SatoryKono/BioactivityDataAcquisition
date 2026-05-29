@@ -6,7 +6,8 @@ from typing import Any
 import pytest
 import yaml
 
-from bioetl.infrastructure.config import load_pipeline_config, load_source_config
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+from bioetl.infrastructure.config.source_config_loader import load_source_config
 from bioetl.infrastructure.config.source_normalizers.source import (
     normalize_source_config,
 )

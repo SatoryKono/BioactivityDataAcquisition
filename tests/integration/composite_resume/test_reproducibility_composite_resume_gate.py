@@ -17,7 +17,7 @@ from bioetl.composition.bootstrap.runtime.composite_control_plane_builder import
 from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
-from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.config._base import Settings
 from tests.integration.ci.reproducibility_contract_support import (
     build_replay_matrix_composite_config as _build_replay_matrix_composite_config,
     load_manifest_payload as _load_manifest_payload,

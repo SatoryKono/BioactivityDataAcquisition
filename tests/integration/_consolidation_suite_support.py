@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from bioetl.infrastructure.config import get_pipeline_config, get_settings
+from bioetl.infrastructure.config._base import get_pipeline_config, get_settings
 from tests.helpers.control_plane_replay import (
     PROJECT_ROOT,
     load_control_plane_payloads,

@@ -18,7 +18,7 @@ from bioetl.composition.factories.pipeline import GenericPipelineFactory
 from bioetl.composition.factories.storage import StorageBundle, StorageContext
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.ports import LoggerPort, MetricsPort
-from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.config._base import Settings
 from bioetl.domain.ports.runtime.runner import PipelineCreateRunnerRequest
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -80,7 +80,7 @@ class IntegrationPipelineTestCase:
             )
 
         # Patch Settings class to return test paths
-        from bioetl.infrastructure.config import Settings
+        from bioetl.infrastructure.config._base import Settings
         from unittest.mock import PropertyMock
 
         type(Settings).bronze_path = PropertyMock(return_value=Path(self.bronze_path))
@@ -274,7 +274,7 @@ class IntegrationPipelineTestCase:
         """
         # Load config via factory (it handles loading)
         # But we might want to override some values (e.g. limit, or sinks)
-        from bioetl.infrastructure.config import load_pipeline_config
+        from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
         pipeline_config = load_pipeline_config(factory.pipeline_name)
 

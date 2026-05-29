@@ -5,7 +5,7 @@ from __future__ import annotations
 from bioetl.application.services.control_plane._effective_config_provenance_support import (
     build_source_class_provenance,
 )
-from bioetl.application.services.control_plane._effective_config_support import (
+from bioetl.application.services.control_plane.effective_config_support import (
     SemanticIdentityPayloadContext,
     build_dq_components,
     build_effective_execution_config,

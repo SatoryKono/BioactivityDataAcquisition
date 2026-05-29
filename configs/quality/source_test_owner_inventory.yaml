@@ -112,30 +112,6 @@ modules:
     owner_tests:
       - tests/unit/application/composite/runner_pkg/test_runner_runtime_helpers.py
 
-  - source: src/bioetl/application/services/control_plane/historical_replay_certification_service.py
-    ownership: direct_test
-    rationale: "Historical replay certification is mutation-gated and owned by a focused same-path suite."
-    owner_tests:
-      - tests/unit/application/services/control_plane/test_historical_replay_certification_service.py
-
-  - source: src/bioetl/application/services/control_plane/historical_replay_closure_service.py
-    ownership: direct_test
-    rationale: "Historical replay closure is mutation-gated and owned by a focused same-path suite."
-    owner_tests:
-      - tests/unit/application/services/control_plane/test_historical_replay_closure_service.py
-
-  - source: src/bioetl/application/services/control_plane/historical_replay_corpus_service.py
-    ownership: direct_test
-    rationale: "Historical replay corpus management is mutation-gated and owned by a focused same-path suite."
-    owner_tests:
-      - tests/unit/application/services/control_plane/test_historical_replay_corpus_service.py
-
-  - source: src/bioetl/application/services/control_plane/historical_replay_universe_service.py
-    ownership: direct_test
-    rationale: "Historical replay universe reporting is mutation-gated and owned by a focused same-path suite."
-    owner_tests:
-      - tests/unit/application/services/control_plane/test_historical_replay_universe_service.py
-
   - source: src/bioetl/infrastructure/adapters/cached_bronze_data_source.py
     ownership: direct_test
     rationale: "Cached bronze source wrapper already has a direct same-path owner test."

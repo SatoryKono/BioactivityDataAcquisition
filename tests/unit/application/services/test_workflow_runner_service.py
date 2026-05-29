@@ -19,7 +19,7 @@ from bioetl.application.services.workflow_transform_service import (
     WorkflowTransformService,
 )
 from bioetl.application.workflow.transforms import WorkflowTransformRegistry
-from bioetl.infrastructure.config import load_workflow_config
+from bioetl.infrastructure.config.workflow_config_api import load_workflow_config
 from bioetl.domain.workflow import (
     TransformStepConfig,
     WorkflowConfig,

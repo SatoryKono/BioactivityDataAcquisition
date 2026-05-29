@@ -77,8 +77,6 @@ def test_flat_control_plane_paths_are_compatibility_wrappers_only() -> None:
         "effective_config_service.py",
         "run_ledger_service.py",
         "run_manifest_service.py",
-        "workflow_execution_service.py",
-        "historical_replay_certification_service.py",
     )
 
     for wrapper in wrappers:

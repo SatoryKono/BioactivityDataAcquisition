@@ -6,11 +6,6 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import cast
 
-from bioetl.application.services.control_plane._run_manifest_diagnostics_artifact_support import (
-    apply_artifact_publication_closure_policy,
-    build_produced_artifact_trace,
-    sorted_text_items,
-)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_composite import (
     build_composite_dossier_projection,
 )
@@ -27,6 +22,11 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
 )
 from bioetl.application.services.control_plane._run_manifest_identity_graph_builder import (
     RunManifestIdentityGraphAssembler,
+)
+from bioetl.application.services.control_plane.run_manifest_diagnostics_artifact_support import (
+    apply_artifact_publication_closure_policy,
+    build_produced_artifact_trace,
+    sorted_text_items,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 

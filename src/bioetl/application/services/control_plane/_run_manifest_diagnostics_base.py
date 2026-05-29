@@ -4,9 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane._run_manifest_diagnostics_artifact_support import (
-    build_produced_artifact_trace as _build_produced_artifact_trace,
-)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_base_helpers import (
     _build_code_provenance_state,
     _build_planned_artifact_refs,
@@ -56,6 +53,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_summary
 )
 from bioetl.application.services.control_plane._run_manifest_replay_family_contract_payload import (
     build_replay_family_contract_payload as _build_replay_family_contract_payload,
+)
+from bioetl.application.services.control_plane.run_manifest_diagnostics_artifact_support import (
+    build_produced_artifact_trace as _build_produced_artifact_trace,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (

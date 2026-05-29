@@ -16,7 +16,6 @@ class XrefHelper:
     """Helper for cross-reference operations in target transformation."""
 
     _XREF_DERIVED_COLUMNS: ClassVar[tuple[str, ...]] = (
-        "target_xref_iuphar_ids",
         "target_xref_pdb_ids",
         "target_xref_go_component",
         "target_xref_go_function",
@@ -24,20 +23,16 @@ class XrefHelper:
         "target_xref_reactome_ids",
     )
 
-    _XREF_SOURCE_TO_COLUMN: ClassVar[dict[str, str]] = {
-        "GUIDE_TO_PHARMACOLOGY": "target_xref_iuphar_ids",
-        "GUIDETOPHARMACOLOGY": "target_xref_iuphar_ids",
-        "IUPHAR": "target_xref_iuphar_ids",
-        "GTOPDB": "target_xref_iuphar_ids",
-        "PDB": "target_xref_pdb_ids",
-        "PDBE": "target_xref_pdb_ids",
-        "GOCOMPONENT": "target_xref_go_component",
-        "GO_COMPONENT": "target_xref_go_component",
-        "GOFUNCTION": "target_xref_go_function",
-        "GO_FUNCTION": "target_xref_go_function",
-        "GOPROCESS": "target_xref_go_process",
-        "GO_PROCESS": "target_xref_go_process",
-        "REACTOME": "target_xref_reactome_ids",
+    _XREF_SOURCE_TO_PROJECTION: ClassVar[dict[str, tuple[str, str]]] = {
+        "PDB": ("target_xref_pdb_ids", "xref_id"),
+        "PDBE": ("target_xref_pdb_ids", "xref_id"),
+        "GOCOMPONENT": ("target_xref_go_component", "xref_name"),
+        "GO_COMPONENT": ("target_xref_go_component", "xref_name"),
+        "GOFUNCTION": ("target_xref_go_function", "xref_name"),
+        "GO_FUNCTION": ("target_xref_go_function", "xref_name"),
+        "GOPROCESS": ("target_xref_go_process", "xref_name"),
+        "GO_PROCESS": ("target_xref_go_process", "xref_name"),
+        "REACTOME": ("target_xref_reactome_ids", "xref_id"),
     }
 
     _UNKNOWN_PIPE_SENTINEL: ClassVar[str] = "unknown"
@@ -74,8 +69,8 @@ class XrefHelper:
         return cleaned.replace("|", r"\|")
 
     @staticmethod
-    def append_unique_xref_id(values: list[str], seen: set[str], value: str) -> None:
-        """Append a normalized xref id preserving first-seen order."""
+    def append_unique_pipe_value(values: list[str], seen: set[str], value: str) -> None:
+        """Append a normalized pipe-safe value preserving first-seen order."""
         if value in seen:
             return
 
@@ -111,19 +106,23 @@ class XrefHelper:
             if not isinstance(item, dict):
                 continue
 
-            xref_id = cls.clean_pipe_value(item.get("xref_id"))
             source = cls.normalize_xref_source(item.get("xref_src_db"))
-            if not xref_id or not source:
+            if not source:
                 continue
 
-            column = cls._XREF_SOURCE_TO_COLUMN.get(source)
-            if column is None:
+            projection = cls._XREF_SOURCE_TO_PROJECTION.get(source)
+            if projection is None:
                 continue
 
-            cls.append_unique_xref_id(
+            column, value_field = projection
+            value = cls.clean_pipe_value(item.get(value_field))
+            if not value:
+                continue
+
+            cls.append_unique_pipe_value(
                 buckets[column],
                 seen_by_column[column],
-                xref_id,
+                value,
             )
 
         return {

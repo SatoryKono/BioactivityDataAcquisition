@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane._run_manifest_replay_taxonomy import (
+from bioetl.application.services.control_plane.run_manifest_replay_taxonomy import (
     resolve_replay_taxonomy_projection,
 )
 from bioetl.domain.control_plane import RunCodeProvenance, RunManifest

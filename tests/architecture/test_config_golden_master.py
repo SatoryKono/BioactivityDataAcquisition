@@ -28,7 +28,8 @@ import pytest
 import yaml
 
 from bioetl.domain.config import PipelineConfig
-from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
+from bioetl.infrastructure.config._base import yaml_config_to_domain
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
 # Path to store snapshots
 SNAPSHOT_DIR = Path("tests/snapshots")

@@ -222,7 +222,7 @@ class TestRegistryConfigConsistency:
         self, test_registry: PipelineRegistry
     ) -> None:
         """Verify each registered pipeline has a corresponding YAML config file."""
-        from bioetl.infrastructure.config import load_pipeline_config
+        from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
         registered = test_registry.list_pipelines()
 

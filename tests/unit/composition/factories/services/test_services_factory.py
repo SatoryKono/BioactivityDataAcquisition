@@ -24,7 +24,7 @@ from bioetl.domain.behavior import DataNormalizationConfig, DefaultDataNormalize
 from bioetl.composition.factories.services.port_factories import (
     create_metrics,
 )
-from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.config._base import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 

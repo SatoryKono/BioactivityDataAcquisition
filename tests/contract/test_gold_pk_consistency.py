@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from bioetl.infrastructure.config import load_pipeline_config
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 from tests.contract.silver_schemas.conftest import (
     SILVER_SCHEMAS,
     extract_field_metadata,

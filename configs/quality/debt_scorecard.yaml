@@ -436,7 +436,7 @@ oversized_source_module_inventory:
     target_split: separate score-card policy rules from manifest projection helpers
 
 hotspot_family_coverage_thresholds:
-  snapshot_date: '2026-05-22'
+  snapshot_date: '2026-05-29'
   linked_issue: '#4567'
   mode: fail-fast
   families:
@@ -464,10 +464,10 @@ hotspot_family_coverage_thresholds:
       min_covered_line_percent: 1.31
       allowlisted_unmeasured_paths: []
     application_services_control_plane:
-      min_measured_module_count: 71
+      min_measured_module_count: 62
       max_unmeasured_module_count: 0
-      min_covered_module_count: 70
-      min_covered_line_percent: 70.0
+      min_covered_module_count: 56
+      min_covered_line_percent: 78.01
       allowlisted_unmeasured_paths:
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_alerts.py
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profile_support.py

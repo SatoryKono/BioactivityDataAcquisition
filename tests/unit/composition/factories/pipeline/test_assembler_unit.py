@@ -23,7 +23,7 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.types import RunType
 from bioetl.domain.ports.runtime.runner import PipelineCreateRunnerRequest
-from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.config._base import Settings
 
 _STARTED_AT = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
 

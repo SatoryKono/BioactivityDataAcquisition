@@ -12,7 +12,7 @@ from bioetl.composition.factories._observability_wiring import (
 )
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.ports import LoggerPort, MetricsPort
-from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.config._base import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 

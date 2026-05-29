@@ -5,8 +5,8 @@
     "entities_total": 26,
     "entities_with_silver_filters": 21,
     "entities_with_gold_filters": 21,
-    "rules_total": 102,
-    "keep_in_silver": 83,
+    "rules_total": 110,
+    "keep_in_silver": 91,
     "move_to_gold": 5,
     "duplicate": 14,
     "conflict": 0
@@ -984,7 +984,7 @@
       "has_silver_filters": true,
       "has_gold_filters": true,
       "counts_by_action": {
-        "keep_in_silver": 4,
+        "keep_in_silver": 12,
         "move_to_gold": 0,
         "duplicate": 1,
         "conflict": 0
@@ -1026,6 +1026,86 @@
           "rule_type": "required_fields",
           "field": "target_type",
           "silver_value": "\"target_type\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_protein_synonyms",
+          "silver_value": "\"target_protein_synonyms\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_gene_synonyms",
+          "silver_value": "\"target_gene_synonyms\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_ec_numbers",
+          "silver_value": "\"target_ec_numbers\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_xref_pdb_ids",
+          "silver_value": "\"target_xref_pdb_ids\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_xref_go_component",
+          "silver_value": "\"target_xref_go_component\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_xref_go_function",
+          "silver_value": "\"target_xref_go_function\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_xref_go_process",
+          "silver_value": "\"target_xref_go_process\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_xref_reactome_ids",
+          "silver_value": "\"target_xref_reactome_ids\"",
           "gold_value": "",
           "action": "keep_in_silver",
           "notes": "structural rule stays in silver_filters"

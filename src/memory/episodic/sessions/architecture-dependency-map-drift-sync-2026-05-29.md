@@ -2,7 +2,7 @@
 id: architecture-dependency-map-drift-sync-2026-05-29
 title: Sync architecture dependency map artifacts
 task_id: architecture-dependency-map-drift-sync-2026-05-29
-created_at: '2026-05-29T15:33:24Z'
+created_at: '2026-05-29T16:33:14Z'
 ttl_days: 14
 confidence: episodic
 source_refs:

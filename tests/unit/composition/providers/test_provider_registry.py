@@ -754,7 +754,7 @@ class TestRealProviderRegistration:
 
     def test_chembl_is_registered(self):
         """Verify ChEMBL provider is registered with values from source config."""
-        from bioetl.infrastructure.config import load_source_config
+        from bioetl.infrastructure.config.source_config_loader import load_source_config
 
         assert ProviderRegistry.is_registered("chembl")
 
@@ -782,7 +782,7 @@ class TestRealProviderRegistration:
 
     def test_pubmed_is_registered(self):
         """Verify PubMed provider is registered with values from source config."""
-        from bioetl.infrastructure.config import load_source_config
+        from bioetl.infrastructure.config.source_config_loader import load_source_config
 
         assert ProviderRegistry.is_registered("pubmed")
 
@@ -796,7 +796,7 @@ class TestRealProviderRegistration:
 
     def test_crossref_is_registered(self):
         """Verify CrossRef provider is registered with values from source config."""
-        from bioetl.infrastructure.config import load_source_config
+        from bioetl.infrastructure.config.source_config_loader import load_source_config
 
         assert ProviderRegistry.is_registered("crossref")
 

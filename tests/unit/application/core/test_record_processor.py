@@ -20,7 +20,7 @@ from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.types import BatchID, ValidationResult
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
-from bioetl.infrastructure.config import get_pipeline_config
+from bioetl.infrastructure.config._base import get_pipeline_config
 from tests.unit.application.core.record_processor_test_support import (
     _create_record_processor,
     _create_record_processor_config,

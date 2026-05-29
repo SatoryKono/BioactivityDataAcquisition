@@ -1,6 +1,6 @@
 """Helper functions for main diagnostics.
 
-Extracted from run_manifest_diagnostics.py to meet file size limits.
+Extracted from manifest/diagnostics.py to meet file size limits.
 """
 
 from __future__ import annotations

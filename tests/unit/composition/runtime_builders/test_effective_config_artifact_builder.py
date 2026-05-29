@@ -42,8 +42,7 @@ from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 from bioetl.domain.types import RunID
 from bioetl.domain.types import RunType
-from bioetl.infrastructure.config import Settings
-from bioetl.infrastructure.config._base import PipelineSettings
+from bioetl.infrastructure.config._base import PipelineSettings, Settings
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
