@@ -1,6 +1,9 @@
 # [testing] Expand publication identifier and vocabulary edge-fixture inventory
 
 **Status**: deferred_by_priority
+**GitHub Issue**: [#4296](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4296)
+**Issue State**: open
+**Synced**: 2026-05-29
 **Priority**: P2 (Medium)
 **Labels**: `provider:crossref`, `provider:openalex`, `provider:pubmed`, `provider:semantic-scholar`, `testing`, `governance`, `quality`
 **Epic**: Non-ChEMBL Normalization Residuals 2026Q2

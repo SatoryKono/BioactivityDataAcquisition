@@ -1,6 +1,9 @@
 # Remove Tracked Root Transient Helpers And Restore Root Allowlist Compliance
 
-**Status**: active
+**Status**: completed_in_repo
+**GitHub Issue**: [#4348](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4348)
+**Issue State**: open
+**Synced**: 2026-05-29
 **Priority**: P1
 **Labels**: `governance`, `cleanup`, `infrastructure`, `documentation`, `priority:high`
 **Last audited**: 2026-05-19

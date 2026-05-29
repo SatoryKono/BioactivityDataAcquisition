@@ -1,6 +1,9 @@
 # [crossref] Add raw sidecars for semantic-sensitive structured publication payloads
 
 **Status**: deferred_by_priority
+**GitHub Issue**: [#4294](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4294)
+**Issue State**: open
+**Synced**: 2026-05-29
 **Priority**: P1 (High)
 **Labels**: `provider:crossref`, `governance`, `schema-evolution`, `technical-debt`, `data-lineage`, `quality`
 **Epic**: Non-ChEMBL Normalization Residuals 2026Q2
