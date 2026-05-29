@@ -37,7 +37,7 @@ ______________________________________________________________________
 
 Текущий pipeline config задаёт:
 
-- `quality.entity_field_validations` для `target_id`, `target_type`, `organism`, `tax_id`
+- `quality.entity_field_validations` для `target_id`, `target_type`, `organism`, `taxonomy_id`
 - `quality.entity_cross_field_validations`: `target_id` + `pref_name`
 - `filters.extraction_params`:
   - `target_type: SINGLE PROTEIN`
@@ -50,6 +50,10 @@ ______________________________________________________________________
 - `filters.gold_filters`:
   - `target_type = SINGLE PROTEIN`
   - list-based checks for `component_accessions`, `component_ids`, `component_types`
+
+Важно: extraction filter остаётся provider-facing (`tax_id__isnull`), а
+runtime DQ/business surface после нормализации использует canonical field
+`taxonomy_id`.
 
 ______________________________________________________________________
 
@@ -119,7 +123,7 @@ Forensic boundary для xrefs остаётся прежней:
 - `target_component_synonyms` и `cross_references` сохраняют агрегированные raw JSON строки для аудита
 - xref-derived scalar-поля формируются только из whitelisted `xref_src_db` значений; всё остальное сохраняется только в `cross_references`
 - derived scalar-поля используются для аналитического Silver/Gold surface и hash-governed replay
-- `cross_references` обрабатывает неизвестные/нестандартные `xref_src_db` как warn-only в DQ, не нарушая форензику
+- `cross_references` fail-closed отклоняет неизвестные/нестандартные `xref_src_db` на DQ-уровне; канонический forensic payload допускает только governed source namespaces
 
 Nested `cross_references[].xref_src_db` namespaces are runtime-governed via
 the shared registry `configs/vocab/chembl_reference_sources.yaml`; malformed JSON or unknown source namespaces are logged as warn by DQ validator and preserved for raw forensic payloads.

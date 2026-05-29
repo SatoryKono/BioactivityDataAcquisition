@@ -118,7 +118,7 @@ ______________________________________________________________________
 | **Архитектура Medallion**  | Поток данных Bronze → Silver → Gold                     | [ADR-002](../../02-architecture/decisions/ADR-002-medallion-architecture.md)         |
 | **Хранилище Delta Lake**   | ACID-транзакции, путешествие во времени, эволюция схемы | [ADR-001](../../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)          |
 | **Только локальное развёртывание** | Файловое хранилище, без Docker/Redis            | [ADR-010](../../02-architecture/decisions/ADR-010-local-only-deployment.md)          |
-| **Корректное завершение**  | Обработка SIGTERM/SIGINT с сохранением чекпоинта        | [ADR-008](../../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)     |
+| **Корректное завершение**  | Обработка SIGTERM/SIGINT с сохранением чекпоинта        | [ADR-015](../../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md)     |
 | **Circuit Breaker**        | Отказоустойчивость при сбоях API                        | [ADR-007](../../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) |
 | **Детерминированные записи** | Воспроизводимый SCD2 с ingestion-ts                  | [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md)           |
 | **Валидация Gold**         | Строгая валидация схем Pandera                          | [ADR-018](../../02-architecture/decisions/ADR-018-gold-strict-validation.md)         |

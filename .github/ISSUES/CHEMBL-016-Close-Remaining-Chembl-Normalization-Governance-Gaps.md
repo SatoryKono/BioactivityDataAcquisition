@@ -1,6 +1,6 @@
 # [normalization] Close remaining cross-family ChEMBL normalization governance gaps
 
-**Status**: active
+**Status**: completed_in_repo
 **Priority**: P0/P1
 **Labels**: `normalization`, `dq`, `contracts`, `configs`, `testing`, `governance`
 **Epic**: ChEMBL Normalization and DQ Alignment 2026Q2

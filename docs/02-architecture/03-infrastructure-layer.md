@@ -355,7 +355,7 @@ ______________________________________________________________________
 
 | ADR                                                            | Тема                           |
 | -------------------------------------------------------------- | ------------------------------ |
-| [ADR-003](decisions/ADR-003-in-memory-locking-strategy.md)     | In-Memory Locking Strategy     |
+| [ADR-010](decisions/ADR-010-local-only-deployment.md)          | Local-Only deployment and single-process locking posture |
 | [ADR-007](decisions/ADR-007-circuit-breaker-implementation.md) | Circuit Breaker Implementation |
 | [ADR-010](decisions/ADR-010-local-only-deployment.md)          | Local-Only Deployment          |
 | [ADR-017](decisions/ADR-017-observability-architecture.md)     | Observability Architecture     |

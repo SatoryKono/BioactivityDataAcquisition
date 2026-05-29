@@ -109,7 +109,7 @@ ______________________________________________________________________
 - [Run Manifest and Run Ledger Contract](../../04-reference/contracts/run-manifest-ledger.md) - Published control-plane contract
 - [ADR-044: Run Manifest and Run Ledger Control Plane](../../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
 - [ADR-045: Data Quality Contract System](../../02-architecture/decisions/ADR-045-dq-contract-system.md)
-- [ADR-008: Graceful Shutdown](../../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)
+- [ADR-015: Pipeline Services Lifecycle](../../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md)
 
 ## Compliance
 

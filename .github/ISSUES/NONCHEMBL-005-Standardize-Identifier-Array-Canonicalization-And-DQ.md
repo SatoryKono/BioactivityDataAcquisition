@@ -1,6 +1,6 @@
 # [normalization] Standardize identifier-array canonicalization and DQ
 
-**Status**: deferred_by_priority
+**Status**: completed_in_repo
 **Priority**: P1 (High)
 **Labels**: `normalization`, `dq`, `identifiers`, `publication`
 **Epic**: Non-ChEMBL Normalization Governance 2026Q2

@@ -1,6 +1,6 @@
 # ADR hygiene: archive historical ADR-003 and ADR-008
 
-**Status**: active
+**Status**: completed_in_repo
 **Priority**: P1 (High)
 **Labels**: `documentation`, `governance`
 **GitHub Issue**: [#4746](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4746)
