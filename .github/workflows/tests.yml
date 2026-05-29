@@ -493,6 +493,7 @@ jobs:
                     HYPOTHESIS_PROFILE=fast \
                     uv run pytest tests/unit/ tests/architecture/ \
                       -m "not slow and not serial and not memory" \
+                      --deselect tests/architecture/test_module_coverage_inventory.py::test_module_coverage_inventory_source_tree_hash_is_current \
                       -n auto --dist loadscope --max-worker-restart=0 \
                       -q --tb=short \
                       --junitxml=reports/test-telemetry/junit-fast.xml
@@ -747,6 +748,13 @@ jobs:
                     uv run python -m scripts.engineering.qa report-module-coverage \
                       --coverage-xml reports/coverage/coverage.xml \
                       --json-out reports/quality/module-coverage-inventory.json
+
+            -   name: Verify committed module coverage inventory is current
+                run: |
+                    uv run python -m scripts.engineering.qa report-module-coverage \
+                      --coverage-xml reports/coverage/coverage.xml \
+                      --json-out reports/quality/module-coverage-inventory.json \
+                      --check
 
             -   name: Upload Coverage Report
                 uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4

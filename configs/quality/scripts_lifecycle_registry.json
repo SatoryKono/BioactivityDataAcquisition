@@ -200,6 +200,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded manual repair script for legacy local Node.js bootstrap incidents; retire it if the governed Codex setup flow no longer needs an emergency fallback."
     },
+    "scripts/ai/gemini/clean-gemini-config.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a Windows compatibility helper while the primary Gemini configuration flow remains in Linux/WSL-supported entry points; promote to active utility only if Windows-native usage becomes a governed path."
+    },
     "scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_helper_orphan",
@@ -223,6 +229,24 @@
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain only as an unreferenced Windows compatibility installer during the reviewed retirement window; remove it once external bootstrap docs and local operator flows no longer depend on the old Codex command shim."
+    },
+    "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a Windows compatibility helper while screenshot orchestration remains primarily Linux/WSL-driven; promote to active utility only if a Windows-native observability flow is formally governed."
+    },
+    "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a Windows compatibility helper while screenshot runtime setup remains driven by Linux/WSL-compatible workflows; promote to active utility only if a Windows-native observability bootstrap is formally governed."
+    },
+    "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded legacy Linux bootstrap helper for Grafana screenshot runtime while screenshot orchestration remains primarily governed elsewhere; retire once screenshot bootstrap flows are formalized under a canonical Linux runbook."
     },
     "scripts/ops/maintenance/git/delete-stale-branches.sh": {
       "owner": "@bioetl-platform",
