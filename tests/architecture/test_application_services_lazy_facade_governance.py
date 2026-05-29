@@ -189,17 +189,20 @@ def _run_command_with_stdout_file(
             )
             start_time = time.time()
             poll_interval = 0.1
+            kill_timeout = 5.0  # Secondary timeout after kill
+            killed = False
             while True:
                 returncode = process.poll()
                 if returncode is not None:
                     break
-                if time.time() - start_time > timeout:
+                elapsed = time.time() - start_time
+                if elapsed > timeout:
                     process.kill()
-                    time.sleep(0.1)  # Give process time to terminate
-                    returncode = process.poll()
-                    if returncode is None:
-                        process.terminate()
-                    raise OSError(f"Command timed out after {timeout}s: {' '.join(command)}")
+                    killed = True
+                    start_time = time.time()  # Reset for kill timeout
+                if killed and (time.time() - start_time > kill_timeout):
+                    process.terminate()
+                    raise OSError(f"Command timed out after {timeout}s and failed to terminate: {' '.join(command)}")
                 time.sleep(poll_interval)
 
             completed = subprocess.CompletedProcess(
