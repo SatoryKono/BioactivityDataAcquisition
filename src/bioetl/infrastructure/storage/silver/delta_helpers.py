@@ -266,6 +266,7 @@ async def _write_plain_delta_request(
     request: _DeltaWriteRequest,
     mode: str,
     schema_mode: str | None = None,
+    timeout_seconds: float = 60.0,
 ) -> None:
     """Execute a non-merge Delta write for an already prepared request."""
     kwargs = _build_plain_delta_write_kwargs(
@@ -274,10 +275,16 @@ async def _write_plain_delta_request(
         schema_mode=schema_mode,
     )
     loop = asyncio.get_running_loop()
-    await loop.run_in_executor(
+    write_future = loop.run_in_executor(
         None,
         lambda: load_module().write_deltalake(**kwargs),
     )
+    try:
+        await asyncio.wait_for(write_future, timeout=timeout_seconds)
+    except TimeoutError as exc:
+        raise TimeoutError(
+            f"Delta write timed out after {timeout_seconds}s for table {request.table_path}"
+        ) from exc
 
 
 def _is_duplicate_field_name_schema_error(exc: BaseException) -> bool:
