@@ -250,6 +250,70 @@ class TargetTransformer(BaseChemblTransformer):
         seen.add(normalized)
         values.append(normalized)
 
+    @staticmethod
+    def _synonym_target_field(syn_type: object) -> str | None:
+        """Resolve syn_type to the target synonym bucket name."""
+        if not isinstance(syn_type, str):
+            return None
+
+        normalized_type = syn_type.strip().upper()
+        if not normalized_type:
+            return None
+
+        if normalized_type == "UNIPROT":
+            return "target_protein_synonyms"
+
+        if normalized_type == "EC_NUMBER":
+            return "target_ec_numbers"
+
+        if normalized_type == "GENE_SYMBOL" or normalized_type.startswith("GENE_SYMBOL_"):
+            return "target_gene_synonyms"
+
+        return None
+
+    @staticmethod
+    def _iter_component_synonym_payloads(
+        components: list[JsonDict],
+    ):
+        """Yield validated synonym payload dicts from target components."""
+        for component in components:
+            if not isinstance(component, Mapping):
+                continue
+
+            raw_synonyms = component.get("target_component_synonyms")
+            if not isinstance(raw_synonyms, list):
+                continue
+
+            for synonym_payload in raw_synonyms:
+                if isinstance(synonym_payload, Mapping):
+                    yield synonym_payload
+
+    @staticmethod
+    def _project_single_synonym(
+        payload: JsonDict,
+        buckets: dict[str, list[str]],
+        seen_by_field: dict[str, set[str]],
+    ) -> None:
+        """Apply one synonym payload into the proper accumulator."""
+        field = TargetTransformer._synonym_target_field(payload.get("syn_type"))
+        if not field:
+            return
+
+        TargetTransformer._append_unique_pipe_escaped(
+            buckets[field],
+            seen_by_field[field],
+            payload.get("component_synonym"),
+        )
+
+    @classmethod
+    def _empty_synonym_projection(cls) -> dict[str, str]:
+        """Return projection output with unknown sentinels."""
+        return {
+            "target_protein_synonyms": cls._UNKNOWN_PIPE_SENTINEL,
+            "target_gene_synonyms": cls._UNKNOWN_PIPE_SENTINEL,
+            "target_ec_numbers": cls._UNKNOWN_PIPE_SENTINEL,
+        }
+
     @classmethod
     def _pipe_or_unknown(cls, values: list[str]) -> str:
         """Join ordered values or emit the configured missing sentinel."""
@@ -260,56 +324,37 @@ class TargetTransformer(BaseChemblTransformer):
         components: list[JsonDict] | None,  # Any: untyped ChEMBL API JSON
     ) -> dict[str, str]:
         """Project categorized synonym strings from raw target component payloads."""
-        protein_synonyms: list[str] = []
-        gene_synonyms: list[str] = []
-        ec_numbers: list[str] = []
-        protein_seen: set[str] = set()
-        gene_seen: set[str] = set()
-        ec_seen: set[str] = set()
-
         if not components or not isinstance(components, list):
-            return {
-                "target_protein_synonyms": self._UNKNOWN_PIPE_SENTINEL,
-                "target_gene_synonyms": self._UNKNOWN_PIPE_SENTINEL,
-                "target_ec_numbers": self._UNKNOWN_PIPE_SENTINEL,
-            }
+            return self._empty_synonym_projection()
 
-        for component in components:
-            if not isinstance(component, Mapping):
-                continue
+        buckets: dict[str, list[str]] = {
+            "target_protein_synonyms": [],
+            "target_gene_synonyms": [],
+            "target_ec_numbers": [],
+        }
+        seen_by_field: dict[str, set[str]] = {
+            "target_protein_synonyms": set(),
+            "target_gene_synonyms": set(),
+            "target_ec_numbers": set(),
+        }
 
-            raw_synonyms = component.get("target_component_synonyms")
-            if not isinstance(raw_synonyms, list):
-                continue
-
-            for synonym_payload in raw_synonyms:
-                if not isinstance(synonym_payload, Mapping):
-                    continue
-
-                syn_type = str(synonym_payload.get("syn_type") or "").strip().upper()
-                component_synonym = synonym_payload.get("component_synonym")
-
-                if syn_type == "UNIPROT":
-                    self._append_unique_pipe_escaped(
-                        protein_synonyms,
-                        protein_seen,
-                        component_synonym,
-                    )
-                elif syn_type == "EC_NUMBER":
-                    self._append_unique_pipe_escaped(ec_numbers, ec_seen, component_synonym)
-                elif syn_type == "GENE_SYMBOL" or syn_type.startswith(
-                    "GENE_SYMBOL_"
-                ):
-                    self._append_unique_pipe_escaped(
-                        gene_synonyms,
-                        gene_seen,
-                        component_synonym,
-                    )
+        for synonym_payload in self._iter_component_synonym_payloads(components):
+            self._project_single_synonym(
+                synonym_payload,
+                buckets,
+                seen_by_field,
+            )
 
         return {
-            "target_protein_synonyms": self._pipe_or_unknown(protein_synonyms),
-            "target_gene_synonyms": self._pipe_or_unknown(gene_synonyms),
-            "target_ec_numbers": self._pipe_or_unknown(ec_numbers),
+            "target_protein_synonyms": self._pipe_or_unknown(
+                buckets["target_protein_synonyms"]
+            ),
+            "target_gene_synonyms": self._pipe_or_unknown(
+                buckets["target_gene_synonyms"]
+            ),
+            "target_ec_numbers": self._pipe_or_unknown(
+                buckets["target_ec_numbers"]
+            ),
         }
 
     def _extract_business_data(

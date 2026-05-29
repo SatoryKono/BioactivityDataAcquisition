@@ -290,6 +290,60 @@
     "required": false,
     "unique": false
   },
+  "target_xref_go_component": {
+    "checks": [],
+    "coerce": false,
+    "description": "Pipe-delimited GO cellular component target cross references or unknown.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_xref_go_function": {
+    "checks": [],
+    "coerce": false,
+    "description": "Pipe-delimited GO molecular function target cross references or unknown.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_xref_go_process": {
+    "checks": [],
+    "coerce": false,
+    "description": "Pipe-delimited GO biological process target cross references or unknown.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_xref_iuphar_ids": {
+    "checks": [],
+    "coerce": false,
+    "description": "Pipe-delimited IUPHAR target cross references or unknown.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_xref_pdb_ids": {
+    "checks": [],
+    "coerce": false,
+    "description": "Pipe-delimited PDB target cross references or unknown.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_xref_reactome_ids": {
+    "checks": [],
+    "coerce": false,
+    "description": "Pipe-delimited Reactome target cross references or unknown.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "target_type": {
     "checks": [
       {

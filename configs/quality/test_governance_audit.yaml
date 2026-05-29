@@ -59,7 +59,7 @@ issues:
   - tests/architecture/test_test_governance_audit.py
 budgets:
   refined_assertless_max: 499
-  duplicate_test_names_max: 788
+  duplicate_test_names_max: 787
   duplicate_test_name_occurrences_max: 2552
   compatibility_test_file_max: 56
   markerless_test_functions_max: 6994
@@ -69,7 +69,7 @@ budget_ratchet:
   linked_issue: '#4685'
   mode: fail-fast-no-growth
   expected_direction: downward
-  refreshed_on: '2026-05-26'
+  refreshed_on: '2026-05-29'
   touch_policy: Refactors touching test families must reduce the applicable budget
     or keep it flat with an explicit owner rationale; increasing a debt budget requires
     a separate governance review.
@@ -201,7 +201,7 @@ assertless_triage:
     - tests/unit/application/core/
     - tests/unit/infrastructure/control_plane/
 duplicate_name_triage:
-  total_duplicate_names: 788
+  total_duplicate_names: 787
   duplicate_occurrences: 2552
   top_generic_names:
   - name: test_default_values
