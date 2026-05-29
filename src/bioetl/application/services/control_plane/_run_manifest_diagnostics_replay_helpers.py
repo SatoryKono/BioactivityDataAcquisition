@@ -7,12 +7,12 @@ from __future__ import annotations
 
 from typing import Literal
 
-from bioetl.application.services.control_plane._historical_replay_certification import (
+from bioetl.application.services.control_plane.historical_replay_certification import (
     HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
     LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
+from bioetl.application.services.control_plane.run_manifest_diagnostics_snapshot_support import (
     lookup_mapping_path,
 )
 from bioetl.application.services.control_plane.run_manifest_exact_replay_blockers import (

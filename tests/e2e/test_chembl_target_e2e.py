@@ -57,6 +57,7 @@ async def test_chembl_target_full_cycle(e2e_data_dir: Path):
     for record in records:
         for field in required_fields:
             assert field in record, f"Missing required field: {field}"
+        assert "target_xref_iuphar_ids" not in record
 
 
 @pytest.mark.e2e
@@ -119,3 +120,4 @@ async def test_chembl_target_projects_derived_synonym_fields(e2e_data_dir: Path)
         assert record["target_gene_synonyms"] is not None
         assert record["target_ec_numbers"] is not None
         assert isinstance(record["target_component_synonyms"], str)
+        assert "target_xref_iuphar_ids" not in record

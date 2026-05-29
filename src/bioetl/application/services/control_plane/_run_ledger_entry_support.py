@@ -7,12 +7,12 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
-from bioetl.application.services.control_plane._ledger_identity_support import (
-    build_ledger_idempotency_key,
-)
 from bioetl.application.services.control_plane._run_ledger_diagnostic_support import (
     _RunLedgerDiagnosticRequest,
     build_run_ledger_diagnostic_details,
+)
+from bioetl.application.services.control_plane.ledger_identity_support import (
+    build_ledger_idempotency_key,
 )
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import infer_ledger_event_family

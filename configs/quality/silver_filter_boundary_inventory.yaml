@@ -348,6 +348,14 @@ pipelines:
           - target_id
           - pref_name
           - organism
+          - target_protein_synonyms
+          - target_gene_synonyms
+          - target_ec_numbers
+          - target_xref_pdb_ids
+          - target_xref_go_component
+          - target_xref_go_function
+          - target_xref_go_process
+          - target_xref_reactome_ids
         business_only:
           - target_type
       columns:

@@ -162,7 +162,6 @@ class TargetTransformer(BaseChemblTransformer):
             "cross_references": self.serialize_json(component_xrefs)
             if component_xrefs
             else None,
-            "target_xref_iuphar_ids": xref_projection["target_xref_iuphar_ids"],
             "target_xref_pdb_ids": xref_projection["target_xref_pdb_ids"],
             "target_xref_go_component": xref_projection[
                 "target_xref_go_component"

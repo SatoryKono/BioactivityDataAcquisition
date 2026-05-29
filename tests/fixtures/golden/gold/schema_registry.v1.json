@@ -1808,6 +1808,11 @@
           "dtype": "str",
           "nullable": true
         },
+        "target_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "target_xref_go_component": {
           "description": "",
           "dtype": "str",
@@ -1823,22 +1828,12 @@
           "dtype": "str",
           "nullable": true
         },
-        "target_xref_iuphar_ids": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
         "target_xref_pdb_ids": {
           "description": "",
           "dtype": "str",
           "nullable": true
         },
         "target_xref_reactome_ids": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "target_type": {
           "description": "",
           "dtype": "str",
           "nullable": true

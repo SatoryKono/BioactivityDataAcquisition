@@ -76,7 +76,7 @@ class TestSourceConfigLoading:
 
     def test_load_source_config_returns_valid_model(self) -> None:
         """load_source_config() should return validated SourceYamlConfig."""
-        from bioetl.infrastructure.config import load_source_config
+        from bioetl.infrastructure.config.source_config_loader import load_source_config
 
         config = load_source_config("chembl")
 
@@ -87,7 +87,7 @@ class TestSourceConfigLoading:
 
     def test_load_source_config_raises_for_unknown_provider(self) -> None:
         """load_source_config() should raise ValueError for unknown provider."""
-        from bioetl.infrastructure.config import load_source_config
+        from bioetl.infrastructure.config.source_config_loader import load_source_config
 
         with pytest.raises(ValueError, match="Source configuration file not found"):
             load_source_config("nonexistent_provider")
@@ -98,7 +98,7 @@ class TestSourceConfigLoading:
     )
     def test_source_config_rate_limit_matches_yaml(self, provider: str) -> None:
         """Rate limit from SourceYamlConfig should match YAML file."""
-        from bioetl.infrastructure.config import load_source_config
+        from bioetl.infrastructure.config.source_config_loader import load_source_config
 
         config = load_source_config(provider)
 
@@ -160,7 +160,7 @@ class TestSourceConfigSchema:
 
     def test_chembl_config_has_page_size(self) -> None:
         """ChEMBL config should have page_size for API pagination."""
-        from bioetl.infrastructure.config import load_source_config
+        from bioetl.infrastructure.config.source_config_loader import load_source_config
 
         config = load_source_config("chembl")
 
@@ -172,7 +172,7 @@ class TestSourceConfigSchema:
 
     def test_chembl_config_disables_env_proxy_inheritance(self) -> None:
         """ChEMBL should not silently inherit shell proxy settings."""
-        from bioetl.infrastructure.config import load_source_config
+        from bioetl.infrastructure.config.source_config_loader import load_source_config
 
         config = load_source_config("chembl")
 

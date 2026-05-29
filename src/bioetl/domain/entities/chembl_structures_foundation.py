@@ -72,7 +72,6 @@ class Target(BaseEntity):
     target_protein_synonyms: str | None = None
     target_gene_synonyms: str | None = None
     target_ec_numbers: str | None = None
-    target_xref_iuphar_ids: str | None = None
     target_xref_pdb_ids: str | None = None
     target_xref_go_component: str | None = None
     target_xref_go_function: str | None = None

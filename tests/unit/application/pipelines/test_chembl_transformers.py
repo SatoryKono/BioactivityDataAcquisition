@@ -827,18 +827,38 @@ class TestTargetTransformer:
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
-        ("source_db", "xref_id", "expected_field", "expected_value"),
+        ("source_db", "xref_id", "xref_name", "expected_field", "expected_value"),
         [
-            ("Guide to PHARMACOLOGY", "1839", "target_xref_iuphar_ids", "1839"),
-            ("GuideToPharmacology", "1839", "target_xref_iuphar_ids", "1839"),
-            ("IUPHAR", "1839", "target_xref_iuphar_ids", "1839"),
-            ("GtoPdb", "1839", "target_xref_iuphar_ids", "1839"),
-            ("PDB", "1ABC", "target_xref_pdb_ids", "1ABC"),
-            ("PDBe", "2XYZ", "target_xref_pdb_ids", "2XYZ"),
-            ("GoComponent", "GO:0005887", "target_xref_go_component", "GO:0005887"),
-            ("GoFunction", "GO:0004911", "target_xref_go_function", "GO:0004911"),
-            ("GoProcess", "GO:0038110", "target_xref_go_process", "GO:0038110"),
-            ("Reactome", "R-HSA-5673001", "target_xref_reactome_ids", "R-HSA-5673001"),
+            ("PDB", "1ABC", "ignored for pdb", "target_xref_pdb_ids", "1ABC"),
+            ("PDBe", "2XYZ", "ignored for pdbe", "target_xref_pdb_ids", "2XYZ"),
+            (
+                "GoComponent",
+                "GO:0005887",
+                "plasma membrane",
+                "target_xref_go_component",
+                "plasma membrane",
+            ),
+            (
+                "GoFunction",
+                "GO:0004911",
+                "dopamine receptor activity",
+                "target_xref_go_function",
+                "dopamine receptor activity",
+            ),
+            (
+                "GoProcess",
+                "GO:0038110",
+                "dopamine receptor signaling pathway",
+                "target_xref_go_process",
+                "dopamine receptor signaling pathway",
+            ),
+            (
+                "Reactome",
+                "R-HSA-5673001",
+                "ignored for reactome",
+                "target_xref_reactome_ids",
+                "R-HSA-5673001",
+            ),
         ],
     )
     async def test_transform_projects_target_xref_source_aliases(
@@ -847,6 +867,7 @@ class TestTargetTransformer:
         mock_context,
         source_db,
         xref_id,
+        xref_name,
         expected_field,
         expected_value,
     ):
@@ -856,7 +877,11 @@ class TestTargetTransformer:
             "target_components": [
                 {
                     "target_component_xrefs": [
-                        {"xref_id": xref_id, "xref_src_db": source_db},
+                        {
+                            "xref_id": xref_id,
+                            "xref_name": xref_name,
+                            "xref_src_db": source_db,
+                        },
                         {"xref_id": "9999", "xref_src_db": "UnknownSource"},
                     ]
                 }
@@ -867,9 +892,7 @@ class TestTargetTransformer:
 
         assert result is not None
         assert result[expected_field] == expected_value
-        assert result["target_xref_iuphar_ids"] == (
-            expected_value if expected_field == "target_xref_iuphar_ids" else "unknown"
-        )
+        assert "target_xref_iuphar_ids" not in result
         assert result["target_xref_pdb_ids"] == (
             expected_value if expected_field == "target_xref_pdb_ids" else "unknown"
         )
@@ -903,7 +926,7 @@ class TestTargetTransformer:
 
     @pytest.mark.asyncio
     async def test_transform_deduplicates_and_orders_target_xrefs(self, transformer, mock_context):
-        """Projection should deduplicate xref ids and preserve source-order per column."""
+        """Projection should deduplicate projected values and preserve first-seen order."""
         record = {
             "target_id": "CHEMBL240",
             "target_components": [
@@ -913,9 +936,21 @@ class TestTargetTransformer:
                         {"xref_id": "Q99999", "xref_src_db": "PDB"},
                         {"xref_id": "1ABC", "xref_src_db": "PDBe"},
                         {"xref_id": "P|2", "xref_src_db": "PDBe"},
-                        {"xref_id": "GO:0005887", "xref_src_db": "GoComponent"},
-                        {"xref_id": "GO:0005887", "xref_src_db": "GoComponent"},
-                        {"xref_id": "GO:0004911", "xref_src_db": "GoFunction"},
+                        {
+                            "xref_id": "GO:0005887",
+                            "xref_name": " plasma membrane ",
+                            "xref_src_db": "GoComponent",
+                        },
+                        {
+                            "xref_id": "GO:0098590",
+                            "xref_name": "plasma membrane",
+                            "xref_src_db": "GoComponent",
+                        },
+                        {
+                            "xref_id": "GO:0004911",
+                            "xref_name": "dopamine receptor activity",
+                            "xref_src_db": "GoFunction",
+                        },
                     ]
                 }
             ],
@@ -925,10 +960,11 @@ class TestTargetTransformer:
 
         assert result is not None
         assert result["target_xref_pdb_ids"] == "1ABC|Q99999|P\\|2"
-        assert result["target_xref_go_component"] == "GO:0005887"
-        assert result["target_xref_go_function"] == "GO:0004911"
+        assert result["target_xref_go_component"] == "plasma membrane"
+        assert result["target_xref_go_function"] == "dopamine receptor activity"
         assert result["target_xref_reactome_ids"] == "unknown"
         assert result["target_xref_go_process"] == "unknown"
+        assert "target_xref_iuphar_ids" not in result
 
         import json
 
@@ -940,12 +976,45 @@ class TestTargetTransformer:
             "1ABC",
             "P|2",
             "GO:0005887",
-            "GO:0005887",
+            "GO:0098590",
             "GO:0004911",
         ]
 
     @pytest.mark.asyncio
-    async def test_transform_skips_go_and_unknown_xref_sources_from_projection(
+    async def test_transform_keeps_removed_iuphar_sources_only_in_cross_references(
+        self, transformer, mock_context
+    ):
+        """Removed IUPHAR-family sources must stay only in forensic cross_references."""
+        record = {
+            "target_id": "CHEMBL240",
+            "target_components": [
+                {
+                    "target_component_xrefs": [
+                        {"xref_id": "1839", "xref_src_db": "GuideToPharmacology"},
+                        {"xref_id": "UNK-1", "xref_src_db": "LegacyDB"},
+                    ]
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert "target_xref_iuphar_ids" not in result
+        assert result["target_xref_pdb_ids"] == "unknown"
+        assert result["target_xref_go_component"] == "unknown"
+        assert result["target_xref_go_function"] == "unknown"
+        assert result["target_xref_go_process"] == "unknown"
+        assert result["target_xref_reactome_ids"] == "unknown"
+
+        import json
+
+        cross_references = json.loads(result["cross_references"])
+        raw_sources = {xref["xref_src_db"] for xref in cross_references}
+        assert raw_sources == {"GuideToPharmacology", "LegacyDB"}
+
+    @pytest.mark.asyncio
+    async def test_transform_skips_general_go_and_unknown_xref_sources_from_projection(
         self, transformer, mock_context
     ):
         """General GO and unknown source labels are preserved only in cross_references."""
@@ -964,7 +1033,7 @@ class TestTargetTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["target_xref_iuphar_ids"] == "unknown"
+        assert "target_xref_iuphar_ids" not in result
         assert result["target_xref_pdb_ids"] == "unknown"
         assert result["target_xref_go_component"] == "unknown"
         assert result["target_xref_go_function"] == "unknown"
@@ -976,6 +1045,43 @@ class TestTargetTransformer:
         cross_references = json.loads(result["cross_references"])
         raw_sources = {xref["xref_src_db"] for xref in cross_references}
         assert raw_sources == {"GO", "LegacyDB"}
+
+    @pytest.mark.asyncio
+    async def test_transform_uses_go_xref_name_without_fallback_to_xref_id(
+        self, transformer, mock_context
+    ):
+        """GO-derived buckets must use xref_name and ignore xref_id when the name is blank."""
+        record = {
+            "target_id": "CHEMBL240",
+            "target_components": [
+                {
+                    "target_component_xrefs": [
+                        {
+                            "xref_id": "GO:0005887",
+                            "xref_name": "  plasma membrane  ",
+                            "xref_src_db": "GoComponent",
+                        },
+                        {
+                            "xref_id": "GO:0004911",
+                            "xref_name": "   ",
+                            "xref_src_db": "GoFunction",
+                        },
+                        {
+                            "xref_id": "GO:0038110",
+                            "xref_src_db": "GoProcess",
+                        },
+                    ]
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["target_xref_go_component"] == "plasma membrane"
+        assert result["target_xref_go_function"] == "unknown"
+        assert result["target_xref_go_process"] == "unknown"
+        assert "target_xref_iuphar_ids" not in result
 
     @pytest.mark.asyncio
     async def test_transform_returns_unknown_when_no_target_component_xrefs(
@@ -992,7 +1098,7 @@ class TestTargetTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["target_xref_iuphar_ids"] == "unknown"
+        assert "target_xref_iuphar_ids" not in result
         assert result["target_xref_pdb_ids"] == "unknown"
         assert result["target_xref_go_component"] == "unknown"
         assert result["target_xref_go_function"] == "unknown"

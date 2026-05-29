@@ -228,7 +228,7 @@ contracts:
     - "dq_contract_compatibility_hash"
   lineage_modules:
     - "src/bioetl/application/services/lineage/lineage_inspection_service.py"
-    - "src/bioetl/application/services/control_plane/run_manifest_diagnostics.py"
+    - "src/bioetl/application/services/control_plane/manifest/diagnostics.py"
   lineage_runtime_modules:
     - "src/bioetl/composition/bootstrap/cli/lineage.py"
     - "src/bioetl/interfaces/cli/commands/lineage.py"

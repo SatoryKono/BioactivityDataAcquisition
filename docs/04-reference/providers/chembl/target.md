@@ -98,7 +98,7 @@ Silver schema.
 - `downgraded` как bool-нормализацию входного значения
 - `target_components`, `target_component_synonyms`, `cross_references`, `pipeline_stages` как JSON-строки
 - `target_protein_synonyms`, `target_gene_synonyms`, `target_ec_numbers` как pipe-delimited derived-поля с sentinel `unknown`
-- `target_xref_iuphar_ids`, `target_xref_pdb_ids`, `target_xref_go_component`, `target_xref_go_function`, `target_xref_go_process`, `target_xref_reactome_ids` как pipe-delimited xref-derived поля с sentinel `unknown`
+- `target_xref_pdb_ids`, `target_xref_go_component`, `target_xref_go_function`, `target_xref_go_process`, `target_xref_reactome_ids` как pipe-delimited xref-derived поля с sentinel `unknown`
 
 ### 3.4. Derived synonym projection
 
@@ -121,7 +121,7 @@ Silver schema.
 Forensic boundary для xrefs остаётся прежней:
 
 - `target_component_synonyms` и `cross_references` сохраняют агрегированные raw JSON строки для аудита
-- xref-derived scalar-поля формируются только из whitelisted `xref_src_db` значений; всё остальное сохраняется только в `cross_references`
+- xref-derived scalar-поля формируются только из whitelisted `xref_src_db` значений; `PDB`/`PDBe` и `Reactome` используют `xref_id`, а `GoComponent`/`GoFunction`/`GoProcess` используют `xref_name`
 - derived scalar-поля используются для аналитического Silver/Gold surface и hash-governed replay
 - `cross_references` не fail-closed на DQ-уровне; неизвестные/нестандартные `xref_src_db` логируются как warn и сохраняются в forensic `cross_references`
 

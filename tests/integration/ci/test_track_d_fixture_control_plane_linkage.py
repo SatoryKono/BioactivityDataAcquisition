@@ -12,7 +12,7 @@ import pytest
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from bioetl.composition.factories import _observability_wiring
 from bioetl.domain.types import RunID
-from bioetl.infrastructure.config import get_pipeline_config, get_settings
+from bioetl.infrastructure.config._base import get_pipeline_config, get_settings
 from tests.helpers.control_plane_replay import (
     PROJECT_ROOT,
     build_cached_fixture_run_context,

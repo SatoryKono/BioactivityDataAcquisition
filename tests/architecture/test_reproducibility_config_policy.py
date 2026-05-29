@@ -11,7 +11,7 @@ import yaml
 from bioetl.domain.control_plane.reproducibility_profiles import (
     registered_reproducibility_families,
 )
-from bioetl.infrastructure.config import PipelineSettings
+from bioetl.infrastructure.config._base import PipelineSettings
 
 ROOT = Path(__file__).resolve().parents[2]
 PUBLISHED_ENTITY_CONFIGS = ROOT / "configs" / "entities"

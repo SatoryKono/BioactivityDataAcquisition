@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from scripts.engineering.qa.report_compatibility_importer_census import (
+    REMOVED_COMPATIBILITY_SURFACES,
     build_compatibility_importer_census,
 )
 from scripts.engineering.qa.report_dead_code_inventory import build_dead_code_inventory
@@ -80,7 +81,9 @@ def test_build_compatibility_importer_census_counts_retained_entrypoints_and_twi
     payload = build_compatibility_importer_census(tmp_path)
 
     assert payload["summary"]["retained_entrypoint_count"] == 2
-    assert payload["summary"]["removed_compatibility_surface_count"] == 3
+    assert payload["summary"]["removed_compatibility_surface_count"] == len(
+        REMOVED_COMPATIBILITY_SURFACES
+    )
     assert payload["summary"]["removed_compatibility_surfaces_with_src_importers"] == 0
     assert payload["summary"]["removed_compatibility_surfaces_with_test_importers"] == 1
     assert payload["summary"]["removed_compatibility_surfaces_still_present"] == 0

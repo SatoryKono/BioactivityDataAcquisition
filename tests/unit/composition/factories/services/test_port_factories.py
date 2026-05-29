@@ -16,7 +16,7 @@ from bioetl.composition.factories.services.port_factories import (
     is_metrics_port_like,
 )
 from bioetl.domain.ports import CheckpointPort, LockPort, MetricsPort, QuarantinePort
-from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.config._base import Settings
 
 
 @dataclass(frozen=True, slots=True)

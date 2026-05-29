@@ -4,7 +4,7 @@
 **Priority**: P1 (High)
 **Labels**: `documentation`, `governance`
 **GitHub Issue**: [#4746](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4746)
-**Issue State**: open
+**Issue State**: closed
 **Last synced**: 2026-05-29
 
 ## Problem

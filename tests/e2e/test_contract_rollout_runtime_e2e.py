@@ -136,7 +136,7 @@ def _append_shadow_only_row(table_path: Path) -> None:
 async def test_runtime_rollout_dual_write_populates_versioned_silver_tables(
     e2e_data_dir: Path,
 ) -> None:
-    from bioetl.infrastructure.config import get_settings
+    from bioetl.infrastructure.config._base import get_settings
 
     await _run_runtime_pipeline(
         contract_policy=_make_contract_policy(affects_hash=False),
@@ -177,7 +177,7 @@ async def test_runtime_rollout_dual_write_populates_versioned_silver_tables(
 async def test_runtime_rollout_affects_hash_flag_executes_full_runtime_path(
     e2e_data_dir: Path,
 ) -> None:
-    from bioetl.infrastructure.config import get_settings
+    from bioetl.infrastructure.config._base import get_settings
 
     await _run_runtime_pipeline(
         contract_policy=_make_contract_policy(affects_hash=True),
@@ -220,7 +220,7 @@ async def test_runtime_rollout_cutover_and_rollback_change_export_reader_priorit
     e2e_data_dir: Path,
 ) -> None:
     from bioetl.composition.bootstrap.cli.storage import bootstrap_export_service
-    from bioetl.infrastructure.config import get_pipeline_config, get_settings
+    from bioetl.infrastructure.config._base import get_pipeline_config, get_settings
     from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
     await _run_runtime_pipeline(

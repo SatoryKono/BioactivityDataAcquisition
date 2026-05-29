@@ -476,7 +476,6 @@
     'target_xref_go_component': 'unknown',
     'target_xref_go_function': 'unknown',
     'target_xref_go_process': 'unknown',
-    'target_xref_iuphar_ids': 'unknown',
     'target_xref_pdb_ids': 'unknown',
     'target_xref_reactome_ids': 'unknown',
     'taxonomy_id': 9606,

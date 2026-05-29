@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.infrastructure.config import get_pipeline_config
+from bioetl.infrastructure.config._base import get_pipeline_config
 from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config_from_root,
 )

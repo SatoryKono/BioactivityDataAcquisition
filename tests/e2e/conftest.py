@@ -85,7 +85,7 @@ E2E_FIXED_STARTED_AT = FIXED_TEST_TIME
 
 def _clear_runtime_config_caches() -> None:
     """Clear runtime settings/config caches after environment mutations."""
-    from bioetl.infrastructure.config import get_pipeline_config, get_settings
+    from bioetl.infrastructure.config._base import get_pipeline_config, get_settings
     from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
     from bioetl.infrastructure.config.source_config_loader import load_source_config
 
@@ -396,7 +396,11 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
     """
     from unittest.mock import PropertyMock, patch
 
-    from bioetl.infrastructure.config import Settings, get_pipeline_config, get_settings
+    from bioetl.infrastructure.config._base import (
+        Settings,
+        get_pipeline_config,
+        get_settings,
+    )
 
     data_dir.mkdir(parents=True, exist_ok=True)
 

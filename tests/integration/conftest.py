@@ -26,7 +26,7 @@ def _build_circuit_breaker_guard() -> CircuitBreakerGuard:
 
 def _clear_runtime_config_caches() -> None:
     """Clear runtime settings/config caches after environment mutations."""
-    from bioetl.infrastructure.config import get_pipeline_config, get_settings
+    from bioetl.infrastructure.config._base import get_pipeline_config, get_settings
     from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
     from bioetl.infrastructure.config.source_config_loader import load_source_config
 

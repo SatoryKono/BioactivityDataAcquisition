@@ -15,11 +15,11 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
-    normalize_profile_text,
     normalize_profile_chembl_organism_name,
     normalize_profile_target_component_relationships,
     normalize_profile_target_component_types,
     normalize_profile_target_organism_class,
+    normalize_profile_text,
 )
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.constants import TARGET_ORGANISM_CLASSES, TARGET_TYPES
@@ -66,25 +66,39 @@ _ENUM_FIELDS = {
 }
 _SPECIAL_RULE_COMPONENTS = {
     **_REFERENCE_IDENTIFIER_RULES,
-    "target_xref_iuphar_ids": (
+    "target_xref_go_component": (
         normalize_profile_text,
         (
-            "Canonicalize derived IUPHAR target xref IDs as a "
-            "text field with json-list-like semantics."
+            "Canonicalize derived GO cellular component target xref names as a "
+            "text field with pipe-delimited list semantics."
+        ),
+    ),
+    "target_xref_go_function": (
+        normalize_profile_text,
+        (
+            "Canonicalize derived GO molecular function target xref names as a "
+            "text field with pipe-delimited list semantics."
+        ),
+    ),
+    "target_xref_go_process": (
+        normalize_profile_text,
+        (
+            "Canonicalize derived GO biological process target xref names as a "
+            "text field with pipe-delimited list semantics."
         ),
     ),
     "target_xref_pdb_ids": (
         normalize_profile_text,
         (
             "Canonicalize derived PDB/PDBe target xref IDs as a "
-            "text field with json-list-like semantics."
+            "text field with pipe-delimited list semantics."
         ),
     ),
     "target_xref_reactome_ids": (
         normalize_profile_text,
         (
             "Canonicalize derived Reactome target xref IDs as a "
-            "text field with json-list-like semantics."
+            "text field with pipe-delimited list semantics."
         ),
     ),
     "organism": (

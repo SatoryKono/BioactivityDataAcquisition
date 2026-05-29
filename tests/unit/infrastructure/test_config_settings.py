@@ -11,7 +11,7 @@ from pydantic import ValidationError
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.config import PipelineConfig
-from bioetl.infrastructure.config import (
+from bioetl.infrastructure.config._base import (
     ObservabilitySettings,
     PipelineSettings,
     Settings,

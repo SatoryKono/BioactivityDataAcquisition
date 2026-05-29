@@ -38,7 +38,7 @@ from bioetl.composition.services.versioning import CodeRevisionProvenance
 from bioetl.domain.control_plane import ReplayCapability, RunInputSnapshotRef
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunID
-from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.config._base import Settings
 
 
 def _make_settings(**overrides: object) -> Settings:

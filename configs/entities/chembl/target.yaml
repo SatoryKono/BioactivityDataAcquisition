@@ -55,7 +55,6 @@ schema:
     - target_protein_synonyms
     - target_gene_synonyms
     - target_ec_numbers
-    - target_xref_iuphar_ids
     - target_xref_pdb_ids
     - target_xref_go_component
     - target_xref_go_function
@@ -146,10 +145,6 @@ quality:
             validator: validate_target_xref_src_db_json_vocab
             nullable: true
             error_message: cross_references must be canonical JSON with governed xref_src_db source namespaces when present
-        -   field: target_xref_iuphar_ids
-            type: not_null
-            nullable: false
-            error_message: target_xref_iuphar_ids must emit a normalized pipe string or unknown sentinel
         -   field: target_xref_pdb_ids
             type: not_null
             nullable: false
@@ -239,7 +234,6 @@ filters:
             - target_protein_synonyms
             - target_gene_synonyms
             - target_ec_numbers
-            - target_xref_iuphar_ids
             - target_xref_pdb_ids
             - target_xref_go_component
             - target_xref_go_function
@@ -295,7 +289,6 @@ hash_policy:
             - target_protein_synonyms
             - target_gene_synonyms
             - target_ec_numbers
-            - target_xref_iuphar_ids
             - target_xref_pdb_ids
             - target_xref_go_component
             - target_xref_go_function

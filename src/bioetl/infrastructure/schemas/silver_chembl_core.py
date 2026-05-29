@@ -241,7 +241,6 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("target_protein_synonyms", pa.string()),
         pa.field("target_gene_synonyms", pa.string()),
         pa.field("target_ec_numbers", pa.string()),
-        pa.field("target_xref_iuphar_ids", pa.string()),
         pa.field("target_xref_pdb_ids", pa.string()),
         pa.field("target_xref_go_component", pa.string()),
         pa.field("target_xref_go_function", pa.string()),

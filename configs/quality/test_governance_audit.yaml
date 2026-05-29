@@ -843,6 +843,9 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/application/pipelines/test_chembl_transformers.py
     target_lane: repo-backed-unit
     protected_surface: configs/** publication-type bootstrap inputs used by transformer initialization
+  - path: tests/unit/application/pipelines/test_chembl_publication_term_transformer.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/** publication-type bootstrap inputs used by term transformer initialization
   - path: tests/unit/application/pipelines/test_transformer_snapshots.py
     target_lane: repo-backed-unit
     protected_surface: configs/** publication-type bootstrap inputs used by snapshot transformer initialization

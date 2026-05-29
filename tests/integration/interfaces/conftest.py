@@ -101,7 +101,10 @@ def temp_env(storage_paths: dict[str, Path]):
     with patch.dict(os.environ, env_vars, clear=False):
         # Clear settings cache to pick up new env vars
         try:
-            from bioetl.infrastructure.config import get_pipeline_config, get_settings
+            from bioetl.infrastructure.config._base import (
+                get_pipeline_config,
+                get_settings,
+            )
 
             get_settings.cache_clear()
             get_pipeline_config.cache_clear()
@@ -112,7 +115,10 @@ def temp_env(storage_paths: dict[str, Path]):
 
         # Clear cache after test
         try:
-            from bioetl.infrastructure.config import get_pipeline_config, get_settings
+            from bioetl.infrastructure.config._base import (
+                get_pipeline_config,
+                get_settings,
+            )
 
             get_settings.cache_clear()
             get_pipeline_config.cache_clear()

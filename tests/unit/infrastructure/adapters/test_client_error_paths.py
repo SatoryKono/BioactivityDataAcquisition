@@ -19,7 +19,7 @@ from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 @pytest.fixture(autouse=True)
 def reset_settings_cache():
     """Reset settings cache before each test."""
-    from bioetl.infrastructure.config import get_settings
+    from bioetl.infrastructure.config._base import get_settings
 
     get_settings.cache_clear()
     yield
@@ -34,7 +34,7 @@ def mock_settings_strict():
         "BIOETL_ENV": "staging",  # Avoid endpoint_url validation
     }
     with patch.dict(os.environ, env_vars):
-        from bioetl.infrastructure.config import get_settings
+        from bioetl.infrastructure.config._base import get_settings
 
         get_settings.cache_clear()
         yield get_settings()
@@ -49,7 +49,7 @@ def mock_settings_lenient():
         "BIOETL_ENV": "staging",  # Avoid endpoint_url validation
     }
     with patch.dict(os.environ, env_vars):
-        from bioetl.infrastructure.config import get_settings
+        from bioetl.infrastructure.config._base import get_settings
 
         get_settings.cache_clear()
         yield get_settings()
@@ -156,7 +156,7 @@ class TestUniProtAdapterErrorPaths:
             os.environ,
             {"BIOETL_STRICT_ERROR_HANDLING": "false", "BIOETL_ENV": "staging"},
         ):
-            from bioetl.infrastructure.config import get_settings
+            from bioetl.infrastructure.config._base import get_settings
 
             get_settings.cache_clear()
 
@@ -223,7 +223,7 @@ class TestUniProtAdapterErrorPaths:
             os.environ,
             {"BIOETL_STRICT_ERROR_HANDLING": "false", "BIOETL_ENV": "staging"},
         ):
-            from bioetl.infrastructure.config import get_settings
+            from bioetl.infrastructure.config._base import get_settings
 
             get_settings.cache_clear()
 
@@ -299,7 +299,7 @@ class TestStrictErrorHandlingConfig:
             # Clear any existing env vars that might affect the test
             os.environ.pop("BIOETL_STRICT_ERROR_HANDLING", None)
 
-            from bioetl.infrastructure.config import Settings
+            from bioetl.infrastructure.config._base import Settings
 
             settings = Settings(test_mode=True)
             assert settings.strict_error_handling is False
@@ -311,7 +311,7 @@ class TestStrictErrorHandlingConfig:
             {"BIOETL_STRICT_ERROR_HANDLING": "true", "BIOETL_ENV": "staging"},
             clear=True,
         ):
-            from bioetl.infrastructure.config import Settings
+            from bioetl.infrastructure.config._base import Settings
 
             settings = Settings(test_mode=True)
             assert settings.strict_error_handling is True
@@ -323,7 +323,7 @@ class TestStrictErrorHandlingConfig:
             {"BIOETL_STRICT_ERROR_HANDLING": "True", "BIOETL_ENV": "staging"},
             clear=True,
         ):
-            from bioetl.infrastructure.config import Settings
+            from bioetl.infrastructure.config._base import Settings
 
             settings = Settings(test_mode=True)
             assert settings.strict_error_handling is True
@@ -333,7 +333,7 @@ class TestStrictErrorHandlingConfig:
             {"BIOETL_STRICT_ERROR_HANDLING": "TRUE", "BIOETL_ENV": "staging"},
             clear=True,
         ):
-            from bioetl.infrastructure.config import Settings
+            from bioetl.infrastructure.config._base import Settings
 
             settings = Settings(test_mode=True)
             assert settings.strict_error_handling is True

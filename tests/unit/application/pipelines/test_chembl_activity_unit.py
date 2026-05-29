@@ -14,7 +14,7 @@ from bioetl.application.pipelines.chembl.activity_transformer import ActivityTra
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
-from bioetl.infrastructure.config import get_pipeline_config
+from bioetl.infrastructure.config._base import get_pipeline_config
 from bioetl.domain.ports.noop import NoOpMetrics
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
