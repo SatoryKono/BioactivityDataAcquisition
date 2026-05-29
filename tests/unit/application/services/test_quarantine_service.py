@@ -6,6 +6,7 @@ Tests the quarantine administrative service.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
@@ -14,6 +15,7 @@ from bioetl.application.services.quarantine_service import (
     QuarantineRecord,
     QuarantineService,
 )
+from bioetl.domain.control_plane.run_ledger import RUN_FINISHED_EVENT
 from bioetl.domain.types import QuarantineRecordStatus
 from tests.helpers.clock import FixedClock
 
@@ -330,10 +332,10 @@ class TestQuarantineServiceFilteredExplorer:
         )
 
     @pytest.mark.asyncio
-    async def test_get_filtered_stats_skips_manifest_fanout_for_pipeline_scope(
+    async def test_get_filtered_stats_skips_manifest_fanout_for_scoped_rows(
         self, mock_quarantine_port, mock_logger, mock_metrics, mock_tracer
     ) -> None:
-        """Pipeline-scoped stats should not scan every run manifest interactively."""
+        """Scoped reject rows must not fan out across every run manifest."""
         mock_quarantine_port.get_filtered_stats.return_value = {
             "total": 12,
             "bronze_records": 0,
@@ -341,17 +343,8 @@ class TestQuarantineServiceFilteredExplorer:
             "run_ids": ["run-2", "run-1", "run-2"],
         }
         mock_run_manifest_service = MagicMock()
-        mock_run_manifest_service.show.side_effect = [
-            MagicMock(
-                ledger_entries=(
-                    MagicMock(metrics_snapshot={"records_bronze": 100}),
-                    MagicMock(metrics_snapshot={"records_bronze": 90}),
-                )
-            ),
-            MagicMock(
-                ledger_entries=(MagicMock(metrics_snapshot={"records_bronze": 50}),)
-            ),
-        ]
+        mock_run_manifest_service.manifest_port.list_all.return_value = ()
+        mock_run_manifest_service.ledger_port.list_entries_by_run_id.return_value = []
         service = QuarantineService(
             quarantine_port=mock_quarantine_port,
             logger=mock_logger,
@@ -368,6 +361,7 @@ class TestQuarantineServiceFilteredExplorer:
         assert result["reject_ratio"] == 0.0
         assert "run_ids" not in result
         mock_run_manifest_service.show.assert_not_called()
+        mock_run_manifest_service.manifest_port.list_all.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_get_filtered_stats_uses_explicit_run_id_for_empty_scope(
@@ -401,6 +395,69 @@ class TestQuarantineServiceFilteredExplorer:
         assert result["bronze_records"] == 80
         assert result["reject_ratio"] == 0.0
         mock_run_manifest_service.show.assert_called_once_with("run-1")
+
+    @pytest.mark.asyncio
+    async def test_get_filtered_stats_resolves_latest_scope_run_for_zero_reject_scope(
+        self, mock_quarantine_port, mock_logger, mock_metrics, mock_tracer
+    ) -> None:
+        """Zero-reject pipeline scope should keep the latest run Bronze denominator."""
+        mock_quarantine_port.get_filtered_stats.return_value = {
+            "total": 0,
+            "bronze_records": 0,
+            "reject_ratio": 0.0,
+            "run_ids": [],
+        }
+        mock_run_manifest_service = MagicMock()
+        older_manifest = SimpleNamespace(
+            pipeline_name="pipeline1",
+            run_type=SimpleNamespace(value="backfill"),
+            created_at=datetime(2026, 4, 24, 10, 0, tzinfo=UTC),
+            run_id="run-older",
+        )
+        latest_manifest = SimpleNamespace(
+            pipeline_name="pipeline1",
+            run_type=SimpleNamespace(value="backfill"),
+            created_at=datetime(2026, 4, 24, 11, 0, tzinfo=UTC),
+            run_id="run-latest",
+        )
+        mock_run_manifest_service.manifest_port.list_all.return_value = (
+            older_manifest,
+            latest_manifest,
+        )
+        mock_run_manifest_service.ledger_port.list_entries_by_run_id.side_effect = (
+            lambda run_id: [
+                SimpleNamespace(
+                    event_type=RUN_FINISHED_EVENT,
+                    occurred_at=(
+                        datetime(2026, 4, 24, 10, 30, tzinfo=UTC)
+                        if run_id == "run-older"
+                        else datetime(2026, 4, 24, 11, 30, tzinfo=UTC)
+                    ),
+                    entry_id=f"{run_id}-entry",
+                    metrics_snapshot={
+                        "records_bronze": 80 if run_id == "run-older" else 120
+                    },
+                )
+            ]
+        )
+        service = QuarantineService(
+            quarantine_port=mock_quarantine_port,
+            logger=mock_logger,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+            metrics=mock_metrics,
+            tracer=mock_tracer,
+            run_manifest_service=mock_run_manifest_service,
+        )
+
+        result = await service.get_filtered_stats(
+            pipeline="pipeline1",
+            run_type="backfill",
+        )
+
+        assert result["bronze_records"] == 120
+        assert result["reject_ratio"] == 0.0
+        mock_run_manifest_service.show.assert_not_called()
+        mock_run_manifest_service.manifest_port.list_all.assert_called_once_with()
 
     @pytest.mark.asyncio
     async def test_get_filtered_filter_options(

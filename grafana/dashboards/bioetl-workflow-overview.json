@@ -102,7 +102,7 @@
       "description": "Unified context/provenance banner for 5. Workflow. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Did the selected workflow emit failed or skipped evidence in this range?</div></div>"
+        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Did the selected workflow emit failed or skipped evidence in this range?</div><div style=\"margin-top:6px;font-size:12px;opacity:0.9;\">Run ID only fills the local ID card; evidence below remains selected-range workflow scope.</div></div>"
       }
     },
     {
@@ -119,7 +119,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range workflow evidence status, not current live run state and not an L0/L2 current verdict. Status mapping: 0=OK for no failed/non-success evidence in the selected range, 1=WARN for non-success evidence, >=2=CRIT for failed workflow evidence, null=UNKNOWN. Pipeline/run_type/run_id are secondary context/identity only.",
+      "description": "Selected-range workflow evidence status, not current live run state and not an L0/L2 current verdict. Status mapping: 0=OK for no failed/non-success evidence in the selected range, 1=WARN for non-success evidence, >=2=CRIT for failed workflow evidence, null=UNKNOWN. Pipeline/run_type remain handoff context and run_id remains local ID-only identity context for this dashboard.",
       "fieldConfig": {
         "defaults": {
           "color": {

@@ -398,6 +398,9 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
     assert "run_type" in provenance_description
     assert "run_id" in provenance_description
     assert "local control-plane identity context only" in provenance_description
+    if dashboard_name == "bioetl-workflow-overview.json":
+        assert "run id only fills the local id card" in provenance_content
+        assert "selected-range workflow scope" in provenance_content
     assert "context shell:" not in provenance_content
     assert "workflow=" not in provenance_content
     assert "pipeline=" not in provenance_content
@@ -414,6 +417,7 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         assert any("$__range" in expr for expr in status_expressions)
         assert "selected-range workflow evidence status" in status_description
         assert "not current live run state" in status_description
+        assert "run_id remains local id-only identity context" in status_description
     else:
         assert all("$__range" not in expr for expr in status_expressions)
         assert "current" in status_description

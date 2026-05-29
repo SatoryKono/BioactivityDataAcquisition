@@ -248,6 +248,8 @@ def test_live_audit_reviewed_specs_cover_semantically_sensitive_panels() -> None
         covered[("bioetl-control-plane-v1", 892)]
         == "Monitor: Checkpoint Freshness Lag (seconds)"
     )
+    assert covered[("bioetl-control-plane-v1", 9402)] == "ID"
+    assert covered[("bioetl-control-plane-v1", 9403)] == "Processed Records"
     assert covered[("bioetl-dq-v2", 101)] == "Review: Latest Successful Data Timestamp"
     assert covered[("bioetl-dq-v2", 8)] == "Monitor: Worst Data Freshness Lag (seconds)"
     assert covered[("bioetl-dq-v2", 9402)] == "ID"
@@ -299,8 +301,10 @@ def test_live_audit_treats_checkpoint_freshness_unknown_as_valid_unknown_state(
         grafana_base_url="http://localhost:3000",
         grafana_username="admin",
         grafana_password="admin",
+        workflow="All",
         pipeline="chembl_target",
         run_type="incremental",
+        run_id="-",
         range_hours=24,
         output_path=Path("reports/observability/grafana/live-panel-audit.json"),
     )
@@ -353,12 +357,50 @@ def test_live_audit_parse_args_uses_grafana_env_defaults(
     monkeypatch.setenv("GRAFANA_USERNAME", "viewer")
     monkeypatch.setenv("GRAFANA_PASSWORD", "secret")
 
-    config = audit_subject._parse_args(["--output", str(tmp_path / "audit.json")])
+    config = audit_subject._parse_args(
+        [
+            "--workflow",
+            "chembl_target",
+            "--run-id",
+            "run-123",
+            "--output",
+            str(tmp_path / "audit.json"),
+        ]
+    )
 
     assert config.app_base_url == "http://localhost:8081"
     assert config.grafana_base_url == "http://grafana.local:3000"
     assert config.grafana_username == "viewer"
     assert config.grafana_password == "secret"
+    assert config.workflow == "chembl_target"
+    assert config.run_id == "run-123"
+
+
+def test_live_audit_substitutes_workflow_and_run_id_tokens() -> None:
+    config = audit_subject.AuditConfig(
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        grafana_base_url="http://localhost:3000",
+        grafana_username="admin",
+        grafana_password="admin",
+        workflow="chembl_target",
+        pipeline="chembl_target",
+        run_type="backfill",
+        run_id="run-123",
+        range_hours=24,
+        output_path=Path("reports/observability/grafana/live-panel-audit.json"),
+    )
+
+    rendered = audit_subject._substitute_dashboard_tokens(
+        "/ops/control-plane/identity-table?workflow=${workflow}&pipeline=${pipeline}"
+        "&run_type=${run_type:csv}&run_id=${run_id}",
+        config,
+    )
+
+    assert "workflow=chembl_target" in rendered
+    assert "pipeline=chembl_target" in rendered
+    assert "run_type=backfill" in rendered
+    assert "run_id=run-123" in rendered
 
 
 def test_live_audit_normalizes_docker_gateway_to_localhost() -> None:
@@ -377,8 +419,10 @@ def test_live_audit_resolves_http_backend_from_datasource_candidates(
         grafana_base_url="http://localhost:3000",
         grafana_username="admin",
         grafana_password="changeme",
+        workflow="All",
         pipeline="chembl_target",
         run_type="incremental",
+        run_id="-",
         range_hours=24,
         output_path=Path("reports/observability/grafana/live-panel-audit.json"),
     )
@@ -1121,8 +1165,10 @@ def test_live_audit_writes_report(monkeypatch: Any, tmp_path: Path) -> None:
         grafana_base_url="http://localhost:3000",
         grafana_username="admin",
         grafana_password="admin",
+        workflow="All",
         pipeline="chembl_target",
         run_type="incremental",
+        run_id="-",
         range_hours=24,
         output_path=output_path,
     )
