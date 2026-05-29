@@ -1,6 +1,6 @@
 # [dq] Align publication_term derived contract
 
-**Status**: active
+**Status**: completed_in_repo
 **Priority**: P0 (Critical)
 **Labels**: `dq`, `configs`, `testing`, `governance`
 **Epic**: ChEMBL Normalization and DQ Alignment 2026Q2

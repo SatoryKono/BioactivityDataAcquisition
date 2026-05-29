@@ -1,6 +1,6 @@
 # [normalization] Normalize molecule_type through ChEMBL profile
 
-**Status**: active
+**Status**: completed_in_repo
 **Priority**: P0 (Critical)
 **Labels**: `dq`, `configs`, `testing`
 **Epic**: ChEMBL Normalization and DQ Alignment 2026Q2
