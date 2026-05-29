@@ -1,8 +1,8 @@
 # Expand Root Hygiene Review Lanes For Observed Transient Root Families
 
-**Status**: active
+**Status**: completed_in_repo
 **GitHub Issue**: [#4349](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4349)
-**Issue State**: open
+**Issue State**: closed
 **Synced**: 2026-05-29
 **Priority**: P2
 **Labels**: `governance`, `tooling`, `cleanup`, `priority:medium`

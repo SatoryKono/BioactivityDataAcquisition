@@ -1,22 +1,22 @@
 ---
 id: chembl-target-derived-synonyms
-title: Plan implementation of derived synonym columns in ChEMBL target transformer
+title: 'feat(chembl): add derived target synonym columns'
 task_id: chembl-target-derived-synonyms
-created_at: '2026-05-29T12:26:50Z'
+created_at: '2026-05-29T12:55:38Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
 summary: Active task session context.
-query: Plan implementation of derived synonym columns in ChEMBL target transformer
+query: 'feat(chembl): add derived target synonym columns'
 ---
 
 # Session note
 
 ## Task
 
-- Title: Plan implementation of derived synonym columns in ChEMBL target transformer
-- Retrieval query: Plan implementation of derived synonym columns in ChEMBL target transformer
+- Title: feat(chembl): add derived target synonym columns
+- Retrieval query: feat(chembl): add derived target synonym columns
 
 ## Retrieved context
 

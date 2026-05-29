@@ -27,18 +27,11 @@ CLI is not installed.
 ## Verification Snapshot
 
 - `./.venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked`
-  previously failed on tracked root drift:
-  - `temp_analyze_conflicting.py`
-  - `temp_get_hash.py`
-  - `test_output.txt`
-  - `artifacts/`
-- `python3 scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked`
-  in the 2026-05-21 audit currently fails on:
-  - `docker-compose.alertmanager.yml`
-  - `docker-compose.minio.yml`
-  - `docker-compose.redis.yml`
-  - `docker-compose.sonarqube.yml`
-  - `concepts/`
+  passes on tracked root policy after the RH-014/015/016/017/018 closeout.
+- `python3 scripts/engineering/diagnostics/audit_structure.py --path .`
+  reports a clean structure state.
+- `./.venv/bin/python -m pytest -q tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py tests/architecture/test_root_hygiene_review_registry.py tests/unit/scripts/repo/test_cleanup_repository.py`
+  pass.
 - `reports/quality/root-hygiene-cleanup-classification.json` currently reports
   `337` cleanup candidates, all `SAFE`, with `0` `REVIEW_REQUIRED` and `0`
   `BLOCKED`.
@@ -63,7 +56,5 @@ CLI is not installed.
 
 - This pack intentionally converts only confirmed residual gaps into issues.
 - It does not open a generic "clean the repo" umbrella issue.
-- The highest-signal defect is the contradiction between root-hygiene policy
-  and the current observability evidence path under `artifacts/`.
-- The 2026-05-21 additions isolate two new confirmed tracked-tree gaps rather
-  than reopening generic local cleanup noise.
+- All previously identified tracked-tree gaps for this pack are now addressed in-draft.
+- The pack currently acts as closeout evidence and audit traceability for completed root-hygiene work.
