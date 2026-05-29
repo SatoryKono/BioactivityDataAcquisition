@@ -57,6 +57,20 @@ def _resolve_bronze_records_from_inspection(inspection: object) -> int | None:
     return bronze_records
 
 
+def _resolve_bronze_records_from_entries(entries: object) -> int | None:
+    """Return one run-scoped Bronze denominator from raw ledger entries."""
+    bronze_records: int | None = None
+    for entry in entries if isinstance(entries, list | tuple) else ():
+        metrics_snapshot = getattr(entry, "metrics_snapshot", None)
+        if not isinstance(metrics_snapshot, dict):
+            continue
+        value = metrics_snapshot.get("records_bronze")
+        if not isinstance(value, int) or value <= 0:
+            continue
+        bronze_records = value if bronze_records is None else max(bronze_records, value)
+    return bronze_records
+
+
 def _resolve_filtered_stats_run_ids(
     *,
     run_id: str | None,
@@ -175,12 +189,20 @@ def _sum_bronze_records_for_runs(
 ) -> int:
     """Sum resolved Bronze record counts across the selected runs."""
     bronze_records = 0
+    ledger_port = getattr(run_manifest_service, "ledger_port", None)
+    list_entries_by_run_id = getattr(ledger_port, "list_entries_by_run_id", None)
     for candidate_run_id in sorted(set(run_ids)):
-        try:
-            inspection = run_manifest_service.show(candidate_run_id)
-        except ValueError:
-            continue
-        resolved = _resolve_bronze_records_from_inspection(inspection)
+        resolved: int | None = None
+        if callable(list_entries_by_run_id):
+            resolved = _resolve_bronze_records_from_entries(
+                list_entries_by_run_id(candidate_run_id)
+            )
+        if resolved is None:
+            try:
+                inspection = run_manifest_service.show(candidate_run_id)
+            except ValueError:
+                continue
+            resolved = _resolve_bronze_records_from_inspection(inspection)
         if resolved is not None:
             bronze_records += resolved
     return bronze_records
