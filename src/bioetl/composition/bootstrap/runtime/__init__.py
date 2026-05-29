@@ -67,6 +67,10 @@ def __getattr__(
     Any  # Any: lazy runtime re-export preserves the original symbol type at lookup time.
 ):  # Any: lazy runtime re-export preserves the original symbol type at lookup time.
     """Resolve runtime re-exports lazily to keep package import light-weight."""
+    if name == "compatibility":
+        module = import_module("bioetl.composition.bootstrap.runtime.compatibility")
+        globals()[name] = module
+        return module
     module_name = _PUBLIC_EXPORTS.get(name)
     if module_name is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

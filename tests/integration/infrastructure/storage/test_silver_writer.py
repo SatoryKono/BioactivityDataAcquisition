@@ -185,6 +185,7 @@ def sample_schema_with_content_hash():
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_write_silver_default_merge(
     silver_writer, temp_delta_path, sample_records, sample_schema
 ):
@@ -234,6 +235,7 @@ async def test_write_silver_default_merge(
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_write_silver_merge_is_idempotent_for_identical_input(
     silver_writer, temp_delta_path, sample_schema_with_content_hash
 ):
@@ -273,6 +275,7 @@ async def test_write_silver_merge_is_idempotent_for_identical_input(
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_write_silver_merge_ignores_metadata_only_rerun(
     silver_writer, temp_delta_path, sample_schema_with_content_hash
 ):
@@ -325,6 +328,7 @@ async def test_write_silver_merge_ignores_metadata_only_rerun(
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_write_silver_append_mode(
     silver_writer, temp_delta_path, sample_records, sample_schema
 ):
@@ -351,6 +355,7 @@ async def test_write_silver_append_mode(
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_write_silver_persisted_rows_strip_runtime_occurrence_fields(
     silver_writer, temp_delta_path, sample_records, sample_schema
 ):
@@ -370,6 +375,7 @@ async def test_write_silver_persisted_rows_strip_runtime_occurrence_fields(
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_write_silver_delete_mode(
     silver_writer, temp_delta_path, sample_records, sample_schema
 ):
@@ -390,6 +396,7 @@ async def test_write_silver_delete_mode(
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_write_silver_partitioning(
     silver_writer, temp_delta_path, sample_records, sample_schema
 ):
@@ -410,6 +417,7 @@ async def test_write_silver_partitioning(
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_read_silver_returns_records(
     silver_writer, temp_delta_path, sample_records, sample_schema
 ):
@@ -429,6 +437,7 @@ async def test_read_silver_returns_records(
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_write_silver_dual_write_routes_to_all_versioned_tables(
     temp_delta_path: str,
     noop_logger,
@@ -472,6 +481,7 @@ async def test_write_silver_dual_write_routes_to_all_versioned_tables(
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_write_silver_dual_write_accepts_runtime_services_without_logger(
     temp_delta_path: str,
     noop_logger,
@@ -505,6 +515,7 @@ async def test_write_silver_dual_write_accepts_runtime_services_without_logger(
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_write_silver_dual_write_fails_logical_write_when_any_target_fails(
     temp_delta_path: str,
     noop_logger,
@@ -558,6 +569,7 @@ async def test_write_silver_dual_write_fails_logical_write_when_any_target_fails
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_read_silver_with_columns(
     silver_writer, temp_delta_path, sample_records, sample_schema
 ):
@@ -578,6 +590,7 @@ async def test_read_silver_with_columns(
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_read_silver_table_not_found(silver_writer):
     """Test read_silver raises FileNotFoundError for missing table."""
     with pytest.raises(FileNotFoundError, match="Table not found"):
@@ -585,6 +598,7 @@ async def test_read_silver_table_not_found(silver_writer):
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_write_silver_merged_creates_table(silver_writer, temp_delta_path):
     """Test write_silver_merged creates table with inferred schema."""
     records = [
@@ -606,6 +620,7 @@ async def test_write_silver_merged_creates_table(silver_writer, temp_delta_path)
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_write_silver_merged_overwrites_existing(silver_writer, temp_delta_path):
     """Test write_silver_merged overwrites existing data."""
     # Write initial records
@@ -628,6 +643,7 @@ async def test_write_silver_merged_overwrites_existing(silver_writer, temp_delta
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_write_silver_merged_strips_runtime_occurrence_fields(
     silver_writer, temp_delta_path
 ):
@@ -653,6 +669,7 @@ async def test_write_silver_merged_strips_runtime_occurrence_fields(
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_write_silver_merged_empty_records(temp_delta_path: str):
     """Test write_silver_merged handles empty records gracefully."""
     logger = RecordingLogger()

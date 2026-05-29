@@ -86,19 +86,17 @@ def _latest_history_checkpoint_path(base_path: Path, pipeline: str) -> Path | No
     history_root = base_path / ".history" / "by_pipeline" / pipeline
     if not history_root.exists():
         return None
-    latest_path: Path | None = None
-    latest_mtime_ns: int | None = None
+    candidates: list[Path] = []
     for run_dir in history_root.iterdir():
         if not run_dir.is_dir():
             continue
         for candidate in run_dir.iterdir():
             if not candidate.is_file() or candidate.suffix != ".json":
                 continue
-            candidate_mtime_ns = candidate.stat().st_mtime_ns
-            if latest_mtime_ns is None or candidate_mtime_ns > latest_mtime_ns:
-                latest_path = candidate
-                latest_mtime_ns = candidate_mtime_ns
-    return latest_path
+            candidates.append(candidate)
+    if not candidates:
+        return None
+    return max(candidates, key=lambda path: (path.stat().st_mtime_ns, path.name))
 
 
 def _atomic_write_text(path: Path, payload: str) -> None:

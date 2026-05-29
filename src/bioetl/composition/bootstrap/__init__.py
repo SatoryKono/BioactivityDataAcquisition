@@ -85,6 +85,10 @@ __all__: list[str] = [
 
 
 def __getattr__(name: str) -> object:
+    if name == "runtime":
+        module = import_module("bioetl.composition.bootstrap.runtime")
+        globals()[name] = module
+        return module
     export = _PUBLIC_EXPORTS.get(name)
     if export is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

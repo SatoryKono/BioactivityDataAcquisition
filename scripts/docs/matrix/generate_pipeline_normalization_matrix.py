@@ -956,6 +956,11 @@ def _composite_schema_coverage(pipeline_name: str, field_name: str) -> str:
 
 @cache
 def _ensure_chembl_policy_registry_initialized() -> None:
+    load_cache = initialize_bootstrap_chembl_policy_registry.__globals__.get(
+        "_load_chembl_policy_registry_data"
+    )
+    if load_cache is not None:
+        load_cache.cache_clear()
     initialize_bootstrap_chembl_policy_registry(Path("configs"))
 
 

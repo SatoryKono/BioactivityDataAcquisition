@@ -34,6 +34,8 @@ BioETL.
   — working prompt for read-only architecture review and refactoring assessment
 - [test_speed_optimization_loop.md](test_speed_optimization_loop.md) —
   working prompt for test-speed optimization loops
+- [test_fix_retest_loop.md](test_fix_retest_loop.md) — working prompt for
+  test run → fix → rerun iterative validation loop
 - [COLLECTED_PROMPTS_INDEX.md](COLLECTED_PROMPTS_INDEX.md) — discoverability
   index for repo-only collected prompt snapshots
 - Historical prompts in this folder explicitly marked `internal-only (historical prompt)` should be treated as reference material, not as current
