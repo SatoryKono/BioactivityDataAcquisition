@@ -1,6 +1,6 @@
 # [normalization] Canonicalize subcellular_fraction before identity and hashing
 
-**Status**: Completed ✅
+**Status**: active
 **Priority**: P0 (Critical)
 **Labels**: `dq`, `technical-debt`, `testing`
 **Epic**: ChEMBL Normalization and DQ Alignment 2026Q2

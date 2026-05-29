@@ -1,6 +1,6 @@
 # [normalization] Move publication_type normalization into domain profile policy
 
-**Status**: Completed ✅
+**Status**: deferred_by_priority
 **Priority**: P1 (High)
 **Labels**: `architecture`, `dq`, `refactor`, `testing`
 **Epic**: ChEMBL Normalization and DQ Alignment 2026Q2

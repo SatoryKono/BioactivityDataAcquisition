@@ -1,6 +1,6 @@
 # [governance] Register missing ChEMBL Gold contracts
 
-**Status**: Completed ✅
+**Status**: deferred_by_priority
 **Priority**: P2 (Medium)
 **Labels**: `governance`, `configs`, `testing`
 **Epic**: ChEMBL Normalization and DQ Alignment 2026Q2

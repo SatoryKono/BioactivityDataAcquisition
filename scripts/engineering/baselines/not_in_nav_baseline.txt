@@ -56,8 +56,8 @@
 00-project/ai/prompts/reprodusibility.md
 00-project/ai/prompts/reprodusibility_2.md
 00-project/ai/prompts/scripts_inventory_consolidation_cleanup_prompt.md
-00-project/ai/prompts/test_speed_optimization_loop.md
 00-project/ai/prompts/test_fix_retest_loop.md
+00-project/ai/prompts/test_speed_optimization_loop.md
 00-project/ai/sessions/custom-1776232397.md
 00-project/ai/sessions/custom-1776232923.md
 00-project/ai/sessions/quick-review-1776233756.md
@@ -166,6 +166,7 @@
 05-operations/deployment/neo4j-audit-instance-implementation.md
 05-operations/deployment/neo4j-audit-instance-quick-start.md
 05-operations/operations-doc-inventory.md
+05-operations/runbooks/merge-campaign.md
 05-operations/runbooks/neo4j-backend-recovery-quick-start.md
 05-operations/runbooks/neo4j-complete-recovery-guide.md
 05-operations/runbooks/workflow-control-plane.md

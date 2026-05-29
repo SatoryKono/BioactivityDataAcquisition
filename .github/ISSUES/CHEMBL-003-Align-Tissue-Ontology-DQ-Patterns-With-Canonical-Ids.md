@@ -1,6 +1,6 @@
 # [dq] Align tissue ontology DQ patterns with canonical IDs
 
-**Status**: Completed ✅
+**Status**: active
 **Priority**: P0 (Critical)
 **Labels**: `dq`, `configs`, `testing`
 **Epic**: ChEMBL Normalization and DQ Alignment 2026Q2

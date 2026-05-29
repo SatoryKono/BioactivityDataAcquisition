@@ -1,0 +1,65 @@
+name: nightly-replay-parity
+
+on:
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: nightly-replay-parity
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  BIOETL_TEST_MODE: "true"
+  BIOETL_PIPELINE__HEALTH_CHECK_MODE: "probe"
+
+jobs:
+  replay-parity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          uv-extras: "dev tracing"
+          uv-sync-args: "--frozen --all-extras --dev"
+
+      - name: Run replay-lane matrix
+        run: |
+          mkdir -p reports/nightly-replay
+          uv run pytest tests/integration/determinism -q \
+            --junitxml=reports/nightly-replay/determinism.xml \
+            --basetemp .artifacts/nightly-replay/determinism/run1
+          uv run pytest tests/integration/idempotency -q \
+            --junitxml=reports/nightly-replay/idempotency.xml \
+            --basetemp .artifacts/nightly-replay/idempotency/run1
+          uv run pytest tests/integration/composite_resume -q \
+            --junitxml=reports/nightly-replay/composite_resume.xml \
+            --basetemp .artifacts/nightly-replay/composite_resume/run1
+          uv run pytest tests/integration/determinism -q \
+            --junitxml=reports/nightly-replay/determinism-recheck.xml \
+            --basetemp .artifacts/nightly-replay/determinism/run2
+
+      - name: Replay parity checksums
+        run: |
+          mkdir -p reports/nightly-replay/checksums
+          find .artifacts/nightly-replay/determinism -type f | sort | xargs sha256sum > reports/nightly-replay/checksums/determinism.sha256
+          find .artifacts/nightly-replay/idempotency -type f | sort | xargs sha256sum > reports/nightly-replay/checksums/idempotency.sha256
+          find .artifacts/nightly-replay/composite_resume -type f | sort | xargs sha256sum > reports/nightly-replay/checksums/composite_resume.sha256
+          find .artifacts/nightly-replay/determinism/run1 -type f | sort | xargs sha256sum > reports/nightly-replay/checksums/determinism-run1.sha256
+          find .artifacts/nightly-replay/determinism/run2 -type f | sort | xargs sha256sum > reports/nightly-replay/checksums/determinism-run2.sha256
+          diff -u reports/nightly-replay/checksums/determinism-run1.sha256 reports/nightly-replay/checksums/determinism-run2.sha256 > reports/nightly-replay/checksums/determinism-replay-diff.txt
+
+      - name: Upload replay parity artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: nightly-replay-parity
+          path: reports/nightly-replay
+          if-no-files-found: error
+          retention-days: 14

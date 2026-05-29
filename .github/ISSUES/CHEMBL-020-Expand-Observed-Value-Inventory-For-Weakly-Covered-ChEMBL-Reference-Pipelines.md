@@ -1,6 +1,6 @@
 # [testing] Expand observed-value inventory for weakly covered ChEMBL reference pipelines
 
-**Status**: Draft
+**Status**: active
 **Priority**: P2 (Medium)
 **Labels**: `provider:chembl`, `testing`, `governance`, `technical-debt`
 **Epic**: ChEMBL Normalization Residuals 2026Q2

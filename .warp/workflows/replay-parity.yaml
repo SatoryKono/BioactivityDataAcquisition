@@ -1,0 +1,14 @@
+name: bioetl replay parity
+command: >
+  mkdir -p .artifacts/replay-parity &&
+  uv run pytest tests/integration/determinism -q --basetemp .artifacts/replay-parity/determinism/run1 &&
+  uv run pytest tests/integration/idempotency -q --basetemp .artifacts/replay-parity/idempotency/run1 &&
+  uv run pytest tests/integration/composite_resume -q --basetemp .artifacts/replay-parity/composite-resume/run1 &&
+  uv run pytest tests/integration/determinism -q --basetemp .artifacts/replay-parity/determinism/run2
+tags:
+  - bioetl
+  - consolidation
+  - replay
+description: Запуск determinism/idempotency/composite_resume с повторным determinism-прогона для parity-сверки.
+shells:
+  - bash

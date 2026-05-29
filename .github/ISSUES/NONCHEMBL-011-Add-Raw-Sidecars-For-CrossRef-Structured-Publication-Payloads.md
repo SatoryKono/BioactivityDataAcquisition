@@ -1,6 +1,6 @@
 # [crossref] Add raw sidecars for semantic-sensitive structured publication payloads
 
-**Status**: Draft
+**Status**: deferred_by_priority
 **Priority**: P1 (High)
 **Labels**: `provider:crossref`, `governance`, `schema-evolution`, `technical-debt`, `data-lineage`, `quality`
 **Epic**: Non-ChEMBL Normalization Residuals 2026Q2

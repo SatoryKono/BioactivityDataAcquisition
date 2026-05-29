@@ -12,8 +12,8 @@ to publish-ready GitHub issue drafts already stored under `.github/ISSUES/`.
 | 2 | UniProt accession / `component_accessions` partial semantics and DQ asymmetry | Confirmed residual governance work | Publish / track | `NONCHEMBL-012-Align-UniProt-Reference-Array-DQ-With-Profile-Owned-Canonicalization.md` |
 | 3 | Composite join and lineage drift around identifiers | Confirmed residual guardrail work | Publish / track | `NONCHEMBL-003-Harden-Composite-Boundaries-Against-Non-Chembl-Normalization-Drift.md` |
 | 4 | Publication identifier edge coverage and provider vocabulary confidence | Confirmed residual test coverage work | Publish / track | `NONCHEMBL-013-Expand-Publication-Identifier-And-Vocabulary-Edge-Fixture-Inventory.md` |
-| 5 | DOI normalization mismatch across publication providers | Not confirmed on current `main` | Do not create new issue | Covered by current normalization/tests |
-| 6 | PubChem `molecule_id` int/string canonicalization gap | Already fixed on current `main` | Do not create new issue | Historical follow-up already superseded |
+| 5 | DOI normalization mismatch across publication providers | Not confirmed on current `main` | stale_not_reproduced | Covered by current normalization/tests |
+| 6 | PubChem `molecule_id` int/string canonicalization gap | Already fixed on current `main` | stale_not_reproduced | Historical follow-up already superseded |
 | 7 | CrossRef structured publication payload fidelity gap | Confirmed, but outside the user summary's top risks | Optional follow-up | `NONCHEMBL-011-Add-Raw-Sidecars-For-CrossRef-Structured-Publication-Payloads.md` |
 | 8 | Date-format incompatibility across publication family | Not confirmed as an active root-cause issue | Do not create new issue | Current shared date normalization already present |
 

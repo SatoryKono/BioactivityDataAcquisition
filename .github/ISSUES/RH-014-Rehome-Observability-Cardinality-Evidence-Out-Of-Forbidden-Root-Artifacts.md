@@ -1,6 +1,6 @@
 # Rehome Observability Cardinality Evidence Out Of Forbidden Root `artifacts/`
 
-**Status**: Draft
+**Status**: active
 **Priority**: P1
 **Labels**: `governance`, `observability`, `infrastructure`, `documentation`, `priority:high`
 **Last audited**: 2026-05-19

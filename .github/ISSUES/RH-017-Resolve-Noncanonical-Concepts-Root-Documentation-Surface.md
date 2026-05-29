@@ -1,6 +1,6 @@
 # Resolve Noncanonical Root `concepts/` Documentation Surface
 
-**Status**: Draft
+**Status**: active
 **Priority**: P2
 **Labels**: `governance`, `documentation`, `cleanup`, `priority:medium`
 **Last audited**: 2026-05-21

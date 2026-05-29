@@ -1,6 +1,6 @@
 # [docs] Sync ChEMBL provider docs with active normalization surfaces
 
-**Status**: Draft
+**Status**: active
 **Priority**: P2 (Medium)
 **Labels**: `provider:chembl`, `docs`, `docs-drift`, `governance`
 **Epic**: ChEMBL Normalization Residuals 2026Q2

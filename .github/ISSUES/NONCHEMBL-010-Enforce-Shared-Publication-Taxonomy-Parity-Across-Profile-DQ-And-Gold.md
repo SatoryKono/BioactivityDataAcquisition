@@ -1,6 +1,6 @@
 # [dq] Enforce shared publication taxonomy parity across profile, DQ, and Gold
 
-**Status**: Draft
+**Status**: active
 **Priority**: P0 (Critical)
 **Labels**: `provider:crossref`, `provider:openalex`, `provider:pubmed`, `provider:semantic-scholar`, `data-quality`, `governance`, `quality`, `testing`
 **Epic**: Non-ChEMBL Normalization Residuals 2026Q2
