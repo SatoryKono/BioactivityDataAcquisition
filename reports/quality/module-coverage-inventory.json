@@ -3973,7 +3973,7 @@
       "missing_lines": 81,
       "module": "bioetl.application.services._quarantine_service_filtered_mixin",
       "path": "src/bioetl/application/services/_quarantine_service_filtered_mixin.py",
-      "source_lines": 475
+      "source_lines": 613
     },
     {
       "coverage_percent": 31.43,
@@ -19498,7 +19498,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-05-29",
-  "source_tree_sha256": "e651fffab7d6b9a546234e2db81900c21ee39f4e2cb31077c456f353055bc103",
+  "source_tree_sha256": "a871dce614b093e9c6465bc6f3d30fa247f5ce983305550041f7f412edb2ab9a",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
