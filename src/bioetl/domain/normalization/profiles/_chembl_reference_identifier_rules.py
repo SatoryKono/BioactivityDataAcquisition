@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from bioetl.domain.normalization.profiles.chembl_policy_registry import (
-    chembl_reference_identifier_family_fields,
-)
 from bioetl.domain.normalization.profiles._standard_profile_rule_components import (
     RuleComponentSpec,
+)
+from bioetl.domain.normalization.profiles.chembl_policy_registry import (
+    chembl_reference_identifier_family_fields,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_chembl_id,
