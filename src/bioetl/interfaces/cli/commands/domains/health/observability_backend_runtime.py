@@ -16,12 +16,8 @@ from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_process import (
-    _build_detached_backend_env as _build_detached_backend_env,
-)
-from bioetl.interfaces.cli.commands.domains.health.observability_backend_process import (
-    _build_detached_backend_popen_kwargs as _build_detached_backend_popen_kwargs,
-)
-from bioetl.interfaces.cli.commands.domains.health.observability_backend_process import (
+    _build_detached_backend_env,
+    _build_detached_backend_popen_kwargs,
     build_detached_backend_log_path,
     drop_listening_backend_on_port,
     python_executable_to_tuple,
@@ -457,27 +453,25 @@ def should_disable_transient_health_server(
     )
 
 
-__all__ = sorted(
-    [
-        "DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST",
-        "DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS",
-        "DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST",
-        "DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS",
-        "DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS",
-        "DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PROBE_TIMEOUT_SECONDS",
-        "ObservabilityBackendEnsureResult",
-        "_build_detached_backend_env",
-        "_build_detached_backend_popen_kwargs",
-        "_build_observability_backend_probe_urls",
-        "build_detached_backend_log_path",
-        "build_observability_backend_health_url",
-        "ensure_observability_backend_started",
-        "probe_observability_backend",
-        "probe_observability_backend_required_paths",
-        "python_executable_to_tuple",
-        "should_disable_transient_health_server",
-        "start_detached_quarantine_backend",
-        "wait_for_observability_backend_required_paths_ready",
-        "wait_for_observability_backend_ready",
-    ]
-)
+__all__ = [
+    "DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST",
+    "DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS",
+    "DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST",
+    "DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS",
+    "DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS",
+    "DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PROBE_TIMEOUT_SECONDS",
+    "ObservabilityBackendEnsureResult",
+    "_build_detached_backend_env",
+    "_build_detached_backend_popen_kwargs",
+    "_build_observability_backend_probe_urls",
+    "build_detached_backend_log_path",
+    "build_observability_backend_health_url",
+    "ensure_observability_backend_started",
+    "probe_observability_backend",
+    "probe_observability_backend_required_paths",
+    "python_executable_to_tuple",
+    "should_disable_transient_health_server",
+    "start_detached_quarantine_backend",
+    "wait_for_observability_backend_required_paths_ready",
+    "wait_for_observability_backend_ready",
+]
