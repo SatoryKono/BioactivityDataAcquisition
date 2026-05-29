@@ -24,7 +24,7 @@ from bioetl.composition.observability import (
 )
 from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 from tests.helpers.deterministic_ids import deterministic_uuid
-from tests.helpers.git_index_scan import git_grep_fixed, git_tracked_files
+from tests.helpers.git_index_scan import git_grep_fixed
 
 pytestmark = pytest.mark.repo_backed
 

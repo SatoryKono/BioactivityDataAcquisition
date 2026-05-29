@@ -6,7 +6,7 @@ import sys
 
 import pytest
 
-from .common import *  # noqa: F401,F403
+from .common import *  # noqa: F403
 
 pytestmark = pytest.mark.skipif(
     sys.platform.startswith("win"),

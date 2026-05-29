@@ -902,14 +902,10 @@ class TestTargetTransformer:
             else "unknown"
         )
         assert result["target_xref_go_function"] == (
-            expected_value
-            if expected_field == "target_xref_go_function"
-            else "unknown"
+            expected_value if expected_field == "target_xref_go_function" else "unknown"
         )
         assert result["target_xref_go_process"] == (
-            expected_value
-            if expected_field == "target_xref_go_process"
-            else "unknown"
+            expected_value if expected_field == "target_xref_go_process" else "unknown"
         )
         assert result["target_xref_reactome_ids"] == (
             expected_value
@@ -925,7 +921,9 @@ class TestTargetTransformer:
         assert {source_db, "UnknownSource"} <= {str(v) for v in raw_sources}
 
     @pytest.mark.asyncio
-    async def test_transform_deduplicates_and_orders_target_xrefs(self, transformer, mock_context):
+    async def test_transform_deduplicates_and_orders_target_xrefs(
+        self, transformer, mock_context
+    ):
         """Projection should deduplicate projected values and preserve first-seen order."""
         record = {
             "target_id": "CHEMBL240",

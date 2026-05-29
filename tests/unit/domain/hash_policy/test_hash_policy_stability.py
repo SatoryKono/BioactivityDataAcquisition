@@ -8,7 +8,6 @@ import os
 from pathlib import Path
 from typing import Any
 
-import pytest
 import yaml
 
 from bioetl.domain.transformations import generate_content_hash

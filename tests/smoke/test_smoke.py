@@ -91,7 +91,7 @@ class TestCoreImports:
 
     def test_domain_imports(self) -> None:
         """Domain layer imports successfully."""
-        from bioetl.domain import config, ports, types  # noqa: F401
+        from bioetl.domain import config, ports, types
 
         assert config is not None
         assert ports is not None
@@ -99,31 +99,31 @@ class TestCoreImports:
 
     def test_application_imports(self) -> None:
         """Application layer imports successfully."""
-        from bioetl.application.core import base_transformer  # noqa: F401
-        from bioetl.application.core import runner  # noqa: F401
+        from bioetl.application.core import base_transformer
+        from bioetl.application.core import runner
 
         assert base_transformer is not None
         assert runner is not None
 
     def test_infrastructure_imports(self) -> None:
         """Infrastructure layer imports successfully."""
-        from bioetl.infrastructure.storage import bronze_writer  # noqa: F401
-        from bioetl.infrastructure.storage import silver_writer  # noqa: F401
+        from bioetl.infrastructure.storage import bronze_writer
+        from bioetl.infrastructure.storage import silver_writer
 
         assert bronze_writer is not None
         assert silver_writer is not None
 
     def test_composition_imports(self) -> None:
         """Composition layer imports successfully."""
-        from bioetl.composition import bootstrap  # noqa: F401
-        from bioetl.composition import entrypoints  # noqa: F401
+        from bioetl.composition import bootstrap
+        from bioetl.composition import entrypoints
 
         assert bootstrap is not None
         assert entrypoints is not None
 
     def test_cli_imports(self) -> None:
         """CLI module imports successfully."""
-        import bioetl.interfaces.cli  # noqa: F401
+        import bioetl.interfaces.cli
 
         assert bioetl.interfaces.cli is not None
 

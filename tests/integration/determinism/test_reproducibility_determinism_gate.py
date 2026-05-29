@@ -33,11 +33,19 @@ def _stable_manifest_payload(payload: dict) -> dict:
         "replay_capability": payload.get("replay_capability"),
         "launch_context": {
             key: payload.get("launch_context", {}).get(key)
-            for key in ("exact_replay", "execution_context", "required_persistence_profile")
+            for key in (
+                "exact_replay",
+                "execution_context",
+                "required_persistence_profile",
+            )
         },
         "runtime_config": {
             key: payload.get("runtime_config", {}).get(key)
-            for key in ("exact_replay", "execution_context", "required_persistence_profile")
+            for key in (
+                "exact_replay",
+                "execution_context",
+                "required_persistence_profile",
+            )
         },
         "code_provenance": {
             "contract_ref": payload["code_provenance"]["contract_ref"],
@@ -65,8 +73,15 @@ async def test_consolidation_determinism_replay_guard(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    first_manifest, second_manifest, first_effective, second_effective, first_run_id, second_run_id = (
-        await run_tracked_fixture_replay_pair(tmp_path=tmp_path, monkeypatch=monkeypatch)
+    (
+        first_manifest,
+        second_manifest,
+        first_effective,
+        second_effective,
+        first_run_id,
+        second_run_id,
+    ) = await run_tracked_fixture_replay_pair(
+        tmp_path=tmp_path, monkeypatch=monkeypatch
     )
 
     assert first_manifest["run_id"] != second_manifest["run_id"]
@@ -76,7 +91,10 @@ async def test_consolidation_determinism_replay_guard(
 
     assert first_manifest["replay_capability"] == "exact_replay_supported"
     assert second_manifest["replay_capability"] == "exact_replay_supported"
-    assert first_manifest["execution_fingerprint"] == second_manifest["execution_fingerprint"]
+    assert (
+        first_manifest["execution_fingerprint"]
+        == second_manifest["execution_fingerprint"]
+    )
     assert first_manifest["launch_context"]["exact_replay"] is True
     assert second_manifest["launch_context"]["exact_replay"] is True
 
@@ -98,9 +116,9 @@ async def test_consolidation_determinism_replay_guard(
         first_manifest["code_provenance"]["dq_contract_compatibility_hash"]
         == second_manifest["code_provenance"]["dq_contract_compatibility_hash"]
     )
-    assert _canonical_manifest_fingerprint(first_manifest) == _canonical_manifest_fingerprint(
-        second_manifest
-    )
+    assert _canonical_manifest_fingerprint(
+        first_manifest
+    ) == _canonical_manifest_fingerprint(second_manifest)
     assert first_effective["artifact_id"] == second_effective["artifact_id"]
 
     evidence_dir = tmp_path / "reports" / "reproducibility"

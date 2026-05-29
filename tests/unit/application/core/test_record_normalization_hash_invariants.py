@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 # ruff: noqa: F403,F405
-from tests.unit.application.core.normalization_test_support import *  # noqa: F403,F405
+from tests.unit.application.core.normalization_test_support import *
 
 
 def test_profile_auto_resolves_for_chembl_publication_similarity() -> None:

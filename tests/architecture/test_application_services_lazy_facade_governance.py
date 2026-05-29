@@ -202,7 +202,9 @@ def _run_command_with_stdout_file(
                     start_time = time.time()  # Reset for kill timeout
                 if killed and (time.time() - start_time > kill_timeout):
                     process.terminate()
-                    raise OSError(f"Command timed out after {timeout}s and failed to terminate: {' '.join(command)}")
+                    raise OSError(
+                        f"Command timed out after {timeout}s and failed to terminate: {' '.join(command)}"
+                    )
                 time.sleep(poll_interval)
 
             completed = subprocess.CompletedProcess(

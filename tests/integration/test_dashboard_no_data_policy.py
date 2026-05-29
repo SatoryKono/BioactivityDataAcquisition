@@ -1,6 +1,5 @@
 """Integration tests for Grafana dashboard no-data/unknown policy."""
 
-from pathlib import Path
 
 import pytest
 

@@ -1,6 +1,5 @@
 """Integration tests for Grafana dashboard panel title conventions."""
 
-from pathlib import Path
 
 import pytest
 

@@ -274,7 +274,9 @@ class IntegrationPipelineTestCase:
         """
         # Load config via factory (it handles loading)
         # But we might want to override some values (e.g. limit, or sinks)
-        from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+        from bioetl.infrastructure.config.pipeline_config_api import (
+            load_pipeline_config,
+        )
 
         pipeline_config = load_pipeline_config(factory.pipeline_name)
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 # ruff: noqa: F403,F405
-from tests.unit.application.core.normalization_test_support import *  # noqa: F403,F405
+from tests.unit.application.core.normalization_test_support import *
 
 
 def test_pubchem_compound_profile_stabilizes_numeric_and_smiles_equivalence() -> None:

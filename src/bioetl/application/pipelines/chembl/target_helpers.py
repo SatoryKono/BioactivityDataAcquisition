@@ -126,8 +126,7 @@ class XrefHelper:
             )
 
         return {
-            column: cls.pipe_or_unknown(values)
-            for column, values in buckets.items()
+            column: cls.pipe_or_unknown(values) for column, values in buckets.items()
         }
 
     @classmethod
@@ -178,7 +177,9 @@ class SynonymHelper:
         if normalized_type == "EC_NUMBER":
             return "target_ec_numbers"
 
-        if normalized_type == "GENE_SYMBOL" or normalized_type.startswith("GENE_SYMBOL_"):
+        if normalized_type == "GENE_SYMBOL" or normalized_type.startswith(
+            "GENE_SYMBOL_"
+        ):
             return "target_gene_synonyms"
 
         return None
@@ -266,9 +267,7 @@ class SynonymHelper:
             "target_gene_synonyms": cls.pipe_or_unknown(
                 buckets["target_gene_synonyms"]
             ),
-            "target_ec_numbers": cls.pipe_or_unknown(
-                buckets["target_ec_numbers"]
-            ),
+            "target_ec_numbers": cls.pipe_or_unknown(buckets["target_ec_numbers"]),
         }
 
 
