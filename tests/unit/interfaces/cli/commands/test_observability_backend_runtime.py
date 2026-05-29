@@ -91,7 +91,9 @@ def test_probe_observability_backend_required_paths_uses_backend_base_url() -> N
     assert (
         probe_observability_backend_required_paths(
             "http://127.0.0.1:8081/health",
-            required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
+            required_probe_paths=(
+                "/ops/control-plane/checkpoint-freshness?pipeline=x",
+            ),
             timeout_seconds=1.0,
             urlopen_fn=fake_urlopen,
         )
@@ -279,7 +281,9 @@ def test_ensure_backend_failure_message_includes_exit_code_and_log_tail() -> Non
         log_path.unlink(missing_ok=True)
 
 
-def test_wait_for_observability_backend_required_paths_ready_retries_until_success() -> None:
+def test_wait_for_observability_backend_required_paths_ready_retries_until_success() -> (
+    None
+):
     checks = {"count": 0}
 
     def fake_required_probe(

@@ -247,6 +247,33 @@
       "decision": "shared_helper_module",
       "review_by": "2026-07-15",
       "next_step": "Retain as the context-aware Neo4j audit connection helper while deployment and live-audit runbooks still reference src/tools/neo4j_audit.py; fold it into a broader canonical ops helper surface only if the audit workflow is consolidated."
+    },
+    "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1": {
+      "status": "orphan",
+      "rationale": "To be removed",
+      "review_date": "2026-05-28",
+      "owner": "team-observability",
+      "decision": "pending_removal",
+      "next_step": "remove file",
+      "review_by": "2026-06-28"
+    },
+    "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh": {
+      "status": "orphan",
+      "rationale": "To be removed",
+      "review_date": "2026-05-28",
+      "owner": "team-observability",
+      "decision": "pending_removal",
+      "next_step": "remove file",
+      "review_by": "2026-06-28"
+    },
+    "scripts/ops/setup.sh": {
+      "status": "supporting",
+      "rationale": "Local environment setup",
+      "review_date": "2026-05-28",
+      "owner": "team-dev-tools",
+      "decision": "maintain",
+      "next_step": "none",
+      "review_by": "2026-06-28"
     }
   }
 }

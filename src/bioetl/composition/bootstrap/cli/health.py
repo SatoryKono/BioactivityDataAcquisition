@@ -13,7 +13,9 @@ from bioetl.composition.bootstrap.assembly.health_service import (
     create_health_server_dependencies,
     create_health_service,
 )
-from bioetl.composition.bootstrap.assembly.checkpoint import bootstrap_checkpoint_adapter
+from bioetl.composition.bootstrap.assembly.checkpoint import (
+    bootstrap_checkpoint_adapter,
+)
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.bootstrap.cli.run_manifest import (
     bootstrap_run_manifest_service,

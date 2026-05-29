@@ -1513,7 +1513,9 @@ class TestHealthServerControlPlaneSelector:
         server, manifest_store = running_server_with_run_catalog
         port = self._get_server_port(server)
         manifest = next(
-            item for item in manifest_store.list_all() if item.manifest_id == "manifest-1"
+            item
+            for item in manifest_store.list_all()
+            if item.manifest_id == "manifest-1"
         )
 
         status_code, _, body = await self._send_request(

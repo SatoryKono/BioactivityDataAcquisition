@@ -147,7 +147,9 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
     class _Result:
         returncode = 0
 
-    monkeypatch.setattr(rerender_subject, "_playwright_script_path", lambda: script_path)
+    monkeypatch.setattr(
+        rerender_subject, "_playwright_script_path", lambda: script_path
+    )
     monkeypatch.setattr(
         rerender_subject, "_resolve_node_executable", lambda: "/usr/bin/node"
     )
@@ -288,9 +290,7 @@ def test_live_audit_treats_checkpoint_freshness_unknown_as_valid_unknown_state(
     )
     panel = {
         "targets": [
-            {
-                "url": "/ops/control-plane/checkpoint-freshness?pipeline=${pipeline}"
-            }
+            {"url": "/ops/control-plane/checkpoint-freshness?pipeline=${pipeline}"}
         ]
     }
     config = audit_subject.AuditConfig(
@@ -338,8 +338,7 @@ def test_live_audit_classifies_http_freshness_zero_and_empty() -> None:
     empty_payload = {"status": "UNKNOWN", "age_seconds": None}
 
     assert (
-        audit_subject._classify_http_freshness_payload(zero_payload)[0]
-        == "zero_result"
+        audit_subject._classify_http_freshness_payload(zero_payload)[0] == "zero_result"
     )
     assert (
         audit_subject._classify_http_freshness_payload(empty_payload)[0]
@@ -458,9 +457,7 @@ def test_grafana_audit_preflight_detects_stale_screenshot(tmp_path: Path) -> Non
     os.utime(screenshot_path, (1, 1))
     os.utime(dashboard_path, (2, 2))
 
-    result = preflight_subject._check_screenshot_artifacts(
-        screenshot_dir
-    )
+    result = preflight_subject._check_screenshot_artifacts(screenshot_dir)
 
     assert result.status == "error"
     assert "stale dashboard screenshots" in result.detail
@@ -684,11 +681,13 @@ def test_grafana_audit_cycle_stops_when_backend_cannot_be_ensured(
     monkeypatch.setattr(
         cycle_subject,
         "ensure_observability_backend_started",
-        lambda **_kwargs: calls.append("ensure")
-        or _backend_result(
-            backend_available=False,
-            message="bind failed",
-            status="failed",
+        lambda **_kwargs: (
+            calls.append("ensure")
+            or _backend_result(
+                backend_available=False,
+                message="bind failed",
+                status="failed",
+            )
         ),
     )
     monkeypatch.setattr(
@@ -869,8 +868,12 @@ def test_grafana_audit_cycle_retries_backend_on_fallback_port(
             status="started",
         )
 
-    monkeypatch.setattr(cycle_subject, "ensure_observability_backend_started", fake_ensure)
-    monkeypatch.setattr(cycle_subject, "drop_listening_backend_on_port", lambda _port: False)
+    monkeypatch.setattr(
+        cycle_subject, "ensure_observability_backend_started", fake_ensure
+    )
+    monkeypatch.setattr(
+        cycle_subject, "drop_listening_backend_on_port", lambda _port: False
+    )
     monkeypatch.setattr(
         cycle_subject,
         "probe_observability_backend_required_paths",
@@ -919,7 +922,9 @@ def test_grafana_audit_cycle_reuses_existing_backend_when_fallback_start_fails(
 ) -> None:
     calls: list[tuple[str, list[str]]] = []
 
-    monkeypatch.setattr(cycle_subject, "drop_listening_backend_on_port", lambda _port: False)
+    monkeypatch.setattr(
+        cycle_subject, "drop_listening_backend_on_port", lambda _port: False
+    )
     monkeypatch.setattr(
         cycle_subject,
         "probe_observability_backend_required_paths",
@@ -981,7 +986,9 @@ def test_grafana_audit_cycle_uses_managed_backend_when_detached_backend_fails(
 ) -> None:
     calls: list[tuple[str, list[str]]] = []
 
-    monkeypatch.setattr(cycle_subject, "drop_listening_backend_on_port", lambda _port: True)
+    monkeypatch.setattr(
+        cycle_subject, "drop_listening_backend_on_port", lambda _port: True
+    )
     monkeypatch.setattr(
         cycle_subject,
         "ensure_observability_backend_started",

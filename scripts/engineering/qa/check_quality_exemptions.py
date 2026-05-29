@@ -31,3 +31,29 @@ if __name__ == "__main__":
         sys.stderr.write(f"ERROR: canonical script not found: {script}\n")
         raise SystemExit(2)
     runpy.run_path(str(script), run_name="__main__")
+
+def main(args: list[str] | None = None) -> int:
+    script = _canonical_script()
+    if not script.exists():
+        sys.stderr.write(f"ERROR: canonical script not found: {script}\n")
+        return 2
+
+    # Save original argv
+    original_argv = sys.argv.copy()
+    try:
+        # Patch sys.argv to pass arguments to runpy correctly
+        if args is not None:
+            sys.argv = [str(script)] + args
+        else:
+            sys.argv = [str(script)] + sys.argv[1:]
+
+        globals_dict = runpy.run_path(str(script), run_name="__main__")
+
+        # If the script has a main function, we should try to return its result if it doesn't sys.exit
+        # But runpy executes it immediately if it has an if __name__ == "__main__" block
+        return 0
+    except SystemExit as e:
+        return e.code if isinstance(e.code, int) else 0
+    finally:
+        # Restore argv
+        sys.argv = original_argv
