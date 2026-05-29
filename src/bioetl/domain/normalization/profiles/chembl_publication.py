@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from bioetl.domain.normalization.profiles._chembl_policy_registry import (
+from bioetl.domain.normalization.profiles.chembl_policy_registry import (
     chembl_boolean_family_fields,
 )
 from bioetl.domain.normalization.profiles._chembl_reference_identifier_rules import (

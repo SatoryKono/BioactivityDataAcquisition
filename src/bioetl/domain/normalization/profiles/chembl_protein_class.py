@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.normalization.profiles._chembl_policy_registry import (
+from bioetl.domain.normalization.profiles.chembl_policy_registry import (
     chembl_flag_family_fields,
 )
 from bioetl.domain.normalization.profiles._chembl_profile_helpers import (

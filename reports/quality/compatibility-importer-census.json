@@ -1182,25 +1182,25 @@
       "public_path": "src/bioetl/domain/normalization/profiles/chembl_policy_registry.py",
       "private_module": "bioetl.domain.normalization.profiles._chembl_policy_registry",
       "public_module": "bioetl.domain.normalization.profiles.chembl_policy_registry",
-      "public_src_importer_count": 1,
+      "public_src_importer_count": 11,
       "public_test_importer_count": 0,
-      "private_src_importer_count": 11,
+      "private_src_importer_count": 1,
       "private_test_importer_count": 3,
       "public_src_importers": [
-        "src/bioetl/composition/bootstrap/runtime/normalization_policy_init.py"
-      ],
-      "private_src_importers": [
+        "src/bioetl/composition/bootstrap/runtime/normalization_policy_init.py",
         "src/bioetl/domain/normalization/profiles/_chembl_reference_identifier_rules.py",
         "src/bioetl/domain/normalization/profiles/chembl_activity.py",
         "src/bioetl/domain/normalization/profiles/chembl_assay.py",
         "src/bioetl/domain/normalization/profiles/chembl_assay_parameters.py",
         "src/bioetl/domain/normalization/profiles/chembl_cell_line.py",
         "src/bioetl/domain/normalization/profiles/chembl_molecule.py",
-        "src/bioetl/domain/normalization/profiles/chembl_policy_registry.py",
         "src/bioetl/domain/normalization/profiles/chembl_protein_class.py",
         "src/bioetl/domain/normalization/profiles/chembl_publication.py",
         "src/bioetl/domain/normalization/profiles/chembl_target.py",
         "src/bioetl/domain/normalization/profiles/chembl_tissue.py"
+      ],
+      "private_src_importers": [
+        "src/bioetl/domain/normalization/profiles/chembl_policy_registry.py"
       ]
     },
     {
@@ -1289,8 +1289,8 @@
       "private_module": "bioetl.composition.runtime_builders._run_manifest_support",
       "canonical_first_party_module": "bioetl.composition.runtime_builders.run_manifest_support",
       "max_public_src_importers": 12,
-      "max_private_src_importers": 1,
-      "rationale": "Issue #4485 collapsed first-party runtime-builder imports onto the public `run_manifest_support` seam. The public budget now reflects the canonicalized importer count, while private imports are limited to the public re-export module only.",
+      "max_private_src_importers": 0,
+      "rationale": "Issue #4485 collapsed first-party runtime-builder imports onto the public `run_manifest_support` seam. The public budget now reflects the canonicalized importer count, and private first-party imports are now fully eliminated.",
       "current_public_src_importer_count": 12,
       "current_private_src_importer_count": 0,
       "current_public_src_importers": [
@@ -1315,26 +1315,26 @@
       "public_module": "bioetl.domain.normalization.profiles.chembl_policy_registry",
       "private_module": "bioetl.domain.normalization.profiles._chembl_policy_registry",
       "canonical_first_party_module": "bioetl.domain.normalization.profiles.chembl_policy_registry",
-      "max_public_src_importers": 1,
-      "max_private_src_importers": 11,
-      "rationale": "The policy-registry twin remains active on the canonical ChEMBL normalization path and should not grow while the family stays split.",
-      "current_public_src_importer_count": 1,
-      "current_private_src_importer_count": 11,
+      "max_public_src_importers": 11,
+      "max_private_src_importers": 1,
+      "rationale": "Issue #4744 collapsed first-party ChEMBL profile callers onto the sanctioned public seam. The residual private importer budget is now limited to the seam re-export module only, while public callers must not grow beyond the reviewed baseline without inventory refresh.",
+      "current_public_src_importer_count": 11,
+      "current_private_src_importer_count": 1,
       "current_public_src_importers": [
-        "src/bioetl/composition/bootstrap/runtime/normalization_policy_init.py"
-      ],
-      "current_private_src_importers": [
+        "src/bioetl/composition/bootstrap/runtime/normalization_policy_init.py",
         "src/bioetl/domain/normalization/profiles/_chembl_reference_identifier_rules.py",
         "src/bioetl/domain/normalization/profiles/chembl_activity.py",
         "src/bioetl/domain/normalization/profiles/chembl_assay.py",
         "src/bioetl/domain/normalization/profiles/chembl_assay_parameters.py",
         "src/bioetl/domain/normalization/profiles/chembl_cell_line.py",
         "src/bioetl/domain/normalization/profiles/chembl_molecule.py",
-        "src/bioetl/domain/normalization/profiles/chembl_policy_registry.py",
         "src/bioetl/domain/normalization/profiles/chembl_protein_class.py",
         "src/bioetl/domain/normalization/profiles/chembl_publication.py",
         "src/bioetl/domain/normalization/profiles/chembl_target.py",
         "src/bioetl/domain/normalization/profiles/chembl_tissue.py"
+      ],
+      "current_private_src_importers": [
+        "src/bioetl/domain/normalization/profiles/chembl_policy_registry.py"
       ]
     },
     {

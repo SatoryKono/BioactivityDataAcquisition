@@ -1,8 +1,8 @@
 version: 1
 policy_scope: sanctioned_twin_module_ratchet
-review_date: "2026-05-22"
+review_date: "2026-05-29"
 ratchet_mode: no_growth
-linked_issue: "#4452"
+linked_issue: "#4744"
 families:
   - family_id: application.core.span_helpers
     owner: bioetl.application.core
@@ -22,22 +22,24 @@ families:
     private_module: bioetl.composition.runtime_builders._run_manifest_support
     canonical_first_party_module: bioetl.composition.runtime_builders.run_manifest_support
     max_public_src_importers: 12
-    max_private_src_importers: 1
+    max_private_src_importers: 0
     rationale: >-
       Issue #4485 collapsed first-party runtime-builder imports onto the public
       `run_manifest_support` seam. The public budget now reflects the
-      canonicalized importer count, while private imports are limited to the
-      public re-export module only.
+      canonicalized importer count, and private first-party imports are now
+      fully eliminated.
   - family_id: domain.normalization.profiles.chembl_policy_registry
     owner: bioetl.domain.normalization.profiles
     public_module: bioetl.domain.normalization.profiles.chembl_policy_registry
     private_module: bioetl.domain.normalization.profiles._chembl_policy_registry
     canonical_first_party_module: bioetl.domain.normalization.profiles.chembl_policy_registry
-    max_public_src_importers: 1
-    max_private_src_importers: 11
+    max_public_src_importers: 11
+    max_private_src_importers: 1
     rationale: >-
-      The policy-registry twin remains active on the canonical ChEMBL
-      normalization path and should not grow while the family stays split.
+      Issue #4744 collapsed first-party ChEMBL profile callers onto the
+      sanctioned public seam. The residual private importer budget is now
+      limited to the seam re-export module only, while public callers must not
+      grow beyond the reviewed baseline without inventory refresh.
   - family_id: domain.normalization.profiles.chembl_policy_registry_data
     owner: bioetl.domain.normalization.profiles
     public_module: bioetl.domain.normalization.profiles.chembl_policy_registry_data

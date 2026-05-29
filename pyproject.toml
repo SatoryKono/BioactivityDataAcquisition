@@ -233,7 +233,8 @@ asyncio_default_fixture_loop_scope = "module"
 cache_dir = ".pytest_cache"
 filterwarnings = [
     "error",
-    "ignore::DeprecationWarning",
+    # Deprecation warnings must fail by default; dedicated compatibility tests
+    # should opt in locally if a retained public seam still emits them.
     # NoOpMetrics warns when metrics are disabled (expected in tests)
     "ignore:NoOpMetrics is being used:UserWarning",
     # Explicit norecursedirs is intentional to avoid mixed Windows/WSL venv traversal.

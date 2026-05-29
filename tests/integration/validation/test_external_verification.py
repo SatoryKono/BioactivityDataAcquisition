@@ -168,6 +168,59 @@ class TestCrossRefExternalVerification:
 
         assert records == []
 
+    async def test_invalid_entity_type_raises(
+        self, crossref_adapter: CrossRefAdapter
+    ) -> None:
+        async with crossref_adapter._http_client:
+            with pytest.raises(
+                ValueError, match="CrossRefAdapter supports 'work' or 'publication'"
+            ):
+                async for _ in crossref_adapter.fetch_filtered(
+                    entity_type="invalid_entity",
+                    filter_ids=["10.1038/nature12373"],
+                    filter_field="doi",
+                ):
+                    continue
+
+    async def test_unsupported_filter_field_logs_warning(
+        self,
+        crossref_adapter: CrossRefAdapter,
+        mock_logger: MagicMock,
+    ) -> None:
+        response_json = {
+            "status": "ok",
+            "message": {
+                "items": [
+                    {
+                        "DOI": "10.1038/nature12373",
+                        "title": ["Crystal structure of rhodopsin"],
+                    }
+                ]
+            },
+        }
+        with respx.mock(base_url=CROSSREF_API_BASE) as respx_mock:
+            respx_mock.get("/works").mock(
+                return_value=Response(200, json=response_json)
+            )
+            async with crossref_adapter._http_client:
+                records = [
+                    record
+                    async for record in crossref_adapter.fetch_filtered(
+                        entity_type="publication",
+                        filter_ids=["10.1038/nature12373"],
+                        filter_field="title",
+                    )
+                ]
+
+        assert len(records) == 1
+        assert records[0]["_lookup_method"] == "doi"
+        assert any(
+            call.args
+            and call.args[0] == "unsupported_filter_field"
+            and call.kwargs.get("field") == "title"
+            for call in mock_logger.warning.call_args_list
+        )
+
 
 @pytest.mark.integration
 class TestPubMedExternalVerification:
@@ -331,6 +384,20 @@ class TestSemanticScholarExternalVerification:
 
         assert len(records) == 1
         assert records[0]["_lookup_method"] == "title_fallback"
+
+    async def test_invalid_entity_type_raises(
+        self, semanticscholar_adapter: SemanticScholarAdapter
+    ) -> None:
+        async with semanticscholar_adapter._http_client:
+            with pytest.raises(
+                ValueError,
+                match="SemanticScholarAdapter supports 'publication' or 'paper'",
+            ):
+                async for _ in semanticscholar_adapter.fetch(
+                    entity_type="dataset",
+                    query="Crystal structure of rhodopsin",
+                ):
+                    continue
 
 
 @pytest.mark.integration

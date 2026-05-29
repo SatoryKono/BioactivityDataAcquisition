@@ -155,6 +155,54 @@
       "nullable": true,
       "description": ""
     },
+    "target_xref_iuphar_ids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_xref_pdb_ids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_xref_go_component": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_xref_go_function": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_xref_go_process": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_xref_reactome_ids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "component_accessions": {
       "type": [
         "string",
@@ -215,6 +263,6 @@
   "normalization_profile": {
     "ref": "chembl.target",
     "version": "1.0.0",
-    "hash": "a724ca9f3f62b7dd0787b104f3fc06fcc6730d766f8f6d60b520d8643f35389e"
+    "hash": "10a4c616d4734fa021a10cc0f04f7de83010b5b29938a6c4c2bf9e1156398aa2"
   }
 }

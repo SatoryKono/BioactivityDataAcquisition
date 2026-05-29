@@ -1,26 +1,25 @@
 ---
 id: target-xref-cleanup
-title: target xref rollout to six derived fields
+title: Resolve legacy validation test debt markers
 task_id: target-xref-cleanup
-created_at: '2026-05-29T14:46:56Z'
+created_at: '2026-05-29T15:08:06Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- src/memory/DAILY_WORKFLOW.md
-summary: Implemented six target xref derived columns from whitelisted source aliases,
-  preserved cross_references forensic JSON, added tests and docs updates, and created
-  NONCHEMBL-014 issue draft for legacy validation debt markers.
+- <add-source-ref>
+summary: Updated docs and completed NONCHEMBL-014 by adding remaining external verification
+  and DQ validation tests; all targeted pytest slices green.
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: target xref rollout to six derived fields
+- Title: Resolve legacy validation test debt markers
 
 ## Outcome
 
-- Implemented six target xref derived columns from whitelisted source aliases, preserved cross_references forensic JSON, added tests and docs updates, and created NONCHEMBL-014 issue draft for legacy validation debt markers.
+- Updated docs and completed NONCHEMBL-014 by adding remaining external verification and DQ validation tests; all targeted pytest slices green.
 
 ## Lessons learned
 
