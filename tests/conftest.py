@@ -23,6 +23,7 @@ _ORIGINAL_OS_NAME = os.name
 _ORIGINAL_SYS_PLATFORM = sys.platform
 _ORIGINAL_PATH = pathlib.Path
 
+
 @pytest.fixture(autouse=True)
 def _guard_global_pathlib_state() -> Generator[None, None, None]:
     """Автоматически восстанавливает глобальное состояние pathlib и OS после грязных тестов."""
@@ -33,6 +34,7 @@ def _guard_global_pathlib_state() -> Generator[None, None, None]:
         sys.platform = _ORIGINAL_SYS_PLATFORM
     if pathlib.Path is not _ORIGINAL_PATH:
         pathlib.Path = _ORIGINAL_PATH
+
 
 pytest_plugins = (
     "tests.helpers.metadata_fixtures",

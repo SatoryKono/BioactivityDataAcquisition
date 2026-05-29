@@ -159,9 +159,7 @@ def _read_markdown_metadata_with_timeout(path: Path, timeout: float) -> dict[str
                 delimiter = first_line
                 parsed = _read_frontmatter_metadata_only(handle, delimiter, path)
                 if not isinstance(parsed, dict):
-                    raise ValueError(
-                        f"note frontmatter must be a mapping: {path}"
-                    )
+                    raise ValueError(f"note frontmatter must be a mapping: {path}")
                 return parsed
         except Exception as exc:
             raise exc
@@ -186,9 +184,7 @@ def _read_markdown_metadata_with_timeout(path: Path, timeout: float) -> dict[str
                 delimiter = first_line
                 parsed = _read_frontmatter_metadata_only(handle, delimiter, path)
                 if not isinstance(parsed, dict):
-                    raise ValueError(
-                        f"note frontmatter must be a mapping: {path}"
-                    )
+                    raise ValueError(f"note frontmatter must be a mapping: {path}")
                 metadata = parsed
         except Exception as e:
             exception = e
@@ -300,7 +296,11 @@ def normalize_text_key(value: str) -> str:
 
 
 def _resolve_read_timeout(read_timeout_seconds: float | None) -> float:
-    return NOTE_READ_TIMEOUT_SECONDS if read_timeout_seconds is None else read_timeout_seconds
+    return (
+        NOTE_READ_TIMEOUT_SECONDS
+        if read_timeout_seconds is None
+        else read_timeout_seconds
+    )
 
 
 def parse_markdown_note(

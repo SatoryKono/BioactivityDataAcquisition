@@ -162,17 +162,31 @@ def _run_command_with_stdout_file(
     output_path = _temporary_output_path()
     try:
         with output_path.open("w", encoding="utf-8", errors="replace") as stdout_file:
-            completed = subprocess.run(
+            process = subprocess.Popen(
                 command,
                 cwd=ROOT,
-                check=False,
                 stdout=stdout_file,
                 stderr=subprocess.DEVNULL,
                 text=True,
                 encoding="utf-8",
                 errors="replace",
-                timeout=timeout,
                 **_hidden_windows_subprocess_kwargs(),
+            )
+            try:
+                returncode = process.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                # Give the process a moment to terminate
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    process.terminate()
+                raise OSError(f"Command timed out after {timeout}s: {' '.join(command)}")
+            completed = subprocess.CompletedProcess(
+                args=command,
+                returncode=returncode,
+                stdout="",
+                stderr="",
             )
         output = output_path.read_text(encoding="utf-8", errors="replace")
     finally:

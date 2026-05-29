@@ -179,11 +179,15 @@ def _iter_python_files_matching_any(
     # Detect network drives on Windows and skip external tools to avoid timeouts
     is_network_drive = False
     import os
+
     if os.name == "nt":
         try:
             import ctypes
+
             drive = os.path.splitdrive(str(existing_roots[0]))[0] + "\\"
-            is_network_drive = ctypes.windll.kernel32.GetDriveTypeW(drive) == 4  # DRIVE_REMOTE
+            is_network_drive = (
+                ctypes.windll.kernel32.GetDriveTypeW(drive) == 4
+            )  # DRIVE_REMOTE
         except Exception:
             pass
 
@@ -204,7 +208,9 @@ def _iter_python_files_matching_any(
                     timeout=30.0,
                 )
                 if result.returncode in {0, 1}:
-                    return sorted(Path(line) for line in result.stdout.splitlines() if line)
+                    return sorted(
+                        Path(line) for line in result.stdout.splitlines() if line
+                    )
             except (subprocess.TimeoutExpired, OSError):
                 pass  # Fall back to filesystem scan
 

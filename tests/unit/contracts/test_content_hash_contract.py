@@ -49,9 +49,7 @@ def test_content_hash_v1_date_policy_collapses_same_calendar_day() -> None:
 
     assert service.compute_content_hash(
         "chembl", record_a, datetime_policy="v1_date"
-    ) == service.compute_content_hash(
-        "chembl", record_b, datetime_policy="v1_date"
-    )
+    ) == service.compute_content_hash("chembl", record_b, datetime_policy="v1_date")
 
 
 def test_content_hash_excludes_meta_and_dq_prefix_contract() -> None:

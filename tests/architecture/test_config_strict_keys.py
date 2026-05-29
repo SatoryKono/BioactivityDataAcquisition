@@ -74,9 +74,7 @@ def test_pipeline_config_no_unknown_keys(pipeline_name: str) -> None:
                 + "Either add the field to the Pydantic model or remove it "
                 + "from the YAML config."
             )
-            pytest.fail(
-                message
-            )
+            pytest.fail(message)
         raise  # Re-raise non-extra validation errors
     except ValueError as exc:
         # Defensive guard for mixed/stale test discovery environments where a

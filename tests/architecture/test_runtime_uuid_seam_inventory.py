@@ -19,6 +19,7 @@ pytestmark = pytest.mark.architecture
 
 def _tracked_python_files() -> list[Path]:
     import shutil
+
     git_cmd = shutil.which("git") or "git"
     try:
         result = subprocess.run(
@@ -28,7 +29,9 @@ def _tracked_python_files() -> list[Path]:
             capture_output=True,
             text=True,
         )
-        return [ROOT / line for line in result.stdout.splitlines() if line.endswith(".py")]
+        return [
+            ROOT / line for line in result.stdout.splitlines() if line.endswith(".py")
+        ]
     except (OSError, subprocess.CalledProcessError):
         files: list[Path] = []
         for scan_root in SCAN_ROOTS:

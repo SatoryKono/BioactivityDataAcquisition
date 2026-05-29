@@ -325,7 +325,9 @@ def _start_observability_backend_detached(
         poll_seconds=poll_seconds,
         probe_fn=probe_fn,
     )
-    command = python_executable_to_tuple(process.args) if hasattr(process, "args") else ()
+    command = (
+        python_executable_to_tuple(process.args) if hasattr(process, "args") else ()
+    )
     if ready and wait_required_paths_fn(
         health_url,
         required_probe_paths=required_probe_paths,
@@ -438,6 +440,7 @@ def ensure_observability_backend_started(
         info_printer=info_printer,
         warning_printer=warning_printer,
     )
+
 
 def should_disable_transient_health_server(
     *,
