@@ -20,6 +20,7 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     create_transformer_instance,
 )
 from bioetl.domain.ports.noop import NoOpAudit
+
 _STARTED_AT = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
 
 

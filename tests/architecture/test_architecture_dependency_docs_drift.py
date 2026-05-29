@@ -101,6 +101,7 @@ def test_dependency_map_drift_check_passes_current_repo(
         f"stderr:\n{stderr.getvalue()}\n"
     )
 
+
 def test_dependency_map_generated_markdown_uses_canonical_generator_path() -> None:
     markdown = Path(
         "docs/02-architecture/generated/module-dependency-map.md"

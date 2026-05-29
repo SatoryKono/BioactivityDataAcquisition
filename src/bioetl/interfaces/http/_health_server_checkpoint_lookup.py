@@ -37,9 +37,8 @@ async def load_checkpoint_freshness_evidence(
                 scope.resolved_manifest.run_id,
             )
             evidence_source = "immutable_run_history"
-    elif (
-        scope.selected_pipelines
-        or not host._is_all_scope_token(scope.requested_pipeline)
+    elif scope.selected_pipelines or not host._is_all_scope_token(
+        scope.requested_pipeline
     ):
         checkpoint_tuple = await host._checkpoint_port.load(target_pipeline)
         if checkpoint_tuple is None and hasattr(

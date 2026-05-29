@@ -39,9 +39,7 @@ def _require_equal_key_tuple_lengths(
 ) -> None:
     """Validate that source_keys and reference_keys have equal cardinality."""
     if len(source_keys) != len(reference_keys):
-        raise ValueError(
-            "source_keys and reference_keys must have the same length"
-        )
+        raise ValueError("source_keys and reference_keys must have the same length")
 
 
 def _require_first_keys_match(

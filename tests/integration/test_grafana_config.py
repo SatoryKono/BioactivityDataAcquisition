@@ -48,7 +48,14 @@ NAVIGATION_CONTRACT_PATH = Path(
 EXPECTED_VARS_BY_DASHBOARD = {
     "bioetl-overview-v2.json": {"workflow", "pipeline", "run_type", "run_id"},
     "bioetl-dq-v2.json": {"workflow", "pipeline", "run_type", "run_id", "stage"},
-    "bioetl-runtime.json": {"workflow", "pipeline", "run_type", "run_id", "stage", "provider_hint"},
+    "bioetl-runtime.json": {
+        "workflow",
+        "pipeline",
+        "run_type",
+        "run_id",
+        "stage",
+        "provider_hint",
+    },
     "bioetl-provider-health-v2.json": {
         "workflow",
         "pipeline",
@@ -1193,8 +1200,8 @@ def test_runtime_provider_alert_conditions_local_panel_scopes_all_addends_to_pro
     assert panel is not None
     expr = panel["targets"][0]["expr"]
     assert expr.count('provider=~"$provider_hint"') >= 6
-    assert "provider_adapter_latency_high_30m{provider=~\"$provider_hint\"}" in expr
-    assert "provider_rate_limiter_wait_high_30m{provider=~\"$provider_hint\"}" in expr
+    assert 'provider_adapter_latency_high_30m{provider=~"$provider_hint"}' in expr
+    assert 'provider_rate_limiter_wait_high_30m{provider=~"$provider_hint"}' in expr
     assert "unless on()" not in expr
 
 

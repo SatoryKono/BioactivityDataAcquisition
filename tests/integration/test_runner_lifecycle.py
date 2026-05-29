@@ -83,7 +83,6 @@ def _build_runner(
     )
 
 
-
 @dataclass
 class CallRecorder:
     """Records the order of method calls for verification."""

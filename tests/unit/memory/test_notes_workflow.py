@@ -155,12 +155,17 @@ def test_parse_markdown_note_uses_git_fallback_when_worktree_read_times_out(
     path = tmp_path / "tracked.md"
     path.write_text("---\nid: tracked\n---\n", encoding="utf-8")
 
+    read_started = threading.Event()
+    read_should_complete = threading.Event()
+
     def blocked_read_text(self: Path, *, encoding: str | None = None) -> str:
         _ = (self, encoding)
-        time.sleep(1.0)
+        read_started.set()
+        read_should_complete.wait(timeout=10.0)
         return ""
 
     monkeypatch.setattr(notes_module, "NOTE_READ_TIMEOUT_SECONDS", 0.01)
+    monkeypatch.setattr(notes_module, "_is_likely_network_drive", lambda _: True)
     monkeypatch.setattr(
         notes_module,
         "_read_text_from_git_object",
@@ -177,10 +182,11 @@ def test_parse_markdown_note_uses_git_fallback_when_worktree_read_times_out(
             "# Session\n"
         ),
     )
-    monkeypatch.setattr(notes_module, "_is_likely_network_drive", lambda _: True)
     monkeypatch.setattr(Path, "read_text", blocked_read_text)
 
     note = parse_markdown_note(path, include_body=False)
+
+    read_should_complete.set()
 
     assert note.metadata["id"] == "tracked"
     assert note.metadata["task_id"] == "task-123"

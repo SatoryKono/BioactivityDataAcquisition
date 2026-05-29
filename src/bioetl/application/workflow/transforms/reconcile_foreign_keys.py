@@ -35,9 +35,7 @@ def build_reconcile_foreign_keys_executor(
             "source_key": result.source_key,
             "reference_key": result.reference_key,
             "source_keys": list(request.source_keys or (request.source_key,)),
-            "reference_keys": list(
-                request.reference_keys or (request.reference_key,)
-            ),
+            "reference_keys": list(request.reference_keys or (request.reference_key,)),
             "action": result.action,
             "nulls_equal": request.nulls_equal,
             "scanned_rows": result.scanned_rows,

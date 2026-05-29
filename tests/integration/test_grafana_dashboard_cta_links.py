@@ -212,19 +212,33 @@ def test_runtime_alert_condition_panels_expose_dashboard_handoffs() -> None:
 
     for panel_title, (link_title, target_uid) in expectations.items():
         panel = next(
-            (item for item in get_dashboard_panels(dashboard) if item.get("title") == panel_title),
+            (
+                item
+                for item in get_dashboard_panels(dashboard)
+                if item.get("title") == panel_title
+            ),
             None,
         )
-        assert panel is not None, f"Panel '{panel_title}' not found in bioetl-runtime.json"
-        
+        assert panel is not None, (
+            f"Panel '{panel_title}' not found in bioetl-runtime.json"
+        )
+
         data_links = panel.get("options", {}).get("dataLinks", [])
-        link = next((item for item in data_links if item.get("title") == link_title), None)
-        assert link is not None, f"Panel '{panel_title}' must expose dashboard handoff '{link_title}'"
-        
+        link = next(
+            (item for item in data_links if item.get("title") == link_title), None
+        )
+        assert link is not None, (
+            f"Panel '{panel_title}' must expose dashboard handoff '{link_title}'"
+        )
+
         url = str(link.get("url", ""))
-        assert target_uid in url, f"Panel '{panel_title}' handoff must target {target_uid}"
-        assert "${__url_time_range}" in url, f"Panel '{panel_title}' handoff must preserve time range"
-        
+        assert target_uid in url, (
+            f"Panel '{panel_title}' handoff must target {target_uid}"
+        )
+        assert "${__url_time_range}" in url, (
+            f"Panel '{panel_title}' handoff must preserve time range"
+        )
+
         required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID.get(target_uid)
         if required_vars:
             passed_vars = _extract_link_vars(url)

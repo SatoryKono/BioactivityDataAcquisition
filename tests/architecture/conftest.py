@@ -70,8 +70,11 @@ def _cache_worker_count(total_files: int) -> int:
     if os.name == "nt":
         try:
             import ctypes
+
             drive = os.path.splitdrive(os.getcwd())[0] + "\\"
-            is_network_drive = ctypes.windll.kernel32.GetDriveTypeW(drive) == 4  # DRIVE_REMOTE
+            is_network_drive = (
+                ctypes.windll.kernel32.GetDriveTypeW(drive) == 4
+            )  # DRIVE_REMOTE
             if is_network_drive:
                 return 1  # Single-threaded for network drives
         except Exception:

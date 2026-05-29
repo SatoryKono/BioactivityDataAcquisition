@@ -50,13 +50,14 @@ def _canonical_mapping(value: object) -> dict[str, object]:
 
 
 def _is_non_string_sequence(value: object) -> bool:
-    return isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray))
+    return isinstance(value, Sequence) and not isinstance(
+        value, (str, bytes, bytearray)
+    )
 
 
 def _canonical_sequence(value: object) -> list[object]:
     return [
-        _canonical_identity_value(nested)
-        for nested in cast(Sequence[object], value)
+        _canonical_identity_value(nested) for nested in cast(Sequence[object], value)
     ]
 
 

@@ -94,7 +94,9 @@ def _isolate_configs_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Pa
         "bioetl.infrastructure.config.pipeline_config_loader",
         "bioetl.infrastructure.config._base",
     ):
-        monkeypatch.setattr(f"{module_path}.resolve_configs_root", _resolve_configs_root)
+        monkeypatch.setattr(
+            f"{module_path}.resolve_configs_root", _resolve_configs_root
+        )
     load_pipeline_config_cached.cache_clear()
     load_source_config.cache_clear()
     return configs_root
