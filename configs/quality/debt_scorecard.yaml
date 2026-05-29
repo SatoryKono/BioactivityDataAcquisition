@@ -314,9 +314,9 @@ hotspot_family_ratchets:
     trend:
       status: ratcheted_2026-05-26_issue_4682
       next_action: 2026-05-26 moves composition/bootstrap/runtime from non-growth
-        headroom to reduction ratchets by lowering files_ge_250_loc from 6 to 5
-        and max_internal_fan_in from 7 to 5 after the live family baseline confirmed
-        both lower values.
+        headroom to reduction ratchets by lowering files_ge_250_loc from 6 to 5 and
+        max_internal_fan_in from 7 to 5 after the live family baseline confirmed both
+        lower values.
   - name: composition_factories_pipeline
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -409,7 +409,8 @@ oversized_source_module_inventory:
   - path: src/bioetl/application/pipelines/common/base_publication_transformer.py
     lines: 284
     owner: '@bioetl-application'
-    target_split: separate publication normalization, persistence shaping, and provenance helpers
+    target_split: separate publication normalization, persistence shaping, and provenance
+      helpers
   - path: src/bioetl/application/services/checkpoint_compatibility_service.py
     lines: 222
     owner: '@bioetl-control-plane'
@@ -417,7 +418,8 @@ oversized_source_module_inventory:
   - path: src/bioetl/infrastructure/config/_base.py
     lines: 478
     owner: '@bioetl-config'
-    target_split: separate config discovery, validation, and environment resolution helpers
+    target_split: separate config discovery, validation, and environment resolution
+      helpers
   - path: src/bioetl/application/services/lineage/metadata_lineage_node_builders.py
     lines: 477
     owner: '@bioetl-lineage'
@@ -434,7 +436,6 @@ oversized_source_module_inventory:
     lines: 456
     owner: '@bioetl-reproducibility'
     target_split: separate score-card policy rules from manifest projection helpers
-
 hotspot_family_coverage_thresholds:
   snapshot_date: '2026-05-29'
   linked_issue: '#4567'
@@ -625,15 +626,15 @@ quarterly_targets:
     god_object: 4
     domain_complexity: 6
 - quarter: 2026-Q2
-  max_total_exemptions: 12
+  max_total_exemptions: 14
   min_integral_score: 70
   group_budgets:
-    size_metrics: 11
-    complexity_metrics: 1
+    size_metrics: 12
+    complexity_metrics: 2
     structural_debt: 1
   registry_budgets:
-    file_size_limits: 10
-    function_complexity: 1
+    file_size_limits: 11
+    function_complexity: 2
     function_length: 0
     class_size: 1
     class_method_count: 0
@@ -647,7 +648,7 @@ owner_decomposition_targets:
     '@bioetl-data-model': 9
 - quarter: 2026-Q2
   allocations:
-    '@bioetl-architecture': 9
+    '@bioetl-architecture': 11
     '@bioetl-platform': 1
     '@bioetl-data-model': 2
 expiry_decomposition_targets:

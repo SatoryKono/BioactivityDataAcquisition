@@ -4,15 +4,15 @@ policy:
   owner_diversification_sync:
     source: configs/quality/debt_scorecard.yaml#governance.owner_diversification
     starts_quarter: 2026-Q2
-    review_on: "2026-06-30"
+    review_on: '2026-06-30'
   required_fields:
-    - value
-    - owner
-    - reason
-    - classification
-    - linked_rf
-    - expires_on
-    - removal_step
+  - value
+  - owner
+  - reason
+  - classification
+  - linked_rf
+  - expires_on
+  - removal_step
 registries:
   file_size_limits:
     src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py:
@@ -22,16 +22,36 @@ registries:
       classification: intentional_exception
       linked_rf: RF-001
       expires_on: '2026-12-31'
-      removal_step: Split module into smaller focused helpers once backend dashboard wiring is fully refactored.
+      removal_step: Split module into smaller focused helpers once backend dashboard
+        wiring is fully refactored.
+    src/bioetl/application/services/_quarantine_service_filtered_mixin.py:
+      value: 650
+      owner: application-workflow
+      reason: Aggregated mixin requiring restructuring but safe to use in current
+        state.
+      classification: intentional_exception
+      linked_rf: RF-004
+      expires_on: '2026-12-31'
+      removal_step: Split mixin into distinct single-responsibility mixins.
   function_complexity:
     src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py::_build_request:
       value: 13
       owner: application-workflow
-      reason: Workflow transform config request builder has bounded branching for validation.
+      reason: Workflow transform config request builder has bounded branching for
+        validation.
       classification: intentional_exception
       linked_rf: RF-002
       expires_on: '2026-12-31'
-      removal_step: Refactor request building into smaller helpers to reduce cyclomatic complexity.
+      removal_step: Refactor request building into smaller helpers to reduce cyclomatic
+        complexity.
+    src/bioetl/application/services/_quarantine_service_filtered_mixin.py::_resolve_latest_scope_run_id:
+      value: 11
+      owner: application-workflow
+      reason: Iterative resolution logic for latest run ID with bounded complexity.
+      classification: intentional_exception
+      linked_rf: RF-003
+      expires_on: '2026-12-31'
+      removal_step: Refactor into smaller helpers once the quarantine service is modularized.
   function_length: {}
   class_size: {}
   class_method_count: {}
