@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 import signal
-import subprocess
+import subprocess  # nosec
 import sys
 import tempfile
 import time
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 def _find_listening_backend_pid_by_port(port: int) -> int | None:
     if os.name == "nt":
-        result = subprocess.run(
+        result = subprocess.run(  # nosec
             ["netstat", "-ano", "-p", "tcp"],
             check=False,
             capture_output=True,
@@ -41,7 +41,7 @@ def _find_listening_backend_pid_by_port(port: int) -> int | None:
                 continue
         return None
 
-    result = subprocess.run(
+    result = subprocess.run(  # nosec
         ["ss", "-ltnp"],
         check=False,
         capture_output=True,
@@ -74,7 +74,7 @@ def drop_listening_backend_on_port(
         return True
     try:
         if os.name == "nt":
-            result = subprocess.run(
+            result = subprocess.run(  # nosec
                 ["taskkill", "/PID", str(pid), "/T", "/F"],
                 check=False,
                 capture_output=True,

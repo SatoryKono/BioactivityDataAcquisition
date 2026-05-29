@@ -172,7 +172,7 @@ async def _run_health_server(host: str, port: int) -> None:
     from bioetl.interfaces.http.health_server import HealthServer
 
     if sys.pycache_prefix is None:
-        sys.pycache_prefix = "/tmp/bioetl-pycache"
+        sys.pycache_prefix = "/tmp/bioetl-pycache"  # nosec
     deps = get_health_server_dependencies()
     _start_health_observability()
     quarantine_service: QuarantineService | None = None

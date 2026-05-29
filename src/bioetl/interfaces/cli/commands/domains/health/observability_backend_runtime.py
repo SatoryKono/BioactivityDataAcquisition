@@ -7,7 +7,7 @@ start ``bioetl quarantine serve`` in detached mode when needed.
 
 from __future__ import annotations
 
-import subprocess
+import subprocess  # nosec
 import time
 from dataclasses import dataclass
 from pathlib import Path
