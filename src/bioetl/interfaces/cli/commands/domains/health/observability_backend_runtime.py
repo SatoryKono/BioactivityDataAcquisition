@@ -472,6 +472,6 @@ __all__ = [
     "python_executable_to_tuple",
     "should_disable_transient_health_server",
     "start_detached_quarantine_backend",
-    "wait_for_observability_backend_required_paths_ready",
     "wait_for_observability_backend_ready",
+    "wait_for_observability_backend_required_paths_ready",
 ]
