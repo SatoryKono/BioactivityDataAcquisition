@@ -263,9 +263,9 @@ oversized_test_module_inventory:
   completed_splits:
     - issue_ref: "#4505"
       source: tests/integration/test_grafana_config.py
-      source_lines_after_split: 1396
+      source_lines_after_split: 1403
       extracted_surface: tests/integration/test_grafana_surface_contracts.py
-      extracted_surface_lines: 709
+      extracted_surface_lines: 705
       owner: observability-dashboards
     - issue_ref: "#4506"
       source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
