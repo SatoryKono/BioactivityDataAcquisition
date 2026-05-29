@@ -95,7 +95,12 @@ async def _request_or_skip(
         try:
             response = await client.request(method, url, **kwargs)
             await response.aread()
-        except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as exc:
+        except (
+            httpx.ConnectError,
+            httpx.ConnectTimeout,
+            httpx.ReadTimeout,
+            httpx.RemoteProtocolError,
+        ) as exc:
             last_transport_error = exc
             if attempt >= _CHEMBL_REQUEST_RETRY_ATTEMPTS:
                 pytest.skip(f"ChEMBL endpoint not reachable: {exc}")
