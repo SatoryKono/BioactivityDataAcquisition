@@ -1,12 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-29T09:07:51.916567+00:00",
+  "generated_at": "2026-05-29T09:27:36.905649+00:00",
   "summary": {
     "total_scripts": 405,
     "status_counts": {
       "active": 362,
-      "orphan": 3,
-      "supporting": 40
+      "supporting": 43
     },
     "reference_group_coverage": {
       "agents": 4,
@@ -1129,7 +1128,7 @@
     {
       "path": "scripts/ai/gemini/clean-gemini-config.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -6064,7 +6063,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 735,
+          "line": 736,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -7500,7 +7499,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 165,
+      "reference_count": 166,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -8379,7 +8378,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 655,
+          "line": 656,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -11290,7 +11289,7 @@
     {
       "path": "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -11355,7 +11354,7 @@
     {
       "path": "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
