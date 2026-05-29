@@ -2,7 +2,7 @@
 
 **Status**: completed_in_repo
 **GitHub Issue**: [#4406](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4406)
-**Issue State**: open
+**Issue State**: closed
 **Synced**: 2026-05-29
 **Priority**: P2
 **Labels**: `governance`, `infrastructure`, `cleanup`, `priority:medium`
