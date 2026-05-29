@@ -26,8 +26,9 @@ Current specification summary:
 - Canonical identifiers and business keys are defined in the entity config.
 - Current target payloads use normalized fields such as `target_type`, `organism`, and provider-specific alias resolution configured via `field_aliases`.
 - Composite and downstream enrichment behavior is defined in the live entity config and current application code.
-- Derived synonym projections now publish `target_protein_synonyms`, `target_gene_synonyms`, and `target_ec_numbers`.
-- Missing derived synonym buckets emit `unknown`; raw `target_component_synonyms` stays forensic JSON.
+- Derived projections now publish `target_protein_synonyms`, `target_gene_synonyms`, `target_ec_numbers`,
+  and xref-derived fields `target_xref_iuphar_ids`, `target_xref_pdb_ids`, `target_xref_go_component`, `target_xref_go_function`, `target_xref_go_process`, `target_xref_reactome_ids`.
+- Missing derived buckets emit `unknown`; raw `target_component_synonyms` and `cross_references` stay forensic JSON.
 
 ## Contract References
 

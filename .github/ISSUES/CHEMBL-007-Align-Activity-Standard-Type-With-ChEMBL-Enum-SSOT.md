@@ -1,6 +1,6 @@
 # [dq] Align activity standard_type with ChEMBL enum SSOT
 
-**Status**: active
+**Status**: completed_in_repo
 **Priority**: P0 (Critical)
 **Labels**: `dq`, `configs`, `testing`, `governance`
 **Epic**: ChEMBL Normalization and DQ Alignment 2026Q2

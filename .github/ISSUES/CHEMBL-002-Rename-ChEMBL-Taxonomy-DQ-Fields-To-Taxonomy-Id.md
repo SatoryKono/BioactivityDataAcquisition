@@ -1,6 +1,6 @@
 # [dq] Rename ChEMBL taxonomy DQ fields to taxonomy_id
 
-**Status**: active
+**Status**: completed_in_repo
 **Priority**: P0 (Critical)
 **Labels**: `dq`, `configs`, `testing`
 **Epic**: ChEMBL Normalization and DQ Alignment 2026Q2

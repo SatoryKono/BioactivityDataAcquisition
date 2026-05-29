@@ -94,6 +94,7 @@ Silver schema.
 - `downgraded` как bool-нормализацию входного значения
 - `target_components`, `target_component_synonyms`, `cross_references`, `pipeline_stages` как JSON-строки
 - `target_protein_synonyms`, `target_gene_synonyms`, `target_ec_numbers` как pipe-delimited derived-поля с sentinel `unknown`
+- `target_xref_iuphar_ids`, `target_xref_pdb_ids`, `target_xref_go_component`, `target_xref_go_function`, `target_xref_go_process`, `target_xref_reactome_ids` как pipe-delimited xref-derived поля с sentinel `unknown`
 
 ### 3.4. Derived synonym projection
 
@@ -113,15 +114,15 @@ Silver schema.
 - dedupe идёт по нормализованному значению с first-seen ordering, без сортировки
 - при отсутствии значений возвращается literal `unknown`
 
-Forensic boundary остаётся прежней:
+Forensic boundary для xrefs остаётся прежней:
 
-- `target_component_synonyms` сохраняет агрегированный raw JSON string для аудита
+- `target_component_synonyms` и `cross_references` сохраняют агрегированные raw JSON строки для аудита
+- xref-derived scalar-поля формируются только из whitelisted `xref_src_db` значений; всё остальное сохраняется только в `cross_references`
 - derived scalar-поля используются для аналитического Silver/Gold surface и hash-governed replay
+- `cross_references` обрабатывает неизвестные/нестандартные `xref_src_db` как warn-only в DQ, не нарушая форензику
 
-Nested `cross_references[].xref_src_db` namespaces are now runtime-governed via
-the shared registry `configs/vocab/chembl_reference_sources.yaml`; malformed
-JSON or unknown source namespaces fail the custom DQ validator instead of
-remaining offline-only governance surfaces.
+Nested `cross_references[].xref_src_db` namespaces are runtime-governed via
+the shared registry `configs/vocab/chembl_reference_sources.yaml`; malformed JSON or unknown source namespaces are logged as warn by DQ validator and preserved for raw forensic payloads.
 
 Текущий runtime boundary намеренно разделён так:
 

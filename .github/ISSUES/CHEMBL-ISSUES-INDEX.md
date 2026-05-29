@@ -56,6 +56,14 @@ performed on `main` at `2026-05-19`.
 
 ## Notes
 
+- As of `2026-05-29`, P0 drafts `CHEMBL-001..010` are verified as
+  `completed_in_repo` on current `main`; active execution should move to
+  `CHEMBL-016`, `CHEMBL-021`, and the residual follow-up set in publish order.
+- Repo-native verification for this closeout wave:
+  - `uv run python -m pytest tests/integration/config/test_chembl_policy_surface_parity.py -q`
+  - `uv run python -m pytest tests/integration/config/test_chembl_observed_value_fixtures.py -q`
+  - `uv run python -m pytest tests/contract/test_chembl_enum_normalization_policy.py -q`
+  - `uv run python -m pytest tests/integration/normalization/test_chembl_edge_observed_values.py -q`
 - The 2026-05-19 audit did not confirm a new P0 defect in determinism,
   `content_hash`, or Gold contract safety.
 - The residual pack is intentionally narrower than `CHEMBL-016` and converts

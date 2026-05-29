@@ -832,6 +832,181 @@ class TestTargetTransformer:
         assert result["target_ec_numbers"] == "unknown"
 
     @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("source_db", "xref_id", "expected_field", "expected_value"),
+        [
+            ("Guide to PHARMACOLOGY", "1839", "target_xref_iuphar_ids", "1839"),
+            ("GuideToPharmacology", "1839", "target_xref_iuphar_ids", "1839"),
+            ("IUPHAR", "1839", "target_xref_iuphar_ids", "1839"),
+            ("GtoPdb", "1839", "target_xref_iuphar_ids", "1839"),
+            ("PDB", "1ABC", "target_xref_pdb_ids", "1ABC"),
+            ("PDBe", "2XYZ", "target_xref_pdb_ids", "2XYZ"),
+            ("GoComponent", "GO:0005887", "target_xref_go_component", "GO:0005887"),
+            ("GoFunction", "GO:0004911", "target_xref_go_function", "GO:0004911"),
+            ("GoProcess", "GO:0038110", "target_xref_go_process", "GO:0038110"),
+            ("Reactome", "R-HSA-5673001", "target_xref_reactome_ids", "R-HSA-5673001"),
+        ],
+    )
+    async def test_transform_projects_target_xref_source_aliases(
+        self,
+        transformer,
+        mock_context,
+        source_db,
+        xref_id,
+        expected_field,
+        expected_value,
+    ):
+        """Alias variants for supported xref sources must project into the expected column."""
+        record = {
+            "target_id": "CHEMBL240",
+            "target_components": [
+                {
+                    "target_component_xrefs": [
+                        {"xref_id": xref_id, "xref_src_db": source_db},
+                        {"xref_id": "9999", "xref_src_db": "UnknownSource"},
+                    ]
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result[expected_field] == expected_value
+        assert result["target_xref_iuphar_ids"] == (
+            expected_value if expected_field == "target_xref_iuphar_ids" else "unknown"
+        )
+        assert result["target_xref_pdb_ids"] == (
+            expected_value if expected_field == "target_xref_pdb_ids" else "unknown"
+        )
+        assert result["target_xref_go_component"] == (
+            expected_value
+            if expected_field == "target_xref_go_component"
+            else "unknown"
+        )
+        assert result["target_xref_go_function"] == (
+            expected_value
+            if expected_field == "target_xref_go_function"
+            else "unknown"
+        )
+        assert result["target_xref_go_process"] == (
+            expected_value
+            if expected_field == "target_xref_go_process"
+            else "unknown"
+        )
+        assert result["target_xref_reactome_ids"] == (
+            expected_value
+            if expected_field == "target_xref_reactome_ids"
+            else "unknown"
+        )
+        # Preserve source-of-record in forensic payload
+        import json
+
+        cross_references = json.loads(result["cross_references"])
+        assert isinstance(cross_references, list)
+        raw_sources = {xref["xref_src_db"] for xref in cross_references}
+        assert {source_db, "UnknownSource"} <= {str(v) for v in raw_sources}
+
+    @pytest.mark.asyncio
+    async def test_transform_deduplicates_and_orders_target_xrefs(self, transformer, mock_context):
+        """Projection should deduplicate xref ids and preserve source-order per column."""
+        record = {
+            "target_id": "CHEMBL240",
+            "target_components": [
+                {
+                    "target_component_xrefs": [
+                        {"xref_id": "  1ABC  ", "xref_src_db": "PDB"},
+                        {"xref_id": "Q99999", "xref_src_db": "PDB"},
+                        {"xref_id": "1ABC", "xref_src_db": "PDBe"},
+                        {"xref_id": "P|2", "xref_src_db": "PDBe"},
+                        {"xref_id": "GO:0005887", "xref_src_db": "GoComponent"},
+                        {"xref_id": "GO:0005887", "xref_src_db": "GoComponent"},
+                        {"xref_id": "GO:0004911", "xref_src_db": "GoFunction"},
+                    ]
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["target_xref_pdb_ids"] == "1ABC|Q99999|P\\|2"
+        assert result["target_xref_go_component"] == "GO:0005887"
+        assert result["target_xref_go_function"] == "GO:0004911"
+        assert result["target_xref_reactome_ids"] == "unknown"
+        assert result["target_xref_go_process"] == "unknown"
+
+        import json
+
+        cross_references = json.loads(result["cross_references"])
+        xref_ids = [item["xref_id"] for item in cross_references]
+        assert xref_ids == [
+            "  1ABC  ",
+            "Q99999",
+            "1ABC",
+            "P|2",
+            "GO:0005887",
+            "GO:0005887",
+            "GO:0004911",
+        ]
+
+    @pytest.mark.asyncio
+    async def test_transform_skips_go_and_unknown_xref_sources_from_projection(
+        self, transformer, mock_context
+    ):
+        """General GO and unknown source labels are preserved only in cross_references."""
+        record = {
+            "target_id": "CHEMBL240",
+            "target_components": [
+                {
+                    "target_component_xrefs": [
+                        {"xref_id": "GO:1234", "xref_src_db": "GO"},
+                        {"xref_id": "UNK-1", "xref_src_db": "LegacyDB"},
+                    ]
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["target_xref_iuphar_ids"] == "unknown"
+        assert result["target_xref_pdb_ids"] == "unknown"
+        assert result["target_xref_go_component"] == "unknown"
+        assert result["target_xref_go_function"] == "unknown"
+        assert result["target_xref_go_process"] == "unknown"
+        assert result["target_xref_reactome_ids"] == "unknown"
+
+        import json
+
+        cross_references = json.loads(result["cross_references"])
+        raw_sources = {xref["xref_src_db"] for xref in cross_references}
+        assert raw_sources == {"GO", "LegacyDB"}
+
+    @pytest.mark.asyncio
+    async def test_transform_returns_unknown_when_no_target_component_xrefs(
+        self, transformer, mock_context
+    ):
+        """No component xrefs should emit unknown sentinel for all derived xref columns."""
+        record = {
+            "target_id": "CHEMBL240",
+            "target_components": [
+                {"accession": "P12345", "component_type": "PROTEIN"},
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["target_xref_iuphar_ids"] == "unknown"
+        assert result["target_xref_pdb_ids"] == "unknown"
+        assert result["target_xref_go_component"] == "unknown"
+        assert result["target_xref_go_function"] == "unknown"
+        assert result["target_xref_go_process"] == "unknown"
+        assert result["target_xref_reactome_ids"] == "unknown"
+        assert result["cross_references"] is None
+
+    @pytest.mark.asyncio
     async def test_transform_projects_description_to_target_description(
         self, transformer, mock_context
     ):
