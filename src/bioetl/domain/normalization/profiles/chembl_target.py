@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from bioetl.domain.normalization.profiles._chembl_policy_registry import (
-    chembl_boolean_family_fields,
-)
 from bioetl.domain.normalization.profiles._chembl_reference_identifier_rules import (
     chembl_reference_identifier_rules,
 )
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
+)
+from bioetl.domain.normalization.profiles._chembl_policy_registry import (
+    chembl_boolean_family_fields,
 )
 from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,

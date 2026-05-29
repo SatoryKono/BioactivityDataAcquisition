@@ -29,13 +29,13 @@ from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 from ._chembl_bao_label_normalizers import (
     normalize_profile_bao_label_from_bao_format as normalize_bao_label_from_bao_format,
 )
+from ._chembl_reference_identifier_rules import chembl_reference_identifier_rules
+from ._chembl_vocab import chembl_enum
+from .chembl_json_ordering_policy import chembl_json_fields
 from .chembl_policy_registry import (
     chembl_controlled_family_fields,
     chembl_ontology_family_fields,
 )
-from ._chembl_reference_identifier_rules import chembl_reference_identifier_rules
-from ._chembl_vocab import chembl_enum
-from .chembl_json_ordering_policy import chembl_json_fields
 
 __all__ = [
     "ASSAY_CATEGORIES",

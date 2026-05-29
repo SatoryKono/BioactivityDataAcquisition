@@ -21,13 +21,13 @@ from ._chembl_activity_fields import (
     STANDARD_RELATIONS,
 )
 from ._chembl_bao_label_normalizers import normalize_profile_bao_label_from_bao_format
+from ._chembl_reference_identifier_rules import chembl_reference_identifier_rules
+from ._standard_profile_builder import build_standard_profile
 from .chembl_policy_registry import (
     chembl_controlled_family_fields,
     chembl_flag_family_fields,
     chembl_ontology_family_fields,
 )
-from ._chembl_reference_identifier_rules import chembl_reference_identifier_rules
-from ._standard_profile_builder import build_standard_profile
 from .chembl_pseudo_nulls import chembl_pseudo_null_fields
 from .profile_normalizers import (
     normalize_profile_activity_bao_endpoint_iri,

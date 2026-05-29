@@ -236,6 +236,15 @@ filters:
             - pref_name
             - organism
             - target_type
+            - target_protein_synonyms
+            - target_gene_synonyms
+            - target_ec_numbers
+            - target_xref_iuphar_ids
+            - target_xref_pdb_ids
+            - target_xref_go_component
+            - target_xref_go_function
+            - target_xref_go_process
+            - target_xref_reactome_ids
     gold_filters:
         columns:
             target_type:
