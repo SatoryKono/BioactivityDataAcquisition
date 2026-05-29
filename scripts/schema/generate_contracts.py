@@ -239,5 +239,11 @@ def generate_contracts() -> None:
     print(f"Diff report written to {DIFF_REPORT_PATH}")
 
 
-if __name__ == "__main__":
+def main() -> int:
+    """CLI entrypoint for schema router compatibility."""
     generate_contracts()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,8 +1,8 @@
 # [composite] Harden composite boundaries against non-ChEMBL normalization drift
 
-**Status**: active
+**Status**: completed_in_repo
 **GitHub Issue**: [#4266](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4266)
-**Issue State**: open
+**Issue State**: closed
 **Synced**: 2026-05-29
 **Priority**: P0 (Critical)
 **Labels**: `composite`, `normalization`, `testing`, `lineage`

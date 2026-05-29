@@ -131,6 +131,30 @@
       "nullable": true,
       "description": ""
     },
+    "target_protein_synonyms": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_gene_synonyms": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_ec_numbers": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "component_accessions": {
       "type": [
         "string",
@@ -191,6 +215,6 @@
   "normalization_profile": {
     "ref": "chembl.target",
     "version": "1.0.0",
-    "hash": "29ead7ac5524a4c21a13c05abe5c59bde3045de5485e2b08f55b4bd293417739"
+    "hash": "a724ca9f3f62b7dd0787b104f3fc06fcc6730d766f8f6d60b520d8643f35389e"
   }
 }

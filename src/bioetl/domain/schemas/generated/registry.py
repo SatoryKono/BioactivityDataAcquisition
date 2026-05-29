@@ -86,6 +86,11 @@ _RAW_CANONICAL_SCHEMA_REGISTRY: tuple[tuple[str, str, str, tuple[str, ...]], ...
         ("system", "business", "dq"),
     ),
     ("chembl", "tissue", "chembl/tissue.yaml", ("system", "identifiers", "business")),
+    ("composite", "activity", "composite/activity.yaml", ()),
+    ("composite", "assay", "composite/assay.yaml", ()),
+    ("composite", "molecule", "composite/molecule.yaml", ()),
+    ("composite", "publication", "composite/publication.yaml", ()),
+    ("composite", "target", "composite/target.yaml", ()),
     (
         "crossref",
         "publication",

@@ -52,6 +52,15 @@ schema:
     - cross_references
     - pipeline_stages
     - target_component_synonyms
+    - target_protein_synonyms
+    - target_gene_synonyms
+    - target_ec_numbers
+    - target_xref_iuphar_ids
+    - target_xref_pdb_ids
+    - target_xref_go_component
+    - target_xref_go_function
+    - target_xref_go_process
+    - target_xref_reactome_ids
     - component_accessions
     - component_descriptions
     - primary_component_id
@@ -136,7 +145,44 @@ quality:
             type: custom
             validator: validate_target_xref_src_db_json_vocab
             nullable: true
+            severity: warn
             error_message: cross_references must be canonical JSON with governed xref_src_db source namespaces when present
+        -   field: target_xref_iuphar_ids
+            type: not_null
+            nullable: false
+            error_message: target_xref_iuphar_ids must emit a normalized pipe string or unknown sentinel
+        -   field: target_xref_pdb_ids
+            type: not_null
+            nullable: false
+            error_message: target_xref_pdb_ids must emit a normalized pipe string or unknown sentinel
+        -   field: target_xref_go_component
+            type: not_null
+            nullable: false
+            error_message: target_xref_go_component must emit a normalized pipe string or unknown sentinel
+        -   field: target_xref_go_function
+            type: not_null
+            nullable: false
+            error_message: target_xref_go_function must emit a normalized pipe string or unknown sentinel
+        -   field: target_xref_go_process
+            type: not_null
+            nullable: false
+            error_message: target_xref_go_process must emit a normalized pipe string or unknown sentinel
+        -   field: target_xref_reactome_ids
+            type: not_null
+            nullable: false
+            error_message: target_xref_reactome_ids must emit a normalized pipe string or unknown sentinel
+        -   field: target_protein_synonyms
+            type: not_null
+            nullable: false
+            error_message: target_protein_synonyms must emit a normalized pipe string or unknown sentinel
+        -   field: target_gene_synonyms
+            type: not_null
+            nullable: false
+            error_message: target_gene_synonyms must emit a normalized pipe string or unknown sentinel
+        -   field: target_ec_numbers
+            type: not_null
+            nullable: false
+            error_message: target_ec_numbers must emit a normalized pipe string or unknown sentinel
     entity_cross_field_validations:
         -   name: target_identifiable
             fields:
@@ -238,6 +284,15 @@ hash_policy:
             - cross_references
             - pipeline_stages
             - target_component_synonyms
+            - target_protein_synonyms
+            - target_gene_synonyms
+            - target_ec_numbers
+            - target_xref_iuphar_ids
+            - target_xref_pdb_ids
+            - target_xref_go_component
+            - target_xref_go_function
+            - target_xref_go_process
+            - target_xref_reactome_ids
             - component_accessions
             - component_descriptions
             - primary_component_id

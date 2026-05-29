@@ -95,3 +95,27 @@ async def test_chembl_target_cross_references(e2e_data_dir: Path):
             # Each xref should have standard fields
             for xref in xrefs:
                 assert "xref_id" in xref or "xref_src_db" in xref
+
+
+@pytest.mark.e2e
+@pytest.mark.vcr
+@pytest.mark.asyncio
+async def test_chembl_target_projects_derived_synonym_fields(e2e_data_dir: Path):
+    """E2E: derived synonym fields should flow through the full target pipeline."""
+    ctx = create_test_context("chembl_target", limit=5)
+
+    runner = bootstrap_pipeline_runner(ctx)
+    await runner.run()
+
+    records = get_silver_records(e2e_data_dir, "chembl_target")
+    projected_records = [
+        record
+        for record in records
+        if record.get("target_protein_synonyms") not in (None, "unknown")
+    ]
+
+    assert projected_records, "Expected at least one target with derived synonyms"
+    for record in projected_records:
+        assert record["target_gene_synonyms"] is not None
+        assert record["target_ec_numbers"] is not None
+        assert isinstance(record["target_component_synonyms"], str)

@@ -1,8 +1,8 @@
 # [testing] Expand observed-value and fixture coverage for non-ChEMBL vocabularies
 
-**Status**: deferred_by_priority
+**Status**: completed_in_repo
 **GitHub Issue**: [#4268](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4268)
-**Issue State**: open
+**Issue State**: closed
 **Synced**: 2026-05-29
 **Priority**: P2 (Medium)
 **Labels**: `testing`, `fixtures`, `governance`, `vcr`

@@ -37,6 +37,122 @@ class TargetTransformer(BaseChemblTransformer):
     entity_class = Target
     primary_id_field = "target_id"
     _PROVIDER_ALIASES: ClassVar[Mapping[str, str]] = {"target_id": "target_chembl_id"}
+    _UNKNOWN_PIPE_SENTINEL = "unknown"
+
+    _XREF_DERIVED_COLUMNS: tuple[str, ...] = (
+        "target_xref_iuphar_ids",
+        "target_xref_pdb_ids",
+        "target_xref_go_component",
+        "target_xref_go_function",
+        "target_xref_go_process",
+        "target_xref_reactome_ids",
+    )
+
+    _XREF_SOURCE_TO_COLUMN: dict[str, str] = {
+        "GUIDE_TO_PHARMACOLOGY": "target_xref_iuphar_ids",
+        "GUIDETOPHARMACOLOGY": "target_xref_iuphar_ids",
+        "IUPHAR": "target_xref_iuphar_ids",
+        "GTOPDB": "target_xref_iuphar_ids",
+        "PDB": "target_xref_pdb_ids",
+        "PDBE": "target_xref_pdb_ids",
+        "GOCOMPONENT": "target_xref_go_component",
+        "GO_COMPONENT": "target_xref_go_component",
+        "GOFUNCTION": "target_xref_go_function",
+        "GO_FUNCTION": "target_xref_go_function",
+        "GOPROCESS": "target_xref_go_process",
+        "GO_PROCESS": "target_xref_go_process",
+        "REACTOME": "target_xref_reactome_ids",
+    }
+
+    @staticmethod
+    def _normalize_xref_source(value: object) -> str | None:
+        """Normalize xref source label for canonical column lookup."""
+        if not isinstance(value, str):
+            return None
+
+        normalized = value.strip()
+        if not normalized:
+            return None
+
+        normalized = normalized.upper()
+        for char in (" ", "-", "/", ":", "."):
+            normalized = normalized.replace(char, "_")
+
+        while "__" in normalized:
+            normalized = normalized.replace("__", "_")
+
+        return normalized.strip("_") or None
+
+    @staticmethod
+    def _clean_pipe_value(value: object) -> str | None:
+        if not isinstance(value, str):
+            return None
+
+        cleaned = value.strip()
+        if not cleaned:
+            return None
+
+        return cleaned.replace("|", r"\|")
+
+    @staticmethod
+    def _append_unique_xref_id(values: list[str], seen: set[str], value: str) -> None:
+        """Append a normalized xref id preserving first-seen order."""
+        if value in seen:
+            return
+
+        seen.add(value)
+        values.append(value)
+
+    def _collect_component_xrefs(
+        self,
+        components: list[JsonDict] | None,  # Any: untyped ChEMBL API JSON
+    ) -> list[JsonDict]:
+        """Collect raw target component xrefs without dropping payload."""
+        xrefs = aggregate_nested_lists(
+            components,
+            "target_component_xrefs",
+            deduplicate=False,
+        )
+        if not isinstance(xrefs, list):
+            return []
+
+        return [item for item in xrefs if isinstance(item, dict)]
+
+    def _project_component_xrefs(
+        self,
+        xrefs: list[JsonDict],  # Any: raw xref entries
+    ) -> dict[str, str]:
+        """Project whitelisted xref sources into pipe-separated derived columns."""
+        buckets: dict[str, list[str]] = {
+            column: [] for column in self._XREF_DERIVED_COLUMNS
+        }
+        seen_by_column: dict[str, set[str]] = {
+            column: set() for column in self._XREF_DERIVED_COLUMNS
+        }
+
+        for item in xrefs:
+            if not isinstance(item, dict):
+                continue
+
+            xref_id = self._clean_pipe_value(item.get("xref_id"))
+            source = self._normalize_xref_source(item.get("xref_src_db"))
+            if not xref_id or not source:
+                continue
+
+            column = self._XREF_SOURCE_TO_COLUMN.get(source)
+            if column is None:
+                continue
+
+            self._append_unique_xref_id(
+                buckets[column],
+                seen_by_column[column],
+                xref_id,
+            )
+
+        return {
+            column: self._pipe_or_unknown(values)
+            for column, values in buckets.items()
+        }
 
     def _prepare_record(
         self,
@@ -113,25 +229,88 @@ class TargetTransformer(BaseChemblTransformer):
         synonyms = aggregate_nested_lists(components, "target_component_synonyms")
         return self.serialize_json(synonyms) if synonyms else None
 
-    def _aggregate_component_xrefs(
+    @staticmethod
+    def _append_unique_pipe_escaped(
+        values: list[str],
+        seen: set[str],
+        raw_value: object,
+    ) -> None:
+        """Append a normalized, pipe-escaped value once while preserving first-seen order."""
+        if raw_value is None:
+            return
+
+        normalized = str(raw_value).strip()
+        if not normalized:
+            return
+
+        normalized = normalized.replace("|", "\\|")
+        if normalized in seen:
+            return
+
+        seen.add(normalized)
+        values.append(normalized)
+
+    @classmethod
+    def _pipe_or_unknown(cls, values: list[str]) -> str:
+        """Join ordered values or emit the configured missing sentinel."""
+        return "|".join(values) if values else cls._UNKNOWN_PIPE_SENTINEL
+
+    def _project_component_synonyms(
         self,
         components: list[JsonDict] | None,  # Any: untyped ChEMBL API JSON
-    ) -> str | int | float | bool | None:
-        """Aggregate cross-references from all target components.
+    ) -> dict[str, str]:
+        """Project categorized synonym strings from raw target component payloads."""
+        protein_synonyms: list[str] = []
+        gene_synonyms: list[str] = []
+        ec_numbers: list[str] = []
+        protein_seen: set[str] = set()
+        gene_seen: set[str] = set()
+        ec_seen: set[str] = set()
 
-        Uses aggregate_nested_lists from dict_transformers.
-        ChEMBL API stores cross-references inside each component's
-        target_component_xrefs field, not at the target level.
+        if not components or not isinstance(components, list):
+            return {
+                "target_protein_synonyms": self._UNKNOWN_PIPE_SENTINEL,
+                "target_gene_synonyms": self._UNKNOWN_PIPE_SENTINEL,
+                "target_ec_numbers": self._UNKNOWN_PIPE_SENTINEL,
+            }
 
-        Args:
-            components: List of component dicts from ChEMBL API.
+        for component in components:
+            if not isinstance(component, Mapping):
+                continue
 
-        Returns:
-            JSON string of aggregated xrefs, or None if empty.
+            raw_synonyms = component.get("target_component_synonyms")
+            if not isinstance(raw_synonyms, list):
+                continue
 
-        """
-        xrefs = aggregate_nested_lists(components, "target_component_xrefs")
-        return self.serialize_json(xrefs) if xrefs else None
+            for synonym_payload in raw_synonyms:
+                if not isinstance(synonym_payload, Mapping):
+                    continue
+
+                syn_type = str(synonym_payload.get("syn_type") or "").strip().upper()
+                component_synonym = synonym_payload.get("component_synonym")
+
+                if syn_type == "UNIPROT":
+                    self._append_unique_pipe_escaped(
+                        protein_synonyms,
+                        protein_seen,
+                        component_synonym,
+                    )
+                elif syn_type == "EC_NUMBER":
+                    self._append_unique_pipe_escaped(ec_numbers, ec_seen, component_synonym)
+                elif syn_type == "GENE_SYMBOL" or syn_type.startswith(
+                    "GENE_SYMBOL_"
+                ):
+                    self._append_unique_pipe_escaped(
+                        gene_synonyms,
+                        gene_seen,
+                        component_synonym,
+                    )
+
+        return {
+            "target_protein_synonyms": self._pipe_or_unknown(protein_synonyms),
+            "target_gene_synonyms": self._pipe_or_unknown(gene_synonyms),
+            "target_ec_numbers": self._pipe_or_unknown(ec_numbers),
+        }
 
     def _extract_business_data(
         self,
@@ -164,6 +343,9 @@ class TargetTransformer(BaseChemblTransformer):
         # Extract primary component_id (first element) for enricher join key
         component_ids = flattened_components.get("component_ids")
         primary_component_id = component_ids[0] if component_ids else None
+        projected_synonyms = self._project_component_synonyms(target_components)
+        component_xrefs = self._collect_component_xrefs(target_components)
+        xref_projection = self._project_component_xrefs(component_xrefs)
 
         # Validate taxonomy_id using TaxonomyId Value Object
         raw_tax_id = record.get("tax_id")
@@ -197,7 +379,22 @@ class TargetTransformer(BaseChemblTransformer):
             # Complex fields (JSON serialized)
             "target_components": self.serialize_json(target_components),
             "target_component_synonyms": self._aggregate_synonyms(target_components),
-            "cross_references": self._aggregate_component_xrefs(target_components),
+            **projected_synonyms,
+            "cross_references": self.serialize_json(component_xrefs)
+            if component_xrefs
+            else None,
+            "target_xref_iuphar_ids": xref_projection["target_xref_iuphar_ids"],
+            "target_xref_pdb_ids": xref_projection["target_xref_pdb_ids"],
+            "target_xref_go_component": xref_projection[
+                "target_xref_go_component"
+            ],
+            "target_xref_go_function": xref_projection[
+                "target_xref_go_function"
+            ],
+            "target_xref_go_process": xref_projection[
+                "target_xref_go_process"
+            ],
+            "target_xref_reactome_ids": xref_projection["target_xref_reactome_ids"],
             # Flattened components
             **serialized_flattened_components,
         }
