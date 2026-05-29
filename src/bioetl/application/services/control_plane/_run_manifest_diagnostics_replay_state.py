@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.run_manifest_diagnostics_base_helpers import (
-    _resolve_source_posture,
-)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
     _build_replay_parentage,
     _collect_append_mode_semantic_sinks,
@@ -18,6 +15,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
     _resolve_exact_replay_blockers,
     _resolve_exact_replay_supported_reason,
     _resolve_reproducibility_profile,
+)
+from bioetl.application.services.control_plane.run_manifest_diagnostics_base_helpers import (
+    _resolve_source_posture,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (

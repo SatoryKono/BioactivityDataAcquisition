@@ -14,7 +14,7 @@ __all__ = [
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.core.batch_execution.contracts import (
+from bioetl.application.core.batch_execution._contracts import (
     BatchExecutionCountersSnapshot,
 )
 from bioetl.domain.types import JsonDict
