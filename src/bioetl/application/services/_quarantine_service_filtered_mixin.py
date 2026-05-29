@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from time import perf_counter
 from typing import TYPE_CHECKING, Protocol
+from uuid import UUID
 
 from bioetl.domain.control_plane.run_ledger import (
     RUN_FAILED_EVENT,
@@ -194,9 +195,17 @@ def _sum_bronze_records_for_runs(
     for candidate_run_id in sorted(set(run_ids)):
         resolved: int | None = None
         if callable(list_entries_by_run_id):
-            resolved = _resolve_bronze_records_from_entries(
-                list_entries_by_run_id(candidate_run_id)
-            )
+            lookup_run_id: object = candidate_run_id
+            try:
+                lookup_run_id = UUID(candidate_run_id)
+            except (TypeError, ValueError):
+                lookup_run_id = candidate_run_id
+            try:
+                resolved = _resolve_bronze_records_from_entries(
+                    list_entries_by_run_id(lookup_run_id)
+                )
+            except (TypeError, ValueError):
+                resolved = None
         if resolved is None:
             try:
                 inspection = run_manifest_service.show(candidate_run_id)
