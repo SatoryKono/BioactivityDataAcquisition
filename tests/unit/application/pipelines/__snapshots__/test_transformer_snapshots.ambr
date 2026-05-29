@@ -468,8 +468,17 @@
     'target_component_synonyms': None,
     'target_components': '{"accession":"P35354","component_id":123,"component_type":"PROTEIN","organism":"Homo sapiens","target_component_xrefs":[{"xref_id":"P35354","xref_src_db":"UniProt"}],"tax_id":9606}',
     'target_description': 'Prostaglandin G/H synthase 2',
+    'target_ec_numbers': 'unknown',
+    'target_gene_synonyms': 'unknown',
     'target_id': 'CHEMBL1862',
+    'target_protein_synonyms': 'unknown',
     'target_type': 'SINGLE PROTEIN',
+    'target_xref_go_component': 'unknown',
+    'target_xref_go_function': 'unknown',
+    'target_xref_go_process': 'unknown',
+    'target_xref_iuphar_ids': 'unknown',
+    'target_xref_pdb_ids': 'unknown',
+    'target_xref_reactome_ids': 'unknown',
     'taxonomy_id': 9606,
   })
 # ---

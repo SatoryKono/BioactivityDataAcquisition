@@ -242,6 +242,10 @@ def e2e_environment():
     os.environ.setdefault("BIOETL_TEST_MODE", "true")
     os.environ.setdefault("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
     os.environ.setdefault("BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__PROFILE", "e2e")
+    os.environ.setdefault(
+        "BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__E2E_EXECUTION_TIMEOUT_SECONDS",
+        "180",
+    )
     # Prevent shutil.get_terminal_size hangs in CI/Test environments
     os.environ["COLUMNS"] = "80"
     os.environ["LINES"] = "24"
