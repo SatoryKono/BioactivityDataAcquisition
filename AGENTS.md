@@ -66,6 +66,15 @@ Minimum expectation:
   `docs/00-project/ai/memory/gemini-memory.json` are machine-readable memory
   artifacts, not human source of truth.
 
+## Dashboard Skill Routing
+
+- For BioETL Grafana screenshot refresh, render preflight, live reviewed panel
+  audit, or render-blocker diagnosis work, agents **SHOULD** use the local
+  skill `.codex/skills/grafana-dashboard-render/`.
+- For edits to shipped dashboard JSON, queries, variables, navigation, or
+  operator-facing dashboard UX, agents **SHOULD** use the local skill
+  `.codex/skills/grafana-dashboard-extension/`.
+
 ## Related Files
 
 - `docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`

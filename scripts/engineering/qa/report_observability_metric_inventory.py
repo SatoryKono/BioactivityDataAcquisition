@@ -638,17 +638,19 @@ def _helper_metric_candidates(
     string_bindings: dict[str, str],
     attribute_bindings: dict[str, str],
     metric_bindings: dict[str, str],
+    call_method_name: str | None,
 ) -> set[str]:
     candidates: set[str] = set()
-    for arg in node.args:
-        metric_name = _resolve_metric_name_expr(
-            arg,
-            string_bindings=string_bindings,
-            attribute_bindings=attribute_bindings,
-            metric_bindings=metric_bindings,
-        )
-        if metric_name is not None:
-            candidates.add(metric_name)
+    if call_method_name == "emit_metric":
+        for arg in node.args:
+            metric_name = _resolve_metric_name_expr(
+                arg,
+                string_bindings=string_bindings,
+                attribute_bindings=attribute_bindings,
+                metric_bindings=metric_bindings,
+            )
+            if metric_name is not None:
+                candidates.add(metric_name)
     for keyword in node.keywords:
         if keyword.value is None:
             continue

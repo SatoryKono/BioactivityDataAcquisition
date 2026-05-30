@@ -51,6 +51,7 @@ bash scripts/ai/codex/check_skills_mirror.sh --sync
 
 | Skill                          | Path                                         | Purpose                                               |
 | ------------------------------ | -------------------------------------------- | ----------------------------------------------------- |
+| `grafana-dashboard-render`     | `.codex/skills/grafana-dashboard-render`     | Render, preflight, and audit shipped Grafana dashboards |
 | `grafana-dashboard-extension`  | `.codex/skills/grafana-dashboard-extension`  | Edit and validate shipped Grafana dashboards          |
 | `prometheus-metric-discovery`  | `.codex/skills/prometheus-metric-discovery`  | Discover real metrics, labels, and selectors          |
 | `prometheus-query-debugger`    | `.codex/skills/prometheus-query-debugger`    | Debug PromQL semantics and empty-state behavior       |
@@ -101,6 +102,7 @@ bash scripts/ai/codex/check_skills_mirror.sh --sync
 - [deep-research](deep-research/SKILL.md)
 - [documentation-audit](documentation-audit/SKILL.md)
 - [documentation-cascade-audit](documentation-cascade-audit/SKILL.md)
+- [grafana-dashboard-render](grafana-dashboard-render/SKILL.md)
 - [grafana-dashboard-extension](grafana-dashboard-extension/SKILL.md)
 - [generating-constrained-specs](generating-constrained-specs/SKILL.md)
 - [initializing-ledger](initializing-ledger/SKILL.md)

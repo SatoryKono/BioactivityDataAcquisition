@@ -50,14 +50,8 @@
   ],
   "alerted_without_declaration": [],
   "alerted_without_emission": [],
-  "alias_emitters": {
-    "checkpoint_saved_at_epoch_seconds": [
-      "src/bioetl/application/core/lifecycle/checkpoint_manager.py"
-    ]
-  },
-  "compatibility_alias_candidates": [
-    "checkpoint_saved_at_epoch_seconds"
-  ],
+  "alias_emitters": {},
+  "compatibility_alias_candidates": [],
   "dashboarded_metrics": [
     "bioetl_adapter_batch_size",
     "bioetl_adapter_dropped_duplicates_total",

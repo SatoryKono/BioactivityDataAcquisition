@@ -32,6 +32,14 @@ Generic imported profiles still inherit BioETL guardrails from `AGENTS.md`,
 `MEMORY_USAGE.md`, and the Local-Only runtime constraints even when they are not
 fully BioETL-specific.
 
+## Dashboard Skill Routing
+
+- Use `.codex/skills/grafana-dashboard-render/` when the task is to render,
+  preflight-check, or collect screenshot/live-audit evidence for shipped
+  Grafana dashboards.
+- Use `.codex/skills/grafana-dashboard-extension/` when the task is to change
+  dashboard JSON, panel queries, navigation, variables, or operator-facing UX.
+
 ## Key Rule
 
 `py-*` names in `.codex/agents/` are **logical project profiles**, not native
