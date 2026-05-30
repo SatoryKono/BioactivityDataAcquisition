@@ -221,7 +221,13 @@ def _update_scorecard() -> None:
     SCORECARD.write_text(text, encoding="utf-8")
 
 
-def run(max_phases: int = 200_000) -> None:
+def run(max_phases: int = 200_000, *, report_only: bool = False) -> None:
+    if report_only:
+        from scripts.engineering.qa.report_config_surface_backlog import main as report_main
+
+        report_main()
+        return
+
     yaml = _yaml_rt()
     start = _load_baseline()["families"]
     start_entity = int(start["entity_effective"]["inconsistent_parameter_count"])
@@ -269,5 +275,8 @@ def run(max_phases: int = 200_000) -> None:
 
 
 if __name__ == "__main__":
-    limit = int(sys.argv[1]) if len(sys.argv) > 1 else 200_000
-    run(limit)
+    if len(sys.argv) > 1 and sys.argv[1] in {"--report", "report"}:
+        run(report_only=True)
+    else:
+        limit = int(sys.argv[1]) if len(sys.argv) > 1 else 200_000
+        run(limit)
