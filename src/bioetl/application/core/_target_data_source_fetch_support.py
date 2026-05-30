@@ -65,25 +65,14 @@ async def yield_wrapped_fetch_records(
     offset: int | None = None,
 ) -> AsyncIterator[RecordT]:
     """Delegate a plain fetch call to a wrapped data source adapter."""
-    async for record in yield_wrapped_fetch_records_with_kwargs(
-        data_source,
-        build_wrapped_fetch_kwargs(
-            entity_type=entity_type,
-            limit=limit,
-            query=query,
-            filter_ids=filter_ids,
-            filter_field=filter_field,
-            offset=offset,
-        ),
-    ):
-        yield record
-
-
-async def yield_wrapped_fetch_records_with_kwargs(
-    data_source: DataSourcePort,
-    fetch_kwargs: dict[str, object | None],
-) -> AsyncIterator[RecordT]:
-    """Delegate fetch using a pre-built forwarded kwargs payload."""
+    fetch_kwargs = build_wrapped_fetch_kwargs(
+        entity_type=entity_type,
+        limit=limit,
+        query=query,
+        filter_ids=filter_ids,
+        filter_field=filter_field,
+        offset=offset,
+    )
     async for record in forward_fetch_records(
         cast(
             "Any",  # Any: Dynamic data source adapter
