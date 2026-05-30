@@ -1,0 +1,9 @@
+title: "Project Test Health Summary"
+generated_at: "2026-05-30T00:00:00Z"
+description: "Test health metrics aggregation."
+policy_scope: "non_canonical_evidence_summary"
+owner: "@bioetl-quality"
+freshness_window_days: 7
+last_verified: "2026-05-30"
+allowed_interpretation: "backlog_signal_only"
+canonical_sources: ["tests/"]
