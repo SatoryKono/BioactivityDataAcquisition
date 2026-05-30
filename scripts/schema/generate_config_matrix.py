@@ -250,7 +250,7 @@ def _live_baseline_metrics(
     *,
     config_count: int,
     unique_parameter_count: int,
-    inconsistent_parameter_count: int,
+    _cross_family_raw_inconsistent: int,
 ) -> dict[str, int]:
     """Return ratchet metrics; inconsistent count is family-scoped actionable sum."""
     families = _collect_family_configs()
@@ -336,7 +336,7 @@ def main(argv: list[str] | None = None) -> int:
     baseline_metrics = _live_baseline_metrics(
         config_count=config_count,
         unique_parameter_count=parameter_count,
-        inconsistent_parameter_count=partial_count,
+        _cross_family_raw_inconsistent=partial_count,
     )
     family_payload = {
         family_name: _family_metrics(family_configs)
