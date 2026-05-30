@@ -210,7 +210,6 @@ DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES: tuple[str, ...] = (
     "docs/02-architecture/diagrams/foundation/svg",
     "docs/02-architecture/diagrams/views/png",
     "docs/02-architecture/diagrams/views/svg",
-    "docs/02-architecture/diagrams/descriptions/legacy",
     "scripts/diagrams/svg2png.mjs",
     "scripts/archive",
 )
