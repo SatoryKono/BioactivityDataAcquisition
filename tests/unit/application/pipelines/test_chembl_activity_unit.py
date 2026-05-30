@@ -22,6 +22,13 @@ from tests.helpers.transformer_dependencies import build_test_transformer_depend
 @pytest.fixture
 def chembl_pipeline():
     """Fixture for a ChEMBLActivityPipeline."""
+    from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+
+    # Pipeline config is lru_cached; clear before load so filter edits in
+    # configs/entities/chembl/activity.yaml are picked up in the same session.
+    get_pipeline_config.cache_clear()
+    load_pipeline_config.cache_clear()
+
     runtime = RuntimeConfig(
         run_type=RunType.INCREMENTAL,
         resume=False,
@@ -118,6 +125,13 @@ def test_chembl_should_write_gold_true(chembl_pipeline):
         run_id=chembl_pipeline.context.run_id,
         run_type=chembl_pipeline.context.run_type,
         logger=MagicMock(),
+    )
+    gold_filters = chembl_pipeline.transformer._gold_filters
+    assert gold_filters is not None
+    decision = gold_filters.evaluate(record)
+    assert decision.include, (
+        "Expected activity record to pass Gold filters; "
+        f"blocked by {decision.rule_type}:{decision.field} ({decision.reason_code})"
     )
     # Use transformer directly as BasePipeline no longer delegates
     assert chembl_pipeline.transformer.should_write_gold(context, record) is True

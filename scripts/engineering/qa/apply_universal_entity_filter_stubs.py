@@ -58,9 +58,7 @@ def _apply_gold_stubs(gold: dict[str, Any], *, reset_list_contains: bool) -> boo
         changed = True
     ranges = gold.get("ranges")
     if not isinstance(ranges, dict):
-        gold["ranges"] = copy.deepcopy({"publication_year": PUBLICATION_YEAR_RANGE})
-        return True
-    if _ensure_pub_year(ranges):
+        gold["ranges"] = {}
         changed = True
     return changed
 

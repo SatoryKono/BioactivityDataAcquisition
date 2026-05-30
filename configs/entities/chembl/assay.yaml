@@ -382,6 +382,8 @@ filters:
         operator: not_in
         values:
         - BAO_0000218
+      src_id:
+      - '1'
     exclude_if_present: []
     required_fields:
     - assay_type

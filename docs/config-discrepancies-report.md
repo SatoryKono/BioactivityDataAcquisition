@@ -1,7 +1,7 @@
 # Config Discrepancies Report
 
 Total configs: 26
-Total unique parameters: 505
+Total unique parameters: 506
 
 ## Inconsistent Parameters
 
@@ -318,6 +318,7 @@ Total unique parameters: 505
 - `filters.gold_filters.columns.potential_duplicate` (2/26): entity/chembl/activity, entity/chembl/molecule
 - `filters.gold_filters.columns.publication_type` (1/26): entity/chembl/publication
 - `filters.gold_filters.columns.reviewed` (1/26): entity/uniprot/protein
+- `filters.gold_filters.columns.src_id` (1/26): entity/chembl/assay
 - `filters.gold_filters.columns.standard_relation` (1/26): entity/chembl/activity
 - `filters.gold_filters.columns.standard_type` (1/26): entity/chembl/activity
 - `filters.gold_filters.columns.standard_units` (1/26): entity/chembl/activity
@@ -327,7 +328,7 @@ Total unique parameters: 505
 - `filters.gold_filters.list_lengths.component_accessions` (2/26): entity/chembl/target, entity/chembl/target_component
 - `filters.gold_filters.list_lengths.component_ids` (2/26): entity/chembl/target, entity/chembl/target_component
 - `filters.gold_filters.ranges.max_tani` (1/26): entity/chembl/publication_similarity
-- `filters.gold_filters.ranges.publication_year` (20/26): entity/chembl/activity, entity/chembl/assay_parameters, entity/chembl/cell_line, entity/chembl/compound_record, entity/chembl/molecule, entity/chembl/protein_class, entity/chembl/publication, entity/chembl/publication_similarity, entity/chembl/publication_term, entity/chembl/subcellular_fraction, entity/chembl/target, entity/chembl/target_component, entity/chembl/tissue, entity/crossref/publication, entity/openalex/publication, entity/pubchem/compound, entity/pubmed/publication, entity/semanticscholar/publication, entity/uniprot/idmapping, entity/uniprot/protein
+- `filters.gold_filters.ranges.publication_year` (5/26): entity/chembl/activity, entity/chembl/publication, entity/chembl/publication_similarity, entity/chembl/target, entity/chembl/target_component
 - `filters.gold_filters.ranges.standard_value` (1/26): entity/chembl/activity
 - `filters.metadata.publication_filter_policy.description` (21/26): entity/chembl/activity, entity/chembl/assay, entity/chembl/assay_parameters, entity/chembl/cell_line, entity/chembl/compound_record, entity/chembl/molecule, entity/chembl/protein_class, entity/chembl/publication, entity/chembl/publication_similarity, entity/chembl/publication_term, entity/chembl/subcellular_fraction, entity/chembl/target, entity/chembl/target_component, entity/chembl/tissue, entity/crossref/publication, entity/openalex/publication, entity/pubchem/compound, entity/pubmed/publication, entity/semanticscholar/publication, entity/uniprot/idmapping, entity/uniprot/protein
 - `filters.metadata.publication_filter_policy.scope` (21/26): entity/chembl/activity, entity/chembl/assay, entity/chembl/assay_parameters, entity/chembl/cell_line, entity/chembl/compound_record, entity/chembl/molecule, entity/chembl/protein_class, entity/chembl/publication, entity/chembl/publication_similarity, entity/chembl/publication_term, entity/chembl/subcellular_fraction, entity/chembl/target, entity/chembl/target_component, entity/chembl/tissue, entity/crossref/publication, entity/openalex/publication, entity/pubchem/compound, entity/pubmed/publication, entity/semanticscholar/publication, entity/uniprot/idmapping, entity/uniprot/protein
@@ -460,8 +461,8 @@ Total unique parameters: 505
 - `filters.gold_filters.list_lengths.component_ids.min` (2/26): entity/chembl/target, entity/chembl/target_component
 - `filters.gold_filters.ranges.max_tani.include_min` (1/26): entity/chembl/publication_similarity
 - `filters.gold_filters.ranges.max_tani.min` (1/26): entity/chembl/publication_similarity
-- `filters.gold_filters.ranges.publication_year.max` (20/26): entity/chembl/activity, entity/chembl/assay_parameters, entity/chembl/cell_line, entity/chembl/compound_record, entity/chembl/molecule, entity/chembl/protein_class, entity/chembl/publication, entity/chembl/publication_similarity, entity/chembl/publication_term, entity/chembl/subcellular_fraction, entity/chembl/target, entity/chembl/target_component, entity/chembl/tissue, entity/crossref/publication, entity/openalex/publication, entity/pubchem/compound, entity/pubmed/publication, entity/semanticscholar/publication, entity/uniprot/idmapping, entity/uniprot/protein
-- `filters.gold_filters.ranges.publication_year.min` (20/26): entity/chembl/activity, entity/chembl/assay_parameters, entity/chembl/cell_line, entity/chembl/compound_record, entity/chembl/molecule, entity/chembl/protein_class, entity/chembl/publication, entity/chembl/publication_similarity, entity/chembl/publication_term, entity/chembl/subcellular_fraction, entity/chembl/target, entity/chembl/target_component, entity/chembl/tissue, entity/crossref/publication, entity/openalex/publication, entity/pubchem/compound, entity/pubmed/publication, entity/semanticscholar/publication, entity/uniprot/idmapping, entity/uniprot/protein
+- `filters.gold_filters.ranges.publication_year.max` (5/26): entity/chembl/activity, entity/chembl/publication, entity/chembl/publication_similarity, entity/chembl/target, entity/chembl/target_component
+- `filters.gold_filters.ranges.publication_year.min` (5/26): entity/chembl/activity, entity/chembl/publication, entity/chembl/publication_similarity, entity/chembl/target, entity/chembl/target_component
 - `filters.gold_filters.ranges.standard_value.include_min` (1/26): entity/chembl/activity
 - `filters.gold_filters.ranges.standard_value.min` (1/26): entity/chembl/activity
 - `filters.silver_filters.ranges.activity_id.max` (1/26): entity/chembl/activity

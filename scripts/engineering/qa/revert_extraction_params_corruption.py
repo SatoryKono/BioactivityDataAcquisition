@@ -5,14 +5,18 @@ from __future__ import annotations
 
 import io
 import os
+import sys
 from pathlib import Path
 from typing import Any
 
 from ruamel.yaml import YAML
 
+ROOT = Path(__file__).resolve().parents[3]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
+
 from bioetl.infrastructure.config.config_ci_contract import EXTRACTION_PARAM_ALLOWLIST
 
-ROOT = Path(__file__).resolve().parents[3]
 ENTITIES = ROOT / "configs" / "entities"
 
 

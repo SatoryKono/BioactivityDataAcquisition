@@ -1481,6 +1481,32 @@ grep BIOETL_METRICS .env
 # BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED=true
 ```
 
+**Причина 5: пустые панели ID / Processed Records (HTTP, не Prometheus).**
+
+Панели **ID** и **Processed Records** на primary dashboards читают datasource `Quarantine Explorer` (`:8081`), а не RunManifest напрямую из Grafana.
+
+```powershell
+# Windows: поднять или переиспользовать backend
+powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/start_quarantine_explorer.ps1
+
+# или
+$env:PYTHONPATH = "src"
+python -m scripts.ops ensure-quarantine-explorer
+
+# Проверка
+curl http://127.0.0.1:8081/health/live
+curl "http://127.0.0.1:8081/ops/control-plane/identity-table?pipeline=chembl_target&run_type=backfill&run_id=<run-id>"
+```
+
+Docker monitoring stack (устойчивый `:8081` с `restart: unless-stopped`):
+
+```bash
+docker compose -f docker-compose.monitoring.yml up -d quarantine-explorer
+docker compose -f docker-compose.monitoring.yml restart grafana
+```
+
+Grafana из Docker обращается к `http://host.docker.internal:8081` (см. `BIOETL_QUARANTINE_EXPLORER_URL`). Backend должен слушать `0.0.0.0:8081`, не только `127.0.0.1`.
+
 ### 15.2 Prometheus Target DOWN
 
 ```bash

@@ -366,10 +366,7 @@ filters:
   gold_filters:
     list_contains: {}
     list_lengths: {}
-    ranges:
-      publication_year:
-        min: 1950
-        max: 2050
+    ranges: {}
     required_fields:
     - paper_id
     - title
