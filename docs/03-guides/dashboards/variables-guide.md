@@ -61,6 +61,6 @@ ______________________________________________________________________
 | `bioetl-dq-v2` | `$pipeline`, `$run_id`, `$run_type`, `$stage`, `$workflow` |
 | `bioetl-overview-v2` | `$pipeline`, `$run_id`, `$run_type`, `$workflow` |
 | `bioetl-provider-health-v2` | `$adapter`, `$pipeline`, `$pipeline_context`, `$provider`, `$run_id`, `$run_type`, `$workflow` |
-| `bioetl-runtime` | `$pipeline`, `$run_id`, `$run_type`, `$stage`, `$workflow` |
+| `bioetl-runtime` | `$pipeline`, `$provider_hint`, `$run_id`, `$run_type`, `$stage`, `$workflow` |
 | `bioetl-silver-reject-explorer` | `$field`, `$payload_hash`, `$pipeline`, `$quarantine_run_id`, `$reason_code`, `$run_type` |
 | `bioetl-workflow-overview` | `$pipeline`, `$pipeline_context`, `$provider_context`, `$run_id`, `$run_type`, `$run_type_context`, `$status`, `$step_kind`, `$step_status`, `$workflow` |

@@ -253,7 +253,7 @@ hotspot_family_ratchets:
       --md-out reports/quality/hotspot-duplication-baseline.md --history-jsonl reports/quality/hotspot-duplication-history.jsonl
     baseline_artifact: reports/quality/hotspot-duplication-baseline.json
     history_artifact: reports/quality/hotspot-duplication-history.jsonl
-    latest_reviewed_snapshot: '2026-05-22'
+    latest_reviewed_snapshot: '2026-05-21'
     confirming_clean_snapshots_required: 2
     expected_direction: downward
     ratchet_policy: Keep the hotspot layer report-only at the repo level; enforce
