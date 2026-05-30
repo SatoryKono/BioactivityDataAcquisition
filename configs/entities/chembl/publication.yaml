@@ -197,10 +197,15 @@ quality:
         publication_type_raw: Preserve the raw/native ChEMBL publication type token for traceability and provider-specific review.
         publication_type: Store the canonical publication type mapped into the global taxonomy for normalized Silver/Gold behavior.
     # Source-specific DQ policy:
+
     # - publication_type uses a ChEMBL-only allowed subset and does not redefine
+
     #   the global taxonomy in configs/enums/chembl.yaml.
+
     # - publication_type_raw preserves the provider-native token for traceability.
+
     # - publication_type stores the canonical mapped type used by this pipeline.
+
     assay_parameter_type_policy:
       scope: raw_plus_canonical_controlled_vocabulary
       description: RAW-PLUS-CANONICAL ChEMBL assay-parameter typing policy. The pipeline preserves the provider-native type lexeme in type_raw for reviewability while parameter_type stores the canonical controlled-vocabulary value used by Silver/Gold semantics and DQ governance.
@@ -245,7 +250,9 @@ quality:
     - patent
     nullable: false
             # Source-specific constraint: ChEMBL source only produces these 4 types
+
             # This is NOT the global publication type taxonomy
+
   - field: publication_year
     type: range
     min: 1500
@@ -364,9 +371,13 @@ filters:
       scope: source_specific
       description: SOURCE-SPECIFIC ChEMBL publication filter policy. Silver and Gold filters intentionally constrain this pipeline to the reviewed ChEMBL publication subset and do not redefine the global publication taxonomy.
     # Source-specific filter policy:
+
     # - Silver and Gold are intentionally scoped to journal-article for the
+
     #   current ChEMBL publication pipeline.
+
     # - This is pipeline scope, not global publication type truth.
+
   input_filter:
     enabled: false
     source_path: data/input/publication.csv
@@ -379,28 +390,11 @@ filters:
     doc_type: PUBLICATION
     year__gte: 1950
     year__lte: 2050
-    assay_type__in: B,F
-    confidence_score__gte: 8
-    data_validity_comment__isnull: true
-    inorganic_flag: 0
-    molecule_type: Small molecule
-    organism__isnull: false
-    pchembl_value__isnull: false
-    potential_duplicate: 0
-    relationship_type: D
-    src_id: 1
-    standard_flag: 1
-    standard_relation: '='
-    standard_type__in: IC50,Ki
-    standard_units: nM
-    structure_type: MOL
-    target_chembl_id__isnull: false
-    target_tax_id__isnull: false
-    target_type: SINGLE PROTEIN
-    tax_id__isnull: false
   silver_filters:
         # Source-specific filter: ChEMBL publication pipeline currently scoped
+
         # to journal-article only. This is NOT a global publication type constraint.
+
     columns:
       publication_type:
       - journal-article
@@ -451,7 +445,9 @@ filters:
     - title
   gold_filters:
         # Source-specific filter: ChEMBL Gold dataset restricted to journal-article
+
         # for canonical publication scope. This is NOT a global publication type constraint.
+
     columns:
       publication_type:
       - journal-article

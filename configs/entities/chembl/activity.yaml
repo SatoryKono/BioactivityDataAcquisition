@@ -497,19 +497,6 @@ filters:
     pchembl_value__isnull: false
     standard_flag: 1
     target_tax_id__isnull: false
-    doc_type: PUBLICATION
-    year__gte: 1950
-    year__lte: 2050
-    confidence_score__gte: 8
-    inorganic_flag: 0
-    molecule_type: Small molecule
-    organism__isnull: false
-    relationship_type: D
-    src_id: 1
-    structure_type: MOL
-    target_chembl_id__isnull: false
-    target_type: SINGLE PROTEIN
-    tax_id__isnull: false
   silver_filters:
     columns:
       standard_type:
