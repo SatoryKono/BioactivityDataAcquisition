@@ -63,7 +63,7 @@ def _live_metrics() -> dict[str, int]:
     return _live_baseline_metrics(
         config_count=config_count,
         unique_parameter_count=unique_parameter_count,
-        inconsistent_parameter_count=inconsistent_parameter_count,
+        _cross_family_raw_inconsistent=inconsistent_parameter_count,
     )
 
 

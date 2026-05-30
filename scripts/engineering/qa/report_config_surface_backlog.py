@@ -15,10 +15,7 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.engineering.qa.config_surface_governance import (  # noqa: E402
-    INTENTIONAL_PREFIXES,
-    is_sanctioned_partial_key,
-)
+from scripts.engineering.qa.config_surface_governance import is_sanctioned_partial_key
 from scripts.schema.generate_config_matrix import (  # noqa: E402
     _collect_family_configs,
     _family_metrics,
