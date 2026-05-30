@@ -65,15 +65,9 @@ class HistoricalReplayUniverseExternalRecord(HistoricalReplayRunIdentity):
 
 
 @dataclass(frozen=True, slots=True)
-class HistoricalReplayUniverseRecord:
+class HistoricalReplayUniverseRecord(HistoricalReplayRunIdentity):
     """One merged historical-run record in the full replay universe."""
 
-    manifest_id: str
-    run_id: str
-    pipeline_name: str
-    provider: str
-    entity: str
-    execution_context: str
     certification_status: str
     replay_occurrence_kind: str
     blocking_reasons: tuple[str, ...]
