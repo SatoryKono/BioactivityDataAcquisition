@@ -310,6 +310,8 @@ def test_metric_inventory_filters_non_metric_alias_noise(
                 'emit_metric(metrics, "record_count")',
                 'emit_metric(metrics, "dq_status")',
                 'emit_metric(metrics, "write_duration_ms")',
+                'metadata = {"checkpoint_saved_at_epoch_seconds": 1234}',
+                'metadata.setdefault("checkpoint_saved_at_epoch_seconds", 5678)',
             ]
         )
         + "\n",
