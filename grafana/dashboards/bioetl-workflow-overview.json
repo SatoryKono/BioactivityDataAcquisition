@@ -99,10 +99,10 @@
         "x": 0,
         "y": 3
       },
-      "description": "Unified context/provenance banner for 5. Workflow. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only.",
+      "description": "Unified context/provenance banner for 5. Workflow. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only. This shell must make the exact-run vs selected-range split visible before any Prometheus evidence is interpreted.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Did the selected workflow emit failed or skipped evidence in this range?</div><div style=\"margin-top:6px;font-size:12px;opacity:0.9;\">Run ID only fills the local ID card; evidence below remains selected-range workflow scope.</div></div>"
+        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Did the selected workflow emit failed or skipped evidence in this range?</div><div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;\"><span style=\"padding:2px 8px;border-radius:999px;background:rgba(59,130,246,0.18);border:1px solid rgba(59,130,246,0.5);font-size:11px;font-weight:700;letter-spacing:0.02em;\">Exact run: ID card only</span><span style=\"padding:2px 8px;border-radius:999px;background:rgba(245,158,11,0.18);border:1px solid rgba(245,158,11,0.5);font-size:11px;font-weight:700;letter-spacing:0.02em;\">Evidence below: selected-range workflow scope</span></div><div style=\"margin-top:8px;font-size:12px;opacity:0.92;\">Run ID only fills the local ID card; Status and all Prometheus evidence below remain selected-range workflow scope and are never exact-run proof on this dashboard.</div></div>"
       }
     },
     {
@@ -119,7 +119,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range workflow evidence status, not current live run state and not an L0/L2 current verdict. Status mapping: 0=OK for no failed/non-success evidence in the selected range, 1=WARN for non-success evidence, >=2=CRIT for failed workflow evidence, null=UNKNOWN. Pipeline/run_type remain handoff context and run_id remains local ID-only identity context for this dashboard.",
+      "description": "Selected-range workflow evidence status, not current live run state, not exact-run evidence, and not an L0/L2 current verdict. Status mapping: 0=OK for no failed/non-success evidence in the selected range, 1=WARN for non-success evidence, >=2=CRIT for failed workflow evidence, null=UNKNOWN. Pipeline/run_type remain handoff context and run_id remains local ID-only identity context for this dashboard.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -213,7 +213,7 @@
         "y": 7
       },
       "datasource": "Quarantine Explorer",
-      "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels.",
+      "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. This is the only above-the-fold exact-run identity panel on Workflow. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels.",
       "fieldConfig": {
         "defaults": {
           "custom": {

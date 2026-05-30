@@ -12,7 +12,6 @@ strict_boolean_families:
       - chembl_molecule.withdrawn_flag
       - chembl_publication.is_oa
       - chembl_target.species_group_flag
-      - chembl_target.downgraded
 
 strict_flag_families:
   binary_flags:

@@ -27,58 +27,72 @@ _EXPECTED_CHEMBL_CONTRACT_SURFACE: dict[str, dict[str, str]] = {
     "chembl.activity": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_activity_v1.0.json",
+        "contract_version": "1.0.0",
     },
     "chembl.assay": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_assay_v1.0.json",
+        "contract_version": "1.0.0",
     },
     "chembl.assay_parameters": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_assay_parameters_v1.0.json",
+        "contract_version": "1.0.0",
     },
     "chembl.cell_line": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_cell_line_v1.0.json",
+        "contract_version": "1.0.0",
     },
     "chembl.compound_record": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_compound_record_v1.0.json",
+        "contract_version": "1.0.0",
     },
     "chembl.molecule": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_molecule_protein_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_molecule_v1.0.json",
+        "contract_version": "1.0.0",
     },
     "chembl.protein_class": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_molecule_protein_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_protein_class_v1.0.json",
+        "contract_version": "1.0.0",
     },
     "chembl.publication": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_publication_v1.0.json",
+        "contract_version": "1.0.0",
     },
     "chembl.publication_similarity": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_publication_similarity_v1.0.json",
+        "contract_version": "1.0.0",
     },
     "chembl.publication_term": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_publication_term_v1.0.json",
+        "contract_version": "1.0.0",
     },
     "chembl.subcellular_fraction": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_subcellular_fraction_v1.0.json",
+        "contract_version": "1.0.0",
     },
     "chembl.target": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
-        "artifact": "../../docs/04-reference/contracts/gold/chembl_target_v1.0.json",
+        "artifact": "../../docs/04-reference/contracts/gold/chembl_target_v2.0.json",
+        "contract_version": "2.0.0",
     },
     "chembl.target_component": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_target_component_v1.0.json",
+        "contract_version": "1.0.0",
     },
     "chembl.tissue": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_tissue_v1.0.json",
+        "contract_version": "1.0.0",
     },
 }
 
@@ -131,7 +145,7 @@ def test_chembl_contract_registry_covers_all_shipped_gold_surfaces() -> None:
         entry = chembl_entries[contract_ref]
         assert entry.source_path == expected["source_path"]
         assert entry.published_artifacts == [expected["artifact"]]
-        assert entry.identity.contract_version == "1.0.0"
+        assert entry.identity.contract_version == expected["contract_version"]
         assert entry.identity.dq_policy_ref == "chembl.dq.v1"
         assert entry.identity.rule_bundle_version == "dq-rules.v1.0"
         profile_identity = resolve_normalization_profile_identity(
@@ -244,7 +258,10 @@ def test_chembl_contract_loader_resolves_each_registered_surface(
     dq_config = loader.load_dq_config_for_pipeline(pipeline_name)
 
     assert dq_config.contract_ref == contract_ref
-    assert dq_config.contract_version == "1.0.0"
+    expected_version = _EXPECTED_CHEMBL_CONTRACT_SURFACE[contract_ref][
+        "contract_version"
+    ]
+    assert dq_config.contract_version == expected_version
     assert dq_config.rule_bundle_version == "dq-rules.v1.0"
 
 

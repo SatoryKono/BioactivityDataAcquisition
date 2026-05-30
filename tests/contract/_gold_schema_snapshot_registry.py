@@ -14,7 +14,10 @@ ROOT = Path(__file__).resolve().parents[2]
 GOLD_SNAPSHOT_REGISTRY_PATH = (
     ROOT / "tests" / "fixtures" / "golden" / "gold" / "schema_registry.v1.json"
 )
-CONTRACT_VERSION = "1.0.0"
+DEFAULT_CONTRACT_VERSION = "1.0.0"
+ENTITY_CONTRACT_VERSIONS: dict[str, str] = {
+    "chembl_target": "2.0.0",
+}
 _ALLOWED_TYPE_NAMES = frozenset({"bool", "float64", "int64", "str"})
 
 _DQ_SENSITIVE_OUTPUTS: dict[str, dict[str, Any]] = {
@@ -176,7 +179,9 @@ def _gold_schema_classes() -> dict[str, type[Any]]:
 
 
 def _published_contract_path(entity: str) -> str:
-    return f"docs/04-reference/contracts/gold/{entity}_v1.0.json"
+    version = ENTITY_CONTRACT_VERSIONS.get(entity, DEFAULT_CONTRACT_VERSION)
+    major_minor = ".".join(version.split(".")[:2])
+    return f"docs/04-reference/contracts/gold/{entity}_v{major_minor}.json"
 
 
 def _canonical_dtype_name(dtype: object) -> str:
@@ -204,6 +209,10 @@ def build_gold_schema_snapshot_registry() -> dict[str, Any]:
     for entity, schema_cls in _gold_schema_classes().items():
         strict = bool(getattr(getattr(schema_cls, "Config", None), "strict", False))
         entities[entity] = {
+            "contract_version": ENTITY_CONTRACT_VERSIONS.get(
+                entity,
+                DEFAULT_CONTRACT_VERSION,
+            ),
             "schema_class": schema_cls.__name__,
             "published_contract_path": _published_contract_path(entity),
             "strict": strict,
@@ -213,7 +222,7 @@ def build_gold_schema_snapshot_registry() -> dict[str, Any]:
     return {
         "surface": "gold_schema_snapshots",
         "version": 1,
-        "contract_version": CONTRACT_VERSION,
+        "contract_version": DEFAULT_CONTRACT_VERSION,
         "entities": entities,
         "dq_sensitive_outputs": _DQ_SENSITIVE_OUTPUTS,
     }
@@ -238,13 +247,14 @@ def gold_schema_entities() -> dict[str, type[Any]]:
 def assert_gold_schema_snapshot_registry_shape(snapshot: Mapping[str, Any]) -> None:
     assert snapshot.get("surface") == "gold_schema_snapshots"
     assert snapshot.get("version") == 1
-    assert snapshot.get("contract_version") == CONTRACT_VERSION
+    assert snapshot.get("contract_version") == DEFAULT_CONTRACT_VERSION
 
     entities = snapshot.get("entities")
     assert isinstance(entities, dict) and entities
     for entity, entry in entities.items():
         assert isinstance(entity, str) and entity
         assert isinstance(entry, dict)
+        assert isinstance(entry.get("contract_version"), str) and entry["contract_version"]
         assert isinstance(entry.get("schema_class"), str) and entry["schema_class"]
         assert isinstance(entry.get("published_contract_path"), str)
         assert isinstance(entry.get("strict"), bool)

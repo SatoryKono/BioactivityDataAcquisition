@@ -469,7 +469,7 @@
       }
     ],
     "coerce": false,
-    "description": "Class Level 1: EXP (experimental), REV (reviews/secondary), PEER (peer review)",
+    "description": "Class Level 1: EXP (experimental), REV (reviews/secondary), PEER (peer review), or provider-preserved PUBLICATION.",
     "dtype": "str",
     "nullable": true,
     "required": true,
@@ -582,7 +582,7 @@
   "title": {
     "checks": [],
     "coerce": false,
-    "description": "Publication title",
+    "description": "Publication title when available from OpenAlex.",
     "dtype": "str",
     "nullable": true,
     "required": true,

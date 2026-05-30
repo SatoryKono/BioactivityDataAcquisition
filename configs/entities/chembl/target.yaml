@@ -47,11 +47,6 @@ schema:
     - organism_class
     - species_group_flag
     - target_description
-    - downgraded
-    - target_components
-    - cross_references
-    - pipeline_stages
-    - target_component_synonyms
     - target_protein_synonyms
     - target_gene_synonyms
     - target_ec_numbers
@@ -60,12 +55,15 @@ schema:
     - target_xref_go_function
     - target_xref_go_process
     - target_xref_reactome_ids
+    - primary_component_id
     - component_accessions
     - component_descriptions
-    - primary_component_id
     - component_ids
     - component_types
     - component_relationships
+    - target_components
+    - cross_references
+    - target_component_synonyms
   - name: dq
     pattern: ^_dq_
   silver:
@@ -267,7 +265,7 @@ hash_policy:
     provider: chembl
     entity: target
     contract:
-        version: 1.0.0
+        version: 2.0.0
         migration_note: 'Explicit config-level hash contract for the normalized ChEMBL target Silver surface.'
     hash_policy:
         algorithm: sha256
@@ -281,11 +279,6 @@ hash_policy:
             - organism_class
             - species_group_flag
             - target_description
-            - downgraded
-            - target_components
-            - cross_references
-            - pipeline_stages
-            - target_component_synonyms
             - target_protein_synonyms
             - target_gene_synonyms
             - target_ec_numbers
@@ -294,12 +287,15 @@ hash_policy:
             - target_xref_go_function
             - target_xref_go_process
             - target_xref_reactome_ids
+            - primary_component_id
             - component_accessions
             - component_descriptions
-            - primary_component_id
             - component_ids
             - component_types
             - component_relationships
+            - target_components
+            - cross_references
+            - target_component_synonyms
         exclude_fields:
             - _ingestion_ts
             - _run_id

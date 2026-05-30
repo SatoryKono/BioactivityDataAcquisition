@@ -19,12 +19,15 @@ if __package__ in {None, ""}:
         sys.path.insert(0, repo_root_str)
 
 from scripts.ops.observability.grafana import audit_live_grafana_panels as live_audit
+from scripts.ops.observability.grafana import (
+    rerender_grafana_screenshots as rerender_screenshots,
+)
 
 DEFAULT_GRAFANA_BASE_URL = "http://localhost:3000"
 DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"
 DEFAULT_APP_BASE_URL = "http://localhost:8081"
 DEFAULT_GRAFANA_USERNAME = "admin"
-DEFAULT_GRAFANA_PASSWORD = "admin"
+DEFAULT_GRAFANA_PASSWORD = "changeme"
 DEFAULT_TIMEOUT_SECONDS = 5.0
 DEFAULT_SCREENSHOT_DIR = Path("reports/observability/grafana/screenshots")
 _DASHBOARD_DIR = Path("grafana/dashboards")
@@ -72,6 +75,64 @@ def _check_http_json(
             detail=f"{url} did not return a JSON object",
         )
     return PreflightCheck(name=name, status="ok", detail=f"{url} reachable")
+
+
+def _check_grafana_render_auth(
+    *,
+    grafana_base_url: str,
+    grafana_username: str,
+    grafana_password: str,
+    timeout_seconds: float,
+) -> PreflightCheck:
+    config = rerender_screenshots.RenderConfig(
+        base_url=grafana_base_url.rstrip("/"),
+        username=grafana_username,
+        password=grafana_password,
+        service_account_token=_read_env("GRAFANA_SERVICE_ACCOUNT_TOKEN", ""),
+        output_dir=DEFAULT_SCREENSHOT_DIR,
+        width=rerender_screenshots.DEFAULT_WIDTH,
+        height=rerender_screenshots.DEFAULT_HEIGHT,
+        timeout_seconds=timeout_seconds,
+        selected_uids=(),
+        fallback="auto",
+    )
+    try:
+        rerender_screenshots._request_json(  # noqa: SLF001
+            f"{config.base_url}/api/frontend/settings",
+            headers=rerender_screenshots._auth_headers(config),  # noqa: SLF001
+            timeout_seconds=timeout_seconds,
+        )
+    except error.HTTPError as exc:
+        detail = (
+            rerender_screenshots._describe_grafana_auth_failure(config)  # noqa: SLF001
+            if exc.code in {401, 403}
+            else f"{config.base_url}/api/frontend/settings returned HTTP {exc.code}"
+        )
+        return PreflightCheck(
+            name="grafana-render-auth",
+            status="error",
+            detail=detail,
+        )
+    except Exception as exc:  # pragma: no cover - exercised by callers
+        return PreflightCheck(
+            name="grafana-render-auth",
+            status="error",
+            detail=f"frontend settings probe failed: {exc}",
+        )
+    return PreflightCheck(
+        name="grafana-render-auth",
+        status="ok",
+        detail="frontend settings auth probe succeeded",
+    )
+
+
+def _check_playwright_runtime() -> PreflightCheck:
+    ok, detail = rerender_screenshots.check_playwright_runtime()
+    return PreflightCheck(
+        name="playwright-runtime",
+        status="ok" if ok else "error",
+        detail=detail,
+    )
 
 
 def _expected_dashboard_screenshot_pairs(
@@ -158,11 +219,18 @@ def run_checks(
             url=f"{grafana_base_url.rstrip('/')}/api/health",
             timeout_seconds=timeout_seconds,
         ),
+        _check_grafana_render_auth(
+            grafana_base_url=grafana_base_url,
+            grafana_username=grafana_username,
+            grafana_password=grafana_password,
+            timeout_seconds=timeout_seconds,
+        ),
         _check_http_json(
             name="prometheus",
             url=f"{prometheus_base_url.rstrip('/')}/api/v1/status/runtimeinfo",
             timeout_seconds=timeout_seconds,
         ),
+        _check_playwright_runtime(),
     ]
 
     try:

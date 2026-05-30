@@ -1209,54 +1209,6 @@ class TestTargetTransformer:
         assert result is not None
 
     @pytest.mark.asyncio
-    async def test_transform_with_downgraded_field(self, transformer, mock_context):
-        """Test transformation extracts downgraded field."""
-        record = {
-            "target_id": "CHEMBL1862",
-            "pref_name": "Cyclooxygenase-2",
-            "target_type": "SINGLE PROTEIN",
-            "downgraded": 0,
-        }
-
-        result = await transformer.transform(mock_context, record, index=0)
-
-        assert result is not None
-        assert result["downgraded"] is False
-
-    def test_extract_business_data_preserves_raw_downgraded_for_domain_profile(
-        self, transformer
-    ):
-        """Application extraction must not collapse invalid or missing bool lexemes."""
-        for raw_value in ("0", "1", True, False, None, "not-a-bool"):
-            record = {
-                "target_id": "CHEMBL1862",
-                "downgraded": raw_value,
-            }
-
-            result = transformer._extract_business_data(record, "CHEMBL1862")
-
-            assert result["downgraded"] is raw_value
-
-    @pytest.mark.asyncio
-    async def test_transform_with_pipeline_stages(self, transformer, mock_context):
-        """Test transformation handles pipeline_stages as JSON."""
-        record = {
-            "target_id": "CHEMBL240",
-            "pipeline_stages": [{"stage": "Phase 1", "status": "Active"}],
-        }
-
-        result = await transformer.transform(mock_context, record, index=0)
-
-        assert result is not None
-        assert isinstance(result.get("pipeline_stages"), str)
-        import json
-
-        stages = json.loads(result["pipeline_stages"])
-        # Single-element lists are unwrapped by serialize_json
-        assert isinstance(stages, dict)
-        assert stages["stage"] == "Phase 1"
-
-    @pytest.mark.asyncio
     async def test_transform_handles_missing_fields_gracefully(
         self, transformer, mock_context
     ):
@@ -1264,14 +1216,16 @@ class TestTargetTransformer:
         record = {
             "target_id": "CHEMBL123",
             "pref_name": "Test Target",
-            # No downgraded, pipeline_stages
         }
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["downgraded"] is None
-        assert result["pipeline_stages"] is None
+        assert "downgraded" not in result
+        assert "pipeline_stages" not in result
+        assert result["target_components"] is None
+        assert result["cross_references"] is None
+        assert result["target_component_synonyms"] is None
 
     @pytest.mark.asyncio
     async def test_transform_organism_class_multicellular(

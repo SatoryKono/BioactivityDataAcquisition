@@ -615,7 +615,7 @@
       }
     ],
     "coerce": false,
-    "description": "Class Level 1: EXP (experimental), REV (reviews/secondary), PEER (peer review)",
+    "description": "Class Level 1: EXP (experimental), REV (reviews/secondary), PEER (peer review), or provider-preserved PUBLICATION.",
     "dtype": "str",
     "nullable": true,
     "required": true,

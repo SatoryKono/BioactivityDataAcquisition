@@ -194,10 +194,10 @@ class TestSilverWriterValidateSilverPandera:
         PYTHON_314,
         reason="Pandera 0.26.1 has compatibility issues with Python 3.14",
     )
-    def test_validate_silver_pandera_accepts_nullable_boolean_target_field(
+    def test_validate_silver_pandera_accepts_target_records_without_removed_fields(
         self, noop_logger
     ):
-        """chembl.target downgraded should accept pandas nullable boolean batches."""
+        """chembl.target should validate without removed legacy contract fields."""
         writer = _build_validation_writer(
             logger=noop_logger,
             validator=PanderaSilverValidator(schema=TargetSchema.to_schema()),
@@ -218,7 +218,6 @@ class TestSilverWriterValidateSilverPandera:
                 "pref_name": "Target one",
                 "organism": "Homo sapiens",
                 "species_group_flag": False,
-                "downgraded": True,
             },
             {
                 "entity_id": "chembl_target:CHEMBL2",
@@ -235,58 +234,6 @@ class TestSilverWriterValidateSilverPandera:
                 "pref_name": "Target two",
                 "organism": "Homo sapiens",
                 "species_group_flag": False,
-                "downgraded": None,
-            },
-        ]
-
-        writer._validate_silver_pandera(records, "chembl.target")
-
-    @pytest.mark.skipif(
-        PYTHON_314,
-        reason="Pandera 0.26.1 has compatibility issues with Python 3.14",
-    )
-    def test_validate_silver_pandera_accepts_all_null_nullable_boolean_target_field(
-        self, noop_logger
-    ):
-        """chembl.target downgraded should accept all-null nullable boolean batches."""
-        writer = _build_validation_writer(
-            logger=noop_logger,
-            validator=PanderaSilverValidator(schema=TargetSchema.to_schema()),
-        )
-        records = [
-            {
-                "entity_id": "chembl_target:CHEMBL1",
-                "content_hash": "a" * 64,
-                "_run_id": "run-1",
-                "_run_type": "backfill",
-                "_source_batch_id": "batch-1",
-                "_ingestion_ts": "2026-05-11T14:55:44Z",
-                "_index": 0,
-                "_dq_warn": False,
-                "_dq_error": False,
-                "target_id": "CHEMBL1",
-                "target_type": "SINGLE PROTEIN",
-                "pref_name": "Target one",
-                "organism": "Homo sapiens",
-                "species_group_flag": False,
-                "downgraded": None,
-            },
-            {
-                "entity_id": "chembl_target:CHEMBL2",
-                "content_hash": "b" * 64,
-                "_run_id": "run-1",
-                "_run_type": "backfill",
-                "_source_batch_id": "batch-1",
-                "_ingestion_ts": "2026-05-11T14:55:45Z",
-                "_index": 1,
-                "_dq_warn": False,
-                "_dq_error": False,
-                "target_id": "CHEMBL2",
-                "target_type": "SINGLE PROTEIN",
-                "pref_name": "Target two",
-                "organism": "Homo sapiens",
-                "species_group_flag": False,
-                "downgraded": None,
             },
         ]
 

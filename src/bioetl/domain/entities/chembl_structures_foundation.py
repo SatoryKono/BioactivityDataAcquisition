@@ -65,8 +65,6 @@ class Target(BaseEntity):
     organism_class: str | None = None
     species_group_flag: bool | None = None
     target_description: str | None = None
-    downgraded: bool | None = None
-    pipeline_stages: str | None = None
     target_components: str | None = None
     target_component_synonyms: str | None = None
     target_protein_synonyms: str | None = None

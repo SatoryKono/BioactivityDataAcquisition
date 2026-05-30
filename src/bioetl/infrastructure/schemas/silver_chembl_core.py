@@ -222,22 +222,15 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
         *build_silver_system_prefix_fields(),
-        # === Business fields (alphabetical order) ===
-        pa.field("component_accessions", pa.string()),
-        pa.field("component_descriptions", pa.string()),
-        pa.field("component_ids", pa.string()),
-        pa.field("component_relationships", pa.string()),
-        pa.field("component_types", pa.string()),
-        pa.field("cross_references", pa.string()),
-        pa.field("description", pa.string()),
-        pa.field("downgraded", pa.bool_()),
+        # === Business fields (reviewed contract order) ===
+        pa.field("target_id", pa.string(), nullable=False),
+        pa.field("target_type", pa.string()),
+        pa.field("pref_name", pa.string(), nullable=False),
+        pa.field("taxonomy_id", pa.int64()),
         pa.field("organism", pa.string(), nullable=False),
         pa.field("organism_class", pa.string()),
-        pa.field("pipeline_stages", pa.string()),
-        pa.field("pref_name", pa.string(), nullable=False),
-        pa.field("primary_component_id", pa.float64()),
         pa.field("species_group_flag", pa.bool_()),
-        pa.field("target_component_synonyms", pa.string()),
+        pa.field("target_description", pa.string()),
         pa.field("target_protein_synonyms", pa.string()),
         pa.field("target_gene_synonyms", pa.string()),
         pa.field("target_ec_numbers", pa.string()),
@@ -246,10 +239,15 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("target_xref_go_function", pa.string()),
         pa.field("target_xref_go_process", pa.string()),
         pa.field("target_xref_reactome_ids", pa.string()),
+        pa.field("primary_component_id", pa.float64()),
+        pa.field("component_accessions", pa.string()),
+        pa.field("component_descriptions", pa.string()),
+        pa.field("component_ids", pa.string()),
+        pa.field("component_types", pa.string()),
+        pa.field("component_relationships", pa.string()),
         pa.field("target_components", pa.string()),
-        pa.field("target_id", pa.string(), nullable=False),
-        pa.field("target_type", pa.string()),
-        pa.field("taxonomy_id", pa.int64()),
+        pa.field("cross_references", pa.string()),
+        pa.field("target_component_synonyms", pa.string()),
         # Note: protein_classifications not available in /target endpoint
         # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
         # === DQ_FIELDS_SUFFIX ===

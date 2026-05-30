@@ -20,7 +20,10 @@ from bioetl.domain.normalization.profiles import (
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-CONTRACT_VERSION = "1.0.0"
+DEFAULT_CONTRACT_VERSION = "1.0.0"
+ENTITY_CONTRACT_VERSIONS: dict[str, str] = {
+    "chembl_target": "2.0.0",
+}
 JSON_SCHEMA_DRAFT7_URI = urlunsplit(
     ("http", "json-schema.org", "/draft-07/schema", "", "")
 )
@@ -71,6 +74,10 @@ def _filename_from_version(entity: str, version: str) -> str:
     return f"{entity}_v{major_minor}.json"
 
 
+def _contract_version_for_entity(entity: str) -> str:
+    return ENTITY_CONTRACT_VERSIONS.get(entity, DEFAULT_CONTRACT_VERSION)
+
+
 def _normalize_export_field_name(column_name: str) -> str:
     if column_name.endswith("_chembl_id"):
         return column_name.replace("_chembl_id", "_id")
@@ -109,7 +116,11 @@ def _build_property_schema(
     }
 
 
-def _build_contract(schema_cls: type[Any], entity: str) -> dict[str, Any]:
+def _build_contract(
+    schema_cls: type[Any],
+    entity: str,
+    version: str,
+) -> dict[str, Any]:
     schema = schema_cls.to_schema()
     json_schema = schema_cls.to_json_schema()
 
@@ -131,7 +142,7 @@ def _build_contract(schema_cls: type[Any], entity: str) -> dict[str, Any]:
     profile_identity = resolve_normalization_profile_identity(provider, entity_type)
     contract_payload = {
         "$schema": f"{JSON_SCHEMA_DRAFT7_URI}#",
-        "$version": CONTRACT_VERSION,
+        "$version": version,
         "title": f"{schema_cls.__name__} Contract",
         "description": (
             f"Gold layer data contract for {entity}. "
@@ -209,17 +220,18 @@ def generate_contracts() -> None:
 
     diff_report: dict[str, Any] = {
         "generated_at": "2026-02-17",
-        "version": CONTRACT_VERSION,
+        "version": DEFAULT_CONTRACT_VERSION,
         "entities": {},
     }
 
     for schema_cls in schema_classes:
         entity = _class_to_entity(schema_cls.__name__)
-        filename = _filename_from_version(entity, CONTRACT_VERSION)
+        contract_version = _contract_version_for_entity(entity)
+        filename = _filename_from_version(entity, contract_version)
         output_path = CONTRACTS_DIR / filename
 
         previous_contract = _load_previous_contract(output_path)
-        current_contract = _build_contract(schema_cls, entity)
+        current_contract = _build_contract(schema_cls, entity, contract_version)
 
         with output_path.open("w", encoding="utf-8") as file_obj:
             json.dump(current_contract, file_obj, indent=2, ensure_ascii=False)
@@ -227,6 +239,7 @@ def generate_contracts() -> None:
 
         diff_report["entities"][entity] = {
             "file": output_path.relative_to(PROJECT_ROOT).as_posix(),
+            "contract_version": contract_version,
             "status": "created" if not previous_contract else "updated",
             "diff": _compute_diff(previous_contract, current_contract),
         }

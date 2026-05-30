@@ -150,8 +150,8 @@ class TestPanderaSilverValidator:
         result = validator.validate(records)
         assert result.valid is True
 
-    def test_validate_chembl_target_all_null_nullable_boolean_batch(self):
-        """chembl.target accepts batches where nullable bool stays null for all rows."""
+    def test_validate_chembl_target_batch_without_removed_legacy_fields(self):
+        """chembl.target accepts batches after legacy field removal."""
         from bioetl.domain.schemas.chembl.target import TargetSchema
 
         validator = PanderaSilverValidator(schema=TargetSchema.to_schema())
@@ -171,7 +171,6 @@ class TestPanderaSilverValidator:
                 "pref_name": "Target one",
                 "organism": "Homo sapiens",
                 "species_group_flag": False,
-                "downgraded": None,
             },
             {
                 "entity_id": "chembl_target:CHEMBL2",
@@ -188,7 +187,6 @@ class TestPanderaSilverValidator:
                 "pref_name": "Target two",
                 "organism": "Homo sapiens",
                 "species_group_flag": False,
-                "downgraded": None,
             },
         ]
 

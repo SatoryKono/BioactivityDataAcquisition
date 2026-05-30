@@ -6,7 +6,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
 
 from scripts.ops import __main__ as ops_router
 from scripts.ops.observability.grafana import audit_live_grafana_panels as audit_subject
@@ -54,16 +54,25 @@ def test_rerender_config_uses_env_defaults(monkeypatch: Any, tmp_path: Path) -> 
     assert config.fallback == "auto"
 
 
-def test_rerender_load_dashboards_filters_and_sorts(monkeypatch: Any) -> None:
-    payload = [
-        {"uid": "bioetl-runtime", "url": "/d/runtime/runtime", "title": "Runtime"},
-        {"uid": "bioetl-dq-v2", "url": "/d/dq/dq", "title": "DQ"},
-    ]
-    monkeypatch.setattr(rerender_subject, "_request_json", lambda *_, **__: payload)
+def test_rerender_load_dashboards_filters_and_sorts(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    dashboard_dir = tmp_path / "tmp-test-dashboards"
+    monkeypatch.setattr(rerender_subject, "_dashboard_dir", lambda: dashboard_dir)
+    dashboard_dir.mkdir(exist_ok=True)
+    (dashboard_dir / "runtime.json").write_text(
+        json.dumps({"uid": "bioetl-runtime", "title": "Runtime"}) + "\n",
+        encoding="utf-8",
+    )
+    (dashboard_dir / "dq.json").write_text(
+        json.dumps({"uid": "bioetl-dq-v2", "title": "DQ"}) + "\n",
+        encoding="utf-8",
+    )
     config = rerender_subject.RenderConfig(
         base_url="http://localhost:3000",
         username="admin",
-        password="admin",
+        password="changeme",
+        service_account_token="",
         output_dir=Path("reports/observability/grafana/screenshots"),
         width=1600,
         height=2200,
@@ -77,7 +86,7 @@ def test_rerender_load_dashboards_filters_and_sorts(monkeypatch: Any) -> None:
     assert dashboards == [
         rerender_subject.DashboardRecord(
             uid="bioetl-dq-v2",
-            url="/d/dq/dq",
+            url="/d/bioetl-dq-v2/dq",
             title="DQ",
         )
     ]
@@ -97,7 +106,8 @@ def test_rerender_failure_hint_includes_frontend_renderer_state(
     config = rerender_subject.RenderConfig(
         base_url="http://localhost:3000",
         username="admin",
-        password="admin",
+        password="changeme",
+        service_account_token="",
         output_dir=tmp_path,
         width=1600,
         height=2200,
@@ -113,11 +123,53 @@ def test_rerender_failure_hint_includes_frontend_renderer_state(
     assert "Playwright fallback" in hint
 
 
+def test_rerender_failure_hint_explains_grafana_auth_drift(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    def raise_unauthorized(*_args: object, **_kwargs: object) -> object:
+        raise HTTPError(
+            url="http://localhost:3000/api/frontend/settings",
+            code=401,
+            msg="Unauthorized",
+            hdrs=None,
+            fp=None,
+        )
+
+    monkeypatch.setattr(rerender_subject, "_request_json", raise_unauthorized)
+    config = rerender_subject.RenderConfig(
+        base_url="http://localhost:3000",
+        username="admin",
+        password="changeme",
+        service_account_token="",
+        output_dir=tmp_path,
+        width=1600,
+        height=2200,
+        timeout_seconds=30.0,
+        selected_uids=(),
+        fallback="auto",
+    )
+
+    hint = rerender_subject._render_failure_hint(config)
+
+    assert "Grafana auth failed" in hint
+    assert "scripts/ops/support/load_repo_env.sh" in hint
+
+
+def test_check_playwright_runtime_reports_missing_node(monkeypatch: Any) -> None:
+    monkeypatch.setattr(rerender_subject, "_resolve_node_executable", lambda: None)
+
+    ok, detail = rerender_subject.check_playwright_runtime()
+
+    assert ok is False
+    assert "Node.js is unavailable" in detail
+
+
 def test_rerender_builds_playwright_env(tmp_path: Path) -> None:
     config = rerender_subject.RenderConfig(
         base_url="http://localhost:3000",
         username="admin",
         password="changeme",
+        service_account_token="",
         output_dir=tmp_path,
         width=1600,
         height=2200,
@@ -183,6 +235,7 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
         base_url="http://localhost:3000",
         username="admin",
         password="changeme",
+        service_account_token="",
         output_dir=tmp_path,
         width=1600,
         height=2200,
@@ -317,7 +370,7 @@ def test_live_audit_treats_checkpoint_freshness_unknown_as_valid_unknown_state(
         app_base_url="http://localhost:8081",
         grafana_base_url="http://localhost:3000",
         grafana_username="admin",
-        grafana_password="admin",
+        grafana_password="changeme",
         workflow="All",
         pipeline="chembl_target",
         run_type="incremental",
@@ -399,7 +452,7 @@ def test_live_audit_substitutes_workflow_and_run_id_tokens() -> None:
         app_base_url="http://localhost:8081",
         grafana_base_url="http://localhost:3000",
         grafana_username="admin",
-        grafana_password="admin",
+        grafana_password="changeme",
         workflow="chembl_target",
         pipeline="chembl_target",
         run_type="backfill",
@@ -486,6 +539,48 @@ def test_grafana_audit_preflight_parser_uses_grafana_env_defaults(
     assert args.skip_screenshot_check is True
 
 
+def test_grafana_audit_preflight_render_auth_reports_unauthorized(
+    monkeypatch: Any,
+) -> None:
+    def raise_unauthorized(*_args: object, **_kwargs: object) -> object:
+        raise HTTPError(
+            url="http://localhost:3000/api/frontend/settings",
+            code=401,
+            msg="Unauthorized",
+            hdrs=None,
+            fp=None,
+        )
+
+    monkeypatch.setattr(rerender_subject, "_request_json", raise_unauthorized)
+
+    result = preflight_subject._check_grafana_render_auth(
+        grafana_base_url="http://localhost:3000",
+        grafana_username="admin",
+        grafana_password="changeme",
+        timeout_seconds=5.0,
+    )
+
+    assert result.name == "grafana-render-auth"
+    assert result.status == "error"
+    assert "Grafana auth failed" in result.detail
+
+
+def test_grafana_audit_preflight_playwright_runtime_surfaces_probe_detail(
+    monkeypatch: Any,
+) -> None:
+    monkeypatch.setattr(
+        rerender_subject,
+        "check_playwright_runtime",
+        lambda: (False, "Playwright browser executable is missing"),
+    )
+
+    result = preflight_subject._check_playwright_runtime()
+
+    assert result.name == "playwright-runtime"
+    assert result.status == "error"
+    assert "browser executable is missing" in result.detail
+
+
 def test_grafana_audit_cycle_parser_exposes_backend_boolean_flag() -> None:
     parser = cycle_subject._build_parser()
 
@@ -537,6 +632,24 @@ def test_grafana_audit_preflight_run_checks_collects_ok_results(
         ),
     )
     monkeypatch.setattr(
+        preflight_subject,
+        "_check_grafana_render_auth",
+        lambda **_kwargs: preflight_subject.PreflightCheck(
+            name="grafana-render-auth",
+            status="ok",
+            detail="frontend settings auth probe succeeded",
+        ),
+    )
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_playwright_runtime",
+        lambda: preflight_subject.PreflightCheck(
+            name="playwright-runtime",
+            status="ok",
+            detail="playwright ready",
+        ),
+    )
+    monkeypatch.setattr(
         audit_subject,
         "_resolve_app_base_url",
         lambda *_args, **_kwargs: "http://localhost:8081",
@@ -563,7 +676,9 @@ def test_grafana_audit_preflight_run_checks_collects_ok_results(
 
     assert [check.name for check in checks] == [
         "grafana",
+        "grafana-render-auth",
         "prometheus",
+        "playwright-runtime",
         "quarantine-explorer",
         "screenshots",
     ]
@@ -580,6 +695,24 @@ def test_grafana_audit_preflight_can_skip_screenshot_check(
             name=str(kwargs["name"]),
             status="ok",
             detail="ok",
+        ),
+    )
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_grafana_render_auth",
+        lambda **_kwargs: preflight_subject.PreflightCheck(
+            name="grafana-render-auth",
+            status="ok",
+            detail="frontend settings auth probe succeeded",
+        ),
+    )
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_playwright_runtime",
+        lambda: preflight_subject.PreflightCheck(
+            name="playwright-runtime",
+            status="ok",
+            detail="playwright ready",
         ),
     )
     monkeypatch.setattr(
@@ -619,7 +752,9 @@ def test_grafana_audit_preflight_can_skip_screenshot_check(
 
     assert [check.name for check in checks] == [
         "grafana",
+        "grafana-render-auth",
         "prometheus",
+        "playwright-runtime",
         "quarantine-explorer",
     ]
     assert called is False
@@ -1181,7 +1316,7 @@ def test_live_audit_writes_report(monkeypatch: Any, tmp_path: Path) -> None:
         app_base_url="http://localhost:8081",
         grafana_base_url="http://localhost:3000",
         grafana_username="admin",
-        grafana_password="admin",
+        grafana_password="changeme",
         workflow="All",
         pipeline="chembl_target",
         run_type="incremental",

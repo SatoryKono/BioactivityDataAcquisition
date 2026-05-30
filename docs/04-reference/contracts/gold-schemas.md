@@ -983,7 +983,7 @@ JSON exports для Gold-схем хранятся в `docs/04-reference/contrac
 - `chembl_protein_class_v1.0.json`
 - `chembl_subcellular_fraction_v1.0.json`
 - `chembl_target_component_v1.0.json`
-- `chembl_target_v1.0.json`
+- `chembl_target_v2.0.json`
 - `chembl_tissue_v1.0.json`
 - `composite_activity_v1.0.json`
 - `composite_assay_v1.0.json`

@@ -187,7 +187,7 @@ assertless_triage:
         under test.
       next_review: '2026-09-30'
     weak_no_value:
-      count: 424
+      count: 423
       decision: burn-down
       rationale: Candidates require assertion strengthening, merge, or removal when
         the owning module is edited.

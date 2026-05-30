@@ -250,13 +250,11 @@ class TestChemblSchemas:
 
         TissueSchema.validate(pd.DataFrame([record]))
 
-    @pytest.mark.parametrize("downgraded_value", [None, "1"])
-    def test_target_schema_coerces_nullable_downgraded_flag(
+    def test_target_schema_accepts_minimal_required_record(
         self,
         base_etl_fields: dict[str, object],
-        downgraded_value: object,
     ) -> None:
-        """Target schema should coerce sparse downgraded values for Silver validation."""
+        """Target schema should validate the reduced contract without legacy fields."""
         record = {
             **base_etl_fields,
             "target_id": "CHEMBL1862",
@@ -264,7 +262,6 @@ class TestChemblSchemas:
             "pref_name": "Cyclooxygenase-2",
             "organism": "Homo sapiens",
             "species_group_flag": False,
-            "downgraded": downgraded_value,
         }
 
         TargetSchema.validate(pd.DataFrame([record]))

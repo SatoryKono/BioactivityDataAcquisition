@@ -154,6 +154,11 @@ def test_chembl_json_ordering_policy_names_all_current_set_like_fields() -> None
     assert actual == expected
 
 
+def test_chembl_target_profile_excludes_removed_contract_fields() -> None:
+    assert CHEMBL_TARGET_PROFILE.rule_for("downgraded") is None
+    assert CHEMBL_TARGET_PROFILE.rule_for("pipeline_stages") is None
+
+
 @pytest.mark.parametrize(
     ("pipeline_name", "config_path"),
     sorted(_CHEMBL_HASH_CONFIG_PATHS.items()),
@@ -641,18 +646,6 @@ def test_chembl_publication_profile_derives_classification_from_raw_type() -> No
     assert subclass_rule.apply("ignored", record=record) == "Original Experimental Data"
     assert class_rule is not None
     assert class_rule.apply("ignored", record=record) == "EXP"
-
-
-def test_chembl_target_profile_owns_downgraded_boolean_canonicalization() -> None:
-    downgraded_rule = CHEMBL_TARGET_PROFILE.rule_for("downgraded")
-
-    assert downgraded_rule is not None
-    assert downgraded_rule.apply("1") is True
-    assert downgraded_rule.apply("0") is False
-    assert downgraded_rule.apply(True) is True
-    assert downgraded_rule.apply(False) is False
-    assert downgraded_rule.apply(None) is None
-    assert downgraded_rule.apply("not-a-bool") is None
 
 
 def test_chembl_assay_parameter_type_preserves_unknown_for_raw_review() -> None:

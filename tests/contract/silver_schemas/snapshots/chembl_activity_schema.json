@@ -387,7 +387,7 @@
   "journal": {
     "checks": [],
     "coerce": false,
-    "description": "Publication journal name.",
+    "description": "Journal name.",
     "dtype": "str",
     "nullable": false,
     "required": true,

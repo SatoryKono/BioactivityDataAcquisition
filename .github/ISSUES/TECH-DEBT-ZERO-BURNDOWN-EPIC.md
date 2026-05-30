@@ -3,223 +3,125 @@
 **Status**: proposed
 **Priority**: P0
 **Labels**: `architecture`, `tech-debt`, `governance`, `epic`
-**GitHub Issue**: `TBD`
-**Issue State**: draft
-**Last synced**: 2026-05-29
+**GitHub Issue**: [#4811](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4811)
+**Issue State**: open
+**Task ID**: `tech-debt-zero-001`
+**Last synced**: 2026-05-30
 
-## TL;DR
+## TL;DR (до 10)
 
-1. Layering is mostly clean (`0` policy violations), but compatibility debt and duplicate hotspots are still bounded and non-zero.
-2. `14` sanctioned public compatibility entrypoints remain; first-party burden through them is still tracked as `retained_public_entrypoint_burden`.
-3. `15` public/private twin-module pairs remain and `4` are ratcheted twins requiring ongoing no-growth enforcement.
-4. Duplication hotspots still sit at: `application/services/control_plane=15`, `composition/runtime_builders=11`, `composition/bootstrap/runtime=5`, `application/core=8`.
-5. Zero-import debt inventory is a review surface: `43` candidates, `19` triaged dispositions.
-6. Compatibility test debt budget remains explicit (`compatibility_test_file_max=56`).
-7. Observability still reports compatibility alias emitter `checkpoint_saved_at_epoch_seconds`.
-8. VCR metadata drift is currently failing drift check for 15 `openalex` health cassettes.
-9. Config/contract parameter drift remains substantial (`31` configs, `448` unique parameters) and is mostly covered but requires governance and cleanup discipline.
-10. Target-state is clear: collapse/retire compatibility seams, remove duplicate helper clusters, and turn visibility baselines into fail-fast enforcement.
+1. Базовая архитектурная инвариантность на уровне слоёв подтверждена (`Layer policy violations = 0`) в `docs/02-architecture/generated/module-dependency-map.md:11` и в `tests/architecture/test_domain_no_infrastructure_dependencies.py`.
+2. Техдолг сейчас структурирован как управляемый: `14` sanctioned compatibility entrypoints, `15` twin-пар модулей и `39` дубликатных кластеров (`reports/quality/compatibility-importer-census.md:1`, `reports/quality/compatibility-importer-census.md:13`, `reports/quality/hotspot-duplication-baseline.md:7`).
+3. Удалённые legacy-совместимые модули зафиксированы и подтверждены как несуществующие + без импортов (`source_importers=0`, `test_importers=0`) в `reports/quality/compatibility-importer-census.md`.
+4. В конфигурационной/контрактной области зафиксирован высокий drift: `31` конфигов, `448` уникальных параметров с разночтениями (`docs/config-discrepancies-report.md:3-31`).
+5. `config_compatibility_registry` и `compatibility_facade_inventory` действуют, но зафиксированы постоянные и временные compatibility debt с no-growth политиками (`configs/quality/config_compatibility_registry.yaml`, `configs/quality/compatibility_facade_inventory.yaml`, `configs/quality/compatibility_twin_module_ratchet.yaml`).
+6. Наличие compatibility-слоя для наблюдаемости подтверждено: `alias_emitters.checkpoint_saved_at_epoch_seconds` в `reports/observability/runtime_cardinality_inventory.json:53-60`.
+7. DQ/idempotency риски формально контролируются: проверка sink idempotency и контрактов в `tests/architecture/test_pipeline_config_idempotency_contract.py` и `configs/quality/determinism_identity_policy.yaml`.
+8. Test-debt контролируется, но есть оставшийся целевой бюджет совместимости: `compatibility_test_file_max=56` (`configs/quality/test_governance_audit.yaml:60-67`).
+9. Runtime/CLI split технически соблюдается тестами (`tests/architecture/test_bootstrap_layer_boundaries.py:23-77`), но это не убирает дублирование runtime/CLI фасадов и owner-контуров (`tests/architecture/test_bootstrap_layer_boundaries.py:172-210`).
+10. Необходимо перейти от «managed debt» к «zero non-sanctioned debt»: исключить все несогласованные shim/legacy и сделать ratchet-параметры fail-fast.
 
 ## Карта техдолга по слоям
 
-### Domain
+| Слой | Артефакты | Тип долга | Состояние | Доказательство |
+| --- | --- | --- | --- | --- |
+| Domain | `src/bioetl/domain` | Архитектурное соответствие | Без нарушений зависимости (`layer policy violations = 0`) | `docs/02-architecture/generated/module-dependency-map.md:11` |
+| Domain | Конфигурационные compatibility-алиасы (`source.*`) | Config compatibility debt | Ограничение и burn-down есть, но сохраняются aliases | `configs/quality/config_compatibility_registry.yaml`, `tests/architecture/test_config_compatibility_registry.py:1-40` |
+| Application | Дубликаты `application/core` | Duplication | `8` кластеров | `reports/quality/hotspot-duplication-baseline.md:7-20`, `reports/quality/hotspot-duplication-baseline.md:27-46` |
+| Application | `application/services/control_plane` | Duplication + historical compatibility seams | `15` кластеров, продолжает использовать новые фабричные/owner разделения | `reports/quality/hotspot-duplication-baseline.md:39-55`, `reports/quality/hotspot-duplication-baseline.md:73-97` |
+| Application | Проверка dead code / zero-import catalog | Dead code / uncertain retention | `43` кандидата, `19` triaged, `0` unresolved | `reports/quality/dead-code-inventory.md:3-18`, `reports/quality/dead-code-inventory.md:22-39` |
+| Composition | `composition/bootstrap/runtime` дубликаты | Duplication | `5` кластеров | `reports/quality/hotspot-duplication-baseline.md:33-42`, `reports/quality/hotspot-duplication-baseline.md:60-90` |
+| Composition | `composition/runtime_builders` | Duplication + compatibility-слой | `11` кластеров + `__getattr__` aliasing | `reports/quality/hotspot-duplication-baseline.md:74-85`, `src/bioetl/composition/runtime_builders/__init__.py:26-49` |
+| Composition | `composition/entrypoints|health_api|maintenance_api` | Compatibility debt | Retained public facades с ростом first-party callers как blocking метрика | `configs/quality/compatibility_facade_inventory.yaml:8-33`, `configs/quality/compatibility_facade_inventory.yaml:245-323` |
+| Interfaces | `interfaces/cli/commands/*` | Compatibility seams (legacy wrappers / public entrypoints) | `7` CLI entrypoint фасадов с growth policy | `configs/quality/compatibility_facade_inventory.yaml:13-33`, `tests/architecture/test_bootstrap_layer_boundaries.py:189-210` |
+| Infrastructure | `infrastructure/config/__init__.py` | Compatibility facade + root-facade import governance | `tracked_public_entrypoint_burden` + `Config-API` root policy | `configs/quality/compatibility_facade_inventory.yaml:240-260`, `configs/quality/compatibility_twin_module_ratchet.yaml:1-200` |
 
-- **State:** no domain layering violations (imports are internally consistent) from generated map.
-  - Evidence: `docs/02-architecture/generated/module-dependency-map.md:11`, `docs/02-architecture/generated/module-dependency-map.md:122-125`.
-- **Debt classification:** compatibility shape debt exists only as explicit, bounded aliases with review metadata.
-  - Evidence: `configs/quality/config_compatibility_registry.yaml:7-29`, `configs/quality/config_compatibility_registry.yaml:36-53`.
-- **Open debt workitems:** none that are currently architectural violations; this layer mostly acts as boundary owner for compat contracts and needs ongoing alias drift control.
+## Карта зависимости долга
 
-### Application
+| Долговой артефакт | Текущие потребители | Почему это debt | Риск удаления |
+| --- | --- | --- | --- |
+| `src/bioetl/composition/bootstrap/cli/*` | `src/bioetl/composition/bootstrap/runtime/*` (ограниченно), `tests/architecture/test_bootstrap_layer_boundaries.py` | Legacy split for admin/admin-like entrypoints; sanctioned as CLI contract | Высокий: внешний CLI/API стабильность требует staged retirement |
+| `src/bioetl/interfaces/cli/commands/run.py` и др. | Прямые src импортеры: `1..7` (по census), тестовые импортеры `0..5` | Санкционированный public command seam | Низкий технический риск, высокий процессный (breaking change window) |
+| `src/bioetl/composition/entrypoints.py` | `tests/unit/composition/*` + ограниченные src точки | Закрывает приватные _pipeline_execution/_resource/_services | Риск: некорректное изменение `__all__/lazy exports` приведёт к регрессу CLI/обработки ресурсов |
+| `src/bioetl/application/core/*` vs `src/bioetl/application/services/control_plane/*` twins | Twin-импортеры по `compatibility-importer-census` | Остаточные приватные пути в twin-семействах | Риск: раннее удаление может разорвать owner-модули без миграции |
+| `src/bioetl/infrastructure/config/_legacy_normalizers` -> public API | `source_normalizers`, `pipeline_payload_normalization` | Совместимость normalized aliases vs канонические поля | Риск: изменение поведения исторических внешних конфигов |
 
-- **Compatibility debt:**
-  - `14` retained sanctioned public entrypoints; current `retained_public_entrypoint_burden=14`.
-    - Evidence: `configs/quality/compatibility_facade_inventory.yaml:12-22`, `:108-110`, `:139-159`.
-  - **Compatibility test debt:** `compatibility_test_file_max=56` remains active.
-    - Evidence: `configs/quality/test_governance_audit.yaml:60-65`.
-- **Duplication debt:**
-  - `application/services/control_plane` = `15` duplicate clusters, `application/core` = `8`.
-    - Evidence: `reports/quality/hotspot-duplication-baseline.md:15-20`, `:67-75`, `:129-133`.
-- **Dead code inventory debt:** `43` zero-import candidates, all currently reviewed with mixed dispositions (`retain_active` + retired).
-  - Evidence: `reports/quality/dead-code-inventory.md:3-12`, `:17-38`.
+## Compatibility debt анализ (критично)
 
-### Infrastructure
+### 1) Alias / shim / façade modules
 
-- **Config/control-plane compatibility surface debt:** `4` sanctioned public export facades still carry compatibility boundary contracts.
-  - Evidence: `reports/quality/compatibility-importer-census.md:13-15`, `:44-45`.
-- **Layering checks:** bootstrap split and adapter boundaries are explicitly tested; no reported violations in last run.
-  - Evidence: `tests/architecture/test_bootstrap_layer_boundaries.py:23-50`, `:52-74` and related pass in previous architecture sweep.
-- **Compat shape/deprecation debt:** compatibility alias policies in `config_compatibility_registry` must remain bounded (`accepted_shape_max=2`, `migration_supported_shape_max=0`).
-  - Evidence: `configs/quality/config_compatibility_registry.yaml:15-17`, `:29-30`.
+- `src/bioetl/composition/runtime_builders/__init__.py` использует `__getattr__` lazy aliasing для `_input_snapshot_resolution` (`src/bioetl/composition/runtime_builders/__init__.py:1-42`).
+- `src/bioetl/composition/__init__.py` держит `_LAZY_MODULE_EXPORTS` / `_LAZY_ATTR_EXPORTS` как управляемый пакетный proxy (`src/bioetl/composition/__init__.py:20-44`, `src/bioetl/composition/__init__.py:46-88`).
+- `src/bioetl/composition/bootstrap/__init__.py` — lazy-кеширующая фасадная пересборка bootstrap API (`src/bioetl/composition/bootstrap/__init__.py:1-62`, `src/bioetl/composition/bootstrap/__init__.py:66-108`).
+- `src/bioetl/composition/factories/datasource/data_source_factory.py` и `src/bioetl/composition/bootstrap/runtime/_composite_config_runtime_compat.py` остаются явными compatibility helpers для load/config контрактов.
 
-### Composition
+Что делать:
+- Keep: stable public API, где требуется внешний контракт (например `run`, `entrypoints`, `bootstrap_*`).
+- Remove/inline: compatibility wrappers в тестовых/внутренних цепочках, если owner-API уже принят и покрыт тестами.
+- Риск: регрессия контракта для CLI и bootstrap consumers.
 
-- **Duplication debt:**
-  - `composition/bootstrap/runtime=5`, `composition/runtime_builders=11` duplicate clusters.
-    - Evidence: `reports/quality/hotspot-duplication-baseline.md:16-20`, `:44-60`, `:96-120`.
-- **Compatibility entrypoint debt:** composition public seams remain sanctioned entrypoints with bounded exports + lazy table.
-  - Evidence: `configs/quality/compatibility_facade_inventory.yaml:160-214`.
-- **Observed compatibility test debt:** not currently failing, but needs ratchet to zero budgets.
-  - Evidence: same as Application compatibility test surface (`...test_governance_audit.yaml:60-65`).
+### 2) Legacy shim / alias modules and removed seams
 
-### Interfaces
+- Удалённые shim/legacy модули подтверждены как absent: `bioetl.application.services.checkpoint_compatibility_service_v2`, `bioetl.application.services.control_plane.workflow_execution_service`, `bioetl.infrastructure.storage.silver.operations.metadata_sidecar_adapter`, и др. (`tests/architecture/test_compatibility_freeze_guards.py:1638-1653`, `tests/architecture/test_compatibility_importer_census_governance.py:57-95`).
+- Контроль удалений дополняется списком в `compatibility_importer_census` (`reports/quality/compatibility-importer-census.md:73-103`) и frozen-governance проверками.
 
-- **Compatibility / CLI debt:** `7` CLI public compatibility command entrypoints retained as public seams.
-  - Evidence: `configs/quality/compatibility_facade_inventory.yaml:13-33`.
-- **Risk debt:** dual-layer CLI/runtime bootstrap compatibility requires ongoing first-party caller narrowing.
-  - Evidence: `tests/architecture/test_bootstrap_layer_boundaries.py:23-50`, `:206-227`.
+### 3) Runtime/CLI split duplicates
 
-## Compatibility debt анализ
-
-### 1) Alias / facade / shim debt
-
-- **Retained public entrypoints (`14`, all sanctioned):**
-  - `src/bioetl/interfaces/cli/commands/{run,run_all,run_composite,health,diagnostics,quarantine,maintenance}.py`
-  - `src/bioetl/composition/{entrypoints.py,health_api.py,maintenance_api.py}`
-  - `src/bioetl/infrastructure/config/__init__.py`
-  - `src/bioetl/domain/composite/config.py`
-  - `src/bioetl/domain/value_objects/activity_values.py`
-  - `src/bioetl/application/composite/merger.py`
-  - Evidence: `configs/quality/compatibility_facade_inventory.yaml:13-33`, `:160-214`, `:240-322`, `:335-322`.
-- **Why kept:** these are intentional seams, not transition debt (`transition_compat_count=0`).
-  - Evidence: `configs/quality/debt_scorecard.yaml:97-107`.
-
-### 2) Twin modules / private compatibility mirrors
-
-- `15` twin pairs are present today, and `4` no-growth families are ratcheted:
-  - `application.core.span_helpers`
-  - `composition.runtime_builders.run_manifest_support`
-  - `domain.normalization.profiles.chembl_policy_registry`
-  - `domain.normalization.profiles.chembl_policy_registry_data`
-  - Evidence: `reports/quality/compatibility-importer-census.md:73-102`, `configs/quality/compatibility_twin_module_ratchet.yaml:6-50`.
-- **Compatibility risk:** remaining twin imports can re-introduce duplicate public/private behavior and ownership drift.
-
-### 3) Removed compatibility surfaces
-
-- `22` legacy removed surfaces confirmed absent.
-- `0` removed surfaces with src/test re-importers.
-  - Evidence: `reports/quality/compatibility-importer-census.md:5-8`, `:46-70`.
-- **Interpretation:** migration succeeded, but remaining sanctioned seams must be narrowed further.
-
-### 4) Lazy exports / alias tables
-
-- Public export facades are tracked and currently clean (no duplicate exports), but lazy aliases still require governance.
-  - Evidence: `reports/quality/compatibility-importer-census.md:37-44`.
-
-### 5) Observability compatibility alias
-
-- One compatibility alias emitter still present:
-  - `checkpoint_saved_at_epoch_seconds` from `src/bioetl/application/core/lifecycle/checkpoint_manager.py`
-  - Evidence: `reports/observability/runtime_cardinality_inventory.json:53-60`, `:192`.
+- Структурная граница зафиксирована: runtime не должен импортировать cli (`tests/architecture/test_bootstrap_layer_boundaries.py:23-50`) и имеет split на `assembly|cli|runtime` (`tests/architecture/test_bootstrap_layer_boundaries.py:52-77`).
+- Дублирование фактов: и CLI, и runtime имеют свои фасады; это intentional seam до этапа consolidation owner modules.
+- Риск: удаление без полной миграции вызовет нарушения CLI/administrative workflows.
 
 ## Приоритизированный backlog
 
-1) **P0 — Закрыть compatibility-заметки в Observability/метриках**
-- **Артефакт:** `reports/observability/runtime_cardinality_inventory.json`, `configs/quality/observability_metric_governance.yaml`
-- **Действие:** удалить `checkpoint_saved_at_epoch_seconds` из emission path или перевести в non-runtime semantic channel без метрик-алиасов.
-- **Риск:** потенциальное временное падение диагностического дашборда `checkpoint_saved_at_epoch_seconds`.
-- **Effort:** M
+| Priority | Тип долга | Артефакт | Действие | Риск | Effort |
+| --- | --- | --- | --- | --- | --- |
+| P0 | Duplicate clusters | `src/bioetl/composition/runtime_builders` (`11`) | Свести к 0 по семейным hotspot с owner-адресацией и удалением повторных helper-копий | Регрессии сборки раннера/фильтров | L |
+| P0 | Duplicate clusters | `src/bioetl/application/core` (`8`) | Убрать дубляжи в helper wiring и migration-логике | Риск изменения DQ/контуров контроля | M |
+| P0 | Duplicate clusters | `src/bioetl/composition/bootstrap/runtime` (`5`) | Консолидировать паритетные runtime-support helpers | Риск в bootstrap-конфигурации observability | M |
+| P0 | Duplicate clusters | `src/bioetl/application/services/control_plane` (`15`) | Продолжить разметку/консолидацию diagnostic/replay helpers после финализации ссылок | Поведение трассировки и диагностик | L |
+| P1 | Compatibility debt | `configs/quality/compatibility_twin_module_ratchet.yaml` | Зафиксировать/снять private-import tails в 4 ratchet families (или подтвердить устойчивый owner-модуль) | Может раскрыть несвязанные пути импорта в проде | M |
+| P1 | Test debt | `configs/quality/test_governance_audit.yaml` | Оценить и снизить `compatibility_test_file_max` от 56 к управляемому минимуму по миграциям | Рост регрессионных false-positive при очистке legacy тестов | M |
+| P1 | Config drift | `docs/config-discrepancies-report.md` | Свести drift к нулю между config и контрактным слоем: унификация схем, `contract_ref`, alias maps | Высокий риск изменения поведения при массовой миграции сущностей | L-M |
+| P2 | Observability compatibility alias | `reports/observability/runtime_cardinality_inventory.json` | Убрать alias emitter `checkpoint_saved_at_epoch_seconds` или мигрировать в non-runtime semantic channel | Потеря обратной совместимости dashboard/alert правил | M |
+| P2 | Dead code | `reports/quality/dead-code-inventory.md` | Разделить `retain_*` с явным owner: либо удалить, либо закрыть как explicit-permanent with rationale | Возможная потеря неиспользуемых, но «тёплых» entrypoints | M |
+| P2 | Config registry governance | `configs/quality/config_compatibility_registry.yaml` | Снизить migration-supported aliases и закрыть expired policy окна до нуля при наличии полного migration plan | Риск неочевидной обратной совместимости для старых конфигов | M |
 
-2) **P0 — Устранить 4 ratcheted twin-семейства до нулевых private-imports, где возможно**
-- **Артефакт:** `configs/quality/compatibility_twin_module_ratchet.yaml`, `reports/quality/compatibility-importer-census.md`
-- **Действие:** закрепить единственный публичный owner-путь для каждой пары, убрать private direct imports за пределами owner modules, перейти в reviewed-baseline/zero для тех, где бизнес-потенциал исчерпан.
-- **Риск:** затраты на адаптацию тестов/вызовов.
-- **Effort:** L
-
-3) **P0 — Привести duplicate-hotspots к нулю по плану семейства**
-- **Артефакт:** `configs/quality/debt_scorecard.yaml`, `reports/quality/hotspot-duplication-baseline.md`
-- **Действие:** поочередно убрать 15, 11, 5, 8 кластеров в control_plane/runtime_builders/bootstrap/runtime/core.
-- **Риск:** регрессии determinism/replay без полной тест-поддержки.
-- **Effort:** L
-
-4) **P1 — Пересмотреть zero-import debt**
-- **Артефакт:** `reports/quality/dead-code-inventory.md`
-- **Действие:** конвертировать triage-позиции `retain_*` в `removed` или `explicit permanent` с owner-обоснованием или подтвердить неизменность как bounded API-узлов.
-- **Риск:** неочевидный runtime usage через динамическую загрузку/тест-плагины.
-- **Effort:** M
-
-5) **P1 — Снизить compat test debt budget**
-- **Артефакт:** `configs/quality/test_governance_audit.yaml`
-- **Действие:** убрать legacy compatibility test surface до `compatibility_test_file_max=0` через миграцию вызовов в новый фасад и очистку метаданных покрытия.
-- **Риск:** повышение объема тест-рефакторинга в нескольких пакетах.
-- **Effort:** M
-
-6) **P1 — Закрыть дрейф VCR-фактуры**
-- **Артефакт:** `tests/fixtures/vcr/openalex`, `tests/architecture/test_vcr_metadata_inventory.py`, `scripts/engineering/qa/vcr`
-- **Действие:** обновить/пересоздать 15 `openalex` `_meta.yaml` cassette fingerprints или зафиксировать намеренную деградацию.
-- **Риск:** изменения ответов провайдеров меняют стабильность контрактов.
-- **Effort:** M
-
-7) **P2 — Довести контрактный drift к управляемому состоянию**
-- **Артефакт:** `docs/config-discrepancies-report.md`, `configs/base/bronze_fixture_gaps.yaml`
-- **Действие:** зафиксировать обязательные инварианты для семейства (entity/contract/pipeline/filters/composite) и снизить необъяснимые расхождения через ADR/issue-driven consolidation.
-- **Риск:** большая матрица потребует поэтапного управления, а не «большой залп».
-- **Effort:** M/L
-
-## Дорожная карта (Phases)
+## Дорожная карта
 
 ### Phase 1 — Visibility (1–2 недели)
 
-- Утвердить baseline и зафризить артефакты:
-  - `configs/quality/dead-code-inventory.md`
-  - `reports/quality/compatibility-importer-census.md`
-  - `reports/quality/hotspot-duplication-baseline.md`
-  - `reports/quality/hotspot-duplication-baseline.json`
-  - `reports/observability/runtime_cardinality_inventory.json`
-- Проставить owner/контракт/условие удаления для каждого retained debt item.
-- Обновить acceptance map в `configs/quality/debt_scorecard.yaml` и `configs/quality/compatibility_facade_inventory.yaml`.
+1. Закрыть baseline: обновить и зафиксировать `reports/quality/hotspot-duplication-baseline.md`, `reports/quality/compatibility-importer-census.md`, `configs/quality/debt_scorecard.yaml`, `configs/quality/observability_metric_governance.yaml`, `reports/quality/test-governance`-артефакты.
+2. Сформировать dependency map по каждому compatibility-узлу: «какой фасад кем используется» для 14 entrypoints и 4 ratchet twin family.
+3. Разделить задачи по ownership: composition bootstrap/runtime, control-plane, application/core, infra-config.
+4. [incomplete] Нужен дополнительный inventory for прямых зависимостей `pipeline <-> contract <-> config` на уровне импортов runtime-модулей (не только summary-отчёты).
 
 ### Phase 2 — Isolation (2–4 недели)
 
-- Ввести/усилить архитектурные запреты на появление новых private twin importers вне sanctioned owner-модулей.
-- Ограничить first-party imports через sanctioned public seams.
-- Отключить рост compatibility-тестовых debt-файлов и alias-таблиц без review.
-- Добавить контроль новых VCR метаданных (`checksum/shadow`) в CI pre-check.
+1. Ввести fail-fast для новых импортеров из compatibility entrypoints во всех non-root owners (`tracked_public_entrypoint_burden` enforce).
+2. Расширить ratchet for `compatibility_twin_module_ratchet` в no-growth с обязательным подтверждением canonical owner в PR чек‑листах.
+3. Зафиксировать правила для `lazy`/`__getattr__` фасадов: только объявленные и с тестом owner-path.
 
 ### Phase 3 — Removal (4–8 недель)
 
-- Удалить/консолидировать совместимые shim-пути по очереди:
-  - `checkpoint_saved_at_epoch_seconds` (runtime event-label alias)
-  - private twin import tails (где owner path стабилен)
-  - duplicate clusters families (control_plane/runtime_builders/bootstrap_runtime/core)
-- Выравнять ownership для `application/services/control_plane` и `composition/runtime_builders`.
+1. Удалить/консолидировать топ-7 duplicate cluster families по приоритету (runtime_builders, bootstrap/runtime, application/core, control_plane).
+2. Перевести `config_compatibility_registry` migration aliases в explicit permanent alias или убрать при подтверждённых migration tests.
+3. Разблокировать dead-code catalog: убрать кандидаты без owner-обоснования, закрыть `retain_*` решения в архитектурно-владельческих модулях.
 
 ### Phase 4 — Enforcement (до конца квартала)
 
-- Перевести выбранные visibility-budgets в fail-fast gates:
-  - `configs/quality/debt_scorecard.yaml` (duplication families)
-  - `configs/quality/dead-code-inventory.md` (newly non-removable retained modules)
-  - `configs/quality/compatibility_twin_module_ratchet.yaml` (no-growth)
-  - `configs/quality/test_governance_audit.yaml` (compatibility debt budget)
-- Синхронизировать тестовую карту и архитектурные checks в CI.
+1. Перевести ключевые метрики в fail-fast с нулевыми целями для несанкционированных классов:
+  duplication per family (`configs/quality/debt_scorecard.yaml`), compatibility importer growth (`configs/quality/compatibility_twin_module_ratchet.yaml`, `configs/quality/compatibility_facade_inventory.yaml`), config-catalog drift evidence (`docs/config-discrepancies-report.md` + `scripts/schema check-invariants`)
+2. Добавить explicit gate в CI на отсутствие [incomplete] pipeline/config/contracts edge drift.
+3. Завести обязательную еженедельную проверку debt-map + approve ticket для любых изменений в compatibility/API фасадах.
 
 ## Риски и trade-offs
 
-1) **Стабильность внешних потребителей.** Часть retained entrypoints может быть использована извне; удаление требует внешнего аудита и поэтапного deprecation window.
-2) **Регрессионый риск при удалении duplicate-кластера.** Без полного перекрытия тестами по контрольной плоскости и replay можно скрыть semantic drift.
-3) **Непредсказуемость VCR provider drift.** Обновление cassette metadata для OpenAlex может приводить к «источниковой» изменчивости и маскировать реальные изменения парсера.
-4) **Административная стоимость:** перевод compatibility debt в fail-fast может временно повысить число артефактов для ручного решения и замедлить CI на старте.
+1) Удаление/свёртка compatibility может нарушить внешние интеграции, если не будет external break-plan. Это ограничивается только теми entrypoints, которые имеют `external_breaking_change_required=true` и уже классифицированы как stable API (`configs/quality/compatibility_facade_inventory.yaml:72-86`, `configs/quality/compatibility_facade_inventory.yaml:97-111`).
+2) Aggressive consolidation дубликатов в control-plane и bootstrap может временно увеличить регрессионные пути и уплотнить blast-radius для DQ/observability.
+3) Config drift cleanup несёт высокий semantic-риск: массовая нормализация `configs/*` и контрактов может изменить replay/ID-поведение без дополнительной фиксации в `determinism_identity_policy`.
+4) Часть debt в observability (alias metric) имеет явное диагностическое значение для dashboards; чистка должна сопровождаться migration dashboard alerts и backfill.
 
-## Acceptance
+## Enforcement (что должно быть в CI)
 
-- [ ] `configs/quality/debt_scorecard.yaml`: `retained_public_entrypoint_burden` remains governed and no transition compatibility debt.
-- [ ] `reports/quality/compatibility-importer-census.md`: `tracked_twin_family_count` reduced to only sanctioned residuals; private-import growth blocked per ratchet.
-- [ ] `reports/quality/hotspot-duplication-baseline.json`: duplicate-cluster counts reduced toward 0 for 4 active families.
-- [ ] `configs/quality/test_governance_audit.yaml`: `compatibility_test_file_max` reduced to 0.
-- [ ] `reports/observability/runtime_cardinality_inventory.json`: no compatibility alias emitters.
-- [ ] `tests/architecture/test_bootstrap_layer_boundaries.py`: pass (runtime/cli split and boundaries).
-- [ ] `scripts/engineering/qa/vcr check-metadata-age --max-age-days 90`: pass or explicit waiver issue with owner + review date.
-
-## Evidence (anchor set)
-
-- `docs/02-architecture/generated/module-dependency-map.md`
-- `configs/quality/debt_scorecard.yaml`
-- `configs/quality/compatibility_facade_inventory.yaml`
-- `configs/quality/compatibility_twin_module_ratchet.yaml`
-- `configs/quality/config_compatibility_registry.yaml`
-- `configs/quality/test_governance_audit.yaml`
-- `docs/config-discrepancies-report.md`
-- `reports/quality/compatibility-importer-census.md`
-- `reports/quality/dead-code-inventory.md`
-- `reports/quality/hotspot-duplication-baseline.md`
-- `reports/observability/runtime_cardinality_inventory.json`
+- Уже действуют: `scripts.engineering.qa report_observability_metric_inventory --check --json` и архитектурные guards в `test_bootstrap_layer_boundaries`, `test_compatibility_importer_census_governance`, `test_compatibility_freeze_guards`, `test_config_compatibility_registry`, `test_pipeline_config_idempotency_contract` (`.github/workflows/tests.yml:236-280`, `.github/workflows/tests.yml:342-375`, `tests/architecture/*`).
+- Требуется добавить/усилить: gate на снижение/заморозку `compatibility_test_file_max` (phase-based owner review), CI-проверка `compatibility-importer-census.md` и `dead-code-inventory` как merge blocker при росте critical rows, отдельный gate по контролю dependency map для config↔contracts pipeline (см. [incomplete] в Phase 1)

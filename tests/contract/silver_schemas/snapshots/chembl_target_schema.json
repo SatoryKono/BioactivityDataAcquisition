@@ -145,15 +145,6 @@
     "required": false,
     "unique": false
   },
-  "downgraded": {
-    "checks": [],
-    "coerce": false,
-    "description": "Downgraded flag.",
-    "dtype": "bool",
-    "nullable": true,
-    "required": false,
-    "unique": false
-  },
   "entity_id": {
     "checks": [],
     "coerce": false,
@@ -181,15 +172,6 @@
     ],
     "coerce": false,
     "description": "Organism cellularity classification.",
-    "dtype": "str",
-    "nullable": true,
-    "required": false,
-    "unique": false
-  },
-  "pipeline_stages": {
-    "checks": [],
-    "coerce": false,
-    "description": "JSON string of pipeline stages.",
     "dtype": "str",
     "nullable": true,
     "required": false,
