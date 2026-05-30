@@ -63,7 +63,10 @@ ______________________________________________________________________
 > The bootstrap now forces repo-local devDependency installation
 > (`npm ci --include=dev` when `package-lock.json` is present, with production
 > flags disabled) before downloading Chromium, so audit hosts do not silently
-> skip the `playwright` package under production-like npm defaults.
+> skip the `playwright` package under production-like npm defaults. If the
+> repo worktree itself is not writable enough for `node_modules` refresh,
+> the shell bootstrap falls back to an isolated tool-cache install and exports
+> `BIOETL_PLAYWRIGHT_NODE_MODULES`/`NODE_PATH` for the rerender tooling.
 > On Windows PowerShell use
 > `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1`.
 > The PowerShell bootstrap now downloads a portable Node.js LTS toolchain

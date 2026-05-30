@@ -5,14 +5,14 @@
 ## Summary
 
 - Registry YAML: `configs/quality/compatibility_facade_inventory.yaml`
-- Curated inventory rows: `14`
-- Transition debt rows: `0`
+- Curated inventory rows: `24`
+- Transition debt rows: `10`
 - Sanctioned public entrypoint rows: `14`
 - Retained review entrypoints: `0`
 - Permanent public entrypoints: `14`
-- Measured tracked modules: `14`
+- Measured tracked modules: `24`
 - Measured-only modules outside curated inventory: `0`
-- Discovered docstring-tracked modules: `0`
+- Discovered docstring-tracked modules: `10`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
@@ -34,6 +34,16 @@
 ## Expected Measured Registry
 
 - `src/bioetl/application/composite/merger.py`
+- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_checkpoint_projection.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_artifact_support.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_base.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_base_helpers.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_checkpoint_projection.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_finalization.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay_projection.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_snapshot_support.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_source_refs.py`
 - `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/composition/health_api.py`
 - `src/bioetl/composition/maintenance_api.py`
@@ -50,6 +60,16 @@
 
 ## Curated Row Governance Metadata
 
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_base.py` — external breaking change required: `false`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_base_helpers.py` — external breaking change required: `false`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_checkpoint_projection.py` — external breaking change required: `false`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_checkpoint_projection.py` — external breaking change required: `false`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_finalization.py` — external breaking change required: `false`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay.py` — external breaking change required: `false`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay_projection.py` — external breaking change required: `false`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_snapshot_support.py` — external breaking change required: `false`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_source_refs.py` — external breaking change required: `false`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_artifact_support.py` — external breaking change required: `false`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run_all.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run_composite.py` — external breaking change required: `true`, internal callers zero: `false`
@@ -103,7 +123,16 @@
 
 ### Discovered Docstring-Tracked Modules
 
-- None.
+- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_checkpoint_projection.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_artifact_support.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_base.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_base_helpers.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_checkpoint_projection.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_finalization.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay_projection.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_snapshot_support.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_source_refs.py`
 
 ### Unexpected Docstring-Tracked Modules
 
