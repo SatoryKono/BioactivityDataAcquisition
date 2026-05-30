@@ -232,14 +232,30 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed schema expansion updates
         the budget.
     inconsistent_parameter_count:
-      current_count: 508
-      max_count: 508
+      current_count: 0
+      max_count: 0
       owner: '@bioetl-config'
       linked_issue: '#4818'
-      rationale: Parameters absent from one or more configs are the Stream B burn-down
-        target for contract alignment.
-      ratchet_policy: Ratchet downward as entity/composite configs converge on shared
-        parameter presence.
+      rationale: Actionable config-surface drift after sanctioned entity-specific partial
+        keys are excluded; family-scoped sum must remain zero post Stream B closeout.
+      ratchet_policy: Non-growth fail-fast; increases require reviewed contract regression.
+    sanctioned_partial_parameter_count:
+      current_count: 97
+      max_count: 97
+      owner: '@bioetl-config'
+      linked_issue: '#4818'
+      rationale: Documented intentional entity-specific partial keys excluded from actionable
+        inconsistent count; tracked in config-surface-backlog.json.
+      ratchet_policy: Non-growth fail-fast unless a reviewed entity contract adds new
+        intentional divergence.
+    raw_inconsistent_parameter_count:
+      current_count: 97
+      max_count: 97
+      owner: '@bioetl-config'
+      linked_issue: '#4818'
+      rationale: Raw family-scoped partial key count before sanctioned-prefix exclusion;
+        informational mirror of backlog partial_key_count totals.
+      ratchet_policy: Non-growth fail-fast unless governed configs expand vocabulary.
   families:
     entity_effective:
       linked_issue: '#4767'
@@ -256,13 +272,24 @@ config_surface_ratchet:
           rationale: Effective flattened vocabulary for entity configs only.
           ratchet_policy: Non-growth fail-fast unless reviewed schema expansion updates budget.
         inconsistent_parameter_count:
+          current_count: 0
+          max_count: 0
+          rationale: Entity actionable drift after sanctioned-prefix exclusion; Stream B
+            closeout target is zero.
+          ratchet_policy: Non-growth fail-fast; entity-specific filters remain in backlog
+            as sanctioned partial keys only.
+        sanctioned_partial_parameter_count:
           current_count: 97
           max_count: 97
-          rationale: Residual entity drift is intentional-only after Stream B plateau
-            (entity-specific filters/extraction_params/overrides). Actionable partial=0
-            per reports/quality/config-surface-backlog.json.
-          ratchet_policy: Ratchet downward only when entity-specific differences are
-            retired via reviewed contract changes; non-growth fail-fast otherwise.
+          rationale: Intentional entity-specific filters/extraction_params/overrides per
+            reports/quality/config-surface-backlog.json.
+          ratchet_policy: Non-growth fail-fast unless reviewed entity contract expands
+            intentional divergence.
+        raw_inconsistent_parameter_count:
+          current_count: 97
+          max_count: 97
+          rationale: Raw entity partial keys before sanctioned-prefix exclusion.
+          ratchet_policy: Informational non-growth guard mirroring backlog partial_key_count.
     composite_runtime:
       linked_issue: '#4768'
       owner: '@bioetl-config'
@@ -280,8 +307,18 @@ config_surface_ratchet:
         inconsistent_parameter_count:
           current_count: 0
           max_count: 0
-          rationale: Composite-family burn-down target separate from entity surface.
-          ratchet_policy: Ratchet downward as composite configs converge on shared keys.
+          rationale: Composite-family actionable drift; Stream B burn-down complete.
+          ratchet_policy: Non-growth fail-fast for composite runtime surface.
+        sanctioned_partial_parameter_count:
+          current_count: 0
+          max_count: 0
+          rationale: No sanctioned composite partial keys remain.
+          ratchet_policy: Non-growth fail-fast.
+        raw_inconsistent_parameter_count:
+          current_count: 0
+          max_count: 0
+          rationale: Raw composite partial keys; aligned across all composite configs.
+          ratchet_policy: Non-growth fail-fast.
 registry_groups:
   size_metrics:
     registries:

@@ -14,11 +14,11 @@
 | --- | --- | --- |
 | [#4812](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4812) | open | runtime_builders duplicate clusters: `11` |
 | [#4813](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4813) | open | application/core duplicates: `8` |
-| [#4814](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4814) | open | bootstrap/runtime duplicates: `5` |
+| [#4814](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4814) | closed | bootstrap/runtime duplicates: **0** |
 | [#4815](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4815) | open | control_plane duplicate clusters: `15` |
 | [#4816](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4816) | open | ratchet families: `4` (`private` 1/0/1/3, `public` 7/12/11/2) |
 | [#4817](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4817) | open | compatibility_test_file_max: `56` |
-| [#4818](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4818) | open | configs/contracts drift: `31`/`448` |
+| [#4818](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4818) | open | configs/contracts drift: actionable **0** (sanctioned **97**, raw family **97**) |
 | [#4819](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4819) | closed | closeout evidence: zero `alias_emitters` |
 | [#4820](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4820) | open | dead-code triage: `19` entries (`uncertain` 0) |
 | [#4821](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4821) | closed | migration_supported alias windows closed (registry has no active migration aliases) |
