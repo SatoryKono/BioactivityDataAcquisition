@@ -114,7 +114,7 @@
       "path_prefixes": [
         "src/bioetl/composition/runtime_builders/"
       ],
-      "duplication_clusters": 7,
+      "duplication_clusters": 4,
       "files": 37,
       "total_loc": 5736,
       "files_ge_250_loc": 7,

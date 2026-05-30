@@ -12,6 +12,9 @@ from typing import TYPE_CHECKING, Self
 
 from bioetl.application.core import idmapping_fetch_support as fetch_support
 from bioetl.application.core import idmapping_lifecycle_support as lifecycle_support
+from bioetl.application.core._data_source_fetch_delegates import (
+    delegate_bound_fetch_records,
+)
 from bioetl.domain.types import HealthStatus, JsonDict
 
 if TYPE_CHECKING:
@@ -66,7 +69,7 @@ class IDMappingDataSource:
     async def aclose(self) -> None:
         await lifecycle_support.close_data_source(self)
 
-    async def fetch(
+    def fetch(
         self,
         entity_type: str,
         limit: int | None = None,
@@ -75,16 +78,16 @@ class IDMappingDataSource:
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[JsonDict]:
-        async for record in fetch_support.fetch_records(
+        return delegate_bound_fetch_records(
             self,
+            fetch_support.fetch_records,
             entity_type=entity_type,
             limit=limit,
             query=query,
             filter_ids=filter_ids,
             filter_field=filter_field,
             offset=offset,
-        ):
-            yield record
+        )
 
     async def health_check(self) -> HealthStatus:
         return await lifecycle_support.health_check(self)

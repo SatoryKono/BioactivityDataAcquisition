@@ -246,7 +246,10 @@ Supported policy slice for issue `#2598`:
   `reports/coverage/coverage.xml` через
   `python -m scripts.engineering.qa report-module-coverage` в lane
   `coverage-verify`. Artifact должен перечислять каждый `src/bioetl/**/*.py`
-  module и явно фиксировать coverage status.
+  module и явно фиксировать coverage status. Поле `source_tree_sha256` MUST
+  обновляться после любых изменений под `src/bioetl/**/*.py` через
+  `python _refresh_module_coverage_inventory.py` (см.
+  `tests/architecture/test_module_coverage_inventory.py`).
 - canonical VCR placement уже enforced в CI: кассеты вне `tests/fixtures/vcr/{provider}/` блокируются
 - extensionless VCR files пока допустимы только через `.github/vcr-noext-allowlist.txt`; новые такие файлы добавлять нельзя
 
@@ -558,6 +561,9 @@ cached-Bronze snapshot envelope.
   `reports/quality/module-coverage-inventory.json` после
   `reports/coverage/coverage.xml`; локальная проверка drift:
   `uv run python -m scripts.engineering.qa report-module-coverage --check`.
+  После изменений в `src/bioetl/**/*.py` обновляй `source_tree_sha256`:
+  `python _refresh_module_coverage_inventory.py`, затем
+  `pytest tests/architecture/test_module_coverage_inventory.py::test_module_coverage_inventory_source_tree_hash_is_current`.
 - **Regression**: Все исправления багов обязаны сопровождаться регрессионным тестом.
 - **Coverage Configuration**: Подробная информация о настройке покрытия, исключаемых паттернах и troubleshooting — см. [Coverage Configuration Guide](./coverage-configuration.md)
 

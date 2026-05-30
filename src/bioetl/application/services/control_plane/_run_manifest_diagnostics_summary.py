@@ -9,6 +9,9 @@ from typing import cast
 from bioetl.application.services.control_plane._run_manifest_diagnostics_composite import (
     build_composite_dossier_projection,
 )
+from bioetl.application.services.control_plane._run_manifest_diagnostics_helpers import (
+    DQDetailsSummary,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_ledger import (
     _resolve_policy_value,
 )
@@ -16,9 +19,6 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_persist
     build_alert_signals,
     build_next_steps,
     build_persistence_profile,
-)
-from bioetl.application.services.control_plane._run_manifest_diagnostics_helpers import (
-    DQDetailsSummary,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
     _is_composite_execution_context,

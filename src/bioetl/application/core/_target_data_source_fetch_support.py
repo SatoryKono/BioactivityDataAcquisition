@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from bioetl.application.core._fetch_forwarding import (
     _UNSET_FETCH_ARG,
+    build_forwarded_fetch_kwargs,
     forward_fetch_records,
 )
 from bioetl.domain.ports import FilterableDataSourcePort
@@ -33,6 +34,26 @@ def ensure_filterable_data_source(
     return data_source
 
 
+def build_wrapped_fetch_kwargs(
+    *,
+    entity_type: str,
+    limit: int | None = None,
+    query: str | None = None,
+    filter_ids: list[str] | None | object = _UNSET_FETCH_ARG,
+    filter_field: str | None | object = _UNSET_FETCH_ARG,
+    offset: int | None = None,
+) -> dict[str, object | None]:
+    """Build canonical kwargs for wrapped data-source fetch delegation."""
+    return build_forwarded_fetch_kwargs(
+        entity_type=entity_type,
+        limit=limit,
+        query=query,
+        filter_ids=filter_ids,
+        filter_field=filter_field,
+        offset=offset,
+    )
+
+
 async def yield_wrapped_fetch_records(
     data_source: DataSourcePort,
     *,
@@ -44,17 +65,31 @@ async def yield_wrapped_fetch_records(
     offset: int | None = None,
 ) -> AsyncIterator[RecordT]:
     """Delegate a plain fetch call to a wrapped data source adapter."""
+    async for record in yield_wrapped_fetch_records_with_kwargs(
+        data_source,
+        build_wrapped_fetch_kwargs(
+            entity_type=entity_type,
+            limit=limit,
+            query=query,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            offset=offset,
+        ),
+    ):
+        yield record
+
+
+async def yield_wrapped_fetch_records_with_kwargs(
+    data_source: DataSourcePort,
+    fetch_kwargs: dict[str, object | None],
+) -> AsyncIterator[RecordT]:
+    """Delegate fetch using a pre-built forwarded kwargs payload."""
     async for record in forward_fetch_records(
         cast(
             "Any",  # Any: Dynamic data source adapter
             data_source,
         ).fetch,
-        entity_type=entity_type,
-        limit=limit,
-        query=query,
-        filter_ids=filter_ids,
-        filter_field=filter_field,
-        offset=offset,
+        **fetch_kwargs,
     ):
         yield cast("RecordT", record)
 

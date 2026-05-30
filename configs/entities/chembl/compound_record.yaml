@@ -192,10 +192,7 @@ filters:
     - molecule_id
     - publication_id
     - record_id
-    ranges:
-      publication_year:
-        min: 1950
-        max: 2050
+    ranges: {}
   gold_filters:
     columns: {}
     exclude_if_present: []
